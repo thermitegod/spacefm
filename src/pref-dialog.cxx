@@ -159,9 +159,13 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                     GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
                     const i32 n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
+                    {
                         gtk_notebook_set_show_tabs(notebook, true);
+                    }
                     else if (n == 1)
+                    {
                         gtk_notebook_set_show_tabs(notebook, false);
+                    }
                 }
             }
         }
@@ -209,7 +213,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             ismall_icon >= 0 ? small_icon_sizes[ismall_icon] : app_settings.get_icon_size_small();
         itool_icon = gtk_combo_box_get_active(GTK_COMBO_BOX(data->tool_icon_size));
         if (itool_icon >= 0 && itool_icon <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
+        {
             tool_icon = tool_icon_sizes[itool_icon];
+        }
 
         if (big_icon != app_settings.get_icon_size_big() ||
             small_icon != app_settings.get_icon_size_small())
@@ -222,9 +228,13 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
 
             /* unload old thumbnails (icons of *.desktop files will be unloaded here, too)  */
             if (big_icon != app_settings.get_icon_size_big())
+            {
                 vfs_dir_foreach(&dir_unload_thumbnails, true);
+            }
             if (small_icon != app_settings.get_icon_size_small())
+            {
                 vfs_dir_foreach(&dir_unload_thumbnails, false);
+            }
 
             app_settings.set_icon_size_big(big_icon);
             app_settings.set_icon_size_small(small_icon);
@@ -276,15 +286,21 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         if (!ztd::same(etext, xset_get_s(XSetName::DATE_FORMAT)))
         {
             if (etext[0] == '\0')
+            {
                 xset_set(XSetName::DATE_FORMAT, XSetVar::S, "%Y-%m-%d %H:%M");
+            }
             else
+            {
                 xset_set(XSetName::DATE_FORMAT, XSetVar::S, etext);
+            }
             free(etext);
             app_settings.set_date_format(xset_get_s(XSetName::DATE_FORMAT));
             need_refresh = true;
         }
         if (need_refresh)
+        {
             main_window_refresh_all();
+        }
 
         /* single click changed? */
         single_click = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->single_click));
@@ -357,9 +373,13 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             if (!custom_su.empty())
             {
                 if (idx == 0)
+                {
                     xset_set(XSetName::SU_COMMAND, XSetVar::S, custom_su);
+                }
                 else
+                {
                     xset_set(XSetName::SU_COMMAND, XSetVar::S, su_commands.at(idx - 1));
+                }
             }
             else
             {
@@ -477,13 +497,17 @@ edit_preference(GtkWindow* parent, i32 page)
         GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_PREFERENCES);
 
         if (!builder)
+        {
             return false;
+        }
         WindowReference::increase();
 
         data = g_new0(FMPrefDlg, 1);
         dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
         if (parent)
+        {
             gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
+        }
         xset_set_window_icon(GTK_WINDOW(dlg));
 
         data->dlg = dlg;
@@ -538,7 +562,9 @@ edit_preference(GtkWindow* parent, i32 page)
             for (i = 0; i < supported_terminals.size(); ++i)
             {
                 if (ztd::same(main_terminal, supported_terminals.at(i)))
+                {
                     break;
+                }
             }
 
             if (i >= supported_terminals.size())
@@ -645,23 +671,35 @@ edit_preference(GtkWindow* parent, i32 page)
             gtk_list_store_set(GTK_LIST_STORE(su_list), &it, 0, custom_su.data(), -1);
         }
         if (use_su.empty())
+        {
             idx = 0;
+        }
         else if (ztd::same(custom_su, use_su))
+        {
             idx = 0;
+        }
         else
         {
             usize i;
             for (i = 0; i < su_commands.size(); ++i)
             {
                 if (ztd::same(su_commands.at(i), use_su))
+                {
                     break;
+                }
             }
             if (i == su_commands.size())
+            {
                 idx = 0;
+            }
             else if (!custom_su.empty())
+            {
                 idx = i + 1;
+            }
             else
+            {
                 idx = i;
+            }
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->su_command), idx);
 
@@ -684,7 +722,9 @@ edit_preference(GtkWindow* parent, i32 page)
             for (i = 0; i < date_formats.size(); ++i)
             {
                 if (ztd::same(date_formats.at(i), date_s))
+                {
                     break;
+                }
             }
             if (i >= date_formats.size())
             {
@@ -699,13 +739,17 @@ edit_preference(GtkWindow* parent, i32 page)
         // editors
         data->editor = GTK_WIDGET(gtk_builder_get_object(builder, "editor"));
         if (xset_get_s(XSetName::EDITOR))
+        {
             gtk_entry_set_text(GTK_ENTRY(data->editor), xset_get_s(XSetName::EDITOR));
+        }
         data->editor_terminal = GTK_WIDGET(gtk_builder_get_object(builder, "editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->editor_terminal),
                                      xset_get_b(XSetName::EDITOR));
         data->root_editor = GTK_WIDGET(gtk_builder_get_object(builder, "root_editor"));
         if (xset_get_s(XSetName::ROOT_EDITOR))
+        {
             gtk_entry_set_text(GTK_ENTRY(data->root_editor), xset_get_s(XSetName::ROOT_EDITOR));
+        }
         data->root_editor_terminal =
             GTK_WIDGET(gtk_builder_get_object(builder, "root_editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal),
@@ -719,7 +763,9 @@ edit_preference(GtkWindow* parent, i32 page)
     const i32 desktop_page_num = 2;
     // notebook page number 3 is permanently hidden Volume Management
     if (page > desktop_page_num)
+    {
         page++;
+    }
     gtk_notebook_set_current_page(GTK_NOTEBOOK(data->notebook), page);
 
     gtk_window_present(GTK_WINDOW(data->dlg));

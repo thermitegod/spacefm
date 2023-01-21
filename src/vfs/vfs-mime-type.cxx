@@ -106,7 +106,9 @@ on_mime_cache_changed(vfs::file_monitor monitor, VFSFileMonitorEvent event,
 
     // ztd::logger::debug("reloading all mime caches");
     if (reload_callback_id == 0)
+    {
         reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
+    }
 }
 
 void
@@ -121,7 +123,9 @@ vfs_mime_type_init()
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
         //  remove nullptr monitor with inotify which caused segfault
         if (!std::filesystem::exists(cache->get_file_path()))
+        {
             continue;
+        }
 
         vfs::file_monitor monitor =
             vfs_file_monitor_add(cache->get_file_path(), on_mime_cache_changed, nullptr);
@@ -202,9 +206,13 @@ vfs_mime_type_unref(vfs::mime_type mime_type)
     if (mime_type->ref_count() == 0)
     {
         if (mime_type->big_icon)
+        {
             g_object_unref(mime_type->big_icon);
+        }
         if (mime_type->small_icon)
+        {
             g_object_unref(mime_type->small_icon);
+        }
 
         delete mime_type;
     }
@@ -217,14 +225,18 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
 
     if (big)
     {
-        if (mime_type->big_icon) /* big icon */
+        if (mime_type->big_icon)
+        { /* big icon */
             return g_object_ref(mime_type->big_icon);
+        }
         size = big_icon_size;
     }
     else /* small icon */
     {
         if (mime_type->small_icon)
+        {
             return g_object_ref(mime_type->small_icon);
+        }
         size = small_icon_size;
     }
 
@@ -234,13 +246,21 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     {
         icon = vfs_load_icon("gtk-directory", size);
         if (!icon)
+        {
             icon = vfs_load_icon("gnome-fs-directory", size);
+        }
         if (!icon)
+        {
             icon = vfs_load_icon("folder", size);
+        }
         if (big)
+        {
             mime_type->big_icon = icon;
+        }
         else
+        {
             mime_type->small_icon = icon;
+        }
         return icon ? g_object_ref(icon) : nullptr;
     }
 
@@ -324,9 +344,13 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     }
 
     if (big)
+    {
         mime_type->big_icon = icon;
+    }
     else
+    {
         mime_type->small_icon = icon;
+    }
     return icon ? g_object_ref(icon) : nullptr;
 }
 
@@ -334,7 +358,9 @@ static void
 free_cached_big_icons(vfs::mime_type mime_type)
 {
     if (!mime_type->big_icon)
+    {
         return;
+    }
     g_object_unref(mime_type->big_icon);
     mime_type->big_icon = nullptr;
 }
@@ -343,7 +369,9 @@ static void
 free_cached_small_icons(vfs::mime_type mime_type)
 {
     if (!mime_type->small_icon)
+    {
         return;
+    }
     g_object_unref(mime_type->small_icon);
     mime_type->small_icon = nullptr;
 }
@@ -352,7 +380,9 @@ void
 vfs_mime_type_set_icon_size_big(i32 size)
 {
     if (size == big_icon_size)
+    {
         return;
+    }
 
     mime_map_lock.lock();
     big_icon_size = size;
@@ -366,7 +396,9 @@ void
 vfs_mime_type_set_icon_size_small(i32 size)
 {
     if (size == small_icon_size)
+    {
         return;
+    }
 
     mime_map_lock.lock();
     small_icon_size = size;
@@ -436,7 +468,9 @@ vfs_mime_type_get_default_action(vfs::mime_type mime_type)
     {
         const std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
         if (!actions.empty())
+        {
             def = ztd::strdup(actions.at(0));
+        }
     }
     return def;
 }
@@ -467,7 +501,9 @@ vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id)
 {
     // MOD  do not create custom desktop file if desktop_id is not a command
     if (!ztd::endswith(desktop_id, ".desktop"))
+    {
         return mime_type_add_action(mime_type->type, desktop_id);
+    }
     return desktop_id.data();
 }
 

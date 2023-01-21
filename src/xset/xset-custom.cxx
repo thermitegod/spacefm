@@ -64,7 +64,9 @@ xset_custom_new_name()
 
             // only use free xset name if no aux data dirs exist for that name too.
             if (!std::filesystem::exists(path1) && !std::filesystem::exists(path2))
+            {
                 break;
+            }
         }
     };
 
@@ -102,7 +104,9 @@ xset_custom_delete(xset_t set, bool delete_next)
     }
 
     if (set == xset_set_clipboard)
+    {
         xset_set_clipboard = nullptr;
+    }
 
     const std::string path1 =
         Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
@@ -142,19 +146,29 @@ xset_custom_remove(xset_t set)
         set_prev = xset_get(set->prev);
         // ztd::logger::info("        set->prev = {} ({})", set_prev->name, set_prev->menu_label);
         if (set_prev->next)
+        {
             free(set_prev->next);
+        }
         if (set->next)
+        {
             set_prev->next = ztd::strdup(set->next);
+        }
         else
+        {
             set_prev->next = nullptr;
+        }
     }
     if (set->next)
     {
         set_next = xset_get(set->next);
         if (set_next->prev)
+        {
             free(set_next->prev);
+        }
         if (set->prev)
+        {
             set_next->prev = ztd::strdup(set->prev);
+        }
         else
         {
             set_next->prev = nullptr;
@@ -162,7 +176,9 @@ xset_custom_remove(xset_t set)
             {
                 set_parent = xset_get(set->parent);
                 if (set_parent->child)
+                {
                     free(set_parent->child);
+                }
                 set_parent->child = ztd::strdup(set_next->name);
                 set_next->parent = ztd::strdup(set->parent);
             }
@@ -172,14 +188,18 @@ xset_custom_remove(xset_t set)
     {
         set_parent = xset_get(set->parent);
         if (set->tool != XSetTool::NOT)
+        {
             set_child = xset_new_builtin_toolitem(XSetTool::HOME);
+        }
         else
         {
             set_child = xset_custom_new();
             set_child->menu_label = ztd::strdup("New _Command");
         }
         if (set_parent->child)
+        {
             free(set_parent->child);
+        }
         set_parent->child = ztd::strdup(set_child->name);
         set_child->parent = ztd::strdup(set->parent);
         return set_child;
@@ -200,17 +220,25 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
             vfs::desktop desktop = vfs_get_desktop(set->z);
 
             if (!(set->menu_label && set->menu_label[0]))
+            {
                 menu_label = ztd::strdup(desktop->get_disp_name());
+            }
             if (set->icon)
+            {
                 icon_new = vfs_load_icon(set->icon, icon_size);
+            }
             if (!icon_new)
+            {
                 icon_new = desktop->get_icon(icon_size);
+            }
         }
         else
         {
             // not a desktop file - probably executable
             if (set->icon)
+            {
                 icon_new = vfs_load_icon(set->icon, icon_size);
+            }
             if (!icon_new && set->z)
             {
                 // guess icon name from executable name
@@ -226,19 +254,27 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
         }
     }
     else
+    {
         ztd::logger::warn("xset_custom_get_app_name_icon set is not XSetCMD::APP");
+    }
 
     if (icon)
+    {
         *icon = icon_new;
+    }
     else if (icon_new)
+    {
         g_object_unref(icon_new);
+    }
 
     if (!menu_label)
     {
         menu_label = set->menu_label && set->menu_label[0] ? ztd::strdup(set->menu_label)
                                                            : ztd::strdup(set->z);
         if (!menu_label)
+        {
             menu_label = ztd::strdup("Application");
+        }
     }
     return menu_label;
 }
@@ -282,16 +318,22 @@ xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, std::string_view plug_d
     xsetpak.insert(xsetpak_local.begin(), xsetpak_local.end());
 
     if (!xset_custom_export_files(set, plug_dir))
+    {
         return false;
+    }
     if (set->menu_style == XSetMenu::SUBMENU && set->child)
     {
         if (!xset_custom_export_write(xsetpak, xset_get(set->child), plug_dir))
+        {
             return false;
+        }
     }
     if (set->next)
     {
         if (!xset_custom_export_write(xsetpak, xset_get(set->next), plug_dir))
+        {
             return false;
+        }
     }
     return true;
 }
@@ -311,7 +353,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     else
     {
         if (!(deffolder = xset_get_s(XSetName::GO_SET_DEFAULT)))
+        {
             deffolder = ztd::strdup("/");
+        }
     }
 
     if (!set->plugin)
@@ -319,15 +363,25 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         const std::string s1 = clean_label(set->menu_label, true, false);
         std::string type;
         if (ztd::startswith(set->name, "hand_arc_"))
+        {
             type = "archive-handler";
+        }
         else if (ztd::startswith(set->name, "hand_fs_"))
+        {
             type = "device-handler";
+        }
         else if (ztd::startswith(set->name, "hand_net_"))
+        {
             type = "protocol-handler";
+        }
         else if (ztd::startswith(set->name, "hand_f_"))
+        {
             type = "file-handler";
+        }
         else
+        {
             type = "plugin";
+        }
 
         deffile = fmt::format("{}-{}-{}.tar.xz", s1, PACKAGE_NAME, type);
     }
@@ -343,9 +397,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                                   deffolder,
                                   deffile.data());
     if (!path)
+    {
         return;
+    }
     if (save->s)
+    {
         free(save->s);
+    }
     save->s = ztd::strdup(Glib::path_get_dirname(path));
 
     // get or create tmp plugin dir
@@ -367,7 +425,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         {
             plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
             if (!std::filesystem::exists(plug_dir))
+            {
                 break;
+            }
         }
         std::filesystem::create_directories(plug_dir);
         std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
@@ -441,18 +501,22 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     const std::string plug_dir_q = ztd::shell::quote(plug_dir);
     const std::string path_q = ztd::shell::quote(path);
     if (!set->plugin)
+    {
         ptask->task->exec_command =
             fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; rm -rf {} ; "
                         "if [ $err -ne 0 ];then rm -f {} ; fi ; exit $err",
                         path_q,
                         plug_dir_q,
                         path_q);
+    }
     else
+    {
         ptask->task->exec_command =
             fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; "
                         "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
                         path_q,
                         path_q);
+    }
     ptask->task->exec_sync = true;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
@@ -471,7 +535,9 @@ xset_custom_get_script(xset_t set, bool create)
     if ((!ztd::startswith(set->name, "cstm_") && !ztd::startswith(set->name, "cust") &&
          !ztd::startswith(set->name, "hand")) ||
         (create && set->plugin))
+    {
         return nullptr;
+    }
 
     std::string path;
 
@@ -513,7 +579,9 @@ xset_custom_get_script(xset_t set, bool create)
         write_file(path, data);
 
         if (std::filesystem::exists(path))
+        {
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+        }
     }
     return ztd::strdup(path);
 }
@@ -534,9 +602,13 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     // copy command dir
 
     if (src->plugin)
+    {
         path_src = Glib::build_filename(src->plug_dir, src->plug_name);
+    }
     else
+    {
         path_src = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", src->name);
+    }
     // ztd::logger::info("    path_src={}", path_src);
 
     // ztd::logger::info("    path_src EXISTS");
@@ -550,9 +622,13 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
     std::string out;
     if (standard_output)
+    {
         out.append(*standard_output);
+    }
     if (standard_error)
+    {
         out.append(*standard_error);
+    }
     ztd::logger::info("{}", out);
     if (exit_status && WIFEXITED(exit_status))
     {
@@ -581,9 +657,13 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
         std::string copy_out;
         if (standard_output)
+        {
             copy_out.append(*standard_output);
+        }
         if (standard_error)
+        {
             copy_out.append(*standard_error);
+        }
         ztd::logger::info("{}", copy_out);
         if (exit_status && WIFEXITED(exit_status))
         {
@@ -609,7 +689,9 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     xset_t mset = set;
     // if a plugin with a mirror, get the mirror
     if (set->plugin && set->shared_key)
+    {
         mset = xset_get_plugin_mirror(set);
+    }
 
     xset_t newset = xset_custom_new();
     newset->menu_label = ztd::strdup(set->menu_label);
@@ -633,9 +715,13 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     newset->scroll_lock = mset->scroll_lock;
 
     if (!mset->icon && set->plugin)
+    {
         newset->icon = ztd::strdup(set->icon);
+    }
     else
+    {
         newset->icon = ztd::strdup(mset->icon);
+    }
 
     xset_custom_copy_files(set, newset);
     newset->tool = set->tool;
@@ -660,7 +746,9 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
 
     // when copying imported plugin file, discard mirror xset
     if (delete_set)
+    {
         xset_custom_delete(set, false);
+    }
 
     return newset;
 }

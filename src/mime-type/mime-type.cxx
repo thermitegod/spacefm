@@ -87,13 +87,17 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
     const char* prev_suffix_pos = (const char*)-1;
 
     if (std::filesystem::is_directory(status))
+    {
         return XDG_MIME_TYPE_DIRECTORY.data();
+    }
 
     for (mime_cache_t cache : caches)
     {
         type = cache->lookup_literal(filename);
         if (type)
+        {
             break;
+        }
 
         const char* _type = cache->lookup_suffix(filename, &suffix_pos);
         if (_type && suffix_pos < prev_suffix_pos)
@@ -102,7 +106,9 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
             prev_suffix_pos = suffix_pos;
 
             if (type)
+            {
                 break;
+            }
         }
     }
 
@@ -121,12 +127,16 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
             }
 
             if (type)
+            {
                 break;
+            }
         }
     }
 
     if (type && *type)
+    {
         return type;
+    }
 
     return XDG_MIME_TYPE_UNKNOWN.data();
 }
@@ -150,18 +160,26 @@ mime_type_get_by_file(std::string_view filepath)
     const auto status = std::filesystem::status(filepath);
 
     if (!std::filesystem::exists(status))
+    {
         return XDG_MIME_TYPE_UNKNOWN.data();
+    }
 
     if (std::filesystem::is_other(status))
+    {
         return XDG_MIME_TYPE_UNKNOWN.data();
+    }
 
     if (std::filesystem::is_directory(status))
+    {
         return XDG_MIME_TYPE_DIRECTORY.data();
+    }
 
     const std::string basename = Glib::path_get_basename(filepath.data());
     const std::string filename_type = mime_type_get_by_filename(basename, status);
     if (!ztd::same(filename_type, XDG_MIME_TYPE_UNKNOWN))
+    {
         return filename_type;
+    }
 
     const char* type = nullptr;
 
@@ -185,18 +203,26 @@ mime_type_get_by_file(std::string_view filepath)
              */
             /* try to lock the common buffer */
             if (G_TRYLOCK(mime_magic_buf))
+            {
                 data = mime_magic_buf;
-            else /* the buffer is in use, allocate new one */
+            }
+            else
+            { /* the buffer is in use, allocate new one */
                 data = CHAR(g_malloc(elen));
+            }
 
             const i32 len = read(fd, data, elen);
 
             if (len == -1)
             {
                 if (data == mime_magic_buf)
+                {
                     G_UNLOCK(mime_magic_buf);
+                }
                 else
+                {
                     free(data);
+                }
                 data = (char*)-1;
             }
             if (data != (char*)-1)
@@ -208,20 +234,28 @@ mime_type_get_by_file(std::string_view filepath)
 
                 /* Check for executable file */
                 if (!type && have_x_access(filepath))
+                {
                     type = XDG_MIME_TYPE_EXECUTABLE.data();
+                }
 
                 /* fallback: check for plain text */
                 if (!type)
                 {
                     if (mime_type_is_data_plain_text(data,
                                                      len > TEXT_MAX_EXTENT ? TEXT_MAX_EXTENT : len))
+                    {
                         type = XDG_MIME_TYPE_PLAIN_TEXT.data();
+                    }
                 }
 
                 if (data == mime_magic_buf)
+                {
                     G_UNLOCK(mime_magic_buf); /* unlock the common buffer */
-                else                          /* we use our own buffer */
+                }
+                else
+                { /* we use our own buffer */
                     free(data);
+                }
             }
             close(fd);
         }
@@ -233,7 +267,9 @@ mime_type_get_by_file(std::string_view filepath)
     }
 
     if (type && *type)
+    {
         return type;
+    }
 
     return XDG_MIME_TYPE_UNKNOWN.data();
 }
@@ -356,7 +392,9 @@ mime_type_init()
     caches.emplace_back(cache);
 
     if (cache->get_magic_max_extent() > mime_cache_max_extent)
+    {
         mime_cache_max_extent = cache->get_magic_max_extent();
+    }
 
     for (std::string_view dir : vfs::user_dirs->system_data_dirs())
     {
@@ -365,7 +403,9 @@ mime_type_init()
         caches.emplace_back(dir_cache);
 
         if (dir_cache->get_magic_max_extent() > mime_cache_max_extent)
+        {
             mime_cache_max_extent = dir_cache->get_magic_max_extent();
+        }
     }
 
     mime_magic_buf = CHAR(g_malloc(mime_cache_max_extent));
@@ -392,7 +432,9 @@ mime_cache_reload(mime_cache_t cache)
     for (mime_cache_t mcache : caches)
     {
         if (mcache->get_magic_max_extent() > mime_cache_max_extent)
+        {
             mime_cache_max_extent = mcache->get_magic_max_extent();
+        }
     }
 
     G_LOCK(mime_magic_buf);
@@ -410,7 +452,9 @@ mime_type_is_data_plain_text(const char* data, i32 len)
         for (i32 i = 0; i < len; ++i)
         {
             if (data[i] == '\0')
+            {
                 return false;
+            }
         }
         return true;
     }
@@ -425,16 +469,24 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
     if (!mime_type.empty())
     {
         if (ztd::same(mime_type, "application/pdf"))
+        {
             // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
             return false;
+        }
         if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
+        {
             return true;
+        }
         if (!ztd::startswith(mime_type, "text/") && !ztd::startswith(mime_type, "application/"))
+        {
             return false;
+        }
     }
 
     if (file_path.empty())
+    {
         return false;
+    }
 
     const i32 fd = open(file_path.data(), O_RDONLY);
     if (fd != -1)
@@ -458,7 +510,9 @@ bool
 mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type)
 {
     if (mime_type.empty())
+    {
         mime_type = mime_type_get_by_file(file_path);
+    }
 
     /*
      * Only executable types can be executale.
@@ -472,7 +526,9 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
         if (!file_path.empty())
         {
             if (!have_x_access(file_path))
+            {
                 return false;
+            }
         }
         return true;
     }
@@ -485,7 +541,9 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
 {
     /* special case, the type specified is identical to the parent type. */
     if (ztd::same(type, parent))
+    {
         return true;
+    }
 
     for (mime_cache_t cache : caches)
     {
@@ -493,7 +551,9 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
         for (std::string_view p : parents)
         {
             if (ztd::same(parent, p))
+            {
                 return true;
+            }
         }
     }
     return false;

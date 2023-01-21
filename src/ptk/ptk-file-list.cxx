@@ -247,7 +247,9 @@ static void
 on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 {
     if (!file || !list->dir || list->dir->cancel)
+    {
         return;
+    }
 
     ptk_file_list_file_changed(file, list);
 
@@ -259,7 +261,9 @@ on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
                                      (file->get_size() < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
+        {
             vfs_thumbnail_loader_request(list->dir, file, list->big_thumbnail);
+        }
     }
 }
 
@@ -273,7 +277,9 @@ on_file_list_file_created(vfs::file_info file, PtkFileList* list)
         (file->is_video() || (file->get_size() < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
+        {
             vfs_thumbnail_loader_request(list->dir, file, list->big_thumbnail);
+        }
     }
 }
 
@@ -281,7 +287,9 @@ void
 ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
 {
     if (list->dir == dir)
+    {
         return;
+    }
 
     if (list->dir)
     {
@@ -304,7 +312,9 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
     list->files = nullptr;
     list->n_files = 0;
     if (!dir)
+    {
         return;
+    }
 
     g_object_ref(list->dir);
 
@@ -375,7 +385,9 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     const u32 n = indices[0]; /* the n-th top level row */
 
     if (n >= list->n_files || n < 0)
+    {
         return false;
+    }
 
     GList* l = g_list_nth(list->files, n);
 
@@ -430,10 +442,14 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             if (file->flags == VFSFileInfoFlag::NONE &&
                 (list->max_thumbnail > file->get_size() ||
                  (list->max_thumbnail != 0 && file->is_video())))
+            {
                 icon = file->get_big_thumbnail();
+            }
 
             if (!icon)
+            {
                 icon = file->get_big_icon();
+            }
             if (icon)
             {
                 g_value_set_object(value, icon);
@@ -445,9 +461,13 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             /* special file can use special icons saved as thumbnails*/
             if (list->max_thumbnail > file->get_size() ||
                 (list->max_thumbnail != 0 && file->is_video()))
+            {
                 icon = file->get_small_thumbnail();
+            }
             if (!icon)
+            {
                 icon = file->get_small_icon();
+            }
             if (icon)
             {
                 g_value_set_object(value, icon);
@@ -460,9 +480,13 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case PTKFileListCol::COL_FILE_SIZE:
             if ((file->is_directory() || file->is_symlink()) &&
                 ztd::same(vfs_mime_type_get_type(file->mime_type), XDG_MIME_TYPE_DIRECTORY))
+            {
                 g_value_set_string(value, nullptr);
+            }
             else
+            {
                 g_value_set_string(value, file->get_disp_size().data());
+            }
             break;
         case PTKFileListCol::COL_FILE_DESC:
             g_value_set_string(value, file->get_mime_type_desc().data());
@@ -488,7 +512,9 @@ static gboolean
 ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     if (iter == nullptr || iter->user_data == nullptr)
+    {
         return false;
+    }
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
@@ -498,7 +524,9 @@ ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
     /* Is this the last l in the list? */
     if (!l->next)
+    {
         return false;
+    }
 
     iter->stamp = list->stamp;
     iter->user_data = l->next;
@@ -512,7 +540,9 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 {
     /* this is a list, nodes have no children */
     if (parent)
+    {
         return false;
+    }
 
     /* parent == nullptr is a special case; we need to return the first top-level row */
     assert(parent != nullptr);
@@ -524,7 +554,9 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 
     /* No rows => no first row */
     if (list->dir->file_list.size() == 0)
+    {
         return false;
+    }
 
     /* Set iter to first item in list */
     iter->stamp = list->stamp;
@@ -550,7 +582,9 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
     assert(list != nullptr);
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
+    {
         return list->n_files;
+    }
     return 0; /* otherwise, this is easy again for a list */
 }
 
@@ -565,11 +599,15 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
 
     /* a list has only top-level rows */
     if (parent)
+    {
         return false;
+    }
 
     /* special case: if parent == nullptr, set iter to n-th top-level row */
-    if (UINT(n) >= list->n_files) //  || n < 0)
+    if (UINT(n) >= list->n_files)
+    { //  || n < 0)
         return false;
+    }
 
     GList* l = g_list_nth(list->files, n);
     assert(l != nullptr);
@@ -595,9 +633,13 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (sort_column_id)
+    {
         *sort_column_id = list->sort_col;
+    }
     if (order)
+    {
         *order = list->sort_order;
+    }
     return true;
 }
 
@@ -606,7 +648,9 @@ ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, 
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (list->sort_col == sort_column_id && list->sort_order == order)
+    {
         return;
+    }
     list->sort_col = sort_column_id;
     list->sort_order = order;
     gtk_tree_sortable_sort_column_changed(sortable);
@@ -650,7 +694,9 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     {
         result = file_a->is_directory() - file_b->is_directory();
         if (result != 0)
+        {
             return list->sort_dir == PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST ? -result : result;
+        }
     }
 
     // by column
@@ -658,19 +704,31 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     {
         case PTKFileListCol::COL_FILE_SIZE:
             if (file_a->get_size() > file_b->get_size())
+            {
                 result = 1;
+            }
             else if (file_a->get_size() == file_b->get_size())
+            {
                 result = 0;
+            }
             else
+            {
                 result = -1;
+            }
             break;
         case PTKFileListCol::COL_FILE_MTIME:
             if (file_a->get_mtime() > file_b->get_mtime())
+            {
                 result = 1;
+            }
             else if (file_a->get_mtime() == file_b->get_mtime())
+            {
                 result = 0;
+            }
             else
+            {
                 result = -1;
+            }
             break;
         case PTKFileListCol::COL_FILE_DESC:
             result = g_ascii_strcasecmp(file_a->get_mime_type_desc().data(),
@@ -688,17 +746,25 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     }
 
     if (result != 0)
+    {
         return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+    }
 
     // hidden first/last
     const bool hidden_a = ztd::startswith(file_a->get_disp_name(), ".");
     const bool hidden_b = ztd::startswith(file_b->get_disp_name(), ".");
     if (hidden_a && !hidden_b)
+    {
         result = list->sort_hidden_first ? -1 : 1;
+    }
     else if (!hidden_a && hidden_b)
+    {
         result = list->sort_hidden_first ? 1 : -1;
+    }
     if (result != 0)
+    {
         return result;
+    }
 
     // by display name
     if (list->sort_alphanum)
@@ -709,11 +775,17 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         const bool num_a = std::isdigit(file_a->get_disp_name().at(0));
         const bool num_b = std::isdigit(file_b->get_disp_name().at(0));
         if (num_a && !num_b)
+        {
             result = -1;
+        }
         else if (!num_a && num_b)
+        {
             result = 1;
+        }
         if (result != 0)
+        {
             return result;
+        }
 
         // alphanumeric
         if (list->sort_case)
@@ -754,7 +826,9 @@ void
 ptk_file_list_sort(PtkFileList* list)
 {
     if (list->n_files <= 1)
+    {
         return;
+    }
 
     GHashTable* old_order = g_hash_table_new(g_direct_hash, g_direct_equal);
     /* save old order */
@@ -802,7 +876,9 @@ static void
 ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
 {
     if (!list->show_hidden && file->get_name()[0] == '.')
+    {
         return;
+    }
 
     GList* ll = nullptr;
 
@@ -821,7 +897,9 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
         if (is_desktop || is_desktop2)
         {
             if (ztd::same(file->name, file2->name))
+            {
                 return;
+            }
         }
         else if (ptk_file_list_compare(file2, file, list) == 0)
         {
@@ -829,30 +907,44 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
             // ptk_file_list_compare may return 0 on differing display names
             // if case-insensitive - need to compare filenames
             if ((list->sort_alphanum || list->sort_natural) && list->sort_case)
+            {
                 return;
+            }
             else if (ztd::same(file->name, file2->name))
+            {
                 return;
+            }
         }
 
         if (!ll && ptk_file_list_compare(file2, file, list) > 0)
         {
             if (!is_desktop && !is_desktop2)
+            {
                 break;
+            }
             else
+            {
                 ll = l; // store insertion location based on disp_name
+            }
         }
     }
 
     if (ll)
+    {
         l = ll;
+    }
 
     list->files = g_list_insert_before(list->files, l, vfs_file_info_ref(file));
     ++list->n_files;
 
     if (l)
+    {
         l = l->prev;
+    }
     else
+    {
         l = g_list_last(list->files);
+    }
 
     GtkTreeIter it;
     it.stamp = list->stamp;
@@ -890,11 +982,15 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
     }
 
     if (!list->show_hidden && file->get_name()[0] == '.')
+    {
         return;
+    }
 
     l = g_list_find(list->files, file);
     if (!l)
+    {
         return;
+    }
 
     path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
 
@@ -911,11 +1007,15 @@ void
 ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 {
     if (!list->show_hidden && file->get_name()[0] == '.')
+    {
         return;
+    }
 
     GList* l = g_list_find(list->files, file);
     if (!l)
+    {
         return;
+    }
 
     GtkTreeIter it;
     it.stamp = list->stamp;
@@ -940,7 +1040,9 @@ void
 ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
 {
     if (!list)
+    {
         return;
+    }
 
     const i32 old_max_thumbnail = list->max_thumbnail;
     list->max_thumbnail = max_file_size;

@@ -116,7 +116,9 @@ vfs_async_task_finalize(GObject* object)
     task->cleanup(true);
 
     if (G_OBJECT_CLASS(parent_class)->finalize)
+    {
         (*G_OBJECT_CLASS(parent_class)->finalize)(object);
+    }
 }
 
 static bool
@@ -178,7 +180,9 @@ void
 VFSAsyncTask::real_cancel(bool finalize)
 {
     if (!this->thread)
+    {
         return;
+    }
 
     /*
      * NOTE: Well, this dirty hack is needed. Since the function is always

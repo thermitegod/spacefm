@@ -273,7 +273,9 @@ load_settings()
         {
             const std::string terminal = Glib::find_program_in_path(supported_terminal.data());
             if (terminal.empty())
+            {
                 continue;
+            }
 
             xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, Glib::path_get_basename(terminal));
             xset_set_b(XSetName::MAIN_TERMINAL, true); // discovery
@@ -326,9 +328,13 @@ save_settings(void* main_window_ptr)
     // save tabs
     const bool save_tabs = xset_get_b(XSetName::MAIN_SAVE_TABS);
     if (main_window_ptr)
+    {
         main_window = MAIN_WINDOW(main_window_ptr);
+    }
     else
+    {
         main_window = main_window_get_last_active();
+    }
 
     if (GTK_IS_WIDGET(main_window))
     {
@@ -363,7 +369,9 @@ save_settings(void* main_window_ptr)
 
                         // save current tab
                         if (set->x)
+                        {
                             free(set->x);
+                        }
 
                         const i32 current_page =
                             gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
@@ -409,7 +417,9 @@ free_settings()
     while (true)
     {
         if (xsets.empty())
+        {
             break;
+        }
 
         xset_t set = xsets.back();
         xsets.pop_back();
@@ -446,7 +456,9 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                 // is a plugin mirror
                 mset = set2;
                 if (!mset->shared_key)
+                {
                     continue;
+                }
                 set2 = xset_is(mset->shared_key);
             }
             else if (set2->plugin && set2->shared_key)
@@ -455,19 +467,29 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                 continue;
             }
             else
+            {
                 set = mset = set2;
+            }
 
             if (!context)
             {
                 if (!(context = xset_context_new()))
+                {
                     return false;
+                }
                 if (file_browser)
+                {
                     main_context_fill(file_browser, context);
+                }
                 else
+                {
                     return false;
+                }
 
                 if (!context->valid)
+                {
                     return false;
+                }
 
                 // get mime type open_all_type set
                 std::string str = context->var[ItemPropContext::CONTEXT_MIME];
@@ -482,14 +504,18 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                 const i32 context_action = xset_context_test(context, mset->context, false);
                 if (context_action == ItemPropContextState::CONTEXT_HIDE ||
                     context_action == ItemPropContextState::CONTEXT_DISABLE)
+                {
                     continue;
+                }
             }
 
             // valid custom type?
             const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
             if (cmd_type != XSetCMD::APP && cmd_type != XSetCMD::LINE &&
                 cmd_type != XSetCMD::SCRIPT)
+            {
                 continue;
+            }
 
             // is set pinned to open_all_type for pre-context?
             pinned = 0;
@@ -504,20 +530,28 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                         {
                             // found pinned to open_all_type
                             if (open_all_tset == open_all_set)
+                            {
                                 // correct mime type
                                 pinned = 2;
+                            }
                             else
+                            {
                                 // wrong mime type
                                 pinned = 1;
+                            }
                             break;
                         }
                         if (tset->next)
+                        {
                             tset = xset_is(tset->next);
+                        }
                     }
                 }
             }
             if (pinned == 1)
+            {
                 continue;
+            }
 
             // valid
             found = true;
@@ -543,10 +577,14 @@ xset_get_image(const char* icon, GtkIconSize icon_size)
     */
 
     if (!(icon && icon[0]))
+    {
         return nullptr;
+    }
 
     if (!icon_size)
+    {
         icon_size = GtkIconSize::GTK_ICON_SIZE_MENU;
+    }
 
     return gtk_image_new_from_icon_name(icon, icon_size);
 }
@@ -556,7 +594,9 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
               const char* elements)
 {
     if (!elements)
+    {
         return;
+    }
 
     const std::vector<std::string> split_elements = ztd::split(elements, " ");
 
@@ -583,7 +623,9 @@ xset_new_menuitem(const char* label, const char* icon)
         item = gtk_menu_item_new_with_mnemonic(label);
     }
     if (!(icon && icon[0]))
+    {
         return item;
+    }
     // GtkWidget* image = xset_get_image(icon, GtkIconSize::GTK_ICON_SIZE_MENU);
 
     return item;
@@ -612,27 +654,39 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         context = mset->context;
     }
     if (!icon_name)
+    {
         icon_name = set->icon;
+    }
     if (!icon_name)
     {
         if (set->plugin)
+        {
             icon_file = Glib::build_filename(set->plug_dir, set->plug_name, "icon");
+        }
         else
+        {
             icon_file = Glib::build_filename(vfs::user_dirs->program_config_dir(),
                                              "scripts",
                                              set->name,
                                              "icon");
+        }
 
         if (std::filesystem::exists(icon_file))
+        {
             icon_name = ztd::strdup(icon_file);
+        }
     }
     if (!context)
+    {
         context = set->context;
+    }
 
     // context?
     if (context && set->tool == XSetTool::NOT && xset_context && xset_context->valid &&
         !xset_get_b(XSetName::CONTEXT_DLG))
+    {
         context_action = xset_context_test(xset_context, context, set->disable);
+    }
 
     if (context_action != ItemPropContextState::CONTEXT_HIDE)
     {
@@ -655,9 +709,13 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                     break;
                 case XSetMenu::RADIO:
                     if (set->ob2_data)
+                    {
                         set_radio = XSET(set->ob2_data);
+                    }
                     else
+                    {
                         set_radio = set;
+                    }
                     item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->ob2_data,
                                                                  set->menu_label);
                     set_radio->ob2_data =
@@ -674,14 +732,18 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                                      G_CALLBACK(xset_menu_keypress),
                                      nullptr);
                     if (set->lock)
+                    {
                         xset_add_menu(file_browser, submenu, accel_group, set->desc);
+                    }
                     else if (set->child)
                     {
                         set_next = xset_get(set->child);
                         xset_add_menuitem(file_browser, submenu, accel_group, set_next);
                         GList* l = gtk_container_get_children(GTK_CONTAINER(submenu));
                         if (l)
+                        {
                             g_list_free(l);
+                        }
                         else
                         {
                             // Nothing was added to the menu (all items likely have
@@ -753,9 +815,13 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         g_object_set_data(G_OBJECT(item), "set", set);
 
         if (set->ob1)
+        {
             g_object_set_data(G_OBJECT(item), set->ob1, set->ob1_data);
+        }
         if (set->menu_style != XSetMenu::RADIO && set->ob2)
+        {
             g_object_set_data(G_OBJECT(item), set->ob2, set->ob2_data);
+        }
 
         if (set->menu_style < XSetMenu::SUBMENU)
         {
@@ -777,16 +843,22 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 
             // key accel
             if (set->shared_key)
+            {
                 keyset = xset_get(set->shared_key);
+            }
             else
+            {
                 keyset = set;
+            }
             if (keyset->key > 0 && accel_group)
+            {
                 gtk_widget_add_accelerator(item,
                                            "activate",
                                            accel_group,
                                            keyset->key,
                                            (GdkModifierType)keyset->keymod,
                                            GTK_ACCEL_VISIBLE);
+            }
         }
         // design mode callback
         g_signal_connect(item, "button-press-event", G_CALLBACK(xset_design_cb), set);
@@ -855,7 +927,9 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                                                    "",
                                                    false);
             if (!response)
+            {
                 return;
+            }
         }
     }
 
@@ -918,7 +992,9 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             // script
             command = xset_custom_get_script(set, false);
             if (command.empty())
+            {
                 return;
+            }
             break;
         case XSetCMD::APP:
             // app or executable
@@ -987,12 +1063,18 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     ptask->task->exec_set = set;
 
     if (set->y && set->y[0] != '\0')
+    {
         ptask->task->exec_as_user = set->y;
+    }
 
     if (set->plugin && set->shared_key && mset->icon)
+    {
         ptask->task->exec_icon = mset->icon;
+    }
     else if (set->icon)
+    {
         ptask->task->exec_icon = set->icon;
+    }
 
     ptask->task->current_dest = value; // temp storage
     ptask->task->exec_terminal = mset->in_terminal;
@@ -1039,19 +1121,25 @@ xset_custom_insert_after(xset_t target, xset_t set)
     {
         target_next = xset_get(target->next);
         if (target_next->prev)
+        {
             free(target_next->prev);
+        }
         target_next->prev = ztd::strdup(set->name);
     }
     target->next = ztd::strdup(set->name);
     if (target->tool != XSetTool::NOT)
     {
         if (set->tool < XSetTool::CUSTOM)
+        {
             set->tool = XSetTool::CUSTOM;
+        }
     }
     else
     {
         if (set->tool > XSetTool::CUSTOM)
+        {
             ztd::logger::warn("xset_custom_insert_after builtin tool inserted after non-tool");
+        }
         set->tool = XSetTool::NOT;
     }
 }
@@ -1060,15 +1148,21 @@ static bool
 xset_clipboard_in_set(xset_t set)
 { // look upward to see if clipboard is in set's tree
     if (!xset_set_clipboard || set->lock)
+    {
         return false;
+    }
     if (set == xset_set_clipboard)
+    {
         return true;
+    }
 
     if (set->parent)
     {
         xset_t set_parent = xset_get(set->parent);
         if (xset_clipboard_in_set(set_parent))
+        {
             return true;
+        }
     }
 
     if (set->prev)
@@ -1080,13 +1174,19 @@ xset_clipboard_in_set(xset_t set)
             {
                 xset_t set_prev_parent = xset_get(set_prev->parent);
                 if (xset_clipboard_in_set(set_prev_parent))
+                {
                     return true;
+                }
                 set_prev = nullptr;
             }
             else if (set_prev->prev)
+            {
                 set_prev = xset_get(set_prev->prev);
+            }
             else
+            {
                 set_prev = nullptr;
+            }
         }
     }
     return false;
@@ -1099,12 +1199,18 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     bool terminal;
     GtkWidget* dlgparent = nullptr;
     if (!path)
+    {
         return;
+    }
     if (force_root && no_root)
+    {
         return;
+    }
 
     if (parent)
+    {
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+    }
 
     std::string editor;
     if (geteuid() != 0 && !force_root && (no_root || have_rw_access(path)))
@@ -1135,15 +1241,25 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     // replacements
     const std::string quoted_path = ztd::shell::quote(path);
     if (ztd::contains(editor, "%f"))
+    {
         editor = ztd::replace(editor, "%f", quoted_path);
+    }
     else if (ztd::contains(editor, "%F"))
+    {
         editor = ztd::replace(editor, "%F", quoted_path);
+    }
     else if (ztd::contains(editor, "%u"))
+    {
         editor = ztd::replace(editor, "%u", quoted_path);
+    }
     else if (ztd::contains(editor, "%U"))
+    {
         editor = ztd::replace(editor, "%U", quoted_path);
+    }
     else
+    {
         editor = fmt::format("{} {}", editor, quoted_path);
+    }
     editor = fmt::format("{} {}", editor, quoted_path);
 
     // task
@@ -1154,7 +1270,9 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     ptask->task->exec_sync = false;
     ptask->task->exec_terminal = terminal;
     if (as_root)
+    {
         ptask->task->exec_as_user = "root";
+    }
     ptk_file_task_run(ptask);
 }
 
@@ -1174,7 +1292,9 @@ xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
         keymod = key_mod;
     }
     if (keyval <= 0)
+    {
         return "( none )";
+    }
 
     std::string mod = gdk_keyval_name(keyval);
 
@@ -1188,17 +1308,29 @@ xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
     if (keymod)
     {
         if (keymod & GdkModifierType::GDK_SUPER_MASK)
+        {
             mod = fmt::format("Super+{}", mod);
+        }
         if (keymod & GdkModifierType::GDK_HYPER_MASK)
+        {
             mod = fmt::format("Hyper+{}", mod);
+        }
         if (keymod & GdkModifierType::GDK_META_MASK)
+        {
             mod = fmt::format("Meta+{}", mod);
+        }
         if (keymod & GdkModifierType::GDK_MOD1_MASK)
+        {
             mod = fmt::format("Alt+{}", mod);
+        }
         if (keymod & GdkModifierType::GDK_CONTROL_MASK)
+        {
             mod = fmt::format("Ctrl+{}", mod);
+        }
         if (keymod & GdkModifierType::GDK_SHIFT_MASK)
+        {
             mod = fmt::format("Shift+{}", mod);
+        }
     }
     return mod;
 }
@@ -1259,7 +1391,9 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     *newkey = 0;
     *newkeymod = 0;
     if (set->shared_key)
+    {
         keyset = xset_get(set->shared_key);
+    }
 
     for (xset_t set2 : xsets)
     {
@@ -1272,14 +1406,22 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
                 // set2 is plugin mirror
                 xset_t rset = xset_get(set2->shared_key);
                 if (rset->menu_label)
+                {
                     name = clean_label(rset->menu_label, false, false);
+                }
                 else
+                {
                     name = "( no name )";
+                }
             }
             else if (set2->menu_label)
+            {
                 name = clean_label(set2->menu_label, false, false);
+            }
             else
+            {
                 name = "( no name )";
+            }
 
             keyname = xset_get_keyname(nullptr, event->keyval, keymod);
 #if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
@@ -1335,15 +1477,21 @@ xset_set_key(GtkWidget* parent, xset_t set)
     GtkWidget* dlgparent = nullptr;
 
     if (set->menu_label)
+    {
         name = clean_label(set->menu_label, false, true);
+    }
     else if (set->tool > XSetTool::CUSTOM)
+    {
         name = xset_get_builtin_toolitem_label(set->tool);
+    }
     else if (ztd::startswith(set->name, "open_all_type_"))
     {
         keyset = xset_get(XSetName::OPEN_ALL);
         name = clean_label(keyset->menu_label, false, true);
         if (set->shared_key)
+        {
             free(set->shared_key);
+        }
         set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
     }
     else
@@ -1356,7 +1504,9 @@ xset_set_key(GtkWidget* parent, xset_t set)
                     "remove the current key assignment, click Unset.",
                     name);
     if (parent)
+    {
         dlgparent = gtk_widget_get_toplevel(parent);
+    }
 
     GtkWidget* dlg = gtk_message_dialog_new_with_markup(GTK_WINDOW(dlgparent),
                                                         GtkDialogFlags::GTK_DIALOG_MODAL,
@@ -1375,11 +1525,17 @@ xset_set_key(GtkWidget* parent, xset_t set)
     gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_unset, GtkResponseType::GTK_RESPONSE_NO);
 
     if (set->shared_key)
+    {
         keyset = xset_get(set->shared_key);
+    }
     else
+    {
         keyset = set;
+    }
     if (keyset->key <= 0)
+    {
         gtk_widget_set_sensitive(btn_unset, false);
+    }
 
     GtkWidget* btn = gtk_button_new_with_label("Apply");
     gtk_button_set_label(GTK_BUTTON(btn), "Set");
@@ -1419,12 +1575,18 @@ xset_set_key(GtkWidget* parent, xset_t set)
         }
         // plugin? set shared_key to mirror if not
         if (set->plugin && !set->shared_key)
+        {
             xset_get_plugin_mirror(set);
+        }
         // set new key
         if (set->shared_key)
+        {
             keyset = xset_get(set->shared_key);
+        }
         else
+        {
             keyset = set;
+        }
         keyset->key = newkey;
         keyset->keymod = newkeymod;
     }
@@ -1438,7 +1600,9 @@ xset_job_is_valid(xset_t set, XSetJob job)
     bool open_all = false;
 
     if (!set)
+    {
         return false;
+    }
 
     if (set->plugin)
     {
@@ -1454,7 +1618,9 @@ xset_job_is_valid(xset_t set, XSetJob job)
 
     // control open_all item
     if (ztd::startswith(set->name, "open_all_type_"))
+    {
         open_all = true;
+    }
 
     switch (job)
     {
@@ -1475,18 +1641,28 @@ xset_job_is_valid(xset_t set, XSetJob job)
             return !set->lock;
         case XSetJob::PASTE:
             if (!xset_set_clipboard)
+            {
                 no_paste = true;
+            }
             else if (set->plugin)
+            {
                 no_paste = true;
+            }
             else if (set == xset_set_clipboard && xset_clipboard_is_cut)
+            {
                 // do not allow cut paste to self
                 no_paste = true;
+            }
             else if (xset_set_clipboard->tool > XSetTool::CUSTOM && set->tool == XSetTool::NOT)
+            {
                 // do not allow paste of builtin tool item to menu
                 no_paste = true;
+            }
             else if (xset_set_clipboard->menu_style == XSetMenu::SUBMENU)
+            {
                 // do not allow paste of submenu to self or below
                 no_paste = xset_clipboard_in_set(set);
+            }
             return !no_paste;
         case XSetJob::REMOVE:
             return (!set->lock && !no_remove);
@@ -1548,7 +1724,9 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
     if (!item)
+    {
         return false;
+    }
 
     const u32 keymod = ptk_get_keymod(event->state);
 
@@ -1568,9 +1746,13 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
                     break;
                 case GDK_KEY_F4:
                     if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                    {
                         job = XSetJob::EDIT;
+                    }
                     else
+                    {
                         job = XSetJob::PROP_CMD;
+                    }
                     break;
                 case GDK_KEY_Delete:
                     job = XSetJob::REMOVE;
@@ -1600,7 +1782,9 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
                         return false;
                     }
                     else
+                    {
                         job = XSetJob::EDIT;
+                    }
                     break;
                 case GDK_KEY_k:
                     job = XSetJob::KEY;
@@ -1701,18 +1885,28 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     }
 
     if (!xset_set_clipboard)
+    {
         no_paste = true;
+    }
     else if (insert_set->plugin)
+    {
         no_paste = true;
+    }
     else if (insert_set == xset_set_clipboard && xset_clipboard_is_cut)
+    {
         // do not allow cut paste to self
         no_paste = true;
+    }
     else if (xset_set_clipboard->tool > XSetTool::CUSTOM && insert_set->tool == XSetTool::NOT)
+    {
         // do not allow paste of builtin tool item to menu
         no_paste = true;
+    }
     else if (xset_set_clipboard->menu_style == XSetMenu::SUBMENU)
+    {
         // do not allow paste of submenu to self or below
         no_paste = xset_clipboard_in_set(insert_set);
+    }
 
     // control open_all item
     // if (ztd::startswith(set->name, "open_all_type_"))
@@ -1725,45 +1919,53 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     newitem = xset_design_additem(design_menu, "Cu_t", XSetJob::CUT, set);
     gtk_widget_set_sensitive(newitem, !set->lock && !set->plugin);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_x,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // Copy
     newitem = xset_design_additem(design_menu, "_Copy", XSetJob::COPY, set);
     gtk_widget_set_sensitive(newitem, !set->lock);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_c,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // Paste
     newitem = xset_design_additem(design_menu, "_Paste", XSetJob::PASTE, insert_set);
     gtk_widget_set_sensitive(newitem, !no_paste);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_v,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // Remove
     newitem = xset_design_additem(design_menu, "_Remove", XSetJob::REMOVE, set);
     gtk_widget_set_sensitive(newitem, !set->lock && !no_remove);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_Delete,
                                    (GdkModifierType)0,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // Export
     newitem = xset_design_additem(design_menu, "E_xport", XSetJob::EXPORT, set);
@@ -1790,12 +1992,14 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // New > Command
     newitem = xset_design_additem(submenu, "_Command", XSetJob::COMMAND, insert_set);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_Insert,
                                    (GdkModifierType)0,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // New > Submenu
     newitem = xset_design_additem(submenu, "Sub_menu", XSetJob::SUBMENU, insert_set);
@@ -1842,31 +2046,37 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     newitem = xset_design_additem(design_menu, "_Help", XSetJob::HELP, set);
     gtk_widget_set_sensitive(newitem, !set->lock || set->line);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_F1,
                                    (GdkModifierType)0,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // Tooltips (toolbar)
     if (set->tool != XSetTool::NOT)
     {
         newitem = xset_design_additem(design_menu, "T_ooltips", XSetJob::TOOLTIPS, set);
         if (!xset_get_b_panel(1, XSetPanel::TOOL_L))
+        {
             set_check_menu_item_block(newitem);
+        }
     }
 
     // Key
     newitem = xset_design_additem(design_menu, "_Key Shortcut", XSetJob::KEY, set);
     gtk_widget_set_sensitive(newitem, (set->menu_style < XSetMenu::SUBMENU));
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_k,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // Edit (script)
     if (!set->lock && set->menu_style < XSetMenu::SUBMENU && set->tool <= XSetTool::CUSTOM)
@@ -1881,12 +2091,14 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                     // edit as user
                     newitem = xset_design_additem(design_menu, "_Edit Script", XSetJob::EDIT, set);
                     if (show_keys)
+                    {
                         gtk_widget_add_accelerator(newitem,
                                                    "activate",
                                                    accel_group,
                                                    GDK_KEY_F4,
                                                    (GdkModifierType)0,
                                                    GTK_ACCEL_VISIBLE);
+                    }
                 }
                 else
                 {
@@ -1894,12 +2106,14 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                     newitem =
                         xset_design_additem(design_menu, "E_dit As Root", XSetJob::EDIT_ROOT, set);
                     if (geteuid() == 0 && show_keys)
+                    {
                         gtk_widget_add_accelerator(newitem,
                                                    "activate",
                                                    accel_group,
                                                    GDK_KEY_F4,
                                                    (GdkModifierType)0,
                                                    GTK_ACCEL_VISIBLE);
+                    }
                 }
                 free(script);
             }
@@ -1909,24 +2123,28 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
             // edit command line
             newitem = xset_design_additem(design_menu, "_Edit Command", XSetJob::PROP_CMD, set);
             if (show_keys)
+            {
                 gtk_widget_add_accelerator(newitem,
                                            "activate",
                                            accel_group,
                                            GDK_KEY_F4,
                                            (GdkModifierType)0,
                                            GTK_ACCEL_VISIBLE);
+            }
         }
     }
 
     // Properties
     newitem = xset_design_additem(design_menu, "_Properties", XSetJob::PROP, set);
     if (show_keys)
+    {
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_F3,
                                    (GdkModifierType)0,
                                    GTK_ACCEL_VISIBLE);
+    }
 
     // show menu
     gtk_widget_show_all(GTK_WIDGET(design_menu));
@@ -1978,7 +2196,9 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
             // https://github.com/IgnorantGuru/spacefm/issues/31
             // https://github.com/IgnorantGuru/spacefm/issues/228
             if (menu)
+            {
                 gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
+            }
             gtk_menu_item_activate(GTK_MENU_ITEM(item));
             return true;
         }
@@ -1987,7 +2207,9 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
         return true;
     }
     else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    {
         return false;
+    }
 
     switch (event->button)
     {
@@ -2008,9 +2230,13 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                     {
                         // activate
                         if (set->tool == XSetTool::CUSTOM)
+                        {
                             xset_menu_cb(nullptr, set);
+                        }
                         else
+                        {
                             xset_builtin_tool_activate(set->tool, set, event);
+                        }
                         return true;
                     }
                     break;
@@ -2048,9 +2274,13 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                     else
                     {
                         if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                        {
                             job = XSetJob::EDIT;
+                        }
                         else
+                        {
                             job = XSetJob::PROP_CMD;
+                        }
                     }
                     break;
                 case GdkModifierType::GDK_CONTROL_MASK:
@@ -2085,12 +2315,16 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
         if (xset_job_is_valid(set, job))
         {
             if (menu)
+            {
                 gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
+            }
             g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
             xset_design_job(item, set);
         }
         else
+        {
             xset_design_show_menu(menu, set, nullptr, event->button, event->time);
+        }
         return true;
     }
     return false; // true will not stop activate on button-press (will on release)
@@ -2108,10 +2342,14 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     {
         set = XSET(g_object_get_data(G_OBJECT(item), "set"));
         if (!set)
+        {
             return false;
+        }
     }
     else
+    {
         return false;
+    }
 
     const u32 keymod = ptk_get_keymod(event->state);
 
@@ -2133,9 +2371,13 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     break;
                 case GDK_KEY_F4:
                     if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                    {
                         job = XSetJob::EDIT;
+                    }
                     else
+                    {
                         job = XSetJob::PROP_CMD;
+                    }
                     break;
                 case GDK_KEY_Delete:
                     job = XSetJob::REMOVE;
@@ -2168,9 +2410,13 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                     else
                     {
                         if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                        {
                             job = XSetJob::EDIT;
+                        }
                         else
+                        {
                             job = XSetJob::PROP_CMD;
+                        }
                     }
                     break;
                 case GDK_KEY_k:
@@ -2196,7 +2442,9 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
             xset_design_job(item, set);
         }
         else
+        {
             xset_design_show_menu(widget, set, nullptr, 0, event->time);
+        }
         return true;
     }
     return false;
@@ -2216,7 +2464,9 @@ xset_menu_cb(GtkWidget* item, xset_t set)
     {
         if (set->lock && set->menu_style == XSetMenu::RADIO && GTK_IS_CHECK_MENU_ITEM(item) &&
             !gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
+        {
             return;
+        }
 
         cb_func = set->cb_func;
         cb_data = set->cb_data;
@@ -2249,23 +2499,37 @@ xset_menu_cb(GtkWidget* item, xset_t set)
     {
         case XSetMenu::NORMAL:
             if (cb_func)
+            {
                 cb_func(item, cb_data);
+            }
             else if (!rset->lock)
+            {
                 xset_custom_activate(item, rset);
+            }
             break;
         case XSetMenu::SEP:
             break;
         case XSetMenu::CHECK:
             if (mset->b == XSetB::XSET_B_TRUE)
+            {
                 mset->b = XSetB::XSET_B_FALSE;
+            }
             else
+            {
                 mset->b = XSetB::XSET_B_TRUE;
+            }
             if (cb_func)
+            {
                 cb_func(item, cb_data);
+            }
             else if (!rset->lock)
+            {
                 xset_custom_activate(item, rset);
+            }
             if (set->tool == XSetTool::CUSTOM)
+            {
                 ptk_file_browser_update_toolbar_widgets(set->browser, set, XSetTool::INVALID);
+            }
             break;
         case XSetMenu::STRING:
         case XSetMenu::CONFIRM:
@@ -2273,11 +2537,17 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             std::string msg = rset->desc;
             char* default_str = nullptr;
             if (rset->title && rset->lock)
+            {
                 title = ztd::strdup(rset->title);
+            }
             else
+            {
                 title = clean_label(rset->menu_label, false, false);
+            }
             if (rset->lock)
+            {
                 default_str = rset->z;
+            }
             else
             {
                 msg = ztd::replace(msg, "\\n", "\n");
@@ -2294,9 +2564,13 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                 if (response == GtkResponseType::GTK_RESPONSE_OK)
                 {
                     if (cb_func)
+                    {
                         cb_func(item, cb_data);
+                    }
                     else if (!set->lock)
+                    {
                         xset_custom_activate(item, rset);
+                    }
                 }
             }
             else
@@ -2306,20 +2580,30 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                 if (response2)
                 {
                     if (cb_func)
+                    {
                         cb_func(item, cb_data);
+                    }
                     else if (!set->lock)
+                    {
                         xset_custom_activate(item, rset);
+                    }
                 }
             }
         }
         break;
         case XSetMenu::RADIO:
             if (mset->b != XSetB::XSET_B_TRUE)
+            {
                 mset->b = XSetB::XSET_B_TRUE;
+            }
             if (cb_func)
+            {
                 cb_func(item, cb_data);
+            }
             else if (!rset->lock)
+            {
                 xset_custom_activate(item, rset);
+            }
             break;
         case XSetMenu::FONTDLG:
             break;
@@ -2351,9 +2635,13 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             if (response2)
             {
                 if (rset->lock)
+                {
                     rset->keep_terminal = true; // trigger save of changed icon
+                }
                 if (cb_func)
+                {
                     cb_func(item, cb_data);
+                }
             }
             break;
         case XSetMenu::COLORDLG: // deprecated
@@ -2368,14 +2656,20 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         case XSetMenu::SUBMENU:
         default:
             if (cb_func)
+            {
                 cb_func(item, cb_data);
+            }
             else if (!set->lock)
+            {
                 xset_custom_activate(item, rset);
+            }
             break;
     }
 
     if (rset->menu_style != XSetMenu::NORMAL)
+    {
         autosave_request_add();
+    }
 }
 
 void
@@ -2384,16 +2678,22 @@ multi_input_select_region(GtkWidget* input, i32 start, i32 end)
     GtkTextIter iter, siter;
 
     if (start < 0 || !GTK_IS_TEXT_VIEW(input))
+    {
         return;
+    }
 
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input));
 
     gtk_text_buffer_get_iter_at_offset(buf, &siter, start);
 
     if (end < 0)
+    {
         gtk_text_buffer_get_end_iter(buf, &iter);
+    }
     else
+    {
         gtk_text_buffer_get_iter_at_offset(buf, &iter, end);
+    }
 
     gtk_text_buffer_select_range(buf, &iter, &siter);
 }
@@ -2424,7 +2724,9 @@ xset_builtin_tool_activate(XSetTool tool_type, xset_t set, GdkEventButton* event
         mode = main_window->panel_context.at(p);
     }
     if (!PTK_IS_FILE_BROWSER(file_browser))
+    {
         return;
+    }
 
     switch (tool_type)
     {
@@ -2498,7 +2800,9 @@ const char*
 xset_get_builtin_toolitem_label(XSetTool tool_type)
 {
     if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID)
+    {
         return nullptr;
+    }
     return builtin_tool_name[INT(tool_type)];
 }
 
@@ -2506,7 +2810,9 @@ xset_t
 xset_new_builtin_toolitem(XSetTool tool_type)
 {
     if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID)
+    {
         return nullptr;
+    }
 
     xset_t set = xset_custom_new();
     set->tool = tool_type;
@@ -2526,13 +2832,17 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu_label,
     // event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    {
         return false;
+    }
     const u32 keymod = ptk_get_keymod(event->state);
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     if (!PTK_IS_FILE_BROWSER(file_browser))
+    {
         return true;
+    }
     ptk_file_browser_focus_me(file_browser);
     set->browser = file_browser;
 
@@ -2540,7 +2850,9 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     if (!context->valid)
+    {
         return true;
+    }
 
     switch (event->button)
     {
@@ -2569,11 +2881,17 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                             xset_menu_cb(nullptr, set);
                         }
                         else if (set->tool == XSetTool::BACK_MENU)
+                        {
                             xset_builtin_tool_activate(XSetTool::BACK, set, event);
+                        }
                         else if (set->tool == XSetTool::FWD_MENU)
+                        {
                             xset_builtin_tool_activate(XSetTool::FWD, set, event);
+                        }
                         else if (set->tool != XSetTool::NOT)
+                        {
                             xset_builtin_tool_activate(set->tool, set, event);
+                        }
                         return true;
                     }
                     else // if ( event->button == 3 )
@@ -2611,9 +2929,13 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                     // no modifier
                     if (set->tool == XSetTool::CUSTOM &&
                         XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::SCRIPT)
+                    {
                         job = XSetJob::EDIT;
+                    }
                     else
+                    {
                         job = XSetJob::PROP_CMD;
+                    }
                     break;
                 case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
@@ -2665,22 +2987,30 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     // ztd::logger::info("on_tool_menu_button_press  {}   button = {}", set->menu_label,
     // event->button);
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    {
         return false;
+    }
     const u32 keymod = ptk_get_keymod(event->state);
     if (keymod != 0 || event->button != 1)
+    {
         return on_tool_icon_button_press(widget, event, set);
+    }
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     if (!PTK_IS_FILE_BROWSER(file_browser))
+    {
         return true;
+    }
     ptk_file_browser_focus_me(file_browser);
 
     // get context
     xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
     if (!context->valid)
+    {
         return true;
+    }
 
     if (event->button == 1)
     {
@@ -2690,7 +3020,9 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
             xset_t set_child;
             if (!(set && !set->lock && set->child && set->menu_style == XSetMenu::SUBMENU &&
                   (set_child = xset_is(set->child))))
+            {
                 return true;
+            }
             GtkWidget* menu = gtk_menu_new();
             GtkAccelGroup* accel_group = gtk_accel_group_new();
             xset_add_menuitem(file_browser, menu, accel_group, set_child);
@@ -2698,7 +3030,9 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
             gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
         }
         else
+        {
             xset_builtin_tool_activate(set->tool, set, event);
+        }
         return true;
     }
     return true;
@@ -2727,10 +3061,14 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                   i32 icon_size, xset_t set, bool show_tooltips)
 {
     if (!set)
+    {
         return nullptr;
+    }
 
     if (set->lock)
+    {
         return nullptr;
+    }
 
     if (set->tool == XSetTool::NOT)
     {
@@ -2766,7 +3104,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         return item;
     }
     if (set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID && !set->shared_key)
+    {
         set->shared_key = ztd::strdup(builtin_tool_shared_key[INT(set->tool)]);
+    }
 
     // builtin toolitems do not have menu_style set
     XSetMenu menu_style;
@@ -2809,16 +3149,22 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                                                            set->name,
                                                            "icon");
         if (std::filesystem::exists(icon_file))
+        {
             icon_name = ztd::strdup(icon_file);
+        }
     }
 
     char* menu_label;
     menu_label = set->menu_label;
     if (!menu_label && set->tool > XSetTool::CUSTOM)
+    {
         menu_label = (char*)xset_get_builtin_toolitem_label(set->tool);
+    }
 
     if (menu_style == XSetMenu::NORMAL)
+    {
         menu_style = XSetMenu::STRING;
+    }
 
     GtkWidget* ebox;
     GtkWidget* hbox;
@@ -2834,10 +3180,14 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             {
                 // builtin tool item
                 if (icon_name)
+                {
                     image = xset_get_image(icon_name, (GtkIconSize)icon_size);
+                }
                 else if (set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
+                {
                     image =
                         xset_get_image(builtin_tool_icon[INT(set->tool)], (GtkIconSize)icon_size);
+                }
             }
             else if (!set->lock && cmd_type == XSetCMD::APP)
             {
@@ -2851,10 +3201,14 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 g_object_unref(pixbuf);
             }
             if (!image)
+            {
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-execute", (GtkIconSize)icon_size);
+            }
             if (!new_menu_label)
+            {
                 new_menu_label = ztd::strdup(menu_label);
+            }
 
             // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, new_menu_label ) );
@@ -2898,11 +3252,15 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             break;
         case XSetMenu::CHECK:
             if (!icon_name && set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
+            {
                 // builtin tool item
                 image = xset_get_image(builtin_tool_icon[INT(set->tool)], (GtkIconSize)icon_size);
+            }
             else
+            {
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-execute", (GtkIconSize)icon_size);
+            }
 
             // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_toggle_tool_button_new() );
@@ -2950,13 +3308,19 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             // create a tool button
             set_child = nullptr;
             if (set->child && set->tool == XSetTool::CUSTOM)
+            {
                 set_child = xset_is(set->child);
+            }
 
             if (!icon_name && set_child && set_child->icon)
+            {
                 // take the user icon from the first item in the submenu
                 icon_name = set_child->icon;
+            }
             else if (!icon_name && set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
+            {
                 icon_name = builtin_tool_icon[INT(set->tool)];
+            }
             else if (!icon_name && set_child && set->tool == XSetTool::CUSTOM)
             {
                 // take the auto icon from the first item in the submenu
@@ -2996,7 +3360,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                         break;
                     case XSetTool::CUSTOM:
                         if (set_child)
+                        {
                             menu_label = set_child->menu_label;
+                        }
                         break;
                     case XSetTool::NOT:
                     case XSetTool::DEVICES:
@@ -3016,16 +3382,22 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                     case XSetTool::INVALID:
                     default:
                         if (!set->menu_label)
+                        {
                             menu_label = (char*)xset_get_builtin_toolitem_label(set->tool);
+                        }
                         else
+                        {
                             menu_label = set->menu_label;
+                        }
                         break;
                 }
             }
 
             if (!image)
+            {
                 image =
                     xset_get_image(icon_name ? icon_name : "gtk-directory", (GtkIconSize)icon_size);
+            }
 
             // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, menu_label ) );
@@ -3070,7 +3442,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             // reset menu_label for below
             menu_label = set->menu_label;
             if (!menu_label && set->tool > XSetTool::CUSTOM)
+            {
                 menu_label = (char*)xset_get_builtin_toolitem_label(set->tool);
+            }
 
             ///////// create a menu_tool_button to steal the button from
             ebox = gtk_event_box_new();
@@ -3199,7 +3573,9 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     // ztd::logger::info("xset_fill_toolbar {}", set_parent->name);
     if (!(file_browser && toolbar && set_parent))
+    {
         return;
+    }
 
     set_parent->lock = true;
     set_parent->menu_style = XSetMenu::SUBMENU;
@@ -3208,7 +3584,9 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     xset_t set_child = nullptr;
     if (set_parent->child)
+    {
         set_child = xset_is(set_parent->child);
+    }
     if (!set_child)
     {
         // toolbar is empty - add default items
@@ -3219,9 +3597,13 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         if (set_parent->xset_name != XSetName::TOOL_R)
         {
             if (set_parent->xset_name == XSetName::TOOL_S)
+            {
                 stop_b4 = 2;
+            }
             else
+            {
                 stop_b4 = default_tools.size();
+            }
             set_target = set_child;
             for (i32 i = 0; i < stop_b4; ++i)
             {
@@ -3255,14 +3637,22 @@ xset_set_window_icon(GtkWindow* win)
     const char* name;
     xset_t set = xset_get(XSetName::MAIN_ICON);
     if (set->icon)
+    {
         name = set->icon;
+    }
     else if (geteuid() == 0)
+    {
         name = "spacefm-root";
+    }
     else
+    {
         name = "spacefm";
+    }
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     if (!icon_theme)
+    {
         return;
+    }
     GError* error = nullptr;
     GdkPixbuf* icon = gtk_icon_theme_load_icon(icon_theme, name, 48, (GtkIconLookupFlags)0, &error);
     if (icon)

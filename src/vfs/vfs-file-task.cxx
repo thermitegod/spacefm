@@ -76,7 +76,9 @@ VFSFileTask::VFSFileTask(VFSFileTaskType type, const std::vector<std::string>& s
     this->type = type;
     this->src_paths = src_files;
     if (!dest_dir.empty())
+    {
         this->dest_dir = dest_dir.data();
+    }
 
     this->is_recursive =
         (this->type == VFSFileTaskType::COPY || this->type == VFSFileTaskType::DELETE);
@@ -100,8 +102,10 @@ VFSFileTask::~VFSFileTask()
     g_slist_free(this->devs);
 
     if (this->chmod_actions)
+    {
         g_slice_free1(sizeof(unsigned char) * magic_enum::enum_count<ChmodActionType>(),
                       this->chmod_actions);
+    }
 
     g_mutex_clear(this->mutex);
     free(this->mutex);
@@ -199,18 +203,26 @@ vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_n
 { // returns nullptr if all names used; otherwise newly allocated string
     std::string new_name;
     if (ext.empty())
+    {
         new_name = base_name.data();
+    }
     else
+    {
         new_name = fmt::format("{}.{}", base_name, ext);
+    }
     std::string new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
 
     u32 n = 1;
     while (std::filesystem::exists(new_dest_file))
     {
         if (ext.empty())
+        {
             new_name = fmt::format("{}-copy{}", base_name, ++n);
+        }
         else
+        {
             new_name = fmt::format("{}-copy{}.{}", base_name, ++n, ext);
+        }
 
         new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
     }
@@ -252,7 +264,9 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
         {
             *dest_exists = dest_file_stat.is_valid();
             if (!*dest_exists)
+            {
                 return !this->abort;
+            }
 
             // auto-rename
             const std::string old_name = Glib::path_get_basename(dest_file.data());
@@ -265,17 +279,23 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
                                                                        filename_extension));
             *dest_exists = false;
             if (*new_dest_file)
+            {
                 return !this->abort;
+            }
             // else ran out of names - fall through to query user
         }
 
         *dest_exists = dest_file_stat.is_valid();
         if (!*dest_exists)
+        {
             return !this->abort;
+        }
 
         // dest exists - query user
-        if (!this->state_cb) // failsafe
+        if (!this->state_cb)
+        { // failsafe
             return false;
+        }
 
         char* new_dest;
         const char* use_dest_file = ztd::strdup(dest_file.data());
@@ -348,13 +368,17 @@ bool
 VFSFileTask::check_dest_in_src(std::string_view src_dir)
 {
     if (this->dest_dir.empty())
+    {
         return false;
+    }
 
     const std::string real_dest_path = std::filesystem::canonical(this->dest_dir);
     const std::string real_src_path = std::filesystem::canonical(src_dir);
 
     if (!ztd::startswith(real_dest_path, real_src_path))
+    {
         return false;
+    }
 
     // source is contained in destination dir
     const std::string disp_src = Glib::filename_display_name(src_dir.data());
@@ -365,7 +389,9 @@ VFSFileTask::check_dest_in_src(std::string_view src_dir)
                     disp_src);
     this->append_add_log(err);
     if (this->state_cb)
+    {
         this->state_cb(this, VFSFileTaskState::ERROR, nullptr, this->state_cb_data);
+    }
     this->state = VFSFileTaskState::RUNNING;
 
     return true;
@@ -405,7 +431,9 @@ bool
 VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
 {
     if (this->should_abort())
+    {
         return false;
+    }
 
     // ztd::logger::info("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
     this->lock();
@@ -432,13 +460,17 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
         if (this->check_dest_in_src(src_file))
         {
             if (new_dest_file)
+            {
                 free(new_dest_file);
+            }
             return false;
         }
         if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
         {
             if (new_dest_file)
+            {
                 free(new_dest_file);
+            }
             return false;
         }
         if (new_dest_file)
@@ -466,11 +498,15 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
             {
                 const std::string file_name = std::filesystem::path(file).filename();
                 if (this->should_abort())
+                {
                     break;
+                }
                 const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
                 const std::string sub_dest_file = Glib::build_filename(actual_dest_file, file_name);
                 if (!this->do_file_copy(sub_src_file, sub_dest_file) && !copy_fail)
+                {
                     copy_fail = true;
+                }
             }
 
             chmod(actual_dest_file.data(), file_stat.mode());
@@ -479,7 +515,9 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
             utime(actual_dest_file.data(), &times);
 
             if (this->avoid_changes)
+            {
                 update_file_display(actual_dest_file);
+            }
 
             /* Move files to different device: Need to delete source dir */
             if ((this->type == VFSFileTaskType::MOVE) && !this->should_abort() && !copy_fail)
@@ -490,8 +528,12 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                     this->task_error(errno, "Removing", src_file);
                     copy_fail = true;
                     if (this->should_abort())
+                    {
                         if (new_dest_file)
+                        {
                             free(new_dest_file);
+                        }
+                    }
                     return false;
                 }
             }
@@ -522,7 +564,9 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
             if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
             {
                 if (new_dest_file)
+                {
                     free(new_dest_file);
+                }
                 return false;
             }
 
@@ -542,7 +586,9 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                 {
                     this->task_error(errno, "Removing", actual_dest_file);
                     if (new_dest_file)
+                    {
                         free(new_dest_file);
+                    }
                     return false;
                 }
             }
@@ -588,7 +634,9 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
             {
                 close(rfd);
                 if (new_dest_file)
+                {
                     free(new_dest_file);
+                }
                 return false;
             }
 
@@ -609,7 +657,9 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                     this->task_error(errno, "Removing", actual_dest_file);
                     close(rfd);
                     if (new_dest_file)
+                    {
                         free(new_dest_file);
+                    }
                     return false;
                 }
             }
@@ -663,7 +713,9 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                         utime(actual_dest_file.data(), &times);
                     }
                     if (this->avoid_changes)
+                    {
                         update_file_display(actual_dest_file);
+                    }
 
                     /* Move files to different device: Need to delete source files */
                     if ((this->type == VFSFileTaskType::MOVE) && !this->should_abort())
@@ -692,9 +744,13 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
     }
 
     if (new_dest_file)
+    {
         free(new_dest_file);
+    }
     if (!copy_fail && this->error_first)
+    {
         this->error_first = false;
+    }
     return !copy_fail;
 }
 
@@ -702,7 +758,9 @@ void
 VFSFileTask::file_move(std::string_view src_file)
 {
     if (this->should_abort())
+    {
         return;
+    }
 
     this->lock();
     this->current_file = src_file;
@@ -743,7 +801,9 @@ i32
 VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
 {
     if (this->should_abort())
+    {
         return 0;
+    }
 
     std::string dest_file = dest_path.data();
 
@@ -762,15 +822,21 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
     }
 
     if (this->should_abort())
+    {
         return 0;
+    }
 
     if (file_stat.is_directory() && this->check_dest_in_src(src_file))
+    {
         return 0;
+    }
 
     char* new_dest_file = nullptr;
     bool dest_exists;
     if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
+    {
         return 0;
+    }
 
     if (new_dest_file)
     {
@@ -787,14 +853,18 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
         {
             const std::string file_name = std::filesystem::path(file).filename();
             if (this->should_abort())
+            {
                 break;
+            }
             const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
             const std::string sub_dest_file = Glib::build_filename(dest_file, file_name);
             this->do_file_move(sub_src_file, sub_dest_file);
         }
         // remove moved src dir if empty
         if (!this->should_abort())
+        {
             std::filesystem::remove_all(src_file);
+        }
 
         return 0;
     }
@@ -804,8 +874,10 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
 
     if (err.value() != 0)
     {
-        if (err.value() == -1 && errno == EXDEV) // Invalid cross-link device
+        if (err.value() == -1 && errno == EXDEV)
+        { // Invalid cross-link device
             return 18;
+        }
 
         this->task_error(errno, "Renaming", src_file);
         if (this->should_abort())
@@ -822,11 +894,15 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
     this->lock();
     this->progress += file_stat.size();
     if (this->error_first)
+    {
         this->error_first = false;
+    }
     this->unlock();
 
     if (new_dest_file)
+    {
         free(new_dest_file);
+    }
     return 0;
 }
 
@@ -834,7 +910,9 @@ void
 VFSFileTask::file_trash(std::string_view src_file)
 {
     if (this->should_abort())
+    {
         return;
+    }
 
     this->lock();
     this->current_file = src_file;
@@ -866,7 +944,9 @@ VFSFileTask::file_trash(std::string_view src_file)
     this->lock();
     this->progress += file_stat.size();
     if (this->error_first)
+    {
         this->error_first = false;
+    }
     this->unlock();
 }
 
@@ -874,7 +954,9 @@ void
 VFSFileTask::file_delete(std::string_view src_file)
 {
     if (this->should_abort())
+    {
         return;
+    }
 
     this->lock();
     this->current_file = src_file.data();
@@ -894,13 +976,17 @@ VFSFileTask::file_delete(std::string_view src_file)
         {
             const std::string file_name = std::filesystem::path(file).filename();
             if (this->should_abort())
+            {
                 break;
+            }
             const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
             this->file_delete(sub_src_file);
         }
 
         if (this->should_abort())
+        {
             return;
+        }
         std::filesystem::remove_all(src_file);
         if (std::filesystem::exists(src_file))
         {
@@ -920,7 +1006,9 @@ VFSFileTask::file_delete(std::string_view src_file)
     this->lock();
     this->progress += file_stat.size();
     if (this->error_first)
+    {
         this->error_first = false;
+    }
     this->unlock();
 }
 
@@ -928,7 +1016,9 @@ void
 VFSFileTask::file_link(std::string_view src_file)
 {
     if (this->should_abort())
+    {
         return;
+    }
 
     const std::string file_name = Glib::path_get_basename(src_file.data());
     const std::string old_dest_file = Glib::build_filename(this->dest_dir, file_name);
@@ -936,7 +1026,9 @@ VFSFileTask::file_link(std::string_view src_file)
 
     // MOD  setup task for check overwrite
     if (this->should_abort())
+    {
         return;
+    }
 
     this->lock();
     this->current_file = src_file.data();
@@ -952,7 +1044,9 @@ VFSFileTask::file_link(std::string_view src_file)
         {
             this->task_error(errno, "Accessing", src_file);
             if (this->should_abort())
+            {
                 return;
+            }
         }
     }
 
@@ -960,7 +1054,9 @@ VFSFileTask::file_link(std::string_view src_file)
     bool dest_exists;
     char* new_dest_file = nullptr;
     if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
+    {
         return;
+    }
 
     if (new_dest_file)
     {
@@ -986,24 +1082,32 @@ VFSFileTask::file_link(std::string_view src_file)
     {
         this->task_error(errno, "Creating Link", dest_file);
         if (this->should_abort())
+        {
             return;
+        }
     }
 
     this->lock();
     this->progress += src_stat.size();
     if (this->error_first)
+    {
         this->error_first = false;
+    }
     this->unlock();
 
     if (new_dest_file)
+    {
         free(new_dest_file);
+    }
 }
 
 void
 VFSFileTask::file_chown_chmod(std::string_view src_file)
 {
     if (this->should_abort())
+    {
         return;
+    }
 
     this->lock();
     this->current_file = src_file;
@@ -1022,7 +1126,9 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
             {
                 this->task_error(errno, "chown", src_file);
                 if (this->should_abort())
+                {
                     return;
+                }
             }
         }
 
@@ -1034,12 +1140,18 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
 
             for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
             {
-                if (this->chmod_actions[i] == 2) /* Do not change */
+                if (this->chmod_actions[i] == 2)
+                { /* Do not change */
                     continue;
-                if (this->chmod_actions[i] == 0) /* Remove this bit */
+                }
+                if (this->chmod_actions[i] == 0)
+                { /* Remove this bit */
                     new_perms &= ~chmod_flags.at(i);
-                else /* Add this bit */
+                }
+                else
+                { /* Add this bit */
                     new_perms |= chmod_flags.at(i);
+                }
             }
             if (new_perms != orig_perms)
             {
@@ -1049,7 +1161,9 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
                 {
                     this->task_error(errno, "chmod", src_file);
                     if (this->should_abort())
+                    {
                         return;
+                    }
                 }
             }
         }
@@ -1059,7 +1173,9 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
         this->unlock();
 
         if (this->avoid_changes)
+        {
             update_file_display(src_file);
+        }
 
         if (src_stat.is_directory() && this->is_recursive)
         {
@@ -1067,14 +1183,18 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
             {
                 const std::string file_name = std::filesystem::path(file).filename();
                 if (this->should_abort())
+                {
                     break;
+                }
                 const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
                 this->file_chown_chmod(sub_src_file);
             }
         }
     }
     if (this->error_first)
+    {
         this->error_first = false;
+    }
 }
 
 static void
@@ -1083,7 +1203,9 @@ call_state_callback(vfs::file_task task, VFSFileTaskState state)
     task->state = state;
 
     if (!task->state_cb)
+    {
         return;
+    }
 
     if (!task->state_cb(task, state, nullptr, task->state_cb_data))
     {
@@ -1136,12 +1258,16 @@ cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
         }
     }
     else
+    {
         task->exec_exit_status = 0;
+    }
 
     if (!task->exec_keep_tmp)
     {
         if (std::filesystem::exists(task->exec_script))
+        {
             std::filesystem::remove(task->exec_script);
+        }
     }
 
     ztd::logger::info("child finished  pid={} exit_status={}",
@@ -1151,7 +1277,9 @@ cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
     if (!task->exec_exit_status && !bad_status)
     {
         if (!task->custom_percent)
+        {
             task->percent = 100;
+        }
     }
     else
     {
@@ -1159,7 +1287,9 @@ cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
     }
 
     if (bad_status || (!task->exec_channel_out && !task->exec_channel_err))
+    {
         call_state_callback(task, VFSFileTaskState::FINISH);
+    }
 }
 
 static bool
@@ -1242,9 +1372,13 @@ VFSFileTask::file_exec(std::string_view src_file)
 
     GtkWidget* parent = nullptr;
     if (this->exec_browser)
+    {
         parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_browser));
+    }
     else if (this->exec_desktop)
+    {
         parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_desktop));
+    }
 
     this->state = VFSFileTaskState::RUNNING;
     this->current_file = src_file;
@@ -1253,7 +1387,9 @@ VFSFileTask::file_exec(std::string_view src_file)
     this->unlock();
 
     if (this->should_abort())
+    {
         return;
+    }
 
     // need su?
     std::string su;
@@ -1345,7 +1481,9 @@ VFSFileTask::file_exec(std::string_view src_file)
             const std::string hexname = fmt::format("{}.sh", ztd::randhex());
             this->exec_script = Glib::build_filename(tmp, hexname);
             if (!std::filesystem::exists(this->exec_script))
+            {
                 break;
+            }
         }
 
         // open buffer
@@ -1368,7 +1506,9 @@ VFSFileTask::file_exec(std::string_view src_file)
                 if (!this->exec_keep_tmp)
                 {
                     if (std::filesystem::exists(this->exec_script))
+                    {
                         std::filesystem::remove(this->exec_script);
+                    }
                 }
                 call_state_callback(this, VFSFileTaskState::FINISH);
                 // ztd::logger::info("vfs_file_task_exec DONE ERROR");
@@ -1389,9 +1529,13 @@ VFSFileTask::file_exec(std::string_view src_file)
 
         // build - export vars
         if (this->exec_export)
+        {
             buf.append(fmt::format("export fm_import=\"source {}\"\n", this->exec_script));
+        }
         else
+        {
             buf.append(fmt::format("export fm_import=\"\"\n"));
+        }
 
         buf.append(fmt::format("export fm_source=\"{}\"\n\n", this->exec_script));
 
@@ -1412,7 +1556,9 @@ VFSFileTask::file_exec(std::string_view src_file)
         if (!terminal.empty() && this->exec_keep_terminal)
         {
             if (geteuid() == 0 || ztd::same(this->exec_as_user, "root"))
+            {
                 buf.append(fmt::format("\necho;read -p '[ Finished ]  Press Enter to close: '\n"));
+            }
             else
             {
                 buf.append(
@@ -1436,7 +1582,9 @@ VFSFileTask::file_exec(std::string_view src_file)
             if (!this->exec_keep_tmp)
             {
                 if (std::filesystem::exists(this->exec_script))
+                {
                     std::filesystem::remove(this->exec_script);
+                }
             }
             call_state_callback(this, VFSFileTaskState::FINISH);
             // ztd::logger::info("vfs_file_task_exec DONE ERROR");
@@ -1483,7 +1631,9 @@ VFSFileTask::file_exec(std::string_view src_file)
         if (!ztd::same(this->exec_as_user, "root"))
         {
             if (!ztd::same(use_su, "/bin/su"))
+            {
                 argv.emplace_back("-u");
+            }
             argv.emplace_back(this->exec_as_user);
         }
 
@@ -1503,7 +1653,9 @@ VFSFileTask::file_exec(std::string_view src_file)
         // spacefm-auth exists?
         auth = get_script_path(Scripts::SPACEFM_AUTH);
         if (!script_exists(auth))
+        {
             sum_script.clear();
+        }
     }
 
     if (!sum_script.empty() && !auth.empty())
@@ -1525,7 +1677,9 @@ VFSFileTask::file_exec(std::string_view src_file)
             argv.emplace_back(BASH_PATH);
             argv.emplace_back(auth);
             if (ztd::same(this->exec_as_user, "root"))
+            {
                 argv.emplace_back("root");
+            }
             argv.emplace_back(this->exec_script);
             argv.emplace_back(sum_script);
         }
@@ -1582,7 +1736,9 @@ VFSFileTask::file_exec(std::string_view src_file)
         if (!this->exec_keep_tmp && this->exec_sync)
         {
             if (std::filesystem::exists(this->exec_script))
+            {
                 std::filesystem::remove(this->exec_script);
+            }
         }
         const std::string cmd = ztd::join(argv, " ");
         const std::string msg =
@@ -1654,7 +1810,9 @@ static bool
 on_size_timeout(vfs::file_task task)
 {
     if (!task->abort)
+    {
         task->state = VFSFileTaskState::SIZE_TIMEOUT;
+    }
     return false;
 }
 
@@ -1732,7 +1890,9 @@ vfs_file_task_thread(vfs::file_task task)
                 return nullptr;
             }
             if (task->state == VFSFileTaskState::SIZE_TIMEOUT)
+            {
                 break;
+            }
         }
     }
     else if (task->type == VFSFileTaskType::TRASH)
@@ -1806,13 +1966,17 @@ vfs_file_task_thread(vfs::file_task task)
                 return nullptr;
             }
             if (task->state == VFSFileTaskState::SIZE_TIMEOUT)
+            {
                 break;
+            }
         }
     }
 
     const auto dest_dir_stat = ztd::stat(task->dest_dir);
     if (!task->dest_dir.empty() && dest_dir_stat.is_valid())
+    {
         task->add_task_dev(dest_dir_stat.dev());
+    }
 
     if (task->abort)
     {
@@ -1860,7 +2024,9 @@ vfs_file_task_thread(vfs::file_task task)
             }
 
             if (!exlimit || task->total_size < exlimit)
+            {
                 task->state_pause = VFSFileTaskState::RUNNING;
+            }
         }
         // device list is populated so signal queue start
         task->queue_start = true;
@@ -2021,29 +2187,41 @@ off_t
 VFSFileTask::get_total_size_of_dir(std::string_view path)
 {
     if (this->abort)
+    {
         return 0;
+    }
 
     const auto file_stat = ztd::lstat(path);
     if (!file_stat.is_valid())
+    {
         return 0;
+    }
 
     off_t size = file_stat.size();
 
     // remember device for smart queue
     if (!this->devs)
+    {
         this->add_task_dev(file_stat.dev());
+    }
     else if (file_stat.dev() != GPOINTER_TO_UINT(this->devs->data))
+    {
         this->add_task_dev(file_stat.dev());
+    }
 
     // Do not follow symlinks
     if (file_stat.is_symlink() || !file_stat.is_directory())
+    {
         return size;
+    }
 
     for (const auto& file : std::filesystem::directory_iterator(path))
     {
         const std::string file_name = file.path().filename();
         if (this->state == VFSFileTaskState::SIZE_TIMEOUT || this->abort)
+        {
             break;
+        }
 
         const std::string full_path = Glib::build_filename(path.data(), file_name);
         if (std::filesystem::exists(full_path))
@@ -2051,9 +2229,13 @@ VFSFileTask::get_total_size_of_dir(std::string_view path)
             const auto dir_file_stat = ztd::lstat(full_path);
 
             if (dir_file_stat.is_directory())
+            {
                 size += this->get_total_size_of_dir(full_path);
+            }
             else
+            {
                 size += dir_file_stat.size();
+            }
         }
     }
 

@@ -61,7 +61,9 @@ PluginData::PluginData()
 PluginData::~PluginData()
 {
     if (this->plug_dir)
+    {
         free(this->plug_dir);
+    }
 }
 
 void
@@ -117,10 +119,14 @@ xset_set_plugin_mirror(xset_t pset)
                     ztd::same(set->parent, pset->plug_dir))
                 {
                     if (set->shared_key)
+                    {
                         free(set->shared_key);
+                    }
                     set->shared_key = ztd::strdup(pset->name);
                     if (pset->shared_key)
+                    {
                         free(pset->shared_key);
+                    }
                     pset->shared_key = ztd::strdup(set->name);
                     return;
                 }
@@ -135,9 +141,13 @@ xset_get_plugin_mirror(xset_t set)
     // plugin mirrors are custom xsets that save the user's key, icon
     // and run prefs for the plugin, if any
     if (!set->plugin)
+    {
         return set;
+    }
     if (set->shared_key)
+    {
         return xset_get(set->shared_key);
+    }
 
     xset_t newset = xset_custom_new();
     newset->desc = ztd::strdup("@plugin@mirror@");
@@ -173,7 +183,9 @@ xset_get_plugins()
     for (xset_t set : xsets)
     {
         if (set->plugin && set->plugin_top && set->plug_dir)
+        {
             plugins.emplace_back(set);
+        }
     }
     std::ranges::sort(plugins, compare_plugin_sets);
     return plugins;
@@ -189,13 +201,17 @@ static xset_t
 xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
 {
     if (plug_name.empty())
+    {
         return nullptr;
+    }
 
     for (xset_t set : xsets)
     {
         if (set->plugin && ztd::same(plug_name, set->plug_name) &&
             ztd::same(plug_dir, set->plug_dir))
+        {
             return set;
+        }
     }
 
     // add new
@@ -216,7 +232,9 @@ xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_
                   std::string_view value, PluginUse use)
 {
     if (value.empty())
+    {
         return;
+    }
 
     // handler
     std::string prefix;
@@ -242,7 +260,9 @@ xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_
     }
 
     if (!ztd::startswith(name, prefix))
+    {
         return;
+    }
 
     XSetVar var;
     try
@@ -336,13 +356,21 @@ xset_import_plugin_parse(std::string_view plug_dir, PluginUse* use, std::string_
         if (ztd::startswith(name, "hand_"))
         {
             if (ztd::startswith(name, "hand_fs_"))
+            {
                 *use = PluginUse::HAND_FS;
+            }
             else if (ztd::startswith(name, "hand_arc_"))
+            {
                 *use = PluginUse::HAND_ARC;
+            }
             else if (ztd::startswith(name, "hand_net_"))
+            {
                 *use = PluginUse::HAND_NET;
+            }
             else if (ztd::startswith(name, "hand_f_"))
+            {
                 *use = PluginUse::HAND_FILE;
+            }
         }
     }
     xset_parse_plugin(plug_dir, name, var, value, use ? *use : PluginUse::NORMAL);
@@ -352,7 +380,9 @@ xset_t
 xset_import_plugin(const char* plug_dir, PluginUse* use)
 {
     if (use)
+    {
         *use = PluginUse::NORMAL;
+    }
 
     // clear all existing plugin sets with this plug_dir
     // ( keep the mirrors to retain user prefs )
@@ -375,7 +405,9 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     const std::string plugin = Glib::build_filename(plug_dir, PLUGIN_FILE_FILENAME);
 
     if (!std::filesystem::exists(plugin))
+    {
         return nullptr;
+    }
 
     const bool plugin_good = load_user_plugin(plug_dir, use, plugin, &xset_import_plugin_parse);
 
@@ -474,9 +506,13 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                     }
                     plugin_data->set->next = ztd::strdup(newset->name);
                     if (plugin_data->set->tool != XSetTool::NOT)
+                    {
                         newset->tool = XSetTool::CUSTOM;
+                    }
                     else
+                    {
                         newset->tool = XSetTool::NOT;
+                    }
                 }
                 else
                 {
@@ -560,9 +596,13 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
     {
         // prevent install of exported bookmarks or handler as plugin or design clipboard
         if (job == PluginJob::INSTALL)
+        {
             book = " || [ -e main_book ] || [ -d hand_* ]";
+        }
         else
+        {
             book = " || [ -e main_book ]";
+        }
     }
 
     ptask->task->exec_command = fmt::format(

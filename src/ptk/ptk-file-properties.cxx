@@ -102,13 +102,21 @@ struct FilePropertiesDialogData
 FilePropertiesDialogData::~FilePropertiesDialogData()
 {
     if (this->owner_name)
+    {
         free(this->owner_name);
+    }
     if (this->group_name)
+    {
         free(this->group_name);
+    }
     if (this->orig_mtime)
+    {
         free(this->orig_mtime);
+    }
     if (this->orig_atime)
+    {
         free(this->orig_atime);
+    }
 }
 
 #define FILE_PROPERTIES_DIALOG_DATA(obj) (static_cast<FilePropertiesDialogData*>(obj))
@@ -128,11 +136,15 @@ static void
 calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
 {
     if (data->cancel)
+    {
         return;
+    }
 
     const auto file_stat = ztd::lstat(path);
     if (!file_stat.is_valid())
+    {
         return;
+    }
 
     data->total_size += file_stat.size();
     data->size_on_disk += (file_stat.blocks() * ztd::BLOCK_SIZE);
@@ -171,7 +183,9 @@ calc_size(void* user_data)
     for (vfs::file_info file : data->file_list)
     {
         if (data->cancel)
+        {
             break;
+        }
         const std::string path = Glib::build_filename(data->dir_path, file->get_name());
         calc_total_size_of_files(path.data(), data);
     }
@@ -206,7 +220,9 @@ on_update_labels(FilePropertiesDialogData* data)
     gtk_label_set_text(data->count_label, count.data());
 
     if (data->done)
+    {
         data->update_label_timer = 0;
+    }
     return !data->done;
 }
 
@@ -288,7 +304,9 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                         char* tmp;
                         gtk_tree_model_get(model, &it, 2, &tmp, -1);
                         if (!tmp)
+                        {
                             continue;
+                        }
                         if (ztd::same(tmp, action))
                         {
                             exist = true;
@@ -316,12 +334,16 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                                                       action,
                                                       -1);
                     if (icon)
+                    {
                         g_object_unref(icon);
+                    }
                     exist = true;
                 }
 
                 if (exist)
+                {
                     gtk_combo_box_set_active_iter(combo, &it);
+                }
                 free(action);
             }
             else
@@ -372,7 +394,9 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     const i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::S);
     const i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Z);
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, -1);
+    }
 
     const auto data = new FilePropertiesDialogData;
     data->update_label_timer = 0;
@@ -409,17 +433,27 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     {
         type = file->get_mime_type();
         if (!type2)
+        {
             type2 = file->get_mime_type();
+        }
         if (file->is_directory())
+        {
             is_dirs = true;
+        }
         if (type != type2)
+        {
             same_type = false;
+        }
         vfs_mime_type_unref(type);
         if (is_dirs && !same_type)
+        {
             break;
+        }
     }
     if (type2)
+    {
         vfs_mime_type_unref(type2);
+    }
 
     data->recurse = GTK_WIDGET(gtk_builder_get_object(builder, "recursive"));
     gtk_widget_set_sensitive(data->recurse, is_dirs);
@@ -484,7 +518,9 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
                                    action.data(),
                                    -1);
                 if (icon)
+                {
                     g_object_unref(icon);
+                }
             }
         }
         else
@@ -543,8 +579,10 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         else
         {
             if (file->is_directory() && !file->is_symlink())
+            {
                 gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name),
                                                    "<b>Directory _Name:</b>");
+            }
             gtk_entry_set_text(GTK_ENTRY(name), file->get_disp_name().data());
         }
 
@@ -622,10 +660,14 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
 
                 // relative link to absolute
                 if (ztd::startswith(target_path, "/"))
+                {
                     target_path = Glib::build_filename(dir_path.data(), target_path);
+                }
 
                 if (!std::filesystem::exists(target_path))
+                {
                     gtk_label_set_text(GTK_LABEL(mime_type), "( broken link )");
+                }
             }
             catch (const std::filesystem::filesystem_error& e)
             {
@@ -666,7 +708,9 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     gtk_notebook_set_current_page(notebook, page);
 
     if (parent)
+    {
         gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
+    }
     return dlg;
 }
 
@@ -708,11 +752,15 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
     if (data)
     {
         if (data->update_label_timer)
+        {
             g_source_remove(data->update_label_timer);
+        }
         data->cancel = true;
 
         if (data->calc_size_thread)
+        {
             g_thread_join(data->calc_size_thread);
+        }
 
         if (response_id == GtkResponseType::GTK_RESPONSE_OK)
         {
@@ -722,10 +770,14 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             std::string quoted_path;
             const char* new_mtime = gtk_entry_get_text(data->mtime);
             if (!(new_mtime && new_mtime[0]) || ztd::same(data->orig_mtime, new_mtime))
+            {
                 new_mtime = nullptr;
+            }
             const char* new_atime = gtk_entry_get_text(data->atime);
             if (!(new_atime && new_atime[0]) || ztd::same(data->orig_atime, new_atime))
+            {
                 new_atime = nullptr;
+            }
 
             if ((new_mtime || new_atime) && !data->file_list.empty())
             {

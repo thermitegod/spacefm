@@ -68,7 +68,9 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
     bool use_uri = false;
 
     if (clipboard_file_list.empty())
+    {
         return;
+    }
 
     std::string uri_list;
 
@@ -147,11 +149,17 @@ ptk_clipboard_copy_name(std::string_view working_dir, const std::vector<vfs::fil
     for (vfs::file_info file : sel_files)
     {
         if (fcount == 0)
+        {
             file_text = fmt::format("{}", file->get_name());
+        }
         else if (fcount == 1)
+        {
             file_text = fmt::format("{}\n{}\n", file_text, file->get_name());
+        }
         else
+        {
             file_text = fmt::format("{}{}\n", file_text, file->get_name());
+        }
         fcount++;
     }
     gtk_clipboard_set_text(clip, file_text.data(), -1);
@@ -233,7 +241,9 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     while (*file_path)
     {
         if (*file_path[0] == '/')
+        {
             file_list.emplace_back(ztd::strdup(*file_path));
+        }
         file_path++;
     }
 
@@ -271,14 +281,20 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
 
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
         if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
+        {
             action = VFSFileTaskType::MOVE;
+        }
         else
+        {
             action = VFSFileTaskType::COPY;
+        }
 
         if (uri_list_str)
         {
             while (*uri_list_str && *uri_list_str != '\n')
+            {
                 ++uri_list_str;
+            }
         }
     }
     else
@@ -286,7 +302,9 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
         GdkAtom uri_list_target = gdk_atom_intern("text/uri-list", false);
         sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
         if (!sel_data)
+        {
             return;
+        }
         if (gtk_selection_data_get_length(sel_data) <= 0 ||
             gtk_selection_data_get_format(sel_data) != 8)
         {
@@ -296,9 +314,13 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
         uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
 
         if (clipboard_action == GdkDragAction::GDK_ACTION_MOVE)
+        {
             action = VFSFileTaskType::MOVE;
+        }
         else
+        {
             action = VFSFileTaskType::COPY;
+        }
     }
 
     if (uri_list_str)
@@ -333,7 +355,9 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
                                                parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                                GTK_WIDGET(task_view));
         if (callback && callback_win)
+        {
             ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
+        }
         ptk_file_task_run(ptask);
     }
     gtk_selection_data_free(sel_data);
@@ -364,7 +388,9 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, std::string_view dest_dir, GtkT
         if (uri_list_str)
         {
             while (*uri_list_str && *uri_list_str != '\n')
+            {
                 ++uri_list_str;
+            }
         }
     }
     else
@@ -372,7 +398,9 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, std::string_view dest_dir, GtkT
         GdkAtom uri_list_target = gdk_atom_intern("text/uri-list", false);
         sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
         if (!sel_data)
+        {
             return;
+        }
         if (gtk_selection_data_get_length(sel_data) <= 0 ||
             gtk_selection_data_get_format(sel_data) != 8)
         {
@@ -409,7 +437,9 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, std::string_view dest_dir, GtkT
                                                parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                                task_view ? GTK_WIDGET(task_view) : nullptr);
         if (callback && callback_win)
+        {
             ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
+        }
         ptk_file_task_run(ptask);
     }
     gtk_selection_data_free(sel_data);
@@ -440,7 +470,9 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
         if (uri_list_str)
         {
             while (*uri_list_str && *uri_list_str != '\n')
+            {
                 ++uri_list_str;
+            }
         }
     }
     else
@@ -448,7 +480,9 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
         GdkAtom uri_list_target = gdk_atom_intern("text/uri-list", false);
         sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
         if (!sel_data)
+        {
             return;
+        }
         if (gtk_selection_data_get_length(sel_data) <= 0 ||
             gtk_selection_data_get_format(sel_data) != 8)
         {
@@ -501,7 +535,9 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
                                                parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                                GTK_WIDGET(task_view));
         if (callback && callback_win)
+        {
             ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
+        }
         ptk_file_task_run(ptask);
 
         if (missing_targets > 0)
@@ -546,7 +582,9 @@ ptk_clipboard_get_file_paths(std::string_view cwd, bool* is_cut, i32* missing_ta
         if (uri_list_str)
         {
             while (*uri_list_str && *uri_list_str != '\n')
+            {
                 ++uri_list_str;
+            }
         }
     }
     else
@@ -554,7 +592,9 @@ ptk_clipboard_get_file_paths(std::string_view cwd, bool* is_cut, i32* missing_ta
         GdkAtom uri_list_target = gdk_atom_intern("text/uri-list", false);
         sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
         if (!sel_data)
+        {
             return file_list;
+        }
         if (gtk_selection_data_get_length(sel_data) <= 0 ||
             gtk_selection_data_get_format(sel_data) != 8)
         {

@@ -75,12 +75,16 @@ bool
 dir_has_files(std::string_view path) noexcept
 {
     if (!std::filesystem::is_directory(path))
+    {
         return false;
+    }
 
     for (const auto& file : std::filesystem::directory_iterator(path))
     {
         if (file.exists())
+        {
             return true;
+        }
     }
 
     return false;
@@ -90,10 +94,14 @@ const std::pair<std::string, std::string>
 get_name_extension(std::string_view full_name) noexcept
 {
     if (std::filesystem::is_directory(full_name))
+    {
         return {full_name.data(), ""};
+    }
 
     if (!ztd::contains(full_name, "."))
+    {
         return {full_name.data(), ""};
+    }
 
     std::string fullpath_filebase;
     std::string file_ext;
@@ -129,7 +137,9 @@ const std::string
 clean_label(std::string_view menu_label, bool kill_special, bool escape) noexcept
 {
     if (menu_label.empty())
+    {
         return "";
+    }
 
     std::string new_menu_label = menu_label.data();
 
@@ -140,14 +150,18 @@ clean_label(std::string_view menu_label, bool kill_special, bool escape) noexcep
         new_menu_label = ztd::replace(new_menu_label, "@UNDERSCORE@", "_");
     }
     else
+    {
         new_menu_label = ztd::replace(new_menu_label, "_", "");
+    }
     if (kill_special)
     {
         new_menu_label = ztd::replace(new_menu_label, "&", "");
         new_menu_label = ztd::replace(new_menu_label, " ", "-");
     }
     else if (escape)
+    {
         new_menu_label = Glib::Markup::escape_text(new_menu_label);
+    }
 
     return new_menu_label;
 }
@@ -162,10 +176,14 @@ get_valid_su() noexcept
         {
             use_su = Glib::find_program_in_path(su_command.data());
             if (!use_su.empty())
+            {
                 break;
+            }
         }
         if (use_su.empty())
+        {
             use_su = su_commands.at(0);
+        }
         xset_set(XSetName::SU_COMMAND, XSetVar::S, use_su);
     }
     const std::string su_path = Glib::find_program_in_path(use_su);

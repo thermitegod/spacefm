@@ -153,23 +153,31 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
     while (!task->is_cancelled())
     {
         if (loader->queue.empty())
+        {
             break;
+        }
 
         vfs::thumbnail::request req = loader->queue.front();
         loader->queue.pop_front();
         if (!req)
+        {
             break;
+        }
         // ztd::logger::debug("pop: {}", req->file->name);
 
         // Only we have the reference. That means, no body is using the file
         if (req->file->ref_count() == 1)
+        {
             continue;
+        }
 
         bool need_update = false;
         for (u32 i = 0; i < 2; ++i)
         {
             if (req->n_requests[i] == 0)
+            {
                 continue;
+            }
 
             const bool load_big = (i == VFSThumbnailSize::BIG);
             if (!req->file->is_thumbnail_loaded(load_big))
@@ -260,7 +268,9 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
         // ztd::logger::info("req->file->name={} | file->name={}", req->file->name, file->name);
         // If file with the same name is already in our queue
         if (req->file == file || ztd::same(req->file->name, file->name))
+        {
             break;
+        }
         req = nullptr;
     }
 
@@ -273,7 +283,9 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     ++req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
 
     if (new_task)
+    {
         loader->task->run_thread();
+    }
 }
 
 void
@@ -283,7 +295,9 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 
     vfs::thumbnail_loader loader = dir->thumbnail_loader;
     if (!loader)
+    {
         return;
+    }
 
     vfs_thumbnail_loader_free(loader);
 }
@@ -311,7 +325,9 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
     // will not have a thumbnail until a refresh
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     if (now - mtime < 5)
+    {
         return nullptr;
+    }
 
     // load existing thumbnail
     i32 w;
@@ -393,7 +409,9 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
         }
 
         if (w > 0 && h > 0)
+        {
             result = gdk_pixbuf_scale_simple(thumbnail, w, h, GdkInterpType::GDK_INTERP_BILINEAR);
+        }
 
         g_object_unref(thumbnail);
     }
@@ -423,7 +441,9 @@ vfs_thumbnail_init()
     const std::string dir = Glib::build_filename(vfs::user_dirs->cache_dir(), "thumbnails/normal");
 
     if (!std::filesystem::is_directory(dir))
+    {
         std::filesystem::create_directories(dir);
+    }
 
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
 }

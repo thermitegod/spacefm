@@ -111,7 +111,9 @@ VFSTrash::trash_dir(std::string_view path) noexcept
     const dev_t dev = device(path).value();
 
     if (this->trash_dirs.count(dev))
+    {
         return this->trash_dirs[dev];
+    }
 
     // on another device cannot use $HOME trashcan
     const std::string top_dir = toplevel(path);
@@ -207,7 +209,9 @@ void
 VFSTrashDir::check_dir_exists(std::string_view path) noexcept
 {
     if (std::filesystem::is_directory(path))
+    {
         return;
+    }
 
     // ztd::logger::info("trash mkdir {}", path);
     std::filesystem::create_directories(path);

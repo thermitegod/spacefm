@@ -106,7 +106,9 @@ xset_design_job_set_edit(xset_t set)
         // script
         char* cscript = xset_custom_get_script(set, !set->plugin);
         if (!cscript)
+        {
             return;
+        }
         xset_edit(parent, cscript, false, true);
         free(cscript);
     }
@@ -123,7 +125,9 @@ xset_design_job_set_edit_root(xset_t set)
         // script
         char* cscript = xset_custom_get_script(set, !set->plugin);
         if (!cscript)
+        {
             return;
+        }
         xset_edit(parent, cscript, true, false);
         free(cscript);
     }
@@ -145,7 +149,9 @@ xset_design_job_set_copyname(xset_t set)
         // script
         char* cscript = xset_custom_get_script(set, true);
         if (!cscript)
+        {
             return;
+        }
         gtk_clipboard_set_text(clip, cscript, -1);
         free(cscript);
     }
@@ -170,7 +176,9 @@ xset_design_job_set_line(xset_t set)
                                            "",
                                            false);
     if (response)
+    {
         xset_set_var(set, XSetVar::X, "0");
+    }
 }
 
 static void
@@ -181,7 +189,9 @@ xset_design_job_set_script(xset_t set)
     xset_set_var(set, XSetVar::X, "1");
     char* cscript = xset_custom_get_script(set, true);
     if (!cscript)
+    {
         return;
+    }
     xset_edit(parent, cscript, false, false);
     free(cscript);
 }
@@ -222,7 +232,9 @@ static void
 xset_design_job_set_user(xset_t set)
 {
     if (set->plugin)
+    {
         return;
+    }
 
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
@@ -272,7 +284,9 @@ xset_design_job_set_app(xset_t set)
     vfs_mime_type_unref(mime_type);
 
     if (!(file && file[0]))
+    {
         free(file);
+    }
 
     // add new menu item
     xset_t newset = xset_custom_new();
@@ -282,7 +296,9 @@ xset_design_job_set_app(xset_t set)
     newset->menu_label = set->name;
     newset->browser = set->browser;
     if (newset->x)
+    {
         free(newset->x);
+    }
     newset->x = ztd::strdup("2"); // XSetCMD::APP
     // unset these to save session space
     newset->task = false;
@@ -322,7 +338,9 @@ xset_design_job_set_command(xset_t set)
     const bool response =
         xset_text_dialog(parent, "Set Item Name", enter_menu_name_new, "", name, &name, "", false);
     if (!response)
+    {
         free(name);
+    }
 
     // add new menu item
     xset_t newset = xset_custom_new();
@@ -356,7 +374,9 @@ xset_design_job_set_submenu(xset_t set)
                                              msg);
 
         if (response != GtkResponseType::GTK_RESPONSE_OK)
+        {
             return;
+        }
     }
 
     char* name;
@@ -371,7 +391,9 @@ xset_design_job_set_submenu(xset_t set)
                          "",
                          false);
     if (!response || !name)
+    {
         return;
+    }
 
     // add new submenu
     xset_t newset = xset_custom_new();
@@ -401,10 +423,14 @@ xset_design_job_set_add_tool(xset_t set, XSetTool tool_type)
 {
     if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID ||
         set->tool == XSetTool::NOT)
+    {
         return;
+    }
     xset_t newset = xset_new_builtin_toolitem(tool_type);
     if (newset)
+    {
         xset_custom_insert_after(set, newset);
+    }
 }
 
 static void
@@ -422,7 +448,9 @@ xset_design_job_set_import_file(xset_t set)
     else
     {
         if (!(folder = xset_get_s(XSetName::GO_SET_DEFAULT)))
+        {
             folder = ztd::strdup("/");
+        }
     }
     char* file = xset_file_dialog(GTK_WIDGET(parent),
                                   GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -430,7 +458,9 @@ xset_design_job_set_import_file(xset_t set)
                                   folder,
                                   nullptr);
     if (!file)
+    {
         return;
+    }
 
     save->s = ztd::strdup(Glib::path_get_dirname(file));
 
@@ -452,7 +482,9 @@ xset_design_job_set_import_file(xset_t set)
     {
         plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
         if (!std::filesystem::exists(plug_dir))
+        {
             break;
+        }
     }
     install_plugin_file(set->browser ? set->browser->main_window : nullptr,
                         nullptr,
@@ -481,10 +513,14 @@ static bool
 xset_design_job_set_paste(xset_t set)
 {
     if (!xset_set_clipboard)
+    {
         return false;
+    }
     if (xset_set_clipboard->tool > XSetTool::CUSTOM && set->tool == XSetTool::NOT)
+    {
         // failsafe - disallow pasting a builtin tool to a menu
         return false;
+    }
 
     bool update_toolbars = false;
     if (xset_clipboard_is_cut)
@@ -494,8 +530,10 @@ xset_design_job_set_paste(xset_t set)
         {
             xset_t newset = xset_get(xset_set_clipboard->parent);
             if (!(newset->tool == XSetTool::NOT))
+            {
                 // we are cutting the first item in a tool submenu
                 update_toolbars = true;
+            }
         }
         xset_custom_remove(xset_set_clipboard);
         xset_custom_insert_after(set, xset_set_clipboard);
@@ -515,7 +553,9 @@ static void
 xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 {
     if (!file_browser || !set || !set->plugin_top || !set->plug_dir)
+    {
         return;
+    }
 
     if (app_settings.get_confirm())
     {
@@ -583,9 +623,13 @@ xset_design_job_set_remove(xset_t set)
     else
     {
         if (!set->lock && set->z && set->menu_style < XSetMenu::SUBMENU && cmd_type == XSetCMD::APP)
+        {
             name = ztd::strdup(set->z);
+        }
         else
+        {
             name = ztd::strdup("( no name )");
+        }
     }
 
     std::string msg;
@@ -611,7 +655,9 @@ xset_design_job_set_remove(xset_t set)
         set->tool <= XSetTool::CUSTOM)
     {
         if (parent)
+        {
             dlgparent = gtk_widget_get_toplevel(parent);
+        }
         dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
                                      GtkDialogFlags::GTK_DIALOG_MODAL,
                                      GtkMessageType::GTK_MESSAGE_WARNING,
@@ -625,7 +671,9 @@ xset_design_job_set_remove(xset_t set)
         gtk_widget_destroy(dlg);
         if (response != GtkResponseType::GTK_RESPONSE_OK &&
             response != GtkResponseType::GTK_RESPONSE_YES)
+        {
             return false;
+        }
     }
 
     bool update_toolbars;
@@ -638,8 +686,10 @@ xset_design_job_set_remove(xset_t set)
 
     if (set->parent && (set_next = xset_is(set->parent)) && set_next->tool == XSetTool::CUSTOM &&
         set_next->menu_style == XSetMenu::SUBMENU)
+    {
         // this set is first item in custom toolbar submenu
         update_toolbars = true;
+    }
 
     xset_custom_remove(set);
 
@@ -660,9 +710,13 @@ xset_design_job_set_remove(xset_t set)
     set = nullptr;
 
     if (prog)
+    {
         free(prog);
+    }
     if (name)
+    {
         free(name);
+    }
 
     return update_toolbars;
 }
@@ -673,7 +727,9 @@ xset_design_job_set_export(xset_t set)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     if ((!set->lock || set->xset_name == XSetName::MAIN_BOOK) && set->tool <= XSetTool::CUSTOM)
+    {
         xset_custom_export(parent, set->browser, set);
+    }
 }
 
 static void
@@ -694,7 +750,9 @@ xset_design_job_set_confirm(xset_t set)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     if (!set->desc)
+    {
         set->desc = ztd::strdup("Are you sure?");
+    }
 
     const bool response = xset_text_dialog(parent,
                                            "Dialog Message",
@@ -706,7 +764,9 @@ xset_design_job_set_confirm(xset_t set)
                                            "",
                                            false);
     if (response)
+    {
         set->menu_style = XSetMenu::CONFIRM;
+    }
 }
 
 static void
@@ -724,7 +784,9 @@ xset_design_job_set_dialog(xset_t set)
                                            "",
                                            false);
     if (response)
+    {
         set->menu_style = XSetMenu::STRING;
+    }
 }
 
 static void
@@ -766,14 +828,18 @@ static void
 xset_design_job_set_browse_files(xset_t set)
 {
     if (set->tool > XSetTool::CUSTOM)
+    {
         return;
+    }
 
     std::string folder;
     if (set->plugin)
     {
         folder = Glib::build_filename(set->plug_dir, "files");
         if (!std::filesystem::exists(folder))
+        {
             folder = Glib::build_filename(set->plug_dir, set->plug_name);
+        }
     }
     else
     {
@@ -795,7 +861,9 @@ static void
 xset_design_job_set_browse_data(xset_t set)
 {
     if (set->tool > XSetTool::CUSTOM)
+    {
         return;
+    }
 
     std::string folder;
     if (set->plugin)
@@ -854,9 +922,13 @@ xset_design_job_set_keep(xset_t set)
 {
     xset_t mset = xset_get_plugin_mirror(set);
     if (mset->keep_terminal)
+    {
         mset->keep_terminal = false;
+    }
     else
+    {
         mset->keep_terminal = true;
+    }
 }
 
 static void
@@ -864,9 +936,13 @@ xset_design_job_set_task(xset_t set)
 {
     xset_t mset = xset_get_plugin_mirror(set);
     if (mset->task)
+    {
         mset->task = false;
+    }
     else
+    {
         mset->task = true;
+    }
 }
 
 static void
@@ -874,9 +950,13 @@ xset_design_job_set_pop(xset_t set)
 {
     xset_t mset = xset_get_plugin_mirror(set);
     if (mset->task_pop)
+    {
         mset->task_pop = false;
+    }
     else
+    {
         mset->task_pop = true;
+    }
 }
 
 static void
@@ -884,9 +964,13 @@ xset_design_job_set_err(xset_t set)
 {
     xset_t mset = xset_get_plugin_mirror(set);
     if (mset->task_err)
+    {
         mset->task_err = false;
+    }
     else
+    {
         mset->task_err = true;
+    }
 }
 
 static void
@@ -894,9 +978,13 @@ xset_design_job_set_out(xset_t set)
 {
     xset_t mset = xset_get_plugin_mirror(set);
     if (mset->task_out)
+    {
         mset->task_out = false;
+    }
     else
+    {
         mset->task_out = true;
+    }
 }
 
 static void
@@ -904,9 +992,13 @@ xset_design_job_set_scroll(xset_t set)
 {
     xset_t mset = xset_get_plugin_mirror(set);
     if (mset->scroll_lock)
+    {
         mset->scroll_lock = false;
+    }
     else
+    {
         mset->scroll_lock = true;
+    }
 }
 
 void
@@ -1057,12 +1149,16 @@ xset_design_job(GtkWidget* item, xset_t set)
     {
         if (set->parent && (set_next = xset_is(set->parent)) &&
             set_next->tool == XSetTool::CUSTOM && set_next->menu_style == XSetMenu::SUBMENU)
+        {
             // this set is first item in custom toolbar submenu
             update_toolbars = true;
+        }
     }
 
     if ((set && !set->lock && !(set->tool == XSetTool::NOT)) || update_toolbars)
+    {
         main_window_rebuild_all_toolbars(set ? set->browser : nullptr);
+    }
 
     // autosave
     autosave_request_add();

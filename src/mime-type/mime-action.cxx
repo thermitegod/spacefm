@@ -62,7 +62,9 @@ save_to_file(std::string_view path, const Glib::ustring& data)
     write_file(path, data);
 
     if (std::filesystem::exists(path))
+    {
         std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+    }
 }
 
 static void
@@ -110,7 +112,9 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
     {
         removed = kf->get_string_list("Removed Associations", mime_type.data());
         if (removed.empty())
+        {
             return;
+        }
     }
     catch (...) // Glib::KeyFileError, Glib::FileError
     {
@@ -315,7 +319,9 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
         {
             types = kf->get_string_list("Desktop Entry", "MimeType");
             if (types.empty())
+            {
                 return false;
+            }
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
@@ -346,7 +352,9 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
 
     const std::vector<std::string> actions = mime_type_get_actions(type);
     if (actions.empty())
+    {
         return found;
+    }
 
     for (std::string_view action : actions)
     {
@@ -493,7 +501,9 @@ const std::string
 mime_type_add_action(std::string_view type, std::string_view desktop_id)
 {
     if (mime_type_has_action(type, desktop_id))
+    {
         return desktop_id.data();
+    }
 
     return make_custom_desktop_file(desktop_id, type);
 }
@@ -504,7 +514,9 @@ _locate_desktop_file(std::string_view dir, std::string_view desktop_id)
     const std::string desktop_path =
         Glib::build_filename(dir.data(), "applications", desktop_id.data());
     if (std::filesystem::is_regular_file(desktop_path))
+    {
         return ztd::strdup(desktop_path);
+    }
 
     // ztd::logger::info("desktop_id={}", desktop_id);
 
@@ -520,7 +532,9 @@ _locate_desktop_file(std::string_view dir, std::string_view desktop_id)
             Glib::build_filename(dir.data(), "applications", new_desktop_id);
         // ztd::logger::info("new_desktop_id={}", new_desktop_id);
         if (std::filesystem::is_regular_file(new_desktop_path))
+        {
             return ztd::strdup(new_desktop_path);
+        }
     }
 
     return nullptr;
@@ -539,13 +553,17 @@ mime_type_locate_desktop_file(std::string_view desktop_id)
 
     const char* data_desktop = _locate_desktop_file(data_dir, desktop_id);
     if (data_desktop)
+    {
         return data_desktop;
+    }
 
     for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const char* sys_desktop = _locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)
+        {
             return sys_desktop;
+        }
     }
 
     return nullptr;
@@ -586,7 +604,9 @@ get_default_action(std::string_view dir, std::string_view type)
             {
                 apps = kf->get_string_list(group.data(), type.data());
                 if (apps.empty())
+                {
                     break;
+                }
             }
             catch (...) // Glib::KeyFileError, Glib::FileError
             {
@@ -596,7 +616,9 @@ get_default_action(std::string_view dir, std::string_view type)
             for (const Glib::ustring& app : apps)
             {
                 if (app.empty())
+                {
                     continue;
+                }
 
                 // ztd::logger::info("        {}", apps[i]);
                 if (mime_type_locate_desktop_file(app.data()))
@@ -607,11 +629,15 @@ get_default_action(std::string_view dir, std::string_view type)
             }
 
             if (ztd::same(name, "defaults.list"))
+            {
                 break; // defaults.list does not have Added Associations
+            }
         }
 
         if (ztd::same(dir, vfs::user_dirs->config_dir()))
+        {
             break; // no defaults.list in ~/.config
+        }
     }
     return nullptr;
 }
@@ -635,14 +661,18 @@ mime_type_get_default_action(std::string_view mime_type)
     const char* home_default_action =
         get_default_action(vfs::user_dirs->config_dir(), mime_type.data());
     if (home_default_action)
+    {
         return home_default_action;
+    }
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
     const std::string data_app_dir =
         Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
     const char* data_default_action = get_default_action(data_app_dir, mime_type.data());
     if (data_default_action)
+    {
         return data_default_action;
+    }
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
     for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
@@ -650,7 +680,9 @@ mime_type_get_default_action(std::string_view mime_type)
         const std::string sys_app_dir = Glib::build_filename(sys_dir.data(), "applications");
         const char* sys_default_action = get_default_action(sys_app_dir, mime_type.data());
         if (sys_default_action)
+        {
             return sys_default_action;
+        }
     }
 
     return nullptr;
@@ -708,7 +740,9 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
         {
             apps = kf->get_string_list(group.data(), type.data());
             if (apps.empty())
+            {
                 return;
+            }
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
@@ -717,16 +751,24 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
 
         MimeTypeAction group_block;
         if (ztd::same(group, "Default Applications"))
+        {
             group_block = MimeTypeAction::DEFAULT;
+        }
         else if (ztd::same(group, "Default Applications"))
+        {
             group_block = MimeTypeAction::APPEND;
-        else // if (ztd::same(group, "Default Applications"))
+        }
+        else
+        { // if (ztd::same(group, "Default Applications"))
             group_block = MimeTypeAction::REMOVE;
+        }
 
         for (usize i = 0; i < apps.size(); ++i)
         {
             if (apps[i].empty())
+            {
                 continue;
+            }
 
             if (ztd::same(apps.at(i).data(), desktop_id))
             {
@@ -801,14 +843,22 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
                 {
                     // add to front of Default or Added list
                     if (action == MimeTypeAction::DEFAULT)
+                    {
                         new_action = fmt::format("{};{}", desktop_id, new_action);
-                    else // if ( action == MimeTypeAction::APPEND )
+                    }
+                    else
+                    { // if ( action == MimeTypeAction::APPEND )
                         new_action = fmt::format("{}{};", new_action, desktop_id);
+                    }
                 }
                 if (!new_action.empty())
+                {
                     kf->set_string(group.data(), type.data(), new_action);
+                }
                 else
+                {
                     kf->remove_key(group.data(), type.data());
+                }
                 data_changed = true;
             }
         }
@@ -825,9 +875,13 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
                     new_action = fmt::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
+                {
                     kf->set_string(group.data(), type.data(), new_action);
+                }
                 else
+                {
                     kf->remove_key(group.data(), type.data());
+                }
                 data_changed = true;
             }
         }

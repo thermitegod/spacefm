@@ -67,21 +67,37 @@ static void
 vfs_file_info_clear(vfs::file_info file)
 {
     if (!file->disp_name.empty() && !ztd::same(file->disp_name, file->name))
+    {
         file->disp_name.clear();
+    }
     if (!file->name.empty())
+    {
         file->name.clear();
+    }
     if (!file->collate_key.empty())
+    {
         file->collate_key.clear();
+    }
     if (!file->collate_icase_key.empty())
+    {
         file->collate_icase_key.clear();
+    }
     if (!file->disp_size.empty())
+    {
         file->disp_size.clear();
+    }
     if (!file->disp_owner.empty())
+    {
         file->disp_owner.clear();
+    }
     if (!file->disp_mtime.empty())
+    {
         file->disp_mtime.clear();
+    }
     if (!file->disp_perm.empty())
+    {
         file->disp_perm.clear();
+    }
     if (file->big_thumbnail)
     {
         g_object_unref(file->big_thumbnail);
@@ -248,7 +264,9 @@ VFSFileInfo::get_big_icon() noexcept
     if (this->flags == VFSFileInfoFlag::NONE)
     {
         if (!this->mime_type)
+        {
             return nullptr;
+        }
         return vfs_mime_type_get_icon(this->mime_type, true);
     }
 
@@ -274,14 +292,22 @@ VFSFileInfo::get_big_icon() noexcept
         if (icon_name)
         {
             if (ztd::startswith(icon_name, "/"))
+            {
                 this->big_thumbnail = gdk_pixbuf_new_from_file(icon_name, nullptr);
+            }
             else
+            {
                 this->big_thumbnail = vfs_load_icon(icon_name, icon_size);
+            }
         }
         if (this->big_thumbnail)
+        {
             g_object_set_data_full(G_OBJECT(this->big_thumbnail), "name", icon_name, free);
+        }
         else
+        {
             free(icon_name);
+        }
     }
     return this->big_thumbnail ? g_object_ref(this->big_thumbnail) : nullptr;
 }
@@ -290,10 +316,14 @@ GdkPixbuf*
 VFSFileInfo::get_small_icon() noexcept
 {
     if (this->flags & VFSFileInfoFlag::DESKTOP_ENTRY && this->small_thumbnail)
+    {
         return g_object_ref(this->small_thumbnail);
+    }
 
     if (!this->mime_type)
+    {
         return nullptr;
+    }
     return vfs_mime_type_get_icon(this->mime_type, false);
 }
 
@@ -393,80 +423,124 @@ get_file_perm_string(std::filesystem::file_status status)
 
     // File Type Permissions
     if (std::filesystem::is_regular_file(status))
+    {
         perm[file_type] = '-';
+    }
     else if (std::filesystem::is_directory(status))
+    {
         perm[file_type] = 'd';
+    }
     else if (std::filesystem::is_symlink(status))
+    {
         perm[file_type] = 'l';
+    }
     else if (std::filesystem::is_character_file(status))
+    {
         perm[file_type] = 'c';
+    }
     else if (std::filesystem::is_block_file(status))
+    {
         perm[file_type] = 'b';
+    }
     else if (std::filesystem::is_fifo(status))
+    {
         perm[file_type] = 'p';
+    }
     else if (std::filesystem::is_socket(status))
+    {
         perm[file_type] = 's';
+    }
 
     std::filesystem::perms p = status.permissions();
 
     // Owner
     if ((p & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
+    {
         perm[owner_read] = 'r';
+    }
 
     if ((p & std::filesystem::perms::owner_write) != std::filesystem::perms::none)
+    {
         perm[owner_write] = 'w';
+    }
 
     if ((p & std::filesystem::perms::set_uid) != std::filesystem::perms::none)
     {
         if ((p & std::filesystem::perms::owner_exec) != std::filesystem::perms::none)
+        {
             perm[owner_exec] = 's';
+        }
         else
+        {
             perm[owner_exec] = 's';
+        }
     }
     else
     {
         if ((p & std::filesystem::perms::owner_exec) != std::filesystem::perms::none)
+        {
             perm[owner_exec] = 'x';
+        }
     }
 
     // Group
     if ((p & std::filesystem::perms::group_read) != std::filesystem::perms::none)
+    {
         perm[group_read] = 'r';
+    }
 
     if ((p & std::filesystem::perms::group_write) != std::filesystem::perms::none)
+    {
         perm[group_write] = 'w';
+    }
 
     if ((p & std::filesystem::perms::set_gid) != std::filesystem::perms::none)
     {
         if ((p & std::filesystem::perms::group_exec) != std::filesystem::perms::none)
+        {
             perm[group_exec] = 's';
+        }
         else
+        {
             perm[group_exec] = 'S';
+        }
     }
     else
     {
         if ((p & std::filesystem::perms::group_exec) != std::filesystem::perms::none)
+        {
             perm[group_exec] = 'x';
+        }
     }
 
     // Other
     if ((p & std::filesystem::perms::others_read) != std::filesystem::perms::none)
+    {
         perm[other_read] = 'r';
+    }
 
     if ((p & std::filesystem::perms::others_write) != std::filesystem::perms::none)
+    {
         perm[other_write] = 'w';
+    }
 
     if ((p & std::filesystem::perms::sticky_bit) != std::filesystem::perms::none)
     {
         if ((p & std::filesystem::perms::others_exec) != std::filesystem::perms::none)
+        {
             perm[other_exec] = 't';
+        }
         else
+        {
             perm[other_exec] = 'T';
+        }
     }
     else
     {
         if ((p & std::filesystem::perms::others_exec) != std::filesystem::perms::none)
+        {
             perm[other_exec] = 'x';
+        }
     }
 
     return perm;
@@ -476,7 +550,9 @@ const std::string&
 VFSFileInfo::get_disp_perm() noexcept
 {
     if (this->disp_perm.empty())
+    {
         this->disp_perm = get_file_perm_string(this->status);
+    }
     return this->disp_perm;
 }
 
@@ -597,7 +673,9 @@ bool
 VFSFileInfo::is_thumbnail_loaded(bool big) const noexcept
 {
     if (big)
+    {
         return (this->big_thumbnail != nullptr);
+    }
     return (this->small_thumbnail != nullptr);
 }
 
@@ -605,16 +683,22 @@ void
 VFSFileInfo::load_thumbnail(std::string_view full_path, bool big) noexcept
 {
     if (big)
+    {
         load_thumbnail_big(full_path);
+    }
     else
+    {
         load_thumbnail_small(full_path);
+    }
 }
 
 void
 VFSFileInfo::load_thumbnail_small(std::string_view full_path) noexcept
 {
     if (this->small_thumbnail)
+    {
         return;
+    }
 
     if (!std::filesystem::exists(full_path))
     {
@@ -636,7 +720,9 @@ void
 VFSFileInfo::load_thumbnail_big(std::string_view full_path) noexcept
 {
     if (this->big_thumbnail)
+    {
         return;
+    }
 
     if (!std::filesystem::exists(full_path))
     {
@@ -670,7 +756,9 @@ void
 VFSFileInfo::load_special_info(std::string_view file_path) noexcept
 {
     if (!ztd::endswith(this->name, ".desktop"))
+    {
         return;
+    }
 
     const std::string file_dir = Glib::path_get_dirname(file_path.data());
 
@@ -679,10 +767,14 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
 
     // MOD  display real filenames of .desktop files not in desktop directory
     if (ztd::same(file_dir, vfs::user_dirs->desktop_dir()))
+    {
         this->set_disp_name(desktop->get_disp_name());
+    }
 
     if (desktop->get_icon_name().empty())
+    {
         return;
+    }
 
     const i32 big_size = vfs_mime_type_get_icon_size_big();
     const i32 small_size = vfs_mime_type_get_icon_size_small();
@@ -690,13 +782,17 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
     {
         GdkPixbuf* icon = desktop->get_icon(big_size);
         if (icon)
+        {
             this->big_thumbnail = icon;
+        }
     }
     if (!this->small_thumbnail)
     {
         GdkPixbuf* icon = desktop->get_icon(small_size);
         if (icon)
+        {
             this->small_thumbnail = icon;
+        }
     }
 }
 

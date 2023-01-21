@@ -77,7 +77,9 @@ autosave_thread(autosave_f autosave_func) noexcept
     {
         // ztd::logger::debug("AUTOSAVE Thread loop");
         if (!autosave->pending_requests)
+        {
             continue;
+        }
 
         // ztd::logger::debug("AUTOSAVE Thread saving_settings");
         autosave->pending_requests.store(false);

@@ -116,7 +116,9 @@ open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>
                                       false,
                                       true);
     if (handlers.empty())
+    {
         return false; // do not handle these files
+    }
 
     ptk_file_archiver_extract(parent->file_browser, sel_files, parent->cwd, dest_dir, cmd, true);
     return true; // all files handled
@@ -216,7 +218,9 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         ptask->task->exec_browser = parent->file_browser;
         ptask->task->exec_command = command_final;
         if (handler_set->icon)
+        {
             ptask->task->exec_icon = handler_set->icon;
+        }
         ptask->task->exec_terminal = handler_set->in_terminal;
         ptask->task->exec_keep_terminal = false;
         // file handlers store Run As Task in keep_terminal
@@ -226,7 +230,9 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         ptk_file_task_run(ptask);
 
         if (multiple)
+        {
             break;
+        }
     }
 }
 
@@ -235,14 +241,18 @@ check_desktop_name(std::string_view app_desktop)
 {
     // Check whether this is an app desktop file or just a command line
     if (ztd::endswith(app_desktop, ".desktop"))
+    {
         return app_desktop.data();
+    }
 
     // Not a desktop entry name
     // If we are lucky enough, there might be a desktop entry
     // for this program
     const std::string name = fmt::format("{}.desktop", app_desktop);
     if (std::filesystem::exists(name))
+    {
         return name;
+    }
 
     // fallback
     return app_desktop.data();
@@ -261,7 +271,9 @@ open_files_with_app(ParentInfo* parent, GList* files, std::string_view app_deskt
         return true;
     }
     if (app_desktop.empty())
+    {
         return false;
+    }
 
     vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
@@ -323,7 +335,9 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
     for (vfs::file_info file : sel_files)
     {
         if (!file)
+        {
             continue;
+        }
 
         full_path = Glib::build_filename(cwd.data(), file->get_name());
 
@@ -360,8 +374,10 @@ ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>&
             {
                 Glib::spawn_command_line_async(full_path);
                 if (file_browser)
+                {
                     file_browser->run_event<EventType::OPEN_ITEM>(full_path,
                                                                   PtkOpenAction::PTK_OPEN_FILE);
+                }
                 continue;
             }
 

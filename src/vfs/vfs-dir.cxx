@@ -265,9 +265,13 @@ vfs_dir_find_file(vfs::dir dir, std::string_view file_name, vfs::file_info file)
     for (vfs::file_info file2 : dir->file_list)
     {
         if (file == file2)
+        {
             return file2;
+        }
         if (ztd::same(file2->name, file_name))
+        {
             return file2;
+        }
     }
     return nullptr;
 }
@@ -345,7 +349,9 @@ vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_in
     // file_name, dir->avoid_changes ? "true" : "false");
 
     if (!force && dir->avoid_changes)
+    {
         return;
+    }
 
     if (ztd::same(file_name, dir->path))
     {
@@ -459,7 +465,9 @@ gethidden(std::string_view path)
     // test access first because open() on missing file may cause
     // long delay on nfs
     if (!have_rw_access(hidden_path))
+    {
         return hidden;
+    }
 
     std::string line;
     std::ifstream file(hidden_path);
@@ -479,7 +487,9 @@ static bool
 ishidden(std::string_view hidden, std::string_view file_name)
 {
     if (ztd::contains(hidden, fmt::format("{}\n", file_name)))
+    {
         return true;
+    }
     return false;
 }
 
@@ -491,7 +501,9 @@ vfs_dir_add_hidden(std::string_view path, std::string_view file_name)
 
     const bool result = write_file(file_path, data);
     if (!result)
+    {
         return false;
+    }
     return true;
 }
 
@@ -499,7 +511,9 @@ static void
 vfs_dir_load(vfs::dir dir)
 {
     if (dir->path.empty())
+    {
         return;
+    }
     // ztd::logger::info("dir->path={}", dir->path);
 
     dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
@@ -519,7 +533,9 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
     dir->load_complete = false;
     dir->xhidden_count = 0;
     if (dir->path.empty())
+    {
         return nullptr;
+    }
 
     /* Install file alteration monitor */
     dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
@@ -530,7 +546,9 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
     for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
     {
         if (dir->task->is_cancelled())
+        {
             break;
+        }
 
         const std::string file_name = std::filesystem::path(dfile).filename();
         const std::string full_path = Glib::build_filename(dir->path, file_name);
@@ -577,7 +595,9 @@ update_file_info(vfs::dir dir, vfs::file_info file)
     /* FIXME: Dirty hack: steal the string to prevent memory allocation */
     const std::string file_name = file->name;
     if (ztd::same(file->name, file->disp_name))
+    {
         file->disp_name.clear();
+    }
     file->name.clear();
 
     const std::string full_path = Glib::build_filename(dir->path, file_name);
@@ -610,7 +630,9 @@ update_changed_files(std::string_view key, vfs::dir dir)
     (void)key;
 
     if (dir->changed_files.empty())
+    {
         return;
+    }
 
     vfs_dir_lock(dir);
     for (vfs::file_info file : dir->changed_files)
@@ -632,7 +654,9 @@ update_created_files(std::string_view key, vfs::dir dir)
     (void)key;
 
     if (dir->created_files.empty())
+    {
         return;
+    }
 
     vfs_dir_lock(dir);
     for (std::string_view created_file : dir->created_files)
@@ -690,7 +714,9 @@ void
 vfs_dir_flush_notify_cache()
 {
     if (change_notify_timeout)
+    {
         g_source_remove(change_notify_timeout);
+    }
     change_notify_timeout = 0;
 
     for (const auto& dir : dir_map)
@@ -739,7 +765,9 @@ vfs_dir_get_by_path_soft(std::string_view path)
     }
 
     if (dir)
+    {
         g_object_ref(dir);
+    }
     return dir;
 }
 
@@ -761,7 +789,9 @@ vfs_dir_get_by_path(std::string_view path)
     }
 
     if (!mime_cb)
+    {
         mime_cb = vfs_mime_type_add_reload_cb(on_mime_type_reload, nullptr);
+    }
 
     if (dir)
     {
@@ -782,7 +812,9 @@ reload_mime_type(std::string_view key, vfs::dir dir)
     (void)key;
 
     if (!dir || dir->file_list.empty())
+    {
         return;
+    }
 
     vfs_dir_lock(dir);
 
@@ -905,15 +937,21 @@ vfs_dir_monitor_mime()
 {
     // start watching for changes
     if (mime_dir)
+    {
         return;
+    }
 
     const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
     if (!std::filesystem::is_directory(path))
+    {
         return;
+    }
 
     mime_dir = vfs_dir_get_by_path(path);
     if (!mime_dir)
+    {
         return;
+    }
 
     // ztd::logger::info("MIME-UPDATE watch started");
     mime_dir->add_event<EventType::FILE_LISTED>(mime_change);

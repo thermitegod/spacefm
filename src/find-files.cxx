@@ -224,7 +224,9 @@ static bool
 open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 {
     if (!files)
+    {
         return false;
+    }
 
     const std::vector<vfs::file_info> sel_files = glist_to_vector_VFSFileInfo(files);
 
@@ -238,7 +240,9 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
         {
             vfs::file_info file = VFS_FILE_INFO(l->data);
             if (!file)
+            {
                 continue;
+            }
 
             const std::string full_path = Glib::build_filename(dir, file->get_name());
             if (std::filesystem::is_directory(full_path))
@@ -276,12 +280,16 @@ on_open_files(GAction* action, FindFile* data)
     bool open_files = true;
 
     if (action)
+    {
         open_files = ztd::same(g_action_get_name(action), "OpenAction");
+    }
 
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view));
     rows = gtk_tree_selection_get_selected_rows(sel, &model);
     if (!rows)
+    {
         return;
+    }
 
     // sfm this frees list when new value inserted - caused segfault
     // hash = g_hash_table_new_full( g_str_hash, g_str_equal, (GDestroyNotify)free, open_files ?
@@ -295,7 +303,8 @@ on_open_files(GAction* action, FindFile* data)
 
         if (gtk_tree_model_get_iter(model, &it, tp))
         {
-            if (open_files) /* open files */
+            if (open_files)
+            { /* open files */
                 gtk_tree_model_get(model,
                                    &it,
                                    FindFilesCol::COL_INFO,
@@ -303,8 +312,11 @@ on_open_files(GAction* action, FindFile* data)
                                    FindFilesCol::COL_DIR,
                                    &dir,
                                    -1);
-            else /* open containing directories */
+            }
+            else
+            { /* open containing directories */
                 gtk_tree_model_get(model, &it, FindFilesCol::COL_DIR, &dir, -1);
+            }
 
             if (open_files)
             {
@@ -313,12 +325,16 @@ on_open_files(GAction* action, FindFile* data)
                 l = g_list_prepend(l, vfs_file_info_ref(file));
                 g_hash_table_insert(hash, dir, l); // sfm caused segfault with destroy function
                 if (file->is_directory())
+                {
                     open_files_has_dir = true;
+                }
             }
             else
             {
                 if (g_hash_table_lookup(hash, dir))
+                {
                     free(dir);
+                }
                 g_hash_table_insert(hash, dir, nullptr);
             }
         }
@@ -459,9 +475,13 @@ compose_command(FindFile* data)
     if (ztd::contains(tmp, "*"))
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fn_case_sensitive)))
+        {
             argv.emplace_back("-name");
+        }
         else
+        {
             argv.emplace_back("-iname");
+        }
 
         argv.emplace_back(tmp);
     }
@@ -528,14 +548,20 @@ compose_command(FindFile* data)
         argv.emplace_back("grep");
 
         if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_case_sensitive)))
+        {
             argv.emplace_back("-i");
+        }
 
         argv.emplace_back("--files-with-matches");
 
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->fc_use_regexp)))
+        {
             argv.emplace_back("--regexp");
+        }
         else
+        {
             argv.emplace_back("--fixed-strings");
+        }
 
         argv.emplace_back(tmp);
 
@@ -544,7 +570,9 @@ compose_command(FindFile* data)
     }
 
     if (!print)
+    {
         argv.emplace_back("-print");
+    }
 
     return argv;
 }
@@ -659,7 +687,9 @@ search_thread(vfs::async_task task, FindFile* data)
 
                 /* we get a complete file path */
                 if (!data->task->is_cancelled())
+                {
                     process_found_files(data, queue, path.data());
+                }
 
                 pbuf = eol + 1;  /* start reading the next line */
                 path.append(""); /* empty the line buffer */
@@ -848,7 +878,9 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
         {
             path = volume->get_mount_point();
             if (path && path[0] != '\0')
+            {
                 add_search_dir(data, path);
+            }
         }
     }
 }
@@ -905,7 +937,9 @@ on_remove_search_folder(GtkWidget* btn, FindFile* data)
     GtkTreeIter it;
     GtkTreeSelection* sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->places_view));
     if (gtk_tree_selection_get_selected(sel, nullptr, &it))
+    {
         gtk_list_store_remove(data->places_list, &it);
+    }
 }
 
 static void
@@ -1091,11 +1125,13 @@ find_files(const std::vector<std::string>& search_dirs)
     GdkPixbuf* icon = nullptr;
     GtkIconTheme* theme = gtk_icon_theme_get_default();
     if (theme)
+    {
         icon = gtk_icon_theme_load_icon(theme,
                                         "spacefm-find",
                                         48,
                                         GtkIconLookupFlags::GTK_ICON_LOOKUP_NO_SVG,
                                         nullptr);
+    }
     if (icon)
     {
         gtk_window_set_icon(GTK_WINDOW(data->win), icon);
@@ -1156,7 +1192,9 @@ find_files(const std::vector<std::string>& search_dirs)
     for (std::string_view dir : search_dirs)
     {
         if (std::filesystem::is_directory(dir))
+        {
             gtk_list_store_insert_with_values(data->places_list, &it, 0, 0, dir.data(), -1);
+        }
     }
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(data->places_view), GTK_TREE_MODEL(data->places_list));
@@ -1219,7 +1257,9 @@ find_files(const std::vector<std::string>& search_dirs)
     const i32 width = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::X);
     const i32 height = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::Y);
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(data->win), width, height);
+    }
 
     gtk_widget_show(data->win);
 }

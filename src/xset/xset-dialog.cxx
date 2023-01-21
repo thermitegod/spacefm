@@ -46,7 +46,9 @@ multi_input_get_text(GtkWidget* input)
     GtkTextIter iter, siter;
 
     if (!GTK_IS_TEXT_VIEW(input))
+    {
         return nullptr;
+    }
 
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input));
     gtk_text_buffer_get_start_iter(buf, &siter);
@@ -80,7 +82,9 @@ on_multi_input_insert(GtkTextBuffer* buf)
 
     // delete selected text that was pasted over
     if (gtk_text_buffer_get_selection_bounds(buf, &siter, &iter))
+    {
         gtk_text_buffer_delete(buf, &siter, &iter);
+    }
 
     GtkTextMark* insert = gtk_text_buffer_get_insert(buf);
     gtk_text_buffer_get_iter_at_mark(buf, &iter, insert);
@@ -95,7 +99,9 @@ on_multi_input_insert(GtkTextBuffer* buf)
         while (b[x] != '\0')
         {
             if (b[x] == '\n')
+            {
                 b[x] = ' ';
+            }
             x++;
         }
     }
@@ -105,7 +111,9 @@ on_multi_input_insert(GtkTextBuffer* buf)
         while (a[x] != '\0')
         {
             if (a[x] == '\n')
+            {
                 a[x] = ' ';
+            }
             x++;
         }
     }
@@ -157,7 +165,9 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
                                 GtkWrapMode::GTK_WRAP_CHAR); // GtkWrapMode::GTK_WRAP_WORD_CHAR
 
     if (text)
+    {
         gtk_text_buffer_set_text(buf, text, -1);
+    }
     gtk_text_buffer_get_end_iter(buf, &iter);
     gtk_text_buffer_place_cursor(buf, &iter);
     GtkTextMark* insert = gtk_text_buffer_get_insert(buf);
@@ -191,7 +201,9 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
     GtkWidget* dlgparent = nullptr;
 
     if (parent)
+    {
         dlgparent = gtk_widget_get_toplevel(parent);
+    }
 
     GtkWidget* dlg =
         gtk_message_dialog_new(GTK_WINDOW(dlgparent),
@@ -203,11 +215,15 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
                                nullptr);
 
     if (action == GtkMessageType::GTK_MESSAGE_INFO)
+    {
         xset_set_window_icon(GTK_WINDOW(dlg));
+    }
     gtk_window_set_role(GTK_WINDOW(dlg), "msg_dialog");
 
     if (!msg2.empty())
+    {
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.data(), nullptr);
+    }
 
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
 
@@ -228,7 +244,9 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     GtkWidget* dlgparent = nullptr;
 
     if (parent)
+    {
         dlgparent = gtk_widget_get_toplevel(parent);
+    }
 
     GtkWidget* dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
                                             GtkDialogFlags::GTK_DIALOG_MODAL,
@@ -242,15 +260,21 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     i32 width = xset_get_int(XSetName::TEXT_DLG, XSetVar::S);
     i32 height = xset_get_int(XSetName::TEXT_DLG, XSetVar::Z);
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
+    }
     else
+    {
         gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 400);
+    }
     // gtk_widget_set_size_request( GTK_WIDGET( dlg ), 600, 400 );
 
     gtk_window_set_resizable(GTK_WINDOW(dlg), true);
 
     if (!msg2.empty())
+    {
         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.data(), nullptr);
+    }
 
     // input view
     GtkScrolledWindow* scroll_input =
@@ -315,7 +339,9 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
     {
         gtk_widget_grab_focus(btn_ok);
         if (btn_default)
+        {
             gtk_widget_set_sensitive(btn_default, false);
+        }
     }
 
     std::string ans;
@@ -340,13 +366,19 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                 else
                 {
                     if (*answer)
+                    {
                         free(*answer);
+                    }
 
                     ans = ztd::strip(ans);
                     if (ans.empty())
+                    {
                         *answer = nullptr;
+                    }
                     else
+                    {
                         *answer = ztd::strdup(Glib::filename_from_utf8(ans));
+                    }
 
                     ret = true;
                     exit_loop = true;
@@ -360,9 +392,11 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                     input,
                     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(btn_edit)));
                 if (btn_default)
+                {
                     gtk_widget_set_sensitive(
                         btn_default,
                         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(btn_edit)));
+                }
                 exit_loop = true;
                 break;
             case GtkResponseType::GTK_RESPONSE_ACCEPT:
@@ -394,7 +428,9 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                 break;
         }
         if (exit_loop)
+        {
             break;
+        }
     }
 
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
@@ -436,7 +472,9 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     gtk_window_set_role(GTK_WINDOW(dlg), "file_dialog");
 
     if (deffolder)
+    {
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), deffolder);
+    }
     else
     {
         path = xset_get_s(XSetName::GO_SET_DEFAULT);
@@ -454,7 +492,9 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     {
         if (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE ||
             action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER)
+        {
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile);
+        }
         else
         {
             const std::string path2 = Glib::build_filename(deffolder, deffile);
@@ -471,7 +511,9 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
+        {
             gtk_main_iteration();
+        }
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
@@ -511,7 +553,9 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
         gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), cursor);
         g_object_unref(cursor);
         while (gtk_events_pending())
+        {
             gtk_main_iteration();
+        }
     }
 
     // btn_icon_choose clicked - preparing the exo icon chooser dialog
@@ -526,11 +570,15 @@ xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
     const i32 width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
     const i32 height = xset_get_int(XSetName::MAIN_ICON, XSetVar::Y);
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(icon_chooser), width, height);
+    }
 
     // Load current icon
     if (def_icon && def_icon[0])
+    {
         exo_icon_chooser_dialog_set_icon(EXO_ICON_CHOOSER_DIALOG(icon_chooser), def_icon);
+    }
 
     // Prompting user to pick icon
     const i32 response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));

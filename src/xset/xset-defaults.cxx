@@ -1499,51 +1499,69 @@ xset_defaults()
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_toolbox");
+        }
 
         set = xset_set_panel(p, XSetPanel::SHOW_DEVMON, XSetVar::MENU_LABEL, "_Devices");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_devmon");
+        }
 
         set = xset_set_panel(p, XSetPanel::SHOW_DIRTREE, XSetVar::MENU_LABEL, "T_ree");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_dirtree");
+        }
 
         set = xset_set_panel(p, XSetPanel::SHOW_SIDEBAR, XSetVar::MENU_LABEL, "_Side Toolbar");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_sidebar");
+        }
 
         set = xset_set_panel(p, XSetPanel::LIST_DETAILED, XSetVar::MENU_LABEL, "_Detailed");
         set->menu_style = XSetMenu::RADIO;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_detailed");
+        }
 
         set = xset_set_panel(p, XSetPanel::LIST_ICONS, XSetVar::MENU_LABEL, "_Icons");
         set->menu_style = XSetMenu::RADIO;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_icons");
+        }
 
         set = xset_set_panel(p, XSetPanel::LIST_COMPACT, XSetVar::MENU_LABEL, "_Compact");
         set->menu_style = XSetMenu::RADIO;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_compact");
+        }
 
         set = xset_set_panel(p, XSetPanel::LIST_LARGE, XSetVar::MENU_LABEL, "_Large Icons");
         set->menu_style = XSetMenu::CHECK;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_large");
+        }
 
         set = xset_set_panel(p, XSetPanel::SHOW_HIDDEN, XSetVar::MENU_LABEL, "_Hidden Files");
         set->menu_style = XSetMenu::CHECK;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_hidden");
+        }
 
         set = xset_set_panel(p, XSetPanel::ICON_TAB, XSetVar::MENU_LABEL, "_Icon");
         set->menu_style = XSetMenu::ICON;
@@ -1553,7 +1571,9 @@ xset_defaults()
         set->menu_style = XSetMenu::ICON;
         xset_set_var(set, XSetVar::ICN, "gtk-yes");
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_icon_status");
+        }
 
         set = xset_set_panel(p, XSetPanel::DETCOL_NAME, XSetVar::MENU_LABEL, "_Name");
         set->menu_style = XSetMenu::CHECK;
@@ -1565,31 +1585,41 @@ xset_defaults()
         set->b = XSetB::XSET_B_TRUE;
         set->x = ztd::strdup("1");
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_size");
+        }
 
         set = xset_set_panel(p, XSetPanel::DETCOL_TYPE, XSetVar::MENU_LABEL, "_Type");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("2");
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_type");
+        }
 
         set = xset_set_panel(p, XSetPanel::DETCOL_PERM, XSetVar::MENU_LABEL, "_Permission");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("3");
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_perm");
+        }
 
         set = xset_set_panel(p, XSetPanel::DETCOL_OWNER, XSetVar::MENU_LABEL, "_Owner");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("4");
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_owner");
+        }
 
         set = xset_set_panel(p, XSetPanel::DETCOL_DATE, XSetVar::MENU_LABEL, "_Modified");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("5");
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_date");
+        }
 
         set = xset_get_panel(p, XSetPanel::SORT_EXTRA);
         set->b = XSetB::XSET_B_TRUE;               // sort_natural
@@ -1601,7 +1631,9 @@ xset_defaults()
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
+        {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_book_fol");
+        }
     }
 
     // speed
@@ -1626,9 +1658,13 @@ xset_defaults()
         if (set2->lock)
         {
             if (set2->in_terminal)
+            {
                 set2->in_terminal = false;
+            }
             if (set2->keep_terminal)
+            {
                 set2->keep_terminal = false;
+            }
         }
     }
 }
@@ -1640,13 +1676,17 @@ def_key(XSetName name, u32 key, u32 keymod)
 
     // key already set or unset?
     if (set->key != 0 || key == 0)
+    {
         return;
+    }
 
     // key combo already in use?
     for (xset_t set2 : keysets)
     {
         if (set2->key == key && set2->keymod == keymod)
+        {
             return;
+        }
     }
     set->key = key;
     set->keymod = keymod;
@@ -1659,7 +1699,9 @@ xset_default_keys()
     for (xset_t set : xsets)
     {
         if (set->key)
+        {
             keysets.emplace_back(set);
+        }
     }
 
     // clang-format off

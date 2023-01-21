@@ -51,24 +51,40 @@ xset_pack_set(xset_t set)
     // hack to not save default handlers - this allows default handlers
     // to be updated more easily
     if (set->disable && set->name[0] == 'h' && ztd::startswith(set->name, "hand"))
+    {
         return setvars;
+    }
 
     if (set->plugin)
+    {
         return setvars;
+    }
 
     if (set->s)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::S), fmt::format("{}", set->s)});
+    }
     if (set->x)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::X), fmt::format("{}", set->x)});
+    }
     if (set->y)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::Y), fmt::format("{}", set->y)});
+    }
     if (set->z)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::Z), fmt::format("{}", set->z)});
+    }
     if (set->key)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::KEY), fmt::format("{}", set->key)});
+    }
     if (set->keymod)
+    {
         setvars.insert(
             {xset_get_name_from_xsetvar(XSetVar::KEYMOD), fmt::format("{}", set->keymod)});
+    }
     // menu label
     if (set->menu_label)
     {
@@ -101,62 +117,100 @@ xset_pack_set(xset_t set)
     }
 
     if (set->next)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::NEXT), fmt::format("{}", set->next)});
+    }
     if (set->child)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::CHILD), fmt::format("{}", set->child)});
+    }
     if (set->context)
+    {
         setvars.insert(
             {xset_get_name_from_xsetvar(XSetVar::CONTEXT), fmt::format("{}", set->context)});
+    }
     if (set->b != XSetB::XSET_B_UNSET)
+    {
         setvars.insert({xset_get_name_from_xsetvar(XSetVar::B), fmt::format("{}", set->b)});
+    }
     if (set->tool != XSetTool::NOT)
+    {
         setvars.insert(
             {xset_get_name_from_xsetvar(XSetVar::TOOL), fmt::format("{}", INT(set->tool))});
+    }
 
     if (!set->lock)
     {
         if (set->menu_style != XSetMenu::NORMAL)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::STYLE),
                             fmt::format("{}", INT(set->menu_style))});
+        }
         if (set->desc)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::DESC), fmt::format("{}", set->desc)});
+        }
         if (set->title)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::TITLE), fmt::format("{}", set->title)});
+        }
         if (set->prev)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::PREV), fmt::format("{}", set->prev)});
+        }
         if (set->parent)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::PARENT), fmt::format("{}", set->parent)});
+        }
         if (set->line)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::LINE), fmt::format("{}", set->line)});
+        }
         if (set->task)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::TASK), fmt::format("{:d}", set->task)});
+        }
         if (set->task_pop)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::TASK_POP),
                             fmt::format("{:d}", set->task_pop)});
+        }
         if (set->task_err)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::TASK_ERR),
                             fmt::format("{:d}", set->task_err)});
+        }
         if (set->task_out)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::TASK_OUT),
                             fmt::format("{:d}", set->task_out)});
+        }
         if (set->in_terminal)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::RUN_IN_TERMINAL),
                             fmt::format("{:d}", set->in_terminal)});
+        }
         if (set->keep_terminal)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::KEEP_TERMINAL),
                             fmt::format("{:d}", set->keep_terminal)});
+        }
         if (set->scroll_lock)
+        {
             setvars.insert({xset_get_name_from_xsetvar(XSetVar::SCROLL_LOCK),
                             fmt::format("{:d}", set->scroll_lock)});
+        }
         if (set->opener != 0)
+        {
             setvars.insert(
                 {xset_get_name_from_xsetvar(XSetVar::OPENER), fmt::format("{}", set->opener)});
+        }
     }
 
     return setvars;
@@ -180,7 +234,9 @@ xset_pack_sets()
         setvars_t setvars = xset_pack_set(set);
 
         if (!setvars.empty())
+        {
             xsetpak.insert({fmt::format("{}", set->name), setvars});
+        }
     }
 
     return xsetpak;

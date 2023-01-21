@@ -403,7 +403,9 @@ config_parse_xset(const toml::value& tbl, u64 version)
                 if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "hand_"))
                 { // custom
                     if (set->lock)
+                    {
                         set->lock = false;
+                    }
                     xset_set_var(set, var, value);
                 }
                 else

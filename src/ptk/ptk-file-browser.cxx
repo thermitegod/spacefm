@@ -307,7 +307,9 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, std::string_view path
         gtk_tree_selection_unselect_all(tree_sel);
     }
     if (!model)
+    {
         return;
+    }
 
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -367,7 +369,9 @@ save_command_history(GtkEntry* entry)
     const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
 
     if (text.empty())
+    {
         return;
+    }
 
     xset_cmd_history.emplace_back(text);
 
@@ -392,7 +396,9 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 {
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
     if (!text || std::strlen(text) == 0)
+    {
         return;
+    }
     std::string path = text;
 
     gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
@@ -407,7 +413,9 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 
     // convert ~/ to /home/user
     if (ztd::startswith(path, "~/"))
+    {
         path = Glib::build_filename(vfs::user_dirs->home_dir(), ztd::removeprefix(path, "~/"));
+    }
 
     // path
     const std::string dir_path = Glib::filename_from_utf8(path);
@@ -416,9 +424,11 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     if (std::filesystem::is_directory(final_path))
     { // open dir
         if (!ztd::same(final_path, ptk_file_browser_get_cwd(file_browser)))
+        {
             ptk_file_browser_chdir(file_browser,
                                    final_path,
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        }
     }
     else if (std::filesystem::is_regular_file(final_path))
     { // open dir and select file
@@ -465,7 +475,9 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
     xset_t set = XSET(set_ptr);
 
     if (!(set && !set->lock && set->browser && set->tool != XSetTool::NOT && GTK_IS_WIDGET(widget)))
+    {
         return;
+    }
 
     unsigned char x;
 
@@ -503,7 +515,9 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
                 g_object_set_data(G_OBJECT(widget), "set", set);
             }
             else
+            {
                 return;
+            }
             break;
         case XSetTool::SHOW_THUMB:
             x = 8;
@@ -530,7 +544,9 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
                                         XSetTool tool_type)
 {
     if (!PTK_IS_FILE_BROWSER(file_browser))
+    {
         return;
+    }
 
     xset_t set = XSET(set_ptr);
 
@@ -620,9 +636,13 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     {
         GtkWidget* widget = GTK_WIDGET(l->data);
         if (GTK_IS_TOGGLE_BUTTON(widget))
+        {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), b);
+        }
         else if (GTK_IS_WIDGET(widget))
+        {
             gtk_widget_set_sensitive(widget, b);
+        }
         else
         {
             ztd::logger::warn("ptk_file_browser_update_toolbar_widget invalid widget");
@@ -649,7 +669,9 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     (void)widget;
     // ztd::logger::info("rebuild_toolbox");
     if (!file_browser)
+    {
         return;
+    }
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
@@ -661,7 +683,9 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     if (file_browser->toolbar)
     {
         if (GTK_IS_WIDGET(file_browser->toolbar))
+        {
             gtk_widget_destroy(file_browser->toolbar);
+        }
         file_browser->toolbar = nullptr;
         file_browser->path_bar = nullptr;
     }
@@ -685,8 +709,10 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->toolbar), GtkToolbarStyle::GTK_TOOLBAR_ICONS);
     if (app_settings.get_icon_size_tool() > 0 &&
         app_settings.get_icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
+    {
         gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->toolbar),
                                   (GtkIconSize)app_settings.get_icon_size_tool());
+    }
 
     // fill left toolbar
     xset_fill_toolbar(GTK_WIDGET(file_browser),
@@ -712,7 +738,9 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 
     // show
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode))
+    {
         gtk_widget_show_all(file_browser->toolbox);
+    }
 }
 
 static void
@@ -728,7 +756,9 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 
     // destroy
     if (file_browser->side_toolbar)
+    {
         gtk_widget_destroy(file_browser->side_toolbar);
+    }
 
     // create side toolbar
     file_browser->side_toolbar = gtk_toolbar_new();
@@ -742,8 +772,10 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
                           GtkToolbarStyle::GTK_TOOLBAR_ICONS);
     if (app_settings.get_icon_size_tool() > 0 &&
         app_settings.get_icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
+    {
         gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->side_toolbar),
                                   (GtkIconSize)app_settings.get_icon_size_tool());
+    }
     // fill side toolbar
     xset_fill_toolbar(GTK_WIDGET(file_browser),
                       file_browser,
@@ -753,7 +785,9 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 
     // show
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode))
+    {
         gtk_widget_show_all(file_browser->side_toolbox);
+    }
 }
 
 void
@@ -772,7 +806,9 @@ ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
         gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.data());
     }
     if (file_browser->side_toolbar)
+    {
         rebuild_side_toolbox(nullptr, file_browser);
+    }
 
     enable_toolbar(file_browser);
 }
@@ -795,7 +831,9 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
                               event->button,
                               event->state,
                               true))
+        {
             return true;
+        }
         if (event->button == 2)
         {
             static constexpr std::array<XSetName, 4> setnames{
@@ -808,27 +846,39 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
             for (usize i = 0; i < setnames.size(); ++i)
             {
                 if (!xset_get_b(setnames.at(i)))
+                {
                     continue;
+                }
 
                 if (i < 2)
                 {
                     const std::vector<vfs::file_info> sel_files =
                         ptk_file_browser_get_selected_files(file_browser);
                     if (sel_files.empty())
+                    {
                         return true;
+                    }
 
                     if (i == 0)
+                    {
                         ptk_clipboard_copy_name(ptk_file_browser_get_cwd(file_browser), sel_files);
+                    }
                     else
+                    {
                         ptk_clipboard_copy_as_text(ptk_file_browser_get_cwd(file_browser),
                                                    sel_files);
+                    }
 
                     vfs_file_info_list_free(sel_files);
                 }
                 else if (i == 2)
+                {
                     ptk_file_browser_file_properties(file_browser, 0);
+                }
                 else if (i == 3)
+                {
                     focus_panel(nullptr, file_browser->main_window, panel_control_code_hide);
+                }
             }
             return true;
         }
@@ -858,9 +908,13 @@ on_status_middle_click_config(GtkMenuItem* menuitem, xset_t set)
     for (XSetName setname : setnames)
     {
         if (set->xset_name == setname)
+        {
             set->b = XSetB::XSET_B_TRUE;
+        }
         else
+        {
             xset_set_b(setname, false);
+        }
     }
 }
 
@@ -1111,6 +1165,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->toolbar || !gtk_widget_get_visible(file_browser->toolbox)))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1121,6 +1176,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               true);
+        }
         if (!file_browser->toolbar)
         {
             rebuild_toolbox(nullptr, file_browser);
@@ -1132,6 +1188,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->toolbox && gtk_widget_get_visible(file_browser->toolbox))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1142,6 +1199,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               false);
+        }
         gtk_widget_hide(file_browser->toolbox);
     }
 
@@ -1149,6 +1207,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->side_toolbox || !gtk_widget_get_visible(file_browser->side_toolbox)))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1159,6 +1218,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               true);
+        }
         if (!file_browser->side_toolbar)
         {
             rebuild_side_toolbox(nullptr, file_browser);
@@ -1171,6 +1231,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->side_toolbar && file_browser->side_toolbox &&
             gtk_widget_get_visible(file_browser->side_toolbox))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1181,6 +1242,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               false);
+        }
         /*  toolboxes must be destroyed together for toolbar_widgets[]
         if ( file_browser->side_toolbar )
         {
@@ -1196,6 +1258,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->side_dir_scroll ||
              !gtk_widget_get_visible(file_browser->side_dir_scroll)))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1206,6 +1269,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               true);
+        }
         if (!file_browser->side_dir)
         {
             file_browser->side_dir = ptk_file_browser_create_dir_tree(file_browser);
@@ -1213,13 +1277,16 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         }
         gtk_widget_show_all(file_browser->side_dir_scroll);
         if (file_browser->side_dir && file_browser->file_list)
+        {
             ptk_dir_tree_view_chdir(GTK_TREE_VIEW(file_browser->side_dir),
                                     ptk_file_browser_get_cwd(file_browser));
+        }
     }
     else
     {
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->side_dir_scroll && gtk_widget_get_visible(file_browser->side_dir_scroll))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1230,9 +1297,12 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               false);
+        }
         gtk_widget_hide(file_browser->side_dir_scroll);
         if (file_browser->side_dir)
+        {
             gtk_widget_destroy(file_browser->side_dir);
+        }
         file_browser->side_dir = nullptr;
     }
 
@@ -1241,6 +1311,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             (!file_browser->side_dev_scroll ||
              !gtk_widget_get_visible(file_browser->side_dev_scroll)))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1251,6 +1322,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               true);
+        }
         if (!file_browser->side_dev)
         {
             file_browser->side_dev = ptk_location_view_new(file_browser);
@@ -1262,6 +1334,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
             file_browser->side_dev_scroll && gtk_widget_get_visible(file_browser->side_dev_scroll))
+        {
             main_window_event(main_window,
                               event_handler->pnl_show,
                               XSetName::EVT_PNL_SHOW,
@@ -1272,25 +1345,38 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                               0,
                               0,
                               false);
+        }
         gtk_widget_hide(file_browser->side_dev_scroll);
         if (file_browser->side_dev)
+        {
             gtk_widget_destroy(file_browser->side_dev);
+        }
         file_browser->side_dev = nullptr;
     }
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
+    {
         gtk_widget_show(file_browser->side_vpane_bottom);
+    }
     else
+    {
         gtk_widget_hide(file_browser->side_vpane_bottom);
+    }
 
     if (xset_get_b_panel_mode(p, XSetPanel::SHOW_DEVMON, mode) ||
         xset_get_b_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode))
+    {
         gtk_widget_show(file_browser->side_vbox);
+    }
     else
+    {
         gtk_widget_hide(file_browser->side_vbox);
+    }
 
     if (need_enable_toolbar)
+    {
         enable_toolbar(file_browser);
+    }
     else
     {
         // toggle sidepane toolbar buttons
@@ -1303,22 +1389,30 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     // hpane
     i32 pos = main_window->panel_slide_x[p - 1];
     if (pos < 100)
+    {
         pos = -1;
+    }
     // ztd::logger::info("    set slide_x = {}", pos);
     if (pos > 0)
+    {
         gtk_paned_set_position(GTK_PANED(file_browser->hpane), pos);
+    }
 
     // side_vpane_top
     pos = main_window->panel_slide_y[p - 1];
     if (pos < 20)
+    {
         pos = -1;
+    }
     // ztd::logger::info("    slide_y = {}", pos);
     gtk_paned_set_position(GTK_PANED(file_browser->side_vpane_top), pos);
 
     // side_vpane_bottom
     pos = main_window->panel_slide_s[p - 1];
     if (pos < 20)
+    {
         pos = -1;
+    }
     // ztd::logger::info( "slide_s = {}", pos);
     gtk_paned_set_position(GTK_PANED(file_browser->side_vpane_bottom), pos);
 
@@ -1353,13 +1447,17 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                 GtkTreeViewColumn* col =
                     gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), i);
                 if (!col)
+                {
                     break;
+                }
                 const char* title = gtk_tree_view_column_get_title(col);
                 i32 j;
                 for (j = 0; j < 6; ++j)
                 {
                     if (ztd::same(title, column_titles.at(j)))
+                    {
                         break;
+                    }
                 }
                 if (j != 6)
                 {
@@ -1419,7 +1517,9 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     }
 
     if (xset_get_b_panel(curpanel, XSetPanel::LIST_DETAILED))
+    {
         view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
+    }
     else if (xset_get_b_panel(curpanel, XSetPanel::LIST_ICONS))
     {
         view_mode = PtkFBViewMode::PTK_FB_ICON_VIEW;
@@ -1463,9 +1563,13 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     char* icon_name;
     xset_t set = xset_get_panel(curpanel, XSetPanel::ICON_STATUS);
     if (set->icon && set->icon[0] != '\0')
+    {
         icon_name = set->icon;
+    }
     else
+    {
         icon_name = ztd::strdup("gtk-yes");
+    }
     gtk_image_set_from_icon_name(GTK_IMAGE(file_browser->status_image),
                                  icon_name,
                                  GtkIconSize::GTK_ICON_SIZE_MENU);
@@ -1554,7 +1658,9 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
                     elementn = g_list_position(file_browser->history, l);
                     // printf ("        found elementn=%d\n", elementn );
                     if (elementn != -1)
+                    {
                         element = g_list_nth(file_browser->histsel, elementn);
+                    }
                     break;
                 }
             }
@@ -1581,7 +1687,9 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
         GtkTreeSelection* tree_sel;
         bool firstsel = true;
         if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        {
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+        }
 
         for (l = (GList*)element->data; l; l = g_list_next(l))
         {
@@ -1660,13 +1768,17 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
     }
 
     if (folder_path.empty())
+    {
         return false;
+    }
 
     std::string path = folder_path.data();
 
     // convert ~ to /home/user for smarter bookmarks
     if (ztd::startswith(path, "~/"))
+    {
         path = Glib::build_filename(vfs::user_dirs->home_dir(), ztd::removeprefix(path, "~/"));
+    }
 
     if (!std::filesystem::is_directory(path))
     {
@@ -1821,7 +1933,9 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
     const std::string disp_path =
         Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
     if (!inhibit_focus)
+    {
         gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.data());
+    }
 
     enable_toolbar(file_browser);
     return true;
@@ -1837,16 +1951,22 @@ on_history_menu_item_activate(GtkWidget* menu_item, PtkFileBrowser* file_browser
     if (!ptk_file_browser_chdir(file_browser,
                                 (char*)l->data,
                                 PtkFBChdirMode::PTK_FB_CHDIR_NO_HISTORY))
+    {
         file_browser->curHistory = tmp;
+    }
     else
     {
         // MOD sync curhistsel
         i32 elementn = -1;
         elementn = g_list_position(file_browser->history, file_browser->curHistory);
         if (elementn != -1)
+        {
             file_browser->curhistsel = g_list_nth(file_browser->histsel, elementn);
+        }
         else
+        {
             ztd::logger::debug("missing history item - ptk-file-browser.cxx");
+        }
     }
 }
 
@@ -1885,7 +2005,9 @@ ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_hi
         {
             add_history_menu_item(file_browser, GTK_WIDGET(menu), l);
             if (!has_items)
+            {
                 has_items = true;
+            }
         }
     }
     else
@@ -1895,7 +2017,9 @@ ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_hi
         {
             add_history_menu_item(file_browser, GTK_WIDGET(menu), l);
             if (!has_items)
+            {
                 has_items = true;
+            }
         }
     }
     if (has_items)
@@ -1904,7 +2028,9 @@ ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_hi
         gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
     }
     else
+    {
         gtk_widget_destroy(menu);
+    }
 }
 
 static bool
@@ -1921,8 +2047,10 @@ on_folder_content_changed(vfs::file_info file, PtkFileBrowser* file_browser)
     {
         // The current directory itself changed
         if (!std::filesystem::is_directory(ptk_file_browser_get_cwd(file_browser)))
+        {
             // current directory does not exist - was renamed
             on_close_notebook_page(nullptr, file_browser);
+        }
     }
     else
     {
@@ -2000,7 +2128,9 @@ ptk_file_browser_update_model(PtkFileBrowser* file_browser)
     GtkTreeModel* old_list = file_browser->file_list;
     file_browser->file_list = GTK_TREE_MODEL(list);
     if (old_list)
+    {
         g_object_unref(G_OBJECT(old_list));
+    }
 
     ptk_file_browser_read_sort_extra(file_browser); // sfm
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
@@ -2061,12 +2191,16 @@ on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
     file_browser->run_event<EventType::CHANGE_SEL>();
 
     if (file_browser->side_dir)
+    {
         ptk_dir_tree_view_chdir(GTK_TREE_VIEW(file_browser->side_dir),
                                 ptk_file_browser_get_cwd(file_browser));
+    }
 
     if (file_browser->side_dev)
+    {
         ptk_location_view_chdir(GTK_TREE_VIEW(file_browser->side_dev),
                                 ptk_file_browser_get_cwd(file_browser));
+    }
 
     // FIXME:  This is already done in update_model, but is there any better way to
     //            reduce unnecessary code?
@@ -2088,7 +2222,9 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, std::string_view path)
     const std::string cwd = ptk_file_browser_get_cwd(file_browser);
     const std::string canon = std::filesystem::canonical(path);
     if (ztd::same(canon, cwd) || ztd::same(canon, path))
+    {
         return;
+    }
 
     if (std::filesystem::is_directory(canon))
     {
@@ -2120,7 +2256,9 @@ const std::string
 ptk_file_browser_get_cwd(PtkFileBrowser* file_browser)
 {
     if (!file_browser->curHistory)
+    {
         return vfs::user_dirs->home_dir();
+    }
     return (const char*)file_browser->curHistory->data;
 }
 
@@ -2131,7 +2269,9 @@ ptk_file_browser_go_back(GtkWidget* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
     /* there is no back history */
     if (!file_browser->curHistory || !file_browser->curHistory->prev)
+    {
         return;
+    }
     const char* path = (const char*)file_browser->curHistory->prev->data;
     ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_BACK);
 }
@@ -2143,7 +2283,9 @@ ptk_file_browser_go_forward(GtkWidget* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
     /* If there is no forward history */
     if (!file_browser->curHistory || !file_browser->curHistory->next)
+    {
         return;
+    }
     const char* path = (const char*)file_browser->curHistory->next->data;
     ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_FORWARD);
 }
@@ -2155,7 +2297,9 @@ ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
     const std::string parent_dir = Glib::path_get_dirname(ptk_file_browser_get_cwd(file_browser));
     if (!ztd::same(parent_dir, ptk_file_browser_get_cwd(file_browser)))
+    {
         ptk_file_browser_chdir(file_browser, parent_dir, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    }
 }
 
 void
@@ -2175,13 +2319,19 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
     const char* path = xset_get_s(XSetName::GO_SET_DEFAULT);
     if (path && path[0] != '\0')
+    {
         ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    }
     else if (geteuid() != 0)
+    {
         ptk_file_browser_chdir(file_browser,
                                vfs::user_dirs->home_dir(),
                                PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    }
     else
+    {
         ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    }
 }
 
 void
@@ -2246,16 +2396,24 @@ invert_selection(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* it,
         case PtkFBViewMode::PTK_FB_ICON_VIEW:
         case PtkFBViewMode::PTK_FB_COMPACT_VIEW:
             if (exo_icon_view_path_is_selected(EXO_ICON_VIEW(file_browser->folder_view), path))
+            {
                 exo_icon_view_unselect_path(EXO_ICON_VIEW(file_browser->folder_view), path);
+            }
             else
+            {
                 exo_icon_view_select_path(EXO_ICON_VIEW(file_browser->folder_view), path);
+            }
             break;
         case PtkFBViewMode::PTK_FB_LIST_VIEW:
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
             if (gtk_tree_selection_path_is_selected(tree_sel, path))
+            {
                 gtk_tree_selection_unselect_path(tree_sel, path);
+            }
             else
+            {
                 gtk_tree_selection_select_path(tree_sel, path);
+            }
             break;
         default:
             break;
@@ -2330,7 +2488,9 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     const char* key;
 
     if (search_key)
+    {
         key = search_key;
+    }
     else
     {
         // get pattern from user  (store in ob1 so it is not saved)
@@ -2348,7 +2508,9 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             false);
 
         if (!response || !set->ob1)
+        {
             return;
+        }
         key = set->ob1;
     }
 
@@ -2400,12 +2562,16 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             // get file
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (!file)
+            {
                 continue;
+            }
 
             // test name
             std::string name = file->get_disp_name();
             if (icase)
+            {
                 name = ztd::lower(name);
+            }
 
             const bool select = ztd::fnmatch(key, name);
 
@@ -2423,11 +2589,15 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                                                        path))
                     {
                         if (!select)
+                        {
                             exo_icon_view_unselect_path(EXO_ICON_VIEW(file_browser->folder_view),
                                                         path);
+                        }
                     }
                     else if (select)
+                    {
                         exo_icon_view_select_path(EXO_ICON_VIEW(file_browser->folder_view), path);
+                    }
 
                     // scroll to first and set cursor
                     if (first_select && select)
@@ -2449,10 +2619,14 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                     if (gtk_tree_selection_path_is_selected(tree_sel, path))
                     {
                         if (!select)
+                        {
                             gtk_tree_selection_unselect_path(tree_sel, path);
+                        }
                     }
                     else if (select)
+                    {
                         gtk_tree_selection_select_path(tree_sel, path);
+                    }
 
                     // scroll to first and set cursor
                     if (first_select && select)
@@ -2519,9 +2693,13 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
     if (!filename || !*filename)
     {
         if (do_select)
+        {
             ptk_file_browser_select_all(nullptr, file_browser);
+        }
         else
+        {
             ptk_file_browser_unselect_all(nullptr, file_browser);
+        }
         return;
     }
 
@@ -2566,7 +2744,9 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
             // get file
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (!file)
+            {
                 continue;
+            }
 
             // test name
             const std::string name = file->get_disp_name();
@@ -2574,13 +2754,19 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
             while (*test_name)
             {
                 if (ztd::same(*test_name, name))
+                {
                     break;
+                }
                 test_name++;
             }
             if (*test_name)
+            {
                 select = do_select;
+            }
             else
+            {
                 select = !do_select;
+            }
 
             // do selection and scroll to first selected
             GtkTreePath* path = gtk_tree_model_get_path(
@@ -2596,11 +2782,15 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                                                        path))
                     {
                         if (!select)
+                        {
                             exo_icon_view_unselect_path(EXO_ICON_VIEW(file_browser->folder_view),
                                                         path);
+                        }
                     }
                     else if (select && do_select)
+                    {
                         exo_icon_view_select_path(EXO_ICON_VIEW(file_browser->folder_view), path);
+                    }
 
                     // scroll to first and set cursor
                     if (first_select && select && do_select)
@@ -2622,10 +2812,14 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                     if (gtk_tree_selection_path_is_selected(tree_sel, path))
                     {
                         if (!select)
+                        {
                             gtk_tree_selection_unselect_path(tree_sel, path);
+                        }
                     }
                     else if (select && do_select)
+                    {
                         gtk_tree_selection_select_path(tree_sel, path);
+                    }
 
                     // scroll to first and set cursor
                     if (first_select && select && do_select)
@@ -2744,7 +2938,9 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
     ptk_file_browser_unselect_all(nullptr, file_browser);
 
     if (seek_name.empty())
+    {
         return;
+    }
 
     // get model, treesel, and stop signals
     GtkTreeModel* model;
@@ -2798,7 +2994,9 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
             // get file
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (!file)
+            {
                 continue;
+            }
 
             // test name
             const std::string name = file->get_disp_name();
@@ -2814,7 +3012,9 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
                 if (file->is_directory())
                 {
                     if (!it_dir.stamp)
+                    {
                         it_dir = it;
+                    }
                 }
                 else if (!it_file.stamp)
                 {
@@ -2825,9 +3025,13 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
     }
 
     if (it_dir.stamp)
+    {
         it = it_dir;
+    }
     else
+    {
         it = it_file;
+    }
     if (!it.stamp)
     {
         ptk_file_browser_restore_sig(file_browser, tree_sel);
@@ -2913,7 +3117,9 @@ static bool
 on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
 {
     if (!GTK_IS_WIDGET(file_browser))
+    {
         return false;
+    }
 
     file_browser->n_sel_files = 0;
     file_browser->sel_size = 0;
@@ -2956,7 +3162,9 @@ on_folder_view_item_sel_change(ExoIconView* iconview, PtkFileBrowser* file_brows
      * So add only one g_idle_add at a time
      */
     if (file_browser->sel_change_idle)
+    {
         return;
+    }
 
     file_browser->sel_change_idle =
         g_idle_add((GSourceFunc)on_folder_view_item_sel_change_idle, file_browser);
@@ -3003,12 +3211,18 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
                                          dir_name ? dir_name : cwd.data(),
                                          sel_files);
     if (popup)
+    {
         gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
+    }
     if (file)
+    {
         vfs_file_info_unref(file);
+    }
 
     if (dir_name)
+    {
         free(dir_name);
+    }
 }
 
 /* invoke popup menu via shortcut key */
@@ -3031,7 +3245,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
     bool ret = false;
 
     if (file_browser->menu_shown)
+    {
         file_browser->menu_shown = false;
+    }
 
     if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
@@ -3058,9 +3274,13 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
             event->button == 9) // sfm
         {
             if (event->button == 4 || event->button == 8)
+            {
                 ptk_file_browser_go_back(nullptr, file_browser);
+            }
             else
+            {
                 ptk_file_browser_go_forward(nullptr, file_browser);
+            }
             return true;
         }
 
@@ -3070,9 +3290,13 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
             (event->button == 1 || event->button == 3)) // sfm
         {
             if (event->button == 1)
+            {
                 ptk_file_browser_go_back(nullptr, file_browser);
+            }
             else
+            {
                 ptk_file_browser_go_forward(nullptr, file_browser);
+            }
             return true;
         }
 
@@ -3086,7 +3310,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
 
                 /* deselect selected files when right click on blank area */
                 if (!tree_path && event->button == 3)
+                {
                     exo_icon_view_unselect_all(EXO_ICON_VIEW(widget));
+                }
                 break;
             case PtkFBViewMode::PTK_FB_LIST_VIEW:
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
@@ -3175,7 +3401,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
             ret = file_browser->menu_shown = true;
         }
         if (file)
+        {
             vfs_file_info_unref(file);
+        }
         gtk_tree_path_free(tree_path);
     }
     else if (event->type == GdkEventType::GDK_2BUTTON_PRESS && event->button == 1)
@@ -3192,22 +3420,28 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
                               0,
                               event->state,
                               true))
+        {
             return true;
+        }
 
         if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        {
             /* set ret true to prevent drag_begin starting in this tab after
              * fuseiso mount.  Why?
              * row_activated occurs before GdkEventType::GDK_2BUTTON_PRESS so use
              * file_browser->button_press to determine if row was already
              * activated or user clicked on non-row */
             ret = true;
+        }
         else if (!app_settings.get_single_click())
+        {
             /* sfm 1.0.6 set skip_release for Icon/Compact to prevent file
              * under cursor being selected when entering dir with double-click.
              * Also see conditional reset of skip_release in
              * ptk_file_browser_chdir(). See also
              * on_folder_view_button_release_event() */
             file_browser->skip_release = true;
+        }
     }
     return ret;
 }
@@ -3224,11 +3458,15 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEventButton* event,
                          GdkModifierType::GDK_MOD1_MASK)))
     {
         if (file_browser->skip_release)
+        {
             file_browser->skip_release = false;
+        }
         // this fixes bug where right-click shows menu and release unselects files
         const bool ret = file_browser->menu_shown && event->button != 1;
         if (file_browser->menu_shown)
+        {
             file_browser->menu_shown = false;
+        }
         return ret;
     }
 
@@ -3289,7 +3527,9 @@ static bool
 on_dir_tree_update_sel(PtkFileBrowser* file_browser)
 {
     if (!file_browser->side_dir)
+    {
         return false;
+    }
     char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_dir));
 
     if (dir_path)
@@ -3299,7 +3539,9 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
             if (ptk_file_browser_chdir(file_browser,
                                        dir_path,
                                        PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
+            {
                 gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), dir_path);
+            }
         }
         free(dir_path);
     }
@@ -3325,14 +3567,22 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
 
     std::string dir_path;
     if (xset_get_s(XSetName::GO_SET_DEFAULT))
+    {
         dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
+    }
     else
+    {
         dir_path = vfs::user_dirs->home_dir();
+    }
 
     if (!std::filesystem::is_directory(dir_path))
+    {
         file_browser->run_event<EventType::OPEN_ITEM>("/", PtkOpenAction::PTK_OPEN_NEW_TAB);
+    }
     else
+    {
         file_browser->run_event<EventType::OPEN_ITEM>(dir_path, PtkOpenAction::PTK_OPEN_NEW_TAB);
+    }
 }
 
 void
@@ -3345,24 +3595,36 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
     if (!std::filesystem::is_directory(dir_path))
     {
         if (xset_get_s(XSetName::GO_SET_DEFAULT))
+        {
             dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
+        }
         else
+        {
             dir_path = vfs::user_dirs->home_dir();
+        }
     }
     if (!std::filesystem::is_directory(dir_path))
+    {
         file_browser->run_event<EventType::OPEN_ITEM>("/", PtkOpenAction::PTK_OPEN_NEW_TAB);
+    }
     else
+    {
         file_browser->run_event<EventType::OPEN_ITEM>(dir_path, PtkOpenAction::PTK_OPEN_NEW_TAB);
+    }
 }
 
 void
 ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_browser)
 {
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_TREE_VIEW(view)))
+    {
         return;
+    }
 
     if (file_browser->view_mode != PtkFBViewMode::PTK_FB_LIST_VIEW)
+    {
         return;
+    }
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
 
@@ -3378,13 +3640,17 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, i);
             if (!col)
+            {
                 return;
+            }
             const char* title = gtk_tree_view_column_get_title(col);
             i32 j;
             for (j = 0; j < 6; ++j)
             {
                 if (ztd::same(title, column_titles.at(j)))
+                {
                     break;
+                }
             }
             if (j != 6)
             {
@@ -3407,22 +3673,30 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
 {
     // user dragged a column to a different position - save positions
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_TREE_VIEW(view)))
+    {
         return;
+    }
 
     if (file_browser->view_mode != PtkFBViewMode::PTK_FB_LIST_VIEW)
+    {
         return;
+    }
 
     for (i32 i = 0; i < 6; ++i)
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(view, i);
         if (!col)
+        {
             return;
+        }
         const char* title = gtk_tree_view_column_get_title(col);
         i32 j;
         for (j = 0; j < 6; ++j)
         {
             if (ztd::same(title, column_titles.at(j)))
+            {
                 break;
+            }
         }
         if (j != 6)
         {
@@ -3449,7 +3723,9 @@ on_folder_view_destroy(GtkTreeView* view, PtkFileBrowser* file_browser)
                                                nullptr,
                                                nullptr);
         if (hand)
+        {
             g_signal_handler_disconnect((void*)view, hand);
+        }
     }
 }
 
@@ -3463,12 +3739,16 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
     bool no_match;
 
     if (col != PTKFileListCol::COL_FILE_NAME)
+    {
         return true;
+    }
 
     gtk_tree_model_get(model, it, col, &name, -1);
 
     if (!name || !key)
+    {
         return true;
+    }
 
     char* lower_key = g_utf8_strdown(key, -1);
     if (ztd::same(lower_key, key))
@@ -3495,15 +3775,25 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
             start = true;
         }
         if (end)
+        {
             key2[std::strlen(key2) - 1] = '\0';
+        }
         if (start && end)
+        {
             no_match = !ztd::contains(name, keyp);
+        }
         else if (start)
+        {
             no_match = !ztd::startswith(name, keyp);
+        }
         else if (end)
+        {
             no_match = !ztd::endswith(name, keyp);
+        }
         else
+        {
             no_match = !ztd::contains(name, key);
+        }
         free(key2);
     }
     free(lower_name);
@@ -3662,7 +3952,9 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
             gtk_tree_selection_set_mode(tree_sel, GtkSelectionMode::GTK_SELECTION_MULTIPLE);
 
             if (xset_get_b(XSetName::RUBBERBAND))
+            {
                 gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(folder_view), true);
+            }
 
             // Search
             gtk_tree_view_set_enable_search(GTK_TREE_VIEW(folder_view), true);
@@ -3805,7 +4097,9 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         for (j = 0; j < cols.size(); ++j)
         {
             if (xset_get_int_panel(p, column_names.at(j), XSetVar::X) == INT(i))
+            {
                 break;
+            }
         }
         if (j == cols.size())
         { // failsafe
@@ -3847,7 +4141,9 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                         {
                             const i32 first_width = gtk_tree_view_column_get_width(first_col);
                             if (first_width > 10)
+                            {
                                 gtk_tree_view_column_set_fixed_width(first_col, first_width - 6);
+                            }
                         }
                     }
                 }
@@ -3896,7 +4192,9 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         }
 
         if (cols.at(j) == PTKFileListCol::COL_FILE_SIZE)
+        {
             gtk_cell_renderer_set_alignment(renderer, 1, 0.5);
+        }
 
         gtk_tree_view_column_pack_start(col, renderer, true);
         gtk_tree_view_column_set_attributes(col, renderer, "text", cols.at(j), nullptr);
@@ -3913,8 +4211,10 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     if (file_browser->busy)
+    {
         // a dir is already loading
         return;
+    }
 
     if (!std::filesystem::is_directory(ptk_file_browser_get_cwd(file_browser)))
     {
@@ -3990,7 +4290,9 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         on_dir_file_listed(file_browser, false);
         if (std::filesystem::exists(cursor_path))
+        {
             ptk_file_browser_select_file(file_browser, cursor_path);
+        }
         file_browser->busy = false;
     }
     else
@@ -4087,7 +4389,9 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
                 }
             }
             else
+            {
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(file_browser->folder_view));
+            }
             break;
         default:
             break;
@@ -4096,7 +4400,9 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
     if (tree_path)
     {
         if (!gtk_tree_model_get_iter(model, &it, tree_path))
+        {
             return nullptr;
+        }
 
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
         if (file)
@@ -4222,9 +4528,13 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 {
                     std::string file_path;
                     if (**puri == '/')
+                    {
                         file_path = *puri;
+                    }
                     else
+                    {
                         file_path = Glib::filename_from_uri(*puri);
+                    }
 
                     file_list.emplace_back(file_path);
                 }
@@ -4339,19 +4649,27 @@ on_folder_view_auto_scroll(GtkScrolledWindow* scroll)
     {
         vpos -= gtk_adjustment_get_step_increment(vadj);
         if (vpos > gtk_adjustment_get_lower(vadj))
+        {
             gtk_adjustment_set_value(vadj, vpos);
+        }
         else
+        {
             gtk_adjustment_set_value(vadj, gtk_adjustment_get_lower(vadj));
+        }
     }
     else
     {
         vpos += gtk_adjustment_get_step_increment(vadj);
         if ((vpos + gtk_adjustment_get_page_size(vadj)) < gtk_adjustment_get_upper(vadj))
+        {
             gtk_adjustment_set_value(vadj, vpos);
+        }
         else
+        {
             gtk_adjustment_set_value(
                 vadj,
                 (gtk_adjustment_get_upper(vadj) - gtk_adjustment_get_page_size(vadj)));
+        }
     }
     return true;
 }
@@ -4472,7 +4790,9 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
     }
 
     if (tree_path)
+    {
         gtk_tree_path_free(tree_path);
+    }
 
     /* FIXME: Creating a new target list everytime is very inefficient,
          but currently gtk_drag_dest_get_target_list always returns nullptr
@@ -4482,23 +4802,32 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
     gtk_target_list_unref(target_list);
 
     if (target == GDK_NONE)
+    {
         gdk_drag_status(drag_context, (GdkDragAction)0, time);
+    }
     else
     {
         GdkDragAction suggested_action;
         /* Only 'move' is available. The user force move action by pressing Shift key */
         if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
             GdkDragAction::GDK_ACTION_MOVE)
+        {
             suggested_action = GdkDragAction::GDK_ACTION_MOVE;
-        /* Only 'copy' is available. The user force copy action by pressing Ctrl key */
+            /* Only 'copy' is available. The user force copy action by pressing Ctrl key */
+        }
         else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
                  GdkDragAction::GDK_ACTION_COPY)
+        {
             suggested_action = GdkDragAction::GDK_ACTION_COPY;
-        /* Only 'link' is available. The user force link action by pressing Shift+Ctrl key */
+            /* Only 'link' is available. The user force link action by pressing Shift+Ctrl key */
+        }
         else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
                  GdkDragAction::GDK_ACTION_LINK)
+        {
             suggested_action = GdkDragAction::GDK_ACTION_LINK;
-        /* Several different actions are available. We have to figure out a good default action. */
+            /* Several different actions are available. We have to figure out a good default action.
+             */
+        }
         else
         {
             const i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
@@ -4597,10 +4926,14 @@ ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
                                        std::string_view cwd)
 {
     if (!file_browser)
+    {
         return;
+    }
 
     if (sel_files.empty())
+    {
         return;
+    }
 
     gtk_widget_grab_focus(file_browser->folder_view);
     gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
@@ -4614,7 +4947,9 @@ ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
                              false,
                              PtkRenameMode::PTK_RENAME,
                              nullptr))
+        {
             break;
+        }
     }
 }
 
@@ -4645,7 +4980,9 @@ ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser)
     std::vector<vfs::file_info> file_list;
     GList* sel_files = folder_view_get_selected_items(file_browser, &model);
     if (!sel_files)
+    {
         return file_list;
+    }
 
     for (GList* sel = sel_files; sel; sel = g_list_next(sel))
     {
@@ -4681,7 +5018,9 @@ void
 ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser)
 {
     if (xset_opener(file_browser, 1))
+    {
         return;
+    }
     ptk_file_browser_open_selected_files_with_app(file_browser);
 }
 
@@ -4690,88 +5029,162 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                          std::string_view cwd, XSetName setname)
 {
     if (!file_browser)
+    {
         return;
+    }
 
     char* copy_dest = nullptr;
     char* move_dest = nullptr;
 
     if (setname == XSetName::COPY_TAB_PREV)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_control_code_prev);
+    }
     else if (setname == XSetName::COPY_TAB_NEXT)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_control_code_next);
+    }
     else if (setname == XSetName::COPY_TAB_1)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_1);
+    }
     else if (setname == XSetName::COPY_TAB_2)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_2);
+    }
     else if (setname == XSetName::COPY_TAB_3)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_3);
+    }
     else if (setname == XSetName::COPY_TAB_4)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_4);
+    }
     else if (setname == XSetName::COPY_TAB_5)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_5);
+    }
     else if (setname == XSetName::COPY_TAB_6)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_6);
+    }
     else if (setname == XSetName::COPY_TAB_7)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_7);
+    }
     else if (setname == XSetName::COPY_TAB_8)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_8);
+    }
     else if (setname == XSetName::COPY_TAB_9)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_9);
+    }
     else if (setname == XSetName::COPY_TAB_10)
+    {
         copy_dest = main_window_get_tab_cwd(file_browser, tab_10);
+    }
     else if (setname == XSetName::COPY_PANEL_PREV)
+    {
         copy_dest = main_window_get_panel_cwd(file_browser, panel_control_code_prev);
+    }
     else if (setname == XSetName::COPY_PANEL_NEXT)
+    {
         copy_dest = main_window_get_panel_cwd(file_browser, panel_control_code_next);
+    }
     else if (setname == XSetName::COPY_PANEL_1)
+    {
         copy_dest = main_window_get_panel_cwd(file_browser, panel_1);
+    }
     else if (setname == XSetName::COPY_PANEL_2)
+    {
         copy_dest = main_window_get_panel_cwd(file_browser, panel_2);
+    }
     else if (setname == XSetName::COPY_PANEL_3)
+    {
         copy_dest = main_window_get_panel_cwd(file_browser, panel_3);
+    }
     else if (setname == XSetName::COPY_PANEL_4)
+    {
         copy_dest = main_window_get_panel_cwd(file_browser, panel_4);
+    }
     else if (setname == XSetName::COPY_LOC_LAST)
     {
         xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
         copy_dest = ztd::strdup(set2->desc);
     }
     else if (setname == XSetName::MOVE_TAB_PREV)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_control_code_prev);
+    }
     else if (setname == XSetName::MOVE_TAB_NEXT)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_control_code_next);
+    }
     else if (setname == XSetName::MOVE_TAB_1)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_1);
+    }
     else if (setname == XSetName::MOVE_TAB_2)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_2);
+    }
     else if (setname == XSetName::MOVE_TAB_3)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_3);
+    }
     else if (setname == XSetName::MOVE_TAB_4)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_4);
+    }
     else if (setname == XSetName::MOVE_TAB_5)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_5);
+    }
     else if (setname == XSetName::MOVE_TAB_6)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_6);
+    }
     else if (setname == XSetName::MOVE_TAB_7)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_7);
+    }
     else if (setname == XSetName::MOVE_TAB_8)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_8);
+    }
     else if (setname == XSetName::MOVE_TAB_9)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_9);
+    }
     else if (setname == XSetName::MOVE_TAB_10)
+    {
         move_dest = main_window_get_tab_cwd(file_browser, tab_10);
+    }
     else if (setname == XSetName::MOVE_PANEL_PREV)
+    {
         move_dest = main_window_get_panel_cwd(file_browser, panel_control_code_prev);
+    }
     else if (setname == XSetName::MOVE_PANEL_NEXT)
+    {
         move_dest = main_window_get_panel_cwd(file_browser, panel_control_code_next);
+    }
     else if (setname == XSetName::MOVE_PANEL_1)
+    {
         move_dest = main_window_get_panel_cwd(file_browser, panel_1);
+    }
     else if (setname == XSetName::MOVE_PANEL_2)
+    {
         move_dest = main_window_get_panel_cwd(file_browser, panel_2);
+    }
     else if (setname == XSetName::MOVE_PANEL_3)
+    {
         move_dest = main_window_get_panel_cwd(file_browser, panel_3);
+    }
     else if (setname == XSetName::MOVE_PANEL_4)
+    {
         move_dest = main_window_get_panel_cwd(file_browser, panel_4);
+    }
     else if (setname == XSetName::MOVE_LOC_LAST)
     {
         xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
@@ -4785,9 +5198,13 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         std::string folder;
         xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
         if (set2->desc)
+        {
             folder = set2->desc;
+        }
         else
+        {
             folder = cwd;
+        }
         char* path = xset_file_dialog(GTK_WIDGET(file_browser),
                                       GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                       "Choose Location",
@@ -4796,9 +5213,13 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         if (path && std::filesystem::is_directory(path))
         {
             if (setname == XSetName::COPY_LOC || setname == XSetName::COPY_LOC_LAST)
+            {
                 copy_dest = path;
+            }
             else
+            {
                 move_dest = path;
+            }
             set2 = xset_get(XSetName::COPY_LOC_LAST);
             xset_set_var(set2, XSetVar::DESC, path);
         }
@@ -4879,7 +5300,9 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
         ".hidden file in your text editor, remove the name of the file, and refresh.");
 
     if (response != GtkResponseType::GTK_RESPONSE_OK)
+    {
         return;
+    }
 
     if (sel_files.empty())
     {
@@ -4892,9 +5315,11 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
     for (vfs::file_info file : sel_files)
     {
         if (!vfs_dir_add_hidden(cwd, file->get_name()))
+        {
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            "Error hiding files");
+        }
     }
 
     // refresh from here causes a segfault occasionally
@@ -4905,7 +5330,9 @@ void
 ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page)
 {
     if (!file_browser)
+    {
         return;
+    }
 
     std::string dir_name;
     std::vector<vfs::file_info> sel_files = ptk_file_browser_get_selected_files(file_browser);
@@ -4938,7 +5365,9 @@ void
 ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show)
 {
     if (!!file_browser->show_hidden_files == show)
+    {
         return;
+    }
     file_browser->show_hidden_files = show;
 
     if (file_browser->file_list)
@@ -4973,7 +5402,9 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
                           evt->button,
                           evt->state,
                           true))
+    {
         return false;
+    }
 
     if (evt->type == GdkEventType::GDK_BUTTON_PRESS && evt->button == 2) /* middle click */
     {
@@ -5063,7 +5494,9 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
     if (!list)
+    {
         return;
+    }
 
     list->sort_alphanum = xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA);
 #if 0
@@ -5082,16 +5515,22 @@ void
 ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname)
 {
     if (!file_browser)
+    {
         return;
+    }
 
     xset_t set = xset_get(setname);
 
     if (!ztd::startswith(set->name, "sortx_"))
+    {
         return;
+    }
 
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
     if (!list)
+    {
         return;
+    }
     const panel_t panel = file_browser->mypanel;
 
     if (set->xset_name == XSetName::SORTX_ALPHANUM)
@@ -5156,7 +5595,9 @@ void
 ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser, PtkFBSortOrder order)
 {
     if (order == file_browser->sort_order)
+    {
         return;
+    }
 
     file_browser->sort_order = order;
     const i32 col = file_list_order_from_sort_order(order);
@@ -5194,7 +5635,9 @@ void
 ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser)
 {
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW && file_browser->folder_view)
+    {
         return;
+    }
 
     show_thumbnails(file_browser,
                     PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
@@ -5203,7 +5646,9 @@ ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser)
 
     file_browser->view_mode = PtkFBViewMode::PTK_FB_ICON_VIEW;
     if (file_browser->folder_view)
+    {
         gtk_widget_destroy(file_browser->folder_view);
+    }
     file_browser->folder_view = create_folder_view(file_browser, PtkFBViewMode::PTK_FB_ICON_VIEW);
     exo_icon_view_set_model(EXO_ICON_VIEW(file_browser->folder_view), file_browser->file_list);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll),
@@ -5218,7 +5663,9 @@ void
 ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser)
 {
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_COMPACT_VIEW && file_browser->folder_view)
+    {
         return;
+    }
 
     show_thumbnails(file_browser,
                     PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
@@ -5227,7 +5674,9 @@ ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser)
 
     file_browser->view_mode = PtkFBViewMode::PTK_FB_COMPACT_VIEW;
     if (file_browser->folder_view)
+    {
         gtk_widget_destroy(file_browser->folder_view);
+    }
     file_browser->folder_view =
         create_folder_view(file_browser, PtkFBViewMode::PTK_FB_COMPACT_VIEW);
     exo_icon_view_set_model(EXO_ICON_VIEW(file_browser->folder_view), file_browser->file_list);
@@ -5242,7 +5691,9 @@ void
 ptk_file_browser_view_as_list(PtkFileBrowser* file_browser)
 {
     if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW && file_browser->folder_view)
+    {
         return;
+    }
 
     show_thumbnails(file_browser,
                     PTK_FILE_LIST_REINTERPRET(file_browser->file_list),
@@ -5251,7 +5702,9 @@ ptk_file_browser_view_as_list(PtkFileBrowser* file_browser)
 
     file_browser->view_mode = PtkFBViewMode::PTK_FB_LIST_VIEW;
     if (file_browser->folder_view)
+    {
         gtk_widget_destroy(file_browser->folder_view);
+    }
     file_browser->folder_view = create_folder_view(file_browser, PtkFBViewMode::PTK_FB_LIST_VIEW);
     gtk_tree_view_set_model(GTK_TREE_VIEW(file_browser->folder_view), file_browser->file_list);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll),
@@ -5265,9 +5718,13 @@ u32
 ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size, u64* sel_disk_size)
 {
     if (sel_size)
+    {
         *sel_size = file_browser->sel_size;
+    }
     if (sel_disk_size)
+    {
         *sel_disk_size = file_browser->sel_disk_size;
+    }
     return file_browser->n_sel_files;
 }
 
@@ -5316,9 +5773,13 @@ show_thumbnails(PtkFileBrowser* file_browser, PtkFileList* list, bool is_big, i3
     /* This function collects all calls to ptk_file_list_show_thumbnails()
      * and disables them if change detection is blacklisted on current device */
     if (!(file_browser && file_browser->dir))
+    {
         max_file_size = 0;
+    }
     else if (file_browser->dir->avoid_changes)
+    {
         max_file_size = 0;
+    }
     ptk_file_list_show_thumbnails(list, is_big, max_file_size);
     ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_THUMB);
 }
@@ -5340,7 +5801,9 @@ void
 ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_click)
 {
     if (single_click == file_browser->single_click)
+    {
         return;
+    }
 
     switch (file_browser->view_mode)
     {
@@ -5363,7 +5826,9 @@ void
 ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, u32 timeout)
 {
     if (timeout == file_browser->single_click_timeout)
+    {
         return;
+    }
 
     switch (file_browser->view_mode)
     {
@@ -5403,9 +5868,13 @@ ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 job2
     GtkWidget* widget;
     i32 job;
     if (item)
+    {
         job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    }
     else
+    {
         job = job2;
+    }
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
@@ -5448,7 +5917,9 @@ ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 job2
             return;
     }
     if (gtk_widget_get_visible(widget))
+    {
         gtk_widget_grab_focus(GTK_WIDGET(widget));
+    }
 }
 
 static void
@@ -5472,27 +5943,39 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 t)
     GtkWidget* notebook = file_browser->mynotebook;
     tab_t tab_num;
     if (item)
+    {
         tab_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tab_num"));
+    }
     else
+    {
         tab_num = t;
+    }
 
     switch (tab_num)
     {
         case tab_control_code_prev:
             // prev
             if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) == 0)
+            {
                 gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook),
                                               gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) - 1);
+            }
             else
+            {
                 gtk_notebook_prev_page(GTK_NOTEBOOK(notebook));
+            }
             break;
         case tab_control_code_next:
             // next
             if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) + 1 ==
                 gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)))
+            {
                 gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), 0);
+            }
             else
+            {
                 gtk_notebook_next_page(GTK_NOTEBOOK(notebook));
+            }
             break;
         case tab_control_code_close:
             // close
@@ -5505,7 +5988,9 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 t)
         default:
             // set tab
             if (tab_num <= gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) && tab_num > 0)
+            {
                 gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), tab_num - 1);
+            }
             break;
     }
 }
@@ -5548,11 +6033,15 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
                                const std::vector<vfs::file_info>& sel_files, std::string_view cwd)
 {
     if (sel_files.empty())
+    {
         return;
+    }
 
     xset_t set = XSET(g_object_get_data(G_OBJECT(item), "set"));
     if (!set || !file_browser)
+    {
         return;
+    }
 
     std::string name;
     std::string prog;
@@ -5566,17 +6055,25 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     {
         name = ztd::removeprefix(set->name, "perm_");
         if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
+        {
             prog = "chmod -R";
+        }
         else
+        {
             prog = "chmod";
+        }
     }
     else if (ztd::startswith(set->name, "rperm_"))
     {
         name = ztd::removeprefix(set->name, "rperm_");
         if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
+        {
             prog = "chmod -R";
+        }
         else
+        {
             prog = "chmod";
+        }
         as_root = true;
     }
     else if (ztd::startswith(set->name, "own_"))
@@ -5598,73 +6095,141 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
 
     std::string cmd;
     if (ztd::same(name, "r"))
+    {
         cmd = "u+r-wx,go-rwx";
+    }
     else if (ztd::same(name, "rw"))
+    {
         cmd = "u+rw-x,go-rwx";
+    }
     else if (ztd::same(name, "rwx"))
+    {
         cmd = "u+rwx,go-rwx";
+    }
     else if (ztd::same(name, "r_r"))
+    {
         cmd = "u+r-wx,g+r-wx,o-rwx";
+    }
     else if (ztd::same(name, "rw_r"))
+    {
         cmd = "u+rw-x,g+r-wx,o-rwx";
+    }
     else if (ztd::same(name, "rw_rw"))
+    {
         cmd = "u+rw-x,g+rw-x,o-rwx";
+    }
     else if (ztd::same(name, "rwxr_x"))
+    {
         cmd = "u+rwx,g+rx-w,o-rwx";
+    }
     else if (ztd::same(name, "rwxrwx"))
+    {
         cmd = "u+rwx,g+rwx,o-rwx";
+    }
     else if (ztd::same(name, "r_r_r"))
+    {
         cmd = "ugo+r,ugo-wx";
+    }
     else if (ztd::same(name, "rw_r_r"))
+    {
         cmd = "u+rw-x,go+r-wx";
+    }
     else if (ztd::same(name, "rw_rw_rw"))
+    {
         cmd = "ugo+rw-x";
+    }
     else if (ztd::same(name, "rwxr_r"))
+    {
         cmd = "u+rwx,go+r-wx";
+    }
     else if (ztd::same(name, "rwxr_xr_x"))
+    {
         cmd = "u+rwx,go+rx-w";
+    }
     else if (ztd::same(name, "rwxrwxrwx"))
+    {
         cmd = "ugo+rwx,-t";
+    }
     else if (ztd::same(name, "rwxrwxrwt"))
+    {
         cmd = "ugo+rwx,+t";
+    }
     else if (ztd::same(name, "unstick"))
+    {
         cmd = "-t";
+    }
     else if (ztd::same(name, "stick"))
+    {
         cmd = "+t";
+    }
     else if (ztd::same(name, "go_w"))
+    {
         cmd = "go-w";
+    }
     else if (ztd::same(name, "go_rwx"))
+    {
         cmd = "go-rwx";
+    }
     else if (ztd::same(name, "ugo_w"))
+    {
         cmd = "ugo+w";
+    }
     else if (ztd::same(name, "ugo_rx"))
+    {
         cmd = "ugo+rX";
+    }
     else if (ztd::same(name, "ugo_rwx"))
+    {
         cmd = "ugo+rwX";
+    }
     else if (ztd::same(name, "myuser"))
+    {
         cmd = fmt::format("{}:{}", myuser, myuser);
+    }
     else if (ztd::same(name, "myuser_users"))
+    {
         cmd = fmt::format("{}:users", myuser);
+    }
     else if (ztd::same(name, "user1"))
+    {
         cmd = fmt::format("{}:{}", user1, user1);
+    }
     else if (ztd::same(name, "user1_users"))
+    {
         cmd = fmt::format("{}:users", user1);
+    }
     else if (ztd::same(name, "user2"))
+    {
         cmd = fmt::format("{}:{}", user2, user2);
+    }
     else if (ztd::same(name, "user2_users"))
+    {
         cmd = fmt::format("{}:users", user2);
+    }
     else if (ztd::same(name, "root"))
+    {
         cmd = "root:root";
+    }
     else if (ztd::same(name, "root_users"))
+    {
         cmd = "root:users";
+    }
     else if (ztd::same(name, "root_myuser"))
+    {
         cmd = fmt::format("root:{}", myuser);
+    }
     else if (ztd::same(name, "root_user1"))
+    {
         cmd = fmt::format("root:{}", user1);
+    }
     else if (ztd::same(name, "root_user2"))
+    {
         cmd = fmt::format("root:{}", user2);
+    }
     else
+    {
         return;
+    }
 
     std::string file_paths;
     for (vfs::file_info file : sel_files)
@@ -5683,7 +6248,9 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     ptask->task->exec_show_output = false;
     ptask->task->exec_export = false;
     if (as_root)
+    {
         ptask->task->exec_as_user = "root";
+    }
     ptk_file_task_run(ptask);
 }
 
@@ -5706,82 +6273,140 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
                                    : nullptr;
             if (text && (std::filesystem::exists(text) || ztd::contains(text, ":/") ||
                          ztd::startswith(text, "//")))
+            {
                 ptk_bookmark_view_add_bookmark(text);
+            }
             else
+            {
                 ptk_bookmark_view_add_bookmark(browser);
+            }
         }
     }
     else if (ztd::startswith(set->name, "go_"))
     {
         if (set->xset_name == XSetName::GO_BACK)
+        {
             ptk_file_browser_go_back(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::GO_FORWARD)
+        {
             ptk_file_browser_go_forward(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::GO_UP)
+        {
             ptk_file_browser_go_up(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::GO_HOME)
+        {
             ptk_file_browser_go_home(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::GO_DEFAULT)
+        {
             ptk_file_browser_go_default(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::GO_SET_DEFAULT)
+        {
             ptk_file_browser_set_default_folder(nullptr, browser);
+        }
     }
     else if (ztd::startswith(set->name, "tab_"))
     {
         if (set->xset_name == XSetName::TAB_NEW)
+        {
             ptk_file_browser_new_tab(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::TAB_NEW_HERE)
+        {
             ptk_file_browser_new_tab_here(nullptr, browser);
+        }
         else
         {
             if (set->xset_name == XSetName::TAB_PREV)
+            {
                 i = tab_control_code_prev;
+            }
             else if (set->xset_name == XSetName::TAB_NEXT)
+            {
                 i = tab_control_code_next;
+            }
             else if (set->xset_name == XSetName::TAB_CLOSE)
+            {
                 i = tab_control_code_close;
+            }
             else if (set->xset_name == XSetName::TAB_RESTORE)
+            {
                 i = tab_control_code_restore;
+            }
             else
+            {
                 i = std::stol(set->name);
+            }
             ptk_file_browser_go_tab(nullptr, browser, i);
         }
     }
     else if (ztd::startswith(set->name, "focus_"))
     {
         if (set->xset_name == XSetName::FOCUS_PATH_BAR)
+        {
             i = 0;
+        }
         else if (set->xset_name == XSetName::FOCUS_FILELIST)
+        {
             i = 4;
+        }
         else if (set->xset_name == XSetName::FOCUS_DIRTREE)
+        {
             i = 1;
+        }
         else if (set->xset_name == XSetName::FOCUS_BOOK)
+        {
             i = 2;
+        }
         else if (set->xset_name == XSetName::FOCUS_DEVICE)
+        {
             i = 3;
+        }
         ptk_file_browser_focus(nullptr, browser, i);
     }
     else if (set->xset_name == XSetName::VIEW_REORDER_COL)
+    {
         on_reorder(nullptr, GTK_WIDGET(browser));
+    }
     else if (set->xset_name == XSetName::VIEW_REFRESH)
+    {
         ptk_file_browser_refresh(nullptr, browser);
+    }
     else if (set->xset_name == XSetName::VIEW_THUMB)
+    {
         main_window_toggle_thumbnails_all_windows();
+    }
     else if (ztd::startswith(set->name, "sortby_"))
     {
         i = -3;
         if (set->xset_name == XSetName::SORTBY_NAME)
+        {
             i = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
+        }
         else if (set->xset_name == XSetName::SORTBY_SIZE)
+        {
             i = PtkFBSortOrder::PTK_FB_SORT_BY_SIZE;
+        }
         else if (set->xset_name == XSetName::SORTBY_TYPE)
+        {
             i = PtkFBSortOrder::PTK_FB_SORT_BY_TYPE;
+        }
         else if (set->xset_name == XSetName::SORTBY_PERM)
+        {
             i = PtkFBSortOrder::PTK_FB_SORT_BY_PERM;
+        }
         else if (set->xset_name == XSetName::SORTBY_OWNER)
+        {
             i = PtkFBSortOrder::PTK_FB_SORT_BY_OWNER;
+        }
         else if (set->xset_name == XSetName::SORTBY_DATE)
+        {
             i = PtkFBSortOrder::PTK_FB_SORT_BY_MTIME;
+        }
         else if (set->xset_name == XSetName::SORTBY_ASCEND)
         {
             i = -1;
@@ -5795,11 +6420,15 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
                                                                             : XSetB::XSET_B_FALSE;
         }
         if (i > 0)
+        {
             set->b = browser->sort_order == i ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
+        }
         on_popup_sortby(nullptr, browser, i);
     }
     else if (ztd::startswith(set->name, "sortx_"))
+    {
         ptk_file_browser_set_sort_extra(browser, set->xset_name);
+    }
     else if (ztd::startswith(set->name, "panel"))
     {
         const i32 panel_num = set->name[5];
@@ -5817,20 +6446,28 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
                     browser,
                     xset_get_b_panel(browser->mypanel, XSetPanel::SHOW_HIDDEN));
             }
-            else if (ztd::same(xname, "show")) // main View|Panel N
+            else if (ztd::same(xname, "show"))
+            { // main View|Panel N
                 show_panels_all_windows(nullptr, MAIN_WINDOW(browser->main_window));
+            }
             else if (ztd::startswith(xname, "show_")) // shared key
             {
                 set2 = xset_get_panel_mode(browser->mypanel, xname, mode);
                 set2->b = set2->b == XSetB::XSET_B_TRUE ? XSetB::XSET_B_UNSET : XSetB::XSET_B_TRUE;
                 update_views_all_windows(nullptr, browser);
             }
-            else if (ztd::same(xname, "list_detailed")) // shared key
+            else if (ztd::same(xname, "list_detailed"))
+            { // shared key
                 on_popup_list_detailed(nullptr, browser);
-            else if (ztd::same(xname, "list_icons")) // shared key
+            }
+            else if (ztd::same(xname, "list_icons"))
+            { // shared key
                 on_popup_list_icons(nullptr, browser);
-            else if (ztd::same(xname, "list_compact")) // shared key
+            }
+            else if (ztd::same(xname, "list_compact"))
+            { // shared key
                 on_popup_list_compact(nullptr, browser);
+            }
             else if (ztd::same(xname, "list_large")) // shared key
             {
                 if (browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
@@ -5853,31 +6490,49 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
     else if (ztd::startswith(set->name, "status_"))
     {
         if (ztd::same(set->name, "status_border") || ztd::same(set->name, "status_text"))
+        {
             on_status_effect_change(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::STATUS_NAME ||
                  set->xset_name == XSetName::STATUS_PATH ||
                  set->xset_name == XSetName::STATUS_INFO || set->xset_name == XSetName::STATUS_HIDE)
+        {
             on_status_middle_click_config(nullptr, set);
+        }
     }
     else if (ztd::startswith(set->name, "paste_"))
     {
         if (set->xset_name == XSetName::PASTE_LINK)
+        {
             ptk_file_browser_paste_link(browser);
+        }
         else if (set->xset_name == XSetName::PASTE_TARGET)
+        {
             ptk_file_browser_paste_target(browser);
+        }
         else if (set->xset_name == XSetName::PASTE_AS)
+        {
             ptk_file_misc_paste_as(browser, ptk_file_browser_get_cwd(browser), nullptr);
+        }
     }
     else if (ztd::startswith(set->name, "select_"))
     {
         if (set->xset_name == XSetName::SELECT_ALL)
+        {
             ptk_file_browser_select_all(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::SELECT_UN)
+        {
             ptk_file_browser_unselect_all(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::SELECT_INVERT)
+        {
             ptk_file_browser_invert_selection(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::SELECT_PATT)
+        {
             ptk_file_browser_select_pattern(nullptr, browser, nullptr);
+        }
     }
     else // all the rest require ptkfilemenu data
     {

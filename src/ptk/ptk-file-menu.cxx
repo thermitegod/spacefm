@@ -122,11 +122,15 @@ PtkFileMenu::PtkFileMenu()
 PtkFileMenu::~PtkFileMenu()
 {
     if (this->file)
+    {
         vfs_file_info_unref(this->file);
+    }
     vfs_file_info_list_free(this->sel_files);
 
     if (this->accel_group)
+    {
         g_object_unref(this->accel_group);
+    }
 }
 
 void
@@ -160,7 +164,9 @@ on_popup_list_detailed(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     {
         if (!xset_get_b_panel(p, XSetPanel::LIST_ICONS) &&
             !xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
+        {
             xset_set_b_panel(p, XSetPanel::LIST_ICONS, true);
+        }
     }
     update_views_all_windows(nullptr, browser);
 }
@@ -181,7 +187,9 @@ on_popup_list_icons(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     {
         if (!xset_get_b_panel(p, XSetPanel::LIST_DETAILED) &&
             !xset_get_b_panel(p, XSetPanel::LIST_COMPACT))
+        {
             xset_set_b_panel(p, XSetPanel::LIST_DETAILED, true);
+        }
     }
     update_views_all_windows(nullptr, browser);
 }
@@ -202,7 +210,9 @@ on_popup_list_compact(GtkMenuItem* menuitem, PtkFileBrowser* browser)
     {
         if (!xset_get_b_panel(p, XSetPanel::LIST_ICONS) &&
             !xset_get_b_panel(p, XSetPanel::LIST_DETAILED))
+        {
             xset_set_b_panel(p, XSetPanel::LIST_DETAILED, true);
+        }
     }
     update_views_all_windows(nullptr, browser);
 }
@@ -212,9 +222,11 @@ on_popup_show_hidden(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 {
     (void)menuitem;
     if (browser)
+    {
         ptk_file_browser_show_hidden_files(
             browser,
             xset_get_b_panel(browser->mypanel, XSetPanel::SHOW_HIDDEN));
+    }
 }
 
 static void
@@ -222,13 +234,21 @@ on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
 {
     xset_t set;
     if (menuitem)
+    {
         set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
+    }
     else
+    {
         set = set2;
+    }
     if (!set)
+    {
         return;
+    }
     if (data->browser)
+    {
         ptk_file_browser_copycmd(data->browser, data->sel_files, data->cwd, set->xset_name);
+    }
 }
 
 static void
@@ -236,11 +256,17 @@ on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
 {
     xset_t set;
     if (menuitem)
+    {
         set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
+    }
     else
+    {
         set = set2;
+    }
     if (set)
+    {
         ptk_file_misc_rootcmd(data->browser, data->sel_files, data->cwd, set->name);
+    }
 }
 
 static void
@@ -248,7 +274,9 @@ on_popup_select_pattern(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->browser)
+    {
         ptk_file_browser_select_pattern(nullptr, data->browser, nullptr);
+    }
 }
 
 static void
@@ -256,7 +284,9 @@ on_open_in_tab(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     const tab_t tab_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "tab_num"));
     if (data->browser)
+    {
         ptk_file_browser_open_in_tab(data->browser, tab_num, data->file_path);
+    }
 }
 
 static void
@@ -265,7 +295,9 @@ on_open_in_panel(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
     const panel_t panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel_num"));
     if (data->browser)
+    {
         main_window_open_in_panel(data->browser, panel_num, data->file_path);
+    }
 }
 
 static void
@@ -287,9 +319,13 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, xset_t 
 {
     xset_t set;
     if (menuitem)
+    {
         set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
+    }
     else
+    {
         set = set2;
+    }
     ptk_file_browser_set_sort_extra(file_browser, set->xset_name);
 }
 
@@ -300,16 +336,24 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, i32 order)
 
     i32 sort_order;
     if (menuitem)
+    {
         sort_order = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "sortorder"));
+    }
     else
+    {
         sort_order = order;
+    }
 
     if (sort_order < 0)
     {
         if (sort_order == -1)
+        {
             v = GtkSortType::GTK_SORT_ASCENDING;
+        }
         else
+        {
             v = GtkSortType::GTK_SORT_DESCENDING;
+        }
         xset_set_panel(file_browser->mypanel,
                        XSetPanel::LIST_DETAILED,
                        XSetVar::Y,
@@ -388,9 +432,13 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
     for (XSetName arcname : arcnames)
     {
         if (set->xset_name == arcname)
+        {
             set->b = XSetB::XSET_B_TRUE;
+        }
         else
+        {
             xset_set_b(arcname, false);
+        }
     }
 }
 
@@ -406,14 +454,18 @@ on_hide_file(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->browser)
+    {
         ptk_file_browser_hide_selected(data->browser, data->sel_files, data->cwd);
+    }
 }
 
 static void
 on_permission(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     if (data->browser)
+    {
         ptk_file_browser_on_permission(menuitem, data->browser, data->sel_files, data->cwd);
+    }
 }
 
 void
@@ -425,7 +477,9 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     std::string desc;
 
     if (!browser || !menu || !browser->file_list)
+    {
         return;
+    }
     const panel_t p = browser->mypanel;
 
     MainWindow* main_window = MAIN_WINDOW(browser->main_window);
@@ -438,11 +492,15 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_set_cb_panel(p, XSetPanel::SHOW_DEVMON, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DEVMON, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
+    {
         show_side = true;
+    }
     set = xset_set_cb_panel(p, XSetPanel::SHOW_DIRTREE, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
+    {
         show_side = true;
+    }
     set = xset_set_cb_panel(p, XSetPanel::SHOW_SIDEBAR, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode)->b;
     set->disable = !show_side;
@@ -653,7 +711,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     GtkMenuItem* item;
 
     if (!browser)
+    {
         return nullptr;
+    }
 
     const auto data = new PtkFileMenu;
 
@@ -662,9 +722,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
     data->file_path = ztd::strdup(file_path);
     if (file)
+    {
         data->file = vfs_file_info_ref(file);
+    }
     else
+    {
         data->file = nullptr;
+    }
     data->sel_files = sel_files;
 
     data->accel_group = gtk_accel_group_new();
@@ -690,9 +754,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             clip,
             gdk_atom_intern("x-special/gnome-copied-files", false)) &&
         !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
+    {
         is_clip = false;
+    }
     else
+    {
         is_clip = true;
+    }
 
     const panel_t p = browser->mypanel;
 
@@ -720,7 +788,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
     // context
     if (file_path)
+    {
         context->var[ItemPropContext::CONTEXT_NAME] = Glib::path_get_basename(file_path);
+    }
 
     context->var[ItemPropContext::CONTEXT_DIR] = cwd;
     context->var[ItemPropContext::CONTEXT_READ_ACCESS] = no_read_access ? "false" : "true";
@@ -740,7 +810,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     }
 
     if (browser)
+    {
         main_context_fill(browser, context);
+    }
 
     if (!context->valid)
     {
@@ -844,11 +916,17 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
                 // add others
                 if (set_arc_extract)
+                {
                     xset_add_menuitem(browser, submenu, accel_group, set_arc_extract);
+                }
                 if (set_arc_extractto)
+                {
                     xset_add_menuitem(browser, submenu, accel_group, set_arc_extractto);
+                }
                 if (set_arc_list)
+                {
                     xset_add_menuitem(browser, submenu, accel_group, set_arc_list);
+                }
                 xset_add_menuitem(browser, submenu, accel_group, xset_get(XSetName::ARC_DEFAULT));
                 set_arc_extract = nullptr;
 
@@ -905,7 +983,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             vfs::mime_type txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
             const std::vector<std::string> txt_apps = vfs_mime_type_get_actions(txt_type);
             if (!txt_apps.empty())
+            {
                 apps = ztd::merge(apps, txt_apps);
+            }
             vfs_mime_type_unref(txt_type);
         }
         if (!apps.empty())
@@ -926,9 +1006,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                 vfs::desktop desktop = vfs_get_desktop(app);
                 const std::string app_name = desktop->get_disp_name();
                 if (!app_name.empty())
+                {
                     app_menu_item = gtk_menu_item_new_with_label(app_name.data());
+                }
                 else
+                {
                     app_menu_item = gtk_menu_item_new_with_label(app.data());
+                }
 
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
@@ -964,7 +1048,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         // Default
         std::string plain_type;
         if (mime_type)
+        {
             plain_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
+        }
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
         plain_type = fmt::format("open_all_type_{}", plain_type);
@@ -972,11 +1058,15 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set->lock = true;
         set->menu_style = XSetMenu::NORMAL;
         if (set->shared_key)
+        {
             free(set->shared_key);
+        }
         set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
         set2 = xset_get(XSetName::OPEN_ALL);
         if (set->menu_label)
+        {
             free(set->menu_label);
+        }
         set->menu_label = ztd::strdup(set2->menu_label);
         if (set->context)
         {
@@ -985,7 +1075,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
         if (set->menu_label)
+        {
             free(set->menu_label);
+        }
         set->menu_label = nullptr; // do not bother to save this
 
         // Edit / Dir
@@ -1064,7 +1156,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     }
 
     if (mime_type)
+    {
         vfs_mime_type_unref(mime_type);
+    }
 
     // Go >
     if (browser)
@@ -1228,7 +1322,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             set->disable = (tab > tab_count) || (tab == tab_num);
 
             if (tab > 4)
+            {
                 continue;
+            }
 
             const bool b = main_window_panel_is_visible(browser, tab);
 
@@ -1324,9 +1420,13 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set = xset_get(XSetName::CON_PROP);
         std::string desc;
         if (geteuid() == 0)
+        {
             desc = "prop_info prop_perm prop_root";
+        }
         else
+        {
             desc = "prop_info prop_perm prop_quick prop_root";
+        }
         xset_set_var(set, XSetVar::DESC, desc);
         xset_add_menuitem(browser, popup, accel_group, set);
     }
@@ -1346,7 +1446,9 @@ on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     std::vector<vfs::file_info> sel_files = data->sel_files;
 
     if (sel_files.empty())
+    {
         sel_files.emplace_back(data->file);
+    }
 
     ptk_open_files_with_app(data->cwd, sel_files, "", data->browser, true, false);
 }
@@ -1372,13 +1474,17 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     GtkWindow* parent_win = nullptr;
     if (data->browser)
+    {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+    }
     char* app = ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
     if (app)
     {
         std::vector<vfs::file_info> sel_files = data->sel_files;
         if (sel_files.empty())
+        {
             sel_files.emplace_back(data->file);
+        }
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
         free(app);
     }
@@ -1397,11 +1503,15 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (xset_opener(data->browser, 1))
+    {
         return;
+    }
 
     std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
+    {
         sel_files.emplace_back(data->file);
+    }
     ptk_open_files_with_app(data->cwd, sel_files, "", data->browser, false, true);
 }
 
@@ -1418,13 +1528,19 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     // is a file handler
     if (handler_set)
+    {
         app = fmt::format("###{}", handler_set->name);
+    }
     else
+    {
         app = desktop->get_name();
+    }
 
     std::vector<vfs::file_info> sel_files = data->sel_files;
     if (sel_files.empty())
+    {
         sel_files.emplace_back(data->file);
+    }
     ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
 }
 
@@ -1454,7 +1570,9 @@ get_shared_desktop_file_location(std::string_view name)
     {
         const char* ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
         if (ret)
+        {
             return ret;
+        }
     }
     return nullptr;
 }
@@ -1472,16 +1590,22 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     vfs::desktop desktop = vfs_get_desktop(desktop_file);
     if (desktop->get_name().empty())
+    {
         return;
+    }
 
     const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     PtkFileMenu* data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
     if (!(data && data->file))
+    {
         return;
+    }
 
     vfs::mime_type mime_type = data->file->get_mime_type();
     if (!mime_type)
+    {
         mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+    }
 
     switch (job)
     {
@@ -1497,6 +1621,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_mime_type_remove_action(mime_type, desktop->get_name());
             if (!ztd::same(mime_type->type, "text/plain") &&
                 ztd::startswith(mime_type->type, "text/"))
+            {
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
                     GtkMessageType::GTK_MESSAGE_INFO,
@@ -1511,6 +1636,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     "(unless the MIME type is text/plain).  Thus using Remove may not remove "
                     "the application from the Open submenu for this type, unless you also remove "
                     "it from text/plain.");
+            }
             break;
         case PTKFileMenuAppJob::APP_JOB_EDIT:
             path = Glib::build_filename(vfs::user_dirs->data_dir(),
@@ -1520,7 +1646,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             {
                 const char* share_desktop = vfs_mime_type_locate_desktop_file(desktop->get_name());
                 if (!(share_desktop && ztd::same(share_desktop, path)))
+                {
                     return;
+                }
 
                 const std::string msg =
                     fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
@@ -1544,7 +1672,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 command = fmt::format("cp -a  {} {}", share_desktop, path);
                 Glib::spawn_command_line_sync(command);
                 if (!std::filesystem::exists(path))
+                {
                     return;
+                }
             }
             xset_edit(GTK_WIDGET(data->browser), path.data(), false, false);
             break;
@@ -1552,7 +1682,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         {
             const char* desktop_path = get_shared_desktop_file_location(desktop->get_name());
             if (desktop_path)
+            {
                 xset_edit(GTK_WIDGET(data->browser), desktop_path, false, true);
+            }
             break;
         }
         case PTKFileMenuAppJob::APP_JOB_EDIT_LIST:
@@ -1580,11 +1712,15 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // ptk_choose_app_for_mime_type returns either a bare command that
             // was already set as default, or a (custom or shared) desktop file
             if (!str)
+            {
                 break;
+            }
 
             path = str;
             if (ztd::endswith(path, ".desktop") && !ztd::contains(path, "/") && mime_type)
+            {
                 vfs_mime_type_append_action(mime_type->type, path);
+            }
             free(str);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE:
@@ -1593,19 +1729,27 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 
             if (data->browser)
+            {
                 data->browser->run_event<EventType::OPEN_ITEM>(path,
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
+            }
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED:
         {
             const char* desktop_path = get_shared_desktop_file_location(desktop->get_name());
             if (desktop_path)
+            {
                 path = Glib::path_get_dirname(desktop_path);
+            }
             else
+            {
                 path = "/usr/share/applications";
+            }
             if (data->browser)
+            {
                 data->browser->run_event<EventType::OPEN_ITEM>(path,
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
+            }
         }
         break;
         case PTKFileMenuAppJob::APP_JOB_EDIT_TYPE:
@@ -1710,12 +1854,16 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                             if ((str = strstr(str + 2, "<!--Created automatically")))
                             {
                                 if ((str = strstr(str, "-->")))
+                                {
                                     start = str + 4;
+                                }
                             }
                         }
                     }
                     if (start)
+                    {
                         contents = fmt::format("{}\n\n{}</mime-info>\n", msg, start);
+                    }
                 }
 
                 if (contents.empty())
@@ -1728,7 +1876,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 write_file(path, contents);
             }
             if (std::filesystem::exists(path))
+            {
                 xset_edit(GTK_WIDGET(data->browser), path.data(), false, false);
+            }
 
             vfs_dir_monitor_mime();
             break;
@@ -1736,7 +1886,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             str2 = fmt::format("{}.xml", mime_type->type);
             path = Glib::build_filename("/usr/share/mime", str2);
             if (std::filesystem::exists(path))
+            {
                 xset_edit(GTK_WIDGET(data->browser), path.data(), false, true);
+            }
             break;
         case PTKFileMenuAppJob::APP_JOB_VIEW_OVER:
             path = "/usr/share/mime/packages/Overrides.xml";
@@ -1744,16 +1896,20 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME_USR:
             if (data->browser)
+            {
                 data->browser->run_event<EventType::OPEN_ITEM>("/usr/share/mime/packages",
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
+            }
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME:
             path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
+            {
                 data->browser->run_event<EventType::OPEN_ITEM>(path,
                                                                PtkOpenAction::PTK_OPEN_NEW_TAB);
+            }
             vfs_dir_monitor_mime();
             break;
         case PTKFileMenuAppJob::APP_JOB_UPDATE:
@@ -1770,7 +1926,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
     }
     if (mime_type)
+    {
         vfs_mime_type_unref(mime_type);
+    }
 }
 
 static bool
@@ -1780,7 +1938,9 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
 
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (!item)
+    {
         return false;
+    }
 
     // if original menu, desktop will be set
     const std::string desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
@@ -1854,7 +2014,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     const char* type;
 
     if (!(data && data->file))
+    {
         return;
+    }
 
     xset_t handler_set = XSET(g_object_get_data(G_OBJECT(app_item), "handler_set"));
     if (handler_set)
@@ -1872,7 +2034,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         vfs_mime_type_unref(mime_type);
     }
     else
+    {
         type = "unknown";
+    }
 
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
@@ -2052,7 +2216,9 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
             // https://github.com/IgnorantGuru/spacefm/issues/31
             // https://github.com/IgnorantGuru/spacefm/issues/228
             if (menu)
+            {
                 gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
+            }
             gtk_menu_item_activate(GTK_MENU_ITEM(item));
             return true;
         }
@@ -2124,8 +2290,10 @@ on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->browser && data->cwd && std::filesystem::is_directory(data->cwd))
+    {
         data->browser->run_event<EventType::OPEN_ITEM>(data->file_path,
                                                        PtkOpenAction::PTK_OPEN_NEW_TAB);
+    }
 }
 
 static void
@@ -2151,7 +2319,9 @@ on_popup_cut_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->sel_files.empty())
+    {
         return;
+    }
     ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, false);
 }
 
@@ -2160,7 +2330,9 @@ on_popup_copy_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->sel_files.empty())
+    {
         return;
+    }
     ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, true);
 }
 
@@ -2184,7 +2356,9 @@ on_popup_paste_link_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD ad
 {
     (void)menuitem;
     if (data->browser)
+    {
         ptk_file_browser_paste_link(data->browser);
+    }
 }
 
 static void
@@ -2192,7 +2366,9 @@ on_popup_paste_target_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD 
 {
     (void)menuitem;
     if (data->browser)
+    {
         ptk_file_browser_paste_target(data->browser);
+    }
 }
 
 static void
@@ -2214,7 +2390,9 @@ on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD a
 {
     (void)menuitem;
     if (data->cwd)
+    {
         ptk_clipboard_copy_text(data->cwd);
+    }
 }
 
 static void
@@ -2230,7 +2408,9 @@ on_popup_delete_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
 
     if (data->sel_files.empty())
+    {
         return;
+    }
 
     if (data->browser)
     {
@@ -2248,7 +2428,9 @@ on_popup_trash_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
 
     if (data->sel_files.empty())
+    {
         return;
+    }
 
     if (data->browser)
     {
@@ -2265,7 +2447,9 @@ on_popup_rename_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (data->browser)
+    {
         ptk_file_browser_rename_selected_files(data->browser, data->sel_files, data->cwd);
+    }
 }
 
 static void
@@ -2316,7 +2500,9 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
 {
     (void)task;
     if (!ao)
+    {
         return;
+    }
 
     if (ao->path && GTK_IS_WIDGET(ao->file_browser) && std::filesystem::exists(ao->path))
     {
@@ -2362,18 +2548,24 @@ static void
 create_new_file(PtkFileMenu* data, i32 create_new)
 {
     if (!data->cwd)
+    {
         return;
+    }
 
     const auto ao = new AutoOpenCreate;
     ao->path = nullptr;
     ao->file_browser = data->browser;
     ao->open_file = false;
     if (data->browser)
+    {
         ao->callback = (GFunc)on_autoopen_create_cb;
+    }
 
     vfs::file_info file = nullptr;
     if (!data->sel_files.empty())
+    {
         file = data->sel_files.front();
+    }
 
     const i32 result = ptk_rename_file(data->browser,
                                        data->cwd,
@@ -2383,7 +2575,9 @@ create_new_file(PtkFileMenu* data, i32 create_new)
                                        (PtkRenameMode)create_new,
                                        ao);
     if (result == 0)
+    {
         delete ao;
+    }
 }
 
 static void
@@ -2413,7 +2607,9 @@ on_popup_file_properties_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
     GtkWindow* parent_win = nullptr;
     if (data->browser)
+    {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+    }
 
     ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 0);
 }
@@ -2424,7 +2620,9 @@ on_popup_file_permissions_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
     GtkWindow* parent_win = nullptr;
     if (data->browser)
+    {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+    }
 
     ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 1);
 }
@@ -2434,7 +2632,9 @@ on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (!data->browser)
+    {
         return;
+    }
 
     ptk_file_browser_canon(data->browser, data->file_path ? data->file_path : data->cwd);
 }
@@ -2443,7 +2643,9 @@ void
 ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
 {
     if (!browser || !setname)
+    {
         return;
+    }
 
     std::string cwd;
     std::string file_path;
@@ -2477,91 +2679,151 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     data->sel_files = sel_files;
     data->file_path = ztd::strdup(file_path);
     if (file)
+    {
         data->file = vfs_file_info_ref(file);
+    }
 
     // action
     xset_t set = xset_get(setname);
     if (ztd::startswith(set->name, "open_") && !ztd::startswith(set->name, "open_in_"))
     {
         if (set->xset_name == XSetName::OPEN_EDIT)
+        {
             xset_edit(GTK_WIDGET(data->browser), data->file_path, false, true);
+        }
         else if (set->xset_name == XSetName::OPEN_EDIT_ROOT)
+        {
             xset_edit(GTK_WIDGET(data->browser), data->file_path, true, false);
+        }
         else if (set->xset_name == XSetName::OPEN_OTHER)
+        {
             on_popup_open_with_another_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::OPEN_EXECUTE)
+        {
             on_popup_open_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::OPEN_ALL)
+        {
             on_popup_open_all(nullptr, data);
+        }
     }
     else if (ztd::startswith(set->name, "arc_"))
     {
         if (set->xset_name == XSetName::ARC_EXTRACT)
+        {
             on_popup_extract_here_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::ARC_EXTRACTTO)
+        {
             on_popup_extract_to_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::ARC_EXTRACT)
+        {
             on_popup_extract_list_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::ARC_CONF2)
+        {
             on_archive_show_config(nullptr, data);
+        }
     }
     else if (ztd::startswith(set->name, "new_"))
     {
         if (set->xset_name == XSetName::NEW_FILE)
+        {
             on_popup_new_text_file_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::NEW_DIRECTORY)
+        {
             on_popup_new_folder_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::NEW_LINK)
+        {
             on_popup_new_link_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::NEW_BOOKMARK)
+        {
             ptk_bookmark_view_add_bookmark(browser);
+        }
         else if (set->xset_name == XSetName::NEW_ARCHIVE)
         {
             if (browser)
+            {
                 on_popup_compress_activate(nullptr, data);
+            }
         }
     }
     else if (set->xset_name == XSetName::PROP_INFO)
+    {
         on_popup_file_properties_activate(nullptr, data);
+    }
     else if (set->xset_name == XSetName::PROP_PERM)
+    {
         on_popup_file_permissions_activate(nullptr, data);
+    }
     else if (ztd::startswith(set->name, "edit_"))
     {
         if (set->xset_name == XSetName::EDIT_CUT)
+        {
             on_popup_cut_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_COPY)
+        {
             on_popup_copy_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_PASTE)
+        {
             on_popup_paste_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_RENAME)
+        {
             on_popup_rename_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_DELETE)
+        {
             on_popup_delete_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_TRASH)
+        {
             on_popup_trash_activate(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_HIDE)
+        {
             on_hide_file(nullptr, data);
+        }
         else if (set->xset_name == XSetName::EDIT_CANON)
         {
             if (browser)
+            {
                 on_popup_canon(nullptr, data);
+            }
         }
     }
     else if (set->xset_name == XSetName::COPY_NAME)
+    {
         on_popup_copy_name_activate(nullptr, data);
+    }
     else if (set->xset_name == XSetName::COPY_PATH)
+    {
         on_popup_copy_text_activate(nullptr, data);
+    }
     else if (set->xset_name == XSetName::COPY_PARENT)
+    {
         on_popup_copy_parent_activate(nullptr, data);
+    }
     else if (ztd::startswith(set->name, "copy_loc") || ztd::startswith(set->name, "copy_tab_") ||
              ztd::startswith(set->name, "copy_panel_") || ztd::startswith(set->name, "move_loc") ||
              ztd::startswith(set->name, "move_tab_") || ztd::startswith(set->name, "move_panel_"))
+    {
         on_copycmd(nullptr, data, set);
+    }
     else if (ztd::startswith(set->name, "root_"))
     {
         if (set->xset_name == XSetName::ROOT_COPY_LOC || set->xset_name == XSetName::ROOT_MOVE2 ||
             set->xset_name == XSetName::ROOT_DELETE || set->xset_name == XSetName::ROOT_TRASH)
+        {
             on_popup_rootcmd_activate(nullptr, data, set);
+        }
     }
     else if (browser)
     {
@@ -2571,11 +2833,17 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
             panel_t i;
 
             if (ztd::same(set->name, "open_in_panel_prev"))
+            {
                 i = panel_control_code_prev;
+            }
             else if (ztd::same(set->name, "open_in_panel_next"))
+            {
                 i = panel_control_code_next;
+            }
             else
+            {
                 i = std::stol(set->name);
+            }
             main_window_open_in_panel(data->browser, i, data->file_path);
         }
         else if (ztd::startswith(set->name, "opentab_"))
@@ -2589,18 +2857,28 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
             else
             {
                 if (set->xset_name == XSetName::OPENTAB_PREV)
+                {
                     i = tab_control_code_prev;
+                }
                 else if (set->xset_name == XSetName::OPENTAB_NEXT)
+                {
                     i = tab_control_code_next;
+                }
                 else
+                {
                     i = std::stol(set->name);
+                }
                 ptk_file_browser_open_in_tab(data->browser, i, data->file_path);
             }
         }
         else if (set->xset_name == XSetName::TAB_NEW)
+        {
             ptk_file_browser_new_tab(nullptr, browser);
+        }
         else if (set->xset_name == XSetName::TAB_NEW_HERE)
+        {
             on_popup_open_in_new_tab_here(nullptr, data);
+        }
     }
 
     ptk_file_menu_free(data);

@@ -204,13 +204,17 @@ static bool
 on_configure_evt_timer(MainWindow* main_window)
 {
     if (all_windows.empty())
+    {
         return false;
+    }
 
     // verify main_window still valid
     for (MainWindow* window : all_windows)
     {
         if (window == main_window)
+        {
             break;
+        }
     }
 
     if (main_window->configure_evt_timer)
@@ -239,8 +243,10 @@ on_window_configure_event(GtkWindow* window, GdkEvent* event, MainWindow* main_w
     // use timer to prevent rapid events during resize
     if ((event_handler->win_move->s || event_handler->win_move->ob2_data) &&
         !main_window->configure_evt_timer)
+    {
         main_window->configure_evt_timer =
             g_timeout_add(200, (GSourceFunc)on_configure_evt_timer, main_window);
+    }
     return false;
 }
 
@@ -254,25 +260,37 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
     PluginJob job = PluginJob::INSTALL;
 
     if (!item)
+    {
         set = set2;
+    }
     else
+    {
         set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+    }
     if (!set)
+    {
         return;
+    }
 
     if (ztd::endswith(set->name, "cfile") || ztd::endswith(set->name, "curl"))
+    {
         job = PluginJob::COPY;
+    }
 
     if (ztd::endswith(set->name, "file"))
     {
         // get file path
         xset_t save = xset_get(XSetName::PLUG_IFILE);
-        if (save->s) //&& std::filesystem::is_directory(save->s)
+        if (save->s)
+        { //&& std::filesystem::is_directory(save->s)
             deffolder = save->s;
+        }
         else
         {
             if (!(deffolder = xset_get_s(XSetName::GO_SET_DEFAULT)))
+            {
                 deffolder = ztd::strdup("/");
+            }
         }
         path = xset_file_dialog(GTK_WIDGET(main_window),
                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -280,9 +298,13 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                                 deffolder,
                                 nullptr);
         if (!path)
+        {
             return;
+        }
         if (save->s)
+        {
             free(save->s);
+        }
         save->s = ztd::strdup(Glib::path_get_dirname(path));
     }
 
@@ -295,12 +317,18 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
             char* filename = ztd::strdup(Glib::path_get_basename(path));
             char* ext = strstr(filename, ".spacefm-plugin");
             if (!ext)
+            {
                 ext = strstr(filename, ".tar.gz");
+            }
             if (ext)
+            {
                 ext[0] = '\0';
+            }
             char* plug_dir_name = filename;
             if (ext)
+            {
                 ext[0] = '.';
+            }
             if (!plug_dir_name)
             {
                 msg = "This plugin's filename is invalid.  Please rename it using "
@@ -358,7 +386,9 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
             {
                 plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
                 if (!std::filesystem::exists(plug_dir))
+                {
                     break;
+                }
             }
             break;
         }
@@ -379,7 +409,9 @@ create_plugins_menu(MainWindow* main_window)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     GtkWidget* plug_menu = gtk_menu_new();
     if (!file_browser)
+    {
         return plug_menu;
+    }
 
     std::vector<xset_t> plugins;
 
@@ -400,9 +432,13 @@ create_plugins_menu(MainWindow* main_window)
 
     plugins = xset_get_plugins();
     for (xset_t set2 : plugins)
+    {
         xset_add_menuitem(file_browser, plug_menu, accel_group, set2);
+    }
     if (!plugins.empty())
+    {
         xset_clear_plugins(plugins);
+    }
 
     gtk_widget_show_all(plug_menu);
     return plug_menu;
@@ -415,7 +451,9 @@ on_devices_show(GtkMenuItem* item, MainWindow* main_window)
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
+    {
         return;
+    }
     const MainWindowPanel mode = main_window->panel_context[file_browser->mypanel - 1];
 
     xset_set_b_panel_mode(file_browser->mypanel,
@@ -424,7 +462,9 @@ on_devices_show(GtkMenuItem* item, MainWindow* main_window)
                           !file_browser->side_dev);
     update_views_all_windows(nullptr, file_browser);
     if (file_browser->side_dev)
+    {
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->side_dev));
+    }
 }
 
 static GtkWidget*
@@ -435,7 +475,9 @@ create_devices_menu(MainWindow* main_window)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     GtkWidget* dev_menu = gtk_menu_new();
     if (!file_browser)
+    {
         return dev_menu;
+    }
 
     xset_t set;
 
@@ -468,7 +510,9 @@ on_open_url(GtkWidget* widget, MainWindow* main_window)
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     char* url = xset_get_s(XSetName::MAIN_SAVE_SESSION);
     if (file_browser && url && url[0])
+    {
         ptk_location_view_mount_network(file_browser, url, true, true);
+    }
 }
 
 static void
@@ -493,7 +537,9 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
+    {
         return;
+    }
     // root task
     PtkFileTask* ptask = ptk_file_exec_new("Open Root Window",
                                            ptk_file_browser_get_cwd(file_browser),
@@ -515,7 +561,9 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
+    {
         return;
+    }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
     const char* main_term = xset_get_s(XSetName::MAIN_TERMINAL);
     if (!main_term)
@@ -526,7 +574,9 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
         edit_preference(GTK_WINDOW(parent), PrefDlgPage::PREF_ADVANCED);
         main_term = xset_get_s(XSetName::MAIN_TERMINAL);
         if (!main_term)
+        {
             return;
+        }
     }
 
     // task
@@ -544,7 +594,9 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
 
     ptask->task->exec_command = terminal;
     if (as_root)
+    {
         ptask->task->exec_as_user = "root";
+    }
     ptask->task->exec_sync = false;
     ptask->task->exec_export = true;
     ptask->task->exec_browser = file_browser;
@@ -625,11 +677,17 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
 
     xset_t set = xset_get(XSetName::MAIN_ICON);
     if (set->icon)
+    {
         name = set->icon;
+    }
     else if (geteuid() == 0)
+    {
         name = ztd::strdup("spacefm-root");
+    }
     else
+    {
         name = ztd::strdup("spacefm");
+    }
 
     GdkPixbuf* icon = gtk_icon_theme_load_icon(theme, name, 48, (GtkIconLookupFlags)0, &error);
     if (icon)
@@ -692,7 +750,9 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
 
     // do this browser first
     if (file_browser)
+    {
         ptk_file_browser_rebuild_toolbars(file_browser);
+    }
 
     // do all windows all panels all tabs
     for (MainWindow* window : all_windows)
@@ -706,7 +766,9 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
                 if (a_browser != file_browser)
+                {
                     ptk_file_browser_rebuild_toolbars(a_browser);
+                }
             }
         }
     }
@@ -720,7 +782,9 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
     // ztd::logger::info("update_views_all_windows");
     // do this browser first
     if (!file_browser)
+    {
         return;
+    }
     const panel_t p = file_browser->mypanel;
 
     ptk_file_browser_update_views(nullptr, file_browser);
@@ -737,7 +801,9 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
                 if (a_browser != file_browser)
+                {
                     ptk_file_browser_update_views(nullptr, a_browser);
+                }
             }
         }
     }
@@ -786,9 +852,13 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
     MainWindow* main_window = MAIN_WINDOW(mw);
 
     if (item)
+    {
         panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "panel_num"));
+    }
     else
+    {
         panel_num = p;
+    }
 
     switch (panel_num)
     {
@@ -798,9 +868,13 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             do
             {
                 if (panel < 1)
+                {
                     panel = 4;
+                }
                 if (xset_get_b_panel(panel, XSetPanel::SHOW))
+                {
                     break;
+                }
                 panel--;
             } while (panel != main_window->curpanel - 1);
             break;
@@ -810,9 +884,13 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             do
             {
                 if (!valid_panel(panel))
+                {
                     panel = 1;
+                }
                 if (xset_get_b_panel(panel, XSetPanel::SHOW))
+                {
                     break;
+                }
                 panel++;
             } while (panel != main_window->curpanel + 1);
             break;
@@ -823,13 +901,19 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             do
             {
                 if (!valid_panel(panel))
+                {
                     panel = 1;
+                }
                 if (xset_get_b_panel(panel, XSetPanel::SHOW))
+                {
                     break;
+                }
                 panel++;
             } while (panel != hidepanel);
             if (panel == hidepanel)
+            {
                 panel = 0;
+            }
             break;
         default:
             panel = panel_num;
@@ -887,7 +971,9 @@ show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window)
     for (MainWindow* window : all_windows)
     {
         if (main_window != window)
+        {
             show_panels(nullptr, window);
+        }
     }
 
     autosave_request_add();
@@ -916,9 +1002,11 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     if (file_browser)
                     {
                         if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+                        {
                             ptk_file_browser_save_column_widths(
                                 GTK_TREE_VIEW(file_browser->folder_view),
                                 file_browser);
+                        }
                         // ptk_file_browser_slider_release( nullptr, nullptr, file_browser );
                     }
                 }
@@ -969,13 +1057,21 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
         }
 
         if (horiz && vert)
+        {
             main_window->panel_context.at(p) = MainWindowPanel::PANEL_BOTH;
+        }
         else if (horiz)
+        {
             main_window->panel_context.at(p) = MainWindowPanel::PANEL_HORIZ;
+        }
         else if (vert)
+        {
             main_window->panel_context.at(p) = MainWindowPanel::PANEL_VERT;
+        }
         else
+        {
             main_window->panel_context.at(p) = MainWindowPanel::PANEL_NEITHER;
+        }
 
         if (show[p])
         {
@@ -1064,7 +1160,9 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     for (std::string_view tab_dir : tab_dirs)
                     {
                         if (tab_dir.empty())
+                        {
                             continue;
+                        }
 
                         std::string folder_path;
                         if (std::filesystem::is_directory(tab_dir))
@@ -1074,9 +1172,13 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                         else
                         {
                             if (geteuid() != 0)
+                            {
                                 folder_path = vfs::user_dirs->home_dir();
+                            }
                             else
+                            {
                                 folder_path = "/";
+                            }
                         }
                         main_window_add_new_tab(main_window, folder_path);
                         tab_added = true;
@@ -1116,15 +1218,20 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     else
                     {
                         if (geteuid() != 0)
+                        {
                             folder_path = vfs::user_dirs->home_dir();
+                        }
                         else
+                        {
                             folder_path = "/";
+                        }
                     }
                     main_window_add_new_tab(main_window, folder_path);
                 }
             }
             if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
                 !gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
+            {
                 main_window_event(main_window,
                                   event_handler->pnl_show,
                                   XSetName::EVT_PNL_SHOW,
@@ -1135,6 +1242,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                   0,
                                   0,
                                   true);
+            }
             gtk_widget_show(GTK_WIDGET(main_window->panel[p - 1]));
         }
         else
@@ -1142,6 +1250,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
             // not shown
             if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
                 gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
+            {
                 main_window_event(main_window,
                                   event_handler->pnl_show,
                                   XSetName::EVT_PNL_SHOW,
@@ -1152,24 +1261,35 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                   0,
                                   0,
                                   false);
+            }
             gtk_widget_hide(GTK_WIDGET(main_window->panel[p - 1]));
         }
     }
     if (show[panel_1] || show[panel_2])
+    {
         gtk_widget_show(GTK_WIDGET(main_window->hpane_top));
+    }
     else
+    {
         gtk_widget_hide(GTK_WIDGET(main_window->hpane_top));
+    }
     if (show[panel_3] || show[panel_4])
+    {
         gtk_widget_show(GTK_WIDGET(main_window->hpane_bottom));
+    }
     else
+    {
         gtk_widget_hide(GTK_WIDGET(main_window->hpane_bottom));
+    }
 
     // current panel hidden?
     if (!xset_get_b_panel(main_window->curpanel, XSetPanel::SHOW))
     {
         panel_t p = main_window->curpanel + 1;
         if (!valid_panel(p))
+        {
             p = 1;
+        }
         while (p != main_window->curpanel)
         {
             if (xset_get_b_panel(p, XSetPanel::SHOW))
@@ -1180,14 +1300,18 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->notebook), cur_tabx));
                 if (!file_browser)
+                {
                     continue;
+                }
                 // if (file_browser->folder_view)
                 gtk_widget_grab_focus(file_browser->folder_view);
                 break;
             }
             p++;
             if (!valid_panel(p))
+            {
                 p = 1;
+            }
         }
     }
     set_panel_focus(main_window, nullptr);
@@ -1203,7 +1327,9 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), cur_tabx));
                 if (file_browser)
+                {
                     ptk_file_browser_update_views(nullptr, file_browser);
+                }
             }
         }
     }
@@ -1232,7 +1358,9 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
             static_cast<const char*>(g_object_get_data(G_OBJECT(item), "path"));
 
         if (file_path.empty())
+        {
             return false;
+        }
 
         const auto file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
@@ -1283,7 +1411,9 @@ rebuild_menus(MainWindow* main_window)
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
+    {
         return;
+    }
     xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
@@ -1317,7 +1447,9 @@ rebuild_menus(MainWindow* main_window)
     for (panel_t p : PANELS)
     {
         if (xset_get_b_panel(p, XSetPanel::SHOW))
+        {
             vis_count++;
+        }
     }
     if (!vis_count)
     {
@@ -1624,7 +1756,9 @@ main_window_init(MainWindow* main_window)
                                 app_settings.get_width(),
                                 app_settings.get_height());
     if (app_settings.get_maximized())
+    {
         gtk_window_maximize(GTK_WINDOW(main_window));
+    }
     gtk_widget_show(GTK_WIDGET(main_window));
 
     // restore panel sliders
@@ -1632,15 +1766,21 @@ main_window_init(MainWindow* main_window)
     // in actual window size
     i32 pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetVar::X);
     if (pos < 200)
+    {
         pos = 200;
+    }
     gtk_paned_set_position(GTK_PANED(main_window->hpane_top), pos);
     pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetVar::Y);
     if (pos < 200)
+    {
         pos = 200;
+    }
     gtk_paned_set_position(GTK_PANED(main_window->hpane_bottom), pos);
     pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetVar::S);
     if (pos < 200)
+    {
         pos = -1;
+    }
     gtk_paned_set_position(GTK_PANED(main_window->vpane), pos);
 
     // build the main menu initially, eg for F10 - Note: file_list is nullptr
@@ -1692,6 +1832,7 @@ main_window_close(MainWindow* main_window)
                             G_CALLBACK(ptk_file_task_notify_handler), nullptr));
     */
     if (event_handler->win_close->s || event_handler->win_close->ob2_data)
+    {
         main_window_event(main_window,
                           event_handler->win_close,
                           XSetName::EVT_WIN_CLOSE,
@@ -1702,6 +1843,7 @@ main_window_close(MainWindow* main_window)
                           0,
                           0,
                           false);
+    }
     gtk_widget_destroy(GTK_WIDGET(main_window));
 }
 
@@ -1717,9 +1859,13 @@ void
 main_window_store_positions(MainWindow* main_window)
 {
     if (!main_window)
+    {
         main_window = main_window_get_last_active();
+    }
     if (!main_window)
+    {
         return;
+    }
     // if the window is not fullscreen (is normal or maximized) save sliders
     // and columns
     if (!main_window->fullscreen)
@@ -1738,15 +1884,21 @@ main_window_store_positions(MainWindow* main_window)
         {
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_top));
             if (pos)
+            {
                 xset_set(XSetName::PANEL_SLIDERS, XSetVar::X, std::to_string(pos));
+            }
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_bottom));
             if (pos)
+            {
                 xset_set(XSetName::PANEL_SLIDERS, XSetVar::Y, std::to_string(pos));
+            }
 
             pos = gtk_paned_get_position(GTK_PANED(main_window->vpane));
             if (pos)
+            {
                 xset_set(XSetName::PANEL_SLIDERS, XSetVar::S, std::to_string(pos));
+            }
 
             if (gtk_widget_get_visible(main_window->task_scroll))
             {
@@ -1769,7 +1921,9 @@ main_window_store_positions(MainWindow* main_window)
         // store fb columns
         PtkFileBrowser* a_browser;
         if (main_window->maximized)
+        {
             main_window->opened_maximized = true; // force save of columns
+        }
         for (panel_t p : PANELS)
         {
             const i32 page_x =
@@ -1779,8 +1933,10 @@ main_window_store_positions(MainWindow* main_window)
                 a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), page_x));
                 if (a_browser && a_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+                {
                     ptk_file_browser_save_column_widths(GTK_TREE_VIEW(a_browser->folder_view),
                                                         a_browser);
+                }
             }
         }
     }
@@ -1832,7 +1988,9 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
             while (main_tasks_running(main_window))
             {
                 while (gtk_events_pending())
+                {
                     gtk_main_iteration();
+                }
             }
         }
         else
@@ -1859,7 +2017,9 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
     if (!main_window->maximized)
     {
         if (main_window->opened_maximized)
+        {
             main_window->opened_maximized = false;
+        }
         show_panels(nullptr, main_window); // restore columns
     }
 
@@ -1870,7 +2030,9 @@ char*
 main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
 {
     if (!file_browser)
+    {
         return nullptr;
+    }
     i32 page_x;
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
@@ -1906,7 +2068,9 @@ char*
 main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 {
     if (!file_browser)
+    {
         return nullptr;
+    }
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     panel_t panel_x = file_browser->mypanel;
 
@@ -1917,9 +2081,13 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
             do
             {
                 if (--panel_x < 1)
+                {
                     panel_x = 4;
+                }
                 if (panel_x == file_browser->mypanel)
+                {
                     return nullptr;
+                }
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
         case panel_control_code_next:
@@ -1927,15 +2095,21 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
             do
             {
                 if (!valid_panel(++panel_x))
+                {
                     panel_x = 1;
+                }
                 if (panel_x == file_browser->mypanel)
+                {
                     return nullptr;
+                }
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
         default:
             panel_x = panel_num;
             if (!gtk_widget_get_visible(main_window->panel[panel_x - 1]))
+            {
                 return nullptr;
+            }
             break;
     }
 
@@ -1950,7 +2124,9 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
                           std::string_view file_path)
 {
     if (!file_browser)
+    {
         return;
+    }
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     panel_t panel_x = file_browser->mypanel;
 
@@ -1961,9 +2137,13 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             do
             {
                 if (--panel_x < 1)
+                {
                     panel_x = 4;
+                }
                 if (panel_x == file_browser->mypanel)
+                {
                     return;
+                }
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
         case panel_control_code_next:
@@ -1971,9 +2151,13 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             do
             {
                 if (!valid_panel(++panel_x))
+                {
                     panel_x = 1;
+                }
                 if (panel_x == file_browser->mypanel)
+                {
                     return;
+                }
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
         default:
@@ -1982,7 +2166,9 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
     }
 
     if (!valid_panel(panel_x))
+    {
         return;
+    }
 
     // show panel
     if (!gtk_widget_get_visible(main_window->panel[panel_x - 1]))
@@ -2014,7 +2200,9 @@ bool
 main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
 {
     if (!valid_panel(panel))
+    {
         return false;
+    }
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     return gtk_widget_get_visible(main_window->panel[panel - 1]);
 }
@@ -2023,7 +2211,9 @@ const std::array<i64, 3>
 main_window_get_counts(PtkFileBrowser* file_browser)
 {
     if (!file_browser)
+    {
         return {0, 0, 0};
+    }
 
     const MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
@@ -2037,7 +2227,9 @@ main_window_get_counts(PtkFileBrowser* file_browser)
     {
         const panel_t idx = p - 1;
         if (gtk_widget_get_visible(main_window->panel[idx]))
+        {
             panel_count++;
+        }
     }
 
     return {panel_count, tab_count, tab_num};
@@ -2062,7 +2254,9 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
     // ztd::logger::info("on_restore_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
+    {
         return;
+    }
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     main_window_add_new_tab(main_window, file_path);
@@ -2080,7 +2274,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
     // ztd::logger::info("on_close_notebook_page fb={:p}", fmt::ptr(file_browser));
     if (!GTK_IS_WIDGET(file_browser))
+    {
         return;
+    }
     GtkNotebook* notebook =
         GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(file_browser), GTK_TYPE_NOTEBOOK));
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
@@ -2089,6 +2285,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
     if (event_handler->tab_close->s || event_handler->tab_close->ob2_data)
+    {
         main_window_event(
             main_window,
             event_handler->tab_close,
@@ -2101,6 +2298,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             0,
             0,
             false);
+    }
 
     // save solumns and slider positions of tab to be closed
     ptk_file_browser_slider_release(nullptr, nullptr, file_browser);
@@ -2123,7 +2321,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     if (!app_settings.get_always_show_tabs())
     {
         if (gtk_notebook_get_n_pages(notebook) == 1)
+        {
             gtk_notebook_set_show_tabs(notebook, false);
+        }
     }
     if (gtk_notebook_get_n_pages(notebook) == 0)
     {
@@ -2131,15 +2331,21 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         if (!(path && path[0] != '\0'))
         {
             if (geteuid() != 0)
+            {
                 path = vfs::user_dirs->home_dir().data();
+            }
             else
+            {
                 path = ztd::strdup("/");
+            }
         }
         main_window_add_new_tab(main_window, path);
         a_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
         if (GTK_IS_WIDGET(a_browser))
+        {
             ptk_file_browser_update_views(nullptr, a_browser);
+        }
 
         g_signal_handlers_unblock_matched(main_window->notebook,
                                           GSignalMatchType::G_SIGNAL_MATCH_FUNC,
@@ -2151,7 +2357,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
         update_window_title(nullptr, main_window);
         if (xset_get_b(XSetName::MAIN_SAVE_TABS))
+        {
             autosave_request_add();
+        }
         return;
     }
 
@@ -2170,6 +2378,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view);
         }
         if (event_handler->tab_focus->s || event_handler->tab_focus->ob2_data)
+        {
             main_window_event(main_window,
                               event_handler->tab_focus,
                               XSetName::EVT_TAB_FOCUS,
@@ -2180,6 +2389,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
                               0,
                               0,
                               false);
+        }
     }
 
     g_signal_handlers_unblock_matched(main_window->notebook,
@@ -2192,7 +2402,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 
     update_window_title(nullptr, main_window);
     if (xset_get_b(XSetName::MAIN_SAVE_TABS))
+    {
         autosave_request_add();
+    }
 }
 
 static bool
@@ -2212,7 +2424,9 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
                           event->button,
                           event->state,
                           true))
+    {
         return true;
+    }
     // middle-click on tab closes
     if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
@@ -2288,9 +2502,12 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
         gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view)); // MOD
     }
     if (xset_get_b(XSetName::MAIN_SAVE_TABS))
+    {
         autosave_request_add();
+    }
 
     if (event_handler->tab_chdir->s || event_handler->tab_chdir->ob2_data)
+    {
         main_window_event(main_window,
                           event_handler->tab_chdir,
                           XSetName::EVT_TAB_CHDIR,
@@ -2301,6 +2518,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
                           0,
                           0,
                           true);
+    }
 }
 
 GtkWidget*
@@ -2330,10 +2548,14 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
             g_object_unref(pixbuf);
         }
         else
+        {
             tab_icon = xset_get_image(set->icon, GtkIconSize::GTK_ICON_SIZE_MENU);
+        }
     }
     if (!tab_icon)
+    {
         tab_icon = gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
+    }
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
     const std::string cwd = ptk_file_browser_get_cwd(file_browser);
@@ -2391,7 +2613,9 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 
     gtk_widget_show_all(GTK_WIDGET(evt_box));
     if (!set->icon)
+    {
         gtk_widget_hide(tab_icon);
+    }
     return GTK_WIDGET(evt_box);
 }
 
@@ -2402,7 +2626,9 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     GtkWidget* label =
         gtk_notebook_get_tab_label(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser));
     if (!label)
+    {
         return;
+    }
 
     GtkContainer* hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
     GList* children = gtk_container_get_children(hbox);
@@ -2444,7 +2670,9 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
         ptk_file_browser_new(main_window->curpanel, notebook, main_window->task_view, main_window));
     if (!file_browser)
+    {
         return;
+    }
     // ztd::logger::info("New tab panel={} path={}", main_window->curpanel, folder_path);
 
     // ztd::logger::info("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
@@ -2483,18 +2711,27 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
     gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), idx);
 
     if (app_settings.get_always_show_tabs())
+    {
         gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), true);
+    }
     else if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) > 1)
+    {
         gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), true);
+    }
     else
+    {
         gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), false);
+    }
 
     if (!ptk_file_browser_chdir(file_browser,
                                 folder_path,
                                 PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
+    {
         ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    }
 
     if (event_handler->tab_new->s || event_handler->tab_new->ob2_data)
+    {
         main_window_event(main_window,
                           event_handler->tab_new,
                           XSetName::EVT_TAB_NEW,
@@ -2505,6 +2742,7 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
                           0,
                           0,
                           true);
+    }
 
     set_panel_focus(main_window, file_browser);
     //    while( gtk_events_pending() )  // wait for chdir to grab focus
@@ -2529,13 +2767,17 @@ main_window_get_current_file_browser(MainWindow* main_window)
     {
         main_window = main_window_get_last_active();
         if (!main_window)
+        {
             return nullptr;
+        }
     }
     if (main_window->notebook)
     {
         const i32 idx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
         if (idx >= 0)
+        {
             return gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->notebook), idx);
+        }
     }
     return nullptr;
 }
@@ -2573,11 +2815,17 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
         const char* name;
         xset_t set = xset_get(XSetName::MAIN_ICON);
         if (set->icon)
+        {
             name = set->icon;
+        }
         else if (geteuid() == 0)
+        {
             name = ztd::strdup("spacefm-root");
+        }
         else
+        {
             name = ztd::strdup("spacefm");
+        }
         gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(about_dlg), name);
 
         // g_object_add_weak_pointer(G_OBJECT(about_dlg), (void*)&about_dlg);
@@ -2626,7 +2874,9 @@ delayed_focus(GtkWidget* widget)
     {
         // ztd::logger::info("delayed_focus {:p}", fmt::ptr(widget));
         if (GTK_IS_WIDGET(widget))
+        {
             gtk_widget_grab_focus(widget);
+        }
     }
     return false;
 }
@@ -2650,14 +2900,19 @@ void
 set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     if (!file_browser && !main_window)
+    {
         return;
+    }
 
     MainWindow* mw = main_window;
     if (!mw)
+    {
         mw = MAIN_WINDOW(file_browser->main_window);
+    }
 
     update_window_title(nullptr, mw);
     if (event_handler->pnl_focus->s || event_handler->pnl_focus->ob2_data)
+    {
         main_window_event(main_window,
                           event_handler->pnl_focus,
                           XSetName::EVT_PNL_FOCUS,
@@ -2668,6 +2923,7 @@ set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
                           0,
                           0,
                           true);
+    }
 }
 
 static void
@@ -2679,8 +2935,10 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
     if (xset_get_b(XSetName::MAIN_FULL))
     {
         if (file_browser && file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        {
             ptk_file_browser_save_column_widths(GTK_TREE_VIEW(file_browser->folder_view),
                                                 file_browser);
+        }
         gtk_widget_hide(main_window->menu_bar);
         gtk_window_fullscreen(GTK_WINDOW(main_window));
         main_window->fullscreen = true;
@@ -2692,7 +2950,9 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
         gtk_widget_show(main_window->menu_bar);
 
         if (!main_window->maximized)
+        {
             show_panels(nullptr, main_window); // restore columns
+        }
     }
 }
 
@@ -2703,7 +2963,9 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     std::string disp_name;
 
     if (!file_browser || !main_window)
+    {
         return;
+    }
 
     if (file_browser->dir)
     {
@@ -2723,9 +2985,13 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     char* orig_fmt = xset_get_s(XSetName::MAIN_TITLE);
     std::string fmt;
     if (orig_fmt)
+    {
         fmt = orig_fmt;
+    }
     else
+    {
         fmt = "%d";
+    }
 
     static constexpr std::array<std::string_view, 4> keys{"%t", "%T", "%p", "%P"};
     if (ztd::contains(fmt, keys))
@@ -2742,11 +3008,17 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
         fmt = ztd::replace(fmt, "%P", std::to_string(ipanel_count));
     }
     if (ztd::contains(fmt, "*") && !main_tasks_running(main_window))
+    {
         fmt = ztd::replace(fmt, "*", "");
+    }
     if (ztd::contains(fmt, "%n"))
+    {
         fmt = ztd::replace(fmt, "%n", disp_name);
+    }
     if (orig_fmt && ztd::contains(orig_fmt, "%d"))
+    {
         fmt = ztd::replace(fmt, "%d", disp_path);
+    }
 
     gtk_window_set_title(GTK_WINDOW(main_window), fmt.data());
 }
@@ -2758,7 +3030,9 @@ update_window_title(GtkMenuItem* item, MainWindow* main_window)
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (file_browser)
+    {
         set_window_title(main_window, file_browser);
+    }
 }
 
 static void
@@ -2776,7 +3050,9 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     {
         ptk_file_browser_slider_release(nullptr, nullptr, curfb);
         if (curfb->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        {
             ptk_file_browser_save_column_widths(GTK_TREE_VIEW(curfb->folder_view), curfb);
+        }
     }
 
     file_browser = PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_num));
@@ -2790,6 +3066,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     set_window_title(main_window, file_browser);
 
     if (event_handler->tab_focus->ob2_data || event_handler->tab_focus->s)
+    {
         main_window_event(main_window,
                           event_handler->tab_focus,
                           XSetName::EVT_TAB_FOCUS,
@@ -2800,11 +3077,14 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
                           0,
                           0,
                           true);
+    }
 
     ptk_file_browser_update_views(nullptr, file_browser);
 
     if (GTK_IS_WIDGET(file_browser))
+    {
         g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view);
+    }
 }
 
 void
@@ -2813,7 +3093,9 @@ main_window_open_path_in_current_tab(MainWindow* main_window, std::string_view p
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
+    {
         return;
+    }
     ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
 }
 
@@ -2823,7 +3105,9 @@ main_window_open_network(MainWindow* main_window, std::string_view path, bool ne
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!file_browser)
+    {
         return;
+    }
     ptk_location_view_mount_network(file_browser, path, new_tab, false);
 }
 
@@ -2832,7 +3116,9 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, P
                           MainWindow* main_window)
 {
     if (path.empty())
+    {
         return;
+    }
 
     switch (action)
     {
@@ -2855,7 +3141,9 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 {
     (void)main_window;
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
+    {
         return;
+    }
 
     if (file_browser->status_bar_custom)
     {
@@ -2867,7 +3155,9 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 
     const std::string cwd = ptk_file_browser_get_cwd(file_browser);
     if (cwd.empty())
+    {
         return;
+    }
 
     std::string statusbar_txt;
 
@@ -2903,7 +3193,9 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         const std::vector<vfs::file_info> sel_files =
             ptk_file_browser_get_selected_files(file_browser);
         if (sel_files.empty())
+        {
             return;
+        }
 
         const std::string file_size = vfs_file_size_format(total_size);
         const std::string disk_size = vfs_file_size_format(total_on_disk_size);
@@ -2916,7 +3208,9 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         {
             vfs::file_info file = vfs_file_info_ref(sel_files.front());
             if (!file)
+            {
                 return;
+            }
 
             if (file->is_symlink())
             {
@@ -2940,9 +3234,13 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                     if (file->is_directory())
                     {
                         if (std::filesystem::exists(target_path))
+                        {
                             statusbar_txt.append(fmt::format("  Link -> {}/", target));
+                        }
                         else
+                        {
                             statusbar_txt.append(fmt::format("  !Link -> {}/ (missing)", target));
+                        }
                     }
                     else
                     {
@@ -2984,40 +3282,70 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
             {
                 file = vfs_file_info_ref(file);
                 if (!file)
+                {
                     continue;
+                }
 
                 if (file->is_directory())
+                {
                     ++count_dir;
+                }
                 else if (file->is_regular_file())
+                {
                     ++count_file;
+                }
                 else if (file->is_symlink())
+                {
                     ++count_symlink;
+                }
                 else if (file->is_socket())
+                {
                     ++count_socket;
+                }
                 else if (file->is_fifo())
+                {
                     ++count_pipe;
+                }
                 else if (file->is_block_file())
+                {
                     ++count_block;
+                }
                 else if (file->is_character_file())
+                {
                     ++count_char;
+                }
 
                 vfs_file_info_unref(file);
             }
 
             if (count_dir)
+            {
                 statusbar_txt.append(fmt::format("  Directories ({})", count_dir));
+            }
             if (count_file)
+            {
                 statusbar_txt.append(fmt::format("  Files ({})", count_file));
+            }
             if (count_symlink)
+            {
                 statusbar_txt.append(fmt::format("  Symlinks ({})", count_symlink));
+            }
             if (count_socket)
+            {
                 statusbar_txt.append(fmt::format("  Sockets ({})", count_socket));
+            }
             if (count_pipe)
+            {
                 statusbar_txt.append(fmt::format("  Named Pipes ({})", count_pipe));
+            }
             if (count_block)
+            {
                 statusbar_txt.append(fmt::format("  Block Devices ({})", count_block));
+            }
             if (count_char)
+            {
                 statusbar_txt.append(fmt::format("  Character Devices ({})", count_char));
+            }
         }
     }
     else
@@ -3030,7 +3358,9 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         {
             const auto file_stat = ztd::stat(file.path().string());
             if (!file_stat.is_regular_file())
+            {
                 continue;
+            }
             disk_size_bytes += file_stat.size();
             disk_size_disk += file_stat.blocks() * ztd::BLOCK_SIZE;
         }
@@ -3101,7 +3431,9 @@ on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window
                           0,
                           0,
                           true))
+    {
         return;
+    }
     main_window_update_status_bar(main_window, file_browser);
 }
 
@@ -3134,7 +3466,9 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
 {
     (void)widget;
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    {
         return false;
+    }
 
     // handle mouse back/forward buttons anywhere in the main window
     if (event->button == 4 || event->button == 5 || event->button == 8 || event->button == 9) // sfm
@@ -3142,11 +3476,17 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
         PtkFileBrowser* file_browser =
             PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         if (!file_browser)
+        {
             return false;
+        }
         if (event->button == 4 || event->button == 8)
+        {
             ptk_file_browser_go_back(nullptr, file_browser);
+        }
         else
+        {
             ptk_file_browser_go_forward(nullptr, file_browser);
+        }
         return true;
     }
     return false;
@@ -3162,6 +3502,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
     // but this unneeded anyway?  cross-window menu changes seem to work ok
     // rebuild_menus( main_window );  // xset may change in another window
     if (event_handler->win_focus->s || event_handler->win_focus->ob2_data)
+    {
         main_window_event(MAIN_WINDOW_REINTERPRET(main_window),
                           event_handler->win_focus,
                           XSetName::EVT_WIN_FOCUS,
@@ -3172,6 +3513,7 @@ on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_da
                           0,
                           0,
                           true);
+    }
     return false;
 }
 
@@ -3189,7 +3531,9 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
     }
 
     if (event->keyval == 0)
+    {
         return false;
+    }
 
     const u32 keymod = ptk_get_keymod(event->state);
 
@@ -3210,7 +3554,9 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
     {
         browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         if (browser && browser->path_bar && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar)))
+        {
             return false; // send to pathbar
+        }
     }
 
 #if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
@@ -3236,7 +3582,9 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                           0,
                           keymod,
                           true))
+    {
         return true;
+    }
 
     for (xset_t set : xsets)
     {
@@ -3273,7 +3621,9 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                 return on_main_window_keypress_found_key(main_window, set);
             }
             else
+            {
                 continue;
+            }
         }
 #if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
         // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
@@ -3297,7 +3647,9 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
 #endif
 
     if ((event->state & GdkModifierType::GDK_MOD1_MASK))
+    {
         rebuild_menus(main_window);
+    }
 
     return false;
 }
@@ -3309,21 +3661,27 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
 
     browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!browser)
+    {
         return true;
+    }
 
     // special edit items
     if (set->xset_name == XSetName::EDIT_CUT || set->xset_name == XSetName::EDIT_COPY ||
         set->xset_name == XSetName::EDIT_DELETE || set->xset_name == XSetName::SELECT_ALL)
     {
         if (!gtk_widget_is_focus(browser->folder_view))
+        {
             return false;
+        }
     }
     else if (set->xset_name == XSetName::EDIT_PASTE)
     {
         const bool side_dir_focus =
             (browser->side_dir && gtk_widget_is_focus(GTK_WIDGET(browser->side_dir)));
         if (!gtk_widget_is_focus(GTK_WIDGET(browser->folder_view)) && !side_dir_focus)
+        {
             return false;
+        }
     }
 
     // run menu_cb
@@ -3333,64 +3691,106 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         xset_menu_cb(nullptr, set); // also does custom activate
     }
     if (!set->lock)
+    {
         return true;
+    }
 
     // handlers
     if (ztd::startswith(set->name, "dev_"))
+    {
         ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
+    }
     else if (ztd::startswith(set->name, "main_"))
     {
         if (set->xset_name == XSetName::MAIN_NEW_WINDOW)
+        {
             on_new_window_activate(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_ROOT_WINDOW)
+        {
             on_open_current_folder_as_root(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_SEARCH)
+        {
             on_find_file_activate(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_TERMINAL)
+        {
             on_open_terminal_activate(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_ROOT_TERMINAL)
+        {
             on_open_root_terminal_activate(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_SAVE_SESSION)
+        {
             on_open_url(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_EXIT)
+        {
             on_quit_activate(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_FULL)
         {
             xset_set_b(XSetName::MAIN_FULL, !main_window->fullscreen);
             on_fullscreen_activate(nullptr, main_window);
         }
         else if (set->xset_name == XSetName::MAIN_PREFS)
+        {
             on_preference_activate(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_DESIGN_MODE)
+        {
             main_design_mode(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_ICON)
+        {
             on_main_icon();
+        }
         else if (set->xset_name == XSetName::MAIN_TITLE)
+        {
             update_window_title(nullptr, main_window);
+        }
         else if (set->xset_name == XSetName::MAIN_ABOUT)
+        {
             on_about_activate(nullptr, main_window);
+        }
     }
     else if (ztd::startswith(set->name, "panel_"))
     {
         i32 i;
         if (set->xset_name == XSetName::PANEL_PREV)
+        {
             i = panel_control_code_prev;
+        }
         else if (set->xset_name == XSetName::PANEL_NEXT)
+        {
             i = panel_control_code_next;
+        }
         else if (set->xset_name == XSetName::PANEL_HIDE)
+        {
             i = panel_control_code_hide;
+        }
         else
+        {
             i = std::stol(set->name);
+        }
         focus_panel(nullptr, main_window, i);
     }
     else if (ztd::startswith(set->name, "plug_"))
+    {
         on_plugin_install(nullptr, main_window, set);
+    }
     else if (ztd::startswith(set->name, "task_"))
     {
         if (set->xset_name == XSetName::TASK_MANAGER)
+        {
             on_task_popup_show(nullptr, main_window, set->name);
+        }
         else if (set->xset_name == XSetName::TASK_COL_REORDER)
+        {
             on_reorder(nullptr, GTK_WIDGET(browser->task_view));
+        }
         else if (set->xset_name == XSetName::TASK_COL_STATUS ||
                  set->xset_name == XSetName::TASK_COL_COUNT ||
                  set->xset_name == XSetName::TASK_COL_PATH ||
@@ -3405,7 +3805,9 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
                  set->xset_name == XSetName::TASK_COL_AVGSPEED ||
                  set->xset_name == XSetName::TASK_COL_AVGEST ||
                  set->xset_name == XSetName::TASK_COL_REORDER)
+        {
             on_task_column_selected(nullptr, browser->task_view);
+        }
         else if (set->xset_name == XSetName::TASK_STOP ||
                  set->xset_name == XSetName::TASK_STOP_ALL ||
                  set->xset_name == XSetName::TASK_PAUSE ||
@@ -3418,14 +3820,22 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
             on_task_stop(nullptr, browser->task_view, set, ptask);
         }
         else if (set->xset_name == XSetName::TASK_SHOWOUT)
+        {
             show_task_dialog(nullptr, browser->task_view);
+        }
         else if (ztd::startswith(set->name, "task_err_"))
+        {
             on_task_popup_errset(nullptr, main_window, set->name);
+        }
     }
     else if (set->xset_name == XSetName::RUBBERBAND)
+    {
         main_window_rubberband_all();
+    }
     else
+    {
         ptk_file_browser_on_action(browser, set->xset_name);
+    }
 
     return true;
 }
@@ -3434,7 +3844,9 @@ MainWindow*
 main_window_get_last_active()
 {
     if (!all_windows.empty())
+    {
         return all_windows.at(0);
+    }
     return nullptr;
 }
 
@@ -3520,7 +3932,9 @@ main_window_get_on_current_desktop()
     const i64 cur_desktop = get_desktop_index(nullptr);
     // ztd::logger::info("current_desktop = {}", cur_desktop);
     if (cur_desktop == -1)
+    {
         return main_window_get_last_active(); // revert to dumb if no current
+    }
 
     bool invalid = false;
     for (MainWindow* window : all_windows)
@@ -3528,9 +3942,13 @@ main_window_get_on_current_desktop()
         const i64 desktop = get_desktop_index(GTK_WINDOW(window));
         // ztd::logger::info( "    test win {:p} = {}", window, desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
+        {
             return window;
+        }
         else if (desktop == -1 && !invalid)
+        {
             invalid = true;
+        }
     }
     // revert to dumb if one or more window desktops unreadable
     return invalid ? main_window_get_last_active() : nullptr;
@@ -3619,11 +4037,15 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
 
     c->valid = false;
     if (!GTK_IS_WIDGET(file_browser))
+    {
         return;
+    }
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     if (!main_window)
+    {
         return;
+    }
 
     if (!c->var[ItemPropContext::CONTEXT_NAME].empty())
     {
@@ -3682,15 +4104,21 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
                 clip,
                 gdk_atom_intern("x-special/gnome-copied-files", false)) &&
             !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
+        {
             c->var[ItemPropContext::CONTEXT_CLIP_FILES] = "false";
+        }
         else
+        {
             c->var[ItemPropContext::CONTEXT_CLIP_FILES] = "true";
+        }
     }
 
     if (c->var[ItemPropContext::CONTEXT_CLIP_TEXT].empty())
     {
         if (!clip)
+        {
             clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+        }
         c->var[ItemPropContext::CONTEXT_CLIP_TEXT] =
             gtk_clipboard_wait_is_text_available(clip) ? "true" : "false";
     }
@@ -3699,7 +4127,9 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     // asynchronously - common if gui thread is blocked on stat
     // NOTE:  this is no longer needed
     if (!GTK_IS_WIDGET(file_browser))
+    {
         return;
+    }
 
     // device
     if (file_browser->side_dev &&
@@ -3713,38 +4143,66 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
 
         std::string flags;
         if (vol->is_removable)
+        {
             flags = fmt::format("{} removable", flags);
+        }
         else
+        {
             flags = fmt::format("{} internal", flags);
+        }
 
         if (vol->requires_eject)
+        {
             flags = fmt::format("{} ejectable", flags);
+        }
 
         if (vol->is_optical)
+        {
             flags = fmt::format("{} optical", flags);
+        }
         if (vol->is_table)
+        {
             flags = fmt::format("{} table", flags);
+        }
         if (vol->is_floppy)
+        {
             flags = fmt::format("{} floppy", flags);
+        }
 
         if (!vol->is_user_visible)
+        {
             flags = fmt::format("{} policy_hide", flags);
+        }
         if (vol->nopolicy)
+        {
             flags = fmt::format("{} policy_noauto", flags);
+        }
 
         if (vol->is_mounted)
+        {
             flags = fmt::format("{} mounted", flags);
+        }
         else if (vol->is_mountable && !vol->is_table)
+        {
             flags = fmt::format("{} mountable", flags);
+        }
         else
+        {
             flags = fmt::format("{} no_media", flags);
+        }
 
         if (vol->is_blank)
+        {
             flags = fmt::format("{} blank", flags);
+        }
         if (vol->is_audiocd)
+        {
             flags = fmt::format("{} audiocd", flags);
+        }
         if (vol->is_dvd)
+        {
             flags = fmt::format("{} dvd", flags);
+        }
 
         c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = flags;
     }
@@ -3754,7 +4212,9 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     for (panel_t p : PANELS)
     {
         if (!xset_get_b_panel(p, XSetPanel::SHOW))
+        {
             continue;
+        }
         const i32 i = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
         if (i != -1)
         {
@@ -3762,16 +4222,22 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
         }
         else
+        {
             continue;
+        }
         if (!a_browser || !gtk_widget_get_visible(GTK_WIDGET(a_browser)))
+        {
             continue;
+        }
 
         panel_count++;
         c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = ptk_file_browser_get_cwd(a_browser);
 
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
+        {
             c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = vol->device_file;
+        }
 
         // panel has files selected?
         if (a_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
@@ -3779,9 +4245,13 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         {
             GList* sel_files = folder_view_get_selected_items(a_browser, &model);
             if (sel_files)
+            {
                 c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "true";
+            }
             else
+            {
                 c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+            }
             g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
             g_list_free(sel_files);
         }
@@ -3790,9 +4260,13 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
             GtkTreeSelection* tree_sel =
                 gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view));
             if (gtk_tree_selection_count_selected_rows(tree_sel) > 0)
+            {
                 c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "true";
+            }
             else
+            {
                 c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+            }
         }
         else
         {
@@ -3812,11 +4286,17 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
     for (panel_t p : PANELS)
     {
         if (c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1].empty())
+        {
             c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = "";
+        }
         if (c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1].empty())
+        {
             c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+        }
         if (c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1].empty())
+        {
             c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = "";
+        }
     }
 
     // tasks
@@ -3844,10 +4324,14 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
             c->var[ItemPropContext::CONTEXT_TASK_NAME] = "";
             ptk_file_task_lock(ptask);
             if (!ptask->task->current_file.empty())
+            {
                 c->var[ItemPropContext::CONTEXT_TASK_DIR] =
                     Glib::path_get_dirname(ptask->task->current_file);
+            }
             else
+            {
                 c->var[ItemPropContext::CONTEXT_TASK_DIR] = "";
+            }
             ptk_file_task_unlock(ptask);
         }
     }
@@ -3858,7 +4342,9 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         c->var[ItemPropContext::CONTEXT_TASK_DIR] = "";
     }
     if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
+    {
         c->var[ItemPropContext::CONTEXT_TASK_COUNT] = "0";
+    }
     else
     {
         model_task = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
@@ -3867,7 +4353,9 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         {
             task_count++;
             while (gtk_tree_model_iter_next(model_task, &it))
+            {
                 task_count++;
+            }
         }
         c->var[ItemPropContext::CONTEXT_TASK_COUNT] = std::to_string(task_count);
     }
@@ -3881,7 +4369,9 @@ get_task_view_window(GtkWidget* view)
     for (MainWindow* window : all_windows)
     {
         if (window->task_view == view)
+        {
             return window;
+        }
     }
     return nullptr;
 }
@@ -3905,7 +4395,9 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         PtkFileBrowser* a_browser;
 
         if (!xset_get_b_panel(p, XSetPanel::SHOW))
+        {
             continue;
+        }
         const i32 current_page =
             gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
         if (current_page != -1)
@@ -3919,7 +4411,9 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         }
 
         if (!a_browser || !gtk_widget_get_visible(GTK_WIDGET(a_browser)))
+        {
             continue;
+        }
 
         // cwd
         const std::string cwd = ptk_file_browser_get_cwd(a_browser);
@@ -3997,7 +4491,9 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                         buf.append(fmt::format("fm_device_label={}\n", esc_path));
                     }
                     if (vol->fs_type)
+                    {
                         buf.append(fmt::format("fm_device_fstype=\"{}\"\n", vol->fs_type));
+                    }
                     buf.append(fmt::format("fm_device_size=\"{}\"\n", vol->size));
                     if (vol->disp_name)
                     {
@@ -4033,8 +4529,9 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                     esc_path = ztd::shell::quote(vol->label);
                     buf.append(fmt::format("fm_panel{}_device_label={}\n", p, esc_path));
                 }
-                if (vol->fs_type)
+                if (vol->fs_type) {
                     buf.append(fmt::format("fm_panel{}_device_fstype=\"{}\"\n", p, vol->fs_type));
+}
                 buf.append(fmt::format("fm_panel{}_device_size=\"{}\"\n", p, vol->size));
                 if (vol->disp_name)
                 {
@@ -4176,11 +4673,17 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
             esc_path = ztd::shell::quote(ptask->task->exec_command);
             buf.append(fmt::format("fm_task_command={}\n", esc_path));
             if (!ptask->task->exec_as_user.empty())
+            {
                 buf.append(fmt::format("fm_task_user=\"{}\"\n", ptask->task->exec_as_user));
+            }
             if (!ptask->task->exec_icon.empty())
+            {
                 buf.append(fmt::format("fm_task_icon=\"{}\"\n", ptask->task->exec_icon));
+            }
             if (ptask->task->exec_pid)
+            {
                 buf.append(fmt::format("fm_task_pid=\"{}\"\n", ptask->task->exec_pid));
+            }
         }
         else
         {
@@ -4208,19 +4711,25 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
     (void)user_data;
     MainWindow* main_window = get_task_view_window(view);
     if (!main_window || !view)
+    {
         return;
+    }
 
     for (i32 i = 0; i < 13; ++i)
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), i);
         if (!col)
+        {
             return;
+        }
         const char* title = gtk_tree_view_column_get_title(col);
         i32 j;
         for (j = 0; j < 13; ++j)
         {
             if (ztd::same(title, task_titles.at(j)))
+            {
                 break;
+            }
         }
         if (j != 13)
         {
@@ -4260,7 +4769,9 @@ on_task_destroy(GtkWidget* view, void* user_data)
                                                nullptr,
                                                nullptr);
         if (hand)
+        {
             g_signal_handler_disconnect((void*)view, hand);
+        }
     }
     on_task_columns_changed(view, nullptr); // save widths
 }
@@ -4276,7 +4787,9 @@ static bool
 main_tasks_running(MainWindow* main_window)
 {
     if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
+    {
         return false;
+    }
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
     GtkTreeIter it;
@@ -4289,7 +4802,9 @@ void
 main_task_pause_all_queued(PtkFileTask* ptask)
 {
     if (!ptask->task_view)
+    {
         return;
+    }
 
     PtkFileTask* qtask;
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ptask->task_view));
@@ -4301,7 +4816,9 @@ main_task_pause_all_queued(PtkFileTask* ptask)
             gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &qtask, -1);
             if (qtask && qtask != ptask && qtask->task && !qtask->complete &&
                 qtask->task->state_pause == VFSFileTaskState::QUEUE)
+            {
                 ptk_file_task_pause(qtask, VFSFileTaskState::PAUSE);
+            }
         } while (gtk_tree_model_iter_next(model, &it));
     }
 }
@@ -4316,7 +4833,9 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     GSList* queued = nullptr;
     const bool smart = xset_get_b(XSetName::TASK_Q_SMART);
     if (!GTK_IS_TREE_VIEW(view))
+    {
         return;
+    }
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
     if (gtk_tree_model_get_iter_first(model, &it))
@@ -4328,9 +4847,13 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
                 qtask->task->state == VFSFileTaskState::RUNNING)
             {
                 if (qtask->task->state_pause == VFSFileTaskState::QUEUE)
+                {
                     queued = g_slist_append(queued, qtask);
+                }
                 else if (qtask->task->state_pause == VFSFileTaskState::RUNNING)
+                {
                     running = g_slist_append(running, qtask);
+                }
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
@@ -4338,7 +4861,9 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     if (new_ptask && new_ptask->task && !new_ptask->complete &&
         new_ptask->task->state_pause == VFSFileTaskState::QUEUE &&
         new_ptask->task->state == VFSFileTaskState::RUNNING)
+    {
         queued = g_slist_append(queued, new_ptask);
+    }
 
     if (!queued || (!smart && running))
     {
@@ -4376,10 +4901,14 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
             for (d = qtask->task->devs; d; d = g_slist_next(d))
             {
                 if (g_slist_find(rtask->task->devs, d->data))
+                {
                     break;
+                }
             }
             if (d)
+            {
                 break;
+            }
         }
         if (!r)
         {
@@ -4411,23 +4940,39 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     MainWindowJob job;
 
     if (item)
+    {
         set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+    }
     else
+    {
         set = set2;
+    }
 
     if (!set || !ztd::startswith(set->name, "task_"))
+    {
         return;
+    }
 
     if (ztd::startswith(set->name, "task_stop"))
+    {
         job = MainWindowJob::JOB_STOP;
+    }
     else if (ztd::startswith(set->name, "task_pause"))
+    {
         job = MainWindowJob::JOB_PAUSE;
+    }
     else if (ztd::startswith(set->name, "task_que"))
+    {
         job = MainWindowJob::JOB_QUEUE;
+    }
     else if (ztd::startswith(set->name, "task_resume"))
+    {
         job = MainWindowJob::JOB_RESUME;
+    }
     else
+    {
         return;
+    }
 
     const bool all = ztd::endswith(set->name, "_all");
 
@@ -4438,11 +4983,17 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     else
     {
         if (item)
+        {
             ptask = PTK_FILE_TASK(g_object_get_data(G_OBJECT(item), "task"));
+        }
         else
+        {
             ptask = ptask2;
+        }
         if (!ptask)
+        {
             return;
+        }
     }
 
     if (!model || gtk_tree_model_get_iter_first(model, &it))
@@ -4450,7 +5001,9 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
         do
         {
             if (model)
+            {
                 gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+            }
             if (ptask && ptask->task && !ptask->complete &&
                 (ptask->task->type != VFSFileTaskType::EXEC || ptask->task->exec_pid ||
                  job == MainWindowJob::JOB_STOP))
@@ -4503,14 +5056,22 @@ idle_set_task_height(MainWindow* main_window)
         // use pre-0.9.2 slider pos to calculate height
         const i32 pos = xset_get_int(XSetName::PANEL_SLIDERS, XSetVar::Z); // < 0.9.2 slider pos
         if (pos == 0)
+        {
             taskh = 200;
+        }
         else
+        {
             taskh = allocation.height - pos;
+        }
     }
     if (taskh > allocation.height / 2)
+    {
         taskh = allocation.height / 2;
+    }
     if (taskh < 1)
+    {
         taskh = 90;
+    }
     // ztd::logger::info("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
     // allocation.height, taskh, allocation.height - taskh);
     gtk_paned_set_position(GTK_PANED(main_window->task_vpane), allocation.height - taskh);
@@ -4560,7 +5121,9 @@ show_task_manager(MainWindow* main_window, bool show)
             PtkFileBrowser* file_browser =
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
+            {
                 gtk_widget_grab_focus(file_browser->folder_view);
+            }
         }
     }
 }
@@ -4573,9 +5136,13 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
     char* name = nullptr;
 
     if (item)
+    {
         name = (char*)g_object_get_data(G_OBJECT(item), "name");
+    }
     else
+    {
         name = name2;
+    }
 
     if (name)
     {
@@ -4584,7 +5151,9 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
         if (xset_name == XSetName::TASK_SHOW_MANAGER)
         {
             if (xset_get_b(XSetName::TASK_SHOW_MANAGER))
+            {
                 xset_set_b(XSetName::TASK_HIDE_MANAGER, false);
+            }
             else
             {
                 xset_set_b(XSetName::TASK_HIDE_MANAGER, true);
@@ -4594,7 +5163,9 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
         else
         {
             if (xset_get_b(XSetName::TASK_HIDE_MANAGER))
+            {
                 xset_set_b(XSetName::TASK_SHOW_MANAGER, false);
+            }
             else
             {
                 xset_set_b(XSetName::TASK_HIDE_MANAGER, false);
@@ -4604,14 +5175,20 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
     }
 
     if (xset_get_b(XSetName::TASK_SHOW_MANAGER))
+    {
         show_task_manager(main_window, true);
+    }
     else
     {
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
         if (gtk_tree_model_get_iter_first(model, &it))
+        {
             show_task_manager(main_window, true);
+        }
         else if (xset_get_b(XSetName::TASK_HIDE_MANAGER))
+        {
             show_task_manager(main_window, false);
+        }
     }
 }
 
@@ -4621,12 +5198,18 @@ on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, char* name2)
     (void)main_window;
     char* name;
     if (item)
+    {
         name = (char*)g_object_get_data(G_OBJECT(item), "name");
+    }
     else
+    {
         name = name2;
+    }
 
     if (!name)
+    {
         return;
+    }
 
     XSetName xset_name = xset_get_xsetname_from_name(name);
 
@@ -4723,10 +5306,14 @@ get_selected_task(GtkWidget* view)
     PtkFileTask* ptask = nullptr;
 
     if (!view)
+    {
         return nullptr;
+    }
     MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
+    {
         return nullptr;
+    }
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
     tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
@@ -4743,7 +5330,9 @@ show_task_dialog(GtkWidget* widget, GtkWidget* view)
     (void)widget;
     PtkFileTask* ptask = get_selected_task(view);
     if (!ptask)
+    {
         return;
+    }
 
     ptk_file_task_lock(ptask);
     ptk_file_task_progress_open(ptask);
@@ -4754,7 +5343,9 @@ show_task_dialog(GtkWidget* widget, GtkWidget* view)
         ptask->progress_count = 50; // trigger fast display
     }
     if (ptask->progress_dlg)
+    {
         gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
+    }
     ptk_file_task_unlock(ptask);
 }
 
@@ -4770,7 +5361,9 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
     bool is_tasks;
 
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    {
         return false;
+    }
 
     if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(main_window,
@@ -4783,7 +5376,9 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                           event->button,
                           event->state,
                           true))
+    {
         return false;
+    }
 
     xset_context_t context;
     std::string menu_elements;
@@ -4800,7 +5395,9 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             // on the column header resize divider registers as a click on the
             // first row first column.  So if event->x < 7 ignore
             if (event->x < 7)
+            {
                 return false;
+            }
             if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                                event->x,
                                                event->y,
@@ -4808,15 +5405,23 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                                                &col,
                                                nullptr,
                                                nullptr))
+            {
                 return false;
+            }
             if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
+            {
                 gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+            }
             gtk_tree_path_free(tree_path);
 
             if (!ptask)
+            {
                 return false;
+            }
             if (event->button == 1 && !ztd::same(gtk_tree_view_column_get_title(col), "Status"))
+            {
                 return false;
+            }
             XSetName sname;
             switch (ptask->task->state_pause)
             {
@@ -4852,11 +5457,13 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                                                   nullptr))
                 {
                     if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
+                    {
                         gtk_tree_model_get(model,
                                            &it,
                                            MainWindowTaskCol::TASK_COL_DATA,
                                            &ptask,
                                            -1);
+                    }
                     gtk_tree_path_free(tree_path);
                 }
             }
@@ -4866,7 +5473,9 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             file_browser =
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (!file_browser)
+            {
                 return false;
+            }
             GtkWidget* popup;
             GtkAccelGroup* accel_group;
             popup = gtk_menu_new();
@@ -4942,11 +5551,15 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
 
     MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
+    {
         return;
+    }
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
     if (!gtk_tree_model_get_iter(model, &it, tree_path))
+    {
         return;
+    }
 
     gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
     if (ptask)
@@ -4973,11 +5586,15 @@ main_task_view_remove_task(PtkFileTask* ptask)
 
     GtkWidget* view = ptask->task_view;
     if (!view)
+    {
         return;
+    }
 
     MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
+    {
         return;
+    }
 
     PtkFileTask* ptaskt = nullptr;
     GtkTreeIter it;
@@ -4991,12 +5608,16 @@ main_task_view_remove_task(PtkFileTask* ptask)
         } while (ptaskt != ptask && gtk_tree_model_iter_next(model, &it));
     }
     if (ptaskt == ptask)
+    {
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
+    }
 
     if (!gtk_tree_model_get_iter_first(model, &it))
     {
         if (xset_get_b(XSetName::TASK_HIDE_MANAGER))
+        {
             show_task_manager(main_window, false);
+        }
     }
 
     update_window_title(nullptr, main_window);
@@ -5026,20 +5647,30 @@ main_task_view_update_task(PtkFileTask* ptask)
     };
 
     if (!ptask)
+    {
         return;
+    }
 
     view = ptask->task_view;
     if (!view)
+    {
         return;
+    }
 
     MainWindow* main_window = get_task_view_window(view);
     if (!main_window)
+    {
         return;
+    }
 
     if (ptask->task->type != VFSFileTaskType::EXEC)
+    {
         dest_dir = ptask->task->dest_dir.data();
+    }
     else
+    {
         dest_dir = nullptr;
+    }
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
     if (gtk_tree_model_get_iter_first(model, &it))
@@ -5078,9 +5709,13 @@ main_task_view_update_task(PtkFileTask* ptask)
 
         i32 percent = ptask->task->percent;
         if (percent < 0)
+        {
             percent = 0;
+        }
         else if (percent > 100)
+        {
             percent = 100;
+        }
         if (ptask->task->type != VFSFileTaskType::EXEC)
         {
             if (!ptask->task->current_file.empty())
@@ -5101,18 +5736,26 @@ main_task_view_update_task(PtkFileTask* ptask)
         if (ptask->task->type != VFSFileTaskType::EXEC)
         {
             if (!ptask->err_count)
+            {
                 status = job_titles.at(ptask->task->type);
+            }
             else
+            {
                 status =
                     fmt::format("{} error {}", ptask->err_count, job_titles.at(ptask->task->type));
+            }
         }
         else
         {
             // exec task
             if (!ptask->task->exec_action.empty())
+            {
                 status = ptask->task->exec_action;
+            }
             else
+            {
                 status = job_titles.at(ptask->task->type);
+            }
         }
 
         if (ptask->task->state_pause == VFSFileTaskState::PAUSE)
@@ -5147,19 +5790,31 @@ main_task_view_update_task(PtkFileTask* ptask)
                 iname = set->icon ? set->icon : "list-add";
             }
             else if (ptask->err_count && ptask->task->type != VFSFileTaskType::EXEC)
+            {
                 iname = "error";
+            }
             else if (ptask->task->type == 0 || ptask->task->type == 1 || ptask->task->type == 4)
+            {
                 iname = "stock_copy";
+            }
             else if (ptask->task->type == 2 || ptask->task->type == 3)
+            {
                 iname = "stock_delete";
+            }
             else if (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_icon.empty())
+            {
                 iname = ptask->task->exec_icon;
+            }
             else
+            {
                 iname = "gtk-execute";
+            }
 
             i32 icon_size = app_settings.get_icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
+            {
                 icon_size = PANE_MAX_ICON_SIZE;
+            }
 
             GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
@@ -5170,18 +5825,21 @@ main_task_view_update_task(PtkFileTask* ptask)
                 (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                 nullptr);
             if (!pixbuf)
+            {
                 pixbuf = gtk_icon_theme_load_icon(
                     icon_theme,
                     "gtk-execute",
                     icon_size,
                     (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                     nullptr);
+            }
             ptask->pause_change_view = false;
         }
 
         if (ptask->task->type != VFSFileTaskType::EXEC || ptaskt != ptask /* new task */)
         {
             if (pixbuf)
+            {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
                                    MainWindowTaskCol::TASK_COL_ICON,
@@ -5209,7 +5867,9 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_AVGEST,
                                    ptask->dsp_avgest.data(),
                                    -1);
+            }
             else
+            {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
                                    MainWindowTaskCol::TASK_COL_STATUS,
@@ -5235,8 +5895,10 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    MainWindowTaskCol::TASK_COL_AVGEST,
                                    ptask->dsp_avgest.data(),
                                    -1);
+            }
         }
         else if (pixbuf)
+        {
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
                                MainWindowTaskCol::TASK_COL_ICON,
@@ -5248,7 +5910,9 @@ main_task_view_update_task(PtkFileTask* ptask)
                                MainWindowTaskCol::TASK_COL_ELAPSED,
                                ptask->dsp_elapsed.data(),
                                -1);
+        }
         else
+        {
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
                                MainWindowTaskCol::TASK_COL_STATUS,
@@ -5258,14 +5922,19 @@ main_task_view_update_task(PtkFileTask* ptask)
                                MainWindowTaskCol::TASK_COL_ELAPSED,
                                ptask->dsp_elapsed.data(),
                                -1);
+        }
 
         // Clearing up
         free(status3);
         if (pixbuf)
+        {
             g_object_unref(pixbuf);
+        }
 
         if (!gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(view))))
+        {
             show_task_manager(main_window, true);
+        }
 
         update_window_title(nullptr, main_window);
     }
@@ -5358,7 +6027,9 @@ main_task_view_new(MainWindow* main_window)
         for (j = 0; j < 13; ++j)
         {
             if (xset_get_int(task_names.at(j), XSetVar::X) == i)
+            {
                 break;
+            }
         }
         if (j == 13)
         { // failsafe
@@ -5369,7 +6040,9 @@ main_task_view_new(MainWindow* main_window)
             // column width
             i32 width = xset_get_int(task_names.at(j), XSetVar::Y);
             if (width == 0)
+            {
                 width = 80;
+            }
             gtk_tree_view_column_set_fixed_width(col, width);
         }
 
@@ -5472,9 +6145,11 @@ main_task_view_new(MainWindow* main_window)
 
     // Sort
     if (GTK_IS_TREE_SORTABLE(list))
+    {
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
                                              MainWindowTaskCol::TASK_COL_STARTTIME,
                                              GtkSortType::GTK_SORT_ASCENDING);
+    }
 
     g_signal_connect(view, "row-activated", G_CALLBACK(on_task_row_activated), nullptr);
     g_signal_connect(view, "columns-changed", G_CALLBACK(on_task_columns_changed), nullptr);
@@ -5493,9 +6168,13 @@ static bool
 get_bool(std::string_view value)
 {
     if (ztd::same(ztd::lower(value), "yes") || ztd::same(value, "1"))
+    {
         return true;
+    }
     else if (ztd::same(ztd::lower(value), "no") || ztd::same(value, "0"))
+    {
         return false;
+    }
 
     // throw std::logic_error("");
     ztd::logger::warn("socket command defaulting to false, invalid value: {}", value);
@@ -5520,7 +6199,9 @@ delayed_show_menu(GtkWidget* menu)
 {
     MainWindow* main_window = main_window_get_last_active();
     if (main_window)
+    {
         gtk_window_present(GTK_WINDOW(main_window));
+    }
     gtk_widget_show_all(GTK_WIDGET(menu));
     gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
     g_signal_connect(G_OBJECT(menu), "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
@@ -5625,7 +6306,9 @@ main_window_socket_command(char* argv[], std::string& reply)
 
     // panel
     if (!panel)
+    {
         panel = main_window->curpanel;
+    }
     if (!valid_panel(panel))
     {
         reply = fmt::format("invalid panel {}", panel);
@@ -5692,16 +6375,24 @@ main_window_socket_command(char* argv[], std::string& reply)
                 return 2;
             }
             if (ztd::same(socket_property, "window_size"))
+            {
                 gtk_window_resize(GTK_WINDOW(main_window), width, height);
+            }
             else
+            {
                 gtk_window_move(GTK_WINDOW(main_window), width, height);
+            }
         }
         else if (ztd::same(socket_property, "window_maximized"))
         {
             if (get_bool(argv[i + 1]))
+            {
                 gtk_window_maximize(GTK_WINDOW(main_window));
+            }
             else
+            {
                 gtk_window_unmaximize(GTK_WINDOW(main_window));
+            }
         }
         else if (ztd::same(socket_property, "window_fullscreen"))
         {
@@ -5718,7 +6409,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             i32 width = -1;
             if (argv[i + 1])
+            {
                 width = std::stol(argv[i + 1]);
+            }
             if (width < 0)
             {
                 reply = "invalid slider value";
@@ -5727,13 +6420,21 @@ main_window_socket_command(char* argv[], std::string& reply)
 
             GtkWidget* widget;
             if (ztd::same(socket_property, "window_vslider_top"))
+            {
                 widget = main_window->hpane_top;
+            }
             else if (ztd::same(socket_property, "window_vslider_bottom"))
+            {
                 widget = main_window->hpane_bottom;
+            }
             else if (ztd::same(socket_property, "window_hslider"))
+            {
                 widget = main_window->vpane;
+            }
             else
+            {
                 widget = main_window->task_vpane;
+            }
 
             gtk_paned_set_position(GTK_PANED(widget), width);
         }
@@ -5743,13 +6444,21 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (argv[i + 1])
             {
                 if (ztd::same(argv[i + 1], "prev"))
+                {
                     width = panel_control_code_prev;
+                }
                 else if (ztd::same(argv[i + 1], "next"))
+                {
                     width = panel_control_code_next;
+                }
                 else if (ztd::same(argv[i + 1], "hide"))
+                {
                     width = panel_control_code_hide;
+                }
                 else
+                {
                     width = std::stol(argv[i + 1]);
+                }
             }
             if (!valid_panel(width) || !valid_panel_code(width))
             {
@@ -5764,16 +6473,26 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (argv[i + 1])
             {
                 if (ztd::same(argv[i + 1], "filelist"))
+                {
                     widget = file_browser->folder_view;
+                }
                 else if (ztd::same(argv[i + 1], "devices"))
+                {
                     widget = file_browser->side_dev;
+                }
                 else if (ztd::same(argv[i + 1], "dirtree"))
+                {
                     widget = file_browser->side_dir;
+                }
                 else if (ztd::same(argv[i + 1], "pathbar"))
+                {
                     widget = file_browser->path_bar;
+                }
             }
             if (GTK_IS_WIDGET(widget))
+            {
                 gtk_widget_grab_focus(widget);
+            }
         }
         else if (ztd::same(socket_property, "current_tab"))
         {
@@ -5781,13 +6500,21 @@ main_window_socket_command(char* argv[], std::string& reply)
             if (argv[i + 1])
             {
                 if (ztd::same(argv[i + 1], "prev"))
+                {
                     width = tab_control_code_prev;
+                }
                 else if (ztd::same(argv[i + 1], "next"))
+                {
                     width = tab_control_code_next;
+                }
                 else if (ztd::same(argv[i + 1], "close"))
+                {
                     width = tab_control_code_close;
+                }
                 else
+                {
                     width = std::stol(argv[i + 1]);
+                }
             }
             if (!valid_tab_code(width) || width == 0 ||
                 width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
@@ -5804,9 +6531,13 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             focus_panel(nullptr, (void*)main_window, panel);
             if (!(argv[i + 1] && std::filesystem::is_directory(argv[i + 1])))
+            {
                 ptk_file_browser_new_tab(nullptr, file_browser);
+            }
             else
+            {
                 main_window_add_new_tab(main_window, argv[i + 1]);
+            }
 
             const auto counts = main_window_get_counts(file_browser);
             // const panel_t panel_count = counts[0];
@@ -5890,7 +6621,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             i32 width = -1;
             if (argv[i + 1])
+            {
                 width = std::stol(argv[i + 1]);
+            }
             if (width < 0)
             {
                 reply = "invalid slider value";
@@ -5898,11 +6631,17 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             GtkWidget* widget;
             if (ztd::same(socket_property, "panel_hslider_top"))
+            {
                 widget = file_browser->side_vpane_top;
+            }
             else if (ztd::same(socket_property, "panel_hslider_bottom"))
+            {
                 widget = file_browser->side_vpane_bottom;
+            }
             else
+            {
                 widget = file_browser->hpane;
+            }
             gtk_paned_set_position(GTK_PANED(widget), width);
             ptk_file_browser_slider_release(nullptr, nullptr, file_browser);
             update_views_all_windows(nullptr, file_browser);
@@ -5911,7 +6650,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         { // COLUMN WIDTH
             i32 width = 0;
             if (argv[i + 1] && argv[i + 2])
+            {
                 width = std::stol(argv[i + 2]);
+            }
             if (width < 1)
             {
                 reply = "invalid column width";
@@ -5925,27 +6666,43 @@ main_window_socket_command(char* argv[], std::string& reply)
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), j);
                     if (!col)
+                    {
                         continue;
+                    }
                     const char* title = gtk_tree_view_column_get_title(col);
                     if (ztd::same(argv[i + 1], title))
+                    {
                         break;
+                    }
                     if (ztd::same(argv[i + 1], "name") && ztd::same(title, column_titles.at(0)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "size") &&
                              ztd::same(title, column_titles.at(1)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "type") &&
                              ztd::same(title, column_titles.at(2)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "permission") &&
                              ztd::same(title, column_titles.at(3)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "owner") &&
                              ztd::same(title, column_titles.at(4)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "modified") &&
                              ztd::same(title, column_titles.at(5)))
+                    {
                         break;
+                    }
                 }
                 if (j == 6)
                 {
@@ -5962,17 +6719,29 @@ main_window_socket_command(char* argv[], std::string& reply)
             {
             }
             else if (ztd::same(argv[i + 1], "name"))
+            {
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
+            }
             else if (ztd::same(argv[i + 1], "size"))
+            {
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_SIZE;
+            }
             else if (ztd::same(argv[i + 1], "type"))
+            {
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_TYPE;
+            }
             else if (ztd::same(argv[i + 1], "permission"))
+            {
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_PERM;
+            }
             else if (ztd::same(argv[i + 1], "owner"))
+            {
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_OWNER;
+            }
             else if (ztd::same(argv[i + 1], "modified"))
+            {
                 j = PtkFBSortOrder::PTK_FB_SORT_BY_MTIME;
+            }
             else
             {
                 reply = fmt::format("invalid column name '{}'", argv[i + 1]);
@@ -6009,19 +6778,29 @@ main_window_socket_command(char* argv[], std::string& reply)
             else if (ztd::same(socket_property, "sort_hidden_first"))
             {
                 if (get_bool(argv[i + 1]))
+                {
                     xset_name = XSetName::SORTX_HIDFIRST;
+                }
                 else
+                {
                     xset_name = XSetName::SORTX_HIDLAST;
+                }
                 xset_set_b(xset_name, true);
             }
             else if (ztd::same(socket_property, "sort_first"))
             {
                 if (ztd::same(argv[i + 1], "files"))
+                {
                     xset_name = XSetName::SORTX_FILES;
+                }
                 else if (ztd::same(argv[i + 1], "directories"))
+                {
                     xset_name = XSetName::SORTX_DIRECTORIES;
+                }
                 else if (ztd::same(argv[i + 1], "mixed"))
+                {
                     xset_name = XSetName::SORTX_MIX;
+                }
                 else
                 {
                     reply = fmt::format("invalid {} value", argv[i]);
@@ -6038,7 +6817,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "show_thumbnails"))
         {
             if (app_settings.get_show_thumbnail() != get_bool(argv[i + 1]))
+            {
                 main_window_toggle_thumbnails_all_windows();
+            }
         }
         else if (ztd::same(socket_property, "large_icons"))
         {
@@ -6068,7 +6849,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "pathbar_text"))
         { // TEXT [[SELSTART] SELEND]
             if (!GTK_IS_WIDGET(file_browser->path_bar))
+            {
                 return 0;
+            }
             if (!(argv[i + 1] && argv[i + 1][0]))
             {
                 gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), "");
@@ -6145,18 +6928,26 @@ main_window_socket_command(char* argv[], std::string& reply)
                  ztd::same(socket_property, "selected_files"))
         {
             if (!argv[i + 1] || argv[i + 1][0] == '\0')
+            {
                 // unselect all
                 ptk_file_browser_select_file_list(file_browser, nullptr, false);
+            }
             else
+            {
                 ptk_file_browser_select_file_list(file_browser, argv + i + 1, true);
+            }
         }
         else if (ztd::same(socket_property, "selected_pattern"))
         {
             if (!argv[i + 1])
+            {
                 // unselect all
                 ptk_file_browser_select_file_list(file_browser, nullptr, false);
+            }
             else
+            {
                 ptk_file_browser_select_pattern(nullptr, file_browser, argv[i + 1]);
+            }
         }
         else if (ztd::same(socket_property, "current_dir"))
         {
@@ -6195,9 +6986,13 @@ main_window_socket_command(char* argv[], std::string& reply)
             i32 width;
             i32 height;
             if (ztd::same(socket_property, "window_size"))
+            {
                 gtk_window_get_size(GTK_WINDOW(main_window), &width, &height);
+            }
             else
+            {
                 gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
+            }
             reply = fmt::format("{}x{}", width, height);
         }
         else if (ztd::same(socket_property, "window_maximized"))
@@ -6223,13 +7018,21 @@ main_window_socket_command(char* argv[], std::string& reply)
             GtkWidget* widget;
 
             if (ztd::same(socket_property, "window_vslider_top"))
+            {
                 widget = main_window->hpane_top;
+            }
             else if (ztd::same(socket_property, "window_vslider_bottom"))
+            {
                 widget = main_window->hpane_bottom;
+            }
             else if (ztd::same(socket_property, "window_hslider"))
+            {
                 widget = main_window->vpane;
+            }
             else
+            {
                 widget = main_window->task_vpane;
+            }
             reply = fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)));
         }
         else if (ztd::same(socket_property, "focused_panel"))
@@ -6240,15 +7043,25 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             std::string str;
             if (file_browser->folder_view && gtk_widget_is_focus(file_browser->folder_view))
+            {
                 str = "filelist";
+            }
             else if (file_browser->side_dev && gtk_widget_is_focus(file_browser->side_dev))
+            {
                 str = "devices";
+            }
             else if (file_browser->side_dir && gtk_widget_is_focus(file_browser->side_dir))
+            {
                 str = "dirtree";
+            }
             else if (file_browser->path_bar && gtk_widget_is_focus(file_browser->path_bar))
+            {
                 str = "pathbar";
+            }
             if (!str.empty())
+            {
                 reply = fmt::format("{}", str);
+            }
         }
         else if (ztd::same(socket_property, "current_tab"))
         {
@@ -6346,11 +7159,17 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             GtkWidget* widget;
             if (ztd::same(socket_property, "panel_hslider_top"))
+            {
                 widget = file_browser->side_vpane_top;
+            }
             else if (ztd::same(socket_property, "panel_hslider_bottom"))
+            {
                 widget = file_browser->side_vpane_bottom;
+            }
             else
+            {
                 widget = file_browser->hpane;
+            }
             reply = fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)));
         }
         else if (ztd::same(socket_property, "column_width"))
@@ -6363,27 +7182,43 @@ main_window_socket_command(char* argv[], std::string& reply)
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), j);
                     if (!col)
+                    {
                         continue;
+                    }
                     const char* title = gtk_tree_view_column_get_title(col);
                     if (ztd::same(argv[i + 1], title))
+                    {
                         break;
+                    }
                     if (ztd::same(argv[i + 1], "name") && ztd::same(title, column_titles.at(0)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "size") &&
                              ztd::same(title, column_titles.at(1)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "type") &&
                              ztd::same(title, column_titles.at(2)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "permission") &&
                              ztd::same(title, column_titles.at(3)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "owner") &&
                              ztd::same(title, column_titles.at(4)))
+                    {
                         break;
+                    }
                     else if (ztd::same(argv[i + 1], "modified") &&
                              ztd::same(title, column_titles.at(5)))
+                    {
                         break;
+                    }
                 }
                 if (j == 6)
                 {
@@ -6502,7 +7337,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(socket_property, "pathbar_text"))
         {
             if (GTK_IS_WIDGET(file_browser->path_bar))
+            {
                 reply = fmt::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)));
+            }
         }
         else if (ztd::same(socket_property, "clipboard_text") ||
                  ztd::same(socket_property, "clipboard_primary_text"))
@@ -6531,7 +7368,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 uri_list_target = gdk_atom_intern("text/uri-list", false);
                 sel_data = gtk_clipboard_wait_for_contents(clip, uri_list_target);
                 if (!sel_data)
+                {
                     return 0;
+                }
             }
             if (gtk_selection_data_get_length(sel_data) <= 0 ||
                 gtk_selection_data_get_format(sel_data) != 8)
@@ -6555,7 +7394,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             const char* clip_txt = gtk_clipboard_wait_for_text(clip);
             gtk_selection_data_free(sel_data);
             if (!clip_txt)
+            {
                 return 0;
+            }
             // build bash array
             const std::vector<std::string> pathv = ztd::split(clip_txt, "");
             std::string str;
@@ -6571,7 +7412,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             const std::vector<vfs::file_info> sel_files =
                 ptk_file_browser_get_selected_files(file_browser);
             if (sel_files.empty())
+            {
                 return 0;
+            }
 
             // build bash array
             std::string str;
@@ -6579,7 +7422,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             {
                 file = vfs_file_info_ref(file);
                 if (!file)
+                {
                     continue;
+                }
                 str.append(fmt::format("{} ", ztd::shell::quote(file->get_name())));
                 vfs_file_info_unref(file);
             }
@@ -6618,7 +7463,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
                 const std::string str = fmt::format("{:p}", (void*)ptask);
                 if (ztd::same(str, argv[i]))
+                {
                     break;
+                }
                 ptask = nullptr;
             } while (gtk_tree_model_iter_next(model, &it));
         }
@@ -6662,14 +7509,20 @@ main_window_socket_command(char* argv[], std::string& reply)
         else if (ztd::same(argv[i + 1], "progress"))
         {
             if (!argv[i + 2])
+            {
                 ptask->task->percent = 50;
+            }
             else
             {
                 j = std::stoi(argv[i + 2]);
                 if (j < 0)
+                {
                     j = 0;
+                }
                 if (j > 100)
+                {
                     j = 100;
+                }
                 ptask->task->percent = j;
             }
             ptask->task->custom_percent = !!argv[i + 2];
@@ -6735,9 +7588,13 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             free(ptask->pop_handler);
             if (argv[i + 2] && argv[i + 2][0] != '\0')
+            {
                 ptask->pop_handler = ztd::strdup(argv[i + 2]);
+            }
             else
+            {
                 ptask->pop_handler = nullptr;
+            }
             return 0;
         }
         else
@@ -6766,7 +7623,9 @@ main_window_socket_command(char* argv[], std::string& reply)
                 gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
                 const std::string str = fmt::format("{:p}", (void*)ptask);
                 if (ztd::same(str, argv[i]))
+                {
                     break;
+                }
                 ptask = nullptr;
             } while (gtk_tree_model_iter_next(model, &it));
         }
@@ -6782,7 +7641,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             ptk_file_task_lock(ptask);
             if (!ptask->task->exec_icon.empty())
+            {
                 reply = fmt::format("{}", ptask->task->exec_icon);
+            }
             ptk_file_task_unlock(ptask);
             return 0;
         }
@@ -6843,20 +7704,30 @@ main_window_socket_command(char* argv[], std::string& reply)
         {
             std::string str;
             if (ptask->task->state_pause == VFSFileTaskState::RUNNING)
+            {
                 str = "run";
+            }
             else if (ptask->task->state_pause == VFSFileTaskState::PAUSE)
+            {
                 str = "pause";
+            }
             else if (ptask->task->state_pause == VFSFileTaskState::QUEUE)
+            {
                 str = "queue";
+            }
             else
+            {
                 str = "stop"; // failsafe
+            }
             reply = fmt::format("{}", str);
             return 0;
         }
         else if (ztd::same(argv[i + 1], "popup_handler"))
         {
             if (ptask->pop_handler)
+            {
                 reply = fmt::format("{}", ptask->pop_handler);
+            }
             return 0;
         }
         else
@@ -6867,7 +7738,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         char* str2;
         gtk_tree_model_get(model, &it, j, &str2, -1);
         if (str2)
+        {
             reply = fmt::format("{}", str2);
+        }
         free(str2);
     }
     else if (ztd::same(socket_cmd, "run-task"))
@@ -6898,20 +7771,32 @@ main_window_socket_command(char* argv[], std::string& reply)
             for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
             {
                 if (ztd::same(argv[j], "--task"))
+                {
                     opt_task = true;
+                }
                 else if (ztd::same(argv[j], "--popup"))
+                {
                     opt_popup = opt_task = true;
+                }
                 else if (ztd::same(argv[j], "--scroll"))
+                {
                     opt_scroll = opt_task = true;
+                }
                 else if (ztd::same(argv[j], "--terminal"))
+                {
                     opt_terminal = true;
-                // disabled due to potential misuse of password caching su programs
-                // else if (ztd::same(argv[j], "--user"))
-                //     opt_user = argv[++j];
+                    // disabled due to potential misuse of password caching su programs
+                    // else if (ztd::same(argv[j], "--user"))
+                    //     opt_user = argv[++j];
+                }
                 else if (ztd::same(argv[j], "--title"))
+                {
                     opt_title = argv[++j];
+                }
                 else if (ztd::same(argv[j], "--icon"))
+                {
                     opt_icon = argv[++j];
+                }
                 else if (ztd::same(argv[j], "--dir"))
                 {
                     opt_cwd = argv[++j];
@@ -6934,7 +7819,9 @@ main_window_socket_command(char* argv[], std::string& reply)
             }
             std::string cmd;
             while (argv[++j])
+            {
                 cmd.append(fmt::format(" {}", argv[j]));
+            }
 
             PtkFileTask* ptask =
                 ptk_file_exec_new(opt_title ? opt_title : cmd,
@@ -6954,14 +7841,18 @@ main_window_socket_command(char* argv[], std::string& reply)
             ptask->task->exec_scroll_lock = !opt_scroll;
             ptask->task->exec_export = true;
             if (opt_popup)
+            {
                 gtk_window_present(GTK_WINDOW(main_window));
+            }
             ptk_file_task_run(ptask);
             if (opt_task)
+            {
                 reply = fmt::format("Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
                                     "new_task_id={}",
                                     (void*)main_window,
                                     (void*)ptask);
+            }
         }
         else if (ztd::same(socket_property, "edit"))
         {
@@ -7053,10 +7944,14 @@ main_window_socket_command(char* argv[], std::string& reply)
             {
                 // mount/unmount vol
                 if (ztd::same(socket_property, "mount"))
+                {
                     cmd = vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
                                                  &run_in_terminal);
+                }
                 else
+                {
                     cmd = vol->device_unmount_cmd(&run_in_terminal);
+                }
             }
             else if (netmount)
             {
@@ -7292,7 +8187,9 @@ main_window_socket_command(char* argv[], std::string& reply)
         // build command
         std::string str = (ztd::same(socket_cmd, "replace-event") ? "*" : "");
         for (i32 j = i + 1; argv[j]; ++j)
+        {
             str.append(fmt::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
+        }
         // modify list
         GList* l = nullptr;
         if (ztd::same(socket_cmd, "remove-event"))
@@ -7342,7 +8239,9 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     const std::string event_name = xset_get_name_from_xsetname(event);
 
     if (!ucmd)
+    {
         return false;
+    }
 
     if (ucmd[0] == '*')
     {
@@ -7350,7 +8249,9 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         inhibit = true;
     }
     else
+    {
         inhibit = false;
+    }
 
     if (!preset && (event == XSetName::EVT_START || event == XSetName::EVT_EXIT ||
                     event == XSetName::EVT_DEVICE))
@@ -7361,7 +8262,9 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         if (event == XSetName::EVT_DEVICE)
         {
             if (!focus)
+            {
                 return false;
+            }
             cmd = ztd::replace(cmd, "%f", focus);
             std::string change;
             switch (state)
@@ -7385,7 +8288,9 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     }
 
     if (!main_window)
+    {
         return false;
+    }
 
     // replace vars
     std::string replace;
@@ -7515,7 +8420,9 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
     if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)
+    {
         inhibit = true;
+    }
 
     ztd::logger::info("REPLACE_EVENT ? {}", inhibit ? "true" : "false");
     return inhibit;
@@ -7531,29 +8438,41 @@ main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab, c
     // ztd::logger::info("main_window_event {}", xset_get_name_from_xsetname(event));
 
     if (preset)
+    {
         set = preset;
+    }
     else
     {
         set = xset_get(event);
         if (!set->s && !set->ob2_data)
+        {
             return false;
+        }
     }
 
     // get main_window, panel, and tab
     MainWindow* main_window;
     PtkFileBrowser* file_browser;
     if (!mw)
+    {
         main_window = main_window_get_last_active();
+    }
     else
+    {
         main_window = MAIN_WINDOW(mw);
+    }
     if (main_window)
     {
         file_browser =
             PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
         if (!file_browser)
+        {
             return false;
+        }
         if (!panel)
+        {
             panel = main_window->curpanel;
+        }
         if (!tab)
         {
             tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[file_browser->mypanel - 1]),
@@ -7562,7 +8481,9 @@ main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab, c
         }
     }
     else
+    {
         file_browser = nullptr;
+    }
 
     // dynamic handlers
     if (set->ob2_data)
@@ -7582,7 +8503,9 @@ main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab, c
                           visible,
                           set,
                           (char*)l->data))
+            {
                 inhibit = true;
+            }
         }
     }
 

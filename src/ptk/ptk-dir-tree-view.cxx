@@ -76,7 +76,9 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
         GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
 
     if (show_hidden)
+    {
         return true;
+    }
 
     gtk_tree_model_get(model, iter, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
     if (file)
@@ -160,7 +162,9 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
                                            nullptr);
 
     if (!dir_tree_view_data)
+    {
         dir_tree_view_data = g_quark_from_static_string("show_hidden");
+    }
     g_object_set_qdata(G_OBJECT(dir_tree_view), dir_tree_view_data, GINT_TO_POINTER(show_hidden));
     model = get_dir_tree_model();
     filter = gtk_tree_model_filter_new(model, nullptr);
@@ -230,17 +234,23 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path)
     GtkTreePath* tree_path = nullptr;
 
     if (!ztd::startswith(path, "/"))
+    {
         return false;
+    }
 
     const std::vector<std::string> dirs = ztd::split(path, "/");
 
     if (dirs.empty())
+    {
         return false;
+    }
 
     GtkTreeModel* model = gtk_tree_view_get_model(dir_tree_view);
 
     if (!gtk_tree_model_iter_children(model, &parent_it, nullptr))
+    {
         return false;
+    }
 
     // special case: root dir
     if (dirs.size() == 1)
@@ -260,10 +270,14 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path)
     for (std::string_view dir : dirs)
     {
         if (dir.empty())
+        {
             continue; // first item will be empty because of how ztd::split works
+        }
 
         if (!gtk_tree_model_iter_children(model, &it, &parent_it))
+        {
             return false;
+        }
 
         bool found = false;
         vfs::file_info file;
@@ -271,7 +285,9 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path)
         {
             gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
             if (!file)
+            {
                 continue;
+            }
 
             if (ztd::same(file->get_name(), dir.data()))
             {
@@ -290,7 +306,9 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path)
         } while (gtk_tree_model_iter_next(model, &it));
 
         if (!found)
+        {
             return false; /* Error! */
+        }
 
         if (tree_path && dir[1])
         {
@@ -328,7 +346,9 @@ ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
 
     GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(dir_tree_view);
     if (gtk_tree_selection_get_selected(tree_sel, &model, &it))
+    {
         return ptk_dir_view_get_dir_path(model, &it);
+    }
     return nullptr;
 }
 
@@ -360,10 +380,14 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
     vfs::file_info file;
 
     if (!gtk_tree_model_get_iter(model, &it, path))
+    {
         return false;
+    }
     gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
     if (!file)
+    {
         return false;
+    }
     vfs_file_info_unref(file);
     return true;
 }
@@ -441,13 +465,17 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
                          * actions are to be taken on the dir itself. */
                         GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path);
                         if (popup)
+                        {
                             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
+                        }
                         gtk_tree_path_free(tree_path);
                         return true;
                     }
                 }
                 else
+                {
                     gtk_tree_view_row_activated(GTK_TREE_VIEW(view), tree_path, tree_col);
+                }
             }
             gtk_tree_path_free(tree_path);
         }
@@ -464,9 +492,13 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
                                           nullptr))
         {
             if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(view), tree_path))
+            {
                 gtk_tree_view_collapse_row(GTK_TREE_VIEW(view), tree_path);
+            }
             else
+            {
                 gtk_tree_view_expand_row(GTK_TREE_VIEW(view), tree_path, false);
+            }
             gtk_tree_path_free(tree_path);
             return true;
         }
@@ -482,7 +514,9 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
     GtkTreeSelection* select = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
     if (!gtk_tree_selection_get_selected(select, &model, &iter))
+    {
         return false;
+    }
 
     const i32 keymod =
         (evt->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
@@ -539,7 +573,9 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
                  * actions are to be taken on the dir itself. */
                 GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path);
                 if (popup)
+                {
                     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
+                }
             }
             break;
         default:
@@ -571,7 +607,9 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
                                            nullptr,
                                            nullptr,
                                            nullptr))
+        {
             tree_path = nullptr;
+        }
     }
     if (tree_path)
     {
@@ -666,9 +704,13 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 {
                     std::string file_path;
                     if (**puri == '/')
+                    {
                         file_path = *puri;
+                    }
                     else
+                    {
                         file_path = Glib::filename_from_uri(*puri);
+                    }
 
                     file_list.emplace_back(file_path);
                 }
@@ -765,25 +807,38 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
         /* Only 'move' is available. The user force move action by pressing Shift key */
         if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
             GdkDragAction::GDK_ACTION_MOVE)
+        {
             suggested_action = GdkDragAction::GDK_ACTION_MOVE;
-        /* Only 'copy' is available. The user force copy action by pressing Ctrl key */
+            /* Only 'copy' is available. The user force copy action by pressing Ctrl key */
+        }
         else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
                  GdkDragAction::GDK_ACTION_COPY)
+        {
             suggested_action = GdkDragAction::GDK_ACTION_COPY;
-        /* Only 'link' is available. The user force link action by pressing Shift+Ctrl key */
+            /* Only 'link' is available. The user force link action by pressing Shift+Ctrl key */
+        }
         else if ((gdk_drag_context_get_actions(drag_context) & GDK_ACTION_ALL) ==
                  GdkDragAction::GDK_ACTION_LINK)
+        {
             suggested_action = GdkDragAction::GDK_ACTION_LINK;
-        /* Several different actions are available. We have to figure out a good default action. */
+            /* Several different actions are available. We have to figure out a good default action.
+             */
+        }
         else
         {
             const i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
             if (drag_action == 1)
+            {
                 suggested_action = GdkDragAction::GDK_ACTION_COPY;
+            }
             else if (drag_action == 2)
+            {
                 suggested_action = GdkDragAction::GDK_ACTION_MOVE;
+            }
             else if (drag_action == 3)
+            {
                 suggested_action = GdkDragAction::GDK_ACTION_LINK;
+            }
             else
             {
                 // automatic

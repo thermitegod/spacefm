@@ -1721,7 +1721,9 @@ xset_get_xsetname_from_name(std::string_view name)
     for (const auto& it : xset_name_map)
     {
         if (ztd::same(name, it.second))
+        {
             return it.first;
+        }
     }
     return XSetName::CUSTOM;
 }
@@ -1857,7 +1859,9 @@ xset_get_name_from_xsetvar(XSetVar name)
     for (const auto& it : xset_var_map)
     {
         if (name == it.second)
+        {
             return it.first.data();
+        }
     }
 
     const std::string err_msg = fmt::format("NOT implemented XSetVar: {}", INT(name));

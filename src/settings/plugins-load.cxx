@@ -77,7 +77,9 @@ load_user_plugin(std::string_view plug_dir, PluginUse* use, std::string_view plu
                 plugin_func(plug_dir, use, name, setvar, value);
 
                 if (!plugin_good)
+                {
                     plugin_good = true;
+                }
             }
         }
     }

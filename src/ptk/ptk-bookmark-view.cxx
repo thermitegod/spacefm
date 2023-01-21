@@ -27,7 +27,9 @@ void
 ptk_bookmark_view_add_bookmark(std::string_view book_path)
 {
     if (book_path.empty())
+    {
         return;
+    }
 
     add_bookmarks(book_path);
 }
@@ -36,7 +38,9 @@ void
 ptk_bookmark_view_add_bookmark(PtkFileBrowser* file_browser)
 { // adding from file browser - bookmarks may not be shown
     if (!file_browser)
+    {
         return;
+    }
 
     add_bookmarks(ptk_file_browser_get_cwd(file_browser));
 }

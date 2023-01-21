@@ -71,11 +71,17 @@ PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& s
     this->keep_dlg = false;
     this->err_count = 0;
     if (xset_get_b(XSetName::TASK_ERR_ANY))
+    {
         this->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_ANY;
+    }
     else if (xset_get_b(XSetName::TASK_ERR_FIRST))
+    {
         this->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_FIRST;
+    }
     else
+    {
         this->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_CONT;
+    }
 
     GtkTextIter iter;
     this->log_buf = gtk_text_buffer_new(nullptr);
@@ -99,7 +105,9 @@ PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& s
     if (this->task->exec_sync && this->task->type != VFSFileTaskType::EXEC &&
         this->task->type != VFSFileTaskType::LINK &&
         this->task->type != VFSFileTaskType::CHMOD_CHOWN && xset_get_b(XSetName::TASK_Q_NEW))
+    {
         ptk_file_task_pause(this, VFSFileTaskState::QUEUE);
+    }
 
     // GThread *self = g_thread_self ();
     // ztd::logger::info("GUI_THREAD = {:p}", fmt::ptr(self));
@@ -127,9 +135,13 @@ PtkFileTask::~PtkFileTask()
         save_progress_dialog_size(this);
 
         if (this->overwrite_combo)
+        {
             gtk_combo_box_popdown(GTK_COMBO_BOX(this->overwrite_combo));
+        }
         if (this->error_combo)
+        {
             gtk_combo_box_popdown(GTK_COMBO_BOX(this->error_combo));
+        }
         gtk_widget_destroy(this->progress_dlg);
         this->progress_dlg = nullptr;
     }
@@ -140,9 +152,13 @@ PtkFileTask::~PtkFileTask()
         // Cannot be placed in cb_exec_child_watch because it causes single
         // line output to be lost
         if (this->task->exec_channel_out)
+        {
             g_io_channel_shutdown(this->task->exec_channel_out, true, nullptr);
+        }
         if (this->task->exec_channel_err)
+        {
             g_io_channel_shutdown(this->task->exec_channel_err, true, nullptr);
+        }
         this->task->exec_channel_out = this->task->exec_channel_err = nullptr;
         if (this->task->child_watch)
         {
@@ -153,13 +169,17 @@ PtkFileTask::~PtkFileTask()
     }
 
     if (this->task)
+    {
         vfs_file_task_free(this->task);
+    }
 
     gtk_text_buffer_set_text(this->log_buf, "", -1);
     g_object_unref(this->log_buf);
 
     if (this->pop_handler)
+    {
         free(this->pop_handler);
+    }
 
     // ztd::logger::info("ptk_file_task_destroy DONE ptask={:p}", fmt::ptr(ptask));
 }
@@ -205,7 +225,9 @@ ptk_file_exec_new(std::string_view item_name, GtkWidget* parent, GtkWidget* task
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
+    {
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+    }
 
     const std::vector<std::string> file_list{item_name.data()};
     const auto ptask =
@@ -220,7 +242,9 @@ ptk_file_exec_new(std::string_view item_name, std::string_view dest_dir, GtkWidg
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
+    {
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+    }
 
     const std::vector<std::string> file_list{item_name.data()};
     const auto ptask = new PtkFileTask(VFSFileTaskType::EXEC,
@@ -243,15 +267,23 @@ save_progress_dialog_size(PtkFileTask* ptask)
 
     const std::string width = std::to_string(allocation.width);
     if (ptask->task->type == VFSFileTaskType::EXEC)
+    {
         xset_set(XSetName::TASK_POP_TOP, XSetVar::S, width);
+    }
     else
+    {
         xset_set(XSetName::TASK_POP_TOP, XSetVar::X, width);
+    }
 
     const std::string height = std::to_string(allocation.height);
     if (ptask->task->type == VFSFileTaskType::EXEC)
+    {
         xset_set(XSetName::TASK_POP_TOP, XSetVar::Z, height);
+    }
     else
+    {
         xset_set(XSetName::TASK_POP_TOP, XSetVar::Y, height);
+    }
 }
 
 void
@@ -295,9 +327,13 @@ on_progress_timer(PtkFileTask* ptask)
     {
         ptask->task->queue_start = false;
         if (ptask->task->state_pause == VFSFileTaskState::RUNNING)
+        {
             ptk_file_task_pause(ptask, VFSFileTaskState::RUNNING);
+        }
         else
+        {
             main_task_start_queued(ptask->task_view, ptask);
+        }
         if (ptask->timeout && ptask->task->state_pause != VFSFileTaskState::RUNNING &&
             ptask->task->state == VFSFileTaskState::RUNNING)
         {
@@ -309,7 +345,9 @@ on_progress_timer(PtkFileTask* ptask)
 
     // only update every 300ms (6 * 50ms)
     if (++ptask->progress_count < 6)
+    {
         return true;
+    }
     ptask->progress_count = 0;
     // ztd::logger::info("on_progress_timer ptask={:p}", ptask);
 
@@ -330,7 +368,9 @@ on_progress_timer(PtkFileTask* ptask)
     }
     else if (ptask->task->state_pause != VFSFileTaskState::RUNNING && !ptask->pause_change &&
              ptask->task->type != VFSFileTaskType::EXEC)
+    {
         return true;
+    }
 
     ptk_file_task_update(ptask);
 
@@ -343,7 +383,9 @@ on_progress_timer(PtkFileTask* ptask)
             return false;
         }
         else if (ptask->progress_dlg && ptask->err_count)
+        {
             gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
+        }
     }
     // ztd::logger::info("on_progress_timer DONE true ptask={:p}", ptask);
     return !ptask->complete;
@@ -368,7 +410,9 @@ ptk_file_task_add_main(PtkFileTask* ptask)
     }
 
     if (ptask->task->state_pause != VFSFileTaskState::RUNNING && !ptask->pause_change)
+    {
         ptask->pause_change = ptask->pause_change_view = true;
+    }
 
     on_progress_timer(ptask);
 
@@ -413,7 +457,9 @@ ptk_file_task_cancel(PtkFileTask* ptask)
 
         // resume task for task list responsiveness
         if (ptask->task->state_pause != VFSFileTaskState::RUNNING)
+        {
             ptk_file_task_pause(ptask, VFSFileTaskState::RUNNING);
+        }
 
         ptask->task->abort_task();
 
@@ -445,7 +491,9 @@ ptk_file_task_cancel(PtkFileTask* ptask)
             // this is used only if exec task run in non-main loop thread
             ptk_file_task_lock(ptask);
             if (ptask->task->exec_cond)
+            {
                 g_cond_broadcast(ptask->task->exec_cond);
+            }
             ptk_file_task_unlock(ptask);
         }
     }
@@ -460,7 +508,9 @@ static void
 set_button_states(PtkFileTask* ptask)
 {
     if (!ptask->progress_dlg)
+    {
         return;
+    }
 
     std::string label;
 
@@ -580,9 +630,13 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case GtkResponseType::GTK_RESPONSE_CANCEL: // Stop btn
             ptask->keep_dlg = false;
             if (ptask->overwrite_combo)
+            {
                 gtk_combo_box_popdown(GTK_COMBO_BOX(ptask->overwrite_combo));
+            }
             if (ptask->error_combo)
+            {
                 gtk_combo_box_popdown(GTK_COMBO_BOX(ptask->error_combo));
+            }
             gtk_widget_destroy(ptask->progress_dlg);
             ptask->progress_dlg = nullptr;
             ptk_file_task_cancel(ptask);
@@ -606,9 +660,13 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case GtkResponseType::GTK_RESPONSE_NONE:
             ptask->keep_dlg = false;
             if (ptask->overwrite_combo)
+            {
                 gtk_combo_box_popdown(GTK_COMBO_BOX(ptask->overwrite_combo));
+            }
             if (ptask->error_combo)
+            {
                 gtk_combo_box_popdown(GTK_COMBO_BOX(ptask->error_combo));
+            }
             gtk_widget_destroy(ptask->progress_dlg);
             ptask->progress_dlg = nullptr;
             break;
@@ -647,42 +705,54 @@ set_progress_icon(PtkFileTask* ptask)
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (task->state_pause != VFSFileTaskState::RUNNING)
+    {
         pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "media-playback-pause",
                                           16,
                                           GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
+    }
     else if (task->err_count)
+    {
         pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "error",
                                           16,
                                           GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
+    }
     else if (task->type == VFSFileTaskType::MOVE || task->type == VFSFileTaskType::COPY ||
              task->type == VFSFileTaskType::LINK || task->type == VFSFileTaskType::TRASH)
+    {
         pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "stock_copy",
                                           16,
                                           GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
+    }
     else if (task->type == VFSFileTaskType::DELETE)
+    {
         pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "stock_delete",
                                           16,
                                           GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
+    }
     else if (task->type == VFSFileTaskType::EXEC && !task->exec_icon.empty())
+    {
         pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           task->exec_icon.data(),
                                           16,
                                           GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
+    }
     else
+    {
         pixbuf = gtk_icon_theme_load_icon(icon_theme,
                                           "gtk-execute",
                                           16,
                                           GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                           nullptr);
+    }
     gtk_window_set_icon(GTK_WINDOW(ptask->progress_dlg), pixbuf);
 }
 
@@ -691,7 +761,9 @@ on_overwrite_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 {
     i32 overwrite_mode = gtk_combo_box_get_active(box);
     if (overwrite_mode < 0)
+    {
         overwrite_mode = 0;
+    }
     ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode(overwrite_mode));
 }
 
@@ -700,7 +772,9 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 {
     i32 error_mode = gtk_combo_box_get_active(box);
     if (error_mode < 0)
+    {
         error_mode = 0;
+    }
     ptask->err_mode = PTKFileTaskPtaskError(error_mode);
 }
 
@@ -727,7 +801,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     };
 
     if (ptask->progress_dlg)
+    {
         return;
+    }
 
     // ztd::logger::info("ptk_file_task_progress_open");
 
@@ -817,7 +893,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
             gtk_grid_attach(grid, GTK_WIDGET(ptask->to), 1, row, 1, 1);
         }
         else
+        {
             ptask->to = nullptr;
+        }
 
         // Stats
         row++;
@@ -846,11 +924,17 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
     std::string status;
     if (task->state_pause == VFSFileTaskState::PAUSE)
+    {
         status = "Paused";
+    }
     else if (task->state_pause == VFSFileTaskState::QUEUE)
+    {
         status = "Queued";
+    }
     else
+    {
         status = "Running...";
+    }
     ptask->errors = GTK_LABEL(gtk_label_new(status.data()));
     gtk_widget_set_halign(GTK_WIDGET(ptask->errors), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(ptask->errors), GtkAlign::GTK_ALIGN_CENTER);
@@ -911,9 +995,11 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                                            overwrite_option.data());
         }
         if (overtask)
+        {
             gtk_combo_box_set_active(
                 GTK_COMBO_BOX(ptask->overwrite_combo),
                 task->overwrite_mode < overwrite_options.size() ? task->overwrite_mode : 0);
+        }
         g_signal_connect(G_OBJECT(ptask->overwrite_combo),
                          "changed",
                          G_CALLBACK(on_overwrite_combo_changed),
@@ -962,11 +1048,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                        true,
                        0);
     if (overwrite_align)
+    {
         gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(ptask->progress_dlg))),
                            GTK_WIDGET(overwrite_align),
                            false,
                            true,
                            5);
+    }
 
     i32 win_width, win_height;
     if (task->type == VFSFileTaskType::EXEC)
@@ -980,23 +1068,35 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::Y);
     }
     if (!win_width)
+    {
         win_width = 750;
+    }
     if (!win_height)
+    {
         win_height = -1;
+    }
     gtk_window_set_default_size(GTK_WINDOW(ptask->progress_dlg), win_width, win_height);
     gtk_button_box_set_layout(
         GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(ptask->progress_dlg))),
         GTK_BUTTONBOX_END);
     if (xset_get_b(XSetName::TASK_POP_TOP))
+    {
         gtk_window_set_type_hint(GTK_WINDOW(ptask->progress_dlg),
                                  GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+    }
     else
+    {
         gtk_window_set_type_hint(GTK_WINDOW(ptask->progress_dlg),
                                  GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_NORMAL);
+    }
     if (xset_get_b(XSetName::TASK_POP_ABOVE))
+    {
         gtk_window_set_keep_above(GTK_WINDOW(ptask->progress_dlg), true);
+    }
     if (xset_get_b(XSetName::TASK_POP_STICK))
+    {
         gtk_window_stick(GTK_WINDOW(ptask->progress_dlg));
+    }
     gtk_window_set_gravity(GTK_WINDOW(ptask->progress_dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(ptask->progress_dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     gtk_window_set_role(GTK_WINDOW(ptask->progress_dlg), "task_dialog");
@@ -1013,12 +1113,18 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     gtk_widget_show_all(ptask->progress_dlg);
     if (ptask->overwrite_combo && !xset_get_b(XSetName::TASK_POP_OVER))
+    {
         gtk_widget_hide(ptask->overwrite_combo);
+    }
     if (ptask->error_combo && !xset_get_b(XSetName::TASK_POP_ERR))
+    {
         gtk_widget_hide(ptask->error_combo);
+    }
     if (overwrite_align && !gtk_widget_get_visible(ptask->overwrite_combo) &&
         !gtk_widget_get_visible(ptask->error_combo))
+    {
         gtk_widget_hide(overwrite_align);
+    }
     gtk_widget_grab_focus(ptask->progress_btn_close);
 
     // icon
@@ -1026,12 +1132,14 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     // auto scroll - must be after show_all
     if (!task->exec_scroll_lock)
+    {
         gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(ptask->error_view),
                                      ptask->log_end,
                                      0.0,
                                      false,
                                      0,
                                      0);
+    }
 
     ptask->progress_count = 50; // trigger fast display
     // ztd::logger::info("ptk_file_task_progress_open DONE");
@@ -1043,7 +1151,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     if (!ptask->progress_dlg)
     {
         if (ptask->pause_change)
+        {
             ptask->pause_change = false; // stop elapsed timer
+        }
         return;
     }
 
@@ -1066,12 +1176,18 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         gtk_widget_set_sensitive(ptask->progress_btn_pause, false);
         gtk_widget_set_sensitive(ptask->progress_btn_close, true);
         if (ptask->overwrite_combo)
+        {
             gtk_widget_set_sensitive(ptask->overwrite_combo, false);
+        }
         if (ptask->error_combo)
+        {
             gtk_widget_set_sensitive(ptask->error_combo, false);
+        }
 
         if (task->type != VFSFileTaskType::EXEC)
+        {
             ufile_path = nullptr;
+        }
         else
         {
             const std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
@@ -1079,13 +1195,19 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
 
         if (ptask->aborted)
+        {
             window_title = "Stopped";
+        }
         else
         {
             if (task->err_count)
+            {
                 window_title = "Errors";
+            }
             else
+            {
                 window_title = "Done";
+            }
         }
         gtk_window_set_title(GTK_WINDOW(ptask->progress_dlg), window_title);
         if (!ufile_path)
@@ -1159,9 +1281,13 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     }
     gtk_label_set_markup(ptask->from, ufile_path);
     if (ptask->src_dir)
+    {
         gtk_label_set_text(ptask->src_dir, usrc_dir.data());
+    }
     if (ptask->to)
+    {
         gtk_label_set_text(ptask->to, udest.data());
+    }
     free(ufile_path);
 
     // progress bar
@@ -1170,13 +1296,17 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->percent >= 0)
         {
             if (task->percent > 100)
+            {
                 task->percent = 100;
+            }
             gtk_progress_bar_set_fraction(ptask->progress_bar, ((f64)task->percent) / 100);
             const std::string percent_str = fmt::format("{} %", task->percent);
             gtk_progress_bar_set_text(ptask->progress_bar, percent_str.data());
         }
         else
+        {
             gtk_progress_bar_set_fraction(ptask->progress_bar, 0);
+        }
         gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ptask->progress_bar), true);
     }
     else if (ptask->complete)
@@ -1184,9 +1314,13 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (!ptask->task->custom_percent)
         {
             if (task->exec_is_error || ptask->aborted)
+            {
                 gtk_progress_bar_set_fraction(ptask->progress_bar, 0);
+            }
             else
+            {
                 gtk_progress_bar_set_fraction(ptask->progress_bar, 1);
+            }
             gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ptask->progress_bar), true);
         }
     }
@@ -1204,17 +1338,22 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (ptask->complete)
         {
             if (ptask->pop_detail)
+            {
                 stats = fmt::format("#{}  ({}) [{}] @avg {}",
                                     ptask->dsp_file_count,
                                     ptask->dsp_size_tally,
                                     ptask->dsp_elapsed,
                                     ptask->dsp_avgspeed);
+            }
             else
+            {
                 stats = fmt::format("{} ({})", ptask->dsp_size_tally, ptask->dsp_avgspeed);
+            }
         }
         else
         {
             if (ptask->pop_detail)
+            {
                 stats = fmt::format("#{} ({}) [{}] @cur {} ({}) @avg {} ({})",
                                     ptask->dsp_file_count,
                                     ptask->dsp_size_tally,
@@ -1223,11 +1362,14 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                                     ptask->dsp_curest,
                                     ptask->dsp_avgspeed,
                                     ptask->dsp_avgest);
+            }
             else
+            {
                 stats = fmt::format("{}  ({})  {} remaining",
                                     ptask->dsp_size_tally,
                                     ptask->dsp_avgspeed,
                                     ptask->dsp_avgest);
+            }
         }
         gtk_label_set_text(ptask->current, stats.data());
     }
@@ -1273,44 +1415,66 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             if (task->err_count && task->type != VFSFileTaskType::EXEC)
             {
                 if (ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_FIRST)
+                {
                     errs = "Error  ( Stop If First )";
+                }
                 else if (ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_ANY)
+                {
                     errs = "Error  ( Stop On Any )";
+                }
                 else
+                {
                     errs = fmt::format("Stopped with {} error", task->err_count);
+                }
             }
             else
+            {
                 errs = "Stopped";
+            }
         }
         else
         {
             if (task->type != VFSFileTaskType::EXEC)
             {
                 if (task->err_count)
+                {
                     errs = fmt::format("Finished with {} error", task->err_count);
+                }
                 else
+                {
                     errs = "Done";
+                }
             }
             else
             {
                 if (task->exec_exit_status)
+                {
                     errs = fmt::format("Finished with error  ( exit status {} )",
                                        task->exec_exit_status);
+                }
                 else if (task->exec_is_error)
+                {
                     errs = "Finished with error";
+                }
                 else
+                {
                     errs = "Done";
+                }
             }
         }
     }
     else if (task->state_pause == VFSFileTaskState::PAUSE)
     {
         if (task->type != VFSFileTaskType::EXEC)
+        {
             errs = "Paused";
+        }
         else
         {
             if (task->exec_pid)
+            {
                 errs = fmt::format("Paused  ( pid {} )", task->exec_pid);
+            }
             else
             {
                 errs = fmt::format("Paused  ( exit status {} )", task->exec_exit_status);
@@ -1321,11 +1485,15 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     else if (task->state_pause == VFSFileTaskState::QUEUE)
     {
         if (task->type != VFSFileTaskType::EXEC)
+        {
             errs = ztd::strdup("Queued");
+        }
         else
         {
             if (task->exec_pid)
+            {
                 errs = fmt::format("Queued  ( pid {} )", task->exec_pid);
+            }
             else
             {
                 errs = fmt::format("Queued  ( exit status {} )", task->exec_exit_status);
@@ -1338,14 +1506,20 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->type != VFSFileTaskType::EXEC)
         {
             if (task->err_count)
+            {
                 errs = fmt::format("Running with {} error", task->err_count);
+            }
             else
+            {
                 errs = "Running...";
+            }
         }
         else
         {
             if (task->exec_pid)
+            {
                 errs = fmt::format("Running...  ( pid {} )", task->exec_pid);
+            }
             else
             {
                 errs = fmt::format("Running...  ( exit status {} )", task->exec_exit_status);
@@ -1407,19 +1581,29 @@ ptk_file_task_update(PtkFileTask* ptask)
             }
             g_spawn_close_pid(task->exec_pid);
             if (task->exec_channel_out)
+            {
                 g_io_channel_shutdown(task->exec_channel_out, true, nullptr);
+            }
             if (task->exec_channel_err)
+            {
                 g_io_channel_shutdown(task->exec_channel_err, true, nullptr);
+            }
             task->exec_channel_out = task->exec_channel_err = nullptr;
             if (status)
             {
                 if (WIFEXITED(status))
+                {
                     task->exec_exit_status = WEXITSTATUS(status);
+                }
                 else
+                {
                     task->exec_exit_status = -1;
+                }
             }
             else
+            {
                 task->exec_exit_status = 0;
+            }
             ztd::logger::info("child ZOMBIED  pid={} exit_status={}",
                               task->exec_pid,
                               task->exec_exit_status);
@@ -1443,9 +1627,13 @@ ptk_file_task_update(PtkFileTask* ptask)
                 task->last_progress = task->progress;
             }
             else if (since_last > 0.1)
+            {
                 cur_speed = (task->progress - task->last_progress) / since_last;
+            }
             else
+            {
                 cur_speed = 0;
+            }
         }
         // calc percent
         i32 ipercent;
@@ -1455,9 +1643,13 @@ ptk_file_task_update(PtkFileTask* ptask)
             ipercent = (i32)(dpercent * 100);
         }
         else
+        {
             ipercent = 50; // total_size calculation timed out
+        }
         if (ipercent != task->percent)
+        {
             task->percent = ipercent;
+        }
     }
 
     // elapsed
@@ -1465,14 +1657,22 @@ ptk_file_task_update(PtkFileTask* ptask)
     std::string elapsed;
     std::string elapsed2;
     if (hours != 0)
+    {
         elapsed = fmt::format("{}", hours);
+    }
     u32 mins = (timer_elapsed - (hours * 3600)) / 60;
     if (hours > 0)
+    {
         elapsed2 = fmt::format("{}:{:02d}", elapsed, mins);
+    }
     else if (mins > 0)
+    {
         elapsed2 = fmt::format("{}", mins);
+    }
     else
+    {
         elapsed2 = elapsed;
+    }
     u32 secs = (timer_elapsed - (hours * 3600) - (mins * 60));
     const std::string elapsed3 = fmt::format("{}:{:02d}", elapsed2, secs);
     ptask->dsp_elapsed = elapsed3;
@@ -1492,22 +1692,34 @@ ptk_file_task_update(PtkFileTask* ptask)
         // size
         size_str = vfs_file_size_format(task->progress);
         if (task->total_size)
+        {
             size_str2 = vfs_file_size_format(task->total_size);
+        }
         else
+        {
             size_str2 = "??"; // total_size calculation timed out
+        }
         const std::string size_tally = fmt::format("{} / {}", size_str, size_str2);
         // cur speed display
         if (task->last_speed != 0)
+        {
             // use speed of last 2 sec interval if available
             cur_speed = task->last_speed;
+        }
         if (cur_speed == 0 || task->state_pause != VFSFileTaskState::RUNNING)
         {
             if (task->state_pause == VFSFileTaskState::PAUSE)
+            {
                 speed1 = "paused";
+            }
             else if (task->state_pause == VFSFileTaskState::QUEUE)
+            {
                 speed1 = "queued";
+            }
             else
+            {
                 speed1 = "stalled";
+            }
         }
         else
         {
@@ -1517,52 +1729,80 @@ ptk_file_task_update(PtkFileTask* ptask)
         // avg speed
         std::time_t avg_speed;
         if (timer_elapsed > 0)
+        {
             avg_speed = task->progress / timer_elapsed;
+        }
         else
+        {
             avg_speed = 0;
+        }
         size_str2 = vfs_file_size_format(avg_speed);
         speed2 = fmt::format("{}/s", size_str2);
 
         // remain cur
         off_t remain;
         if (cur_speed > 0 && task->total_size != 0)
+        {
             remain = (task->total_size - task->progress) / cur_speed;
+        }
         else
+        {
             remain = 0;
+        }
         if (remain <= 0)
+        {
             remain1 = ""; // n/a
+        }
         else if (remain > 3599)
         {
             hours = remain / 3600;
             if (remain - (hours * 3600) > 1799)
+            {
                 hours++;
+            }
             remain1 = fmt::format("{}/h", hours);
         }
         else if (remain > 59)
+        {
             remain1 =
                 fmt::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
+        }
         else
+        {
             remain1 = fmt::format(":{:02}", remain);
+        }
 
         // remain avg
         if (avg_speed > 0 && task->total_size != 0)
+        {
             remain = (task->total_size - task->progress) / avg_speed;
+        }
         else
+        {
             remain = 0;
+        }
         if (remain <= 0)
+        {
             remain2 = ""; // n/a
+        }
         else if (remain > 3599)
         {
             hours = remain / 3600;
             if (remain - (hours * 3600) > 1799)
+            {
                 hours++;
+            }
             remain2 = fmt::format("{}/h", hours);
         }
         else if (remain > 59)
+        {
             remain2 =
                 fmt::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
+        }
         else
+        {
             remain2 = fmt::format(":{:02}", remain);
+        }
 
         ptask->dsp_file_count = file_count;
         ptask->dsp_size_tally = size_tally;
@@ -1601,32 +1841,40 @@ ptk_file_task_update(PtkFileTask* ptask)
                                                        50000);
             }
             else
+            {
                 // trim to 700 lines
                 gtk_text_buffer_get_iter_at_line(ptask->log_buf,
                                                  &iter,
                                                  gtk_text_buffer_get_line_count(ptask->log_buf) -
                                                      700);
+            }
             gtk_text_buffer_get_start_iter(ptask->log_buf, &siter);
             gtk_text_buffer_delete(ptask->log_buf, &siter, &iter);
             gtk_text_buffer_get_start_iter(ptask->log_buf, &siter);
             if (task->type == VFSFileTaskType::EXEC)
+            {
                 gtk_text_buffer_insert(
                     ptask->log_buf,
                     &siter,
                     "[ SNIP - additional output above has been trimmed from this log ]\n",
                     -1);
+            }
             else
+            {
                 gtk_text_buffer_insert(
                     ptask->log_buf,
                     &siter,
                     "[ SNIP - additional errors above have been trimmed from this log ]\n",
                     -1);
+            }
         }
 
         if (task->type == VFSFileTaskType::EXEC && task->exec_show_output)
         {
             if (!ptask->keep_dlg)
+            {
                 ptask->keep_dlg = true;
+            }
             if (!ptask->progress_dlg)
             {
                 // disable this line to open every time output occurs
@@ -1664,7 +1912,9 @@ ptk_file_task_update(PtkFileTask* ptask)
             ptask->keep_dlg = true;
             if (ptask->complete || ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_ANY ||
                 (task->error_first && ptask->err_mode == PTKFileTaskPtaskError::PTASK_ERROR_FIRST))
+            {
                 gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
+            }
         }
         else if (task->type == VFSFileTaskType::EXEC && ptask->err_count != task->err_count)
         {
@@ -1679,7 +1929,9 @@ ptk_file_task_update(PtkFileTask* ptask)
     ptk_file_task_progress_update(ptask);
 
     if (!ptask->timeout && !ptask->complete)
+    {
         main_task_view_update_task(ptask);
+    }
 
     task->unlock();
     // ztd::logger::info("ptk_file_task_update DONE ptask={:p}", fmt::ptr(ptask));
@@ -1701,7 +1953,9 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
 
             task->lock();
             if (task->type != VFSFileTaskType::EXEC)
+            {
                 task->current_file.clear();
+            }
             ptask->progress_count = 50; // trigger fast display
             task->unlock();
             // gtk_signal_emit_by_name( G_OBJECT( ptask->signal_widget ), "task-notify",
@@ -1787,11 +2041,17 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
         const char* old_name = (const char*)g_object_get_data(G_OBJECT(widget), "old_name");
         GtkWidget* dlg = gtk_widget_get_toplevel(widget);
         if (!GTK_IS_DIALOG(dlg))
+        {
             return true;
+        }
         if (new_name && !ztd::same(new_name, old_name))
+        {
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_RENAME);
+        }
         else
+        {
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_AUTO_RENAME);
+        }
         free(new_name);
         return true;
     }
@@ -1808,10 +2068,14 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     free(new_name);
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))
+    {
         return;
+    }
     GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "rename_button"));
     if (GTK_IS_WIDGET(rename_button))
+    {
         gtk_widget_set_sensitive(rename_button, can_rename);
+    }
     gtk_dialog_set_response_sensitive(GTK_DIALOG(dlg), RESPONSE_OVERWRITE, !can_rename);
     gtk_dialog_set_response_sensitive(GTK_DIALOG(dlg), RESPONSE_OVERWRITEALL, !can_rename);
 }
@@ -1827,8 +2091,10 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case RESPONSE_OVERWRITEALL:
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::OVERWRITE_ALL);
             if (ptask->progress_dlg)
+            {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
                                          VFSFileTaskOverwriteMode::OVERWRITE_ALL);
+            }
             break;
         case RESPONSE_OVERWRITE:
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::OVERWRITE);
@@ -1836,8 +2102,10 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case RESPONSE_SKIPALL:
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::SKIP_ALL);
             if (ptask->progress_dlg)
+            {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
                                          VFSFileTaskOverwriteMode::SKIP_ALL);
+            }
             break;
         case RESPONSE_SKIP:
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::SKIP);
@@ -1845,8 +2113,10 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case RESPONSE_AUTO_RENAME_ALL:
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::AUTO_RENAME);
             if (ptask->progress_dlg)
+            {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->overwrite_combo),
                                          VFSFileTaskOverwriteMode::AUTO_RENAME);
+            }
             break;
         case RESPONSE_AUTO_RENAME:
         case RESPONSE_RENAME:
@@ -1925,18 +2195,28 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
 {
     GtkWidget* dlg = gtk_widget_get_toplevel(widget);
     if (!GTK_IS_DIALOG(dlg))
+    {
         return;
+    }
     GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "rename_button"));
     GtkWidget* auto_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "auto_button"));
     if (!rename_button || !auto_button)
+    {
         return;
+    }
     i32 response;
     if (widget == rename_button)
+    {
         response = RESPONSE_RENAME;
+    }
     else if (widget == auto_button)
+    {
         response = RESPONSE_AUTO_RENAME;
+    }
     else
+    {
         response = RESPONSE_AUTO_RENAME_ALL;
+    }
     query_overwrite_response(GTK_DIALOG(dlg), response, ptask);
 }
 
@@ -1959,11 +2239,17 @@ query_overwrite(PtkFileTask* ptask)
     std::string from_disp;
 
     if (ptask->task->type == VFSFileTaskType::MOVE)
+    {
         from_disp = "Moving from directory:";
+    }
     else if (ptask->task->type == VFSFileTaskType::LINK)
+    {
         from_disp = "Linking from directory:";
+    }
     else
+    {
         from_disp = "Copying from directory:";
+    }
 
     const bool different_files = (!ztd::same(ptask->task->current_file, ptask->task->current_dest));
 
@@ -1996,11 +2282,17 @@ query_overwrite(PtkFileTask* ptask)
             const bool is_dest_sym = std::filesystem::is_symlink(ptask->task->current_dest);
 
             if (is_src_sym)
+            {
                 src_link = "\t<b>( link )</b>";
+            }
             if (is_dest_sym)
+            {
                 dest_link = "\t<b>( link )</b>";
+            }
             if (is_src_sym && !is_dest_sym)
+            {
                 link_warn = "\t<b>! overwrite file with link !</b>";
+            }
             if (src_stat.size() == dest_stat.size())
             {
                 src_size = "<b>( same size )</b>";
@@ -2010,9 +2302,13 @@ query_overwrite(PtkFileTask* ptask)
                 const std::string size_str = vfs_file_size_format(src_stat.size());
                 src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.size());
                 if (src_stat.size() > dest_stat.size())
+                {
                     src_rel_size = "larger";
+                }
                 else
+                {
                     src_rel_size = "smaller";
+                }
             }
             if (src_stat.mtime() == dest_stat.mtime())
             {
@@ -2029,9 +2325,13 @@ query_overwrite(PtkFileTask* ptask)
                 src_time = src_date.str();
 
                 if (src_stat.mtime() > dest_stat.mtime())
+                {
                     src_rel_time = "newer";
+                }
                 else
+                {
                     src_rel_time = "older";
+                }
             }
             const std::string size_str = vfs_file_size_format(dest_stat.size());
             const std::string dest_size =
@@ -2072,7 +2372,9 @@ query_overwrite(PtkFileTask* ptask)
         has_overwrite_btn = false;
         title = "Rename Required";
         if (!different_files)
+        {
             from_disp = "In directory:";
+        }
         message = "<b>Filename already exists.</b>  Please rename or select an action.";
     }
 
@@ -2106,9 +2408,13 @@ query_overwrite(PtkFileTask* ptask)
 
     // create dialog
     if (ptask->progress_dlg)
+    {
         parent_win = GTK_WIDGET(ptask->progress_dlg);
+    }
     else
+    {
         parent_win = GTK_WIDGET(ptask->parent_window);
+    }
     dlg =
         gtk_dialog_new_with_buttons(title.data(),
                                     GTK_WINDOW(parent_win),
@@ -2137,9 +2443,13 @@ query_overwrite(PtkFileTask* ptask)
         height = xset_get_int(XSetName::TASK_POPUPS, XSetVar::Z);
     }
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
+    }
     else if (!has_overwrite_btn)
+    {
         gtk_widget_set_size_request(GTK_WIDGET(dlg), 600, -1);
+    }
 
     GtkWidget* align = gtk_alignment_new(1, 0, 1, 1);
     gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 14, 7, 7);
@@ -2291,7 +2601,9 @@ query_overwrite(PtkFileTask* ptask)
     ptk_file_task_progress_update(ptask);
     if (ptask->task_view &&
         gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(ptask->task_view))))
+    {
         main_task_view_update_task(ptask);
+    }
 
     // show dialog
     g_object_set_data(G_OBJECT(dlg), "rename_button", rename_button);

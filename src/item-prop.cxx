@@ -242,7 +242,9 @@ ContextData::ContextData()
 ContextData::~ContextData()
 {
     if (this->temp_cmd_line)
+    {
         free(this->temp_cmd_line);
+    }
     gtk_widget_destroy(this->dlg);
 }
 
@@ -361,12 +363,16 @@ get_element_next(char** s)
     char* ret;
 
     if (!*s)
+    {
         return nullptr;
+    }
     char* sep = strstr(*s, "%%%%%");
     if (!sep)
     {
         if (*s[0] == '\0')
+        {
             return (*s = nullptr);
+        }
         ret = ztd::strdup(*s);
         *s = nullptr;
         return ret;
@@ -382,18 +388,26 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
     char* vs;
     vs = get_element_next(s);
     if (!vs)
+    {
         return false;
+    }
     *sub = std::stol(vs);
     free(vs);
     if (*sub < 0 || *sub >= (i32)context_subs.size())
+    {
         return false;
+    }
     vs = get_element_next(s);
     *comp = std::stol(vs);
     free(vs);
     if (*comp < 0 || *comp >= (i32)context_comps.size())
+    {
         return false;
+    }
     if (!(*value = get_element_next(s)))
+    {
         *value = ztd::strdup("");
+    }
     return true;
 }
 
@@ -422,22 +436,32 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
     // get valid action and match
     char* elements = rules;
     if (!(s = get_element_next(&elements)))
+    {
         return 0;
+    }
     const i32 action = std::stol(s);
     free(s);
     if (action < 0 || action > 3)
+    {
         return 0;
+    }
 
     if (!(s = get_element_next(&elements)))
+    {
         return 0;
+    }
     const i32 match = std::stol(s);
     free(s);
     if (match < 0 || match > 3)
+    {
         return 0;
+    }
 
     if (action != ItemPropContextState::CONTEXT_HIDE &&
         action != ItemPropContextState::CONTEXT_SHOW && def_disable)
+    {
         return ItemPropContextState::CONTEXT_DISABLE;
+    }
 
     // parse rules
     bool is_rules = false;
@@ -452,9 +476,13 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
         do
         {
             if ((sep = strstr(eleval, "||")))
+            {
                 sep_type = 1;
+            }
             else if ((sep = strstr(eleval, "&&")))
+            {
                 sep_type = 2;
+            }
 
             if (sep)
             {
@@ -516,7 +544,9 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
                     }
                     free(s);
                     if (comp == ItemPropContextComp::CONTEXT_COMP_MATCH)
+                    {
                         test = !test;
+                    }
                     break;
                 default:
                     test = match == ItemPropContextTest::NANY ||
@@ -527,20 +557,28 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
             {
                 if (test)
                 {
-                    if (sep_type == 1) // ||
+                    if (sep_type == 1)
+                    { // ||
                         break;
+                    }
                 }
                 else
                 {
-                    if (sep_type == 2) // &&
+                    if (sep_type == 2)
+                    { // &&
                         break;
+                    }
                 }
                 eleval = sep + 2;
                 while (eleval[0] == ' ')
+                {
                     eleval++;
+                }
             }
             else
+            {
                 eleval[0] = '\0';
+            }
         } while (eleval[0] != '\0');
         free(value);
 
@@ -550,18 +588,24 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
             no_match = false;
             if (match == ItemPropContextTest::ANY || match == ItemPropContextTest::NANY ||
                 match == ItemPropContextTest::NALL)
+            {
                 break;
+            }
         }
         else
         {
             all_match = false;
             if (match == ItemPropContextTest::ALL)
+            {
                 break;
+            }
         }
     }
 
     if (!is_rules)
+    {
         return ItemPropContextState::CONTEXT_SHOW;
+    }
 
     bool is_match;
     switch (match)
@@ -598,7 +642,9 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
     }
     // ItemPropContextState::CONTEXT_HIDE
     if (is_match)
+    {
         return ItemPropContextState::CONTEXT_HIDE;
+    }
     return def_disable ? ItemPropContextState::CONTEXT_DISABLE : ItemPropContextState::CONTEXT_SHOW;
 }
 
@@ -653,13 +699,19 @@ enable_context(ContextData* ctxt)
         {
             const i32 action = xset_context_test(ctxt->context, rules, false);
             if (action == ItemPropContextState::CONTEXT_HIDE)
+            {
                 text = "Current: Hide";
+            }
             else if (action == ItemPropContextState::CONTEXT_DISABLE)
+            {
                 text = "Current: Disable";
+            }
             else if (action == ItemPropContextState::CONTEXT_SHOW &&
                      gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)) ==
                          ItemPropContextState::CONTEXT_DISABLE)
+            {
                 text = "Current: Enable";
+            }
         }
         gtk_label_set_text(ctxt->test, text.data());
     }
@@ -677,9 +729,13 @@ context_display(i32 sub, i32 comp, const char* value)
 {
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
+    {
         disp = fmt::format("{} {} \"{}\"", context_subs.at(sub), context_comps.at(comp), value);
+    }
     else
+    {
         disp = fmt::format("{} {} {}", context_subs.at(sub), context_comps.at(comp), value);
+    }
     return ztd::strdup(disp);
 }
 
@@ -695,15 +751,21 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
         const i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
         const i32 comp = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_comp));
         if (sub < 0 || comp < 0)
+        {
             return;
+        }
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
         if (widget == GTK_WIDGET(ctxt->btn_add))
+        {
             gtk_list_store_append(GTK_LIST_STORE(model), &it);
+        }
         else
         {
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view));
             if (!gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
+            {
                 return;
+            }
         }
         char* value = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(ctxt->box_value));
         char* disp = context_display(sub, comp, value);
@@ -722,8 +784,10 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
         free(value);
         gtk_widget_set_sensitive(GTK_WIDGET(ctxt->btn_ok), true);
         if (widget == GTK_WIDGET(ctxt->btn_add))
+        {
             gtk_tree_selection_select_iter(gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view)),
                                            &it);
+        }
         enable_context(ctxt);
         return;
     }
@@ -732,7 +796,9 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
     tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view));
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
+    {
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
+    }
 
     enable_context(ctxt);
 }
@@ -746,11 +812,15 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
 
     GtkTreeModel* model = gtk_combo_box_get_model(GTK_COMBO_BOX(ctxt->box_value));
     while (gtk_tree_model_get_iter_first(model, &it))
+    {
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
+    }
 
     const i32 sub = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_sub));
     if (sub < 0)
+    {
         return;
+    }
     char* elements = ztd::strdup(context_sub_lists[sub].data());
     char* def_comp = get_element_next(&elements);
     if (def_comp)
@@ -765,7 +835,9 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     }
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ctxt->box_value))), "");
     if (ctxt->context && ctxt->context->valid)
+    {
         gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub].data());
+    }
 
     free(elements);
 }
@@ -782,7 +854,9 @@ on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewC
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
     if (!gtk_tree_model_get_iter(model, &it, tree_path))
+    {
         return;
+    }
     gtk_tree_model_get(model,
                        &it,
                        ItemPropContextCol::CONTEXT_COL_VALUE,
@@ -822,7 +896,9 @@ on_context_entry_insert(GtkEntryBuffer* buf, u32 position, char* chars, u32 n_ch
     (void)n_chars;
     (void)user_data;
     if (!strchr(gtk_entry_buffer_get_text(buf), '\n'))
+    {
         return;
+    }
 
     const std::string new_text = ztd::replace(gtk_entry_buffer_get_text(buf), "\n", "");
     gtk_entry_buffer_set_text(buf, new_text.data(), -1);
@@ -843,9 +919,13 @@ on_context_entry_keypress(GtkWidget* entry, GdkEventKey* event, ContextData* ctx
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
         if (gtk_widget_get_sensitive(GTK_WIDGET(ctxt->btn_apply)))
+        {
             on_context_button_press(GTK_WIDGET(ctxt->btn_apply), ctxt);
+        }
         else
+        {
             on_context_button_press(GTK_WIDGET(ctxt->btn_add), ctxt);
+        }
         return true;
     }
     return false;
@@ -876,7 +956,9 @@ enable_options(ContextData* ctxt)
         // add default msg
         GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_msg));
         if (gtk_text_buffer_get_char_count(buf) == 0)
+        {
             gtk_text_buffer_set_text(buf, "Are you sure?", -1);
+        }
     }
     else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input)))
     {
@@ -887,7 +969,9 @@ enable_options(ContextData* ctxt)
         gtk_text_buffer_get_end_iter(buf, &iter);
         char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
         if (text && ztd::same(text, "Are you sure?"))
+        {
             gtk_text_buffer_set_text(buf, "", -1);
+        }
         free(text);
     }
 }
@@ -896,21 +980,31 @@ static bool
 is_command_script_newer(ContextData* ctxt)
 {
     if (!ctxt->script_stat_valid)
+    {
         return false;
+    }
     const char* script = xset_custom_get_script(ctxt->set, false);
     if (!script)
+    {
         return false;
+    }
 
     const auto script_stat = ztd::stat(script);
     if (!script_stat.is_valid())
+    {
         return false;
+    }
 
     if (!ctxt->script_stat.is_valid())
+    {
         return true;
+    }
 
     if (script_stat.mtime() != ctxt->script_stat.mtime() ||
         script_stat.size() != ctxt->script_stat.size())
+    {
         return true;
+    }
 
     return false;
 }
@@ -927,9 +1021,13 @@ command_script_stat(ContextData* ctxt)
 
     const auto script_stat = ztd::stat(script);
     if (script_stat.is_valid())
+    {
         ctxt->script_stat_valid = true;
+    }
     else
+    {
         ctxt->script_stat_valid = false;
+    }
 }
 
 void
@@ -1007,9 +1105,13 @@ load_command_script(ContextData* ctxt, xset_t set)
     command_script_stat(ctxt);
     free(script);
     if (have_access && geteuid() != 0)
+    {
         gtk_widget_hide(ctxt->cmd_edit_root);
+    }
     else
+    {
         gtk_widget_show(ctxt->cmd_edit_root);
+    }
 }
 
 static void
@@ -1017,7 +1119,9 @@ save_command_script(ContextData* ctxt, bool query)
 {
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     if (!gtk_text_buffer_get_modified(buf))
+    {
         return;
+    }
 
     if (query)
     {
@@ -1028,7 +1132,9 @@ save_command_script(ContextData* ctxt, bool query)
                                              "Save your changes to the command script?");
 
         if (response == GtkResponseType::GTK_RESPONSE_NO)
+        {
             return;
+        }
     }
 
     if (is_command_script_newer(ctxt))
@@ -1041,12 +1147,16 @@ save_command_script(ContextData* ctxt, bool query)
             "The command script on disk has changed.\n\nDo you want to overwrite it?");
 
         if (response == GtkResponseType::GTK_RESPONSE_NO)
+        {
             return;
+        }
     }
 
     char* script = xset_custom_get_script(ctxt->set, false);
     if (!script)
+    {
         return;
+    }
 
     GtkTextIter iter, siter;
     gtk_text_buffer_get_start_iter(buf, &siter);
@@ -1062,7 +1172,9 @@ static void
 on_script_toggled(GtkWidget* item, ContextData* ctxt)
 {
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item)))
+    {
         return;
+    }
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
     {
         // set to command line
@@ -1092,10 +1204,14 @@ on_cmd_opt_toggled(GtkWidget* item, ContextData* ctxt)
     enable_options(ctxt);
     if ((item == ctxt->cmd_opt_confirm || item == ctxt->cmd_opt_input) &&
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item)))
+    {
         gtk_widget_grab_focus(ctxt->cmd_msg);
+    }
     else if (item == ctxt->opt_terminal && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item)))
+    {
         // checking run in terminal unchecks run as task
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task), false);
+    }
 }
 
 static void
@@ -1190,9 +1306,11 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
                                           mset->name);
         }
         else
+        {
             folder = Glib::build_filename(vfs::user_dirs->program_config_dir(),
                                           "plugin-data",
                                           ctxt->set->name);
+        }
         if (!std::filesystem::exists(folder))
         {
             std::filesystem::create_directories(folder);
@@ -1203,7 +1321,9 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     {
         // Plugin Dir
         if (ctxt->set->plugin && ctxt->set->plug_dir)
+        {
             folder = ztd::strdup(ctxt->set->plug_dir);
+        }
     }
     else
     {
@@ -1211,7 +1331,9 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     }
 
     if (std::filesystem::is_directory(folder))
+    {
         open_in_prog(folder);
+    }
 }
 
 static void
@@ -1222,9 +1344,13 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
 
     xset_t keyset;
     if (ctxt->set->shared_key)
+    {
         keyset = xset_get(ctxt->set->shared_key);
+    }
     else
+    {
         keyset = ctxt->set;
+    }
     const std::string str = xset_get_keyname(keyset, 0, 0);
     gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str.data());
 }
@@ -1278,7 +1404,9 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
         load_command_script(ctxt, rset);
     }
     else
+    {
         load_text_view(GTK_TEXT_VIEW(ctxt->cmd_script), rset->line);
+    }
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     GtkTextIter siter;
     gtk_text_buffer_get_start_iter(buf, &siter);
@@ -1304,13 +1432,21 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll),
                                  !mset->scroll_lock || ctxt->reset_command);
     if (rset->menu_style == XSetMenu::CHECK)
+    {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox), true);
+    }
     else if (rset->menu_style == XSetMenu::CONFIRM)
+    {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm), true);
+    }
     else if (rset->menu_style == XSetMenu::STRING)
+    {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input), true);
+    }
     else
+    {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_normal), true);
+    }
     load_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg), rset->desc);
     enable_options(ctxt);
     if (geteuid() == 0)
@@ -1337,10 +1473,14 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     {
         // Opener
         if (mset->opener > 2 || mset->opener < 0)
+        {
             // forwards compat
             gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->opener), -1);
+        }
         else
+        {
             gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->opener), mset->opener);
+        }
     }
 }
 
@@ -1439,8 +1579,10 @@ replace_item_props(ContextData* ctxt)
                 break;
             case ItemPropItemType::ITEM_TYPE_COMMAND:
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
+                {
                     // line
                     x = XSetCMD::LINE;
+                }
                 else
                 {
                     // script
@@ -1457,9 +1599,13 @@ replace_item_props(ContextData* ctxt)
         {
             free(rset->x);
             if (x == XSetCMD::LINE)
+            {
                 rset->x = nullptr;
+            }
             else
+            {
                 rset->x = ztd::strdup(INT(x));
+            }
         }
         if (!rset->plugin)
         {
@@ -1472,13 +1618,21 @@ replace_item_props(ContextData* ctxt)
             rset->y = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
+            {
                 rset->menu_style = XSetMenu::CHECK;
+            }
             else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm)))
+            {
                 rset->menu_style = XSetMenu::CONFIRM;
+            }
             else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input)))
+            {
                 rset->menu_style = XSetMenu::STRING;
+            }
             else
+            {
                 rset->menu_style = XSetMenu::NORMAL;
+            }
             // style msg
             free(rset->desc);
             rset->desc = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg));
@@ -1489,6 +1643,7 @@ replace_item_props(ContextData* ctxt)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
             if (rset->line && std::strlen(rset->line) > 2000)
+            {
                 xset_msg_dialog(ctxt->dlg,
                                 GtkMessageType::GTK_MESSAGE_WARNING,
                                 "Command Line Too Long",
@@ -1496,9 +1651,12 @@ replace_item_props(ContextData* ctxt)
                                 "Your command line is greater than 2000 characters and may be "
                                 "truncated when saved.  Consider using a command script instead "
                                 "by selecting Script on the Command tab.");
+            }
         }
         else
+        {
             rset->line = ztd::strdup(ctxt->temp_cmd_line);
+        }
 
         // run options
         mset->in_terminal =
@@ -1520,29 +1678,39 @@ replace_item_props(ContextData* ctxt)
              item_type == ItemPropItemType::ITEM_TYPE_APP))
         {
             if (gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener)) > -1)
+            {
                 mset->opener = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener));
+            }
             // otherwise do not change for forward compat
         }
         else
+        {
             // reset if not applicable
             mset->opener = 0;
+        }
     }
     if (rset->menu_style != XSetMenu::SEP && !rset->plugin)
     {
         // name
         if (rset->lock &&
             !ztd::same(rset->menu_label, gtk_entry_get_text(GTK_ENTRY(ctxt->item_name))))
+        {
             // built-in label has been changed from default, save it
             rset->in_terminal = true;
+        }
 
         free(rset->menu_label);
         if (rset->tool > XSetTool::CUSTOM &&
             ztd::same(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                       xset_get_builtin_toolitem_label(rset->tool)))
+        {
             // do not save default label of builtin toolitems
             rset->menu_label = nullptr;
+        }
         else
+        {
             rset->menu_label = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)));
+        }
     }
     // icon
     if (rset->menu_style != XSetMenu::RADIO && rset->menu_style != XSetMenu::SEP)
@@ -1554,13 +1722,19 @@ replace_item_props(ContextData* ctxt)
         free(mset->icon);
         const char* icon_name = gtk_entry_get_text(GTK_ENTRY(ctxt->item_icon));
         if (icon_name && icon_name[0])
+        {
             mset->icon = ztd::strdup(icon_name);
+        }
         else
+        {
             mset->icon = nullptr;
+        }
 
         if (rset->lock && !ztd::same(old_icon, mset->icon))
+        {
             // built-in icon has been changed from default, save it
             rset->keep_terminal = true;
+        }
         free(old_icon);
     }
 
@@ -1587,7 +1761,9 @@ static bool
 delayed_focus(GtkWidget* widget)
 {
     if (GTK_IS_WIDGET(widget))
+    {
         gtk_widget_grab_focus(widget);
+    }
     return false;
 }
 
@@ -1656,12 +1832,16 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     GtkCellRenderer* renderer;
 
     if (!context || !set)
+    {
         return;
+    }
     const auto ctxt = new ContextData;
     ctxt->context = context;
     ctxt->set = set;
     if (set->browser)
+    {
         ctxt->parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
+    }
 
     // Dialog
     ctxt->dlg = gtk_dialog_new_with_buttons(
@@ -1677,9 +1857,13 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     i32 width = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::X);
     i32 height = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::Y);
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
+    }
     else
+    {
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), 800, 600);
+    }
 
     gtk_dialog_add_button(GTK_DIALOG(ctxt->dlg), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL);
     ctxt->btn_ok = GTK_BUTTON(
@@ -2038,11 +2222,15 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     {
         i32 i = std::stol(match);
         if (i < 0 || i > 3)
+        {
             i = 0;
+        }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_match), i);
         i = std::stol(action);
         if (i < 0 || i > 3)
+        {
             i = 0;
+        }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_action), i);
         free(match);
         free(action);
@@ -2052,9 +2240,13 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_match), 0);
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_action), 0);
         if (match)
+        {
             free(match);
+        }
         if (action)
+        {
             free(action);
+        }
     }
     // set rules
     i32 sub, comp;
@@ -2078,7 +2270,9 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
                            -1);
         free(disp);
         if (value)
+        {
             free(value);
+        }
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_sub), 0);
 
@@ -2262,9 +2456,13 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     std::string str;
     std::string path;
     if (rset->plugin)
+    {
         path = Glib::build_filename(rset->plug_dir, rset->plug_name);
+    }
     else
+    {
         path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", rset->name);
+    }
     str = fmt::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 
@@ -2291,12 +2489,18 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
 
     std::string item_type_str;
     if (set->tool > XSetTool::CUSTOM)
+    {
         item_type_str =
             fmt::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
+    }
     else if (rset->menu_style == XSetMenu::SUBMENU)
+    {
         item_type_str = "Submenu";
+    }
     else if (rset->menu_style == XSetMenu::SEP)
+    {
         item_type_str = "Separator";
+    }
     else if (set->lock)
     {
         // built-in
@@ -2366,13 +2570,19 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     if (rset->menu_style != XSetMenu::SEP)
     {
         if (set->menu_label)
+        {
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name), set->menu_label);
+        }
         else if (set->tool > XSetTool::CUSTOM)
+        {
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name),
                                xset_get_builtin_toolitem_label(set->tool));
+        }
     }
     else
+    {
         gtk_widget_set_sensitive(ctxt->item_name, false);
+    }
     // key
     if (rset->menu_style < XSetMenu::SUBMENU || set->tool == XSetTool::BACK_MENU ||
         set->tool == XSetTool::FWD_MENU)
@@ -2380,17 +2590,25 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
         std::string str2;
         xset_t keyset;
         if (set->shared_key)
+        {
             keyset = xset_get(set->shared_key);
+        }
         else
+        {
             keyset = set;
+        }
         str2 = xset_get_keyname(keyset, 0, 0);
         gtk_button_set_label(GTK_BUTTON(ctxt->item_key), str2.data());
     }
     else
+    {
         gtk_widget_set_sensitive(ctxt->item_key, false);
+    }
     // icon
     if (rset->icon || mset->icon)
+    {
         gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon), mset->icon ? mset->icon : rset->icon);
+    }
     gtk_widget_set_sensitive(ctxt->item_icon,
                              rset->menu_style != XSetMenu::RADIO &&
                                  rset->menu_style != XSetMenu::SEP);
@@ -2455,9 +2673,13 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     enable_context(ctxt);
     if (page &&
         gtk_widget_get_visible(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), page)))
+    {
         gtk_notebook_set_current_page(GTK_NOTEBOOK(ctxt->notebook), page);
+    }
     else
+    {
         gtk_widget_grab_focus(ctxt->set->plugin ? ctxt->item_icon : ctxt->item_name);
+    }
 
     i32 response;
     while ((response = gtk_dialog_run(GTK_DIALOG(ctxt->dlg))))
@@ -2467,7 +2689,9 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
         {
             case GtkResponseType::GTK_RESPONSE_OK:
                 if (mset->context)
+                {
                     free(mset->context);
+                }
                 mset->context = context_build(ctxt);
                 replace_item_props(ctxt);
                 exit_loop = true;
@@ -2477,7 +2701,9 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
                 break;
         }
         if (exit_loop)
+        {
             break;
+        }
     }
 
     GtkAllocation allocation;

@@ -101,14 +101,18 @@ static bool
 on_socket_event(Glib::IOCondition condition)
 {
     if (condition != Glib::IOCondition::IO_IN)
+    {
         return true;
+    }
 
     socklen_t addr_len = 0;
     struct sockaddr_un client_addr;
 
     const i32 client = accept(sock_fd, (struct sockaddr*)&client_addr, &addr_len);
     if (client == -1)
+    {
         return true;
+    }
 
     static char buf[1024];
     std::string args;
@@ -118,12 +122,16 @@ on_socket_event(Glib::IOCondition condition)
         args.append(buf, r);
         if (args[0] == SocketEvent::CMD_SOCKET_CMD && args.size() > 1 &&
             args[args.size() - 2] == '\n' && args[args.size() - 1] == '\n')
+        {
             // because SocketEvent::CMD_SOCKET_CMD does not immediately close the socket
             // data is terminated by two linefeeds to prevent read blocking
             break;
+        }
     }
     if (args[0] == SocketEvent::CMD_SOCKET_CMD)
+    {
         receive_socket_command(client, args);
+    }
     shutdown(client, 2);
     close(client);
 
@@ -193,9 +201,13 @@ on_socket_event(Glib::IOCondition condition)
     }
 
     if (args[argx + 1])
+    {
         cli_flags.files = g_strsplit(args.data() + argx + 1, "\n", 0);
+    }
     else
+    {
         cli_flags.files = nullptr;
+    }
 
     if (cli_flags.files)
     {
@@ -222,7 +234,9 @@ get_socket_name()
     std::string dpy = Glib::getenv("DISPLAY");
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
+    {
         dpy = ":0";
+    }
 
     const std::string socket_path = fmt::format("{}/{}-{}{}.socket",
                                                 vfs::user_dirs->runtime_dir(),
@@ -278,22 +292,34 @@ single_instance_check()
         }
 
         if (cli_flags.daemon_mode)
+        {
             cmd = SocketEvent::CMD_DAEMON_MODE;
+        }
         else if (cli_flags.new_window)
         {
             if (cli_flags.panel > 0 && cli_flags.panel < 5)
+            {
                 cmd = SocketEvent::CMD_OPEN_PANEL1 + cli_flags.panel - 1;
+            }
             else
+            {
                 cmd = SocketEvent::CMD_OPEN;
+            }
         }
         else if (cli_flags.find_files)
+        {
             cmd = SocketEvent::CMD_FIND_FILES;
+        }
         else if (cli_flags.panel > 0 && cli_flags.panel < 5)
+        {
             cmd = SocketEvent::CMD_PANEL1 + cli_flags.panel - 1;
+        }
 
         // open a new window if no file spec
         if (cmd == SocketEvent::CMD_OPEN_TAB && !cli_flags.files)
+        {
             cmd = SocketEvent::CMD_OPEN;
+        }
 
         write(sock_fd, &cmd, sizeof(char));
 
@@ -320,7 +346,9 @@ single_instance_check()
         }
 
         if (cli_flags.config_dir)
+        {
             ztd::logger::warn("Option --config ignored - an instance is already running");
+        }
 
         shutdown(sock_fd, 2);
         close(sock_fd);
@@ -377,7 +405,9 @@ receive_socket_command(i32 client, const std::string& args)
     std::string reply;
 
     if (!args.empty())
+    {
         argv = g_strsplit(args.data() + 1, "\n", 0);
+    }
 
     // check inode tag - was socket command sent from the same filesystem?
     // eg this helps deter use of socket commands sent from a chroot jail
@@ -399,7 +429,9 @@ receive_socket_command(i32 client, const std::string& args)
     // send response
     write(client, &cmd, sizeof(char)); // send exit status
     if (!reply.empty())
+    {
         write(client, reply.data(), reply.size()); // send reply or error msg
+    }
 }
 
 i32

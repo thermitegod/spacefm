@@ -145,7 +145,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     // Obtaining new archive filename
     char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
     if (!path)
+    {
         return;
+    }
 
     std::string name = Glib::path_get_basename(path);
     free(path);
@@ -192,7 +194,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
                 /* It does - recording its length if its the longest match
                  * yet, and continuing */
                 if (extension.size() > len)
+                {
                     len = extension.size();
+                }
             }
         }
         free(xset_name);
@@ -420,7 +424,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     for (std::string_view archive_handler : archive_handlers)
     {
         if (archive_handler.empty())
+        {
             continue;
+        }
 
         // Fetching handler
         handler_xset = xset_is(archive_handler);
@@ -457,7 +463,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
 
             // Is last used handler?
             if (ztd::same(xset_name, handler_xset->name))
+            {
                 format = n;
+            }
             n++;
         }
     }
@@ -469,7 +477,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     xset_name = nullptr;
     n = gtk_tree_model_iter_n_children(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)), nullptr);
     if (format < 0 || format > n - 1)
+    {
         format = 0;
+    }
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), format);
 
     // Adding filter box to hbox and connecting callback
@@ -581,7 +591,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
+        {
             gtk_main_iteration();
+        }
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
@@ -740,7 +752,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                 return;
         }
         if (exit_loop)
+        {
             break;
+        }
     }
 
     // Saving dialog dimensions
@@ -820,7 +834,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
                 desc = ztd::shell::quote(s1);
             }
             else
+            {
                 desc = ztd::shell::quote(desc);
+            }
 
             // Replace sub vars  %n %N %O (and erroneous %o treat as %O)
             cmd_to_run = replace_archive_subs(command,
@@ -832,7 +848,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
 
             // Appending to final command as appropriate
             if (i == 0)
+            {
                 final_command = fmt::format("{}\n[[ $? -eq 0 ]] || fm_handle_err\n", cmd_to_run);
+            }
             else
             {
                 final_command = fmt::format("{}echo\n{}\n[[ $? -eq 0 ]] || fm_handle_err\n",
@@ -841,7 +859,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
             }
 
             if (loop_once)
+            {
                 break;
+            }
             ++i;
         }
     }
@@ -925,7 +945,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     /* Setting correct exec reference - probably causes different bash
      * to be output */
     if (file_browser)
+    {
         ptask->task->exec_browser = file_browser;
+    }
 
     // Using terminals for certain handlers
     if (run_in_terminal)
@@ -934,7 +956,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
         ptask->task->exec_sync = false;
     }
     else
+    {
         ptask->task->exec_sync = true;
+    }
 
     // Final configuration, setting custom icon
     ptask->task->exec_command = final_command;
@@ -942,7 +966,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::fi
     ptask->task->exec_export = true; // Setup SpaceFM bash variables
     xset_t set = xset_get(XSetName::NEW_ARCHIVE);
     if (set->icon)
+    {
         ptask->task->exec_icon = set->icon;
+    }
 
     // Running task
     ptk_file_task_run(ptask);
@@ -975,7 +1001,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
     // Making sure files to act on have been passed
     if (sel_files.empty() || job == PtkHandlerArchive::HANDLER_COMPRESS)
+    {
         return;
+    }
 
     /* Detecting whether this function call is actually to list the
      * contents of the archive or not... */
@@ -1018,12 +1046,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         }
 
         if (!archive_found)
+        {
             return;
+        }
     }
 
     // Determining parent of dialog
     if (file_browser)
+    {
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window));
+    }
 
     // Checking if extract to directory has not been specified
     if (dest_dir.empty() && !list_contents)
@@ -1084,7 +1116,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
             gtk_window_resize(GTK_WINDOW(dlg), width, height);
             while (gtk_events_pending())
+            {
                 gtk_main_iteration();
+            }
             gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
         }
 
@@ -1119,7 +1153,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                     return;
             }
             if (exit_loop)
+            {
                 break;
+            }
         }
 
         // Saving dialog dimensions
@@ -1138,7 +1174,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
         // Exiting if user didnt choose an extraction directory
         if (!choose_dir)
+        {
             return;
+        }
         dest = choose_dir;
     }
     else
@@ -1181,7 +1219,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                           false,
                                           true);
         if (!handlers.empty())
+        {
             handler_xset = handlers.front();
+        }
         vfs_mime_type_unref(mime_type);
 
         // Continuing to next file if a handler hasnt been found
@@ -1200,7 +1240,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
          * of the handlers needing to run in a terminal will cause all of
          * them to */
         if (!in_term)
+        {
             in_term = archive_handler_run_in_term(handler_xset, archive_operation);
+        }
 
         // Archive to list or extract:
         full_quote = ztd::shell::quote(full_path); // %x
@@ -1244,7 +1286,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                     get_name_extension(pathname);
 
                 if (filename_extension.empty())
+                {
                     continue;
+                }
 
                 // add a dot to extension
                 const std::string new_extension = fmt::format(".{}", filename_extension);
@@ -1260,7 +1304,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
              * extensions specified for the handler (they are optional)
              * - making sure filename_no_archive_ext is set in this case */
             if (filename_no_archive_ext.empty())
+            {
                 filename_no_archive_ext = filename;
+            }
 
             /* Get extraction command - Doing this here as parent
              * directory creation needs access to the command. */
@@ -1375,9 +1421,13 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
      * needs to be made */
     std::string str;
     if (create_parent)
+    {
         str = generate_bash_error_function(in_term, parent_quote);
+    }
     else
+    {
         str = generate_bash_error_function(in_term);
+    }
     final_command = fmt::format("{}\n{}", str, final_command);
     free(choose_dir);
 
@@ -1391,7 +1441,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     /* Setting correct exec reference - probably causes different bash
      * to be output */
     if (file_browser)
+    {
         ptask->task->exec_browser = file_browser;
+    }
 
     // Configuring task
     ptask->task->exec_command = final_command;
@@ -1407,7 +1459,9 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     // Setting custom icon
     xset_t set = xset_get(XSetName::ARC_EXTRACT);
     if (set->icon)
+    {
         ptask->task->exec_icon = set->icon;
+    }
 
     // Running task
     ptk_file_task_run(ptask);

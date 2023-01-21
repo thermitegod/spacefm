@@ -30,10 +30,14 @@ write_file(std::string_view path, const T data)
 {
     std::ofstream file(path.data());
     if (file.is_open())
+    {
         file << data;
+    }
 
     const bool result = file.good();
     if (!result)
+    {
         ztd::logger::error("Failed to write file: {}", path);
+    }
     return result;
 }

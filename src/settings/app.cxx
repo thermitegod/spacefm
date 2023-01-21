@@ -171,7 +171,9 @@ const std::string&
 AppSettings::get_date_format() const noexcept
 {
     if (this->date_format_custom.empty())
+    {
         return this->date_format_default;
+    }
     return this->date_format_custom;
 }
 
@@ -179,7 +181,9 @@ void
 AppSettings::set_date_format(std::string_view val) noexcept
 {
     if (val.empty())
+    {
         return;
+    }
     this->date_format_custom = val.data();
 }
 

@@ -40,10 +40,14 @@ vfs_load_icon(std::string_view icon_name, i32 size)
                            GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
 
     if (!inf && !ztd::startswith(icon_name, "/"))
+    {
         return gdk_pixbuf_new_from_file_at_size(icon_name.data(), size, size, nullptr);
+    }
 
     if (!inf)
+    {
         return nullptr;
+    }
 
     const char* file = gtk_icon_info_get_filename(inf);
     GdkPixbuf* icon = nullptr;

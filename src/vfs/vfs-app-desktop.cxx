@@ -286,7 +286,9 @@ const std::string&
 VFSAppDesktop::get_disp_name() const noexcept
 {
     if (!this->name.empty())
+    {
         return this->name;
+    }
     return this->file_name;
 }
 
@@ -330,7 +332,9 @@ VFSAppDesktop::get_icon(i32 size) const noexcept
         desktop_icon = vfs_load_icon("application-x-executable", size);
         // fallback to generic icon
         if (!desktop_icon)
+        {
             desktop_icon = vfs_load_icon("gnome-mime-application-x-executable", size);
+        }
     }
     return desktop_icon;
 }
@@ -339,11 +343,15 @@ bool
 VFSAppDesktop::open_multiple_files() const noexcept
 {
     if (this->exec.empty())
+    {
         return false;
+    }
 
     static constexpr std::array<std::string_view, 2> keys{"%U", "%F"};
     if (ztd::contains(this->exec, keys))
+    {
         return true;
+    }
 
     return false;
 }
@@ -409,7 +417,9 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         for (std::string& arg : argv)
         {
             if (!ztd::contains(arg, "%c"))
+            {
                 continue;
+            }
 
             arg = ztd::replace(arg, "%c", this->get_disp_name());
             break;
@@ -421,7 +431,9 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         for (std::string& arg : argv)
         {
             if (!ztd::contains(arg, "%k"))
+            {
                 continue;
+            }
 
             arg = ztd::replace(arg, "%k", this->get_full_path());
             break;
@@ -433,7 +445,9 @@ VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
         for (std::string& arg : argv)
         {
             if (!ztd::contains(arg, "%i"))
+            {
                 continue;
+            }
 
             arg = ztd::replace(arg, "%i", fmt::format("--icon {}", this->get_icon_name()));
             break;
@@ -506,7 +520,9 @@ VFSAppDesktop::exec_desktop(std::string_view working_dir,
 {
     const std::vector<std::string> argv = this->app_exec_to_argv(file_paths, this->use_terminal());
     if (argv.empty())
+    {
         return;
+    }
 
     if (this->use_terminal())
     {

@@ -90,7 +90,9 @@ static void
 init_folder()
 {
     if (folder_initialized)
+    {
         return;
+    }
 
     vfs_volume_init();
     vfs_thumbnail_init();
@@ -115,7 +117,9 @@ static void
 init_daemon()
 {
     if (daemon_initialized)
+    {
         return;
+    }
 
     init_folder();
 
@@ -137,7 +141,9 @@ open_in_tab(MainWindow** main_window, const char* real_path)
     {
         // initialize things required by folder view
         if (!cli_flags.daemon_mode)
+        {
             init_folder();
+        }
 
         // preload panel?
         if (cli_flags.panel > 0 && cli_flags.panel < 5)
@@ -218,7 +224,9 @@ handle_parsed_commandline_args()
 
     // no files were specified from cli
     if (!cli_flags.files)
+    {
         cli_flags.files = default_files;
+    }
 
     // get the last active window on this desktop, if available
     MainWindow* main_window = nullptr;
@@ -241,9 +249,13 @@ handle_parsed_commandline_args()
         for (dir = cli_flags.files; *dir; ++dir)
         {
             if (!*dir)
+            {
                 continue;
+            }
             if (std::filesystem::is_directory(*dir))
+            {
                 search_dirs.emplace_back(*dir);
+            }
         }
 
         find_files(search_dirs);
@@ -263,7 +275,9 @@ handle_parsed_commandline_args()
         {
             // skip empty string
             if (!**file)
+            {
                 continue;
+            }
 
             const std::string real_path = std::filesystem::absolute(*file);
 
@@ -284,7 +298,9 @@ handle_parsed_commandline_args()
                         ptk_location_view_open_block(real_path, false);
                     }
                     else
+                    {
                         ptk_location_view_open_block(real_path, true);
+                    }
                     ret = true;
                     gtk_window_present(GTK_WINDOW(main_window));
                 }
@@ -297,7 +313,9 @@ handle_parsed_commandline_args()
                      ztd::startswith(*file, "//"))
             {
                 if (main_window)
+                {
                     main_window_open_network(main_window, *file, true);
+                }
                 else
                 {
                     open_in_tab(&main_window, "/");
@@ -320,7 +338,9 @@ handle_parsed_commandline_args()
         {
             // initialize things required by folder view
             if (!cli_flags.daemon_mode)
+            {
                 init_folder();
+            }
             main_window_store_positions(nullptr);
             main_window = MAIN_WINDOW_REINTERPRET(main_window_new());
         }
@@ -344,7 +364,9 @@ handle_parsed_commandline_args()
     // ztd::logger::info("    handle_parsed_commandline_args mw = {:p}", main_window);
 
     if (cli_flags.files != default_files)
+    {
         g_strfreev(cli_flags.files);
+    }
     cli_flags.files = nullptr;
 
     return ret;
@@ -399,7 +421,9 @@ main(i32 argc, char* argv[])
             std::string sock_reply;
             const i32 ret = send_socket_command(argc, argv, sock_reply);
             if (!sock_reply.empty())
+            {
                 fmt::print("{}\n", sock_reply);
+            }
             std::exit(ret);
         }
     }
@@ -462,7 +486,9 @@ main(i32 argc, char* argv[])
 
     // Sets custom config dir
     if (cli_flags.config_dir)
+    {
         vfs::user_dirs->program_config_dir(cli_flags.config_dir);
+    }
 
     // load config file
     load_settings();

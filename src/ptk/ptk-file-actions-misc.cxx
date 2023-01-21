@@ -46,7 +46,9 @@ action_dialog(GtkWindow* parent_win, std::string_view title, std::string_view me
     gtk_widget_destroy(dlg);
 
     if (response != GtkResponseType::GTK_RESPONSE_YES)
+    {
         return false;
+    }
     return true;
 }
 
@@ -55,14 +57,18 @@ ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
                  const std::vector<vfs::file_info>& sel_files, GtkTreeView* task_view)
 {
     if (sel_files.empty())
+    {
         return;
+    }
 
     if (app_settings.get_confirm_delete())
     {
         const std::string msg = fmt::format("Delete {} selected item ?", sel_files.size());
         const bool ret = action_dialog(parent_win, "Confirm Delete", msg);
         if (!ret)
+        {
             return;
+        }
     }
 
     std::vector<std::string> file_list;
@@ -84,14 +90,18 @@ ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
                 const std::vector<vfs::file_info>& sel_files, GtkTreeView* task_view)
 {
     if (sel_files.empty())
+    {
         return;
+    }
 
     if (app_settings.get_confirm_trash())
     {
         const std::string msg = fmt::format("Trash {} selected item ?", sel_files.size());
         const bool ret = action_dialog(parent_win, "Confirm Trash", msg);
         if (!ret)
+        {
             return;
+        }
     }
 
     std::vector<std::string> file_list;

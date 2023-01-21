@@ -58,7 +58,9 @@ parse_bookmarks(std::string_view raw_line) noexcept
     const std::string book_name = book_parts[2];
 
     if (book_path.empty())
+    {
         return;
+    }
 
     // ztd::logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
 
@@ -70,14 +72,20 @@ load_bookmarks() noexcept
 {
     // If not the first time calling then need to remove loaded bookmarks
     if (!bookmarks.empty())
+    {
         bookmarks.clear();
+    }
 
     if (bookmark_file.empty())
+    {
         bookmark_file = Glib::build_filename(vfs::user_dirs->config_dir(), "gtk-3.0", "bookmarks");
+    }
 
     // no bookmark file
     if (!std::filesystem::exists(bookmark_file))
+    {
         return;
+    }
 
     std::string line;
     std::ifstream file(bookmark_file);
@@ -95,7 +103,9 @@ void
 save_bookmarks() noexcept
 {
     if (!bookmarks_changed)
+    {
         return;
+    }
     bookmarks_changed = false;
 
     std::string book_entry;

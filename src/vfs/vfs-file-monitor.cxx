@@ -136,7 +136,9 @@ static void
 vfs_file_monitor_disconnect_from_inotify()
 {
     if (!inotify_io_channel)
+    {
         return;
+    }
 
     close(inotify_fd);
     inotify_fd = -1;
@@ -154,7 +156,9 @@ bool
 vfs_file_monitor_init()
 {
     if (!vfs_file_monitor_connect_to_inotify())
+    {
         return false;
+    }
     return true;
 }
 
@@ -206,7 +210,9 @@ vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback ca
                         void* user_data)
 {
     if (!monitor || !callback)
+    {
         return;
+    }
 
     for (vfs::file_monitor_callback_entry installed_callback : monitor->callbacks)
     {
@@ -233,7 +239,9 @@ vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent e
 {
     // Call the callback functions
     if (monitor->callbacks.empty())
+    {
         return;
+    }
 
     for (vfs::file_monitor_callback_entry cb : monitor->callbacks)
     {
@@ -272,7 +280,9 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
             for (const auto& fm : monitor_map)
             {
                 if (fm.second->wd != event->wd)
+                {
                     continue;
+                }
 
                 monitor = fm.second;
                 break;

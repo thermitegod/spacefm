@@ -62,11 +62,15 @@ get_cwd(GtkEntry* entry)
 {
     const char* entry_txt = gtk_entry_get_text(entry);
     if (!entry_txt)
+    {
         return vfs::user_dirs->home_dir();
+    }
 
     const std::string path = entry_txt;
     if (path.empty())
+    {
         return vfs::user_dirs->home_dir();
+    }
 
     if (ztd::startswith(path, "/"))
     {
@@ -84,11 +88,15 @@ static bool
 seek_path(GtkEntry* entry)
 {
     if (!GTK_IS_ENTRY(entry))
+    {
         return false;
+    }
 
     EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
+    {
         return false;
+    }
 
     if (edata->seek_timer)
     {
@@ -97,17 +105,23 @@ seek_path(GtkEntry* entry)
     }
 
     if (!xset_get_b(XSetName::PATH_SEEK))
+    {
         return false;
+    }
 
     const char* entry_txt = gtk_entry_get_text(entry);
     if (!entry_txt)
+    {
         return false;
+    }
     const std::string path = entry_txt;
 
     // get dir and name prefix
     const std::string cwd = get_cwd(entry);
     if (!std::filesystem::is_directory(cwd))
+    {
         return false; // entry does not contain a valid dir
+    }
 
     const std::string seek_name = Glib::path_get_basename(path);
     const std::string seek_dir = Glib::build_filename(cwd, seek_name);
@@ -132,7 +146,9 @@ seek_path(GtkEntry* entry)
             {
                 const std::string full_path = Glib::build_filename(seek_dir, file_name);
                 if (std::filesystem::is_directory(full_path))
+                {
                     count++;
+                }
             }
         }
     }
@@ -147,11 +163,15 @@ seek_path_delayed(GtkEntry* entry, u32 delay = 250)
 {
     EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
+    {
         return;
+    }
 
     // user is still typing - restart timer
     if (edata->seek_timer)
+    {
         g_source_remove(edata->seek_timer);
+    }
     edata->seek_timer = g_timeout_add(delay, (GSourceFunc)seek_path, entry);
 }
 
@@ -167,7 +187,9 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
     gtk_tree_model_get(model, it, PTKPathEntryCol::COL_NAME, &name, -1);
 
     if (!name)
+    {
         return false;
+    }
 
     if (*key == 0 || g_ascii_strncasecmp(name, key, std::strlen(key)) == 0)
     {
@@ -184,7 +206,9 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 {
     const char* text = gtk_entry_get_text(entry);
     if (!text)
+    {
         return;
+    }
 
     // dir completion
     const std::string fn = ztd::rpartition(text, "/")[2];
@@ -193,7 +217,9 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
     const std::string cwd = get_cwd(entry);
     const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
     if (old_dir && ztd::same(cwd, old_dir))
+    {
         return;
+    }
 
     g_object_set_data_full(G_OBJECT(completion), "cwd", ztd::strdup(cwd), free);
 
@@ -206,7 +232,9 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             const std::string file_name = std::filesystem::path(file).filename();
             const std::string full_path = Glib::build_filename(cwd, file_name);
             if (std::filesystem::is_directory(full_path))
+            {
                 name_list.emplace_back(full_path);
+            }
         }
 
         std::ranges::sort(name_list);
@@ -258,11 +286,15 @@ insert_complete(GtkEntry* entry)
     // find a real completion
     const char* prefix = gtk_entry_get_text(GTK_ENTRY(entry));
     if (!prefix)
+    {
         return;
+    }
 
     const std::string cwd = get_cwd(entry);
     if (!std::filesystem::is_directory(cwd))
+    {
         return;
+    }
 
     // find longest common prefix
     i32 count = 0;
@@ -271,7 +303,9 @@ insert_complete(GtkEntry* entry)
     std::string long_prefix;
 
     if (!ztd::endswith(prefix, "/"))
+    {
         prefix_name = Glib::path_get_basename(prefix);
+    }
 
     for (const auto& file : std::filesystem::directory_iterator(cwd))
     {
@@ -279,13 +313,17 @@ insert_complete(GtkEntry* entry)
         const std::string full_path = Glib::build_filename(cwd, file_name);
 
         if (!std::filesystem::is_directory(full_path))
+        {
             continue;
+        }
 
         if (prefix_name.empty())
         { // full match
             last_path = full_path;
             if (++count > 1)
+            {
                 break;
+            }
         }
         else if (ztd::startswith(file_name, prefix_name))
         { // prefix matches
@@ -298,7 +336,9 @@ insert_complete(GtkEntry* entry)
             {
                 i32 i = 0;
                 while (file_name[i] && file_name[i] == long_prefix[i])
+                {
                     i++;
+                }
 
                 if (i && long_prefix[i])
                 {
@@ -318,9 +358,13 @@ insert_complete(GtkEntry* entry)
     {
         const std::string full_path = Glib::build_filename(cwd, long_prefix);
         if (count == 1 && std::filesystem::is_directory(full_path))
+        {
             new_prefix = fmt::format("{}/", full_path);
+        }
         else
+        {
             new_prefix = full_path;
+        }
     }
     if (!new_prefix.empty())
     {
@@ -352,7 +396,9 @@ on_key_press(GtkWidget* entry, GdkEventKey* evt, EntryData* edata)
     {
         const u32 keymod = ptk_get_keymod(evt->state);
         if (keymod)
+        {
             return false;
+        }
 
         insert_complete(GTK_ENTRY(entry));
         on_changed(GTK_ENTRY(entry), nullptr);
@@ -473,7 +519,9 @@ static void
 on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 {
     if (!file_browser)
+    {
         return;
+    }
 
     xset_t set;
 

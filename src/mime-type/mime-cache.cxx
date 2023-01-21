@@ -80,7 +80,9 @@ MimeCache::load_mime_file()
     const i32 fd = open(this->file_path.data(), O_RDONLY, 0);
 
     if (fd < 0)
+    {
         return;
+    }
 
     const auto mime_stat = ztd::stat(fd);
 
@@ -159,7 +161,9 @@ MimeCache::lookup_literal(std::string_view filename)
     i32 middle = upper / 2;
 
     if (!entries)
+    {
         return nullptr;
+    }
 
     /* binary search */
     while (upper >= lower)
@@ -169,11 +173,17 @@ MimeCache::lookup_literal(std::string_view filename)
         const char* str = this->buffer + VAL32(entry, 0);
         const i32 comp = ztd::compare(filename, str);
         if (comp < 0)
+        {
             upper = middle - 1;
+        }
         else if (comp > 0)
+        {
             lower = middle + 1;
-        else /* comp == 0 */
+        }
+        else
+        { /* comp == 0 */
             return (this->buffer + VAL32(entry, 4));
+        }
         middle = (upper + lower) / 2;
     }
 
@@ -187,7 +197,9 @@ MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
     const u32 n = this->n_suffix_roots;
 
     if (n == 0)
+    {
         return nullptr;
+    }
 
     const char* _suffix_pos = (const char*)-1;
     const usize fn_len = filename.size();
@@ -196,7 +208,9 @@ MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
         this->lookup_reverse_suffix_nodes(this->buffer, root, n, filename, suffix, &_suffix_pos);
 
     if (!leaf_node)
+    {
         return nullptr;
+    }
 
     const char* mime_type = this->buffer + VAL32(leaf_node, 4);
     // ztd::logger::debug("found: {}", mime_type);
@@ -210,12 +224,16 @@ MimeCache::lookup_magic(const char* data, u32 len)
     const char* magic = this->magics;
 
     if (!data || (len == 0) || !magic)
+    {
         return nullptr;
+    }
 
     for (usize i = 0; i < this->n_magics; ++i, magic += 16)
     {
         if (magic_match(this->buffer, magic, data, len))
+        {
             return this->buffer + VAL32(magic, 4);
+        }
     }
     return nullptr;
 }
@@ -253,7 +271,9 @@ MimeCache::lookup_parents(std::string_view mime_type)
     const char* found_parents =
         this->lookup_str_in_entries(this->parents, this->n_parents, mime_type);
     if (!found_parents)
+    {
         return result;
+    }
 
     const u32 n = VAL32(found_parents, 0);
     found_parents += 4;
@@ -293,7 +313,9 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, std::string_view st
     i32 middle = upper / 2;
 
     if (!entries || str.empty())
+    {
         return nullptr;
+    }
 
     /* binary search */
     while (upper >= lower)
@@ -303,11 +325,17 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, std::string_view st
 
         const i32 comp = ztd::compare(str, str2);
         if (comp < 0)
+        {
             upper = middle - 1;
+        }
         else if (comp > 0)
+        {
             lower = middle + 1;
-        else /* comp == 0 */
+        }
+        else
+        { /* comp == 0 */
             return (this->buffer + VAL32(entry, 4));
+        }
 
         middle = (upper + lower) / 2;
     }
@@ -340,15 +368,21 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
             for (; i < val_len; ++i)
             {
                 if ((data[offset + i] & mask[i]) != value[i])
+                {
                     break;
+                }
             }
             if (i >= val_len)
+            {
                 match = true;
+            }
         }
         else /* direct comparison */
         {
             if (memcmp(value, data + offset, val_len) == 0)
+            {
                 match = true;
+            }
         }
 
         if (match)
@@ -361,7 +395,9 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
                 for (usize i = 0; i < n_children; ++i, rule += 32)
                 {
                     if (magic_rule_match(buf, rule, data, len))
+                    {
                         return true;
+                    }
                 }
             }
             else
@@ -381,8 +417,12 @@ MimeCache::magic_match(const char* buf, const char* magic, const char* data, u32
     const char* rule = buf + rules_off;
 
     for (usize i = 0; i < n_rules; ++i, rule += 32)
+    {
         if (magic_rule_match(buf, rule, data, len))
+        {
             return true;
+        }
+    }
     return false;
 }
 
@@ -417,7 +457,9 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
             if (n_children > 0)
             {
                 if (uchar == 0)
+                {
                     return nullptr;
+                }
 
                 if (!name || name[0] == 0)
                 {

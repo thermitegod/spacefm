@@ -146,19 +146,29 @@ struct MoveSet
 MoveSet::~MoveSet()
 {
     if (this->full_path)
+    {
         free(this->full_path);
+    }
     if (this->new_path)
+    {
         free(this->new_path);
+    }
     if (this->desc)
+    {
         free(this->desc);
+    }
     if (this->mime_type)
+    {
         free(this->mime_type);
+    }
 }
 
 AutoOpenCreate::~AutoOpenCreate()
 {
     if (this->path)
+    {
         free(this->path);
+    }
 }
 
 static void on_toggled(GtkMenuItem* item, MoveSet* mset);
@@ -177,7 +187,9 @@ on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
             case GDK_KEY_Return:
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
+                {
                     gtk_dialog_response(GTK_DIALOG(mset->dlg), GtkResponseType::GTK_RESPONSE_OK);
+                }
                 return true;
             default:
                 break;
@@ -199,7 +211,9 @@ on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
             case GDK_KEY_Return:
             case GDK_KEY_KP_Enter:
                 if (gtk_widget_get_sensitive(GTK_WIDGET(mset->next)))
+                {
                     gtk_dialog_response(GTK_DIALOG(mset->dlg), GtkResponseType::GTK_RESPONSE_OK);
+                }
                 return true;
             default:
                 break;
@@ -259,12 +273,18 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
              gtk_entry_get_text(GTK_ENTRY(mset->entry_target))[0] == '/'))
         {
             if (!mset->is_dir)
+            {
                 mset->is_dir = true;
+            }
         }
         else if (mset->is_dir)
+        {
             mset->is_dir = false;
+        }
         if (mset->is_dir && gtk_widget_is_focus(GTK_WIDGET(mset->entry_ext)))
+        {
             gtk_widget_grab_focus(GTK_WIDGET(mset->input_name));
+        }
         gtk_widget_set_sensitive(GTK_WIDGET(mset->entry_ext), !mset->is_dir);
         gtk_widget_set_sensitive(GTK_WIDGET(mset->label_ext), !mset->is_dir);
     }
@@ -280,9 +300,13 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         char* ext;
 
         if (widget == GTK_WIDGET(mset->buf_name))
+        {
             mset->last_widget = GTK_WIDGET(mset->input_name);
+        }
         else
+        {
             mset->last_widget = GTK_WIDGET(mset->entry_ext);
+        }
 
         gtk_text_buffer_get_start_iter(mset->buf_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_name, &iter);
@@ -304,16 +328,26 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         // update full_name
         if (name && ext)
+        {
             full_name = fmt::format("{}.{}", name, ext);
+        }
         else if (name && !ext)
+        {
             full_name = name;
+        }
         else if (!name && ext)
+        {
             full_name = ext;
+        }
         else
+        {
             full_name = "";
+        }
 
         if (name)
+        {
             free(name);
+        }
         gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
         // update full_path
@@ -355,9 +389,13 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         gtk_text_buffer_set_text(mset->buf_name, filename_no_extension.data(), -1);
         if (!filename_extension.empty())
+        {
             gtk_entry_set_text(mset->entry_ext, filename_extension.data());
+        }
         else
+        {
             gtk_entry_set_text(mset->entry_ext, "");
+        }
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -428,9 +466,13 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         // update name & ext
         if (full_path[0] == '\0')
+        {
             full_name = "";
+        }
         else
+        {
             full_name = Glib::path_get_basename(full_path);
+        }
 
         path = Glib::path_get_dirname(full_path);
         if (ztd::same(path, "."))
@@ -452,19 +494,31 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         gtk_text_buffer_set_text(mset->buf_name, filename_no_extension.data(), -1);
         if (!filename_extension.empty())
+        {
             gtk_entry_set_text(mset->entry_ext, filename_extension.data());
+        }
         else
+        {
             gtk_entry_set_text(mset->entry_ext, "");
+        }
 
         // update full_name
         if (!filename_no_extension.empty() && !filename_extension.empty())
+        {
             full_name = fmt::format("{}.{}", filename_no_extension, filename_extension);
+        }
         else if (!filename_no_extension.empty() && filename_extension.empty())
+        {
             full_name = filename_no_extension;
+        }
         else if (filename_no_extension.empty() && !filename_extension.empty())
+        {
             full_name = filename_extension;
+        }
         else
+        {
             full_name = "";
+        }
         gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
         // update path
@@ -504,7 +558,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             {
                 full_path_exists = true;
                 if (std::filesystem::is_directory(full_path))
+                {
                     full_path_exists_dir = true;
+                }
             }
         }
     }
@@ -517,12 +573,16 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         {
             full_path_exists = true;
             if (std::filesystem::is_directory(full_path))
+            {
                 full_path_exists_dir = true;
+            }
         }
         else if (path_stat.is_valid())
         {
             if (!std::filesystem::is_directory(path))
+            {
                 path_exists_file = true;
+            }
         }
         else
         {
@@ -644,7 +704,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     {
         mset->is_move = is_move;
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move)))
+        {
             gtk_button_set_label(GTK_BUTTON(mset->next), is_move != 0 ? "_Move" : "_Rename");
+        }
     }
 
     if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
@@ -656,7 +718,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
 
     if (mset->open)
+    {
         gtk_widget_set_sensitive(mset->open, gtk_widget_get_sensitive(mset->next));
+    }
 
     g_signal_handlers_unblock_matched(mset->entry_ext,
                                       GSignalMatchType::G_SIGNAL_MATCH_FUNC,
@@ -699,11 +763,15 @@ static void
 select_input(GtkWidget* widget, MoveSet* mset)
 {
     if (GTK_IS_EDITABLE(widget))
+    {
         gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+    }
     else if (GTK_IS_COMBO_BOX(widget))
+    {
         gtk_editable_select_region(GTK_EDITABLE(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget)))),
                                    0,
                                    -1);
+    }
     else
     {
         GtkTextIter iter, siter;
@@ -748,21 +816,35 @@ on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
         {
             GtkWidget* input = nullptr;
             if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+            {
                 input = mset->input_name;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
+            {
                 input = mset->input_full_name;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
+            {
                 input = mset->input_path;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
+            {
                 input = mset->input_full_path;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->entry_target))))
+            {
                 input = GTK_WIDGET(mset->entry_target);
+            }
             else if (gtk_widget_get_visible(
                          gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))))
+            {
                 input = GTK_WIDGET(mset->combo_template);
+            }
             else if (gtk_widget_get_visible(
                          gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))))
+            {
                 input = GTK_WIDGET(mset->combo_template_dir);
+            }
             if (input)
             {
                 select_input(input, mset);
@@ -773,13 +855,21 @@ on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
         {
             GtkWidget* input = nullptr;
             if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
+            {
                 input = mset->input_full_path;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
+            {
                 input = mset->input_path;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
+            {
                 input = mset->input_full_name;
+            }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+            {
                 input = mset->input_name;
+            }
             if (input)
             {
                 select_input(input, mset);
@@ -826,7 +916,9 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         {
             dir = Glib::path_get_dirname(mset->full_path);
             if (text)
+            {
                 name = text;
+            }
         }
     }
     else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
@@ -843,9 +935,13 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         {
             dir = get_template_dir();
             if (dir.empty())
+            {
                 dir = Glib::path_get_dirname(mset->full_path);
+            }
             if (text)
+            {
                 name = text;
+            }
         }
     }
     else
@@ -862,9 +958,13 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         {
             dir = get_template_dir();
             if (dir.empty())
+            {
                 dir = Glib::path_get_dirname(mset->full_path);
+            }
             if (text)
+            {
                 name = text;
+            }
         }
     }
 
@@ -898,7 +998,9 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
+        {
             gtk_main_iteration();
+        }
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
@@ -909,18 +1011,26 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         char* path = new_path;
         GtkWidget* w;
         if (widget == GTK_WIDGET(mset->browse_target))
+        {
             w = GTK_WIDGET(mset->entry_target);
+        }
         else
         {
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
+            {
                 w = gtk_bin_get_child(GTK_BIN(mset->combo_template));
+            }
             else
+            {
                 w = gtk_bin_get_child(GTK_BIN(mset->combo_template_dir));
+            }
             dir = get_template_dir();
             if (!dir.empty())
             {
                 if (ztd::startswith(new_path, dir) && new_path[dir.size()] == '/')
+                {
                     path = new_path + dir.size() + 1;
+                }
             }
         }
         gtk_entry_set_text(GTK_ENTRY(w), path);
@@ -973,7 +1083,9 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
                                         GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
                 gtk_window_resize(GTK_WINDOW(dlg), width, height);
                 while (gtk_events_pending())
+                {
                     gtk_main_iteration();
+                }
                 gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
             }
             return;
@@ -991,7 +1103,9 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 
     xset_t set = xset_get(XSetName::MOVE_DLG_HELP);
     if (set->z)
+    {
         mode_default = xset_get_int(XSetName::MOVE_DLG_HELP, XSetVar::Z);
+    }
 
     // action create directory does not work properly so not used:
     //  it creates a directory by default with no way to stop it
@@ -1056,7 +1170,9 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (gtk_events_pending())
+        {
             gtk_main_iteration();
+        }
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
@@ -1067,7 +1183,9 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
         {
             if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
+            {
                 continue;
+            }
 
             std::string str;
             switch (i)
@@ -1139,11 +1257,17 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         btn_label = ztd::strdup("Create");
         action = ztd::strdup("Create New");
         if (new_file)
+        {
             desc = ztd::strdup("File");
+        }
         else if (new_folder)
+        {
             desc = ztd::strdup("Directory");
+        }
         else if (new_link)
+        {
             desc = ztd::strdup("Link");
+        }
     }
     else
     {
@@ -1188,40 +1312,58 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 
     const char* root_msg;
     if (as_root)
+    {
         root_msg = ztd::strdup(" As Root");
+    }
     else
+    {
         root_msg = ztd::strdup("");
+    }
 
     // Window Icon
     const char* win_icon;
     if (as_root)
+    {
         win_icon = ztd::strdup("gtk-dialog-warning");
+    }
     else if (mset->create_new)
+    {
         win_icon = ztd::strdup("gtk-new");
+    }
     else
+    {
         win_icon = ztd::strdup("gtk-edit");
+    }
     GdkPixbuf* pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
                                                  win_icon,
                                                  16,
                                                  GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                                  nullptr);
     if (pixbuf)
+    {
         gtk_window_set_icon(GTK_WINDOW(mset->dlg), pixbuf);
+    }
 
     // title
     if (!desc)
+    {
         desc = mset->desc;
+    }
     const std::string title = fmt::format("{} {}{}", action, desc, root_msg);
     gtk_window_set_title(GTK_WINDOW(mset->dlg), title.data());
 
     if (btn_label)
+    {
         gtk_button_set_label(GTK_BUTTON(mset->next), btn_label);
+    }
 
     mset->full_path_same = false;
     mset->mode_change = true;
     on_move_change(GTK_WIDGET(mset->buf_full_path), mset);
     if (mset->create_new)
+    {
         on_toggled(nullptr, mset);
+    }
 }
 
 static void
@@ -1233,11 +1375,15 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     // opts
     if (xset_get_b(XSetName::MOVE_COPY) || mset->clip_copy)
+    {
         gtk_widget_show(mset->opt_copy);
+    }
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy)))
+        {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
+        }
         gtk_widget_hide(mset->opt_copy);
     }
 
@@ -1248,30 +1394,42 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link)))
+        {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
+        }
         gtk_widget_hide(mset->opt_link);
     }
 
     if (xset_get_b(XSetName::MOVE_COPYT) && mset->is_link)
+    {
         gtk_widget_show(mset->opt_copy_target);
+    }
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target)))
+        {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
+        }
         gtk_widget_hide(mset->opt_copy_target);
     }
 
     if (xset_get_b(XSetName::MOVE_LINKT) && mset->is_link)
+    {
         gtk_widget_show(mset->opt_link_target);
+    }
     else
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target)))
+        {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
+        }
         gtk_widget_hide(mset->opt_link_target);
     }
 
     if (xset_get_b(XSetName::MOVE_AS_ROOT))
+    {
         gtk_widget_show(mset->opt_as_root);
+    }
     else
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_as_root), false);
@@ -1418,11 +1576,17 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         {
         }
         else if (gtk_widget_get_visible(GTK_WIDGET(mset->blank_path)))
+        {
             gtk_widget_hide(GTK_WIDGET(mset->blank_path));
+        }
         else if (gtk_widget_get_visible(GTK_WIDGET(mset->blank_full_name)))
+        {
             gtk_widget_hide(GTK_WIDGET(mset->blank_full_name));
+        }
         else if (gtk_widget_get_visible(GTK_WIDGET(mset->blank_name)))
+        {
             gtk_widget_hide(GTK_WIDGET(mset->blank_name));
+        }
     }
 }
 
@@ -1497,58 +1661,94 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
     {
         case GTK_DIR_TAB_FORWARD:
             if (widget == GTK_WIDGET(mset->label_name))
+            {
                 input = mset->input_name;
+            }
             else if (widget == GTK_WIDGET(mset->label_ext))
+            {
                 input = GTK_WIDGET(mset->entry_ext);
+            }
             else if (widget == GTK_WIDGET(mset->label_full_name))
+            {
                 input = mset->input_full_name;
+            }
             else if (widget == GTK_WIDGET(mset->label_path))
+            {
                 input = mset->input_path;
+            }
             else if (widget == GTK_WIDGET(mset->label_full_path))
+            {
                 input = mset->input_full_path;
+            }
             else if (widget == GTK_WIDGET(mset->label_type))
             {
                 on_button_focus(mset->options, GTK_DIR_TAB_FORWARD, mset);
                 return true;
             }
             else if (widget == GTK_WIDGET(mset->label_target))
+            {
                 input = GTK_WIDGET(mset->entry_target);
+            }
             else if (widget == GTK_WIDGET(mset->label_template))
             {
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
+                {
                     input = GTK_WIDGET(mset->combo_template);
+                }
                 else
+                {
                     input = GTK_WIDGET(mset->combo_template_dir);
+                }
             }
             break;
         case GTK_DIR_TAB_BACKWARD:
             if (widget == GTK_WIDGET(mset->label_name))
             {
                 if (mset->combo_template_dir)
+                {
                     input = GTK_WIDGET(mset->combo_template_dir);
+                }
                 else if (mset->combo_template)
+                {
                     input = GTK_WIDGET(mset->combo_template);
+                }
                 else if (mset->entry_target)
+                {
                     input = GTK_WIDGET(mset->entry_target);
+                }
                 else
+                {
                     input = mset->input_full_path;
+                }
             }
             else if (widget == GTK_WIDGET(mset->label_ext))
+            {
                 input = mset->input_name;
+            }
             else if (widget == GTK_WIDGET(mset->label_full_name))
             {
                 if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->entry_ext))) &&
                     gtk_widget_get_sensitive(GTK_WIDGET(mset->entry_ext)))
+                {
                     input = GTK_WIDGET(mset->entry_ext);
+                }
                 else
+                {
                     input = mset->input_name;
+                }
             }
             else if (widget == GTK_WIDGET(mset->label_path))
+            {
                 input = mset->input_full_name;
+            }
             else if (widget == GTK_WIDGET(mset->label_full_path))
+            {
                 input = mset->input_path;
+            }
             else
+            {
                 input = mset->input_full_path;
+            }
 
             first_input = input;
             while (input && !gtk_widget_get_visible(gtk_widget_get_parent(input)))
@@ -1557,52 +1757,86 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
                 if (input == GTK_WIDGET(mset->combo_template_dir))
                 {
                     if (mset->combo_template)
+                    {
                         input2 = GTK_WIDGET(mset->combo_template);
+                    }
                     else if (mset->entry_target)
+                    {
                         input2 = GTK_WIDGET(mset->entry_target);
+                    }
                     else
+                    {
                         input2 = mset->input_full_path;
+                    }
                 }
                 else if (input == GTK_WIDGET(mset->combo_template))
                 {
                     if (mset->entry_target)
+                    {
                         input2 = GTK_WIDGET(mset->entry_target);
+                    }
                     else
+                    {
                         input2 = mset->input_full_path;
+                    }
                 }
                 else if (input == GTK_WIDGET(mset->entry_target))
+                {
                     input2 = mset->input_full_path;
+                }
                 else if (input == mset->input_full_path)
+                {
                     input2 = mset->input_path;
+                }
                 else if (input == mset->input_path)
+                {
                     input2 = mset->input_full_name;
+                }
                 else if (input == mset->input_full_name)
                 {
                     if (gtk_widget_get_visible(
                             gtk_widget_get_parent(GTK_WIDGET(mset->entry_ext))) &&
                         gtk_widget_get_sensitive(GTK_WIDGET(mset->entry_ext)))
+                    {
                         input2 = GTK_WIDGET(mset->entry_ext);
+                    }
                     else
+                    {
                         input2 = mset->input_name;
+                    }
                 }
                 else if (input == GTK_WIDGET(mset->entry_ext))
+                {
                     input2 = mset->input_name;
+                }
                 else if (input == mset->input_name)
                 {
                     if (mset->combo_template_dir)
+                    {
                         input2 = GTK_WIDGET(mset->combo_template_dir);
+                    }
                     else if (mset->combo_template)
+                    {
                         input2 = GTK_WIDGET(mset->combo_template);
+                    }
                     else if (mset->entry_target)
+                    {
                         input2 = GTK_WIDGET(mset->entry_target);
+                    }
                     else
+                    {
                         input2 = mset->input_full_path;
+                    }
                 }
 
                 if (input2 == first_input)
+                {
                     input = nullptr;
+                }
                 else
+                {
                     input = input2;
+                }
             }
             break;
         case GTK_DIR_UP:
@@ -1633,18 +1867,26 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     GtkTextBuffer* buf = nullptr;
 
     if (widget == GTK_WIDGET(mset->label_name))
+    {
         buf = mset->buf_name;
+    }
     else if (widget == GTK_WIDGET(mset->label_ext))
     {
         gtk_clipboard_set_text(clip, gtk_entry_get_text(mset->entry_ext), -1);
         return;
     }
     else if (widget == GTK_WIDGET(mset->label_full_name))
+    {
         buf = mset->buf_full_name;
+    }
     else if (widget == GTK_WIDGET(mset->label_path))
+    {
         buf = mset->buf_path;
+    }
     else if (widget == GTK_WIDGET(mset->label_full_path))
+    {
         buf = mset->buf_full_path;
+    }
     else if (widget == GTK_WIDGET(mset->label_type))
     {
         gtk_clipboard_set_text(clip, mset->mime_type, -1);
@@ -1659,14 +1901,20 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     {
         GtkWidget* w;
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
+        {
             w = gtk_bin_get_child(GTK_BIN(mset->combo_template));
+        }
         else
+        {
             w = gtk_bin_get_child(GTK_BIN(mset->combo_template_dir));
+        }
         gtk_clipboard_set_text(clip, gtk_entry_get_text(GTK_ENTRY(w)), -1);
     }
 
     if (!buf)
+    {
         return;
+    }
 
     GtkTextIter iter;
     GtkTextIter siter;
@@ -1686,31 +1934,49 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
         {
             GtkWidget* input = nullptr;
             if (widget == GTK_WIDGET(mset->label_name))
+            {
                 input = mset->input_name;
+            }
             else if (widget == GTK_WIDGET(mset->label_ext))
+            {
                 input = GTK_WIDGET(mset->entry_ext);
+            }
             else if (widget == GTK_WIDGET(mset->label_full_name))
+            {
                 input = mset->input_full_name;
+            }
             else if (widget == GTK_WIDGET(mset->label_path))
+            {
                 input = mset->input_path;
+            }
             else if (widget == GTK_WIDGET(mset->label_full_path))
+            {
                 input = mset->input_full_path;
+            }
             else if (widget == GTK_WIDGET(mset->label_type))
             {
                 gtk_label_select_region(mset->label_mime, 0, -1);
                 gtk_widget_grab_focus(GTK_WIDGET(mset->label_mime));
                 if (event->button == 2)
+                {
                     copy_entry_to_clipboard(widget, mset);
+                }
                 return true;
             }
             else if (widget == GTK_WIDGET(mset->label_target))
+            {
                 input = GTK_WIDGET(mset->entry_target);
+            }
             else if (widget == GTK_WIDGET(mset->label_template))
             {
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
+                {
                     input = GTK_WIDGET(mset->combo_template);
+                }
                 else
+                {
                     input = GTK_WIDGET(mset->combo_template_dir);
+                }
             }
 
             if (input)
@@ -1718,7 +1984,9 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
                 select_input(input, mset);
                 gtk_widget_grab_focus(input);
                 if (event->button == 2)
+                {
                     copy_entry_to_clipboard(widget, mset);
+                }
             }
         }
     }
@@ -1752,9 +2020,13 @@ get_unique_name(std::string_view dir, std::string_view ext = "")
     {
         std::string name;
         if (ext.empty())
+        {
             name = fmt::format("{}{}", base, ++n);
+        }
         else
+        {
             name = fmt::format("{}{}.{}", base, ++n, ext);
+        }
 
         path = Glib::build_filename(dir.data(), name);
     }
@@ -1787,7 +2059,9 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
     const std::string templates_path = Glib::build_filename(templates_dir.data(), subdir.data());
 
     if (!std::filesystem::is_directory(templates_path))
+    {
         return templates;
+    }
 
     for (const auto& file : std::filesystem::directory_iterator(templates_path))
     {
@@ -1801,9 +2075,13 @@ get_templates(std::string_view templates_dir, std::string_view subdir, bool getd
                 std::string subsubdir;
 
                 if (subdir.empty())
+                {
                     subsubdir = file_name;
+                }
                 else
+                {
                     subsubdir = Glib::build_filename(subdir.data(), file_name);
+                }
 
                 templates.emplace_back(subsubdir);
 
@@ -1862,7 +2140,9 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
     (void)widget;
 
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
+    {
         return;
+    }
 
     std::string ext;
 
@@ -1873,9 +2153,13 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
         // ext = ztd::strip(text);
         ext = ztd::rpartition(ext, "/")[2];
         if (ztd::contains(ext, "."))
+        {
             ext = ztd::rpartition(ext, ".")[2];
+        }
         else
+        {
             ext = "";
+        }
     }
     gtk_entry_set_text(mset->entry_ext, ext.data());
 
@@ -1909,7 +2193,9 @@ update_new_display_delayed(const char* path)
         vfs_dir_flush_notify_cache();
     }
     if (vdir)
+    {
         g_object_unref(vdir);
+    }
     return false;
 }
 
@@ -1935,38 +2221,54 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     bool target_missing = false;
 
     if (!file_dir)
+    {
         return 0;
+    }
 
     const auto mset = new MoveSet;
 
     if (!create_new)
     {
         if (!file)
+        {
             return 0;
+        }
 
         std::string full_name;
         // special processing for files with inconsistent real name and display name
         if (file->is_desktop_entry())
+        {
             full_name = Glib::filename_display_name(file->name);
+        }
         if (full_name.empty())
+        {
             full_name = file->get_disp_name();
+        }
         if (full_name.empty())
+        {
             full_name = file->get_name();
+        }
 
         mset->is_dir = file->is_directory();
         mset->is_link = file->is_symlink();
         mset->clip_copy = clip_copy;
         mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         if (dest_dir)
+        {
             mset->new_path = ztd::strdup(Glib::build_filename(dest_dir, full_name));
+        }
         else
+        {
             mset->new_path = ztd::strdup(mset->full_path);
+        }
     }
     else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK && file)
     {
         std::string full_name = file->get_disp_name();
         if (full_name.empty())
+        {
             full_name = file->get_name();
+        }
         mset->full_path = ztd::strdup(Glib::build_filename(file_dir, full_name));
         mset->new_path = ztd::strdup(mset->full_path);
         mset->is_dir = file->is_directory(); // is_dir is dynamic for create
@@ -1995,11 +2297,17 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     // Dialog
     const char* root_msg;
     if (mset->is_link)
+    {
         mset->desc = ztd::strdup("Link");
+    }
     else if (mset->is_dir)
+    {
         mset->desc = ztd::strdup("Directory");
+    }
     else
+    {
         mset->desc = ztd::strdup("File");
+    }
 
     mset->browser = file_browser;
 
@@ -2086,7 +2394,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
             mset->mime_type = ztd::strdup(target_path);
             if (std::filesystem::exists(target_path))
+            {
                 type = fmt::format("Link-> {}", target_path);
+            }
             else
             {
                 type = fmt::format("!Link-> {} (missing)", target_path);
@@ -2165,7 +2475,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             mset->browse_target = gtk_button_new();
             gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_target), false);
             if (mset->new_path && file)
+            {
                 gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->new_path);
+            }
             g_signal_connect(G_OBJECT(mset->browse_target),
                              "clicked",
                              G_CALLBACK(on_create_browse_button_press),
@@ -2180,7 +2492,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         g_signal_connect(G_OBJECT(mset->entry_target), "changed", G_CALLBACK(on_move_change), mset);
     }
     else
+    {
         mset->label_target = nullptr;
+    }
 
     // Template
     if (create_new)
@@ -2478,22 +2792,26 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                            true,
                            0);
         if (!create_new)
+        {
             gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                                GTK_WIDGET(gtk_label_new(" ")),
                                false,
                                true,
                                0);
+        }
         gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                            GTK_WIDGET(mset->entry_target),
                            true,
                            true,
                            create_new ? 3 : 0);
         if (mset->browse_target)
+        {
             gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                                GTK_WIDGET(mset->browse_target),
                                false,
                                true,
                                0);
+        }
         gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_target), false, true, 5);
     }
 
@@ -2578,13 +2896,21 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     on_opt_toggled(nullptr, mset);
 
     if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+    {
         mset->last_widget = mset->input_name;
+    }
     else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
+    {
         mset->last_widget = mset->input_full_name;
+    }
     else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
+    {
         mset->last_widget = mset->input_path;
+    }
     else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
+    {
         mset->last_widget = mset->input_full_path;
+    }
 
     // select last widget
     select_input(mset->last_widget, mset);
@@ -2627,7 +2953,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             bool overwrite = false;
 
             if (response == GtkResponseType::GTK_RESPONSE_APPLY)
+            {
                 ret = 2;
+            }
 
             if (!create_new && (mset->full_path_same || ztd::same(full_path, mset->full_path)))
             {
@@ -2652,9 +2980,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
 
             if (as_root)
+            {
                 root_msg = " As Root";
+            }
             else
+            {
                 root_msg = "";
+            }
 
             if (!std::filesystem::exists(path))
             {
@@ -2730,7 +3062,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 while (ztd::endswith(str, "/"))
                 {
                     if (str.size() == 1)
+                    {
                         break;
+                    }
                     str = ztd::removesuffix(str, "/");
                 }
 
@@ -2753,7 +3087,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 if (as_root)
+                {
                     ptask->task->exec_as_user = "root";
+                }
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
@@ -2797,23 +3133,31 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 to_path = ztd::shell::quote(full_path);
                 std::string over_cmd;
                 if (overwrite)
+                {
                     over_cmd = fmt::format("rm -f {} && ", to_path);
+                }
 
                 const std::string task_name = fmt::format("Create New File{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (from_path.empty())
+                {
                     ptask->task->exec_command =
                         fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
+                }
                 else
+                {
                     ptask->task->exec_command =
                         fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
+                }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 if (as_root)
+                {
                     ptask->task->exec_as_user = "root";
+                }
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
@@ -2862,17 +3206,23 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 const std::string task_name = fmt::format("Create New Directory{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (from_path.empty())
+                {
                     ptask->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
+                }
                 else
+                {
                     ptask->task->exec_command =
                         fmt::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
+                }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 if (as_root)
+                {
                     ptask->task->exec_as_user = "root";
+                }
                 if (auto_open)
                 {
                     auto_open->path = ztd::strdup(full_path);
@@ -2907,9 +3257,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     from_path = ztd::shell::quote(real_path);
                 }
                 if (overwrite)
+                {
                     over_opt = ztd::strdup(" --remove-destination");
+                }
                 if (!over_opt)
+                {
                     over_opt = ztd::strdup("");
+                }
 
                 if (mset->is_dir)
                 {
@@ -2928,7 +3282,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 if (as_root)
+                {
                     ptask->task->exec_as_user = "root";
+                }
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
@@ -2970,7 +3326,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 if (as_root)
+                {
                     ptask->task->exec_as_user = "root";
+                }
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
@@ -3000,7 +3358,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 if (as_root)
+                {
                     ptask->task->exec_as_user = "root";
+                }
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
@@ -3013,7 +3373,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     // directory rename fails due to the directory existing in
                     // multiple underlying branches)
                     if (errno == EXDEV)
+                    {
                         goto _move_task;
+                    }
 
                     // Unknown error has occurred - alert user as usual
                     const std::string errno_msg = std::strerror(errno);
@@ -3036,7 +3398,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         }
     }
     if (response == 0)
+    {
         ret = 0;
+    }
 
     // save size
     GtkAllocation allocation;
@@ -3087,7 +3451,9 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc
     {
         GtkWindow* parent = nullptr;
         if (file_browser)
+        {
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
+        }
 
         const std::string msg = fmt::format("{} target{} missing",
                                             missing_targets,
@@ -3106,7 +3472,9 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
      * root_delete      delete
      */
     if (!setname || !file_browser)
+    {
         return;
+    }
     xset_t set;
     char* path;
     std::string cmd;
@@ -3150,9 +3518,13 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_
         const char* folder;
         set = xset_get(setname);
         if (set->desc)
+        {
             folder = set->desc;
+        }
         else
+        {
             folder = cwd;
+        }
         path = xset_file_dialog(parent,
                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                 "Choose Location",

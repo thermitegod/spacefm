@@ -149,7 +149,9 @@ add_list_item(GtkListStore* list, std::string_view path)
                        tooltip.data(),
                        -1);
     if (icon)
+    {
         g_object_unref(icon);
+    }
 }
 
 static GtkTreeModel*
@@ -223,9 +225,13 @@ app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_a
     const i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::X);
     const i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Y);
     if (width && height)
+    {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
+    }
     else
+    {
         gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 600);
+    }
 
     const std::string mime_desc =
         fmt::format(" {}\n ( {} )", vfs_mime_type_get_description(mime_type), mime_type->type);
@@ -589,12 +595,16 @@ static void
 load_all_apps_in_dir(std::string_view dir_path, GtkListStore* list, vfs::async_task task)
 {
     if (!std::filesystem::is_directory(dir_path))
+    {
         return;
+    }
 
     for (const auto& file : std::filesystem::directory_iterator(dir_path))
     {
         if (task->is_cancelled())
+        {
             break;
+        }
 
         const std::string file_name = std::filesystem::path(file).filename();
         const std::string file_path = Glib::build_filename(dir_path.data(), file_name);
@@ -605,10 +615,14 @@ load_all_apps_in_dir(std::string_view dir_path, GtkListStore* list, vfs::async_t
             continue;
         }
         if (!ztd::endswith(file_name, ".desktop"))
+        {
             continue;
+        }
 
         if (task->is_cancelled())
+        {
             break;
+        }
 
         /* There are some operations using GTK+, so lock may be needed. */
         add_list_item(list, file_path);

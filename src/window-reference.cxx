@@ -34,7 +34,9 @@ WindowRef::ref_dec()
 {
     this->ref_count = ref_count - 1;
     if (this->ref_count == 0 && !this->daemon_mode)
+    {
         gtk_main_quit();
+    }
 };
 
 void
