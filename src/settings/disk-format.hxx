@@ -114,6 +114,21 @@ const std::string PLUGIN_FILE_FILENAME{"plugin.toml"};
 
 const std::string PLUGIN_FILE_SECTION_PLUGIN{"Plugin"};
 
+// TOML /etc/spacefm
+inline constexpr u64 ETC_FILE_VERSION{1};
+const std::string ETC_FILE_FILENAME{"spacefm.conf"};
+
+// TOML /etc/spacefm - etc sections
+const std::string ETC_SECTION_CONFIG{"Config"};
+
+// TOML /etc/spacefm - etc section keys
+const std::string ETC_KEY_TMP_DIR{"tmp_dir"};
+const std::string ETC_KEY_TERMINAL_SU{"terminal_su"};
+// const std::string ETC_KEY_GRAPHICAL_SU{"graphical_su"};
+const std::string ETC_KEY_FONT_VIEW_ICON{"font_view_icon"};
+const std::string ETC_KEY_FONT_VIEW_COMPACT{"font_view_compact"};
+const std::string ETC_KEY_FONT_GENERAL{"font_general"};
+
 /**
  * INI
  */

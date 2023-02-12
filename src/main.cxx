@@ -405,9 +405,6 @@ main(i32 argc, char* argv[])
     // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
     freopen("/dev/null", "w", stderr);
 
-    // load /etc/spacefm.conf
-    load_etc_conf();
-
     // separate instance options
     if (argc > 1)
     {
@@ -490,6 +487,9 @@ main(i32 argc, char* argv[])
     {
         vfs::user_dirs->program_config_dir(cli_flags.config_dir);
     }
+
+    // load /etc/spacefm/spacefm.cfg
+    load_etc_conf();
 
     // load config file
     load_settings();

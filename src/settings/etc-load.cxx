@@ -16,12 +16,12 @@
 #include <string>
 #include <string_view>
 
-#include <filesystem>
-
-#include <iostream>
-#include <fstream>
-
 #include <fmt/format.h>
+
+#include <toml.hpp> // toml11
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 #include <glibmm.h>
 
@@ -33,85 +33,78 @@
 #include "settings/etc.hxx"
 #include "settings/etc-load.hxx"
 
+#include "settings/disk-format.hxx"
+
 static void
-parse_etc_conf(std::string_view etc_path, std::string_view raw_line)
+parse_etc_conf(const toml::value& tbl)
 {
-    const usize sep = raw_line.find("=");
-    if (sep == std::string::npos)
+    if (!tbl.contains(ETC_SECTION_CONFIG))
     {
+        // ztd::logger::error("etc missing TOML section [{}]", ETC_SECTION_CONFIG);
         return;
     }
 
-    const std::string line = ztd::strip(raw_line);
+    const auto& section = toml::find(tbl, ETC_SECTION_CONFIG);
 
-    if (line.at(0) == '#')
+    if (section.contains(ETC_KEY_TMP_DIR))
     {
-        return;
+        const auto tmp_dir = toml::find<std::string>(section, ETC_KEY_TMP_DIR);
+        etc_settings.set_tmp_dir(tmp_dir);
     }
 
-    const std::string token = line.substr(0, sep);
-    std::string value = line.substr(sep + 1, std::string::npos - 1);
-
-    // remove any quotes
-    value = ztd::replace(value, "\"", "");
-
-    if (value.empty())
+    if (section.contains(ETC_KEY_TERMINAL_SU))
     {
-        return;
+        const auto terminal_su = toml::find<std::string>(section, ETC_KEY_TERMINAL_SU);
+        etc_settings.set_terminal_su(terminal_su);
     }
 
-    if (ztd::same(token, "terminal_su") || ztd::same(token, "graphical_su"))
+    if (section.contains(ETC_KEY_FONT_VIEW_ICON))
     {
-        if (value.at(0) != '/' || !std::filesystem::exists(value))
-        {
-            ztd::logger::warn("{}: {} '{}' file not found", etc_path, token, value);
-        }
-        else if (ztd::same(token, "terminal_su"))
-        {
-            etc_settings.set_terminal_su(value);
-        }
+        const auto font_view_icon = toml::find<std::string>(section, ETC_KEY_FONT_VIEW_ICON);
+        etc_settings.set_font_view_icon(font_view_icon);
     }
-    else if (ztd::same(token, "font_view_icon"))
+
+    if (section.contains(ETC_KEY_FONT_VIEW_COMPACT))
     {
-        etc_settings.set_font_view_icon(value);
+        const auto font_view_compact = toml::find<std::string>(section, ETC_KEY_FONT_VIEW_COMPACT);
+        etc_settings.set_font_view_compact(font_view_compact);
     }
-    else if (ztd::same(token, "font_view_compact"))
+
+    if (section.contains(ETC_KEY_FONT_GENERAL))
     {
-        etc_settings.set_font_view_compact(value);
-    }
-    else if (ztd::same(token, "font_general"))
-    {
-        etc_settings.set_font_general(value);
+        const auto font_general = toml::find<std::string>(section, ETC_KEY_FONT_GENERAL);
+        etc_settings.set_font_general(font_general);
     }
 }
 
 void
 load_etc_conf()
 {
-    // Set default config values
-    etc_settings.set_tmp_dir(vfs::user_dirs->cache_dir());
+    const std::string config_path = Glib::build_filename(SYSCONFDIR, PACKAGE_NAME, "spacefm.cfg");
 
-    // load spacefm.conf
-    std::string config_path =
-        Glib::build_filename(vfs::user_dirs->config_dir(), PACKAGE_NAME, "spacefm.conf");
     if (!std::filesystem::exists(config_path))
     {
-        config_path = Glib::build_filename(SYSCONFDIR, PACKAGE_NAME, "spacefm.conf");
-    }
-
-    if (!std::filesystem::is_regular_file(config_path))
-    {
+        ztd::logger::warn("Config file missing {}", config_path);
         return;
     }
 
-    std::string line;
-    std::ifstream file(config_path);
-    if (file.is_open())
+    try
     {
-        while (std::getline(file, line))
-        {
-            parse_etc_conf(config_path, line);
-        }
+        const auto tbl = toml::parse(config_path);
+        // DEBUG
+        // std::cout << "###### TOML PARSE ######" << "\n\n";
+        // std::cout << tbl << "\n\n";
+
+        parse_etc_conf(tbl);
     }
-    file.close();
+    catch (const toml::syntax_error& e)
+    {
+        ztd::logger::error("TOML parsing failed {}", e.what());
+        return;
+    }
+    catch (...)
+    {
+        ztd::logger::error("Failed to parse {}", config_path);
+        return;
+    }
 }
