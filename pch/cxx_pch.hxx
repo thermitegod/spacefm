@@ -19,6 +19,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <deque>
 #include <tuple>

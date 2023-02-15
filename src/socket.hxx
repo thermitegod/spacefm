@@ -43,4 +43,5 @@ extern CliFlags cli_flags;
 bool check_socket_daemon();
 bool single_instance_check();
 void single_instance_finalize();
-i32 send_socket_command(i32 argc, char* argv[], std::string& reply);
+
+const std::tuple<i32, std::string> send_socket_command(std::span<const std::string_view> args);

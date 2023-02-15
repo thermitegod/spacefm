@@ -20,6 +20,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -417,8 +419,12 @@ tmp_clean()
 }
 
 int
-main(i32 argc, char* argv[])
+main(int argc, char* argv[])
+// main(const int argc, const char* const* const argv) // does not work with gtk_init_with_args()
 {
+    const std::vector<std::string_view> args(argv,
+                                             std::next(argv, static_cast<std::ptrdiff_t>(argc)));
+
     // logging init
     ztd::Logger->initialize();
 
@@ -441,21 +447,15 @@ main(i32 argc, char* argv[])
     freopen("/dev/null", "w", stderr);
 
     // separate instance options
-    if (argc > 1)
+    if (args.size() > 1)
     {
         // socket_command?
-        if (ztd::same(argv[1], "-s") || ztd::same(argv[1], "--socket-cmd"))
+        if (ztd::same(args[1], "-s") || ztd::same(args[1], "--socket-cmd"))
         {
-            if (argv[2] && (ztd::same(argv[2], "help") || ztd::same(argv[2], "--help")))
+            const auto [ret, socket_reply] = send_socket_command(args);
+            if (!socket_reply.empty())
             {
-                fmt::print("For help run, 'man spacefm-socket'\n");
-                std::exit(EXIT_SUCCESS);
-            }
-            std::string sock_reply;
-            const i32 ret = send_socket_command(argc, argv, sock_reply);
-            if (!sock_reply.empty())
-            {
-                fmt::print("{}\n", sock_reply);
+                fmt::print("{}\n", socket_reply);
             }
             std::exit(ret);
         }

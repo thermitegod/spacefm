@@ -8216,6 +8216,10 @@ main_window_socket_command(char* argv[], std::string& reply)
         }
         set->ob2_data = (void*)l;
     }
+    else if (ztd::same(socket_cmd, "help"))
+    {
+        reply = "For help run, 'man spacefm-socket'";
+    }
     else if (ztd::same(socket_cmd, "ping"))
     {
         reply = "pong";

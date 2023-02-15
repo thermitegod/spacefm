@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <tuple>
+
 #include <sys/socket.h>
 #include <sys/un.h>
 
@@ -434,20 +436,18 @@ receive_socket_command(i32 client, const std::string& args)
     }
 }
 
-i32
-send_socket_command(i32 argc, char* argv[], std::string& reply)
+const std::tuple<i32, std::string>
+send_socket_command(std::span<const std::string_view> args)
 {
-    if (argc < 3)
+    if (args.size() < 3)
     {
-        reply = "socket-cmd requires an argument";
-        return EXIT_FAILURE;
+        return {EXIT_FAILURE, "socket-cmd requires an argument"};
     }
 
     // create socket
     if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
-        reply = "failed to create socket";
-        return EXIT_FAILURE;
+        return {EXIT_FAILURE, "failed to create socket"};
     }
 
     // open socket
@@ -459,9 +459,9 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
 
     if (connect(sock_fd, (struct sockaddr*)&addr, addr_len) != 0)
     {
-        reply = fmt::format("failed to connect to socket ({})\nnot running or $DISPLAY not set",
-                            addr.sun_path);
-        return EXIT_FAILURE;
+        return {EXIT_FAILURE,
+                fmt::format("failed to connect to socket ({})\nnot running or $DISPLAY not set",
+                            addr.sun_path)};
     }
 
     // send command
@@ -474,9 +474,9 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
     write(sock_fd, "\n", 1);
 
     // send arguments
-    for (i32 i = 2; i < argc; ++i)
+    for (usize i = 2; i < args.size(); ++i)
     {
-        write(sock_fd, argv[i], std::strlen(argv[i]));
+        write(sock_fd, args[i].data(), std::strlen(args[i].data()));
         write(sock_fd, "\n", 1);
     }
     write(sock_fd, "\n", 1);
@@ -498,9 +498,8 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
     if (sock_reply.size() == 0)
     {
         ztd::logger::error("invalid response from socket");
-        return EXIT_FAILURE;
+        return {EXIT_FAILURE, ""};
     }
 
-    reply = sock_reply.substr(1);
-    return sock_reply[0];
+    return {sock_reply[0], sock_reply.substr(1)};
 }
