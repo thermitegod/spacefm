@@ -20,6 +20,7 @@
 
 #include <array>
 #include <map>
+#include <tuple>
 #include <vector>
 
 #include "types.hxx"
@@ -141,4 +142,4 @@ bool main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 t
                        const char* focus, i32 keyval, i32 button, i32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);
 
-char main_window_socket_command(char* argv[], std::string& reply);
+const std::tuple<char, std::string> main_window_socket_command(char* argv[]);

@@ -400,12 +400,20 @@ single_instance_finalize()
 }
 
 static void
+write_socket_response(i32 client, char cmd, std::string_view reply)
+{
+    // send response and exit status
+    write(client, &cmd, sizeof(char));
+    if (!reply.empty())
+    { // send reply or error msg
+        write(client, reply.data(), reply.size());
+    }
+}
+
+static void
 receive_socket_command(i32 client, const std::string& args)
 {
     char** argv = nullptr;
-    char cmd;
-    std::string reply;
-
     if (!args.empty())
     {
         argv = g_strsplit(args.data() + 1, "\n", 0);
@@ -417,23 +425,18 @@ receive_socket_command(i32 client, const std::string& args)
     const std::string inode_tag = get_inode_tag();
     if (argv && !ztd::same(inode_tag, argv[0]))
     {
-        cmd = 1;
-        reply = "invalid socket command user";
+        char cmd = 1;
+        const std::string reply = "invalid socket command user";
         ztd::logger::warn("{}", reply);
+        write_socket_response(client, cmd, reply);
     }
     else
     {
         // process command and get reply
-        cmd = main_window_socket_command(argv ? argv + 1 : nullptr, reply);
+        const auto [cmd, reply] = main_window_socket_command(argv ? argv + 1 : nullptr);
+        write_socket_response(client, cmd, reply);
     }
     g_strfreev(argv);
-
-    // send response
-    write(client, &cmd, sizeof(char)); // send exit status
-    if (!reply.empty())
-    {
-        write(client, reply.data(), reply.size()); // send reply or error msg
-    }
 }
 
 const std::tuple<i32, std::string>

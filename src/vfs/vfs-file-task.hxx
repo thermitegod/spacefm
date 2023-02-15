@@ -193,8 +193,8 @@ class VFSFileTask
     uid_t uid{0};
     gid_t gid{0};
 
-    // For chmod
-    unsigned char* chmod_actions{nullptr}; // If chmod is not needed, this should be nullptr
+    // For chmod. If chmod is not needed, this should be nullptr
+    unsigned char* chmod_actions{nullptr};
 
     off_t total_size{0}; // Total size of the files to be processed, in bytes
     off_t progress{0};   // Total size of current processed files, in btytes
