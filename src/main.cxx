@@ -84,9 +84,6 @@ static std::array<GOptionEntry, 13> opt_entries =
 };
 // clang-format on
 
-static bool handle_parsed_commandline_args();
-static void open_file(std::string_view path);
-
 static void
 init_folder()
 {
@@ -130,6 +127,44 @@ init_daemon()
     signal(SIGTERM, exit_from_signal);
 
     daemon_initialized = true;
+}
+
+static void
+open_file(std::string_view path)
+{
+    vfs::file_info file = vfs_file_info_new();
+    vfs_file_info_get(file, path);
+    vfs::mime_type mime_type = file->get_mime_type();
+
+    const char* app_name = vfs_mime_type_get_default_action(mime_type);
+    if (!app_name)
+    {
+        app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
+        if (!app_name)
+        {
+            ztd::logger::error("no application to open file: {}", path);
+            return;
+        }
+    }
+
+    const vfs::desktop desktop = vfs_get_desktop(app_name);
+
+    const std::vector<std::string> open_files{path.data()};
+
+    try
+    {
+        desktop->open_files(vfs::user_dirs->current_dir(), open_files);
+    }
+    catch (const VFSAppDesktopException& e)
+    {
+        const std::string disp_path = Glib::filename_display_name(path.data());
+        const std::string msg =
+            fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
+        ptk_show_error(nullptr, "Error", msg);
+    }
+
+    vfs_mime_type_unref(mime_type);
+    vfs_file_info_unref(file);
 }
 
 static void
@@ -524,42 +559,4 @@ main(i32 argc, char* argv[])
     main_window_event(nullptr, nullptr, XSetName::EVT_EXIT, 0, 0, nullptr, 0, 0, 0, false);
 
     std::exit(EXIT_SUCCESS);
-}
-
-static void
-open_file(std::string_view path)
-{
-    vfs::file_info file = vfs_file_info_new();
-    vfs_file_info_get(file, path);
-    vfs::mime_type mime_type = file->get_mime_type();
-
-    const char* app_name = vfs_mime_type_get_default_action(mime_type);
-    if (!app_name)
-    {
-        app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
-        if (!app_name)
-        {
-            ztd::logger::error("no application to open file: {}", path);
-            return;
-        }
-    }
-
-    const vfs::desktop desktop = vfs_get_desktop(app_name);
-
-    const std::vector<std::string> open_files{path.data()};
-
-    try
-    {
-        desktop->open_files(vfs::user_dirs->current_dir(), open_files);
-    }
-    catch (const VFSAppDesktopException& e)
-    {
-        const std::string disp_path = Glib::filename_display_name(path.data());
-        const std::string msg =
-            fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
-        ptk_show_error(nullptr, "Error", msg);
-    }
-
-    vfs_mime_type_unref(mime_type);
-    vfs_file_info_unref(file);
 }
