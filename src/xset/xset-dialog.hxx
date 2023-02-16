@@ -34,5 +34,3 @@ bool xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_vie
 
 char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                        const char* deffolder, const char* deffile);
-
-char* xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon);

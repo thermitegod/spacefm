@@ -24,8 +24,6 @@
 
 #include <glib.h>
 
-#include <exo/exo.h>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -346,7 +344,6 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
 
     std::string ans;
     i32 response;
-    char* icon;
     bool ret = false;
     while ((response = gtk_dialog_run(GTK_DIALOG(dlg))))
     {
@@ -400,20 +397,9 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                 exit_loop = true;
                 break;
             case GtkResponseType::GTK_RESPONSE_ACCEPT:
-                // get current icon
-                gtk_text_buffer_get_start_iter(buf, &siter);
-                gtk_text_buffer_get_end_iter(buf, &iter);
-                icon = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-
                 // show icon chooser
-                char* new_icon;
-                new_icon = xset_icon_chooser_dialog(GTK_WINDOW(dlg), icon);
-                free(icon);
-                if (new_icon)
-                {
-                    gtk_text_buffer_set_text(buf, new_icon, -1);
-                    free(new_icon);
-                }
+                ptk_show_error(nullptr, "Removed", "removed xset_icon_chooser_dialog()");
+
                 exit_loop = true;
                 break;
             case GtkResponseType::GTK_RESPONSE_NO:
@@ -537,68 +523,4 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     }
     gtk_widget_destroy(dlg);
     return nullptr;
-}
-
-char*
-xset_icon_chooser_dialog(GtkWindow* parent, const char* def_icon)
-{
-    GtkAllocation allocation;
-    char* icon = nullptr;
-
-    // set busy cursor
-    GdkCursor* cursor = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(parent)),
-                                                   GdkCursorType::GDK_WATCH);
-    if (cursor)
-    {
-        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), cursor);
-        g_object_unref(cursor);
-        while (gtk_events_pending())
-        {
-            gtk_main_iteration();
-        }
-    }
-
-    // btn_icon_choose clicked - preparing the exo icon chooser dialog
-    GtkWidget* icon_chooser = exo_icon_chooser_dialog_new("Choose Icon",
-                                                          GTK_WINDOW(parent),
-                                                          "Cancel",
-                                                          GtkResponseType::GTK_RESPONSE_CANCEL,
-                                                          "OK",
-                                                          GtkResponseType::GTK_RESPONSE_ACCEPT,
-                                                          nullptr);
-    // Set icon chooser dialog size
-    const i32 width = xset_get_int(XSetName::MAIN_ICON, XSetVar::X);
-    const i32 height = xset_get_int(XSetName::MAIN_ICON, XSetVar::Y);
-    if (width && height)
-    {
-        gtk_window_set_default_size(GTK_WINDOW(icon_chooser), width, height);
-    }
-
-    // Load current icon
-    if (def_icon && def_icon[0])
-    {
-        exo_icon_chooser_dialog_set_icon(EXO_ICON_CHOOSER_DIALOG(icon_chooser), def_icon);
-    }
-
-    // Prompting user to pick icon
-    const i32 response_icon_chooser = gtk_dialog_run(GTK_DIALOG(icon_chooser));
-    if (response_icon_chooser == GtkResponseType::GTK_RESPONSE_ACCEPT)
-    {
-        /* Fetching selected icon */
-        icon = exo_icon_chooser_dialog_get_icon(EXO_ICON_CHOOSER_DIALOG(icon_chooser));
-    }
-
-    // Save icon chooser dialog size
-    gtk_widget_get_allocation(GTK_WIDGET(icon_chooser), &allocation);
-    if (allocation.width && allocation.height)
-    {
-        xset_set(XSetName::MAIN_ICON, XSetVar::X, std::to_string(allocation.width));
-        xset_set(XSetName::MAIN_ICON, XSetVar::Y, std::to_string(allocation.height));
-    }
-    gtk_widget_destroy(icon_chooser);
-
-    // remove busy cursor
-    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), nullptr);
-
-    return icon;
 }

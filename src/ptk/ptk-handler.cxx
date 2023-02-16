@@ -1590,11 +1590,6 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_mime), handler_xset->s ? handler_xset->s : "");
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_extension),
                        handler_xset->x ? handler_xset->x : "");
-    if (hnd->entry_handler_icon)
-    {
-        gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_icon),
-                           handler_xset->icon ? handler_xset->icon : "");
-    }
 
     if (handler)
     {
@@ -1678,10 +1673,6 @@ config_unload_handler_settings(HandlerData* hnd)
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_name), "");
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_mime), "");
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_extension), "");
-    if (hnd->entry_handler_icon)
-    {
-        gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_icon), "");
-    }
     ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_compress));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_compress_term), false);
     ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_extract));
@@ -1822,15 +1813,6 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     const char* handler_name = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_name));
     const char* handler_mime = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_mime));
     const char* handler_extension = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_extension));
-    const char* handler_icon;
-    if (hnd->entry_handler_icon)
-    {
-        handler_icon = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_icon));
-    }
-    else
-    {
-        handler_icon = nullptr;
-    }
 
     const bool handler_compress_term =
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_compress_term));
@@ -1908,14 +1890,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                                         GTK_TEXT_VIEW(hnd->view_handler_compress),
                                         command,
                                         error_message);
-        if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
-        {
-            if (handler_icon)
-            {
-                xset_set_var(new_handler_xset, XSetVar::ICN, handler_icon);
-            }
-        }
-        else
+        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
         {
             new_handler_xset->scroll_lock = handler_list_term;
             if (!error)
@@ -2042,14 +2017,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                                             command,
                                             error_message);
         }
-        if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
-        {
-            if (handler_icon)
-            {
-                xset_set_var(handler_xset, XSetVar::ICN, handler_icon);
-            }
-        }
-        else
+        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
         {
             handler_xset->scroll_lock = handler_list_term;
             if (hnd->extract_changed || was_default)
@@ -2825,21 +2793,6 @@ on_terminal_toggled(GtkToggleButton* togglebutton, HandlerData* hnd)
 }
 
 static void
-on_icon_choose_button_clicked(GtkWidget* widget, HandlerData* hnd)
-{
-    (void)widget;
-    // get current icon
-    const char* icon = gtk_entry_get_text(GTK_ENTRY(hnd->entry_handler_icon));
-    char* new_icon = xset_icon_chooser_dialog(GTK_WINDOW(hnd->dlg), icon);
-
-    if (new_icon)
-    {
-        gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_icon), new_icon);
-        free(new_icon);
-    }
-}
-
-static void
 on_option_cb(GtkMenuItem* item, HandlerData* hnd)
 {
     if (hnd->changed)
@@ -3324,19 +3277,6 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     hnd->entry_handler_name = gtk_entry_new();
     hnd->entry_handler_mime = gtk_entry_new();
     hnd->entry_handler_extension = gtk_entry_new();
-    if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
-    {
-        hnd->entry_handler_icon = gtk_entry_new();
-        hnd->icon_choose_btn = gtk_button_new_with_mnemonic("C_hoose");
-        gtk_widget_set_focus_on_click(GTK_WIDGET(hnd->icon_choose_btn), false);
-
-        // keep this
-        gtk_button_set_always_show_image(GTK_BUTTON(hnd->icon_choose_btn), true);
-    }
-    else
-    {
-        hnd->entry_handler_icon = hnd->icon_choose_btn = nullptr;
-    }
 
     g_signal_connect(G_OBJECT(gtk_entry_get_buffer(GTK_ENTRY(hnd->entry_handler_name))),
                      "inserted-text",
@@ -3362,21 +3302,6 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
                      "deleted-text",
                      G_CALLBACK(on_entry_text_delete),
                      hnd);
-    if (hnd->entry_handler_icon)
-    {
-        g_signal_connect(G_OBJECT(gtk_entry_get_buffer(GTK_ENTRY(hnd->entry_handler_icon))),
-                         "inserted-text",
-                         G_CALLBACK(on_entry_text_insert),
-                         hnd);
-        g_signal_connect(G_OBJECT(gtk_entry_get_buffer(GTK_ENTRY(hnd->entry_handler_icon))),
-                         "deleted-text",
-                         G_CALLBACK(on_entry_text_delete),
-                         hnd);
-        g_signal_connect(G_OBJECT(hnd->icon_choose_btn),
-                         "clicked",
-                         G_CALLBACK(on_icon_choose_button_clicked),
-                         hnd);
-    }
 
     /* Creating new textviews in scrolled windows */
     hnd->view_handler_compress = gtk_text_view_new();
@@ -3540,15 +3465,6 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     gtk_grid_attach(grid, GTK_WIDGET(hnd->entry_handler_mime), 1, 1, 1, 1);
     gtk_grid_attach(grid, GTK_WIDGET(lbl_handler_extension), 0, 2, 1, 1);
     gtk_grid_attach(grid, GTK_WIDGET(hnd->entry_handler_extension), 1, 2, 1, 1);
-
-    if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
-    {
-        gtk_grid_attach(grid, GTK_WIDGET(lbl_handler_icon), 0, 3, 1, 1);
-        GtkWidget* hbox_icon = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
-        gtk_box_pack_start(GTK_BOX(hbox_icon), GTK_WIDGET(hnd->entry_handler_icon), true, true, 0);
-        gtk_box_pack_start(GTK_BOX(hbox_icon), GTK_WIDGET(hnd->icon_choose_btn), false, true, 0);
-        gtk_grid_attach(grid, GTK_WIDGET(hbox_icon), 1, 3, 1, 1);
-    }
 
     // Make sure widgets do not separate too much vertically
     gtk_box_set_spacing(GTK_BOX(vbox_settings), 1);

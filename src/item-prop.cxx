@@ -1790,23 +1790,6 @@ on_prop_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_nu
 }
 
 static void
-on_icon_choose_button_clicked(GtkWidget* widget, ContextData* ctxt)
-{
-    (void)widget;
-    // get current icon
-    char* new_icon;
-    const char* icon = gtk_entry_get_text(GTK_ENTRY(ctxt->item_icon));
-
-    new_icon = xset_icon_chooser_dialog(GTK_WINDOW(ctxt->dlg), icon);
-
-    if (new_icon)
-    {
-        gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon), new_icon);
-        free(new_icon);
-    }
-}
-
-static void
 on_entry_activate(GtkWidget* entry, ContextData* ctxt)
 {
     (void)entry;
@@ -2687,7 +2670,6 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
 
     g_signal_connect(G_OBJECT(ctxt->item_target), "key-press-event", G_CALLBACK(on_target_keypress), ctxt);
     g_signal_connect(G_OBJECT(ctxt->item_key), "clicked", G_CALLBACK(on_key_button_clicked), ctxt);
-    g_signal_connect(G_OBJECT(ctxt->icon_choose_btn), "clicked", G_CALLBACK(on_icon_choose_button_clicked), ctxt);
     g_signal_connect(G_OBJECT(ctxt->item_choose), "clicked", G_CALLBACK(on_browse_button_clicked), ctxt);
     g_signal_connect(G_OBJECT(ctxt->item_browse),"clicked", G_CALLBACK(on_browse_button_clicked), ctxt);
     g_signal_connect(G_OBJECT(ctxt->item_name), "activate", G_CALLBACK(on_entry_activate), ctxt);
