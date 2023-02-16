@@ -1854,6 +1854,9 @@ xset_design_additem(GtkWidget* menu, const char* label, XSetJob job, xset_t set)
 GtkWidget*
 xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button, std::time_t time)
 {
+    (void)button;
+    (void)time;
+
     GtkWidget* newitem;
     GtkWidget* submenu;
     GtkWidget* submenu2;
@@ -2153,15 +2156,14 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
      * to open original design menu.  Affected only bookmarks pane and toolbar
      * where menu == nullptr.  So pass 0 for button if !menu. */
 
-    // FIXME does not destroy parent popup
-    // gtk_menu_popup_at_pointer(GTK_MENU(design_menu), nullptr);
-    gtk_menu_popup(GTK_MENU(design_menu),
-                   menu ? GTK_WIDGET(menu) : nullptr,
-                   nullptr,
-                   nullptr,
-                   nullptr,
-                   menu ? button : 0,
-                   time);
+    // Get the pointer location
+    i32 x, y;
+    GdkModifierType mods;
+    gdk_window_get_device_position(gtk_widget_get_window(menu), nullptr, &x, &y, &mods);
+
+    // Popup the menu at the pointer location
+    gtk_menu_popup_at_pointer(GTK_MENU(design_menu), nullptr);
+
     if (menu)
     {
         gtk_widget_set_sensitive(GTK_WIDGET(menu), false);
