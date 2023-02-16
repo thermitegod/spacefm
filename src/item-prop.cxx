@@ -1880,13 +1880,18 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
                        0);
 
     // Menu Item Page  =====================================================
-    GtkWidget* align = gtk_alignment_new(0, 0, 0.4, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     GtkWidget* vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 4);
-    gtk_container_add(GTK_CONTAINER(align), vbox);
+    gtk_widget_set_halign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_margin_top(vbox, 8);
+    gtk_widget_set_margin_bottom(vbox, 0);
+    gtk_widget_set_margin_start(vbox, 8);
+    gtk_widget_set_margin_end(vbox, 8);
     gtk_notebook_append_page(
         GTK_NOTEBOOK(ctxt->notebook),
-        align,
+        vbox,
         gtk_label_new_with_mnemonic(set->tool != XSetTool::NOT ? "_Toolbar Item" : "_Menu Item"));
 
     GtkGrid* grid = GTK_GRID(gtk_grid_new());
@@ -1974,12 +1979,17 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
 
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->target_vbox), false, true, 4);
 
-    align = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(align), vbox);
+    gtk_widget_set_halign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_margin_top(vbox, 8);
+    gtk_widget_set_margin_bottom(vbox, 0);
+    gtk_widget_set_margin_start(vbox, 8);
+    gtk_widget_set_margin_end(vbox, 8);
     gtk_notebook_append_page(GTK_NOTEBOOK(ctxt->notebook),
-                             align,
+                             vbox,
                              gtk_label_new_with_mnemonic("Con_text"));
 
     GtkListStore* list =
@@ -2277,12 +2287,17 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_sub), 0);
 
     // Command Page  =====================================================
-    align = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 4);
-    gtk_container_add(GTK_CONTAINER(align), vbox);
+    gtk_widget_set_halign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_margin_top(vbox, 8);
+    gtk_widget_set_margin_bottom(vbox, 0);
+    gtk_widget_set_margin_start(vbox, 8);
+    gtk_widget_set_margin_end(vbox, 8);
     gtk_notebook_append_page(GTK_NOTEBOOK(ctxt->notebook),
-                             align,
+                             vbox,
                              gtk_label_new_with_mnemonic("Comm_and"));
 
     hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 8);
@@ -2333,20 +2348,30 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->cmd_scroll_script), true, true, 4);
 
     // Option Page  =====================================================
-    align = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 4);
-    gtk_container_add(GTK_CONTAINER(align), vbox);
+    gtk_widget_set_halign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_margin_top(vbox, 8);
+    gtk_widget_set_margin_bottom(vbox, 0);
+    gtk_widget_set_margin_start(vbox, 8);
+    gtk_widget_set_margin_end(vbox, 8);
     gtk_notebook_append_page(GTK_NOTEBOOK(ctxt->notebook),
-                             align,
+                             vbox,
                              gtk_label_new_with_mnemonic("Optio_ns"));
 
     GtkWidget* frame = gtk_frame_new("Run Options");
-    align = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox_frame = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 8);
-    gtk_container_add(GTK_CONTAINER(align), vbox_frame);
-    gtk_container_add(GTK_CONTAINER(frame), align);
+    gtk_widget_set_halign(GTK_WIDGET(vbox_frame), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(vbox_frame), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox_frame), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox_frame), true);
+    gtk_widget_set_margin_top(vbox_frame, 8);
+    gtk_widget_set_margin_bottom(vbox_frame, 0);
+    gtk_widget_set_margin_start(vbox_frame, 8);
+    gtk_widget_set_margin_end(vbox_frame, 8);
+    gtk_container_add(GTK_CONTAINER(frame), vbox_frame);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(frame), false, true, 8);
 
     ctxt->opt_task = gtk_check_button_new_with_mnemonic("Run As Task");
@@ -2395,11 +2420,16 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
     gtk_box_pack_start(GTK_BOX(vbox_frame), GTK_WIDGET(hbox), false, true, 4);
 
     frame = gtk_frame_new("Style");
-    align = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 8, 0, 8, 8);
     vbox_frame = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 8);
-    gtk_container_add(GTK_CONTAINER(align), vbox_frame);
-    gtk_container_add(GTK_CONTAINER(frame), align);
+    gtk_widget_set_halign(GTK_WIDGET(vbox_frame), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(vbox_frame), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox_frame), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox_frame), true);
+    gtk_widget_set_margin_top(vbox_frame, 8);
+    gtk_widget_set_margin_bottom(vbox_frame, 0);
+    gtk_widget_set_margin_start(vbox_frame, 8);
+    gtk_widget_set_margin_end(vbox_frame, 8);
+    gtk_container_add(GTK_CONTAINER(frame), vbox_frame);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(frame), true, true, 8);
 
     hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 8);

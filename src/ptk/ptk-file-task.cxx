@@ -963,12 +963,18 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ptask->error_view), false);
 
     g_signal_connect(ptask->error_view, "populate-popup", G_CALLBACK(on_view_popup), nullptr);
-    GtkWidget* align = gtk_alignment_new(1, 1, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
-    gtk_container_add(GTK_CONTAINER(align), GTK_WIDGET(ptask->scroll));
+
+    gtk_widget_set_halign(GTK_WIDGET(ptask->scroll), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(ptask->scroll), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_hexpand(GTK_WIDGET(ptask->scroll), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(ptask->scroll), true);
+    gtk_widget_set_margin_top(GTK_WIDGET(ptask->scroll), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(ptask->scroll), 0);
+    gtk_widget_set_margin_start(GTK_WIDGET(ptask->scroll), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(ptask->scroll), 5);
 
     // Overwrite & Error
-    GtkWidget* overwrite_align;
+    GtkWidget* overwrite_box = nullptr;
     if (task->type != VFSFileTaskType::EXEC)
     {
         static constexpr std::array<std::string_view, 4> overwrite_options{
@@ -1018,20 +1024,25 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                          "changed",
                          G_CALLBACK(on_error_combo_changed),
                          ptask);
-        GtkWidget* overwrite_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 20);
+        overwrite_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 20);
         gtk_box_pack_start(GTK_BOX(overwrite_box),
                            GTK_WIDGET(ptask->overwrite_combo),
                            false,
                            true,
                            0);
         gtk_box_pack_start(GTK_BOX(overwrite_box), GTK_WIDGET(ptask->error_combo), false, true, 0);
-        overwrite_align = gtk_alignment_new(1, 0, 1, 0);
-        gtk_alignment_set_padding(GTK_ALIGNMENT(overwrite_align), 0, 0, 5, 5);
-        gtk_container_add(GTK_CONTAINER(overwrite_align), GTK_WIDGET(overwrite_box));
+
+        gtk_widget_set_halign(GTK_WIDGET(overwrite_box), GtkAlign::GTK_ALIGN_END);
+        gtk_widget_set_valign(GTK_WIDGET(overwrite_box), GtkAlign::GTK_ALIGN_START);
+        gtk_widget_set_hexpand(GTK_WIDGET(overwrite_box), true);
+        gtk_widget_set_vexpand(GTK_WIDGET(overwrite_box), true);
+        gtk_widget_set_margin_top(GTK_WIDGET(overwrite_box), 0);
+        gtk_widget_set_margin_bottom(GTK_WIDGET(overwrite_box), 0);
+        gtk_widget_set_margin_start(GTK_WIDGET(overwrite_box), 5);
+        gtk_widget_set_margin_end(GTK_WIDGET(overwrite_box), 5);
     }
     else
     {
-        overwrite_align = nullptr;
         ptask->overwrite_combo = nullptr;
         ptask->error_combo = nullptr;
     }
@@ -1043,14 +1054,15 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                        true,
                        0);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(ptask->progress_dlg))),
-                       GTK_WIDGET(align),
+                       GTK_WIDGET(ptask->scroll),
                        true,
                        true,
                        0);
-    if (overwrite_align)
+
+    if (overwrite_box)
     {
         gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(ptask->progress_dlg))),
-                           GTK_WIDGET(overwrite_align),
+                           GTK_WIDGET(overwrite_box),
                            false,
                            true,
                            5);
@@ -1120,10 +1132,10 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     {
         gtk_widget_hide(ptask->error_combo);
     }
-    if (overwrite_align && !gtk_widget_get_visible(ptask->overwrite_combo) &&
+    if (overwrite_box && !gtk_widget_get_visible(ptask->overwrite_combo) &&
         !gtk_widget_get_visible(ptask->error_combo))
     {
-        gtk_widget_hide(overwrite_align);
+        gtk_widget_hide(overwrite_box);
     }
     gtk_widget_grab_focus(ptask->progress_btn_close);
 
@@ -2431,6 +2443,15 @@ query_overwrite(PtkFileTask* ptask)
     gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     gtk_window_set_role(GTK_WINDOW(dlg), "overwrite_dialog");
 
+    gtk_widget_set_halign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_hexpand(GTK_WIDGET(dlg), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(dlg), true);
+    gtk_widget_set_margin_top(GTK_WIDGET(dlg), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(dlg), 0);
+    gtk_widget_set_margin_start(GTK_WIDGET(dlg), 0);
+    gtk_widget_set_margin_end(GTK_WIDGET(dlg), 0);
+
     i32 width, height;
     if (has_overwrite_btn)
     {
@@ -2451,11 +2472,17 @@ query_overwrite(PtkFileTask* ptask)
         gtk_widget_set_size_request(GTK_WIDGET(dlg), 600, -1);
     }
 
-    GtkWidget* align = gtk_alignment_new(1, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 14, 7, 7);
     GtkWidget* vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(align), vbox);
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), align, true, true, 0);
+    gtk_widget_set_halign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_margin_top(GTK_WIDGET(vbox), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(vbox), 14);
+    gtk_widget_set_margin_start(GTK_WIDGET(vbox), 7);
+    gtk_widget_set_margin_end(GTK_WIDGET(vbox), 7);
+    gtk_widget_set_size_request(GTK_WIDGET(vbox), 600, 300);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), vbox, true, true, 0);
 
     // buttons
     if (has_overwrite_btn)
@@ -2585,12 +2612,22 @@ query_overwrite(PtkFileTask* ptask)
                      G_CALLBACK(on_query_button_press),
                      ptask);
     GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 30);
+    gtk_widget_set_halign(GTK_WIDGET(hbox), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(hbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_hexpand(GTK_WIDGET(hbox), false);
+    gtk_widget_set_vexpand(GTK_WIDGET(hbox), false);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(rename_button), false, true, 0);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(auto_button), false, true, 0);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(auto_all_button), false, true, 0);
-    align = gtk_alignment_new(1, 0, 0, 0);
-    gtk_container_add(GTK_CONTAINER(align), GTK_WIDGET(hbox));
-    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(align), false, true, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 0);
+    gtk_widget_set_halign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(vbox), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_hexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(vbox), true);
+    gtk_widget_set_margin_top(GTK_WIDGET(vbox), 1);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(vbox), 0);
+    gtk_widget_set_margin_start(GTK_WIDGET(vbox), 0);
+    gtk_widget_set_margin_end(GTK_WIDGET(vbox), 0);
 
     free(src_dir_disp);
     free(dest_dir_disp);
