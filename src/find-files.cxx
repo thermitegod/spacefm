@@ -18,6 +18,8 @@
 // FIXME: Currently this only works with GNU find-utils.
 // Compatibility with other systems like BSD, need to be improved.
 
+#if 0
+
 #include <string>
 #include <string_view>
 
@@ -1265,3 +1267,19 @@ find_files(const std::vector<std::string>& search_dirs)
 
     gtk_widget_show(data->win);
 }
+
+#else
+
+#include <string>
+#include <vector>
+
+#include "ptk/ptk-error.hxx"
+
+void
+find_files(const std::vector<std::string>& search_dirs)
+{
+    (void)search_dirs;
+    ptk_show_error(nullptr, "Disabled", "Find files is disabled");
+}
+
+#endif
