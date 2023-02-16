@@ -390,6 +390,9 @@ main(int argc, char* argv[])
     // logging init
     ztd::Logger->initialize();
 
+    // Gtk4 porting
+    g_set_prgname(PACKAGE_NAME);
+
     // start program timer
     program_timer::start();
 
