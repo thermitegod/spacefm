@@ -208,7 +208,7 @@ ptk_file_browser_get_type()
             (GInstanceInitFunc)ptk_file_browser_init,
             nullptr,
         };
-        type = g_type_register_static(GTK_TYPE_VBOX,
+        type = g_type_register_static(GTK_TYPE_BOX,
                                       "PtkFileBrowser",
                                       &info,
                                       GTypeFlags::G_TYPE_FLAG_NONE);
@@ -954,6 +954,9 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
 static void
 ptk_file_browser_init(PtkFileBrowser* file_browser)
 {
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(file_browser),
+                                   GtkOrientation::GTK_ORIENTATION_VERTICAL);
+
     file_browser->mypanel = 0; // do not load font yet in ptk_path_entry_new
     file_browser->path_bar = ptk_path_entry_new(file_browser);
     g_signal_connect(file_browser->path_bar,
@@ -5345,6 +5348,10 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page)
         dir_name = Glib::path_get_dirname(cwd);
     }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(parent),
+                                   GtkOrientation::GTK_ORIENTATION_VERTICAL);
+
     ptk_show_file_properties(GTK_WINDOW(parent),
                              !dir_name.empty() ? dir_name : cwd,
                              sel_files,

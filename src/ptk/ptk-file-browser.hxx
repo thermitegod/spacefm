@@ -75,7 +75,7 @@ struct MainWindow;
 struct PtkFileBrowser
 {
     /* parent class */
-    GtkVBox parent;
+    GtkBox parent;
 
     /* <private> */
     GList* history{nullptr};
