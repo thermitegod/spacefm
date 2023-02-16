@@ -159,7 +159,7 @@ static void rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
 static void rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
 
 static u32 folder_view_auto_scroll_timer = 0;
-static GtkDirectionType folder_view_auto_scroll_direction = GTK_DIR_TAB_FORWARD;
+static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_TAB_FORWARD;
 
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
@@ -4648,7 +4648,7 @@ on_folder_view_auto_scroll(GtkScrolledWindow* scroll)
     GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(scroll);
     f64 vpos = gtk_adjustment_get_value(vadj);
 
-    if (folder_view_auto_scroll_direction == GTK_DIR_UP)
+    if (folder_view_auto_scroll_direction == GtkDirectionType::GTK_DIR_UP)
     {
         vpos -= gtk_adjustment_get_step_increment(vadj);
         if (vpos > gtk_adjustment_get_lower(vadj))
@@ -4696,7 +4696,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
         /* Auto scroll up */
         if (!folder_view_auto_scroll_timer)
         {
-            folder_view_auto_scroll_direction = GTK_DIR_UP;
+            folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_UP;
             folder_view_auto_scroll_timer =
                 g_timeout_add(150, (GSourceFunc)on_folder_view_auto_scroll, scroll);
         }
@@ -4705,7 +4705,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
     {
         if (!folder_view_auto_scroll_timer)
         {
-            folder_view_auto_scroll_direction = GTK_DIR_DOWN;
+            folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_DOWN;
             folder_view_auto_scroll_timer =
                 g_timeout_add(150, (GSourceFunc)on_folder_view_auto_scroll, scroll);
         }

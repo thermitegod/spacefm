@@ -810,7 +810,8 @@ on_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 static bool
 on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 {
-    if (direction == GTK_DIR_TAB_FORWARD || direction == GTK_DIR_TAB_BACKWARD)
+    if (direction == GtkDirectionType::GTK_DIR_TAB_FORWARD ||
+        direction == GtkDirectionType::GTK_DIR_TAB_BACKWARD)
     {
         if (widget == mset->options || widget == mset->opt_move || widget == mset->opt_new_file)
         {
@@ -1659,7 +1660,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 
     switch (direction)
     {
-        case GTK_DIR_TAB_FORWARD:
+        case GtkDirectionType::GTK_DIR_TAB_FORWARD:
             if (widget == GTK_WIDGET(mset->label_name))
             {
                 input = mset->input_name;
@@ -1682,7 +1683,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
             }
             else if (widget == GTK_WIDGET(mset->label_type))
             {
-                on_button_focus(mset->options, GTK_DIR_TAB_FORWARD, mset);
+                on_button_focus(mset->options, GtkDirectionType::GTK_DIR_TAB_FORWARD, mset);
                 return true;
             }
             else if (widget == GTK_WIDGET(mset->label_target))
@@ -1701,7 +1702,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
                 }
             }
             break;
-        case GTK_DIR_TAB_BACKWARD:
+        case GtkDirectionType::GTK_DIR_TAB_BACKWARD:
             if (widget == GTK_WIDGET(mset->label_name))
             {
                 if (mset->combo_template_dir)
@@ -1839,10 +1840,10 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
                 }
             }
             break;
-        case GTK_DIR_UP:
-        case GTK_DIR_DOWN:
-        case GTK_DIR_LEFT:
-        case GTK_DIR_RIGHT:
+        case GtkDirectionType::GTK_DIR_UP:
+        case GtkDirectionType::GTK_DIR_DOWN:
+        case GtkDirectionType::GTK_DIR_LEFT:
+        case GtkDirectionType::GTK_DIR_RIGHT:
         default:
             break;
     }
