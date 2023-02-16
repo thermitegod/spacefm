@@ -3469,7 +3469,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             else
             {
                 // steal the drop-down button
-                gtk_widget_reparent(btn, ebox);
+                gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(btn)), btn);
+                gtk_container_add(GTK_CONTAINER(ebox), btn);
+
                 gtk_button_set_relief(GTK_BUTTON(btn), GTK_RELIEF_NONE);
             }
             gtk_widget_set_margin_start(btn, 0);
