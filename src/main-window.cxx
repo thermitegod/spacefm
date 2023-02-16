@@ -1987,9 +1987,9 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
                          nullptr);
             while (main_tasks_running(main_window))
             {
-                while (gtk_events_pending())
+                while (g_main_context_pending(nullptr))
                 {
-                    gtk_main_iteration();
+                    g_main_context_iteration(nullptr, true);
                 }
             }
         }
@@ -2189,10 +2189,10 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
     // focus original panel
-    // while( gtk_events_pending() )
-    //    gtk_main_iteration();
-    // gtk_widget_grab_focus( GTK_WIDGET( main_window->notebook ) );
-    // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
+    // while(g_main_context_pending(nullptr))
+    //    g_main_context_iteration(nullptr, true);
+    // gtk_widget_grab_focus(GTK_WIDGET(main_window->notebook));
+    // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
     g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
 }
 
@@ -2745,8 +2745,8 @@ main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
     }
 
     set_panel_focus(main_window, file_browser);
-    //    while( gtk_events_pending() )  // wait for chdir to grab focus
-    //        gtk_main_iteration();
+    //    while(g_main_context_pending(nullptr))  // wait for chdir to grab focus
+    //        g_main_context_iteration(nullptr, true);
     // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
     // ztd::logger::info("focus browser {} {}", idx, file_browser->folder_view);
     // ztd::logger::info("call delayed (newtab) #{} {:p}", idx,

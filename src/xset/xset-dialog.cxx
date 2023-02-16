@@ -496,9 +496,9 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         gtk_widget_show_all(dlg);
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
-        while (gtk_events_pending())
+        while (g_main_context_pending(nullptr))
         {
-            gtk_main_iteration();
+            g_main_context_iteration(nullptr, true);
         }
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }

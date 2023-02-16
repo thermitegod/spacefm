@@ -2158,8 +2158,8 @@ ptk_file_browser_update_model(PtkFileBrowser* file_browser)
     }
 
     // try to smooth list bounce created by delayed re-appearance of column headers
-    // while( gtk_events_pending() )
-    //    gtk_main_iteration();
+    // while (g_main_context_pending(nullptr))
+    //    g_main_context_iteration(nullptr, true);
 }
 
 static void
