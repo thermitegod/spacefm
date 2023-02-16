@@ -1088,9 +1088,8 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         win_height = -1;
     }
     gtk_window_set_default_size(GTK_WINDOW(ptask->progress_dlg), win_width, win_height);
-    gtk_button_box_set_layout(
-        GTK_BUTTON_BOX(gtk_dialog_get_action_area(GTK_DIALOG(ptask->progress_dlg))),
-        GTK_BUTTONBOX_END);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(ptask->progress_dlg),
+                              GtkButtonBoxStyle::GTK_BUTTONBOX_END);
     if (xset_get_b(XSetName::TASK_POP_TOP))
     {
         gtk_window_set_type_hint(GTK_WINDOW(ptask->progress_dlg),
