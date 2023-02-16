@@ -28,40 +28,34 @@
 #include "vfs/vfs-utils.hxx"
 
 GdkPixbuf*
-vfs_load_icon(std::string_view icon_name, i32 size)
+vfs_load_icon(std::string_view icon_name, i32 icon_size)
 {
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
-    GtkIconInfo* inf = gtk_icon_theme_lookup_icon(
+    GtkIconInfo* icon_info = gtk_icon_theme_lookup_icon(
         icon_theme,
         icon_name.data(),
-        size,
+        icon_size,
         GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
                            GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
 
-    if (!inf && !ztd::startswith(icon_name, "/"))
+    if (!icon_info && !ztd::startswith(icon_name, "/"))
     {
-        return gdk_pixbuf_new_from_file_at_size(icon_name.data(), size, size, nullptr);
+        return gdk_pixbuf_new_from_file_at_size(icon_name.data(), icon_size, icon_size, nullptr);
     }
 
-    if (!inf)
+    if (!icon_info)
     {
         return nullptr;
     }
 
-    const char* file = gtk_icon_info_get_filename(inf);
+    const char* file = gtk_icon_info_get_filename(icon_info);
     GdkPixbuf* icon = nullptr;
     if (file)
     {
-        icon = gdk_pixbuf_new_from_file_at_size(file, size, size, nullptr);
+        icon = gdk_pixbuf_new_from_file_at_size(file, icon_size, icon_size, nullptr);
     }
-    else
-    {
-        icon = gtk_icon_info_get_builtin_pixbuf(inf);
-        g_object_ref(icon);
-    }
-    // if (inf)
-    //     g_object_unref(inf);
+
     return icon;
 }
 
