@@ -25,8 +25,6 @@
 
 #include <chrono>
 
-#include "window-reference.hxx"
-
 #include <fmt/format.h>
 
 #include <gtk/gtk.h>
@@ -439,7 +437,6 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
     gtk_widget_destroy(GTK_WIDGET(dlg));
     free(data);
     data = nullptr;
-    WindowReference::decrease();
 }
 
 static void
@@ -500,7 +497,6 @@ edit_preference(GtkWindow* parent, i32 page)
         {
             return false;
         }
-        WindowReference::increase();
 
         data = g_new0(FMPrefDlg, 1);
         dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));

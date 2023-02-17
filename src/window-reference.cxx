@@ -13,6 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
@@ -20,48 +22,51 @@
 
 #include "window-reference.hxx"
 
-WindowRef* window_ref = window_ref->getInstance();
-
-WindowRef* WindowRef::s_instance = nullptr;
-
-void
-WindowRef::ref_inc()
+class WindowSingleton
 {
-    this->ref_count = ref_count + 1;
-};
-void
-WindowRef::ref_dec()
-{
-    this->ref_count = ref_count - 1;
-    if (this->ref_count == 0 && !this->daemon_mode)
+  public:
+    static std::shared_ptr<WindowSingleton>
+    instance()
     {
-        gtk_main_quit();
-    }
-};
-
-void
-WindowRef::set_daemon_mode(bool is_daemon)
-{
-    this->daemon_mode = is_daemon;
-};
-
-namespace WindowReference
-{
-    void
-    increase()
-    {
-        window_ref->ref_inc();
-    };
-    void
-    decrease()
-    {
-        window_ref->ref_dec();
-    };
-
-    void
-    set_daemon(bool is_daemon)
-    {
-        window_ref->set_daemon_mode(is_daemon);
+        static std::shared_ptr<WindowSingleton> instance = std::make_shared<WindowSingleton>();
+        return instance;
     }
 
-} // namespace WindowReference
+    // After opening any window/dialog/tool, this should be called.
+    void
+    ref_inc()
+    {
+        ++this->ref_count;
+    };
+
+    // After closing any window/dialog/tool, this should be called.
+    // If the last window is closed and we are not a deamon, pcmanfm will quit.
+    void
+    ref_dec()
+    {
+        --this->ref_count;
+        if (this->ref_count == 0)
+        {
+            gtk_main_quit();
+        }
+    };
+
+  private:
+    // WindowSingleton() = default;
+    // ~WindowSingleton() = default;
+
+    u32 ref_count{0};
+};
+
+std::shared_ptr<WindowSingleton> window = window->instance();
+
+void
+WindowReference::increase()
+{
+    window->ref_inc();
+};
+void
+WindowReference::decrease()
+{
+    window->ref_dec();
+};

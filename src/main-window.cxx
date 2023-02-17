@@ -2805,8 +2805,6 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
     {
         GtkBuilder* builder = gtk_builder_new();
 
-        WindowReference::increase();
-
         builder = ptk_gtk_builder_new_from_file(PTK_DLG_ABOUT);
         about_dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
         g_object_unref(builder);
@@ -2830,7 +2828,6 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
 
         // g_object_add_weak_pointer(G_OBJECT(about_dlg), (void*)&about_dlg);
         g_signal_connect(about_dlg, "response", G_CALLBACK(gtk_widget_destroy), nullptr);
-        g_signal_connect(about_dlg, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
     }
     gtk_window_set_transient_for(GTK_WINDOW(about_dlg), GTK_WINDOW(user_data));
     gtk_window_present(GTK_WINDOW(about_dlg));

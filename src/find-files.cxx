@@ -47,8 +47,6 @@
 
 #include <magic_enum.hpp>
 
-#include "window-reference.hxx"
-
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
@@ -1256,9 +1254,6 @@ find_files(const std::vector<std::string>& search_dirs)
     gtk_combo_box_set_active(GTK_COMBO_BOX(data->date_limit), 0);
 
     g_signal_connect(data->win, "delete-event", G_CALLBACK(gtk_widget_destroy), nullptr);
-
-    WindowReference::increase();
-    g_signal_connect(data->win, "destroy", G_CALLBACK(WindowReference::decrease), nullptr);
 
     const i32 width = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::X);
     const i32 height = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::Y);

@@ -40,7 +40,6 @@
 #include "types.hxx"
 
 #include "main-window.hxx"
-#include "window-reference.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
@@ -65,7 +64,6 @@
 #include "bookmarks.hxx"
 
 static bool folder_initialized = false;
-static bool daemon_initialized = false;
 
 // clang-format off
 static std::array<GOptionEntry, 13> opt_entries =
@@ -75,7 +73,6 @@ static std::array<GOptionEntry, 13> opt_entries =
     GOptionEntry{"no-saved-tabs", 'n', 0, G_OPTION_ARG_NONE, &cli_flags.no_tabs, "Don't load saved tabs", nullptr},
     GOptionEntry{"new-window", 'w', 0, G_OPTION_ARG_NONE, &cli_flags.new_window, "Open directories in new window", nullptr},
     GOptionEntry{"panel", 'p', 0, G_OPTION_ARG_INT, &cli_flags.panel, "Open directories in panel 'P' (1-4)", "P"},
-    GOptionEntry{"daemon-mode", 'd', 0, G_OPTION_ARG_NONE, &cli_flags.daemon_mode, "Run as a daemon", nullptr},
     GOptionEntry{"config", 'c', 0, G_OPTION_ARG_STRING, &cli_flags.config_dir, "Use DIR as configuration directory", "DIR"},
     GOptionEntry{"disable-git", 'G', 0, G_OPTION_ARG_NONE, &cli_flags.disable_git_settings, "Don't use git to keep session history", nullptr},
     GOptionEntry{"find-files", 'f', 0, G_OPTION_ARG_NONE, &cli_flags.find_files, "Show File Search", nullptr},
@@ -104,31 +101,6 @@ init_folder()
     vfs_file_info_set_thumbnail_size_small(app_settings.get_icon_size_small());
 
     folder_initialized = true;
-}
-
-[[noreturn]] static void
-exit_from_signal(i32 sig)
-{
-    gtk_main_quit();
-    std::exit(sig);
-}
-
-static void
-init_daemon()
-{
-    if (daemon_initialized)
-    {
-        return;
-    }
-
-    init_folder();
-
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGHUP, exit_from_signal);
-    signal(SIGINT, exit_from_signal);
-    signal(SIGTERM, exit_from_signal);
-
-    daemon_initialized = true;
 }
 
 static void
@@ -178,10 +150,7 @@ open_in_tab(MainWindow** main_window, const char* real_path)
     if (!*main_window)
     {
         // initialize things required by folder view
-        if (!cli_flags.daemon_mode)
-        {
-            init_folder();
-        }
+        init_folder();
 
         // preload panel?
         if (cli_flags.panel > 0 && cli_flags.panel < 5)
@@ -299,11 +268,6 @@ handle_parsed_commandline_args()
         find_files(search_dirs);
         cli_flags.find_files = false;
     }
-    else if (cli_flags.daemon_mode)
-    {
-        // start daemon mode
-        init_daemon();
-    }
     else if (cli_flags.files != default_files)
     {
         // open files passed in command line arguments
@@ -369,16 +333,14 @@ handle_parsed_commandline_args()
             }
         }
     }
-    else if (!check_socket_daemon())
+    else
     {
         // no files specified, just create window with default tabs
         if (!main_window)
         {
             // initialize things required by folder view
-            if (!cli_flags.daemon_mode)
-            {
-                init_folder();
-            }
+            init_folder();
+
             main_window_store_positions(nullptr);
             main_window = MAIN_WINDOW_REINTERPRET(main_window_new());
         }
@@ -469,9 +431,6 @@ main(int argc, char* argv[])
         g_error_free(err);
         std::exit(EXIT_FAILURE);
     }
-
-    // ref counter needs to know if in daemon_mode
-    WindowReference::set_daemon(cli_flags.daemon_mode);
 
     // socket command with other options?
     if (cli_flags.socket_cmd)

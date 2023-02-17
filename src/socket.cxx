@@ -45,7 +45,6 @@ enum SocketEvent
     CMD_OPEN = 1,
     CMD_OPEN_TAB,
     CMD_REUSE_TAB,
-    CMD_DAEMON_MODE,
     CMD_FIND_FILES,
     CMD_OPEN_PANEL1,
     CMD_OPEN_PANEL2,
@@ -64,16 +63,8 @@ CliFlags cli_flags = CliFlags();
 static i32 sock_fd = -1;
 static Glib::RefPtr<Glib::IOChannel> sock_io_channel = nullptr;
 
-static bool socket_daemon = false;
-
 static bool on_socket_event(Glib::IOCondition condition);
 static void receive_socket_command(i32 client, const std::string& args);
-
-bool
-check_socket_daemon()
-{
-    return socket_daemon;
-}
 
 static const std::string
 get_inode_tag()
@@ -141,7 +132,6 @@ on_socket_event(Glib::IOCondition condition)
     cli_flags.panel = 0;
     cli_flags.reuse_tab = false;
     cli_flags.no_tabs = false;
-    socket_daemon = false;
 
     usize argx = 0;
     if (args[argx] == SocketEvent::CMD_NO_TABS)
@@ -190,9 +180,6 @@ on_socket_event(Glib::IOCondition condition)
             cli_flags.new_tab = false;
             cli_flags.panel = 4;
             break;
-        case SocketEvent::CMD_DAEMON_MODE:
-            socket_daemon = cli_flags.daemon_mode = true;
-            return true;
         case SocketEvent::CMD_FIND_FILES:
             cli_flags.find_files = true;
             return true;
@@ -225,7 +212,6 @@ on_socket_event(Glib::IOCondition condition)
     }
     // handle_parsed_commandline_args();
     app_settings.set_load_saved_tabs(true);
-    socket_daemon = false;
 
     return true;
 }
@@ -293,11 +279,7 @@ single_instance_check()
             cmd = SocketEvent::CMD_OPEN;
         }
 
-        if (cli_flags.daemon_mode)
-        {
-            cmd = SocketEvent::CMD_DAEMON_MODE;
-        }
-        else if (cli_flags.new_window)
+        if (cli_flags.new_window)
         {
             if (cli_flags.panel > 0 && cli_flags.panel < 5)
             {

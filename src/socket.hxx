@@ -29,8 +29,6 @@ struct CliFlags
     bool socket_cmd{false};
     bool version_opt{false};
 
-    bool daemon_mode{false};
-
     i32 panel{0};
 
     bool find_files{false};
@@ -40,7 +38,6 @@ struct CliFlags
 
 extern CliFlags cli_flags;
 
-bool check_socket_daemon();
 bool single_instance_check();
 void single_instance_finalize();
 
