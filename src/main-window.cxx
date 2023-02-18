@@ -28,8 +28,8 @@
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
-#include <gdk/gdkx.h>
-#include <X11/Xatom.h>
+// #include <gdk/gdkx.h>
+// #include <X11/Xatom.h>
 
 #include <malloc.h>
 
