@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <gtk/gtk.h>
 #include "ptk/ptk-file-browser.hxx"
 
@@ -50,5 +52,5 @@ i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::fil
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc callback);
 void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser,
-                           const std::vector<vfs::file_info>& sel_files, const char* cwd,
+                           const std::span<const vfs::file_info> sel_files, const char* cwd,
                            const char* setname);

@@ -16,6 +16,13 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
+#include <vector>
+
+#include <algorithm>
+#include <ranges>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -192,7 +199,7 @@ xset_get_plugins()
 }
 
 void
-xset_clear_plugins(const std::vector<xset_t>& plugins)
+xset_clear_plugins(const std::span<const xset_t> plugins)
 {
     std::ranges::for_each(plugins, xset_remove);
 }

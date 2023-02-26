@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -357,7 +359,7 @@ VFSAppDesktop::open_multiple_files() const noexcept
 }
 
 const std::vector<std::string>
-VFSAppDesktop::app_exec_to_argv(const std::vector<std::string>& file_list,
+VFSAppDesktop::app_exec_to_argv(const std::span<const std::string> file_list,
                                 bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
@@ -490,7 +492,7 @@ VFSAppDesktop::exec_in_terminal(std::string_view cwd, std::string_view command) 
 
 bool
 VFSAppDesktop::open_files(std::string_view working_dir,
-                          const std::vector<std::string>& file_paths) const
+                          const std::span<const std::string> file_paths) const
 {
     if (this->exec.empty())
     {
@@ -507,8 +509,8 @@ VFSAppDesktop::open_files(std::string_view working_dir,
         // app does not accept multiple files, so run multiple times
         for (const std::string_view open_file : file_paths)
         {
-            // const std::vector<std::string> open_files{open_file};
-            this->exec_desktop(working_dir, {open_file.data()});
+            const std::vector<std::string> open_files{open_file.data()};
+            this->exec_desktop(working_dir, open_files);
         }
     }
     return true;
@@ -516,7 +518,7 @@ VFSAppDesktop::open_files(std::string_view working_dir,
 
 void
 VFSAppDesktop::exec_desktop(std::string_view working_dir,
-                            const std::vector<std::string>& file_paths) const noexcept
+                            const std::span<const std::string> file_paths) const noexcept
 {
     const std::vector<std::string> argv = this->app_exec_to_argv(file_paths, this->use_terminal());
     if (argv.empty())

@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <vector>
 
 #include <chrono>
@@ -56,7 +58,7 @@
  * freed after file operation has been completed
  */
 vfs::file_task
-vfs_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+vfs_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
              std::string_view dest_dir)
 {
     const auto task = new VFSFileTask(type, src_files, dest_dir);
@@ -70,11 +72,11 @@ vfs_file_task_free(vfs::file_task task)
     delete task;
 }
 
-VFSFileTask::VFSFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+VFSFileTask::VFSFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
                          std::string_view dest_dir)
 {
     this->type = type;
-    this->src_paths = src_files;
+    this->src_paths = std::vector<std::string>(src_files.begin(), src_files.end());
     if (!dest_dir.empty())
     {
         this->dest_dir = dest_dir.data();

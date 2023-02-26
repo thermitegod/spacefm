@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <vector>
 
 #include <memory>
@@ -47,14 +49,15 @@ class VFSAppDesktop
     GdkPixbuf* get_icon(i32 size) const noexcept;
     bool use_terminal() const noexcept;
     bool open_multiple_files() const noexcept;
-    bool open_files(std::string_view working_dir, const std::vector<std::string>& file_paths) const;
+    bool open_files(std::string_view working_dir,
+                    const std::span<const std::string> file_paths) const;
 
   private:
-    const std::vector<std::string> app_exec_to_argv(const std::vector<std::string>& file_list,
+    const std::vector<std::string> app_exec_to_argv(const std::span<const std::string> file_list,
                                                     bool quote_file_list) const noexcept;
     void exec_in_terminal(std::string_view cwd, std::string_view cmd) const noexcept;
     void exec_desktop(std::string_view working_dir,
-                      const std::vector<std::string>& file_paths) const noexcept;
+                      const std::span<const std::string> file_paths) const noexcept;
 
   private:
     std::string file_name{};

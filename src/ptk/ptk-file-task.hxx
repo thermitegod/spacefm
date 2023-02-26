@@ -19,6 +19,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -40,7 +42,7 @@ struct PtkFileTask
     PtkFileTask() = delete;
     ~PtkFileTask();
 
-    PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+    PtkFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
                 std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
 
     vfs::file_task task{nullptr};
@@ -102,10 +104,10 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
                                GtkWindow* parent_window, GtkWidget* task_view);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
                                std::string_view dest_dir, GtkWindow* parent_window,
                                GtkWidget* task_view);
 

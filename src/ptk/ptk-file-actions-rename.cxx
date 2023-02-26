@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -3464,7 +3466,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc
 }
 
 void
-ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
+ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files,
                       const char* cwd, const char* setname)
 {
     /*

@@ -22,6 +22,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <gtk/gtk.h>
 #include <glib.h>
 
@@ -37,7 +39,9 @@ enum PTKFileArchiverArc
 
 // Pass file_browser or desktop depending on where you are calling from
 void ptk_file_archiver_create(PtkFileBrowser* file_browser,
-                              const std::vector<vfs::file_info>& sel_files, std::string_view cwd);
+                              const std::span<const vfs::file_info> sel_files,
+                              std::string_view cwd);
 void ptk_file_archiver_extract(PtkFileBrowser* file_browser,
-                               const std::vector<vfs::file_info>& sel_files, std::string_view cwd,
-                               std::string_view dest_dir, i32 job, bool archive_presence_checked);
+                               const std::span<const vfs::file_info> sel_files,
+                               std::string_view cwd, std::string_view dest_dir, i32 job,
+                               bool archive_presence_checked);

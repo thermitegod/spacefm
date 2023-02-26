@@ -21,6 +21,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -331,8 +333,8 @@ replace_archive_subs(std::string_view line, std::string_view n, std::string_view
 }
 
 void
-ptk_file_archiver_create(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
-                         std::string_view cwd)
+ptk_file_archiver_create(PtkFileBrowser* file_browser,
+                         const std::span<const vfs::file_info> sel_files, std::string_view cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
      * placate an irrelevant compilation warning. See notes in
@@ -983,7 +985,7 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 
 void
 ptk_file_archiver_extract(PtkFileBrowser* file_browser,
-                          const std::vector<vfs::file_info>& sel_files, std::string_view cwd,
+                          const std::span<const vfs::file_info> sel_files, std::string_view cwd,
                           std::string_view dest_dir, i32 job, bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;

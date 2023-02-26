@@ -22,6 +22,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -1118,7 +1120,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
 }
 
 bool
-ptk_handler_values_in_list(std::string_view list, const std::vector<std::string>& values,
+ptk_handler_values_in_list(std::string_view list, const std::span<const std::string> values,
                            std::string& msg)
 { /* test for the presence of values in list, using wildcards.
    *  list is space-separated, plus sign (+) indicates required. */

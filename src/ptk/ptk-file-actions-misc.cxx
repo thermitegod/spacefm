@@ -16,6 +16,7 @@
 #include <string>
 #include <string_view>
 
+#include <span>
 #include <vector>
 
 #include <fmt/format.h>
@@ -54,7 +55,7 @@ action_dialog(GtkWindow* parent_win, std::string_view title, std::string_view me
 
 void
 ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
-                 const std::vector<vfs::file_info>& sel_files, GtkTreeView* task_view)
+                 const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view)
 {
     if (sel_files.empty())
     {
@@ -87,7 +88,7 @@ ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
 
 void
 ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
-                const std::vector<vfs::file_info>& sel_files, GtkTreeView* task_view)
+                const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view)
 {
     if (sel_files.empty())
     {

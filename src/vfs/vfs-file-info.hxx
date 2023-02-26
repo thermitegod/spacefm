@@ -22,7 +22,7 @@
 
 #include <filesystem>
 
-#include <vector>
+#include <span>
 
 #include <memory>
 
@@ -156,7 +156,7 @@ void vfs_file_info_unref(vfs::file_info file);
 
 bool vfs_file_info_get(vfs::file_info file, std::string_view file_path);
 
-void vfs_file_info_list_free(const std::vector<vfs::file_info>& list);
+void vfs_file_info_list_free(const std::span<const vfs::file_info> list);
 
 void vfs_file_info_set_thumbnail_size_big(i32 size);
 void vfs_file_info_set_thumbnail_size_small(i32 size);

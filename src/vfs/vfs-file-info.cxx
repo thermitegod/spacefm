@@ -20,6 +20,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <vector>
 
 #include <map>
@@ -797,7 +799,7 @@ VFSFileInfo::load_special_info(std::string_view file_path) noexcept
 }
 
 void
-vfs_file_info_list_free(const std::vector<vfs::file_info>& list)
+vfs_file_info_list_free(const std::span<const vfs::file_info> list)
 {
     std::ranges::for_each(list, vfs_file_info_unref);
 }

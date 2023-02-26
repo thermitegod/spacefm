@@ -23,6 +23,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <vector>
 
 #include <gtk/gtk.h>
@@ -59,7 +61,7 @@ enum PtkHandlerMode
 void ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing);
 void ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set);
 void ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handler_set);
-bool ptk_handler_values_in_list(std::string_view list, const std::vector<std::string>& values,
+bool ptk_handler_values_in_list(std::string_view list, const std::span<const std::string> values,
                                 std::string& msg);
 bool ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view,
                              std::string& script, std::string& error_message);

@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -71,7 +73,7 @@ ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)
 }
 
 static bool
-open_archives_with_handler(ParentInfo* parent, const std::vector<vfs::file_info>& sel_files,
+open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_info> sel_files,
                            std::string_view full_path, vfs::mime_type mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
@@ -317,7 +319,7 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(std::string_view cwd, const std::vector<vfs::file_info>& sel_files,
+ptk_open_files_with_app(std::string_view cwd, const std::span<const vfs::file_info> sel_files,
                         std::string_view app_desktop, PtkFileBrowser* file_browser, bool xforce,
                         bool xnever)
 {

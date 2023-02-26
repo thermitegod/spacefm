@@ -20,6 +20,10 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
+#include <vector>
+
 #include <gtk/gtk.h>
 #include "ptk/ptk-file-browser.hxx"
 
@@ -44,7 +48,7 @@ struct PtkFileMenu
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
-                             const char* cwd, const std::vector<vfs::file_info>& sel_files);
+                             const char* cwd, const std::span<const vfs::file_info> sel_files);
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
                              const char* cwd);
 

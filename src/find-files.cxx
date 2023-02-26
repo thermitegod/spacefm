@@ -25,6 +25,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -1271,12 +1273,12 @@ find_files(const std::vector<std::string>& search_dirs)
 #else
 
 #include <string>
-#include <vector>
+#include <span>
 
 #include "ptk/ptk-error.hxx"
 
 void
-find_files(const std::vector<std::string>& search_dirs)
+find_files(const std::span<const std::string> search_dirs)
 {
     (void)search_dirs;
     ptk_show_error(nullptr, "Disabled", "Find files is disabled");

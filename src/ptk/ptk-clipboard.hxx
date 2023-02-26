@@ -20,6 +20,7 @@
 #include <string>
 #include <string_view>
 
+#include <span>
 #include <vector>
 
 #include <glib.h>
@@ -28,13 +29,13 @@
 #include "vfs/vfs-file-info.hxx"
 
 void ptk_clipboard_cut_or_copy_files(std::string_view working_dir,
-                                     const std::vector<vfs::file_info>& sel_files, bool copy);
+                                     const std::span<const vfs::file_info> sel_files, bool copy);
 
 void ptk_clipboard_copy_as_text(std::string_view working_dir,
-                                const std::vector<vfs::file_info>& sel_files);
+                                const std::span<const vfs::file_info> sel_files);
 
 void ptk_clipboard_copy_name(std::string_view working_dir,
-                             const std::vector<vfs::file_info>& sel_files);
+                             const std::span<const vfs::file_info> sel_files);
 
 void ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir,
                                GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);

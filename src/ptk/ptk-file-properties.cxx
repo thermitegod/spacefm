@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -367,7 +369,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 
 static GtkWidget*
 file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
-                        const std::vector<vfs::file_info>& sel_files, i32 page)
+                        const std::span<const vfs::file_info> sel_files, i32 page)
 {
     GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FILE_PROPERTIES);
     GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
@@ -402,7 +404,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     data->update_label_timer = 0;
     /* FIXME: When will the data be freed??? */
     g_object_set_data(G_OBJECT(dlg), "DialogData", data);
-    data->file_list = sel_files;
+    data->file_list = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
     data->dlg = dlg;
 
     data->dir_path = ztd::strdup(dir_path.data());

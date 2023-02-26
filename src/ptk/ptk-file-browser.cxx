@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -4925,7 +4927,7 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
 
 void
 ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
-                                       const std::vector<vfs::file_info>& sel_files,
+                                       const std::span<const vfs::file_info> sel_files,
                                        std::string_view cwd)
 {
     if (!file_browser)
@@ -5028,8 +5030,9 @@ ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::file_info>& sel_files,
-                         std::string_view cwd, XSetName setname)
+ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
+                         const std::span<const vfs::file_info> sel_files, std::string_view cwd,
+                         XSetName setname)
 {
     if (!file_browser)
     {
@@ -5290,7 +5293,8 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser, const std::vector<vfs::fi
 
 void
 ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
-                               const std::vector<vfs::file_info>& sel_files, std::string_view cwd)
+                               const std::span<const vfs::file_info> sel_files,
+                               std::string_view cwd)
 {
     const i32 response = xset_msg_dialog(
         GTK_WIDGET(file_browser),
@@ -6037,7 +6041,8 @@ ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
 
 void
 ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
-                               const std::vector<vfs::file_info>& sel_files, std::string_view cwd)
+                               const std::span<const vfs::file_info> sel_files,
+                               std::string_view cwd)
 {
     if (sel_files.empty())
     {

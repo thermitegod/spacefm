@@ -18,6 +18,8 @@
 
 #include <filesystem>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -702,7 +704,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
 GtkWidget*
 ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
-                  const char* cwd, const std::vector<vfs::file_info>& sel_files)
+                  const char* cwd, const std::span<const vfs::file_info> sel_files)
 { // either desktop or browser must be non-nullptr
 
     xset_t set_radio;
@@ -729,7 +731,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     {
         data->file = nullptr;
     }
-    data->sel_files = sel_files;
+    data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
 
     data->accel_group = gtk_accel_group_new();
 
@@ -2676,7 +2678,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
     const auto data = new PtkFileMenu;
     data->cwd = ztd::strdup(cwd);
     data->browser = browser;
-    data->sel_files = sel_files;
+    data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
     data->file_path = ztd::strdup(file_path);
     if (file)
     {

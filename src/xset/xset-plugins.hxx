@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <vector>
 
 #include <gtk/gtk.h>
@@ -60,7 +62,7 @@ struct PluginData
 };
 
 const std::vector<xset_t> xset_get_plugins();
-void xset_clear_plugins(const std::vector<xset_t>& plugins);
+void xset_clear_plugins(const std::span<const xset_t> plugins);
 
 void on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data);
 

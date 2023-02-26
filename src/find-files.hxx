@@ -18,8 +18,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
+#include <span>
 
-#include <vector>
-
-void find_files(const std::vector<std::string>& search_dirs);
+void find_files(const std::span<const std::string> search_dirs);

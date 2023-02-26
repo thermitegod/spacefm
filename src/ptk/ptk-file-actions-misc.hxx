@@ -18,13 +18,13 @@
 #include <string>
 #include <string_view>
 
-#include <vector>
+#include <span>
 
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-file-info.hxx"
 
 void ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
-                     const std::vector<vfs::file_info>& sel_files, GtkTreeView* task_view);
+                     const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view);
 void ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
-                      const std::vector<vfs::file_info>& sel_files, GtkTreeView* task_view);
+                      const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view);

@@ -18,6 +18,7 @@
 
 #include <filesystem>
 
+#include <span>
 #include <vector>
 
 #include <fmt/format.h>
@@ -120,7 +121,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 
 void
 ptk_clipboard_copy_as_text(std::string_view working_dir,
-                           const std::vector<vfs::file_info>& sel_files)
+                           const std::span<const vfs::file_info> sel_files)
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -137,7 +138,8 @@ ptk_clipboard_copy_as_text(std::string_view working_dir,
 }
 
 void
-ptk_clipboard_copy_name(std::string_view working_dir, const std::vector<vfs::file_info>& sel_files)
+ptk_clipboard_copy_name(std::string_view working_dir,
+                        const std::span<const vfs::file_info> sel_files)
 {
     (void)working_dir;
 
@@ -177,7 +179,7 @@ ptk_clipboard_copy_text(std::string_view text)
 
 void
 ptk_clipboard_cut_or_copy_files(std::string_view working_dir,
-                                const std::vector<vfs::file_info>& sel_files, bool copy)
+                                const std::span<const vfs::file_info> sel_files, bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);

@@ -131,7 +131,7 @@ class VFSFileTask
 {
   public:
     VFSFileTask() = delete;
-    VFSFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+    VFSFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
                 std::string_view dest_dir);
     ~VFSFileTask();
 
@@ -265,7 +265,7 @@ class VFSFileTask
     void* exec_ptask{nullptr};
 };
 
-vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::vector<std::string>& src_files,
+vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::span<const std::string> src_files,
                             std::string_view dest_dir);
 
 void vfs_file_task_free(vfs::file_task task);

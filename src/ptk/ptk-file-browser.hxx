@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <sigc++/sigc++.h>
 
 #include <gtk/gtk.h>
@@ -384,7 +386,7 @@ void ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_brows
 void ptk_file_browser_canon(PtkFileBrowser* file_browser, std::string_view path);
 
 void ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
-                                            const std::vector<vfs::file_info>& sel_files,
+                                            const std::span<const vfs::file_info> sel_files,
                                             std::string_view cwd);
 
 void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page);
@@ -394,7 +396,7 @@ void ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser);
 void ptk_file_browser_view_as_list(PtkFileBrowser* file_browser);
 
 void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
-                                    const std::vector<vfs::file_info>& sel_files,
+                                    const std::span<const vfs::file_info> sel_files,
                                     std::string_view cwd);
 
 void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, i32 max_file_size);
@@ -420,10 +422,10 @@ void ptk_file_browser_focus_me(PtkFileBrowser* file_browser);
 void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
                                   std::string_view file_path);
 void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
-                                    const std::vector<vfs::file_info>& sel_files,
+                                    const std::span<const vfs::file_info> sel_files,
                                     std::string_view cwd);
 void ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
-                              const std::vector<vfs::file_info>& sel_files, std::string_view cwd,
+                              const std::span<const vfs::file_info> sel_files, std::string_view cwd,
                               XSetName setname);
 void ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname);
 GList* folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model);

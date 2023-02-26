@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <span>
+
 #include <array>
 #include <vector>
 
@@ -53,7 +55,7 @@ static bool ptk_file_task_add_main(PtkFileTask* ptask);
 static void on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask);
 static void save_progress_dialog_size(PtkFileTask* ptask);
 
-PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::vector<std::string>& src_files,
+PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
                          std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
 {
     this->task = vfs_task_new(type, src_files, dest_dir);
@@ -203,7 +205,7 @@ ptk_file_task_trylock(PtkFileTask* ptask)
 }
 
 PtkFileTask*
-ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
                   GtkWindow* parent_window, GtkWidget* task_view)
 {
     const auto ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
@@ -212,7 +214,7 @@ ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_file
 }
 
 PtkFileTask*
-ptk_file_task_new(VFSFileTaskType type, const std::vector<std::string>& src_files,
+ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
                   std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
 {
     const auto ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
