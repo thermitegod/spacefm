@@ -71,7 +71,7 @@ VFSTrash::VFSTrash() noexcept
 std::optional<dev_t>
 VFSTrash::device(std::string_view path) noexcept
 {
-    const auto statbuf = ztd::stat(path);
+    const auto statbuf = ztd::lstat(path);
     if (statbuf.is_valid())
     {
         return statbuf.dev();
@@ -133,14 +133,6 @@ VFSTrash::trash(std::string_view path) noexcept
     if (!trash_dir)
     {
         return false;
-    }
-
-    if (std::filesystem::is_symlink(path))
-    {
-        // TODO std::filesystem::rename does not support symlinks
-        // should limit too only regular files and directories;
-        LOG_WARN("Cannot trash symlink: {}", path);
-        return true;
     }
 
     if (ztd::endswith(path, "/Trash") || ztd::endswith(path, fmt::format("/.Trash-{}", getuid())))
@@ -253,8 +245,11 @@ VFSTrashDir::create_trash_info(std::string_view path, std::string_view target_na
 void
 VFSTrashDir::move(std::string_view path, std::string_view target_name) const noexcept
 {
+    const std::string target_path = Glib::build_filename(this->files_path, target_name.data());
+
     // ztd::logger::info("fp {}", this->files_path);
     // ztd::logger::info("ip {}", this->info_path);
-    const std::string target_path = Glib::build_filename(this->files_path, target_name.data());
+    // ztd::logger::info("tp {}", target_path);
+
     std::filesystem::rename(path, target_path);
 }
