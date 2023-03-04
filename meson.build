@@ -260,6 +260,7 @@ fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 magic_enum_dep = dependency('magic_enum', required : true)
 toml11_dep = dependency('toml11', required : true)
+pugixml_dep = dependency('pugixml', required : true)
 
 #gtk_dep = dependency('gtk+-4.0', required : true)
 gtk_dep = dependency('gtk+-3.0', required : true)
@@ -370,6 +371,7 @@ spacefm = build_target(
     sigc_dep,
     magic_enum_dep,
     toml11_dep,
+    pugixml_dep,
 
     libudev_dep,
     libffmpegthumbnailer_dep,

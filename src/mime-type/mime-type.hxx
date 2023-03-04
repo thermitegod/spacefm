@@ -20,6 +20,7 @@
 #include <string>
 #include <string_view>
 
+#include <array>
 #include <vector>
 
 #include "mime-type/mime-cache.hxx"
@@ -53,12 +54,10 @@ const std::string mime_type_get_by_file(std::string_view filepath);
 bool mime_type_is_text_file(std::string_view file_path, std::string_view mime_type = "");
 bool mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type = "");
 
-/* Get human-readable description and icon name of the mime-type
- * If locale is nullptr, current locale will be used.
- * The returned string should be freed when no longer used.
- * The icon_name will only be set if points to nullptr, and must be freed. */
-const std::string mime_type_get_desc_icon(std::string_view type, std::string_view locale,
-                                          char** icon_name);
+/**
+ * Get human-readable description and icon name of the mime-type
+ */
+const std::array<std::string, 2> mime_type_get_desc_icon(std::string_view type);
 
 /*
  * Get mime caches

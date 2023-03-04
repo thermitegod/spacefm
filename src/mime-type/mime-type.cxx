@@ -20,7 +20,10 @@
 #include <string>
 #include <filesystem>
 
+#include <array>
 #include <vector>
+
+#include <optional>
 
 #include <iostream>
 #include <fstream>
@@ -33,6 +36,8 @@
 #include <fcntl.h>
 
 #include <fmt/format.h>
+
+#include <pugixml.hpp>
 
 #include <glibmm.h>
 
@@ -234,133 +239,57 @@ mime_type_get_by_file(std::string_view filepath)
     return XDG_MIME_TYPE_UNKNOWN.data();
 }
 
-static char*
-parse_xml_icon(const char* buf, usize len, bool is_local)
-{ // Note: This function modifies contents of buf
-    char* icon_tag = nullptr;
+// returns - icon_name, icon_desc
+static std::optional<std::array<std::string, 2>>
+mime_type_parse_xml_file(std::string_view file_path, bool is_local)
+{
+    // ztd::logger::info("MIME XML = {}", file_path);
 
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(file_path.data());
+
+    if (!result)
+    {
+        ztd::logger::error("XML parsing error: {}", result.description());
+        return std::nullopt;
+    }
+
+    std::string comment;
+    pugi::xml_node mime_type_node = doc.child("mime-type");
+    pugi::xml_node comment_node = mime_type_node.child("comment");
+    if (comment_node)
+    {
+        comment = comment_node.child_value();
+    }
+
+    std::string icon_name;
     if (is_local)
     {
-        //  "<icon name=.../>" is only used in user .local XML files
-        // find <icon name=
-        icon_tag = g_strstr_len(buf, len, "<icon name=");
-        if (icon_tag)
+        pugi::xml_node icon_node = mime_type_node.child("icon");
+        if (icon_node)
         {
-            icon_tag += 11;
-            len -= 11;
+            pugi::xml_attribute name_attr = icon_node.attribute("name");
+            if (name_attr)
+            {
+                icon_name = name_attr.value();
+            }
         }
     }
-    if (!icon_tag && !is_local)
+    else
     {
-        // otherwise find <generic-icon name=
-        icon_tag = g_strstr_len(buf, len, "<generic-icon name=");
-        if (icon_tag)
+        pugi::xml_node generic_icon_node = mime_type_node.child("generic-icon");
+        if (generic_icon_node)
         {
-            icon_tag += 19;
-            len -= 19;
+            pugi::xml_attribute name_attr = generic_icon_node.attribute("name");
+            if (name_attr)
+            {
+                icon_name = name_attr.value();
+            }
         }
     }
-    if (!icon_tag)
-        return nullptr; // no icon found
 
-    // find />
-    char* end_tag = g_strstr_len(icon_tag, len, "/>");
-    if (!end_tag)
-        return nullptr;
-    end_tag[0] = '\0';
-    if (strchr(end_tag, '\n'))
-        return nullptr; // linefeed in tag
-
-    // remove quotes
-    if (icon_tag[0] == '"')
-        icon_tag++;
-    if (end_tag[-1] == '"')
-        end_tag[-1] = '\0';
-
-    if (icon_tag == end_tag)
-        return nullptr; // blank name
-
-    return ztd::strdup(icon_tag);
-}
-
-static char*
-parse_xml_desc(const char* buf, usize len, const char* locale)
-{
-    const char* buf_end = buf + len;
-    const char* comment = nullptr;
-    const char* comment_end;
-    const char* eng_comment;
-    usize comment_len = 0;
-    static const char end_comment_tag[] = "</comment>";
-
-    eng_comment = g_strstr_len(buf, len, "<comment>"); /* default English comment */
-    if (!eng_comment)                                  /* This xml file is invalid */
-        return nullptr;
-    len -= 9;
-    eng_comment += 9;
-    comment_end = g_strstr_len(eng_comment, len, end_comment_tag); /* find </comment> */
-    if (!comment_end)
-        return nullptr;
-    usize eng_comment_len = comment_end - eng_comment;
-
-    if (locale)
-    {
-        char target[64];
-        i32 target_len = g_snprintf(target, 64, "<comment xml:lang=\"%s\">", locale);
-        buf = comment_end + 10;
-        len = (buf_end - buf);
-        if ((comment = g_strstr_len(buf, len, target)))
-        {
-            len -= target_len;
-            comment += target_len;
-            comment_end = g_strstr_len(comment, len, end_comment_tag); /* find </comment> */
-            if (comment_end)
-                comment_len = (comment_end - comment);
-            else
-                comment = nullptr;
-        }
-    }
-    if (comment)
-        return strndup(comment, comment_len);
-    return strndup(eng_comment, eng_comment_len);
-}
-
-static char*
-_mime_type_get_desc_icon(std::string_view file_path, std::string_view locale, bool is_local,
-                         char** icon_name)
-{
-    std::string line;
-    std::ifstream file(file_path.data());
-    if (!file.is_open())
-        return nullptr;
-
-    std::string buffer;
-    while (std::getline(file, line))
-    {
-        buffer.append(line);
-    }
-    file.close();
-
-    if (buffer.empty())
-        return nullptr;
-
-    const char* new_locale = locale.data();
-    if (locale.empty())
-    {
-        const char* const* langs = g_get_language_names();
-        char* dot = (char*)strchr(langs[0], '.');
-        if (dot)
-            new_locale = strndup(langs[0], (usize)(dot - langs[0]));
-        else
-            new_locale = langs[0];
-    }
-    char* desc = parse_xml_desc(buffer.data(), buffer.size(), new_locale);
-
-    // only look for <icon /> tag in .local
-    if (is_local && icon_name && *icon_name == nullptr)
-        *icon_name = parse_xml_icon(buffer.data(), buffer.size(), is_local);
-
-    return desc;
+    // ztd::logger::info("MIME XML | icon_name = {} | comment = {}", icon_name, comment);
+    return std::array{icon_name, comment};
 }
 
 /* Get human-readable description and icon name of the mime-type
@@ -371,8 +300,8 @@ _mime_type_get_desc_icon(std::string_view file_path, std::string_view locale, bo
  * Note: Spec is not followed for icon.  If icon tag is found in .local
  * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
  * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed. */
-const std::string
-mime_type_get_desc_icon(std::string_view type, std::string_view locale, char** icon_name)
+const std::array<std::string, 2>
+mime_type_get_desc_icon(std::string_view type)
 {
     /*  //sfm 0.7.7+ FIXED:
      * According to specs on freedesktop.org, user_data_dir has
@@ -385,9 +314,11 @@ mime_type_get_desc_icon(std::string_view type, std::string_view locale, char** i
     const std::string file_path = fmt::format("{}/mime/{}.xml", vfs_user_data_dir(), type);
     if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
     {
-        const char* desc = _mime_type_get_desc_icon(file_path, locale, true, icon_name);
-        if (desc)
-            return desc;
+        const auto icon_data = mime_type_parse_xml_file(file_path, true);
+        if (icon_data)
+        {
+            return icon_data.value();
+        }
     }
 
     // look in system dirs
@@ -396,12 +327,14 @@ mime_type_get_desc_icon(std::string_view type, std::string_view locale, char** i
         const std::string sys_file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
         if (faccessat(0, sys_file_path.data(), F_OK, AT_EACCESS) != -1)
         {
-            const char* desc = _mime_type_get_desc_icon(sys_file_path, locale, false, icon_name);
-            if (desc)
-                return desc;
+            const auto icon_data = mime_type_parse_xml_file(sys_file_path, false);
+            if (icon_data)
+            {
+                return icon_data.value();
+            }
         }
     }
-    return "";
+    return {"", ""};
 }
 
 void

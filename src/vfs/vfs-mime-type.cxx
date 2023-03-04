@@ -249,18 +249,18 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
 
     // get description and icon from freedesktop XML - these are fetched
     // together for performance.
-    char* xml_icon = nullptr;
-    const std::string xml_desc = mime_type_get_desc_icon(mime_type->type, "", &xml_icon);
-    if (xml_icon)
+    const auto [mime_icon, mime_desc] = mime_type_get_desc_icon(mime_type->type);
+
+    if (!mime_icon.empty())
     {
-        if (xml_icon[0])
-            icon = vfs_load_icon(xml_icon, size);
-        free(xml_icon);
+        icon = vfs_load_icon(mime_icon, size);
     }
-    if (!xml_desc.empty())
+    if (!mime_desc.empty())
     {
-        if (mime_type->description.empty() && xml_desc[0])
-            mime_type->description = xml_desc;
+        if (mime_type->description.empty())
+        {
+            mime_type->description = mime_desc;
+        }
     }
     if (mime_type->description.empty())
     {
@@ -403,7 +403,8 @@ vfs_mime_type_get_description(vfs::mime_type mime_type)
 {
     if (mime_type->description.empty())
     {
-        mime_type->description = mime_type_get_desc_icon(mime_type->type, "", nullptr);
+        const auto icon_data = mime_type_get_desc_icon(mime_type->type);
+        mime_type->description = icon_data[1];
         if (mime_type->description.empty())
         {
             LOG_WARN("mime-type {} has no description (comment)", mime_type->type);
