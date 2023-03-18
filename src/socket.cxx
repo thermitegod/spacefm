@@ -64,7 +64,6 @@ static Glib::RefPtr<Glib::IOChannel> sock_io_channel = nullptr;
 
 static bool socket_daemon = false;
 
-static void get_socket_name(char* buf, i32 len);
 static bool on_socket_event(Glib::IOCondition condition);
 static void receive_socket_command(i32 client, const std::string& args);
 
@@ -217,10 +216,10 @@ on_socket_event(Glib::IOCondition condition)
     return true;
 }
 
-static void
-get_socket_name(char* buf, i32 len)
+static const std::string
+get_socket_name()
 {
-    std::string dpy = ztd::strdup(Glib::getenv("DISPLAY"));
+    std::string dpy = Glib::getenv("DISPLAY");
     // treat :0.0 as :0 to prevent multiple instances on screen 0
     if (ztd::same(dpy, ":0.0"))
         dpy = ":0";
@@ -230,7 +229,8 @@ get_socket_name(char* buf, i32 len)
                                                 PACKAGE_NAME,
                                                 Glib::get_user_name(),
                                                 dpy);
-    g_snprintf(buf, len, "%s", socket_path.data());
+
+    return socket_path;
 }
 
 [[noreturn]] static void
@@ -249,10 +249,12 @@ single_instance_check()
         single_instance_check_fatal(EXIT_FAILURE);
     }
 
-    struct sockaddr_un addr;
+    // open socket
+    sockaddr_un addr;
+    std::memset(&addr, 0, sizeof(sockaddr_un));
     addr.sun_family = AF_UNIX;
-    get_socket_name(addr.sun_path, sizeof(addr.sun_path));
-    const i32 addr_len = SUN_LEN(&addr);
+    std::strcpy(addr.sun_path, get_socket_name().data());
+    const socklen_t addr_len = SUN_LEN(&addr);
 
     // try to connect to existing instance
     if (sock_fd && connect(sock_fd, (struct sockaddr*)&addr, addr_len) == 0)
@@ -363,8 +365,7 @@ single_instance_finalize()
     shutdown(sock_fd, 2);
     close(sock_fd);
 
-    char lock_file[256];
-    get_socket_name(lock_file, sizeof(lock_file));
+    const std::string lock_file = get_socket_name();
     std::filesystem::remove(lock_file);
 }
 
@@ -418,10 +419,11 @@ send_socket_command(i32 argc, char* argv[], std::string& reply)
     }
 
     // open socket
-    struct sockaddr_un addr;
+    sockaddr_un addr;
+    std::memset(&addr, 0, sizeof(sockaddr_un));
     addr.sun_family = AF_UNIX;
-    get_socket_name(addr.sun_path, sizeof(addr.sun_path));
-    socklen_t addr_len = SUN_LEN(&addr);
+    std::strcpy(addr.sun_path, get_socket_name().data());
+    const socklen_t addr_len = SUN_LEN(&addr);
 
     if (connect(sock_fd, (struct sockaddr*)&addr, addr_len) != 0)
     {

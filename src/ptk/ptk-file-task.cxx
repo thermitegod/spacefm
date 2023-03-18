@@ -1061,7 +1061,6 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     const char* window_title;
     std::string str;
     std::string str2;
-    char percent_str[16];
 
     // LOG_INFO("ptk_file_task_progress_update ptask={:p}", ptask);
 
@@ -1183,8 +1182,8 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             if (task->percent > 100)
                 task->percent = 100;
             gtk_progress_bar_set_fraction(ptask->progress_bar, ((f64)task->percent) / 100);
-            g_snprintf(percent_str, 16, "%d %%", task->percent);
-            gtk_progress_bar_set_text(ptask->progress_bar, percent_str);
+            const std::string percent_str = fmt::format("{} %", task->percent);
+            gtk_progress_bar_set_text(ptask->progress_bar, percent_str.data());
         }
         else
             gtk_progress_bar_set_fraction(ptask->progress_bar, 0);
