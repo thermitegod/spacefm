@@ -169,7 +169,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     bool multiple = ztd::contains(command, keys);
     if (multiple)
     {
-        for (GList* l = files; l; l = l->next)
+        for (GList* l = files; l; l = g_list_next(l))
         {
             // filename
             std::string quoted;
@@ -188,7 +188,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     command = replace_line_subs(command);
 
     // start task(s)
-    for (GList* l = files; l; l = l->next)
+    for (GList* l = files; l; l = g_list_next(l))
     {
         if (multiple)
         {

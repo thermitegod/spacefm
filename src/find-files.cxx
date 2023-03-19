@@ -234,7 +234,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
     // sfm open selected dirs
     if (file_browser)
     {
-        for (GList* l = files; l; l = l->next)
+        for (GList* l = files; l; l = g_list_next(l))
         {
             vfs::file_info file = VFS_FILE_INFO(l->data);
             if (!file)

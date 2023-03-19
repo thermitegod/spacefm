@@ -4345,7 +4345,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     // smart
     GSList* d;
     GSList* r;
-    for (GSList* q = queued; q; q = q->next)
+    for (GSList* q = queued; q; q = g_slist_next(q))
     {
         qtask = PTK_FILE_TASK(q->data);
         if (!qtask->task->devs)
@@ -4356,10 +4356,10 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
             continue;
         }
         // does qtask have running devices?
-        for (r = running; r; r = r->next)
+        for (r = running; r; r = g_slist_next(r))
         {
             rtask = PTK_FILE_TASK(r->data);
-            for (d = qtask->task->devs; d; d = d->next)
+            for (d = qtask->task->devs; d; d = g_slist_next(d))
             {
                 if (g_slist_find(rtask->task->devs, d->data))
                     break;
@@ -7556,7 +7556,7 @@ main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab, c
     // dynamic handlers
     if (set->ob2_data)
     {
-        for (GList* l = (GList*)set->ob2_data; l; l = l->next)
+        for (GList* l = (GList*)set->ob2_data; l; l = g_list_next(l))
         {
             if (run_event(main_window,
                           file_browser,

@@ -532,14 +532,13 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
         return;
 
     unsigned char x;
-    GSList* l;
     GtkWidget* widget;
     xset_t set = XSET(set_ptr);
 
     if (set && !set->lock && set->menu_style == XSetMenu::CHECK && set->tool == XSetTool::CUSTOM)
     {
         // a custom checkbox is being updated
-        for (l = file_browser->toolbar_widgets[7]; l; l = l->next)
+        for (GSList* l = file_browser->toolbar_widgets[7]; l; l = g_slist_next(l))
         {
             if (XSET(g_object_get_data(G_OBJECT(l->data), "set")) == set)
             {
@@ -617,7 +616,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
     }
 
     // update all widgets in list
-    for (l = file_browser->toolbar_widgets[x]; l; l = l->next)
+    for (GSList* l = file_browser->toolbar_widgets[x]; l; l = g_slist_next(l))
     {
         widget = GTK_WIDGET(l->data);
         if (GTK_IS_TOGGLE_BUTTON(widget))
@@ -1545,7 +1544,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
         }
         if (!element)
         {
-            while ((l = l->prev))
+            while ((l = g_list_previous(l)))
             {
                 if (l->data && ztd::same((char*)l->data, (char*)file_browser->curHistory->data))
                 {
@@ -1580,7 +1579,8 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
         bool firstsel = true;
         if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-        for (l = (GList*)element->data; l; l = l->next)
+
+        for (l = (GList*)element->data; l; l = g_list_next(l))
         {
             if (l->data)
             {
@@ -1733,8 +1733,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
                 if (file_browser->curhistsel && file_browser->curhistsel->next)
                 {
                     // LOG_DEBUG("@@@@@@@@@@@ free forward");
-                    GList* l;
-                    for (l = file_browser->curhistsel->next; l; l = l->next)
+                    for (GList* l = file_browser->curhistsel->next; l; l = g_list_next(l))
                     {
                         if (l->data)
                         {
@@ -1873,13 +1872,13 @@ ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_hi
 {
     (void)event;
     GtkWidget* menu = gtk_menu_new();
-    GList* l;
     bool has_items = false;
 
     if (is_back_history)
     {
         // back history
-        for (l = file_browser->curHistory->prev; l != nullptr; l = l->prev)
+        for (GList* l = g_list_previous(file_browser->curHistory); l != nullptr;
+             l = g_list_previous(l))
         {
             add_history_menu_item(file_browser, GTK_WIDGET(menu), l);
             if (!has_items)
@@ -1889,7 +1888,7 @@ ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_hi
     else
     {
         // forward history
-        for (l = file_browser->curHistory->next; l != nullptr; l = l->next)
+        for (GList* l = g_list_next(file_browser->curHistory); l != nullptr; l = g_list_next(l))
         {
             add_history_menu_item(file_browser, GTK_WIDGET(menu), l);
             if (!has_items)
@@ -2920,8 +2919,7 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
     GtkTreeModel* model;
     GList* sel_files = folder_view_get_selected_items(file_browser, &model);
 
-    GList* sel;
-    for (sel = sel_files; sel; sel = g_list_next(sel))
+    for (GList* sel = sel_files; sel; sel = g_list_next(sel))
     {
         vfs::file_info file;
         GtkTreeIter it;
@@ -4645,8 +4643,7 @@ ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser)
     if (!sel_files)
         return file_list;
 
-    GList* sel;
-    for (sel = sel_files; sel; sel = g_list_next(sel))
+    for (GList* sel = sel_files; sel; sel = g_list_next(sel))
     {
         GtkTreeIter it;
         vfs::file_info file;

@@ -764,16 +764,20 @@ ptk_file_list_sort(PtkFileList* list)
     /* save old order */
     i32 i;
     GList* l;
-    for (i = 0, l = list->files; l; l = l->next, ++i)
+    for (i = 0, l = list->files; l; l = g_list_next(l), ++i)
+    {
         g_hash_table_insert(old_order, l, GINT_TO_POINTER(i));
+    }
 
     /* sort the list */
     list->files = g_list_sort_with_data(list->files, ptk_file_list_compare, list);
 
     /* save new order */
     i32* new_order = g_new(i32, list->n_files);
-    for (i = 0, l = list->files; l; l = l->next, ++i)
+    for (i = 0, l = list->files; l; l = g_list_next(l), ++i)
+    {
         new_order[i] = GPOINTER_TO_INT(g_hash_table_lookup(old_order, l));
+    }
     g_hash_table_destroy(old_order);
     GtkTreePath* path = gtk_tree_path_new();
     gtk_tree_model_rows_reordered(GTK_TREE_MODEL(list), path, nullptr, new_order);
@@ -784,8 +788,7 @@ ptk_file_list_sort(PtkFileList* list)
 bool
 ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info file1)
 {
-    GList* l;
-    for (l = list->files; l; l = l->next)
+    for (GList* l = list->files; l; l = g_list_next(l))
     {
         vfs::file_info file2 = VFS_FILE_INFO(l->data);
         if (file1 == file2 || ztd::same(file1->get_name(), file2->get_name()))
@@ -808,7 +811,7 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
     GList* ll = nullptr;
 
     GList* l;
-    for (l = list->files; l; l = l->next)
+    for (l = list->files; l; l = g_list_next(l))
     {
         vfs::file_info file2 = VFS_FILE_INFO(l->data);
         if (file == file2)
@@ -955,7 +958,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
 
             list->signal_file_thumbnail_loaded.disconnect();
 
-            for (GList* l = list->files; l; l = l->next)
+            for (GList* l = list->files; l; l = g_list_next(l))
             {
                 vfs::file_info file = VFS_FILE_INFO(l->data);
                 if ((file->is_image() || file->is_video()) && file->is_thumbnail_loaded(is_big))
@@ -975,7 +978,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     list->signal_file_thumbnail_loaded =
         list->dir->add_event<EventType::FILE_THUMBNAIL_LOADED>(on_thumbnail_loaded, list);
 
-    for (GList* l = list->files; l; l = l->next)
+    for (GList* l = list->files; l; l = g_list_next(l))
     {
         vfs::file_info file = VFS_FILE_INFO(l->data);
         if (list->max_thumbnail != 0 &&

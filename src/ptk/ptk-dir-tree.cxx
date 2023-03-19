@@ -644,14 +644,14 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
 
     i32 len;
     GSList* l;
-    for (len = 1, l = names; l; l = l->next)
+    for (len = 1, l = names; l; l = g_slist_next(l))
     {
         len += std::strlen((char*)l->data) + 1;
     }
     char* dir_path = CHAR(g_malloc(len));
 
     char* p;
-    for (p = dir_path, l = names; l; l = l->next)
+    for (p = dir_path, l = names; l; l = g_slist_next(l))
     {
         char* name = (char*)l->data;
         len = std::strlen(name);

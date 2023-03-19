@@ -30,7 +30,7 @@ std::vector<std::string>
 glist_t_char_to_vector_t_string(GList* list)
 {
     std::vector<std::string> vec;
-    for (GList* l = list; l; l = l->next)
+    for (GList* l = list; l; l = g_list_next(l))
     {
         const std::string open_file = (const char*)(l->data);
         vec.emplace_back(open_file);
@@ -46,7 +46,7 @@ std::vector<vfs::file_info>
 glist_to_vector_VFSFileInfo(GList* list)
 {
     std::vector<vfs::file_info> vec;
-    for (GList* l = list; l; l = l->next)
+    for (GList* l = list; l; l = g_list_next(l))
     {
         vfs::file_info file = VFS_FILE_INFO(l->data);
         vec.emplace_back(file);
