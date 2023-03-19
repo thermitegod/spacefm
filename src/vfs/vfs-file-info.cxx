@@ -602,6 +602,11 @@ VFSFileInfo::load_thumbnail_small(std::string_view full_path) noexcept
     if (this->small_thumbnail)
         return;
 
+    if (!std::filesystem::exists(full_path))
+    {
+        return;
+    }
+
     GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, small_thumb_size);
     if (thumbnail)
     {
@@ -618,6 +623,11 @@ VFSFileInfo::load_thumbnail_big(std::string_view full_path) noexcept
 {
     if (this->big_thumbnail)
         return;
+
+    if (!std::filesystem::exists(full_path))
+    {
+        return;
+    }
 
     GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, big_thumb_size);
     if (thumbnail)
