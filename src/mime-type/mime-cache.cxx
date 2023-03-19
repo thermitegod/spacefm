@@ -248,8 +248,10 @@ MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
     /* entry size is changed in mime.cache 1.1 */
     static constexpr usize entry_size = 12;
 
-    for (usize i = 0; i < this->n_globs; ++i)
+    for (const auto i : ztd::range(this->n_globs))
     {
+        (void)i;
+
         const char* glob = this->buffer + VAL32(entry, 0);
         const i32 _glob_len = std::strlen(glob);
         if (ztd::fnmatch(glob, filename) && _glob_len > max_glob_len)
@@ -278,7 +280,7 @@ MimeCache::lookup_parents(std::string_view mime_type)
     const u32 n = VAL32(found_parents, 0);
     found_parents += 4;
 
-    for (usize i = 0; i < n; ++i)
+    for (const auto i : ztd::range(n))
     {
         const u32 parent_off = VAL32(found_parents, i * 4);
         const std::string parent = this->buffer + parent_off;
@@ -500,7 +502,7 @@ MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n
     const u32 uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
     // ztd::logger::debug("{}: suffix= '{}'", name, suffix);
 
-    for (usize i = 0; i < n; ++i)
+    for (const auto i : ztd::range(n))
     {
         const char* node = nodes + i * 12;
         const u32 ch = VAL32(node, 0);

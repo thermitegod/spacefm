@@ -1331,7 +1331,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
         overwrite = add_missing = true;
     }
 
-    for (usize i = 0; i < nelements; ++i)
+    for (const auto i : ztd::range(nelements))
     {
         switch (mode)
         {
@@ -2484,7 +2484,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         bool found_handler = false;
-        for (usize i = 0; i < nelements; ++i)
+        for (const auto i : ztd::range(nelements))
         {
             switch (hnd->mode)
             {
@@ -2510,6 +2510,7 @@ restore_defaults(HandlerData* hnd, bool all)
                 break;
             }
         }
+
         free(xset_name);
         if (!found_handler)
         {

@@ -180,8 +180,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                 for (const panel_t p : PANELS)
                 {
                     GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    const i32 n = gtk_notebook_get_n_pages(notebook);
-                    for (i32 i = 0; i < n; ++i)
+                    const i32 num_pages = gtk_notebook_get_n_pages(notebook);
+                    for (const auto i : ztd::range(num_pages))
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -245,8 +245,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                 for (const panel_t p : PANELS)
                 {
                     GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    const i32 n = gtk_notebook_get_n_pages(notebook);
-                    for (i32 i = 0; i < n; ++i)
+                    const i32 num_pages = gtk_notebook_get_n_pages(notebook);
+                    for (const auto i : ztd::range(num_pages))
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -313,8 +313,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                 for (const panel_t p : PANELS)
                 {
                     GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    const i32 n = gtk_notebook_get_n_pages(notebook);
-                    for (i32 i = 0; i < n; ++i)
+                    const i32 num_pages = gtk_notebook_get_n_pages(notebook);
+                    for (const auto i : ztd::range(num_pages))
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -337,8 +337,8 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                 for (const panel_t p : PANELS)
                 {
                     GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-                    const i32 n = gtk_notebook_get_n_pages(notebook);
-                    for (i32 i = 0; i < n; ++i)
+                    const i32 num_pages = gtk_notebook_get_n_pages(notebook);
+                    for (const auto i : ztd::range(num_pages))
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -558,21 +558,21 @@ edit_preference(GtkWindow* parent, i32 page)
         const char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
         if (main_terminal)
         {
-            usize i;
-            for (i = 0; i < supported_terminals.size(); ++i)
+            bool set = false;
+            for (const auto [index, value] : ztd::enumerate(supported_terminals))
             {
-                if (ztd::same(main_terminal, supported_terminals.at(i)))
+                if (ztd::same(main_terminal, value))
                 {
+                    gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->terminal),
+                                                    main_terminal);
+                    gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), index);
                     break;
                 }
             }
-
-            if (i >= supported_terminals.size())
-            { /* Found */
-                gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->terminal), main_terminal);
-                i = 0;
+            if (!set)
+            {
+                gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), 0);
             }
-            gtk_combo_box_set_active(GTK_COMBO_BOX(data->terminal), i);
         }
 
         for (const u64 big_icon_size : big_icon_sizes)
@@ -715,23 +715,23 @@ edit_preference(GtkWindow* parent, i32 page)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format),
                                            date_format.data());
         }
-        char* date_s = xset_get_s(XSetName::DATE_FORMAT);
+        const char* date_s = xset_get_s(XSetName::DATE_FORMAT);
         if (date_s)
         {
-            usize i;
-            for (i = 0; i < date_formats.size(); ++i)
+            bool set = false;
+            for (const auto [index, value] : ztd::enumerate(date_formats))
             {
-                if (ztd::same(date_formats.at(i), date_s))
+                if (ztd::same(date_s, value))
                 {
+                    gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->date_format), date_s);
+                    gtk_combo_box_set_active(GTK_COMBO_BOX(data->date_format), index);
                     break;
                 }
             }
-            if (i >= date_formats.size())
+            if (!set)
             {
-                gtk_combo_box_text_prepend_text(GTK_COMBO_BOX_TEXT(data->date_format), date_s);
-                i = 0;
+                gtk_combo_box_set_active(GTK_COMBO_BOX(data->date_format), 0);
             }
-            gtk_combo_box_set_active(GTK_COMBO_BOX(data->date_format), i);
         }
         on_date_format_changed(nullptr, data);
         g_signal_connect(data->date_format, "changed", G_CALLBACK(on_date_format_changed), data);

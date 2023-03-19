@@ -355,11 +355,11 @@ save_settings(void* main_window_ptr)
                             set->s = nullptr;
                         }
                         std::string tabs;
-                        for (i32 g = 0; g < pages; ++g)
+                        for (const auto i : ztd::range(pages))
                         {
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
-                                                          g));
+                                                          i));
                             tabs = fmt::format("{}{}{}",
                                                tabs,
                                                CONFIG_FILE_TABS_DELIM,
@@ -3609,7 +3609,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 stop_b4 = default_tools.size();
             }
             set_target = set_child;
-            for (i32 i = 0; i < stop_b4; ++i)
+            for (const auto i : ztd::range(stop_b4))
             {
                 set = xset_new_builtin_toolitem(default_tools.at(i));
                 xset_custom_insert_after(set_target, set);

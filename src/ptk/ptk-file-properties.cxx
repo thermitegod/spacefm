@@ -267,7 +267,7 @@ static bool
 combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
 {
     (void)user_data;
-    for (i32 i = 2; i > 0; --i)
+    for (const auto i : ztd::range(2, 0, -1))
     {
         char* tmp;
         gtk_tree_model_get(model, it, i, &tmp, -1);
@@ -422,7 +422,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     data->mtime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "mtime")));
     data->atime = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "atime")));
 
-    for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+    for (const auto i : ztd::range(magic_enum::enum_count<ChmodActionType>()))
     {
         data->chmod_btns[i] = GTK_TOGGLE_BUTTON(
             GTK_WIDGET(gtk_builder_get_object(builder, chmod_names.at(i).data())));
@@ -560,7 +560,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         data->orig_mtime = nullptr;
         data->orig_atime = nullptr;
 
-        for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+        for (const auto i : ztd::range(magic_enum::enum_count<ChmodActionType>()))
         {
             gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
             data->chmod_states[i] = 2; /* Do not touch this bit */
@@ -636,7 +636,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         data->group_name = ztd::strdup(group);
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
 
-        for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+        for (const auto i : ztd::range(magic_enum::enum_count<ChmodActionType>()))
         {
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
@@ -868,7 +868,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 }
             }
 
-            for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+            for (const auto i : ztd::range(magic_enum::enum_count<ChmodActionType>()))
             {
                 if (gtk_toggle_button_get_inconsistent(data->chmod_btns[i]))
                 {

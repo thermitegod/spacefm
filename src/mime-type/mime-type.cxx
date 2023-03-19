@@ -449,7 +449,7 @@ mime_type_is_data_plain_text(const char* data, i32 len)
 {
     if (len >= 0 && data)
     {
-        for (i32 i = 0; i < len; ++i)
+        for (const auto i : ztd::range(len))
         {
             if (data[i] == '\0')
             {

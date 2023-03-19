@@ -1141,7 +1141,7 @@ VFSFileTask::file_chown_chmod(std::string_view src_file)
             const std::filesystem::perms orig_perms =
                 std::filesystem::status(src_file).permissions();
 
-            for (usize i = 0; i < magic_enum::enum_count<ChmodActionType>(); ++i)
+            for (const auto i : ztd::range(magic_enum::enum_count<ChmodActionType>()))
             {
                 if (this->chmod_actions[i] == 2)
                 { /* Do not change */

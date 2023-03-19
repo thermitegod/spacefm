@@ -199,8 +199,8 @@ update_change_detection()
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-            const i32 n = gtk_notebook_get_n_pages(notebook);
-            for (i32 i = 0; i < n; ++i)
+            const i32 num_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : ztd::range(num_pages))
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

@@ -156,7 +156,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
     };
 
     // ztd::logger::info("get_actions( {}/, {} )", dir, type);
-    for (usize n = 0; n < names.size(); ++n)
+    for (const auto n : ztd::range(names.size()))
     {
         const std::string path = Glib::build_filename(dir.data(), names.at(n).data());
         // ztd::logger::info( "    {}", path);
@@ -763,7 +763,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
             group_block = MimeTypeAction::REMOVE;
         }
 
-        for (usize i = 0; i < apps.size(); ++i)
+        for (const auto i : ztd::range(apps.size()))
         {
             if (apps[i].empty())
             {

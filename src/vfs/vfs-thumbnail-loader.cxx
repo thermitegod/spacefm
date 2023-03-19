@@ -174,14 +174,14 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         }
 
         bool need_update = false;
-        for (u32 i = 0; i < 2; ++i)
+        for (const auto [index, value] : ztd::enumerate(req->n_requests))
         {
-            if (req->n_requests[i] == 0)
+            if (value == 0)
             {
                 continue;
             }
 
-            const bool load_big = (i == VFSThumbnailSize::BIG);
+            const bool load_big = (index == VFSThumbnailSize::BIG);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
                 const std::string full_path =

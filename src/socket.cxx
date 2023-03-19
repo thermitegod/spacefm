@@ -477,7 +477,7 @@ send_socket_command(std::span<const std::string_view> args)
     write(sock_fd, "\n", 1);
 
     // send arguments
-    for (usize i = 2; i < args.size(); ++i)
+    for (const auto i : ztd::range(2, args.size()))
     {
         write(sock_fd, args[i].data(), std::strlen(args[i].data()));
         write(sock_fd, "\n", 1);

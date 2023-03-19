@@ -356,7 +356,7 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     PtkDirTreeNode* node = tree->root;
     assert(node != nullptr);
 
-    for (i32 i = 0; i < depth; ++i)
+    for (const auto i : ztd::range(depth))
     {
         node = get_nth_node(node, indices[i]);
         if (!node)

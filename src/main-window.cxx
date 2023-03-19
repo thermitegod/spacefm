@@ -636,7 +636,7 @@ main_window_rubberband_all()
         {
             GtkWidget* notebook = window->panel[p - 1];
             const i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            for (i32 i = 0; i < num_pages; ++i)
+            for (const auto i : ztd::range(num_pages))
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
@@ -659,7 +659,7 @@ main_window_refresh_all()
         {
             const i64 notebook = (i64)window->panel[p - 1];
             const i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            for (i32 i = 0; i < num_pages; ++i)
+            for (const auto i : ztd::range(num_pages))
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
@@ -761,7 +761,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         {
             GtkWidget* notebook = window->panel[p - 1];
             const i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
-            for (i32 cur_tabx = 0; cur_tabx < pages; ++cur_tabx)
+            for (const auto cur_tabx : ztd::range(pages))
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
@@ -822,8 +822,8 @@ main_window_toggle_thumbnails_all_windows()
         for (const panel_t p : PANELS)
         {
             GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
-            const i32 n = gtk_notebook_get_n_pages(notebook);
-            for (i32 i = 0; i < n; ++i)
+            const i32 num_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : ztd::range(num_pages))
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -3974,9 +3974,7 @@ enum MainWindowTaskCol
     TASK_COL_DATA
 };
 
-// clang-format off
-inline constexpr std::array<std::string_view, 14> task_titles
-{
+inline constexpr std::array<std::string_view, 14> task_titles{
     // If you change "Status", also change it in on_task_button_press_event
     "Status",
     "#",
@@ -3994,8 +3992,7 @@ inline constexpr std::array<std::string_view, 14> task_titles
     "StartTime",
 };
 
-inline constexpr std::array<XSetName, 13> task_names
-{
+inline constexpr std::array<XSetName, 13> task_names{
     XSetName::TASK_COL_STATUS,
     XSetName::TASK_COL_COUNT,
     XSetName::TASK_COL_PATH,
@@ -4010,7 +4007,6 @@ inline constexpr std::array<XSetName, 13> task_names
     XSetName::TASK_COL_AVGSPEED,
     XSetName::TASK_COL_AVGEST,
 };
-// clang-format on
 
 void
 on_reorder(GtkWidget* item, GtkWidget* parent)
@@ -4555,7 +4551,7 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
 
         // tabs
         const i32 num_pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1]));
-        for (i32 i = 0; i < num_pages; ++i)
+        for (const auto i : ztd::range(num_pages))
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
@@ -4715,7 +4711,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         return;
     }
 
-    for (i32 i = 0; i < 13; ++i)
+    for (const auto i : ztd::range(task_names.size()))
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), i);
         if (!col)
@@ -4723,33 +4719,30 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
             return;
         }
         const char* title = gtk_tree_view_column_get_title(col);
-        i32 j;
-        for (j = 0; j < 13; ++j)
+        for (const auto [index, value] : ztd::enumerate(task_names))
         {
-            if (ztd::same(title, task_titles.at(j)))
+            if (ztd::same(title, task_titles.at(index)))
             {
+                xset_t set = xset_get(value);
+                // save column position
+                xset_set_var(set, XSetVar::X, std::to_string(i));
+                // if the window was opened maximized and stayed maximized, or the
+                // window is unmaximized and not fullscreen, save the columns
+                if ((!main_window->maximized || main_window->opened_maximized) &&
+                    !main_window->fullscreen)
+                {
+                    const i32 width = gtk_tree_view_column_get_width(col);
+                    if (width) // manager unshown, all widths are zero
+                    {
+                        // save column width
+                        xset_set_var(set, XSetVar::Y, std::to_string(width));
+                    }
+                }
+                // set column visibility
+                gtk_tree_view_column_set_visible(col, xset_get_b(value));
+
                 break;
             }
-        }
-        if (j != 13)
-        {
-            xset_t set = xset_get(task_names.at(j));
-            // save column position
-            xset_set_var(set, XSetVar::X, std::to_string(i));
-            // if the window was opened maximized and stayed maximized, or the
-            // window is unmaximized and not fullscreen, save the columns
-            if ((!main_window->maximized || main_window->opened_maximized) &&
-                !main_window->fullscreen)
-            {
-                const i32 width = gtk_tree_view_column_get_width(col);
-                if (width) // manager unshown, all widths are zero
-                {
-                    // save column width
-                    xset_set_var(set, XSetVar::Y, std::to_string(width));
-                }
-            }
-            // set column visibility
-            gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
         }
     }
 }
@@ -6015,7 +6008,7 @@ main_task_view_new(MainWindow* main_window)
     // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(view), SINGLE_CLICK_TIMEOUT);
 
     // Columns
-    for (i32 i = 0; i < 13; ++i)
+    for (const auto i : ztd::range(task_names.size()))
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -6023,27 +6016,23 @@ main_task_view_new(MainWindow* main_window)
         gtk_tree_view_column_set_min_width(col, 20);
 
         // column order
-        i32 j;
-        for (j = 0; j < 13; ++j)
+        i32 j = 0;
+        for (const auto [index, value] : ztd::enumerate(task_names))
         {
-            if (xset_get_int(task_names.at(j), XSetVar::X) == i)
+            if (xset_get_int(value, XSetVar::X) == i)
             {
+                // column width
+                i32 width = xset_get_int(value, XSetVar::Y);
+                if (width == 0)
+                {
+                    width = 80;
+                }
+                gtk_tree_view_column_set_fixed_width(col, width);
+
+                j = index;
+
                 break;
             }
-        }
-        if (j == 13)
-        { // failsafe
-            j = i;
-        }
-        else
-        {
-            // column width
-            i32 width = xset_get_int(task_names.at(j), XSetVar::Y);
-            if (width == 0)
-            {
-                width = 80;
-            }
-            gtk_tree_view_column_set_fixed_width(col, width);
         }
 
         GValue val;
@@ -6646,11 +6635,11 @@ main_window_socket_command(char* argv[])
             }
             if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             {
+                bool found = false;
                 GtkTreeViewColumn* col;
-                i32 j;
-                for (j = 0; j < 6; ++j)
+                for (const auto [index, value] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), j);
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), index);
                     if (!col)
                     {
                         continue;
@@ -6658,43 +6647,48 @@ main_window_socket_command(char* argv[])
                     const char* title = gtk_tree_view_column_get_title(col);
                     if (ztd::same(argv[i + 1], title))
                     {
+                        found = true;
                         break;
                     }
-                    if (ztd::same(argv[i + 1], "name") && ztd::same(title, column_titles.at(0)))
+                    if (ztd::same(argv[i + 1], "name") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "size") &&
-                             ztd::same(title, column_titles.at(1)))
+                    else if (ztd::same(argv[i + 1], "size") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "type") &&
-                             ztd::same(title, column_titles.at(2)))
+                    else if (ztd::same(argv[i + 1], "type") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "permission") &&
-                             ztd::same(title, column_titles.at(3)))
+                    else if (ztd::same(argv[i + 1], "permission") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "owner") &&
-                             ztd::same(title, column_titles.at(4)))
+                    else if (ztd::same(argv[i + 1], "owner") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "modified") &&
-                             ztd::same(title, column_titles.at(5)))
+                    else if (ztd::same(argv[i + 1], "modified") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
                 }
-                if (j == 6)
+                if (found)
+                {
+                    gtk_tree_view_column_set_fixed_width(col, width);
+                }
+                else
                 {
                     return {SOCKET_INVALID, fmt::format("invalid column name '{}'", argv[i + 1])};
                 }
-                gtk_tree_view_column_set_fixed_width(col, width);
             }
         }
         else if (ztd::same(socket_property, "sort_by"))
@@ -7145,11 +7139,11 @@ main_window_socket_command(char* argv[])
         { // COLUMN
             if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
             {
+                bool found = false;
                 GtkTreeViewColumn* col;
-                i32 j;
-                for (j = 0; j < 6; ++j)
+                for (const auto [index, value] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), j);
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), index);
                     if (!col)
                     {
                         continue;
@@ -7157,43 +7151,48 @@ main_window_socket_command(char* argv[])
                     const char* title = gtk_tree_view_column_get_title(col);
                     if (ztd::same(argv[i + 1], title))
                     {
+                        found = true;
                         break;
                     }
-                    if (ztd::same(argv[i + 1], "name") && ztd::same(title, column_titles.at(0)))
+                    if (ztd::same(argv[i + 1], "name") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "size") &&
-                             ztd::same(title, column_titles.at(1)))
+                    else if (ztd::same(argv[i + 1], "size") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "type") &&
-                             ztd::same(title, column_titles.at(2)))
+                    else if (ztd::same(argv[i + 1], "type") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "permission") &&
-                             ztd::same(title, column_titles.at(3)))
+                    else if (ztd::same(argv[i + 1], "permission") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "owner") &&
-                             ztd::same(title, column_titles.at(4)))
+                    else if (ztd::same(argv[i + 1], "owner") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
-                    else if (ztd::same(argv[i + 1], "modified") &&
-                             ztd::same(title, column_titles.at(5)))
+                    else if (ztd::same(argv[i + 1], "modified") && ztd::same(title, value))
                     {
+                        found = true;
                         break;
                     }
                 }
-                if (j == 6)
+                if (found)
+                {
+                    return {SOCKET_SUCCESS, fmt::format("{}", gtk_tree_view_column_get_width(col))};
+                }
+                else
                 {
                     return {SOCKET_INVALID, fmt::format("invalid column name '{}'", argv[i + 1])};
                 }
-                return {SOCKET_SUCCESS, fmt::format("{}", gtk_tree_view_column_get_width(col))};
             }
         }
         else if (ztd::same(socket_property, "sort_by"))

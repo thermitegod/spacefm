@@ -65,7 +65,7 @@ transpose_nonlatin_keypress(GdkEventKey* event)
                                            &keyvals,
                                            &n_entries))
     {
-        for (i32 n = 0; n < n_entries; ++n)
+        for (const auto i : ztd::range(n_entries))
         {
             if (keys[n].group == event->group)
                 // Skip keys from the same group
