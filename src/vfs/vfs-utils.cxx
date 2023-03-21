@@ -67,12 +67,10 @@ vfs_file_size_format(u64 size_in_bytes, bool decimal)
 {
     if (app_settings.get_use_si_prefix())
     {
-        ztd::FileSizeSI filesize(size_in_bytes);
-        return filesize.get_formated_size(decimal ? 1 : 0);
+        return ztd::format_filesize(size_in_bytes, ztd::format_base::SI, decimal ? 1 : 0);
     }
     else
     {
-        ztd::FileSize filesize(size_in_bytes);
-        return filesize.get_formated_size(decimal ? 1 : 0);
+        return ztd::format_filesize(size_in_bytes, ztd::format_base::IEC, decimal ? 1 : 0);
     }
 }
