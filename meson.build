@@ -391,6 +391,4 @@ install_data('etc/spacefm.conf', install_dir : sysconfdir / 'spacefm')
 install_subdir('data/applications', install_dir : datadir)
 install_subdir('data/ui', install_dir : datadir / target_name)
 install_subdir('data/icons', install_dir : datadir)
-
-# SCRIPTS
-install_subdir('scripts', install_dir : datadir / target_name / 'scripts')
+install_subdir('data/scripts', install_dir : datadir / target_name)
