@@ -132,10 +132,6 @@ inline constexpr std::array<std::string_view, 3> cmds_mnt{
     "info",
 };
 
-/* do not change this script header or it will break header detection on
- * existing scripts! */
-const std::string script_header = fmt::format("#!{}\n", BASH_PATH);
-
 struct HandlerData
 {
     HandlerData() = default;
@@ -222,7 +218,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
      * In list commands:
      *     %x: Archive to list
      *
-     * Plus standard bash variables are accepted.
+     * Plus standard fish variables are accepted.
      */
     Handler{
         "hand_arc_+7z",
@@ -230,11 +226,11 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         "7-Zip",
         "application/x-7z-compressed",
         "*.7z",
-        "\"$(which 7za || echo 7zr)\" a %o %N",
+        "7z a %o %N",
         true,
-        "\"$(which 7za || echo 7zr)\" x %x",
+        "7z x %x",
         true,
-        "\"$(which 7za || echo 7zr)\" l %x",
+        "7z l %x",
         false,
     },
     Handler{
@@ -243,7 +239,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         "RAR",
         "application/x-rar",
         "*.rar *.RAR",
-        "rar a -r %o %N",
+        "command rar a -r %o %N",
         true,
         "unrar -o- x %x",
         true,
@@ -524,7 +520,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
         "if [ -z \"$missing_davfs\" ];then\n"
         "    grep -qs '^[[:space:]]*allowed_types[[:space:]]*=[^#]*davfs' \\\n"
         "                                    /etc/udevil/udevil.conf 2>/dev/null\n"
-        "    missing_davfs=$?\n"
+        "    missing_davfs=$status\n"
         "fi\n"
         "if [ \"$fm_url_proto\" = \"webdav\" ] || [ \"$fm_url_proto\" = \"davfs\" ] || \\\n"
         "   [ \"$fm_url_proto\" = \"dav\" ]    || [ \"$fm_url_proto\" = \"davs\" ] || \\\n"
@@ -568,7 +564,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
         "echo \">>> curlftpfs -o $options$user ftp://%host%${portcolon}%port%%path% %a\"\n"
         "echo\n"
         "curlftpfs -o $options$user ftp://%host%${portcolon}%port%%path% \"%a\"\n"
-        "[[ $? -eq 0 ]] && sleep 1 && ls \"%a\"  # set error status or wait until ready\n",
+        "[[ $status -eq 0 ]] && sleep 1 && ls \"%a\"  # set error status or wait until ready\n",
         // clang-format on
         true,
         "fusermount -u \"%a\"",
@@ -590,14 +586,14 @@ inline constexpr std::array<Handler, 10> handlers_net{
         "# Run sshfs through nohup to prevent disconnect on terminal close\n"
         "sshtmp=\"$(mktemp --tmpdir spacefm-ssh-output-XXXXXXXX.tmp)\" || exit 1\n"
         "nohup sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a &> \"$sshtmp\"\n"
-        "err=$?\n"
+        "err=$status\n"
         "[[ -e \"$sshtmp\" ]] && cat \"$sshtmp\" ; rm -f \"$sshtmp\"\n"
         "[[ $err -eq 0 ]]  # set error status\n\n"
         "# Alternate Method - if enabled, disable nohup line above and\n"
         "#                    uncheck Run In Terminal\n"
         "# # Run sshfs in a terminal without SpaceFM task.  sshfs disconnects when the\n"
         "# # terminal is closed\n"
-        "# spacefm -s run-task cmd --terminal \"echo 'Connecting to $fm_url'; echo; sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a; if [ $? -ne 0 ];then echo; echo '[ Finished ] Press Enter to close'; else echo; echo 'Press Enter to close (closing this window may unmount sshfs)'; fi; read\" & sleep 1\n",
+        "# spacefm -s run-task cmd --terminal \"echo 'Connecting to $fm_url'; echo; sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a; if [ $status -ne 0 ];then echo; echo '[ Finished ] Press Enter to close'; else echo; echo 'Press Enter to close (closing this window may unmount sshfs)'; fi; read\" & sleep 1\n",
         // clang-format on
         true,
         "fusermount -u \"%a\"",
@@ -719,7 +715,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
 
 inline constexpr std::array<Handler, 1> handlers_file{
     /* %a custom mount point
-     * Plus standard bash variables are accepted.
+     * Plus standard fish variables are accepted.
      * For file handlers, extract_term is used for Run As Task. */
     Handler{
         "hand_f_+iso",
@@ -740,7 +736,7 @@ inline constexpr std::array<Handler, 1> handlers_file{
         "    fi\n"
         "    # use udevil - attempt mount\n"
         "    uout=\"$($udevil mount \"$fm_file\" 2>&1)\"\n"
-        "    err=$?; echo \"$uout\"\n"
+        "    err=$status; echo \"$uout\"\n"
         "    if [ $err -eq 2 ];then\n"
         "        # is file already mounted? (english only)\n"
         "        point=\"${uout#* is already mounted at }\"\n"
@@ -930,10 +926,10 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
     }
     // name script
     const std::string str =
-        fmt::format("/hand-{}-{}.sh",
+        fmt::format("/hand-{}-{}.fish",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
-    const std::string script = ztd::replace(def_script, "/exec.sh", str);
+    const std::string script = ztd::replace(def_script, "/exec.fish", str);
     free(def_script);
     if (std::filesystem::exists(script))
     {
@@ -990,10 +986,10 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     }
     // name script
     const std::string script_name =
-        fmt::format("/hand-{}-{}.sh",
+        fmt::format("/hand-{}-{}.fish",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
-    script = ztd::replace(def_script, "/exec.sh", script_name);
+    script = ztd::replace(def_script, "/exec.fish", script_name);
     free(def_script);
     // load script
     // bool modified = false;
@@ -1013,25 +1009,10 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
         {
             while (std::getline(file, line))
             {
-                if (!g_utf8_validate(line.data(), -1, nullptr))
-                {
-                    file.close();
-                    if (view)
-                    {
-                        gtk_text_buffer_set_text(buf, "", -1);
-                    }
-                    else
-                    {
-                        script.clear();
-                    }
-                    // modified = true;
-                    error_message = fmt::format("file '{}' contents are not valid UTF-8", script);
-                    break;
-                }
                 if (start)
                 {
                     // skip script header
-                    if (ztd::same(line, script_header))
+                    if (ztd::same(line, fmt::format("#!{}\n", FISH_PATH)))
                     {
                         continue;
                     }
@@ -1085,10 +1066,10 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     }
     // name script
     const std::string str =
-        fmt::format("/hand-{}-{}.sh",
+        fmt::format("/hand-{}-{}.fish",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
-    const std::string script = ztd::replace(def_script, "/exec.sh", str);
+    const std::string script = ztd::replace(def_script, "/exec.fish", str);
     free(def_script);
     // get text
     std::string text;
@@ -1106,7 +1087,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     }
 
     // ztd::logger::info("WRITE {}", script);
-    const std::string data = fmt::format("{}\n{}\n", script_header, text);
+    const std::string data = fmt::format("#!{}\nsource {}\n\n{}\n", FISH_PATH, FISH_FMLIB, text);
     const bool result = write_file(script, data);
     if (!result)
     {

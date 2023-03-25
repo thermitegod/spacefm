@@ -27,9 +27,6 @@ struct ConfigSettings
     const std::string& get_terminal_su() const noexcept;
     void set_terminal_su(std::string_view val) noexcept;
 
-    const std::string& get_tmp_dir() const noexcept;
-    void set_tmp_dir(std::string_view val) noexcept;
-
     const std::string& get_font_view_icon() const noexcept;
     void set_font_view_icon(std::string_view val) noexcept;
 

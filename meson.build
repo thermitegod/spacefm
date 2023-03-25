@@ -13,11 +13,8 @@ project(
     meson_version : '>= 1.0.0'
 )
 
-sh = find_program('sh', required : true)
-sed = find_program('sed', required : true)
 bash = find_program('bash', required : true)
-echo = find_program('echo', required : true)
-grep = find_program('grep', required : true)
+fish = find_program('fish', required : true)
 python = find_program('python3', required : true)
 
 build_root = meson.project_build_root()
@@ -275,8 +272,7 @@ preprocessor = [
     '-DPACKAGE_BUGREPORT="TODO"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
 
-    '-DBASH_PATH="@0@"'.format(bash.full_path()),
-    '-DSHELL_SETTINGS="set -o pipefail;shopt -s failglob"',
+    '-DFISH_PATH="@0@"'.format(fish.full_path()),
 
     '-DG_DISABLE_ASSERT',
     '-DG_DISABLE_CAST_CHECKS',
@@ -331,6 +327,7 @@ data_args = [
     '-DSYSCONFDIR="/etc"',
     '-DPACKAGE_UI_PATH="/usr/share/spacefm/ui"',
     '-DPACKAGE_SCRIPTS_PATH="/usr/share/spacefm/scripts"',
+    '-DFISH_FMLIB="/usr/share/spacefm/lib/fmlib.fish"',
 ]
 
 foreach a : data_args

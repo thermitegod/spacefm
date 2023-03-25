@@ -175,7 +175,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Auto Run On Mount");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically after a removable "
+                 "Enter program or fish command line to be run automatically after a removable "
                  "drive or data disc is auto-mounted:\n\nUse:\n\t%%v\tdevice (eg "
                  "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
@@ -184,7 +184,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Auto Run On Audio CD");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically when an audio CD is "
+                 "Enter program or fish command line to be run automatically when an audio CD is "
                  "inserted in a qualified device:\n\nUse:\n\t%%v\tdevice (eg "
                  "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
@@ -193,7 +193,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Auto Run On Video DVD");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically when a video DVD is "
+                 "Enter program or fish command line to be run automatically when a video DVD is "
                  "auto-mounted:\n\nUse:\n\t%%v\tdevice (eg /dev/sda1)\n\t%%l\tdevice "
                  "label\n\t%%m\tdevice mount point (eg /media/disk)");
 
@@ -202,7 +202,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Auto Run On Insert");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically when any device is "
+                 "Enter program or fish command line to be run automatically when any device is "
                  "inserted:\n\nUse:\n\t%%v\tdevice added (eg /dev/sda1)\n\t%%l\tdevice "
                  "label\n\t%%m\tdevice mount point (eg /media/disk)");
 
@@ -211,7 +211,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Auto Run On Unmount");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically when any device is "
+                 "Enter program or fish command line to be run automatically when any device is "
                  "unmounted by any means:\n\nUse:\n\t%%v\tdevice unmounted (eg "
                  "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
@@ -221,7 +221,7 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically when any device is removed "
+        "Enter program or fish command line to be run automatically when any device is removed "
         "(ejection of media does not qualify):\n\nUse:\n\t%%v\tdevice removed (eg "
         "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
@@ -504,7 +504,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Instance Startup Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically when a SpaceFM "
+                 "Enter program or fish command line to be run automatically when a SpaceFM "
                  "instance starts:\n\nUse:\n\t%%e\tevent type  (evt_start)\n");
 
     set = xset_set(XSetName::EVT_EXIT, XSetVar::MENU_LABEL, "_Exit");
@@ -512,7 +512,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Instance Exit Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically when a SpaceFM "
+                 "Enter program or fish command line to be run automatically when a SpaceFM "
                  "instance exits:\n\nUse:\n\t%%e\tevent type  (evt_exit)\n");
 
     set = xset_set(XSetName::AUTO_WIN, XSetVar::MENU_LABEL, "_Window");
@@ -527,9 +527,9 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever a new SpaceFM "
+        "Enter program or fish command line to be run automatically whenever a new SpaceFM "
         "window is opened:\n\nUse:\n\t%%e\tevent type  (evt_win_new)\n\t%%w\twindow id  (see "
-        "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) "
+        "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, etc) "
         "can be used in this command.");
 
     set = xset_set(XSetName::EVT_WIN_FOCUS, XSetVar::MENU_LABEL, "_Focus");
@@ -537,9 +537,9 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Window Focus Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a SpaceFM "
+                 "Enter program or fish command line to be run automatically whenever a SpaceFM "
                  "window gets focus:\n\nUse:\n\t%%e\tevent type  (evt_win_focus)\n\t%%w\twindow "
-                 "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables "
+                 "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables "
                  "(eg $fm_pwd, etc) can be used in this command.");
 
     set = xset_set(XSetName::EVT_WIN_MOVE, XSetVar::MENU_LABEL, "_Move/Resize");
@@ -548,9 +548,9 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever a SpaceFM window is "
+        "Enter program or fish command line to be run automatically whenever a SpaceFM window is "
         "moved or resized:\n\nUse:\n\t%%e\tevent type  (evt_win_move)\n\t%%w\twindow id  (see "
-        "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) "
+        "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, etc) "
         "can be used in this command.\n\nNote: This command may be run multiple times during "
         "resize.");
 
@@ -560,10 +560,10 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever the mouse is "
+        "Enter program or fish command line to be run automatically whenever the mouse is "
         "clicked:\n\nUse:\n\t%%e\tevent type  (evt_win_click)\n\t%%w\twindow id  (see spacefm -s "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%b\tbutton  (mouse button pressed)\n\t%%m\tmodifier "
-        " (modifier keys)\n\t%%f\tfocus  (element which received the click)\n\nExported bash "
+        " (modifier keys)\n\t%%f\tfocus  (element which received the click)\n\nExported fish "
         "variables (eg $fm_pwd, etc) can be used in this command when no asterisk prefix is "
         "used.\n\nPrefix your command with an asterisk (*) and conditionally return exit status "
         "0 to inhibit the default handler.  For example:\n*if [ \"%%b\" != \"2\" ];then exit 1; "
@@ -575,10 +575,10 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever a key is "
+        "Enter program or fish command line to be run automatically whenever a key is "
         "pressed:\n\nUse:\n\t%%e\tevent type  (evt_win_key)\n\t%%w\twindow id  (see spacefm -s "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%k\tkey code  (key pressed)\n\t%%m\tmodifier  "
-        "(modifier keys)\n\nExported bash variables (eg $fm_pwd, etc) can be used in this "
+        "(modifier keys)\n\nExported fish variables (eg $fm_pwd, etc) can be used in this "
         "command when no asterisk prefix is used.\n\nPrefix your command with an asterisk (*) "
         "and conditionally return exit status 0 to inhibit the default handler.  For "
         "example:\n*if [ \"%%k\" != \"0xffc5\" ];then exit 1; fi; spacefm -g --label \"\\nKey "
@@ -589,9 +589,9 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Window Close Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a SpaceFM "
+                 "Enter program or fish command line to be run automatically whenever a SpaceFM "
                  "window is closed:\n\nUse:\n\t%%e\tevent type  (evt_win_close)\n\t%%w\twindow "
-                 "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables "
+                 "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables "
                  "(eg $fm_pwd, etc) can be used in this command.");
 
     set = xset_set(XSetName::AUTO_PNL, XSetVar::MENU_LABEL, "_Panel");
@@ -603,9 +603,9 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Panel Focus Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a panel "
+                 "Enter program or fish command line to be run automatically whenever a panel "
                  "gets focus:\n\nUse:\n\t%%e\tevent type  (evt_pnl_focus)\n\t%%w\twindow id  "
-                 "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
+                 "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
     set = xset_set(XSetName::EVT_PNL_SHOW, XSetVar::MENU_LABEL, "_Show");
@@ -614,10 +614,10 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever a panel or panel "
+        "Enter program or fish command line to be run automatically whenever a panel or panel "
         "element is shown or hidden:\n\nUse:\n\t%%e\tevent type  (evt_pnl_show)\n\t%%w\twindow "
         "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%f\tfocus  (element shown or "
-        "hidden)\n\t%%v\tvisible  (1 or 0)\n\nExported bash variables (eg $fm_pwd, etc) can be "
+        "hidden)\n\t%%v\tvisible  (1 or 0)\n\nExported fish variables (eg $fm_pwd, etc) can be "
         "used in this command.");
 
     set = xset_set(XSetName::EVT_PNL_SEL, XSetVar::MENU_LABEL, "S_elect");
@@ -626,9 +626,9 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever the file selection "
+        "Enter program or fish command line to be run automatically whenever the file selection "
         "changes:\n\nUse:\n\t%%e\tevent type  (evt_pnl_sel)\n\t%%w\twindow id  (see spacefm -s "
-        "help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg $fm_pwd, etc) can be "
+        "help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, etc) can be "
         "used in this command.\n\nPrefix your command with an asterisk (*) and conditionally "
         "return exit status 0 to inhibit the default handler.");
 
@@ -641,9 +641,9 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set New Tab Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a new tab "
+                 "Enter program or fish command line to be run automatically whenever a new tab "
                  "is opened:\n\nUse:\n\t%%e\tevent type  (evt_tab_new)\n\t%%w\twindow id  (see "
-                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
+                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
     set = xset_set(XSetName::EVT_TAB_CHDIR, XSetVar::MENU_LABEL, "_Change Dir");
@@ -652,9 +652,9 @@ xset_defaults()
     xset_set_var(
         set,
         XSetVar::DESC,
-        "Enter program or bash command line to be run automatically whenever a tab changes to a "
+        "Enter program or fish command line to be run automatically whenever a tab changes to a "
         "different directory:\n\nUse:\n\t%%e\tevent type  (evt_tab_chdir)\n\t%%w\twindow id  "
-        "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%d\tnew directory\n\nExported bash "
+        "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%d\tnew directory\n\nExported fish "
         "variables (eg $fm_pwd, etc) can be used in this command.");
 
     set = xset_set(XSetName::EVT_TAB_FOCUS, XSetVar::MENU_LABEL, "_Focus");
@@ -662,9 +662,9 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Tab Focus Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a tab gets "
+                 "Enter program or fish command line to be run automatically whenever a tab gets "
                  "focus:\n\nUse:\n\t%%e\tevent type  (evt_tab_focus)\n\t%%w\twindow id  (see "
-                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported bash variables (eg "
+                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
     set = xset_set(XSetName::EVT_TAB_CLOSE, XSetVar::MENU_LABEL, "_Close");
@@ -672,7 +672,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Tab Close Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a tab is "
+                 "Enter program or fish command line to be run automatically whenever a tab is "
                  "closed:\n\nUse:\n\t%%e\tevent type  (evt_tab_close)\n\t%%w\twindow id  (see "
                  "spacefm -s help)\n\t%%p\tpanel\n\t%%t\tclosed tab");
 
@@ -681,7 +681,7 @@ xset_defaults()
     xset_set_var(set, XSetVar::TITLE, "Set Device Command");
     xset_set_var(set,
                  XSetVar::DESC,
-                 "Enter program or bash command line to be run automatically whenever a device "
+                 "Enter program or fish command line to be run automatically whenever a device "
                  "state changes:\n\nUse:\n\t%%e\tevent type  (evt_device)\n\t%%f\tdevice "
                  "file\n\t%%v\tchange  (added|removed|changed)\n");
 

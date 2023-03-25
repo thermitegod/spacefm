@@ -1480,7 +1480,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         // get script name
         while (true)
         {
-            const std::string hexname = fmt::format("{}.sh", ztd::randhex());
+            const std::string hexname = fmt::format("{}.fish", ztd::randhex());
             this->exec_script = Glib::build_filename(tmp, hexname);
             if (!std::filesystem::exists(this->exec_script))
             {
@@ -1492,16 +1492,12 @@ VFSFileTask::file_exec(std::string_view src_file)
         std::string buf;
 
         // build - header
-        buf.append(fmt::format("#!{}\n{}\n#tmp exec script\n", BASH_PATH, SHELL_SETTINGS));
+        buf.append(fmt::format("#!{}\nsource {}\n\n", FISH_PATH, FISH_FMLIB));
 
         // build - exports
         if (this->exec_export && (this->exec_browser || this->exec_desktop))
         {
-            if (this->exec_browser)
-            {
-                main_write_exports(this, this->current_dest.data(), buf);
-            }
-            else
+            if (!this->exec_browser)
             {
                 this->task_error(errno, "Error writing temporary file");
 
@@ -1516,6 +1512,8 @@ VFSFileTask::file_exec(std::string_view src_file)
                 // ztd::logger::info("vfs_file_task_exec DONE ERROR");
                 return;
             }
+
+            buf.append(main_write_exports(this, this->current_dest));
         }
         else
         {
@@ -1526,20 +1524,17 @@ VFSFileTask::file_exec(std::string_view src_file)
             }
         }
 
-        // build - run
-        // buf.append(fmt::format("#run\nif [ \"$1\" == \"run\" ];then\n\n"));
-
         // build - export vars
         if (this->exec_export)
         {
-            buf.append(fmt::format("export fm_import=\"source {}\"\n", this->exec_script));
+            buf.append(fmt::format("set fm_import {}\n", ztd::shell::quote(this->exec_script)));
         }
         else
         {
-            buf.append(fmt::format("export fm_import=\"\"\n"));
+            buf.append(fmt::format("set fm_import\n"));
         }
 
-        buf.append(fmt::format("export fm_source=\"{}\"\n\n", this->exec_script));
+        buf.append(fmt::format("set fm_source {}\n\n", ztd::shell::quote(this->exec_script)));
 
         // build - trap rm
         if (!this->exec_keep_tmp && geteuid() != 0 && ztd::same(this->exec_as_user, "root"))
@@ -1552,29 +1547,24 @@ VFSFileTask::file_exec(std::string_view src_file)
         // build - command
         ztd::logger::info("TASK_COMMAND({:p})={}", fmt::ptr(this->exec_ptask), this->exec_command);
 
-        buf.append(fmt::format("{}\nfm_err=$?\n", this->exec_command));
+        buf.append(fmt::format("{}\n\n", this->exec_command));
+        buf.append(fmt::format("set fm_err $status\n\n"));
 
         // build - press enter to close
         if (!terminal.empty() && this->exec_keep_terminal)
         {
             if (geteuid() == 0 || ztd::same(this->exec_as_user, "root"))
             {
-                buf.append(fmt::format("\necho;read -p '[ Finished ]  Press Enter to close: '\n"));
+                buf.append("fm_enter_to_close\n\n");
             }
             else
             {
-                buf.append(
-                    fmt::format("\necho;read -p '[ Finished ]  Press Enter to close or s + "
-                                "Enter for a shell: ' "
-                                "s\nif [ \"$s\" = 's' ];then\n    if [ \"$(whoami)\" = "
-                                "\"root\" ];then\n        "
-                                "echo '\n[ {} ]'\n    fi\n    echo\n    You are ROOT\nfi\n\n",
-                                BASH_PATH));
+                buf.append("fm_enter_for_shell\n\n");
             }
         }
 
-        buf.append(fmt::format("\nexit $fm_err\n"));
-        // buf.append(fmt::format("\nfi\n"));
+        buf.append(fmt::format("exit $fm_err\n"));
+        // ztd::logger::debug(buf);
 
         const bool result = write_file(this->exec_script, buf);
         if (!result)
@@ -1642,7 +1632,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         {
             // /bin/su
             argv.emplace_back("-s");
-            argv.emplace_back(BASH_PATH);
+            argv.emplace_back(FISH_PATH);
             argv.emplace_back("-c");
             single_arg = true;
         }
@@ -1666,7 +1656,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         {
             const std::string script =
                 fmt::format("{} {} {} {} {}",
-                            BASH_PATH,
+                            FISH_PATH,
                             auth,
                             ztd::same(this->exec_as_user, "root") ? "root" : "",
                             this->exec_script,
@@ -1675,7 +1665,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         }
         else
         {
-            argv.emplace_back(BASH_PATH);
+            argv.emplace_back(FISH_PATH);
             argv.emplace_back(auth);
             if (ztd::same(this->exec_as_user, "root"))
             {
@@ -1692,9 +1682,7 @@ VFSFileTask::file_exec(std::string_view src_file)
     }
     else
     {
-        // argv.emplace_back(BASH_PATH);
         argv.emplace_back(this->exec_script);
-        // argv.emplace_back("run");
     }
 
     pid_t pid;

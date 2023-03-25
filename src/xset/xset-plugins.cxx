@@ -614,7 +614,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view pat
 
     ptask->task->exec_command = fmt::format(
         "rm -rf {} ; mkdir -p {} && cd {} && tar --exclude='/*' --keep-old-files -xf {} ; "
-        "err=$? ; if [ $err -ne 0 ] || [ ! -e plugin ] {} ; then rm -rf {} ; echo 'Error "
+        "err=$status ; if [ $err -ne 0 ] || [ ! -e plugin ] {} ; then rm -rf {} ; echo 'Error "
         "installing "
         "plugin (invalid plugin file?)'; exit 1 ; fi ; {}",
         plug_dir_q,

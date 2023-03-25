@@ -153,7 +153,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         return;
     }
 
-    /* prepare bash vars for just the files being opened by this handler,
+    /* prepare fish vars for just the files being opened by this handler,
      * not necessarily all selected */
     std::string fm_filenames = "fm_filenames=(\n";
     std::string fm_files = "fm_files=(\n";

@@ -46,12 +46,6 @@ parse_etc_conf(const toml::value& tbl)
 
     const auto& section = toml::find(tbl, ETC_SECTION_CONFIG);
 
-    if (section.contains(ETC_KEY_TMP_DIR))
-    {
-        const auto tmp_dir = toml::find<std::string>(section, ETC_KEY_TMP_DIR);
-        etc_settings.set_tmp_dir(tmp_dir);
-    }
-
     if (section.contains(ETC_KEY_TERMINAL_SU))
     {
         const auto terminal_su = toml::find<std::string>(section, ETC_KEY_TERMINAL_SU);

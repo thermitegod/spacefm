@@ -41,24 +41,6 @@ ConfigSettings::set_terminal_su(std::string_view val) noexcept
 }
 
 const std::string&
-ConfigSettings::get_tmp_dir() const noexcept
-{
-    return this->tmp_dir;
-}
-
-void
-ConfigSettings::set_tmp_dir(std::string_view val) noexcept
-{
-    if (std::filesystem::is_directory(val))
-    {
-        ztd::logger::error("Missing directory {}", val);
-        return;
-    }
-
-    this->tmp_dir = val.data();
-}
-
-const std::string&
 ConfigSettings::get_font_view_icon() const noexcept
 {
     return this->font_view_icon;

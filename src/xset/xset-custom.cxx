@@ -503,7 +503,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     if (!set->plugin)
     {
         ptask->task->exec_command =
-            fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; rm -rf {} ; "
+            fmt::format("tar --numeric-owner -cJf {} * ; err=$status ; rm -rf {} ; "
                         "if [ $err -ne 0 ];then rm -f {} ; fi ; exit $err",
                         path_q,
                         plug_dir_q,
@@ -512,7 +512,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     else
     {
         ptask->task->exec_command =
-            fmt::format("tar --numeric-owner -cJf {} * ; err=$? ; "
+            fmt::format("tar --numeric-owner -cJf {} * ; err=$status ; "
                         "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
                         path_q,
                         path_q);
@@ -553,28 +553,28 @@ xset_custom_get_script(xset_t set, bool create)
 
     if (set->plugin)
     {
-        path = Glib::build_filename(set->plug_dir, set->plug_name, "exec.sh");
+        path = Glib::build_filename(set->plug_dir, set->plug_name, "exec.fish");
     }
     else
     {
         path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
                                     "scripts",
                                     set->name,
-                                    "exec.sh");
+                                    "exec.fish");
     }
 
     if (create && !std::filesystem::exists(path))
     {
         std::string data;
-        data.append(fmt::format("#!{}\n", BASH_PATH));
-        data.append(fmt::format("{}\n\n", SHELL_SETTINGS));
+        data.append(fmt::format("#!{}\n", FISH_PATH));
+        data.append(fmt::format("source {}\n\n", FISH_FMLIB));
         data.append("#import file manager variables\n");
         data.append("$fm_import\n\n");
         data.append("#For all spacefm variables see man page: spacefm-scripts\n\n");
         data.append("#Start script\n");
         data.append("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
         data.append("#End script\n");
-        data.append("exit $?\n");
+        data.append("exit $status\n");
 
         write_file(path, data);
 

@@ -261,58 +261,6 @@ on_format_changed(GtkComboBox* combo, void* user_data)
 }
 
 static const std::string
-generate_bash_error_function(bool run_in_terminal, std::string_view parent_quote = "")
-{
-    /* When ran in a terminal, errors need to result in a pause so that
-     * the user can review the situation. Even outside a terminal, IG
-     * has requested text is output
-     * No translation for security purposes */
-    std::string error_pause;
-    std::string finished_with_errors;
-
-    if (run_in_terminal)
-    {
-        error_pause = "read -p";
-        finished_with_errors = "[ Finished With Errors ]  Press Enter to close: ";
-    }
-    else
-    {
-        error_pause = "echo";
-        finished_with_errors = "[ Finished With Errors ]";
-    }
-
-    std::string script;
-    if (!parent_quote.empty())
-    {
-        script = fmt::format("fm_handle_err(){{\n"
-                             "    fm_err=$?\n"
-                             "    rmdir --ignore-fail-on-non-empty {}\n"
-                             "    if [ $fm_err -ne 0 ];then\n"
-                             "       echo;{} \"{}\"\n"
-                             "       exit $fm_err\n"
-                             "    fi\n"
-                             "}}",
-                             parent_quote,
-                             error_pause,
-                             finished_with_errors);
-    }
-    else
-    {
-        script = fmt::format("fm_handle_err(){{\n"
-                             "    fm_err=$?\n"
-                             "    if [ $fm_err -ne 0 ];then\n"
-                             "       echo;{} \"{}\"\n"
-                             "       exit $fm_err\n"
-                             "    fi\n"
-                             "}}",
-                             error_pause,
-                             finished_with_errors);
-    }
-
-    return script;
-}
-
-static const std::string
 replace_archive_subs(std::string_view line, std::string_view n, std::string_view N,
                      std::string_view o, std::string_view x, std::string_view g)
 {
@@ -826,7 +774,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             }
             udest_quote = ztd::shell::quote(udest_file);
 
-            /* Bash quoting desc - desc original value comes from the
+            /* fish quoting desc - desc original value comes from the
              * VFSFileInfo struct and therefore should not be freed */
             if (desc.at(0) == '-')
             {
@@ -851,13 +799,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             // Appending to final command as appropriate
             if (i == 0)
             {
-                final_command = fmt::format("{}\n[[ $? -eq 0 ]] || fm_handle_err\n", cmd_to_run);
+                final_command = fmt::format("{}\nfm_check_exit_code\n", cmd_to_run);
             }
             else
             {
-                final_command = fmt::format("{}echo\n{}\n[[ $? -eq 0 ]] || fm_handle_err\n",
-                                            final_command,
-                                            cmd_to_run);
+                final_command =
+                    fmt::format("{}\necho\n\n{}\nfm_check_exit_code\n", final_command, cmd_to_run);
             }
 
             if (loop_once)
@@ -923,15 +870,20 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         cmd_to_run = replace_archive_subs(command, first, all, udest_quote, "", "");
 
         // Enforce error check
-        final_command = fmt::format("{}\n[[ $? -eq 0 ]] || fm_handle_err\n", cmd_to_run);
+        final_command = fmt::format("{}\nfm_check_exit_code\n", cmd_to_run);
     }
     free(dest_file);
 
-    /* When ran in a terminal, errors need to result in a pause so that
-     * the user can review the situation - in any case an error check
-     * needs to be made */
-    const std::string str = generate_bash_error_function(run_in_terminal);
-    final_command = fmt::format("{}\n\n{}", str, final_command);
+    // When ran in a terminal, errors need to result in a pause so that
+    // the user can review the situation - in any case an error check
+    // needs to be made
+    std::string shell_err_func_setup;
+    if (run_in_terminal)
+    {
+        shell_err_func_setup.append("set fm_handle_err_run_in_terminal true\n");
+    }
+
+    final_command = fmt::format("{}\n\n{}", shell_err_func_setup, final_command);
 
     /* Cleaning up - final_command does not need freeing, as this
      * is freed by the task */
@@ -944,8 +896,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                                            file_browser ? file_browser->task_view : nullptr);
     free(task_name);
 
-    /* Setting correct exec reference - probably causes different bash
-     * to be output */
+    /* Setting correct exec reference */
     if (file_browser)
     {
         ptask->task->exec_browser = file_browser;
@@ -965,7 +916,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     // Final configuration, setting custom icon
     ptask->task->exec_command = final_command;
     ptask->task->exec_show_error = true;
-    ptask->task->exec_export = true; // Setup SpaceFM bash variables
+    ptask->task->exec_export = true; // Setup SpaceFM fish variables
     xset_t set = xset_get(XSetName::NEW_ARCHIVE);
     if (set->icon)
     {
@@ -1190,8 +1141,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         dest = ztd::strdup(dest_dir.data());
     }
 
-    /* Quoting destination directory (doing this outside of the later
-     * loop as its needed after the selected files loop completes) */
+    // Quoting destination directory (doing this outside of the later
+    // loop as its needed after the selected files loop completes)
     dest_quote = ztd::shell::quote(dest ? dest : cwd);
 
     // Fetching available archive handlers and splitting
@@ -1234,13 +1185,13 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         }
         ztd::logger::info("Archive Handler Selected: {}", handler_xset->menu_label);
 
-        /* Handler found - fetching the 'run in terminal' preference, if
-         * the operation is listing then the terminal should be kept
-         * open, otherwise the user should explicitly keep the terminal
-         * running via the handler's command
-         * Since multiple commands are now batched together, only one
-         * of the handlers needing to run in a terminal will cause all of
-         * them to */
+        // Handler found - fetching the 'run in terminal' preference, if
+        // the operation is listing then the terminal should be kept
+        // open, otherwise the user should explicitly keep the terminal
+        // running via the handler's command
+        // Since multiple commands are now batched together, only one
+        // of the handlers needing to run in a terminal will cause all of
+        // them to
         if (!in_term)
         {
             in_term = archive_handler_run_in_term(handler_xset, archive_operation);
@@ -1270,11 +1221,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         }
         else
         {
-            /* An archive is to be extracted
-             * Obtaining filename minus the archive extension - this is
-             * needed if a parent directory must be created, and if the
-             * extraction target is a file without the handler extension
-             * filename is strdup'd to get rid of the const */
+            // An archive is to be extracted
+            // Obtaining filename minus the archive extension - this is
+            // needed if a parent directory must be created, and if the
+            // extraction target is a file without the handler extension
+            // filename is strdup'd to get rid of the const
             const std::string filename = file->get_name();
             std::string filename_no_archive_ext;
 
@@ -1302,16 +1253,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 }
             }
 
-            /* An archive may not have an extension, or there may be no
-             * extensions specified for the handler (they are optional)
-             * - making sure filename_no_archive_ext is set in this case */
+            // An archive may not have an extension, or there may be no
+            // extensions specified for the handler (they are optional)
+            // - making sure filename_no_archive_ext is set in this case
             if (filename_no_archive_ext.empty())
             {
                 filename_no_archive_ext = filename;
             }
 
-            /* Get extraction command - Doing this here as parent
-             * directory creation needs access to the command. */
+            // Get extraction command - Doing this here as parent
+            // directory creation needs access to the command.
             const bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_ARC,
                                                        PtkHandlerArchive::HANDLER_EXTRACT,
                                                        handler_xset,
@@ -1327,13 +1278,13 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
             std::string parent_path;
 
-            /* Dealing with creation of parent directory if needed -
-             * never create a parent directory if '%G' is used - this is
-             * an override substitution for the sake of gzip */
+            // Dealing with creation of parent directory if needed -
+            // never create a parent directory if '%G' is used - this is
+            // an override substitution for the sake of gzip
             if (create_parent && !ztd::contains(command, "%G"))
             {
-                /* Determining full path of parent directory to make
-                 * (also used later in '%g' substitution) */
+                // Determining full path of parent directory to make
+                // (also used later in '%g' substitution)
                 parent_path = Glib::build_filename(dest, filename_no_archive_ext);
                 i32 n = 1;
 
@@ -1345,20 +1296,16 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
                 // Generating shell command to make directory
                 parent_quote = ztd::shell::quote(parent_path);
-                mkparent = fmt::format("mkdir -p {} || fm_handle_err\n"
-                                       "cd {} || fm_handle_err\n",
-                                       parent_quote,
-                                       parent_quote);
+                mkparent = fmt::format("fm_util_mkcd {}\n", parent_quote);
 
-                /* Dealing with the need to make extracted files writable if
-                 * desired (e.g. a tar of files originally archived from a CD
-                 * will be readonly). Root users do not obey such access
-                 * permissions and making such owned files writeable may be a
-                 * security issue */
+                // Dealing with the need to make extracted files writable if
+                // desired (e.g. a tar of files originally archived from a CD
+                // will be readonly). Root users do not obey such access
+                // permissions and making such owned files writeable may be a
+                // security issue
                 if (write_access && geteuid() != 0)
                 {
-                    /* deliberately omitting fm_handle_error - only a
-                     * convenience function */
+                    // deliberately omitting fm_handle_error - only a convenience function
                     perm = fmt::format("chmod -R u+rwX {}\n", parent_quote);
                 }
                 parent_quote.clear();
@@ -1377,14 +1324,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             static constexpr std::array<std::string_view, 2> keys{"%g", "%G"};
             if (ztd::contains(command, keys))
             {
-                /* Creating extraction target, taking into account whether
-                 * a parent directory has been created or not - target is
-                 * guaranteed not to exist so as to avoid overwriting */
+                // Creating extraction target, taking into account whether
+                // a parent directory has been created or not - target is
+                // guaranteed not to exist so as to avoid overwriting
                 extract_target = Glib::build_filename(create_parent ? parent_path : dest,
                                                       filename_no_archive_ext);
 
-                /* Now the extraction filename is obtained, determine the
-                 * normal filename without the extension */
+                // Now the extraction filename is obtained, determine the
+                // normal filename without the extension
                 const auto [filename_no_extension, filename_extension] =
                     get_name_extension(filename_no_archive_ext);
 
@@ -1405,12 +1352,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         // Substituting %x %g %G
         command = replace_archive_subs(command, "", "", "", full_quote, extract_target);
 
-        /* Finally constructing command to run, taking into account more than
-         * one archive to list/extract. The mkparent command itself has error
-         * checking - final error check not here as I want the code shared with
-         * the list code flow */
-        final_command = fmt::format("{}\ncd {} || fm_handle_err\n{}{}"
-                                    "\n[[ $? -eq 0 ]] || fm_handle_err\n{}\n",
+        // Finally constructing command to run, taking into account more than
+        // one archive to list/extract. The mkparent command itself has error
+        // checking - final error check not here as I want the code shared with
+        // the list code flow
+        final_command = fmt::format("{}\nfm_util_cd {}\n{}{}\nfm_check_exit_code\n{}\n",
                                     final_command,
                                     dest_quote,
                                     mkparent,
@@ -1418,19 +1364,21 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                     perm);
     }
 
-    /* When ran in a terminal, errors need to result in a pause so that
-     * the user can review the situation - in any case an error check
-     * needs to be made */
-    std::string str;
+    // When ran in a terminal, errors need to result in a pause so that
+    // the user can review the situation - in any case an error check
+    // needs to be made
+    std::string shell_err_func_setup;
+    if (in_term)
+    {
+        shell_err_func_setup.append("set fm_handle_err_run_in_terminal true\n");
+    }
     if (create_parent)
     {
-        str = generate_bash_error_function(in_term, parent_quote);
+        shell_err_func_setup.append(
+            fmt::format("set fm_handle_err_parent_path {}\n", parent_quote));
     }
-    else
-    {
-        str = generate_bash_error_function(in_term);
-    }
-    final_command = fmt::format("{}\n{}", str, final_command);
+
+    final_command = fmt::format("{}\n{}", shell_err_func_setup, final_command);
     free(choose_dir);
 
     // Creating task
@@ -1440,8 +1388,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                            dlgparent,
                                            file_browser ? file_browser->task_view : nullptr);
 
-    /* Setting correct exec reference - probably causes different bash
-     * to be output */
+    // Setting correct exec reference
     if (file_browser)
     {
         ptask->task->exec_browser = file_browser;
@@ -1456,7 +1403,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     ptask->task->exec_show_output = list_contents && !in_term;
     ptask->task->exec_terminal = in_term;
     ptask->task->exec_keep_terminal = keep_term;
-    ptask->task->exec_export = true; // Setup SpaceFM bash variables
+    ptask->task->exec_export = true; // Setup SpaceFM fish variables
 
     // Setting custom icon
     xset_t set = xset_get(XSetName::ARC_EXTRACT);

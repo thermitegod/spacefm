@@ -18,7 +18,7 @@
 #include <string_view>
 
 inline constexpr std::string_view enter_command_line =
-    "Enter program or bash command line:\n\nUse:\n\t%%F\tselected files  or  %%f first selected "
+    "Enter program or fish command line:\n\nUse:\n\t%%F\tselected files  or  %%f first selected "
     "file\n\t%%N\tselected filenames  or  %%n first selected filename\n\t%%d\tcurrent "
     "directory\n\t%%v\tselected device (eg /dev/sda1)\n\t%%m\tdevice mount point (eg "
     "/media/dvd);  %%l device label\n\t%%b\tselected bookmark\n\t%%t\tselected task directory;  "

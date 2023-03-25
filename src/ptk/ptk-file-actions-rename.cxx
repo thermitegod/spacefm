@@ -390,16 +390,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
         const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
-
         gtk_text_buffer_set_text(mset->buf_name, filename_no_extension.data(), -1);
-        if (!filename_extension.empty())
-        {
-            gtk_entry_set_text(mset->entry_ext, filename_extension.data());
-        }
-        else
-        {
-            gtk_entry_set_text(mset->entry_ext, "");
-        }
+        gtk_entry_set_text(mset->entry_ext, filename_extension.data());
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -495,16 +487,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
 
         const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
-
         gtk_text_buffer_set_text(mset->buf_name, filename_no_extension.data(), -1);
-        if (!filename_extension.empty())
-        {
-            gtk_entry_set_text(mset->entry_ext, filename_extension.data());
-        }
-        else
-        {
-            gtk_entry_set_text(mset->entry_ext, "");
-        }
+        gtk_entry_set_text(mset->entry_ext, filename_extension.data());
 
         // update full_name
         if (!filename_no_extension.empty() && !filename_extension.empty())

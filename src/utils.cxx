@@ -91,36 +91,38 @@ dir_has_files(std::string_view path) noexcept
 }
 
 const std::pair<std::string, std::string>
-get_name_extension(std::string_view full_name) noexcept
+get_name_extension(std::string_view filename) noexcept
 {
-    if (std::filesystem::is_directory(full_name))
+    if (std::filesystem::is_directory(filename))
     {
-        return {full_name.data(), ""};
+        return std::make_pair(filename.data(), "");
     }
 
-    if (!ztd::contains(full_name, "."))
+    // Find the last dot in the filename
+    const auto dot_pos = filename.find_last_of('.');
+
+    // Check if the dot is not at the beginning or end of the filename
+    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos != filename.length() - 1)
     {
-        return {full_name.data(), ""};
+        const auto split = ztd::rpartition(filename, ".");
+
+        // Check if the extension is a compressed tar archive
+        if (ztd::endswith(split[0], ".tar"))
+        {
+            // Find the second last dot in the filename
+            const auto split_second = ztd::rpartition(split[0], ".");
+
+            return std::make_pair(split_second[0], fmt::format("{}.{}", split_second[2], split[2]));
+        }
+        else
+        {
+            // Return the base name and the extension
+            return std::make_pair(split[0], split[2]);
+        }
     }
 
-    std::string fullpath_filebase;
-    std::string file_ext;
-
-    if (ztd::contains(full_name, ".tar."))
-    {
-        // compressed tar archive
-        const auto parts = ztd::rpartition(full_name, ".tar.");
-        fullpath_filebase = parts[0];
-        file_ext = fmt::format("tar.{}", parts[2]);
-    }
-    else
-    {
-        const auto parts = ztd::rpartition(full_name, ".");
-        fullpath_filebase = parts[0];
-        file_ext = parts[2];
-    }
-
-    return {fullpath_filebase, file_ext};
+    // No valid extension found, return the whole filename as the base name
+    return std::make_pair(filename.data(), "");
 }
 
 void

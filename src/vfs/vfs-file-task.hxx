@@ -242,7 +242,7 @@ class VFSFileTask
     bool exec_export{false};
     bool exec_direct{false};
     std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
-                                          // for su commands, must use bash -c
+                                          // for su commands, must use fish -c
                                           // as su does not execute binaries
     std::string exec_script{};
     bool exec_keep_tmp{false}; // diagnostic to keep temp files

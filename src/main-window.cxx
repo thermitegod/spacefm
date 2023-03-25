@@ -4366,17 +4366,17 @@ get_task_view_window(GtkWidget* view)
     return nullptr;
 }
 
-void
-main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
+const std::string
+main_write_exports(vfs::file_task vtask, std::string_view value)
 {
-    std::string path;
-    std::string esc_path;
-
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
-    xset_t set = XSET(vtask->exec_set);
 
-    buf.append("\n#source");
+    const xset_t set = XSET(vtask->exec_set);
+
+    std::string buf;
+
+    // buf.append("\n#source");
     // buf.append("\n\ncp $0 /tmp\n\n");
 
     // panels
@@ -4407,47 +4407,31 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
 
         // cwd
         const std::string cwd = ptk_file_browser_get_cwd(a_browser);
-        const bool cwd_needs_quote = ztd::contains(cwd, "\"");
-        if (cwd_needs_quote)
-        {
-            path = ztd::shell::quote(cwd);
-            buf.append(fmt::format("\nfm_pwd_panel[{}]={}\n", p, path));
-        }
-        else
-        {
-            buf.append(fmt::format("\nfm_pwd_panel[{}]=\"{}\"\n", p, cwd));
-        }
-        buf.append(fmt::format("\nfm_tab_panel[{}]=\"{}\"\n", p, current_page + 1));
+        buf.append(fmt::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd)));
+        buf.append(fmt::format("set fm_tab_panel[{}] {}\n", p, current_page + 1));
 
         // selected files
         const std::vector<vfs::file_info> sel_files =
             ptk_file_browser_get_selected_files(a_browser);
         if (!sel_files.empty())
         {
-            buf.append(fmt::format("fm_panel{}_files=(\n", p));
+            // create fish array
+            buf.append(fmt::format("set fm_panel{}_files (echo ", p));
             for (vfs::file_info file : sel_files)
             {
-                path = file->get_name();
-                if (!cwd_needs_quote && ztd::contains(path, "\""))
-                {
-                    buf.append(fmt::format("\"{}\"\n", Glib::build_filename(cwd, path)));
-                }
-                else
-                {
-                    path = Glib::build_filename(cwd, path);
-                    esc_path = ztd::shell::quote(path);
-                    buf.append(fmt::format("{}\n", esc_path));
-                }
+                buf.append(
+                    fmt::format("{} ",
+                                ztd::shell::quote(Glib::build_filename(cwd, file->get_name()))));
             }
             buf.append(fmt::format(")\n"));
 
             if (file_browser == a_browser)
             {
-                buf.append(fmt::format("fm_filenames=(\n"));
+                // create fish array
+                buf.append(fmt::format("set fm_filenames (echo "));
                 for (vfs::file_info file : sel_files)
                 {
-                    path = file->get_name();
-                    buf.append(fmt::format("{}\n", ztd::shell::quote(path)));
+                    buf.append(fmt::format("{} ", ztd::shell::quote(file->get_name())));
                 }
                 buf.append(fmt::format(")\n"));
             }
@@ -4464,72 +4448,34 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
             {
                 if (file_browser == a_browser)
                 {
-                    buf.append(fmt::format("fm_device=\"{}\"\n", vol->device_file));
-                    if (!vol->udi.empty())
-                    {
-                        esc_path = ztd::shell::quote(vol->udi);
-                        buf.append(fmt::format("fm_device_udi={}\n", esc_path));
-                    }
-                    if (!vol->mount_point.empty())
-                    {
-                        esc_path = ztd::shell::quote(vol->mount_point);
-                        buf.append(fmt::format("fm_device_mount_point={}\n", esc_path));
-                    }
-                    if (!vol->label.empty())
-                    {
-                        esc_path = ztd::shell::quote(vol->label);
-                        buf.append(fmt::format("fm_device_label={}\n", esc_path));
-                    }
-                    if (!vol->fs_type.empty())
-                    {
-                        buf.append(fmt::format("fm_device_fstype=\"{}\"\n", vol->fs_type));
-                    }
-                    buf.append(fmt::format("fm_device_size=\"{}\"\n", vol->size));
-                    if (!vol->disp_name.empty())
-                    {
-                        esc_path = ztd::shell::quote(vol->disp_name);
-                        buf.append(fmt::format("fm_device_display_name=\"{}\"\n", esc_path));
-                    }
                     // clang-format off
-                    buf.append(fmt::format("fm_device_icon=\"{}\"\n", vol->icon));
-                    buf.append(fmt::format("fm_device_is_mounted=\"{}\"\n", vol->is_mounted ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_optical=\"{}\"\n", vol->is_optical ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_removable=\"{}\"\n", vol->is_removable ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_mountable=\"{}\"\n", vol->is_mountable ? 1 : 0));
+                    buf.append(fmt::format("set fm_device {}\n", ztd::shell::quote(vol->device_file)));
+                    buf.append(fmt::format("set fm_device_udi {}\n", ztd::shell::quote(vol->udi)));
+                    buf.append(fmt::format("set fm_device_mount_point {}\n", ztd::shell::quote(vol->mount_point)));
+                    buf.append(fmt::format("set fm_device_label {}\n", ztd::shell::quote(vol->label)));
+                    buf.append(fmt::format("set fm_device_fstype {}\n", ztd::shell::quote(vol->fs_type)));
+                    buf.append(fmt::format("set fm_device_size {}\n", vol->size));
+                    buf.append(fmt::format("set fm_device_display_name {}\n", ztd::shell::quote(vol->disp_name)));
+                    buf.append(fmt::format("set fm_device_icon {}\n", ztd::shell::quote(vol->icon)));
+                    buf.append(fmt::format("set fm_device_is_mounted {}\n", vol->is_mounted ? 1 : 0));
+                    buf.append(fmt::format("set fm_device_is_optical {}\n", vol->is_optical ? 1 : 0));
+                    buf.append(fmt::format("set fm_device_is_removable {}\n", vol->is_removable ? 1 : 0));
+                    buf.append(fmt::format("set fm_device_is_mountable {}\n", vol->is_mountable ? 1 : 0));
                     // clang-format on
                 }
-                buf.append(fmt::format("fm_panel{}_device=\"{}\"\n", p, vol->device_file));
-                if (!vol->udi.empty())
-                {
-                    esc_path = ztd::shell::quote(vol->udi);
-                    buf.append(fmt::format("fm_panel{}_device_udi={}\n", p, esc_path));
-                }
-                if (!vol->mount_point.empty())
-                {
-                    esc_path = ztd::shell::quote(vol->mount_point);
-                    buf.append(fmt::format("fm_panel{}_device_mount_point={}\n", p, esc_path));
-                }
-                if (!vol->label.empty())
-                {
-                    esc_path = ztd::shell::quote(vol->label);
-                    buf.append(fmt::format("fm_panel{}_device_label={}\n", p, esc_path));
-                }
-                if (!vol->fs_type.empty())
-                {
-                    buf.append(fmt::format("fm_panel{}_device_fstype=\"{}\"\n", p, vol->fs_type));
-                }
-                buf.append(fmt::format("fm_panel{}_device_size=\"{}\"\n", p, vol->size));
-                if (!vol->disp_name.empty())
-                {
-                    esc_path = ztd::shell::quote(vol->disp_name);
-                    buf.append(fmt::format("fm_panel{}_device_display_name={}\n", p, esc_path));
-                }
                 // clang-format off
-                buf.append(fmt::format("fm_panel{}_device_icon=\"{}\"\n", p, vol->icon));
-                buf.append(fmt::format("fm_panel{}_device_is_mounted=\"{}\"\n", p, vol->is_mounted ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_optical=\"{}\"\n", p, vol->is_optical ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_removable=\"{}\"\n", p, vol->is_removable ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_mountable=\"{}\"\n", p, vol->is_mountable ? 1 : 0));
+                buf.append(fmt::format("set fm_panel{}_device {}\n", p, ztd::shell::quote(vol->device_file)));
+                buf.append(fmt::format("set fm_panel{}_device_udi {}\n", p, ztd::shell::quote(vol->udi)));
+                buf.append(fmt::format("set fm_panel{}_device_mount_point {}\n", p, ztd::shell::quote(vol->mount_point)));
+                buf.append(fmt::format("set fm_panel{}_device_label {}\n", p, ztd::shell::quote(vol->label)));
+                buf.append(fmt::format("set fm_panel{}_device_fstype {}\n", p, ztd::shell::quote(vol->fs_type)));
+                buf.append(fmt::format("set fm_panel{}_device_size {}\n", p, vol->size));
+                buf.append(fmt::format("set fm_panel{}_device_display_name {}\n", p, ztd::shell::quote(vol->disp_name)));
+                buf.append(fmt::format("set fm_panel{}_device_icon {}\n", p, ztd::shell::quote(vol->icon)));
+                buf.append(fmt::format("set fm_panel{}_device_is_mounted {}\n", p, vol->is_mounted ? 1 : 0));
+                buf.append(fmt::format("set fm_panel{}_device_is_optical {}\n", p, vol->is_optical ? 1 : 0));
+                buf.append(fmt::format("set fm_panel{}_device_is_removable{}\n", p, vol->is_removable ? 1 : 0));
+                buf.append(fmt::format("set fm_panel{}_device_is_mountable{}\n", p, vol->is_mountable ? 1 : 0));
                 // clang-format on
             }
         }
@@ -4540,54 +4486,53 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-            path = ztd::shell::quote(ptk_file_browser_get_cwd(t_browser));
-            buf.append(fmt::format("fm_pwd_panel{}_tab[{}]={}\n", p, i + 1, path));
+            const std::string path = ztd::shell::quote(ptk_file_browser_get_cwd(t_browser));
+            buf.append(fmt::format("set fm_pwd_panel{}_tab[{}] {}\n", p, i + 1, path));
             if (p == file_browser->mypanel)
             {
-                buf.append(fmt::format("fm_pwd_tab[{}]={}\n", i + 1, path));
+                buf.append(fmt::format("set fm_pwd_tab[{}] {}\n", i + 1, path));
             }
             if (file_browser == t_browser)
             {
                 // my browser
-                buf.append(fmt::format("fm_pwd={}\n", path));
-                buf.append(fmt::format("fm_panel=\"{}\"\n", p));
-                buf.append(fmt::format("fm_tab=\"{}\"\n", i + 1));
+                buf.append(fmt::format("set fm_pwd {}\n", path));
+                buf.append(fmt::format("set fm_panel {}\n", p));
+                buf.append(fmt::format("set fm_tab {}\n", i + 1));
             }
         }
     }
+
     // my selected files
-    buf.append(fmt::format("\nfm_files=(\"${{fm_panel{}_files[@]}}\")\n", file_browser->mypanel));
-    buf.append(fmt::format("fm_file=\"${{fm_panel{}_files[0]}}\"\n", file_browser->mypanel));
-    buf.append(fmt::format("fm_filename=\"${{fm_filenames[0]}}\"\n"));
+    buf.append("\n");
+    buf.append(fmt::format("set fm_files (echo $fm_panel{}_files)\n", file_browser->mypanel));
+    buf.append(fmt::format("set fm_file $fm_panel{}_files[1]\n", file_browser->mypanel));
+    buf.append(fmt::format("set fm_filename $fm_filenames[1]\n"));
+    buf.append("\n");
 
     // user
-    const std::string this_user = Glib::get_user_name();
-    esc_path = ztd::shell::quote(this_user);
-    buf.append(fmt::format("fm_user={}\n", esc_path));
+    buf.append(fmt::format("set fm_user {}\n", ztd::shell::quote(Glib::get_user_name())));
 
     // variable value
-    if (value)
-    {
-        esc_path = ztd::shell::quote(value);
-        buf.append(fmt::format("fm_value={}\n", esc_path));
-    }
+    buf.append(fmt::format("set fm_value {}\n", ztd::shell::quote(value)));
     if (vtask->exec_ptask)
     {
-        buf.append(fmt::format("fm_my_task=\"{:p}\"\n", (void*)vtask->exec_ptask));
-        buf.append(fmt::format("fm_my_task_id=\"{:p}\"\n", (void*)vtask->exec_ptask));
+        buf.append(fmt::format("set fm_my_task {:p}\n", fmt::ptr(vtask->exec_ptask)));
+        buf.append(fmt::format("set fm_my_task_id {:p}\n", fmt::ptr(vtask->exec_ptask)));
     }
-    buf.append(fmt::format("fm_my_window=\"{:p}\"\n", (void*)main_window));
-    buf.append(fmt::format("fm_my_window_id=\"{:p}\"\n", (void*)main_window));
+    buf.append(fmt::format("set fm_my_window {:p}\n", fmt::ptr(main_window)));
+    buf.append(fmt::format("set fm_my_window_id {:p}\n", fmt::ptr(main_window)));
 
     // utils
-    esc_path = ztd::shell::quote(xset_get_s(XSetName::EDITOR));
-    buf.append(fmt::format("fm_editor={}\n", esc_path));
-    buf.append(fmt::format("fm_editor_terminal=\"{}\"\n", xset_get_b(XSetName::EDITOR) ? 1 : 0));
+    buf.append(fmt::format("set fm_editor {}\n", ztd::shell::quote(xset_get_s(XSetName::EDITOR))));
+    buf.append(fmt::format("set fm_editor_terminal {}\n", xset_get_b(XSetName::EDITOR) ? 1 : 0));
 
     // set
     if (set)
     {
         // cmd_dir
+        std::string path;
+        std::string esc_path;
+
         if (set->plugin)
         {
             path = Glib::build_filename(set->plug_dir, "files");
@@ -4600,43 +4545,28 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
         {
             path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
         }
-        esc_path = ztd::shell::quote(path);
-        buf.append(fmt::format("fm_cmd_dir={}\n", esc_path));
+        buf.append(fmt::format("set fm_cmd_dir {}\n", ztd::shell::quote(path)));
 
         // cmd_data
-        if (set->plugin)
-        {
-            xset_t mset = xset_get_plugin_mirror(set);
-            path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                        "plugin-data",
-                                        mset->name);
-        }
-        else
-        {
-            path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                        "plugin-data",
-                                        set->name);
-        }
-        esc_path = ztd::shell::quote(path);
-        buf.append(fmt::format("fm_cmd_data={}\n", esc_path));
+        path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", set->name);
+        buf.append(fmt::format("set fm_cmd_data {}\n", ztd::shell::quote(path)));
 
         // plugin_dir
         if (set->plugin)
         {
-            esc_path = ztd::shell::quote(set->plug_dir);
-            buf.append(fmt::format("fm_plugin_dir={}\n", esc_path));
+            buf.append(fmt::format("set fm_plugin_dir {}\n", ztd::shell::quote(set->plug_dir)));
         }
 
         // cmd_name
         if (set->menu_label)
         {
-            esc_path = ztd::shell::quote(set->menu_label);
-            buf.append(fmt::format("fm_cmd_name={}\n", esc_path));
+            buf.append(fmt::format("set fm_cmd_name {}\n", ztd::shell::quote(set->menu_label)));
         }
     }
 
     // tmp
-    buf.append(fmt::format("fm_tmp_dir=\"{}\"\n", vfs::user_dirs->program_tmp_dir()));
+    buf.append(
+        fmt::format("set fm_tmp_dir {}\n", ztd::shell::quote(vfs::user_dirs->program_tmp_dir())));
 
     // tasks
     PtkFileTask* ptask = get_selected_task(file_browser->task_view);
@@ -4644,46 +4574,38 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
     {
         static constexpr std::array<std::string_view, 7>
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
-        buf.append(fmt::format("\nfm_task_type=\"{}\"\n", job_titles.at(ptask->task->type)));
+        buf.append("\n");
+        buf.append(fmt::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
         if (ptask->task->type == VFSFileTaskType::EXEC)
         {
-            esc_path = ztd::shell::quote(ptask->task->dest_dir);
-            buf.append(fmt::format("fm_task_pwd={}\n", esc_path));
-            esc_path = ztd::shell::quote(ptask->task->current_file);
-            buf.append(fmt::format("fm_task_name={}\n", esc_path));
-            esc_path = ztd::shell::quote(ptask->task->exec_command);
-            buf.append(fmt::format("fm_task_command={}\n", esc_path));
-            if (!ptask->task->exec_as_user.empty())
-            {
-                buf.append(fmt::format("fm_task_user=\"{}\"\n", ptask->task->exec_as_user));
-            }
-            if (!ptask->task->exec_icon.empty())
-            {
-                buf.append(fmt::format("fm_task_icon=\"{}\"\n", ptask->task->exec_icon));
-            }
-            if (ptask->task->exec_pid)
-            {
-                buf.append(fmt::format("fm_task_pid=\"{}\"\n", ptask->task->exec_pid));
-            }
+            // clang-format off
+            buf.append(fmt::format("set fm_task_pwd {}\n", ztd::shell::quote(ptask->task->dest_dir)));
+            buf.append(fmt::format("set fm_task_name {}\n", ztd::shell::quote(ptask->task->current_file)));
+            buf.append(fmt::format("set fm_task_command {}\n", ztd::shell::quote(ptask->task->exec_command)));
+            buf.append(fmt::format("set fm_task_user {}\n", ztd::shell::quote(ptask->task->exec_as_user)));
+            buf.append(fmt::format("set fm_task_icon {}\n", ztd::shell::quote(ptask->task->exec_icon)));
+            buf.append(fmt::format("set fm_task_pid {}\n", ptask->task->exec_pid));
+            // clang-format on
         }
         else
         {
-            esc_path = ztd::shell::quote(ptask->task->dest_dir);
-            buf.append(fmt::format("fm_task_dest_dir={}\n", esc_path));
-            esc_path = ztd::shell::quote(ptask->task->current_file);
-            buf.append(fmt::format("fm_task_current_src_file={}\n", esc_path));
-            esc_path = ztd::shell::quote(ptask->task->current_dest);
-            buf.append(fmt::format("fm_task_current_dest_file={}\n", esc_path));
+            // clang-format off
+            buf.append(fmt::format("set fm_task_dest_dir {}\n", ztd::shell::quote(ptask->task->dest_dir)));
+            buf.append(fmt::format("set fm_task_current_src_file {}\n", ztd::shell::quote(ptask->task->current_file)));
+            buf.append(fmt::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(ptask->task->current_dest)));
+            // clang-format on
         }
-        buf.append(fmt::format("fm_task_id=\"{:p}\"\n", (void*)ptask));
+        buf.append(fmt::format("set fm_task_id {:p}\n", fmt::ptr(ptask)));
         if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
         {
-            buf.append(fmt::format("fm_task_window=\"{:p}\"\n", (void*)main_window));
-            buf.append(fmt::format("fm_task_window_id=\"{:p}\"\n", (void*)main_window));
+            buf.append(fmt::format("set fm_task_window {:p}\n", fmt::ptr(main_window)));
+            buf.append(fmt::format("set fm_task_window_id {:p}\n", fmt::ptr(main_window)));
         }
     }
 
-    buf.append(fmt::format("\n"));
+    buf.append("\n\n");
+
+    return buf;
 }
 
 static void
@@ -5520,7 +5442,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         {
             // show custom dialog
             ztd::logger::info("TASK_POPUP >>> {}", ptask->pop_handler);
-            const std::string command = fmt::format("bash -c {}", ptask->pop_handler);
+            const std::string command = fmt::format("{} -c {}", FISH_PATH, ptask->pop_handler);
             Glib::spawn_command_line_async(command);
         }
         else
@@ -7325,7 +7247,7 @@ main_window_socket_command(char* argv[])
             {
                 return {SOCKET_SUCCESS, ""};
             }
-            // build bash array
+            // build fish array
             const std::vector<std::string> pathv = ztd::split(clip_txt, "");
             std::string str;
             for (const std::string_view path : pathv)
@@ -7344,7 +7266,7 @@ main_window_socket_command(char* argv[])
                 return {SOCKET_SUCCESS, ""};
             }
 
-            // build bash array
+            // build fish array
             std::string str;
             for (vfs::file_info file : sel_files)
             {
@@ -8165,7 +8087,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
             cmd = ztd::replace(cmd, "%v", change);
         }
         ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
-        const std::string command = fmt::format("bash -c {}", cmd);
+        const std::string command = fmt::format("{} -c {}", FISH_PATH, cmd);
         Glib::spawn_command_line_async(command);
         return false;
     }
@@ -8275,7 +8197,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
         if (event == XSetName::EVT_TAB_CLOSE)
         {
-            const std::string command = fmt::format("bash -c {}", cmd);
+            const std::string command = fmt::format("{} -c {}", FISH_PATH, cmd);
             // file_browser becomes invalid so spawn
             Glib::spawn_command_line_async(command);
         }
@@ -8299,7 +8221,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     ztd::logger::info("REPLACE_EVENT {} >>> {}", event_name, cmd);
 
     inhibit = false;
-    const std::string command = fmt::format("bash -c {}", cmd);
+    const std::string command = fmt::format("{} -c {}", FISH_PATH, cmd);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
     if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)

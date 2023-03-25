@@ -80,7 +80,7 @@ class VFSUserDirs
 
     // Program config dir
     std::string program_config{Glib::build_filename(this->user_config, PACKAGE_NAME)};
-    std::string tmp{Glib::build_filename(etc_settings.get_tmp_dir(), PACKAGE_NAME)};
+    std::string tmp{Glib::build_filename(this->user_cache, PACKAGE_NAME)};
 };
 
 namespace vfs

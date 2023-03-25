@@ -29,7 +29,7 @@ bool dir_has_files(std::string_view path) noexcept;
 
 const std::string replace_line_subs(std::string_view line) noexcept;
 
-const std::pair<std::string, std::string> get_name_extension(std::string_view full_name) noexcept;
+const std::pair<std::string, std::string> get_name_extension(std::string_view filename) noexcept;
 
 void open_in_prog(std::string_view path) noexcept;
 
