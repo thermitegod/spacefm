@@ -209,6 +209,7 @@ endif
 
 libudev_dep = dependency('libudev', required : true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
+openssl_dep = dependency('openssl', required : true)
 
 exo_dep = dependency('exo-2', required : true)
 # x11_dep = dependency('x11', required : true)
@@ -246,6 +247,7 @@ dependencies = [
 
     libudev_dep,
     libffmpegthumbnailer_dep,
+    openssl_dep,
 
     ztd_dep,
 ]

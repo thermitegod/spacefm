@@ -1600,9 +1600,8 @@ VFSFileTask::file_exec(std::string_view src_file)
         // use checksum
         if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
         {
-            const Glib::Checksum check = Glib::Checksum();
-            sum_script =
-                check.compute_checksum(Glib::Checksum::Type::MD5, this->exec_script.data());
+            auto check = ztd::Checksum();
+            sum_script = check.compute_checksum(ztd::Checksum::Type::MD5, this->exec_script);
         }
     }
 
