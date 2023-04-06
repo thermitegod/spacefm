@@ -248,7 +248,12 @@ endforeach
 
 # preprocessor related - end
 
-libztd_dep = dependency('ztd', required : true)
+# ztd use system or subproject
+ztd_dep = dependency('ztd', required : false)
+if not ztd_dep.found() # using subproject
+  ztd_proj = subproject('ztd')
+  ztd_dep = ztd_proj.get_variable('ztd_dep')
+endif
 
 libudev_dep = dependency('libudev', required : true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
@@ -376,7 +381,7 @@ spacefm = build_target(
     libudev_dep,
     libffmpegthumbnailer_dep,
 
-    libztd_dep,
+    ztd_dep,
   ],
   cpp_pch: 'pch/cxx_pch.hxx',
 )
