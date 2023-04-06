@@ -195,120 +195,196 @@ xset_parse(std::string& line)
 #endif // Deprecated INI loader - end
 
 static u64
-get_config_file_version(const toml::value& data)
+get_config_file_version(const toml::value& tbl)
 {
-    const auto& version = toml::find(data, TOML_SECTION_VERSION);
+    if (!tbl.contains(TOML_SECTION_VERSION))
+    {
+        ztd::logger::error("config missing TOML section [{}]", TOML_SECTION_VERSION);
+        return 0;
+    }
+
+    const auto& version = toml::find(tbl, TOML_SECTION_VERSION);
 
     const auto config_version = toml::find<u64>(version, TOML_KEY_VERSION);
     return config_version;
 }
 
 static void
-config_parse_general(const toml::value& toml_data, u64 version)
+config_parse_general(const toml::value& tbl, u64 version)
 {
     (void)version;
 
-    const auto& section = toml::find(toml_data, TOML_SECTION_GENERAL);
+    if (!tbl.contains(TOML_SECTION_GENERAL))
+    {
+        ztd::logger::error("config missing TOML section [{}]", TOML_SECTION_GENERAL);
+        return;
+    }
 
-    const auto show_thumbnail = toml::find<bool>(section, TOML_KEY_SHOW_THUMBNAIL);
-    app_settings.set_show_thumbnail(show_thumbnail);
+    const auto& section = toml::find(tbl, TOML_SECTION_GENERAL);
 
-    const auto max_thumb_size = toml::find<u64>(section, TOML_KEY_MAX_THUMB_SIZE);
-    app_settings.set_max_thumb_size(max_thumb_size << 10);
+    if (section.contains(TOML_KEY_SHOW_THUMBNAIL))
+    {
+        const auto show_thumbnail = toml::find<bool>(section, TOML_KEY_SHOW_THUMBNAIL);
+        app_settings.set_show_thumbnail(show_thumbnail);
+    }
 
-    const auto icon_size_big = toml::find<u64>(section, TOML_KEY_ICON_SIZE_BIG);
-    app_settings.set_icon_size_big(icon_size_big);
+    if (section.contains(TOML_KEY_MAX_THUMB_SIZE))
+    {
+        const auto max_thumb_size = toml::find<u64>(section, TOML_KEY_MAX_THUMB_SIZE);
+        app_settings.set_max_thumb_size(max_thumb_size << 10);
+    }
 
-    const auto icon_size_small = toml::find<u64>(section, TOML_KEY_ICON_SIZE_SMALL);
-    app_settings.set_icon_size_small(icon_size_small);
+    if (section.contains(TOML_KEY_ICON_SIZE_BIG))
+    {
+        const auto icon_size_big = toml::find<u64>(section, TOML_KEY_ICON_SIZE_BIG);
+        app_settings.set_icon_size_big(icon_size_big);
+    }
 
-    const auto icon_size_tool = toml::find<u64>(section, TOML_KEY_ICON_SIZE_TOOL);
-    app_settings.set_icon_size_tool(icon_size_tool);
+    if (section.contains(TOML_KEY_ICON_SIZE_SMALL))
+    {
+        const auto icon_size_small = toml::find<u64>(section, TOML_KEY_ICON_SIZE_SMALL);
+        app_settings.set_icon_size_small(icon_size_small);
+    }
 
-    const auto single_click = toml::find<bool>(section, TOML_KEY_SINGLE_CLICK);
-    app_settings.set_single_click(single_click);
+    if (section.contains(TOML_KEY_ICON_SIZE_TOOL))
+    {
+        const auto icon_size_tool = toml::find<u64>(section, TOML_KEY_ICON_SIZE_TOOL);
+        app_settings.set_icon_size_tool(icon_size_tool);
+    }
 
-    const auto single_hover = toml::find<bool>(section, TOML_KEY_SINGLE_HOVER);
-    app_settings.set_single_hover(single_hover);
+    if (section.contains(TOML_KEY_SINGLE_CLICK))
+    {
+        const auto single_click = toml::find<bool>(section, TOML_KEY_SINGLE_CLICK);
+        app_settings.set_single_click(single_click);
+    }
 
-    const auto sort_order = toml::find<u64>(section, TOML_KEY_SORT_ORDER);
-    app_settings.set_sort_order(sort_order);
+    if (section.contains(TOML_KEY_SINGLE_HOVER))
+    {
+        const auto single_hover = toml::find<bool>(section, TOML_KEY_SINGLE_HOVER);
+        app_settings.set_single_hover(single_hover);
+    }
 
-    const auto sort_type = toml::find<u64>(section, TOML_KEY_SORT_TYPE);
-    app_settings.set_sort_type(sort_type);
+    if (section.contains(TOML_KEY_SORT_ORDER))
+    {
+        const auto sort_order = toml::find<u64>(section, TOML_KEY_SORT_ORDER);
+        app_settings.set_sort_order(sort_order);
+    }
 
-    const auto use_si_prefix = toml::find<bool>(section, TOML_KEY_USE_SI_PREFIX);
-    app_settings.set_use_si_prefix(use_si_prefix);
+    if (section.contains(TOML_KEY_SORT_TYPE))
+    {
+        const auto sort_type = toml::find<u64>(section, TOML_KEY_SORT_TYPE);
+        app_settings.set_sort_type(sort_type);
+    }
 
-    const auto click_executes = toml::find<bool>(section, TOML_KEY_CLICK_EXECUTE);
-    app_settings.set_click_executes(click_executes);
+    if (section.contains(TOML_KEY_USE_SI_PREFIX))
+    {
+        const auto use_si_prefix = toml::find<bool>(section, TOML_KEY_USE_SI_PREFIX);
+        app_settings.set_use_si_prefix(use_si_prefix);
+    }
 
-    const auto confirm = toml::find<bool>(section, TOML_KEY_CONFIRM);
-    app_settings.set_confirm(confirm);
+    if (section.contains(TOML_KEY_CLICK_EXECUTE))
+    {
+        const auto click_executes = toml::find<bool>(section, TOML_KEY_CLICK_EXECUTE);
+        app_settings.set_click_executes(click_executes);
+    }
 
-    const auto confirm_delete = toml::find<bool>(section, TOML_KEY_CONFIRM_DELETE);
-    app_settings.set_confirm_delete(confirm_delete);
+    if (section.contains(TOML_KEY_CONFIRM))
+    {
+        const auto confirm = toml::find<bool>(section, TOML_KEY_CONFIRM);
+        app_settings.set_confirm(confirm);
+    }
 
-    const auto confirm_trash = toml::find<bool>(section, TOML_KEY_CONFIRM_TRASH);
-    app_settings.set_confirm_trash(confirm_trash);
+    if (section.contains(TOML_KEY_CONFIRM_DELETE))
+    {
+        const auto confirm_delete = toml::find<bool>(section, TOML_KEY_CONFIRM_DELETE);
+        app_settings.set_confirm_delete(confirm_delete);
+    }
+
+    if (section.contains(TOML_KEY_CONFIRM_TRASH))
+    {
+        const auto confirm_trash = toml::find<bool>(section, TOML_KEY_CONFIRM_TRASH);
+        app_settings.set_confirm_trash(confirm_trash);
+    }
 }
 
 static void
-config_parse_window(const toml::value& toml_data, u64 version)
+config_parse_window(const toml::value& tbl, u64 version)
 {
     (void)version;
 
-    const auto& section = toml::find(toml_data, TOML_SECTION_WINDOW);
+    if (!tbl.contains(TOML_SECTION_WINDOW))
+    {
+        ztd::logger::error("config missing TOML section [{}]", TOML_SECTION_WINDOW);
+        return;
+    }
 
-    const auto height = toml::find<u64>(section, TOML_KEY_HEIGHT);
-    app_settings.set_height(height);
+    const auto& section = toml::find(tbl, TOML_SECTION_WINDOW);
 
-    const auto width = toml::find<u64>(section, TOML_KEY_WIDTH);
-    app_settings.set_width(width);
+    if (section.contains(TOML_KEY_HEIGHT))
+    {
+        const auto height = toml::find<u64>(section, TOML_KEY_HEIGHT);
+        app_settings.set_height(height);
+    }
 
-    const auto maximized = toml::find<bool>(section, TOML_KEY_MAXIMIZED);
-    app_settings.set_maximized(maximized);
+    if (section.contains(TOML_KEY_WIDTH))
+    {
+        const auto width = toml::find<u64>(section, TOML_KEY_WIDTH);
+        app_settings.set_width(width);
+    }
+
+    if (section.contains(TOML_KEY_MAXIMIZED))
+    {
+        const auto maximized = toml::find<bool>(section, TOML_KEY_MAXIMIZED);
+        app_settings.set_maximized(maximized);
+    }
 }
 
 static void
-config_parse_interface(const toml::value& toml_data, u64 version)
+config_parse_interface(const toml::value& tbl, u64 version)
 {
     (void)version;
 
-    const auto& section = toml::find(toml_data, TOML_SECTION_INTERFACE);
+    if (!tbl.contains(TOML_SECTION_INTERFACE))
+    {
+        ztd::logger::error("config missing TOML section [{}]", TOML_SECTION_INTERFACE);
+        return;
+    }
 
-    const auto always_show_tabs = toml::find<bool>(section, TOML_KEY_SHOW_TABS);
-    app_settings.set_always_show_tabs(always_show_tabs);
+    const auto& section = toml::find(tbl, TOML_SECTION_INTERFACE);
 
-    const auto show_close_tab_buttons = toml::find<bool>(section, TOML_KEY_SHOW_CLOSE);
-    app_settings.set_show_close_tab_buttons(show_close_tab_buttons);
+    if (section.contains(TOML_KEY_SHOW_TABS))
+    {
+        const auto always_show_tabs = toml::find<bool>(section, TOML_KEY_SHOW_TABS);
+        app_settings.set_always_show_tabs(always_show_tabs);
+    }
+
+    if (section.contains(TOML_KEY_SHOW_CLOSE))
+    {
+        const auto show_close_tab_buttons = toml::find<bool>(section, TOML_KEY_SHOW_CLOSE);
+        app_settings.set_show_close_tab_buttons(show_close_tab_buttons);
+    }
 }
 
 static void
-config_parse_xset(const toml::value& toml_data, u64 version)
+config_parse_xset(const toml::value& tbl, u64 version)
 {
     (void)version;
 
     // loop over all of [[XSet]]
-    for (const auto& section : toml::find<toml::array>(toml_data, TOML_SECTION_XSET))
+    for (const auto& section : toml::find<toml::array>(tbl, TOML_SECTION_XSET))
     {
         // get [XSet.name] and all vars
         for (const auto& [toml_name, toml_vars] : section.as_table())
         {
+            const std::string name = toml_name.data();
+            const xset_t set = xset_get(name);
+
             // get var and value
             for (const auto& [toml_var, toml_value] : toml_vars.as_table())
             {
-                std::stringstream ss_name;
-                std::stringstream ss_var;
-                std::stringstream ss_value;
-
-                ss_name << toml_name;
-                ss_var << toml_var;
-                ss_value << toml_value;
-
-                const std::string name{ss_name.str()};
-                const std::string setvar{ss_var.str()};
-                const std::string value{ztd::strip(ss_value.str(), "\"")};
+                const std::string setvar = toml_var.data();
+                const std::string value =
+                    ztd::strip(toml::format(toml_value, std::numeric_limits<usize>::max()), "\"");
 
                 // LOG_INFO("name: {} | var: {} | value: {}", name, setvar, value);
 
@@ -324,7 +400,6 @@ config_parse_xset(const toml::value& toml_data, u64 version)
                     return;
                 }
 
-                xset_t set = xset_get(name);
                 if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "hand_"))
                 { // custom
                     if (set->lock)
@@ -340,34 +415,7 @@ config_parse_xset(const toml::value& toml_data, u64 version)
     }
 }
 
-#ifndef HAVE_DEPRECATED_INI_LOADING
-
-void
-load_user_confing(std::string_view session)
-{
-    toml::value toml_data;
-    try
-    {
-        toml_data = toml::parse(session.data());
-        // DEBUG
-        // std::cout << "###### TOML PARSE ######" << "\n\n";
-        // std::cout << toml_data << "\n\n";
-    }
-    catch (const toml::syntax_error& e)
-    {
-        LOG_ERROR("Config file parsing failed: {}", e.what());
-        return;
-    }
-
-    const u64 version = get_config_file_version(toml_data);
-
-    config_parse_general(toml_data, version);
-    config_parse_window(toml_data, version);
-    config_parse_interface(toml_data, version);
-    config_parse_xset(toml_data, version);
-}
-
-#else
+#if defined(HAVE_DEPRECATED_INI_LOADING)
 
 void
 load_user_confing(std::string_view session, bool load_deprecated_ini_config)
@@ -376,26 +424,25 @@ load_user_confing(std::string_view session, bool load_deprecated_ini_config)
     { // TOML
         // LOG_INFO("Parse TOML");
 
-        toml::value toml_data;
         try
         {
-            toml_data = toml::parse(session.data());
+            const auto tbl = toml::parse(session.data());
             // DEBUG
             // std::cout << "###### TOML PARSE ######" << "\n\n";
-            // std::cout << toml_data << "\n\n";
+            // std::cout << tbl << "\n\n";
+
+            const u64 version = get_config_file_version(tbl);
+
+            config_parse_general(tbl, version);
+            config_parse_window(tbl, version);
+            config_parse_interface(tbl, version);
+            config_parse_xset(tbl, version);
         }
         catch (const toml::syntax_error& e)
         {
             LOG_ERROR("Config file parsing failed: {}", e.what());
             return;
         }
-
-        const u64 version = get_config_file_version(toml_data);
-
-        config_parse_general(toml_data, version);
-        config_parse_window(toml_data, version);
-        config_parse_interface(toml_data, version);
-        config_parse_xset(toml_data, version);
     }
     else
     { // INI
@@ -432,6 +479,32 @@ load_user_confing(std::string_view session, bool load_deprecated_ini_config)
             }
         }
         file.close();
+    }
+}
+
+#else
+
+void
+load_user_confing(std::string_view session)
+{
+    try
+    {
+        const auto tbl = toml::parse(session.data());
+        // DEBUG
+        // std::cout << "###### TOML PARSE ######" << "\n\n";
+        // std::cout << tbl << "\n\n";
+
+        const u64 version = get_config_file_version(tbl);
+
+        config_parse_general(tbl, version);
+        config_parse_window(tbl, version);
+        config_parse_interface(tbl, version);
+        config_parse_xset(tbl, version);
+    }
+    catch (const toml::syntax_error& e)
+    {
+        ztd::logger::error("Config file parsing failed: {}", e.what());
+        return;
     }
 }
 

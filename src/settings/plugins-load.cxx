@@ -35,13 +35,13 @@ bool
 load_user_plugin(std::string_view plug_dir, PluginUse* use, std::string_view plugin,
                  plugin_func_t plugin_func)
 {
-    toml::value toml_data;
+    toml::value tbl;
     try
     {
-        toml_data = toml::parse(plugin.data());
+        tbl = toml::parse(plugin.data());
         // DEBUG
         // std::cout << "###### TOML PARSE ######" << "\n\n";
-        // std::cout << toml_data << "\n\n";
+        // std::cout << tbl << "\n\n";
     }
     catch (const toml::syntax_error& e)
     {
@@ -54,30 +54,27 @@ load_user_plugin(std::string_view plug_dir, PluginUse* use, std::string_view plu
 
     bool plugin_good = false;
 
-    // const u64 version = get_config_file_version(toml_data);
+    if (!tbl.contains(PLUGIN_FILE_SECTION_PLUGIN))
+    {
+        ztd::logger::error("plugin missing TOML section [{}]", PLUGIN_FILE_SECTION_PLUGIN);
+        return plugin_good;
+    }
 
     // loop over all of [[Plugin]]
-    for (const auto& section : toml::find<toml::array>(toml_data, PLUGIN_FILE_SECTION_PLUGIN))
+    for (const auto& section : toml::find<toml::array>(tbl, PLUGIN_FILE_SECTION_PLUGIN))
     {
         // get [Plugin.name] and all vars
         for (const auto& [toml_name, toml_vars] : section.as_table())
         {
+            const std::string name = toml_name.data();
             // get var and value
             for (const auto& [toml_var, toml_value] : toml_vars.as_table())
             {
-                std::stringstream ss_name;
-                std::stringstream ss_var;
-                std::stringstream ss_value;
+                const std::string setvar = toml_var.data();
+                const std::string value =
+                    ztd::strip(toml::format(toml_value, std::numeric_limits<usize>::max()), "\"");
 
-                ss_name << toml_name;
-                ss_var << toml_var;
-                ss_value << toml_value;
-
-                const std::string name{ss_name.str()};
-                const std::string var{ss_var.str()};
-                const std::string value{ztd::strip(ss_value.str(), "\"")};
-
-                plugin_func(plug_dir, use, name, var, value);
+                plugin_func(plug_dir, use, name, setvar, value);
 
                 if (!plugin_good)
                     plugin_good = true;
