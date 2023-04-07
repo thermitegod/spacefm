@@ -166,7 +166,6 @@ class VFSFileTask
     void file_chown_chmod(std::string_view src_file);
     void file_exec(std::string_view src_file);
 
-    void add_task_dev(dev_t dev);
     bool should_abort();
 
     off_t get_total_size_of_dir(std::string_view path);
@@ -182,7 +181,6 @@ class VFSFileTask
                                           // after file operation is completed.
     std::string dest_dir{};               // Destinaton directory
     bool avoid_changes{false};
-    GSList* devs{nullptr};
 
     VFSFileTaskOverwriteMode overwrite_mode;
     bool is_recursive{false}; // Apply operation to all files under directories

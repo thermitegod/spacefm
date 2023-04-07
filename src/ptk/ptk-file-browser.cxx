@@ -455,8 +455,8 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     }
     else
     { // do nothing for other special files
-      // ztd::logger::info("special file ignored: {}", final_path);
-      // return;
+        // ztd::logger::info("special file ignored: {}", final_path);
+        // return;
     }
 
     gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
@@ -1660,7 +1660,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
                 if (l->data && ztd::same((char*)l->data, (char*)file_browser->curHistory->data))
                 {
                     elementn = g_list_position(file_browser->history, l);
-                    // printf ("        found elementn=%d\n", elementn );
+                    // ztd::logger::info("        found elementn={}", elementn);
                     if (elementn != -1)
                     {
                         element = g_list_nth(file_browser->histsel, elementn);

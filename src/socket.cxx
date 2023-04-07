@@ -23,6 +23,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <sys/types.h>
+#include <sys/sysmacros.h>
 #include <linux/kdev_t.h>
 
 #include <fmt/format.h>
@@ -76,8 +78,8 @@ get_inode_tag()
     {
         inode_tag = fmt::format("{}={}:{}-{}",
                                 getuid(),
-                                MAJOR(statbuf.dev()),
-                                MINOR(statbuf.dev()),
+                                gnu_dev_major(statbuf.dev()),
+                                gnu_dev_minor(statbuf.dev()),
                                 statbuf.ino());
     }
     else

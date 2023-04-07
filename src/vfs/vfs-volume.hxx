@@ -19,14 +19,13 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 #include <vector>
 
-#include <chrono>
-
 #include <memory>
 
-#include <glib.h>
+#include <optional>
 
 #include "settings.hxx"
 
@@ -49,30 +48,6 @@ enum VFSVolumeDeviceType
     OTHER, // eg fuseiso mounted file
 };
 
-enum class SplitNetworkURL
-{
-    NOT_A_NETWORK_URL,
-    VALID_NETWORK_URL,
-    INVALID_NETWORK_URL,
-};
-
-struct Netmount
-{
-    // netmount_t();
-    // ~netmount_t();
-
-    const char* url{nullptr};
-    const char* fstype{nullptr};
-    const char* host{nullptr};
-    const char* ip{nullptr};
-    const char* port{nullptr};
-    const char* user{nullptr};
-    const char* pass{nullptr};
-    const char* path{nullptr};
-};
-
-using netmount_t = std::shared_ptr<Netmount>;
-
 // forward declare types
 struct VFSVolume;
 struct VFSMimeType;
@@ -85,67 +60,46 @@ namespace vfs
 struct VFSVolume
 {
   public:
-    VFSVolume();
-    ~VFSVolume();
+    VFSVolume() = default;
+    ~VFSVolume() = default;
+
+    VFSVolumeDeviceType device_type;
 
     dev_t devnum{0};
-    VFSVolumeDeviceType device_type;
-    char* device_file{nullptr};
-    char* udi{nullptr};
-    char* disp_name{nullptr};
+    std::string device_file{};
+    std::string udi{};
+    std::string disp_name{};
     std::string icon{};
-    char* mount_point{nullptr};
+    std::string mount_point{};
     u64 size{0};
     std::string label{};
-    char* fs_type{nullptr};
+    std::string fs_type{};
 
-    bool should_autounmount{false}; // a network or ISO file was mounted
     bool is_mounted{false};
     bool is_removable{false};
     bool is_mountable{false};
-    bool is_audiocd{false};
-    bool is_dvd{false};
-    bool is_blank{false};
-    bool requires_eject{false};
-    bool is_user_visible{false};
-    bool nopolicy{false};
-    bool is_optical{false};
-    bool is_floppy{false};
-    bool is_table{false};
-    bool ever_mounted{false};
-    bool inhibit_auto{false};
 
-    std::time_t automount_time{0};
-    void* open_main_window{nullptr};
+    bool is_user_visible{false};
+
+    bool is_optical{false};
+    bool requires_eject{false};
+
+    bool ever_mounted{false};
 
   public:
-    const char* get_disp_name() const noexcept;
-    const char* get_mount_point() const noexcept;
-    const char* get_device() const noexcept;
-    const char* get_fstype() const noexcept;
-    const char* get_icon() const noexcept;
+    const std::string get_disp_name() const noexcept;
+    const std::string get_mount_point() const noexcept;
+    const std::string get_device_file() const noexcept;
+    const std::string get_fstype() const noexcept;
+    const std::string get_icon() const noexcept;
 
-    // bool is_mounted() const noexcept;
-
-    const char* get_mount_command(const char* default_options, bool* run_in_terminal) noexcept;
-    const char* get_mount_options(const char* options) const noexcept;
-
-    void automount() noexcept;
-    void set_info() noexcept;
-
-    const char* device_mount_cmd(const char* options, bool* run_in_terminal) noexcept;
-    const char* device_unmount_cmd(bool* run_in_terminal) noexcept;
+    const std::optional<std::string> device_mount_cmd() noexcept;
+    const std::optional<std::string> device_unmount_cmd() noexcept;
 
     // private:
-    bool is_automount() const noexcept;
+    void set_info() noexcept;
 
-    void autoexec() noexcept;
-
-    void exec(const char* command) const noexcept;
-    void autounmount() noexcept;
-    void device_added(bool automount) noexcept;
-
-    void unmount_if_mounted() noexcept;
+    void device_added() noexcept;
 };
 
 using VFSVolumeCallback = void (*)(vfs::volume vol, VFSVolumeState state, void* user_data);
@@ -153,22 +107,13 @@ using VFSVolumeCallback = void (*)(vfs::volume vol, VFSVolumeState state, void* 
 bool vfs_volume_init();
 void vfs_volume_finalize();
 
-const std::vector<vfs::volume> vfs_volume_get_all_volumes();
+const std::vector<vfs::volume>& vfs_volume_get_all_volumes();
 
 void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
 void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
 
-////////////////
-
-char* vfs_volume_handler_cmd(i32 mode, i32 action, vfs::volume vol, const char* options,
-                             netmount_t netmount, bool* run_in_terminal, char** mount_point);
-
-SplitNetworkURL split_network_url(std::string_view url, netmount_t netmount);
-bool vfs_volume_dir_avoid_changes(std::string_view dir);
-dev_t get_device_parent(dev_t dev);
-bool path_is_mounted_mtab(const char* mtab_file, const char* path, char** device_file,
-                          char** fs_type);
-bool mtab_fstype_is_handled_by_protocol(const char* mtab_fstype);
-
 vfs::volume vfs_volume_get_by_device(std::string_view device_file);
-vfs::volume vfs_volume_get_by_device_or_point(std::string_view device_file, std::string_view point);
+
+bool vfs_volume_dir_avoid_changes(std::string_view dir);
+
+bool is_path_mountpoint(std::string_view path);

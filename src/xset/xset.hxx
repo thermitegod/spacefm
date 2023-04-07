@@ -62,7 +62,7 @@ enum class XSetMenu
 
 enum class XSetTool
 { // do not reorder - these values are saved in session files
-  // also update builtin_tool_name builtin_tool_icon in settings.c
+    // also update builtin_tool_name builtin_tool_icon in settings.c
     NOT,
     CUSTOM,
     DEVICES,

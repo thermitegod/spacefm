@@ -152,16 +152,6 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
                         error_message);
         return;
     }
-    // auto mount point
-    if (ztd::contains(command, "%a"))
-    {
-        const std::string name = ptk_location_view_create_mount_point(
-            PtkHandlerMode::HANDLER_MODE_FILE,
-            nullptr,
-            nullptr,
-            files && files->data ? (char*)files->data : nullptr);
-        command = ztd::replace(command, "%a", name);
-    }
 
     /* prepare bash vars for just the files being opened by this handler,
      * not necessarily all selected */

@@ -50,6 +50,7 @@
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-keyboard.hxx"
+#include "ptk/ptk-error.hxx"
 #include "main-window.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -119,10 +120,6 @@ AutoOpen::~AutoOpen()
 static bool volume_is_visible(vfs::volume vol);
 static void update_all();
 
-// do not translate - bash security
-static const char* press_enter_to_close = "[ Finished ]  Press Enter to close";
-static const char* keep_term_when_done = "\\n[[ $? -eq 0 ]] || ( read -p '%s: ' )\\n\"";
-
 /*  Drag & Drop/Clipboard targets  */
 // static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
@@ -145,8 +142,6 @@ update_volume_icons()
     }
 
     GtkTreeIter it;
-    GdkPixbuf* icon;
-    vfs::volume vol;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
     i32 icon_size = app_settings.get_icon_size_small();
@@ -159,17 +154,11 @@ update_volume_icons()
     {
         do
         {
+            vfs::volume vol = nullptr;
             gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
             if (vol)
             {
-                if (vol->get_icon())
-                {
-                    icon = vfs_load_icon(vol->get_icon(), icon_size);
-                }
-                else
-                {
-                    icon = nullptr;
-                }
+                GdkPixbuf* icon = vfs_load_icon(vol->get_icon(), icon_size);
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
                                    PtkLocationViewCol::COL_ICON,
@@ -228,13 +217,13 @@ update_all()
     }
 
     vfs::volume v = nullptr;
-    bool havevol;
 
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
         if (volume)
         {
+            bool havevol = false;
+
             // search model for volume vol
             GtkTreeIter it;
             if (gtk_tree_model_get_iter_first(model, &it))
@@ -245,21 +234,12 @@ update_all()
                 } while (v != volume && gtk_tree_model_iter_next(model, &it));
                 havevol = (v == volume);
             }
-            else
-            {
-                havevol = false;
-            }
 
             if (volume_is_visible(volume))
             {
                 if (havevol)
                 {
                     update_volume(volume);
-
-                    // attempt automount in case settings changed
-                    volume->automount_time = 0;
-                    volume->ever_mounted = false;
-                    volume->automount();
                 }
                 else
                 {
@@ -278,8 +258,7 @@ static void
 update_names()
 {
     vfs::volume v = nullptr;
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
         volume->set_info();
 
@@ -315,8 +294,8 @@ ptk_location_view_chdir(GtkTreeView* location_view, std::string_view cur_dir)
         {
             vfs::volume vol;
             gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
-            const char* mount_point = vol->get_mount_point();
-            if (mount_point && ztd::same(cur_dir, mount_point))
+            const std::string mount_point = vol->get_mount_point();
+            if (ztd::same(cur_dir, mount_point))
             {
                 gtk_tree_selection_select_iter(tree_sel, &it);
                 GtkTreePath* path = gtk_tree_model_get_path(model, &it);
@@ -383,18 +362,18 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         try_mount(view, vol);
         if (vol->is_mounted)
         {
-            const char* mount_point = vol->get_mount_point();
-            if (mount_point && mount_point[0] != '\0')
+            const std::string mount_point = vol->get_mount_point();
+            if (!mount_point.empty())
             {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
                                    PtkLocationViewCol::COL_PATH,
-                                   mount_point,
+                                   mount_point.data(),
                                    -1);
             }
         }
     }
-    if (vol->is_mounted && vol->mount_point)
+    if (vol->is_mounted && !vol->mount_point.empty())
     {
         if (xset_get_b(XSetName::DEV_NEWTAB))
         {
@@ -422,10 +401,9 @@ ptk_location_view_open_block(std::string_view block, bool new_tab)
     // may be link so get real path
     const std::string canon = std::filesystem::canonical(block);
 
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
-        if (ztd::same(volume->get_device(), canon))
+        if (ztd::same(volume->get_device_file(), canon))
         {
             if (new_tab)
             {
@@ -446,11 +424,10 @@ ptk_location_view_init_model(GtkListStore* list)
 {
     (void)list;
     n_vols = 0;
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
 
     vfs_volume_add_callback(on_volume_event, model);
 
-    for (vfs::volume volume : volumes)
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
         add_volume(volume, false);
     }
@@ -577,20 +554,16 @@ add_volume(vfs::volume vol, bool set_icon)
     }
 
     // get mount point
-    const char* mnt = vol->get_mount_point();
-    if (mnt && !*mnt)
-    {
-        mnt = nullptr;
-    }
+    const std::string mnt = vol->get_mount_point();
 
     // add to model
     gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                       &it,
                                       0,
                                       PtkLocationViewCol::COL_NAME,
-                                      vol->get_disp_name(),
+                                      vol->get_disp_name().data(),
                                       PtkLocationViewCol::COL_PATH,
-                                      mnt,
+                                      mnt.data(),
                                       PtkLocationViewCol::COL_DATA,
                                       vol,
                                       -1);
@@ -601,6 +574,7 @@ add_volume(vfs::volume vol, bool set_icon)
         {
             icon_size = PANE_MAX_ICON_SIZE;
         }
+
         GdkPixbuf* icon = vfs_load_icon(vol->get_icon(), icon_size);
         gtk_list_store_set(GTK_LIST_STORE(model), &it, PtkLocationViewCol::COL_ICON, icon, -1);
         if (icon)
@@ -671,9 +645,9 @@ update_volume(vfs::volume vol)
                        PtkLocationViewCol::COL_ICON,
                        icon,
                        PtkLocationViewCol::COL_NAME,
-                       vol->get_disp_name(),
+                       vol->get_disp_name().data(),
                        PtkLocationViewCol::COL_PATH,
-                       vol->get_mount_point(),
+                       vol->get_mount_point().data(),
                        -1);
     if (icon)
     {
@@ -681,469 +655,18 @@ update_volume(vfs::volume vol)
     }
 }
 
-char*
-ptk_location_view_get_mount_point_dir(const char* name)
-{
-    std::string parent;
-
-    // clean mount points
-    if (name)
-    {
-        ptk_location_view_clean_mount_points();
-    }
-
-    xset_t set = xset_get(XSetName::DEV_AUTOMOUNT_DIRS);
-    if (set->s)
-    {
-        if (ztd::startswith(set->s, "~/"))
-        {
-            parent = Glib::build_filename(vfs::user_dirs->home_dir(), set->s + 2);
-        }
-        else
-        {
-            parent = set->s;
-        }
-
-        static constexpr std::array<std::string_view, 5> varnames{
-            "$USER",
-            "$UID",
-            "$HOME",
-            "$XDG_RUNTIME_DIR",
-            "$XDG_CACHE_HOME",
-        };
-        for (usize i = 0; i < varnames.size(); ++i)
-        {
-            if (!ztd::contains(parent, varnames.at(i)))
-            {
-                continue;
-            }
-
-            std::string value;
-            switch (i)
-            {
-                case 0: // $USER
-                    value = Glib::get_user_name();
-                    break;
-                case 1: // $UID
-                    value = fmt::format("{}", geteuid());
-                    break;
-                case 2: // $HOME
-                    value = vfs::user_dirs->home_dir();
-                    break;
-                case 3: // $XDG_RUNTIME_DIR
-                    value = vfs::user_dirs->runtime_dir();
-                    break;
-                case 4: // $XDG_CACHE_HOME
-                    value = vfs::user_dirs->cache_dir();
-                    break;
-                default:
-                    value = "";
-            }
-            parent = ztd::replace(parent, varnames.at(i), value);
-        }
-        std::filesystem::create_directories(parent);
-        std::filesystem::permissions(parent, std::filesystem::perms::owner_all);
-
-        if (!have_rw_access(parent.data()))
-        {
-            parent.clear();
-        }
-    }
-
-    std::string path;
-    if (!std::filesystem::exists(parent))
-    {
-        path = Glib::build_filename(vfs::user_dirs->cache_dir(), "spacefm-mount", name);
-    }
-    else
-    {
-        path = Glib::build_filename(parent, name);
-    }
-
-    return ztd::strdup(path);
-}
-
-void
-ptk_location_view_clean_mount_points()
-{
-    /* This function was moved from vfs-volume-nohal.c because HAL
-     * build also requires it. */
-
-    // clean cache and Auto-Mount|Mount Dirs  (eg for fuse mounts)
-    for (i32 i = 0; i < 2; ++i)
-    {
-        std::string path;
-
-        if (i == 0)
-        {
-            path = Glib::build_filename(vfs::user_dirs->cache_dir(), "spacefm-mount");
-        }
-        else // i == 1
-        {
-            char* del_path = ptk_location_view_get_mount_point_dir(nullptr);
-            if (ztd::same(del_path, path))
-            {
-                // Auto-Mount|Mount Dirs is not set or valid
-                free(del_path);
-                break;
-            }
-            path = del_path;
-            free(del_path);
-        }
-
-        if (std::filesystem::is_directory(path))
-        {
-            for (const auto& file : std::filesystem::directory_iterator(path))
-            {
-                const std::string file_name = std::filesystem::path(file).filename();
-
-                const std::string del_path = Glib::build_filename(path, file_name);
-
-                // removes empty, non-mounted directories
-                std::filesystem::remove_all(del_path);
-            }
-        }
-    }
-
-    // clean udevil mount points
-    const std::string udevil = Glib::find_program_in_path("udevil");
-    if (!udevil.empty())
-    {
-        const std::string command = fmt::format("{} -c \"sleep 1 ; {} clean\"", BASH_PATH, udevil);
-        ztd::logger::info("COMMAND={}", command);
-        Glib::spawn_command_line_async(command);
-    }
-}
-
-char*
-ptk_location_view_create_mount_point(i32 mode, vfs::volume vol, netmount_t netmount,
-                                     const char* path)
-{
-    std::string mname;
-    switch (mode)
-    {
-        case PtkHandlerMode::HANDLER_MODE_FS:
-            if (vol)
-            {
-                const std::string bdev = Glib::path_get_basename(vol->device_file);
-                if (!vol->label.empty() && vol->label.at(0) != ' ' &&
-                    g_utf8_validate(vol->label.data(), -1, nullptr) &&
-                    !ztd::contains(vol->label, "/"))
-                {
-                    mname = fmt::format("{:.20s}", vol->label);
-                }
-                else if (vol->udi && vol->udi[0] != '\0' && g_utf8_validate(vol->udi, -1, nullptr))
-                {
-                    mname = fmt::format("{}-{:.20s}", bdev, Glib::path_get_basename(vol->udi));
-                }
-                else
-                {
-                    mname = bdev;
-                }
-            }
-            break;
-        case PtkHandlerMode::HANDLER_MODE_NET:
-            if (netmount->host && g_utf8_validate(netmount->host, -1, nullptr))
-            {
-                std::string parent_dir;
-                if (netmount->path)
-                {
-                    const std::string parent_dir_str = ztd::replace(netmount->path, "/", "-");
-                    parent_dir = ztd::strip(parent_dir_str);
-                    parent_dir = ztd::strip(parent_dir, "-");
-                    if (parent_dir.empty() || parent_dir.size() > 30)
-                    {
-                        parent_dir = "";
-                    }
-                }
-                if (!parent_dir.empty())
-                {
-                    mname = fmt::format("{}-{}-{}", netmount->fstype, netmount->host, parent_dir);
-                }
-                else if (netmount->host && netmount->host[0])
-                {
-                    mname = fmt::format("{}-{}", netmount->fstype, netmount->host);
-                }
-                else
-                {
-                    mname = fmt::format("{}", netmount->fstype);
-                }
-            }
-            else
-            {
-                mname = netmount->fstype;
-            }
-            break;
-        case PtkHandlerMode::HANDLER_MODE_FILE:
-            if (path)
-            {
-                mname = Glib::path_get_basename(path);
-            }
-            break;
-        default:
-            break;
-    }
-
-    // remove spaces
-    if (ztd::contains(mname, " "))
-    {
-        mname = ztd::replace(ztd::strip(mname), " ", "");
-    }
-
-    if (mname.empty())
-    {
-        mname = "mount";
-    }
-
-    // complete mount point
-    char* point1 = ptk_location_view_get_mount_point_dir(mname.data());
-    i32 r = 2;
-    std::string point = point1;
-
-    // attempt to remove existing dir - succeeds only if empty and unmounted
-    std::filesystem::remove_all(point);
-    while (std::filesystem::exists(point))
-    {
-        point = fmt::format("{}-{}", point1, ++r);
-        std::filesystem::remove_all(point);
-    }
-    free(point1);
-    std::filesystem::create_directories(point);
-    std::filesystem::permissions(point, std::filesystem::perms::owner_all);
-
-    if (!std::filesystem::is_directory(point))
-    {
-        const std::string errno_msg = std::strerror(errno);
-        ztd::logger::warn("Error creating mount point directory '{}': {}", point, errno_msg);
-    }
-
-    return ztd::strdup(point);
-}
-
-static void
-on_autoopen_net_cb(vfs::file_task task, AutoOpen* ao)
-{
-    (void)task;
-    if (!(ao && ao->device_file))
-    {
-        return;
-    }
-
-    // try to find device of mounted url.  url in mtab may differ from
-    // user-entered url
-    vfs::volume device_file_vol = nullptr;
-    vfs::volume mount_point_vol = nullptr;
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
-    {
-        if (volume->is_mounted)
-        {
-            if (ztd::same(volume->device_file, ao->device_file))
-            {
-                device_file_vol = volume;
-                break;
-            }
-            else if (!mount_point_vol && ao->mount_point && !volume->should_autounmount &&
-                     ztd::same(volume->mount_point, ao->mount_point))
-            {
-                // found an unspecial mount point that matches the ao mount point -
-                // save for later use if no device file match found
-                mount_point_vol = volume;
-            }
-        }
-    }
-
-    if (!device_file_vol)
-    {
-        if (mount_point_vol)
-        {
-            // ztd::logger::info("on_autoopen_net_cb used mount point:");
-            // ztd::logger::info("    mount_point     = {}", ao->mount_point);
-            // ztd::logger::info("    device_file     = {}", mount_point_vol->device_file);
-            // ztd::logger::info("    ao->device_file = {}", ao->device_file);
-            device_file_vol = mount_point_vol;
-        }
-    }
-    if (device_file_vol)
-    {
-        // copy the user-entered url to udi
-        free(device_file_vol->udi);
-        device_file_vol->udi = ztd::strdup(ao->device_file);
-
-        // mark as special mount
-        device_file_vol->should_autounmount = true;
-
-        // open in browser
-        // if fuse fails, device may be in mtab even though mount point does not
-        // exist, so test for mount point exists
-        if (GTK_IS_WIDGET(ao->file_browser) &&
-            std::filesystem::is_directory(device_file_vol->mount_point))
-        {
-            PtkFileBrowser* file_browser = ao->file_browser;
-            file_browser->run_event<EventType::OPEN_ITEM>(device_file_vol->mount_point, ao->job);
-
-            if (ao->job == PtkOpenAction::PTK_OPEN_NEW_TAB && GTK_IS_WIDGET(file_browser))
-            {
-                if (file_browser->side_dev)
-                {
-                    ptk_location_view_chdir(GTK_TREE_VIEW(file_browser->side_dev),
-                                            ptk_file_browser_get_cwd(file_browser));
-                }
-            }
-        }
-    }
-
-    if (!ao->keep_point)
-    {
-        ptk_location_view_clean_mount_points();
-    }
-
-    delete ao;
-}
-
 void
 ptk_location_view_mount_network(PtkFileBrowser* file_browser, std::string_view url, bool new_tab,
                                 bool force_new_mount)
 {
-    const netmount_t netmount = std::make_shared<Netmount>();
+    (void)file_browser;
+    (void)url;
+    (void)new_tab;
+    (void)force_new_mount;
 
-    // split url
-    if (split_network_url(url, netmount) != SplitNetworkURL::VALID_NETWORK_URL)
-    {
-        // not a valid url
-        xset_msg_dialog(GTK_WIDGET(file_browser),
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Invalid URL",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "The entered URL is not valid.");
-        return;
-    }
+    // TODO - rewrite netmount parser and mount code, kept entry point shims.
 
-    /*
-    ztd::logger::info("url={}", netmount->url);
-    ztd::logger::info("  fstype = {}", netmount->fstype);
-    ztd::logger::info("  host   = {}", netmount->host);
-    ztd::logger::info("  port   = {}", netmount->port);
-    ztd::logger::info("  user   = {}", netmount->user);
-    ztd::logger::info("  pass   = {}", netmount->pass);
-    ztd::logger::info("  path   = {}", netmount->path);
-    */
-
-    // already mounted?
-    if (!force_new_mount)
-    {
-        const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-        for (vfs::volume volume : volumes)
-        {
-            // test against mtab url and copy of user-entered url (udi)
-            if (ztd::contains(volume->device_file, netmount->url) ||
-                ztd::contains(volume->udi, netmount->url))
-            {
-                if (volume->is_mounted && volume->mount_point && have_x_access(volume->mount_point))
-                {
-                    if (new_tab)
-                    {
-                        file_browser->run_event<EventType::OPEN_ITEM>(
-                            volume->mount_point,
-                            PtkOpenAction::PTK_OPEN_NEW_TAB);
-                    }
-                    else
-                    {
-                        if (!ztd::same(volume->mount_point, ptk_file_browser_get_cwd(file_browser)))
-                        {
-                            ptk_file_browser_chdir(file_browser,
-                                                   volume->mount_point,
-                                                   PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
-                        }
-                    }
-                    return;
-                }
-            }
-        }
-    }
-
-    // get mount command
-    char* mount_point = nullptr;
-    bool run_in_terminal;
-    bool ssh_udevil;
-    ssh_udevil = false;
-    char* cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
-                                       PtkHandlerMount::HANDLER_MOUNT,
-                                       nullptr,
-                                       nullptr,
-                                       netmount,
-                                       &run_in_terminal,
-                                       &mount_point);
-    if (!cmd)
-    {
-        xset_msg_dialog(GTK_WIDGET(file_browser),
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Handler Not Found",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "No network handler is configured for this URL, or no mount command is "
-                        "set.  Add a handler in Devices|Settings|Protocol Handlers.");
-
-        free(mount_point);
-        return;
-    }
-
-    // task
-    std::string keepterm;
-    if (ssh_udevil)
-    {
-        keepterm = fmt::format("if [ $? -ne 0 ];then\n    read -p \"{}\"\nelse\n    echo;"
-                               "read -p \"Press Enter to close (closing this window may "
-                               "unmount sshfs)\"\nfi\n",
-                               press_enter_to_close);
-    }
-    else if (run_in_terminal)
-    {
-        keepterm = fmt::format("[[ $? -eq 0 ]] || ( read -p '{}: ' )\n", press_enter_to_close);
-    }
-
-    const std::string line =
-        fmt::format("{}{}\n{}", ssh_udevil ? "echo Connecting...\n\n" : "", cmd, keepterm);
-    free(cmd);
-
-    const std::string task_name = fmt::format("Open URL {}", netmount->url);
-    PtkFileTask* ptask =
-        ptk_file_exec_new(task_name, GTK_WIDGET(file_browser), file_browser->task_view);
-    ptask->task->exec_command = line;
-    ptask->task->exec_sync = !ssh_udevil;
-    ptask->task->exec_export = true;
-    ptask->task->exec_browser = file_browser;
-    ptask->task->exec_popup = false;
-    ptask->task->exec_show_output = false;
-    ptask->task->exec_show_error = true;
-    ptask->task->exec_terminal = run_in_terminal;
-    ptask->task->exec_keep_terminal = false;
-    xset_t set;
-    set = xset_get(XSetName::DEV_ICON_NETWORK);
-    ptask->task->exec_icon = set->icon;
-
-    // autoopen
-    if (!ssh_udevil) // !sync
-    {
-        const auto ao = new AutoOpen(file_browser);
-        ao->device_file = ztd::strdup(netmount->url);
-        ao->devnum = 0;
-        ao->mount_point = mount_point;
-
-        if (new_tab)
-        {
-            ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
-        }
-        else
-        {
-            ao->job = PtkOpenAction::PTK_OPEN_DIR;
-        }
-
-        ptask->complete_notify = (GFunc)on_autoopen_net_cb;
-        ptask->user_data = ao;
-    }
-    ptk_file_task_run(ptask);
-
-    free(mount_point);
+    ptk_show_error(nullptr, "Netmounting is Disabled", "Recommended to mount through a shell");
 }
 
 static void
@@ -1160,7 +683,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
     }
     const std::string msg =
         fmt::format("No handler is configured for this device type, or no {} command is set. "
-                    " Add a handler in Settings|Device Handlers or Protocol Handlers.",
+                    "Add a handler in Settings|Device Handlers or Protocol Handlers.",
                     cmd);
     xset_msg_dialog(view,
                     GtkMessageType::GTK_MESSAGE_ERROR,
@@ -1186,7 +709,7 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     {
         return;
     }
-    if (!vol->device_file)
+    if (vol->device_file.empty())
     {
         return;
     }
@@ -1199,34 +722,26 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
 
     // task
-    bool run_in_terminal;
-    const char* line =
-        vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS), &run_in_terminal);
-    if (!line)
+    const auto check_mount_command = vol->device_mount_cmd();
+    if (!check_mount_command)
     {
-        popup_missing_mount(view, 0);
+        popup_missing_mount(GTK_WIDGET(view), 0);
         return;
     }
+    const auto mount_command = check_mount_command.value();
+
     const std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* ptask =
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
-
-    std::string keep_term;
-    if (run_in_terminal)
-    {
-        keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-    }
-
-    ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
-    ptask->task->exec_sync = !run_in_terminal;
+    ptask->task->exec_command = mount_command;
+    ptask->task->exec_sync = true;
     ptask->task->exec_export = !!file_browser;
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
     ptask->task->exec_show_error = true;
-    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_terminal = false;
     ptask->task->exec_icon = vol->get_icon();
-    vol->inhibit_auto = true;
     ptk_file_task_run(ptask);
 }
 
@@ -1251,30 +766,25 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
 
     // task
-    bool run_in_terminal;
-    const char* line = vol->device_unmount_cmd(&run_in_terminal);
-    if (!line)
+    const auto check_unmount_command = vol->device_unmount_cmd();
+    if (!check_unmount_command)
     {
         popup_missing_mount(view, 1);
         return;
     }
+    const auto unmount_command = check_unmount_command.value();
+
     const std::string task_name = fmt::format("Unmount {}", vol->device_file);
     PtkFileTask* ptask =
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
-
-    std::string keep_term;
-    if (run_in_terminal)
-    {
-        keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-    }
-    ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
-    ptask->task->exec_sync = !run_in_terminal;
+    ptask->task->exec_command = unmount_command;
+    ptask->task->exec_sync = true;
     ptask->task->exec_export = !!file_browser;
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
     ptask->task->exec_show_error = true;
-    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_terminal = false;
     ptask->task->exec_icon = vol->get_icon();
     ptk_file_task_run(ptask);
 }
@@ -1302,70 +812,23 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (vol->is_mounted)
     {
         // task
-        std::string wait;
-        std::string wait_done;
-        std::string eject;
-        bool run_in_terminal;
-
-        const char* unmount = vol->device_unmount_cmd(&run_in_terminal);
-        if (!unmount)
+        const auto check_unmount_command = vol->device_unmount_cmd();
+        if (!check_unmount_command)
         {
             popup_missing_mount(view, 1);
             return;
         }
+        const auto unmount_command = check_unmount_command.value();
 
-        if (vol->device_type == VFSVolumeDeviceType::BLOCK &&
-            (vol->is_optical || vol->requires_eject))
-        {
-            eject = fmt::format("\neject {}", vol->device_file);
-        }
-        else
-        {
-            eject = "\nexit 0";
-        }
-
-        if (!file_browser && !run_in_terminal && vol->device_type == VFSVolumeDeviceType::BLOCK)
-        {
-            const std::string exe = ztd::program::exe();
-            // run from desktop window - show a pending dialog
-            wait = fmt::format("{} -g --title 'Remove {}' --label '\\nPlease wait while device "
-                               "{} is synced and unmounted...' >/dev/null &\nwaitp=$!\n",
-                               exe,
-                               vol->device_file,
-                               vol->device_file);
-            // sleep .2 here to ensure spacefm -g is not killed too quickly causing hang
-            wait_done = "\n( sleep .2; kill $waitp 2>/dev/null ) &";
-        }
-
-        std::string line;
-        if (run_in_terminal)
-        {
-            line = fmt::format("echo 'Unmounting {}...'\n{}{}\nif [ $? -ne 0 ];then\n    "
-                               "read -p '{}: '\n    exit 1\nelse\n    {}\nfi",
-                               vol->device_file,
-                               vol->device_type == VFSVolumeDeviceType::BLOCK ? "sync\n" : "",
-                               unmount,
-                               press_enter_to_close,
-                               eject);
-        }
-        else
-        {
-            line = fmt::format("{}{}{}\nuerr=$?{}\nif [ $uerr -ne 0 ];then\n    exit 1\nfi{}",
-                               wait,
-                               vol->device_type == VFSVolumeDeviceType::BLOCK ? "sync\n" : "",
-                               unmount,
-                               wait_done,
-                               eject);
-        }
         const std::string task_name = fmt::format("Remove {}", vol->device_file);
         PtkFileTask* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
-        ptask->task->exec_command = line;
-        ptask->task->exec_sync = !run_in_terminal;
+        ptask->task->exec_command = unmount_command;
+        ptask->task->exec_sync = true;
         ptask->task->exec_export = !!file_browser;
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_show_error = true;
-        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_terminal = false;
         ptask->task->exec_icon = vol->get_icon();
 
         ptk_file_task_run(ptask);
@@ -1406,12 +869,10 @@ on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
 {
     (void)task;
     // ztd::logger::info("on_autoopen_cb");
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
         if (volume->devnum == ao->devnum)
         {
-            volume->inhibit_auto = false;
             if (volume->is_mounted)
             {
                 PtkFileBrowser* file_browser = ao->file_browser;
@@ -1452,29 +913,24 @@ try_mount(GtkTreeView* view, vfs::volume vol)
         return false;
     }
     // task
-    bool run_in_terminal;
-    const char* line =
-        vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS), &run_in_terminal);
-    if (!line)
+    const auto check_mount_command = vol->device_mount_cmd();
+    if (!check_mount_command)
     {
         popup_missing_mount(GTK_WIDGET(view), 0);
         return false;
     }
+    const auto mount_command = check_mount_command.value();
+
     const std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view);
-    std::string keep_term;
-    if (run_in_terminal)
-    {
-        keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-    }
-    ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
+    ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
     ptask->task->exec_export = true;
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
     ptask->task->exec_show_error = true; // set to true for error on click
-    ptask->task->exec_terminal = run_in_terminal;
+    ptask->task->exec_terminal = false;
     ptask->task->exec_icon = vol->get_icon();
 
     // autoopen
@@ -1492,7 +948,6 @@ try_mount(GtkTreeView* view, vfs::volume vol)
 
     ptask->complete_notify = (GFunc)on_autoopen_cb;
     ptask->user_data = ao;
-    vol->inhibit_auto = true;
 
     ptk_file_task_run(ptask);
 
@@ -1530,31 +985,25 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (!vol->is_mounted)
     {
         // get mount command
-        bool run_in_terminal;
-        const char* line =
-            vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS), &run_in_terminal);
-        if (!line)
+        const auto check_mount_command = vol->device_mount_cmd();
+        if (!check_mount_command)
         {
             popup_missing_mount(view, 0);
             return;
         }
+        const auto mount_command = check_mount_command.value();
 
         // task
         const std::string task_name = fmt::format("Mount {}", vol->device_file);
         PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view);
-        std::string keep_term;
-        if (run_in_terminal)
-        {
-            keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-        }
-        ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
+        ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
         ptask->task->exec_export = true;
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;
         ptask->task->exec_show_error = true;
-        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_terminal = false;
         ptask->task->exec_icon = vol->get_icon();
 
         // autoopen
@@ -1564,7 +1013,6 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
-        vol->inhibit_auto = true;
 
         ptk_file_task_run(ptask);
     }
@@ -1611,32 +1059,26 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     if (!vol->is_mounted)
     {
         // get mount command
-        bool run_in_terminal;
-        const char* line =
-            vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS), &run_in_terminal);
-        if (!line)
+        const auto check_mount_command = vol->device_mount_cmd();
+        if (!check_mount_command)
         {
             popup_missing_mount(view, 0);
             return;
         }
+        const auto mount_command = check_mount_command.value();
 
         // task
         const std::string task_name = fmt::format("Mount {}", vol->device_file);
         PtkFileTask* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
-        std::string keep_term;
-        if (run_in_terminal)
-        {
-            keep_term = fmt::format("{} {}", keep_term_when_done, press_enter_to_close);
-        }
-        ptask->task->exec_command = fmt::format("{}{}", line, keep_term);
+        ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
         ptask->task->exec_export = !!file_browser;
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;
         ptask->task->exec_show_error = true;
-        ptask->task->exec_terminal = run_in_terminal;
+        ptask->task->exec_terminal = false;
         ptask->task->exec_icon = vol->get_icon();
 
         // autoopen
@@ -1646,7 +1088,6 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
-        vol->inhibit_auto = true;
 
         ptk_file_task_run(ptask);
     }
@@ -1678,12 +1119,8 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     xset_t set = xset_get(XSetName::DEV_SHOW_HIDE_VOLUMES);
     if (vol)
     {
-        char* devid = vol->udi;
-        devid = strrchr(devid, '/');
-        if (devid)
-        {
-            devid++;
-        }
+        const std::string devid = ztd::removeprefix(vol->udi, "/");
+
         msg = fmt::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
                           set->desc,
                           vol->device_file,
@@ -1718,12 +1155,8 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     xset_t set = xset_get(XSetName::DEV_AUTOMOUNT_VOLUMES);
     if (vol)
     {
-        char* devid = vol->udi;
-        devid = strrchr(devid, '/');
-        if (devid)
-        {
-            devid++;
-        }
+        const std::string devid = ztd::removeprefix(vol->udi, "/");
+
         msg = fmt::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
                           set->desc,
                           vol->device_file,
@@ -1777,48 +1210,6 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
 static bool
 volume_is_visible(vfs::volume vol)
 {
-    // check show/hide
-#if 0
-    char* test;
-    char* value;
-
-    char* showhidelist = g_strdup_printf(" %s ", xset_get_s(XSetName::DEV_SHOW_HIDE_VOLUMES));
-    for (i32 i = 0; i < 3; ++i)
-    {
-        for (i32 j = 0; j < 2; ++j)
-        {
-            if (i == 0)
-                value = vol->device_file;
-            else if (i == 1)
-                value = ztd::strdup(vol->label);
-            else
-            {
-                if ((value = vol->udi))
-                {
-                    value = strrchr(value, '/');
-                    if (value)
-                        value++;
-                }
-            }
-            if (value && value[0] != '\0')
-            {
-                if (j == 0)
-                    test = g_strdup_printf(" +%s ", value);
-                else
-                    test = g_strdup_printf(" -%s ", value);
-                if (ztd::contains(showhidelist, test))
-                {
-                    free(test);
-                    free(showhidelist);
-                    return (j == 0);
-                }
-                free(test);
-            }
-        }
-    }
-    free(showhidelist);
-#endif
-
     // network
     if (vol->device_type == VFSVolumeDeviceType::NETWORK)
     {
@@ -1858,14 +1249,8 @@ volume_is_visible(vfs::volume vol)
         return false;
     }
 
-    // table?
-    if (vol->is_table && !xset_get_b(XSetName::DEV_SHOW_PARTITION_TABLES))
-    {
-        return false;
-    }
-
-    // udisks hide?
-    if (!vol->is_user_visible && !xset_get_b(XSetName::DEV_IGNORE_UDISKS_HIDE))
+    // hide?
+    if (!vol->is_user_visible)
     {
         return false;
     }
@@ -2185,8 +1570,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     PtkFileBrowser* file_browser;
 
     // validate vol
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
         if (volume == vol)
         {
@@ -2354,17 +1738,16 @@ cmp_dev_name(vfs::volume a, vfs::volume b)
 void
 ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* menu)
 { // add currently visible devices to menu with dev design mode callback
-    GtkWidget* item;
     xset_t set;
-
-    std::vector<vfs::volume> names;
 
     g_object_set_data(G_OBJECT(menu), "parent", parent);
     // file_browser may be nullptr
     g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
 
-    const std::vector<vfs::volume> volumes = vfs_volume_get_all_volumes();
-    for (vfs::volume volume : volumes)
+    std::vector<vfs::volume> names;
+    const auto& volumes = vfs_volume_get_all_volumes();
+    names.reserve(volumes.size());
+    for (const auto volume : volumes)
     {
         if (volume && volume_is_visible(volume))
         {
@@ -2375,10 +1758,10 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     vfs::volume vol;
 
     std::ranges::sort(names, cmp_dev_name);
-    for (vfs::volume volume : names)
+    for (const auto volume : names)
     {
         vol = volume;
-        item = gtk_menu_item_new_with_label(volume->get_disp_name());
+        GtkWidget* item = gtk_menu_item_new_with_label(volume->get_disp_name().data());
         g_object_set_data(G_OBJECT(item), "menu", menu);
         g_object_set_data(G_OBJECT(item), "vol", volume);
         g_signal_connect(item, "button-press-event", G_CALLBACK(on_dev_menu_button_press), volume);

@@ -733,6 +733,28 @@ main_design_mode(GtkMenuItem* menuitem, MainWindow* main_window)
 }
 
 void
+main_window_close_all_invalid_tabs()
+{
+    // do all windows all panels all tabs
+    for (MainWindow* window : all_windows)
+    {
+        for (const panel_t p : PANELS)
+        {
+            GtkWidget* notebook = window->panel[p - 1];
+            const i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
+            for (const auto cur_tabx : ztd::range(pages))
+            {
+                PtkFileBrowser* browser = PTK_FILE_BROWSER_REINTERPRET(
+                    gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
+
+                // will close all tabs that no longer exist on the filesystem
+                ptk_file_browser_refresh(nullptr, browser);
+            }
+        }
+    }
+}
+
+void
 main_window_refresh_all_tabs_matching(std::string_view path)
 {
     (void)path;
@@ -4153,48 +4175,23 @@ main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
         {
             flags = fmt::format("{} optical", flags);
         }
-        if (vol->is_table)
-        {
-            flags = fmt::format("{} table", flags);
-        }
-        if (vol->is_floppy)
-        {
-            flags = fmt::format("{} floppy", flags);
-        }
 
         if (!vol->is_user_visible)
         {
             flags = fmt::format("{} policy_hide", flags);
-        }
-        if (vol->nopolicy)
-        {
-            flags = fmt::format("{} policy_noauto", flags);
         }
 
         if (vol->is_mounted)
         {
             flags = fmt::format("{} mounted", flags);
         }
-        else if (vol->is_mountable && !vol->is_table)
+        else if (vol->is_mountable)
         {
             flags = fmt::format("{} mountable", flags);
         }
         else
         {
             flags = fmt::format("{} no_media", flags);
-        }
-
-        if (vol->is_blank)
-        {
-            flags = fmt::format("{} blank", flags);
-        }
-        if (vol->is_audiocd)
-        {
-            flags = fmt::format("{} audiocd", flags);
-        }
-        if (vol->is_dvd)
-        {
-            flags = fmt::format("{} dvd", flags);
         }
 
         c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = flags;
@@ -4468,12 +4465,12 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                 if (file_browser == a_browser)
                 {
                     buf.append(fmt::format("fm_device=\"{}\"\n", vol->device_file));
-                    if (vol->udi)
+                    if (!vol->udi.empty())
                     {
                         esc_path = ztd::shell::quote(vol->udi);
                         buf.append(fmt::format("fm_device_udi={}\n", esc_path));
                     }
-                    if (vol->mount_point)
+                    if (!vol->mount_point.empty())
                     {
                         esc_path = ztd::shell::quote(vol->mount_point);
                         buf.append(fmt::format("fm_device_mount_point={}\n", esc_path));
@@ -4483,12 +4480,12 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                         esc_path = ztd::shell::quote(vol->label);
                         buf.append(fmt::format("fm_device_label={}\n", esc_path));
                     }
-                    if (vol->fs_type)
+                    if (!vol->fs_type.empty())
                     {
                         buf.append(fmt::format("fm_device_fstype=\"{}\"\n", vol->fs_type));
                     }
                     buf.append(fmt::format("fm_device_size=\"{}\"\n", vol->size));
-                    if (vol->disp_name)
+                    if (!vol->disp_name.empty())
                     {
                         esc_path = ztd::shell::quote(vol->disp_name);
                         buf.append(fmt::format("fm_device_display_name=\"{}\"\n", esc_path));
@@ -4497,22 +4494,17 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                     buf.append(fmt::format("fm_device_icon=\"{}\"\n", vol->icon));
                     buf.append(fmt::format("fm_device_is_mounted=\"{}\"\n", vol->is_mounted ? 1 : 0));
                     buf.append(fmt::format("fm_device_is_optical=\"{}\"\n", vol->is_optical ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_floppy=\"{}\"\n", vol->is_floppy ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_table=\"{}\"\n", vol->is_table ? 1 : 0));
                     buf.append(fmt::format("fm_device_is_removable=\"{}\"\n", vol->is_removable ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_audiocd=\"{}\"\n", vol->is_audiocd ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_dvd=\"{}\"\n", vol->is_dvd ? 1 : 0));
-                    buf.append(fmt::format("fm_device_is_blank=\"{}\"\n", vol->is_blank ? 1 : 0));
                     buf.append(fmt::format("fm_device_is_mountable=\"{}\"\n", vol->is_mountable ? 1 : 0));
-                    buf.append(fmt::format("fm_device_nopolicy=\"{}\"\n", vol->nopolicy ? 1 : 0));
+                    // clang-format on
                 }
                 buf.append(fmt::format("fm_panel{}_device=\"{}\"\n", p, vol->device_file));
-                if (vol->udi)
+                if (!vol->udi.empty())
                 {
                     esc_path = ztd::shell::quote(vol->udi);
                     buf.append(fmt::format("fm_panel{}_device_udi={}\n", p, esc_path));
                 }
-                if (vol->mount_point)
+                if (!vol->mount_point.empty())
                 {
                     esc_path = ztd::shell::quote(vol->mount_point);
                     buf.append(fmt::format("fm_panel{}_device_mount_point={}\n", p, esc_path));
@@ -4522,26 +4514,22 @@ main_write_exports(vfs::file_task vtask, const char* value, std::string& buf)
                     esc_path = ztd::shell::quote(vol->label);
                     buf.append(fmt::format("fm_panel{}_device_label={}\n", p, esc_path));
                 }
-                if (vol->fs_type) {
+                if (!vol->fs_type.empty())
+                {
                     buf.append(fmt::format("fm_panel{}_device_fstype=\"{}\"\n", p, vol->fs_type));
-}
+                }
                 buf.append(fmt::format("fm_panel{}_device_size=\"{}\"\n", p, vol->size));
-                if (vol->disp_name)
+                if (!vol->disp_name.empty())
                 {
                     esc_path = ztd::shell::quote(vol->disp_name);
                     buf.append(fmt::format("fm_panel{}_device_display_name={}\n", p, esc_path));
                 }
+                // clang-format off
                 buf.append(fmt::format("fm_panel{}_device_icon=\"{}\"\n", p, vol->icon));
                 buf.append(fmt::format("fm_panel{}_device_is_mounted=\"{}\"\n", p, vol->is_mounted ? 1 : 0));
                 buf.append(fmt::format("fm_panel{}_device_is_optical=\"{}\"\n", p, vol->is_optical ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_table=\"{}\"\n", p, vol->is_table ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_floppy=\"{}\"\n", p, vol->is_floppy ? 1 : 0));
                 buf.append(fmt::format("fm_panel{}_device_is_removable=\"{}\"\n", p, vol->is_removable ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_audiocd=\"{}\"\n", p, vol->is_audiocd ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_dvd=\"{}\"\n", p, vol->is_dvd ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_is_blank=\"{}\"\n", p, vol->is_blank ? 1 : 0));
                 buf.append(fmt::format("fm_panel{}_device_is_mountable=\"{}\"\n", p, vol->is_mountable ? 1 : 0));
-                buf.append(fmt::format("fm_panel{}_device_nopolicy=\"{}\"\n", p, vol->nopolicy ? 1 : 0));
                 // clang-format on
             }
         }
@@ -4818,7 +4806,6 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 {
     GtkTreeIter it;
     PtkFileTask* qtask;
-    PtkFileTask* rtask;
     GSList* running = nullptr;
     GSList* queued = nullptr;
     const bool smart = xset_get_b(XSetName::TASK_Q_SMART);
@@ -4872,37 +4859,12 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     }
 
     // smart
-    GSList* d;
-    GSList* r;
     for (GSList* q = queued; q; q = g_slist_next(q))
     {
         qtask = PTK_FILE_TASK(q->data);
-        if (!qtask->task->devs)
+        if (qtask)
         {
             // qtask has no devices so run it
-            running = g_slist_append(running, qtask);
-            ptk_file_task_pause(qtask, VFSFileTaskState::RUNNING);
-            continue;
-        }
-        // does qtask have running devices?
-        for (r = running; r; r = g_slist_next(r))
-        {
-            rtask = PTK_FILE_TASK(r->data);
-            for (d = qtask->task->devs; d; d = g_slist_next(d))
-            {
-                if (g_slist_find(rtask->task->devs, d->data))
-                {
-                    break;
-                }
-            }
-            if (d)
-            {
-                break;
-            }
-        }
-        if (!r)
-        {
-            // qtask has no running devices so run it
             running = g_slist_append(running, qtask);
             ptk_file_task_pause(qtask, VFSFileTaskState::RUNNING);
             continue;
@@ -7834,82 +7796,63 @@ main_window_socket_command(char* argv[])
 
             // Resolve TARGET
             char* real_path = argv[j];
-            char* device_file = nullptr;
+
+            if (!std::filesystem::exists(real_path))
+            {
+                return {SOCKET_INVALID, fmt::format("path does not exist '{}'", real_path)};
+            }
+
             const auto real_path_stat = ztd::stat(real_path);
             vfs::volume vol = nullptr;
-            const netmount_t netmount = std::make_shared<Netmount>();
             if (ztd::same(socket_property, "unmount") && std::filesystem::is_directory(real_path))
             {
                 // unmount DIR
-                if (path_is_mounted_mtab(nullptr, real_path, &device_file, nullptr) && device_file)
+                if (is_path_mountpoint(real_path))
                 {
-                    const auto device_file_stat = ztd::stat(device_file);
-
-                    if (!device_file_stat.is_valid() || !device_file_stat.is_block_file())
+                    if (!real_path_stat.is_valid() || !real_path_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
-                        vol = vfs_volume_get_by_device(device_file);
+                        vol = vfs_volume_get_by_device(real_path);
                         if (!vol)
                         {
                             return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
                         }
-                        free(device_file);
-                        device_file = nullptr;
                     }
                 }
             }
             else if (real_path_stat.is_valid() && real_path_stat.is_block_file())
             {
                 // block device eg /dev/sda1
-                device_file = ztd::strdup(real_path);
+                vol = vfs_volume_get_by_device(real_path);
             }
-            else if (ztd::same(socket_property, "mount") &&
-                     ((real_path[0] != '/' && strstr(real_path, ":/")) ||
-                      ztd::startswith(real_path, "//")))
+            else
             {
-                // mount URL
-                if (split_network_url(real_path, netmount) != SplitNetworkURL::VALID_NETWORK_URL)
-                {
-                    // not a valid url
-                    return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
-                }
-            }
-
-            if (device_file)
-            {
-                // block device - get vol
-                vol = vfs_volume_get_by_device(device_file);
-                free(device_file);
-                device_file = nullptr;
+                return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
             }
 
             // Create command
-            bool run_in_terminal = false;
             std::string cmd;
             if (vol)
             {
                 // mount/unmount vol
                 if (ztd::same(socket_property, "mount"))
                 {
-                    cmd = vol->get_mount_command(xset_get_s(XSetName::DEV_MOUNT_OPTIONS),
-                                                 &run_in_terminal);
+                    const auto check_mount_command = vol->device_mount_cmd();
+                    if (check_mount_command)
+                    {
+                        cmd = check_mount_command.value();
+                    }
                 }
                 else
                 {
-                    cmd = vol->device_unmount_cmd(&run_in_terminal);
+                    const auto check_unmount_command = vol->device_unmount_cmd();
+                    if (check_unmount_command)
+                    {
+                        cmd = check_unmount_command.value();
+                    }
                 }
             }
-            else if (netmount)
-            {
-                // URL mount only
-                cmd = vfs_volume_handler_cmd(PtkHandlerMode::HANDLER_MODE_NET,
-                                             PtkHandlerMount::HANDLER_MOUNT,
-                                             nullptr,
-                                             nullptr,
-                                             netmount,
-                                             &run_in_terminal,
-                                             nullptr);
-            }
+
             if (cmd.empty())
             {
                 return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
@@ -7921,7 +7864,7 @@ main_window_socket_command(char* argv[])
                                                    file_browser->task_view);
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
-            ptask->task->exec_terminal = run_in_terminal;
+            ptask->task->exec_terminal = false;
             ptask->task->exec_keep_terminal = false;
             ptask->task->exec_sync = true;
             ptask->task->exec_export = false;

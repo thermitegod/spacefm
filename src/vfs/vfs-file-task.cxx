@@ -101,8 +101,6 @@ VFSFileTask::VFSFileTask(VFSFileTaskType type, const std::span<const std::string
 
 VFSFileTask::~VFSFileTask()
 {
-    g_slist_free(this->devs);
-
     if (this->chmod_actions)
     {
         g_slice_free1(sizeof(unsigned char) * magic_enum::enum_count<ChmodActionType>(),
@@ -1975,12 +1973,6 @@ vfs_file_task_thread(vfs::file_task task)
         }
     }
 
-    const auto dest_dir_stat = ztd::stat(task->dest_dir);
-    if (!task->dest_dir.empty() && dest_dir_stat.is_valid())
-    {
-        task->add_task_dev(dest_dir_stat.dev());
-    }
-
     if (task->abort)
     {
         task->state = VFSFileTaskState::RUNNING;
@@ -2159,24 +2151,6 @@ VFSFileTask::abort_task()
     }
 }
 
-void
-VFSFileTask::add_task_dev(dev_t dev)
-{
-    if (!g_slist_find(this->devs, GUINT_TO_POINTER(dev)))
-    {
-        const dev_t parent = get_device_parent(dev);
-        // ztd::logger::info("add_task_dev {}:{}", major(dev), minor(dev));
-        this->lock();
-        this->devs = g_slist_append(this->devs, GUINT_TO_POINTER(dev));
-        if (parent && !g_slist_find(this->devs, GUINT_TO_POINTER(parent)))
-        {
-            // ztd::logger::info("add_task_dev PARENT {}:{}", major(parent), minor(parent));
-            this->devs = g_slist_append(this->devs, GUINT_TO_POINTER(parent));
-        }
-        this->unlock();
-    }
-}
-
 /*
  * void get_total_size_of_dir(const char* path, off_t* size)
  * Recursively count total size of all files in the specified directory.
@@ -2201,16 +2175,6 @@ VFSFileTask::get_total_size_of_dir(std::string_view path)
     }
 
     off_t size = file_stat.size();
-
-    // remember device for smart queue
-    if (!this->devs)
-    {
-        this->add_task_dev(file_stat.dev());
-    }
-    else if (file_stat.dev() != GPOINTER_TO_UINT(this->devs->data))
-    {
-        this->add_task_dev(file_stat.dev());
-    }
 
     // Do not follow symlinks
     if (file_stat.is_symlink() || !file_stat.is_directory())

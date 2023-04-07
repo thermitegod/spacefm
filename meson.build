@@ -413,6 +413,14 @@ sources = files(
     'src/vfs/vfs-user-dirs.cxx',
     'src/vfs/vfs-utils.cxx',
     'src/vfs/vfs-volume.cxx',
+
+    'src/vfs/libudevpp/udev.cxx',
+    'src/vfs/libudevpp/udev_device.cxx',
+    'src/vfs/libudevpp/udev_enumerate.cxx',
+    'src/vfs/libudevpp/udev_monitor.cxx',
+
+    'src/vfs/linux/procfs.cxx',
+    'src/vfs/linux/sysfs.cxx',
 )
 
 target_name = 'spacefm'
