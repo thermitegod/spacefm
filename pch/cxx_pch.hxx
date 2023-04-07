@@ -26,6 +26,8 @@
 #include <tuple>
 #include <vector>
 
+#include <optional>
+
 #include <algorithm>
 #include <ranges>
 

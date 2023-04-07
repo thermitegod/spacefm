@@ -23,6 +23,8 @@
 #include <array>
 #include <vector>
 
+#include <optional>
+
 #include <algorithm>
 #include <ranges>
 
@@ -174,7 +176,7 @@ AutoOpenCreate::~AutoOpenCreate()
 }
 
 static void on_toggled(GtkMenuItem* item, MoveSet* mset);
-static const std::string get_template_dir();
+static const std::optional<std::string> get_template_dir();
 
 static bool
 on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
@@ -936,8 +938,12 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         }
         else
         {
-            dir = get_template_dir();
-            if (dir.empty())
+            const auto valid_dir = get_template_dir();
+            if (valid_dir)
+            {
+                dir = valid_dir.value();
+            }
+            else
             {
                 dir = Glib::path_get_dirname(mset->full_path);
             }
@@ -959,8 +965,12 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         }
         else
         {
-            dir = get_template_dir();
-            if (dir.empty())
+            const auto valid_dir = get_template_dir();
+            if (valid_dir)
+            {
+                dir = valid_dir.value();
+            }
+            else
             {
                 dir = Glib::path_get_dirname(mset->full_path);
             }
@@ -1027,9 +1037,10 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             {
                 w = gtk_bin_get_child(GTK_BIN(mset->combo_template_dir));
             }
-            dir = get_template_dir();
-            if (!dir.empty())
+            const auto valid_dir = get_template_dir();
+            if (valid_dir)
             {
+                dir = valid_dir.value();
                 if (ztd::startswith(new_path, dir) && new_path[dir.size()] == '/')
                 {
                     path = new_path + dir.size() + 1;
@@ -2037,7 +2048,7 @@ get_unique_name(std::string_view dir, std::string_view ext = "")
     return path;
 }
 
-static const std::string
+static const std::optional<std::string>
 get_template_dir()
 {
     const std::string templates_path = vfs::user_dirs->template_dir();
@@ -2048,7 +2059,7 @@ get_template_dir()
          * recurse it as this is too many files/directories and may slow
          * dialog open and cause filesystem find loops.
          * https://wiki.freedesktop.org/www/Software/xdg-user-dirs/ */
-        return "";
+        return std::nullopt;
     }
 
     return templates_path;
@@ -2526,7 +2537,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), "Empty File");
         templates.clear();
-        templates = get_templates(get_template_dir(), "", false);
+        templates = get_templates(get_template_dir().value_or(""), "", false);
         if (!templates.empty())
         {
             std::ranges::sort(templates);
@@ -2553,7 +2564,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
                                        "Empty Directory");
         templates.clear();
-        templates = get_templates(get_template_dir(), "", true);
+        templates = get_templates(get_template_dir().value_or(""), "", true);
         if (!templates.empty())
         {
             std::ranges::sort(templates);
@@ -3118,10 +3129,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                     else
                     {
-                        const std::string templates_path = get_template_dir();
-                        if (!templates_path.empty())
+                        const auto template_path = get_template_dir();
+                        if (template_path)
                         {
-                            from_path = Glib::build_filename(templates_path, str);
+                            from_path = Glib::build_filename(template_path.value(), str);
                             if (!std::filesystem::is_regular_file(from_path))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
@@ -3189,10 +3200,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                     else
                     {
-                        const std::string templates_path = get_template_dir();
-                        if (!templates_path.empty())
+                        const auto template_path = get_template_dir();
+                        if (template_path)
                         {
-                            from_path = Glib::build_filename(templates_path, str);
+                            from_path = Glib::build_filename(template_path.value(), str);
                             if (!std::filesystem::is_directory(from_path))
                             {
                                 ptk_show_error(GTK_WINDOW(mset->dlg),
