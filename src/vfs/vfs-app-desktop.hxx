@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <optional>
+
 #include <memory>
 
 #include <exception>
@@ -53,8 +55,9 @@ class VFSAppDesktop
                     const std::span<const std::string> file_paths) const;
 
   private:
-    const std::vector<std::string> app_exec_to_argv(const std::span<const std::string> file_list,
-                                                    bool quote_file_list) const noexcept;
+    const std::optional<std::vector<std::vector<std::string>>>
+    app_exec_generate_desktop_argv(const std::span<const std::string> file_list,
+                                   bool quote_file_list) const noexcept;
     void exec_in_terminal(std::string_view cwd, std::string_view cmd) const noexcept;
     void exec_desktop(std::string_view working_dir,
                       const std::span<const std::string> file_paths) const noexcept;

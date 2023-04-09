@@ -25,6 +25,8 @@
 
 #include <map>
 
+#include <optional>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -358,33 +360,40 @@ VFSAppDesktop::open_multiple_files() const noexcept
     return false;
 }
 
-const std::vector<std::string>
-VFSAppDesktop::app_exec_to_argv(const std::span<const std::string> file_list,
-                                bool quote_file_list) const noexcept
+const std::optional<std::vector<std::vector<std::string>>>
+VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string> file_list,
+                                              bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
-    std::vector<std::string> argv{ztd::split(this->exec, " ")};
+    std::vector<std::vector<std::string>> commands = {{ztd::split(this->exec, " ")}};
 
     bool add_files = false;
 
     static constexpr std::array<std::string_view, 2> open_files_keys{"%F", "%U"};
     if (ztd::contains(this->exec, open_files_keys))
     {
-        // TODO
-        // %F and %U should always be at the end
-        // probably need a better way to do this
-
-        argv.pop_back(); // remove open_files_key
-        for (const std::string_view file : file_list)
+        // %F and %U must always be at the end
+        if (!ztd::endswith(this->exec, open_files_keys))
         {
-            if (quote_file_list)
+            ztd::logger::error("Malformed desktop file, %F and %U must always be at the end : {}",
+                               this->full_path);
+            return std::nullopt;
+        }
+
+        for (auto& argv : commands)
+        {
+            argv.pop_back(); // remove open_files_key
+            for (const std::string_view file : file_list)
             {
-                argv.emplace_back(ztd::shell::quote(file));
-            }
-            else
-            {
-                argv.emplace_back(file.data());
+                if (quote_file_list)
+                {
+                    argv.emplace_back(ztd::shell::quote(file));
+                }
+                else
+                {
+                    argv.emplace_back(file.data());
+                }
             }
         }
 
@@ -394,84 +403,89 @@ VFSAppDesktop::app_exec_to_argv(const std::span<const std::string> file_list,
     static constexpr std::array<std::string_view, 2> open_file_keys{"%f", "%u"};
     if (ztd::contains(this->exec, open_file_keys))
     {
-        // TODO
-        // %f and %u should always be at the end
-        // probably need a better way to do this
-
-        argv.pop_back(); // remove open_file_key
-        for (const std::string_view file : file_list)
+        // %f and %u must always be at the end
+        if (!ztd::endswith(this->exec, open_file_keys))
         {
-            if (quote_file_list)
-            {
-                argv.emplace_back(ztd::shell::quote(file));
-            }
-            else
-            {
-                argv.emplace_back(file.data());
-            }
+            ztd::logger::error("Malformed desktop file, %f and %u must always be at the end : {}",
+                               this->full_path);
+            return std::nullopt;
         }
 
+        // desktop files with these keys can only open one file.
+        // spawn multiple copies of the program for each selected file
+        commands.insert(commands.begin(), file_list.size() - 1, commands.front());
+
+        for (auto& argv : commands)
+        {
+            argv.pop_back(); // remove open_file_key
+            for (const std::string_view file : file_list)
+            {
+                if (quote_file_list)
+                {
+                    argv.emplace_back(ztd::shell::quote(file));
+                }
+                else
+                {
+                    argv.emplace_back(file.data());
+                }
+            }
+        }
         add_files = true;
+    }
+
+    if (!add_files && !file_list.empty())
+    {
+        ztd::logger::warn(
+            "Trying to open a desktop file with a file list without file/url keys : {}",
+            this->full_path);
     }
 
     if (ztd::contains(this->exec, "%c"))
     {
-        for (std::string& arg : argv)
+        for (auto& argv : commands)
         {
-            if (!ztd::contains(arg, "%c"))
+            for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                continue;
+                if (!ztd::contains(arg, "%c"))
+                {
+                    argv[index] = this->get_disp_name();
+                    break;
+                }
             }
-
-            arg = ztd::replace(arg, "%c", this->get_disp_name());
-            break;
         }
     }
 
     if (ztd::contains(this->exec, "%k"))
     {
-        for (std::string& arg : argv)
+        for (auto& argv : commands)
         {
-            if (!ztd::contains(arg, "%k"))
+            for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                continue;
+                if (ztd::contains(arg, "%k"))
+                {
+                    argv[index] = this->get_full_path();
+                    break;
+                }
             }
-
-            arg = ztd::replace(arg, "%k", this->get_full_path());
-            break;
         }
     }
 
     if (ztd::contains(this->exec, "%i"))
     {
-        for (std::string& arg : argv)
+        for (auto& argv : commands)
         {
-            if (!ztd::contains(arg, "%i"))
+            for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                continue;
-            }
-
-            arg = ztd::replace(arg, "%i", fmt::format("--icon {}", this->get_icon_name()));
-            break;
-        }
-    }
-
-    if (!add_files)
-    {
-        for (const std::string_view file : file_list)
-        {
-            if (quote_file_list)
-            {
-                argv.emplace_back(ztd::shell::quote(file));
-            }
-            else
-            {
-                argv.emplace_back(file.data());
+                if (ztd::contains(arg, "%i"))
+                {
+                    argv[index] = fmt::format("--icon {}", this->get_icon_name());
+                    break;
+                }
             }
         }
     }
 
-    return argv;
+    return commands;
 }
 
 void
@@ -520,28 +534,35 @@ void
 VFSAppDesktop::exec_desktop(std::string_view working_dir,
                             const std::span<const std::string> file_paths) const noexcept
 {
-    const std::vector<std::string> argv = this->app_exec_to_argv(file_paths, this->use_terminal());
-    if (argv.empty())
+    const auto desktop_commands =
+        this->app_exec_generate_desktop_argv(file_paths, this->use_terminal());
+    if (!desktop_commands)
     {
         return;
     }
 
     if (this->use_terminal())
     {
-        const std::string command = ztd::join(argv, " ");
-        this->exec_in_terminal(!this->path.empty() ? this->path : working_dir, command);
+        for (const auto& argv : desktop_commands.value())
+        {
+            const std::string command = ztd::join(argv, " ");
+            this->exec_in_terminal(!this->path.empty() ? this->path : working_dir, command);
+        }
     }
     else
     {
-        Glib::spawn_async_with_pipes(!this->path.empty() ? this->path : working_dir.data(),
-                                     argv,
-                                     Glib::SpawnFlags::SEARCH_PATH |
-                                         Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
-                                         Glib::SpawnFlags::STDERR_TO_DEV_NULL,
-                                     Glib::SlotSpawnChildSetup(),
-                                     nullptr,
-                                     nullptr,
-                                     nullptr,
-                                     nullptr);
+        for (const auto& argv : desktop_commands.value())
+        {
+            Glib::spawn_async_with_pipes(!this->path.empty() ? this->path : working_dir.data(),
+                                         argv,
+                                         Glib::SpawnFlags::SEARCH_PATH |
+                                             Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
+                                             Glib::SpawnFlags::STDERR_TO_DEV_NULL,
+                                         Glib::SlotSpawnChildSetup(),
+                                         nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         nullptr);
+        }
     }
 }
