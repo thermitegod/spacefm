@@ -52,6 +52,7 @@ debug_flags = [
     '-pedantic',
     '-pedantic-errors',
     # '-Wfatal-errors',
+    # '-ftime-trace',
 ]
 
 if get_option('buildtype') == 'debug'
