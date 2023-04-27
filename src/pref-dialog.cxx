@@ -37,7 +37,6 @@
 #include "types.hxx"
 
 #include "settings/app.hxx"
-#include "settings/etc.hxx"
 
 #include "terminal-handlers.hxx"
 
@@ -359,30 +358,10 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         xset_set(XSetName::DRAG_ACTION, XSetVar::X, s);
 
         // terminal su command
-        std::string custom_su = etc_settings.get_terminal_su();
-        if (!custom_su.empty())
-        { // get su from /etc/spacefm/spacefm.conf
-            custom_su = Glib::find_program_in_path(custom_su);
-        }
-
         const i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
         if (idx > -1)
         {
-            if (!custom_su.empty())
-            {
-                if (idx == 0)
-                {
-                    xset_set(XSetName::SU_COMMAND, XSetVar::S, custom_su);
-                }
-                else
-                {
-                    xset_set(XSetName::SU_COMMAND, XSetVar::S, su_commands.at(idx - 1));
-                }
-            }
-            else
-            {
-                xset_set(XSetName::SU_COMMAND, XSetVar::S, su_commands.at(idx));
-            }
+            xset_set(XSetName::SU_COMMAND, XSetVar::S, su_commands.at(idx));
         }
 
         // MOD editors
@@ -650,51 +629,14 @@ edit_preference(GtkWindow* parent, i32 page)
 
         // terminal su
         i32 idx;
-        GtkTreeIter it;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
-
         const std::string use_su = xset_get_s(XSetName::SU_COMMAND);
-        std::string custom_su = etc_settings.get_terminal_su();
-        if (!custom_su.empty())
-        { // get su from /etc/spacefm/spacefm.conf
-            custom_su = Glib::find_program_in_path(custom_su);
-        }
-        if (!custom_su.empty())
+        for (const auto [index, value] : ztd::enumerate(su_commands))
         {
-            GtkListStore* su_list =
-                GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(data->su_command)));
-            gtk_list_store_prepend(su_list, &it);
-            gtk_list_store_set(GTK_LIST_STORE(su_list), &it, 0, custom_su.data(), -1);
-        }
-        if (use_su.empty())
-        {
-            idx = 0;
-        }
-        else if (ztd::same(custom_su, use_su))
-        {
-            idx = 0;
-        }
-        else
-        {
-            usize i;
-            for (i = 0; i < su_commands.size(); ++i)
+            if (ztd::same(value, use_su))
             {
-                if (ztd::same(su_commands.at(i), use_su))
-                {
-                    break;
-                }
-            }
-            if (i == su_commands.size())
-            {
-                idx = 0;
-            }
-            else if (!custom_su.empty())
-            {
-                idx = i + 1;
-            }
-            else
-            {
-                idx = i;
+                idx = index;
+                break;
             }
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(data->su_command), idx);

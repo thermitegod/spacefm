@@ -89,6 +89,9 @@ struct AppSettings
     bool get_use_si_prefix() const noexcept;
     void set_use_si_prefix(bool val) noexcept;
 
+    bool get_git_backed_settings() const noexcept;
+    void set_git_backed_settings(bool val) noexcept;
+
   private:
     // General Settings
     bool show_thumbnail{false};
@@ -128,6 +131,9 @@ struct AppSettings
 
     // Units
     bool use_si_prefix{false};
+
+    // Git
+    bool git_backed_settings{true};
 };
 
 extern AppSettings app_settings;

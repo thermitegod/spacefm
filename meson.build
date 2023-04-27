@@ -366,10 +366,8 @@ sources = files(
     'src/xset/xset-plugins.cxx',
 
     'src/settings/app.cxx',
-    'src/settings/etc.cxx',
     'src/settings/config-load.cxx',
     'src/settings/config-save.cxx',
-    'src/settings/etc-load.cxx',
     'src/settings/plugins-load.cxx',
     'src/settings/plugins-save.cxx',
 
@@ -435,8 +433,6 @@ spacefm = build_target(
 )
 
 ## Install
-
-install_data('etc/spacefm.conf', install_dir : sysconfdir / target_name)
 
 install_subdir('data/applications', install_dir : datadir)
 install_subdir('data/ui', install_dir : datadir / target_name)

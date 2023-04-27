@@ -348,6 +348,11 @@ xset_defaults()
     xset_set_var(set, XSetVar::ICN, "gtk-directory");
     set->menu_style = XSetMenu::SUBMENU;
 
+    // Fonts
+    set = xset_set(XSetName::FONT_GENERAL, XSetVar::S, "Monospace 9");
+    set = xset_set(XSetName::FONT_VIEW_ICON, XSetVar::S, "Monospace 9");
+    set = xset_set(XSetName::FONT_VIEW_COMPACT, XSetVar::S, "Monospace 9");
+
     // Rename/Move Dialog
     set = xset_set(XSetName::MOVE_NAME, XSetVar::MENU_LABEL, "_Name");
     set->menu_style = XSetMenu::CHECK;

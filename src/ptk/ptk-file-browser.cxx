@@ -70,7 +70,6 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
-#include "settings/etc.hxx"
 
 #include "signals.hxx"
 
@@ -3883,7 +3882,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                              "yalign",
                              0.5,
                              "font",
-                             etc_settings.get_font_view_compact().data(),
+                             xset_get_s(XSetName::FONT_VIEW_COMPACT),
                              "size-set",
                              true,
                              nullptr);
@@ -3905,7 +3904,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                              "attributes",
                              attr_list,
                              "font",
-                             etc_settings.get_font_view_icon().data(),
+                             xset_get_s(XSetName::FONT_VIEW_ICON),
                              "size-set",
                              true,
                              nullptr);

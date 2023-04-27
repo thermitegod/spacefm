@@ -282,3 +282,15 @@ AppSettings::set_use_si_prefix(bool val) noexcept
 {
     this->use_si_prefix = val;
 }
+
+bool
+AppSettings::get_git_backed_settings() const noexcept
+{
+    return this->git_backed_settings;
+}
+
+void
+AppSettings::set_git_backed_settings(bool val) noexcept
+{
+    this->git_backed_settings = val;
+}

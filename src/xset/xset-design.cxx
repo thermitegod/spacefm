@@ -56,7 +56,6 @@
 #include "types.hxx"
 
 #include "settings/app.hxx"
-#include "settings/etc.hxx"
 #include "settings/disk-format.hxx"
 
 #include "autosave.hxx"

@@ -50,8 +50,6 @@
 #include "ptk/ptk-location-view.hxx"
 
 #include "settings/app.hxx"
-#include "settings/etc.hxx"
-#include "settings/etc-load.hxx"
 
 #include "program-timer.hxx"
 #include "autosave.hxx"
@@ -443,7 +441,7 @@ main(int argc, char* argv[])
     }
 
     // --disable-git
-    etc_settings.set_git_backed_settings(!cli_flags.disable_git_settings);
+    app_settings.set_git_backed_settings(!cli_flags.disable_git_settings);
 
     // --version
     if (cli_flags.version_opt)
@@ -484,9 +482,6 @@ main(int argc, char* argv[])
     {
         vfs::user_dirs->program_config_dir(cli_flags.config_dir);
     }
-
-    // load /etc/spacefm/spacefm.cfg
-    load_etc_conf();
 
     // load config file
     load_settings();

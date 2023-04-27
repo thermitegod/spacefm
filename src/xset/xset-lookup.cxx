@@ -101,6 +101,11 @@ static const std::unordered_map<XSetName, std::string_view> xset_name_map{
     {XSetName::BOOK_ADD,                    "book_add"sv},
     {XSetName::MAIN_BOOK,                   "main_book"sv},
 
+    // Fonts
+    {XSetName::FONT_GENERAL,                "font_general"sv},
+    {XSetName::FONT_VIEW_ICON,              "font_view_icon"sv},
+    {XSetName::FONT_VIEW_COMPACT,           "font_view_compact"sv},
+
     // Rename/Move Dialog
     {XSetName::MOVE_NAME,                   "move_name"sv},
     {XSetName::MOVE_FILENAME,               "move_filename"sv},

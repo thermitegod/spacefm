@@ -66,7 +66,6 @@
 #include "xset/xset-static-strings.hxx"
 
 #include "settings/app.hxx"
-#include "settings/etc.hxx"
 #include "settings/config-load.hxx"
 #include "settings/config-save.hxx"
 
@@ -193,8 +192,7 @@ load_settings()
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    bool git_backed_settings = etc_settings.get_git_backed_settings();
-
+    bool git_backed_settings = app_settings.get_git_backed_settings();
     if (git_backed_settings)
     {
         if (Glib::find_program_in_path("git").empty())
@@ -217,6 +215,7 @@ load_settings()
                             CONFIG_FILE_FILENAME,
                             CONFIG_FILE_VERSION);
 
+            ztd::logger::info("SCRIPT={}", command_script);
             Glib::spawn_command_line_sync(command_args);
         }
     }
@@ -231,6 +230,7 @@ load_settings()
                                                          settings_config_dir,
                                                          CONFIG_FILE_FILENAME);
 
+            ztd::logger::info("SCRIPT={}", command_script);
             Glib::spawn_command_line_sync(command_args);
         }
     }

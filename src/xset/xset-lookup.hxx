@@ -116,6 +116,11 @@ enum class XSetName
     BOOK_ADD,
     MAIN_BOOK,
 
+    // Fonts
+    FONT_GENERAL,
+    FONT_VIEW_ICON,
+    FONT_VIEW_COMPACT,
+
     // Rename/Move Dialog
     MOVE_NAME,
     MOVE_FILENAME,
