@@ -1607,6 +1607,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         // terminal
         const auto terminal_args =
             terminal_handlers->get_terminal_args(xset_get_s(XSetName::MAIN_TERMINAL));
+        argv.reserve(terminal_args.size());
         for (std::string_view terminal_arg : terminal_args)
         {
             argv.emplace_back(terminal_arg);

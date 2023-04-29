@@ -2055,6 +2055,7 @@ void
 xset_default_keys()
 {
     // read all currently set or unset keys
+    keysets.reserve(xsets.size());
     for (xset_t set : xsets)
     {
         assert(set != nullptr);

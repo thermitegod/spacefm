@@ -287,6 +287,8 @@ MimeCache::lookup_parents(std::string_view mime_type)
     const u32 n = VAL32(found_parents, 0);
     found_parents += 4;
 
+    result.reserve(n);
+
     for (const auto i : ztd::range(n))
     {
         const u32 parent_off = VAL32(found_parents, i * 4);

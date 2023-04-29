@@ -921,6 +921,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             if (!uid || !gid || mod_change)
             {
                 std::vector<std::string> file_list;
+                file_list.reserve(data->file_list.size());
                 for (vfs::file_info file : data->file_list)
                 {
                     const std::string file_path =

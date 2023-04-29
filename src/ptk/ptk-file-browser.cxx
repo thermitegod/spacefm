@@ -4976,6 +4976,7 @@ ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser)
         return file_list;
     }
 
+    file_list.reserve(g_list_length(sel_files));
     for (GList* sel = sel_files; sel; sel = g_list_next(sel))
     {
         GtkTreeIter it;
@@ -5251,6 +5252,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
 
         // rebuild sel_files with full paths
         std::vector<std::string> file_list;
+        file_list.reserve(sel_files.size());
         std::string file_path;
         for (vfs::file_info file : sel_files)
         {

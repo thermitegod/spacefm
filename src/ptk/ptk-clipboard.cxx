@@ -199,6 +199,7 @@ ptk_clipboard_cut_or_copy_files(std::string_view working_dir,
     gtk_target_list_unref(target_list);
 
     std::vector<std::string> file_list;
+    file_list.reserve(sel_files.size());
     for (vfs::file_info file : sel_files)
     {
         const std::string file_path = Glib::build_filename(working_dir.data(), file->get_name());
@@ -327,9 +328,9 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
 
     if (uri_list_str)
     {
-        std::vector<std::string> file_list;
-
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+        std::vector<std::string> file_list;
+        file_list.reserve(uri_list.size());
         for (const std::string_view uri : uri_list)
         {
             std::string file_path;
@@ -415,9 +416,9 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, std::string_view dest_dir, GtkT
 
     if (uri_list_str)
     {
-        std::vector<std::string> file_list;
-
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+        std::vector<std::string> file_list;
+        file_list.reserve(uri_list.size());
         for (const std::string_view uri : uri_list)
         {
             std::string file_path;
@@ -500,9 +501,10 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
     {
         i32 missing_targets = 0;
 
-        std::vector<std::string> file_list;
-
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+        std::vector<std::string> file_list;
+        file_list.reserve(uri_list.size());
+
         for (const std::string_view uri : uri_list)
         {
             std::string file_path;
@@ -614,6 +616,7 @@ ptk_clipboard_get_file_paths(std::string_view cwd, bool* is_cut, i32* missing_ta
 
     // create file list
     const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
+    file_list.reserve(uri_list.size());
     for (const std::string_view uri : uri_list)
     {
         std::string file_path;

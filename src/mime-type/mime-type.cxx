@@ -358,6 +358,7 @@ mime_type_init()
         mime_cache_max_extent = cache->get_magic_max_extent();
     }
 
+    caches.reserve(vfs::user_dirs->system_data_dirs().size());
     for (const std::string_view dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string path2 = Glib::build_filename(dir.data(), filename);

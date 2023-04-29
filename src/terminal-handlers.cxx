@@ -102,6 +102,7 @@ const std::vector<std::string>
 TerminalHandlers::get_supported_terminal_names()
 {
     std::vector<std::string> terminal_names;
+    terminal_names.reserve(handlers.size());
     for (const auto& handler : this->handlers)
     {
         terminal_names.emplace_back(handler.second.name);
