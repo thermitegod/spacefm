@@ -554,7 +554,8 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     if (browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW)
     {
-        set = xset_set_b_panel(p, XSetPanel::LIST_LARGE, true);
+        set = xset_get_panel(p, XSetPanel::LIST_LARGE);
+        xset_set_b(set, true);
         set->disable = true;
     }
     else

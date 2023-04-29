@@ -392,15 +392,14 @@ bool xset_get_b_panel(panel_t panel, XSetPanel name) noexcept;
 bool xset_get_b_panel_mode(panel_t panel, std::string_view name, MainWindowPanel mode) noexcept;
 bool xset_get_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcept;
 
-xset_t xset_set_b(xset_t set, bool bval) noexcept;
-xset_t xset_set_b(XSetName name, bool bval) noexcept;
-xset_t xset_set_b(std::string_view name, bool bval) noexcept;
-xset_t xset_set_b_panel(panel_t panel, std::string_view name, bool bval) noexcept;
-xset_t xset_set_b_panel(panel_t panel, XSetPanel name, bool bval) noexcept;
-xset_t xset_set_b_panel_mode(panel_t panel, std::string_view name, MainWindowPanel mode,
-                             bool bval) noexcept;
-xset_t xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode,
-                             bool bval) noexcept;
+void xset_set_b(xset_t set, bool bval) noexcept;
+void xset_set_b(XSetName name, bool bval) noexcept;
+void xset_set_b(std::string_view name, bool bval) noexcept;
+void xset_set_b_panel(panel_t panel, std::string_view name, bool bval) noexcept;
+void xset_set_b_panel(panel_t panel, XSetPanel name, bool bval) noexcept;
+void xset_set_b_panel_mode(panel_t panel, std::string_view name, MainWindowPanel mode,
+                           bool bval) noexcept;
+void xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode, bool bval) noexcept;
 
 // S
 char* xset_get_s(xset_t set) noexcept;
