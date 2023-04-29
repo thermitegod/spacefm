@@ -1680,7 +1680,7 @@ xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) n
     xset_set_cb(xset_get_xsetname_from_panel(panel, name), cb_func, cb_data);
 }
 
-xset_t
+void
 xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept
 {
     assert(set != nullptr);
@@ -1690,10 +1690,9 @@ xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept
     }
     set->ob1 = ztd::strdup(ob1);
     set->ob1_data = GINT_TO_POINTER(ob1_int);
-    return set;
 }
 
-xset_t
+void
 xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept
 {
     assert(set != nullptr);
@@ -1703,10 +1702,9 @@ xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept
     }
     set->ob1 = ztd::strdup(ob1);
     set->ob1_data = ob1_data;
-    return set;
 }
 
-xset_t
+void
 xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept
 {
     assert(set != nullptr);
@@ -1716,5 +1714,4 @@ xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept
     }
     set->ob2 = ztd::strdup(ob2);
     set->ob2_data = ob2_data;
-    return set;
 }

@@ -441,9 +441,9 @@ void xset_set_cb(std::string_view name, GFunc cb_func, void* cb_data) noexcept;
 void xset_set_cb_panel(panel_t panel, std::string_view name, GFunc cb_func, void* cb_data) noexcept;
 void xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) noexcept;
 
-xset_t xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept;
-xset_t xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept;
-xset_t xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept;
+void xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept;
+void xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept;
+void xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept;
 
 // Int
 
