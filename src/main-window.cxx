@@ -33,6 +33,8 @@
 
 #include <malloc.h>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <ztd/ztd.hxx>
@@ -433,9 +435,10 @@ create_plugins_menu(MainWindow* main_window)
     gtk_menu_shell_append(GTK_MENU_SHELL(plug_menu), item);
 
     plugins = xset_get_plugins();
-    for (xset_t set2 : plugins)
+    for (xset_t plugin : plugins)
     {
-        xset_add_menuitem(file_browser, plug_menu, accel_group, set2);
+        assert(plugin != nullptr);
+        xset_add_menuitem(file_browser, plug_menu, accel_group, plugin);
     }
     if (!plugins.empty())
     {
@@ -3624,6 +3627,8 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
 
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (set->shared_key)
         {
             // set has shared key

@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <ranges>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -83,6 +85,8 @@ clean_plugin_mirrors()
         redo = false;
         for (xset_t set : xsets)
         {
+            assert(set != nullptr);
+
             if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
             {
                 if (!set->shared_key || !xset_is(set->shared_key))
@@ -116,8 +120,12 @@ clean_plugin_mirrors()
 static void
 xset_set_plugin_mirror(xset_t pset)
 {
+    assert(pset != nullptr);
+
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
         {
             if (set->parent && set->child)
@@ -145,6 +153,8 @@ xset_set_plugin_mirror(xset_t pset)
 xset_t
 xset_get_plugin_mirror(xset_t set)
 {
+    assert(set != nullptr);
+
     // plugin mirrors are custom xsets that save the user's key, icon
     // and run prefs for the plugin, if any
     if (!set->plugin)
@@ -179,6 +189,9 @@ xset_get_plugin_mirror(xset_t set)
 static i32
 compare_plugin_sets(xset_t a, xset_t b)
 {
+    assert(a != nullptr);
+    assert(b != nullptr);
+
     return g_utf8_collate(a->menu_label, b->menu_label);
 }
 
@@ -189,6 +202,8 @@ xset_get_plugins()
 
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (set->plugin && set->plugin_top && set->plug_dir)
         {
             plugins.emplace_back(set);
@@ -214,6 +229,8 @@ xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
 
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (set->plugin && ztd::same(plug_name, set->plug_name) &&
             ztd::same(plug_dir, set->plug_dir))
         {
@@ -399,6 +416,8 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
         redo = false;
         for (xset_t set : xsets)
         {
+            assert(set != nullptr);
+
             if (set->plugin && ztd::same(plug_dir, set->plug_dir))
             {
                 xset_remove(set);
@@ -423,6 +442,8 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     xset_t rset = nullptr;
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (set->plugin && ztd::same(plug_dir, set->plug_dir))
         {
             set->key = 0;

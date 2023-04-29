@@ -18,6 +18,8 @@
 
 #include <vector>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -1003,6 +1005,8 @@ xset_design_job_set_scroll(xset_t set)
 void
 xset_design_job(GtkWidget* item, xset_t set)
 {
+    assert(set != nullptr);
+
     bool update_toolbars = false;
 
     XSetTool tool_type;

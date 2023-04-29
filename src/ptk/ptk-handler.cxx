@@ -33,6 +33,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -1539,7 +1541,8 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
 static void
 config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const Handler* handler,
                              HandlerData* hnd)
-{ // handler_xset_name optional if handler_xset passed
+{
+    // handler_xset_name optional if handler_xset passed
     // Fetching actual xset if only the name has been passed
     if (!handler_xset)
     {

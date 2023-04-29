@@ -30,6 +30,8 @@
 
 #include <chrono>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -69,6 +71,8 @@ enum PTKFileArchiverExtensionsCol
 static const std::string
 archive_handler_get_first_extension(xset_t handler_xset)
 {
+    assert(handler_xset != nullptr);
+
     // Function deals with the possibility that a handler is responsible
     // for multiple MIME types and therefore file extensions. Functions
     // like archive creation need only one extension
@@ -109,6 +113,8 @@ archive_handler_get_first_extension(xset_t handler_xset)
 static bool
 archive_handler_run_in_term(xset_t handler_xset, i32 operation)
 {
+    assert(handler_xset != nullptr);
+
     // Making sure a valid handler_xset has been passed
     if (!handler_xset)
     {

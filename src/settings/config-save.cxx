@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -47,6 +49,8 @@
 const setvars_t
 xset_pack_set(xset_t set)
 {
+    assert(set != nullptr);
+
     setvars_t setvars;
     // hack to not save default handlers - this allows default handlers
     // to be updated more easily
@@ -231,8 +235,9 @@ xset_pack_sets()
 
     for (xset_t set : xsets)
     {
-        const setvars_t setvars = xset_pack_set(set);
+        assert(set != nullptr);
 
+        const setvars_t setvars = xset_pack_set(set);
         if (!setvars.empty())
         {
             xsetpak.insert({fmt::format("{}", set->name), setvars});

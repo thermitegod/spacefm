@@ -18,6 +18,8 @@
 
 #include <vector>
 
+#include <cassert>
+
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
@@ -2008,6 +2010,8 @@ xset_defaults()
     // mark all labels and icons as default
     for (xset_t set2 : xsets)
     {
+        assert(set2 != nullptr);
+
         if (set2->lock)
         {
             if (set2->in_terminal)
@@ -2036,6 +2040,8 @@ def_key(XSetName name, u32 key, u32 keymod)
     // key combo already in use?
     for (xset_t set2 : keysets)
     {
+        assert(set2 != nullptr);
+
         if (set2->key == key && set2->keymod == keymod)
         {
             return;
@@ -2051,6 +2057,8 @@ xset_default_keys()
     // read all currently set or unset keys
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (set->key)
         {
             keysets.emplace_back(set);

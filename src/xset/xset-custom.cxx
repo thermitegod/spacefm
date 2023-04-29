@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <gtk/gtk.h>
@@ -91,6 +93,8 @@ xset_custom_new()
 void
 xset_custom_delete(xset_t set, bool delete_next)
 {
+    assert(set != nullptr);
+
     if (set->menu_style == XSetMenu::SUBMENU && set->child)
     {
         xset_t set_child = xset_get(set->child);
@@ -130,6 +134,8 @@ xset_custom_delete(xset_t set, bool delete_next)
 xset_t
 xset_custom_remove(xset_t set)
 {
+    assert(set != nullptr);
+
     xset_t set_prev;
     xset_t set_next;
     xset_t set_parent;
@@ -210,6 +216,8 @@ xset_custom_remove(xset_t set)
 char*
 xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 {
+    assert(set != nullptr);
+
     char* menu_label = nullptr;
     GdkPixbuf* icon_new = nullptr;
 
@@ -282,6 +290,8 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 static bool
 xset_custom_export_files(xset_t set, std::string_view plug_dir)
 {
+    assert(set != nullptr);
+
     std::string path_src;
     std::string path_dest;
 
@@ -532,6 +542,8 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 char*
 xset_custom_get_script(xset_t set, bool create)
 {
+    assert(set != nullptr);
+
     if ((!ztd::startswith(set->name, "cstm_") && !ztd::startswith(set->name, "cust") &&
          !ztd::startswith(set->name, "hand")) ||
         (create && set->plugin))
@@ -589,6 +601,9 @@ xset_custom_get_script(xset_t set, bool create)
 static void
 xset_custom_copy_files(xset_t src, xset_t dest)
 {
+    assert(src != nullptr);
+    assert(dest != nullptr);
+
     std::string path_src;
     std::string path_dest;
     std::string command;
@@ -684,6 +699,8 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 xset_t
 xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
 {
+    assert(set != nullptr);
+
     // ztd::logger::info("xset_custom_copy( {}, {}, {})", set->name, copy_next ? "true" : "false",
     // delete_set ? "true" : "false");
     xset_t mset = set;
@@ -761,6 +778,8 @@ xset_find_custom(std::string_view search)
 
     for (xset_t set : xsets)
     {
+        assert(set != nullptr);
+
         if (!set->lock && ((set->menu_style == XSetMenu::SUBMENU && set->child) ||
                            (set->menu_style < XSetMenu::SUBMENU &&
                             XSetCMD(xset_get_int(set, XSetVar::X)) <= XSetCMD::BOOKMARK)))

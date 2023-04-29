@@ -31,6 +31,8 @@
 #include <algorithm>
 #include <ranges>
 
+#include <cassert>
+
 #include <unistd.h>
 
 #include <fmt/format.h>
@@ -448,6 +450,8 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 
     for (xset_t set2 : xsets)
     {
+        assert(set2 != nullptr);
+
         if (!set2->lock && set2->opener == job && set2->tool == XSetTool::NOT &&
             set2->menu_style != XSetMenu::SUBMENU && set2->menu_style != XSetMenu::SEP)
         {
@@ -521,6 +525,8 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             pinned = 0;
             for (xset_t set3 : xsets)
             {
+                assert(set3 != nullptr);
+
                 if (set3->next && ztd::startswith(set3->name, "open_all_type_"))
                 {
                     tset = open_all_tset = set3;
@@ -1094,8 +1100,12 @@ xset_custom_activate(GtkWidget* item, xset_t set)
 void
 xset_custom_insert_after(xset_t target, xset_t set)
 { // inserts single set 'set', no next
-    xset_t target_next;
 
+    assert(target != nullptr);
+    assert(set != nullptr);
+    assert(target != nullptr);
+
+#if 0
     if (!set)
     {
         ztd::logger::warn("xset_custom_insert_after set == nullptr");
@@ -1106,6 +1116,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
         ztd::logger::warn("xset_custom_insert_after target == nullptr");
         return;
     }
+#endif
 
     if (set->parent)
     {
@@ -1119,7 +1130,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
     set->next = target->next; // steal string
     if (target->next)
     {
-        target_next = xset_get(target->next);
+        xset_t target_next = xset_get(target->next);
         if (target_next->prev)
         {
             std::free(target_next->prev);
@@ -1147,6 +1158,8 @@ xset_custom_insert_after(xset_t target, xset_t set)
 static bool
 xset_clipboard_in_set(xset_t set)
 { // look upward to see if clipboard is in set's tree
+    assert(set != nullptr);
+
     if (!xset_set_clipboard || set->lock)
     {
         return false;
@@ -1279,6 +1292,8 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
 const std::string
 xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
 {
+    assert(set != nullptr);
+
     i32 keyval;
     i32 keymod;
     if (set)
@@ -1397,6 +1412,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 
     for (xset_t set2 : xsets)
     {
+        assert(set2 != nullptr);
+
         if (set2 && set2 != set && set2->key > 0 && set2->key == event->keyval &&
             set2->keymod == keymod && set2 != keyset)
         {
@@ -1561,6 +1578,8 @@ xset_set_key(GtkWidget* parent, xset_t set)
             // clear duplicate key assignments
             for (xset_t set2 : xsets)
             {
+                assert(set2 != nullptr);
+
                 if (set2 && set2->key > 0 && set2->key == newkey && set2->keymod == newkeymod)
                 {
                     set2->key = 0;
@@ -1595,6 +1614,8 @@ xset_set_key(GtkWidget* parent, xset_t set)
 static bool
 xset_job_is_valid(xset_t set, XSetJob job)
 {
+    assert(set != nullptr);
+
     bool no_remove = false;
     bool no_paste = false;
     bool open_all = false;
