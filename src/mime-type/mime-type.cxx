@@ -89,7 +89,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
         return XDG_MIME_TYPE_DIRECTORY.data();
     }
 
-    for (mime_cache_t cache : caches)
+    for (const mime_cache_t& cache : caches)
     {
         type = cache->lookup_literal(filename);
         if (type)
@@ -114,7 +114,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
     {
         i32 max_glob_len = 0;
         i32 glob_len = 0;
-        for (mime_cache_t cache : caches)
+        for (const mime_cache_t& cache : caches)
         {
             const char* matched_type = cache->lookup_glob(filename, &glob_len);
             /* according to the mime.cache 1.0 spec, we should use the longest glob matched. */
@@ -387,7 +387,7 @@ mime_cache_reload(mime_cache_t cache)
     cache->reload();
 
     /* recalculate max magic extent */
-    for (mime_cache_t mcache : caches)
+    for (const mime_cache_t& mcache : caches)
     {
         if (mcache->get_magic_max_extent() > mime_cache_max_extent)
         {
@@ -506,7 +506,7 @@ mime_type_is_subclass(std::string_view type, std::string_view parent)
         return true;
     }
 
-    for (mime_cache_t cache : caches)
+    for (const mime_cache_t& cache : caches)
     {
         const std::vector<std::string> parents = cache->lookup_parents(type);
         for (const std::string_view p : parents)

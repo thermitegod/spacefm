@@ -214,7 +214,7 @@ vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback ca
         return;
     }
 
-    for (vfs::file_monitor_callback_entry installed_callback : monitor->callbacks)
+    for (const vfs::file_monitor_callback_entry& installed_callback : monitor->callbacks)
     {
         if (installed_callback->callback == callback && installed_callback->user_data == user_data)
         {
@@ -243,7 +243,7 @@ vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent e
         return;
     }
 
-    for (vfs::file_monitor_callback_entry cb : monitor->callbacks)
+    for (const vfs::file_monitor_callback_entry& cb : monitor->callbacks)
     {
         vfs::file_monitor_callback func = cb->callback;
         func(monitor, evt, file_name, cb->user_data);

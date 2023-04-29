@@ -155,7 +155,7 @@ info_mount_points(device_t device)
     // if we have the mount point list, use this instead of reading mountinfo
     if (!devmounts.empty())
     {
-        for (devmount_t devmount : devmounts)
+        for (const devmount_t& devmount : devmounts)
         {
             if (devmount->major == dmajor && devmount->minor == dminor)
             {
@@ -389,7 +389,7 @@ parse_mounts(bool report)
 
         // ztd::logger::debug("mount_point({}:{})={}", mount.major, mount.minor, mount.mount_point);
         devmount_t devmount = nullptr;
-        for (devmount_t search : newmounts)
+        for (const devmount_t& search : newmounts)
         {
             if (search->major == mount.major && search->minor == mount.minor)
             {
@@ -457,7 +457,7 @@ parse_mounts(bool report)
     }
     // ztd::logger::debug("LINES DONE");
     // translate each mount points list to string
-    for (devmount_t devmount : newmounts)
+    for (const devmount_t& devmount : newmounts)
     {
         // Sort the list to ensure that shortest mount paths appear first
         std::ranges::sort(devmount->mounts, ztd::compare);
@@ -472,13 +472,13 @@ parse_mounts(bool report)
     std::vector<devmount_t> changed;
     if (report)
     {
-        for (devmount_t devmount : newmounts)
+        for (const devmount_t& devmount : newmounts)
         {
             // ztd::logger::debug("finding {}:{}", devmount->major, devmount->minor);
 
             devmount_t found = nullptr;
 
-            for (devmount_t search : devmounts)
+            for (const devmount_t& search : devmounts)
             {
                 if (devmount->major == search->major && devmount->minor == search->minor)
                 {
@@ -512,7 +512,7 @@ parse_mounts(bool report)
 
     // ztd::logger::debug("REMAINING");
     // any remaining devices in old list have changed mount status
-    for (devmount_t devmount : devmounts)
+    for (const devmount_t& devmount : devmounts)
     {
         // ztd::logger::debug("remain {}:{}", devmount->major, devmount->minor);
         if (report)
@@ -527,7 +527,7 @@ parse_mounts(bool report)
     // report
     if (report && !changed.empty())
     {
-        for (devmount_t devmount : changed)
+        for (const devmount_t& devmount : changed)
         {
             const dev_t devnum = makedev(devmount->major, devmount->minor);
             const auto check_udevice = udev.device_from_devnum('b', devnum);
@@ -563,7 +563,7 @@ get_devmount_fstype(dev_t device)
     const auto major = gnu_dev_major(device);
     const auto minor = gnu_dev_minor(device);
 
-    for (devmount_t devmount : devmounts)
+    for (const devmount_t& devmount : devmounts)
     {
         if (devmount->major == major && devmount->minor == minor)
         {
@@ -967,7 +967,7 @@ vfs_volume_init()
         enumerate.add_match_subsystem("block");
         enumerate.scan_devices();
         const auto devices = enumerate.enumerate_devices();
-        for (auto device : devices)
+        for (const auto& device : devices)
         {
             const auto syspath = device.get_syspath();
             const auto udevice = udev.device_from_syspath(syspath.value());
@@ -1087,7 +1087,7 @@ vfs_volume_get_by_device(std::string_view device_file)
 static void
 call_callbacks(vfs::volume vol, VFSVolumeState state)
 {
-    for (auto callback : callbacks)
+    for (const auto& callback : callbacks)
     {
         callback->cb(vol, state, callback->user_data);
     }
@@ -1123,7 +1123,7 @@ vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data)
 void
 vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
 {
-    for (auto callback : callbacks)
+    for (const auto& callback : callbacks)
     {
         if (callback->cb == cb && callback->user_data == user_data)
         {

@@ -117,8 +117,7 @@ vfs_mime_type_init()
     mime_type_init();
 
     /* install file alteration monitor for mime-cache */
-    const std::vector<mime_cache_t> caches = mime_type_get_caches();
-    for (mime_cache_t cache : caches)
+    for (const mime_cache_t& cache : mime_type_get_caches())
     {
         // MOD NOTE1  check to see if path exists - otherwise it later tries to
         //  remove nullptr monitor with inotify which caused segfault
