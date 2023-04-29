@@ -105,19 +105,19 @@ FilePropertiesDialogData::~FilePropertiesDialogData()
 {
     if (this->owner_name)
     {
-        free(this->owner_name);
+        std::free(this->owner_name);
     }
     if (this->group_name)
     {
-        free(this->group_name);
+        std::free(this->group_name);
     }
     if (this->orig_mtime)
     {
-        free(this->orig_mtime);
+        std::free(this->orig_mtime);
     }
     if (this->orig_atime)
     {
-        free(this->orig_atime);
+        std::free(this->orig_atime);
     }
 }
 
@@ -306,7 +306,7 @@ combo_sep(GtkTreeModel* model, GtkTreeIter* it, void* user_data)
         gtk_tree_model_get(model, it, i, &tmp, -1);
         if (tmp)
         {
-            free(tmp);
+            std::free(tmp);
             return false;
         }
     }
@@ -345,10 +345,10 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                         if (ztd::same(tmp, action))
                         {
                             exist = true;
-                            free(tmp);
+                            std::free(tmp);
                             break;
                         }
-                        free(tmp);
+                        std::free(tmp);
                     } while (gtk_tree_model_iter_next(model, &it));
                 }
 
@@ -379,7 +379,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                 {
                     gtk_combo_box_set_active_iter(combo, &it);
                 }
-                free(action);
+                std::free(action);
             }
             else
             {
@@ -872,7 +872,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                         vfs::mime_type mime = file->get_mime_type();
                         vfs_mime_type_set_default_action(mime, action);
                         vfs_mime_type_unref(mime);
-                        free(action);
+                        std::free(action);
                     }
                 }
             }

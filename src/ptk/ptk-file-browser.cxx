@@ -254,7 +254,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         const i32 pos = gtk_paned_get_position(GTK_PANED(file_browser->hpane));
         if (!main_window->fullscreen)
         {
-            free(set->x);
+            std::free(set->x);
             set->x = ztd::strdup(pos);
         }
         main_window->panel_slide_x[p - 1] = pos;
@@ -268,7 +268,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_top));
         if (!main_window->fullscreen)
         {
-            free(set->y);
+            std::free(set->y);
             set->y = ztd::strdup(pos);
         }
         main_window->panel_slide_y[p - 1] = pos;
@@ -277,7 +277,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_bottom));
         if (!main_window->fullscreen)
         {
-            free(set->s);
+            std::free(set->s);
             set->s = ztd::strdup(pos);
         }
         main_window->panel_slide_s[p - 1] = pos;
@@ -436,7 +436,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         const std::string dirname_path = Glib::path_get_dirname(final_path);
         if (!ztd::contains(dirname_path, ptk_file_browser_get_cwd(file_browser)))
         {
-            free(file_browser->select_path);
+            std::free(file_browser->select_path);
             file_browser->select_path = ztd::strdup(final_path);
             ptk_file_browser_chdir(file_browser,
                                    dirname_path,
@@ -1110,12 +1110,12 @@ ptk_file_browser_finalize(GObject* obj)
         g_object_unref(G_OBJECT(file_browser->file_list));
     }
 
-    free(file_browser->status_bar_custom);
-    free(file_browser->seek_name);
+    std::free(file_browser->status_bar_custom);
+    std::free(file_browser->seek_name);
     file_browser->seek_name = nullptr;
-    free(file_browser->book_set_name);
+    std::free(file_browser->book_set_name);
     file_browser->book_set_name = nullptr;
-    free(file_browser->select_path);
+    std::free(file_browser->select_path);
     file_browser->select_path = nullptr;
     for (auto& toolbar_widget : file_browser->toolbar_widgets)
     {
@@ -1623,7 +1623,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
     if (file_browser->select_path)
     {
         ptk_file_browser_select_file(file_browser, file_browser->select_path);
-        free(file_browser->select_path);
+        std::free(file_browser->select_path);
         file_browser->select_path = nullptr;
         return;
     }
@@ -1843,7 +1843,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, std::string_view folder_pat
                 if (file_browser->curHistory && file_browser->curHistory->next)
                 {
                     /* clear old forward history */
-                    g_list_foreach(file_browser->curHistory->next, (GFunc)free, nullptr);
+                    g_list_foreach(file_browser->curHistory->next, (GFunc)std::free, nullptr);
                     g_list_free(file_browser->curHistory->next);
                     file_browser->curHistory->next = nullptr;
                 }
@@ -2241,7 +2241,7 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, std::string_view path)
         const std::string dir_path = Glib::path_get_dirname(canon);
         if (!ztd::same(dir_path, cwd))
         {
-            free(file_browser->select_path);
+            std::free(file_browser->select_path);
             file_browser->select_path = ztd::strdup(canon);
             ptk_file_browser_chdir(file_browser,
                                    dir_path,
@@ -2525,7 +2525,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
         // key is all lowercase so do icase search
         icase = true;
     }
-    free(lower_key);
+    std::free(lower_key);
 
     // get model, treesel, and stop signals
     switch (file_browser->view_mode)
@@ -2920,7 +2920,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
     if (!ztd::same(cwd, seek_dir))
     {
         // change dir
-        free(file_browser->seek_name);
+        std::free(file_browser->seek_name);
         file_browser->seek_name = ztd::strdup(seek_name.data());
         file_browser->inhibit_focus = true;
         if (!ptk_file_browser_chdir(file_browser,
@@ -2928,7 +2928,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_d
                                     PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
         {
             file_browser->inhibit_focus = false;
-            free(file_browser->seek_name);
+            std::free(file_browser->seek_name);
             file_browser->seek_name = nullptr;
         }
         // return here to allow dir to load
@@ -3224,7 +3224,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 
     if (dir_name)
     {
-        free(dir_name);
+        std::free(dir_name);
     }
 }
 
@@ -3546,7 +3546,7 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
                 gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), dir_path);
             }
         }
-        free(dir_path);
+        std::free(dir_path);
     }
     return false;
 }
@@ -3656,7 +3656,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                     const i32 width = gtk_tree_view_column_get_width(col);
                     if (width > 0)
                     {
-                        free(set->y);
+                        std::free(set->y);
                         set->y = ztd::strdup(width);
                         // ztd::logger::info("        {}\t{}", width, title);
                     }
@@ -3696,7 +3696,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
             {
                 // save column position
                 xset_t set = xset_get_panel(file_browser->mypanel, column_names.at(index));
-                free(set->x);
+                std::free(set->x);
                 set->x = ztd::strdup(i);
 
                 break;
@@ -3791,10 +3791,10 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
         {
             no_match = !ztd::contains(name, key);
         }
-        free(key2);
+        std::free(key2);
     }
-    free(lower_name);
-    free(lower_key);
+    std::free(lower_name);
+    std::free(lower_key);
     return no_match; // return false for match
 }
 
@@ -4290,7 +4290,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     else
     {
         file_browser->busy = true;
-        free(file_browser->select_path);
+        std::free(file_browser->select_path);
         file_browser->select_path = ztd::strdup(cursor_path);
     }
     file_browser->signal_file_listed =
@@ -5245,7 +5245,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
                             "Invalid Destination",
                             GtkButtonsType::GTK_BUTTONS_OK,
                             "Destination same as source");
-            free(dest_dir);
+            std::free(dest_dir);
             return;
         }
 
@@ -5266,7 +5266,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
                               GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                               file_browser->task_view);
         ptk_file_task_run(ptask);
-        free(dest_dir);
+        std::free(dest_dir);
     }
     else
     {

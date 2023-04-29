@@ -221,7 +221,7 @@ mime_type_get_by_file(std::string_view filepath)
                 }
                 else
                 {
-                    free(data);
+                    std::free(data);
                 }
                 data = (char*)-1;
             }
@@ -254,7 +254,7 @@ mime_type_get_by_file(std::string_view filepath)
                 }
                 else
                 { /* we use our own buffer */
-                    free(data);
+                    std::free(data);
                 }
             }
             close(fd);
@@ -419,7 +419,7 @@ mime_cache_free_all()
 
     mime_cache_max_extent = 0;
 
-    free(mime_magic_buf);
+    std::free(mime_magic_buf);
     mime_magic_buf = nullptr;
 }
 

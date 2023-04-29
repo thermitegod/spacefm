@@ -212,7 +212,7 @@ ptk_clipboard_cut_or_copy_files(std::string_view working_dir,
                                 clipboard_clean_data,
                                 nullptr);
 
-    free(targets);
+    std::free(targets);
 
     clipboard_file_list = file_list;
     clipboard_action = copy ? GdkDragAction::GDK_ACTION_COPY : GdkDragAction::GDK_ACTION_MOVE;
@@ -255,7 +255,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
                                 clipboard_get_data,
                                 clipboard_clean_data,
                                 nullptr);
-    free(targets);
+    std::free(targets);
 
     clipboard_file_list = file_list;
     clipboard_action = copy ? GdkDragAction::GDK_ACTION_COPY : GdkDragAction::GDK_ACTION_MOVE;

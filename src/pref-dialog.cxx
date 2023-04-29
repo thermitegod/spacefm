@@ -290,7 +290,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
             {
                 xset_set(XSetName::DATE_FORMAT, XSetVar::S, etext);
             }
-            free(etext);
+            std::free(etext);
             app_settings.set_date_format(xset_get_s(XSetName::DATE_FORMAT));
             need_refresh = true;
         }
@@ -414,7 +414,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         }
     }
     gtk_widget_destroy(GTK_WIDGET(dlg));
-    free(data);
+    std::free(data);
     data = nullptr;
 }
 

@@ -59,77 +59,77 @@ XSet::~XSet()
 
     if (this->name)
     {
-        free(this->name);
+        std::free(this->name);
     }
     if (this->s)
     {
-        free(this->s);
+        std::free(this->s);
     }
     if (this->x)
     {
-        free(this->x);
+        std::free(this->x);
     }
     if (this->y)
     {
-        free(this->y);
+        std::free(this->y);
     }
     if (this->z)
     {
-        free(this->z);
+        std::free(this->z);
     }
     if (this->menu_label)
     {
-        free(this->menu_label);
+        std::free(this->menu_label);
     }
     if (this->shared_key)
     {
-        free(this->shared_key);
+        std::free(this->shared_key);
     }
     if (this->icon)
     {
-        free(this->icon);
+        std::free(this->icon);
     }
     if (this->desc)
     {
-        free(this->desc);
+        std::free(this->desc);
     }
     if (this->title)
     {
-        free(this->title);
+        std::free(this->title);
     }
     if (this->next)
     {
-        free(this->next);
+        std::free(this->next);
     }
     if (this->parent)
     {
-        free(this->parent);
+        std::free(this->parent);
     }
     if (this->child)
     {
-        free(this->child);
+        std::free(this->child);
     }
     if (this->prev)
     {
-        free(this->prev);
+        std::free(this->prev);
     }
     if (this->line)
     {
-        free(this->line);
+        std::free(this->line);
     }
     if (this->context)
     {
-        free(this->context);
+        std::free(this->context);
     }
     if (this->plugin)
     {
         if (this->plug_dir)
         {
-            free(this->plug_dir);
+            std::free(this->plug_dir);
         }
         if (this->plug_name)
         {
-            free(this->plug_name);
+            std::free(this->plug_name);
         }
     }
 }
@@ -207,7 +207,7 @@ void
 XSet::set_s(const char* val) noexcept
 {
     if (this->s)
-        free(this->s);
+        std::free(this->s);
     this->s = ztd::strdup(val);
 }
 
@@ -215,7 +215,7 @@ void
 XSet::set_s(const std::string& val) noexcept
 {
     if (this->s)
-        free(this->s);
+        std::free(this->s);
     this->s = ztd::strdup(val);
 }
 
@@ -237,7 +237,7 @@ void
 XSet::set_x(const char* val) noexcept
 {
     if (this->x)
-        free(this->x);
+        std::free(this->x);
     this->x = ztd::strdup(val);
 }
 
@@ -245,7 +245,7 @@ void
 XSet::set_x(const std::string& val) noexcept
 {
     if (this->x)
-        free(this->x);
+        std::free(this->x);
     this->x = ztd::strdup(val);
 }
 
@@ -267,7 +267,7 @@ void
 XSet::set_y(const char* val) noexcept
 {
     if (this->y)
-        free(this->y);
+        std::free(this->y);
     this->y = ztd::strdup(val);
 }
 
@@ -275,7 +275,7 @@ void
 XSet::set_y(const std::string& val) noexcept
 {
     if (this->y)
-        free(this->y);
+        std::free(this->y);
     this->y = ztd::strdup(val);
 }
 
@@ -297,7 +297,7 @@ void
 XSet::set_z(const char* val) noexcept
 {
     if (this->z)
-        free(this->z);
+        std::free(this->z);
     this->z = ztd::strdup(val);
 }
 
@@ -305,7 +305,7 @@ void
 XSet::set_z(const std::string& val) noexcept
 {
     if (this->z)
-        free(this->z);
+        std::free(this->z);
     this->z = ztd::strdup(val);
 }
 
@@ -331,7 +331,7 @@ void
 XSet::set_menu_label(const char* val) noexcept
 {
     if (this->menu_label)
-        free(this->menu_label);
+        std::free(this->menu_label);
     this->menu_label = ztd::strdup(val);
     if (this->lock)
     { // indicate that menu label is not default and should be saved
@@ -343,7 +343,7 @@ void
 XSet::set_menu_label(const std::string& val) noexcept
 {
     if (this->menu_label)
-        free(this->menu_label);
+        std::free(this->menu_label);
     this->menu_label = ztd::strdup(val);
     if (this->lock)
     { // indicate that menu label is not default and should be saved
@@ -405,7 +405,7 @@ void
 XSet::set_ob1(const char* ob, void* data) noexcept
 {
     if (this->ob1)
-        free(this->ob1);
+        std::free(this->ob1);
     this->ob1 = ztd::strdup(ob);
     this->ob1_data = data;
 }
@@ -414,7 +414,7 @@ void
 XSet::set_ob1(const char* ob, const char* data) noexcept
 {
     if (this->ob1)
-        free(this->ob1);
+        std::free(this->ob1);
     this->ob1 = ztd::strdup(ob);
     // this->ob1_data = const_cast<char*>(data);
     this->ob1_data = ztd::strdup(data);
@@ -424,7 +424,7 @@ void
 XSet::set_ob1_int(const char* ob, i32 data) noexcept
 {
     if (this->ob1)
-        free(this->ob1);
+        std::free(this->ob1);
     this->ob1 = ztd::strdup(ob);
     this->ob1_data = GINT_TO_POINTER(data);
 }
@@ -433,7 +433,7 @@ void
 XSet::set_ob2(const char* ob, void* data) noexcept
 {
     if (this->ob2)
-        free(this->ob2);
+        std::free(this->ob2);
     this->ob2 = ztd::strdup(ob);
     this->ob2_data = data;
 }
@@ -472,7 +472,7 @@ void
 XSet::set_shared_key(const char* val) noexcept
 {
     if (this->shared_key)
-        free(this->shared_key);
+        std::free(this->shared_key);
     this->shared_key = ztd::strdup(val);
 }
 
@@ -480,7 +480,7 @@ void
 XSet::set_shared_key(const std::string& val) noexcept
 {
     if (this->shared_key)
-        free(this->shared_key);
+        std::free(this->shared_key);
     this->shared_key = ztd::strdup(val);
 }
 
@@ -495,7 +495,7 @@ XSet::set_icon(const char* val) noexcept
 {
     // icn is only used >= 0.9.0 for changed lock default icon
     if (this->icon)
-        free(this->icon);
+        std::free(this->icon);
     this->icon = ztd::strdup(val);
     if (this->lock)
     { // indicate that icon is not default and should be saved
@@ -508,7 +508,7 @@ XSet::set_icon(const std::string& val) noexcept
 {
     // icn is only used >= 0.9.0 for changed lock default icon
     if (this->icon)
-        free(this->icon);
+        std::free(this->icon);
     this->icon = ztd::strdup(val);
     if (this->lock)
     { // indicate that icon is not default and should be saved
@@ -526,7 +526,7 @@ void
 XSet::set_desc(const char* val) noexcept
 {
     if (this->desc)
-        free(this->desc);
+        std::free(this->desc);
     this->desc = ztd::strdup(val);
 }
 
@@ -534,7 +534,7 @@ void
 XSet::set_desc(const std::string& val) noexcept
 {
     if (this->desc)
-        free(this->desc);
+        std::free(this->desc);
     this->desc = ztd::strdup(val);
 }
 
@@ -548,7 +548,7 @@ void
 XSet::set_title(const char* val) noexcept
 {
     if (this->title)
-        free(this->title);
+        std::free(this->title);
     this->title = ztd::strdup(val);
 }
 
@@ -556,7 +556,7 @@ void
 XSet::set_title(const std::string& val) noexcept
 {
     if (this->title)
-        free(this->title);
+        std::free(this->title);
     this->title = ztd::strdup(val);
 }
 
@@ -570,7 +570,7 @@ void
 XSet::set_next(const char* val) noexcept
 {
     if (this->next)
-        free(this->next);
+        std::free(this->next);
     this->next = ztd::strdup(val);
 }
 
@@ -578,7 +578,7 @@ void
 XSet::set_next(const std::string& val) noexcept
 {
     if (this->next)
-        free(this->next);
+        std::free(this->next);
     this->next = ztd::strdup(val);
 }
 
@@ -592,7 +592,7 @@ void
 XSet::set_context(const char* val) noexcept
 {
     if (this->context)
-        free(this->context);
+        std::free(this->context);
     this->context = ztd::strdup(val);
 }
 
@@ -600,7 +600,7 @@ void
 XSet::set_context(const std::string& val) noexcept
 {
     if (this->context)
-        free(this->context);
+        std::free(this->context);
     this->context = ztd::strdup(val);
 }
 
@@ -655,7 +655,7 @@ void
 XSet::set_prev(const char* val) noexcept
 {
     if (this->prev)
-        free(this->prev);
+        std::free(this->prev);
     this->prev = ztd::strdup(val);
 }
 
@@ -663,7 +663,7 @@ void
 XSet::set_prev(const std::string& val) noexcept
 {
     if (this->prev)
-        free(this->prev);
+        std::free(this->prev);
     this->prev = ztd::strdup(val);
 }
 
@@ -677,7 +677,7 @@ void
 XSet::set_parent(const char* val) noexcept
 {
     if (this->parent)
-        free(this->parent);
+        std::free(this->parent);
     this->parent = ztd::strdup(val);
 }
 
@@ -685,7 +685,7 @@ void
 XSet::set_parent(const std::string& val) noexcept
 {
     if (this->parent)
-        free(this->parent);
+        std::free(this->parent);
     this->parent = ztd::strdup(val);
 }
 
@@ -699,7 +699,7 @@ void
 XSet::set_child(const char* val) noexcept
 {
     if (this->child)
-        free(this->child);
+        std::free(this->child);
     this->child = ztd::strdup(val);
 }
 
@@ -707,7 +707,7 @@ void
 XSet::set_child(const std::string& val) noexcept
 {
     if (this->child)
-        free(this->child);
+        std::free(this->child);
     this->child = ztd::strdup(val);
 }
 
@@ -721,7 +721,7 @@ void
 XSet::set_line(const char* val) noexcept
 {
     if (this->line)
-        free(this->line);
+        std::free(this->line);
     this->line = ztd::strdup(val);
 }
 
@@ -729,7 +729,7 @@ void
 XSet::set_line(const std::string& val) noexcept
 {
     if (this->line)
-        free(this->line);
+        std::free(this->line);
     this->line = ztd::strdup(val);
 }
 
@@ -863,7 +863,7 @@ void
 XSet::set_plug_name(const char* val) noexcept
 {
     if (this->plug_name)
-        free(this->plug_name);
+        std::free(this->plug_name);
     this->plug_name = ztd::strdup(val);
 }
 
@@ -871,7 +871,7 @@ void
 XSet::set_plug_name(const std::string& val) noexcept
 {
     if (this->plug_name)
-        free(this->plug_name);
+        std::free(this->plug_name);
     this->plug_name = ztd::strdup(val);
 }
 
@@ -885,7 +885,7 @@ void
 XSet::set_plug_dir(const char* val) noexcept
 {
     if (this->plug_dir)
-        free(this->plug_dir);
+        std::free(this->plug_dir);
     this->plug_dir = ztd::strdup(val);
 }
 
@@ -893,7 +893,7 @@ void
 XSet::set_plug_dir(const std::string& val) noexcept
 {
     if (this->plug_dir)
-        free(this->plug_dir);
+        std::free(this->plug_dir);
     this->plug_dir = ztd::strdup(val);
 }
 
@@ -983,7 +983,7 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
         case XSetVar::S:
             if (set->s)
             {
-                free(set->s);
+                std::free(set->s);
             }
             set->s = ztd::strdup(value.data());
             break;
@@ -1000,21 +1000,21 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
         case XSetVar::X:
             if (set->x)
             {
-                free(set->x);
+                std::free(set->x);
             }
             set->x = ztd::strdup(value.data());
             break;
         case XSetVar::Y:
             if (set->y)
             {
-                free(set->y);
+                std::free(set->y);
             }
             set->y = ztd::strdup(value.data());
             break;
         case XSetVar::Z:
             if (set->z)
             {
-                free(set->z);
+                std::free(set->z);
             }
             set->z = ztd::strdup(value.data());
             break;
@@ -1030,14 +1030,14 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
         case XSetVar::DESC:
             if (set->desc)
             {
-                free(set->desc);
+                std::free(set->desc);
             }
             set->desc = ztd::strdup(value.data());
             break;
         case XSetVar::TITLE:
             if (set->title)
             {
-                free(set->title);
+                std::free(set->title);
             }
             set->title = ztd::strdup(value.data());
             break;
@@ -1045,7 +1045,7 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
             // lbl is only used >= 0.9.0 for changed lock default menu_label
             if (set->menu_label)
             {
-                free(set->menu_label);
+                std::free(set->menu_label);
             }
             set->menu_label = ztd::strdup(value.data());
             if (set->lock)
@@ -1058,7 +1058,7 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
             // icn is only used >= 0.9.0 for changed lock default icon
             if (set->icon)
             {
-                free(set->icon);
+                std::free(set->icon);
             }
             set->icon = ztd::strdup(value.data());
             if (set->lock)
@@ -1074,7 +1074,7 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
             {
                 if (set->menu_label)
                 {
-                    free(set->menu_label);
+                    std::free(set->menu_label);
                 }
                 set->menu_label = ztd::strdup(value.data());
                 if (set->lock)
@@ -1092,49 +1092,49 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
         case XSetVar::SHARED_KEY:
             if (set->shared_key)
             {
-                free(set->shared_key);
+                std::free(set->shared_key);
             }
             set->shared_key = ztd::strdup(value.data());
             break;
         case XSetVar::NEXT:
             if (set->next)
             {
-                free(set->next);
+                std::free(set->next);
             }
             set->next = ztd::strdup(value.data());
             break;
         case XSetVar::PREV:
             if (set->prev)
             {
-                free(set->prev);
+                std::free(set->prev);
             }
             set->prev = ztd::strdup(value.data());
             break;
         case XSetVar::PARENT:
             if (set->parent)
             {
-                free(set->parent);
+                std::free(set->parent);
             }
             set->parent = ztd::strdup(value.data());
             break;
         case XSetVar::CHILD:
             if (set->child)
             {
-                free(set->child);
+                std::free(set->child);
             }
             set->child = ztd::strdup(value.data());
             break;
         case XSetVar::CONTEXT:
             if (set->context)
             {
-                free(set->context);
+                std::free(set->context);
             }
             set->context = ztd::strdup(value.data());
             break;
         case XSetVar::LINE:
             if (set->line)
             {
-                free(set->line);
+                std::free(set->line);
             }
             set->line = ztd::strdup(value.data());
             break;
@@ -1686,7 +1686,7 @@ xset_set_ob1_int(xset_t set, const char* ob1, i32 ob1_int) noexcept
     assert(set != nullptr);
     if (set->ob1)
     {
-        free(set->ob1);
+        std::free(set->ob1);
     }
     set->ob1 = ztd::strdup(ob1);
     set->ob1_data = GINT_TO_POINTER(ob1_int);
@@ -1698,7 +1698,7 @@ xset_set_ob1(xset_t set, const char* ob1, void* ob1_data) noexcept
     assert(set != nullptr);
     if (set->ob1)
     {
-        free(set->ob1);
+        std::free(set->ob1);
     }
     set->ob1 = ztd::strdup(ob1);
     set->ob1_data = ob1_data;
@@ -1710,7 +1710,7 @@ xset_set_ob2(xset_t set, const char* ob2, void* ob2_data) noexcept
     assert(set != nullptr);
     if (set->ob2)
     {
-        free(set->ob2);
+        std::free(set->ob2);
     }
     set->ob2 = ztd::strdup(ob2);
     set->ob2_data = ob2_data;

@@ -151,19 +151,19 @@ MoveSet::~MoveSet()
 {
     if (this->full_path)
     {
-        free(this->full_path);
+        std::free(this->full_path);
     }
     if (this->new_path)
     {
-        free(this->new_path);
+        std::free(this->new_path);
     }
     if (this->desc)
     {
-        free(this->desc);
+        std::free(this->desc);
     }
     if (this->mime_type)
     {
-        free(this->mime_type);
+        std::free(this->mime_type);
     }
 }
 
@@ -171,7 +171,7 @@ AutoOpenCreate::~AutoOpenCreate()
 {
     if (this->path)
     {
-        free(this->path);
+        std::free(this->path);
     }
 }
 
@@ -317,7 +317,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, false);
         if (name[0] == '\0')
         {
-            free(name);
+            std::free(name);
             name = nullptr;
         }
         ext = (char*)gtk_entry_get_text(mset->entry_ext);
@@ -350,7 +350,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         if (name)
         {
-            free(name);
+            std::free(name);
         }
         gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
@@ -774,7 +774,7 @@ select_input(GtkWidget* widget, MoveSet* mset)
 
             const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
 
-            free(full_name);
+            std::free(full_name);
             gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_no_extension.length());
         }
         else
@@ -1032,7 +1032,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             }
         }
         gtk_entry_set_text(GTK_ENTRY(w), path);
-        free(new_path);
+        std::free(new_path);
     }
 
     GtkAllocation allocation;
@@ -1124,7 +1124,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
     char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
-    free(path);
+    std::free(path);
 
     if (mode_default != MODE_PARENT)
     {
@@ -1132,7 +1132,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
         path = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), path);
-        free(path);
+        std::free(path);
     }
 
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
@@ -1202,7 +1202,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
                     gtk_text_buffer_set_text(mset->buf_full_path, path, -1);
                     break;
             }
-            free(path);
+            std::free(path);
             break;
         }
     }
@@ -1277,7 +1277,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         const std::string new_path = Glib::path_get_dirname(full_path);
 
         const bool rename = (ztd::same(mset->old_path, new_path) || ztd::same(new_path, "."));
-        free(full_path);
+        std::free(full_path);
 
         if (move)
         {
@@ -1931,7 +1931,7 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(buf, &iter);
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     gtk_clipboard_set_text(clip, text, -1);
-    free(text);
+    std::free(text);
 }
 
 static bool
@@ -2333,7 +2333,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                                    GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
                                     nullptr,
                                     nullptr);
-    // free( title );
+    // std::free( title );
     gtk_window_set_role(GTK_WINDOW(mset->dlg), "rename_dialog");
 
     // Buttons
@@ -3284,7 +3284,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     ptask->task->exec_command =
                         fmt::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
-                free(over_opt);
+                std::free(over_opt);
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
@@ -3557,7 +3557,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
                 cmd = fmt::format("cp -r {} {}", file_paths, quote_path);
             }
 
-            free(path);
+            std::free(path);
         }
         else
         {

@@ -91,7 +91,7 @@ xset_design_job_set_icon(xset_t set)
         // built-in icon has been changed from default, save it
         set->keep_terminal = true;
     }
-    free(old_icon);
+    std::free(old_icon);
 }
 
 static void
@@ -109,7 +109,7 @@ xset_design_job_set_edit(xset_t set)
             return;
         }
         xset_edit(parent, cscript, false, true);
-        free(cscript);
+        std::free(cscript);
     }
 }
 
@@ -128,7 +128,7 @@ xset_design_job_set_edit_root(xset_t set)
             return;
         }
         xset_edit(parent, cscript, true, false);
-        free(cscript);
+        std::free(cscript);
     }
 }
 
@@ -152,7 +152,7 @@ xset_design_job_set_copyname(xset_t set)
             return;
         }
         gtk_clipboard_set_text(clip, cscript, -1);
-        free(cscript);
+        std::free(cscript);
     }
     else if (cmd_type == XSetCMD::APP)
     {
@@ -192,7 +192,7 @@ xset_design_job_set_script(xset_t set)
         return;
     }
     xset_edit(parent, cscript, false, false);
-    free(cscript);
+    std::free(cscript);
 }
 
 static void
@@ -223,7 +223,7 @@ xset_design_job_set_custom(xset_t set)
     {
         xset_set_var(set, XSetVar::X, "2");
         xset_set_var(set, XSetVar::Z, custom_file);
-        free(custom_file);
+        std::free(custom_file);
     }
 }
 
@@ -284,7 +284,7 @@ xset_design_job_set_app(xset_t set)
 
     if (!(file && file[0]))
     {
-        free(file);
+        std::free(file);
     }
 
     // add new menu item
@@ -296,7 +296,7 @@ xset_design_job_set_app(xset_t set)
     newset->browser = set->browser;
     if (newset->x)
     {
-        free(newset->x);
+        std::free(newset->x);
     }
     newset->x = ztd::strdup("2"); // XSetCMD::APP
     // unset these to save session space
@@ -338,7 +338,7 @@ xset_design_job_set_command(xset_t set)
         xset_text_dialog(parent, "Set Item Name", enter_menu_name_new, "", name, &name, "", false);
     if (!response)
     {
-        free(name);
+        std::free(name);
     }
 
     // add new menu item
@@ -406,7 +406,7 @@ xset_design_job_set_submenu(xset_t set)
     childset->parent = ztd::strdup(newset->name);
     childset->menu_label = ztd::strdup("New _Command");
 
-    free(name);
+    std::free(name);
 }
 
 static void
@@ -472,7 +472,7 @@ xset_design_job_set_import_file(xset_t set)
                         "Error Creating Temp Directory",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         "Unable to create temporary directory");
-        free(file);
+        std::free(file);
         return;
     }
 
@@ -491,7 +491,7 @@ xset_design_job_set_import_file(xset_t set)
                         plug_dir,
                         PluginJob::COPY,
                         set);
-    free(file);
+    std::free(file);
 }
 
 static void
@@ -647,7 +647,7 @@ xset_design_job_set_remove(xset_t set)
                           name);
         buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;
     }
-    free(name);
+    std::free(name);
     const bool is_app = !set->lock && set->menu_style < XSetMenu::SUBMENU &&
                         cmd_type == XSetCMD::APP && set->tool <= XSetTool::CUSTOM;
     if (!(set->menu_style == XSetMenu::SEP) && app_settings.get_confirm() && !is_app &&
@@ -695,13 +695,13 @@ xset_design_job_set_remove(xset_t set)
     if (!(set->tool == XSetTool::NOT))
     {
         update_toolbars = true;
-        free(name);
-        free(prog);
+        std::free(name);
+        std::free(prog);
         name = prog = nullptr;
     }
     else
     {
-        free(prog);
+        std::free(prog);
         prog = nullptr;
     }
 
@@ -710,11 +710,11 @@ xset_design_job_set_remove(xset_t set)
 
     if (prog)
     {
-        free(prog);
+        std::free(prog);
     }
     if (name)
     {
-        free(name);
+        std::free(name);
     }
 
     return update_toolbars;

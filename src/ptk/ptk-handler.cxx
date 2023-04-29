@@ -930,7 +930,7 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     const std::string script = ztd::replace(def_script, "/exec.fish", str);
-    free(def_script);
+    std::free(def_script);
     if (std::filesystem::exists(script))
     {
         return ztd::strdup(script);
@@ -990,7 +990,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     script = ztd::replace(def_script, "/exec.fish", script_name);
-    free(def_script);
+    std::free(def_script);
     // load script
     // bool modified = false;
     bool start = true;
@@ -1070,7 +1070,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     const std::string script = ztd::replace(def_script, "/exec.fish", str);
-    free(def_script);
+    std::free(def_script);
     // get text
     std::string text;
     if (view)
@@ -1271,7 +1271,7 @@ string_copy_free(char** s, const char* src)
 {
     char* discard = *s;
     *s = ztd::strdup(src);
-    free(discard);
+    std::free(discard);
 }
 
 void
@@ -1341,7 +1341,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
             // add a missing default handler to the list
             str = list;
             list = g_strconcat(list, list[0] ? " " : "", handler->setname, nullptr);
-            free(str);
+            std::free(str);
         }
         testlist = fmt::format("{} ", list);
         if (add_missing || ztd::contains(testlist, testname))
@@ -1373,7 +1373,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
         }
     }
     // update handler list
-    free(set_conf->s);
+    std::free(set_conf->s);
     set_conf->s = list;
 }
 
@@ -1774,7 +1774,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
         {
             archive_handlers = fmt::format("{} {}", archive_handlers, xset_name);
         }
-        free(xset_name);
+        std::free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
@@ -1834,8 +1834,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         {
             ztd::logger::warn("Unable to fetch the xset for the archive handler '%s'",
                               handler_name);
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
     }
@@ -1845,8 +1845,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Exiting if there is no handler to add
         if (!(handler_name && handler_name[0]))
         {
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
 
@@ -1951,8 +1951,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Exiting if apply has been pressed when no handlers are present
         if (xset_name == nullptr)
         {
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
 
@@ -2028,8 +2028,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Exiting if remove has been pressed when no handlers are present
         if (xset_name == nullptr)
         {
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
 
@@ -2041,8 +2041,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 
         if (response != GtkResponseType::GTK_RESPONSE_YES)
         {
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
 
@@ -2120,8 +2120,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (!handler_xset)
         {
             // no row selected
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
 
@@ -2129,8 +2129,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         GtkTreeIter iter_prev;
         if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
         {
-            free(xset_name);
-            free(handler_name_from_model);
+            std::free(xset_name);
+            std::free(handler_name_from_model);
             return;
         }
         iter_prev = iter;
@@ -2147,8 +2147,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 else if (!gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter))
                 {
                     // was last row
-                    free(xset_name);
-                    free(handler_name_from_model);
+                    std::free(xset_name);
+                    std::free(handler_name_from_model);
                     return;
                 }
                 break;
@@ -2172,8 +2172,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                         error_message);
     }
 
-    free(xset_name);
-    free(handler_name_from_model);
+    std::free(xset_name);
+    std::free(handler_name_from_model);
 }
 
 static void
@@ -2198,7 +2198,7 @@ on_configure_changed(GtkTreeSelection* selection, HandlerData* hnd)
 
     // Loading new archive handler values
     config_load_handler_settings(nullptr, xset_name, nullptr, hnd);
-    free(xset_name);
+    std::free(xset_name);
     hnd->changed = hnd->compress_changed = hnd->extract_changed = hnd->list_changed = false;
     gtk_widget_set_sensitive(hnd->btn_apply, false);
 
@@ -2406,7 +2406,7 @@ restore_defaults(HandlerData* hnd, bool all)
         // a default handler is selected?
         if (!(xset_name && ztd::startswith(xset_name, handler_def_prefixs.at(hnd->mode))))
         {
-            free(xset_name);
+            std::free(xset_name);
             return;
         }
 
@@ -2460,7 +2460,7 @@ restore_defaults(HandlerData* hnd, bool all)
             }
         }
 
-        free(xset_name);
+        std::free(xset_name);
         if (!found_handler)
         {
             return;
@@ -2568,9 +2568,9 @@ validate_archive_handler(HandlerData* hnd)
                             "file/directory");
             gtk_widget_grab_focus(hnd->view_handler_compress);
 
-            free(handler_compress);
-            free(handler_extract);
-            free(handler_list);
+            std::free(handler_compress);
+            std::free(handler_extract);
+            std::free(handler_list);
             return false;
         }
     }
@@ -2590,9 +2590,9 @@ validate_archive_handler(HandlerData* hnd)
                         "Archive to extract");
         gtk_widget_grab_focus(hnd->view_handler_extract);
 
-        free(handler_compress);
-        free(handler_extract);
-        free(handler_list);
+        std::free(handler_compress);
+        std::free(handler_extract);
+        std::free(handler_list);
         return false;
     }
 
@@ -2611,15 +2611,15 @@ validate_archive_handler(HandlerData* hnd)
                         "Archive to list");
         gtk_widget_grab_focus(hnd->view_handler_list);
 
-        free(handler_compress);
-        free(handler_extract);
-        free(handler_list);
+        std::free(handler_compress);
+        std::free(handler_extract);
+        std::free(handler_list);
         return false;
     }
 
-    free(handler_compress);
-    free(handler_extract);
-    free(handler_list);
+    std::free(handler_compress);
+    std::free(handler_extract);
+    std::free(handler_list);
 
     // Validation passed
     return ret;
@@ -2668,7 +2668,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     char* xset_name = nullptr;
     gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
     xset_t set = xset_is(xset_name);
-    free(xset_name);
+    std::free(xset_name);
     if (!(set && !set->disable && set->b == XSetB::XSET_B_TRUE))
     {
         return true;
@@ -2679,7 +2679,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
         return true;
     }
     xset_edit(hnd->dlg, script, false, false);
-    free(script);
+    std::free(script);
     return true;
 }
 
@@ -2793,7 +2793,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     {
         gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
         set_sel = xset_is(xset_name);
-        free(xset_name);
+        std::free(xset_name);
     }
 
     // determine job
@@ -2827,7 +2827,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             }
             if (save->s)
             {
-                free(save->s);
+                std::free(save->s);
             }
             save->s = ztd::strdup(Glib::path_get_dirname(file));
             break;
@@ -2870,7 +2870,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                         "Error Creating Temp Directory",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         "Unable to create temporary directory");
-        free(file);
+        std::free(file);
         return;
     }
 
@@ -2886,7 +2886,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
 
     // Install plugin
     install_plugin_file(nullptr, hnd->dlg, file, plug_dir, PluginJob::COPY, nullptr);
-    free(file);
+    std::free(file);
 }
 
 static void
@@ -3000,7 +3000,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             set->desc = ztd::strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                                     "arc_def_parent arc_def_write");
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
-            free(set->desc);
+            std::free(set->desc);
             set->desc = old_desc;
         }
         else if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FS)

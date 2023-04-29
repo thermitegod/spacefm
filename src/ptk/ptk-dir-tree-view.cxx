@@ -683,7 +683,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                 }
 
-                free(dest_dir);
+                std::free(dest_dir);
                 g_strfreev(list);
                 file_browser->pending_drag_status_tree = false;
                 return;
@@ -747,11 +747,11 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         ptk_file_task_run(ptask);
                     }
                 }
-                free(dest_dir);
+                std::free(dest_dir);
                 gtk_drag_finish(drag_context, true, false, time);
                 return;
             }
-            free(dest_dir);
+            std::free(dest_dir);
         }
         else
         {

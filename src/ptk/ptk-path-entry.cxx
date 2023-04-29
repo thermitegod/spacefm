@@ -193,11 +193,11 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
 
     if (*key == 0 || g_ascii_strncasecmp(name, key, std::strlen(key)) == 0)
     {
-        free(name);
+        std::free(name);
         return true;
     }
 
-    free(name);
+    std::free(name);
     return false;
 }
 
@@ -212,7 +212,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
     // dir completion
     const std::string fn = ztd::rpartition(text, "/")[2];
-    g_object_set_data_full(G_OBJECT(completion), "fn", ztd::strdup(fn), (GDestroyNotify)free);
+    g_object_set_data_full(G_OBJECT(completion), "fn", ztd::strdup(fn), (GDestroyNotify)std::free);
 
     const std::string cwd = get_cwd(entry);
     const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
@@ -221,7 +221,10 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         return;
     }
 
-    g_object_set_data_full(G_OBJECT(completion), "cwd", ztd::strdup(cwd), free);
+    g_object_set_data_full(G_OBJECT(completion),
+                           "cwd",
+                           ztd::strdup(cwd),
+                           (GDestroyNotify)std::free);
 
     if (std::filesystem::is_directory(cwd))
     {
@@ -439,7 +442,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
                                         nullptr);
 
         gtk_entry_set_text(GTK_ENTRY(entry), path);
-        free(path);
+        std::free(path);
         gtk_editable_set_position(GTK_EDITABLE(entry), -1);
 
         g_signal_handlers_unblock_matched(G_OBJECT(entry),

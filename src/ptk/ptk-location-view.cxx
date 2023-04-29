@@ -109,11 +109,11 @@ AutoOpen::~AutoOpen()
 {
     if (this->device_file)
     {
-        free(this->device_file);
+        std::free(this->device_file);
     }
     if (this->mount_point)
     {
-        free(this->mount_point);
+        std::free(this->mount_point);
     }
 }
 

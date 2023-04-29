@@ -82,8 +82,8 @@ transpose_nonlatin_keypress(GdkEventKey* event)
                 break;
             }
         }
-        free(keys);
-        free(keyvals);
+        std::free(keys);
+        std::free(keyvals);
     }
 }
 #endif

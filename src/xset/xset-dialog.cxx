@@ -54,7 +54,7 @@ multi_input_get_text(GtkWidget* input)
     char* ret = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (ret && ret[0] == '\0')
     {
-        free(ret);
+        std::free(ret);
         ret = nullptr;
     }
     return ret;
@@ -73,10 +73,10 @@ on_multi_input_insert(GtkTextBuffer* buf)
     char* all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (!strchr(all, '\n'))
     {
-        free(all);
+        std::free(all);
         return;
     }
-    free(all);
+    std::free(all);
 
     // delete selected text that was pasted over
     if (gtk_text_buffer_get_selection_bounds(buf, &siter, &iter))
@@ -140,8 +140,8 @@ on_multi_input_insert(GtkTextBuffer* buf)
                                       (void*)on_multi_input_insert,
                                       nullptr);
 
-    free(a);
-    free(b);
+    std::free(a);
+    std::free(b);
 }
 
 GtkTextView*
@@ -364,7 +364,7 @@ xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg
                 {
                     if (*answer)
                     {
-                        free(*answer);
+                        std::free(*answer);
                     }
 
                     ans = ztd::strip(ans);

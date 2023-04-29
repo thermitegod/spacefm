@@ -304,11 +304,14 @@ VFSFileInfo::get_big_icon() noexcept
         }
         if (this->big_thumbnail)
         {
-            g_object_set_data_full(G_OBJECT(this->big_thumbnail), "name", icon_name, free);
+            g_object_set_data_full(G_OBJECT(this->big_thumbnail),
+                                   "name",
+                                   icon_name,
+                                   (GDestroyNotify)std::free);
         }
         else
         {
-            free(icon_name);
+            std::free(icon_name);
         }
     }
     return this->big_thumbnail ? g_object_ref(this->big_thumbnail) : nullptr;

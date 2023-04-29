@@ -167,7 +167,7 @@ static void
 vfs_dir_clear(vfs::dir dir)
 {
     g_mutex_clear(dir->mutex);
-    free(dir->mutex);
+    std::free(dir->mutex);
 }
 
 /* destructor */

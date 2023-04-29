@@ -294,9 +294,9 @@ on_open_files(GAction* action, FindFile* data)
     }
 
     // sfm this frees list when new value inserted - caused segfault
-    // hash = g_hash_table_new_full( g_str_hash, g_str_equal, (GDestroyNotify)free, open_files ?
+    // hash = g_hash_table_new_full( g_str_hash, g_str_equal, (GDestroyNotify)std::free, open_files ?
     // (GDestroyNotify)vfs_file_info_list_free : nullptr );
-    hash = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)free, nullptr);
+    hash = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)std::free, nullptr);
 
     for (row = rows; row; row = row->next)
     {
@@ -335,7 +335,7 @@ on_open_files(GAction* action, FindFile* data)
             {
                 if (g_hash_table_lookup(hash, dir))
                 {
-                    free(dir);
+                    std::free(dir);
                 }
                 g_hash_table_insert(hash, dir, nullptr);
             }
@@ -431,7 +431,7 @@ compose_command(FindFile* data)
             if (arg && *arg)
             {
                 argv.emplace_back(arg);
-                free(arg);
+                std::free(arg);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(data->places_list), &it));
     }
@@ -851,7 +851,7 @@ on_add_search_browse(GtkWidget* menu, FindFile* data)
     {
         char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         add_search_dir(data, path);
-        free(path);
+        std::free(path);
     }
     gtk_widget_destroy(dlg);
 }

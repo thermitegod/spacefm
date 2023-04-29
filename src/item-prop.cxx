@@ -243,7 +243,7 @@ ContextData::~ContextData()
 {
     if (this->temp_cmd_line)
     {
-        free(this->temp_cmd_line);
+        std::free(this->temp_cmd_line);
     }
     gtk_widget_destroy(this->dlg);
 }
@@ -392,14 +392,14 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
         return false;
     }
     *sub = std::stol(vs);
-    free(vs);
+    std::free(vs);
     if (*sub < 0 || *sub >= (i32)context_subs.size())
     {
         return false;
     }
     vs = get_element_next(s);
     *comp = std::stol(vs);
-    free(vs);
+    std::free(vs);
     if (*comp < 0 || *comp >= (i32)context_comps.size())
     {
         return false;
@@ -440,7 +440,7 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
         return 0;
     }
     const i32 action = std::stol(s);
-    free(s);
+    std::free(s);
     if (action < 0 || action > 3)
     {
         return 0;
@@ -451,7 +451,7 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
         return 0;
     }
     const i32 match = std::stol(s);
-    free(s);
+    std::free(s);
     if (match < 0 || match > 3)
     {
         return 0;
@@ -542,7 +542,7 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
                         const std::string str = ztd::lower(context->var[sub]);
                         test = !ztd::fnmatch(s, str);
                     }
-                    free(s);
+                    std::free(s);
                     if (comp == ItemPropContextComp::CONTEXT_COMP_MATCH)
                     {
                         test = !test;
@@ -580,7 +580,7 @@ xset_context_test(xset_context_t context, char* rules, bool def_disable)
                 eleval[0] = '\0';
             }
         } while (eleval[0] != '\0');
-        free(value);
+        std::free(value);
 
         if (test)
         {
@@ -780,8 +780,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
                            ItemPropContextCol::CONTEXT_COL_VALUE,
                            value,
                            -1);
-        free(disp);
-        free(value);
+        std::free(disp);
+        std::free(value);
         gtk_widget_set_sensitive(GTK_WIDGET(ctxt->btn_ok), true);
         if (widget == GTK_WIDGET(ctxt->btn_add))
         {
@@ -826,12 +826,12 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     if (def_comp)
     {
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_comp), std::stol(def_comp));
-        free(def_comp);
+        std::free(def_comp);
     }
     while ((value = get_element_next(&elements)))
     {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_value), value);
-        free(value);
+        std::free(value);
     }
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(ctxt->box_value))), "");
     if (ctxt->context && ctxt->context->valid)
@@ -839,7 +839,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
         gtk_label_set_text(ctxt->current_value, ctxt->context->var[sub].data());
     }
 
-    free(elements);
+    std::free(elements);
 }
 
 static void
@@ -972,7 +972,7 @@ enable_options(ContextData* ctxt)
         {
             gtk_text_buffer_set_text(buf, "", -1);
         }
-        free(text);
+        std::free(text);
     }
 }
 
@@ -1055,7 +1055,7 @@ get_text_view(GtkTextView* view)
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     if (!(text && text[0]))
     {
-        free(text);
+        std::free(text);
         return nullptr;
     }
     std::string text2 = text;
@@ -1103,7 +1103,7 @@ load_command_script(ContextData* ctxt, xset_t set)
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ctxt->cmd_script), !set->plugin && have_access);
     gtk_text_buffer_set_modified(buf, modified);
     command_script_stat(ctxt);
-    free(script);
+    std::free(script);
     if (have_access && geteuid() != 0)
     {
         gtk_widget_hide(ctxt->cmd_edit_root);
@@ -1165,7 +1165,7 @@ save_command_script(ContextData* ctxt, bool query)
 
     write_file(script, text);
 
-    free(text);
+    std::free(text);
 }
 
 static void
@@ -1187,7 +1187,7 @@ on_script_toggled(GtkWidget* item, ContextData* ctxt)
     {
         // set to script
         gtk_widget_hide(ctxt->cmd_line_label);
-        free(ctxt->temp_cmd_line);
+        std::free(ctxt->temp_cmd_line);
         ctxt->temp_cmd_line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
         load_command_script(ctxt, ctxt->set);
     }
@@ -1241,7 +1241,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
                 path = Glib::find_program_in_path(path);
             }
         }
-        free(text);
+        std::free(text);
         if (path.empty() || !mime_type_is_text_file(path, ""))
         {
             xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
@@ -1506,8 +1506,8 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                                                      add_path);
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
             gtk_text_buffer_set_text(buf, new_path.data(), -1);
-            free(add_path);
-            free(old_path);
+            std::free(add_path);
+            std::free(old_path);
         }
     }
     else
@@ -1532,7 +1532,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                 GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
                 gtk_text_buffer_set_text(buf, app, -1);
             }
-            free(app);
+            std::free(app);
             vfs_mime_type_unref(mime_type);
         }
         else
@@ -1547,7 +1547,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
             {
                 GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
                 gtk_text_buffer_set_text(buf, exec_path, -1);
-                free(exec_path);
+                std::free(exec_path);
             }
         }
     }
@@ -1597,7 +1597,7 @@ replace_item_props(ContextData* ctxt)
 
         if (x != XSetCMD::INVALID)
         {
-            free(rset->x);
+            std::free(rset->x);
             if (x == XSetCMD::LINE)
             {
                 rset->x = nullptr;
@@ -1611,10 +1611,10 @@ replace_item_props(ContextData* ctxt)
         {
             // target
             char* str = multi_input_get_text(ctxt->item_target);
-            free(rset->z);
+            std::free(rset->z);
             rset->z = str ? ztd::strdup(ztd::strip(str)) : nullptr;
             // run as user
-            free(rset->y);
+            std::free(rset->y);
             rset->y = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
@@ -1634,11 +1634,11 @@ replace_item_props(ContextData* ctxt)
                 rset->menu_style = XSetMenu::NORMAL;
             }
             // style msg
-            free(rset->desc);
+            std::free(rset->desc);
             rset->desc = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg));
         }
         // command line
-        free(rset->line);
+        std::free(rset->line);
         if (x == XSetCMD::LINE)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
@@ -1699,7 +1699,7 @@ replace_item_props(ContextData* ctxt)
             rset->in_terminal = true;
         }
 
-        free(rset->menu_label);
+        std::free(rset->menu_label);
         if (rset->tool > XSetTool::CUSTOM &&
             ztd::same(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                       xset_get_builtin_toolitem_label(rset->tool)))
@@ -1719,7 +1719,7 @@ replace_item_props(ContextData* ctxt)
     //( rset->menu_style != XSetMenu::CHECK || rset->tool ) )
     {
         char* old_icon = ztd::strdup(mset->icon);
-        free(mset->icon);
+        std::free(mset->icon);
         const char* icon_name = gtk_entry_get_text(GTK_ENTRY(ctxt->item_icon));
         if (icon_name && icon_name[0])
         {
@@ -1735,7 +1735,7 @@ replace_item_props(ContextData* ctxt)
             // built-in icon has been changed from default, save it
             rset->keep_terminal = true;
         }
-        free(old_icon);
+        std::free(old_icon);
     }
 
     // Ignore Context
@@ -2225,8 +2225,8 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
             i = 0;
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_action), i);
-        free(match);
-        free(action);
+        std::free(match);
+        std::free(action);
     }
     else
     {
@@ -2234,11 +2234,11 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_action), 0);
         if (match)
         {
-            free(match);
+            std::free(match);
         }
         if (action)
         {
-            free(action);
+            std::free(action);
         }
     }
     // set rules
@@ -2261,10 +2261,10 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
                            ItemPropContextCol::CONTEXT_COL_VALUE,
                            value,
                            -1);
-        free(disp);
+        std::free(disp);
         if (value)
         {
-            free(value);
+            std::free(value);
         }
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_sub), 0);
@@ -2702,7 +2702,7 @@ xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
             case GtkResponseType::GTK_RESPONSE_OK:
                 if (mset->context)
                 {
-                    free(mset->context);
+                    std::free(mset->context);
                 }
                 mset->context = context_build(ctxt);
                 replace_item_props(ctxt);

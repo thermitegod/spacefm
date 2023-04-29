@@ -152,7 +152,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     }
 
     std::string name = Glib::path_get_basename(path);
-    free(path);
+    std::free(path);
 
     // Fetching the combo model
     GtkListStore* list = GTK_LIST_STORE(g_object_get_data(G_OBJECT(dlg), "combo-model"));
@@ -201,7 +201,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
                 }
             }
         }
-        free(xset_name);
+        std::free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &iter));
 
     // Cropping current extension if found
@@ -234,7 +234,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             // Updating new archive filename
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.data());
         }
-        free(xset_name);
+        std::free(xset_name);
     }
 
     // Loading command
@@ -488,7 +488,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                 error_message.clear();
             }
         }
-        free(xset_name);
+        std::free(xset_name);
     }
     else
     {
@@ -526,7 +526,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         const std::string ext = archive_handler_get_first_extension(handler_xset);
         dest_file = g_strjoin(nullptr, file->get_disp_name().data(), ext.data(), nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
-        free(dest_file);
+        std::free(dest_file);
         dest_file = nullptr;
     }
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.data());
@@ -567,7 +567,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                     // Unable to fetch iter from combo box - warning user and
                     // exiting
                     ztd::logger::warn("Unable to fetch iter from combobox!");
-                    free(dest_file);
+                    std::free(dest_file);
                     gtk_widget_destroy(dlg);
                     return;
                 }
@@ -584,7 +584,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                 handler_xset = xset_get(xset_name);
                 // Saving selected archive handler name as default
                 xset_set(XSetName::ARC_DLG, XSetVar::S, xset_name);
-                free(xset_name);
+                std::free(xset_name);
 
                 // run in the terminal or not
                 run_in_terminal = handler_xset->in_terminal;
@@ -872,7 +872,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         // Enforce error check
         final_command = fmt::format("{}\nfm_check_exit_code\n", cmd_to_run);
     }
-    free(dest_file);
+    std::free(dest_file);
 
     // When ran in a terminal, errors need to result in a pause so that
     // the user can review the situation - in any case an error check
@@ -894,7 +894,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                                            cwd,
                                            file_browser ? GTK_WIDGET(file_browser) : nullptr,
                                            file_browser ? file_browser->task_view : nullptr);
-    free(task_name);
+    std::free(task_name);
 
     /* Setting correct exec reference */
     if (file_browser)
@@ -1379,7 +1379,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     }
 
     final_command = fmt::format("{}\n{}", shell_err_func_setup, final_command);
-    free(choose_dir);
+    std::free(choose_dir);
 
     // Creating task
     const std::string task_name = fmt::format("Extract {}", sel_files.front()->get_name());

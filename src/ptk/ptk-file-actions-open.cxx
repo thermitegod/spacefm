@@ -304,7 +304,7 @@ free_file_list_hash(void* key, void* value, void* user_data)
     (void)user_data;
 
     GList* files = (GList*)value;
-    g_list_foreach(files, (GFunc)free, nullptr);
+    g_list_foreach(files, (GFunc)std::free, nullptr);
     g_list_free(files);
 }
 
@@ -498,7 +498,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::span<const vfs::file_in
     {
         // specified app to open all files
         open_files_with_app(parent, files_to_open, app_desktop);
-        g_list_foreach(files_to_open, (GFunc)free, nullptr);
+        g_list_foreach(files_to_open, (GFunc)std::free, nullptr);
         g_list_free(files_to_open);
     }
     else if (file_list_hash)
@@ -516,7 +516,7 @@ ptk_open_files_with_app(std::string_view cwd, const std::span<const vfs::file_in
         {
             file_browser->run_event<EventType::OPEN_ITEM>(full_path, PtkOpenAction::PTK_OPEN_DIR);
         }
-        free(new_dir);
+        std::free(new_dir);
     }
 
     delete parent;

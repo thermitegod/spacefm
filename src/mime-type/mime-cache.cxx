@@ -107,7 +107,7 @@ MimeCache::load_mime_file()
             LIB_MINOR_VERSION,
             majv,
             minv);
-        free(buf);
+        std::free(buf);
         return;
     }
 

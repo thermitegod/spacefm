@@ -89,9 +89,9 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
         if (name_b)
         {
             ret = g_ascii_strcasecmp(name_a, name_b);
-            free(name_b);
+            std::free(name_b);
         }
-        free(name_a);
+        std::free(name_a);
     }
     return ret;
 }
@@ -118,10 +118,10 @@ add_list_item(GtkListStore* list, std::string_view path)
                 if (ztd::same(file, desktop->get_name()))
                 {
                     // already exists
-                    free(file);
+                    std::free(file);
                     return;
                 }
-                free(file);
+                std::free(file);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
     }
@@ -444,7 +444,7 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
             {
                 gtk_entry_set_text(entry, filename);
             }
-            free(filename);
+            std::free(filename);
             gtk_widget_set_sensitive(GTK_WIDGET(notebook), gtk_entry_get_text_length(entry) == 0);
             gtk_widget_grab_focus(GTK_WIDGET(entry));
             gtk_editable_set_position(GTK_EDITABLE(entry), -1);
@@ -581,7 +581,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool f
                       !ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY)))
             {
                 const std::string custom = vfs_mime_type_add_action(mime_type, app);
-                free(app);
+                std::free(app);
                 app = ztd::strdup(custom);
             }
         }

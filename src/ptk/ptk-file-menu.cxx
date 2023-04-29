@@ -1093,24 +1093,24 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set->menu_style = XSetMenu::NORMAL;
         if (set->shared_key)
         {
-            free(set->shared_key);
+            std::free(set->shared_key);
         }
         set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
         set2 = xset_get(XSetName::OPEN_ALL);
         if (set->menu_label)
         {
-            free(set->menu_label);
+            std::free(set->menu_label);
         }
         set->menu_label = ztd::strdup(set2->menu_label);
         if (set->context)
         {
-            free(set->context);
+            std::free(set->context);
             set->context = nullptr;
         }
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
         if (set->menu_label)
         {
-            free(set->menu_label);
+            std::free(set->menu_label);
         }
         set->menu_label = nullptr; // do not bother to save this
 
@@ -1563,7 +1563,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
             sel_files.emplace_back(data->file);
         }
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
-        free(app);
+        std::free(app);
     }
     vfs_mime_type_unref(mime_type);
 }
@@ -1798,7 +1798,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             {
                 vfs_mime_type_append_action(mime_type->type, path);
             }
-            free(str);
+            std::free(str);
             break;
         case PTKFileMenuAppJob::APP_JOB_BROWSE:
             path = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");

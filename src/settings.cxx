@@ -351,7 +351,7 @@ save_settings(void* main_window_ptr)
                     {
                         if (set->s)
                         {
-                            free(set->s);
+                            std::free(set->s);
                             set->s = nullptr;
                         }
                         std::string tabs;
@@ -370,7 +370,7 @@ save_settings(void* main_window_ptr)
                         // save current tab
                         if (set->x)
                         {
-                            free(set->x);
+                            std::free(set->x);
                         }
 
                         const i32 current_page =
@@ -388,12 +388,12 @@ save_settings(void* main_window_ptr)
                 xset_t set = xset_get_panel(p, XSetPanel::SHOW);
                 if (set->s)
                 {
-                    free(set->s);
+                    std::free(set->s);
                     set->s = nullptr;
                 }
                 if (set->x)
                 {
-                    free(set->x);
+                    std::free(set->x);
                     set->x = nullptr;
                 }
             }
@@ -426,7 +426,7 @@ free_settings()
 
         if (set->ob2_data && ztd::startswith(set->name, "evt_"))
         {
-            g_list_foreach((GList*)set->ob2_data, (GFunc)free, nullptr);
+            g_list_foreach((GList*)set->ob2_data, (GFunc)std::free, nullptr);
             g_list_free((GList*)set->ob2_data);
         }
 
@@ -797,7 +797,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 // Application
                 char* menu_label = xset_custom_get_app_name_icon(set, &app_icon, icon_size);
                 item = xset_new_menuitem(menu_label, nullptr);
-                free(menu_label);
+                std::free(menu_label);
             }
             else
             {
@@ -1109,12 +1109,12 @@ xset_custom_insert_after(xset_t target, xset_t set)
 
     if (set->parent)
     {
-        free(set->parent);
+        std::free(set->parent);
         set->parent = nullptr;
     }
 
-    free(set->prev);
-    free(set->next);
+    std::free(set->prev);
+    std::free(set->next);
     set->prev = ztd::strdup(target->name);
     set->next = target->next; // steal string
     if (target->next)
@@ -1122,7 +1122,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
         target_next = xset_get(target->next);
         if (target_next->prev)
         {
-            free(target_next->prev);
+            std::free(target_next->prev);
         }
         target_next->prev = ztd::strdup(set->name);
     }
@@ -1490,7 +1490,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
         name = clean_label(keyset->menu_label, false, true);
         if (set->shared_key)
         {
-            free(set->shared_key);
+            std::free(set->shared_key);
         }
         set->shared_key = ztd::strdup(xset_get_name_from_xsetname(XSetName::OPEN_ALL));
     }
@@ -2118,7 +2118,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                                                    GTK_ACCEL_VISIBLE);
                     }
                 }
-                free(script);
+                std::free(script);
             }
         }
         else if (XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::LINE)
@@ -2619,7 +2619,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                                         rset->s,
                                         "foobar.xyz");
                 // ztd::logger::info("file={}", file);
-                free(file);
+                std::free(file);
             }
             break;
         case XSetMenu::ICON:
@@ -3250,7 +3250,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 str = clean_label(new_menu_label, false, false);
                 gtk_widget_set_tooltip_text(ebox, str.data());
             }
-            free(new_menu_label);
+            std::free(new_menu_label);
             break;
         case XSetMenu::CHECK:
             if (!icon_name && set->tool > XSetTool::CUSTOM && set->tool < XSetTool::INVALID)
@@ -3439,7 +3439,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 str = clean_label(menu_label, false, false);
                 gtk_widget_set_tooltip_text(ebox, str.data());
             }
-            free(new_menu_label);
+            std::free(new_menu_label);
 
             // reset menu_label for below
             menu_label = set->menu_label;

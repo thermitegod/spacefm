@@ -303,7 +303,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
         }
         if (save->s)
         {
-            free(save->s);
+            std::free(save->s);
         }
         save->s = ztd::strdup(Glib::path_get_dirname(path));
     }
@@ -339,8 +339,8 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
 
-                free(plug_dir_name);
-                free(path);
+                std::free(plug_dir_name);
+                std::free(path);
                 return;
             }
 
@@ -360,12 +360,12 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
-                    free(plug_dir_name);
-                    free(path);
+                    std::free(plug_dir_name);
+                    std::free(path);
                     return;
                 }
             }
-            free(plug_dir_name);
+            std::free(plug_dir_name);
             break;
         }
         case PluginJob::COPY:
@@ -379,7 +379,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                                 "Error Creating Temp Directory",
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 "Unable to create temporary directory");
-                free(path);
+                std::free(path);
                 return;
             }
             while (true)
@@ -398,7 +398,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
     }
 
     install_plugin_file(main_window, nullptr, path, plug_dir, job, nullptr);
-    free(path);
+    std::free(path);
 }
 
 static GtkWidget*
@@ -1228,7 +1228,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                             g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view);
                         }
                     }
-                    free(set->ob1);
+                    std::free(set->ob1);
                     set->ob1 = nullptr;
                 }
                 if (!tab_added)
@@ -1455,7 +1455,7 @@ rebuild_menus(MainWindow* main_window)
         "main_save_session main_search separator main_terminal main_root_terminal "
         "main_new_window main_root_window separator main_save_tabs separator main_exit");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
-    free(menu_elements);
+    std::free(menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->file_menu_item), newmenu);
@@ -1538,12 +1538,12 @@ rebuild_menus(MainWindow* main_window)
         fmt::format("Panel {} {}", main_window->curpanel, set->menu_label);
     set->menu_label = ztd::strdup(menu_label);
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
-    free(set->menu_label);
+    std::free(set->menu_label);
     set->menu_label = str;
 
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements2);
-    free(menu_elements);
-    free(menu_elements2);
+    std::free(menu_elements);
+    std::free(menu_elements2);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->view_menu_item), newmenu);
@@ -1600,7 +1600,7 @@ rebuild_menus(MainWindow* main_window)
     xset_set_cb(XSetName::MAIN_ABOUT, (GFunc)on_about_activate, main_window);
     menu_elements = ztd::strdup("main_about");
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
-    free(menu_elements);
+    std::free(menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->help_menu_item), newmenu);
@@ -2531,7 +2531,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
         if (file_browser->seek_name)
         {
             ptk_file_browser_seek_path(file_browser, "", file_browser->seek_name);
-            free(file_browser->seek_name);
+            std::free(file_browser->seek_name);
             file_browser->seek_name = nullptr;
         }
     }
@@ -5825,7 +5825,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         }
 
         // Clearing up
-        free(status3);
+        std::free(status3);
         if (pixbuf)
         {
             g_object_unref(pixbuf);
@@ -6719,12 +6719,12 @@ main_window_socket_command(char* argv[])
         {
             if (!(argv[i + 1] && argv[i + 1][0]))
             {
-                free(file_browser->status_bar_custom);
+                std::free(file_browser->status_bar_custom);
                 file_browser->status_bar_custom = nullptr;
             }
             else
             {
-                free(file_browser->status_bar_custom);
+                std::free(file_browser->status_bar_custom);
                 file_browser->status_bar_custom = ztd::strdup(argv[i + 1]);
             }
             main_window_update_status_bar(main_window, file_browser);
@@ -7456,7 +7456,7 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(argv[i + 1], "popup_handler"))
         {
-            free(ptask->pop_handler);
+            std::free(ptask->pop_handler);
             if (argv[i + 2] && argv[i + 2][0] != '\0')
             {
                 ptask->pop_handler = ztd::strdup(argv[i + 2]);
@@ -7603,7 +7603,7 @@ main_window_socket_command(char* argv[])
         {
             return {SOCKET_SUCCESS, fmt::format("{}", str2)};
         }
-        free(str2);
+        std::free(str2);
     }
     else if (ztd::same(socket_cmd, "run-task"))
     { // TYPE [OPTIONS] ...
@@ -7858,7 +7858,7 @@ main_window_socket_command(char* argv[])
                     // last argument - use as TARGET
                     if (argv[j][0] != '/')
                     {
-                        g_list_foreach(l, (GFunc)free, nullptr);
+                        g_list_foreach(l, (GFunc)std::free, nullptr);
                         g_list_free(l);
                         return {SOCKET_INVALID, fmt::format("no such directory '{}'", argv[j])};
                     }
@@ -7877,7 +7877,7 @@ main_window_socket_command(char* argv[])
                         // relative path
                         if (!opt_cwd)
                         {
-                            g_list_foreach(l, (GFunc)free, nullptr);
+                            g_list_foreach(l, (GFunc)std::free, nullptr);
                             g_list_free(l);
                             return {SOCKET_INVALID,
                                     fmt::format("relative path '{}' requires {} option --dir DIR",

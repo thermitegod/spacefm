@@ -180,7 +180,7 @@ PtkFileTask::~PtkFileTask()
 
     if (this->pop_handler)
     {
-        free(this->pop_handler);
+        std::free(this->pop_handler);
     }
 
     // ztd::logger::info("ptk_file_task_destroy DONE ptask={:p}", fmt::ptr(ptask));
@@ -1307,7 +1307,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     {
         gtk_label_set_text(ptask->to, udest.data());
     }
-    free(ufile_path);
+    std::free(ufile_path);
 
     // progress bar
     if (task->type != VFSFileTaskType::EXEC || ptask->task->custom_percent)
@@ -1844,7 +1844,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         // insert into log
         gtk_text_buffer_get_iter_at_mark(ptask->log_buf, &iter, ptask->log_end);
         gtk_text_buffer_insert(ptask->log_buf, &iter, text, -1);
-        free(text);
+        std::free(text);
         ptask->log_appended = true;
 
         // trim log ?  (less than 64K and 800 lines)
@@ -2071,7 +2071,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
         {
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_AUTO_RENAME);
         }
-        free(new_name);
+        std::free(new_name);
         return true;
     }
     return false;
@@ -2084,7 +2084,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     char* new_name = multi_input_get_text(query_input);
     const char* old_name = (const char*)g_object_get_data(G_OBJECT(query_input), "old_name");
     const bool can_rename = new_name && (!ztd::same(new_name, old_name));
-    free(new_name);
+    std::free(new_name);
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))
     {
@@ -2159,7 +2159,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                 const std::string path = Glib::build_filename(dir_name, file_name);
                 *ptask->query_new_dest = ztd::strdup(path);
             }
-            free(str);
+            std::free(str);
             break;
         case RESPONSE_PAUSE:
             ptk_file_task_pause(ptask, VFSFileTaskState::PAUSE);
@@ -2419,11 +2419,11 @@ query_overwrite(PtkFileTask* ptask)
 
     const i32 pos = ext_disp ? std::strlen(base_name_disp) - std::strlen(ext_disp) - 1 : -1;
 
-    free(base_name);
-    free(ext_disp);
-    free(src_dir);
-    free(dest_dir);
-    free(new_name_plain);
+    std::free(base_name);
+    std::free(ext_disp);
+    std::free(src_dir);
+    std::free(dest_dir);
+    std::free(new_name_plain);
 
     // create dialog
     if (ptask->progress_dlg)
@@ -2589,7 +2589,10 @@ query_overwrite(PtkFileTask* ptask)
                      "changed",
                      G_CALLBACK(on_multi_input_changed),
                      query_input);
-    g_object_set_data_full(G_OBJECT(query_input), "old_name", base_name_disp, free);
+    g_object_set_data_full(G_OBJECT(query_input),
+                           "old_name",
+                           base_name_disp,
+                           (GDestroyNotify)std::free);
     gtk_widget_set_size_request(GTK_WIDGET(query_input), -1, 60);
     gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 60);
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(query_input));
@@ -2619,9 +2622,9 @@ query_overwrite(PtkFileTask* ptask)
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(auto_all_button), false, true, 0);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 0);
 
-    free(src_dir_disp);
-    free(dest_dir_disp);
-    free(new_name);
+    std::free(src_dir_disp);
+    std::free(dest_dir_disp);
+    std::free(new_name);
 
     // update displays (mutex is already locked)
     ptask->dsp_curspeed = "stalled";

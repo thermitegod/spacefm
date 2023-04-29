@@ -859,7 +859,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
             ptk_dir_tree_delete_child(tree, place_holder);
         }
     }
-    free(path);
+    std::free(path);
 }
 
 void

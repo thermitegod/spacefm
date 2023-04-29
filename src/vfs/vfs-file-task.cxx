@@ -108,7 +108,7 @@ VFSFileTask::~VFSFileTask()
     }
 
     g_mutex_clear(this->mutex);
-    free(this->mutex);
+    std::free(this->mutex);
 
     gtk_text_buffer_set_text(this->add_log_buf, "", -1);
     g_object_unref(this->add_log_buf);
@@ -321,13 +321,13 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
             // may pause here - user may change overwrite mode
             if (this->should_abort())
             {
-                free(new_dest);
+                std::free(new_dest);
                 return false;
             }
 
             if (this->overwrite_mode != VFSFileTaskOverwriteMode::RENAME)
             {
-                free(new_dest);
+                std::free(new_dest);
                 new_dest = nullptr;
 
                 if (this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE ||
@@ -462,7 +462,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
         {
             if (new_dest_file)
             {
-                free(new_dest_file);
+                std::free(new_dest_file);
             }
             return false;
         }
@@ -470,7 +470,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
         {
             if (new_dest_file)
             {
-                free(new_dest_file);
+                std::free(new_dest_file);
             }
             return false;
         }
@@ -532,7 +532,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                     {
                         if (new_dest_file)
                         {
-                            free(new_dest_file);
+                            std::free(new_dest_file);
                         }
                     }
                     return false;
@@ -566,7 +566,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
             {
                 if (new_dest_file)
                 {
-                    free(new_dest_file);
+                    std::free(new_dest_file);
                 }
                 return false;
             }
@@ -588,7 +588,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                     this->task_error(errno, "Removing", actual_dest_file);
                     if (new_dest_file)
                     {
-                        free(new_dest_file);
+                        std::free(new_dest_file);
                     }
                     return false;
                 }
@@ -636,7 +636,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                 close(rfd);
                 if (new_dest_file)
                 {
-                    free(new_dest_file);
+                    std::free(new_dest_file);
                 }
                 return false;
             }
@@ -659,7 +659,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                     close(rfd);
                     if (new_dest_file)
                     {
-                        free(new_dest_file);
+                        std::free(new_dest_file);
                     }
                     return false;
                 }
@@ -746,7 +746,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
 
     if (new_dest_file)
     {
-        free(new_dest_file);
+        std::free(new_dest_file);
     }
     if (!copy_fail && this->error_first)
     {
@@ -883,7 +883,7 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
         this->task_error(errno, "Renaming", src_file);
         if (this->should_abort())
         {
-            free(new_dest_file);
+            std::free(new_dest_file);
             return 0;
         }
     }
@@ -902,7 +902,7 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
 
     if (new_dest_file)
     {
-        free(new_dest_file);
+        std::free(new_dest_file);
     }
     return 0;
 }
@@ -1098,7 +1098,7 @@ VFSFileTask::file_link(std::string_view src_file)
 
     if (new_dest_file)
     {
-        free(new_dest_file);
+        std::free(new_dest_file);
     }
 }
 
@@ -1234,7 +1234,7 @@ cb_exec_child_cleanup(pid_t pid, i32 status, char* tmp_file)
     if (tmp_file)
     {
         std::filesystem::remove(tmp_file);
-        free(tmp_file);
+        std::free(tmp_file);
     }
     ztd::logger::info("async child finished  pid={} status={}", pid, status);
 }

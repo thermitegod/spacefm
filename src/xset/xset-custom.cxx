@@ -147,7 +147,7 @@ xset_custom_remove(xset_t set)
         // ztd::logger::info("        set->prev = {} ({})", set_prev->name, set_prev->menu_label);
         if (set_prev->next)
         {
-            free(set_prev->next);
+            std::free(set_prev->next);
         }
         if (set->next)
         {
@@ -163,7 +163,7 @@ xset_custom_remove(xset_t set)
         set_next = xset_get(set->next);
         if (set_next->prev)
         {
-            free(set_next->prev);
+            std::free(set_next->prev);
         }
         if (set->prev)
         {
@@ -177,7 +177,7 @@ xset_custom_remove(xset_t set)
                 set_parent = xset_get(set->parent);
                 if (set_parent->child)
                 {
-                    free(set_parent->child);
+                    std::free(set_parent->child);
                 }
                 set_parent->child = ztd::strdup(set_next->name);
                 set_next->parent = ztd::strdup(set->parent);
@@ -198,7 +198,7 @@ xset_custom_remove(xset_t set)
         }
         if (set_parent->child)
         {
-            free(set_parent->child);
+            std::free(set_parent->child);
         }
         set_parent->child = ztd::strdup(set_child->name);
         set_child->parent = ztd::strdup(set->parent);
@@ -402,7 +402,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     if (save->s)
     {
-        free(save->s);
+        std::free(save->s);
     }
     save->s = ztd::strdup(Glib::path_get_dirname(path));
 
@@ -413,7 +413,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
         if (!std::filesystem::is_directory(user_tmp))
         {
-            free(path);
+            std::free(path);
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_ERROR,
                             "Export Error",
@@ -456,7 +456,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                 std::filesystem::remove_all(plug_dir);
                 ztd::logger::info("Removed {}", plug_dir);
             }
-            free(path);
+            std::free(path);
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_ERROR,
                             "Export Error",
@@ -473,7 +473,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                     std::filesystem::remove_all(plug_dir);
                     ztd::logger::info("Removed {}", plug_dir);
                 }
-                free(path);
+                std::free(path);
                 xset_msg_dialog(parent,
                                 GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Export Error",
@@ -525,7 +525,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     ptask->task->exec_browser = file_browser;
     ptk_file_task_run(ptask);
 
-    free(path);
+    std::free(path);
     return;
 }
 
