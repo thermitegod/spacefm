@@ -22,7 +22,12 @@
 
 #include <vector>
 
+#include <span>
+
 #include <memory>
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 class MimeCache
 {
@@ -37,7 +42,7 @@ class MimeCache
 
     const char* lookup_literal(std::string_view filename);
     const char* lookup_suffix(std::string_view filename, const char** suffix_pos);
-    const char* lookup_magic(const char* data, u32 len);
+    const char* lookup_magic(const std::span<const char8_t> data);
     const char* lookup_glob(std::string_view filename, i32* glob_len);
     const std::vector<std::string> lookup_parents(std::string_view mime_type);
     const char* lookup_alias(std::string_view mime_type);
@@ -48,8 +53,8 @@ class MimeCache
   private:
     void load_mime_file();
     const char* lookup_str_in_entries(const char* entries, u32 n, std::string_view str);
-    bool magic_rule_match(const char* buf, const char* rule, const char* data, u32 len);
-    bool magic_match(const char* buf, const char* magic, const char* data, u32 len);
+    bool magic_rule_match(const char* buf, const char* rule, const std::span<const char8_t> data);
+    bool magic_match(const char* buf, const char* magic, const std::span<const char8_t> data);
     const char* lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const char* name);
     const char* lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n,
                                             std::string_view name, const char* suffix,

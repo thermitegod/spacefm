@@ -23,6 +23,8 @@
 #include <array>
 #include <vector>
 
+#include <span>
+
 #include <optional>
 
 #include <iostream>
@@ -32,6 +34,8 @@
 #include <ranges>
 
 #include <memory>
+
+#include <cassert>
 
 #include <fcntl.h>
 
@@ -64,16 +68,10 @@ std::vector<mime_cache_t> caches;
 /* max magic extent of all caches */
 static u32 mime_cache_max_extent = 0;
 
-/* allocated buffer used for mime magic checking to
-     prevent frequent memory allocation */
-static char* mime_magic_buf = nullptr;
-/* for MT safety, the buffer should be locked */
-G_LOCK_DEFINE_STATIC(mime_magic_buf);
-
 /* free all mime.cache files on the system */
 static void mime_cache_free_all();
 
-static bool mime_type_is_data_plain_text(const char* data, i32 len);
+static bool mime_type_is_data_plain_text(const std::span<const char8_t> data);
 
 /*
  * Get mime-type of the specified file (quick, but less accurate):
@@ -188,75 +186,39 @@ mime_type_get_by_file(std::string_view filepath)
     if (file_size > 0 &&
         (std::filesystem::is_regular_file(status) || std::filesystem::is_symlink(status)))
     {
-        char* data;
-
         /* Open the file and map it into memory */
         const i32 fd = open(filepath.data(), O_RDONLY, 0);
         if (fd != -1)
         {
-            const i32 elen = mime_cache_max_extent < file_size ? mime_cache_max_extent : file_size;
-            /*
-             * FIXME: Can g_alloca() be used here? It is very fast, but is it safe?
-             * Actually, we can allocate a block of memory with the size of mime_cache_max_extent,
-             * then we do not need to  do dynamic allocation/free every time, but multi-threading
-             * will be a nightmare, so...
-             */
-            /* try to lock the common buffer */
-            if (G_TRYLOCK(mime_magic_buf))
-            {
-                data = mime_magic_buf;
-            }
-            else
-            { /* the buffer is in use, allocate new one */
-                data = CHAR(g_malloc(elen));
-            }
+            // mime header size
+            std::array<char8_t, 512> data;
 
-            const i32 len = read(fd, data, elen);
-
+            const i32 len = read(fd, data.data(), data.size());
             if (len == -1)
             {
-                if (data == mime_magic_buf)
-                {
-                    G_UNLOCK(mime_magic_buf);
-                }
-                else
-                {
-                    std::free(data);
-                }
-                data = (char*)-1;
+                return XDG_MIME_TYPE_UNKNOWN.data();
             }
-            if (data != (char*)-1)
+
+            for (usize i = 0; !type && i < caches.size(); ++i)
             {
-                for (usize i = 0; !type && i < caches.size(); ++i)
-                {
-                    type = caches.at(i)->lookup_magic(data, len);
-                }
+                type = caches.at(i)->lookup_magic(data);
+            }
 
-                /* Check for executable file */
-                if (!type && have_x_access(filepath))
-                {
-                    type = XDG_MIME_TYPE_EXECUTABLE.data();
-                }
+            /* Check for executable file */
+            if (!type && have_x_access(filepath))
+            {
+                type = XDG_MIME_TYPE_EXECUTABLE.data();
+            }
 
-                /* fallback: check for plain text */
-                if (!type)
+            /* fallback: check for plain text */
+            if (!type)
+            {
+                if (mime_type_is_data_plain_text(data))
                 {
-                    if (mime_type_is_data_plain_text(data,
-                                                     len > TEXT_MAX_EXTENT ? TEXT_MAX_EXTENT : len))
-                    {
-                        type = XDG_MIME_TYPE_PLAIN_TEXT.data();
-                    }
-                }
-
-                if (data == mime_magic_buf)
-                {
-                    G_UNLOCK(mime_magic_buf); /* unlock the common buffer */
-                }
-                else
-                { /* we use our own buffer */
-                    std::free(data);
+                    type = XDG_MIME_TYPE_PLAIN_TEXT.data();
                 }
             }
+
             close(fd);
         }
     }
@@ -407,8 +369,6 @@ mime_type_init()
             mime_cache_max_extent = dir_cache->get_magic_max_extent();
         }
     }
-
-    mime_magic_buf = CHAR(g_malloc(mime_cache_max_extent));
 }
 
 /* free all mime.cache files on the system */
@@ -418,9 +378,6 @@ mime_cache_free_all()
     caches.clear();
 
     mime_cache_max_extent = 0;
-
-    std::free(mime_magic_buf);
-    mime_magic_buf = nullptr;
 }
 
 void
@@ -436,29 +393,24 @@ mime_cache_reload(mime_cache_t cache)
             mime_cache_max_extent = mcache->get_magic_max_extent();
         }
     }
-
-    G_LOCK(mime_magic_buf);
-
-    mime_magic_buf = (char*)g_realloc(mime_magic_buf, mime_cache_max_extent);
-
-    G_UNLOCK(mime_magic_buf);
 }
 
 static bool
-mime_type_is_data_plain_text(const char* data, i32 len)
+mime_type_is_data_plain_text(const std::span<const char8_t> data)
 {
-    if (len >= 0 && data)
+    if (data.size() == 0)
     {
-        for (const auto i : ztd::range(len))
-        {
-            if (data[i] == '\0')
-            {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
-    return false;
+
+    for (const auto d : data)
+    {
+        if (d == '\0')
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool
@@ -496,9 +448,17 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
         {
             if (file_stat.is_regular_file())
             {
-                unsigned char data[TEXT_MAX_EXTENT];
-                const i32 rlen = read(fd, data, sizeof(data));
-                ret = mime_type_is_data_plain_text((char*)data, rlen);
+                std::array<char8_t, TEXT_MAX_EXTENT> data;
+                const i32 len = read(fd, data.data(), data.size());
+                if (len == -1)
+                {
+                    ztd::logger::error("failed to read {}", file_path);
+                    ret = false;
+                }
+                else
+                {
+                    ret = mime_type_is_data_plain_text(data);
+                }
             }
         }
         close(fd);

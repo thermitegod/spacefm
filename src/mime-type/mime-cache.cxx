@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <span>
+
 #include <fcntl.h>
 
 #include <glib.h>
@@ -219,18 +221,18 @@ MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
 }
 
 const char*
-MimeCache::lookup_magic(const char* data, u32 len)
+MimeCache::lookup_magic(const std::span<const char8_t> data)
 {
     const char* magic = this->magics;
 
-    if (!data || (len == 0) || !magic)
+    if (data.size() == 0 || !magic)
     {
         return nullptr;
     }
 
     for (usize i = 0; i < this->n_magics; ++i, magic += 16)
     {
-        if (magic_match(this->buffer, magic, data, len))
+        if (magic_match(this->buffer, magic, data))
         {
             return this->buffer + VAL32(magic, 4);
         }
@@ -346,7 +348,7 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, std::string_view st
 }
 
 bool
-MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data, u32 len)
+MimeCache::magic_rule_match(const char* buf, const char* rule, const std::span<const char8_t> data)
 {
     u32 offset = VAL32(rule, 0);
     const u32 range = VAL32(rule, 4);
@@ -354,7 +356,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
     const u32 max_offset = offset + range;
     const u32 val_len = VAL32(rule, 12);
 
-    for (; offset < max_offset && (offset + val_len) <= len; ++offset)
+    for (; offset < max_offset && (offset + val_len) <= data.size(); ++offset)
     {
         bool match = false;
         const u32 val_off = VAL32(rule, 16);
@@ -381,7 +383,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
         }
         else /* direct comparison */
         {
-            if (memcmp(value, data + offset, val_len) == 0)
+            if (memcmp(value, data.data() + offset, val_len) == 0)
             {
                 match = true;
             }
@@ -396,7 +398,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
                 rule = buf + first_child_off;
                 for (usize i = 0; i < n_children; ++i, rule += 32)
                 {
-                    if (magic_rule_match(buf, rule, data, len))
+                    if (magic_rule_match(buf, rule, data))
                     {
                         return true;
                     }
@@ -412,7 +414,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const char* data,
 }
 
 bool
-MimeCache::magic_match(const char* buf, const char* magic, const char* data, u32 len)
+MimeCache::magic_match(const char* buf, const char* magic, const std::span<const char8_t> data)
 {
     const u32 n_rules = VAL32(magic, 8);
     const u32 rules_off = VAL32(magic, 12);
@@ -420,7 +422,7 @@ MimeCache::magic_match(const char* buf, const char* magic, const char* data, u32
 
     for (usize i = 0; i < n_rules; ++i, rule += 32)
     {
-        if (magic_rule_match(buf, rule, data, len))
+        if (magic_rule_match(buf, rule, data))
         {
             return true;
         }
