@@ -293,8 +293,8 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     {
         // guess icon
         const auto mime_parts = ztd::partition(mime_type->type, "/");
-        const std::string mime = mime_parts[0];
-        const std::string type = mime_parts[2];
+        const std::string& mime = mime_parts[0];
+        const std::string& type = mime_parts[2];
 
         if (ztd::contains(mime_type->type, "/"))
         {

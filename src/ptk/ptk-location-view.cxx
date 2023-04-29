@@ -728,7 +728,7 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         popup_missing_mount(GTK_WIDGET(view), 0);
         return;
     }
-    const auto mount_command = check_mount_command.value();
+    const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* ptask =
@@ -772,7 +772,7 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         popup_missing_mount(view, 1);
         return;
     }
-    const auto unmount_command = check_unmount_command.value();
+    const auto& unmount_command = check_unmount_command.value();
 
     const std::string task_name = fmt::format("Unmount {}", vol->device_file);
     PtkFileTask* ptask =
@@ -818,7 +818,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
             popup_missing_mount(view, 1);
             return;
         }
-        const auto unmount_command = check_unmount_command.value();
+        const auto& unmount_command = check_unmount_command.value();
 
         const std::string task_name = fmt::format("Remove {}", vol->device_file);
         PtkFileTask* ptask =
@@ -919,7 +919,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
         popup_missing_mount(GTK_WIDGET(view), 0);
         return false;
     }
-    const auto mount_command = check_mount_command.value();
+    const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = fmt::format("Mount {}", vol->device_file);
     PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view);
@@ -991,7 +991,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
             popup_missing_mount(view, 0);
             return;
         }
-        const auto mount_command = check_mount_command.value();
+        const auto& mount_command = check_mount_command.value();
 
         // task
         const std::string task_name = fmt::format("Mount {}", vol->device_file);
@@ -1065,7 +1065,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
             popup_missing_mount(view, 0);
             return;
         }
-        const auto mount_command = check_mount_command.value();
+        const auto& mount_command = check_mount_command.value();
 
         // task
         const std::string task_name = fmt::format("Mount {}", vol->device_file);

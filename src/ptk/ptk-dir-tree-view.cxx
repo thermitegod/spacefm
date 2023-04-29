@@ -83,7 +83,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
     gtk_tree_model_get(model, iter, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
     if (file)
     {
-        const std::string name = file->get_name();
+        const std::string& name = file->get_name();
         if (ztd::startswith(name, "."))
         {
             vfs_file_info_unref(file);

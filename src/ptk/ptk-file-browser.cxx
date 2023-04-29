@@ -321,7 +321,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, std::string_view path
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
             if (file)
             {
-                const std::string file_name = file->get_name();
+                const std::string& file_name = file->get_name();
                 if (ztd::same(file_name, name))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);

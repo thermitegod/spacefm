@@ -410,7 +410,7 @@ parse_mounts(bool report)
                     const auto check_udevice = udev.device_from_devnum('b', devnum);
                     if (check_udevice)
                     {
-                        const auto udevice = check_udevice.value();
+                        const auto& udevice = check_udevice.value();
                         if (udevice.is_initialized())
                         {
                             // is block device with subdir mount - ignore
@@ -430,7 +430,7 @@ parse_mounts(bool report)
                 const auto check_udevice = udev.device_from_devnum('b', devnum);
                 if (check_udevice)
                 {
-                    const auto udevice = check_udevice.value();
+                    const auto& udevice = check_udevice.value();
                     if (udevice.is_initialized())
                     {
                         // is block device
@@ -536,7 +536,7 @@ parse_mounts(bool report)
                 continue;
             }
 
-            const auto udevice = check_udevice.value();
+            const auto& udevice = check_udevice.value();
             if (udevice.is_initialized())
             {
                 const std::string devnode = udevice.get_devnode().value();
@@ -606,7 +606,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
     const auto check_udevice = umonitor.receive_device();
     if (check_udevice)
     {
-        const auto udevice = check_udevice.value();
+        const auto& udevice = check_udevice.value();
 
         const auto action = udevice.get_action().value();
         const auto devnode = udevice.get_devnode().value();
@@ -1189,7 +1189,7 @@ vfs_volume_dir_avoid_changes(std::string_view dir)
     {
         return false;
     }
-    const std::string fstype = check_fstype.value();
+    const std::string& fstype = check_fstype.value();
     // ztd::logger::debug("    fstype={}", fstype);
 
     const auto blacklisted = ztd::split(xset_get_s(XSetName::DEV_CHANGE), " ");

@@ -54,8 +54,8 @@ parse_bookmarks(std::string_view raw_line) noexcept
 
     const auto book_parts = ztd::rpartition(line, " ");
 
-    const std::string book_path = book_parts[0];
-    const std::string book_name = book_parts[2];
+    const std::string& book_path = book_parts[0];
+    const std::string& book_name = book_parts[2];
 
     if (book_path.empty())
     {
