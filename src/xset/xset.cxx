@@ -973,7 +973,7 @@ xset_is(std::string_view name) noexcept
 
 /////////////////
 
-xset_t
+void
 xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
 {
     assert(set != nullptr);
@@ -1227,8 +1227,6 @@ xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept
         default:
             break;
     }
-
-    return set;
 }
 
 /**
