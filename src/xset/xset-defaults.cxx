@@ -1826,7 +1826,8 @@ xset_defaults()
     // PANELS
     for (const panel_t p : PANELS)
     {
-        set = xset_set_panel(p, XSetPanel::SHOW_TOOLBOX, XSetVar::MENU_LABEL, "_Toolbar");
+        set = xset_get_panel(p, XSetPanel::SHOW_TOOLBOX);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Toolbar");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
@@ -1834,7 +1835,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_toolbox");
         }
 
-        set = xset_set_panel(p, XSetPanel::SHOW_DEVMON, XSetVar::MENU_LABEL, "_Devices");
+        set = xset_get_panel(p, XSetPanel::SHOW_DEVMON);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Devices");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
@@ -1842,7 +1844,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_devmon");
         }
 
-        set = xset_set_panel(p, XSetPanel::SHOW_DIRTREE, XSetVar::MENU_LABEL, "T_ree");
+        set = xset_get_panel(p, XSetPanel::SHOW_DIRTREE);
+        xset_set_var(set, XSetVar::MENU_LABEL, "T_ree");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
@@ -1850,7 +1853,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_dirtree");
         }
 
-        set = xset_set_panel(p, XSetPanel::SHOW_SIDEBAR, XSetVar::MENU_LABEL, "_Side Toolbar");
+        set = xset_get_panel(p, XSetPanel::SHOW_SIDEBAR);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Side Toolbar");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_UNSET;
         if (p != 1)
@@ -1858,7 +1862,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_sidebar");
         }
 
-        set = xset_set_panel(p, XSetPanel::LIST_DETAILED, XSetVar::MENU_LABEL, "_Detailed");
+        set = xset_get_panel(p, XSetPanel::LIST_DETAILED);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Detailed");
         set->menu_style = XSetMenu::RADIO;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)
@@ -1866,39 +1871,45 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_detailed");
         }
 
-        set = xset_set_panel(p, XSetPanel::LIST_ICONS, XSetVar::MENU_LABEL, "_Icons");
+        set = xset_get_panel(p, XSetPanel::LIST_ICONS);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Icons");
         set->menu_style = XSetMenu::RADIO;
         if (p != 1)
         {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_icons");
         }
 
-        set = xset_set_panel(p, XSetPanel::LIST_COMPACT, XSetVar::MENU_LABEL, "_Compact");
+        set = xset_get_panel(p, XSetPanel::LIST_COMPACT);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Compact");
         set->menu_style = XSetMenu::RADIO;
         if (p != 1)
         {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_compact");
         }
 
-        set = xset_set_panel(p, XSetPanel::LIST_LARGE, XSetVar::MENU_LABEL, "_Large Icons");
+        set = xset_get_panel(p, XSetPanel::LIST_LARGE);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Large Icons");
         set->menu_style = XSetMenu::CHECK;
         if (p != 1)
         {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_list_large");
         }
 
-        set = xset_set_panel(p, XSetPanel::SHOW_HIDDEN, XSetVar::MENU_LABEL, "_Hidden Files");
+        set = xset_get_panel(p, XSetPanel::SHOW_HIDDEN);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Hidden Files");
         set->menu_style = XSetMenu::CHECK;
         if (p != 1)
         {
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_show_hidden");
         }
 
-        set = xset_set_panel(p, XSetPanel::ICON_TAB, XSetVar::MENU_LABEL, "_Icon");
+        set = xset_get_panel(p, XSetPanel::ICON_TAB);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Icon");
         set->menu_style = XSetMenu::ICON;
         xset_set_var(set, XSetVar::ICN, "gtk-directory");
 
-        set = xset_set_panel(p, XSetPanel::ICON_STATUS, XSetVar::MENU_LABEL, "_Icon");
+        set = xset_get_panel(p, XSetPanel::ICON_STATUS);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Icon");
         set->menu_style = XSetMenu::ICON;
         xset_set_var(set, XSetVar::ICN, "gtk-yes");
         if (p != 1)
@@ -1906,12 +1917,14 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_icon_status");
         }
 
-        set = xset_set_panel(p, XSetPanel::DETCOL_NAME, XSetVar::MENU_LABEL, "_Name");
+        set = xset_get_panel(p, XSetPanel::DETCOL_NAME);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Name");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE; // visible
         set->x = ztd::strdup("0");   // position
 
-        set = xset_set_panel(p, XSetPanel::DETCOL_SIZE, XSetVar::MENU_LABEL, "_Size");
+        set = xset_get_panel(p, XSetPanel::DETCOL_SIZE);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Size");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         set->x = ztd::strdup("1");
@@ -1920,7 +1933,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_size");
         }
 
-        set = xset_set_panel(p, XSetPanel::DETCOL_TYPE, XSetVar::MENU_LABEL, "_Type");
+        set = xset_get_panel(p, XSetPanel::DETCOL_TYPE);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Type");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("2");
         if (p != 1)
@@ -1928,7 +1942,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_type");
         }
 
-        set = xset_set_panel(p, XSetPanel::DETCOL_PERM, XSetVar::MENU_LABEL, "_Permission");
+        set = xset_get_panel(p, XSetPanel::DETCOL_PERM);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Permission");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("3");
         if (p != 1)
@@ -1936,7 +1951,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_perm");
         }
 
-        set = xset_set_panel(p, XSetPanel::DETCOL_OWNER, XSetVar::MENU_LABEL, "_Owner");
+        set = xset_get_panel(p, XSetPanel::DETCOL_OWNER);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Owner");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("4");
         if (p != 1)
@@ -1944,7 +1960,8 @@ xset_defaults()
             xset_set_var(set, XSetVar::SHARED_KEY, "panel1_detcol_owner");
         }
 
-        set = xset_set_panel(p, XSetPanel::DETCOL_DATE, XSetVar::MENU_LABEL, "_Modified");
+        set = xset_get_panel(p, XSetPanel::DETCOL_DATE);
+        xset_set_var(set, XSetVar::MENU_LABEL, "_Modified");
         set->menu_style = XSetMenu::CHECK;
         set->x = ztd::strdup("5");
         if (p != 1)
@@ -1958,7 +1975,8 @@ xset_defaults()
         set->y = ztd::strdup("1");                 // PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
         set->z = ztd::strdup(XSetB::XSET_B_TRUE);  // sort_hidden_first
 
-        set = xset_set_panel(p, XSetPanel::BOOK_FOL, XSetVar::MENU_LABEL, "Follow _Dir");
+        set = xset_get_panel(p, XSetPanel::BOOK_FOL);
+        xset_set_var(set, XSetVar::MENU_LABEL, "Follow _Dir");
         set->menu_style = XSetMenu::CHECK;
         set->b = XSetB::XSET_B_TRUE;
         if (p != 1)

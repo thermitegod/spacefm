@@ -429,9 +429,9 @@ xset_t xset_get_panel(panel_t panel, XSetPanel name) noexcept;
 xset_t xset_get_panel_mode(panel_t panel, std::string_view name, MainWindowPanel mode) noexcept;
 xset_t xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcept;
 
-xset_t xset_set_panel(panel_t panel, std::string_view name, XSetVar var,
-                      std::string_view value) noexcept;
-xset_t xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, std::string_view value) noexcept;
+void xset_set_panel(panel_t panel, std::string_view name, XSetVar var,
+                    std::string_view value) noexcept;
+void xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, std::string_view value) noexcept;
 
 // CB
 

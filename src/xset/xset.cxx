@@ -1626,21 +1626,19 @@ xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept
  * Panel Set Generic
  */
 
-xset_t
+void
 xset_set_panel(panel_t panel, std::string_view name, XSetVar var, std::string_view value) noexcept
 {
     const std::string fullname = fmt::format("panel{}_{}", panel, name);
     const xset_t set = xset_get(fullname);
     xset_set_var(set, var, value);
-    return set;
 }
 
-xset_t
+void
 xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, std::string_view value) noexcept
 {
     const xset_t set = xset_get(xset_get_xsetname_from_panel(panel, name));
     xset_set_var(set, var, value);
-    return set;
 }
 
 /**
