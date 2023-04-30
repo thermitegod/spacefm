@@ -237,7 +237,7 @@ on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
     xset_t set;
     if (menuitem)
     {
-        set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "set")));
     }
     else
     {
@@ -259,7 +259,7 @@ on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
     xset_t set;
     if (menuitem)
     {
-        set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "set")));
     }
     else
     {
@@ -322,7 +322,7 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, xset_t 
     xset_t set;
     if (menuitem)
     {
-        set = XSET(g_object_get_data(G_OBJECT(menuitem), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "set")));
     }
     else
     {
@@ -996,7 +996,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                                  "button-release-event",
                                  G_CALLBACK(on_app_button_press),
                                  (void*)data);
-                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", handler_set);
+                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", handler_set->name);
             }
             // add a separator
             item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
@@ -1588,10 +1588,16 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    xset_t handler_set = XSET(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
+    xset_t handler_set = nullptr;
+    const char* xset_name =
+        static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
+    if (xset_name != nullptr)
+    {
+        handler_set = xset_get(xset_name);
+    }
 
-    const std::string desktop_file =
-        CONST_CHAR(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
+    const char* desktop_file =
+        static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
     const vfs::desktop desktop = vfs_get_desktop(desktop_file);
 
     std::string app;
@@ -2083,7 +2089,14 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         return;
     }
 
-    xset_t handler_set = XSET(g_object_get_data(G_OBJECT(app_item), "handler_set"));
+    xset_t handler_set = nullptr;
+    const char* xset_name =
+        static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "handler_set"));
+    if (xset_name != nullptr)
+    {
+        handler_set = xset_get(xset_name);
+    }
+
     if (handler_set)
     {
         // is a file handler - open file handler config

@@ -267,7 +267,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
     }
     else
     {
-        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     }
     if (!set)
     {
@@ -4836,7 +4836,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
 
     if (item)
     {
-        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     }
     else
     {

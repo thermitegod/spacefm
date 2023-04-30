@@ -817,7 +817,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 
         set->browser = file_browser;
         g_object_set_data(G_OBJECT(item), "menu", menu);
-        g_object_set_data(G_OBJECT(item), "set", set);
+        g_object_set_data(G_OBJECT(item), "set", set->name);
 
         if (set->ob1)
         {
@@ -1356,7 +1356,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
     i32* newkey = (i32*)g_object_get_data(G_OBJECT(dlg), "newkey");
     i32* newkeymod = (i32*)g_object_get_data(G_OBJECT(dlg), "newkeymod");
     GtkWidget* btn = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "btn"));
-    xset_t set = XSET(g_object_get_data(G_OBJECT(dlg), "set"));
+    xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(dlg), "set")));
     xset_t keyset = nullptr;
     std::string keyname;
 
@@ -1558,7 +1558,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn, GtkResponseType::GTK_RESPONSE_OK);
     gtk_widget_set_sensitive(btn, false);
 
-    g_object_set_data(G_OBJECT(dlg), "set", set);
+    g_object_set_data(G_OBJECT(dlg), "set", set->name);
     g_object_set_data(G_OBJECT(dlg), "newkey", &newkey);
     g_object_set_data(G_OBJECT(dlg), "newkeymod", &newkeymod);
     g_object_set_data(G_OBJECT(dlg), "btn", btn);
@@ -2362,7 +2362,7 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
     if (item)
     {
-        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
         if (!set)
         {
             return false;

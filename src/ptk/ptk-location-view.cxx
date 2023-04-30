@@ -1187,7 +1187,7 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
     }
     else
     {
-        set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     }
 
     if (set->xset_name == XSetName::DEV_FS_CNF)

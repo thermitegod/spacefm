@@ -513,7 +513,7 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
             {
                 x = 7;
                 // attach set pointer to custom checkboxes so we can find it
-                g_object_set_data(G_OBJECT(widget), "set", set);
+                g_object_set_data(G_OBJECT(widget), "set", set->name);
             }
             else
             {
@@ -556,7 +556,8 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
         // a custom checkbox is being updated
         for (GSList* l = file_browser->toolbar_widgets[7]; l; l = g_slist_next(l))
         {
-            if (XSET(g_object_get_data(G_OBJECT(l->data), "set")) == set)
+            xset_t test_set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(l->data), "set")));
+            if (set == test_set)
             {
                 GtkWidget* widget = GTK_WIDGET(l->data);
                 if (GTK_IS_TOGGLE_BUTTON(widget))
@@ -6038,7 +6039,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
         return;
     }
 
-    xset_t set = XSET(g_object_get_data(G_OBJECT(item), "set"));
+    xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     if (!set || !file_browser)
     {
         return;
