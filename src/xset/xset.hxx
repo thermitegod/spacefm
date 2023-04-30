@@ -377,9 +377,9 @@ xset_t xset_get(std::string_view name) noexcept;
 xset_t xset_is(XSetName name) noexcept;
 xset_t xset_is(std::string_view name) noexcept;
 
-xset_t xset_set(xset_t name, XSetVar var, std::string_view value) noexcept;
-xset_t xset_set(XSetName name, XSetVar var, std::string_view value) noexcept;
-xset_t xset_set(std::string_view name, XSetVar var, std::string_view value) noexcept;
+void xset_set(xset_t name, XSetVar var, std::string_view value) noexcept;
+void xset_set(XSetName name, XSetVar var, std::string_view value) noexcept;
+void xset_set(std::string_view name, XSetVar var, std::string_view value) noexcept;
 
 xset_t xset_set_var(xset_t set, XSetVar var, std::string_view value) noexcept;
 

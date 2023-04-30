@@ -527,7 +527,9 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_DATE, mode)->b;
 
         xset_set_cb(XSetName::VIEW_REORDER_COL, (GFunc)on_reorder, browser);
-        set = xset_set(XSetName::VIEW_COLUMNS, XSetVar::DISABLE, "0");
+
+        set = xset_get(XSetName::VIEW_COLUMNS);
+        xset_set_var(set, XSetVar::DISABLE, "0");
         desc = fmt::format("panel{}_detcol_size panel{}_detcol_type panel{}_detcol_perm "
                            "panel{}_detcol_owner panel{}_detcol_date separator view_reorder_col",
                            p,
