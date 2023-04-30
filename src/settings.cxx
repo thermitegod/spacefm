@@ -286,15 +286,14 @@ load_settings()
     }
 
     // MOD editor discovery
-    const char* app_name = xset_get_s(XSetName::EDITOR);
-    if (!app_name)
+    std::string app_name = xset_get_s(XSetName::EDITOR);
+    if (app_name.empty())
     {
         vfs::mime_type mime_type = vfs_mime_type_get_from_type("text/plain");
         if (mime_type)
         {
-            app_name = vfs_mime_type_get_default_action(mime_type);
-            vfs_mime_type_unref(mime_type);
-            if (app_name)
+            app_name = mime_type->get_default_action();
+            if (app_name.empty())
             {
                 const vfs::desktop desktop = vfs_get_desktop(app_name);
                 xset_set(XSetName::EDITOR, XSetVar::S, desktop->get_exec());

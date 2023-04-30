@@ -1174,8 +1174,9 @@ value_in_list(std::string_view list, std::string_view value)
 }
 
 const std::vector<xset_t>
-ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mime_type mime_type,
-                              bool test_cmd, bool multiple, bool enabled_only)
+ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path,
+                              const vfs::mime_type& mime_type, bool test_cmd, bool multiple,
+                              bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
    * command must be non-empty if test_cmd */
 
@@ -1190,7 +1191,7 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path, vfs::mim
     std::string type;
     if (mime_type)
     {
-        type = vfs_mime_type_get_type(mime_type);
+        type = mime_type->get_type();
     }
 
     // replace spaces in path with underscores for matching

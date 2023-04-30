@@ -807,8 +807,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     if (file)
     {
         mime_type = file->get_mime_type();
-        apps = vfs_mime_type_get_actions(mime_type);
-        context->var[ItemPropContext::CONTEXT_MIME] = vfs_mime_type_get_type(mime_type);
+        apps = mime_type->get_actions();
+        context->var[ItemPropContext::CONTEXT_MIME] = mime_type->get_type();
     }
     else
     {
@@ -1012,12 +1012,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         if (is_text)
         {
             vfs::mime_type txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-            const std::vector<std::string> txt_apps = vfs_mime_type_get_actions(txt_type);
+            const std::vector<std::string> txt_apps = txt_type->get_actions();
             if (!txt_apps.empty())
             {
                 apps = ztd::merge(apps, txt_apps);
             }
-            vfs_mime_type_unref(txt_type);
         }
         if (!apps.empty())
         {
@@ -1082,7 +1081,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         std::string plain_type;
         if (mime_type)
         {
-            plain_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
+            plain_type = ztd::strdup(mime_type->get_type());
         }
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
@@ -1194,11 +1193,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
 
         g_signal_connect(submenu, "key-press-event", G_CALLBACK(app_menu_keypress), data);
-    }
-
-    if (mime_type)
-    {
-        vfs_mime_type_unref(mime_type);
     }
 
     // Go >
@@ -1565,7 +1559,6 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
         ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
         std::free(app);
     }
-    vfs_mime_type_unref(mime_type);
 }
 
 static void
@@ -1687,7 +1680,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     switch (job)
     {
         case PTKFileMenuAppJob::APP_JOB_DEFAULT:
-            vfs_mime_type_set_default_action(mime_type, desktop->get_name());
+            mime_type->set_default_action(desktop->get_name());
             ptk_app_chooser_has_handler_warn(data->browser ? GTK_WIDGET(data->browser) : nullptr,
                                              mime_type);
             break;
@@ -1695,9 +1688,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // for text files, spacefm displays both the actions for the type
             // and the actions for text/plain, so removing an app may appear to not
             // work if that app is still associated with text/plain
-            vfs_mime_type_remove_action(mime_type, desktop->get_name());
-            if (!ztd::same(mime_type->type, "text/plain") &&
-                ztd::startswith(mime_type->type, "text/"))
+            mime_type->remove_action(desktop->get_name());
+            if (!ztd::same(mime_type->get_type(), "text/plain") &&
+                ztd::startswith(mime_type->get_type(), "text/"))
             {
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
@@ -1796,7 +1789,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = str;
             if (ztd::endswith(path, ".desktop") && !ztd::contains(path, "/") && mime_type)
             {
-                vfs_mime_type_append_action(mime_type->type, path);
+                vfs_mime_type_append_action(mime_type->get_type(), path);
             }
             std::free(str);
             break;
@@ -1833,13 +1826,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-            str2 = ztd::replace(mime_type->type, "/", "-");
+            str2 = ztd::replace(mime_type->get_type(), "/", "-");
             str2 = fmt::format("{}.xml", str2);
             path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages", str2);
             if (!std::filesystem::exists(path))
             {
                 std::string msg;
-                const std::string xml_file = fmt::format("{}.xml", mime_type->type);
+                const std::string xml_file = fmt::format("{}.xml", mime_type->get_type());
                 const std::string usr_path = Glib::build_filename("/usr/share/mime", xml_file);
 
                 if (std::filesystem::exists(usr_path))
@@ -1850,7 +1843,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                       path,
                                       usr_path,
                                       path,
-                                      mime_type->type);
+                                      mime_type->get_type());
                 }
                 else
                 {
@@ -1859,7 +1852,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                       "recognized for the current user.\n\nCreate this file now?",
                                       path,
                                       path,
-                                      mime_type->type);
+                                      mime_type->get_type());
                 }
 
                 const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
@@ -1902,7 +1895,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     "            <match type=\"string\" value=\"\\x89PNG\" offset=\"0\"/>\n"
                     "        </magic>\n"
                     "-->",
-                    mime_type->type);
+                    mime_type->get_type());
                 // clang-format on
 
                 // build from /usr/share/mime type ?
@@ -1960,7 +1953,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_dir_monitor_mime();
             break;
         case PTKFileMenuAppJob::APP_JOB_VIEW_TYPE:
-            str2 = fmt::format("{}.xml", mime_type->type);
+            str2 = fmt::format("{}.xml", mime_type->get_type());
             path = Glib::build_filename("/usr/share/mime", str2);
             if (std::filesystem::exists(path))
             {
@@ -2001,10 +1994,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             break;
         default:
             break;
-    }
-    if (mime_type)
-    {
-        vfs_mime_type_unref(mime_type);
     }
 }
 
@@ -2088,7 +2077,6 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     GtkWidget* submenu;
     std::string str;
     std::string path;
-    const char* type;
 
     if (!(data && data->file))
     {
@@ -2104,11 +2092,11 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         return;
     }
 
+    std::string type;
     vfs::mime_type mime_type = data->file->get_mime_type();
     if (mime_type)
     {
-        type = vfs_mime_type_get_type(mime_type);
-        vfs_mime_type_unref(mime_type);
+        type = mime_type->get_type();
     }
     else
     {

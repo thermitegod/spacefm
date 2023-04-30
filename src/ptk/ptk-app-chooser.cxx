@@ -164,13 +164,11 @@ create_model_from_mime_type(vfs::mime_type mime_type)
                                             G_TYPE_STRING);
     if (mime_type)
     {
-        std::vector<std::string> apps = vfs_mime_type_get_actions(mime_type);
-        const std::string type = vfs_mime_type_get_type(mime_type);
+        std::vector<std::string> apps = mime_type->get_actions();
+        const std::string type = mime_type->get_type();
         if (apps.empty() && mime_type_is_text_file("", type))
         {
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-            apps = vfs_mime_type_get_actions(mime_type);
-            vfs_mime_type_unref(mime_type);
         }
         if (!apps.empty())
         {
@@ -205,7 +203,7 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
 }
 
 static GtkWidget*
-app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_all_apps,
+app_chooser_dialog_new(GtkWindow* parent, const vfs::mime_type& mime_type, bool focus_all_apps,
                        bool show_command, bool show_default, bool dir_default)
 {
     /*
@@ -234,13 +232,13 @@ app_chooser_dialog_new(GtkWindow* parent, vfs::mime_type mime_type, bool focus_a
     }
 
     const std::string mime_desc =
-        fmt::format(" {}\n ( {} )", vfs_mime_type_get_description(mime_type), mime_type->type);
+        fmt::format(" {}\n ( {} )", mime_type->get_description(), mime_type->get_type());
     gtk_label_set_text(GTK_LABEL(file_type), mime_desc.data());
 
     /* Do not set default handler for directories and files with unknown type */
     if (!show_default ||
-        /*  ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_UNKNOWN) || */
-        (ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
+        /*  ztd::same(mime_type->get_type(), XDG_MIME_TYPE_UNKNOWN) || */
+        (ztd::same(mime_type->get_type(), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
     {
         gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(builder, "set_default")));
     }
@@ -486,7 +484,7 @@ on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
 }
 
 void
-ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
+ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_type)
 {
     // is file handler set for this type?
     std::vector<xset_t> handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
@@ -503,7 +501,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
             "than with your associated MIME application.\n\nYou may also need to disable this "
             "handler in Open|File Handlers for this type to be opened with your associated "
             "application by default.",
-            vfs_mime_type_get_type(mime_type),
+            mime_type->get_type(),
             handlers.front()->menu_label);
         xset_msg_dialog(parent,
                         GtkMessageType::GTK_MESSAGE_INFO,
@@ -529,7 +527,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
                 "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
                 "global option Open|Archive Defaults|Open With App, for this type to be opened "
                 "with your associated application by default.",
-                vfs_mime_type_get_type(mime_type),
+                mime_type->get_type(),
                 handlers.front()->menu_label);
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_INFO,
@@ -541,8 +539,9 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, vfs::mime_type mime_type)
 }
 
 char*
-ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool focus_all_apps,
-                             bool show_command, bool show_default, bool dir_default)
+ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
+                             bool focus_all_apps, bool show_command, bool show_default,
+                             bool dir_default)
 {
     /*
     focus_all_apps      Focus All Apps tab by default
@@ -572,15 +571,14 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, vfs::mime_type mime_type, bool f
             /* TODO: full-featured mime editor??? */
             if (app_chooser_dialog_get_set_default(dlg))
             {
-                vfs_mime_type_set_default_action(mime_type, app);
+                mime_type->set_default_action(app);
                 ptk_app_chooser_has_handler_warn(dlg, mime_type);
             }
-            else if (/* !ztd::same(vfs_mime_type_get_type(mime_type),
+            else if (/* !ztd::same(mime_type->get_type(),
                                                     XDG_MIME_TYPE_UNKNOWN) && */
-                     (dir_default ||
-                      !ztd::same(vfs_mime_type_get_type(mime_type), XDG_MIME_TYPE_DIRECTORY)))
+                     (dir_default || !ztd::same(mime_type->get_type(), XDG_MIME_TYPE_DIRECTORY)))
             {
-                const std::string custom = vfs_mime_type_add_action(mime_type, app);
+                const std::string custom = mime_type->add_action(app);
                 std::free(app);
                 app = ztd::strdup(custom);
             }

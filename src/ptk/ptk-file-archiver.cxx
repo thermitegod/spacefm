@@ -996,7 +996,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                               true,
                                               false,
                                               true);
-            vfs_mime_type_unref(mime_type);
             if (!handlers.empty())
             {
                 archive_found = true;
@@ -1181,7 +1180,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         {
             handler_xset = handlers.front();
         }
-        vfs_mime_type_unref(mime_type);
 
         // Continuing to next file if a handler hasnt been found
         if (!handler_xset)

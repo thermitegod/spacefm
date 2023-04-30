@@ -112,7 +112,6 @@ vfs_file_info_clear(vfs::file_info file)
     }
     if (file->mime_type)
     {
-        vfs_mime_type_unref(file->mime_type);
         file->mime_type = nullptr;
     }
     file->flags = VFSFileInfoFlag::NONE;
@@ -237,7 +236,6 @@ VFSFileInfo::get_blocks() const noexcept
 vfs::mime_type
 VFSFileInfo::get_mime_type() const noexcept
 {
-    vfs_mime_type_ref(this->mime_type);
     return this->mime_type;
 }
 
@@ -250,13 +248,12 @@ VFSFileInfo::reload_mime_type(std::string_view full_path) noexcept
 
     this->mime_type = vfs_mime_type_get_from_file(full_path);
     this->load_special_info(full_path);
-    vfs_mime_type_unref(this->mime_type); /* FIXME: is vfs_mime_type_unref needed ?*/
 }
 
 const std::string
 VFSFileInfo::get_mime_type_desc() const noexcept
 {
-    return vfs_mime_type_get_description(this->mime_type);
+    return mime_type->get_description();
 }
 
 GdkPixbuf*
@@ -269,7 +266,7 @@ VFSFileInfo::get_big_icon() noexcept
         {
             return nullptr;
         }
-        return vfs_mime_type_get_icon(this->mime_type, true);
+        return this->mime_type->get_icon(true);
     }
 
     i32 w = 0;
@@ -329,7 +326,7 @@ VFSFileInfo::get_small_icon() noexcept
     {
         return nullptr;
     }
-    return vfs_mime_type_get_icon(this->mime_type, false);
+    return this->mime_type->get_icon(false);
 }
 
 GdkPixbuf*
@@ -632,14 +629,14 @@ bool
 VFSFileInfo::is_image() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
-    return ztd::startswith(vfs_mime_type_get_type(this->mime_type), "image/");
+    return ztd::startswith(this->mime_type->get_type(), "image/");
 }
 
 bool
 VFSFileInfo::is_video() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
-    return ztd::startswith(vfs_mime_type_get_type(this->mime_type), "video/");
+    return ztd::startswith(this->mime_type->get_type(), "video/");
 }
 
 bool
@@ -651,21 +648,21 @@ VFSFileInfo::is_desktop_entry() const noexcept
 bool
 VFSFileInfo::is_unknown_type() const noexcept
 {
-    return ztd::same(vfs_mime_type_get_type(this->mime_type), XDG_MIME_TYPE_UNKNOWN);
+    return ztd::same(this->mime_type->get_type(), XDG_MIME_TYPE_UNKNOWN);
 }
 
 // full path of the file is required by this function
 bool
 VFSFileInfo::is_executable(std::string_view file_path) const noexcept
 {
-    return mime_type_is_executable_file(file_path, this->mime_type->type);
+    return mime_type_is_executable_file(file_path, this->mime_type->get_type());
 }
 
 // full path of the file is required by this function
 bool
 VFSFileInfo::is_text(std::string_view file_path) const noexcept
 {
-    return mime_type_is_text_file(file_path, this->mime_type->type);
+    return mime_type_is_text_file(file_path, this->mime_type->get_type());
 }
 
 std::filesystem::perms

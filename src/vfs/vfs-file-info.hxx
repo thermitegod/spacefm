@@ -60,6 +60,7 @@ struct VFSFileInfo
 
   public:
     std::string name{};                           // real name on file system
+    std::string path{};                           // real path on file system
     std::string disp_name{};                      // displayed name (in UTF-8)
     std::string collate_key{};                    // sfm sort key
     std::string collate_icase_key{};              // sfm case folded sort key

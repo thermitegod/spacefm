@@ -108,11 +108,11 @@ open_file(std::string_view path)
     vfs_file_info_get(file, path);
     vfs::mime_type mime_type = file->get_mime_type();
 
-    const char* app_name = vfs_mime_type_get_default_action(mime_type);
-    if (!app_name)
+    std::string app_name = mime_type->get_default_action();
+    if (app_name.empty())
     {
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
-        if (!app_name)
+        if (app_name.empty())
         {
             ztd::logger::error("no application to open file: {}", path);
             return;
@@ -135,7 +135,6 @@ open_file(std::string_view path)
         ptk_show_error(nullptr, "Error", msg);
     }
 
-    vfs_mime_type_unref(mime_type);
     vfs_file_info_unref(file);
 }
 
@@ -497,7 +496,7 @@ main(int argc, char* argv[])
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
     std::atexit(vfs_file_monitor_clean);
-    std::atexit(vfs_mime_type_clean);
+    std::atexit(vfs_mime_type_finalize);
     std::atexit(vfs_volume_finalize);
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);

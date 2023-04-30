@@ -45,6 +45,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 
@@ -324,7 +325,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
         gtk_tree_model_get(model, &it, 2, &action, -1);
         if (!action)
         {
-            vfs::mime_type mime = VFS_MIME_TYPE(user_data);
+            vfs::mime_type mime = vfs_mime_type_get_from_type(static_cast<const char*>(user_data));
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(combo));
             action = (char*)
                 ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime, false, true, true, true);
@@ -479,15 +480,10 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         {
             same_type = false;
         }
-        vfs_mime_type_unref(type);
         if (is_dirs && !same_type)
         {
             break;
         }
-    }
-    if (type2)
-    {
-        vfs_mime_type_unref(type2);
     }
 
     data->recurse = GTK_WIDGET(gtk_builder_get_object(builder, "recursive"));
@@ -497,11 +493,9 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
     if (same_type)
     {
         vfs::mime_type mime = file->get_mime_type();
-        const std::string file_type = fmt::format("{}\n{}",
-                                                  vfs_mime_type_get_description(mime),
-                                                  vfs_mime_type_get_type(mime));
+        const std::string file_type =
+            fmt::format("{}\n{}", mime->get_description(), mime->get_type());
         gtk_label_set_text(GTK_LABEL(mime_type), file_type.data());
-        vfs_mime_type_unref(mime);
     }
     else
     {
@@ -524,7 +518,7 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
         GtkTreeIter it;
 
         vfs::mime_type mime = file->get_mime_type();
-        const std::vector<std::string> actions = vfs_mime_type_get_actions(mime);
+        const std::vector<std::string> actions = mime->get_actions();
         GtkCellRenderer* renderer;
         GtkListStore* model;
         gtk_cell_layout_clear(GTK_CELL_LAYOUT(open_with));
@@ -576,11 +570,13 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
                                              nullptr,
                                              nullptr);
         gtk_combo_box_set_active(GTK_COMBO_BOX(open_with), 0);
-        g_signal_connect(open_with, "changed", G_CALLBACK(on_combo_change), mime);
 
-        /* vfs_mime_type_unref( mime ); */
+        char* mime_data = ztd::strdup(file->get_mime_type()->get_type());
+
+        g_signal_connect(open_with, "changed", G_CALLBACK(on_combo_change), mime_data);
+
         /* We can unref mime when combo box gets destroyed */
-        g_object_weak_ref(G_OBJECT(open_with), (GWeakNotify)vfs_mime_type_unref, mime);
+        g_object_weak_ref(G_OBJECT(open_with), (GWeakNotify)std::free, mime_data);
     }
     g_object_set_data(G_OBJECT(dlg), "open_with", open_with);
 
@@ -870,8 +866,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     {
                         vfs::file_info file = data->file_list.front();
                         vfs::mime_type mime = file->get_mime_type();
-                        vfs_mime_type_set_default_action(mime, action);
-                        vfs_mime_type_unref(mime);
+                        mime->set_default_action(action);
                         std::free(action);
                     }
                 }

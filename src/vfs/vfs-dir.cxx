@@ -93,8 +93,6 @@ static void* vfs_dir_load_thread(vfs::async_task task, vfs::dir dir);
 static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
                                      std::string_view file_name, void* user_data);
 
-static void on_mime_type_reload(void* user_data);
-
 static bool notify_file_change(void* user_data);
 static bool update_file_info(vfs::dir dir, vfs::file_info file);
 
@@ -105,7 +103,6 @@ static GObjectClass* parent_class = nullptr;
 // static std::map<std::string, vfs::dir> dir_map;
 static std::map<const char*, vfs::dir> dir_map;
 
-static GList* mime_cb = nullptr;
 static u32 change_notify_timeout = 0;
 
 GType
@@ -175,9 +172,6 @@ vfs_dir_finalize(GObject* obj)
         /* There is no VFSDir instance */
         if (dir_map.size() == 0)
         {
-            vfs_mime_type_remove_reload_cb(mime_cb);
-            mime_cb = nullptr;
-
             if (change_notify_timeout)
             {
                 g_source_remove(change_notify_timeout);
@@ -755,11 +749,6 @@ vfs_dir_get_by_path(std::string_view path)
         }
     }
 
-    if (!mime_cb)
-    {
-        mime_cb = vfs_mime_type_add_reload_cb(on_mime_type_reload, nullptr);
-    }
-
     if (dir)
     {
         g_object_ref(dir);
@@ -797,10 +786,9 @@ reload_mime_type(std::string_view key, vfs::dir dir)
     std::ranges::for_each(dir->file_list, action);
 }
 
-static void
-on_mime_type_reload(void* user_data)
+void
+vfs_dir_mime_type_reload()
 {
-    (void)user_data;
     // ztd::logger::debug("reload mime-type");
     const auto action = [](const auto& dir) { reload_mime_type(dir.first, dir.second); };
     std::ranges::for_each(dir_map, action);

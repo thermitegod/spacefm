@@ -282,7 +282,6 @@ xset_design_job_set_app(xset_t set)
             : XDG_MIME_TYPE_UNKNOWN);
     char* file =
         ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, true, false, false, false);
-    vfs_mime_type_unref(mime_type);
 
     if (!(file && file[0]))
     {

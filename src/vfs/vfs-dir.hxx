@@ -308,3 +308,5 @@ bool vfs_dir_add_hidden(std::string_view path, std::string_view file_name);
 void vfs_dir_foreach(VFSDirForeachFunc func, bool user_data);
 
 void vfs_dir_monitor_mime();
+
+void vfs_dir_mime_type_reload();

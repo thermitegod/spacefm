@@ -21,6 +21,7 @@
 #include <span>
 
 #include <array>
+#include <utility>
 #include <vector>
 
 #include <fmt/format.h>
@@ -384,7 +385,6 @@ ptk_open_files_with_app(std::string_view cwd, const std::span<const vfs::file_in
                 open_archives_with_handler(parent, sel_files, full_path, mime_type))
             {
                 // all files were handled by open_archives_with_handler
-                vfs_mime_type_unref(mime_type);
                 break;
             }
 
@@ -415,19 +415,16 @@ ptk_open_files_with_app(std::string_view cwd, const std::span<const vfs::file_in
                 }
                 else
                 {
-                    alloc_desktop = vfs_mime_type_get_default_action(mime_type);
+                    alloc_desktop = mime_type->get_default_action();
                 }
             }
 
-            if (alloc_desktop.empty() && mime_type_is_text_file(full_path, mime_type->type))
+            if (alloc_desktop.empty() && mime_type_is_text_file(full_path, mime_type->get_type()))
             {
                 /* FIXME: special handling for plain text file */
-                vfs_mime_type_unref(mime_type);
                 mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-                alloc_desktop = vfs_mime_type_get_default_action(mime_type);
+                alloc_desktop = mime_type->get_default_action();
             }
-
-            vfs_mime_type_unref(mime_type);
 
             if (alloc_desktop.empty() && file->is_symlink())
             {

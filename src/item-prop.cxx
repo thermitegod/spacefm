@@ -1533,7 +1533,6 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                 gtk_text_buffer_set_text(buf, app, -1);
             }
             std::free(app);
-            vfs_mime_type_unref(mime_type);
         }
         else
         {

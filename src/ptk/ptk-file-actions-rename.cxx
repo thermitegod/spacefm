@@ -2423,11 +2423,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         vfs::mime_type mime_type = file->get_mime_type();
         if (mime_type)
         {
-            mset->mime_type = ztd::strdup(vfs_mime_type_get_type(mime_type));
-            type = fmt::format(" {} ( {} )",
-                               vfs_mime_type_get_description(mime_type),
-                               mset->mime_type);
-            vfs_mime_type_unref(mime_type);
+            mset->mime_type = ztd::strdup(mime_type->get_type());
+            type = fmt::format(" {} ( {} )", mime_type->get_description(), mset->mime_type);
         }
         else
         {

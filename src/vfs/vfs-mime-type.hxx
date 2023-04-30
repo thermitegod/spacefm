@@ -22,47 +22,66 @@
 
 #include <vector>
 
-#include <atomic>
+#include <memory>
 
 #include <gdk/gdk.h>
 
 #include "mime-type/mime-type.hxx"
 
-#define VFS_MIME_TYPE(obj) (static_cast<vfs::mime_type>(obj))
-
 struct VFSMimeType
 {
+  public:
+    VFSMimeType(std::string_view type_name);
+    ~VFSMimeType();
+
+    GdkPixbuf* get_icon(bool big) noexcept;
+
+    // Get mime-type string
+    const std::string get_type() const noexcept;
+
+    // Get human-readable description of mime-type
+    const std::string get_description() noexcept;
+
+    // Get available actions (applications) for this mime-type
+    // returned vector should be freed with g_strfreev when not needed.
+    const std::vector<std::string> get_actions() const noexcept;
+
+    // returned string should be freed with g_strfreev when not needed.
+    const std::string get_default_action() const noexcept;
+
+    void set_default_action(std::string_view desktop_id) noexcept;
+
+    void remove_action(std::string_view desktop_id) noexcept;
+
+    // If user-custom desktop file is created, it is returned in custom_desktop.
+    const std::string add_action(std::string_view desktop_id) noexcept;
+
+    void free_cached_big_icons() noexcept;
+    void free_cached_small_icons() noexcept;
+
+  private:
     std::string type{};        // mime_type-type string
     std::string description{}; // description of the mimele type
     GdkPixbuf* big_icon{nullptr};
     GdkPixbuf* small_icon{nullptr};
-
-    void ref_inc();
-    void ref_dec();
-    u32 ref_count();
-
-  private:
-    std::atomic<u32> n_ref{0};
 };
 
 namespace vfs
 {
-    using mime_type = ztd::raw_ptr<VFSMimeType>;
+    using mime_type_callback_entry = void (*)();
+
+    using mime_type = std::shared_ptr<VFSMimeType>;
 } // namespace vfs
 
 void vfs_mime_type_init();
-
-void vfs_mime_type_clean();
-
-vfs::mime_type vfs_mime_type_get_from_file(std::string_view file_path);
-
-vfs::mime_type vfs_mime_type_get_from_type(std::string_view type);
+void vfs_mime_type_finalize();
 
 vfs::mime_type vfs_mime_type_new(std::string_view type_name);
-void vfs_mime_type_ref(vfs::mime_type mime_type);
-void vfs_mime_type_unref(vfs::mime_type mime_type);
 
-GdkPixbuf* vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big);
+vfs::mime_type vfs_mime_type_get_from_file(std::string_view file_path);
+vfs::mime_type vfs_mime_type_get_from_type(std::string_view type);
+
+//////////////////////
 
 void vfs_mime_type_set_icon_size_big(i32 size);
 void vfs_mime_type_set_icon_size_small(i32 size);
@@ -70,33 +89,7 @@ void vfs_mime_type_set_icon_size_small(i32 size);
 i32 vfs_mime_type_get_icon_size_big();
 i32 vfs_mime_type_get_icon_size_small();
 
-/* Get mime-type string */
-const char* vfs_mime_type_get_type(vfs::mime_type mime_type);
-
-/* Get human-readable description of mime-type */
-const char* vfs_mime_type_get_description(vfs::mime_type mime_type);
-
-/*
- * Get available actions (applications) for this mime-type
- * returned vector should be freed with g_strfreev when not needed.
- */
-const std::vector<std::string> vfs_mime_type_get_actions(vfs::mime_type mime_type);
-
-/* returned string should be freed with g_strfreev when not needed. */
-const char* vfs_mime_type_get_default_action(vfs::mime_type mime_type);
-
-void vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view desktop_id);
-
-void vfs_mime_type_remove_action(vfs::mime_type mime_type, std::string_view desktop_id);
-
-/* If user-custom desktop file is created, it is returned in custom_desktop. */
-const std::string vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id);
-
 void vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id);
-
-GList* vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data);
-
-void vfs_mime_type_remove_reload_cb(GList* cb);
 
 const char* vfs_mime_type_locate_desktop_file(std::string_view desktop_id);
 const char* vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);

@@ -15,6 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -28,7 +29,11 @@
 #include <algorithm>
 #include <ranges>
 
+#include <thread>
 #include <mutex>
+#include <chrono>
+
+#include <memory>
 
 #include <glibmm.h>
 
@@ -43,56 +48,56 @@
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-file-monitor.hxx"
 
-#include "vfs/vfs-utils.hxx"
+#include "vfs/vfs-dir.hxx"
 
-#define VFS_MIME_TYPE_CALLBACK_DATA(obj) (static_cast<VFSMimeReloadCbEnt*>(obj))
+#include "vfs/vfs-utils.hxx"
 
 static std::map<std::string, vfs::mime_type> mime_map;
 std::mutex mime_map_lock;
-
-static u32 reload_callback_id = 0;
-static GList* reload_cb = nullptr;
 
 static i32 big_icon_size{32};
 static i32 small_icon_size{16};
 
 static std::vector<vfs::file_monitor> mime_caches_monitors;
 
-struct VFSMimeReloadCbEnt
+vfs::mime_type
+vfs_mime_type_new(std::string_view type_name)
 {
-    VFSMimeReloadCbEnt(GFreeFunc cb, void* user_data);
+    auto mime_type = std::make_shared<VFSMimeType>(type_name);
+    return mime_type;
+}
 
-    GFreeFunc cb{nullptr};
-    void* user_data{nullptr};
-};
-
-VFSMimeReloadCbEnt::VFSMimeReloadCbEnt(GFreeFunc cb, void* user_data)
+vfs::mime_type
+vfs_mime_type_get_from_file(std::string_view file_path)
 {
-    this->cb = cb;
-    this->user_data = user_data;
+    const std::string type = mime_type_get_by_file(file_path);
+    return vfs_mime_type_get_from_type(type);
+}
+
+vfs::mime_type
+vfs_mime_type_get_from_type(std::string_view type)
+{
+    std::unique_lock<std::mutex> lock(mime_map_lock);
+
+    if (mime_map.contains(type.data()))
+    {
+        return mime_map.at(type.data());
+    }
+
+    vfs::mime_type mime_type = vfs_mime_type_new(type);
+    mime_map.insert({mime_type->get_type(), mime_type});
+
+    return mime_type;
 }
 
 static bool
-vfs_mime_type_reload(void* user_data)
+vfs_mime_type_reload()
 {
-    (void)user_data;
-
-    /* FIXME: process mime database reloading properly. */
-    /* Remove all items in the hash table */
-
-    mime_map_lock.lock();
-    const auto action = [](const auto& mime) { vfs_mime_type_unref(mime.second); };
-    std::ranges::for_each(mime_map, action);
+    std::unique_lock<std::mutex> lock(mime_map_lock);
     mime_map.clear();
-    mime_map_lock.unlock();
-
-    g_source_remove(reload_callback_id);
-    reload_callback_id = 0;
-
     // ztd::logger::debug("reload mime-types");
-
+    vfs_dir_mime_type_reload();
     mime_type_regen_all_caches();
-
     return false;
 }
 
@@ -106,10 +111,14 @@ on_mime_cache_changed(const vfs::file_monitor& monitor, VFSFileMonitorEvent even
     (void)user_data;
 
     // ztd::logger::debug("reloading all mime caches");
-    if (reload_callback_id == 0)
-    {
-        reload_callback_id = g_idle_add((GSourceFunc)vfs_mime_type_reload, nullptr);
-    }
+    std::jthread idle_thread(
+        []()
+        {
+            vfs_mime_type_reload();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        });
+
+    idle_thread.join();
 }
 
 void
@@ -135,7 +144,7 @@ vfs_mime_type_init()
 }
 
 void
-vfs_mime_type_clean()
+vfs_mime_type_finalize()
 {
     // remove file alteration monitor for mime-cache
     const auto action_remove = [](const vfs::file_monitor& monitor)
@@ -144,105 +153,52 @@ vfs_mime_type_clean()
 
     mime_type_finalize();
 
-    const auto action_unref = [](const auto& mime) { vfs_mime_type_unref(mime.second); };
-    std::ranges::for_each(mime_map, action_unref);
-
     mime_map.clear();
 }
 
-vfs::mime_type
-vfs_mime_type_get_from_file(std::string_view file_path)
+/////////////////////////////////////
+
+VFSMimeType::VFSMimeType(std::string_view type_name) : type(type_name)
 {
-    const std::string type = mime_type_get_by_file(file_path);
-    return vfs_mime_type_get_from_type(type);
 }
 
-vfs::mime_type
-vfs_mime_type_get_from_type(std::string_view type)
+VFSMimeType::~VFSMimeType()
 {
-    mime_map_lock.lock();
-    vfs::mime_type mime_type = nullptr;
-    try
+    if (this->big_icon)
     {
-        mime_type = mime_map.at(type.data());
+        g_object_unref(this->big_icon);
     }
-    catch (const std::out_of_range& e)
+    if (this->small_icon)
     {
-        mime_type = nullptr;
-    }
-    mime_map_lock.unlock();
-
-    if (!mime_type)
-    {
-        mime_type = vfs_mime_type_new(type);
-        mime_map_lock.lock();
-        mime_map.insert({mime_type->type, mime_type});
-        mime_map_lock.unlock();
-    }
-    vfs_mime_type_ref(mime_type);
-    return mime_type;
-}
-
-vfs::mime_type
-vfs_mime_type_new(std::string_view type_name)
-{
-    const auto mime_type = new VFSMimeType();
-    mime_type->type = type_name.data();
-    mime_type->ref_inc();
-    return mime_type;
-}
-
-void
-vfs_mime_type_ref(vfs::mime_type mime_type)
-{
-    mime_type->ref_inc();
-}
-
-void
-vfs_mime_type_unref(vfs::mime_type mime_type)
-{
-    mime_type->ref_dec();
-
-    if (mime_type->ref_count() == 0)
-    {
-        if (mime_type->big_icon)
-        {
-            g_object_unref(mime_type->big_icon);
-        }
-        if (mime_type->small_icon)
-        {
-            g_object_unref(mime_type->small_icon);
-        }
-
-        delete mime_type;
+        g_object_unref(this->small_icon);
     }
 }
 
 GdkPixbuf*
-vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
+VFSMimeType::get_icon(bool big) noexcept
 {
     i32 size;
 
     if (big)
     {
-        if (mime_type->big_icon)
+        if (this->big_icon)
         { /* big icon */
-            return g_object_ref(mime_type->big_icon);
+            return g_object_ref(this->big_icon);
         }
         size = big_icon_size;
     }
     else /* small icon */
     {
-        if (mime_type->small_icon)
+        if (this->small_icon)
         {
-            return g_object_ref(mime_type->small_icon);
+            return g_object_ref(this->small_icon);
         }
         size = small_icon_size;
     }
 
     GdkPixbuf* icon = nullptr;
 
-    if (ztd::same(mime_type->type, XDG_MIME_TYPE_DIRECTORY))
+    if (ztd::same(this->type, XDG_MIME_TYPE_DIRECTORY))
     {
         icon = vfs_load_icon("gtk-directory", size);
         if (!icon)
@@ -255,18 +211,18 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
         }
         if (big)
         {
-            mime_type->big_icon = icon;
+            this->big_icon = icon;
         }
         else
         {
-            mime_type->small_icon = icon;
+            this->small_icon = icon;
         }
         return icon ? g_object_ref(icon) : nullptr;
     }
 
     // get description and icon from freedesktop XML - these are fetched
     // together for performance.
-    const auto [mime_icon, mime_desc] = mime_type_get_desc_icon(mime_type->type);
+    const auto [mime_icon, mime_desc] = mime_type_get_desc_icon(this->type);
 
     if (!mime_icon.empty())
     {
@@ -274,54 +230,53 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     }
     if (!mime_desc.empty())
     {
-        if (mime_type->description.empty())
+        if (this->description.empty())
         {
-            mime_type->description = mime_desc;
+            this->description = mime_desc;
         }
     }
-    if (mime_type->description.empty())
+    if (this->description.empty())
     {
-        ztd::logger::warn("mime-type {} has no description (comment)", mime_type->type);
+        ztd::logger::warn("mime-type {} has no description (comment)", this->type);
         vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
-            mime_type->description = ztd::strdup(vfs_mime_type_get_description(vfs_mime));
-            vfs_mime_type_unref(vfs_mime);
+            this->description = vfs_mime->get_description();
         }
     }
 
     if (!icon)
     {
         // guess icon
-        const auto mime_parts = ztd::partition(mime_type->type, "/");
-        const std::string& mime = mime_parts[0];
-        const std::string& type = mime_parts[2];
+        const auto mime_parts = ztd::partition(this->type, "/");
+        const std::string& split_mime = mime_parts[0];
+        const std::string& split_type = mime_parts[2];
 
-        if (ztd::contains(mime_type->type, "/"))
+        if (ztd::contains(this->type, "/"))
         {
             // convert mime-type foo/bar to foo-bar
-            std::string icon_name = ztd::replace(mime_type->type, "/", "-");
+            std::string icon_name = ztd::replace(this->type, "/", "-");
 
             // is there an icon named foo-bar?
             icon = vfs_load_icon(icon_name, size);
             if (!icon)
             {
                 // maybe we can find a legacy icon named gnome-mime-foo-bar
-                icon_name = fmt::format("gnome-mime-{}-{}", mime, type);
+                icon_name = fmt::format("gnome-mime-{}-{}", split_mime, split_type);
                 icon = vfs_load_icon(icon_name, size);
             }
 
             // try gnome-mime-foo
             if (!icon)
             {
-                icon_name = fmt::format("gnome-mime-{}", mime);
+                icon_name = fmt::format("gnome-mime-{}", split_mime);
                 icon = vfs_load_icon(icon_name, size);
             }
 
             // try foo-x-generic
             if (!icon)
             {
-                icon_name = fmt::format("{}-x-generic", mime);
+                icon_name = fmt::format("{}-x-generic", split_mime);
                 icon = vfs_load_icon(icon_name, size);
             }
         }
@@ -330,12 +285,11 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
     if (!icon)
     {
         /* prevent endless recursion of XDG_MIME_TYPE_UNKNOWN */
-        if (!ztd::same(mime_type->type, XDG_MIME_TYPE_UNKNOWN))
+        if (!ztd::same(this->type, XDG_MIME_TYPE_UNKNOWN))
         {
             /* FIXME: fallback to icon of parent mime-type */
             vfs::mime_type unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
-            icon = vfs_mime_type_get_icon(unknown, big);
-            vfs_mime_type_unref(unknown);
+            icon = unknown->get_icon(big);
         }
         else /* unknown */
         {
@@ -345,67 +299,155 @@ vfs_mime_type_get_icon(vfs::mime_type mime_type, bool big)
 
     if (big)
     {
-        mime_type->big_icon = icon;
+        this->big_icon = icon;
     }
     else
     {
-        mime_type->small_icon = icon;
+        this->small_icon = icon;
     }
     return icon ? g_object_ref(icon) : nullptr;
 }
 
-static void
-free_cached_big_icons(vfs::mime_type mime_type)
+const std::string
+VFSMimeType::get_type() const noexcept
 {
-    if (!mime_type->big_icon)
-    {
-        return;
-    }
-    g_object_unref(mime_type->big_icon);
-    mime_type->big_icon = nullptr;
+    return this->type;
 }
 
-static void
-free_cached_small_icons(vfs::mime_type mime_type)
+/* Get human-readable description of mime type */
+const std::string
+VFSMimeType::get_description() noexcept
 {
-    if (!mime_type->small_icon)
+    if (this->description.empty())
+    {
+        const auto icon_data = mime_type_get_desc_icon(this->type);
+        this->description = icon_data[1];
+        if (this->description.empty())
+        {
+            ztd::logger::warn("mime-type {} has no description (comment)", this->type);
+            vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+            if (vfs_mime)
+            {
+                this->description = vfs_mime->get_description();
+            }
+        }
+    }
+    return this->description;
+}
+
+const std::vector<std::string>
+VFSMimeType::get_actions() const noexcept
+{
+    return mime_type_get_actions(this->type);
+}
+
+const std::string
+VFSMimeType::get_default_action() const noexcept
+{
+    const char* def = mime_type_get_default_action(this->type);
+
+    /* FIXME:
+     * If default app is not set, choose one from all availble actions.
+     * Is there any better way to do this?
+     * Should we put this fallback handling here, or at API of higher level?
+     */
+    if (def != nullptr)
+    {
+        return def;
+    }
+
+    const std::vector<std::string> actions = mime_type_get_actions(this->type);
+    if (!actions.empty())
+    {
+        return actions.at(0).data();
+    }
+    return "";
+}
+
+/*
+ * Set default app.desktop for specified file.
+ * app can be the name of the desktop file or a command line.
+ */
+void
+VFSMimeType::set_default_action(std::string_view desktop_id) noexcept
+{
+    const std::string custom_desktop = this->add_action(desktop_id);
+
+    mime_type_update_association(this->type,
+                                 custom_desktop.empty() ? desktop_id : custom_desktop,
+                                 MimeTypeAction::DEFAULT);
+}
+
+void
+VFSMimeType::remove_action(std::string_view desktop_id) noexcept
+{
+    mime_type_update_association(this->type, desktop_id, MimeTypeAction::REMOVE);
+}
+
+/* If user-custom desktop file is created, it is returned in custom_desktop. */
+const std::string
+VFSMimeType::add_action(std::string_view desktop_id) noexcept
+{
+    // MOD  do not create custom desktop file if desktop_id is not a command
+    if (!ztd::endswith(desktop_id, ".desktop"))
+    {
+        return mime_type_add_action(this->type, desktop_id);
+    }
+    return desktop_id.data();
+}
+
+void
+VFSMimeType::free_cached_big_icons() noexcept
+{
+    if (!this->big_icon)
     {
         return;
     }
-    g_object_unref(mime_type->small_icon);
-    mime_type->small_icon = nullptr;
+    g_object_unref(this->big_icon);
+    this->big_icon = nullptr;
+}
+
+void
+VFSMimeType::free_cached_small_icons() noexcept
+{
+    if (!this->small_icon)
+    {
+        return;
+    }
+    g_object_unref(this->small_icon);
+    this->small_icon = nullptr;
 }
 
 void
 vfs_mime_type_set_icon_size_big(i32 size)
 {
+    std::unique_lock<std::mutex> lock(mime_map_lock);
+
     if (size == big_icon_size)
     {
         return;
     }
 
-    mime_map_lock.lock();
     big_icon_size = size;
     // Unload old cached icons
-    const auto action = [](const auto& mime) { free_cached_big_icons(mime.second); };
+    const auto action = [](const auto& mime) { mime.second->free_cached_big_icons(); };
     std::ranges::for_each(mime_map, action);
-    mime_map_lock.unlock();
 }
 
 void
 vfs_mime_type_set_icon_size_small(i32 size)
 {
+    std::unique_lock<std::mutex> lock(mime_map_lock);
+
     if (size == small_icon_size)
     {
         return;
     }
 
-    mime_map_lock.lock();
     small_icon_size = size;
     // Unload old cached icons
-    const auto action = [](const auto& mime) { free_cached_small_icons(mime.second); };
+    const auto action = [](const auto& mime) { mime.second->free_cached_small_icons(); };
     std::ranges::for_each(mime_map, action);
-    mime_map_lock.unlock();
 }
 
 i32
@@ -418,108 +460,6 @@ i32
 vfs_mime_type_get_icon_size_small()
 {
     return small_icon_size;
-}
-
-const char*
-vfs_mime_type_get_type(vfs::mime_type mime_type)
-{
-    return mime_type->type.data();
-}
-
-/* Get human-readable description of mime type */
-const char*
-vfs_mime_type_get_description(vfs::mime_type mime_type)
-{
-    if (mime_type->description.empty())
-    {
-        const auto icon_data = mime_type_get_desc_icon(mime_type->type);
-        mime_type->description = icon_data[1];
-        if (mime_type->description.empty())
-        {
-            ztd::logger::warn("mime-type {} has no description (comment)", mime_type->type);
-            vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
-            if (vfs_mime)
-            {
-                mime_type->description = ztd::strdup(vfs_mime_type_get_description(vfs_mime));
-                vfs_mime_type_unref(vfs_mime);
-            }
-        }
-    }
-    return mime_type->description.data();
-}
-
-const std::vector<std::string>
-vfs_mime_type_get_actions(vfs::mime_type mime_type)
-{
-    return mime_type_get_actions(mime_type->type);
-}
-
-const char*
-vfs_mime_type_get_default_action(vfs::mime_type mime_type)
-{
-    const char* def = mime_type_get_default_action(mime_type->type);
-
-    /* FIXME:
-     * If default app is not set, choose one from all availble actions.
-     * Is there any better way to do this?
-     * Should we put this fallback handling here, or at API of higher level?
-     */
-    if (!def)
-    {
-        const std::vector<std::string> actions = mime_type_get_actions(mime_type->type);
-        if (!actions.empty())
-        {
-            def = ztd::strdup(actions.at(0));
-        }
-    }
-    return def;
-}
-
-/*
- * Set default app.desktop for specified file.
- * app can be the name of the desktop file or a command line.
- */
-void
-vfs_mime_type_set_default_action(vfs::mime_type mime_type, std::string_view desktop_id)
-{
-    const std::string custom_desktop = vfs_mime_type_add_action(mime_type, desktop_id);
-
-    mime_type_update_association(mime_type->type,
-                                 custom_desktop.empty() ? desktop_id : custom_desktop,
-                                 MimeTypeAction::DEFAULT);
-}
-
-void
-vfs_mime_type_remove_action(vfs::mime_type mime_type, std::string_view desktop_id)
-{
-    mime_type_update_association(mime_type->type, desktop_id, MimeTypeAction::REMOVE);
-}
-
-/* If user-custom desktop file is created, it is returned in custom_desktop. */
-const std::string
-vfs_mime_type_add_action(vfs::mime_type mime_type, std::string_view desktop_id)
-{
-    // MOD  do not create custom desktop file if desktop_id is not a command
-    if (!ztd::endswith(desktop_id, ".desktop"))
-    {
-        return mime_type_add_action(mime_type->type, desktop_id);
-    }
-    return desktop_id.data();
-}
-
-GList*
-vfs_mime_type_add_reload_cb(GFreeFunc cb, void* user_data)
-{
-    const auto ent = new VFSMimeReloadCbEnt(cb, user_data);
-    reload_cb = g_list_append(reload_cb, ent);
-    return g_list_last(reload_cb);
-}
-
-void
-vfs_mime_type_remove_reload_cb(GList* cb)
-{
-    delete VFS_MIME_TYPE_CALLBACK_DATA(cb->data);
-    reload_cb = g_list_delete_link(reload_cb, cb);
 }
 
 const char*
@@ -538,22 +478,4 @@ void
 vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id)
 {
     mime_type_update_association(type, desktop_id, MimeTypeAction::APPEND);
-}
-
-void
-VFSMimeType::ref_inc()
-{
-    ++n_ref;
-}
-
-void
-VFSMimeType::ref_dec()
-{
-    --n_ref;
-}
-
-u32
-VFSMimeType::ref_count()
-{
-    return n_ref;
 }
