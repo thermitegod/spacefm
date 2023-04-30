@@ -57,7 +57,7 @@ glist_to_vector_VFSFileInfo(GList* list)
 }
 
 GList*
-vector_to_glist_VFSFileInfo(std::vector<vfs::file_info> list)
+vector_to_glist_VFSFileInfo(const std::vector<vfs::file_info>& list)
 {
     GList* l = nullptr;
     for (vfs::file_info file : list)

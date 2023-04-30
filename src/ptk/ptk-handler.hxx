@@ -66,7 +66,7 @@ bool ptk_handler_values_in_list(std::string_view list, const std::span<const std
 bool ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view,
                              std::string& script, std::string& error_message);
 bool ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view,
-                             const std::string command, std::string& error_message);
+                             const std::string& command, std::string& error_message);
 char* ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set);
 bool ptk_handler_command_is_empty(std::string_view command);
 const std::vector<xset_t> ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path,

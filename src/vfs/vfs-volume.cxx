@@ -22,6 +22,7 @@
 #include <filesystem>
 
 #include <array>
+#include <utility>
 #include <vector>
 
 #include <optional>
@@ -147,7 +148,7 @@ Device::Device(const libudev::device& udevice) : udevice(udevice)
 using device_t = std::shared_ptr<Device>;
 
 static const std::optional<std::string>
-info_mount_points(device_t device)
+info_mount_points(const device_t& device)
 {
     const dev_t dmajor = gnu_dev_major(device->devnum);
     const dev_t dminor = gnu_dev_minor(device->devnum);
@@ -199,7 +200,7 @@ info_mount_points(device_t device)
 }
 
 static bool
-device_get_info(device_t device)
+device_get_info(const device_t& device)
 {
     const auto device_syspath = device->udevice.get_syspath();
     const auto device_devnode = device->udevice.get_devnode();

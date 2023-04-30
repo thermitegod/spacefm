@@ -382,7 +382,7 @@ mime_cache_free_all()
 }
 
 void
-mime_cache_reload(mime_cache_t cache)
+mime_cache_reload(const mime_cache_t& cache)
 {
     cache->reload();
 

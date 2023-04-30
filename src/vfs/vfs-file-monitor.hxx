@@ -43,8 +43,9 @@ namespace vfs
     using file_monitor = std::shared_ptr<VFSFileMonitor>;
 
     // Callback function which will be called when monitored events happen
-    using file_monitor_callback = void (*)(vfs::file_monitor monitor, VFSFileMonitorEvent event,
-                                           std::string_view file_name, void* user_data);
+    using file_monitor_callback = void (*)(const vfs::file_monitor& monitor,
+                                           VFSFileMonitorEvent event, std::string_view file_name,
+                                           void* user_data);
 
     using file_monitor_callback_entry = std::shared_ptr<VFSFileMonitorCallbackEntry>;
 
@@ -90,7 +91,7 @@ vfs::file_monitor vfs_file_monitor_add(std::string_view path, vfs::file_monitor_
 /*
  * Remove previously installed monitor.
  */
-void vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback cb,
+void vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_callback cb,
                              void* user_data);
 
 /*

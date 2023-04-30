@@ -1040,7 +1040,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
 
 bool
 ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view,
-                        const std::string command, std::string& error_message)
+                        const std::string& command, std::string& error_message)
 {
     // returns true if there is an error
 

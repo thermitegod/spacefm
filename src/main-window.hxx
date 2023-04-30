@@ -134,7 +134,7 @@ void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
                                std::string_view file_path);
 void main_window_rubberband_all();
 void main_window_refresh_all();
-void main_context_fill(PtkFileBrowser* file_browser, xset_context_t c);
+void main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c);
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
 void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
 void main_window_open_path_in_current_tab(MainWindow* main_window, std::string_view path);

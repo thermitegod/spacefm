@@ -4062,7 +4062,7 @@ on_reorder(GtkWidget* item, GtkWidget* parent)
 }
 
 void
-main_context_fill(PtkFileBrowser* file_browser, xset_context_t c)
+main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
 {
     PtkFileBrowser* a_browser;
     vfs::mime_type mime_type;

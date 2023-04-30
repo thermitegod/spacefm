@@ -18,6 +18,7 @@
 
 #include <toml.hpp> // toml11
 
+#include <utility>
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -39,7 +40,7 @@ save_user_plugin(std::string_view path, xsetpak_t xsetpak)
 
         {PLUGIN_FILE_SECTION_PLUGIN,
          toml::value{
-             xsetpak,
+             std::move(xsetpak),
          }},
     };
 

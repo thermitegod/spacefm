@@ -412,7 +412,7 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
 }
 
 i32
-xset_context_test(xset_context_t context, char* rules, bool def_disable)
+xset_context_test(const xset_context_t& context, char* rules, bool def_disable)
 {
     // assumes valid xset_context and rules != nullptr and no global ignore
     i32 i;
@@ -1809,7 +1809,7 @@ on_target_keypress(GtkWidget* widget, GdkEventKey* event, ContextData* ctxt)
 }
 
 void
-xset_item_prop_dlg(xset_context_t context, xset_t set, i32 page)
+xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
 {
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;

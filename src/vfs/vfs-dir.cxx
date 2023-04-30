@@ -89,7 +89,7 @@ static vfs::dir vfs_dir_new(std::string_view path);
 static void vfs_dir_load(vfs::dir dir);
 static void* vfs_dir_load_thread(vfs::async_task task, vfs::dir dir);
 
-static void vfs_dir_monitor_callback(vfs::file_monitor monitor, VFSFileMonitorEvent event,
+static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
                                      std::string_view file_name, void* user_data);
 
 static void on_mime_type_reload(void* user_data);
@@ -728,7 +728,7 @@ vfs_dir_flush_notify_cache()
 
 /* Callback function which will be called when monitored events happen */
 static void
-vfs_dir_monitor_callback(vfs::file_monitor monitor, VFSFileMonitorEvent event,
+vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
                          std::string_view file_name, void* user_data)
 {
     (void)monitor;

@@ -206,7 +206,7 @@ vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback,
 }
 
 void
-vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback callback,
+vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_callback callback,
                         void* user_data)
 {
     if (!monitor || !callback)
@@ -234,7 +234,7 @@ vfs_file_monitor_remove(vfs::file_monitor monitor, vfs::file_monitor_callback ca
 }
 
 static void
-vfs_file_monitor_dispatch_event(vfs::file_monitor monitor, VFSFileMonitorEvent evt,
+vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent evt,
                                 std::string_view file_name)
 {
     // Call the callback functions

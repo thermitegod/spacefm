@@ -20,6 +20,7 @@
 
 #include <filesystem>
 
+#include <utility>
 #include <vector>
 
 #include <map>
@@ -96,7 +97,7 @@ vfs_mime_type_reload(void* user_data)
 }
 
 static void
-on_mime_cache_changed(vfs::file_monitor monitor, VFSFileMonitorEvent event,
+on_mime_cache_changed(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
                       std::string_view file_name, void* user_data)
 {
     (void)monitor;
@@ -137,7 +138,7 @@ void
 vfs_mime_type_clean()
 {
     // remove file alteration monitor for mime-cache
-    const auto action_remove = [](vfs::file_monitor monitor)
+    const auto action_remove = [](const vfs::file_monitor& monitor)
     { vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr); };
     std::ranges::for_each(mime_caches_monitors, action_remove);
 
