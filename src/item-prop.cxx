@@ -895,7 +895,8 @@ on_context_entry_insert(GtkEntryBuffer* buf, u32 position, char* chars, u32 n_ch
     (void)chars;
     (void)n_chars;
     (void)user_data;
-    if (!strchr(gtk_entry_buffer_get_text(buf), '\n'))
+
+    if (!ztd::contains(gtk_entry_buffer_get_text(buf), "\n"))
     {
         return;
     }

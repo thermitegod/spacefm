@@ -64,19 +64,15 @@ static void
 on_multi_input_insert(GtkTextBuffer* buf)
 { // remove linefeeds from pasted text
     GtkTextIter iter, siter;
-    // bool changed = false;
-    i32 x;
 
     // buffer contains linefeeds?
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
-    char* all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-    if (!strchr(all, '\n'))
+    const char* all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    if (!ztd::contains(all, "\n"))
     {
-        std::free(all);
         return;
     }
-    std::free(all);
 
     // delete selected text that was pasted over
     if (gtk_text_buffer_get_selection_bounds(buf, &siter, &iter))
@@ -87,34 +83,12 @@ on_multi_input_insert(GtkTextBuffer* buf)
     GtkTextMark* insert = gtk_text_buffer_get_insert(buf);
     gtk_text_buffer_get_iter_at_mark(buf, &iter, insert);
     gtk_text_buffer_get_start_iter(buf, &siter);
-    char* b = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    std::string b = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     gtk_text_buffer_get_end_iter(buf, &siter);
-    char* a = gtk_text_buffer_get_text(buf, &iter, &siter, false);
+    std::string a = gtk_text_buffer_get_text(buf, &iter, &siter, false);
 
-    if (strchr(b, '\n'))
-    {
-        x = 0;
-        while (b[x] != '\0')
-        {
-            if (b[x] == '\n')
-            {
-                b[x] = ' ';
-            }
-            x++;
-        }
-    }
-    if (strchr(a, '\n'))
-    {
-        x = 0;
-        while (a[x] != '\0')
-        {
-            if (a[x] == '\n')
-            {
-                a[x] = ' ';
-            }
-            x++;
-        }
-    }
+    a = ztd::replace(a, "\n", " ");
+    b = ztd::replace(b, "\n", " ");
 
     g_signal_handlers_block_matched(buf,
                                     GSignalMatchType::G_SIGNAL_MATCH_FUNC,
@@ -124,11 +98,11 @@ on_multi_input_insert(GtkTextBuffer* buf)
                                     (void*)on_multi_input_insert,
                                     nullptr);
 
-    gtk_text_buffer_set_text(buf, b, -1);
+    gtk_text_buffer_set_text(buf, b.data(), -1);
     gtk_text_buffer_get_end_iter(buf, &iter);
     GtkTextMark* mark = gtk_text_buffer_create_mark(buf, nullptr, &iter, true);
     gtk_text_buffer_get_end_iter(buf, &iter);
-    gtk_text_buffer_insert(buf, &iter, a, -1);
+    gtk_text_buffer_insert(buf, &iter, a.data(), -1);
     gtk_text_buffer_get_iter_at_mark(buf, &iter, mark);
     gtk_text_buffer_place_cursor(buf, &iter);
 
@@ -139,9 +113,6 @@ on_multi_input_insert(GtkTextBuffer* buf)
                                       nullptr,
                                       (void*)on_multi_input_insert,
                                       nullptr);
-
-    std::free(a);
-    std::free(b);
 }
 
 GtkTextView*

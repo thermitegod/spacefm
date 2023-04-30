@@ -3755,7 +3755,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
         name = lower_name;
     }
 
-    if (strchr(key, '*') || strchr(key, '?'))
+    if (ztd::contains(key, "*") || ztd::contains(key, "?"))
     {
         const std::string key2 = fmt::format("*{}*", key);
         no_match = !ztd::fnmatch(key2, name);
