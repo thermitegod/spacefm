@@ -2985,15 +2985,15 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 
             set = xset_get(XSetName::ARC_DEF_EX);
             xset_set_cb(XSetName::ARC_DEF_EX, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio);
+            xset_set_ob2(set, nullptr, set_radio->name);
 
             set = xset_get(XSetName::ARC_DEF_EXTO);
             xset_set_cb(XSetName::ARC_DEF_EXTO, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio);
+            xset_set_ob2(set, nullptr, set_radio->name);
 
             set = xset_get(XSetName::ARC_DEF_LIST);
             xset_set_cb(XSetName::ARC_DEF_LIST, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio);
+            xset_set_ob2(set, nullptr, set_radio->name);
 
             set = xset_get(XSetName::ARC_DEF_WRITE);
             set->disable = geteuid() == 0 || !xset_get_b(XSetName::ARC_DEF_PARENT);

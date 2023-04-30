@@ -715,7 +715,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 case XSetMenu::RADIO:
                     if (set->ob2_data)
                     {
-                        set_radio = XSET(set->ob2_data);
+                        set_radio = xset_get(static_cast<const char*>(set->ob2_data));
                     }
                     else
                     {

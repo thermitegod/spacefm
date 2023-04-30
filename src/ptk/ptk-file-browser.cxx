@@ -957,13 +957,13 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_t set_radio = set;
     set = xset_get(XSetName::STATUS_PATH);
     xset_set_cb(XSetName::STATUS_PATH, (GFunc)on_status_middle_click_config, set);
-    xset_set_ob2(set, nullptr, set_radio);
+    xset_set_ob2(set, nullptr, set_radio->name);
     set = xset_get(XSetName::STATUS_INFO);
     xset_set_cb(XSetName::STATUS_INFO, (GFunc)on_status_middle_click_config, set);
-    xset_set_ob2(set, nullptr, set_radio);
+    xset_set_ob2(set, nullptr, set_radio->name);
     set = xset_get(XSetName::STATUS_HIDE);
     xset_set_cb(XSetName::STATUS_HIDE, (GFunc)on_status_middle_click_config, set);
-    xset_set_ob2(set, nullptr, set_radio);
+    xset_set_ob2(set, nullptr, set_radio->name);
 
     xset_add_menu(file_browser, menu, accel_group, desc.data());
     gtk_widget_show_all(menu);

@@ -4393,7 +4393,7 @@ main_write_exports(vfs::file_task vtask, std::string_view value)
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
 
-    const xset_t set = XSET(vtask->exec_set);
+    const xset_t set = vtask->exec_set;
 
     std::string buf;
 
@@ -5166,7 +5166,7 @@ main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* 
     set = xset_get(XSetName::TASK_HIDE_MANAGER);
     xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
     xset_set_ob1(set, "name", set->name);
-    xset_set_ob2(set, nullptr, set_radio);
+    xset_set_ob2(set, nullptr, set_radio->name);
 
     xset_set_cb(XSetName::TASK_COL_COUNT, (GFunc)on_task_column_selected, parent);
     xset_set_cb(XSetName::TASK_COL_PATH, (GFunc)on_task_column_selected, parent);
@@ -5190,11 +5190,11 @@ main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* 
     set = xset_get(XSetName::TASK_ERR_ANY);
     xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
-    xset_set_ob2(set, nullptr, set_radio);
+    xset_set_ob2(set, nullptr, set_radio->name);
     set = xset_get(XSetName::TASK_ERR_CONT);
     xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
-    xset_set_ob2(set, nullptr, set_radio);
+    xset_set_ob2(set, nullptr, set_radio->name);
 }
 
 static PtkFileTask*

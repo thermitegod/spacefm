@@ -360,8 +360,6 @@ struct XSet
 // using xset_t = std::unique_ptr<XSet>;
 using xset_t = ztd::raw_ptr<XSet>;
 
-#define XSET(obj) (static_cast<xset_t>(obj))
-
 // all xsets
 extern std::vector<xset_t> xsets;
 

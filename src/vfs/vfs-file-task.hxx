@@ -37,6 +37,8 @@
 
 #include <magic_enum.hpp>
 
+#include "xset/xset.hxx"
+
 enum VFSFileTaskType
 {
     MOVE,
@@ -258,7 +260,7 @@ class VFSFileTask
     GIOChannel* exec_channel_err{nullptr};
     bool exec_scroll_lock{false};
     bool exec_checksum{false};
-    void* exec_set{nullptr};
+    xset_t exec_set{nullptr};
     GCond* exec_cond{nullptr};
     void* exec_ptask{nullptr};
 };
