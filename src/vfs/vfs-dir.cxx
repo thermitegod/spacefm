@@ -26,6 +26,8 @@
 #include <algorithm>
 #include <ranges>
 
+#include <mutex>
+
 #include <cassert>
 
 #include <fmt/format.h>
@@ -75,7 +77,6 @@ struct VFSDirClass
 };
 
 static void vfs_dir_class_init(VFSDirClass* klass);
-static void vfs_dir_init(vfs::dir dir);
 static void vfs_dir_finalize(GObject* obj);
 static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
 static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
@@ -122,7 +123,7 @@ vfs_dir_get_type()
             nullptr,
             sizeof(VFSDir),
             0,
-            (GInstanceInitFunc)vfs_dir_init,
+            nullptr,
             nullptr,
         };
         type = g_type_register_static(G_TYPE_OBJECT, "VFSDir", &info, GTypeFlags::G_TYPE_FLAG_NONE);
@@ -143,35 +144,7 @@ vfs_dir_class_init(VFSDirClass* klass)
     object_class->finalize = vfs_dir_finalize;
 }
 
-/* constructor */
-static void
-vfs_dir_init(vfs::dir dir)
-{
-    dir->mutex = (GMutex*)g_malloc(sizeof(GMutex));
-    g_mutex_init(dir->mutex);
-}
-
-void
-vfs_dir_lock(vfs::dir dir)
-{
-    g_mutex_lock(dir->mutex);
-}
-
-void
-vfs_dir_unlock(vfs::dir dir)
-{
-    g_mutex_unlock(dir->mutex);
-}
-
-static void
-vfs_dir_clear(vfs::dir dir)
-{
-    g_mutex_clear(dir->mutex);
-    std::free(dir->mutex);
-}
-
 /* destructor */
-
 static void
 vfs_dir_finalize(GObject* obj)
 {
@@ -237,7 +210,6 @@ vfs_dir_finalize(GObject* obj)
         dir->created_files.clear();
     }
 
-    vfs_dir_clear(dir);
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 }
 
@@ -304,15 +276,16 @@ vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force)
 void
 vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_info file)
 {
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     if (ztd::same(file_name, dir->path))
     {
         /* Special Case: The directory itself was deleted... */
         file = nullptr;
+
         /* clear the whole list */
-        vfs_dir_lock(dir);
         vfs_file_info_list_free(dir->file_list);
         dir->file_list.clear();
-        vfs_dir_unlock(dir);
 
         dir->run_event<EventType::FILE_DELETED>(file);
 
@@ -345,6 +318,8 @@ vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_in
 void
 vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_info file, bool force)
 {
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     // ztd::logger::info("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path,
     // file_name, dir->avoid_changes ? "true" : "false");
 
@@ -359,8 +334,6 @@ vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_in
         dir->run_event<EventType::FILE_CHANGED>(nullptr);
         return;
     }
-
-    vfs_dir_lock(dir);
 
     vfs::file_info file_found = vfs_dir_find_file(dir, file_name, file);
     if (file_found)
@@ -400,14 +373,12 @@ vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_in
             vfs_file_info_unref(file_found);
         }
     }
-
-    vfs_dir_unlock(dir);
 }
 
 void
 vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
 {
-    vfs_dir_lock(dir);
+    std::lock_guard<std::mutex> lock(dir->mutex);
 
     vfs::file_info file_found = vfs_dir_find_file(dir, file->name, file);
     if (file_found)
@@ -419,8 +390,6 @@ vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
     {
         file = nullptr;
     }
-
-    vfs_dir_unlock(dir);
 
     if (file)
     {
@@ -529,6 +498,8 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
 {
     (void)task;
 
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     dir->file_listed = false;
     dir->load_complete = false;
     dir->xhidden_count = 0;
@@ -563,14 +534,10 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
         vfs::file_info file = vfs_file_info_new();
         if (vfs_file_info_get(file, full_path))
         {
-            vfs_dir_lock(dir);
-
             /* Special processing for desktop directory */
             file->load_special_info(full_path);
 
             dir->file_list.emplace_back(file);
-
-            vfs_dir_unlock(dir);
         }
         else
         {
@@ -629,12 +596,13 @@ update_changed_files(std::string_view key, vfs::dir dir)
 {
     (void)key;
 
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     if (dir->changed_files.empty())
     {
         return;
     }
 
-    vfs_dir_lock(dir);
     for (vfs::file_info file : dir->changed_files)
     {
         if (update_file_info(dir, file))
@@ -645,7 +613,6 @@ update_changed_files(std::string_view key, vfs::dir dir)
         // else was deleted, signaled, and unrefed in update_file_info
     }
     dir->changed_files.clear();
-    vfs_dir_unlock(dir);
 }
 
 static void
@@ -653,12 +620,13 @@ update_created_files(std::string_view key, vfs::dir dir)
 {
     (void)key;
 
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     if (dir->created_files.empty())
     {
         return;
     }
 
-    vfs_dir_lock(dir);
     for (const std::string_view created_file : dir->created_files)
     {
         vfs::file_info file;
@@ -692,7 +660,6 @@ update_created_files(std::string_view key, vfs::dir dir)
         }
     }
     dir->created_files.clear();
-    vfs_dir_unlock(dir);
 }
 
 static bool
@@ -811,12 +778,12 @@ reload_mime_type(std::string_view key, vfs::dir dir)
 {
     (void)key;
 
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     if (!dir || dir->file_list.empty())
     {
         return;
     }
-
-    vfs_dir_lock(dir);
 
     for (vfs::file_info file : dir->file_list)
     {
@@ -828,8 +795,6 @@ reload_mime_type(std::string_view key, vfs::dir dir)
     const auto action = [dir](vfs::file_info file)
     { dir->run_event<EventType::FILE_CHANGED>(file); };
     std::ranges::for_each(dir->file_list, action);
-
-    vfs_dir_unlock(dir);
 }
 
 static void
@@ -852,7 +817,8 @@ vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 void
 vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
 {
-    vfs_dir_lock(dir);
+    std::lock_guard<std::mutex> lock(dir->mutex);
+
     for (vfs::file_info file : dir->file_list)
     {
         if (is_big)
@@ -880,7 +846,6 @@ vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
             file->load_special_info(file_path);
         }
     }
-    vfs_dir_unlock(dir);
 
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails

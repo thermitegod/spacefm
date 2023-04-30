@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include <mutex>
+
 #include <sigc++/sigc++.h>
 
 #include <glib.h>
@@ -59,7 +61,7 @@ struct VFSDir
     /*<private>*/
     vfs::file_monitor monitor{nullptr};
 
-    GMutex* mutex{nullptr}; /* Used to guard file_list */
+    std::mutex mutex;
 
     vfs::async_task task{nullptr};
 
@@ -282,9 +284,6 @@ struct VFSDir
 };
 
 using VFSDirForeachFunc = void (*)(vfs::dir dir, bool user_data);
-
-void vfs_dir_lock(vfs::dir dir);
-void vfs_dir_unlock(vfs::dir dir);
 
 GType vfs_dir_get_type();
 
