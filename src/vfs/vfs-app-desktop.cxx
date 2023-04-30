@@ -107,7 +107,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->type = g_type;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -119,7 +119,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->name = g_name;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -131,7 +131,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->generic_name = g_generic_name;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -139,7 +139,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
     {
         this->no_display = kf->get_boolean(desktop_entry, "NoDisplay");
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -151,7 +151,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->comment = g_comment;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -163,7 +163,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->icon = g_icon;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -175,7 +175,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->try_exec = g_try_exec;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -187,7 +187,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->exec = g_exec;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -199,7 +199,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->path = g_path;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -207,7 +207,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
     {
         this->terminal = kf->get_boolean(desktop_entry, "Terminal");
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -219,7 +219,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->actions = g_actions;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -231,7 +231,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->mime_type = g_mime_type; // TODO vector
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -243,7 +243,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->categories = g_categories;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -255,7 +255,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->keywords = g_keywords;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -263,7 +263,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
     {
         this->startup_notify = kf->get_boolean(desktop_entry, "StartupNotify");
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 
@@ -275,7 +275,7 @@ VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
             this->startup_wm_class = g_startup_wm_class;
         }
     }
-    catch (Glib::KeyFileError)
+    catch (const Glib::KeyFileError& e)
     { /* Desktop Missing Key, Use Default init */
     }
 }

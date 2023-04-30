@@ -338,7 +338,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, std::string_view dest_dir, GtkT
             {
                 file_path = Glib::filename_from_uri(uri.data());
             }
-            catch (Glib::ConvertError)
+            catch (const Glib::ConvertError& e)
             {
                 continue;
             }
@@ -426,7 +426,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, std::string_view dest_dir, GtkT
             {
                 file_path = Glib::filename_from_uri(uri.data());
             }
-            catch (Glib::ConvertError)
+            catch (const Glib::ConvertError& e)
             {
                 continue;
             }
@@ -512,7 +512,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, std::string_view dest_dir,
             {
                 file_path = Glib::filename_from_uri(uri.data());
             }
-            catch (Glib::ConvertError)
+            catch (const Glib::ConvertError& e)
             {
                 continue;
             }
@@ -624,7 +624,7 @@ ptk_clipboard_get_file_paths(std::string_view cwd, bool* is_cut, i32* missing_ta
         {
             file_path = Glib::filename_from_uri(uri.data());
         }
-        catch (Glib::ConvertError)
+        catch (const Glib::ConvertError& e)
         {
             continue;
         }

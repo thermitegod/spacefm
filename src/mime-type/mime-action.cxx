@@ -91,7 +91,7 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
 
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
     }
-    catch (Glib::FileError)
+    catch (const Glib::FileError& e)
     {
         try
         {
@@ -101,7 +101,7 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
 
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
         }
-        catch (Glib::FileError)
+        catch (const Glib::FileError& e)
         {
             return;
         }
@@ -165,7 +165,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
         {
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
         }
-        catch (Glib::FileError)
+        catch (const Glib::FileError& e)
         {
             continue;
         }
@@ -309,7 +309,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
         {
             kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
         }
-        catch (Glib::FileError)
+        catch (const Glib::FileError& e)
         {
             return false;
         }
@@ -373,7 +373,7 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
             {
                 kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
             }
-            catch (Glib::FileError)
+            catch (const Glib::FileError& e)
             {
                 return false;
             }
@@ -423,7 +423,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
         {
             kf->load_from_file(filename, Glib::KeyFile::Flags::KEEP_TRANSLATIONS);
         }
-        catch (Glib::FileError)
+        catch (const Glib::FileError& e)
         {
             return nullptr;
         }
@@ -592,7 +592,7 @@ get_default_action(std::string_view dir, std::string_view type)
         {
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
         }
-        catch (Glib::FileError)
+        catch (const Glib::FileError& e)
         {
             return nullptr;
         }
@@ -719,7 +719,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
     {
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
     }
-    catch (Glib::FileError)
+    catch (const Glib::FileError& e)
     {
         return;
     }

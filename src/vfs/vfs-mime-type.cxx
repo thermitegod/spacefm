@@ -166,7 +166,7 @@ vfs_mime_type_get_from_type(std::string_view type)
     {
         mime_type = mime_map.at(type.data());
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range& e)
     {
         mime_type = nullptr;
     }

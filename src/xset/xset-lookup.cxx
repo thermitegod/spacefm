@@ -1740,7 +1740,7 @@ xset_get_name_from_xsetname(XSetName name)
     {
         return xset_name_map.at(name).data();
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range& e)
     {
         const std::string msg = fmt::format("XSetName:: Not Implemented: {}", INT(name));
         throw InvalidXSetName(msg);
@@ -1851,7 +1851,7 @@ xset_get_xsetvar_from_name(std::string_view name)
     {
         return xset_var_map.at(name);
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range& e)
     {
         const std::string err_msg = fmt::format("Unknown XSet var {}", name);
         throw std::logic_error(err_msg);
@@ -1882,7 +1882,7 @@ xset_get_window_panel_mode(MainWindowPanel mode)
     {
         return main_window_panel_mode_map.at(mode).data();
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range& e)
     {
         const std::string msg = fmt::format("MainWindowPanel:: Not Implemented: {}", INT(mode));
         throw InvalidXSetName(msg);

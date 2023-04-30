@@ -2412,7 +2412,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 target_missing = true;
             }
         }
-        catch (std::filesystem::filesystem_error)
+        catch (const std::filesystem::filesystem_error& e)
         {
             mset->mime_type = ztd::strdup("inode/symlink");
             type = ztd::strdup("symbolic link ( inode/symlink )");

@@ -40,7 +40,7 @@ vfs::linux::sysfs::get_string(std::string_view dir, std::string_view attribute)
     {
         contents = Glib::file_get_contents(filename);
     }
-    catch (Glib::FileError)
+    catch (const Glib::FileError& e)
     {
         return std::nullopt;
     }
@@ -57,7 +57,7 @@ vfs::linux::sysfs::get_i64(std::string_view dir, std::string_view attribute)
     {
         contents = Glib::file_get_contents(filename);
     }
-    catch (Glib::FileError)
+    catch (const Glib::FileError& e)
     {
         return std::nullopt;
     }
@@ -74,7 +74,7 @@ vfs::linux::sysfs::get_u64(std::string_view dir, std::string_view attribute)
     {
         contents = Glib::file_get_contents(filename);
     }
-    catch (Glib::FileError)
+    catch (const Glib::FileError& e)
     {
         return std::nullopt;
     }
@@ -91,7 +91,7 @@ vfs::linux::sysfs::get_f64(std::string_view dir, std::string_view attribute)
     {
         contents = Glib::file_get_contents(filename);
     }
-    catch (Glib::FileError)
+    catch (const Glib::FileError& e)
     {
         return std::nullopt;
     }

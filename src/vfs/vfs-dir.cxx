@@ -759,7 +759,7 @@ vfs_dir_get_by_path_soft(std::string_view path)
     {
         dir = dir_map.at(path.data());
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range& e)
     {
         dir = nullptr;
     }
@@ -782,7 +782,7 @@ vfs_dir_get_by_path(std::string_view path)
         {
             dir = dir_map.at(path.data());
         }
-        catch (std::out_of_range)
+        catch (const std::out_of_range& e)
         {
             dir = nullptr;
         }

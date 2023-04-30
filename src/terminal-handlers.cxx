@@ -91,7 +91,7 @@ TerminalHandlers::get_terminal_args(std::string_view terminal)
             return {handler.path, handler.exec};
         }
     }
-    catch (std::out_of_range)
+    catch (const std::out_of_range& e)
     {
         ztd::logger::error("Failed to get terminal: {}", terminal);
         return {};
