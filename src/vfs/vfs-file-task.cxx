@@ -43,6 +43,7 @@
 
 #include "main-window.hxx"
 #include "vfs/vfs-volume.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "scripts.hxx"
 #include "write.hxx"
@@ -197,39 +198,6 @@ VFSFileTask::should_abort()
     return this->abort;
 }
 
-const std::string
-vfs_file_task_get_unique_name(std::string_view dest_dir, std::string_view base_name,
-                              std::string_view ext)
-{ // returns nullptr if all names used; otherwise newly allocated string
-    std::string new_name;
-    if (ext.empty())
-    {
-        new_name = base_name.data();
-    }
-    else
-    {
-        new_name = fmt::format("{}.{}", base_name, ext);
-    }
-    std::string new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
-
-    u32 n = 1;
-    while (std::filesystem::exists(new_dest_file))
-    {
-        if (ext.empty())
-        {
-            new_name = fmt::format("{}-copy{}", base_name, ++n);
-        }
-        else
-        {
-            new_name = fmt::format("{}-copy{}.{}", base_name, ++n, ext);
-        }
-
-        new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
-    }
-
-    return new_dest_file;
-}
-
 /*
  * Check if the destination file exists.
  * If the dest_file exists, let the user choose a new destination,
@@ -274,9 +242,8 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
 
             const auto [filename_no_extension, filename_extension] = get_name_extension(old_name);
 
-            *new_dest_file = ztd::strdup(vfs_file_task_get_unique_name(dest_file_dir,
-                                                                       filename_no_extension,
-                                                                       filename_extension));
+            *new_dest_file = ztd::strdup(
+                vfs_get_unique_name(dest_file_dir, filename_no_extension, filename_extension));
             *dest_exists = false;
             if (*new_dest_file)
             {

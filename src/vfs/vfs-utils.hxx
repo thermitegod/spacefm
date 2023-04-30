@@ -22,6 +22,11 @@
 
 #include <gtk/gtk.h>
 
+#include <ztd/ztd.hxx>
+
 GdkPixbuf* vfs_load_icon(std::string_view icon_name, i32 icon_size);
 
 const std::string vfs_file_size_format(u64 size_in_bytes, bool decimal = true);
+
+const std::string vfs_get_unique_name(std::string_view dest_dir, std::string_view base_name,
+                                      std::string_view ext);

@@ -267,6 +267,3 @@ vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::span<const std
                             std::string_view dest_dir);
 
 void vfs_file_task_free(vfs::file_task task);
-
-const std::string vfs_file_task_get_unique_name(std::string_view dest_dir,
-                                                std::string_view base_name, std::string_view ext);

@@ -23,6 +23,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <glibmm.h>
+
 #include "settings/app.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -70,4 +72,36 @@ vfs_file_size_format(u64 size_in_bytes, bool decimal)
     {
         return ztd::format_filesize(size_in_bytes, ztd::format_base::iec, decimal ? 1 : 0);
     }
+}
+
+const std::string
+vfs_get_unique_name(std::string_view dest_dir, std::string_view base_name, std::string_view ext)
+{ // returns nullptr if all names used; otherwise newly allocated string
+    std::string new_name;
+    if (ext.empty())
+    {
+        new_name = base_name.data();
+    }
+    else
+    {
+        new_name = fmt::format("{}.{}", base_name, ext);
+    }
+    std::string new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
+
+    u32 n = 1;
+    while (std::filesystem::exists(new_dest_file))
+    {
+        if (ext.empty())
+        {
+            new_name = fmt::format("{}-copy{}", base_name, ++n);
+        }
+        else
+        {
+            new_name = fmt::format("{}-copy{}.{}", base_name, ++n, ext);
+        }
+
+        new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
+    }
+
+    return new_dest_file;
 }

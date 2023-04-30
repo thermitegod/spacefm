@@ -2411,7 +2411,7 @@ query_overwrite(PtkFileTask* ptask)
                          ? ztd::strdup(Glib::filename_display_name(filename_extension))
                          : nullptr;
     const std::string unique_name =
-        vfs_file_task_get_unique_name(dest_dir, filename_no_extension, filename_extension);
+        vfs_get_unique_name(dest_dir, filename_no_extension, filename_extension);
     char* new_name_plain =
         !unique_name.empty() ? ztd::strdup(Glib::path_get_basename(unique_name)) : nullptr;
     char* new_name =
