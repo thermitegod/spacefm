@@ -434,8 +434,9 @@ void ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** file
                                        bool do_select);
 void ptk_file_browser_seek_path(PtkFileBrowser* file_browser, std::string_view seek_dir,
                                 std::string_view seek_name);
-void ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget);
-void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_ptr,
+void ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget);
+void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, XSetTool tool_type);
+void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset_t set_ptr,
                                              XSetTool tool_type);
 void ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_history,
                                         GdkEventButton* event);

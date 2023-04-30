@@ -23,6 +23,8 @@
 #include <array>
 #include <vector>
 
+#include <cassert>
+
 #include <malloc.h>
 
 #include <fcntl.h>
@@ -471,9 +473,9 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
+ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget)
 { // store the toolbar widget created by set for later change of status
-    xset_t set = XSET(set_ptr);
+    assert(set != nullptr);
 
     if (!(set && !set->lock && set->browser && set->tool != XSetTool::NOT && GTK_IS_WIDGET(widget)))
     {
@@ -541,22 +543,26 @@ ptk_file_browser_add_toolbar_widget(void* set_ptr, GtkWidget* widget)
 }
 
 void
-ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_ptr,
+ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset_t set,
                                         XSetTool tool_type)
 {
-    if (!PTK_IS_FILE_BROWSER(file_browser))
-    {
-        return;
-    }
+    (void)tool_type;
 
-    xset_t set = XSET(set_ptr);
+    assert(set != nullptr);
+    assert(file_browser != nullptr);
+
+    // if (!PTK_IS_FILE_BROWSER(file_browser))
+    // {
+    //     return;
+    // }
 
     if (set && !set->lock && set->menu_style == XSetMenu::CHECK && set->tool == XSetTool::CUSTOM)
     {
         // a custom checkbox is being updated
         for (GSList* l = file_browser->toolbar_widgets[7]; l; l = g_slist_next(l))
         {
-            xset_t test_set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(l->data), "set")));
+            xset_t test_set =
+                xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(l->data), "set")));
             if (set == test_set)
             {
                 GtkWidget* widget = GTK_WIDGET(l->data);
@@ -571,11 +577,22 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
         ztd::logger::warn("ptk_file_browser_update_toolbar_widget widget not found for set");
         return;
     }
-    else if (set_ptr)
+    else if (set)
     {
-        ztd::logger::warn("ptk_file_browser_update_toolbar_widget invalid set_ptr or set");
+        ztd::logger::warn("ptk_file_browser_update_toolbar_widget invalid set");
         return;
     }
+}
+
+void
+ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, XSetTool tool_type)
+{
+    assert(file_browser != nullptr);
+
+    // if (!PTK_IS_FILE_BROWSER(file_browser))
+    // {
+    //     return;
+    // }
 
     // builtin tool
     bool b = false;
@@ -655,14 +672,14 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, void* set_
 static void
 enable_toolbar(PtkFileBrowser* file_browser)
 {
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::BACK);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::FWD);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::UP);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::DEVICES);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::TREE);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_HIDDEN);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_THUMB);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::LARGE_ICONS);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::BACK);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::FWD);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::UP);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::DEVICES);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::TREE);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::SHOW_HIDDEN);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::SHOW_THUMB);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::LARGE_ICONS);
 }
 
 static void
@@ -1385,8 +1402,8 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
     else
     {
         // toggle sidepane toolbar buttons
-        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::DEVICES);
-        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::TREE);
+        ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::DEVICES);
+        ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::TREE);
     }
 
     // set slider positions
@@ -1433,7 +1450,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             file_browser->folder_view = nullptr;
         }
         file_browser->large_icons = large_icons;
-        ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::LARGE_ICONS);
+        ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::LARGE_ICONS);
     }
 
     // List Styles
@@ -5384,7 +5401,7 @@ ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show)
                                             file_browser->show_hidden_files);
     }
 
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_HIDDEN);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::SHOW_HIDDEN);
 }
 
 static bool
@@ -5782,7 +5799,7 @@ show_thumbnails(PtkFileBrowser* file_browser, PtkFileList* list, bool is_big, i3
         max_file_size = 0;
     }
     ptk_file_list_show_thumbnails(list, is_big, max_file_size);
-    ptk_file_browser_update_toolbar_widgets(file_browser, nullptr, XSetTool::SHOW_THUMB);
+    ptk_file_browser_update_toolbar_widgets(file_browser, XSetTool::SHOW_THUMB);
 }
 
 void
