@@ -489,41 +489,45 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     bool show_side = false;
     xset_set_cb(XSetName::VIEW_REFRESH, (GFunc)ptk_file_browser_refresh, browser);
-    set = xset_set_cb_panel(p, XSetPanel::SHOW_TOOLBOX, (GFunc)on_popup_toggle_view, browser);
+    set = xset_get_panel(p, XSetPanel::SHOW_TOOLBOX);
+    xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_TOOLBOX, mode)->b;
-    set = xset_set_cb_panel(p, XSetPanel::SHOW_DEVMON, (GFunc)on_popup_toggle_view, browser);
+    set = xset_get_panel(p, XSetPanel::SHOW_DEVMON);
+    xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DEVMON, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
     {
         show_side = true;
     }
-    set = xset_set_cb_panel(p, XSetPanel::SHOW_DIRTREE, (GFunc)on_popup_toggle_view, browser);
+    set = xset_get_panel(p, XSetPanel::SHOW_DIRTREE);
+    xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_DIRTREE, mode)->b;
     if (set->b == XSetB::XSET_B_TRUE)
     {
         show_side = true;
     }
-    set = xset_set_cb_panel(p, XSetPanel::SHOW_SIDEBAR, (GFunc)on_popup_toggle_view, browser);
+    set = xset_get_panel(p, XSetPanel::SHOW_SIDEBAR);
+    xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, XSetPanel::SHOW_SIDEBAR, mode)->b;
     set->disable = !show_side;
     xset_set_cb_panel(p, XSetPanel::SHOW_HIDDEN, (GFunc)on_popup_show_hidden, browser);
 
     if (browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
     {
-        set =
-            xset_set_cb_panel(p, XSetPanel::DETCOL_SIZE, (GFunc)on_popup_detailed_column, browser);
+        set = xset_get_panel(p, XSetPanel::DETCOL_SIZE);
+        xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_SIZE, mode)->b;
-        set =
-            xset_set_cb_panel(p, XSetPanel::DETCOL_TYPE, (GFunc)on_popup_detailed_column, browser);
+        set = xset_get_panel(p, XSetPanel::DETCOL_TYPE);
+        xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_TYPE, mode)->b;
-        set =
-            xset_set_cb_panel(p, XSetPanel::DETCOL_PERM, (GFunc)on_popup_detailed_column, browser);
+        set = xset_get_panel(p, XSetPanel::DETCOL_PERM);
+        xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_PERM, mode)->b;
-        set =
-            xset_set_cb_panel(p, XSetPanel::DETCOL_OWNER, (GFunc)on_popup_detailed_column, browser);
+        set = xset_get_panel(p, XSetPanel::DETCOL_OWNER);
+        xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_OWNER, mode)->b;
-        set =
-            xset_set_cb_panel(p, XSetPanel::DETCOL_DATE, (GFunc)on_popup_detailed_column, browser);
+        set = xset_get_panel(p, XSetPanel::DETCOL_DATE);
+        xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, XSetPanel::DETCOL_DATE, mode)->b;
 
         xset_set_cb(XSetName::VIEW_REORDER_COL, (GFunc)on_reorder, browser);
@@ -538,7 +542,8 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                            p,
                            p);
         xset_set_var(set, XSetVar::DESC, desc);
-        set = xset_set_cb(XSetName::RUBBERBAND, (GFunc)main_window_rubberband_all, nullptr);
+        set = xset_get(XSetName::RUBBERBAND);
+        xset_set_cb(set, (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
     }
     else
@@ -547,9 +552,8 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         xset_set(XSetName::RUBBERBAND, XSetVar::DISABLE, "1");
     }
 
-    set = xset_set_cb(XSetName::VIEW_THUMB,
-                      (GFunc)main_window_toggle_thumbnails_all_windows,
-                      nullptr);
+    set = xset_get(XSetName::VIEW_THUMB);
+    xset_set_cb(set, (GFunc)main_window_toggle_thumbnails_all_windows, nullptr);
     set->b = app_settings.get_show_thumbnail() ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
 
     if (browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW)
@@ -560,58 +564,70 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
     else
     {
-        set = xset_set_cb_panel(p, XSetPanel::LIST_LARGE, (GFunc)on_popup_list_large, browser);
+        set = xset_get_panel(p, XSetPanel::LIST_LARGE);
+        xset_set_cb(set, (GFunc)on_popup_list_large, browser);
         set->disable = false;
         set->b = xset_get_panel_mode(p, XSetPanel::LIST_LARGE, mode)->b;
     }
 
-    set = xset_set_cb_panel(p, XSetPanel::LIST_DETAILED, (GFunc)on_popup_list_detailed, browser);
+    set = xset_get_panel(p, XSetPanel::LIST_DETAILED);
+    xset_set_cb(set, (GFunc)on_popup_list_detailed, browser);
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
-    set = xset_set_cb_panel(p, XSetPanel::LIST_ICONS, (GFunc)on_popup_list_icons, browser);
+    set = xset_get_panel(p, XSetPanel::LIST_ICONS);
+    xset_set_cb(set, (GFunc)on_popup_list_icons, browser);
     xset_set_ob2(set, nullptr, set_radio);
-    set = xset_set_cb_panel(p, XSetPanel::LIST_COMPACT, (GFunc)on_popup_list_compact, browser);
+    set = xset_get_panel(p, XSetPanel::LIST_COMPACT);
+    xset_set_cb(set, (GFunc)on_popup_list_compact, browser);
     xset_set_ob2(set, nullptr, set_radio);
 
-    set = xset_set_cb(XSetName::SORTBY_NAME, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_NAME);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_NAME);
     xset_set_ob2(set, nullptr, nullptr);
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_NAME ? XSetB::XSET_B_TRUE
                                                                         : XSetB::XSET_B_FALSE;
     set_radio = set;
-    set = xset_set_cb(XSetName::SORTBY_SIZE, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_SIZE);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_SIZE);
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_SIZE ? XSetB::XSET_B_TRUE
                                                                         : XSetB::XSET_B_FALSE;
-    set = xset_set_cb(XSetName::SORTBY_TYPE, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_TYPE);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_TYPE);
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_TYPE ? XSetB::XSET_B_TRUE
                                                                         : XSetB::XSET_B_FALSE;
-    set = xset_set_cb(XSetName::SORTBY_PERM, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_PERM);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_PERM);
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_PERM ? XSetB::XSET_B_TRUE
                                                                         : XSetB::XSET_B_FALSE;
-    set = xset_set_cb(XSetName::SORTBY_OWNER, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_OWNER);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_OWNER);
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_OWNER ? XSetB::XSET_B_TRUE
                                                                          : XSetB::XSET_B_FALSE;
-    set = xset_set_cb(XSetName::SORTBY_DATE, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_DATE);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_MTIME);
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_MTIME ? XSetB::XSET_B_TRUE
                                                                          : XSetB::XSET_B_FALSE;
 
-    set = xset_set_cb(XSetName::SORTBY_ASCEND, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_ASCEND);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", -1);
     xset_set_ob2(set, nullptr, nullptr);
     set->b = browser->sort_type == GtkSortType::GTK_SORT_ASCENDING ? XSetB::XSET_B_TRUE
                                                                    : XSetB::XSET_B_FALSE;
     set_radio = set;
-    set = xset_set_cb(XSetName::SORTBY_DESCEND, (GFunc)on_popup_sortby, browser);
+    set = xset_get(XSetName::SORTBY_DESCEND);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", -2);
     xset_set_ob2(set, nullptr, set_radio);
     set->b = browser->sort_type == GtkSortType::GTK_SORT_DESCENDING ? XSetB::XSET_B_TRUE
@@ -620,49 +636,58 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     // this crashes if !browser->file_list so do not allow
     if (browser->file_list)
     {
-        set = xset_set_cb(XSetName::SORTX_ALPHANUM, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_ALPHANUM);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_alphanum ? XSetB::XSET_B_TRUE
                                                                               : XSetB::XSET_B_FALSE;
-        set = xset_set_cb(XSetName::SORTX_CASE, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_CASE);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_case ? XSetB::XSET_B_TRUE
                                                                           : XSetB::XSET_B_FALSE;
         set->disable = !PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_alphanum;
 
 #if 0
-        set = xset_set_cb(XSetName::SORTX_NATURAL, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_NATURAL);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_natural ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
-        set = xset_set_cb(XSetName::SORTX_CASE, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_CASE);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_case ? XSetB::XSET_B_TRUE : XSetB::XSET_B_FALSE;
         set->disable = !PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_natural;
 #endif
 
-        set = xset_set_cb(XSetName::SORTX_DIRECTORIES, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_DIRECTORIES);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
         set_radio = set;
-        set = xset_set_cb(XSetName::SORTX_FILES, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_FILES);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
-        set = xset_set_cb(XSetName::SORTX_MIX, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_MIX);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
 
-        set = xset_set_cb(XSetName::SORTX_HIDFIRST, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_HIDFIRST);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_hidden_first
                      ? XSetB::XSET_B_TRUE
                      : XSetB::XSET_B_FALSE;
         set_radio = set;
-        set = xset_set_cb(XSetName::SORTX_HIDLAST, (GFunc)on_popup_sort_extra, browser);
+        set = xset_get(XSetName::SORTX_HIDLAST);
+        xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_hidden_first
                      ? XSetB::XSET_B_FALSE
@@ -842,7 +867,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
              // Note: network filesystems may become unresponsive here
              file->is_executable(file_path)))
         {
-            set = xset_set_cb(XSetName::OPEN_EXECUTE, (GFunc)on_popup_open_activate, data);
+            set = xset_get(XSetName::OPEN_EXECUTE);
+            xset_set_cb(set, (GFunc)on_popup_open_activate, data);
             xset_add_menuitem(browser, submenu, accel_group, set);
         }
 
@@ -861,17 +887,17 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                                                  false);
         if (!handlers.empty())
         {
-            set_arc_extract =
-                xset_set_cb(XSetName::ARC_EXTRACT, (GFunc)on_popup_extract_here_activate, data);
+            set_arc_extract = xset_get(XSetName::ARC_EXTRACT);
+            xset_set_cb(set_arc_extract, (GFunc)on_popup_extract_here_activate, data);
             xset_set_ob1(set_arc_extract, "set", set_arc_extract);
             set_arc_extract->disable = no_write_access;
 
-            set_arc_extractto =
-                xset_set_cb(XSetName::ARC_EXTRACTTO, (GFunc)on_popup_extract_to_activate, data);
+            set_arc_extractto = xset_get(XSetName::ARC_EXTRACTTO);
+            xset_set_cb(set_arc_extractto, (GFunc)on_popup_extract_to_activate, data);
             xset_set_ob1(set_arc_extractto, "set", set_arc_extractto);
 
-            set_arc_list =
-                xset_set_cb(XSetName::ARC_LIST, (GFunc)on_popup_extract_list_activate, data);
+            set_arc_list = xset_get(XSetName::ARC_LIST);
+            xset_set_cb(set_arc_list, (GFunc)on_popup_extract_list_activate, data);
             xset_set_ob1(set_arc_list, "set", set_arc_list);
 
             set = xset_get(XSetName::ARC_DEF_OPEN);
@@ -1044,10 +1070,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
         gtk_menu_shell_append(GTK_MENU_SHELL(submenu), GTK_WIDGET(item));
 
-        set = xset_set_cb(XSetName::OPEN_OTHER, (GFunc)on_popup_open_with_another_activate, data);
+        set = xset_get(XSetName::OPEN_OTHER);
+        xset_set_cb(set, (GFunc)on_popup_open_with_another_activate, data);
         xset_add_menuitem(browser, submenu, accel_group, set);
 
-        set = xset_set_cb(XSetName::OPEN_HAND, (GFunc)on_popup_handlers_activate, data);
+        set = xset_get(XSetName::OPEN_HAND);
+        xset_set_cb(set, (GFunc)on_popup_handlers_activate, data);
         xset_add_menuitem(browser, submenu, accel_group, set);
 
         // Default
@@ -1059,7 +1087,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
         plain_type = fmt::format("open_all_type_{}", plain_type);
-        set = xset_set_cb(plain_type.data(), (GFunc)on_popup_open_all, data);
+        set = xset_get(plain_type.data());
+        xset_set_cb(set, (GFunc)on_popup_open_all, data);
         set->lock = true;
         set->menu_style = XSetMenu::NORMAL;
         if (set->shared_key)
@@ -1094,43 +1123,50 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             if (is_text)
             {
                 // Edit
-                set = xset_set_cb(XSetName::OPEN_EDIT, (GFunc)on_file_edit, data);
+                set = xset_get(XSetName::OPEN_EDIT);
+                xset_set_cb(set, (GFunc)on_file_edit, data);
                 set->disable = (geteuid() == 0);
                 xset_add_menuitem(browser, submenu, accel_group, set);
-                set = xset_set_cb(XSetName::OPEN_EDIT_ROOT, (GFunc)on_file_root_edit, data);
+                set = xset_get(XSetName::OPEN_EDIT_ROOT);
+                xset_set_cb(set, (GFunc)on_file_root_edit, data);
                 xset_add_menuitem(browser, submenu, accel_group, set);
             }
             else if (browser && is_dir)
             {
                 // Open Dir
-                set = xset_set_cb(XSetName::OPENTAB_PREV, (GFunc)on_open_in_tab, data);
+                set = xset_get(XSetName::OPENTAB_PREV);
+                xset_set_cb(set, (GFunc)on_open_in_tab, data);
                 xset_set_ob1_int(set, "tab_num", tab_control_code_prev);
                 set->disable = (tab_num == 1);
-                set = xset_set_cb(XSetName::OPENTAB_NEXT, (GFunc)on_open_in_tab, data);
+                set = xset_get(XSetName::OPENTAB_NEXT);
+                xset_set_cb(set, (GFunc)on_open_in_tab, data);
                 xset_set_ob1_int(set, "tab_num", tab_control_code_next);
                 set->disable = (tab_num == tab_count);
-                set = xset_set_cb(XSetName::OPENTAB_NEW,
-                                  (GFunc)on_popup_open_in_new_tab_activate,
-                                  data);
+                set = xset_get(XSetName::OPENTAB_NEW);
+                xset_set_cb(set, (GFunc)on_popup_open_in_new_tab_activate, data);
                 for (tab_t tab : TABS)
                 {
                     const std::string name = fmt::format("opentab_{}", tab);
-                    set = xset_set_cb(name, (GFunc)on_open_in_tab, data);
+                    set = xset_get(name);
+                    xset_set_cb(set, (GFunc)on_open_in_tab, data);
                     xset_set_ob1_int(set, "tab_num", tab);
                     set->disable = (tab > tab_count) || (tab == tab_num);
                 }
 
-                set = xset_set_cb(XSetName::OPEN_IN_PANELPREV, (GFunc)on_open_in_panel, data);
+                set = xset_get(XSetName::OPEN_IN_PANELPREV);
+                xset_set_cb(set, (GFunc)on_open_in_panel, data);
                 xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
                 set->disable = (panel_count == 1);
-                set = xset_set_cb(XSetName::OPEN_IN_PANELNEXT, (GFunc)on_open_in_panel, data);
+                set = xset_get(XSetName::OPEN_IN_PANELNEXT);
+                xset_set_cb(set, (GFunc)on_open_in_panel, data);
                 xset_set_ob1_int(set, "panel_num", panel_control_code_next);
                 set->disable = (panel_count == 1);
 
                 for (panel_t panel : PANELS)
                 {
                     const std::string name = fmt::format("open_in_panel{}", panel);
-                    set = xset_set_cb(name, (GFunc)on_open_in_panel, data);
+                    set = xset_get(name);
+                    xset_set_cb(set, (GFunc)on_open_in_panel, data);
                     xset_set_ob1_int(set, "panel_num", panel);
                     // set->disable = ( p == i );
                 }
@@ -1168,44 +1204,57 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     // Go >
     if (browser)
     {
-        set = xset_set_cb(XSetName::GO_BACK, (GFunc)ptk_file_browser_go_back, browser);
+        set = xset_get(XSetName::GO_BACK);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_back, browser);
         set->disable = !(browser->curHistory && browser->curHistory->prev);
-        set = xset_set_cb(XSetName::GO_FORWARD, (GFunc)ptk_file_browser_go_forward, browser);
+        set = xset_get(XSetName::GO_FORWARD);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_forward, browser);
         set->disable = !(browser->curHistory && browser->curHistory->next);
-        set = xset_set_cb(XSetName::GO_UP, (GFunc)ptk_file_browser_go_up, browser);
+        set = xset_get(XSetName::GO_UP);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_up, browser);
         set->disable = ztd::same(cwd, "/");
         xset_set_cb(XSetName::GO_HOME, (GFunc)ptk_file_browser_go_home, browser);
         xset_set_cb(XSetName::GO_DEFAULT, (GFunc)ptk_file_browser_go_default, browser);
         xset_set_cb(XSetName::GO_SET_DEFAULT, (GFunc)ptk_file_browser_set_default_folder, browser);
         xset_set_cb(XSetName::EDIT_CANON, (GFunc)on_popup_canon, data);
         xset_set_cb("go_refresh", (GFunc)ptk_file_browser_refresh, browser);
-        set = xset_set_cb(XSetName::FOCUS_PATH_BAR, (GFunc)ptk_file_browser_focus, browser);
+        set = xset_get(XSetName::FOCUS_PATH_BAR);
+        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
         xset_set_ob1_int(set, "job", 0);
-        set = xset_set_cb(XSetName::FOCUS_FILELIST, (GFunc)ptk_file_browser_focus, browser);
+        set = xset_get(XSetName::FOCUS_FILELIST);
+        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
         xset_set_ob1_int(set, "job", 4);
-        set = xset_set_cb(XSetName::FOCUS_DIRTREE, (GFunc)ptk_file_browser_focus, browser);
+        set = xset_get(XSetName::FOCUS_DIRTREE);
+        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
         xset_set_ob1_int(set, "job", 1);
-        set = xset_set_cb(XSetName::FOCUS_BOOK, (GFunc)ptk_file_browser_focus, browser);
+        set = xset_get(XSetName::FOCUS_BOOK);
+        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
         xset_set_ob1_int(set, "job", 2);
-        set = xset_set_cb(XSetName::FOCUS_DEVICE, (GFunc)ptk_file_browser_focus, browser);
+        set = xset_get(XSetName::FOCUS_DEVICE);
+        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
         xset_set_ob1_int(set, "job", 3);
 
         // Go > Tab >
-        set = xset_set_cb(XSetName::TAB_PREV, (GFunc)ptk_file_browser_go_tab, browser);
+        set = xset_get(XSetName::TAB_PREV);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", tab_control_code_prev);
         set->disable = (tab_count < 2);
-        set = xset_set_cb(XSetName::TAB_NEXT, (GFunc)ptk_file_browser_go_tab, browser);
+        set = xset_get(XSetName::TAB_NEXT);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", tab_control_code_next);
         set->disable = (tab_count < 2);
-        set = xset_set_cb(XSetName::TAB_CLOSE, (GFunc)ptk_file_browser_go_tab, browser);
+        set = xset_get(XSetName::TAB_CLOSE);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", tab_control_code_close);
-        set = xset_set_cb(XSetName::TAB_RESTORE, (GFunc)ptk_file_browser_go_tab, browser);
+        set = xset_get(XSetName::TAB_RESTORE);
+        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
         xset_set_ob1_int(set, "tab_num", tab_control_code_restore);
 
         for (tab_t tab : TABS)
         {
             const std::string name = fmt::format("tab_{}", tab);
-            set = xset_set_cb(name, (GFunc)ptk_file_browser_go_tab, browser);
+            set = xset_get(name);
+            xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
             xset_set_ob1_int(set, "tab_num", tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
         }
@@ -1213,17 +1262,21 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_add_menuitem(browser, popup, accel_group, set);
 
         // New >
-        set = xset_set_cb(XSetName::NEW_FILE, (GFunc)on_popup_new_text_file_activate, data);
-        set = xset_set_cb(XSetName::NEW_DIRECTORY, (GFunc)on_popup_new_folder_activate, data);
-        set = xset_set_cb(XSetName::NEW_LINK, (GFunc)on_popup_new_link_activate, data);
-        set = xset_set_cb(XSetName::NEW_ARCHIVE, (GFunc)on_popup_compress_activate, data);
+        xset_set_cb(XSetName::NEW_FILE, (GFunc)on_popup_new_text_file_activate, data);
+        xset_set_cb(XSetName::NEW_DIRECTORY, (GFunc)on_popup_new_folder_activate, data);
+        xset_set_cb(XSetName::NEW_LINK, (GFunc)on_popup_new_link_activate, data);
+        set = xset_get(XSetName::NEW_ARCHIVE);
+        xset_set_cb(set, (GFunc)on_popup_compress_activate, data);
         set->disable = set_disable;
 
-        set = xset_set_cb(XSetName::TAB_NEW, (GFunc)ptk_file_browser_new_tab, browser);
+        set = xset_get(XSetName::TAB_NEW);
+        xset_set_cb(set, (GFunc)ptk_file_browser_new_tab, browser);
         set->disable = !browser;
-        set = xset_set_cb(XSetName::TAB_NEW_HERE, (GFunc)on_popup_open_in_new_tab_here, data);
+        set = xset_get(XSetName::TAB_NEW_HERE);
+        xset_set_cb(set, (GFunc)on_popup_open_in_new_tab_here, data);
         set->disable = !browser;
-        set = xset_set_cb(XSetName::NEW_BOOKMARK, (GFunc)on_new_bookmark, data);
+        set = xset_get(XSetName::NEW_BOOKMARK);
+        xset_set_cb(set, (GFunc)on_new_bookmark, data);
         set->disable = !browser;
 
         set = xset_get(XSetName::OPEN_NEW);
@@ -1238,35 +1291,46 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_add_menuitem(browser, popup, accel_group, set);
 
         // Edit
-        set = xset_set_cb(XSetName::COPY_NAME, (GFunc)on_popup_copy_name_activate, data);
+        set = xset_get(XSetName::COPY_NAME);
+        xset_set_cb(set, (GFunc)on_popup_copy_name_activate, data);
         set->disable = set_disable;
-        set = xset_set_cb(XSetName::COPY_PATH, (GFunc)on_popup_copy_text_activate, data);
+        set = xset_get(XSetName::COPY_PATH);
+        xset_set_cb(set, (GFunc)on_popup_copy_text_activate, data);
         set->disable = set_disable;
-        set = xset_set_cb(XSetName::COPY_PARENT, (GFunc)on_popup_copy_parent_activate, data);
+        set = xset_get(XSetName::COPY_PARENT);
+        xset_set_cb(set, (GFunc)on_popup_copy_parent_activate, data);
         set->disable = set_disable;
-        set = xset_set_cb(XSetName::PASTE_LINK, (GFunc)on_popup_paste_link_activate, data);
+        set = xset_get(XSetName::PASTE_LINK);
+        xset_set_cb(set, (GFunc)on_popup_paste_link_activate, data);
         set->disable = !is_clip || no_write_access;
-        set = xset_set_cb(XSetName::PASTE_TARGET, (GFunc)on_popup_paste_target_activate, data);
+        set = xset_get(XSetName::PASTE_TARGET);
+        xset_set_cb(set, (GFunc)on_popup_paste_target_activate, data);
         set->disable = !is_clip || no_write_access;
 
-        set = xset_set_cb(XSetName::PASTE_AS, (GFunc)on_popup_paste_as_activate, data);
+        set = xset_get(XSetName::PASTE_AS);
+        xset_set_cb(set, (GFunc)on_popup_paste_as_activate, data);
         set->disable = !is_clip;
 
-        set = xset_set_cb(XSetName::ROOT_COPY_LOC, (GFunc)on_popup_rootcmd_activate, data);
+        set = xset_get(XSetName::ROOT_COPY_LOC);
+        xset_set_cb(set, (GFunc)on_popup_rootcmd_activate, data);
         xset_set_ob1(set, "set", set);
         set->disable = set_disable;
-        set = xset_set_cb(XSetName::ROOT_MOVE2, (GFunc)on_popup_rootcmd_activate, data);
+        set = xset_get(XSetName::ROOT_MOVE2);
+        xset_set_cb(set, (GFunc)on_popup_rootcmd_activate, data);
         xset_set_ob1(set, "set", set);
         set->disable = set_disable;
-        set = xset_set_cb(XSetName::ROOT_DELETE, (GFunc)on_popup_rootcmd_activate, data);
+        set = xset_get(XSetName::ROOT_DELETE);
+        xset_set_cb(set, (GFunc)on_popup_rootcmd_activate, data);
         xset_set_ob1(set, "set", set);
         set->disable = set_disable;
 
-        set = xset_set_cb(XSetName::EDIT_HIDE, (GFunc)on_hide_file, data);
+        set = xset_get(XSetName::EDIT_HIDE);
+        xset_set_cb(set, (GFunc)on_hide_file, data);
         set->disable = set_disable || no_write_access || !browser;
 
         xset_set_cb(XSetName::SELECT_ALL, (GFunc)ptk_file_browser_select_all, data->browser);
-        set = xset_set_cb(XSetName::SELECT_UN, (GFunc)ptk_file_browser_unselect_all, browser);
+        set = xset_get(XSetName::SELECT_UN);
+        xset_set_cb(set, (GFunc)ptk_file_browser_unselect_all, browser);
         set->disable = set_disable;
         xset_set_cb(XSetName::SELECT_INVERT, (GFunc)ptk_file_browser_invert_selection, browser);
         xset_set_cb(XSetName::SELECT_PATT, (GFunc)on_popup_select_pattern, data);
@@ -1290,7 +1354,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         for (const XSetName copycmd : copycmds)
         {
-            set = xset_set_cb(copycmd, (GFunc)on_copycmd, data);
+            set = xset_get(copycmd);
+            xset_set_cb(set, (GFunc)on_copycmd, data);
             xset_set_ob1(set, "set", set);
         }
 
@@ -1355,22 +1420,28 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 
-    set = xset_set_cb(XSetName::EDIT_CUT, (GFunc)on_popup_cut_activate, data);
+    set = xset_get(XSetName::EDIT_CUT);
+    xset_set_cb(set, (GFunc)on_popup_cut_activate, data);
     set->disable = set_disable;
     xset_add_menuitem(browser, popup, accel_group, set);
-    set = xset_set_cb(XSetName::EDIT_COPY, (GFunc)on_popup_copy_activate, data);
+    set = xset_get(XSetName::EDIT_COPY);
+    xset_set_cb(set, (GFunc)on_popup_copy_activate, data);
     set->disable = set_disable;
     xset_add_menuitem(browser, popup, accel_group, set);
-    set = xset_set_cb(XSetName::EDIT_PASTE, (GFunc)on_popup_paste_activate, data);
+    set = xset_get(XSetName::EDIT_PASTE);
+    xset_set_cb(set, (GFunc)on_popup_paste_activate, data);
     set->disable = !is_clip || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
-    set = xset_set_cb(XSetName::EDIT_RENAME, (GFunc)on_popup_rename_activate, data);
+    set = xset_get(XSetName::EDIT_RENAME);
+    xset_set_cb(set, (GFunc)on_popup_rename_activate, data);
     set->disable = set_disable;
     xset_add_menuitem(browser, popup, accel_group, set);
-    set = xset_set_cb(XSetName::EDIT_TRASH, (GFunc)on_popup_trash_activate, data);
+    set = xset_get(XSetName::EDIT_TRASH);
+    xset_set_cb(set, (GFunc)on_popup_trash_activate, data);
     set->disable = set_disable || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
-    set = xset_set_cb(XSetName::EDIT_DELETE, (GFunc)on_popup_delete_activate, data);
+    set = xset_get(XSetName::EDIT_DELETE);
+    xset_set_cb(set, (GFunc)on_popup_delete_activate, data);
     set->disable = set_disable || no_write_access;
     xset_add_menuitem(browser, popup, accel_group, set);
 
@@ -1383,8 +1454,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         ptk_file_menu_add_panel_view_menu(browser, popup, accel_group);
 
         // Properties
-        set = xset_set_cb(XSetName::PROP_INFO, (GFunc)on_popup_file_properties_activate, data);
-        set = xset_set_cb(XSetName::PROP_PERM, (GFunc)on_popup_file_permissions_activate, data);
+        xset_set_cb(XSetName::PROP_INFO, (GFunc)on_popup_file_properties_activate, data);
+        xset_set_cb(XSetName::PROP_PERM, (GFunc)on_popup_file_permissions_activate, data);
 
         static constexpr std::array<XSetName, 63> permcmds{
             XSetName::PERM_R,           XSetName::PERM_RW,          XSetName::PERM_RWX,
@@ -1412,7 +1483,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         for (const XSetName permcmd : permcmds)
         {
-            set = xset_set_cb(permcmd, (GFunc)on_permission, data);
+            set = xset_get(permcmd);
+            xset_set_cb(set, (GFunc)on_permission, data);
             xset_set_ob1(set, "set", set);
         }
 

@@ -540,7 +540,8 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 
     set = xset_get(XSetName::PATH_SEEK);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
-    set = xset_set_cb(XSetName::PATH_HAND, (GFunc)on_protocol_handlers, file_browser);
+    set = xset_get(XSetName::PATH_HAND);
+    xset_set_cb(set, (GFunc)on_protocol_handlers, file_browser);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
 

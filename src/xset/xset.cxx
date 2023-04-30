@@ -1645,35 +1645,39 @@ xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, std::string_view valu
  * CB set
  */
 
-xset_t
+void
+xset_set_cb(xset_t set, GFunc cb_func, void* cb_data) noexcept
+{
+    assert(set != nullptr);
+    set->cb_func = cb_func;
+    set->cb_data = cb_data;
+}
+
+void
 xset_set_cb(XSetName name, GFunc cb_func, void* cb_data) noexcept
 {
     xset_t set = xset_get(name);
-    set->cb_func = cb_func;
-    set->cb_data = cb_data;
-    return set;
+    xset_set_cb(set, cb_func, cb_data);
 }
 
-xset_t
+void
 xset_set_cb(std::string_view name, GFunc cb_func, void* cb_data) noexcept
 {
     xset_t set = xset_get(name);
-    set->cb_func = cb_func;
-    set->cb_data = cb_data;
-    return set;
+    xset_set_cb(set, cb_func, cb_data);
 }
 
-xset_t
+void
 xset_set_cb_panel(panel_t panel, std::string_view name, GFunc cb_func, void* cb_data) noexcept
 {
     const std::string fullname = fmt::format("panel{}_{}", panel, name);
-    return xset_set_cb(fullname, cb_func, cb_data);
+    xset_set_cb(fullname, cb_func, cb_data);
 }
 
-xset_t
+void
 xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) noexcept
 {
-    return xset_set_cb(xset_get_xsetname_from_panel(panel, name), cb_func, cb_data);
+    xset_set_cb(xset_get_xsetname_from_panel(panel, name), cb_func, cb_data);
 }
 
 xset_t

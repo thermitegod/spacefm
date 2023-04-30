@@ -417,9 +417,11 @@ create_plugins_menu(MainWindow* main_window)
 
     xset_t set;
 
-    set = xset_set_cb(XSetName::PLUG_IFILE, (GFunc)on_plugin_install, main_window);
+    set = xset_get(XSetName::PLUG_IFILE);
+    xset_set_cb(set, (GFunc)on_plugin_install, main_window);
     xset_set_ob1(set, "set", set);
-    set = xset_set_cb(XSetName::PLUG_CFILE, (GFunc)on_plugin_install, main_window);
+    set = xset_get(XSetName::PLUG_CFILE);
+    xset_set_cb(set, (GFunc)on_plugin_install, main_window);
     xset_set_ob1(set, "set", set);
 
     set = xset_get(XSetName::PLUG_INSTALL);
@@ -481,7 +483,8 @@ create_devices_menu(MainWindow* main_window)
 
     xset_t set;
 
-    set = xset_set_cb(XSetName::MAIN_DEV, (GFunc)on_devices_show, main_window);
+    set = xset_get(XSetName::MAIN_DEV);
+    xset_set_cb(set, (GFunc)on_devices_show, main_window);
     set->b = file_browser->side_dev ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
     xset_add_menuitem(file_browser, dev_menu, accel_group, set);
 
@@ -1478,34 +1481,45 @@ rebuild_menus(MainWindow* main_window)
         xset_set_b_panel(1, XSetPanel::SHOW, true);
         vis_count++;
     }
-    set = xset_set_cb(XSetName::PANEL1_SHOW, (GFunc)show_panels_all_windows, main_window);
+    set = xset_get(XSetName::PANEL1_SHOW);
+    xset_set_cb(set, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 1 && vis_count == 1);
-    set = xset_set_cb(XSetName::PANEL2_SHOW, (GFunc)show_panels_all_windows, main_window);
+    set = xset_get(XSetName::PANEL2_SHOW);
+    xset_set_cb(set, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 2 && vis_count == 1);
-    set = xset_set_cb(XSetName::PANEL3_SHOW, (GFunc)show_panels_all_windows, main_window);
+    set = xset_get(XSetName::PANEL3_SHOW);
+    xset_set_cb(set, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 3 && vis_count == 1);
-    set = xset_set_cb(XSetName::PANEL4_SHOW, (GFunc)show_panels_all_windows, main_window);
+    set = xset_get(XSetName::PANEL4_SHOW);
+    xset_set_cb(set, (GFunc)show_panels_all_windows, main_window);
     set->disable = (main_window->curpanel == 4 && vis_count == 1);
 
-    set = xset_set_cb(XSetName::PANEL_PREV, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_PREV);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
     set->disable = (vis_count == 1);
-    set = xset_set_cb(XSetName::PANEL_NEXT, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_NEXT);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_control_code_next);
     set->disable = (vis_count == 1);
-    set = xset_set_cb(XSetName::PANEL_HIDE, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_HIDE);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_control_code_hide);
     set->disable = (vis_count == 1);
-    set = xset_set_cb(XSetName::PANEL_1, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_1);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_1);
     set->disable = (main_window->curpanel == 1);
-    set = xset_set_cb(XSetName::PANEL_2, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_2);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_2);
     set->disable = (main_window->curpanel == 2);
-    set = xset_set_cb(XSetName::PANEL_3, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_3);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_3);
     set->disable = (main_window->curpanel == 3);
-    set = xset_set_cb(XSetName::PANEL_4, (GFunc)focus_panel, main_window);
+    set = xset_get(XSetName::PANEL_4);
+    xset_set_cb(set, (GFunc)focus_panel, main_window);
     xset_set_ob1_int(set, "panel_num", panel_4);
     set->disable = (main_window->curpanel == 4);
 
@@ -1544,7 +1558,8 @@ rebuild_menus(MainWindow* main_window)
 
     // Bookmarks
     newmenu = gtk_menu_new();
-    set = xset_set_cb(XSetName::BOOK_ADD, (GFunc)ptk_bookmark_view_add_bookmark_cb, file_browser);
+    set = xset_get(XSetName::BOOK_ADD);
+    xset_set_cb(set, (GFunc)ptk_bookmark_view_add_bookmark_cb, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
     gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
@@ -2466,15 +2481,17 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
 
             xset_t set;
 
-            set = xset_set_cb(XSetName::TAB_CLOSE, (GFunc)on_close_notebook_page, file_browser);
+            set = xset_get(XSetName::TAB_CLOSE);
+            xset_set_cb(set, (GFunc)on_close_notebook_page, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_set_cb(XSetName::TAB_RESTORE, (GFunc)on_restore_notebook_page, file_browser);
+            set = xset_get(XSetName::TAB_RESTORE);
+            xset_set_cb(set, (GFunc)on_restore_notebook_page, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_set_cb(XSetName::TAB_NEW, (GFunc)ptk_file_browser_new_tab, file_browser);
+            set = xset_get(XSetName::TAB_NEW);
+            xset_set_cb(set, (GFunc)ptk_file_browser_new_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_set_cb(XSetName::TAB_NEW_HERE,
-                              (GFunc)ptk_file_browser_new_tab_here,
-                              file_browser);
+            set = xset_get(XSetName::TAB_NEW_HERE);
+            xset_set_cb(set, (GFunc)ptk_file_browser_new_tab_here, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
@@ -5137,11 +5154,13 @@ main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* 
     xset_t set_radio;
 
     GtkWidget* parent = main_window->task_view;
-    set = xset_set_cb(XSetName::TASK_SHOW_MANAGER, (GFunc)on_task_popup_show, main_window);
+    set = xset_get(XSetName::TASK_SHOW_MANAGER);
+    xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
-    set = xset_set_cb(XSetName::TASK_HIDE_MANAGER, (GFunc)on_task_popup_show, main_window);
+    set = xset_get(XSetName::TASK_HIDE_MANAGER);
+    xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, set_radio);
 
@@ -5159,14 +5178,17 @@ main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* 
     xset_set_cb(XSetName::TASK_COL_AVGEST, (GFunc)on_task_column_selected, parent);
     xset_set_cb(XSetName::TASK_COL_REORDER, (GFunc)on_reorder, parent);
 
-    set = xset_set_cb(XSetName::TASK_ERR_FIRST, (GFunc)on_task_popup_errset, main_window);
+    set = xset_get(XSetName::TASK_ERR_FIRST);
+    xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
-    set = xset_set_cb(XSetName::TASK_ERR_ANY, (GFunc)on_task_popup_errset, main_window);
+    set = xset_get(XSetName::TASK_ERR_ANY);
+    xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, set_radio);
-    set = xset_set_cb(XSetName::TASK_ERR_CONT, (GFunc)on_task_popup_errset, main_window);
+    set = xset_get(XSetName::TASK_ERR_CONT);
+    xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
     xset_set_ob1(set, "name", set->name);
     xset_set_ob2(set, nullptr, set_radio);
 }
@@ -5357,21 +5379,25 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             context = xset_context_new();
             main_context_fill(file_browser, context);
 
-            set = xset_set_cb(XSetName::TASK_STOP, (GFunc)on_task_stop, view);
+            set = xset_get(XSetName::TASK_STOP);
+            xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable = !ptask;
 
-            set = xset_set_cb(XSetName::TASK_PAUSE, (GFunc)on_task_stop, view);
+            set = xset_get(XSetName::TASK_PAUSE);
+            xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause == VFSFileTaskState::PAUSE ||
                             (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid));
 
-            set = xset_set_cb(XSetName::TASK_QUE, (GFunc)on_task_stop, view);
+            set = xset_get(XSetName::TASK_QUE);
+            xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause == VFSFileTaskState::QUEUE ||
                             (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid));
 
-            set = xset_set_cb(XSetName::TASK_RESUME, (GFunc)on_task_stop, view);
+            set = xset_get(XSetName::TASK_RESUME);
+            xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause == VFSFileTaskState::RUNNING ||
                             (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid));

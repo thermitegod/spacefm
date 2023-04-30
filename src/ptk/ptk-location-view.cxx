@@ -1356,19 +1356,24 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
-    set = xset_set_cb(XSetName::DEV_MENU_REMOVE, (GFunc)on_eject, vol);
+    set = xset_get(XSetName::DEV_MENU_REMOVE);
+    xset_set_cb(set, (GFunc)on_eject, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_set_cb(XSetName::DEV_MENU_UNMOUNT, (GFunc)on_umount, vol);
+    set = xset_get(XSetName::DEV_MENU_UNMOUNT);
+    xset_set_cb(set, (GFunc)on_umount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol; //!( vol && vol->is_mounted );
-    set = xset_set_cb(XSetName::DEV_MENU_OPEN, (GFunc)on_open, vol);
+    set = xset_get(XSetName::DEV_MENU_OPEN);
+    xset_set_cb(set, (GFunc)on_open, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_set_cb(XSetName::DEV_MENU_TAB, (GFunc)on_open_tab, vol);
+    set = xset_get(XSetName::DEV_MENU_TAB);
+    xset_set_cb(set, (GFunc)on_open_tab, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_set_cb(XSetName::DEV_MENU_MOUNT, (GFunc)on_mount, vol);
+    set = xset_get(XSetName::DEV_MENU_MOUNT);
+    xset_set_cb(set, (GFunc)on_mount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol; // || ( vol && vol->is_mounted );
 
@@ -1376,16 +1381,15 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(XSetName::DEV_SHOW_EMPTY, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_SHOW_PARTITION_TABLES, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_SHOW_NET, (GFunc)update_all, nullptr);
-    set = xset_set_cb(XSetName::DEV_SHOW_FILE, (GFunc)update_all, nullptr);
+    xset_set_cb(XSetName::DEV_SHOW_FILE, (GFunc)update_all, nullptr);
     // set->disable = xset_get_b(XSetName::DEV_SHOW_INTERNAL_DRIVES);
     xset_set_cb(XSetName::DEV_IGNORE_UDISKS_HIDE, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_SHOW_HIDE_VOLUMES, (GFunc)on_showhide, vol);
-    set = xset_set_cb(XSetName::DEV_AUTOMOUNT_OPTICAL, (GFunc)update_all, nullptr);
-    const bool auto_optical = set->b == XSetB::XSET_B_TRUE;
-    set = xset_set_cb(XSetName::DEV_AUTOMOUNT_REMOVABLE, (GFunc)update_all, nullptr);
-    const bool auto_removable = set->b == XSetB::XSET_B_TRUE;
+    xset_set_cb(XSetName::DEV_AUTOMOUNT_OPTICAL, (GFunc)update_all, nullptr);
+    xset_set_cb(XSetName::DEV_AUTOMOUNT_REMOVABLE, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_IGNORE_UDISKS_NOPOLICY, (GFunc)update_all, nullptr);
-    set = xset_set_cb(XSetName::DEV_AUTOMOUNT_VOLUMES, (GFunc)on_automountlist, vol);
+    set = xset_get(XSetName::DEV_AUTOMOUNT_VOLUMES);
+    xset_set_cb(set, (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
     if (vol && vol->device_type == VFSVolumeDeviceType::NETWORK &&
@@ -1422,6 +1426,9 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(XSetName::DEV_DISPNAME, (GFunc)update_names, nullptr);
     xset_set_cb(XSetName::DEV_CHANGE, (GFunc)update_change_detection, nullptr);
 
+    const bool auto_optical = xset_get_b(XSetName::DEV_AUTOMOUNT_OPTICAL);
+    const bool auto_removable = xset_get_b(XSetName::DEV_AUTOMOUNT_REMOVABLE);
+
     set = xset_get(XSetName::DEV_EXEC_FS);
     set->disable = !auto_optical && !auto_removable;
     set = xset_get(XSetName::DEV_EXEC_AUDIO);
@@ -1429,9 +1436,11 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     set = xset_get(XSetName::DEV_EXEC_VIDEO);
     set->disable = !auto_optical;
 
-    set = xset_set_cb(XSetName::DEV_FS_CNF, (GFunc)on_handler_show_config, view);
+    set = xset_get(XSetName::DEV_FS_CNF);
+    xset_set_cb(set, (GFunc)on_handler_show_config, view);
     xset_set_ob1(set, "set", set);
-    set = xset_set_cb(XSetName::DEV_NET_CNF, (GFunc)on_handler_show_config, view);
+    set = xset_get(XSetName::DEV_NET_CNF);
+    xset_set_cb(set, (GFunc)on_handler_show_config, view);
     xset_set_ob1(set, "set", set);
 
     set = xset_get(XSetName::DEV_MENU_SETTINGS);
@@ -1777,21 +1786,23 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_cb(XSetName::DEV_SHOW_EMPTY, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_SHOW_PARTITION_TABLES, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_SHOW_NET, (GFunc)update_all, nullptr);
-    set = xset_set_cb(XSetName::DEV_SHOW_FILE, (GFunc)update_all, nullptr);
+    xset_set_cb(XSetName::DEV_SHOW_FILE, (GFunc)update_all, nullptr);
     // set->disable = xset_get_b(XSetName::DEV_SHOW_INTERNAL_DRIVES);
     xset_set_cb(XSetName::DEV_IGNORE_UDISKS_HIDE, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_SHOW_HIDE_VOLUMES, (GFunc)on_showhide, vol);
-    set = xset_set_cb(XSetName::DEV_AUTOMOUNT_OPTICAL, (GFunc)update_all, nullptr);
+    xset_set_cb(XSetName::DEV_AUTOMOUNT_OPTICAL, (GFunc)update_all, nullptr);
     // bool auto_optical = set->b == XSetB::XSET_B_TRUE;
-    set = xset_set_cb(XSetName::DEV_AUTOMOUNT_REMOVABLE, (GFunc)update_all, nullptr);
+    xset_set_cb(XSetName::DEV_AUTOMOUNT_REMOVABLE, (GFunc)update_all, nullptr);
     // bool auto_removable = set->b == XSetB::XSET_B_TRUE;
     xset_set_cb(XSetName::DEV_IGNORE_UDISKS_NOPOLICY, (GFunc)update_all, nullptr);
     xset_set_cb(XSetName::DEV_AUTOMOUNT_VOLUMES, (GFunc)on_automountlist, vol);
     xset_set_cb(XSetName::DEV_CHANGE, (GFunc)update_change_detection, nullptr);
 
-    set = xset_set_cb(XSetName::DEV_FS_CNF, (GFunc)on_handler_show_config, parent);
+    set = xset_get(XSetName::DEV_FS_CNF);
+    xset_set_cb(set, (GFunc)on_handler_show_config, parent);
     xset_set_ob1(set, "set", set);
-    set = xset_set_cb(XSetName::DEV_NET_CNF, (GFunc)on_handler_show_config, parent);
+    set = xset_get(XSetName::DEV_NET_CNF);
+    xset_set_cb(set, (GFunc)on_handler_show_config, parent);
     xset_set_ob1(set, "set", set);
 
     set = xset_get(XSetName::DEV_MENU_SETTINGS);
