@@ -76,26 +76,28 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal)
         return {};
     }
 
-    try
+    if (ztd::contains(terminal, "/"))
     {
-        if (ztd::contains(terminal, "/"))
+        const auto terminal_name = ztd::rpartition(terminal, "/")[2];
+        if (this->handlers.contains(terminal_name))
         {
-            const auto handler = this->handlers.at(ztd::rpartition(terminal, "/")[2]);
+            const auto handler = this->handlers.at(terminal_name);
             // ztd::logger::error("Terminal={}, name={}, exec={}", terminal, handler.name, handler.exec);
             return {handler.path, handler.exec};
         }
-        else
+    }
+    else
+    {
+        if (this->handlers.contains(terminal.data()))
         {
             const auto handler = this->handlers.at(terminal.data());
             // ztd::logger::error("Terminal={}, name={}, exec={}", terminal, handler.name, handler.exec);
             return {handler.path, handler.exec};
         }
     }
-    catch (const std::out_of_range& e)
-    {
-        ztd::logger::error("Failed to get terminal: {}", terminal);
-        return {};
-    }
+
+    ztd::logger::error("Failed to get terminal: {}", terminal);
+    return {};
 }
 
 const std::vector<std::string>

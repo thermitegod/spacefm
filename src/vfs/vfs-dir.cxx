@@ -716,18 +716,10 @@ vfs::dir
 vfs_dir_get_by_path_soft(const std::string_view path)
 {
     vfs::dir dir = nullptr;
-
-    try
+    if (dir_map.contains(path.data()))
     {
         dir = dir_map.at(path.data());
-    }
-    catch (const std::out_of_range& e)
-    {
-        dir = nullptr;
-    }
-
-    if (dir)
-    {
+        assert(dir != nullptr);
         g_object_ref(dir);
     }
     return dir;
@@ -736,30 +728,21 @@ vfs_dir_get_by_path_soft(const std::string_view path)
 vfs::dir
 vfs_dir_get_by_path(const std::string_view path)
 {
-    vfs::dir dir = nullptr;
-
     if (!dir_map.empty())
     {
-        try
+        if (dir_map.contains(path.data()))
         {
-            dir = dir_map.at(path.data());
-        }
-        catch (const std::out_of_range& e)
-        {
-            dir = nullptr;
+            vfs::dir dir = dir_map.at(path.data());
+            assert(dir != nullptr);
+            g_object_ref(dir);
+            return dir;
         }
     }
 
-    if (dir)
-    {
-        g_object_ref(dir);
-    }
-    else
-    {
-        dir = vfs_dir_new(path);
-        vfs_dir_load(dir); /* asynchronous operation */
-        dir_map.insert({dir->path.data(), dir});
-    }
+    vfs::dir dir = vfs_dir_new(path);
+    vfs_dir_load(dir); /* asynchronous operation */
+    dir_map.insert({dir->path.data(), dir});
+
     return dir;
 }
 
