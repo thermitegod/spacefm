@@ -21,7 +21,7 @@
 #include "ptk/ptk-builder.hxx"
 
 GtkBuilder*
-ptk_gtk_builder_new_from_file(std::string_view file)
+ptk_gtk_builder_new_from_file(const std::string_view file)
 {
     GtkBuilder* builder = gtk_builder_new();
     const std::string filename = Glib::build_filename(PACKAGE_UI_PATH, file.data());

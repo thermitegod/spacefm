@@ -31,7 +31,7 @@
 #include "vfs/linux/sysfs.hxx"
 
 const std::optional<std::string>
-vfs::linux::sysfs::get_string(std::string_view dir, std::string_view attribute)
+vfs::linux::sysfs::get_string(const std::string_view dir, const std::string_view attribute)
 {
     const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
@@ -48,7 +48,7 @@ vfs::linux::sysfs::get_string(std::string_view dir, std::string_view attribute)
 }
 
 const std::optional<i64>
-vfs::linux::sysfs::get_i64(std::string_view dir, std::string_view attribute)
+vfs::linux::sysfs::get_i64(const std::string_view dir, const std::string_view attribute)
 {
     const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
@@ -65,7 +65,7 @@ vfs::linux::sysfs::get_i64(std::string_view dir, std::string_view attribute)
 }
 
 const std::optional<u64>
-vfs::linux::sysfs::get_u64(std::string_view dir, std::string_view attribute)
+vfs::linux::sysfs::get_u64(const std::string_view dir, const std::string_view attribute)
 {
     const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
@@ -82,7 +82,7 @@ vfs::linux::sysfs::get_u64(std::string_view dir, std::string_view attribute)
 }
 
 const std::optional<f64>
-vfs::linux::sysfs::get_f64(std::string_view dir, std::string_view attribute)
+vfs::linux::sysfs::get_f64(const std::string_view dir, const std::string_view attribute)
 {
     const std::string filename = Glib::build_filename(dir.data(), attribute.data());
 
@@ -99,13 +99,13 @@ vfs::linux::sysfs::get_f64(std::string_view dir, std::string_view attribute)
 }
 
 bool
-vfs::linux::sysfs::file_exists(std::string_view dir, std::string_view attribute)
+vfs::linux::sysfs::file_exists(const std::string_view dir, const std::string_view attribute)
 {
     return std::filesystem::exists(Glib::build_filename(dir.data(), attribute.data()));
 }
 
 const std::optional<std::string>
-vfs::linux::sysfs::resolve_link(std::string_view path, std::string_view name)
+vfs::linux::sysfs::resolve_link(const std::string_view path, const std::string_view name)
 {
     const std::string full_path = Glib::build_filename(path.data(), name.data());
 

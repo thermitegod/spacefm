@@ -30,7 +30,7 @@
 #include "vfs/vfs-utils.hxx"
 
 GdkPixbuf*
-vfs_load_icon(std::string_view icon_name, i32 icon_size)
+vfs_load_icon(const std::string_view icon_name, i32 icon_size)
 {
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
@@ -75,7 +75,8 @@ vfs_file_size_format(u64 size_in_bytes, bool decimal)
 }
 
 const std::string
-vfs_get_unique_name(std::string_view dest_dir, std::string_view base_name, std::string_view ext)
+vfs_get_unique_name(const std::string_view dest_dir, const std::string_view base_name,
+                    const std::string_view ext)
 { // returns nullptr if all names used; otherwise newly allocated string
     std::string new_name;
     if (ext.empty())

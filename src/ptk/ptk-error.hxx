@@ -22,4 +22,5 @@
 // The string 'message' can contain pango markups.
 // Special markup characters can also be used and will be
 // escaped in this function.
-void ptk_show_error(GtkWindow* parent, std::string_view title, std::string_view message);
+void ptk_show_error(GtkWindow* parent, const std::string_view title,
+                    const std::string_view message);

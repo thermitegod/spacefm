@@ -19,10 +19,10 @@
 
 #include <gtk/gtk.h>
 
-inline constexpr std::string_view PTK_DLG_FIND_FILES("find-files3.ui");
-inline constexpr std::string_view PTK_DLG_ABOUT("about-dlg3.ui");
-inline constexpr std::string_view PTK_DLG_PREFERENCES("prefdlg3.ui");
-inline constexpr std::string_view PTK_DLG_APP_CHOOSER("appchooserdlg3.ui");
-inline constexpr std::string_view PTK_DLG_FILE_PROPERTIES("file_properties3.ui");
+inline constexpr const std::string_view PTK_DLG_FIND_FILES("find-files3.ui");
+inline constexpr const std::string_view PTK_DLG_ABOUT("about-dlg3.ui");
+inline constexpr const std::string_view PTK_DLG_PREFERENCES("prefdlg3.ui");
+inline constexpr const std::string_view PTK_DLG_APP_CHOOSER("appchooserdlg3.ui");
+inline constexpr const std::string_view PTK_DLG_FILE_PROPERTIES("file_properties3.ui");
 
-GtkBuilder* ptk_gtk_builder_new_from_file(std::string_view file);
+GtkBuilder* ptk_gtk_builder_new_from_file(const std::string_view file);

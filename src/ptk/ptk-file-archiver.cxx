@@ -267,8 +267,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
 }
 
 static const std::string
-replace_archive_subs(std::string_view line, std::string_view n, std::string_view N,
-                     std::string_view o, std::string_view x, std::string_view g)
+replace_archive_subs(const std::string_view line, const std::string_view n,
+                     const std::string_view N, const std::string_view o, const std::string_view x,
+                     const std::string_view g)
 {
     std::string new_line = line.data();
 
@@ -288,7 +289,8 @@ replace_archive_subs(std::string_view line, std::string_view n, std::string_view
 
 void
 ptk_file_archiver_create(PtkFileBrowser* file_browser,
-                         const std::span<const vfs::file_info> sel_files, std::string_view cwd)
+                         const std::span<const vfs::file_info> sel_files,
+                         const std::string_view cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
      * placate an irrelevant compilation warning. See notes in
@@ -942,8 +944,9 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 
 void
 ptk_file_archiver_extract(PtkFileBrowser* file_browser,
-                          const std::span<const vfs::file_info> sel_files, std::string_view cwd,
-                          std::string_view dest_dir, i32 job, bool archive_presence_checked)
+                          const std::span<const vfs::file_info> sel_files,
+                          const std::string_view cwd, const std::string_view dest_dir, i32 job,
+                          bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
     char* choose_dir = nullptr;
@@ -1325,7 +1328,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             // ztd::logger::info("dest       : {}", dest);
 
             // Singular file extraction target (e.g. stdout-redirected gzip)
-            static constexpr std::array<std::string_view, 2> keys{"%g", "%G"};
+            static constexpr std::array<const std::string_view, 2> keys{"%g", "%G"};
             if (ztd::contains(command, keys))
             {
                 // Creating extraction target, taking into account whether

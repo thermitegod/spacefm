@@ -25,12 +25,13 @@
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
 char* multi_input_get_text(GtkWidget* input);
 
-i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
-                    GtkButtonsType buttons, std::string_view msg1 = "", std::string_view msg2 = "");
+i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string_view title,
+                    GtkButtonsType buttons, const std::string_view msg1 = "",
+                    const std::string_view msg2 = "");
 
-bool xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg1,
-                      std::string_view msg2, const char* defstring, char** answer,
-                      std::string_view defreset, bool edit_care);
+bool xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
+                      const std::string_view msg2, const char* defstring, char** answer,
+                      const std::string_view defreset, bool edit_care);
 
 char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                        const char* deffolder, const char* deffile);

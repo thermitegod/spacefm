@@ -42,13 +42,13 @@ inline constexpr u64 LIB_MINOR_VERSION = 2;
 
 /* handle byte order here */
 static u16
-VAL16(std::string_view buffer, u16 idx)
+VAL16(const std::string_view buffer, u16 idx)
 {
     return GUINT16_FROM_BE(*(u16*)(buffer.data() + idx));
 }
 
 static u32
-VAL32(std::string_view buffer, u32 idx)
+VAL32(const std::string_view buffer, u32 idx)
 {
     return GUINT32_FROM_BE(*(u32*)(buffer.data() + idx));
 }
@@ -66,7 +66,7 @@ inline constexpr u64 MAGIC_LIST     = 24;
 // inline constexpr u64 NAMESPACE_LIST = 28;
 // clang-format on
 
-MimeCache::MimeCache(std::string_view file_path)
+MimeCache::MimeCache(const std::string_view file_path)
 {
     // ztd::logger::info("MimeCache Constructor");
 
@@ -156,7 +156,7 @@ MimeCache::reload()
 }
 
 const char*
-MimeCache::lookup_literal(std::string_view filename)
+MimeCache::lookup_literal(const std::string_view filename)
 {
     /* FIXME: weight is used in literal lookup after mime.cache v1.1.
      * However, it is poorly documented. So I have no idea how to implement this. */
@@ -198,7 +198,7 @@ MimeCache::lookup_literal(std::string_view filename)
 }
 
 const char*
-MimeCache::lookup_suffix(std::string_view filename, const char** suffix_pos)
+MimeCache::lookup_suffix(const std::string_view filename, const char** suffix_pos)
 {
     const char* root = this->suffix_roots;
     const u32 n = this->n_suffix_roots;
@@ -246,7 +246,7 @@ MimeCache::lookup_magic(const std::span<const char8_t> data)
 }
 
 const char*
-MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
+MimeCache::lookup_glob(const std::string_view filename, i32* glob_len)
 {
     const char* entry = this->globs;
     const char* type = nullptr;
@@ -273,7 +273,7 @@ MimeCache::lookup_glob(std::string_view filename, i32* glob_len)
 }
 
 const std::vector<std::string>
-MimeCache::lookup_parents(std::string_view mime_type)
+MimeCache::lookup_parents(const std::string_view mime_type)
 {
     std::vector<std::string> result;
 
@@ -299,7 +299,7 @@ MimeCache::lookup_parents(std::string_view mime_type)
 }
 
 const char*
-MimeCache::lookup_alias(std::string_view mime_type)
+MimeCache::lookup_alias(const std::string_view mime_type)
 {
     return this->lookup_str_in_entries(this->alias, this->n_alias, mime_type);
 }
@@ -317,7 +317,7 @@ MimeCache::get_magic_max_extent()
 }
 
 const char*
-MimeCache::lookup_str_in_entries(const char* entries, u32 n, std::string_view str)
+MimeCache::lookup_str_in_entries(const char* entries, u32 n, const std::string_view str)
 {
     i32 upper = n;
     i32 lower = 0;
@@ -502,7 +502,7 @@ MimeCache::lookup_suffix_nodes(const char* buf, const char* nodes, u32 n, const 
  */
 const char*
 MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n,
-                                       std::string_view name, const char* suffix,
+                                       const std::string_view name, const char* suffix,
                                        const char** suffix_pos)
 {
     const char* ret = nullptr;

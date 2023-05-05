@@ -57,7 +57,7 @@
 #include "mime-type/mime-action.hxx"
 
 static void
-save_to_file(std::string_view path, const Glib::ustring& data)
+save_to_file(const std::string_view path, const Glib::ustring& data)
 {
     write_file(path, data);
 
@@ -78,7 +78,7 @@ update_desktop_database()
 
 /* Determine removed associations for this type */
 static void
-remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
+remove_actions(const std::string_view mime_type, std::vector<std::string>& actions)
 {
     // ztd::logger::info("remove_actions( {} )", type);
 
@@ -140,16 +140,17 @@ remove_actions(std::string_view mime_type, std::vector<std::string>& actions)
  *
  */
 static void
-get_actions(std::string_view dir, std::string_view type, std::vector<std::string>& actions)
+get_actions(const std::string_view dir, const std::string_view type,
+            std::vector<std::string>& actions)
 {
     // ztd::logger::info("get_actions( {}, {} )\n", dir, type);
     std::vector<Glib::ustring> removed;
 
-    static constexpr std::array<std::string_view, 2> names{
+    static constexpr std::array<const std::string_view, 2> names{
         "mimeapps.list",
         "mimeinfo.cache",
     };
-    static constexpr std::array<std::string_view, 3> groups{
+    static constexpr std::array<const std::string_view, 3> groups{
         "Default Applications",
         "Added Associations",
         "MIME Cache",
@@ -238,7 +239,7 @@ get_actions(std::string_view dir, std::string_view type, std::vector<std::string
 }
 
 const std::vector<std::string>
-mime_type_get_actions(std::string_view mime_type)
+mime_type_get_actions(const std::string_view mime_type)
 {
     std::vector<std::string> actions;
 
@@ -292,7 +293,7 @@ mime_type_get_actions(std::string_view mime_type)
  * desktop_id is the name of *.desktop file.
  */
 static bool
-mime_type_has_action(std::string_view type, std::string_view desktop_id)
+mime_type_has_action(const std::string_view type, const std::string_view desktop_id)
 {
     Glib::ustring cmd;
     Glib::ustring name;
@@ -406,13 +407,13 @@ mime_type_has_action(std::string_view type, std::string_view desktop_id)
 }
 
 static const std::string
-make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type)
+make_custom_desktop_file(const std::string_view desktop_id, const std::string_view mime_type)
 {
     std::string cust_template;
     Glib::ustring file_content;
 
-    static constexpr std::string_view desktop_ext{".desktop"};
-    static constexpr std::string_view replace_txt{"<REPLACE_TXT>"};
+    static constexpr const std::string_view desktop_ext{".desktop"};
+    static constexpr const std::string_view replace_txt{"<REPLACE_TXT>"};
 
     if (ztd::endswith(desktop_id, desktop_ext))
     {
@@ -498,7 +499,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
 const std::string
-mime_type_add_action(std::string_view type, std::string_view desktop_id)
+mime_type_add_action(const std::string_view type, const std::string_view desktop_id)
 {
     if (mime_type_has_action(type, desktop_id))
     {
@@ -509,7 +510,7 @@ mime_type_add_action(std::string_view type, std::string_view desktop_id)
 }
 
 static char*
-_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
+_locate_desktop_file(const std::string_view dir, const std::string_view desktop_id)
 {
     const std::string desktop_path =
         Glib::build_filename(dir.data(), "applications", desktop_id.data());
@@ -541,13 +542,13 @@ _locate_desktop_file(std::string_view dir, std::string_view desktop_id)
 }
 
 const char*
-mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
+mime_type_locate_desktop_file(const std::string_view dir, const std::string_view desktop_id)
 {
     return _locate_desktop_file(dir, desktop_id);
 }
 
 const char*
-mime_type_locate_desktop_file(std::string_view desktop_id)
+mime_type_locate_desktop_file(const std::string_view desktop_id)
 {
     const std::string& data_dir = vfs::user_dirs->data_dir();
 
@@ -570,15 +571,15 @@ mime_type_locate_desktop_file(std::string_view desktop_id)
 }
 
 static char*
-get_default_action(std::string_view dir, std::string_view type)
+get_default_action(const std::string_view dir, const std::string_view type)
 {
     // ztd::logger::info("get_default_action( {}, {} )", dir, type);
     // search these files in dir for the first existing default app
-    static constexpr std::array<std::string_view, 2> names{
+    static constexpr std::array<const std::string_view, 2> names{
         "mimeapps.list",
         "defaults.list",
     };
-    static constexpr std::array<std::string_view, 3> groups{
+    static constexpr std::array<const std::string_view, 3> groups{
         "Default Applications",
         "Added Associations",
     };
@@ -653,7 +654,7 @@ get_default_action(std::string_view dir, std::string_view type)
  * The old defaults.list is also checked.
  */
 const char*
-mime_type_get_default_action(std::string_view mime_type)
+mime_type_get_default_action(const std::string_view mime_type)
 {
     /* FIXME: need to check parent types if default action of current type is not set. */
 
@@ -699,7 +700,7 @@ mime_type_get_default_action(std::string_view mime_type)
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
 void
-mime_type_update_association(std::string_view type, std::string_view desktop_id,
+mime_type_update_association(const std::string_view type, const std::string_view desktop_id,
                              MimeTypeAction action)
 {
     if (type.empty() || desktop_id.empty())
@@ -724,7 +725,7 @@ mime_type_update_association(std::string_view type, std::string_view desktop_id,
         return;
     }
 
-    static constexpr std::array<std::string_view, 3> groups{
+    static constexpr std::array<const std::string_view, 3> groups{
         "Default Applications",
         "Added Associations",
         "Removed Associations",

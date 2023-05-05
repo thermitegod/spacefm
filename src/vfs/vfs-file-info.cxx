@@ -139,7 +139,7 @@ vfs_file_info_unref(vfs::file_info file)
 }
 
 bool
-vfs_file_info_get(vfs::file_info file, std::string_view file_path)
+vfs_file_info_get(vfs::file_info file, const std::string_view file_path)
 {
     vfs_file_info_clear(file);
 
@@ -196,7 +196,7 @@ VFSFileInfo::get_disp_name() const noexcept
 }
 
 void
-VFSFileInfo::set_disp_name(std::string_view new_disp_name) noexcept
+VFSFileInfo::set_disp_name(const std::string_view new_disp_name) noexcept
 {
     this->disp_name = new_disp_name.data();
     // sfm get new collate keys
@@ -242,7 +242,7 @@ VFSFileInfo::get_mime_type() const noexcept
 }
 
 void
-VFSFileInfo::reload_mime_type(std::string_view full_path) noexcept
+VFSFileInfo::reload_mime_type(const std::string_view full_path) noexcept
 {
     // In current implementation, only st_mode is used in
     // mime-type detection, so let's save some CPU cycles
@@ -647,14 +647,14 @@ VFSFileInfo::is_unknown_type() const noexcept
 
 // full path of the file is required by this function
 bool
-VFSFileInfo::is_executable(std::string_view file_path) const noexcept
+VFSFileInfo::is_executable(const std::string_view file_path) const noexcept
 {
     return mime_type_is_executable_file(file_path, this->mime_type->get_type());
 }
 
 // full path of the file is required by this function
 bool
-VFSFileInfo::is_text(std::string_view file_path) const noexcept
+VFSFileInfo::is_text(const std::string_view file_path) const noexcept
 {
     return mime_type_is_text_file(file_path, this->mime_type->get_type());
 }
@@ -676,7 +676,7 @@ VFSFileInfo::is_thumbnail_loaded(bool big) const noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail(std::string_view full_path, bool big) noexcept
+VFSFileInfo::load_thumbnail(const std::string_view full_path, bool big) noexcept
 {
     if (big)
     {
@@ -689,7 +689,7 @@ VFSFileInfo::load_thumbnail(std::string_view full_path, bool big) noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail_small(std::string_view full_path) noexcept
+VFSFileInfo::load_thumbnail_small(const std::string_view full_path) noexcept
 {
     if (this->small_thumbnail)
     {
@@ -713,7 +713,7 @@ VFSFileInfo::load_thumbnail_small(std::string_view full_path) noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail_big(std::string_view full_path) noexcept
+VFSFileInfo::load_thumbnail_big(const std::string_view full_path) noexcept
 {
     if (this->big_thumbnail)
     {
@@ -749,7 +749,7 @@ vfs_file_info_set_thumbnail_size_small(i32 size)
 }
 
 void
-VFSFileInfo::load_special_info(std::string_view file_path) noexcept
+VFSFileInfo::load_special_info(const std::string_view file_path) noexcept
 {
     if (!ztd::endswith(this->name, ".desktop"))
     {

@@ -63,7 +63,7 @@ struct AppSettings
     void set_load_saved_tabs(bool val) noexcept;
 
     const std::string& get_date_format() const noexcept;
-    void set_date_format(std::string_view val) noexcept;
+    void set_date_format(const std::string_view val) noexcept;
 
     u64 get_sort_order() const noexcept;
     void set_sort_order(u64 val) noexcept;

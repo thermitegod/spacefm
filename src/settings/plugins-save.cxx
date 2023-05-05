@@ -29,7 +29,7 @@
 #include "write.hxx"
 
 void
-save_user_plugin(std::string_view path, xsetpak_t xsetpak)
+save_user_plugin(const std::string_view path, xsetpak_t xsetpak)
 {
     // Plugin TOML
     const toml::value toml_data = toml::value{

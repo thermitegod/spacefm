@@ -23,11 +23,13 @@
 
 namespace vfs::linux::sysfs
 {
-    const std::optional<std::string> get_string(std::string_view dir, std::string_view attribute);
-    const std::optional<i64> get_i64(std::string_view dir, std::string_view attribute);
-    const std::optional<u64> get_u64(std::string_view dir, std::string_view attribute);
-    const std::optional<f64> get_f64(std::string_view dir, std::string_view attribute);
+    const std::optional<std::string> get_string(const std::string_view dir,
+                                                const std::string_view attribute);
+    const std::optional<i64> get_i64(const std::string_view dir, const std::string_view attribute);
+    const std::optional<u64> get_u64(const std::string_view dir, const std::string_view attribute);
+    const std::optional<f64> get_f64(const std::string_view dir, const std::string_view attribute);
 
-    bool file_exists(std::string_view dir, std::string_view attribute);
-    const std::optional<std::string> resolve_link(std::string_view path, std::string_view name);
+    bool file_exists(const std::string_view dir, const std::string_view attribute);
+    const std::optional<std::string> resolve_link(const std::string_view path,
+                                                  const std::string_view name);
 } // namespace vfs::linux::sysfs

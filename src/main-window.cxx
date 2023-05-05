@@ -95,7 +95,7 @@ static gboolean main_window_window_state_event(GtkWidget* widget, GdkEventWindow
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data);
 static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
-static void on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path,
+static void on_file_browser_open_item(PtkFileBrowser* file_browser, const std::string_view path,
                                       PtkOpenAction action, MainWindow* main_window);
 static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
 static void on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window);
@@ -761,7 +761,7 @@ main_window_close_all_invalid_tabs()
 }
 
 void
-main_window_refresh_all_tabs_matching(std::string_view path)
+main_window_refresh_all_tabs_matching(const std::string_view path)
 {
     (void)path;
     // This function actually closes the tabs because refresh does not work.
@@ -2161,7 +2161,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 
 void
 main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
-                          std::string_view file_path)
+                          const std::string_view file_path)
 {
     if (!file_browser)
     {
@@ -2663,7 +2663,7 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 
 void
 main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
-                             std::string_view path)
+                             const std::string_view path)
 {
     GtkWidget* label =
         gtk_notebook_get_tab_label(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser));
@@ -2696,7 +2696,7 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 }
 
 void
-main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path)
+main_window_add_new_tab(MainWindow* main_window, const std::string_view folder_path)
 {
     GtkWidget* notebook = main_window->notebook;
 
@@ -3032,7 +3032,7 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
         fmt = "%d";
     }
 
-    static constexpr std::array<std::string_view, 4> keys{"%t", "%T", "%p", "%P"};
+    static constexpr std::array<const std::string_view, 4> keys{"%t", "%T", "%p", "%P"};
     if (ztd::contains(fmt, keys))
     {
         // get panel/tab info
@@ -3127,7 +3127,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 }
 
 void
-main_window_open_path_in_current_tab(MainWindow* main_window, std::string_view path)
+main_window_open_path_in_current_tab(MainWindow* main_window, const std::string_view path)
 {
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
@@ -3139,7 +3139,7 @@ main_window_open_path_in_current_tab(MainWindow* main_window, std::string_view p
 }
 
 void
-main_window_open_network(MainWindow* main_window, std::string_view path, bool new_tab)
+main_window_open_network(MainWindow* main_window, const std::string_view path, bool new_tab)
 {
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
@@ -3151,8 +3151,8 @@ main_window_open_network(MainWindow* main_window, std::string_view path, bool ne
 }
 
 static void
-on_file_browser_open_item(PtkFileBrowser* file_browser, std::string_view path, PtkOpenAction action,
-                          MainWindow* main_window)
+on_file_browser_open_item(PtkFileBrowser* file_browser, const std::string_view path,
+                          PtkOpenAction action, MainWindow* main_window)
 {
     if (path.empty())
     {
@@ -4015,7 +4015,7 @@ enum MainWindowTaskCol
     TASK_COL_DATA
 };
 
-inline constexpr std::array<std::string_view, 14> task_titles{
+inline constexpr std::array<const std::string_view, 14> task_titles{
     // If you change "Status", also change it in on_task_button_press_event
     "Status",
     "#",
@@ -4311,7 +4311,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
     }
 
     // tasks
-    static constexpr std::array<std::string_view, 7> job_titles{
+    static constexpr std::array<const std::string_view, 7> job_titles{
         "move",
         "copy",
         "trash",
@@ -4388,7 +4388,7 @@ get_task_view_window(GtkWidget* view)
 }
 
 const std::string
-main_write_exports(vfs::file_task vtask, std::string_view value)
+main_write_exports(vfs::file_task vtask, const std::string_view value)
 {
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
@@ -4593,7 +4593,7 @@ main_write_exports(vfs::file_task vtask, std::string_view value)
     PtkFileTask* ptask = get_selected_task(file_browser->task_view);
     if (ptask)
     {
-        static constexpr std::array<std::string_view, 7>
+        static constexpr std::array<const std::string_view, 7>
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
         buf.append("\n");
         buf.append(fmt::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
@@ -5540,7 +5540,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     xset_t set;
 
     // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
-    static constexpr std::array<std::string_view, 7> job_titles{
+    static constexpr std::array<const std::string_view, 7> job_titles{
         "moving",
         "copying",
         "trashing",
@@ -6065,7 +6065,7 @@ main_task_view_new(MainWindow* main_window)
 // ============== socket commands
 
 static bool
-get_bool(std::string_view value)
+get_bool(const std::string_view value)
 {
     if (ztd::same(ztd::lower(value), "yes") || ztd::same(value, "1"))
     {
@@ -6083,7 +6083,7 @@ get_bool(std::string_view value)
 }
 
 static const std::string
-unescape(std::string_view t)
+unescape(const std::string_view t)
 {
     std::string unescaped = t.data();
     unescaped = ztd::replace(unescaped, "\\\n", "\\n");
@@ -6127,7 +6127,7 @@ main_window_socket_command(char* argv[])
     const char* window = nullptr;
 
     // must match file-browser.c
-    static constexpr std::array<std::string_view, 6> column_titles{
+    static constexpr std::array<const std::string_view, 6> column_titles{
         "Name",
         "Size",
         "Type",

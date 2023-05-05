@@ -45,7 +45,7 @@
 std::map<std::string, vfs::desktop> desktops_map;
 
 vfs::desktop
-vfs_get_desktop(std::string_view desktop_file)
+vfs_get_desktop(const std::string_view desktop_file)
 {
     if (desktops_map.count(desktop_file.data()) == 1)
     {
@@ -61,7 +61,7 @@ vfs_get_desktop(std::string_view desktop_file)
     return desktop;
 }
 
-VFSAppDesktop::VFSAppDesktop(std::string_view open_file_name) noexcept
+VFSAppDesktop::VFSAppDesktop(const std::string_view open_file_name) noexcept
 {
     // ztd::logger::info("VFSAppDesktop constructor = {}", open_file_name);
 
@@ -351,7 +351,7 @@ VFSAppDesktop::open_multiple_files() const noexcept
         return false;
     }
 
-    static constexpr std::array<std::string_view, 2> keys{"%U", "%F"};
+    static constexpr std::array<const std::string_view, 2> keys{"%U", "%F"};
     if (ztd::contains(this->exec, keys))
     {
         return true;
@@ -370,7 +370,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string>
 
     bool add_files = false;
 
-    static constexpr std::array<std::string_view, 2> open_files_keys{"%F", "%U"};
+    static constexpr std::array<const std::string_view, 2> open_files_keys{"%F", "%U"};
     if (ztd::contains(this->exec, open_files_keys))
     {
         // %F and %U must always be at the end
@@ -400,7 +400,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string>
         add_files = true;
     }
 
-    static constexpr std::array<std::string_view, 2> open_file_keys{"%f", "%u"};
+    static constexpr std::array<const std::string_view, 2> open_file_keys{"%f", "%u"};
     if (ztd::contains(this->exec, open_file_keys))
     {
         // %f and %u must always be at the end
@@ -489,7 +489,8 @@ VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string>
 }
 
 void
-VFSAppDesktop::exec_in_terminal(std::string_view cwd, std::string_view command) const noexcept
+VFSAppDesktop::exec_in_terminal(const std::string_view cwd,
+                                const std::string_view command) const noexcept
 {
     // task
     PtkFileTask* ptask = ptk_file_exec_new(this->get_disp_name(), cwd, nullptr, nullptr);
@@ -505,7 +506,7 @@ VFSAppDesktop::exec_in_terminal(std::string_view cwd, std::string_view command) 
 }
 
 bool
-VFSAppDesktop::open_files(std::string_view working_dir,
+VFSAppDesktop::open_files(const std::string_view working_dir,
                           const std::span<const std::string> file_paths) const
 {
     if (this->exec.empty())
@@ -531,7 +532,7 @@ VFSAppDesktop::open_files(std::string_view working_dir,
 }
 
 void
-VFSAppDesktop::exec_desktop(std::string_view working_dir,
+VFSAppDesktop::exec_desktop(const std::string_view working_dir,
                             const std::span<const std::string> file_paths) const noexcept
 {
     const auto desktop_commands =

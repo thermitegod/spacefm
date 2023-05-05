@@ -112,8 +112,8 @@ const std::vector<vfs::volume>& vfs_volume_get_all_volumes();
 void vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data);
 void vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data);
 
-vfs::volume vfs_volume_get_by_device(std::string_view device_file);
+vfs::volume vfs_volume_get_by_device(const std::string_view device_file);
 
-bool vfs_volume_dir_avoid_changes(std::string_view dir);
+bool vfs_volume_dir_avoid_changes(const std::string_view dir);
 
-bool is_path_mountpoint(std::string_view path);
+bool is_path_mountpoint(const std::string_view path);

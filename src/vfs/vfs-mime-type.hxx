@@ -31,7 +31,7 @@
 struct VFSMimeType
 {
   public:
-    VFSMimeType(std::string_view type_name);
+    VFSMimeType(const std::string_view type_name);
     ~VFSMimeType();
 
     GdkPixbuf* get_icon(bool big) noexcept;
@@ -49,12 +49,12 @@ struct VFSMimeType
     // returned string should be freed with g_strfreev when not needed.
     const std::string get_default_action() const noexcept;
 
-    void set_default_action(std::string_view desktop_id) noexcept;
+    void set_default_action(const std::string_view desktop_id) noexcept;
 
-    void remove_action(std::string_view desktop_id) noexcept;
+    void remove_action(const std::string_view desktop_id) noexcept;
 
     // If user-custom desktop file is created, it is returned in custom_desktop.
-    const std::string add_action(std::string_view desktop_id) noexcept;
+    const std::string add_action(const std::string_view desktop_id) noexcept;
 
     void free_cached_big_icons() noexcept;
     void free_cached_small_icons() noexcept;
@@ -76,10 +76,10 @@ namespace vfs
 void vfs_mime_type_init();
 void vfs_mime_type_finalize();
 
-vfs::mime_type vfs_mime_type_new(std::string_view type_name);
+vfs::mime_type vfs_mime_type_new(const std::string_view type_name);
 
-vfs::mime_type vfs_mime_type_get_from_file(std::string_view file_path);
-vfs::mime_type vfs_mime_type_get_from_type(std::string_view type);
+vfs::mime_type vfs_mime_type_get_from_file(const std::string_view file_path);
+vfs::mime_type vfs_mime_type_get_from_type(const std::string_view type);
 
 //////////////////////
 
@@ -89,7 +89,8 @@ void vfs_mime_type_set_icon_size_small(i32 size);
 i32 vfs_mime_type_get_icon_size_big();
 i32 vfs_mime_type_get_icon_size_small();
 
-void vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id);
+void vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id);
 
-const char* vfs_mime_type_locate_desktop_file(std::string_view desktop_id);
-const char* vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);
+const char* vfs_mime_type_locate_desktop_file(const std::string_view desktop_id);
+const char* vfs_mime_type_locate_desktop_file(const std::string_view dir,
+                                              const std::string_view desktop_id);

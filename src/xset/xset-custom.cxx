@@ -288,7 +288,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 }
 
 static bool
-xset_custom_export_files(xset_t set, std::string_view plug_dir)
+xset_custom_export_files(xset_t set, const std::string_view plug_dir)
 {
     assert(set != nullptr);
 
@@ -321,7 +321,7 @@ xset_custom_export_files(xset_t set, std::string_view plug_dir)
 }
 
 static bool
-xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, std::string_view plug_dir)
+xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::string_view plug_dir)
 { // recursively write set, submenu sets, and next sets
     xsetpak_t xsetpak_local{{fmt::format("{}", set->name), xset_pack_set(set)}};
 
@@ -771,7 +771,7 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
 }
 
 xset_t
-xset_find_custom(std::string_view search)
+xset_find_custom(const std::string_view search)
 {
     // find a custom command or submenu by label or xset name
     const std::string label = clean_label(search, true, false);

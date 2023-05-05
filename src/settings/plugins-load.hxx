@@ -19,8 +19,8 @@
 
 #include "xset/xset-plugins.hxx"
 
-using plugin_func_t = void(std::string_view, PluginUse*, std::string_view, std::string_view,
-                           std::string_view);
+using plugin_func_t = void(const std::string_view, PluginUse*, const std::string_view,
+                           const std::string_view, const std::string_view);
 
-bool load_user_plugin(std::string_view plug_dir, PluginUse* use, std::string_view plugin,
-                      plugin_func_t plugin_func);
+bool load_user_plugin(const std::string_view plug_dir, PluginUse* use,
+                      const std::string_view plugin, plugin_func_t plugin_func);

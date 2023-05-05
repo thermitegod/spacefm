@@ -60,7 +60,7 @@
  */
 vfs::file_task
 vfs_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
-             std::string_view dest_dir)
+             const std::string_view dest_dir)
 {
     const auto task = new VFSFileTask(type, src_files, dest_dir);
 
@@ -74,7 +74,7 @@ vfs_file_task_free(vfs::file_task task)
 }
 
 VFSFileTask::VFSFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                         std::string_view dest_dir)
+                         const std::string_view dest_dir)
 {
     this->type = type;
     this->src_paths = std::vector<std::string>(src_files.begin(), src_files.end());
@@ -166,7 +166,7 @@ VFSFileTask::set_overwrite_mode(VFSFileTaskOverwriteMode mode)
 }
 
 void
-VFSFileTask::append_add_log(std::string_view msg)
+VFSFileTask::append_add_log(const std::string_view msg)
 {
     this->lock();
     GtkTextIter iter;
@@ -205,7 +205,8 @@ VFSFileTask::should_abort()
  * The returned string is the new destination file chosen by the user
  */
 bool
-VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char** new_dest_file)
+VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists,
+                             char** new_dest_file)
 {
     const auto dest_file_stat = ztd::lstat(dest_file);
 
@@ -332,7 +333,7 @@ VFSFileTask::check_overwrite(std::string_view dest_file, bool* dest_exists, char
 }
 
 bool
-VFSFileTask::check_dest_in_src(std::string_view src_dir)
+VFSFileTask::check_dest_in_src(const std::string_view src_dir)
 {
     if (this->dest_dir.empty())
     {
@@ -366,7 +367,7 @@ VFSFileTask::check_dest_in_src(std::string_view src_dir)
 }
 
 static void
-update_file_display(std::string_view path)
+update_file_display(const std::string_view path)
 {
     // for devices like nfs, emit created and flush to avoid a
     // blocking stat call in GUI thread during writes
@@ -387,7 +388,7 @@ update_file_display(std::string_view path)
 }
 
 void
-VFSFileTask::file_copy(std::string_view src_file)
+VFSFileTask::file_copy(const std::string_view src_file)
 {
     const std::string file_name = Glib::path_get_basename(src_file.data());
     const std::string dest_file = Glib::build_filename(this->dest_dir, file_name);
@@ -396,7 +397,7 @@ VFSFileTask::file_copy(std::string_view src_file)
 }
 
 bool
-VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
+VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_view dest_file)
 {
     if (this->should_abort())
     {
@@ -724,7 +725,7 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
 }
 
 void
-VFSFileTask::file_move(std::string_view src_file)
+VFSFileTask::file_move(const std::string_view src_file)
 {
     if (this->should_abort())
     {
@@ -767,7 +768,7 @@ VFSFileTask::file_move(std::string_view src_file)
 }
 
 i32
-VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
+VFSFileTask::do_file_move(const std::string_view src_file, const std::string_view dest_path)
 {
     if (this->should_abort())
     {
@@ -876,7 +877,7 @@ VFSFileTask::do_file_move(std::string_view src_file, std::string_view dest_path)
 }
 
 void
-VFSFileTask::file_trash(std::string_view src_file)
+VFSFileTask::file_trash(const std::string_view src_file)
 {
     if (this->should_abort())
     {
@@ -920,7 +921,7 @@ VFSFileTask::file_trash(std::string_view src_file)
 }
 
 void
-VFSFileTask::file_delete(std::string_view src_file)
+VFSFileTask::file_delete(const std::string_view src_file)
 {
     if (this->should_abort())
     {
@@ -982,7 +983,7 @@ VFSFileTask::file_delete(std::string_view src_file)
 }
 
 void
-VFSFileTask::file_link(std::string_view src_file)
+VFSFileTask::file_link(const std::string_view src_file)
 {
     if (this->should_abort())
     {
@@ -1071,7 +1072,7 @@ VFSFileTask::file_link(std::string_view src_file)
 }
 
 void
-VFSFileTask::file_chown_chmod(std::string_view src_file)
+VFSFileTask::file_chown_chmod(const std::string_view src_file)
 {
     if (this->should_abort())
     {
@@ -1330,7 +1331,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, vfs::file_task task)
 }
 
 void
-VFSFileTask::file_exec(std::string_view src_file)
+VFSFileTask::file_exec(const std::string_view src_file)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
@@ -1575,7 +1576,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         const auto terminal_args =
             terminal_handlers->get_terminal_args(xset_get_s(XSetName::MAIN_TERMINAL));
         argv.reserve(terminal_args.size());
-        for (std::string_view terminal_arg : terminal_args)
+        for (const std::string_view terminal_arg : terminal_args)
         {
             argv.emplace_back(terminal_arg);
         }
@@ -2117,7 +2118,7 @@ VFSFileTask::abort_task()
  * NOTE: *size should be set to zero before calling this function.
  */
 off_t
-VFSFileTask::get_total_size_of_dir(std::string_view path)
+VFSFileTask::get_total_size_of_dir(const std::string_view path)
 {
     if (this->abort)
     {
@@ -2166,7 +2167,7 @@ VFSFileTask::get_total_size_of_dir(std::string_view path)
 }
 
 void
-VFSFileTask::task_error(i32 errnox, std::string_view action)
+VFSFileTask::task_error(i32 errnox, const std::string_view action)
 {
     if (errnox)
     {
@@ -2184,7 +2185,7 @@ VFSFileTask::task_error(i32 errnox, std::string_view action)
 }
 
 void
-VFSFileTask::task_error(i32 errnox, std::string_view action, std::string_view target)
+VFSFileTask::task_error(i32 errnox, const std::string_view action, const std::string_view target)
 {
     this->error = errnox;
     const std::string errno_msg = std::strerror(errnox);

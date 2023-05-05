@@ -61,21 +61,21 @@ static i32 small_icon_size{16};
 static std::vector<vfs::file_monitor> mime_caches_monitors;
 
 vfs::mime_type
-vfs_mime_type_new(std::string_view type_name)
+vfs_mime_type_new(const std::string_view type_name)
 {
     auto mime_type = std::make_shared<VFSMimeType>(type_name);
     return mime_type;
 }
 
 vfs::mime_type
-vfs_mime_type_get_from_file(std::string_view file_path)
+vfs_mime_type_get_from_file(const std::string_view file_path)
 {
     const std::string type = mime_type_get_by_file(file_path);
     return vfs_mime_type_get_from_type(type);
 }
 
 vfs::mime_type
-vfs_mime_type_get_from_type(std::string_view type)
+vfs_mime_type_get_from_type(const std::string_view type)
 {
     std::unique_lock<std::mutex> lock(mime_map_lock);
 
@@ -158,7 +158,7 @@ vfs_mime_type_finalize()
 
 /////////////////////////////////////
 
-VFSMimeType::VFSMimeType(std::string_view type_name) : type(type_name)
+VFSMimeType::VFSMimeType(const std::string_view type_name) : type(type_name)
 {
 }
 
@@ -369,7 +369,7 @@ VFSMimeType::get_default_action() const noexcept
  * app can be the name of the desktop file or a command line.
  */
 void
-VFSMimeType::set_default_action(std::string_view desktop_id) noexcept
+VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
 {
     const std::string custom_desktop = this->add_action(desktop_id);
 
@@ -379,14 +379,14 @@ VFSMimeType::set_default_action(std::string_view desktop_id) noexcept
 }
 
 void
-VFSMimeType::remove_action(std::string_view desktop_id) noexcept
+VFSMimeType::remove_action(const std::string_view desktop_id) noexcept
 {
     mime_type_update_association(this->type, desktop_id, MimeTypeAction::REMOVE);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
 const std::string
-VFSMimeType::add_action(std::string_view desktop_id) noexcept
+VFSMimeType::add_action(const std::string_view desktop_id) noexcept
 {
     // MOD  do not create custom desktop file if desktop_id is not a command
     if (!ztd::endswith(desktop_id, ".desktop"))
@@ -463,19 +463,19 @@ vfs_mime_type_get_icon_size_small()
 }
 
 const char*
-vfs_mime_type_locate_desktop_file(std::string_view desktop_id)
+vfs_mime_type_locate_desktop_file(const std::string_view desktop_id)
 {
     return mime_type_locate_desktop_file(desktop_id);
 }
 
 const char*
-vfs_mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id)
+vfs_mime_type_locate_desktop_file(const std::string_view dir, const std::string_view desktop_id)
 {
     return mime_type_locate_desktop_file(dir, desktop_id);
 }
 
 void
-vfs_mime_type_append_action(std::string_view type, std::string_view desktop_id)
+vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id)
 {
     mime_type_update_association(type, desktop_id, MimeTypeAction::APPEND);
 }

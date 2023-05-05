@@ -178,7 +178,7 @@ AppSettings::get_date_format() const noexcept
 }
 
 void
-AppSettings::set_date_format(std::string_view val) noexcept
+AppSettings::set_date_format(const std::string_view val) noexcept
 {
     if (val.empty())
     {

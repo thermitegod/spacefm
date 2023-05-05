@@ -287,22 +287,22 @@ using VFSDirForeachFunc = void (*)(vfs::dir dir, bool user_data);
 
 GType vfs_dir_get_type();
 
-vfs::dir vfs_dir_get_by_path(std::string_view path);
-vfs::dir vfs_dir_get_by_path_soft(std::string_view path);
+vfs::dir vfs_dir_get_by_path(const std::string_view path);
+vfs::dir vfs_dir_get_by_path_soft(const std::string_view path);
 
 bool vfs_dir_is_file_listed(vfs::dir dir);
 
 void vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big);
 
 /* emit signals */
-void vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force);
-void vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_info file);
-void vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_info file,
+void vfs_dir_emit_file_created(vfs::dir dir, const std::string_view file_name, bool force);
+void vfs_dir_emit_file_deleted(vfs::dir dir, const std::string_view file_name, vfs::file_info file);
+void vfs_dir_emit_file_changed(vfs::dir dir, const std::string_view file_name, vfs::file_info file,
                                bool force);
 void vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file);
 void vfs_dir_flush_notify_cache();
 
-bool vfs_dir_add_hidden(std::string_view path, std::string_view file_name);
+bool vfs_dir_add_hidden(const std::string_view path, const std::string_view file_name);
 
 /* call function "func" for every VFSDir instances */
 void vfs_dir_foreach(VFSDirForeachFunc func, bool user_data);

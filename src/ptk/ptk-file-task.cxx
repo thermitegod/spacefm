@@ -56,7 +56,8 @@ static void on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* 
 static void save_progress_dialog_size(PtkFileTask* ptask);
 
 PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                         std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
+                         const std::string_view dest_dir, GtkWindow* parent_window,
+                         GtkWidget* task_view)
 {
     this->task = vfs_task_new(type, src_files, dest_dir);
 
@@ -215,7 +216,7 @@ ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_f
 
 PtkFileTask*
 ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
-                  std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
+                  const std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
 {
     const auto ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
 
@@ -223,7 +224,7 @@ ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_f
 }
 
 PtkFileTask*
-ptk_file_exec_new(std::string_view item_name, GtkWidget* parent, GtkWidget* task_view)
+ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget* task_view)
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
@@ -239,8 +240,8 @@ ptk_file_exec_new(std::string_view item_name, GtkWidget* parent, GtkWidget* task
 }
 
 PtkFileTask*
-ptk_file_exec_new(std::string_view item_name, std::string_view dest_dir, GtkWidget* parent,
-                  GtkWidget* task_view)
+ptk_file_exec_new(const std::string_view item_name, const std::string_view dest_dir,
+                  GtkWidget* parent, GtkWidget* task_view)
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
@@ -786,7 +787,7 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 void
 ptk_file_task_progress_open(PtkFileTask* ptask)
 {
-    static constexpr std::array<std::string_view, 7> actions{
+    static constexpr std::array<const std::string_view, 7> actions{
         "Move: ",
         "Copy: ",
         "Trash: ",
@@ -795,7 +796,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         "Change: ",
         "Run: ",
     };
-    static constexpr std::array<std::string_view, 7> titles{
+    static constexpr std::array<const std::string_view, 7> titles{
         "Moving...",
         "Copying...",
         "Trashing...",
@@ -990,13 +991,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     GtkWidget* overwrite_box = nullptr;
     if (task->type != VFSFileTaskType::EXEC)
     {
-        static constexpr std::array<std::string_view, 4> overwrite_options{
+        static constexpr std::array<const std::string_view, 4> overwrite_options{
             "Ask",
             "Overwrite All",
             "Skip All",
             "Auto Rename",
         };
-        static constexpr std::array<std::string_view, 3> error_options{
+        static constexpr std::array<const std::string_view, 3> error_options{
             "Stop If Error First",
             "Stop On Any Error",
             "Continue",

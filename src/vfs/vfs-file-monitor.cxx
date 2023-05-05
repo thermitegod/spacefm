@@ -79,7 +79,7 @@ VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callb
     this->user_data = user_data;
 }
 
-VFSFileMonitor::VFSFileMonitor(std::string_view real_path, i32 wd)
+VFSFileMonitor::VFSFileMonitor(const std::string_view real_path, i32 wd)
 {
     // ztd::logger::info("VFSFileMonitor Constructor {}", real_path);
     this->path = real_path.data();
@@ -163,7 +163,8 @@ vfs_file_monitor_init()
 }
 
 vfs::file_monitor
-vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback callback, void* user_data)
+vfs_file_monitor_add(const std::string_view path, vfs::file_monitor_callback callback,
+                     void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
     const std::string real_path = std::filesystem::absolute(path);
@@ -235,7 +236,7 @@ vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_call
 
 static void
 vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent evt,
-                                std::string_view file_name)
+                                const std::string_view file_name)
 {
     // Call the callback functions
     if (monitor->callbacks.empty())

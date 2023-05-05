@@ -1640,7 +1640,7 @@ enum PTKFileMenuAppJob
 };
 
 static const char*
-get_shared_desktop_file_location(std::string_view name)
+get_shared_desktop_file_location(const std::string_view name)
 {
     for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
@@ -2062,7 +2062,7 @@ on_app_menu_hide(GtkWidget* widget, GtkWidget* app_menu)
 }
 
 static GtkWidget*
-app_menu_additem(GtkWidget* menu, std::string_view label, i32 job, GtkWidget* app_item,
+app_menu_additem(GtkWidget* menu, const std::string_view label, i32 job, GtkWidget* app_item,
                  PtkFileMenu* data)
 {
     GtkWidget* item = gtk_menu_item_new_with_mnemonic(label.data());

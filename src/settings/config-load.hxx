@@ -18,7 +18,7 @@
 #include <string_view>
 
 #if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
-void load_user_confing(std::string_view session, bool load_deprecated_ini_config = false);
+void load_user_confing(const std::string_view session, bool load_deprecated_ini_config = false);
 #else
-void load_user_confing(std::string_view session);
+void load_user_confing(const std::string_view session);
 #endif

@@ -2008,7 +2008,7 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
 }
 
 static const std::string
-get_unique_name(std::string_view dir, std::string_view ext = "")
+get_unique_name(const std::string_view dir, const std::string_view ext = "")
 {
     const std::string base = "new";
 
@@ -2061,7 +2061,7 @@ get_template_dir()
 }
 
 static const std::vector<std::string>
-get_templates(std::string_view templates_dir, std::string_view subdir, bool getdir)
+get_templates(const std::string_view templates_dir, const std::string_view subdir, bool getdir)
 {
     std::vector<std::string> templates;
 
@@ -2208,7 +2208,7 @@ update_new_display_delayed(const char* path)
 }
 
 static void
-update_new_display(std::string_view path)
+update_new_display(const std::string_view path)
 {
     // for devices like nfs, emit created so the new file is shown
     // update now
@@ -3421,7 +3421,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 /////////////////////////////////////////////////////////////
 
 void
-ptk_file_misc_paste_as(PtkFileBrowser* file_browser, std::string_view cwd, GFunc callback)
+ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::string_view cwd, GFunc callback)
 {
     (void)callback;
     bool is_cut = false;

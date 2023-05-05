@@ -102,7 +102,7 @@ inline constexpr std::array<i32, 13> big_icon_sizes{
     512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
 inline constexpr std::array<i32, 15> small_icon_sizes{
     512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
-inline constexpr std::array<std::string_view, 3> date_formats{
+inline constexpr std::array<const std::string_view, 3> date_formats{
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d",
     "%Y-%m-%d %H:%M:%S",

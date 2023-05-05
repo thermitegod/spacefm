@@ -75,5 +75,5 @@ void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
 // prevent unnecessary disk I/O and this can speed up the loading.
 // Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
 // to get mtime.
-GdkPixbuf* vfs_thumbnail_load_for_uri(std::string_view uri, i32 thumb_size);
-GdkPixbuf* vfs_thumbnail_load_for_file(std::string_view file, i32 thumb_size);
+GdkPixbuf* vfs_thumbnail_load_for_uri(const std::string_view uri, i32 thumb_size);
+GdkPixbuf* vfs_thumbnail_load_for_file(const std::string_view file, i32 thumb_size);

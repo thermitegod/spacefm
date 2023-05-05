@@ -24,7 +24,7 @@
 #include "ptk/ptk-bookmark-view.hxx"
 
 void
-ptk_bookmark_view_add_bookmark(std::string_view book_path)
+ptk_bookmark_view_add_bookmark(const std::string_view book_path)
 {
     if (book_path.empty())
     {

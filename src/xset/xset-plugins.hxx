@@ -66,8 +66,8 @@ void xset_clear_plugins(const std::span<const xset_t> plugins);
 
 void on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data);
 
-void install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view path,
-                         std::string_view plug_dir, PluginJob job, xset_t insert_set);
+void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string_view path,
+                         const std::string_view plug_dir, PluginJob job, xset_t insert_set);
 
 void clean_plugin_mirrors();
 

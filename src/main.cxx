@@ -102,7 +102,7 @@ init_folder()
 }
 
 static void
-open_file(std::string_view path)
+open_file(const std::string_view path)
 {
     vfs::file_info file = vfs_file_info_new();
     vfs_file_info_get(file, path);

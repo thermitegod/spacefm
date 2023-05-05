@@ -153,7 +153,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
  * the specified file again.
  */
 const std::string
-mime_type_get_by_file(std::string_view filepath)
+mime_type_get_by_file(const std::string_view filepath)
 {
     const auto status = std::filesystem::status(filepath);
 
@@ -238,7 +238,7 @@ mime_type_get_by_file(std::string_view filepath)
 
 // returns - icon_name, icon_desc
 static std::optional<std::array<std::string, 2>>
-mime_type_parse_xml_file(std::string_view file_path, bool is_local)
+mime_type_parse_xml_file(const std::string_view file_path, bool is_local)
 {
     // ztd::logger::info("MIME XML = {}", file_path);
 
@@ -298,7 +298,7 @@ mime_type_parse_xml_file(std::string_view file_path, bool is_local)
  * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
  * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed. */
 const std::array<std::string, 2>
-mime_type_get_desc_icon(std::string_view type)
+mime_type_get_desc_icon(const std::string_view type)
 {
     /*  //sfm 0.7.7+ FIXED:
      * According to specs on freedesktop.org, user_data_dir has
@@ -319,7 +319,7 @@ mime_type_get_desc_icon(std::string_view type)
     }
 
     // look in system dirs
-    for (std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const std::string sys_file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
         if (faccessat(0, sys_file_path.data(), F_OK, AT_EACCESS) != -1)
@@ -415,7 +415,7 @@ mime_type_is_data_plain_text(const std::span<const char8_t> data)
 }
 
 bool
-mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
+mime_type_is_text_file(const std::string_view file_path, const std::string_view mime_type)
 {
     bool ret = false;
 
@@ -468,11 +468,16 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
 }
 
 bool
-mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type)
+mime_type_is_executable_file(const std::string_view file_path, const std::string_view mime_type)
 {
+    std::string file_mime_type;
     if (mime_type.empty())
     {
-        mime_type = mime_type_get_by_file(file_path);
+        file_mime_type = mime_type_get_by_file(file_path);
+    }
+    else
+    {
+        file_mime_type = mime_type;
     }
 
     /*
@@ -480,9 +485,9 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    if (!ztd::same(mime_type, XDG_MIME_TYPE_UNKNOWN) &&
-        (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
-         mime_type_is_subclass(mime_type, "application/x-shellscript")))
+    if (!ztd::same(file_mime_type, XDG_MIME_TYPE_UNKNOWN) &&
+        (mime_type_is_subclass(file_mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
+         mime_type_is_subclass(file_mime_type, "application/x-shellscript")))
     {
         if (!file_path.empty())
         {
@@ -498,7 +503,7 @@ mime_type_is_executable_file(std::string_view file_path, std::string_view mime_t
 
 /* Check if the specified mime_type is the subclass of the specified parent type */
 static bool
-mime_type_is_subclass(std::string_view type, std::string_view parent)
+mime_type_is_subclass(const std::string_view type, const std::string_view parent)
 {
     /* special case, the type specified is identical to the parent type. */
     if (ztd::same(type, parent))

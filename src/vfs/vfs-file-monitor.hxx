@@ -44,8 +44,8 @@ namespace vfs
 
     // Callback function which will be called when monitored events happen
     using file_monitor_callback = void (*)(const vfs::file_monitor& monitor,
-                                           VFSFileMonitorEvent event, std::string_view file_name,
-                                           void* user_data);
+                                           VFSFileMonitorEvent event,
+                                           const std::string_view file_name, void* user_data);
 
     using file_monitor_callback_entry = std::shared_ptr<VFSFileMonitorCallbackEntry>;
 
@@ -54,7 +54,7 @@ namespace vfs
 struct VFSFileMonitor
 {
     VFSFileMonitor() = delete;
-    VFSFileMonitor(std::string_view real_path, i32 wd);
+    VFSFileMonitor(const std::string_view real_path, i32 wd);
     ~VFSFileMonitor();
 
     void add_user() noexcept;
@@ -85,7 +85,7 @@ bool vfs_file_monitor_init();
  * cb: callback function to be called when file event happens.
  * user_data: user data to be passed to callback function.
  */
-vfs::file_monitor vfs_file_monitor_add(std::string_view path, vfs::file_monitor_callback cb,
+vfs::file_monitor vfs_file_monitor_add(const std::string_view path, vfs::file_monitor_callback cb,
                                        void* user_data);
 
 /*

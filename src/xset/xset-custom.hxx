@@ -34,4 +34,4 @@ void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t 
 char* xset_custom_get_script(xset_t set, bool create);
 xset_t xset_custom_copy(xset_t set, bool copy_next, bool delete_set);
 
-xset_t xset_find_custom(std::string_view search);
+xset_t xset_find_custom(const std::string_view search);

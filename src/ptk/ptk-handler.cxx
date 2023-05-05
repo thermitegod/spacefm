@@ -79,7 +79,7 @@ enum PtkHandlerCol
 };
 
 // xset name prefixes of default handlers
-inline constexpr std::array<std::string_view, 4> handler_def_prefixs{
+inline constexpr std::array<const std::string_view, 4> handler_def_prefixs{
     "hand_arc_+",
     "hand_fs_+",
     "hand_net_+",
@@ -87,7 +87,7 @@ inline constexpr std::array<std::string_view, 4> handler_def_prefixs{
 };
 
 // xset name prefixes of custom handlers
-inline constexpr std::array<std::string_view, 4> handler_cust_prefixs{
+inline constexpr std::array<const std::string_view, 4> handler_cust_prefixs{
     "hand_arc_",
     "hand_fs_",
     "hand_net_",
@@ -101,34 +101,34 @@ inline constexpr std::array<XSetName, 4> handler_conf_xsets{
     XSetName::OPEN_HAND,
 };
 
-inline constexpr std::array<std::string_view, 4> dialog_titles{
+inline constexpr std::array<const std::string_view, 4> dialog_titles{
     "Archive Handlers",
     "Device Handlers",
     "Protocol Handlers",
     "File Handlers",
 };
 
-inline constexpr std::array<std::string_view, 4> dialog_mnemonics{
+inline constexpr std::array<const std::string_view, 4> dialog_mnemonics{
     "Archive Hand_lers",
     "Device Hand_lers",
     "Protocol Hand_lers",
     "File Hand_lers",
 };
 
-inline constexpr std::array<std::string_view, 4> modes{
+inline constexpr std::array<const std::string_view, 4> modes{
     "archive",
     "device",
     "protocol",
     "file",
 };
 
-inline constexpr std::array<std::string_view, 3> cmds_arc{
+inline constexpr std::array<const std::string_view, 3> cmds_arc{
     "compress",
     "extract",
     "list",
 };
 
-inline constexpr std::array<std::string_view, 3> cmds_mnt{
+inline constexpr std::array<const std::string_view, 3> cmds_mnt{
     "mount",
     "unmount",
     "info",
@@ -789,7 +789,7 @@ static bool validate_archive_handler(HandlerData* hnd);
 static void on_options_button_clicked(GtkWidget* btn, HandlerData* hnd);
 
 bool
-ptk_handler_command_is_empty(std::string_view command)
+ptk_handler_command_is_empty(const std::string_view command)
 {
     if (command.empty())
     {
@@ -813,7 +813,7 @@ ptk_handler_command_is_empty(std::string_view command)
 }
 
 static void
-ptk_handler_load_text_view(GtkTextView* view, std::string_view text = "")
+ptk_handler_load_text_view(GtkTextView* view, const std::string_view text = "")
 {
     if (!view)
     {
@@ -1103,7 +1103,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
 }
 
 bool
-ptk_handler_values_in_list(std::string_view list, const std::span<const std::string> values,
+ptk_handler_values_in_list(const std::string_view list, const std::span<const std::string> values,
                            std::string& msg)
 { /* test for the presence of values in list, using wildcards.
    *  list is space-separated, plus sign (+) indicates required. */
@@ -1122,15 +1122,16 @@ ptk_handler_values_in_list(std::string_view list, const std::span<const std::str
     // test each element for match
     bool required, match;
     bool ret = false;
-    for (std::string_view element : elements)
+    for (const std::string_view element : elements)
     {
         if (element.empty())
         {
             continue;
         }
+        std::string_view match_element = element;
         if (ztd::startswith(element, "+"))
-        {                                // plus prefix indicates this element is required
-            element = element.substr(1); // shift right of '+'
+        {                                      // plus prefix indicates this element is required
+            match_element = element.substr(1); // shift right of '+'
             required = true;
         }
         else
@@ -1140,7 +1141,7 @@ ptk_handler_values_in_list(std::string_view list, const std::span<const std::str
         match = false;
         for (const std::string_view handler : values)
         {
-            if (ztd::fnmatch(element, handler))
+            if (ztd::fnmatch(match_element, handler))
             {
                 // match
                 ret = match = true;
@@ -1160,7 +1161,7 @@ ptk_handler_values_in_list(std::string_view list, const std::span<const std::str
 }
 
 static bool
-value_in_list(std::string_view list, std::string_view value)
+value_in_list(const std::string_view list, const std::string_view value)
 { // this function must be FAST - is run multiple times on menu popup
     // value in space-separated list with wildcards
     for (const std::string_view key : ztd::split(list, " "))
@@ -1174,7 +1175,7 @@ value_in_list(std::string_view list, std::string_view value)
 }
 
 const std::vector<xset_t>
-ptk_handler_file_has_handlers(i32 mode, i32 cmd, std::string_view path,
+ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::string_view path,
                               const vfs::mime_type& mime_type, bool test_cmd, bool multiple,
                               bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
@@ -2056,7 +2057,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         std::string new_archive_handlers_s;
 
         // Looping for handlers (nullptr-terminated list)
-        for (std::string_view archive_handler : archive_handlers)
+        for (const std::string_view archive_handler : archive_handlers)
         {
             // Appending to new archive handlers list when it isnt the
             // deleted handler - remember that archive handlers are
@@ -2918,7 +2919,7 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
 }
 
 static GtkWidget*
-add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, std::string_view label,
+add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, const std::string_view label,
                    PtkHandlerJob job, HandlerData* hnd)
 {
     (void)accel_group;

@@ -321,7 +321,7 @@ device_get_info(const device_t& device)
 
     // links
     const auto entrys = device->udevice.get_devlinks();
-    for (std::string_view entry : entrys)
+    for (const std::string_view entry : entrys)
     {
         if (ztd::startswith(entry, "/dev/disk/by-id/") ||
             ztd::startswith(entry, "/dev/disk/by-uuid/"))
@@ -805,7 +805,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
 }
 
 bool
-is_path_mountpoint(std::string_view path)
+is_path_mountpoint(const std::string_view path)
 {
     if (!std::filesystem::exists(path))
     {
@@ -1073,7 +1073,7 @@ vfs_volume_get_all_volumes()
 }
 
 vfs::volume
-vfs_volume_get_by_device(std::string_view device_file)
+vfs_volume_get_by_device(const std::string_view device_file)
 {
     for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
@@ -1164,7 +1164,7 @@ VFSVolume::get_icon() const noexcept
 }
 
 bool
-vfs_volume_dir_avoid_changes(std::string_view dir)
+vfs_volume_dir_avoid_changes(const std::string_view dir)
 {
     // determines if file change detection should be disabled for this
     // dir (eg nfs stat calls block when a write is in progress so file

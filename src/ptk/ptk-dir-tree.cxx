@@ -120,17 +120,18 @@ static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* 
 static i32 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b);
 
 static void ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
-                                      std::string_view file_path, std::string_view name);
+                                      const std::string_view file_path,
+                                      const std::string_view name);
 
 static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
 
 /* signal handlers */
 
 static void on_file_monitor_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                                  std::string_view file_name, void* user_data);
+                                  const std::string_view file_name, void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
-                                             std::string_view path);
+                                             const std::string_view path);
 
 static GObjectClass* parent_class = nullptr;
 
@@ -658,7 +659,7 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
 }
 
 static PtkDirTreeNode*
-ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, std::string_view path)
+ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const std::string_view path)
 {
     const auto node = new PtkDirTreeNode;
     node->tree = tree;
@@ -723,8 +724,8 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
 }
 
 static void
-ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent, std::string_view file_path = "",
-                          std::string_view name = "")
+ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
+                          const std::string_view file_path = "", const std::string_view name = "")
 {
     (void)name;
 
@@ -908,7 +909,7 @@ ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter)
 }
 
 static PtkDirTreeNode*
-find_node(PtkDirTreeNode* parent, std::string_view name)
+find_node(PtkDirTreeNode* parent, const std::string_view name)
 {
     PtkDirTreeNode* child;
     for (child = parent->children; child; child = child->next)
@@ -923,7 +924,7 @@ find_node(PtkDirTreeNode* parent, std::string_view name)
 
 static void
 on_file_monitor_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                      std::string_view file_name, void* user_data)
+                      const std::string_view file_name, void* user_data)
 {
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);
     assert(node != nullptr);

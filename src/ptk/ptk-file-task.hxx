@@ -43,7 +43,7 @@ struct PtkFileTask
     ~PtkFileTask();
 
     PtkFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
+                const std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
 
     vfs::file_task task{nullptr};
 
@@ -108,11 +108,12 @@ PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::span<const std::
                                GtkWindow* parent_window, GtkWidget* task_view);
 
 PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
-                               std::string_view dest_dir, GtkWindow* parent_window,
+                               const std::string_view dest_dir, GtkWindow* parent_window,
                                GtkWidget* task_view);
 
-PtkFileTask* ptk_file_exec_new(std::string_view item_name, GtkWidget* parent, GtkWidget* task_view);
-PtkFileTask* ptk_file_exec_new(std::string_view item_name, std::string_view dest_dir,
+PtkFileTask* ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
+                               GtkWidget* task_view);
+PtkFileTask* ptk_file_exec_new(const std::string_view item_name, const std::string_view dest_dir,
                                GtkWidget* parent, GtkWidget* task_view);
 
 void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);

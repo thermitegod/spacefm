@@ -49,15 +49,17 @@ void mime_type_finalize();
  * efifciency, too. Otherwise, the function will try to get the basename of
  * the specified file again.
  */
-const std::string mime_type_get_by_file(std::string_view filepath);
+const std::string mime_type_get_by_file(const std::string_view filepath);
 
-bool mime_type_is_text_file(std::string_view file_path, std::string_view mime_type = "");
-bool mime_type_is_executable_file(std::string_view file_path, std::string_view mime_type = "");
+bool mime_type_is_text_file(const std::string_view file_path,
+                            const std::string_view mime_type = "");
+bool mime_type_is_executable_file(const std::string_view file_path,
+                                  const std::string_view mime_type = "");
 
 /**
  * Get human-readable description and icon name of the mime-type
  */
-const std::array<std::string, 2> mime_type_get_desc_icon(std::string_view type);
+const std::array<std::string, 2> mime_type_get_desc_icon(const std::string_view type);
 
 /*
  * Get mime caches

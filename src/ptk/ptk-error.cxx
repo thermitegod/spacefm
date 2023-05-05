@@ -24,7 +24,7 @@
 #include "ptk/ptk-error.hxx"
 
 void
-ptk_show_error(GtkWindow* parent, std::string_view title, std::string_view message)
+ptk_show_error(GtkWindow* parent, const std::string_view title, const std::string_view message)
 {
     // const Glib::ustring msg = Glib::Markup::escape_text(message.data());
     GtkWidget* dlg = gtk_message_dialog_new(parent,

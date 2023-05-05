@@ -420,7 +420,7 @@ config_parse_xset(const toml::value& tbl, u64 version)
 #if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
 
 void
-load_user_confing(std::string_view session, bool load_deprecated_ini_config)
+load_user_confing(const std::string_view session, bool load_deprecated_ini_config)
 {
     if (!load_deprecated_ini_config)
     { // TOML
@@ -487,7 +487,7 @@ load_user_confing(std::string_view session, bool load_deprecated_ini_config)
 #else
 
 void
-load_user_confing(std::string_view session)
+load_user_confing(const std::string_view session)
 {
     try
     {

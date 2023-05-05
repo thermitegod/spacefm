@@ -51,7 +51,7 @@
 
 #include "ptk/ptk-app-chooser.hxx"
 
-static constexpr std::array<std::string_view, 12> chmod_names{
+static constexpr std::array<const std::string_view, 12> chmod_names{
     "owner_r",
     "owner_w",
     "owner_x",
@@ -402,7 +402,7 @@ on_combo_change(GtkComboBox* combo, void* user_data)
 }
 
 static GtkWidget*
-file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
+file_properties_dlg_new(GtkWindow* parent, const std::string_view dir_path,
                         const std::span<const vfs::file_info> sel_files, i32 page)
 {
     GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_FILE_PROPERTIES);
@@ -746,14 +746,14 @@ file_properties_dlg_new(GtkWindow* parent, std::string_view dir_path,
 }
 
 static uid_t
-uid_from_name(std::string_view user_name)
+uid_from_name(const std::string_view user_name)
 {
     const auto pw = ztd::passwd(user_name);
     return pw.uid();
 }
 
 static gid_t
-gid_from_name(std::string_view group_name)
+gid_from_name(const std::string_view group_name)
 {
     const auto gr = ztd::group(group_name);
     return gr.gid();
@@ -960,7 +960,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
 }
 
 void
-ptk_show_file_properties(GtkWindow* parent_win, std::string_view cwd,
+ptk_show_file_properties(GtkWindow* parent_win, const std::string_view cwd,
                          std::vector<vfs::file_info>& sel_files, i32 page)
 {
     GtkWidget* dlg;

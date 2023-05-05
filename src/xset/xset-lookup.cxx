@@ -1721,7 +1721,7 @@ static const std::unordered_map<MainWindowPanel, std::string_view> main_window_p
 // clang-format on
 
 XSetName
-xset_get_xsetname_from_name(std::string_view name)
+xset_get_xsetname_from_name(const std::string_view name)
 {
     for (const auto& it : xset_name_map)
     {
@@ -1845,7 +1845,7 @@ xset_get_name_from_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mod
 // xset var
 
 XSetVar
-xset_get_xsetvar_from_name(std::string_view name)
+xset_get_xsetvar_from_name(const std::string_view name)
 {
     try
     {

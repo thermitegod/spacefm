@@ -48,7 +48,7 @@ get_all_bookmarks() noexcept
 }
 
 static void
-parse_bookmarks(std::string_view raw_line) noexcept
+parse_bookmarks(const std::string_view raw_line) noexcept
 {
     const std::string line = ztd::strip(raw_line); // remove newline
 
@@ -118,7 +118,7 @@ save_bookmarks() noexcept
 }
 
 void
-add_bookmarks(std::string_view book_path) noexcept
+add_bookmarks(const std::string_view book_path) noexcept
 {
     bookmarks_changed = true;
 

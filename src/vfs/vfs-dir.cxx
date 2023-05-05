@@ -81,17 +81,17 @@ static void vfs_dir_finalize(GObject* obj);
 static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
 static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
 
-static const std::string gethidden(std::string_view path);
-static bool ishidden(std::string_view hidden, std::string_view file_name);
+static const std::string gethidden(const std::string_view path);
+static bool ishidden(const std::string_view hidden, const std::string_view file_name);
 
 /* constructor is private */
-static vfs::dir vfs_dir_new(std::string_view path);
+static vfs::dir vfs_dir_new(const std::string_view path);
 
 static void vfs_dir_load(vfs::dir dir);
 static void* vfs_dir_load_thread(vfs::async_task task, vfs::dir dir);
 
 static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                                     std::string_view file_name, void* user_data);
+                                     const std::string_view file_name, void* user_data);
 
 static bool notify_file_change(void* user_data);
 static bool update_file_info(vfs::dir dir, vfs::file_info file);
@@ -226,7 +226,7 @@ vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec*
 }
 
 static vfs::file_info
-vfs_dir_find_file(vfs::dir dir, std::string_view file_name, vfs::file_info file)
+vfs_dir_find_file(vfs::dir dir, const std::string_view file_name, vfs::file_info file)
 {
     for (vfs::file_info file2 : dir->file_list)
     {
@@ -244,7 +244,7 @@ vfs_dir_find_file(vfs::dir dir, std::string_view file_name, vfs::file_info file)
 
 /* signal handlers */
 void
-vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force)
+vfs_dir_emit_file_created(vfs::dir dir, const std::string_view file_name, bool force)
 {
     (void)force;
     // Ignore avoid_changes for creation of files
@@ -268,7 +268,7 @@ vfs_dir_emit_file_created(vfs::dir dir, std::string_view file_name, bool force)
 }
 
 void
-vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_info file)
+vfs_dir_emit_file_deleted(vfs::dir dir, const std::string_view file_name, vfs::file_info file)
 {
     std::lock_guard<std::mutex> lock(dir->mutex);
 
@@ -310,7 +310,8 @@ vfs_dir_emit_file_deleted(vfs::dir dir, std::string_view file_name, vfs::file_in
 }
 
 void
-vfs_dir_emit_file_changed(vfs::dir dir, std::string_view file_name, vfs::file_info file, bool force)
+vfs_dir_emit_file_changed(vfs::dir dir, const std::string_view file_name, vfs::file_info file,
+                          bool force)
 {
     std::lock_guard<std::mutex> lock(dir->mutex);
 
@@ -395,7 +396,7 @@ vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
 /* methods */
 
 static vfs::dir
-vfs_dir_new(std::string_view path)
+vfs_dir_new(const std::string_view path)
 {
     vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
 
@@ -418,7 +419,7 @@ on_list_task_finished(vfs::dir dir, bool is_cancelled)
 }
 
 static const std::string
-gethidden(std::string_view path)
+gethidden(const std::string_view path)
 {
     std::string hidden;
 
@@ -447,7 +448,7 @@ gethidden(std::string_view path)
 }
 
 static bool
-ishidden(std::string_view hidden, std::string_view file_name)
+ishidden(const std::string_view hidden, const std::string_view file_name)
 {
     if (ztd::contains(hidden, fmt::format("{}\n", file_name)))
     {
@@ -457,7 +458,7 @@ ishidden(std::string_view hidden, std::string_view file_name)
 }
 
 bool
-vfs_dir_add_hidden(std::string_view path, std::string_view file_name)
+vfs_dir_add_hidden(const std::string_view path, const std::string_view file_name)
 {
     const std::string file_path = Glib::build_filename(path.data(), ".hidden");
     const std::string data = fmt::format("{}\n", file_name);
@@ -586,7 +587,7 @@ update_file_info(vfs::dir dir, vfs::file_info file)
 }
 
 static void
-update_changed_files(std::string_view key, vfs::dir dir)
+update_changed_files(const std::string_view key, vfs::dir dir)
 {
     (void)key;
 
@@ -610,7 +611,7 @@ update_changed_files(std::string_view key, vfs::dir dir)
 }
 
 static void
-update_created_files(std::string_view key, vfs::dir dir)
+update_created_files(const std::string_view key, vfs::dir dir)
 {
     (void)key;
 
@@ -690,7 +691,7 @@ vfs_dir_flush_notify_cache()
 /* Callback function which will be called when monitored events happen */
 static void
 vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                         std::string_view file_name, void* user_data)
+                         const std::string_view file_name, void* user_data)
 {
     (void)monitor;
     vfs::dir dir = VFS_DIR(user_data);
@@ -712,7 +713,7 @@ vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent e
 }
 
 vfs::dir
-vfs_dir_get_by_path_soft(std::string_view path)
+vfs_dir_get_by_path_soft(const std::string_view path)
 {
     vfs::dir dir = nullptr;
 
@@ -733,7 +734,7 @@ vfs_dir_get_by_path_soft(std::string_view path)
 }
 
 vfs::dir
-vfs_dir_get_by_path(std::string_view path)
+vfs_dir_get_by_path(const std::string_view path)
 {
     vfs::dir dir = nullptr;
 
@@ -763,7 +764,7 @@ vfs_dir_get_by_path(std::string_view path)
 }
 
 static void
-reload_mime_type(std::string_view key, vfs::dir dir)
+reload_mime_type(const std::string_view key, vfs::dir dir)
 {
     (void)key;
 

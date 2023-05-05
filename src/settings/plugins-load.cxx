@@ -32,7 +32,7 @@
 #include "settings/plugins-load.hxx"
 
 bool
-load_user_plugin(std::string_view plug_dir, PluginUse* use, std::string_view plugin,
+load_user_plugin(const std::string_view plug_dir, PluginUse* use, const std::string_view plugin,
                  plugin_func_t plugin_func)
 {
     toml::value tbl;

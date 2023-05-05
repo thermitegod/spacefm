@@ -305,7 +305,8 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 }
 
 static GdkPixbuf*
-vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 thumb_size)
+vfs_thumbnail_load(const std::string_view file_path, const std::string_view file_uri,
+                   i32 thumb_size)
 {
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file_uri);
     const std::string file_name = fmt::format("{}.png", file_hash);
@@ -421,7 +422,7 @@ vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 th
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_uri(std::string_view uri, i32 thumb_size)
+vfs_thumbnail_load_for_uri(const std::string_view uri, i32 thumb_size)
 {
     const std::string file = Glib::filename_from_uri(uri.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
@@ -429,7 +430,7 @@ vfs_thumbnail_load_for_uri(std::string_view uri, i32 thumb_size)
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(std::string_view file, i32 thumb_size)
+vfs_thumbnail_load_for_file(const std::string_view file, i32 thumb_size)
 {
     const std::string uri = Glib::filename_to_uri(file.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);

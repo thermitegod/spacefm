@@ -38,7 +38,7 @@
 #include "utils.hxx"
 
 const std::string
-replace_line_subs(std::string_view line) noexcept
+replace_line_subs(const std::string_view line) noexcept
 {
     std::string cmd = line.data();
 
@@ -94,7 +94,7 @@ have_rw_access(const std::filesystem::path& path) noexcept
 }
 
 bool
-dir_has_files(std::string_view path) noexcept
+dir_has_files(const std::string_view path) noexcept
 {
     if (!std::filesystem::is_directory(path))
     {
@@ -113,7 +113,7 @@ dir_has_files(std::string_view path) noexcept
 }
 
 const std::pair<std::string, std::string>
-get_name_extension(std::string_view filename) noexcept
+get_name_extension(const std::string_view filename) noexcept
 {
     if (std::filesystem::is_directory(filename))
     {
@@ -148,7 +148,7 @@ get_name_extension(std::string_view filename) noexcept
 }
 
 void
-open_in_prog(std::string_view path) noexcept
+open_in_prog(const std::string_view path) noexcept
 {
     const std::string exe = ztd::program::exe();
     const std::string qpath = ztd::shell::quote(path);
@@ -158,7 +158,7 @@ open_in_prog(std::string_view path) noexcept
 }
 
 const std::string
-clean_label(std::string_view menu_label, bool kill_special, bool escape) noexcept
+clean_label(const std::string_view menu_label, bool kill_special, bool escape) noexcept
 {
     if (menu_label.empty())
     {

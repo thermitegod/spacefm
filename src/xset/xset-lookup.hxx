@@ -26,7 +26,7 @@ class InvalidXSetName : virtual public std::exception
     std::string error_message;
 
   public:
-    explicit InvalidXSetName(std::string_view msg) : error_message(msg)
+    explicit InvalidXSetName(const std::string_view msg) : error_message(msg)
     {
     }
 
@@ -1193,7 +1193,7 @@ enum class MainWindowPanel
     PANEL_BOTH
 };
 
-XSetName xset_get_xsetname_from_name(std::string_view name);
+XSetName xset_get_xsetname_from_name(const std::string_view name);
 const std::string xset_get_name_from_xsetname(XSetName name);
 
 XSetName xset_get_xsetname_from_panel(panel_t panel, XSetPanel panel_var);
@@ -1203,7 +1203,7 @@ XSetName xset_get_xsetname_from_panel_mode(panel_t panel, XSetPanel name, MainWi
 const std::string xset_get_name_from_panel_mode(panel_t panel, XSetPanel name,
                                                 MainWindowPanel mode);
 
-XSetVar xset_get_xsetvar_from_name(std::string_view name);
+XSetVar xset_get_xsetvar_from_name(const std::string_view name);
 const std::string xset_get_name_from_xsetvar(XSetVar name);
 
 // main window panel mode

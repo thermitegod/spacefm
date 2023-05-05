@@ -134,7 +134,7 @@ class VFSFileTask
   public:
     VFSFileTask() = delete;
     VFSFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                std::string_view dest_dir);
+                const std::string_view dest_dir);
     ~VFSFileTask();
 
     void lock();
@@ -153,29 +153,29 @@ class VFSFileTask
     void abort_task();
 
   public: // private: // TODO
-    bool check_overwrite(std::string_view dest_file, bool* dest_exists, char** new_dest_file);
-    bool check_dest_in_src(std::string_view src_dir);
+    bool check_overwrite(const std::string_view dest_file, bool* dest_exists, char** new_dest_file);
+    bool check_dest_in_src(const std::string_view src_dir);
 
-    void file_copy(std::string_view src_file);
-    bool do_file_copy(std::string_view src_file, std::string_view dest_file);
+    void file_copy(const std::string_view src_file);
+    bool do_file_copy(const std::string_view src_file, const std::string_view dest_file);
 
-    void file_move(std::string_view src_file);
-    i32 do_file_move(std::string_view src_file, std::string_view dest_path);
+    void file_move(const std::string_view src_file);
+    i32 do_file_move(const std::string_view src_file, const std::string_view dest_path);
 
-    void file_trash(std::string_view src_file);
-    void file_delete(std::string_view src_file);
-    void file_link(std::string_view src_file);
-    void file_chown_chmod(std::string_view src_file);
-    void file_exec(std::string_view src_file);
+    void file_trash(const std::string_view src_file);
+    void file_delete(const std::string_view src_file);
+    void file_link(const std::string_view src_file);
+    void file_chown_chmod(const std::string_view src_file);
+    void file_exec(const std::string_view src_file);
 
     bool should_abort();
 
-    off_t get_total_size_of_dir(std::string_view path);
+    off_t get_total_size_of_dir(const std::string_view path);
 
-    void append_add_log(std::string_view msg);
+    void append_add_log(const std::string_view msg);
 
-    void task_error(i32 errnox, std::string_view action);
-    void task_error(i32 errnox, std::string_view action, std::string_view target);
+    void task_error(i32 errnox, const std::string_view action);
+    void task_error(i32 errnox, const std::string_view action, const std::string_view target);
 
   public:
     VFSFileTaskType type;
@@ -266,6 +266,6 @@ class VFSFileTask
 };
 
 vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::span<const std::string> src_files,
-                            std::string_view dest_dir);
+                            const std::string_view dest_dir);
 
 void vfs_file_task_free(vfs::file_task task);

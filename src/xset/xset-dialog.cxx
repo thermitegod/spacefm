@@ -164,8 +164,8 @@ on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
 }
 
 i32
-xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title,
-                GtkButtonsType buttons, std::string_view msg1, std::string_view msg2)
+xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string_view title,
+                GtkButtonsType buttons, const std::string_view msg1, const std::string_view msg2)
 {
     GtkWidget* dlgparent = nullptr;
 
@@ -203,9 +203,9 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, std::string_view title
 }
 
 bool
-xset_text_dialog(GtkWidget* parent, std::string_view title, std::string_view msg1,
-                 std::string_view msg2, const char* defstring, char** answer,
-                 std::string_view defreset, bool edit_care)
+xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
+                 const std::string_view msg2, const char* defstring, char** answer,
+                 const std::string_view defreset, bool edit_care)
 {
     GtkTextIter iter;
     GtkTextIter siter;

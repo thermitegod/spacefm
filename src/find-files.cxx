@@ -200,14 +200,14 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(vfs::file_info file, std::string_view dir_path);
+    FoundFile(vfs::file_info file, const std::string_view dir_path);
     // ~FoundFile();
 
     vfs::file_info file;
     std::string dir_path;
 };
 
-FoundFile::FoundFile(vfs::file_info file, std::string_view dir_path)
+FoundFile::FoundFile(vfs::file_info file, const std::string_view dir_path)
 {
     this->file = file;
     this->dir_path = dir_path.data();
@@ -260,7 +260,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
 }
 
 static void
-open_dir(std::string_view dir, GList* files, MainWindow* w)
+open_dir(const std::string_view dir, GList* files, MainWindow* w)
 {
     (void)files;
     main_window_add_new_tab(w, dir);
@@ -417,7 +417,7 @@ compose_command(FindFile* data)
     std::string tmp;
 
     GtkTreeIter it;
-    static constexpr std::array<std::string_view, 4> size_units{"c", "k", "M", "G"};
+    static constexpr std::array<const std::string_view, 4> size_units{"c", "k", "M", "G"};
 
     argv.emplace_back("find");
     argv.emplace_back("-H");
@@ -824,7 +824,7 @@ menu_pos(GtkMenu* menu, i32* x, i32* y, bool* push_in, GtkWidget* btn)
 }
 
 static void
-add_search_dir(FindFile* data, std::string_view path)
+add_search_dir(FindFile* data, const std::string_view path)
 {
     GtkTreeIter it;
     gtk_list_store_append(data->places_list, &it);
@@ -1192,7 +1192,7 @@ find_files(const std::vector<std::string>& search_dirs)
     remove_directory_btn = GTK_WIDGET(gtk_builder_get_object(builder, "remove_directory_btn"));
     data->include_sub = GTK_WIDGET(gtk_builder_get_object(builder, "include_sub"));
 
-    for (const std::string_view dir : search_dirs)
+    for (const  std::string_view dir : search_dirs)
     {
         if (std::filesystem::is_directory(dir))
         {

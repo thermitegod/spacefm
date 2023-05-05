@@ -26,5 +26,5 @@
 
 #include "vfs/vfs-file-info.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent_win, std::string_view cwd,
+void ptk_show_file_properties(GtkWindow* parent_win, const std::string_view cwd,
                               std::vector<vfs::file_info>& sel_files, i32 page);

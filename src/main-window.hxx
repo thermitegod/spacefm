@@ -92,12 +92,12 @@ GtkWidget* main_window_new();
 /* Utility functions */
 GtkWidget* main_window_get_current_file_browser(MainWindow* mainWindow);
 
-void main_window_add_new_tab(MainWindow* main_window, std::string_view folder_path);
+void main_window_add_new_tab(MainWindow* main_window, const std::string_view folder_path);
 
 GtkWidget* main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser);
 
 void main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
-                                  std::string_view path);
+                                  const std::string_view path);
 
 // void main_window_preference(MainWindow* main_window);
 
@@ -121,24 +121,24 @@ void on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
 void main_window_toggle_thumbnails_all_windows();
-void main_window_refresh_all_tabs_matching(std::string_view path);
+void main_window_refresh_all_tabs_matching(const std::string_view path);
 void main_window_close_all_invalid_tabs();
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
-const std::string main_write_exports(vfs::file_task vtask, std::string_view value);
+const std::string main_write_exports(vfs::file_task vtask, const std::string_view value);
 void on_reorder(GtkWidget* item, GtkWidget* parent);
 char* main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num);
 char* main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num);
 const std::array<i64, 3> main_window_get_counts(PtkFileBrowser* file_browser);
 bool main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel);
 void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
-                               std::string_view file_path);
+                               const std::string_view file_path);
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c);
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
 void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
-void main_window_open_path_in_current_tab(MainWindow* main_window, std::string_view path);
-void main_window_open_network(MainWindow* main_window, std::string_view path, bool new_tab);
+void main_window_open_path_in_current_tab(MainWindow* main_window, const std::string_view path);
+void main_window_open_network(MainWindow* main_window, const std::string_view path, bool new_tab);
 bool main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab,
                        const char* focus, i32 keyval, i32 button, i32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);

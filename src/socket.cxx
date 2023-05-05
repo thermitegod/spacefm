@@ -384,7 +384,7 @@ single_instance_finalize()
 }
 
 static void
-write_socket_response(i32 client, char cmd, std::string_view reply)
+write_socket_response(i32 client, char cmd, const std::string_view reply)
 {
     // send response and exit status
     const auto length = write(client, &cmd, sizeof(char));

@@ -43,7 +43,7 @@ enum PTKAppChooser
     COL_FULL_PATH,
 };
 
-static void load_all_apps_in_dir(std::string_view dir_path, GtkListStore* list,
+static void load_all_apps_in_dir(const std::string_view dir_path, GtkListStore* list,
                                  vfs::async_task task);
 static void* load_all_known_apps_thread(vfs::async_task task);
 
@@ -97,7 +97,7 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
 }
 
 static void
-add_list_item(GtkListStore* list, std::string_view path)
+add_list_item(GtkListStore* list, const std::string_view path)
 {
     GtkTreeIter it;
 
@@ -590,7 +590,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
 }
 
 static void
-load_all_apps_in_dir(std::string_view dir_path, GtkListStore* list, vfs::async_task task)
+load_all_apps_in_dir(const std::string_view dir_path, GtkListStore* list, vfs::async_task task)
 {
     if (!std::filesystem::is_directory(dir_path))
     {

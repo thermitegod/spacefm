@@ -33,23 +33,24 @@ class VFSTrashDir
 {
   public:
     // Create the trash directory and subdirectories if they do not exist.
-    VFSTrashDir(std::string_view path) noexcept;
+    VFSTrashDir(const std::string_view path) noexcept;
     ~VFSTrashDir() = default;
 
     // Get a unique name for use within the trash directory
-    const std::string unique_name(std::string_view path) const noexcept;
+    const std::string unique_name(const std::string_view path) const noexcept;
 
     void create_trash_dir() const noexcept;
 
     // Create a .trashinfo file for a file or directory 'path'
-    void create_trash_info(std::string_view path, std::string_view target_name) const noexcept;
+    void create_trash_info(const std::string_view path,
+                           const std::string_view target_name) const noexcept;
 
     // Move a file or directory into the trash directory
-    void move(std::string_view path, std::string_view target_name) const noexcept;
+    void move(const std::string_view path, const std::string_view target_name) const noexcept;
 
   protected:
     // Create a directory if it does not exist
-    static void check_dir_exists(std::string_view dir) noexcept;
+    static void check_dir_exists(const std::string_view dir) noexcept;
 
     // Data Members
 
@@ -71,11 +72,11 @@ class VFSTrash
 {
   public:
     // Move a file or directory into the trash.
-    static bool trash(std::string_view path) noexcept;
+    static bool trash(const std::string_view path) noexcept;
 
     // Restore a file or directory from the trash to its original location.
     // Currently a NOOP
-    static bool restore(std::string_view path) noexcept;
+    static bool restore(const std::string_view path) noexcept;
 
     // Empty all trash cans
     // Currently a NOOP
@@ -95,13 +96,13 @@ class VFSTrash
     static VFSTrash* single_instance;
 
     // return the device of the file or directory
-    static std::optional<dev_t> device(std::string_view path) noexcept;
+    static std::optional<dev_t> device(const std::string_view path) noexcept;
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
-    static const std::string toplevel(std::string_view path) noexcept;
+    static const std::string toplevel(const std::string_view path) noexcept;
 
     // Return the trash dir to use for 'path'.
-    std::shared_ptr<VFSTrashDir> trash_dir(std::string_view path) noexcept;
+    std::shared_ptr<VFSTrashDir> trash_dir(const std::string_view path) noexcept;
 
     // Data Members
     std::map<dev_t, std::shared_ptr<VFSTrashDir>> trash_dirs;

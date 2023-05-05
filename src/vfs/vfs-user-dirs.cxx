@@ -120,7 +120,7 @@ VFSUserDirs::current_dir() const noexcept
 }
 
 void
-VFSUserDirs::program_config_dir(std::string_view config_dir) noexcept
+VFSUserDirs::program_config_dir(const std::string_view config_dir) noexcept
 {
     this->program_config = config_dir.data();
 }
@@ -144,7 +144,7 @@ VFSUserDirs::program_tmp_dir() const noexcept
 }
 
 void
-VFSUserDirs::program_tmp_dir(std::string_view tmp_dir) noexcept
+VFSUserDirs::program_tmp_dir(const std::string_view tmp_dir) noexcept
 {
     this->tmp = tmp_dir;
 

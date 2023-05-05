@@ -31,7 +31,7 @@
 #include "ptk/ptk-file-actions-misc.hxx"
 
 static bool
-action_dialog(GtkWindow* parent_win, std::string_view title, std::string_view message)
+action_dialog(GtkWindow* parent_win, const std::string_view title, const std::string_view message)
 {
     GtkWidget* dlg = gtk_message_dialog_new(parent_win,
                                             GtkDialogFlags::GTK_DIALOG_MODAL,
@@ -54,7 +54,7 @@ action_dialog(GtkWindow* parent_win, std::string_view title, std::string_view me
 }
 
 void
-ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
+ptk_delete_files(GtkWindow* parent_win, const std::string_view cwd,
                  const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view)
 {
     if (sel_files.empty())
@@ -88,7 +88,7 @@ ptk_delete_files(GtkWindow* parent_win, std::string_view cwd,
 }
 
 void
-ptk_trash_files(GtkWindow* parent_win, std::string_view cwd,
+ptk_trash_files(GtkWindow* parent_win, const std::string_view cwd,
                 const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view)
 {
     if (sel_files.empty())

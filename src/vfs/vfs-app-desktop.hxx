@@ -41,7 +41,7 @@ class VFSAppDesktop
     ~VFSAppDesktop() = default;
     // ~VFSAppDesktop() { ztd::logger::info("VFSAppDesktop destructor") };
 
-    VFSAppDesktop(std::string_view open_file_name) noexcept;
+    VFSAppDesktop(const std::string_view open_file_name) noexcept;
 
     const std::string& get_name() const noexcept;
     const std::string& get_disp_name() const noexcept;
@@ -51,15 +51,15 @@ class VFSAppDesktop
     GdkPixbuf* get_icon(i32 size) const noexcept;
     bool use_terminal() const noexcept;
     bool open_multiple_files() const noexcept;
-    bool open_files(std::string_view working_dir,
+    bool open_files(const std::string_view working_dir,
                     const std::span<const std::string> file_paths) const;
 
   private:
     const std::optional<std::vector<std::vector<std::string>>>
     app_exec_generate_desktop_argv(const std::span<const std::string> file_list,
                                    bool quote_file_list) const noexcept;
-    void exec_in_terminal(std::string_view cwd, std::string_view cmd) const noexcept;
-    void exec_desktop(std::string_view working_dir,
+    void exec_in_terminal(const std::string_view cwd, const std::string_view cmd) const noexcept;
+    void exec_desktop(const std::string_view working_dir,
                       const std::span<const std::string> file_paths) const noexcept;
 
   private:
@@ -97,7 +97,7 @@ class VFSAppDesktopException : virtual public std::exception
     std::string error_message;
 
   public:
-    explicit VFSAppDesktopException(std::string_view msg) : error_message(msg)
+    explicit VFSAppDesktopException(const std::string_view msg) : error_message(msg)
     {
     }
 
@@ -113,4 +113,4 @@ class VFSAppDesktopException : virtual public std::exception
 };
 
 // get cached VFSAppDesktop
-vfs::desktop vfs_get_desktop(std::string_view desktop_file);
+vfs::desktop vfs_get_desktop(const std::string_view desktop_file);

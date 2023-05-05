@@ -26,7 +26,7 @@
 /* Create a new dir tree view */
 GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden);
 
-bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, std::string_view path);
+bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::string_view path);
 
 /* Return a newly allocated string containing path of current selected dir. */
 char* ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view);

@@ -279,7 +279,7 @@ update_names()
 }
 
 bool
-ptk_location_view_chdir(GtkTreeView* location_view, std::string_view cur_dir)
+ptk_location_view_chdir(GtkTreeView* location_view, const std::string_view cur_dir)
 {
     if (cur_dir.empty() || !GTK_IS_TREE_VIEW(location_view))
     {
@@ -394,7 +394,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
 }
 
 bool
-ptk_location_view_open_block(std::string_view block, bool new_tab)
+ptk_location_view_open_block(const std::string_view block, bool new_tab)
 {
     // open block device file if in volumes list
 
@@ -656,8 +656,8 @@ update_volume(vfs::volume vol)
 }
 
 void
-ptk_location_view_mount_network(PtkFileBrowser* file_browser, std::string_view url, bool new_tab,
-                                bool force_new_mount)
+ptk_location_view_mount_network(PtkFileBrowser* file_browser, const std::string_view url,
+                                bool new_tab, bool force_new_mount)
 {
     (void)file_browser;
     (void)url;

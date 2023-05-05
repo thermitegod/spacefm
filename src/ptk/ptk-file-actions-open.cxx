@@ -61,13 +61,13 @@ using namespace std::literals::string_view_literals;
 
 struct ParentInfo
 {
-    ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd);
+    ParentInfo(PtkFileBrowser* file_browser, const std::string_view cwd);
 
     PtkFileBrowser* file_browser{nullptr};
     std::string cwd{};
 };
 
-ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)
+ParentInfo::ParentInfo(PtkFileBrowser* file_browser, const std::string_view cwd)
 {
     this->file_browser = file_browser;
     this->cwd = cwd.data();
@@ -75,7 +75,7 @@ ParentInfo::ParentInfo(PtkFileBrowser* file_browser, std::string_view cwd)
 
 static bool
 open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_info> sel_files,
-                           std::string_view full_path, vfs::mime_type mime_type)
+                           const std::string_view full_path, vfs::mime_type mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
     {                 // user has open archives with app option enabled
@@ -159,7 +159,10 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     std::string fm_filenames = "fm_filenames=(\n";
     std::string fm_files = "fm_files=(\n";
     // command looks like it handles multiple files ?
-    static constexpr std::array<std::string_view, 4> keys{"%N", "%F", "fm_files[", "fm_filenames["};
+    static constexpr std::array<const std::string_view, 4> keys{"%N",
+                                                                "%F",
+                                                                "fm_files[",
+                                                                "fm_filenames["};
     const bool multiple = ztd::contains(command, keys);
     if (multiple)
     {
@@ -230,7 +233,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
 }
 
 static const std::string
-check_desktop_name(std::string_view app_desktop)
+check_desktop_name(const std::string_view app_desktop)
 {
     // Check whether this is an app desktop file or just a command line
     if (ztd::endswith(app_desktop, ".desktop"))
@@ -252,7 +255,7 @@ check_desktop_name(std::string_view app_desktop)
 }
 
 static bool
-open_files_with_app(ParentInfo* parent, GList* files, std::string_view app_desktop)
+open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app_desktop)
 {
     xset_t handler_set;
 
@@ -310,9 +313,9 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(std::string_view cwd, const std::span<const vfs::file_info> sel_files,
-                        std::string_view app_desktop, PtkFileBrowser* file_browser, bool xforce,
-                        bool xnever)
+ptk_open_files_with_app(const std::string_view cwd, const std::span<const vfs::file_info> sel_files,
+                        const std::string_view app_desktop, PtkFileBrowser* file_browser,
+                        bool xforce, bool xnever)
 {
     // if xnever, never execute an executable
     // if xforce, force execute of executable ignoring app_settings.click_executes

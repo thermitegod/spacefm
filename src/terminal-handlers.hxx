@@ -28,7 +28,7 @@ class TerminalHandler
 {
   public:
     TerminalHandler() = delete;
-    TerminalHandler(std::string_view name, std::string_view exec);
+    TerminalHandler(const std::string_view name, const std::string_view exec);
 
     std::string name;
     std::string path;
@@ -40,7 +40,7 @@ class TerminalHandlers
   public:
     TerminalHandlers();
 
-    const std::vector<std::string> get_terminal_args(std::string_view terminal);
+    const std::vector<std::string> get_terminal_args(const std::string_view terminal);
     const std::vector<std::string> get_supported_terminal_names();
 
   private:

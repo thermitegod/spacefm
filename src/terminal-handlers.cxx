@@ -31,7 +31,7 @@
 
 #include "terminal-handlers.hxx"
 
-TerminalHandler::TerminalHandler(std::string_view name, std::string_view exec)
+TerminalHandler::TerminalHandler(const std::string_view name, const std::string_view exec)
     : name(name), exec(exec)
 {
     this->path = Glib::find_program_in_path(name.data());
@@ -67,7 +67,7 @@ TerminalHandlers::TerminalHandlers()
 }
 
 const std::vector<std::string>
-TerminalHandlers::get_terminal_args(std::string_view terminal)
+TerminalHandlers::get_terminal_args(const std::string_view terminal)
 {
     // ztd::logger::debug("get_terminal_args={}", terminal);
     if (!this->handlers.contains(terminal.data()))

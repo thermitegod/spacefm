@@ -32,7 +32,7 @@ enum class MimeTypeAction
 /*
  *  Get a list of applications supporting this mime-type
  */
-const std::vector<std::string> mime_type_get_actions(std::string_view type);
+const std::vector<std::string> mime_type_get_actions(const std::string_view type);
 
 /*
  * Add an applications used to open this mime-type
@@ -40,7 +40,8 @@ const std::vector<std::string> mime_type_get_actions(std::string_view type);
  *
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
-const std::string mime_type_add_action(std::string_view type, std::string_view desktop_id);
+const std::string mime_type_add_action(const std::string_view type,
+                                       const std::string_view desktop_id);
 
 /*
  * Get default applications used to open this mime-type
@@ -52,7 +53,7 @@ const std::string mime_type_add_action(std::string_view type, std::string_view d
  *
  * The old defaults.list is also checked.
  */
-const char* mime_type_get_default_action(std::string_view type);
+const char* mime_type_get_default_action(const std::string_view type);
 
 /*
  * Set applications used to open or never used to open this mime-type
@@ -64,9 +65,10 @@ const char* mime_type_get_default_action(std::string_view type);
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_update_association(std::string_view type, std::string_view desktop_id,
+void mime_type_update_association(const std::string_view type, const std::string_view desktop_id,
                                   MimeTypeAction action);
 
 /* Locate the file path of desktop file by desktop_id */
-const char* mime_type_locate_desktop_file(std::string_view desktop_id);
-const char* mime_type_locate_desktop_file(std::string_view dir, std::string_view desktop_id);
+const char* mime_type_locate_desktop_file(const std::string_view desktop_id);
+const char* mime_type_locate_desktop_file(const std::string_view dir,
+                                          const std::string_view desktop_id);

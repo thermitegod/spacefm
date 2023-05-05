@@ -20,7 +20,7 @@
 #include <array>
 
 // order and contents must match prefdlg.ui
-inline constexpr std::array<std::string_view, 3> su_commands{
+inline constexpr std::array<const std::string_view, 3> su_commands{
     "/bin/su",
     "/usr/bin/sudo",
     "/usr/bin/doas",

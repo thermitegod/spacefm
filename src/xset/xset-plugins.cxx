@@ -220,7 +220,7 @@ xset_clear_plugins(const std::span<const xset_t> plugins)
 }
 
 static xset_t
-xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
+xset_get_by_plug_name(const std::string_view plug_dir, const std::string_view plug_name)
 {
     if (plug_name.empty())
     {
@@ -252,8 +252,8 @@ xset_get_by_plug_name(std::string_view plug_dir, std::string_view plug_name)
 }
 
 static void
-xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_view setvar,
-                  std::string_view value, PluginUse use)
+xset_parse_plugin(const std::string_view plug_dir, const std::string_view name,
+                  const std::string_view setvar, const std::string_view value, PluginUse use)
 {
     if (value.empty())
     {
@@ -370,8 +370,9 @@ xset_parse_plugin(std::string_view plug_dir, std::string_view name, std::string_
 }
 
 static void
-xset_import_plugin_parse(std::string_view plug_dir, PluginUse* use, std::string_view name,
-                         std::string_view var, std::string_view value)
+xset_import_plugin_parse(const std::string_view plug_dir, PluginUse* use,
+                         const std::string_view name, const std::string_view var,
+                         const std::string_view value)
 {
     // ztd::logger::info("name: {} | var: {} | value: {}", name, var, value);
 
@@ -589,8 +590,8 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
 }
 
 void
-install_plugin_file(void* main_win, GtkWidget* handler_dlg, std::string_view path,
-                    std::string_view plug_dir, PluginJob job, xset_t insert_set)
+install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string_view path,
+                    const std::string_view plug_dir, PluginJob job, xset_t insert_set)
 {
     std::string own;
     const std::string plug_dir_q = ztd::shell::quote(plug_dir);
