@@ -91,10 +91,10 @@ struct FilePropertiesDialogData
     GtkLabel* total_size_label{nullptr};
     GtkLabel* size_on_disk_label{nullptr};
     GtkLabel* count_label{nullptr};
-    off_t total_size{0};
-    off_t size_on_disk{0};
-    u32 total_count{0};
-    u32 total_count_dir{0};
+    u64 total_size{0};
+    u64 size_on_disk{0};
+    u64 total_count{0};
+    u64 total_count_dir{0};
     bool cancel{false};
     bool done{false};
     GThread* calc_size_thread{nullptr};
