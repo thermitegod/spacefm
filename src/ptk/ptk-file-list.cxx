@@ -385,7 +385,6 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     }
 
     GList* l = g_list_nth(list->files, n);
-
     assert(l != nullptr);
 
     /* We simply store a pointer in the iter */

@@ -5523,7 +5523,8 @@ ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser)
     list->sort_case =
         xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::X) ==
         XSetB::XSET_B_TRUE;
-    list->sort_dir = xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::Y);
+    list->sort_dir = PTKFileListSortDir(
+        xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::Y));
     list->sort_hidden_first =
         xset_get_int_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA, XSetVar::Z) ==
         XSetB::XSET_B_TRUE;

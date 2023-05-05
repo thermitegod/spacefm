@@ -80,7 +80,7 @@ struct PtkFileList
     bool sort_natural{false};
     bool sort_case{false};
     bool sort_hidden_first{false};
-    char sort_dir{false};
+    PTKFileListSortDir sort_dir{PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED};
 
     // Random integer to check whether an iter belongs to our model
     const i32 stamp{std::rand()};
