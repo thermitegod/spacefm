@@ -227,18 +227,18 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
 }
 
 bool
-ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::string_view path)
+ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path)
 {
     GtkTreeIter it;
     GtkTreeIter parent_it;
     GtkTreePath* tree_path = nullptr;
 
-    if (!ztd::startswith(path, "/"))
+    if (!ztd::startswith(path.string(), "/"))
     {
         return false;
     }
 
-    const std::vector<std::string> dirs = ztd::split(path, "/");
+    const std::vector<std::string> dirs = ztd::split(path.string(), "/");
 
     if (dirs.empty())
     {
@@ -528,6 +528,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
     switch (evt->keyval)
     {
         case GDK_KEY_Left:
+        {
             if (gtk_tree_view_row_expanded(GTK_TREE_VIEW(view), path))
             {
                 gtk_tree_view_collapse_row(GTK_TREE_VIEW(view), path);
@@ -543,7 +544,9 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
                 return false;
             }
             break;
+        }
         case GDK_KEY_Right:
+        {
             if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(view), path))
             {
                 gtk_tree_view_expand_row(GTK_TREE_VIEW(view), path, false);
@@ -555,16 +558,17 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
                 gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, nullptr, false);
             }
             break;
+        }
         case GDK_KEY_F10:
         case GDK_KEY_Menu:
+        {
             if (evt->keyval == GDK_KEY_F10 && keymod != GdkModifierType::GDK_SHIFT_MASK)
             {
                 gtk_tree_path_free(path);
                 return false;
             }
 
-            char* dir_path;
-            dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+            const char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
             if (ptk_file_browser_chdir(browser, dir_path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
             {
                 /* show right-click menu
@@ -578,6 +582,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
                 }
             }
             break;
+        }
         default:
             gtk_tree_path_free(path);
             return false;
@@ -659,7 +664,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         file_browser->drag_source_dev_tree = dest_statbuf.dev();
                         for (; *puri; ++puri)
                         {
-                            const std::string file_path = Glib::filename_from_uri(*puri);
+                            const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
                             const auto statbuf = ztd::stat(file_path);
                             if (statbuf.is_valid() && statbuf.dev() != dest_statbuf.dev())
@@ -691,7 +696,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
             if (puri)
             {
-                std::vector<std::string> file_list;
+                std::vector<std::filesystem::path> file_list;
                 if ((gdk_drag_context_get_selected_action(drag_context) &
                      (GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |
                       GdkDragAction::GDK_ACTION_LINK)) == 0)
@@ -702,7 +707,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
                 for (; *puri; ++puri)
                 {
-                    std::string file_path;
+                    std::filesystem::path file_path;
                     if (**puri == '/')
                     {
                         file_path = *puri;

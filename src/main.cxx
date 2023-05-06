@@ -102,7 +102,7 @@ init_folder()
 }
 
 static void
-open_file(const std::string_view path)
+open_file(const std::filesystem::path& path)
 {
     vfs::file_info file = vfs_file_info_new();
     vfs_file_info_get(file, path);
@@ -121,7 +121,7 @@ open_file(const std::string_view path)
 
     const vfs::desktop desktop = vfs_get_desktop(app_name);
 
-    const std::vector<std::string> open_files{path.data()};
+    const std::vector<std::filesystem::path> open_files{path};
 
     try
     {
@@ -129,9 +129,7 @@ open_file(const std::string_view path)
     }
     catch (const VFSAppDesktopException& e)
     {
-        const std::string disp_path = Glib::filename_display_name(path.data());
-        const std::string msg =
-            fmt::format("Unable to open file:\n\"{}\"\n{}", disp_path, e.what());
+        const std::string msg = fmt::format("Unable to open file:\n{}\n{}", path, e.what());
         ptk_show_error(nullptr, "Error", msg);
     }
 
@@ -248,7 +246,7 @@ handle_parsed_commandline_args()
         // find files
         init_folder();
 
-        std::vector<std::string> search_dirs;
+        std::vector<std::filesystem::path> search_dirs;
         char** dir;
         for (dir = cli_flags.files; *dir; ++dir)
         {
@@ -372,7 +370,7 @@ handle_parsed_commandline_args()
 static void
 tmp_clean()
 {
-    const std::string& tmp = vfs::user_dirs->program_tmp_dir();
+    const auto tmp = vfs::user_dirs->program_tmp_dir();
     std::filesystem::remove_all(tmp);
     ztd::logger::info("Removed {}", tmp);
 }

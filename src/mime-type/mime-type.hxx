@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <array>
 #include <vector>
 
@@ -49,11 +51,11 @@ void mime_type_finalize();
  * efifciency, too. Otherwise, the function will try to get the basename of
  * the specified file again.
  */
-const std::string mime_type_get_by_file(const std::string_view filepath);
+const std::string mime_type_get_by_file(const std::filesystem::path& filepath);
 
-bool mime_type_is_text_file(const std::string_view file_path,
+bool mime_type_is_text_file(const std::filesystem::path& filepath,
                             const std::string_view mime_type = "");
-bool mime_type_is_executable_file(const std::string_view file_path,
+bool mime_type_is_executable_file(const std::filesystem::path& filepath,
                                   const std::string_view mime_type = "");
 
 /**

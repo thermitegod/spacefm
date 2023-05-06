@@ -133,8 +133,8 @@ class VFSFileTask
 {
   public:
     VFSFileTask() = delete;
-    VFSFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                const std::string_view dest_dir);
+    VFSFileTask(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
+                const std::filesystem::path& dest_dir);
     ~VFSFileTask();
 
     void lock();
@@ -153,35 +153,37 @@ class VFSFileTask
     void abort_task();
 
   public: // private: // TODO
-    bool check_overwrite(const std::string_view dest_file, bool* dest_exists, char** new_dest_file);
-    bool check_dest_in_src(const std::string_view src_dir);
+    bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
+                         char** new_dest_file);
+    bool check_dest_in_src(const std::filesystem::path& src_dir);
 
-    void file_copy(const std::string_view src_file);
-    bool do_file_copy(const std::string_view src_file, const std::string_view dest_file);
+    void file_copy(const std::filesystem::path& src_file);
+    bool do_file_copy(const std::filesystem::path& src_file,
+                      const std::filesystem::path& dest_file);
 
-    void file_move(const std::string_view src_file);
-    i32 do_file_move(const std::string_view src_file, const std::string_view dest_path);
+    void file_move(const std::filesystem::path& src_file);
+    i32 do_file_move(const std::filesystem::path& src_file, const std::filesystem::path& dest_path);
 
-    void file_trash(const std::string_view src_file);
-    void file_delete(const std::string_view src_file);
-    void file_link(const std::string_view src_file);
-    void file_chown_chmod(const std::string_view src_file);
-    void file_exec(const std::string_view src_file);
+    void file_trash(const std::filesystem::path& src_file);
+    void file_delete(const std::filesystem::path& src_file);
+    void file_link(const std::filesystem::path& src_file);
+    void file_chown_chmod(const std::filesystem::path& src_file);
+    void file_exec(const std::filesystem::path& src_file);
 
     bool should_abort();
 
-    off_t get_total_size_of_dir(const std::string_view path);
+    off_t get_total_size_of_dir(const std::filesystem::path& path);
 
     void append_add_log(const std::string_view msg);
 
     void task_error(i32 errnox, const std::string_view action);
-    void task_error(i32 errnox, const std::string_view action, const std::string_view target);
+    void task_error(i32 errnox, const std::string_view action, const std::filesystem::path& target);
 
   public:
     VFSFileTaskType type;
-    std::vector<std::string> src_paths{}; // All source files. This list will be freed
-                                          // after file operation is completed.
-    std::string dest_dir{};               // Destinaton directory
+    std::vector<std::filesystem::path> src_paths{}; // All source files. This list will be freed
+                                                    // after file operation is completed.
+    std::filesystem::path dest_dir{};               // Destinaton directory
     bool avoid_changes{false};
 
     VFSFileTaskOverwriteMode overwrite_mode;
@@ -208,8 +210,8 @@ class VFSFileTask
     ztd::timer timer;
     std::time_t start_time;
 
-    std::string current_file{}; // copy of Current processed file
-    std::string current_dest{}; // copy of Current destination file
+    std::filesystem::path current_file{}; // copy of Current processed file
+    std::filesystem::path current_dest{}; // copy of Current destination file
 
     i32 err_count{0};
     i32 error{0};
@@ -246,7 +248,7 @@ class VFSFileTask
     std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
                                           // for su commands, must use fish -c
                                           // as su does not execute binaries
-    std::string exec_script{};
+    std::filesystem::path exec_script{};
     bool exec_keep_tmp{false}; // diagnostic to keep temp files
     void* exec_browser{nullptr};
     void* exec_desktop{nullptr};
@@ -265,7 +267,8 @@ class VFSFileTask
     void* exec_ptask{nullptr};
 };
 
-vfs::file_task vfs_task_new(VFSFileTaskType task_type, const std::span<const std::string> src_files,
-                            const std::string_view dest_dir);
+vfs::file_task vfs_task_new(VFSFileTaskType task_type,
+                            const std::span<const std::filesystem::path> src_files,
+                            const std::filesystem::path& dest_dir);
 
 void vfs_file_task_free(vfs::file_task task);

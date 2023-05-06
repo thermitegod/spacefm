@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <deque>
 
 #include <chrono>
@@ -76,4 +78,4 @@ void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
 // Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
 // to get mtime.
 GdkPixbuf* vfs_thumbnail_load_for_uri(const std::string_view uri, i32 thumb_size);
-GdkPixbuf* vfs_thumbnail_load_for_file(const std::string_view file, i32 thumb_size);
+GdkPixbuf* vfs_thumbnail_load_for_file(const std::filesystem::path& file, i32 thumb_size);

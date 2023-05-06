@@ -59,8 +59,8 @@
  * freed after file operation has been completed
  */
 vfs::file_task
-vfs_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
-             const std::string_view dest_dir)
+vfs_task_new(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
+             const std::filesystem::path& dest_dir)
 {
     const auto task = new VFSFileTask(type, src_files, dest_dir);
 
@@ -73,14 +73,15 @@ vfs_file_task_free(vfs::file_task task)
     delete task;
 }
 
-VFSFileTask::VFSFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                         const std::string_view dest_dir)
+VFSFileTask::VFSFileTask(VFSFileTaskType type,
+                         const std::span<const std::filesystem::path> src_files,
+                         const std::filesystem::path& dest_dir)
 {
     this->type = type;
-    this->src_paths = std::vector<std::string>(src_files.begin(), src_files.end());
+    this->src_paths = std::vector<std::filesystem::path>(src_files.begin(), src_files.end());
     if (!dest_dir.empty())
     {
-        this->dest_dir = dest_dir.data();
+        this->dest_dir = dest_dir;
     }
 
     this->is_recursive =
@@ -205,7 +206,7 @@ VFSFileTask::should_abort()
  * The returned string is the new destination file chosen by the user
  */
 bool
-VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists,
+VFSFileTask::check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
                              char** new_dest_file)
 {
     const auto dest_file_stat = ztd::lstat(dest_file);
@@ -216,7 +217,7 @@ VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists
         if (this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE_ALL)
         {
             *dest_exists = dest_file_stat.is_valid();
-            if (ztd::same(this->current_file, this->current_dest))
+            if (std::filesystem::equivalent(this->current_file, this->current_dest))
             {
                 // src and dest are same file - do not overwrite (truncates)
                 // occurs if user pauses task and changes overwrite mode
@@ -238,8 +239,8 @@ VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists
             }
 
             // auto-rename
-            const std::string old_name = Glib::path_get_basename(dest_file.data());
-            const std::string dest_file_dir = Glib::path_get_dirname(dest_file.data());
+            const auto old_name = dest_file.filename();
+            const auto dest_file_dir = dest_file.parent_path();
 
             const auto [filename_no_extension, filename_extension] = get_name_extension(old_name);
 
@@ -266,7 +267,7 @@ VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists
         }
 
         char* new_dest;
-        const char* use_dest_file = ztd::strdup(dest_file.data());
+        std::filesystem::path use_dest_file = dest_file;
         do
         {
             // destination file exists
@@ -302,7 +303,7 @@ VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists
                     this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE_ALL)
                 {
                     *dest_exists = dest_file_stat.is_valid();
-                    if (ztd::same(this->current_file, this->current_dest))
+                    if (std::filesystem::equivalent(this->current_file, this->current_dest))
                     {
                         // src and dest are same file - do not overwrite (truncates)
                         // occurs if user pauses task and changes overwrite mode
@@ -333,7 +334,7 @@ VFSFileTask::check_overwrite(const std::string_view dest_file, bool* dest_exists
 }
 
 bool
-VFSFileTask::check_dest_in_src(const std::string_view src_dir)
+VFSFileTask::check_dest_in_src(const std::filesystem::path& src_dir)
 {
     if (this->dest_dir.empty())
     {
@@ -367,11 +368,11 @@ VFSFileTask::check_dest_in_src(const std::string_view src_dir)
 }
 
 static void
-update_file_display(const std::string_view path)
+update_file_display(const std::filesystem::path& path)
 {
     // for devices like nfs, emit created and flush to avoid a
     // blocking stat call in GUI thread during writes
-    const std::string dir_path = Glib::path_get_dirname(path.data());
+    const auto dir_path = path.parent_path();
     vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
     if (vdir && vdir->avoid_changes)
     {
@@ -388,16 +389,17 @@ update_file_display(const std::string_view path)
 }
 
 void
-VFSFileTask::file_copy(const std::string_view src_file)
+VFSFileTask::file_copy(const std::filesystem::path& src_file)
 {
-    const std::string file_name = Glib::path_get_basename(src_file.data());
-    const std::string dest_file = Glib::build_filename(this->dest_dir, file_name);
+    const auto file_name = src_file.filename();
+    const auto dest_file = this->dest_dir / file_name;
 
     this->do_file_copy(src_file, dest_file);
 }
 
 bool
-VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_view dest_file)
+VFSFileTask::do_file_copy(const std::filesystem::path& src_file,
+                          const std::filesystem::path& dest_file)
 {
     if (this->should_abort())
     {
@@ -422,7 +424,7 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
     bool dest_exists;
     bool copy_fail = false;
 
-    std::string actual_dest_file = dest_file.data();
+    std::filesystem::path actual_dest_file = dest_file;
 
     if (std::filesystem::is_directory(src_file))
     {
@@ -465,23 +467,23 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
 
             for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
-                const std::string file_name = std::filesystem::path(file).filename();
+                const auto file_name = file.path().filename();
                 if (this->should_abort())
                 {
                     break;
                 }
-                const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
-                const std::string sub_dest_file = Glib::build_filename(actual_dest_file, file_name);
+                const auto sub_src_file = src_file / file_name;
+                const auto sub_dest_file = actual_dest_file / file_name;
                 if (!this->do_file_copy(sub_src_file, sub_dest_file) && !copy_fail)
                 {
                     copy_fail = true;
                 }
             }
 
-            chmod(actual_dest_file.data(), file_stat.mode());
+            chmod(actual_dest_file.c_str(), file_stat.mode());
             times.actime = file_stat.atime();
             times.modtime = file_stat.mtime();
-            utime(actual_dest_file.data(), &times);
+            utime(actual_dest_file.c_str(), &times);
 
             if (this->avoid_changes)
             {
@@ -517,7 +519,7 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
     {
         bool read_symlink = false;
 
-        std::string target_path;
+        std::filesystem::path target_path;
         try
         {
             target_path = std::filesystem::read_symlink(src_file);
@@ -597,7 +599,7 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
         i32 rfd;
         i32 wfd;
 
-        if ((rfd = open(src_file.data(), O_RDONLY)) >= 0)
+        if ((rfd = open(src_file.c_str(), O_RDONLY)) >= 0)
         {
             if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
             {
@@ -633,7 +635,7 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
                 }
             }
 
-            if ((wfd = creat(actual_dest_file.data(), file_stat.mode() | S_IWUSR)) >= 0)
+            if ((wfd = creat(actual_dest_file.c_str(), file_stat.mode() | S_IWUSR)) >= 0)
             {
                 // sshfs becomes unresponsive with this, nfs is okay with it
                 // if (this->avoid_changes)
@@ -677,10 +679,10 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
                     // MOD do not chmod link
                     if (!std::filesystem::is_symlink(actual_dest_file))
                     {
-                        chmod(actual_dest_file.data(), file_stat.mode());
+                        chmod(actual_dest_file.c_str(), file_stat.mode());
                         times.actime = file_stat.atime();
                         times.modtime = file_stat.mtime();
-                        utime(actual_dest_file.data(), &times);
+                        utime(actual_dest_file.c_str(), &times);
                     }
                     if (this->avoid_changes)
                     {
@@ -725,7 +727,7 @@ VFSFileTask::do_file_copy(const std::string_view src_file, const std::string_vie
 }
 
 void
-VFSFileTask::file_move(const std::string_view src_file)
+VFSFileTask::file_move(const std::filesystem::path& src_file)
 {
     if (this->should_abort())
     {
@@ -736,8 +738,8 @@ VFSFileTask::file_move(const std::string_view src_file)
     this->current_file = src_file;
     this->unlock();
 
-    const std::string file_name = Glib::path_get_basename(src_file.data());
-    const std::string dest_file = Glib::build_filename(this->dest_dir, file_name);
+    const auto file_name = src_file.filename();
+    const auto dest_file = this->dest_dir / file_name;
 
     const auto src_stat = ztd::lstat(src_file);
     const auto dest_stat = ztd::stat(this->dest_dir);
@@ -768,14 +770,15 @@ VFSFileTask::file_move(const std::string_view src_file)
 }
 
 i32
-VFSFileTask::do_file_move(const std::string_view src_file, const std::string_view dest_path)
+VFSFileTask::do_file_move(const std::filesystem::path& src_file,
+                          const std::filesystem::path& dest_path)
 {
     if (this->should_abort())
     {
         return 0;
     }
 
-    std::string dest_file = dest_path.data();
+    std::filesystem::path dest_file = dest_path;
 
     this->lock();
     this->current_file = src_file;
@@ -821,13 +824,13 @@ VFSFileTask::do_file_move(const std::string_view src_file, const std::string_vie
         // moving a directory onto a directory that exists
         for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
-            const std::string file_name = std::filesystem::path(file).filename();
+            const auto file_name = file.path().filename();
             if (this->should_abort())
             {
                 break;
             }
-            const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
-            const std::string sub_dest_file = Glib::build_filename(dest_file, file_name);
+            const auto sub_src_file = src_file / file_name;
+            const auto sub_dest_file = dest_file / file_name;
             this->do_file_move(sub_src_file, sub_dest_file);
         }
         // remove moved src dir if empty
@@ -858,7 +861,7 @@ VFSFileTask::do_file_move(const std::string_view src_file, const std::string_vie
     }
     else if (!std::filesystem::is_symlink(dest_file))
     { // do not chmod link
-        chmod(dest_file.data(), file_stat.mode());
+        chmod(dest_file.c_str(), file_stat.mode());
     }
 
     this->lock();
@@ -877,7 +880,7 @@ VFSFileTask::do_file_move(const std::string_view src_file, const std::string_vie
 }
 
 void
-VFSFileTask::file_trash(const std::string_view src_file)
+VFSFileTask::file_trash(const std::filesystem::path& src_file)
 {
     if (this->should_abort())
     {
@@ -921,7 +924,7 @@ VFSFileTask::file_trash(const std::string_view src_file)
 }
 
 void
-VFSFileTask::file_delete(const std::string_view src_file)
+VFSFileTask::file_delete(const std::filesystem::path& src_file)
 {
     if (this->should_abort())
     {
@@ -929,7 +932,7 @@ VFSFileTask::file_delete(const std::string_view src_file)
     }
 
     this->lock();
-    this->current_file = src_file.data();
+    this->current_file = src_file;
     this->current_item++;
     this->unlock();
 
@@ -944,12 +947,12 @@ VFSFileTask::file_delete(const std::string_view src_file)
     {
         for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
-            const std::string file_name = std::filesystem::path(file).filename();
+            const auto file_name = file.path().filename();
             if (this->should_abort())
             {
                 break;
             }
-            const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
+            const auto sub_src_file = src_file / file_name;
             this->file_delete(sub_src_file);
         }
 
@@ -983,16 +986,16 @@ VFSFileTask::file_delete(const std::string_view src_file)
 }
 
 void
-VFSFileTask::file_link(const std::string_view src_file)
+VFSFileTask::file_link(const std::filesystem::path& src_file)
 {
     if (this->should_abort())
     {
         return;
     }
 
-    const std::string file_name = Glib::path_get_basename(src_file.data());
-    const std::string old_dest_file = Glib::build_filename(this->dest_dir, file_name);
-    std::string dest_file = old_dest_file;
+    const auto file_name = src_file.filename();
+    const auto old_dest_file = this->dest_dir / file_name;
+    auto dest_file = old_dest_file;
 
     // MOD  setup task for check overwrite
     if (this->should_abort())
@@ -1001,7 +1004,7 @@ VFSFileTask::file_link(const std::string_view src_file)
     }
 
     this->lock();
-    this->current_file = src_file.data();
+    this->current_file = src_file;
     this->current_dest = old_dest_file;
     this->current_item++;
     this->unlock();
@@ -1072,7 +1075,7 @@ VFSFileTask::file_link(const std::string_view src_file)
 }
 
 void
-VFSFileTask::file_chown_chmod(const std::string_view src_file)
+VFSFileTask::file_chown_chmod(const std::filesystem::path& src_file)
 {
     if (this->should_abort())
     {
@@ -1091,7 +1094,7 @@ VFSFileTask::file_chown_chmod(const std::string_view src_file)
         /* chown */
         if (!this->uid || !this->gid)
         {
-            const i32 result = chown(src_file.data(), this->uid, this->gid);
+            const i32 result = chown(src_file.c_str(), this->uid, this->gid);
             if (result != 0)
             {
                 this->task_error(errno, "chown", src_file);
@@ -1152,12 +1155,12 @@ VFSFileTask::file_chown_chmod(const std::string_view src_file)
         {
             for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
-                const std::string file_name = std::filesystem::path(file).filename();
+                const auto file_name = file.path().filename();
                 if (this->should_abort())
                 {
                     break;
                 }
-                const std::string sub_src_file = Glib::build_filename(src_file.data(), file_name);
+                const auto sub_src_file = src_file / file_name;
                 this->file_chown_chmod(sub_src_file);
             }
         }
@@ -1331,7 +1334,7 @@ cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, vfs::file_task task)
 }
 
 void
-VFSFileTask::file_exec(const std::string_view src_file)
+VFSFileTask::file_exec(const std::filesystem::path& src_file)
 {
     // this function is now thread safe but is not currently run in
     // another thread because gio adds watches to main loop thread anyway
@@ -1394,7 +1397,7 @@ VFSFileTask::file_exec(const std::string_view src_file)
     }
 
     // make tmpdir
-    const std::string& tmp = vfs::user_dirs->program_tmp_dir();
+    const auto tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(tmp))
     {
         const std::string msg = "Cannot create temporary directory";
@@ -1449,8 +1452,8 @@ VFSFileTask::file_exec(const std::string_view src_file)
         // get script name
         while (true)
         {
-            const std::string hexname = fmt::format("{}.fish", ztd::randhex());
-            this->exec_script = Glib::build_filename(tmp, hexname);
+            const std::filesystem::path hexname = fmt::format("{}.fish", ztd::randhex());
+            this->exec_script = tmp / hexname;
             if (!std::filesystem::exists(this->exec_script))
             {
                 break;
@@ -1482,7 +1485,7 @@ VFSFileTask::file_exec(const std::string_view src_file)
                 return;
             }
 
-            buf.append(main_write_exports(this, this->current_dest));
+            buf.append(main_write_exports(this, this->current_dest.string()));
         }
         else
         {
@@ -1496,14 +1499,16 @@ VFSFileTask::file_exec(const std::string_view src_file)
         // build - export vars
         if (this->exec_export)
         {
-            buf.append(fmt::format("set fm_import {}\n", ztd::shell::quote(this->exec_script)));
+            buf.append(
+                fmt::format("set fm_import {}\n", ztd::shell::quote(this->exec_script.string())));
         }
         else
         {
             buf.append(fmt::format("set fm_import\n"));
         }
 
-        buf.append(fmt::format("set fm_source {}\n\n", ztd::shell::quote(this->exec_script)));
+        buf.append(
+            fmt::format("set fm_source {}\n\n", ztd::shell::quote(this->exec_script.string())));
 
         // build - trap rm
         if (!this->exec_keep_tmp && geteuid() != 0 && ztd::same(this->exec_as_user, "root"))
@@ -1553,12 +1558,13 @@ VFSFileTask::file_exec(const std::string_view src_file)
         }
 
         // set permissions
-        chmod(this->exec_script.data(), 0700);
+        chmod(this->exec_script.c_str(), 0700);
 
         // use checksum
         if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
         {
-            sum_script = ztd::compute_checksum(ztd::checksum::type::md5, this->exec_script);
+            sum_script =
+                ztd::compute_checksum(ztd::checksum::type::md5, this->exec_script.string());
         }
     }
 
@@ -1719,7 +1725,7 @@ VFSFileTask::file_exec(const std::string_view src_file)
         // task can be destroyed while this watch is still active
         g_child_watch_add(pid,
                           (GChildWatchFunc)cb_exec_child_cleanup,
-                          !this->exec_keep_tmp && !this->exec_direct && this->exec_script.data()
+                          !this->exec_keep_tmp && !this->exec_direct && this->exec_script.c_str()
                               ? ztd::strdup(this->exec_script)
                               : nullptr);
         call_state_callback(this, VFSFileTaskState::FINISH);
@@ -1819,7 +1825,7 @@ vfs_file_task_thread(vfs::file_task task)
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
-        for (const std::string_view src_path : task->src_paths)
+        for (const auto& src_path : task->src_paths)
         {
             const auto file_stat = ztd::lstat(src_path);
             if (!file_stat.is_valid())
@@ -1884,7 +1890,7 @@ vfs_file_task_thread(vfs::file_task task)
             dest_dev = file_stat.dev();
         }
 
-        for (const std::string_view src_path : task->src_paths)
+        for (const auto& src_path : task->src_paths)
         {
             const auto file_stat = ztd::lstat(src_path);
             if (!file_stat.is_valid())
@@ -2004,7 +2010,7 @@ vfs_file_task_thread(vfs::file_task task)
         return nullptr;
     }
 
-    for (const std::string_view src_path : task->src_paths)
+    for (const auto& src_path : task->src_paths)
     {
         switch (task->type)
         {
@@ -2053,7 +2059,7 @@ VFSFileTask::run_task()
     {
         if (this->type == VFSFileTaskType::CHMOD_CHOWN && !this->src_paths.empty())
         {
-            const std::string dir = Glib::path_get_dirname(this->src_paths.at(0));
+            const auto dir = this->src_paths.at(0).parent_path();
             this->avoid_changes = vfs_volume_dir_avoid_changes(dir);
         }
         else
@@ -2118,7 +2124,7 @@ VFSFileTask::abort_task()
  * NOTE: *size should be set to zero before calling this function.
  */
 off_t
-VFSFileTask::get_total_size_of_dir(const std::string_view path)
+VFSFileTask::get_total_size_of_dir(const std::filesystem::path& path)
 {
     if (this->abort)
     {
@@ -2141,13 +2147,13 @@ VFSFileTask::get_total_size_of_dir(const std::string_view path)
 
     for (const auto& file : std::filesystem::directory_iterator(path))
     {
-        const std::string file_name = file.path().filename();
+        const auto file_name = file.path().filename();
         if (this->state == VFSFileTaskState::SIZE_TIMEOUT || this->abort)
         {
             break;
         }
 
-        const std::string full_path = Glib::build_filename(path.data(), file_name);
+        const auto full_path = path / file_name;
         if (std::filesystem::exists(full_path))
         {
             const auto dir_file_stat = ztd::lstat(full_path);
@@ -2185,7 +2191,8 @@ VFSFileTask::task_error(i32 errnox, const std::string_view action)
 }
 
 void
-VFSFileTask::task_error(i32 errnox, const std::string_view action, const std::string_view target)
+VFSFileTask::task_error(i32 errnox, const std::string_view action,
+                        const std::filesystem::path& target)
 {
     this->error = errnox;
     const std::string errno_msg = std::strerror(errnox);

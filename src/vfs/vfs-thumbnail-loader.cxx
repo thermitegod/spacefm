@@ -184,8 +184,8 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             const bool load_big = (index == VFSThumbnailSize::BIG);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
-                const std::string full_path =
-                    Glib::build_filename(loader->dir->path, req->file->get_name());
+                const auto full_path =
+                    std::filesystem::path() / loader->dir->path / req->file->get_name();
 
                 // ztd::logger::info("loader->dir->path    = {}", loader->dir->path);
                 // ztd::logger::info("req->file->get_name  = {}", req->file->get_name());
@@ -305,14 +305,13 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 }
 
 static GdkPixbuf*
-vfs_thumbnail_load(const std::string_view file_path, const std::string_view file_uri,
+vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_view file_uri,
                    i32 thumb_size)
 {
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file_uri);
     const std::string file_name = fmt::format("{}.png", file_hash);
 
-    const std::string thumbnail_file =
-        Glib::build_filename(vfs::user_dirs->cache_dir(), "thumbnails/normal", file_name);
+    const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / file_name;
 
     // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri,
     // thumb_size);
@@ -339,7 +338,7 @@ vfs_thumbnail_load(const std::string_view file_path, const std::string_view file
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
         // ztd::logger::debug("Existing thumb: {}", thumbnail_file);
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
         if (thumbnail)
         { // need to check for broken thumbnail images
             w = gdk_pixbuf_get_width(thumbnail);
@@ -375,7 +374,7 @@ vfs_thumbnail_load(const std::string_view file_path, const std::string_view file
             video_thumb.setSeekPercentage(25);
             video_thumb.setThumbnailSize(thumb_size);
             video_thumb.setMaintainAspectRatio(true);
-            video_thumb.generateThumbnail(file_path.data(),
+            video_thumb.generateThumbnail(file_path,
                                           ThumbnailerImageType::Png,
                                           thumbnail_file,
                                           nullptr);
@@ -386,7 +385,7 @@ vfs_thumbnail_load(const std::string_view file_path, const std::string_view file
             return nullptr;
         }
 #endif
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.data(), nullptr);
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
     }
 
     GdkPixbuf* result = nullptr;
@@ -424,15 +423,15 @@ vfs_thumbnail_load(const std::string_view file_path, const std::string_view file
 GdkPixbuf*
 vfs_thumbnail_load_for_uri(const std::string_view uri, i32 thumb_size)
 {
-    const std::string file = Glib::filename_from_uri(uri.data());
+    const std::filesystem::path file = Glib::filename_from_uri(uri.data());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
     return ret;
 }
 
 GdkPixbuf*
-vfs_thumbnail_load_for_file(const std::string_view file, i32 thumb_size)
+vfs_thumbnail_load_for_file(const std::filesystem::path& file, i32 thumb_size)
 {
-    const std::string uri = Glib::filename_to_uri(file.data());
+    const std::string uri = Glib::filename_to_uri(file.string());
     GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
     return ret;
 }
@@ -440,12 +439,10 @@ vfs_thumbnail_load_for_file(const std::string_view file, i32 thumb_size)
 void
 vfs_thumbnail_init()
 {
-    const std::string dir = Glib::build_filename(vfs::user_dirs->cache_dir(), "thumbnails/normal");
-
+    const auto dir = vfs::user_dirs->cache_dir() / "thumbnails/normal";
     if (!std::filesystem::is_directory(dir))
     {
         std::filesystem::create_directories(dir);
     }
-
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
 }

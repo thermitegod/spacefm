@@ -61,21 +61,21 @@ using namespace std::literals::string_view_literals;
 
 struct ParentInfo
 {
-    ParentInfo(PtkFileBrowser* file_browser, const std::string_view cwd);
+    ParentInfo(PtkFileBrowser* file_browser, const std::filesystem::path& cwd);
 
     PtkFileBrowser* file_browser{nullptr};
-    std::string cwd{};
+    std::filesystem::path cwd{};
 };
 
-ParentInfo::ParentInfo(PtkFileBrowser* file_browser, const std::string_view cwd)
+ParentInfo::ParentInfo(PtkFileBrowser* file_browser, const std::filesystem::path& cwd)
 {
     this->file_browser = file_browser;
-    this->cwd = cwd.data();
+    this->cwd = cwd;
 }
 
 static bool
 open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_info> sel_files,
-                           const std::string_view full_path, vfs::mime_type mime_type)
+                           const std::filesystem::path& full_path, vfs::mime_type mime_type)
 {
     if (xset_get_b(XSetName::ARC_DEF_OPEN))
     {                 // user has open archives with app option enabled
@@ -83,7 +83,7 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
     }
 
     const bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
-    std::string dest_dir;
+    std::filesystem::path dest_dir;
     i32 cmd;
 
     // determine default archive action in this dir
@@ -91,7 +91,7 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
     {
         // Extract Here
         cmd = PtkHandlerArchive::HANDLER_EXTRACT;
-        dest_dir = parent->cwd.data();
+        dest_dir = parent->cwd;
     }
     else if (extract_here || xset_get_b(XSetName::ARC_DEF_EXTO))
     {
@@ -169,10 +169,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         for (GList* l = files; l; l = g_list_next(l))
         {
             // filename
-            std::string const quoted;
-
-            const std::string name = Glib::path_get_basename((char*)l->data);
-            fm_filenames.append(fmt::format("{}\n", ztd::shell::quote(name)));
+            const auto name = std::filesystem::path((char*)l->data).filename();
+            fm_filenames.append(fmt::format("{}\n", ztd::shell::quote(name.string())));
             // file path
             fm_filenames.append(fmt::format("{}\n", ztd::shell::quote((char*)l->data)));
         }
@@ -195,8 +193,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
             // filename
             std::string quoted;
 
-            const std::string name = Glib::path_get_basename((char*)l->data);
-            quoted = ztd::shell::quote(name);
+            const auto name = std::filesystem::path((char*)l->data).filename();
+            quoted = ztd::shell::quote(name.string());
             str = fmt::format("fm_filename={}\n", quoted);
             // file path
             quoted = ztd::shell::quote((char*)l->data);
@@ -275,7 +273,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app
 
     ztd::logger::info("EXEC({})={}", desktop->get_full_path(), desktop->get_exec());
 
-    const std::vector<std::string> open_files = glist_t_char_to_vector_t_string(files);
+    const std::vector<std::filesystem::path> open_files = glist_t_char_to_vector_t_path(files);
 
     try
     {
@@ -313,14 +311,15 @@ free_file_list_hash(void* key, void* value, void* user_data)
 }
 
 void
-ptk_open_files_with_app(const std::string_view cwd, const std::span<const vfs::file_info> sel_files,
+ptk_open_files_with_app(const std::filesystem::path& cwd,
+                        const std::span<const vfs::file_info> sel_files,
                         const std::string_view app_desktop, PtkFileBrowser* file_browser,
                         bool xforce, bool xnever)
 {
     // if xnever, never execute an executable
     // if xforce, force execute of executable ignoring app_settings.click_executes
 
-    std::string full_path;
+    std::filesystem::path full_path;
     GList* files_to_open = nullptr;
     GHashTable* file_list_hash = nullptr;
     char* new_dir = nullptr;
@@ -335,7 +334,7 @@ ptk_open_files_with_app(const std::string_view cwd, const std::span<const vfs::f
             continue;
         }
 
-        full_path = Glib::build_filename(cwd.data(), file->get_name());
+        full_path = cwd / file->get_name();
 
         if (!app_desktop.empty())
         { // specified app to open all files
@@ -483,7 +482,7 @@ ptk_open_files_with_app(const std::string_view cwd, const std::span<const vfs::f
                 files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.data());
             }
 
-            if (!ztd::same(alloc_desktop, full_path))
+            if (!ztd::same(alloc_desktop, full_path.string()))
             { /* it is not a desktop file itself - add file to list.
                * Otherwise use full_path as hash table key, which will
                * be freed when hash table is destroyed. */

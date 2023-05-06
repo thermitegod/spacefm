@@ -151,14 +151,12 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     GtkFileChooser* dlg = GTK_FILE_CHOOSER(user_data);
 
     // Obtaining new archive filename
-    char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+    const char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
     if (!path)
     {
         return;
     }
-
-    std::string name = Glib::path_get_basename(path);
-    std::free(path);
+    auto name = std::filesystem::path(path).filename();
 
     // Fetching the combo model
     GtkListStore* list = GTK_LIST_STORE(g_object_get_data(G_OBJECT(dlg), "combo-model"));
@@ -197,7 +195,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             extension = archive_handler_get_first_extension(handler_xset);
 
             // Checking to see if the current archive filename has this
-            if (ztd::endswith(name, extension))
+            if (ztd::endswith(name.string(), extension))
             {
                 /* It does - recording its length if its the longest match
                  * yet, and continuing */
@@ -213,8 +211,9 @@ on_format_changed(GtkComboBox* combo, void* user_data)
     // Cropping current extension if found
     if (len)
     {
-        len = name.size() - len;
-        name = name.substr(0, len);
+        len = name.string().size() - len;
+        name = name.string().substr(0, len);
+        name = ztd::removesuffix(name.string(), extension);
     }
 
     // Getting at currently selected archive handler
@@ -290,7 +289,7 @@ replace_archive_subs(const std::string_view line, const std::string_view n,
 void
 ptk_file_archiver_create(PtkFileBrowser* file_browser,
                          const std::span<const vfs::file_info> sel_files,
-                         const std::string_view cwd)
+                         const std::filesystem::path& cwd)
 {
     /* Generating dialog - extra nullptr on the nullptr-terminated list to
      * placate an irrelevant compilation warning. See notes in
@@ -537,7 +536,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         std::free(dest_file);
         dest_file = nullptr;
     }
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.data());
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.c_str());
 
     // Setting dimension and position
     const i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
@@ -764,14 +763,15 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             if (i == 0)
             {
                 // First archive - use user-selected destination
-                udest_file = Glib::filename_display_name(dest_file);
+                udest_file = dest_file;
             }
             else
             {
                 /* For subsequent archives, base archive name on the filename
                  * being compressed, in the user-selected dir */
-                const std::string dest_dir = Glib::path_get_dirname(dest_file);
-                udest_file = fmt::format("{}/{}{}", dest_dir, desc, ext);
+                const auto dest_dir = std::filesystem::path(dest_file).parent_path();
+                // Need to use .string() to avoid fmt adding double quotes when formating
+                udest_file = fmt::format("{}/{}{}", dest_dir.string(), desc, ext);
 
                 // Looping to find a path that doesnt exist
                 i32 c = 1;
@@ -826,7 +826,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     {
         /* '%O' is not present - the normal single command is needed
          * Obtaining valid quoted UTF8 file name %o for archive to create */
-        udest_file = Glib::filename_display_name(dest_file);
+        udest_file = dest_file;
         udest_quote = ztd::shell::quote(udest_file);
         std::string all;
         std::string first;
@@ -945,8 +945,8 @@ on_create_subfolder_toggled(GtkToggleButton* togglebutton, GtkWidget* chk_write)
 void
 ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                           const std::span<const vfs::file_info> sel_files,
-                          const std::string_view cwd, const std::string_view dest_dir, i32 job,
-                          bool archive_presence_checked)
+                          const std::filesystem::path& cwd, const std::filesystem::path& dest_dir,
+                          i32 job, bool archive_presence_checked)
 { /* This function is also used to list the contents of archives */
     GtkWidget* dlgparent = nullptr;
     char* choose_dir = nullptr;
@@ -956,8 +956,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     bool write_access = false;
     bool list_contents = false;
     std::string parent_quote;
-    const char* dest;
-    std::string dest_quote;
+    std::filesystem::path dest;
     std::string full_quote;
     i32 res;
 
@@ -988,7 +987,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         {
             // Fetching file details
             vfs::mime_type mime_type = file->get_mime_type();
-            const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
+            const auto full_path = cwd / file->get_name();
 
             // Checking for enabled handler with non-empty command
             const std::vector<xset_t> handlers =
@@ -1065,7 +1064,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dlg), hbox);
 
         // Setting dialog to current working directory
-        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.data());
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.c_str());
 
         // Fetching saved dialog dimensions and applying
         i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
@@ -1146,12 +1145,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         create_parent = xset_get_b(XSetName::ARC_DEF_PARENT);
         write_access = create_parent && xset_get_b(XSetName::ARC_DEF_WRITE);
 
-        dest = ztd::strdup(dest_dir.data());
+        dest = ztd::strdup(dest_dir.string());
     }
 
     // Quoting destination directory (doing this outside of the later
     // loop as its needed after the selected files loop completes)
-    dest_quote = ztd::shell::quote(dest ? dest : cwd);
+    const std::string dest_quote = ztd::shell::quote(!dest.empty() ? dest.string() : cwd.string());
 
     // Fetching available archive handlers and splitting
     const std::string archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
@@ -1168,7 +1167,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         // Fetching file details
         vfs::mime_type mime_type = file->get_mime_type();
         // Determining file paths
-        const std::string full_path = Glib::build_filename(cwd.data(), file->get_name());
+        const auto full_path = cwd / file->get_name();
 
         // Get handler with non-empty command
         const std::vector<xset_t> handlers =
@@ -1205,8 +1204,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         }
 
         // Archive to list or extract:
-        full_quote = ztd::shell::quote(full_path); // %x
-        std::string extract_target;                // %g or %G
+        full_quote = ztd::shell::quote(full_path.string()); // %x
+        std::string extract_target_quote;                   // %g or %G
         std::string mkparent;
         std::string perm;
 
@@ -1283,7 +1282,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 command = "";
             }
 
-            std::string parent_path;
+            std::filesystem::path parent_path;
 
             // Dealing with creation of parent directory if needed -
             // never create a parent directory if '%G' is used - this is
@@ -1292,7 +1291,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             {
                 // Determining full path of parent directory to make
                 // (also used later in '%g' substitution)
-                parent_path = Glib::build_filename(dest, filename_no_archive_ext);
+                parent_path = dest / filename_no_archive_ext;
                 i32 n = 1;
 
                 // Looping to find a path that doesnt exist
@@ -1302,7 +1301,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 }
 
                 // Generating shell command to make directory
-                parent_quote = ztd::shell::quote(parent_path);
+                parent_quote = ztd::shell::quote(parent_path.string());
                 mkparent = fmt::format("fm_util_mkcd {}\n", parent_quote);
 
                 // Dealing with the need to make extracted files writable if
@@ -1334,8 +1333,15 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 // Creating extraction target, taking into account whether
                 // a parent directory has been created or not - target is
                 // guaranteed not to exist so as to avoid overwriting
-                extract_target = Glib::build_filename(create_parent ? parent_path : dest,
-                                                      filename_no_archive_ext);
+                std::filesystem::path extract_target;
+                if (create_parent)
+                {
+                    extract_target = parent_path / filename_no_archive_ext;
+                }
+                else
+                {
+                    extract_target = dest / filename_no_archive_ext;
+                }
 
                 // Now the extraction filename is obtained, determine the
                 // normal filename without the extension
@@ -1346,18 +1352,27 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 // Looping to find a path that doesnt exist
                 while (std::filesystem::exists(extract_target))
                 {
-                    const std::string str2 =
+                    const auto new_filename =
                         fmt::format("{}-{}{}.{}", filename, "copy", ++n, filename_extension);
-                    extract_target = Glib::build_filename(create_parent ? parent_path : dest, str2);
+                    if (create_parent)
+                    {
+                        const auto path = std::filesystem::path() / parent_path / new_filename;
+                        extract_target = std::filesystem::path(path);
+                    }
+                    else
+                    {
+                        const auto path = std::filesystem::path() / dest / new_filename;
+                        extract_target = std::filesystem::path(path);
+                    }
                 }
 
                 // Quoting target
-                extract_target = ztd::shell::quote(extract_target);
+                extract_target_quote = ztd::shell::quote(extract_target.string());
             }
         }
 
         // Substituting %x %g %G
-        command = replace_archive_subs(command, "", "", "", full_quote, extract_target);
+        command = replace_archive_subs(command, "", "", "", full_quote, extract_target_quote);
 
         // Finally constructing command to run, taking into account more than
         // one archive to list/extract. The mkparent command itself has error

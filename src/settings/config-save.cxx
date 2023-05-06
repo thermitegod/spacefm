@@ -299,8 +299,7 @@ save_user_confing()
     // std::cout << "###### TOML DUMP ######" << "\n\n";
     // std::cout << toml_data << "\n\n";
 
-    const std::string config_file =
-        Glib::build_filename(vfs::user_dirs->program_config_dir(), CONFIG_FILE_FILENAME);
+    const auto config_file = vfs::user_dirs->program_config_dir() / CONFIG_FILE_FILENAME;
 
     write_file(config_file, toml_data);
 }

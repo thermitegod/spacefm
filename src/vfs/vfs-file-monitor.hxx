@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <atomic>
@@ -45,7 +47,7 @@ namespace vfs
     // Callback function which will be called when monitored events happen
     using file_monitor_callback = void (*)(const vfs::file_monitor& monitor,
                                            VFSFileMonitorEvent event,
-                                           const std::string_view file_name, void* user_data);
+                                           const std::filesystem::path& file_name, void* user_data);
 
     using file_monitor_callback_entry = std::shared_ptr<VFSFileMonitorCallbackEntry>;
 
@@ -54,14 +56,14 @@ namespace vfs
 struct VFSFileMonitor
 {
     VFSFileMonitor() = delete;
-    VFSFileMonitor(const std::string_view real_path, i32 wd);
+    VFSFileMonitor(const std::filesystem::path& real_path, i32 wd);
     ~VFSFileMonitor();
 
     void add_user() noexcept;
     void remove_user() noexcept;
     bool has_users() const noexcept;
 
-    std::string path{};
+    std::filesystem::path path{};
 
     // TODO private
     i32 wd{0};
@@ -85,8 +87,8 @@ bool vfs_file_monitor_init();
  * cb: callback function to be called when file event happens.
  * user_data: user data to be passed to callback function.
  */
-vfs::file_monitor vfs_file_monitor_add(const std::string_view path, vfs::file_monitor_callback cb,
-                                       void* user_data);
+vfs::file_monitor vfs_file_monitor_add(const std::filesystem::path& path,
+                                       vfs::file_monitor_callback cb, void* user_data);
 
 /*
  * Remove previously installed monitor.

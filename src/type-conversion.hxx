@@ -18,9 +18,14 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <glib.h>
+
+// std::filesystem::path
+std::vector<std::filesystem::path> glist_t_char_to_vector_t_path(GList* list);
 
 // std::string
 std::vector<std::string> glist_t_char_to_vector_t_string(GList* list);

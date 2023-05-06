@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
 #include <string>
 #include <string_view>
 
@@ -55,8 +56,9 @@ static bool ptk_file_task_add_main(PtkFileTask* ptask);
 static void on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask);
 static void save_progress_dialog_size(PtkFileTask* ptask);
 
-PtkFileTask::PtkFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                         const std::string_view dest_dir, GtkWindow* parent_window,
+PtkFileTask::PtkFileTask(VFSFileTaskType type,
+                         const std::span<const std::filesystem::path> src_files,
+                         const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                          GtkWidget* task_view)
 {
     this->task = vfs_task_new(type, src_files, dest_dir);
@@ -206,7 +208,7 @@ ptk_file_task_trylock(PtkFileTask* ptask)
 }
 
 PtkFileTask*
-ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
+ptk_file_task_new(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
                   GtkWindow* parent_window, GtkWidget* task_view)
 {
     const auto ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
@@ -215,8 +217,9 @@ ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_f
 }
 
 PtkFileTask*
-ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
-                  const std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view)
+ptk_file_task_new(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
+                  const std::filesystem::path& dest_dir, GtkWindow* parent_window,
+                  GtkWidget* task_view)
 {
     const auto ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
 
@@ -232,7 +235,7 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
     }
 
-    const std::vector<std::string> file_list{item_name.data()};
+    const std::vector<std::filesystem::path> file_list{item_name.data()};
     const auto ptask =
         new PtkFileTask(VFSFileTaskType::EXEC, file_list, "", GTK_WINDOW(parent_win), task_view);
 
@@ -240,7 +243,7 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget
 }
 
 PtkFileTask*
-ptk_file_exec_new(const std::string_view item_name, const std::string_view dest_dir,
+ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path& dest_dir,
                   GtkWidget* parent, GtkWidget* task_view)
 {
     GtkWidget* parent_win = nullptr;
@@ -249,7 +252,7 @@ ptk_file_exec_new(const std::string_view item_name, const std::string_view dest_
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
     }
 
-    const std::vector<std::string> file_list{item_name.data()};
+    const std::vector<std::filesystem::path> file_list{item_name.data()};
     const auto ptask = new PtkFileTask(VFSFileTaskType::EXEC,
                                        file_list,
                                        dest_dir,
@@ -866,7 +869,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_set_halign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-    ptask->from = GTK_LABEL(gtk_label_new(ptask->complete ? "" : task->current_file.data()));
+    ptask->from = GTK_LABEL(gtk_label_new(ptask->complete ? "" : task->current_file.c_str()));
     gtk_widget_set_halign(GTK_WIDGET(ptask->from), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(ptask->from), GtkAlign::GTK_ALIGN_CENTER);
     gtk_label_set_ellipsize(ptask->from, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -896,7 +899,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
             gtk_widget_set_halign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_CENTER);
             gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-            ptask->to = GTK_LABEL(gtk_label_new(task->dest_dir.data()));
+            ptask->to = GTK_LABEL(gtk_label_new(task->dest_dir.c_str()));
             gtk_widget_set_halign(GTK_WIDGET(ptask->to), GtkAlign::GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(ptask->to), GtkAlign::GTK_ALIGN_CENTER);
             gtk_label_set_ellipsize(ptask->to, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -1179,16 +1182,14 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
     char* ufile_path;
     const char* window_title;
-    std::string str;
-    std::string str2;
 
     // ztd::logger::info("ptk_file_task_progress_update ptask={:p}", ptask);
 
     vfs::file_task task = ptask->task;
 
     // current file
-    std::string usrc_dir;
-    std::string udest;
+    std::filesystem::path usrc_dir;
+    std::filesystem::path udest;
 
     if (ptask->complete)
     {
@@ -1210,7 +1211,8 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
         else
         {
-            const std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
+            const std::string escaped_markup =
+                Glib::Markup::escape_text(task->current_file.string());
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
         }
 
@@ -1241,47 +1243,38 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (task->type != VFSFileTaskType::EXEC)
         {
             // Copy: <src basename>
-            const std::string name = Glib::filename_display_basename(task->current_file);
-            const std::string escaped_markup = Glib::Markup::escape_text(name);
+            const auto name = task->current_file.filename();
+            const std::string escaped_markup = Glib::Markup::escape_text(name.string());
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
 
             // From: <src_dir>
-            str = Glib::path_get_dirname(task->current_file);
-            usrc_dir = Glib::filename_display_name(str);
-            if (!ztd::same(usrc_dir, "/"))
+            const auto current_parent = task->current_file.parent_path();
+            if (!std::filesystem::equivalent(current_parent, "/"))
             {
-                usrc_dir = fmt::format("{}/", usrc_dir);
+                usrc_dir = current_parent;
             }
 
             // To: <dest_dir> OR <dest_file>
             if (!task->current_dest.empty())
             {
-                str = Glib::path_get_basename(task->current_file);
-                str2 = Glib::path_get_basename(task->current_dest);
-                if (!ztd::same(str, str2))
+                const auto current_file = task->current_file.filename();
+                const auto current_dest = task->current_dest.filename();
+                if (!std::filesystem::equivalent(current_file, current_dest))
                 {
                     // source and dest filenames differ, user renamed - show all
-                    udest = Glib::filename_display_name(task->current_dest);
+                    udest = task->current_dest;
                 }
                 else
                 {
                     // source and dest filenames same - show dest dir only
-                    str = Glib::path_get_dirname(task->current_dest);
-                    if (ztd::same(str, "/"))
-                    {
-                        udest = Glib::filename_display_name(str);
-                    }
-                    else
-                    {
-                        const std::string f = Glib::filename_display_name(str);
-                        udest = fmt::format("{}/", f);
-                    }
+                    udest = task->current_dest.parent_path();
                 }
             }
         }
         else
         {
-            const std::string escaped_markup = Glib::Markup::escape_text(task->current_file);
+            const std::string escaped_markup =
+                Glib::Markup::escape_text(task->current_file.string());
             ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
         }
     }
@@ -1292,21 +1285,16 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
     if (udest.empty() && !ptask->complete && !task->dest_dir.empty())
     {
-        udest = Glib::filename_display_name(task->dest_dir);
-        if (!ztd::same(udest, "/"))
-        {
-            const std::string f = Glib::filename_display_name(udest);
-            udest = fmt::format("{}/", f);
-        }
+        udest = task->dest_dir;
     }
     gtk_label_set_markup(ptask->from, ufile_path);
     if (ptask->src_dir)
     {
-        gtk_label_set_text(ptask->src_dir, usrc_dir.data());
+        gtk_label_set_text(ptask->src_dir, usrc_dir.c_str());
     }
     if (ptask->to)
     {
-        gtk_label_set_text(ptask->to, udest.data());
+        gtk_label_set_text(ptask->to, udest.c_str());
     }
     std::free(ufile_path);
 
@@ -2103,12 +2091,10 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 static void
 query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 {
-    std::string file_name;
-    char* str;
-
     switch (response)
     {
         case RESPONSE_OVERWRITEALL:
+        {
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::OVERWRITE_ALL);
             if (ptask->progress_dlg)
             {
@@ -2116,10 +2102,14 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                                          VFSFileTaskOverwriteMode::OVERWRITE_ALL);
             }
             break;
+        }
         case RESPONSE_OVERWRITE:
+        {
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::OVERWRITE);
             break;
+        }
         case RESPONSE_SKIPALL:
+        {
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::SKIP_ALL);
             if (ptask->progress_dlg)
             {
@@ -2127,10 +2117,14 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                                          VFSFileTaskOverwriteMode::SKIP_ALL);
             }
             break;
+        }
         case RESPONSE_SKIP:
+        {
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::SKIP);
             break;
+        }
         case RESPONSE_AUTO_RENAME_ALL:
+        {
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::AUTO_RENAME);
             if (ptask->progress_dlg)
             {
@@ -2138,8 +2132,11 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                                          VFSFileTaskOverwriteMode::AUTO_RENAME);
             }
             break;
+        }
         case RESPONSE_AUTO_RENAME:
         case RESPONSE_RENAME:
+        {
+            char* str;
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::RENAME);
             if (response == RESPONSE_AUTO_RENAME)
             {
@@ -2153,25 +2150,30 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
                 str = multi_input_get_text(query_input);
             }
-            file_name = Glib::filename_from_utf8(str);
+            const auto file_name = std::filesystem::path(str);
             if (str && !file_name.empty() && !ptask->task->current_dest.empty())
             {
-                const std::string dir_name = Glib::path_get_dirname(ptask->task->current_dest);
-                const std::string path = Glib::build_filename(dir_name, file_name);
+                const auto dir_name = ptask->task->current_dest.parent_path();
+                const auto path = dir_name / file_name;
                 *ptask->query_new_dest = ztd::strdup(path);
             }
             std::free(str);
             break;
+        }
         case RESPONSE_PAUSE:
+        {
             ptk_file_task_pause(ptask, VFSFileTaskState::PAUSE);
             main_task_start_queued(ptask->task_view, ptask);
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::RENAME);
             ptask->restart_timeout = false;
             break;
+        }
         case GtkResponseType::GTK_RESPONSE_DELETE_EVENT: // escape was pressed or window closed
         case GtkResponseType::GTK_RESPONSE_CANCEL:
+        {
             ptask->task->abort = true;
             break;
+        }
         default:
             break;
     }
@@ -2271,7 +2273,8 @@ query_overwrite(PtkFileTask* ptask)
         from_disp = "Copying from directory:";
     }
 
-    const bool different_files = (!ztd::same(ptask->task->current_file, ptask->task->current_dest));
+    const bool different_files =
+        (!std::filesystem::equivalent(ptask->task->current_file, ptask->task->current_dest));
 
     const auto src_stat = ztd::lstat(ptask->task->current_file);
     const auto dest_stat = ztd::lstat(ptask->task->current_dest);
@@ -2399,24 +2402,21 @@ query_overwrite(PtkFileTask* ptask)
     }
 
     // filenames
-    char* base_name = ztd::strdup(Glib::path_get_basename(ptask->task->current_dest));
-    char* base_name_disp = ztd::strdup(Glib::filename_display_name(base_name)); // auto free
-    char* src_dir = ztd::strdup(Glib::path_get_dirname(ptask->task->current_file));
-    char* src_dir_disp = ztd::strdup(Glib::filename_display_name(src_dir));
-    char* dest_dir = ztd::strdup(Glib::path_get_dirname(ptask->task->current_dest));
-    char* dest_dir_disp = ztd::strdup(Glib::filename_display_name(dest_dir));
+    char* base_name = ztd::strdup(ptask->task->current_dest.filename());
+    char* base_name_disp = ztd::strdup(base_name); // auto free
+    char* src_dir = ztd::strdup(ptask->task->current_file.parent_path());
+    char* src_dir_disp = ztd::strdup(src_dir);
+    char* dest_dir = ztd::strdup(ptask->task->current_dest.parent_path());
+    char* dest_dir_disp = ztd::strdup(dest_dir);
 
     const auto [filename_no_extension, filename_extension] = get_name_extension(base_name);
 
-    char* ext_disp = !filename_extension.empty()
-                         ? ztd::strdup(Glib::filename_display_name(filename_extension))
-                         : nullptr;
+    char* ext_disp = !filename_extension.empty() ? ztd::strdup(filename_extension) : nullptr;
     const std::string unique_name =
         vfs_get_unique_name(dest_dir, filename_no_extension, filename_extension);
     char* new_name_plain =
-        !unique_name.empty() ? ztd::strdup(Glib::path_get_basename(unique_name)) : nullptr;
-    char* new_name =
-        new_name_plain ? ztd::strdup(Glib::filename_display_name(new_name_plain)) : nullptr;
+        !unique_name.empty() ? ztd::strdup(std::filesystem::path(unique_name).filename()) : nullptr;
+    char* new_name = new_name_plain ? ztd::strdup(new_name_plain) : nullptr;
 
     const i32 pos = ext_disp ? std::strlen(base_name_disp) - std::strlen(ext_disp) - 1 : -1;
 

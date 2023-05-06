@@ -16,15 +16,17 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <glibmm.h>
 
 #include "ptk/ptk-builder.hxx"
 
 GtkBuilder*
-ptk_gtk_builder_new_from_file(const std::string_view file)
+ptk_gtk_builder_new_from_file(const std::filesystem::path& file)
 {
     GtkBuilder* builder = gtk_builder_new();
-    const std::string filename = Glib::build_filename(PACKAGE_UI_PATH, file.data());
-    gtk_builder_add_from_file(builder, filename.data(), nullptr);
+    const auto filename = std::filesystem::path() / PACKAGE_UI_PATH / file;
+    gtk_builder_add_from_file(builder, filename.c_str(), nullptr);
     return builder;
 }

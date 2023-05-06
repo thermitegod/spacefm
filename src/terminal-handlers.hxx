@@ -31,7 +31,7 @@ class TerminalHandler
     TerminalHandler(const std::string_view name, const std::string_view exec);
 
     std::string name;
-    std::string path;
+    std::filesystem::path path;
     std::string exec;
 };
 

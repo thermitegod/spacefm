@@ -35,6 +35,9 @@
 
 #include <sys/inotify.h>
 
+#include <fmt/format.h>
+#include <fmt/std.h>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -49,7 +52,7 @@ inline constexpr u64 EVENT_SIZE = (sizeof(struct inotify_event));
 inline constexpr u64 BUF_LEN    = (1024 * (EVENT_SIZE + 16));
 // clang-format on
 
-static std::map<std::string, vfs::file_monitor> monitor_map;
+static std::map<std::filesystem::path, vfs::file_monitor> monitor_map;
 
 static i32 inotify_fd = -1;
 static Glib::RefPtr<Glib::IOChannel> inotify_io_channel = nullptr;
@@ -79,10 +82,10 @@ VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callb
     this->user_data = user_data;
 }
 
-VFSFileMonitor::VFSFileMonitor(const std::string_view real_path, i32 wd)
+VFSFileMonitor::VFSFileMonitor(const std::filesystem::path& real_path, i32 wd)
 {
     // ztd::logger::info("VFSFileMonitor Constructor {}", real_path);
-    this->path = real_path.data();
+    this->path = real_path;
     this->wd = wd;
 }
 
@@ -163,7 +166,7 @@ vfs_file_monitor_init()
 }
 
 vfs::file_monitor
-vfs_file_monitor_add(const std::string_view path, vfs::file_monitor_callback callback,
+vfs_file_monitor_add(const std::filesystem::path& path, vfs::file_monitor_callback callback,
                      void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
@@ -236,7 +239,7 @@ vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_call
 
 static void
 vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent evt,
-                                const std::string_view file_name)
+                                const std::filesystem::path& file_name)
 {
     // Call the callback functions
     if (monitor->callbacks.empty())
@@ -291,45 +294,39 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
 
             if (monitor)
             {
-                // const std::string file_name = event->len > 0 ? (char*)event->name :
-                // monitor->path;
-                const std::string file_name = (const char*)event->name;
+                const std::filesystem::path file_name = (const char*)event->name;
 
                 VFSFileMonitorEvent monitor_event;
                 if (event->mask & (IN_CREATE | IN_MOVED_TO))
                 {
                     monitor_event = VFSFileMonitorEvent::CREATE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    ztd::logger::debug("inotify-event MASK={} CREATE={}",
-                                       event->mask,
-                                       Glib::build_filename(monitor->path, file_name));
+                    const auto path = monitor->path / file_name;
+                    ztd::logger::debug("inotify-event MASK={} CREATE={}", event->mask, path);
 #endif
                 }
                 else if (event->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
                 {
                     monitor_event = VFSFileMonitorEvent::DELETE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    ztd::logger::debug("inotify-event MASK={} DELETE={}",
-                                       event->mask,
-                                       Glib::build_filename(monitor->path, file_name));
+                    const auto path = monitor->path / file_name;
+                    ztd::logger::debug("inotify-event MASK={} DELETE={}", event->mask, path);
 #endif
                 }
                 else if (event->mask & (IN_MODIFY | IN_ATTRIB))
                 {
                     monitor_event = VFSFileMonitorEvent::CHANGE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    ztd::logger::debug("inotify-event MASK={} CHANGE={}",
-                                       event->mask,
-                                       Glib::build_filename(monitor->path, file_name));
+                    const auto path = monitor->path / file_name;
+                    ztd::logger::debug("inotify-event MASK={} CHANGE={}", event->mask, path);
 #endif
                 }
                 else
                 { // IN_IGNORED not handled
                     monitor_event = VFSFileMonitorEvent::CHANGE;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    ztd::logger::debug("inotify-event MASK={} OTHER={}",
-                                       event->mask,
-                                       Glib::build_filename(monitor->path, file_name));
+                    const auto path = monitor->path / file_name;
+                    ztd::logger::debug("inotify-event MASK={} OTHER={}", event->mask, path);
 #endif
                 }
 

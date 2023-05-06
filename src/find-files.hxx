@@ -18,6 +18,9 @@
 #pragma once
 
 #include <string>
+
+#include <filesystem>
+
 #include <span>
 
-void find_files(const std::span<const std::string> search_dirs);
+void find_files(const std::span<const std::filesystem::path> search_dirs);

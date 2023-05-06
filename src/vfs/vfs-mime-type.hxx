@@ -26,6 +26,8 @@
 
 #include <gdk/gdk.h>
 
+#include <ztd/ztd.hxx>
+
 #include "mime-type/mime-type.hxx"
 
 struct VFSMimeType
@@ -78,7 +80,7 @@ void vfs_mime_type_finalize();
 
 vfs::mime_type vfs_mime_type_new(const std::string_view type_name);
 
-vfs::mime_type vfs_mime_type_get_from_file(const std::string_view file_path);
+vfs::mime_type vfs_mime_type_get_from_file(const std::filesystem::path& file_path);
 vfs::mime_type vfs_mime_type_get_from_type(const std::string_view type);
 
 //////////////////////
@@ -92,5 +94,5 @@ i32 vfs_mime_type_get_icon_size_small();
 void vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id);
 
 const char* vfs_mime_type_locate_desktop_file(const std::string_view desktop_id);
-const char* vfs_mime_type_locate_desktop_file(const std::string_view dir,
+const char* vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
                                               const std::string_view desktop_id);

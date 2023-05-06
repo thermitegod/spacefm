@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <span>
 
 #include <vector>
@@ -36,12 +38,12 @@
 
 struct PtkFileMenu
 {
-    PtkFileMenu();
+    PtkFileMenu() = default;
     ~PtkFileMenu();
 
     PtkFileBrowser* browser{nullptr};
-    const char* cwd{nullptr};
-    const char* file_path{nullptr};
+    std::filesystem::path cwd{};
+    std::filesystem::path file_path{};
     vfs::file_info file{nullptr};
     std::vector<vfs::file_info> sel_files{};
     GtkAccelGroup* accel_group{nullptr};

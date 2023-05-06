@@ -1270,7 +1270,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
 static void
 on_open_browser(GtkComboBox* box, ContextData* ctxt)
 {
-    std::string folder;
+    std::filesystem::path folder;
     const i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
     gtk_combo_box_set_active(GTK_COMBO_BOX(box), -1);
     if (job == 0)
@@ -1278,17 +1278,15 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         // Command Dir
         if (ctxt->set->plugin)
         {
-            folder = Glib::build_filename(ctxt->set->plug_dir, "files");
+            folder = ctxt->set->plug_dir / "files";
             if (!std::filesystem::exists(folder))
             {
-                folder = Glib::build_filename(ctxt->set->plug_dir, ctxt->set->plug_name);
+                folder = ctxt->set->plug_dir / ctxt->set->plug_name;
             }
         }
         else
         {
-            folder = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                          "scripts",
-                                          ctxt->set->name);
+            folder = vfs::user_dirs->program_config_dir() / "scripts" / ctxt->set->name;
         }
         if (!std::filesystem::exists(folder) && !ctxt->set->plugin)
         {
@@ -1302,15 +1300,11 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         if (ctxt->set->plugin)
         {
             xset_t mset = xset_get_plugin_mirror(ctxt->set);
-            folder = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                          "plugin-data",
-                                          mset->name);
+            folder = vfs::user_dirs->program_config_dir() / "plugin-data" / mset->name;
         }
         else
         {
-            folder = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                          "plugin-data",
-                                          ctxt->set->name);
+            folder = vfs::user_dirs->program_config_dir() / "plugin-data" / ctxt->set->name;
         }
         if (!std::filesystem::exists(folder))
         {
@@ -1321,9 +1315,9 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     else if (job == 2)
     {
         // Plugin Dir
-        if (ctxt->set->plugin && ctxt->set->plug_dir)
+        if (ctxt->set->plugin && !ctxt->set->plug_dir.empty())
         {
-            folder = ztd::strdup(ctxt->set->plug_dir);
+            folder = ctxt->set->plug_dir;
         }
     }
     else
@@ -2467,21 +2461,27 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->open_browser), false);
 
     std::string str;
-    std::string path;
+    std::filesystem::path path;
     if (rset->plugin)
     {
-        path = Glib::build_filename(rset->plug_dir, rset->plug_name);
+        path = rset->plug_dir / rset->plug_name;
     }
     else
     {
-        path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", rset->name);
+        path = vfs::user_dirs->program_config_dir() / "scripts" / rset->name;
     }
     str = fmt::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 
-    path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                "plugin-data",
-                                rset->plugin ? mset->name : rset->name);
+    if (rset->plugin)
+    {
+        path = vfs::user_dirs->program_config_dir() / "plugin-data" / mset->name;
+    }
+    else
+    {
+        path = vfs::user_dirs->program_config_dir() / "plugin-data" / rset->name;
+    }
+
     str = fmt::format("Data Dir  $fm_cmd_data  {}", dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 

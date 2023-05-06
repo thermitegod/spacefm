@@ -1,5 +1,5 @@
 ---
-Checks:          '-*,clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-osx*,cppcoreguidelines-*.-cppcoreguidelines-pro-type-cstyle-cast,bugprone-*,-bugprone-easily-swappable-parameters,readability-*.-readability-implicit-bool-conversion,misc-*,-misc-use-anonymous-namespace,-modernize-use-trailing-return-type,performance-*'
+Checks:          '-*,clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-osx*,cppcoreguidelines-*.-cppcoreguidelines-pro-type-cstyle-cast,bugprone-*,-bugprone-easily-swappable-parameters,readability-*.-readability-implicit-bool-conversion,misc-*,-misc-use-anonymous-namespace,-modernize-use-trailing-return-type,performance-*,-misc-no-recursion'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false

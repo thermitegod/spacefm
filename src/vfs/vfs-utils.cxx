@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <fmt/format.h>
 
 #include <ztd/ztd.hxx>
@@ -74,8 +76,8 @@ vfs_file_size_format(u64 size_in_bytes, bool decimal)
     }
 }
 
-const std::string
-vfs_get_unique_name(const std::string_view dest_dir, const std::string_view base_name,
+const std::filesystem::path
+vfs_get_unique_name(const std::filesystem::path& dest_dir, const std::string_view base_name,
                     const std::string_view ext)
 { // returns nullptr if all names used; otherwise newly allocated string
     std::string new_name;
@@ -87,7 +89,8 @@ vfs_get_unique_name(const std::string_view dest_dir, const std::string_view base
     {
         new_name = fmt::format("{}.{}", base_name, ext);
     }
-    std::string new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
+
+    auto new_dest_file = dest_dir / new_name;
 
     u32 n = 1;
     while (std::filesystem::exists(new_dest_file))
@@ -101,7 +104,7 @@ vfs_get_unique_name(const std::string_view dest_dir, const std::string_view base
             new_name = fmt::format("{}-copy{}.{}", base_name, ++n, ext);
         }
 
-        new_dest_file = Glib::build_filename(dest_dir.data(), new_name);
+        new_dest_file = dest_dir / new_name;
     }
 
     return new_dest_file;

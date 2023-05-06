@@ -200,17 +200,17 @@ FindFile::FindFile()
 
 struct FoundFile
 {
-    FoundFile(vfs::file_info file, const std::string_view dir_path);
+    FoundFile(vfs::file_info file, const std::filesystem::path& dir_path);
     // ~FoundFile();
 
     vfs::file_info file;
-    std::string dir_path;
+    std::filesystem::path dir_path;
 };
 
-FoundFile::FoundFile(vfs::file_info file, const std::string_view dir_path)
+FoundFile::FoundFile(vfs::file_info file, const std::filesystem::path& dir_path)
 {
     this->file = file;
-    this->dir_path = dir_path.data();
+    this->dir_path = dir_path;
 }
 
 #define FOUND_FILE(obj) (static_cast<FoundFile*>(obj))
@@ -246,7 +246,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
                 continue;
             }
 
-            const std::string full_path = Glib::build_filename(dir, file->get_name());
+            const auto full_path = std::filesystem::path() / dir / file->get_name();
             if (std::filesystem::is_directory(full_path))
             {
                 file_browser->run_event<EventType::OPEN_ITEM>(full_path,
@@ -620,7 +620,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         file = vfs_file_info_new();
         if (vfs_file_info_get(file, path))
         {
-            ff = new FoundFile(file, Glib::path_get_dirname(path));
+            ff = new FoundFile(file, std::filesystem::path(path).filename());
             g_queue_push_tail(queue, ff);
         }
         else
@@ -1267,12 +1267,15 @@ find_files(const std::vector<std::string>& search_dirs)
 #else
 
 #include <string>
+
+#include <filesystem>
+
 #include <span>
 
 #include "ptk/ptk-error.hxx"
 
 void
-find_files(const std::span<const std::string> search_dirs)
+find_files(const std::span<const std::filesystem::path> search_dirs)
 {
     (void)search_dirs;
     ptk_show_error(nullptr, "Disabled", "Find files is disabled");

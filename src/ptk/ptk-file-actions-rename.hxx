@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <span>
 
 #include <gtk/gtk.h>
@@ -29,10 +31,7 @@
 
 struct AutoOpenCreate
 {
-    AutoOpenCreate() = default;
-    ~AutoOpenCreate();
-
-    char* path{nullptr};
+    std::filesystem::path path{};
     PtkFileBrowser* file_browser{nullptr};
     GFunc callback{nullptr};
     bool open_file{false};
@@ -50,7 +49,7 @@ i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::fil
                     const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
                     AutoOpenCreate* auto_open);
 
-void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::string_view cwd,
+void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path& cwd,
                             GFunc callback);
 void ptk_file_misc_rootcmd(PtkFileBrowser* file_browser,
                            const std::span<const vfs::file_info> sel_files, const char* cwd,

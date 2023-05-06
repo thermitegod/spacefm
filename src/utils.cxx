@@ -94,7 +94,7 @@ have_rw_access(const std::filesystem::path& path) noexcept
 }
 
 bool
-dir_has_files(const std::string_view path) noexcept
+dir_has_files(const std::filesystem::path& path) noexcept
 {
     if (!std::filesystem::is_directory(path))
     {
@@ -113,20 +113,20 @@ dir_has_files(const std::string_view path) noexcept
 }
 
 const std::pair<std::string, std::string>
-get_name_extension(const std::string_view filename) noexcept
+get_name_extension(const std::filesystem::path& filename) noexcept
 {
     if (std::filesystem::is_directory(filename))
     {
-        return std::make_pair(filename.data(), "");
+        return std::make_pair(filename.string(), "");
     }
 
     // Find the last dot in the filename
-    const auto dot_pos = filename.find_last_of('.');
+    const auto dot_pos = filename.string().find_last_of('.');
 
     // Check if the dot is not at the beginning or end of the filename
-    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos != filename.length() - 1)
+    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos != filename.string().length() - 1)
     {
-        const auto split = ztd::rpartition(filename, ".");
+        const auto split = ztd::rpartition(filename.string(), ".");
 
         // Check if the extension is a compressed tar archive
         if (ztd::endswith(split[0], ".tar"))
@@ -144,14 +144,14 @@ get_name_extension(const std::string_view filename) noexcept
     }
 
     // No valid extension found, return the whole filename as the base name
-    return std::make_pair(filename.data(), "");
+    return std::make_pair(filename.string(), "");
 }
 
 void
-open_in_prog(const std::string_view path) noexcept
+open_in_prog(const std::filesystem::path& path) noexcept
 {
     const std::string exe = ztd::program::exe();
-    const std::string qpath = ztd::shell::quote(path);
+    const std::string qpath = ztd::shell::quote(path.string());
     const std::string command = fmt::format("{} {}", exe, qpath);
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_async(command);

@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
@@ -28,5 +30,6 @@ GdkPixbuf* vfs_load_icon(const std::string_view icon_name, i32 icon_size);
 
 const std::string vfs_file_size_format(u64 size_in_bytes, bool decimal = true);
 
-const std::string vfs_get_unique_name(const std::string_view dest_dir,
-                                      const std::string_view base_name, const std::string_view ext);
+const std::filesystem::path vfs_get_unique_name(const std::filesystem::path& dest_dir,
+                                                const std::string_view base_name,
+                                                const std::string_view ext);

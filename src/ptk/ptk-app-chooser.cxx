@@ -43,7 +43,7 @@ enum PTKAppChooser
     COL_FULL_PATH,
 };
 
-static void load_all_apps_in_dir(const std::string_view dir_path, GtkListStore* list,
+static void load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
                                  vfs::async_task task);
 static void* load_all_known_apps_thread(vfs::async_task task);
 
@@ -435,8 +435,8 @@ on_browse_btn_clicked(GtkButton* button, void* user_data)
             if (ztd::startswith(filename, "/usr/share/applications") &&
                 ztd::endswith(filename, ".desktop"))
             {
-                const std::string app_name = Glib::path_get_basename(filename);
-                gtk_entry_set_text(entry, app_name.data());
+                const auto app_name = std::filesystem::path(filename).filename();
+                gtk_entry_set_text(entry, app_name.c_str());
             }
             else
             {
@@ -590,7 +590,8 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
 }
 
 static void
-load_all_apps_in_dir(const std::string_view dir_path, GtkListStore* list, vfs::async_task task)
+load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
+                     vfs::async_task task)
 {
     if (!std::filesystem::is_directory(dir_path))
     {
@@ -604,15 +605,15 @@ load_all_apps_in_dir(const std::string_view dir_path, GtkListStore* list, vfs::a
             break;
         }
 
-        const std::string file_name = std::filesystem::path(file).filename();
-        const std::string file_path = Glib::build_filename(dir_path.data(), file_name);
+        const auto file_name = file.path().filename();
+        const auto file_path = dir_path / file_name;
         if (std::filesystem::is_directory(file_path))
         {
             /* recursively load sub dirs */
             load_all_apps_in_dir(file_path, list, task);
             continue;
         }
-        if (!ztd::endswith(file_name, ".desktop"))
+        if (!ztd::endswith(file_name.string(), ".desktop"))
         {
             continue;
         }
@@ -623,7 +624,7 @@ load_all_apps_in_dir(const std::string_view dir_path, GtkListStore* list, vfs::a
         }
 
         /* There are some operations using GTK+, so lock may be needed. */
-        add_list_item(list, file_path);
+        add_list_item(list, file_path.string());
     }
 }
 
@@ -632,12 +633,12 @@ load_all_known_apps_thread(vfs::async_task task)
 {
     GtkListStore* list = GTK_LIST_STORE(task->get_data());
 
-    const std::string dir = Glib::build_filename(vfs::user_dirs->data_dir(), "applications");
+    const auto dir = vfs::user_dirs->data_dir() / "applications";
     load_all_apps_in_dir(dir, list, task);
 
     for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const std::string sdir = Glib::build_filename(sys_dir.data(), "applications");
+        const auto sdir = std::filesystem::path() / sys_dir / "applications";
         load_all_apps_in_dir(sdir, list, task);
     }
 

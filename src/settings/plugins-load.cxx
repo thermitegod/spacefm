@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <fmt/format.h>
 
 #include <ztd/ztd.hxx>
@@ -32,13 +34,13 @@
 #include "settings/plugins-load.hxx"
 
 bool
-load_user_plugin(const std::string_view plug_dir, PluginUse* use, const std::string_view plugin,
-                 plugin_func_t plugin_func)
+load_user_plugin(const std::filesystem::path& plug_dir, PluginUse* use,
+                 const std::filesystem::path& plugin, plugin_func_t plugin_func)
 {
     toml::value tbl;
     try
     {
-        tbl = toml::parse(plugin.data());
+        tbl = toml::parse(plugin);
         // DEBUG
         // std::cout << "###### TOML PARSE ######" << "\n\n";
         // std::cout << tbl << "\n\n";

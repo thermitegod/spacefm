@@ -29,79 +29,79 @@
 
 const vfs::user_dirs_t vfs::user_dirs = std::make_unique<VFSUserDirs>();
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::desktop_dir() const noexcept
 {
     return this->user_desktop;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::documents_dir() const noexcept
 {
     return this->user_documents;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::download_dir() const noexcept
 {
     return this->user_download;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::music_dir() const noexcept
 {
     return this->user_music;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::pictures_dir() const noexcept
 {
     return this->user_pictures;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::public_share_dir() const noexcept
 {
     return this->user_share;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::template_dir() const noexcept
 {
     return this->user_template;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::videos_dir() const noexcept
 {
     return this->user_videos;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::home_dir() const noexcept
 {
     return this->user_home;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::cache_dir() const noexcept
 {
     return this->user_cache;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::data_dir() const noexcept
 {
     return this->user_data;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::config_dir() const noexcept
 {
     return this->user_config;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::runtime_dir() const noexcept
 {
     return this->user_runtime;
@@ -113,7 +113,7 @@ VFSUserDirs::system_data_dirs() const noexcept
     return this->sys_data;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::current_dir() const noexcept
 {
     return this->current;
@@ -125,13 +125,13 @@ VFSUserDirs::program_config_dir(const std::string_view config_dir) noexcept
     this->program_config = config_dir.data();
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::program_config_dir() const noexcept
 {
     return this->program_config;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSUserDirs::program_tmp_dir() const noexcept
 {
     if (!std::filesystem::exists(this->tmp))

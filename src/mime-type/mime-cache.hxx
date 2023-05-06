@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <span>
@@ -36,7 +38,7 @@ class MimeCache
     ~MimeCache() = default;
     // ~MimeCache() { ztd::logger::info("MimeCache Destructor"); };
 
-    MimeCache(const std::string_view file_path);
+    MimeCache(const std::filesystem::path& file_path);
 
     void reload();
 
@@ -47,7 +49,7 @@ class MimeCache
     const std::vector<std::string> lookup_parents(const std::string_view mime_type);
     const char* lookup_alias(const std::string_view mime_type);
 
-    const std::string& get_file_path();
+    const std::filesystem::path& get_file_path();
     u32 get_magic_max_extent();
 
   private:
@@ -61,7 +63,7 @@ class MimeCache
                                             const char** suffix_pos);
 
   private:
-    std::string file_path{};
+    std::filesystem::path file_path{};
 
     usize buffer_size{0};
     const char* buffer{nullptr};

@@ -1060,7 +1060,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
         return true;
     }
     // create parent dir
-    const std::string parent_dir = Glib::path_get_dirname(def_script);
+    const auto parent_dir = std::filesystem::path(def_script).parent_path();
     if (!std::filesystem::is_directory(parent_dir))
     {
         std::filesystem::create_directories(parent_dir);
@@ -1175,7 +1175,7 @@ value_in_list(const std::string_view list, const std::string_view value)
 }
 
 const std::vector<xset_t>
-ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::string_view path,
+ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& path,
                               const vfs::mime_type& mime_type, bool test_cmd, bool multiple,
                               bool enabled_only)
 { /* this function must be FAST - is run multiple times on menu popup
@@ -1197,9 +1197,9 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::string_view path,
 
     // replace spaces in path with underscores for matching
     std::string under_path;
-    if (ztd::contains(path, " "))
+    if (ztd::contains(path.string(), " "))
     {
-        const std::string cleaned = ztd::replace(path, " ", "_");
+        const std::filesystem::path& cleaned = ztd::replace(path.string(), " ", "_");
         under_path = ztd::strdup(cleaned);
     }
     else
@@ -1415,13 +1415,12 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     new_handler_xset->scroll_lock = set->scroll_lock;
 
     // build copy scripts command
-    const std::string path_src = Glib::build_filename(set->plug_dir, set->plug_name);
-    std::string path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts");
-    std::filesystem::create_directories(path_dest);
-    std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                     "scripts",
-                                     new_handler_xset->name);
+    const auto path_src = set->plug_dir / set->plug_name;
+    const auto path_dest_dir = vfs::user_dirs->program_config_dir() / "scripts";
+    std::filesystem::create_directories(path_dest_dir);
+    std::filesystem::permissions(path_dest_dir, std::filesystem::perms::owner_all);
+    const auto path_dest =
+        vfs::user_dirs->program_config_dir() / "scripts" / new_handler_xset->name;
     const std::string cp_command = fmt::format("cp -a {} {}", path_src, path_dest);
 
     // run command
@@ -2834,7 +2833,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             {
                 std::free(save->s);
             }
-            save->s = ztd::strdup(Glib::path_get_dirname(file));
+            save->s = ztd::strdup(std::filesystem::path(file).parent_path());
             break;
         case PtkHandlerJob::HANDLER_JOB_RESTORE_ALL:
             restore_defaults(hnd, true);
@@ -2867,7 +2866,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // Make Plugin Dir
-    const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
+    const auto user_tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(user_tmp))
     {
         xset_msg_dialog(GTK_WIDGET(hnd->dlg),
@@ -2879,10 +2878,10 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
         return;
     }
 
-    std::string plug_dir;
+    std::filesystem::path plug_dir;
     while (true)
     {
-        plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
+        plug_dir = user_tmp / ztd::randhex();
         if (!std::filesystem::exists(plug_dir))
         {
             break;

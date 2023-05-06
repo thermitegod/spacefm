@@ -729,7 +729,7 @@ VFSVolume::set_info() noexcept
 
     parameter = ztd::replace(parameter, "  ", " ");
 
-    this->disp_name = Glib::filename_display_name(parameter);
+    this->disp_name = parameter;
     if (this->udi.empty())
     {
         this->udi = this->device_file;
@@ -805,7 +805,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
 }
 
 bool
-is_path_mountpoint(const std::string_view path)
+is_path_mountpoint(const std::filesystem::path& path)
 {
     if (!std::filesystem::exists(path))
     {
@@ -821,7 +821,7 @@ is_path_mountpoint(const std::string_view path)
 const std::optional<std::string>
 VFSVolume::device_mount_cmd() noexcept
 {
-    const std::string path = Glib::find_program_in_path("udiskie-mount");
+    const std::filesystem::path path = Glib::find_program_in_path("udiskie-mount");
     if (path.empty())
     {
         return std::nullopt;
@@ -832,7 +832,7 @@ VFSVolume::device_mount_cmd() noexcept
 const std::optional<std::string>
 VFSVolume::device_unmount_cmd() noexcept
 {
-    const std::string path = Glib::find_program_in_path("udiskie-umount");
+    const std::filesystem::path path = Glib::find_program_in_path("udiskie-umount");
     if (path.empty())
     {
         return std::nullopt;
@@ -1164,7 +1164,7 @@ VFSVolume::get_icon() const noexcept
 }
 
 bool
-vfs_volume_dir_avoid_changes(const std::string_view dir)
+vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
 {
     // determines if file change detection should be disabled for this
     // dir (eg nfs stat calls block when a write is in progress so file
@@ -1177,7 +1177,7 @@ vfs_volume_dir_avoid_changes(const std::string_view dir)
         return false;
     }
 
-    const std::string canon = std::filesystem::canonical(dir);
+    const auto canon = std::filesystem::canonical(dir);
     const auto stat = ztd::stat(canon);
     if (!stat.is_valid() || stat.is_block_file())
     {

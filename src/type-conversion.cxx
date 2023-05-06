@@ -16,11 +16,30 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <glib.h>
 
 #include "vfs/vfs-file-info.hxx"
+
+/**
+ * std::filesystem::path
+ */
+
+std::vector<std::filesystem::path>
+glist_t_char_to_vector_t_path(GList* list)
+{
+    std::vector<std::filesystem::path> vec;
+    vec.reserve(g_list_length(list));
+    for (GList* l = list; l; l = g_list_next(l))
+    {
+        const std::filesystem::path open_file = (const char*)(l->data);
+        vec.emplace_back(open_file);
+    }
+    return vec;
+}
 
 /**
  * std::string

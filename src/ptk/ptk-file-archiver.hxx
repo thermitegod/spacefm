@@ -40,8 +40,9 @@ enum PTKFileArchiverArc
 // Pass file_browser or desktop depending on where you are calling from
 void ptk_file_archiver_create(PtkFileBrowser* file_browser,
                               const std::span<const vfs::file_info> sel_files,
-                              const std::string_view cwd);
+                              const std::filesystem::path& cwd);
 void ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                                const std::span<const vfs::file_info> sel_files,
-                               const std::string_view cwd, const std::string_view dest_dir, i32 job,
+                               const std::filesystem::path& cwd,
+                               const std::filesystem::path& dest_dir, i32 job,
                                bool archive_presence_checked);

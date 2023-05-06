@@ -95,8 +95,9 @@ static gboolean main_window_window_state_event(GtkWidget* widget, GdkEventWindow
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data);
 static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
-static void on_file_browser_open_item(PtkFileBrowser* file_browser, const std::string_view path,
-                                      PtkOpenAction action, MainWindow* main_window);
+static void on_file_browser_open_item(PtkFileBrowser* file_browser,
+                                      const std::filesystem::path& path, PtkOpenAction action,
+                                      MainWindow* main_window);
 static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
 static void on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window);
 static void on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window);
@@ -141,7 +142,7 @@ static i32 n_windows = 0;
 
 static std::vector<MainWindow*> all_windows;
 
-static std::map<panel_t, std::vector<std::string>> closed_tabs_restore;
+static std::map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore;
 
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
@@ -307,16 +308,16 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
         {
             std::free(save->s);
         }
-        save->s = ztd::strdup(Glib::path_get_dirname(path));
+        save->s = ztd::strdup(std::filesystem::path(path).filename());
     }
 
-    std::string plug_dir;
+    std::filesystem::path plug_dir;
     switch (job)
     {
         case PluginJob::INSTALL:
         {
             // install job
-            char* filename = ztd::strdup(Glib::path_get_basename(path));
+            char* filename = ztd::strdup(std::filesystem::path(path).filename());
             char* ext = strstr(filename, ".spacefm-plugin");
             if (!ext)
             {
@@ -346,7 +347,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                 return;
             }
 
-            plug_dir = Glib::build_filename(DATADIR, PACKAGE_NAME, "plugins", plug_dir_name);
+            plug_dir = std::filesystem::path() / DATADIR / PACKAGE_NAME / "plugins" / plug_dir_name;
 
             if (std::filesystem::exists(plug_dir))
             {
@@ -373,7 +374,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
         case PluginJob::COPY:
         {
             // copy job
-            const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
+            const auto user_tmp = vfs::user_dirs->program_tmp_dir();
             if (std::filesystem::is_directory(user_tmp))
             {
                 xset_msg_dialog(GTK_WIDGET(main_window),
@@ -386,7 +387,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
             }
             while (true)
             {
-                plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
+                plug_dir = user_tmp / ztd::randhex();
                 if (!std::filesystem::exists(plug_dir))
                 {
                     break;
@@ -528,9 +529,9 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
     MainWindow* main_window = MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
 
-    const std::vector<std::string> search_dirs{cwd};
+    const std::vector<std::filesystem::path> search_dirs{cwd};
 
     find_files(search_dirs);
 }
@@ -552,7 +553,7 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
                                            GTK_WIDGET(file_browser),
                                            file_browser->task_view);
     const std::string exe = ztd::program::exe();
-    const std::string cwd = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser));
+    const std::string cwd = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser).string());
     ptask->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
     ptask->task->exec_as_user = "root";
     ptask->task->exec_sync = false;
@@ -761,7 +762,7 @@ main_window_close_all_invalid_tabs()
 }
 
 void
-main_window_refresh_all_tabs_matching(const std::string_view path)
+main_window_refresh_all_tabs_matching(const std::filesystem::path& path)
 {
     (void)path;
     // This function actually closes the tabs because refresh does not work.
@@ -1192,21 +1193,14 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                             continue;
                         }
 
-                        std::string folder_path;
+                        std::filesystem::path folder_path;
                         if (std::filesystem::is_directory(tab_dir))
                         {
-                            folder_path = tab_dir.data();
+                            folder_path = tab_dir;
                         }
                         else
                         {
-                            if (geteuid() != 0)
-                            {
-                                folder_path = vfs::user_dirs->home_dir();
-                            }
-                            else
-                            {
-                                folder_path = "/";
-                            }
+                            folder_path = vfs::user_dirs->home_dir();
                         }
                         main_window_add_new_tab(main_window, folder_path);
                         tab_added = true;
@@ -1237,8 +1231,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 if (!tab_added)
                 {
                     // open default tab
-                    std::string folder_path;
-
+                    std::filesystem::path folder_path;
                     if (xset_get_s(XSetName::GO_SET_DEFAULT))
                     {
                         folder_path = xset_get_s(XSetName::GO_SET_DEFAULT);
@@ -1410,7 +1403,7 @@ bookmark_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu)
     // Add All Bookmarks
     for (auto [book_path, book_name] : get_all_bookmarks())
     {
-        item = gtk_menu_item_new_with_label(book_path.data());
+        item = gtk_menu_item_new_with_label(book_path.c_str());
 
         g_object_set_data(G_OBJECT(item), "file_browser", file_browser);
         g_object_set_data(G_OBJECT(item), "path", ztd::strdup(book_path));
@@ -2161,7 +2154,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 
 void
 main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
-                          const std::string_view file_path)
+                          const std::filesystem::path& file_path)
 {
     if (!file_browser)
     {
@@ -2288,7 +2281,7 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         return;
     }
 
-    const std::string file_path = closed_tabs_restore[panel].back();
+    const auto file_path = closed_tabs_restore[panel].back();
     closed_tabs_restore[panel].pop_back();
     // ztd::logger::info("on_restore_notebook_page panel={} path={}", panel, file_path);
 
@@ -2367,17 +2360,15 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     }
     if (gtk_notebook_get_n_pages(notebook) == 0)
     {
-        const char* path = xset_get_s(XSetName::GO_SET_DEFAULT);
-        if (!(path && path[0] != '\0'))
+        std::filesystem::path path;
+        const char* go_default = xset_get_s(XSetName::GO_SET_DEFAULT);
+        if (go_default != nullptr)
         {
-            if (geteuid() != 0)
-            {
-                path = vfs::user_dirs->home_dir().data();
-            }
-            else
-            {
-                path = ztd::strdup("/");
-            }
+            path = go_default;
+        }
+        else
+        {
+            path = vfs::user_dirs->home_dir();
         }
         main_window_add_new_tab(main_window, path);
         a_browser =
@@ -2600,11 +2591,11 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     }
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
     if (!cwd.empty())
     {
-        const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
-        tab_text = gtk_label_new(name.data());
+        const auto name = ptk_file_browser_get_cwd(file_browser).filename();
+        tab_text = gtk_label_new(name.c_str());
     }
 
     gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -2663,7 +2654,7 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 
 void
 main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
-                             const std::string_view path)
+                             const std::filesystem::path& path)
 {
     GtkWidget* label =
         gtk_notebook_get_tab_label(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser));
@@ -2679,7 +2670,7 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 
     // TODO: Change the icon
 
-    const std::string name = Glib::path_get_basename(path.data());
+    const std::string name = path.filename();
     gtk_label_set_text(text, name.data());
     gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (name.size() < 30)
@@ -2696,7 +2687,7 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 }
 
 void
-main_window_add_new_tab(MainWindow* main_window, const std::string_view folder_path)
+main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& folder_path)
 {
     GtkWidget* notebook = main_window->notebook;
 
@@ -2998,7 +2989,7 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
 static void
 set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
-    std::string disp_path;
+    std::filesystem::path disp_path;
     std::string disp_name;
 
     if (!file_browser || !main_window)
@@ -3009,15 +3000,15 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     if (file_browser->dir)
     {
         disp_path = file_browser->dir->path;
-        disp_name = Glib::path_get_basename(disp_path);
+        disp_name = disp_path.filename();
     }
     else
     {
-        const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+        const auto cwd = ptk_file_browser_get_cwd(file_browser);
         if (!cwd.empty())
         {
-            disp_path = Glib::filename_display_name(cwd);
-            disp_name = Glib::path_get_basename(disp_path);
+            disp_path = cwd;
+            disp_name = disp_path.filename();
         }
     }
 
@@ -3056,7 +3047,7 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     }
     if (orig_fmt && ztd::contains(orig_fmt, "%d"))
     {
-        fmt = ztd::replace(fmt, "%d", disp_path);
+        fmt = ztd::replace(fmt, "%d", disp_path.string());
     }
 
     gtk_window_set_title(GTK_WINDOW(main_window), fmt.data());
@@ -3127,7 +3118,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 }
 
 void
-main_window_open_path_in_current_tab(MainWindow* main_window, const std::string_view path)
+main_window_open_path_in_current_tab(MainWindow* main_window, const std::filesystem::path& path)
 {
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
@@ -3139,7 +3130,7 @@ main_window_open_path_in_current_tab(MainWindow* main_window, const std::string_
 }
 
 void
-main_window_open_network(MainWindow* main_window, const std::string_view path, bool new_tab)
+main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab)
 {
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
@@ -3147,11 +3138,11 @@ main_window_open_network(MainWindow* main_window, const std::string_view path, b
     {
         return;
     }
-    ptk_location_view_mount_network(file_browser, path, new_tab, false);
+    ptk_location_view_mount_network(file_browser, url, new_tab, false);
 }
 
 static void
-on_file_browser_open_item(PtkFileBrowser* file_browser, const std::string_view path,
+on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::path& path,
                           PtkOpenAction action, MainWindow* main_window)
 {
     if (path.empty())
@@ -3192,7 +3183,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         return;
     }
 
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
     if (cwd.empty())
     {
         return;
@@ -3253,17 +3244,17 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 
             if (file->is_symlink())
             {
-                const std::string file_path = Glib::build_filename(cwd, file->get_name());
-                const std::string target = std::filesystem::absolute(file_path);
+                const auto file_path = cwd / file->get_name();
+                const auto target = std::filesystem::absolute(file_path);
                 if (!target.empty())
                 {
-                    std::string target_path;
+                    std::filesystem::path target_path;
 
                     // ztd::logger::info("LINK: {}", file_path);
-                    if (target.at(0) != '/')
+                    if (!target.is_absolute())
                     {
                         // relative link
-                        target_path = Glib::build_filename(cwd, target);
+                        target_path = cwd / target;
                     }
                     else
                     {
@@ -3395,7 +3386,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         u64 disk_size_disk = 0;
         for (const auto& file : std::filesystem::directory_iterator(cwd))
         {
-            const auto file_stat = ztd::stat(file.path().string());
+            const auto file_stat = ztd::stat(file.path());
             if (!file_stat.is_regular_file())
             {
                 continue;
@@ -4101,8 +4092,8 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             vfs::file_info file = vfs_file_info_ref(sel_files.front());
 
             c->var[ItemPropContext::CONTEXT_NAME] = file->get_name();
-            const std::string path = Glib::build_filename(c->var[ItemPropContext::CONTEXT_DIR],
-                                                          c->var[ItemPropContext::CONTEXT_NAME]);
+            const auto path = std::filesystem::path() / c->var[ItemPropContext::CONTEXT_DIR] /
+                              c->var[ItemPropContext::CONTEXT_NAME];
             c->var[ItemPropContext::CONTEXT_IS_DIR] =
                 std::filesystem::is_directory(path) ? "true" : "false";
             c->var[ItemPropContext::CONTEXT_IS_TEXT] = file->is_text(path) ? "true" : "false";
@@ -4336,8 +4327,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             ptk_file_task_lock(ptask);
             if (!ptask->task->current_file.empty())
             {
-                c->var[ItemPropContext::CONTEXT_TASK_DIR] =
-                    Glib::path_get_dirname(ptask->task->current_file);
+                c->var[ItemPropContext::CONTEXT_TASK_DIR] = ptask->task->current_file.parent_path();
             }
             else
             {
@@ -4427,8 +4417,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         }
 
         // cwd
-        const std::string cwd = ptk_file_browser_get_cwd(a_browser);
-        buf.append(fmt::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd)));
+        const auto cwd = ptk_file_browser_get_cwd(a_browser);
+        buf.append(fmt::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd.string())));
         buf.append(fmt::format("set fm_tab_panel[{}] {}\n", p, current_page + 1));
 
         // selected files
@@ -4440,9 +4430,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             buf.append(fmt::format("set fm_panel{}_files (echo ", p));
             for (vfs::file_info file : sel_files)
             {
-                buf.append(
-                    fmt::format("{} ",
-                                ztd::shell::quote(Glib::build_filename(cwd, file->get_name()))));
+                const auto path = cwd / file->get_name();
+                buf.append(fmt::format("{} ", ztd::shell::quote(path.string())));
             }
             buf.append(fmt::format(")\n"));
 
@@ -4507,7 +4496,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-            const std::string path = ztd::shell::quote(ptk_file_browser_get_cwd(t_browser));
+            const std::string path =
+                ztd::shell::quote(ptk_file_browser_get_cwd(t_browser).string());
             buf.append(fmt::format("set fm_pwd_panel{}_tab[{}] {}\n", p, i + 1, path));
             if (p == file_browser->mypanel)
             {
@@ -4551,31 +4541,32 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     if (set)
     {
         // cmd_dir
-        std::string path;
-        std::string esc_path;
+        std::filesystem::path path;
+        std::filesystem::path esc_path;
 
         if (set->plugin)
         {
-            path = Glib::build_filename(set->plug_dir, "files");
+            path = set->plug_dir / "files";
             if (!std::filesystem::exists(path))
             {
-                path = Glib::build_filename(set->plug_dir, set->plug_name);
+                path = set->plug_dir / set->plug_name;
             }
         }
         else
         {
-            path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
+            path = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
         }
-        buf.append(fmt::format("set fm_cmd_dir {}\n", ztd::shell::quote(path)));
+        buf.append(fmt::format("set fm_cmd_dir {}\n", ztd::shell::quote(path.string())));
 
         // cmd_data
-        path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", set->name);
-        buf.append(fmt::format("set fm_cmd_data {}\n", ztd::shell::quote(path)));
+        path = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
+        buf.append(fmt::format("set fm_cmd_data {}\n", ztd::shell::quote(path.string())));
 
         // plugin_dir
         if (set->plugin)
         {
-            buf.append(fmt::format("set fm_plugin_dir {}\n", ztd::shell::quote(set->plug_dir)));
+            buf.append(
+                fmt::format("set fm_plugin_dir {}\n", ztd::shell::quote(set->plug_dir.string())));
         }
 
         // cmd_name
@@ -4586,8 +4577,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     }
 
     // tmp
-    buf.append(
-        fmt::format("set fm_tmp_dir {}\n", ztd::shell::quote(vfs::user_dirs->program_tmp_dir())));
+    buf.append(fmt::format("set fm_tmp_dir {}\n",
+                           ztd::shell::quote(vfs::user_dirs->program_tmp_dir().string())));
 
     // tasks
     PtkFileTask* ptask = get_selected_task(file_browser->task_view);
@@ -4600,8 +4591,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         if (ptask->task->type == VFSFileTaskType::EXEC)
         {
             // clang-format off
-            buf.append(fmt::format("set fm_task_pwd {}\n", ztd::shell::quote(ptask->task->dest_dir)));
-            buf.append(fmt::format("set fm_task_name {}\n", ztd::shell::quote(ptask->task->current_file)));
+            buf.append(fmt::format("set fm_task_pwd {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
+            buf.append(fmt::format("set fm_task_name {}\n", ztd::shell::quote(ptask->task->current_file.string())));
             buf.append(fmt::format("set fm_task_command {}\n", ztd::shell::quote(ptask->task->exec_command)));
             buf.append(fmt::format("set fm_task_user {}\n", ztd::shell::quote(ptask->task->exec_as_user)));
             buf.append(fmt::format("set fm_task_icon {}\n", ztd::shell::quote(ptask->task->exec_icon)));
@@ -4611,9 +4602,9 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         else
         {
             // clang-format off
-            buf.append(fmt::format("set fm_task_dest_dir {}\n", ztd::shell::quote(ptask->task->dest_dir)));
-            buf.append(fmt::format("set fm_task_current_src_file {}\n", ztd::shell::quote(ptask->task->current_file)));
-            buf.append(fmt::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(ptask->task->current_dest)));
+            buf.append(fmt::format("set fm_task_dest_dir {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
+            buf.append(fmt::format("set fm_task_current_src_file {}\n", ztd::shell::quote(ptask->task->current_file.string())));
+            buf.append(fmt::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(ptask->task->current_dest.string())));
             // clang-format on
         }
         buf.append(fmt::format("set fm_task_id {:p}\n", fmt::ptr(ptask)));
@@ -5536,7 +5527,6 @@ main_task_view_update_task(PtkFileTask* ptask)
     GtkTreeModel* model;
     GtkTreeIter it;
     GdkPixbuf* pixbuf;
-    const char* dest_dir;
     xset_t set;
 
     // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
@@ -5567,13 +5557,10 @@ main_task_view_update_task(PtkFileTask* ptask)
         return;
     }
 
+    std::filesystem::path dest_dir;
     if (ptask->task->type != VFSFileTaskType::EXEC)
     {
-        dest_dir = ptask->task->dest_dir.data();
-    }
-    else
-    {
-        dest_dir = nullptr;
+        dest_dir = ptask->task->dest_dir;
     }
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -5595,7 +5582,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                           &it,
                                           0,
                                           MainWindowTaskCol::TASK_COL_TO,
-                                          dest_dir,
+                                          dest_dir.empty() ? nullptr : dest_dir.c_str(),
                                           MainWindowTaskCol::TASK_COL_STARTED,
                                           started.str().data(),
                                           MainWindowTaskCol::TASK_COL_STARTTIME,
@@ -5624,8 +5611,8 @@ main_task_view_update_task(PtkFileTask* ptask)
         {
             if (!ptask->task->current_file.empty())
             {
-                path = Glib::path_get_dirname(ptask->task->current_file);
-                file = Glib::path_get_basename(ptask->task->current_file);
+                path = ptask->task->current_file.parent_path();
+                file = ptask->task->current_file.filename();
             }
         }
         else
@@ -7852,7 +7839,7 @@ main_window_socket_command(char* argv[])
                             fmt::format("invalid {} task option '{}'", socket_property, argv[j])};
                 }
             }
-            std::vector<std::string> file_list;
+            std::vector<std::filesystem::path> file_list;
             GList* l = nullptr; // file list
             char* target_dir = nullptr;
             for (; argv[j]; ++j)
@@ -7871,7 +7858,7 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    std::string str;
+                    std::filesystem::path str;
                     if (ztd::startswith(argv[j], "/"))
                     { // absolute path
                         str = argv[j];
@@ -7888,7 +7875,7 @@ main_window_socket_command(char* argv[])
                                                 argv[j],
                                                 argv[i])};
                         }
-                        str = Glib::build_filename(opt_cwd, argv[j]);
+                        str = std::filesystem::path() / opt_cwd / argv[j];
                     }
                     file_list.emplace_back(str);
                 }
@@ -8217,7 +8204,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     {
         if (file_browser)
         {
-            rep = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser));
+            rep = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser).string());
             cmd = ztd::replace(cmd, "%d", rep);
         }
     }

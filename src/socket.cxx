@@ -218,7 +218,7 @@ on_socket_event(Glib::IOCondition condition)
     return true;
 }
 
-static const std::string
+static const std::filesystem::path
 get_socket_name()
 {
     std::string dpy = Glib::getenv("DISPLAY");
@@ -228,13 +228,10 @@ get_socket_name()
         dpy = ":0";
     }
 
-    const std::string socket_path = fmt::format("{}/{}-{}{}.socket",
-                                                vfs::user_dirs->runtime_dir(),
-                                                PACKAGE_NAME,
-                                                Glib::get_user_name(),
-                                                dpy);
+    const std::string socket_file =
+        fmt::format("{}-{}{}.socket", PACKAGE_NAME, Glib::get_user_name(), dpy);
 
-    return socket_path;
+    return vfs::user_dirs->runtime_dir() / socket_file;
 }
 
 [[noreturn]] static void
@@ -257,7 +254,7 @@ single_instance_check()
     sockaddr_un addr;
     std::memset(&addr, 0, sizeof(sockaddr_un));
     addr.sun_family = AF_UNIX;
-    std::strcpy(addr.sun_path, get_socket_name().data());
+    std::strcpy(addr.sun_path, get_socket_name().c_str());
     const socklen_t addr_len = SUN_LEN(&addr);
 
     // try to connect to existing instance
@@ -379,7 +376,7 @@ single_instance_finalize()
     shutdown(sock_fd, SHUT_RDWR);
     close(sock_fd);
 
-    const std::string lock_file = get_socket_name();
+    const auto lock_file = get_socket_name();
     std::filesystem::remove(lock_file);
 }
 
@@ -453,7 +450,7 @@ send_socket_command(std::span<const std::string_view> args)
     sockaddr_un addr;
     std::memset(&addr, 0, sizeof(sockaddr_un));
     addr.sun_family = AF_UNIX;
-    std::strcpy(addr.sun_path, get_socket_name().data());
+    std::strcpy(addr.sun_path, get_socket_name().c_str());
     const socklen_t addr_len = SUN_LEN(&addr);
 
     if (connect(sock_fd, (struct sockaddr*)&addr, addr_len) != 0)

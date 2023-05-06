@@ -18,6 +18,8 @@
 /* Currently this library is NOT MT-safe */
 
 #include <string>
+#include <string_view>
+
 #include <filesystem>
 
 #include <array>
@@ -61,7 +63,7 @@
 inline constexpr i32 TEXT_MAX_EXTENT = 512;
 
 /* Check if the specified mime_type is the subclass of the specified parent type */
-static bool mime_type_is_subclass(std::string_view type, std::string_view parent);
+static bool mime_type_is_subclass(const std::string_view type, const std::string_view parent);
 
 std::vector<mime_cache_t> caches;
 
@@ -78,7 +80,8 @@ static bool mime_type_is_data_plain_text(const std::span<const char8_t> data);
  * Mime-type of the file is determined by cheking the filename only.
  */
 static const std::string
-mime_type_get_by_filename(std::string_view filename, std::filesystem::file_status status)
+mime_type_get_by_filename(const std::filesystem::path& filename,
+                          const std::filesystem::file_status& status)
 {
     const char* type = nullptr;
     const char* suffix_pos = nullptr;
@@ -91,13 +94,13 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
 
     for (const mime_cache_t& cache : caches)
     {
-        type = cache->lookup_literal(filename);
+        type = cache->lookup_literal(filename.c_str());
         if (type)
         {
             break;
         }
 
-        const char* _type = cache->lookup_suffix(filename, &suffix_pos);
+        const char* _type = cache->lookup_suffix(filename.c_str(), &suffix_pos);
         if (_type && suffix_pos < prev_suffix_pos)
         {
             type = _type;
@@ -116,7 +119,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
         i32 glob_len = 0;
         for (const mime_cache_t& cache : caches)
         {
-            const char* matched_type = cache->lookup_glob(filename, &glob_len);
+            const char* matched_type = cache->lookup_glob(filename.c_str(), &glob_len);
             /* according to the mime.cache 1.0 spec, we should use the longest glob matched. */
             if (matched_type && glob_len > max_glob_len)
             {
@@ -153,7 +156,7 @@ mime_type_get_by_filename(std::string_view filename, std::filesystem::file_statu
  * the specified file again.
  */
 const std::string
-mime_type_get_by_file(const std::string_view filepath)
+mime_type_get_by_file(const std::filesystem::path& filepath)
 {
     const auto status = std::filesystem::status(filepath);
 
@@ -172,7 +175,7 @@ mime_type_get_by_file(const std::string_view filepath)
         return XDG_MIME_TYPE_DIRECTORY.data();
     }
 
-    const std::string basename = Glib::path_get_basename(filepath.data());
+    const auto basename = filepath.filename();
     const std::string filename_type = mime_type_get_by_filename(basename, status);
     if (!ztd::same(filename_type, XDG_MIME_TYPE_UNKNOWN))
     {
@@ -187,7 +190,7 @@ mime_type_get_by_file(const std::string_view filepath)
         (std::filesystem::is_regular_file(status) || std::filesystem::is_symlink(status)))
     {
         /* Open the file and map it into memory */
-        const i32 fd = open(filepath.data(), O_RDONLY, 0);
+        const i32 fd = open(filepath.c_str(), O_RDONLY, 0);
         if (fd != -1)
         {
             // mime header size
@@ -238,12 +241,12 @@ mime_type_get_by_file(const std::string_view filepath)
 
 // returns - icon_name, icon_desc
 static std::optional<std::array<std::string, 2>>
-mime_type_parse_xml_file(const std::string_view file_path, bool is_local)
+mime_type_parse_xml_file(const std::filesystem::path& filepath, bool is_local)
 {
     // ztd::logger::info("MIME XML = {}", file_path);
 
     pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(file_path.data());
+    pugi::xml_parse_result result = doc.load_file(filepath.c_str());
 
     if (!result)
     {
@@ -347,10 +350,8 @@ mime_type_finalize()
 void
 mime_type_init()
 {
-    const std::string filename = "/mime/mime.cache";
-
-    const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), filename);
-    const mime_cache_t cache = std::make_shared<MimeCache>(path);
+    const auto user_mime_cache = vfs::user_dirs->data_dir() / "mime/mime.cache";
+    const mime_cache_t cache = std::make_shared<MimeCache>(user_mime_cache);
     caches.emplace_back(cache);
 
     if (cache->get_magic_max_extent() > mime_cache_max_extent)
@@ -361,8 +362,8 @@ mime_type_init()
     caches.reserve(vfs::user_dirs->system_data_dirs().size());
     for (const std::string_view dir : vfs::user_dirs->system_data_dirs())
     {
-        const std::string path2 = Glib::build_filename(dir.data(), filename);
-        const mime_cache_t dir_cache = std::make_shared<MimeCache>(path2);
+        const auto sys_mime_cache = std::filesystem::path() / dir.data() / "mime/mime.cache";
+        const mime_cache_t dir_cache = std::make_shared<MimeCache>(sys_mime_cache);
         caches.emplace_back(dir_cache);
 
         if (dir_cache->get_magic_max_extent() > mime_cache_max_extent)
@@ -415,7 +416,7 @@ mime_type_is_data_plain_text(const std::span<const char8_t> data)
 }
 
 bool
-mime_type_is_text_file(const std::string_view file_path, const std::string_view mime_type)
+mime_type_is_text_file(const std::filesystem::path& file_path, const std::string_view mime_type)
 {
     bool ret = false;
 
@@ -441,7 +442,7 @@ mime_type_is_text_file(const std::string_view file_path, const std::string_view 
         return false;
     }
 
-    const i32 fd = open(file_path.data(), O_RDONLY);
+    const i32 fd = open(file_path.c_str(), O_RDONLY);
     if (fd != -1)
     {
         const auto file_stat = ztd::stat(fd);
@@ -468,7 +469,8 @@ mime_type_is_text_file(const std::string_view file_path, const std::string_view 
 }
 
 bool
-mime_type_is_executable_file(const std::string_view file_path, const std::string_view mime_type)
+mime_type_is_executable_file(const std::filesystem::path& file_path,
+                             const std::string_view mime_type)
 {
     std::string file_mime_type;
     if (mime_type.empty())

@@ -123,10 +123,6 @@ XSet::~XSet()
     }
     if (this->plugin)
     {
-        if (this->plug_dir)
-        {
-            std::free(this->plug_dir);
-        }
         if (this->plug_name)
         {
             std::free(this->plug_name);
@@ -884,16 +880,12 @@ XSet::get_plug_dir() const noexcept
 void
 XSet::set_plug_dir(const char* val) noexcept
 {
-    if (this->plug_dir)
-        std::free(this->plug_dir);
     this->plug_dir = ztd::strdup(val);
 }
 
 void
 XSet::set_plug_dir(const std::string& val) noexcept
 {
-    if (this->plug_dir)
-        std::free(this->plug_dir);
     this->plug_dir = ztd::strdup(val);
 }
 

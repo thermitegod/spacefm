@@ -39,7 +39,7 @@
 static all_bookmarks_t bookmarks;
 
 static bool bookmarks_changed = false;
-static std::string bookmark_file;
+static std::filesystem::path bookmark_file;
 
 const all_bookmarks_t&
 get_all_bookmarks() noexcept
@@ -78,7 +78,7 @@ load_bookmarks() noexcept
 
     if (bookmark_file.empty())
     {
-        bookmark_file = Glib::build_filename(vfs::user_dirs->config_dir(), "gtk-3.0", "bookmarks");
+        bookmark_file = vfs::user_dirs->config_dir() / "gtk-3.0" / "bookmarks";
     }
 
     // no bookmark file
@@ -118,13 +118,13 @@ save_bookmarks() noexcept
 }
 
 void
-add_bookmarks(const std::string_view book_path) noexcept
+add_bookmarks(const std::filesystem::path& book_path) noexcept
 {
     bookmarks_changed = true;
 
-    const std::string book_name = ztd::rpartition(book_path, "/")[2];
+    const std::string book_name = book_path.filename();
 
-    bookmarks.push_back({book_path.data(), book_name});
+    bookmarks.push_back({book_path, book_name});
 }
 
 void

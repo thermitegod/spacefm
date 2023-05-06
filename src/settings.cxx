@@ -165,7 +165,7 @@ inline constexpr std::array<const char*, 18> builtin_tool_shared_key{
 void
 load_settings()
 {
-    const std::string& settings_config_dir = vfs::user_dirs->program_config_dir();
+    const auto settings_config_dir = vfs::user_dirs->program_config_dir();
 
     app_settings.set_load_saved_tabs(true);
 
@@ -174,9 +174,9 @@ load_settings()
 
 #if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
     // choose which config file to load
-    std::string conf_ini = Glib::build_filename(settings_config_dir, CONFIG_FILE_INI_FILENAME);
-    std::string conf_toml = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
-    std::string& session = conf_toml;
+    const auto conf_ini = settings_config_dir / CONFIG_FILE_INI_FILENAME;
+    const auto conf_toml = settings_config_dir / CONFIG_FILE_FILENAME;
+    const auto session = conf_toml;
     bool load_deprecated_ini_config = false;
     if (std::filesystem::exists(conf_ini) && !std::filesystem::exists(conf_toml))
     {
@@ -185,7 +185,7 @@ load_settings()
         session = conf_ini;
     }
 #else
-    const std::string session = Glib::build_filename(settings_config_dir, CONFIG_FILE_FILENAME);
+    const auto session = std::filesystem::path() / settings_config_dir / CONFIG_FILE_FILENAME;
 #endif
 
     if (!std::filesystem::exists(settings_config_dir))
@@ -273,13 +273,14 @@ load_settings()
         const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
         for (const std::string_view supported_terminal : supported_terminals)
         {
-            const std::string terminal = Glib::find_program_in_path(supported_terminal.data());
+            const std::filesystem::path terminal =
+                Glib::find_program_in_path(supported_terminal.data());
             if (terminal.empty())
             {
                 continue;
             }
 
-            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, Glib::path_get_basename(terminal));
+            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, terminal.filename().string());
             xset_set_b(XSetName::MAIN_TERMINAL, true); // discovery
             break;
         }
@@ -364,7 +365,10 @@ save_settings(void* main_window_ptr)
                             tabs = fmt::format("{}{}{}",
                                                tabs,
                                                CONFIG_FILE_TABS_DELIM,
-                                               ptk_file_browser_get_cwd(file_browser));
+                                               // Need to use .string() as libfmt will by default
+                                               // format paths with double quotes surrounding them
+                                               // which will break config file parsing.
+                                               ptk_file_browser_get_cwd(file_browser).string());
                         }
                         set->s = ztd::strdup(tabs);
 
@@ -402,7 +406,7 @@ save_settings(void* main_window_ptr)
     }
 
     /* save settings */
-    const std::string& settings_config_dir = vfs::user_dirs->program_config_dir();
+    const auto settings_config_dir = vfs::user_dirs->program_config_dir();
     if (!std::filesystem::exists(settings_config_dir))
     {
         std::filesystem::create_directories(settings_config_dir);
@@ -648,7 +652,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     char* context = nullptr;
     i32 context_action = ItemPropContextState::CONTEXT_SHOW;
     xset_t mset;
-    std::string icon_file;
     // ztd::logger::info("xset_add_menuitem {}", set->name);
 
     // plugin?
@@ -662,18 +665,17 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     {
         icon_name = set->icon;
     }
+
+    std::filesystem::path icon_file;
     if (!icon_name)
     {
         if (set->plugin)
         {
-            icon_file = Glib::build_filename(set->plug_dir, set->plug_name, "icon");
+            icon_file = set->plug_dir / set->plug_name / "icon";
         }
         else
         {
-            icon_file = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                             "scripts",
-                                             set->name,
-                                             "icon");
+            icon_file = vfs::user_dirs->program_config_dir() / "scripts" / set->name / "icon";
         }
 
         if (std::filesystem::exists(icon_file))
@@ -890,7 +892,6 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     (void)item;
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
-    std::string cwd;
     std::string value;
     xset_t mset;
 
@@ -904,6 +905,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     // plugin?
     mset = xset_get_plugin_mirror(set);
 
+    std::filesystem::path cwd;
     if (set->browser)
     {
         parent = GTK_WIDGET(set->browser);
@@ -1024,12 +1026,11 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                         cwd = "/";
                     }
 
-                    std::vector<std::string> open_files;
+                    std::vector<std::filesystem::path> open_files;
                     open_files.reserve(sel_files.size());
                     for (vfs::file_info file : sel_files)
                     {
-                        const std::string open_file = Glib::build_filename(cwd, file->get_name());
-
+                        const auto open_file = cwd / file->get_name();
                         open_files.emplace_back(open_file);
                     }
 
@@ -1276,7 +1277,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
 
     // task
     const std::string task_name = fmt::format("Edit {}", path);
-    const std::string cwd = Glib::path_get_dirname(path);
+    const auto cwd = std::filesystem::path(path).parent_path();
     PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, dlgparent, nullptr);
     ptask->task->exec_command = editor;
     ptask->task->exec_sync = false;
@@ -1626,7 +1627,7 @@ xset_job_is_valid(xset_t set, XSetJob job)
 
     if (set->plugin)
     {
-        if (!set->plug_dir)
+        if (set->plug_dir.empty())
         {
             return false;
         }
@@ -1894,7 +1895,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
 
     if (set->plugin)
     {
-        if (set->plug_dir)
+        if (!set->plug_dir.empty())
         {
             if (!set->plugin_top)
             {
@@ -3161,23 +3162,19 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             menu_style = set->menu_style;
     }
 
-    const char* icon_name;
-    icon_name = set->icon;
+    const char* icon_name = set->icon;
     if (!icon_name && set->tool == XSetTool::CUSTOM)
     {
         // custom 'icon' file?
-        const std::string icon_file = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                                           "scripts",
-                                                           set->name,
-                                                           "icon");
+        const std::filesystem::path icon_file =
+            vfs::user_dirs->program_config_dir() / "scripts" / set->name / "icon";
         if (std::filesystem::exists(icon_file))
         {
             icon_name = ztd::strdup(icon_file);
         }
     }
 
-    char* menu_label;
-    menu_label = set->menu_label;
+    char* menu_label = set->menu_label;
     if (!menu_label && set->tool > XSetTool::CUSTOM)
     {
         menu_label = (char*)xset_get_builtin_toolitem_label(set->tool);

@@ -44,7 +44,7 @@ static const std::map<Scripts, const std::string_view> script_map{
 bool
 script_exists(Scripts script) noexcept
 {
-    const std::string script_name = get_script_path(script);
+    const auto script_name = get_script_path(script);
 
     if (!std::filesystem::exists(script_name))
     {
@@ -65,18 +65,8 @@ script_exists(const std::string_view script) noexcept
     return true;
 }
 
-const std::string
+const std::filesystem::path
 get_script_path(Scripts script) noexcept
 {
-    const std::string script_name = script_map.at(script).data();
-
-#if defined(SPACEFM_USER_SCRIPT_OVERRIDE)
-    const std::string script_path =
-        Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", script_name);
-    // ztd::logger::info("user script: {}", script_path);
-    if (std::filesystem::exists(script_path))
-        return script_path;
-#endif
-
-    return Glib::build_filename(PACKAGE_SCRIPTS_PATH, script_name);
+    return std::filesystem::path() / PACKAGE_SCRIPTS_PATH / script_map.at(script);
 }

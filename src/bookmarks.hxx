@@ -18,10 +18,12 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <array>
 #include <vector>
 
-using bookmark_t = std::array<std::string, 2>;
+using bookmark_t = std::array<std::filesystem::path, 2>;
 using all_bookmarks_t = std::vector<bookmark_t>;
 
 const all_bookmarks_t& get_all_bookmarks() noexcept;
@@ -29,5 +31,5 @@ const all_bookmarks_t& get_all_bookmarks() noexcept;
 void load_bookmarks() noexcept;
 void save_bookmarks() noexcept;
 
-void add_bookmarks(const std::string_view book_path) noexcept;
+void add_bookmarks(const std::filesystem::path& book_path) noexcept;
 void remove_bookmarks() noexcept;

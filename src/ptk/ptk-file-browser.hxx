@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <span>
 
 #include <sigc++/sigc++.h>
@@ -162,7 +164,7 @@ struct PtkFileBrowser
     using evt_chdir_before_t = void(PtkFileBrowser*, MainWindow*);
     using evt_chdir_begin_t = void(PtkFileBrowser*, MainWindow*);
     using evt_chdir_after_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_open_file_t = void(PtkFileBrowser*, const std::string_view, PtkOpenAction,
+    using evt_open_file_t = void(PtkFileBrowser*, const std::filesystem::path&, PtkOpenAction,
                                  MainWindow*);
     using evt_change_content_t = void(PtkFileBrowser*, MainWindow*);
     using evt_change_sel_t = void(PtkFileBrowser*, MainWindow*);
@@ -259,7 +261,7 @@ struct PtkFileBrowser
 
     template<EventType evt>
     typename std::enable_if<evt == EventType::OPEN_ITEM, void>::type
-    run_event(const std::string_view path, PtkOpenAction action)
+    run_event(const std::filesystem::path& path, PtkOpenAction action)
     {
         // ztd::logger::trace("Signal Execute   : EventType::OPEN_ITEM");
         this->evt_open_file.emit(this, path, action, this->evt_data_window);
@@ -318,10 +320,10 @@ struct PtkFileBrowserClass
     GtkPanedClass parent;
 
     /* Default signal handlers */
-    void (*before_chdir)(PtkFileBrowser* file_browser, const std::string_view path);
+    void (*before_chdir)(PtkFileBrowser* file_browser, const std::filesystem::path& path);
     void (*begin_chdir)(PtkFileBrowser* file_browser);
     void (*after_chdir)(PtkFileBrowser* file_browser);
-    void (*open_item)(PtkFileBrowser* file_browser, const std::string_view path, i32 action);
+    void (*open_item)(PtkFileBrowser* file_browser, const std::filesystem::path& path, i32 action);
     void (*content_change)(PtkFileBrowser* file_browser);
     void (*sel_change)(PtkFileBrowser* file_browser);
     void (*pane_mode_change)(PtkFileBrowser* file_browser);
@@ -335,14 +337,14 @@ GtkWidget* ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* ta
 /*
  * folder_path should be encodede in on-disk encoding
  */
-bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::string_view folder_path,
+bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path& folder_path,
                             PtkFBChdirMode mode);
 
 /*
  * returned path should be encodede in on-disk encoding
  * returned path should be encodede in UTF-8
  */
-const std::string ptk_file_browser_get_cwd(PtkFileBrowser* file_browser);
+const std::filesystem::path ptk_file_browser_get_cwd(PtkFileBrowser* file_browser);
 
 u32 ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser);
 u32 ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser);
@@ -384,11 +386,11 @@ void ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_bro
 void ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                                      const char* search_key);
-void ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::string_view path);
+void ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::filesystem::path& path);
 
 void ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
                                             const std::span<const vfs::file_info> sel_files,
-                                            const std::string_view cwd);
+                                            const std::filesystem::path& cwd);
 
 void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page);
 
@@ -398,13 +400,13 @@ void ptk_file_browser_view_as_list(PtkFileBrowser* file_browser);
 
 void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
                                     const std::span<const vfs::file_info> sel_files,
-                                    const std::string_view cwd);
+                                    const std::filesystem::path& cwd);
 
 void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, i32 max_file_size);
 
 // MOD
-i32 ptk_file_browser_write_access(const std::string_view cwd);
-i32 ptk_file_browser_read_access(const std::string_view cwd);
+bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
+bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
 
 void ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);
@@ -421,20 +423,20 @@ bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
 void ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser);
 void ptk_file_browser_focus_me(PtkFileBrowser* file_browser);
 void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
-                                  const std::string_view file_path);
+                                  const std::filesystem::path& file_path);
 void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
                                     const std::span<const vfs::file_info> sel_files,
-                                    const std::string_view cwd);
+                                    const std::filesystem::path& cwd);
 void ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
                               const std::span<const vfs::file_info> sel_files,
-                              const std::string_view cwd, XSetName setname);
+                              const std::filesystem::path& cwd, XSetName setname);
 void ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname);
 GList* folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model);
-void ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::string_view path);
+void ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem::path& path);
 void ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                                        bool do_select);
-void ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::string_view seek_dir,
-                                const std::string_view seek_name);
+void ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::path& seek_dir,
+                                const std::filesystem::path& seek_name);
 void ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget);
 void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, XSetTool tool_type);
 void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset_t set_ptr,

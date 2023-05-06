@@ -27,14 +27,14 @@
 bool have_rw_access(const std::filesystem::path& path) noexcept;
 bool have_x_access(const std::filesystem::path& path) noexcept;
 
-bool dir_has_files(const std::string_view path) noexcept;
+bool dir_has_files(const std::filesystem::path& path) noexcept;
 
 const std::string replace_line_subs(const std::string_view line) noexcept;
 
 const std::pair<std::string, std::string>
-get_name_extension(const std::string_view filename) noexcept;
+get_name_extension(const std::filesystem::path& filename) noexcept;
 
-void open_in_prog(const std::string_view path) noexcept;
+void open_in_prog(const std::filesystem::path& path) noexcept;
 
 const std::string clean_label(const std::string_view menu_label, bool kill_special,
                               bool escape) noexcept;

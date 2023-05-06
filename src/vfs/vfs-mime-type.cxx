@@ -68,7 +68,7 @@ vfs_mime_type_new(const std::string_view type_name)
 }
 
 vfs::mime_type
-vfs_mime_type_get_from_file(const std::string_view file_path)
+vfs_mime_type_get_from_file(const std::filesystem::path& file_path)
 {
     const std::string type = mime_type_get_by_file(file_path);
     return vfs_mime_type_get_from_type(type);
@@ -103,7 +103,7 @@ vfs_mime_type_reload()
 
 static void
 on_mime_cache_changed(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                      std::string_view file_name, void* user_data)
+                      const std::filesystem::path& file_name, void* user_data)
 {
     (void)monitor;
     (void)event;
@@ -469,7 +469,8 @@ vfs_mime_type_locate_desktop_file(const std::string_view desktop_id)
 }
 
 const char*
-vfs_mime_type_locate_desktop_file(const std::string_view dir, const std::string_view desktop_id)
+vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
+                                  const std::string_view desktop_id)
 {
     return mime_type_locate_desktop_file(dir, desktop_id);
 }

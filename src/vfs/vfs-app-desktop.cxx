@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <span>
 
 #include <array>
@@ -61,29 +63,30 @@ vfs_get_desktop(const std::string_view desktop_file)
     return desktop;
 }
 
-VFSAppDesktop::VFSAppDesktop(const std::string_view open_file_name) noexcept
+VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
 {
-    // ztd::logger::info("VFSAppDesktop constructor = {}", open_file_name);
-
     bool load;
     const auto kf = Glib::KeyFile::create();
 
-    if (Glib::path_is_absolute(open_file_name.data()))
+    if (desktop_file.is_absolute())
     {
-        this->file_name = Glib::path_get_basename(open_file_name.data());
-        this->full_path = open_file_name.data();
-        load = kf->load_from_file(open_file_name.data(), Glib::KeyFile::Flags::NONE);
+        this->file_name = desktop_file.filename();
+        this->full_path = desktop_file;
+        load = kf->load_from_file(desktop_file, Glib::KeyFile::Flags::NONE);
     }
     else
     {
-        this->file_name = open_file_name.data();
-        const std::string relative_path = Glib::build_filename("applications", this->file_name);
-        load = kf->load_from_data_dirs(relative_path, this->full_path, Glib::KeyFile::Flags::NONE);
+        this->file_name = desktop_file.filename();
+        const auto relative_path = std::filesystem::path() / "applications" / this->file_name;
+        std::string relative_full_path;
+        load =
+            kf->load_from_data_dirs(relative_path, relative_full_path, Glib::KeyFile::Flags::NONE);
+        this->full_path = relative_full_path;
     }
 
     if (!load)
     {
-        ztd::logger::warn("Failed to load desktop file {}", open_file_name);
+        ztd::logger::warn("Failed to load desktop file {}", desktop_file);
         this->exec = this->file_name;
         return;
     }
@@ -308,7 +311,7 @@ VFSAppDesktop::use_terminal() const noexcept
     return this->terminal;
 }
 
-const std::string&
+const std::filesystem::path&
 VFSAppDesktop::get_full_path() const noexcept
 {
     return this->full_path;
@@ -361,8 +364,8 @@ VFSAppDesktop::open_multiple_files() const noexcept
 }
 
 const std::optional<std::vector<std::vector<std::string>>>
-VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string> file_list,
-                                              bool quote_file_list) const noexcept
+VFSAppDesktop::app_exec_generate_desktop_argv(
+    const std::span<const std::filesystem::path> file_list, bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -384,15 +387,15 @@ VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string>
         for (auto& argv : commands)
         {
             argv.pop_back(); // remove open_files_key
-            for (const std::string_view file : file_list)
+            for (const auto& file : file_list)
             {
                 if (quote_file_list)
                 {
-                    argv.emplace_back(ztd::shell::quote(file));
+                    argv.emplace_back(ztd::shell::quote(file.string()));
                 }
                 else
                 {
-                    argv.emplace_back(file.data());
+                    argv.emplace_back(file.string());
                 }
             }
         }
@@ -418,15 +421,15 @@ VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string>
         for (auto& argv : commands)
         {
             argv.pop_back(); // remove open_file_key
-            for (const std::string_view file : file_list)
+            for (const auto& file : file_list)
             {
                 if (quote_file_list)
                 {
-                    argv.emplace_back(ztd::shell::quote(file));
+                    argv.emplace_back(ztd::shell::quote(file.string()));
                 }
                 else
                 {
-                    argv.emplace_back(file.data());
+                    argv.emplace_back(file);
                 }
             }
         }
@@ -489,7 +492,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(const std::span<const std::string>
 }
 
 void
-VFSAppDesktop::exec_in_terminal(const std::string_view cwd,
+VFSAppDesktop::exec_in_terminal(const std::filesystem::path& cwd,
                                 const std::string_view command) const noexcept
 {
     // task
@@ -506,8 +509,8 @@ VFSAppDesktop::exec_in_terminal(const std::string_view cwd,
 }
 
 bool
-VFSAppDesktop::open_files(const std::string_view working_dir,
-                          const std::span<const std::string> file_paths) const
+VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
+                          const std::span<const std::filesystem::path> file_paths) const
 {
     if (this->exec.empty())
     {
@@ -522,9 +525,9 @@ VFSAppDesktop::open_files(const std::string_view working_dir,
     else
     {
         // app does not accept multiple files, so run multiple times
-        for (const std::string_view open_file : file_paths)
+        for (const auto& open_file : file_paths)
         {
-            const std::vector<std::string> open_files{open_file.data()};
+            const std::vector<std::filesystem::path> open_files{open_file};
             this->exec_desktop(working_dir, open_files);
         }
     }
@@ -532,8 +535,8 @@ VFSAppDesktop::open_files(const std::string_view working_dir,
 }
 
 void
-VFSAppDesktop::exec_desktop(const std::string_view working_dir,
-                            const std::span<const std::string> file_paths) const noexcept
+VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
+                            const std::span<const std::filesystem::path> file_paths) const noexcept
 {
     const auto desktop_commands =
         this->app_exec_generate_desktop_argv(file_paths, this->use_terminal());
@@ -547,14 +550,15 @@ VFSAppDesktop::exec_desktop(const std::string_view working_dir,
         for (const auto& argv : desktop_commands.value())
         {
             const std::string command = ztd::join(argv, " ");
-            this->exec_in_terminal(!this->path.empty() ? this->path : working_dir, command);
+            this->exec_in_terminal(!this->path.empty() ? this->path : working_dir.string(),
+                                   command);
         }
     }
     else
     {
         for (const auto& argv : desktop_commands.value())
         {
-            Glib::spawn_async_with_pipes(!this->path.empty() ? this->path : working_dir.data(),
+            Glib::spawn_async_with_pipes(!this->path.empty() ? this->path : working_dir.string(),
                                          argv,
                                          Glib::SpawnFlags::SEARCH_PATH |
                                              Glib::SpawnFlags::STDOUT_TO_DEV_NULL |

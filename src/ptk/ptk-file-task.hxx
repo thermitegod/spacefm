@@ -42,8 +42,9 @@ struct PtkFileTask
     PtkFileTask() = delete;
     ~PtkFileTask();
 
-    PtkFileTask(VFSFileTaskType type, const std::span<const std::string> src_files,
-                const std::string_view dest_dir, GtkWindow* parent_window, GtkWidget* task_view);
+    PtkFileTask(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
+                const std::filesystem::path& dest_dir, GtkWindow* parent_window,
+                GtkWidget* task_view);
 
     vfs::file_task task{nullptr};
 
@@ -104,17 +105,20 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type,
+                               const std::span<const std::filesystem::path> src_files,
                                GtkWindow* parent_window, GtkWidget* task_view);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type, const std::span<const std::string> src_files,
-                               const std::string_view dest_dir, GtkWindow* parent_window,
+PtkFileTask* ptk_file_task_new(VFSFileTaskType type,
+                               const std::span<const std::filesystem::path> src_files,
+                               const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                                GtkWidget* task_view);
 
 PtkFileTask* ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
                                GtkWidget* task_view);
-PtkFileTask* ptk_file_exec_new(const std::string_view item_name, const std::string_view dest_dir,
-                               GtkWidget* parent, GtkWidget* task_view);
+PtkFileTask* ptk_file_exec_new(const std::string_view item_name,
+                               const std::filesystem::path& dest_dir, GtkWidget* parent,
+                               GtkWidget* task_view);
 
 void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);
 

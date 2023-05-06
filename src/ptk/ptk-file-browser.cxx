@@ -143,12 +143,12 @@ static void on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_cont
 
 /* Default signal handlers */
 static void ptk_file_browser_before_chdir(PtkFileBrowser* file_browser,
-                                          const std::string_view path);
+                                          const std::filesystem::path& path);
 static void ptk_file_browser_after_chdir(PtkFileBrowser* file_browser);
 static void ptk_file_browser_content_change(PtkFileBrowser* file_browser);
 static void ptk_file_browser_sel_change(PtkFileBrowser* file_browser);
-static void ptk_file_browser_open_item(PtkFileBrowser* file_browser, const std::string_view path,
-                                       i32 action);
+static void ptk_file_browser_open_item(PtkFileBrowser* file_browser,
+                                       const std::filesystem::path& path, i32 action);
 static void ptk_file_browser_pane_mode_change(PtkFileBrowser* file_browser);
 static void focus_folder_view(PtkFileBrowser* file_browser);
 static void enable_toolbar(PtkFileBrowser* file_browser);
@@ -290,7 +290,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
 }
 
 void
-ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::string_view path)
+ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem::path& path)
 {
     GtkTreeIter it;
     GtkTreeSelection* tree_sel;
@@ -317,7 +317,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::string_vie
 
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        const std::string name = Glib::path_get_basename(path.data());
+        const std::string name = path.filename();
 
         do
         {
@@ -403,61 +403,56 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     {
         return;
     }
-    std::string path = text;
 
     gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
 
     // network path
-    if ((!ztd::startswith(path, "/") && ztd::contains(path, ":/")) || ztd::startswith(path, "//"))
+    if ((!ztd::startswith(text, "/") && ztd::contains(text, ":/")) || ztd::startswith(text, "//"))
     {
         save_command_history(GTK_ENTRY(entry));
-        ptk_location_view_mount_network(file_browser, path, false, false);
+        ptk_location_view_mount_network(file_browser, text, false, false);
         return;
     }
 
-    // convert ~/ to /home/user
-    if (ztd::startswith(path, "~/"))
+    if (!std::filesystem::exists(text))
     {
-        path = Glib::build_filename(vfs::user_dirs->home_dir(), ztd::removeprefix(path, "~/"));
+        return;
     }
+    const auto dir_path = std::filesystem::canonical(text);
 
-    // path
-    const std::string dir_path = Glib::filename_from_utf8(path);
-    const std::string final_path = std::filesystem::absolute(dir_path);
-
-    if (std::filesystem::is_directory(final_path))
+    if (std::filesystem::is_directory(dir_path))
     { // open dir
-        if (!ztd::same(final_path, ptk_file_browser_get_cwd(file_browser)))
+        if (!std::filesystem::equivalent(dir_path, ptk_file_browser_get_cwd(file_browser)))
         {
             ptk_file_browser_chdir(file_browser,
-                                   final_path,
+                                   dir_path,
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
         }
     }
-    else if (std::filesystem::is_regular_file(final_path))
+    else if (std::filesystem::is_regular_file(dir_path))
     { // open dir and select file
-        const std::string dirname_path = Glib::path_get_dirname(final_path);
-        if (!ztd::contains(dirname_path, ptk_file_browser_get_cwd(file_browser)))
+        const auto dirname_path = dir_path.parent_path();
+        if (!std::filesystem::equivalent(dirname_path, ptk_file_browser_get_cwd(file_browser)))
         {
             std::free(file_browser->select_path);
-            file_browser->select_path = ztd::strdup(final_path);
+            file_browser->select_path = ztd::strdup(dir_path);
             ptk_file_browser_chdir(file_browser,
                                    dirname_path,
                                    PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
         }
         else
         {
-            ptk_file_browser_select_file(file_browser, final_path);
+            ptk_file_browser_select_file(file_browser, dir_path);
         }
     }
-    else if (std::filesystem::is_block_file(final_path))
+    else if (std::filesystem::is_block_file(dir_path))
     { // open block device
-        // ztd::logger::info("opening block device: {}", final_path);
-        ptk_location_view_open_block(final_path, false);
+        // ztd::logger::info("opening block device: {}", dir_path);
+        ptk_location_view_open_block(dir_path, false);
     }
     else
     { // do nothing for other special files
-        // ztd::logger::info("special file ignored: {}", final_path);
+        // ztd::logger::info("special file ignored: {}", dir_path);
         // return;
     }
 
@@ -603,7 +598,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, XSetTool t
     {
         case XSetTool::UP:
             x = 0;
-            b = !ztd::same(ptk_file_browser_get_cwd(file_browser), "/");
+            b = !std::filesystem::equivalent(ptk_file_browser_get_cwd(file_browser), "/");
             break;
         case XSetTool::BACK:
         case XSetTool::BACK_MENU:
@@ -821,9 +816,8 @@ ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser)
     if (file_browser->toolbar)
     {
         rebuild_toolbox(nullptr, file_browser);
-        const std::string disp_path =
-            Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
-        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.data());
+        const auto cwd = ptk_file_browser_get_cwd(file_browser);
+        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), cwd.c_str());
     }
     if (file_browser->side_toolbar)
     {
@@ -1620,7 +1614,7 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
 
     /* TODO: Change the icon */
 
-    const std::string name = Glib::path_get_basename(ptk_file_browser_get_cwd(file_browser));
+    const std::string name = ptk_file_browser_get_cwd(file_browser).filename();
     gtk_label_set_text(text, name.data());
     gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (name.size() < 30)
@@ -1769,7 +1763,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
 }
 
 bool
-ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::string_view folder_path,
+ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path& folder_path,
                        PtkFBChdirMode mode)
 {
     GtkWidget* folder_view = file_browser->folder_view;
@@ -1789,18 +1783,12 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::string_view fold
         file_browser->skip_release = false;
     }
 
-    if (folder_path.empty())
+    if (!std::filesystem::exists(folder_path))
     {
         return false;
     }
 
-    std::string path = folder_path.data();
-
-    // convert ~ to /home/user for smarter bookmarks
-    if (ztd::startswith(path, "~/"))
-    {
-        path = Glib::build_filename(vfs::user_dirs->home_dir(), ztd::removeprefix(path, "~/"));
-    }
+    const auto path = std::filesystem::canonical(folder_path);
 
     if (!std::filesystem::is_directory(path))
     {
@@ -1856,7 +1844,9 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::string_view fold
     {
         case PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY:
             if (!file_browser->curHistory ||
-                !ztd::same((char*)file_browser->curHistory->data, path))
+                !std::filesystem::equivalent(
+                    static_cast<const char*>(file_browser->curHistory->data),
+                    path))
             {
                 /* Has forward history */
                 if (file_browser->curHistory && file_browser->curHistory->next)
@@ -1952,11 +1942,10 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::string_view fold
 
     ptk_file_browser_update_tab_label(file_browser);
 
-    const std::string disp_path =
-        Glib::filename_display_name(ptk_file_browser_get_cwd(file_browser));
+    const auto disp_path = ptk_file_browser_get_cwd(file_browser);
     if (!inhibit_focus)
     {
-        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.data());
+        gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), disp_path.c_str());
     }
 
     enable_toolbar(file_browser);
@@ -1997,8 +1986,8 @@ add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu, GList* l)
 {
     GtkWidget* menu_item;
     // GtkWidget* folder_image;
-    const std::string disp_name = Glib::filename_display_basename((char*)l->data);
-    menu_item = gtk_menu_item_new_with_label(disp_name.data());
+    const auto disp_name = std::filesystem::path((char*)l->data).filename();
+    menu_item = gtk_menu_item_new_with_label(disp_name.c_str());
     g_object_set_data(G_OBJECT(menu_item), "path", l);
     // folder_image = gtk_image_new_from_icon_name("gnome-fs-directory",
     // GtkIconSize::GTK_ICON_SIZE_MENU);
@@ -2239,11 +2228,11 @@ on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
 }
 
 void
-ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::string_view path)
+ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::filesystem::path& path)
 {
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
-    const std::string canon = std::filesystem::canonical(path);
-    if (ztd::same(canon, cwd) || ztd::same(canon, path))
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto canon = std::filesystem::canonical(path);
+    if (std::filesystem::equivalent(canon, cwd) || std::filesystem::equivalent(canon, path))
     {
         return;
     }
@@ -2257,8 +2246,8 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::string_view path
     else if (std::filesystem::exists(canon))
     {
         // open dir and select file
-        const std::string dir_path = Glib::path_get_dirname(canon);
-        if (!ztd::same(dir_path, cwd))
+        const auto dir_path = canon.parent_path();
+        if (!std::filesystem::equivalent(dir_path, cwd))
         {
             std::free(file_browser->select_path);
             file_browser->select_path = ztd::strdup(canon);
@@ -2274,7 +2263,7 @@ ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::string_view path
     }
 }
 
-const std::string
+const std::filesystem::path
 ptk_file_browser_get_cwd(PtkFileBrowser* file_browser)
 {
     if (!file_browser->curHistory)
@@ -2317,8 +2306,8 @@ ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     focus_folder_view(file_browser);
-    const std::string parent_dir = Glib::path_get_dirname(ptk_file_browser_get_cwd(file_browser));
-    if (!ztd::same(parent_dir, ptk_file_browser_get_cwd(file_browser)))
+    const auto parent_dir = ptk_file_browser_get_cwd(file_browser).parent_path();
+    if (!std::filesystem::equivalent(parent_dir, ptk_file_browser_get_cwd(file_browser)))
     {
         ptk_file_browser_chdir(file_browser, parent_dir, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
@@ -2360,7 +2349,7 @@ void
 ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    xset_set(XSetName::GO_SET_DEFAULT, XSetVar::S, ptk_file_browser_get_cwd(file_browser));
+    xset_set(XSetName::GO_SET_DEFAULT, XSetVar::S, ptk_file_browser_get_cwd(file_browser).string());
 }
 
 void
@@ -2929,18 +2918,18 @@ ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* tre
 }
 
 void
-ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::string_view seek_dir,
-                           const std::string_view seek_name)
+ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::path& seek_dir,
+                           const std::filesystem::path& seek_name)
 {
     // change to dir seek_dir if needed; select first dir or else file with
     // prefix seek_name
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
 
-    if (!ztd::same(cwd, seek_dir))
+    if (!std::filesystem::equivalent(cwd, seek_dir))
     {
         // change dir
         std::free(file_browser->seek_name);
-        file_browser->seek_name = ztd::strdup(seek_name.data());
+        file_browser->seek_name = ztd::strdup(seek_name.string());
         file_browser->inhibit_focus = true;
         if (!ptk_file_browser_chdir(file_browser,
                                     seek_dir,
@@ -3022,13 +3011,13 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::string_view 
 
             // test name
             const std::string name = file->get_disp_name();
-            if (ztd::same(name, seek_name))
+            if (std::filesystem::equivalent(name, seek_name))
             {
                 // exact match (may be file or dir)
                 it_dir = it;
                 break;
             }
-            if (ztd::startswith(name, seek_name))
+            if (ztd::startswith(name, seek_name.string()))
             {
                 // prefix found
                 if (file->is_directory())
@@ -3196,10 +3185,10 @@ static void
 show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 {
     (void)event;
-    std::string file_path;
+    std::filesystem::path file_path;
     vfs::file_info file;
 
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
     const std::vector<vfs::file_info> sel_files = ptk_file_browser_get_selected_files(file_browser);
     if (sel_files.empty())
     {
@@ -3208,7 +3197,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     else
     {
         file = vfs_file_info_ref(sel_files.front());
-        file_path = Glib::build_filename(cwd, file->get_name());
+        file_path = cwd / file->get_name();
     }
 
     /*
@@ -3228,9 +3217,9 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 
     char* dir_name = nullptr;
     GtkWidget* popup = ptk_file_menu_new(file_browser,
-                                         file_path.data(),
+                                         file_path.c_str(),
                                          file,
-                                         dir_name ? dir_name : cwd.data(),
+                                         dir_name ? dir_name : cwd.c_str(),
                                          sel_files);
     if (popup)
     {
@@ -3362,12 +3351,11 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         /* an item is clicked, get its file path */
         vfs::file_info file;
         GtkTreeIter it;
-        std::string file_path;
+        std::filesystem::path file_path;
         if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
         {
             gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
-            file_path =
-                Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
+            file_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
         }
         else /* no item is clicked */
         {
@@ -3556,7 +3544,7 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
 
     if (dir_path)
     {
-        if (!ztd::same(dir_path, ptk_file_browser_get_cwd(file_browser)))
+        if (!std::filesystem::equivalent(dir_path, ptk_file_browser_get_cwd(file_browser)))
         {
             if (ptk_file_browser_chdir(file_browser,
                                        dir_path,
@@ -3587,7 +3575,7 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
 
     focus_folder_view(file_browser);
 
-    std::string dir_path;
+    std::filesystem::path dir_path;
     if (xset_get_s(XSetName::GO_SET_DEFAULT))
     {
         dir_path = xset_get_s(XSetName::GO_SET_DEFAULT);
@@ -3613,7 +3601,7 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
     (void)item;
     focus_folder_view(file_browser);
 
-    std::string dir_path = ptk_file_browser_get_cwd(file_browser);
+    auto dir_path = ptk_file_browser_get_cwd(file_browser);
     if (!std::filesystem::is_directory(dir_path))
     {
         if (xset_get_s(XSetName::GO_SET_DEFAULT))
@@ -4238,7 +4226,6 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     vfs::file_info file;
-    std::string cursor_path;
 
     switch (file_browser->view_mode)
     {
@@ -4255,13 +4242,13 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
             break;
     }
 
+    std::filesystem::path cursor_path;
     if (tree_path && model && gtk_tree_model_get_iter(model, &it, tree_path))
     {
         gtk_tree_model_get(model, &it, PTKFileListCol::COL_FILE_INFO, &file, -1);
         if (file)
         {
-            cursor_path =
-                Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
+            cursor_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
         }
     }
     gtk_tree_path_free(tree_path);
@@ -4360,7 +4347,6 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
     GtkTreeViewColumn* col;
     GtkTreeIter it;
     vfs::file_info file;
-    std::string dest_path;
 
     switch (file_browser->view_mode)
     {
@@ -4408,6 +4394,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
             break;
     }
 
+    std::filesystem::path dest_path;
     if (tree_path)
     {
         if (!gtk_tree_model_get_iter(model, &it, tree_path))
@@ -4420,8 +4407,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
         {
             if (file->is_directory())
             {
-                dest_path =
-                    Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
+                dest_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
             }
             else /* Drop on a file, not directory */
             {
@@ -4490,7 +4476,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     file_browser->drag_source_dev = dest_dev;
                     for (; *puri; ++puri)
                     {
-                        const std::string file_path = Glib::filename_from_uri(*puri);
+                        const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
                         const auto file_path_stat = ztd::stat(file_path);
                         if (file_path_stat.is_valid())
@@ -4504,8 +4490,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                             else if (file_browser->drag_source_inode == 0)
                             {
                                 // same device - store source parent inode
-                                const std::string src_dir = Glib::path_get_dirname(file_path);
-
+                                const auto src_dir = file_path.parent_path();
                                 const auto src_dir_stat = ztd::stat(src_dir);
                                 if (src_dir_stat.is_valid())
                                 {
@@ -4533,11 +4518,11 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     file_action = VFSFileTaskType::MOVE;
                 }
 
-                std::vector<std::string> file_list;
+                std::vector<std::filesystem::path> file_list;
                 puri = list = gtk_selection_data_get_uris(sel_data);
                 for (; *puri; ++puri)
                 {
-                    std::string file_path;
+                    std::filesystem::path file_path;
                     if (**puri == '/')
                     {
                         file_path = *puri;
@@ -4597,8 +4582,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     for (vfs::file_info file : sel_files)
     {
-        const std::string full_path =
-            Glib::build_filename(ptk_file_browser_get_cwd(file_browser), file->get_name());
+        const auto full_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
         const std::string uri = Glib::filename_to_uri(full_path);
 
         uri_list.append(fmt::format("{}\n", uri));
@@ -4934,7 +4918,7 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
 void
 ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
                                        const std::span<const vfs::file_info> sel_files,
-                                       const std::string_view cwd)
+                                       const std::filesystem::path& cwd)
 {
     if (!file_browser)
     {
@@ -4952,7 +4936,7 @@ ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
     for (vfs::file_info file : sel_files)
     {
         if (!ptk_rename_file(file_browser,
-                             cwd.data(),
+                             cwd.c_str(),
                              file,
                              nullptr,
                              false,
@@ -5039,7 +5023,7 @@ ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser)
 void
 ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
                          const std::span<const vfs::file_info> sel_files,
-                         const std::string_view cwd, XSetName setname)
+                         const std::filesystem::path& cwd, XSetName setname)
 {
     if (!file_browser)
     {
@@ -5208,7 +5192,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
          setname == XSetName::MOVE_LOC || setname == XSetName::MOVE_LOC_LAST) &&
         !copy_dest && !move_dest)
     {
-        std::string folder;
+        std::filesystem::path folder;
         xset_t set2 = xset_get(XSetName::COPY_LOC_LAST);
         if (set2->desc)
         {
@@ -5221,7 +5205,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         char* path = xset_file_dialog(GTK_WIDGET(file_browser),
                                       GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                       "Choose Location",
-                                      folder.data(),
+                                      folder.c_str(),
                                       nullptr);
         if (path && std::filesystem::is_directory(path))
         {
@@ -5258,7 +5242,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
             dest_dir = move_dest;
         }
 
-        if (ztd::same(dest_dir, cwd))
+        if (std::filesystem::equivalent(dest_dir, cwd))
         {
             xset_msg_dialog(GTK_WIDGET(file_browser),
                             GtkMessageType::GTK_MESSAGE_ERROR,
@@ -5270,12 +5254,11 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         }
 
         // rebuild sel_files with full paths
-        std::vector<std::string> file_list;
+        std::vector<std::filesystem::path> file_list;
         file_list.reserve(sel_files.size());
-        std::string file_path;
         for (vfs::file_info file : sel_files)
         {
-            file_path = Glib::build_filename(cwd.data(), file->get_name());
+            const auto file_path = cwd / file->get_name();
             file_list.emplace_back(file_path);
         }
 
@@ -5302,7 +5285,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
 void
 ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
                                const std::span<const vfs::file_info> sel_files,
-                               const std::string_view cwd)
+                               const std::filesystem::path& cwd)
 {
     const i32 response = xset_msg_dialog(
         GTK_WIDGET(file_browser),
@@ -5351,13 +5334,13 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page)
 
     std::string dir_name;
     std::vector<vfs::file_info> sel_files = ptk_file_browser_get_selected_files(file_browser);
-    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
     if (sel_files.empty())
     {
         vfs::file_info file = vfs_file_info_new();
         vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser));
         sel_files.emplace_back(file);
-        dir_name = Glib::path_get_dirname(cwd);
+        dir_name = cwd.parent_path();
     }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 
@@ -5365,7 +5348,7 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page)
                                    GtkOrientation::GTK_ORIENTATION_VERTICAL);
 
     ptk_show_file_properties(GTK_WINDOW(parent),
-                             !dir_name.empty() ? dir_name : cwd,
+                             !dir_name.empty() ? dir_name : cwd.string(),
                              sel_files,
                              page);
     vfs_file_info_list_free(sel_files);
@@ -5447,7 +5430,7 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
                 gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
                 if (file)
                 {
-                    const std::string file_path = ptk_dir_view_get_dir_path(model, &it);
+                    const auto file_path = ptk_dir_view_get_dir_path(model, &it);
                     file_browser->run_event<EventType::OPEN_ITEM>(file_path,
                                                                   PtkOpenAction::PTK_OPEN_NEW_TAB);
                     vfs_file_info_unref(file);
@@ -5749,7 +5732,7 @@ ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size, u64* sel
 }
 
 static void
-ptk_file_browser_before_chdir(PtkFileBrowser* file_browser, const std::string_view path)
+ptk_file_browser_before_chdir(PtkFileBrowser* file_browser, const std::filesystem::path& path)
 {
     (void)file_browser;
     (void)path;
@@ -5780,7 +5763,8 @@ ptk_file_browser_pane_mode_change(PtkFileBrowser* file_browser)
 }
 
 static void
-ptk_file_browser_open_item(PtkFileBrowser* file_browser, const std::string_view path, i32 action)
+ptk_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::path& path,
+                           i32 action)
 {
     (void)file_browser;
     (void)path;
@@ -5870,16 +5854,20 @@ ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, u32 time
 
 ////////////////////////////////////////////////////////////////////////////
 
-i32
-ptk_file_browser_write_access(const std::string_view cwd)
+bool
+ptk_file_browser_write_access(const std::filesystem::path& cwd)
 {
-    return faccessat(0, cwd.data(), W_OK, AT_EACCESS);
+    const auto status = std::filesystem::status(cwd);
+    return ((status.permissions() & std::filesystem::perms::owner_write) !=
+            std::filesystem::perms::none);
 }
 
-i32
-ptk_file_browser_read_access(const std::string_view cwd)
+bool
+ptk_file_browser_read_access(const std::filesystem::path& cwd)
 {
-    return faccessat(0, cwd.data(), R_OK, AT_EACCESS);
+    const auto status = std::filesystem::status(cwd);
+    return ((status.permissions() & std::filesystem::perms::owner_read) !=
+            std::filesystem::perms::none);
 }
 
 void
@@ -6017,7 +6005,7 @@ ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 t)
 
 void
 ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
-                             const std::string_view file_path)
+                             const std::filesystem::path& file_path)
 {
     tab_t page_x;
     GtkWidget* notebook = file_browser->mynotebook;
@@ -6051,7 +6039,7 @@ ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
 void
 ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
                                const std::span<const vfs::file_info> sel_files,
-                               const std::string_view cwd)
+                               const std::filesystem::path& cwd)
 {
     if (sel_files.empty())
     {

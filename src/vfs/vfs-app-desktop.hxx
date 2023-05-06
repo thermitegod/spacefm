@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <span>
 
 #include <vector>
@@ -41,30 +43,31 @@ class VFSAppDesktop
     ~VFSAppDesktop() = default;
     // ~VFSAppDesktop() { ztd::logger::info("VFSAppDesktop destructor") };
 
-    VFSAppDesktop(const std::string_view open_file_name) noexcept;
+    VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept;
 
     const std::string& get_name() const noexcept;
     const std::string& get_disp_name() const noexcept;
     const std::string& get_exec() const noexcept;
-    const std::string& get_full_path() const noexcept;
+    const std::filesystem::path& get_full_path() const noexcept;
     const std::string& get_icon_name() const noexcept;
     GdkPixbuf* get_icon(i32 size) const noexcept;
     bool use_terminal() const noexcept;
     bool open_multiple_files() const noexcept;
-    bool open_files(const std::string_view working_dir,
-                    const std::span<const std::string> file_paths) const;
+    bool open_files(const std::filesystem::path& working_dir,
+                    const std::span<const std::filesystem::path> file_paths) const;
 
   private:
     const std::optional<std::vector<std::vector<std::string>>>
-    app_exec_generate_desktop_argv(const std::span<const std::string> file_list,
+    app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
                                    bool quote_file_list) const noexcept;
-    void exec_in_terminal(const std::string_view cwd, const std::string_view cmd) const noexcept;
-    void exec_desktop(const std::string_view working_dir,
-                      const std::span<const std::string> file_paths) const noexcept;
+    void exec_in_terminal(const std::filesystem::path& cwd,
+                          const std::string_view cmd) const noexcept;
+    void exec_desktop(const std::filesystem::path& working_dir,
+                      const std::span<const std::filesystem::path> file_paths) const noexcept;
 
   private:
     std::string file_name{};
-    std::string full_path{};
+    std::filesystem::path full_path{};
 
     // desktop entry spec keys
     std::string type{};

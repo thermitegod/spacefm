@@ -36,7 +36,7 @@
 #include "ptk/ptk-clipboard.hxx"
 
 static GdkDragAction clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
-static std::vector<std::string> clipboard_file_list;
+static std::vector<std::filesystem::path> clipboard_file_list;
 
 static const std::vector<std::string>
 uri_list_extract_uris(const char* uri_list_str)
@@ -87,17 +87,17 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
         use_uri = true;
     }
 
-    for (const std::string_view clipboard_file : clipboard_file_list)
+    for (const auto& clipboard_file : clipboard_file_list)
     {
         if (use_uri)
         {
-            const std::string uri_name = Glib::filename_to_uri(clipboard_file.data());
+            const std::string uri_name = Glib::filename_to_uri(clipboard_file.string());
             uri_list.append(fmt::format("{}\n", uri_name));
         }
         else
         {
-            const std::string file_name = Glib::filename_display_name(clipboard_file.data());
-            uri_list.append(fmt::format("{}\n", file_name));
+            // Need to use .string() to avoid fmt adding double quotes when formating
+            uri_list.append(fmt::format("{}\n", clipboard_file.string()));
         }
     }
 
@@ -120,7 +120,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 }
 
 void
-ptk_clipboard_copy_as_text(const std::string_view working_dir,
+ptk_clipboard_copy_as_text(const std::filesystem::path& working_dir,
                            const std::span<const vfs::file_info> sel_files)
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -129,8 +129,8 @@ ptk_clipboard_copy_as_text(const std::string_view working_dir,
     std::string file_text;
     for (vfs::file_info file : sel_files)
     {
-        const std::string file_path = Glib::build_filename(working_dir.data(), file->get_name());
-        const std::string quoted = ztd::shell::quote(file_path);
+        const auto file_path = working_dir / file->get_name();
+        const std::string quoted = ztd::shell::quote(file_path.string());
         file_text = fmt::format("{} {}", file_text, quoted);
     }
     gtk_clipboard_set_text(clip, file_text.data(), -1);
@@ -138,7 +138,7 @@ ptk_clipboard_copy_as_text(const std::string_view working_dir,
 }
 
 void
-ptk_clipboard_copy_name(const std::string_view working_dir,
+ptk_clipboard_copy_name(const std::filesystem::path& working_dir,
                         const std::span<const vfs::file_info> sel_files)
 {
     (void)working_dir;
@@ -178,7 +178,7 @@ ptk_clipboard_copy_text(const std::string_view text)
 }
 
 void
-ptk_clipboard_cut_or_copy_files(const std::string_view working_dir,
+ptk_clipboard_cut_or_copy_files(const std::filesystem::path& working_dir,
                                 const std::span<const vfs::file_info> sel_files, bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -198,11 +198,11 @@ ptk_clipboard_cut_or_copy_files(const std::string_view working_dir,
 
     gtk_target_list_unref(target_list);
 
-    std::vector<std::string> file_list;
+    std::vector<std::filesystem::path> file_list;
     file_list.reserve(sel_files.size());
     for (vfs::file_info file : sel_files)
     {
-        const std::string file_path = Glib::build_filename(working_dir.data(), file->get_name());
+        const auto file_path = working_dir / file->get_name();
         file_list.emplace_back(file_path);
     }
 
@@ -240,7 +240,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
     gtk_target_list_unref(target_list);
 
     char** file_path = path;
-    std::vector<std::string> file_list;
+    std::vector<std::filesystem::path> file_list;
     while (*file_path)
     {
         if (*file_path[0] == '/')
@@ -263,7 +263,7 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
 }
 
 void
-ptk_clipboard_paste_files(GtkWindow* parent_win, const std::string_view dest_dir,
+ptk_clipboard_paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                           GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -329,11 +329,11 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const std::string_view dest_dir
     if (uri_list_str)
     {
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        std::vector<std::string> file_list;
+        std::vector<std::filesystem::path> file_list;
         file_list.reserve(uri_list.size());
         for (const std::string_view uri : uri_list)
         {
-            std::string file_path;
+            std::filesystem::path file_path;
             try
             {
                 file_path = Glib::filename_from_uri(uri.data());
@@ -367,7 +367,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const std::string_view dest_dir
 }
 
 void
-ptk_clipboard_paste_links(GtkWindow* parent_win, const std::string_view dest_dir,
+ptk_clipboard_paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                           GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -417,11 +417,11 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const std::string_view dest_dir
     if (uri_list_str)
     {
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        std::vector<std::string> file_list;
+        std::vector<std::filesystem::path> file_list;
         file_list.reserve(uri_list.size());
         for (const std::string_view uri : uri_list)
         {
-            std::string file_path;
+            std::filesystem::path file_path;
             try
             {
                 file_path = Glib::filename_from_uri(uri.data());
@@ -449,7 +449,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const std::string_view dest_dir
 }
 
 void
-ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::string_view dest_dir,
+ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                             GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -502,12 +502,12 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::string_view dest_d
         i32 missing_targets = 0;
 
         const std::vector<std::string> uri_list = uri_list_extract_uris(uri_list_str);
-        std::vector<std::string> file_list;
+        std::vector<std::filesystem::path> file_list;
         file_list.reserve(uri_list.size());
 
         for (const std::string_view uri : uri_list)
         {
-            std::string file_path;
+            std::filesystem::path file_path;
             try
             {
                 file_path = Glib::filename_from_uri(uri.data());
@@ -556,14 +556,15 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::string_view dest_d
     gtk_selection_data_free(sel_data);
 }
 
-const std::vector<std::string>
-ptk_clipboard_get_file_paths(const std::string_view cwd, bool* is_cut, i32* missing_targets)
+const std::vector<std::filesystem::path>
+ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32* missing_targets)
 {
     (void)cwd;
+
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
     char* uri_list_str;
-    std::vector<std::string> file_list;
+    std::vector<std::filesystem::path> file_list;
 
     *is_cut = false;
     *missing_targets = 0;

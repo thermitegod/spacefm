@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <memory>
@@ -61,13 +63,13 @@ VFSTrash::instance() noexcept
 VFSTrash::VFSTrash() noexcept
 {
     const dev_t home_device = device(vfs::user_dirs->home_dir()).value();
-    const std::string user_trash = Glib::build_filename(vfs::user_dirs->data_dir(), "Trash");
+    const auto user_trash = vfs::user_dirs->data_dir() / "Trash";
     std::shared_ptr<VFSTrashDir> home_trash = std::make_shared<VFSTrashDir>(user_trash);
     this->trash_dirs[home_device] = home_trash;
 }
 
 std::optional<dev_t>
-VFSTrash::device(const std::string_view path) noexcept
+VFSTrash::device(const std::filesystem::path& path) noexcept
 {
     const auto statbuf = ztd::lstat(path);
     if (statbuf.is_valid())
@@ -80,13 +82,13 @@ VFSTrash::device(const std::string_view path) noexcept
     }
 }
 
-const std::string
-VFSTrash::toplevel(const std::string_view path) noexcept
+const std::filesystem::path
+VFSTrash::toplevel(const std::filesystem::path& path) noexcept
 {
     const dev_t dev = device(path).value();
 
-    std::string mount_path = path.data();
-    std::string last_path;
+    std::filesystem::path mount_path = path;
+    std::filesystem::path last_path;
 
     // ztd::logger::info("dev mount {}", device(mount_path));
     // ztd::logger::info("dev       {}", dev);
@@ -96,7 +98,7 @@ VFSTrash::toplevel(const std::string_view path) noexcept
     {
         last_path = mount_path;
         const std::filesystem::path mount_parent = std::filesystem::path(mount_path).parent_path();
-        mount_path = mount_parent.string();
+        mount_path = mount_parent;
     }
 
     // ztd::logger::info("last path   {}", last_path);
@@ -106,7 +108,7 @@ VFSTrash::toplevel(const std::string_view path) noexcept
 }
 
 std::shared_ptr<VFSTrashDir>
-VFSTrash::trash_dir(const std::string_view path) noexcept
+VFSTrash::trash_dir(const std::filesystem::path& path) noexcept
 {
     const dev_t dev = device(path).value();
 
@@ -115,10 +117,13 @@ VFSTrash::trash_dir(const std::string_view path) noexcept
         return this->trash_dirs[dev];
     }
 
-    // on another device cannot use $HOME trashcan
-    const std::string top_dir = toplevel(path);
-    const std::string trash_path =
-        Glib::build_filename(top_dir, fmt::format("/.Trash-{}", getuid()));
+    // on another device, cannot use $HOME trashcan
+    const std::filesystem::path top_dir = toplevel(path);
+    // BUGGED - only the std::format part of the path is used in creating 'trash_path',
+    // do not think this is my bug.
+    // const auto trash_path = top_dir / std::format("/.Trash-{}", getuid());
+    const std::filesystem::path trash_path =
+        std::format("{}/.Trash-{}", top_dir.string(), getuid());
 
     std::shared_ptr<VFSTrashDir> trash_dir = std::make_shared<VFSTrashDir>(trash_path);
     this->trash_dirs[dev] = trash_dir;
@@ -127,7 +132,7 @@ VFSTrash::trash_dir(const std::string_view path) noexcept
 }
 
 bool
-VFSTrash::trash(const std::string_view path) noexcept
+VFSTrash::trash(const std::filesystem::path& path) noexcept
 {
     const auto trash_dir = VFSTrash::instance()->trash_dir(path);
     if (!trash_dir)
@@ -135,7 +140,8 @@ VFSTrash::trash(const std::string_view path) noexcept
         return false;
     }
 
-    if (ztd::endswith(path, "/Trash") || ztd::endswith(path, fmt::format("/.Trash-{}", getuid())))
+    if (path.string().ends_with("/Trash") ||
+        path.string().ends_with(fmt::format("/.Trash-{}", getuid())))
     {
         ztd::logger::warn("Refusing to trash Trash Dir: {}", path);
         return true;
@@ -153,7 +159,7 @@ VFSTrash::trash(const std::string_view path) noexcept
 }
 
 bool
-VFSTrash::restore(const std::string_view path) noexcept
+VFSTrash::restore(const std::filesystem::path& path) noexcept
 {
     (void)path;
     // NOOP
@@ -166,24 +172,24 @@ VFSTrash::empty() noexcept
     // NOOP
 }
 
-VFSTrashDir::VFSTrashDir(const std::string_view path) noexcept
+VFSTrashDir::VFSTrashDir(const std::filesystem::path& path) noexcept
 {
-    this->trash_path = path.data();
-    this->files_path = Glib::build_filename(this->trash_path, "files");
-    this->info_path = Glib::build_filename(this->trash_path, "info");
+    this->trash_path = path;
+    this->files_path = this->trash_path / "files";
+    this->info_path = this->trash_path / "info";
 
     create_trash_dir();
 }
 
 const std::string
-VFSTrashDir::unique_name(const std::string_view path) const noexcept
+VFSTrashDir::unique_name(const std::filesystem::path& path) const noexcept
 {
-    const std::string filename = std::filesystem::path(path).filename();
-    const std::string basename = std::filesystem::path(path).stem();
-    const std::string ext = std::filesystem::path(path).extension();
+    const std::string filename = path.filename();
+    const std::string basename = path.stem();
+    const std::string ext = path.extension();
 
     std::string to_trash_filename = filename;
-    const std::string to_trash_path = Glib::build_filename(this->files_path, to_trash_filename);
+    const std::string to_trash_path = this->files_path / to_trash_filename;
 
     if (!std::filesystem::exists(to_trash_path))
     {
@@ -193,8 +199,7 @@ VFSTrashDir::unique_name(const std::string_view path) const noexcept
     for (usize i = 1; true; ++i)
     {
         const std::string check_to_trash_filename = fmt::format("{}_{}{}", basename, i, ext);
-        const std::string check_to_trash_path =
-            Glib::build_filename(this->files_path, check_to_trash_filename);
+        const auto check_to_trash_path = this->files_path / check_to_trash_filename;
         if (!std::filesystem::exists(check_to_trash_path))
         {
             to_trash_filename = check_to_trash_filename;
@@ -206,7 +211,7 @@ VFSTrashDir::unique_name(const std::string_view path) const noexcept
 }
 
 void
-VFSTrashDir::check_dir_exists(const std::string_view path) noexcept
+VFSTrashDir::check_dir_exists(const std::filesystem::path& path) noexcept
 {
     if (std::filesystem::is_directory(path))
     {
@@ -229,11 +234,10 @@ VFSTrashDir::create_trash_dir() const noexcept
 }
 
 void
-VFSTrashDir::create_trash_info(const std::string_view path,
+VFSTrashDir::create_trash_info(const std::filesystem::path& path,
                                const std::string_view target_name) const noexcept
 {
-    const std::string trash_info =
-        Glib::build_filename(this->info_path, fmt::format("{}.trashinfo", target_name));
+    const auto trash_info = this->info_path / fmt::format("{}.trashinfo", target_name);
 
     const std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
@@ -248,9 +252,10 @@ VFSTrashDir::create_trash_info(const std::string_view path,
 }
 
 void
-VFSTrashDir::move(const std::string_view path, const std::string_view target_name) const noexcept
+VFSTrashDir::move(const std::filesystem::path& path,
+                  const std::string_view target_name) const noexcept
 {
-    const std::string target_path = Glib::build_filename(this->files_path, target_name.data());
+    const auto target_path = this->files_path / target_name;
 
     // ztd::logger::info("fp {}", this->files_path);
     // ztd::logger::info("ip {}", this->info_path);

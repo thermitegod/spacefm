@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <iostream>
 #include <fstream>
 
@@ -26,9 +28,9 @@
 
 template<class T>
 bool
-write_file(const std::string_view path, const T data)
+write_file(const std::filesystem::path& path, const T data)
 {
-    std::ofstream file(path.data());
+    std::ofstream file(path);
     if (file.is_open())
     {
         file << data;

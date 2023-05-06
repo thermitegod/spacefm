@@ -18,6 +18,7 @@
 
 #include <filesystem>
 
+#include <vector>
 #include <map>
 
 #include <iostream>
@@ -27,6 +28,8 @@
 #include <ranges>
 
 #include <mutex>
+
+#include <optional>
 
 #include <cassert>
 
@@ -81,17 +84,14 @@ static void vfs_dir_finalize(GObject* obj);
 static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
 static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
 
-static const std::string gethidden(const std::string_view path);
-static bool ishidden(const std::string_view hidden, const std::string_view file_name);
-
-/* constructor is private */
-static vfs::dir vfs_dir_new(const std::string_view path);
+static const std::optional<std::vector<std::filesystem::path>>
+gethidden(const std::filesystem::path& path);
 
 static void vfs_dir_load(vfs::dir dir);
 static void* vfs_dir_load_thread(vfs::async_task task, vfs::dir dir);
 
 static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                                     const std::string_view file_name, void* user_data);
+                                     const std::filesystem::path& file_name, void* user_data);
 
 static bool notify_file_change(void* user_data);
 static bool update_file_info(vfs::dir dir, vfs::file_info file);
@@ -100,8 +100,9 @@ static void on_list_task_finished(vfs::dir dir, bool is_cancelled);
 
 static GObjectClass* parent_class = nullptr;
 
-// static std::map<std::string, vfs::dir> dir_map;
 static std::map<const char*, vfs::dir> dir_map;
+// static std::map<std::string, vfs::dir> dir_map; // breaks multiple tabs with save VFSDir, reason unknown
+// static std::map<std::filesystem::path, vfs::dir> dir_map; // breaks multiple tabs with save VFSDir, reason unknown
 
 static u32 change_notify_timeout = 0;
 
@@ -167,7 +168,7 @@ vfs_dir_finalize(GObject* obj)
     }
     if (!dir->path.empty())
     {
-        dir_map.erase(dir->path.data());
+        dir_map.erase(dir->path.c_str());
 
         /* There is no VFSDir instance */
         if (dir_map.size() == 0)
@@ -226,7 +227,7 @@ vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec*
 }
 
 static vfs::file_info
-vfs_dir_find_file(vfs::dir dir, const std::string_view file_name, vfs::file_info file)
+vfs_dir_find_file(vfs::dir dir, const std::filesystem::path& file_name, vfs::file_info file)
 {
     for (vfs::file_info file2 : dir->file_list)
     {
@@ -234,7 +235,7 @@ vfs_dir_find_file(vfs::dir dir, const std::string_view file_name, vfs::file_info
         {
             return file2;
         }
-        if (ztd::same(file2->name, file_name))
+        if (ztd::same(file2->name, file_name.string()))
         {
             return file2;
         }
@@ -244,19 +245,19 @@ vfs_dir_find_file(vfs::dir dir, const std::string_view file_name, vfs::file_info
 
 /* signal handlers */
 void
-vfs_dir_emit_file_created(vfs::dir dir, const std::string_view file_name, bool force)
+vfs_dir_emit_file_created(vfs::dir dir, const std::filesystem::path& file_name, bool force)
 {
     (void)force;
     // Ignore avoid_changes for creation of files
     // if ( !force && dir->avoid_changes )
     //    return;
 
-    if (ztd::same(file_name, dir->path))
+    if (std::filesystem::equivalent(file_name, dir->path))
     { // Special Case: The directory itself was created?
         return;
     }
 
-    dir->created_files.emplace_back(file_name.data());
+    dir->created_files.emplace_back(file_name);
     if (change_notify_timeout == 0)
     {
         change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
@@ -268,11 +269,11 @@ vfs_dir_emit_file_created(vfs::dir dir, const std::string_view file_name, bool f
 }
 
 void
-vfs_dir_emit_file_deleted(vfs::dir dir, const std::string_view file_name, vfs::file_info file)
+vfs_dir_emit_file_deleted(vfs::dir dir, const std::filesystem::path& file_name, vfs::file_info file)
 {
     std::lock_guard<std::mutex> lock(dir->mutex);
 
-    if (ztd::same(file_name, dir->path))
+    if (std::filesystem::equivalent(file_name, dir->path))
     {
         /* Special Case: The directory itself was deleted... */
         file = nullptr;
@@ -310,7 +311,7 @@ vfs_dir_emit_file_deleted(vfs::dir dir, const std::string_view file_name, vfs::f
 }
 
 void
-vfs_dir_emit_file_changed(vfs::dir dir, const std::string_view file_name, vfs::file_info file,
+vfs_dir_emit_file_changed(vfs::dir dir, const std::filesystem::path& file_name, vfs::file_info file,
                           bool force)
 {
     std::lock_guard<std::mutex> lock(dir->mutex);
@@ -323,7 +324,7 @@ vfs_dir_emit_file_changed(vfs::dir dir, const std::string_view file_name, vfs::f
         return;
     }
 
-    if (ztd::same(file_name, dir->path))
+    if (std::filesystem::equivalent(file_name, dir->path))
     {
         // Special Case: The directory itself was changed
         dir->run_event<EventType::FILE_CHANGED>(nullptr);
@@ -395,12 +396,14 @@ vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
 
 /* methods */
 
+/* constructor is private */
 static vfs::dir
 vfs_dir_new(const std::string_view path)
 {
     vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
+    assert(dir != nullptr);
 
-    dir->path = path;
+    dir->path = path.data();
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
 
     // ztd::logger::info("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes);
@@ -418,19 +421,24 @@ on_list_task_finished(vfs::dir dir, bool is_cancelled)
     dir->load_complete = true;
 }
 
-static const std::string
-gethidden(const std::string_view path)
+static const std::optional<std::vector<std::filesystem::path>>
+gethidden(const std::filesystem::path& path)
 {
-    std::string hidden;
+    std::vector<std::filesystem::path> hidden;
 
     // Read .hidden into string
-    const std::string hidden_path = Glib::build_filename(path.data(), ".hidden");
+    const auto hidden_path = path / ".hidden";
+
+    if (std::filesystem::is_regular_file(hidden_path))
+    {
+        return std::nullopt;
+    }
 
     // test access first because open() on missing file may cause
     // long delay on nfs
     if (!have_rw_access(hidden_path))
     {
-        return hidden;
+        return std::nullopt;
     }
 
     std::string line;
@@ -439,7 +447,14 @@ gethidden(const std::string_view path)
     {
         while (std::getline(file, line))
         {
-            hidden.append(line + '\n');
+            const auto hidden_file = std::filesystem::path(ztd::strip(line));
+            if (hidden_file.is_absolute())
+            {
+                ztd::logger::warn("Absolute path ignored in {}", hidden_path);
+                continue;
+            }
+
+            hidden.push_back(hidden_file);
         }
     }
     file.close();
@@ -447,20 +462,10 @@ gethidden(const std::string_view path)
     return hidden;
 }
 
-static bool
-ishidden(const std::string_view hidden, const std::string_view file_name)
-{
-    if (ztd::contains(hidden, fmt::format("{}\n", file_name)))
-    {
-        return true;
-    }
-    return false;
-}
-
 bool
-vfs_dir_add_hidden(const std::string_view path, const std::string_view file_name)
+vfs_dir_add_hidden(const std::filesystem::path& path, const std::filesystem::path& file_name)
 {
-    const std::string file_path = Glib::build_filename(path.data(), ".hidden");
+    const auto file_path = path / ".hidden";
     const std::string data = fmt::format("{}\n", file_name);
 
     const bool result = write_file(file_path, data);
@@ -507,7 +512,7 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
     dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
 
     // MOD  dir contains .hidden file?
-    const std::string hidden = gethidden(dir->path);
+    const auto hidden_files = gethidden(dir->path);
 
     for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
     {
@@ -516,14 +521,29 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
             break;
         }
 
-        const std::string file_name = std::filesystem::path(dfile).filename();
-        const std::string full_path = Glib::build_filename(dir->path, file_name);
+        const auto file_name = dfile.path().filename();
+        const auto full_path = std::filesystem::path() / dir->path / file_name;
 
         // MOD ignore if in .hidden
-        if (ishidden(hidden, file_name))
+        if (hidden_files)
         {
-            dir->xhidden_count++;
-            continue;
+            bool hide_file = false;
+            for (const auto& hidden_file : hidden_files.value())
+            {
+                // if (ztd::same(hidden_file.string(), file_name.string()))
+                std::error_code ec;
+                const bool equivalent = std::filesystem::equivalent(hidden_file, file_name, ec);
+                if (!ec && equivalent)
+                {
+                    hide_file = true;
+                    dir->xhidden_count++;
+                    break;
+                }
+            }
+            if (hide_file)
+            {
+                continue;
+            }
         }
 
         vfs::file_info file = vfs_file_info_new();
@@ -562,7 +582,7 @@ update_file_info(vfs::dir dir, vfs::file_info file)
     }
     file->name.clear();
 
-    const std::string full_path = Glib::build_filename(dir->path, file_name);
+    const auto full_path = std::filesystem::path() / dir->path / file_name;
 
     if (vfs_file_info_get(file, full_path))
     {
@@ -587,7 +607,7 @@ update_file_info(vfs::dir dir, vfs::file_info file)
 }
 
 static void
-update_changed_files(const std::string_view key, vfs::dir dir)
+update_changed_files(const std::filesystem::path& key, vfs::dir dir)
 {
     (void)key;
 
@@ -611,7 +631,7 @@ update_changed_files(const std::string_view key, vfs::dir dir)
 }
 
 static void
-update_created_files(const std::string_view key, vfs::dir dir)
+update_created_files(const std::filesystem::path& key, vfs::dir dir)
 {
     (void)key;
 
@@ -629,7 +649,7 @@ update_created_files(const std::string_view key, vfs::dir dir)
         if (!file_found)
         {
             // file is not in dir file_list
-            const std::string full_path = Glib::build_filename(dir->path, created_file.data());
+            const auto full_path = std::filesystem::path() / dir->path / created_file;
             file = vfs_file_info_new();
             if (vfs_file_info_get(file, full_path))
             {
@@ -662,10 +682,10 @@ notify_file_change(void* user_data)
 {
     (void)user_data;
 
-    for (const auto& dir : dir_map)
+    for (const auto& [path, dir] : dir_map)
     {
-        update_changed_files(dir.first, dir.second);
-        update_created_files(dir.first, dir.second);
+        update_changed_files(path, dir);
+        update_created_files(path, dir);
     }
     /* remove the timeout */
     change_notify_timeout = 0;
@@ -681,17 +701,17 @@ vfs_dir_flush_notify_cache()
     }
     change_notify_timeout = 0;
 
-    for (const auto& dir : dir_map)
+    for (const auto& [path, dir] : dir_map)
     {
-        update_changed_files(dir.first, dir.second);
-        update_created_files(dir.first, dir.second);
+        update_changed_files(path, dir);
+        update_created_files(path, dir);
     }
 }
 
 /* Callback function which will be called when monitored events happen */
 static void
 vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
-                         const std::string_view file_name, void* user_data)
+                         const std::filesystem::path& file_name, void* user_data)
 {
     (void)monitor;
     vfs::dir dir = VFS_DIR(user_data);
@@ -713,12 +733,12 @@ vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent e
 }
 
 vfs::dir
-vfs_dir_get_by_path_soft(const std::string_view path)
+vfs_dir_get_by_path_soft(const std::filesystem::path& path)
 {
     vfs::dir dir = nullptr;
-    if (dir_map.contains(path.data()))
+    if (dir_map.contains(path.c_str()))
     {
-        dir = dir_map.at(path.data());
+        dir = dir_map.at(path.c_str());
         assert(dir != nullptr);
         g_object_ref(dir);
     }
@@ -726,28 +746,26 @@ vfs_dir_get_by_path_soft(const std::string_view path)
 }
 
 vfs::dir
-vfs_dir_get_by_path(const std::string_view path)
+vfs_dir_get_by_path(const std::filesystem::path& path)
 {
-    if (!dir_map.empty())
+    if (dir_map.contains(path.c_str()))
     {
-        if (dir_map.contains(path.data()))
-        {
-            vfs::dir dir = dir_map.at(path.data());
-            assert(dir != nullptr);
-            g_object_ref(dir);
-            return dir;
-        }
+        vfs::dir dir = dir_map.at(path.c_str());
+        assert(dir != nullptr);
+        g_object_ref(dir);
+        return dir;
     }
 
-    vfs::dir dir = vfs_dir_new(path);
+    vfs::dir dir = vfs_dir_new(path.c_str());
+    assert(dir != nullptr);
     vfs_dir_load(dir); /* asynchronous operation */
-    dir_map.insert({dir->path.data(), dir});
+    dir_map.insert({dir->path.c_str(), dir});
 
     return dir;
 }
 
 static void
-reload_mime_type(const std::string_view key, vfs::dir dir)
+reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
 {
     (void)key;
 
@@ -760,7 +778,7 @@ reload_mime_type(const std::string_view key, vfs::dir dir)
 
     for (vfs::file_info file : dir->file_list)
     {
-        const std::string full_path = Glib::build_filename(dir->path, file->get_name());
+        const auto full_path = std::filesystem::path() / dir->path / file->get_name();
         file->reload_mime_type(full_path);
         // ztd::logger::debug("reload {}", full_path);
     }
@@ -814,7 +832,7 @@ vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
              FIXME: This is not a good way to do things, but there is no better way now.  */
         if (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY)
         {
-            const std::string file_path = Glib::build_filename(dir->path, file->name);
+            const auto file_path = std::filesystem::path() / dir->path / file->name;
             file->load_special_info(file_path);
         }
     }
@@ -878,7 +896,7 @@ vfs_dir_monitor_mime()
         return;
     }
 
-    const std::string path = Glib::build_filename(vfs::user_dirs->data_dir(), "mime/packages");
+    const auto path = vfs::user_dirs->data_dir() / "mime" / "packages";
     if (!std::filesystem::is_directory(path))
     {
         return;

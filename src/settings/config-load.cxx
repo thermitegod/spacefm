@@ -487,11 +487,11 @@ load_user_confing(const std::string_view session, bool load_deprecated_ini_confi
 #else
 
 void
-load_user_confing(const std::string_view session)
+load_user_confing(const std::filesystem::path& session)
 {
     try
     {
-        const auto tbl = toml::parse(session.data());
+        const auto tbl = toml::parse(session);
         // DEBUG
         // std::cout << "###### TOML PARSE ######" << "\n\n";
         // std::cout << tbl << "\n\n";

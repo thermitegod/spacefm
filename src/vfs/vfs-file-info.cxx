@@ -139,15 +139,12 @@ vfs_file_info_unref(vfs::file_info file)
 }
 
 bool
-vfs_file_info_get(vfs::file_info file, const std::string_view file_path)
+vfs_file_info_get(vfs::file_info file, const std::filesystem::path& file_path)
 {
     vfs_file_info_clear(file);
 
-    const std::string name = Glib::path_get_basename(file_path.data());
-    const std::string disp_name = Glib::filename_display_basename(file_path.data());
-
-    file->name = name;
-    file->disp_name = disp_name;
+    file->name = file_path.filename();
+    file->disp_name = file_path.filename();
 
     file->file_stat = ztd::lstat(file_path);
     if (file->file_stat.is_valid())
@@ -242,7 +239,7 @@ VFSFileInfo::get_mime_type() const noexcept
 }
 
 void
-VFSFileInfo::reload_mime_type(const std::string_view full_path) noexcept
+VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
 {
     // In current implementation, only st_mode is used in
     // mime-type detection, so let's save some CPU cycles
@@ -647,14 +644,14 @@ VFSFileInfo::is_unknown_type() const noexcept
 
 // full path of the file is required by this function
 bool
-VFSFileInfo::is_executable(const std::string_view file_path) const noexcept
+VFSFileInfo::is_executable(const std::filesystem::path& file_path) const noexcept
 {
     return mime_type_is_executable_file(file_path, this->mime_type->get_type());
 }
 
 // full path of the file is required by this function
 bool
-VFSFileInfo::is_text(const std::string_view file_path) const noexcept
+VFSFileInfo::is_text(const std::filesystem::path& file_path) const noexcept
 {
     return mime_type_is_text_file(file_path, this->mime_type->get_type());
 }
@@ -676,7 +673,7 @@ VFSFileInfo::is_thumbnail_loaded(bool big) const noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail(const std::string_view full_path, bool big) noexcept
+VFSFileInfo::load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept
 {
     if (big)
     {
@@ -689,14 +686,16 @@ VFSFileInfo::load_thumbnail(const std::string_view full_path, bool big) noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail_small(const std::string_view full_path) noexcept
+VFSFileInfo::load_thumbnail_small(const std::filesystem::path& full_path) noexcept
 {
     if (this->small_thumbnail)
     {
         return;
     }
 
-    if (!std::filesystem::exists(full_path))
+    std::error_code ec;
+    const bool exists = std::filesystem::exists(full_path, ec);
+    if (ec || !exists)
     {
         return;
     }
@@ -713,14 +712,16 @@ VFSFileInfo::load_thumbnail_small(const std::string_view full_path) noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail_big(const std::string_view full_path) noexcept
+VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
 {
     if (this->big_thumbnail)
     {
         return;
     }
 
-    if (!std::filesystem::exists(full_path))
+    std::error_code ec;
+    const bool exists = std::filesystem::exists(full_path, ec);
+    if (ec || !exists)
     {
         return;
     }
@@ -749,20 +750,20 @@ vfs_file_info_set_thumbnail_size_small(i32 size)
 }
 
 void
-VFSFileInfo::load_special_info(const std::string_view file_path) noexcept
+VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
 {
     if (!ztd::endswith(this->name, ".desktop"))
     {
         return;
     }
 
-    const std::string file_dir = Glib::path_get_dirname(file_path.data());
+    const auto file_dir = file_path.parent_path();
 
     this->flags = (VFSFileInfoFlag)(this->flags | VFSFileInfoFlag::DESKTOP_ENTRY);
-    const vfs::desktop desktop = vfs_get_desktop(file_path);
+    const vfs::desktop desktop = vfs_get_desktop(file_path.string());
 
     // MOD  display real filenames of .desktop files not in desktop directory
-    if (ztd::same(file_dir, vfs::user_dirs->desktop_dir()))
+    if (std::filesystem::equivalent(file_dir, vfs::user_dirs->desktop_dir()))
     {
         this->set_disp_name(desktop->get_disp_name());
     }

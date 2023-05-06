@@ -59,10 +59,8 @@ xset_custom_new_name()
         setname = fmt::format("cstm_{}", ztd::randhex());
         if (!xset_is(setname))
         {
-            const std::string path1 =
-                Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", setname);
-            const std::string path2 =
-                Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", setname);
+            const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / setname;
+            const auto path2 = vfs::user_dirs->program_config_dir() / "plugin-data" / setname;
 
             // only use free xset name if no aux data dirs exist for that name too.
             if (!std::filesystem::exists(path1) && !std::filesystem::exists(path2))
@@ -112,10 +110,8 @@ xset_custom_delete(xset_t set, bool delete_next)
         xset_set_clipboard = nullptr;
     }
 
-    const std::string path1 =
-        Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
-    const std::string path2 =
-        Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", set->name);
+    const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
+    const auto path2 = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
     if (std::filesystem::exists(path1))
     {
         std::filesystem::remove_all(path1);
@@ -250,8 +246,9 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
             if (!icon_new && set->z)
             {
                 // guess icon name from executable name
-                const std::string name = Glib::path_get_basename(set->z);
-                icon_new = vfs_load_icon(name, icon_size);
+                const auto path = std::filesystem::path(set->z);
+                const auto name = path.filename();
+                icon_new = vfs_load_icon(name.string(), icon_size);
             }
         }
 
@@ -288,22 +285,22 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 }
 
 static bool
-xset_custom_export_files(xset_t set, const std::string_view plug_dir)
+xset_custom_export_files(xset_t set, const std::filesystem::path& plug_dir)
 {
     assert(set != nullptr);
 
-    std::string path_src;
-    std::string path_dest;
+    std::filesystem::path path_src;
+    std::filesystem::path path_dest;
 
     if (set->plugin)
     {
-        path_src = Glib::build_filename(set->plug_dir, set->plug_name);
-        path_dest = Glib::build_filename(plug_dir.data(), set->plug_name);
+        path_src = set->plug_dir / set->plug_name;
+        path_dest = plug_dir / set->plug_name;
     }
     else
     {
-        path_src = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
-        path_dest = Glib::build_filename(plug_dir.data(), set->name);
+        path_src = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
+        path_dest = plug_dir / set->name;
     }
 
     if (!(std::filesystem::exists(path_src) && dir_has_files(path_src)))
@@ -321,7 +318,7 @@ xset_custom_export_files(xset_t set, const std::string_view plug_dir)
 }
 
 static bool
-xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::string_view plug_dir)
+xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::filesystem::path& plug_dir)
 { // recursively write set, submenu sets, and next sets
     xsetpak_t xsetpak_local{{fmt::format("{}", set->name), xset_pack_set(set)}};
 
@@ -397,8 +394,9 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     else
     {
-        const std::string s1 = Glib::path_get_basename(set->plug_dir);
-        deffile = fmt::format("{}-{}-plugin.tar.xz", s1, PACKAGE_NAME);
+        const auto s1 = set->plug_dir.filename();
+        // Need to use .string() to avoid fmt adding double quotes when formating
+        deffile = fmt::format("{}-{}-plugin.tar.xz", s1.string(), PACKAGE_NAME);
     }
 
     char* path = xset_file_dialog(parent,
@@ -414,13 +412,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     {
         std::free(save->s);
     }
-    save->s = ztd::strdup(Glib::path_get_dirname(path));
+    save->s = ztd::strdup(std::filesystem::path(path).parent_path());
 
     // get or create tmp plugin dir
-    std::string plug_dir;
+    std::filesystem::path plug_dir;
     if (!set->plugin)
     {
-        const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
+        const auto user_tmp = vfs::user_dirs->program_tmp_dir();
         if (!std::filesystem::is_directory(user_tmp))
         {
             std::free(path);
@@ -433,7 +431,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         }
         while (true)
         {
-            plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
+            plug_dir = user_tmp / ztd::randhex();
             if (!std::filesystem::exists(plug_dir))
             {
                 break;
@@ -443,7 +441,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
 
         // Create plugin file
-        // const std::string plugin_path = Glib::build_filename(plug_dir, PLUGIN_FILE_FILENAME);
+        // const auto plugin_path = plug_dir / PLUGIN_FILE_FILENAME;
 
         // Do not want to store plugins prev/next/parent
         // TODO - Better way
@@ -508,7 +506,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                               parent,
                               file_browser ? file_browser->task_view : nullptr);
 
-    const std::string plug_dir_q = ztd::shell::quote(plug_dir);
+    const std::string plug_dir_q = ztd::shell::quote(plug_dir.string());
     const std::string path_q = ztd::shell::quote(path);
     if (!set->plugin)
     {
@@ -551,11 +549,11 @@ xset_custom_get_script(xset_t set, bool create)
         return nullptr;
     }
 
-    std::string path;
+    std::filesystem::path path;
 
     if (create)
     {
-        path = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
+        path = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
         if (!std::filesystem::exists(path))
         {
             std::filesystem::create_directories(path);
@@ -565,14 +563,11 @@ xset_custom_get_script(xset_t set, bool create)
 
     if (set->plugin)
     {
-        path = Glib::build_filename(set->plug_dir, set->plug_name, "exec.fish");
+        path = set->plug_dir / set->plug_name / "exec.fish";
     }
     else
     {
-        path = Glib::build_filename(vfs::user_dirs->program_config_dir(),
-                                    "scripts",
-                                    set->name,
-                                    "exec.fish");
+        path = vfs::user_dirs->program_config_dir() / "scripts" / set->name / "exec.fish";
     }
 
     if (create && !std::filesystem::exists(path))
@@ -604,8 +599,6 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     assert(src != nullptr);
     assert(dest != nullptr);
 
-    std::string path_src;
-    std::string path_dest;
     std::string command;
 
     std::string* standard_output = nullptr;
@@ -616,21 +609,24 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 
     // copy command dir
 
+    std::filesystem::path path_src;
+    std::filesystem::path path_dest;
+
     if (src->plugin)
     {
-        path_src = Glib::build_filename(src->plug_dir, src->plug_name);
+        path_src = src->plug_dir / src->plug_name;
     }
     else
     {
-        path_src = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", src->name);
+        path_src = vfs::user_dirs->program_config_dir() / "scripts" / src->name;
     }
     // ztd::logger::info("    path_src={}", path_src);
 
     // ztd::logger::info("    path_src EXISTS");
-    path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts");
+    path_dest = vfs::user_dirs->program_config_dir() / "scripts";
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    path_dest = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", dest->name);
+    path_dest = vfs::user_dirs->program_config_dir() / "scripts" / dest->name;
     command = fmt::format("cp -a {} {}", path_src, path_dest);
     // ztd::logger::info("    path_dest={}", path_dest);
     ztd::logger::info("COMMAND={}", command);
@@ -661,12 +657,10 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 
     // copy data dir
     xset_t mset = xset_get_plugin_mirror(src);
-    path_src =
-        Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", mset->name);
+    path_src = vfs::user_dirs->program_config_dir() / "plugin-data" / mset->name;
     if (std::filesystem::is_directory(path_src))
     {
-        path_dest =
-            Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", dest->name);
+        path_dest = vfs::user_dirs->program_config_dir() / "plugin-data" / dest->name;
         command = fmt::format("cp -a {} {}", path_src, path_dest);
         ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);

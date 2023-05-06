@@ -195,7 +195,7 @@ update_change_detection()
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 if (file_browser)
                 {
-                    const std::string cwd = ptk_file_browser_get_cwd(file_browser);
+                    const auto cwd = ptk_file_browser_get_cwd(file_browser);
                     // update current dir change detection
                     file_browser->dir->avoid_changes = vfs_volume_dir_avoid_changes(cwd);
                     // update thumbnail visibility
@@ -279,7 +279,7 @@ update_names()
 }
 
 bool
-ptk_location_view_chdir(GtkTreeView* location_view, const std::string_view cur_dir)
+ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& cur_dir)
 {
     if (cur_dir.empty() || !GTK_IS_TREE_VIEW(location_view))
     {
@@ -295,7 +295,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::string_view cur_d
             vfs::volume vol;
             gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
             const std::string mount_point = vol->get_mount_point();
-            if (ztd::same(cur_dir, mount_point))
+            if (std::filesystem::equivalent(cur_dir, mount_point))
             {
                 gtk_tree_selection_select_iter(tree_sel, &it);
                 GtkTreePath* path = gtk_tree_model_get_path(model, &it);
@@ -383,7 +383,8 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         }
         else
         {
-            if (!ztd::same(vol->mount_point, ptk_file_browser_get_cwd(file_browser)))
+            if (!std::filesystem::equivalent(vol->mount_point,
+                                             ptk_file_browser_get_cwd(file_browser)))
             {
                 ptk_file_browser_chdir(file_browser,
                                        vol->mount_point,
@@ -394,16 +395,16 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
 }
 
 bool
-ptk_location_view_open_block(const std::string_view block, bool new_tab)
+ptk_location_view_open_block(const std::filesystem::path& block, bool new_tab)
 {
     // open block device file if in volumes list
 
     // may be link so get real path
-    const std::string canon = std::filesystem::canonical(block);
+    const auto canon = std::filesystem::canonical(block);
 
     for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
-        if (ztd::same(volume->get_device_file(), canon))
+        if (ztd::same(volume->get_device_file(), canon.string()))
         {
             if (new_tab)
             {

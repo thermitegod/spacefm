@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <span>
 
 #include <vector>
@@ -59,22 +61,6 @@
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-plugins.hxx"
 
-PluginData::PluginData()
-{
-    this->main_window = nullptr;
-    this->handler_dlg = nullptr;
-    this->plug_dir = nullptr;
-    this->set = nullptr;
-}
-
-PluginData::~PluginData()
-{
-    if (this->plug_dir)
-    {
-        std::free(this->plug_dir);
-    }
-}
-
 void
 clean_plugin_mirrors()
 { // remove plugin mirrors for non-existent plugins
@@ -100,16 +86,15 @@ clean_plugin_mirrors()
     }
 
     // remove plugin-data for non-existent xsets
-    const std::string path =
-        Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data");
+    const auto path = vfs::user_dirs->program_config_dir() / "plugin-data";
     if (std::filesystem::is_directory(path))
     {
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
-            const std::string file_name = std::filesystem::path(file).filename();
-            if (ztd::startswith(file_name, "cstm_") && !xset_is(file_name))
+            const auto file_name = file.path().filename();
+            if (ztd::startswith(file_name.string(), "cstm_") && !xset_is(file_name.string()))
             {
-                const std::string plugin_path = fmt::format("{}/{}", path, file_name);
+                const auto plugin_path = path / file_name;
                 std::filesystem::remove_all(plugin_path);
                 ztd::logger::info("Removed {}/{}", path, file_name);
             }
@@ -131,7 +116,7 @@ xset_set_plugin_mirror(xset_t pset)
             if (set->parent && set->child)
             {
                 if (ztd::same(set->child, pset->plug_name) &&
-                    ztd::same(set->parent, pset->plug_dir))
+                    ztd::same(set->parent, pset->plug_dir.string()))
                 {
                     if (set->shared_key)
                     {
@@ -204,7 +189,7 @@ xset_get_plugins()
     {
         assert(set != nullptr);
 
-        if (set->plugin && set->plugin_top && set->plug_dir)
+        if (set->plugin && set->plugin_top && !set->plug_dir.empty())
         {
             plugins.emplace_back(set);
         }
@@ -220,7 +205,7 @@ xset_clear_plugins(const std::span<const xset_t> plugins)
 }
 
 static xset_t
-xset_get_by_plug_name(const std::string_view plug_dir, const std::string_view plug_name)
+xset_get_by_plug_name(const std::filesystem::path& plug_dir, const std::string_view plug_name)
 {
     if (plug_name.empty())
     {
@@ -232,7 +217,7 @@ xset_get_by_plug_name(const std::string_view plug_dir, const std::string_view pl
         assert(set != nullptr);
 
         if (set->plugin && ztd::same(plug_name, set->plug_name) &&
-            ztd::same(plug_dir, set->plug_dir))
+            std::filesystem::equivalent(plug_dir, set->plug_dir))
         {
             return set;
         }
@@ -242,7 +227,7 @@ xset_get_by_plug_name(const std::string_view plug_dir, const std::string_view pl
     const std::string setname = xset_custom_new_name();
 
     xset_t set = xset_new(setname, XSetName::CUSTOM);
-    set->plug_dir = ztd::strdup(plug_dir.data());
+    set->plug_dir = plug_dir;
     set->plug_name = ztd::strdup(plug_name.data());
     set->plugin = true;
     set->lock = false;
@@ -252,7 +237,7 @@ xset_get_by_plug_name(const std::string_view plug_dir, const std::string_view pl
 }
 
 static void
-xset_parse_plugin(const std::string_view plug_dir, const std::string_view name,
+xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view name,
                   const std::string_view setvar, const std::string_view value, PluginUse use)
 {
     if (value.empty())
@@ -370,7 +355,7 @@ xset_parse_plugin(const std::string_view plug_dir, const std::string_view name,
 }
 
 static void
-xset_import_plugin_parse(const std::string_view plug_dir, PluginUse* use,
+xset_import_plugin_parse(const std::filesystem::path& plug_dir, PluginUse* use,
                          const std::string_view name, const std::string_view var,
                          const std::string_view value)
 {
@@ -402,7 +387,7 @@ xset_import_plugin_parse(const std::string_view plug_dir, PluginUse* use,
 }
 
 xset_t
-xset_import_plugin(const char* plug_dir, PluginUse* use)
+xset_import_plugin(const std::filesystem::path& plug_dir, PluginUse* use)
 {
     if (use)
     {
@@ -419,7 +404,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
         {
             assert(set != nullptr);
 
-            if (set->plugin && ztd::same(plug_dir, set->plug_dir))
+            if (set->plugin && std::filesystem::equivalent(plug_dir, set->plug_dir))
             {
                 xset_remove(set);
                 redo = true; // search list from start again due to changed list
@@ -429,7 +414,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     }
 
     // read plugin file into xsets
-    const std::string plugin = Glib::build_filename(plug_dir, PLUGIN_FILE_FILENAME);
+    const std::filesystem::path plugin = plug_dir / PLUGIN_FILE_FILENAME;
 
     if (!std::filesystem::exists(plugin))
     {
@@ -445,7 +430,7 @@ xset_import_plugin(const char* plug_dir, PluginUse* use)
     {
         assert(set != nullptr);
 
-        if (set->plugin && ztd::same(plug_dir, set->plug_dir))
+        if (set->plugin && std::filesystem::equivalent(plug_dir, set->plug_dir))
         {
             set->key = 0;
             set->keymod = 0;
@@ -478,8 +463,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
     }
     else
     {
-        const std::string plugin =
-            Glib::build_filename(plugin_data->plug_dir, PLUGIN_FILE_FILENAME);
+        const auto plugin = plugin_data->plug_dir / PLUGIN_FILE_FILENAME;
         if (std::filesystem::exists(plugin))
         {
             PluginUse use = PluginUse::NORMAL;
@@ -590,12 +574,12 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
 }
 
 void
-install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string_view path,
-                    const std::string_view plug_dir, PluginJob job, xset_t insert_set)
+install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesystem::path& path,
+                    const std::filesystem::path& plug_dir, PluginJob job, xset_t insert_set)
 {
     std::string own;
-    const std::string plug_dir_q = ztd::shell::quote(plug_dir);
-    const std::string file_path_q = ztd::shell::quote(path);
+    const std::string plug_dir_q = ztd::shell::quote(plug_dir.string());
+    const std::string file_path_q = ztd::shell::quote(path.string());
 
     MainWindow* main_window = MAIN_WINDOW(main_win);
     // task
@@ -656,7 +640,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::string_vi
     const auto plugin_data = new PluginData;
     plugin_data->main_window = main_window;
     plugin_data->handler_dlg = handler_dlg;
-    plugin_data->plug_dir = ztd::strdup(plug_dir.data());
+    plugin_data->plug_dir = plug_dir;
     plugin_data->job = job;
     plugin_data->set = insert_set;
     ptask->complete_notify = (GFunc)on_install_plugin_cb;

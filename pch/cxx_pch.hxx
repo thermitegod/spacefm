@@ -64,6 +64,7 @@
 
 // FMT
 #include <fmt/format.h>
+#include <fmt/std.h>
 
 // SIGNALS
 #include <sigc++/sigc++.h>

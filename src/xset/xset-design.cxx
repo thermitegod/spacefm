@@ -207,8 +207,8 @@ xset_design_job_set_custom(xset_t set)
 
     if (set->z)
     {
-        folder = Glib::path_get_dirname(set->z);
-        file = Glib::path_get_basename(set->z);
+        folder = std::filesystem::path(set->z).parent_path();
+        file = std::filesystem::path(set->z).filename();
     }
     else
     {
@@ -462,10 +462,10 @@ xset_design_job_set_import_file(xset_t set)
         return;
     }
 
-    save->s = ztd::strdup(Glib::path_get_dirname(file));
+    save->s = ztd::strdup(std::filesystem::path(file).parent_path());
 
     // Make Plugin Dir
-    const std::string& user_tmp = vfs::user_dirs->program_tmp_dir();
+    const auto user_tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(user_tmp))
     {
         xset_msg_dialog(GTK_WIDGET(parent),
@@ -477,10 +477,10 @@ xset_design_job_set_import_file(xset_t set)
         return;
     }
 
-    std::string plug_dir;
+    std::filesystem::path plug_dir;
     while (std::filesystem::exists(plug_dir))
     {
-        plug_dir = Glib::build_filename(user_tmp, ztd::randhex());
+        plug_dir = user_tmp / ztd::randhex();
         if (!std::filesystem::exists(plug_dir))
         {
             break;
@@ -489,7 +489,7 @@ xset_design_job_set_import_file(xset_t set)
     install_plugin_file(set->browser ? set->browser->main_window : nullptr,
                         nullptr,
                         file,
-                        plug_dir,
+                        plug_dir.string(),
                         PluginJob::COPY,
                         set);
     std::free(file);
@@ -552,7 +552,7 @@ xset_design_job_set_paste(xset_t set)
 static void
 xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 {
-    if (!file_browser || !set || !set->plugin_top || !set->plug_dir)
+    if (!file_browser || !set || !set->plugin_top || set->plug_dir.empty())
     {
         return;
     }
@@ -576,7 +576,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view);
 
-    const std::string plug_dir_q = ztd::shell::quote(set->plug_dir);
+    const std::string plug_dir_q = ztd::shell::quote(set->plug_dir.string());
 
     ptask->task->exec_command = fmt::format("rm -rf {}", plug_dir_q);
     ptask->task->exec_sync = true;
@@ -832,18 +832,18 @@ xset_design_job_set_browse_files(xset_t set)
         return;
     }
 
-    std::string folder;
+    std::filesystem::path folder;
     if (set->plugin)
     {
-        folder = Glib::build_filename(set->plug_dir, "files");
+        folder = std::filesystem::path() / set->plug_dir / "files";
         if (!std::filesystem::exists(folder))
         {
-            folder = Glib::build_filename(set->plug_dir, set->plug_name);
+            folder = std::filesystem::path() / set->plug_dir / set->plug_name;
         }
     }
     else
     {
-        folder = Glib::build_filename(vfs::user_dirs->program_config_dir(), "scripts", set->name);
+        folder = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
     }
     if (!std::filesystem::exists(folder) && !set->plugin)
     {
@@ -865,17 +865,15 @@ xset_design_job_set_browse_data(xset_t set)
         return;
     }
 
-    std::string folder;
+    std::filesystem::path folder;
     if (set->plugin)
     {
         xset_t mset = xset_get_plugin_mirror(set);
-        folder =
-            Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", mset->name);
+        folder = vfs::user_dirs->program_config_dir() / "plugin-data" / mset->name;
     }
     else
     {
-        folder =
-            Glib::build_filename(vfs::user_dirs->program_config_dir(), "plugin-data", set->name);
+        folder = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
     }
     if (!std::filesystem::exists(folder))
     {
@@ -892,7 +890,7 @@ xset_design_job_set_browse_data(xset_t set)
 static void
 xset_design_job_set_browse_plugins(xset_t set)
 {
-    if (set->plugin && set->plug_dir)
+    if (set->plugin && !set->plug_dir.empty())
     {
         if (set->browser)
         {

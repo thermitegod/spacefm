@@ -202,10 +202,10 @@ struct XSet
     char opener{0};            // saved
 
     // Plugin (not saved at all)
-    bool plugin{false};       // not saved
-    bool plugin_top{false};   // not saved
-    char* plug_name{nullptr}; // not saved
-    char* plug_dir{nullptr};  // not saved
+    bool plugin{false};               // not saved
+    bool plugin_top{false};           // not saved
+    char* plug_name{nullptr};         // not saved
+    std::filesystem::path plug_dir{}; // not saved
 
 #if defined(XSET_GETTER_SETTER)
   public:

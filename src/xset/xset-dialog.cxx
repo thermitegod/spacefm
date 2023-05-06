@@ -345,7 +345,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                     }
                     else
                     {
-                        *answer = ztd::strdup(Glib::filename_from_utf8(ans));
+                        *answer = ztd::strdup(std::filesystem::path(ans));
                     }
 
                     ret = true;
@@ -442,7 +442,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         else
         {
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg),
-                                                vfs::user_dirs->home_dir().data());
+                                                vfs::user_dirs->home_dir().c_str());
         }
     }
     if (deffile)
@@ -454,8 +454,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         }
         else
         {
-            const std::string path2 = Glib::build_filename(deffolder, deffile);
-            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.data());
+            const auto path2 = std::filesystem::path(deffolder, deffile);
+            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.c_str());
         }
     }
 

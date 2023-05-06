@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <span>
@@ -66,11 +68,9 @@ inline constexpr u64 MAGIC_LIST     = 24;
 // inline constexpr u64 NAMESPACE_LIST = 28;
 // clang-format on
 
-MimeCache::MimeCache(const std::string_view file_path)
+MimeCache::MimeCache(const std::filesystem::path& file_path) : file_path(file_path)
 {
     // ztd::logger::info("MimeCache Constructor");
-
-    this->file_path = file_path.data();
 
     load_mime_file();
 }
@@ -79,7 +79,7 @@ void
 MimeCache::load_mime_file()
 {
     // Open the file and map it into memory
-    const i32 fd = open(this->file_path.data(), O_RDONLY, 0);
+    const i32 fd = open(this->file_path.c_str(), O_RDONLY, 0);
     if (fd == -1)
     {
         ztd::logger::error("failed to open {}", this->file_path);
@@ -304,7 +304,7 @@ MimeCache::lookup_alias(const std::string_view mime_type)
     return this->lookup_str_in_entries(this->alias, this->n_alias, mime_type);
 }
 
-const std::string&
+const std::filesystem::path&
 MimeCache::get_file_path()
 {
     return this->file_path;

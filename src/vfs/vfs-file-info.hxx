@@ -59,8 +59,8 @@ struct VFSFileInfo
     std::filesystem::file_status status;
 
   public:
+    std::filesystem::path path{};                 // real path on file system
     std::string name{};                           // real name on file system
-    std::string path{};                           // real path on file system
     std::string disp_name{};                      // displayed name (in UTF-8)
     std::string collate_key{};                    // sfm sort key
     std::string collate_icase_key{};              // sfm case folded sort key
@@ -91,7 +91,7 @@ struct VFSFileInfo
     std::filesystem::perms get_permissions() const noexcept;
 
     vfs::mime_type get_mime_type() const noexcept;
-    void reload_mime_type(const std::string_view full_path) noexcept;
+    void reload_mime_type(const std::filesystem::path& full_path) noexcept;
 
     const std::string get_mime_type_desc() const noexcept;
 
@@ -102,7 +102,7 @@ struct VFSFileInfo
     std::time_t get_mtime() noexcept;
     std::time_t get_atime() noexcept;
 
-    void load_thumbnail(const std::string_view full_path, bool big) noexcept;
+    void load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
 
     GdkPixbuf* get_big_icon() noexcept;
@@ -111,7 +111,7 @@ struct VFSFileInfo
     GdkPixbuf* get_big_thumbnail() const noexcept;
     GdkPixbuf* get_small_thumbnail() const noexcept;
 
-    void load_special_info(const std::string_view file_path) noexcept;
+    void load_special_info(const std::filesystem::path& file_path) noexcept;
 
     bool is_directory() const noexcept;
     bool is_regular_file() const noexcept;
@@ -128,14 +128,14 @@ struct VFSFileInfo
     bool is_unknown_type() const noexcept;
 
     // Full path of the file is required by this function
-    bool is_executable(const std::string_view file_path = "") const noexcept;
+    bool is_executable(const std::filesystem::path& file_path = "") const noexcept;
 
     // Full path of the file is required by this function
-    bool is_text(const std::string_view file_path = "") const noexcept;
+    bool is_text(const std::filesystem::path& file_path = "") const noexcept;
 
   private:
-    void load_thumbnail_small(const std::string_view full_path) noexcept;
-    void load_thumbnail_big(const std::string_view full_path) noexcept;
+    void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;
+    void load_thumbnail_big(const std::filesystem::path& full_path) noexcept;
 
   public:
     void ref_inc();
@@ -155,7 +155,7 @@ vfs::file_info vfs_file_info_new();
 vfs::file_info vfs_file_info_ref(vfs::file_info file);
 void vfs_file_info_unref(vfs::file_info file);
 
-bool vfs_file_info_get(vfs::file_info file, const std::string_view file_path);
+bool vfs_file_info_get(vfs::file_info file, const std::filesystem::path& file_path);
 
 void vfs_file_info_list_free(const std::span<const vfs::file_info> list);
 

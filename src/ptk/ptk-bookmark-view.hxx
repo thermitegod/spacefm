@@ -16,13 +16,14 @@
 #pragma once
 
 #include <string>
-#include <string_view>
+
+#include <filesystem>
 
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-volume.hxx"
 
-void ptk_bookmark_view_add_bookmark(const std::string_view book_path);
+void ptk_bookmark_view_add_bookmark(const std::filesystem::path& book_path);
 void ptk_bookmark_view_add_bookmark(PtkFileBrowser* file_browser);
 
 void ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, PtkFileBrowser* file_browser);
