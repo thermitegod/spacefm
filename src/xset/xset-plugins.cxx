@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -26,8 +28,6 @@
 #include <ranges>
 
 #include <cassert>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -280,7 +280,8 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
     }
     catch (const std::logic_error& e)
     {
-        const std::string msg = fmt::format("Plugin load error:\n\"{}\"\n{}", plug_dir, e.what());
+        const std::string msg =
+            std::format("Plugin load error:\n\"{}\"\n{}", plug_dir.string(), e.what());
         ztd::logger::error("{}", msg);
         ptk_show_error(nullptr, "Plugin Load Error", msg);
         return;
@@ -470,9 +471,9 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
             set = xset_import_plugin(plugin_data->plug_dir, &use);
             if (!set)
             {
-                const std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "The imported plugin directory does not contain a valid plugin.\n\n({}/)",
-                    plugin_data->plug_dir);
+                    plugin_data->plug_dir.string());
                 xset_msg_dialog(GTK_WIDGET(plugin_data->main_window),
                                 GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Invalid Plugin",
@@ -538,7 +539,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                         const std::string label = clean_label(set->menu_label, false, false);
                         if (geteuid() == 0)
                         {
-                            msg = fmt::format(
+                            msg = std::format(
                                 "The '{}' plugin has been copied to the design clipboard.  Use "
                                 "View|Design Mode to paste it into a menu.\n\nBecause it has not "
                                 "been installed, this plugin will not appear in the Plugins "
@@ -547,7 +548,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                         }
                         else
                         {
-                            msg = fmt::format(
+                            msg = std::format(
                                 "The '{}' plugin has been copied to the design clipboard.  Use "
                                 "View|Design Mode to paste it into a menu.\n\nBecause it has not "
                                 "been installed, this plugin will not appear in the Plugins "
@@ -592,12 +593,12 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesyste
         case PluginJob::INSTALL:
             // install
             own =
-                fmt::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
+                std::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
             ptask->task->exec_as_user = "root";
             break;
         case PluginJob::COPY:
             // copy to clipboard or import to menu
-            own = fmt::format("chmod -R go+rX-w {}", plug_dir_q);
+            own = std::format("chmod -R go+rX-w {}", plug_dir_q);
             break;
         case PluginJob::REMOVE:
         default:
@@ -618,7 +619,7 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesyste
         }
     }
 
-    ptask->task->exec_command = fmt::format(
+    ptask->task->exec_command = std::format(
         "rm -rf {} ; mkdir -p {} && cd {} && tar --exclude='/*' --keep-old-files -xf {} ; "
         "err=$status ; if [ $err -ne 0 ] || [ ! -e plugin ] {} ; then rm -rf {} ; echo 'Error "
         "installing "

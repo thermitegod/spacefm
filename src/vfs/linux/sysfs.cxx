@@ -16,11 +16,11 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <optional>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>

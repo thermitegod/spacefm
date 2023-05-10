@@ -16,9 +16,9 @@
 #include <string>
 #include <string_view>
 
-#include <filesystem>
+#include <format>
 
-#include <fmt/format.h>
+#include <filesystem>
 
 #include <glibmm.h>
 
@@ -129,8 +129,8 @@ add_list_item(GtkListStore* list, const std::string_view path)
     const vfs::desktop desktop = vfs_get_desktop(path);
 
     // tooltip
-    const std::string tooltip = fmt::format("{}\nName={}\nExec={}{}",
-                                            desktop->get_full_path(),
+    const std::string tooltip = std::format("{}\nName={}\nExec={}{}",
+                                            desktop->get_full_path().string(),
                                             desktop->get_disp_name(),
                                             desktop->get_exec(),
                                             desktop->use_terminal() ? "\nTerminal=true" : "");
@@ -232,7 +232,7 @@ app_chooser_dialog_new(GtkWindow* parent, const vfs::mime_type& mime_type, bool 
     }
 
     const std::string mime_desc =
-        fmt::format(" {}\n ( {} )", mime_type->get_description(), mime_type->get_type());
+        std::format(" {}\n ( {} )", mime_type->get_description(), mime_type->get_type());
     gtk_label_set_text(GTK_LABEL(file_type), mime_desc.data());
 
     /* Do not set default handler for directories and files with unknown type */
@@ -496,7 +496,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                                                                  true);
     if (!handlers.empty())
     {
-        const std::string msg = fmt::format(
+        const std::string msg = std::format(
             "Note:  MIME type '{}' is currently set to open with the '{}' file handler, rather "
             "than with your associated MIME application.\n\nYou may also need to disable this "
             "handler in Open|File Handlers for this type to be opened with your associated "
@@ -521,7 +521,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                                                  true);
         if (!handlers.empty())
         {
-            const std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
                 "rather than with your associated MIME application.\n\nYou may also need to "
                 "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "

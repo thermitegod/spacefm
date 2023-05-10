@@ -16,9 +16,9 @@
 #include <string>
 #include <string_view>
 
-#include <cassert>
+#include <format>
 
-#include <fmt/format.h>
+#include <cassert>
 
 #include <gtk/gtk.h>
 
@@ -56,7 +56,7 @@ xset_custom_new_name()
 
     while (true)
     {
-        setname = fmt::format("cstm_{}", ztd::randhex());
+        setname = std::format("cstm_{}", ztd::randhex());
         if (!xset_is(setname))
         {
             const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / setname;
@@ -310,7 +310,7 @@ xset_custom_export_files(xset_t set, const std::filesystem::path& plug_dir)
     }
 
     i32 exit_status;
-    const std::string command = fmt::format("cp -a {} {}", path_src, path_dest);
+    const std::string command = std::format("cp -a {} {}", path_src.string(), path_dest.string());
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
@@ -320,7 +320,7 @@ xset_custom_export_files(xset_t set, const std::filesystem::path& plug_dir)
 static bool
 xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::filesystem::path& plug_dir)
 { // recursively write set, submenu sets, and next sets
-    xsetpak_t xsetpak_local{{fmt::format("{}", set->name), xset_pack_set(set)}};
+    xsetpak_t xsetpak_local{{std::format("{}", set->name), xset_pack_set(set)}};
 
     xsetpak.insert(xsetpak_local.begin(), xsetpak_local.end());
 
@@ -390,13 +390,13 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             type = "plugin";
         }
 
-        deffile = fmt::format("{}-{}-{}.tar.xz", s1, PACKAGE_NAME, type);
+        deffile = std::format("{}-{}-{}.tar.xz", s1, PACKAGE_NAME, type);
     }
     else
     {
         const auto s1 = set->plug_dir.filename();
         // Need to use .string() to avoid fmt adding double quotes when formating
-        deffile = fmt::format("{}-{}-plugin.tar.xz", s1.string(), PACKAGE_NAME);
+        deffile = std::format("{}-{}-plugin.tar.xz", s1.string(), PACKAGE_NAME);
     }
 
     char* path = xset_file_dialog(parent,
@@ -451,7 +451,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         set->prev = nullptr;
         set->next = nullptr;
         set->parent = nullptr;
-        xsetpak_t xsetpak{{fmt::format("{}", set->name), xset_pack_set(set)}};
+        xsetpak_t xsetpak{{std::format("{}", set->name), xset_pack_set(set)}};
         set->prev = s_prev;
         set->next = s_next;
         set->parent = s_parent;
@@ -511,7 +511,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     if (!set->plugin)
     {
         ptask->task->exec_command =
-            fmt::format("tar --numeric-owner -cJf {} * ; err=$status ; rm -rf {} ; "
+            std::format("tar --numeric-owner -cJf {} * ; err=$status ; rm -rf {} ; "
                         "if [ $err -ne 0 ];then rm -f {} ; fi ; exit $err",
                         path_q,
                         plug_dir_q,
@@ -520,7 +520,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     else
     {
         ptask->task->exec_command =
-            fmt::format("tar --numeric-owner -cJf {} * ; err=$status ; "
+            std::format("tar --numeric-owner -cJf {} * ; err=$status ; "
                         "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
                         path_q,
                         path_q);
@@ -573,8 +573,8 @@ xset_custom_get_script(xset_t set, bool create)
     if (create && !std::filesystem::exists(path))
     {
         std::string data;
-        data.append(fmt::format("#!{}\n", FISH_PATH));
-        data.append(fmt::format("source {}\n\n", FISH_FMLIB));
+        data.append(std::format("#!{}\n", FISH_PATH));
+        data.append(std::format("source {}\n\n", FISH_FMLIB));
         data.append("#import file manager variables\n");
         data.append("$fm_import\n\n");
         data.append("#For all spacefm variables see man page: spacefm-scripts\n\n");
@@ -627,7 +627,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     std::filesystem::create_directories(path_dest);
     std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
     path_dest = vfs::user_dirs->program_config_dir() / "scripts" / dest->name;
-    command = fmt::format("cp -a {} {}", path_src, path_dest);
+    command = std::format("cp -a {} {}", path_src.string(), path_dest.string());
     // ztd::logger::info("    path_dest={}", path_dest);
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
@@ -644,14 +644,14 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     if (exit_status && WIFEXITED(exit_status))
     {
         const std::string msg =
-            fmt::format("An error occured copying command files\n\n{}", *standard_error);
+            std::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr,
                         GtkMessageType::GTK_MESSAGE_ERROR,
                         "Copy Command Error",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         msg);
     }
-    command = fmt::format("chmod -R go-rwx {}", path_dest);
+    command = std::format("chmod -R go-rwx {}", path_dest.string());
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
 
@@ -661,7 +661,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     if (std::filesystem::is_directory(path_src))
     {
         path_dest = vfs::user_dirs->program_config_dir() / "plugin-data" / dest->name;
-        command = fmt::format("cp -a {} {}", path_src, path_dest);
+        command = std::format("cp -a {} {}", path_src.string(), path_dest.string());
         ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
         std::string copy_out;
@@ -677,14 +677,14 @@ xset_custom_copy_files(xset_t src, xset_t dest)
         if (exit_status && WIFEXITED(exit_status))
         {
             const std::string msg =
-                fmt::format("An error occured copying command data files\n\n{}", *standard_error);
+                std::format("An error occured copying command data files\n\n{}", *standard_error);
             xset_msg_dialog(nullptr,
                             GtkMessageType::GTK_MESSAGE_ERROR,
                             "Copy Command Error",
                             GtkButtonsType::GTK_BUTTONS_OK,
                             msg);
         }
-        command = fmt::format("chmod -R go-rwx {}", path_dest);
+        command = std::format("chmod -R go-rwx {}", path_dest.string());
         ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_sync(command);
     }

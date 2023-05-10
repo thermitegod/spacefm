@@ -19,6 +19,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -26,8 +28,6 @@
 #include <chrono>
 
 #include <memory>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -309,7 +309,7 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
                    i32 thumb_size)
 {
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file_uri);
-    const std::string file_name = fmt::format("{}.png", file_hash);
+    const std::string file_name = std::format("{}.png", file_hash);
 
     const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / file_name;
 
@@ -359,7 +359,7 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
 
         // create new thumbnail
 #if defined(HAVE_USE_FFMPEGTHUMBNAILER_CLI)
-        const std::string command = fmt::format("ffmpegthumbnailer -s {} -i {} -o {}",
+        const std::string command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
                                                 thumb_size,
                                                 ztd::shell::quote(file_path),
                                                 ztd::shell::quote(thumbnail_file));

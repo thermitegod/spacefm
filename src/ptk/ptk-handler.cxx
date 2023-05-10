@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -34,8 +36,6 @@
 #include <fstream>
 
 #include <cassert>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -928,7 +928,7 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
     }
     // name script
     const std::string str =
-        fmt::format("/hand-{}-{}.fish",
+        std::format("/hand-{}-{}.fish",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     const std::string script = ztd::replace(def_script, "/exec.fish", str);
@@ -983,12 +983,12 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     if (!def_script)
     {
         error_message =
-            fmt::format("get_handler_script unable to get script for custom {}", handler_set->name);
+            std::format("get_handler_script unable to get script for custom {}", handler_set->name);
         return true;
     }
     // name script
     const std::string script_name =
-        fmt::format("/hand-{}-{}.fish",
+        std::format("/hand-{}-{}.fish",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     script = ztd::replace(def_script, "/exec.fish", script_name);
@@ -1004,7 +1004,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
         if (!file.is_open())
         {
             const std::string errno_msg = std::strerror(errno);
-            error_message = fmt::format("Error reading file '{}':\n\n{}", script, errno_msg);
+            error_message = std::format("Error reading file '{}':\n\n{}", script, errno_msg);
             return true;
         }
         else
@@ -1014,7 +1014,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
                 if (start)
                 {
                     // skip script header
-                    if (ztd::same(line, fmt::format("#!{}\n", FISH_PATH)))
+                    if (ztd::same(line, std::format("#!{}\n", FISH_PATH)))
                     {
                         continue;
                     }
@@ -1068,7 +1068,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     }
     // name script
     const std::string str =
-        fmt::format("/hand-{}-{}.fish",
+        std::format("/hand-{}-{}.fish",
                     modes.at(mode),
                     mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     const std::string script = ztd::replace(def_script, "/exec.fish", str);
@@ -1089,12 +1089,12 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     }
 
     // ztd::logger::info("WRITE {}", script);
-    const std::string data = fmt::format("#!{}\nsource {}\n\n{}\n", FISH_PATH, FISH_FMLIB, text);
+    const std::string data = std::format("#!{}\nsource {}\n\n{}\n", FISH_PATH, FISH_FMLIB, text);
     const bool result = write_file(script, data);
     if (!result)
     {
         const std::string errno_msg = std::strerror(errno);
-        error_message = fmt::format("Error writing to file: {}\n\nerrno: {}", script, errno_msg);
+        error_message = std::format("Error writing to file: {}\n\nerrno: {}", script, errno_msg);
         return true;
     }
 
@@ -1154,7 +1154,7 @@ ptk_handler_values_in_list(const std::string_view list, const std::span<const st
             return false;
         }
 
-        msg = fmt::format("{}{}{}", match ? "[" : "", element, match ? "]" : "");
+        msg = std::format("{}{}{}", match ? "[" : "", element, match ? "]" : "");
     }
 
     return ret;
@@ -1338,8 +1338,8 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
 
         // add a space to end of list and end of name before testing to avoid
         // substring false positive
-        std::string testlist = fmt::format("{} ", list);
-        std::string const testname = fmt::format("{} ", handler->setname);
+        std::string testlist = std::format("{} ", list);
+        std::string const testname = std::format("{} ", handler->setname);
         if (add_missing && !ztd::contains(testlist, testname))
         {
             // add a missing default handler to the list
@@ -1347,7 +1347,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
             list = g_strconcat(list, list[0] ? " " : "", handler->setname, nullptr);
             std::free(str);
         }
-        testlist = fmt::format("{} ", list);
+        testlist = std::format("{} ", list);
         if (add_missing || ztd::contains(testlist, testname))
         {
             set = xset_is(handler->xset_name);
@@ -1388,7 +1388,7 @@ add_new_handler(i32 mode)
     while (true)
     {
         const std::string setname =
-            fmt::format("{}{}", handler_cust_prefixs.at(mode), ztd::randhex());
+            std::format("{}{}", handler_cust_prefixs.at(mode), ztd::randhex());
         if (!xset_is(setname))
         {
             // create and return the xset
@@ -1421,7 +1421,8 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     std::filesystem::permissions(path_dest_dir, std::filesystem::perms::owner_all);
     const auto path_dest =
         vfs::user_dirs->program_config_dir() / "scripts" / new_handler_xset->name;
-    const std::string cp_command = fmt::format("cp -a {} {}", path_src, path_dest);
+    const std::string cp_command =
+        std::format("cp -a {} {}", path_src.string(), path_dest.string());
 
     // run command
     std::string* standard_output = nullptr;
@@ -1443,14 +1444,14 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     if (exit_status && WIFEXITED(exit_status))
     {
         const std::string msg =
-            fmt::format("An error occured copying command files\n\n{}", *standard_error);
+            std::format("An error occured copying command files\n\n{}", *standard_error);
         xset_msg_dialog(nullptr,
                         GtkMessageType::GTK_MESSAGE_ERROR,
                         "Copy Command Error",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         msg);
     }
-    const std::string chmod_command = fmt::format("chmod -R go-rwx {}", path_dest);
+    const std::string chmod_command = std::format("chmod -R go-rwx {}", path_dest.string());
     ztd::logger::info("COMMAND={}", chmod_command);
     Glib::spawn_command_line_sync(chmod_command);
 
@@ -1464,7 +1465,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     {
         // Adding new handler to handlers
         const std::string new_handlers_list =
-            fmt::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
+            std::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
         xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handlers_list);
     }
 
@@ -1494,7 +1495,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
                 return;
         }
         const std::string msg =
-            fmt::format("The selected {} Handler file has been imported to the {} Handlers list.",
+            std::format("The selected {} Handler file has been imported to the {} Handlers list.",
                         mode_name,
                         mode_name);
         xset_msg_dialog(nullptr,
@@ -1515,7 +1516,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     const char* disabled =
         hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
     const std::string dis_name =
-        fmt::format("{} {}",
+        std::format("{} {}",
                     new_handler_xset->menu_label,
                     new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
@@ -1705,7 +1706,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                 const std::string disabled =
                     hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
                 const std::string dis_name =
-                    fmt::format("{} {}",
+                    std::format("{} {}",
                                 handler_xset->menu_label,
                                 handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
                 gtk_list_store_set(GTK_LIST_STORE(hnd->list),
@@ -1776,7 +1777,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
         }
         else
         {
-            archive_handlers = fmt::format("{} {}", archive_handlers, xset_name);
+            archive_handlers = std::format("{} {}", archive_handlers, xset_name);
         }
         std::free(xset_name);
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
@@ -1905,7 +1906,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         const char* disabled =
             hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
         const std::string dis_name =
-            fmt::format("{} {}",
+            std::format("{} {}",
                         handler_name,
                         new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
         gtk_list_store_set(GTK_LIST_STORE(hnd->list),
@@ -1926,7 +1927,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         {
             // Adding new handler to handlers
             const std::string new_handlers_list =
-                fmt::format("{} {}",
+                std::format("{} {}",
                             new_handler_xset->name,
                             xset_get_s(handler_conf_xsets.at(hnd->mode)));
             xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_handlers_list);
@@ -1974,7 +1975,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             const char* disabled =
                 hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
             const std::string dis_name =
-                fmt::format("{} {}", handler_name, handler_enabled ? "" : disabled);
+                std::format("{} {}", handler_name, handler_enabled ? "" : disabled);
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
                                PtkHandlerCol::COL_XSET_NAME,
@@ -2074,7 +2075,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 else
                 {
                     new_archive_handlers_s =
-                        fmt::format("{} {}", new_archive_handlers_s, archive_handler);
+                        std::format("{} {}", new_archive_handlers_s, archive_handler);
                 }
             }
         }
@@ -3087,7 +3088,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     // Generating left-hand side of dialog
     GtkWidget* lbl_handlers = gtk_label_new(nullptr);
-    const std::string markup = fmt::format("<b>{}</b>", dialog_mnemonics.at(mode));
+    const std::string markup = std::format("<b>{}</b>", dialog_mnemonics.at(mode));
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handlers), markup.data());
     gtk_widget_set_halign(GTK_WIDGET(lbl_handlers), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handlers), GtkAlign::GTK_ALIGN_START);
@@ -3386,15 +3387,15 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
                      hnd);
 
     GtkWidget* lbl_edit0 = gtk_label_new(nullptr);
-    str = fmt::format("<a href=\"{}\">{}</a>", 0, "Edit");
+    str = std::format("<a href=\"{}\">{}</a>", 0, "Edit");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit0), str.data());
     g_signal_connect(G_OBJECT(lbl_edit0), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit1 = gtk_label_new(nullptr);
-    str = fmt::format("<a href=\"{}\">{}</a>", 1, "Edit");
+    str = std::format("<a href=\"{}\">{}</a>", 1, "Edit");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit1), str.data());
     g_signal_connect(G_OBJECT(lbl_edit1), "activate-link", G_CALLBACK(on_activate_link), hnd);
     GtkWidget* lbl_edit2 = gtk_label_new(nullptr);
-    str = fmt::format("<a href=\"{}\">{}</a>", 2, "Edit");
+    str = std::format("<a href=\"{}\">{}</a>", 2, "Edit");
     gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_edit2), str.data());
     g_signal_connect(G_OBJECT(lbl_edit2), "activate-link", G_CALLBACK(on_activate_link), hnd);
 

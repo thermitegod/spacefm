@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -27,8 +29,6 @@
 
 #include <algorithm>
 #include <ranges>
-
-#include <fmt/format.h>
 
 #include <glib.h>
 #include <glibmm.h>
@@ -305,7 +305,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         // update full_name
         if (name && ext)
         {
-            full_name = fmt::format("{}.{}", name, ext);
+            full_name = std::format("{}.{}", name, ext);
         }
         else if (name && !ext)
         {
@@ -465,7 +465,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         // update full_name
         if (!filename_no_extension.empty() && !filename_extension.empty())
         {
-            full_name = fmt::format("{}.{}", filename_no_extension, filename_extension);
+            full_name = std::format("{}.{}", filename_no_extension, filename_extension);
         }
         else if (!filename_no_extension.empty() && filename_extension.empty())
         {
@@ -1332,7 +1332,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     {
         desc = mset->desc;
     }
-    const std::string title = fmt::format("{} {}{}", action, desc, root_msg);
+    const std::string title = std::format("{} {}{}", action, desc, root_msg);
     gtk_window_set_title(GTK_WINDOW(mset->dlg), title.data());
 
     if (btn_label)
@@ -2005,7 +2005,7 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
     }
     else
     {
-        const std::string name = fmt::format("{}.{}", base, ext);
+        const std::string name = std::format("{}.{}", base, ext);
         path = dir / name;
     }
 
@@ -2015,11 +2015,11 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
         std::string name;
         if (ext.empty())
         {
-            name = fmt::format("{}{}", base, ++n);
+            name = std::format("{}{}", base, ++n);
         }
         else
         {
-            name = fmt::format("{}{}.{}", base, ++n, ext);
+            name = std::format("{}{}.{}", base, ++n, ext);
         }
 
         path = dir / name;
@@ -2390,11 +2390,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             mset->mime_type = ztd::strdup(target_path);
             if (std::filesystem::exists(target_path))
             {
-                type = fmt::format("Link-> {}", target_path);
+                type = std::format("Link-> {}", target_path.string());
             }
             else
             {
-                type = fmt::format("!Link-> {} (missing)", target_path);
+                type = std::format("!Link-> {} (missing)", target_path.string());
                 target_missing = true;
             }
         }
@@ -2410,7 +2410,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         if (mime_type)
         {
             mset->mime_type = ztd::strdup(mime_type->get_type());
-            type = fmt::format(" {} ( {} )", mime_type->get_description(), mset->mime_type);
+            type = std::format(" {} ( {} )", mime_type->get_description(), mset->mime_type);
         }
         else
         {
@@ -2998,7 +2998,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (as_root)
                 {
                     to_path = ztd::shell::quote(path.string());
-                    root_mkdir = fmt::format("mkdir -p {} && ", to_path);
+                    root_mkdir = std::format("mkdir -p {} && ", to_path);
                 }
                 else
                 {
@@ -3009,7 +3009,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     {
                         const std::string errno_msg = std::strerror(errno);
                         const std::string msg =
-                            fmt::format("Error creating parent directory\n\n{}", errno_msg);
+                            std::format("Error creating parent directory\n\n{}", errno_msg);
                         ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
 
                         continue;
@@ -3045,7 +3045,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             if (create_new && new_link)
             {
                 // new link task
-                const std::string task_name = fmt::format("Create Link{}", root_msg);
+                const std::string task_name = std::format("Create Link{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
 
                 std::string str = gtk_entry_get_text(mset->entry_target);
@@ -3065,12 +3065,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (overwrite)
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3125,20 +3125,20 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 std::string over_cmd;
                 if (overwrite)
                 {
-                    over_cmd = fmt::format("rm -f {} && ", to_path);
+                    over_cmd = std::format("rm -f {} && ", to_path);
                 }
 
-                const std::string task_name = fmt::format("Create New File{}", root_msg);
+                const std::string task_name = std::format("Create New File{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (from_path.empty())
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
+                        std::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
+                        std::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3194,16 +3194,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 to_path = ztd::shell::quote(full_path.string());
 
-                const std::string task_name = fmt::format("Create New Directory{}", root_msg);
+                const std::string task_name = std::format("Create New Directory{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (from_path.empty())
                 {
-                    ptask->task->exec_command = fmt::format("{}mkdir {}", root_mkdir, to_path);
+                    ptask->task->exec_command = std::format("{}mkdir {}", root_mkdir, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3227,7 +3227,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else if (copy || copy_target)
             {
                 // copy task
-                const std::string task_name = fmt::format("Copy{}", root_msg);
+                const std::string task_name = std::format("Copy{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 char* over_opt = nullptr;
                 to_path = ztd::shell::quote(full_path.string());
@@ -3259,12 +3259,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (mset->is_dir)
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}cp -Pfr {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}cp -Pfr {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
+                        std::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
                 std::free(over_opt);
                 ptask->task->exec_sync = true;
@@ -3282,7 +3282,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else if (link || link_target)
             {
                 // link task
-                const std::string task_name = fmt::format("Create Link{}", root_msg);
+                const std::string task_name = std::format("Create Link{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 if (link || !mset->is_link)
                 {
@@ -3304,12 +3304,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 if (overwrite)
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3329,19 +3329,19 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             _move_task:
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
-                const std::string task_name = fmt::format("Move{}", root_msg);
+                const std::string task_name = std::format("Move{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
                 from_path = ztd::shell::quote(mset->full_path.string());
                 to_path = ztd::shell::quote(full_path.string());
                 if (overwrite)
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}mv -f {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}mv -f {} {}", root_mkdir, from_path, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        fmt::format("{}mv {} {}", root_mkdir, from_path, to_path);
+                        std::format("{}mv {} {}", root_mkdir, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3370,7 +3370,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
                     // Unknown error has occurred - alert user as usual
                     const std::string errno_msg = std::strerror(errno);
-                    const std::string msg = fmt::format("Error renaming file\n\n{}", errno_msg);
+                    const std::string msg = std::format("Error renaming file\n\n{}", errno_msg);
                     ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
                     continue;
                 }
@@ -3447,7 +3447,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
         }
 
-        const std::string msg = fmt::format("{} target{} missing",
+        const std::string msg = std::format("{} target{} missing",
                                             missing_targets,
                                             missing_targets > 1 ? "s are" : " is");
         ptk_show_error(parent, "Error", msg);
@@ -3479,7 +3479,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     {
         const auto file_path = std::filesystem::path() / cwd / file->get_name();
         file_path_q = ztd::shell::quote(file_path.string());
-        file_paths = fmt::format("{} {}", file_paths, file_path_q);
+        file_paths = std::format("{} {}", file_paths, file_path_q);
         item_count++;
     }
 
@@ -3487,7 +3487,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     {
         if (app_settings.get_confirm_delete())
         {
-            const std::string msg = fmt::format("Delete {} selected item as root ?", item_count);
+            const std::string msg = std::format("Delete {} selected item as root ?", item_count);
 
             const i32 response = xset_msg_dialog(parent,
                                                  GtkMessageType::GTK_MESSAGE_WARNING,
@@ -3501,7 +3501,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
                 return;
             }
         }
-        cmd = fmt::format("rm -r {}", file_paths);
+        cmd = std::format("rm -r {}", file_paths);
         task_name = "Delete As Root";
     }
     else
@@ -3531,13 +3531,13 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
             {
                 task_name = "Move As Root";
                 // problem: no warning if already exists
-                cmd = fmt::format("mv -f {} {}", file_paths, quote_path);
+                cmd = std::format("mv -f {} {}", file_paths, quote_path);
             }
             else
             {
                 task_name = "Copy As Root";
                 // problem: no warning if already exists
-                cmd = fmt::format("cp -r {} {}", file_paths, quote_path);
+                cmd = std::format("cp -r {} {}", file_paths, quote_path);
             }
         }
         else

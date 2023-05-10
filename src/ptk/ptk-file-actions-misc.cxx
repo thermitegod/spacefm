@@ -16,10 +16,10 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <span>
 #include <vector>
-
-#include <fmt/format.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -64,7 +64,7 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     if (app_settings.get_confirm_delete())
     {
-        const std::string msg = fmt::format("Delete {} selected item ?", sel_files.size());
+        const std::string msg = std::format("Delete {} selected item ?", sel_files.size());
         const bool ret = action_dialog(parent_win, "Confirm Delete", msg);
         if (!ret)
         {
@@ -98,7 +98,7 @@ ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     if (app_settings.get_confirm_trash())
     {
-        const std::string msg = fmt::format("Trash {} selected item ?", sel_files.size());
+        const std::string msg = std::format("Trash {} selected item ?", sel_files.size());
         const bool ret = action_dialog(parent_win, "Confirm Trash", msg);
         if (!ret)
         {

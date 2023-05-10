@@ -16,7 +16,7 @@
 #include <string>
 #include <string_view>
 
-#include <fmt/format.h>
+#include <format>
 
 #include <toml.hpp> // toml11
 
@@ -170,7 +170,7 @@ xset_parse(std::string& line)
     }
     catch (const std::logic_error& e)
     {
-        std::string msg = fmt::format("XSet parse error:\n\n{}", e.what());
+        std::string msg = std::format("XSet parse error:\n\n{}", e.what());
         ptk_show_error(nullptr, "Error", e.what());
         return;
     }
@@ -395,7 +395,7 @@ config_parse_xset(const toml::value& tbl, u64 version)
                 }
                 catch (const std::logic_error& e)
                 {
-                    const std::string msg = fmt::format("XSet parse error:\n\n{}", e.what());
+                    const std::string msg = std::format("XSet parse error:\n\n{}", e.what());
                     ptk_show_error(nullptr, "Error", e.what());
                     return;
                 }

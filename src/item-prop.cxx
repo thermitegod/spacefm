@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -23,8 +25,6 @@
 
 #include <iostream>
 #include <fstream>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -659,7 +659,7 @@ context_build(ContextData* ctxt)
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        new_context = fmt::format("{}%%%%%{}",
+        new_context = std::format("{}%%%%%{}",
                                   gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)),
                                   gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_match)));
         do
@@ -673,7 +673,7 @@ context_build(ContextData* ctxt)
                                ItemPropContextCol::CONTEXT_COL_COMP,
                                &comp,
                                -1);
-            new_context = fmt::format("{}%%%%%{}%%%%%{}%%%%%{}", new_context, sub, comp, value);
+            new_context = std::format("{}%%%%%{}%%%%%{}%%%%%{}", new_context, sub, comp, value);
         } while (gtk_tree_model_iter_next(model, &it));
     }
     return ztd::strdup(new_context);
@@ -730,11 +730,11 @@ context_display(i32 sub, i32 comp, const char* value)
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
     {
-        disp = fmt::format("{} {} \"{}\"", context_subs.at(sub), context_comps.at(comp), value);
+        disp = std::format("{} {} \"{}\"", context_subs.at(sub), context_comps.at(comp), value);
     }
     else
     {
-        disp = fmt::format("{} {} {}", context_subs.at(sub), context_comps.at(comp), value);
+        disp = std::format("{} {} {}", context_subs.at(sub), context_comps.at(comp), value);
     }
     return ztd::strdup(disp);
 }
@@ -1495,7 +1495,7 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         if (add_path && add_path[0])
         {
             char* old_path = multi_input_get_text(ctxt->item_target);
-            const std::string new_path = fmt::format("{}{}{}",
+            const std::string new_path = std::format("{}{}{}",
                                                      old_path && old_path[0] ? old_path : "",
                                                      old_path && old_path[0] ? "; " : "",
                                                      add_path);
@@ -2470,7 +2470,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     {
         path = vfs::user_dirs->program_config_dir() / "scripts" / rset->name;
     }
-    str = fmt::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
+    str = std::format("Command Dir  $fm_cmd_dir  {}", dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 
     if (rset->plugin)
@@ -2482,7 +2482,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         path = vfs::user_dirs->program_config_dir() / "plugin-data" / rset->name;
     }
 
-    str = fmt::format("Data Dir  $fm_cmd_data  {}", dir_has_files(path) ? "" : "(no files)");
+    str = std::format("Data Dir  $fm_cmd_data  {}", dir_has_files(path) ? "" : "(no files)");
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->open_browser), str.data());
 
     if (rset->plugin)
@@ -2504,7 +2504,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     if (set->tool > XSetTool::CUSTOM)
     {
         item_type_str =
-            fmt::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
+            std::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
     }
     else if (rset->menu_style == XSetMenu::SUBMENU)
     {

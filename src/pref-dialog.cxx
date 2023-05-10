@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <chrono>
 
 #include <array>
@@ -24,8 +26,6 @@
 #include <sstream>
 
 #include <chrono>
-
-#include <fmt/format.h>
 
 #include <gtk/gtk.h>
 
@@ -401,7 +401,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         if (terminal.empty())
         {
             const std::string msg =
-                fmt::format("Unable to find terminal program '{}'", new_terminal);
+                std::format("Unable to find terminal program '{}'", new_terminal);
             ptk_show_error(GTK_WINDOW(dlg), "Error", msg);
         }
 

@@ -16,14 +16,14 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <array>
 #include <vector>
 
 #include <iostream>
 
 #include <filesystem>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -111,7 +111,7 @@ save_bookmarks() noexcept
     std::string book_entry;
     for (auto [book_path, book_name] : bookmarks)
     {
-        book_entry.append(fmt::format("file://{} {}\n", book_path, book_name));
+        book_entry.append(std::format("file://{} {}\n", book_path.string(), book_name.string()));
     }
 
     write_file(bookmark_file, book_entry);

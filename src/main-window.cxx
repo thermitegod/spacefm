@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -351,7 +353,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 
             if (std::filesystem::exists(plug_dir))
             {
-                msg = fmt::format(
+                msg = std::format(
                     "There is already a plugin installed as '{}'.  Overwrite ?\n\nTip: You can "
                     "also rename this plugin file to install it under a different name.",
                     plug_dir_name);
@@ -554,7 +556,7 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
                                            file_browser->task_view);
     const std::string exe = ztd::program::exe();
     const std::string cwd = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser).string());
-    ptask->task->exec_command = fmt::format("HOME=/root {} {}", exe, cwd);
+    ptask->task->exec_command = std::format("HOME=/root {} {}", exe, cwd);
     ptask->task->exec_as_user = "root";
     ptask->task->exec_sync = false;
     ptask->task->exec_export = false;
@@ -1178,7 +1180,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     // set->ob1 is preload path
 
                     const std::string tabs_add =
-                        fmt::format("{}{}{}",
+                        std::format("{}{}{}",
                                     set->s && app_settings.get_load_saved_tabs() ? set->s : "",
                                     set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
                                     set->ob1 ? set->ob1 : "");
@@ -1531,7 +1533,7 @@ rebuild_menus(MainWindow* main_window)
     set = xset_get(XSetName::CON_VIEW);
     str = set->menu_label;
     const std::string menu_label =
-        fmt::format("Panel {} {}", main_window->curpanel, set->menu_label);
+        std::format("Panel {} {}", main_window->curpanel, set->menu_label);
     set->menu_label = ztd::strdup(menu_label);
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
     std::free(set->menu_label);
@@ -3200,13 +3202,14 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         // calc total space
         const std::string disk_size = vfs_file_size_format(fs_stat.frsize() * fs_stat.blocks());
 
-        statusbar_txt.append(fmt::format(" {} / {}   ", free_size, disk_size));
+        statusbar_txt.append(std::format(" {} / {}   ", free_size, disk_size));
     }
 
     // Show Reading... while sill loading
     if (file_browser->busy)
     {
-        statusbar_txt.append(fmt::format("Reading {} ...", ptk_file_browser_get_cwd(file_browser)));
+        statusbar_txt.append(
+            std::format("Reading {} ...", ptk_file_browser_get_cwd(file_browser).string()));
         gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.data());
         return;
     }
@@ -3231,7 +3234,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         const std::string disk_size = vfs_file_size_format(total_on_disk_size);
 
         statusbar_txt.append(
-            fmt::format("{} / {} ({} / {})", num_sel, num_vis, file_size, disk_size));
+            std::format("{} / {} ({} / {})", num_sel, num_vis, file_size, disk_size));
 
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
@@ -3265,11 +3268,12 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                     {
                         if (std::filesystem::exists(target_path))
                         {
-                            statusbar_txt.append(fmt::format("  Link -> {}/", target));
+                            statusbar_txt.append(std::format("  Link -> {}/", target.string()));
                         }
                         else
                         {
-                            statusbar_txt.append(fmt::format("  !Link -> {}/ (missing)", target));
+                            statusbar_txt.append(
+                                std::format("  !Link -> {}/ (missing)", target.string()));
                         }
                     }
                     else
@@ -3278,22 +3282,24 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                         if (results.is_valid())
                         {
                             const std::string lsize = vfs_file_size_format(results.size());
-                            statusbar_txt.append(fmt::format("  Link -> {} ({})", target, lsize));
+                            statusbar_txt.append(
+                                std::format("  Link -> {} ({})", target.string(), lsize));
                         }
                         else
                         {
-                            statusbar_txt.append(fmt::format("  !Link -> {} (missing)", target));
+                            statusbar_txt.append(
+                                std::format("  !Link -> {} (missing)", target.string()));
                         }
                     }
                 }
                 else
                 {
-                    statusbar_txt.append(fmt::format("  !Link -> (error reading target)"));
+                    statusbar_txt.append(std::format("  !Link -> (error reading target)"));
                 }
             }
             else
             {
-                statusbar_txt.append(fmt::format("  {}", file->get_name()));
+                statusbar_txt.append(std::format("  {}", file->get_name()));
             }
 
             vfs_file_info_unref(file);
@@ -3350,31 +3356,31 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 
             if (count_dir)
             {
-                statusbar_txt.append(fmt::format("  Directories ({})", count_dir));
+                statusbar_txt.append(std::format("  Directories ({})", count_dir));
             }
             if (count_file)
             {
-                statusbar_txt.append(fmt::format("  Files ({})", count_file));
+                statusbar_txt.append(std::format("  Files ({})", count_file));
             }
             if (count_symlink)
             {
-                statusbar_txt.append(fmt::format("  Symlinks ({})", count_symlink));
+                statusbar_txt.append(std::format("  Symlinks ({})", count_symlink));
             }
             if (count_socket)
             {
-                statusbar_txt.append(fmt::format("  Sockets ({})", count_socket));
+                statusbar_txt.append(std::format("  Sockets ({})", count_socket));
             }
             if (count_pipe)
             {
-                statusbar_txt.append(fmt::format("  Named Pipes ({})", count_pipe));
+                statusbar_txt.append(std::format("  Named Pipes ({})", count_pipe));
             }
             if (count_block)
             {
-                statusbar_txt.append(fmt::format("  Block Devices ({})", count_block));
+                statusbar_txt.append(std::format("  Block Devices ({})", count_block));
             }
             if (count_char)
             {
-                statusbar_txt.append(fmt::format("  Character Devices ({})", count_char));
+                statusbar_txt.append(std::format("  Character Devices ({})", count_char));
             }
         }
     }
@@ -3402,7 +3408,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         const u32 num_hidx = file_browser->dir ? file_browser->dir->xhidden_count : 0;
         if (num_hid || num_hidx)
         {
-            statusbar_txt.append(fmt::format("{} visible ({} hidden)  ({} / {})",
+            statusbar_txt.append(std::format("{} visible ({} hidden)  ({} / {})",
                                              num_vis,
                                              num_hid,
                                              file_size,
@@ -3410,7 +3416,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         }
         else
         {
-            statusbar_txt.append(fmt::format("{} {}  ({} / {})",
+            statusbar_txt.append(std::format("{} {}  ({} / {})",
                                              num_vis,
                                              num_vis == 1 ? "item" : "items",
                                              file_size,
@@ -3420,12 +3426,12 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         // cur dir is a symlink? canonicalize path
         if (std::filesystem::is_symlink(cwd))
         {
-            const std::string canon = std::filesystem::read_symlink(cwd);
-            statusbar_txt.append(fmt::format("  {} -> {}", cwd, canon));
+            const auto canon = std::filesystem::read_symlink(cwd);
+            statusbar_txt.append(std::format("  {} -> {}", cwd.string(), canon.string()));
         }
         else
         {
-            statusbar_txt.append(fmt::format("  {}", cwd));
+            statusbar_txt.append(std::format("  {}", cwd.string()));
         }
     }
 
@@ -3642,7 +3648,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                     if (browser)
                     {
                         const std::string new_set_name =
-                            fmt::format("panel{}{}", browser->mypanel, set->name + 6);
+                            std::format("panel{}{}", browser->mypanel, set->name + 6);
                         set = xset_get(new_set_name);
                     }
                     else
@@ -4171,39 +4177,39 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         std::string flags;
         if (vol->is_removable)
         {
-            flags = fmt::format("{} removable", flags);
+            flags = std::format("{} removable", flags);
         }
         else
         {
-            flags = fmt::format("{} internal", flags);
+            flags = std::format("{} internal", flags);
         }
 
         if (vol->requires_eject)
         {
-            flags = fmt::format("{} ejectable", flags);
+            flags = std::format("{} ejectable", flags);
         }
 
         if (vol->is_optical)
         {
-            flags = fmt::format("{} optical", flags);
+            flags = std::format("{} optical", flags);
         }
 
         if (!vol->is_user_visible)
         {
-            flags = fmt::format("{} policy_hide", flags);
+            flags = std::format("{} policy_hide", flags);
         }
 
         if (vol->is_mounted)
         {
-            flags = fmt::format("{} mounted", flags);
+            flags = std::format("{} mounted", flags);
         }
         else if (vol->is_mountable)
         {
-            flags = fmt::format("{} mountable", flags);
+            flags = std::format("{} mountable", flags);
         }
         else
         {
-            flags = fmt::format("{} no_media", flags);
+            flags = std::format("{} no_media", flags);
         }
 
         c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = flags;
@@ -4418,8 +4424,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
 
         // cwd
         const auto cwd = ptk_file_browser_get_cwd(a_browser);
-        buf.append(fmt::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd.string())));
-        buf.append(fmt::format("set fm_tab_panel[{}] {}\n", p, current_page + 1));
+        buf.append(std::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd.string())));
+        buf.append(std::format("set fm_tab_panel[{}] {}\n", p, current_page + 1));
 
         // selected files
         const std::vector<vfs::file_info> sel_files =
@@ -4427,23 +4433,23 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         if (!sel_files.empty())
         {
             // create fish array
-            buf.append(fmt::format("set fm_panel{}_files (echo ", p));
+            buf.append(std::format("set fm_panel{}_files (echo ", p));
             for (vfs::file_info file : sel_files)
             {
                 const auto path = cwd / file->get_name();
-                buf.append(fmt::format("{} ", ztd::shell::quote(path.string())));
+                buf.append(std::format("{} ", ztd::shell::quote(path.string())));
             }
-            buf.append(fmt::format(")\n"));
+            buf.append(std::format(")\n"));
 
             if (file_browser == a_browser)
             {
                 // create fish array
-                buf.append(fmt::format("set fm_filenames (echo "));
+                buf.append(std::format("set fm_filenames (echo "));
                 for (vfs::file_info file : sel_files)
                 {
-                    buf.append(fmt::format("{} ", ztd::shell::quote(file->get_name())));
+                    buf.append(std::format("{} ", ztd::shell::quote(file->get_name())));
                 }
-                buf.append(fmt::format(")\n"));
+                buf.append(std::format(")\n"));
             }
 
             vfs_file_info_list_free(sel_files);
@@ -4459,33 +4465,33 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
                 if (file_browser == a_browser)
                 {
                     // clang-format off
-                    buf.append(fmt::format("set fm_device {}\n", ztd::shell::quote(vol->device_file)));
-                    buf.append(fmt::format("set fm_device_udi {}\n", ztd::shell::quote(vol->udi)));
-                    buf.append(fmt::format("set fm_device_mount_point {}\n", ztd::shell::quote(vol->mount_point)));
-                    buf.append(fmt::format("set fm_device_label {}\n", ztd::shell::quote(vol->label)));
-                    buf.append(fmt::format("set fm_device_fstype {}\n", ztd::shell::quote(vol->fs_type)));
-                    buf.append(fmt::format("set fm_device_size {}\n", vol->size));
-                    buf.append(fmt::format("set fm_device_display_name {}\n", ztd::shell::quote(vol->disp_name)));
-                    buf.append(fmt::format("set fm_device_icon {}\n", ztd::shell::quote(vol->icon)));
-                    buf.append(fmt::format("set fm_device_is_mounted {}\n", vol->is_mounted ? 1 : 0));
-                    buf.append(fmt::format("set fm_device_is_optical {}\n", vol->is_optical ? 1 : 0));
-                    buf.append(fmt::format("set fm_device_is_removable {}\n", vol->is_removable ? 1 : 0));
-                    buf.append(fmt::format("set fm_device_is_mountable {}\n", vol->is_mountable ? 1 : 0));
+                    buf.append(std::format("set fm_device {}\n", ztd::shell::quote(vol->device_file)));
+                    buf.append(std::format("set fm_device_udi {}\n", ztd::shell::quote(vol->udi)));
+                    buf.append(std::format("set fm_device_mount_point {}\n", ztd::shell::quote(vol->mount_point)));
+                    buf.append(std::format("set fm_device_label {}\n", ztd::shell::quote(vol->label)));
+                    buf.append(std::format("set fm_device_fstype {}\n", ztd::shell::quote(vol->fs_type)));
+                    buf.append(std::format("set fm_device_size {}\n", vol->size));
+                    buf.append(std::format("set fm_device_display_name {}\n", ztd::shell::quote(vol->disp_name)));
+                    buf.append(std::format("set fm_device_icon {}\n", ztd::shell::quote(vol->icon)));
+                    buf.append(std::format("set fm_device_is_mounted {}\n", vol->is_mounted ? 1 : 0));
+                    buf.append(std::format("set fm_device_is_optical {}\n", vol->is_optical ? 1 : 0));
+                    buf.append(std::format("set fm_device_is_removable {}\n", vol->is_removable ? 1 : 0));
+                    buf.append(std::format("set fm_device_is_mountable {}\n", vol->is_mountable ? 1 : 0));
                     // clang-format on
                 }
                 // clang-format off
-                buf.append(fmt::format("set fm_panel{}_device {}\n", p, ztd::shell::quote(vol->device_file)));
-                buf.append(fmt::format("set fm_panel{}_device_udi {}\n", p, ztd::shell::quote(vol->udi)));
-                buf.append(fmt::format("set fm_panel{}_device_mount_point {}\n", p, ztd::shell::quote(vol->mount_point)));
-                buf.append(fmt::format("set fm_panel{}_device_label {}\n", p, ztd::shell::quote(vol->label)));
-                buf.append(fmt::format("set fm_panel{}_device_fstype {}\n", p, ztd::shell::quote(vol->fs_type)));
-                buf.append(fmt::format("set fm_panel{}_device_size {}\n", p, vol->size));
-                buf.append(fmt::format("set fm_panel{}_device_display_name {}\n", p, ztd::shell::quote(vol->disp_name)));
-                buf.append(fmt::format("set fm_panel{}_device_icon {}\n", p, ztd::shell::quote(vol->icon)));
-                buf.append(fmt::format("set fm_panel{}_device_is_mounted {}\n", p, vol->is_mounted ? 1 : 0));
-                buf.append(fmt::format("set fm_panel{}_device_is_optical {}\n", p, vol->is_optical ? 1 : 0));
-                buf.append(fmt::format("set fm_panel{}_device_is_removable{}\n", p, vol->is_removable ? 1 : 0));
-                buf.append(fmt::format("set fm_panel{}_device_is_mountable{}\n", p, vol->is_mountable ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device {}\n", p, ztd::shell::quote(vol->device_file)));
+                buf.append(std::format("set fm_panel{}_device_udi {}\n", p, ztd::shell::quote(vol->udi)));
+                buf.append(std::format("set fm_panel{}_device_mount_point {}\n", p, ztd::shell::quote(vol->mount_point)));
+                buf.append(std::format("set fm_panel{}_device_label {}\n", p, ztd::shell::quote(vol->label)));
+                buf.append(std::format("set fm_panel{}_device_fstype {}\n", p, ztd::shell::quote(vol->fs_type)));
+                buf.append(std::format("set fm_panel{}_device_size {}\n", p, vol->size));
+                buf.append(std::format("set fm_panel{}_device_display_name {}\n", p, ztd::shell::quote(vol->disp_name)));
+                buf.append(std::format("set fm_panel{}_device_icon {}\n", p, ztd::shell::quote(vol->icon)));
+                buf.append(std::format("set fm_panel{}_device_is_mounted {}\n", p, vol->is_mounted ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device_is_optical {}\n", p, vol->is_optical ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device_is_removable{}\n", p, vol->is_removable ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device_is_mountable{}\n", p, vol->is_mountable ? 1 : 0));
                 // clang-format on
             }
         }
@@ -4498,44 +4504,44 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
             const std::string path =
                 ztd::shell::quote(ptk_file_browser_get_cwd(t_browser).string());
-            buf.append(fmt::format("set fm_pwd_panel{}_tab[{}] {}\n", p, i + 1, path));
+            buf.append(std::format("set fm_pwd_panel{}_tab[{}] {}\n", p, i + 1, path));
             if (p == file_browser->mypanel)
             {
-                buf.append(fmt::format("set fm_pwd_tab[{}] {}\n", i + 1, path));
+                buf.append(std::format("set fm_pwd_tab[{}] {}\n", i + 1, path));
             }
             if (file_browser == t_browser)
             {
                 // my browser
-                buf.append(fmt::format("set fm_pwd {}\n", path));
-                buf.append(fmt::format("set fm_panel {}\n", p));
-                buf.append(fmt::format("set fm_tab {}\n", i + 1));
+                buf.append(std::format("set fm_pwd {}\n", path));
+                buf.append(std::format("set fm_panel {}\n", p));
+                buf.append(std::format("set fm_tab {}\n", i + 1));
             }
         }
     }
 
     // my selected files
     buf.append("\n");
-    buf.append(fmt::format("set fm_files (echo $fm_panel{}_files)\n", file_browser->mypanel));
-    buf.append(fmt::format("set fm_file $fm_panel{}_files[1]\n", file_browser->mypanel));
-    buf.append(fmt::format("set fm_filename $fm_filenames[1]\n"));
+    buf.append(std::format("set fm_files (echo $fm_panel{}_files)\n", file_browser->mypanel));
+    buf.append(std::format("set fm_file $fm_panel{}_files[1]\n", file_browser->mypanel));
+    buf.append(std::format("set fm_filename $fm_filenames[1]\n"));
     buf.append("\n");
 
     // user
-    buf.append(fmt::format("set fm_user {}\n", ztd::shell::quote(Glib::get_user_name())));
+    buf.append(std::format("set fm_user {}\n", ztd::shell::quote(Glib::get_user_name())));
 
     // variable value
-    buf.append(fmt::format("set fm_value {}\n", ztd::shell::quote(value)));
+    buf.append(std::format("set fm_value {}\n", ztd::shell::quote(value)));
     if (vtask->exec_ptask)
     {
-        buf.append(fmt::format("set fm_my_task {:p}\n", fmt::ptr(vtask->exec_ptask)));
-        buf.append(fmt::format("set fm_my_task_id {:p}\n", fmt::ptr(vtask->exec_ptask)));
+        buf.append(std::format("set fm_my_task {:p}\n", fmt::ptr(vtask->exec_ptask)));
+        buf.append(std::format("set fm_my_task_id {:p}\n", fmt::ptr(vtask->exec_ptask)));
     }
-    buf.append(fmt::format("set fm_my_window {:p}\n", fmt::ptr(main_window)));
-    buf.append(fmt::format("set fm_my_window_id {:p}\n", fmt::ptr(main_window)));
+    buf.append(std::format("set fm_my_window {:p}\n", fmt::ptr(main_window)));
+    buf.append(std::format("set fm_my_window_id {:p}\n", fmt::ptr(main_window)));
 
     // utils
-    buf.append(fmt::format("set fm_editor {}\n", ztd::shell::quote(xset_get_s(XSetName::EDITOR))));
-    buf.append(fmt::format("set fm_editor_terminal {}\n", xset_get_b(XSetName::EDITOR) ? 1 : 0));
+    buf.append(std::format("set fm_editor {}\n", ztd::shell::quote(xset_get_s(XSetName::EDITOR))));
+    buf.append(std::format("set fm_editor_terminal {}\n", xset_get_b(XSetName::EDITOR) ? 1 : 0));
 
     // set
     if (set)
@@ -4556,28 +4562,28 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         {
             path = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
         }
-        buf.append(fmt::format("set fm_cmd_dir {}\n", ztd::shell::quote(path.string())));
+        buf.append(std::format("set fm_cmd_dir {}\n", ztd::shell::quote(path.string())));
 
         // cmd_data
         path = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
-        buf.append(fmt::format("set fm_cmd_data {}\n", ztd::shell::quote(path.string())));
+        buf.append(std::format("set fm_cmd_data {}\n", ztd::shell::quote(path.string())));
 
         // plugin_dir
         if (set->plugin)
         {
             buf.append(
-                fmt::format("set fm_plugin_dir {}\n", ztd::shell::quote(set->plug_dir.string())));
+                std::format("set fm_plugin_dir {}\n", ztd::shell::quote(set->plug_dir.string())));
         }
 
         // cmd_name
         if (set->menu_label)
         {
-            buf.append(fmt::format("set fm_cmd_name {}\n", ztd::shell::quote(set->menu_label)));
+            buf.append(std::format("set fm_cmd_name {}\n", ztd::shell::quote(set->menu_label)));
         }
     }
 
     // tmp
-    buf.append(fmt::format("set fm_tmp_dir {}\n",
+    buf.append(std::format("set fm_tmp_dir {}\n",
                            ztd::shell::quote(vfs::user_dirs->program_tmp_dir().string())));
 
     // tasks
@@ -4587,31 +4593,31 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         static constexpr std::array<const std::string_view, 7>
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
         buf.append("\n");
-        buf.append(fmt::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
+        buf.append(std::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
         if (ptask->task->type == VFSFileTaskType::EXEC)
         {
             // clang-format off
-            buf.append(fmt::format("set fm_task_pwd {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
-            buf.append(fmt::format("set fm_task_name {}\n", ztd::shell::quote(ptask->task->current_file.string())));
-            buf.append(fmt::format("set fm_task_command {}\n", ztd::shell::quote(ptask->task->exec_command)));
-            buf.append(fmt::format("set fm_task_user {}\n", ztd::shell::quote(ptask->task->exec_as_user)));
-            buf.append(fmt::format("set fm_task_icon {}\n", ztd::shell::quote(ptask->task->exec_icon)));
-            buf.append(fmt::format("set fm_task_pid {}\n", ptask->task->exec_pid));
+            buf.append(std::format("set fm_task_pwd {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
+            buf.append(std::format("set fm_task_name {}\n", ztd::shell::quote(ptask->task->current_file.string())));
+            buf.append(std::format("set fm_task_command {}\n", ztd::shell::quote(ptask->task->exec_command)));
+            buf.append(std::format("set fm_task_user {}\n", ztd::shell::quote(ptask->task->exec_as_user)));
+            buf.append(std::format("set fm_task_icon {}\n", ztd::shell::quote(ptask->task->exec_icon)));
+            buf.append(std::format("set fm_task_pid {}\n", ptask->task->exec_pid));
             // clang-format on
         }
         else
         {
             // clang-format off
-            buf.append(fmt::format("set fm_task_dest_dir {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
-            buf.append(fmt::format("set fm_task_current_src_file {}\n", ztd::shell::quote(ptask->task->current_file.string())));
-            buf.append(fmt::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(ptask->task->current_dest.string())));
+            buf.append(std::format("set fm_task_dest_dir {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
+            buf.append(std::format("set fm_task_current_src_file {}\n", ztd::shell::quote(ptask->task->current_file.string())));
+            buf.append(std::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(ptask->task->current_dest.string())));
             // clang-format on
         }
-        buf.append(fmt::format("set fm_task_id {:p}\n", fmt::ptr(ptask)));
+        buf.append(std::format("set fm_task_id {:p}\n", fmt::ptr(ptask)));
         if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
         {
-            buf.append(fmt::format("set fm_task_window {:p}\n", fmt::ptr(main_window)));
-            buf.append(fmt::format("set fm_task_window_id {:p}\n", fmt::ptr(main_window)));
+            buf.append(std::format("set fm_task_window {:p}\n", fmt::ptr(main_window)));
+            buf.append(std::format("set fm_task_window_id {:p}\n", fmt::ptr(main_window)));
         }
     }
 
@@ -5414,7 +5420,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
 
             main_task_prepare_menu(main_window, popup, accel_group);
 
-            menu_elements = fmt::format(
+            menu_elements = std::format(
                 "task_stop separator task_pause task_que task_resume{} task_all separator "
                 "task_show_manager "
                 "task_hide_manager separator task_columns task_popups task_errors task_queue",
@@ -5463,7 +5469,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         {
             // show custom dialog
             ztd::logger::info("TASK_POPUP >>> {}", ptask->pop_handler);
-            const std::string command = fmt::format("{} -c {}", FISH_PATH, ptask->pop_handler);
+            const std::string command = std::format("{} -c {}", FISH_PATH, ptask->pop_handler);
             Glib::spawn_command_line_async(command);
         }
         else
@@ -5618,7 +5624,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         else
         {
             path = ptask->task->dest_dir; // cwd
-            file = fmt::format("( {} )", ptask->task->current_file);
+            file = std::format("( {} )", ptask->task->current_file.string());
         }
 
         // status
@@ -5633,7 +5639,7 @@ main_task_view_update_task(PtkFileTask* ptask)
             else
             {
                 status =
-                    fmt::format("{} error {}", ptask->err_count, job_titles.at(ptask->task->type));
+                    std::format("{} error {}", ptask->err_count, job_titles.at(ptask->task->type));
             }
         }
         else
@@ -5651,12 +5657,12 @@ main_task_view_update_task(PtkFileTask* ptask)
 
         if (ptask->task->state_pause == VFSFileTaskState::PAUSE)
         {
-            const std::string str = fmt::format("paused {}", status);
+            const std::string str = std::format("paused {}", status);
             status3 = ztd::strdup(str);
         }
         else if (ptask->task->state_pause == VFSFileTaskState::QUEUE)
         {
-            const std::string str = fmt::format("queued {}", status);
+            const std::string str = std::format("queued {}", status);
             status3 = ztd::strdup(str);
         }
         else
@@ -6133,7 +6139,7 @@ main_window_socket_command(char* argv[])
         {
             if (!argv[i + 1])
             {
-                return {SOCKET_FAILURE, fmt::format("option {} requires an argument", argv[i])};
+                return {SOCKET_FAILURE, std::format("option {} requires an argument", argv[i])};
             }
             window = argv[i + 1];
             i += 2;
@@ -6143,7 +6149,7 @@ main_window_socket_command(char* argv[])
         {
             if (!argv[i + 1])
             {
-                return {SOCKET_FAILURE, fmt::format("option {} requires an argument", argv[i])};
+                return {SOCKET_FAILURE, std::format("option {} requires an argument", argv[i])};
             }
             panel = std::stol(argv[i + 1]);
             i += 2;
@@ -6153,13 +6159,13 @@ main_window_socket_command(char* argv[])
         {
             if (!argv[i + 1])
             {
-                return {SOCKET_FAILURE, fmt::format("option {} requires an argument", argv[i])};
+                return {SOCKET_FAILURE, std::format("option {} requires an argument", argv[i])};
             }
             tab = std::stol(argv[i + 1]);
             i += 2;
             continue;
         }
-        return {SOCKET_FAILURE, fmt::format("invalid option '{}'", argv[i])};
+        return {SOCKET_FAILURE, std::format("invalid option '{}'", argv[i])};
     }
 
     // window
@@ -6176,7 +6182,7 @@ main_window_socket_command(char* argv[])
     {
         for (MainWindow* window2 : all_windows)
         {
-            const std::string str = fmt::format("{:p}", (void*)window2);
+            const std::string str = std::format("{:p}", (void*)window2);
             if (ztd::same(str, window))
             {
                 main_window = window2;
@@ -6185,7 +6191,7 @@ main_window_socket_command(char* argv[])
         }
         if (!main_window)
         {
-            return {SOCKET_INVALID, fmt::format("invalid window {}", window)};
+            return {SOCKET_INVALID, std::format("invalid window {}", window)};
         }
     }
 
@@ -6196,12 +6202,12 @@ main_window_socket_command(char* argv[])
     }
     if (!valid_panel(panel))
     {
-        return {SOCKET_INVALID, fmt::format("invalid panel {}", panel)};
+        return {SOCKET_INVALID, std::format("invalid panel {}", panel)};
     }
     if (!xset_get_b_panel(panel, XSetPanel::SHOW) ||
         gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) == -1)
     {
-        return {SOCKET_INVALID, fmt::format("panel {} is not visible", panel)};
+        return {SOCKET_INVALID, std::format("panel {} is not visible", panel)};
     }
 
     // tab
@@ -6211,7 +6217,7 @@ main_window_socket_command(char* argv[])
     }
     if (tab < 1 || tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
     {
-        return {SOCKET_INVALID, fmt::format("invalid tab {}", tab)};
+        return {SOCKET_INVALID, std::format("invalid tab {}", tab)};
     }
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
         gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[panel - 1]), tab - 1));
@@ -6243,7 +6249,7 @@ main_window_socket_command(char* argv[])
                 // size format '620x480'
                 if (!ztd::contains(argv[i + 1], "x"))
                 {
-                    return {SOCKET_INVALID, fmt::format("invalid size format {}", argv[i + 1])};
+                    return {SOCKET_INVALID, std::format("invalid size format {}", argv[i + 1])};
                 }
                 const auto size = ztd::split(argv[i + 1], "x");
                 width = std::stol(size[0]);
@@ -6251,7 +6257,7 @@ main_window_socket_command(char* argv[])
             }
             if (height < 1 || width < 1)
             {
-                return {SOCKET_INVALID, fmt::format("invalid {} value", argv[i])};
+                return {SOCKET_INVALID, std::format("invalid {} value", argv[i])};
             }
             if (ztd::same(socket_property, "window_size"))
             {
@@ -6421,7 +6427,7 @@ main_window_socket_command(char* argv[])
             const tab_t tab_num = counts[2];
 
             return {SOCKET_SUCCESS,
-                    fmt::format("new_tab_window={}\nnew_tab_panel={}\n"
+                    std::format("new_tab_window={}\nnew_tab_panel={}\n"
                                 "new_tab_number={}\nnew_tab_path={}",
                                 (void*)main_window,
                                 panel,
@@ -6467,7 +6473,7 @@ main_window_socket_command(char* argv[])
                 const i32 j = argv[i][5] - 48;
                 if (!valid_panel(j))
                 {
-                    return {SOCKET_INVALID, fmt::format("invalid property {}", argv[i])};
+                    return {SOCKET_INVALID, std::format("invalid property {}", argv[i])};
                 }
                 xset_set_b_panel(j, XSetPanel::SHOW, get_bool(argv[i + 1]));
                 show_panels_all_windows(nullptr, main_window);
@@ -6475,7 +6481,7 @@ main_window_socket_command(char* argv[])
             }
             if (!valid)
             {
-                return {SOCKET_FAILURE, fmt::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
             }
             if (use_mode)
             {
@@ -6585,7 +6591,7 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    return {SOCKET_INVALID, fmt::format("invalid column name '{}'", argv[i + 1])};
+                    return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
                 }
             }
         }
@@ -6621,7 +6627,7 @@ main_window_socket_command(char* argv[])
             }
             else
             {
-                return {SOCKET_INVALID, fmt::format("invalid column name '{}'", argv[i + 1])};
+                return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
             }
             ptk_file_browser_set_sort_order(file_browser, j);
         }
@@ -6679,12 +6685,12 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    return {SOCKET_INVALID, fmt::format("invalid {} value", argv[i])};
+                    return {SOCKET_INVALID, std::format("invalid {} value", argv[i])};
                 }
             }
             else
             {
-                return {SOCKET_FAILURE, fmt::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
             }
             ptk_file_browser_set_sort_extra(file_browser, xset_name);
         }
@@ -6768,7 +6774,7 @@ main_window_socket_command(char* argv[])
         {
             if (!argv[i + 1])
             {
-                return {SOCKET_FAILURE, fmt::format("{} requires a file path", argv[i])};
+                return {SOCKET_FAILURE, std::format("{} requires a file path", argv[i])};
             }
             std::string contents;
             try
@@ -6777,12 +6783,12 @@ main_window_socket_command(char* argv[])
             }
             catch (const Glib::FileError& e)
             {
-                return {SOCKET_INVALID, fmt::format("error reading file '{}'", argv[i + 1])};
+                return {SOCKET_INVALID, std::format("error reading file '{}'", argv[i + 1])};
             }
             if (!g_utf8_validate(contents.data(), -1, nullptr))
             {
                 return {SOCKET_INVALID,
-                        fmt::format("file '{}' does not contain valid UTF-8 text", argv[i + 1])};
+                        std::format("file '{}' does not contain valid UTF-8 text", argv[i + 1])};
             }
             GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_from_file")
                                                        ? GDK_SELECTION_CLIPBOARD
@@ -6824,11 +6830,11 @@ main_window_socket_command(char* argv[])
         {
             if (!argv[i + 1])
             {
-                return {SOCKET_FAILURE, fmt::format("{} requires a directory path", argv[i])};
+                return {SOCKET_FAILURE, std::format("{} requires a directory path", argv[i])};
             }
             if (!std::filesystem::is_directory(argv[i + 1]))
             {
-                return {SOCKET_FAILURE, fmt::format("directory '{}' does not exist", argv[i + 1])};
+                return {SOCKET_FAILURE, std::format("directory '{}' does not exist", argv[i + 1])};
             }
             ptk_file_browser_chdir(file_browser,
                                    argv[i + 1],
@@ -6836,7 +6842,7 @@ main_window_socket_command(char* argv[])
         }
         else
         {
-            return {SOCKET_FAILURE, fmt::format("invalid property {}", argv[i])};
+            return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
         }
     }
     else if (ztd::same(socket_cmd, "get"))
@@ -6844,7 +6850,7 @@ main_window_socket_command(char* argv[])
         // get
         if (!argv[i])
         {
-            return {SOCKET_FAILURE, fmt::format("command {} requires an argument", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("command {} requires an argument", socket_cmd)};
         }
 
         if (ztd::same(socket_property, "window_size") ||
@@ -6860,22 +6866,22 @@ main_window_socket_command(char* argv[])
             {
                 gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
             }
-            return {SOCKET_SUCCESS, fmt::format("{}x{}", width, height)};
+            return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
         }
         else if (ztd::same(socket_property, "window_maximized"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", !!main_window->maximized)};
+            return {SOCKET_SUCCESS, std::format("{}", !!main_window->maximized)};
         }
         else if (ztd::same(socket_property, "window_fullscreen"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", !!main_window->fullscreen)};
+            return {SOCKET_SUCCESS, std::format("{}", !!main_window->fullscreen)};
         }
         else if (ztd::same(socket_property, "screen_size"))
         {
             GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
-            return {SOCKET_SUCCESS, fmt::format("{}x{}", workarea.width, workarea.height)};
+            return {SOCKET_SUCCESS, std::format("{}x{}", workarea.width, workarea.height)};
         }
         else if (ztd::same(socket_property, "window_vslider_top") ||
                  ztd::same(socket_property, "window_vslider_bottom") ||
@@ -6900,11 +6906,11 @@ main_window_socket_command(char* argv[])
             {
                 widget = main_window->task_vpane;
             }
-            return {SOCKET_SUCCESS, fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
+            return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
         }
         else if (ztd::same(socket_property, "focused_panel"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", main_window->curpanel)};
+            return {SOCKET_SUCCESS, std::format("{}", main_window->curpanel)};
         }
         else if (ztd::same(socket_property, "focused_pane"))
         {
@@ -6928,7 +6934,7 @@ main_window_socket_command(char* argv[])
         else if (ztd::same(socket_property, "current_tab"))
         {
             return {SOCKET_SUCCESS,
-                    fmt::format("{}",
+                    std::format("{}",
                                 gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[panel - 1]),
                                                       GTK_WIDGET(file_browser)) +
                                     1)};
@@ -6940,7 +6946,7 @@ main_window_socket_command(char* argv[])
             // const tab_t tab_count = counts[1];
             // const tab_t tab_num = counts[2];
 
-            return {SOCKET_SUCCESS, fmt::format("{}", panel_count)};
+            return {SOCKET_SUCCESS, std::format("{}", panel_count)};
         }
         else if (ztd::same(socket_property, "tab_count"))
         {
@@ -6949,7 +6955,7 @@ main_window_socket_command(char* argv[])
             const tab_t tab_count = counts[1];
             // const tab_t tab_num = counts[2];
 
-            return {SOCKET_SUCCESS, fmt::format("{}", tab_count)};
+            return {SOCKET_SUCCESS, std::format("{}", tab_count)};
         }
         else if (ztd::same(socket_property, "new_tab"))
         {
@@ -6993,25 +6999,25 @@ main_window_socket_command(char* argv[])
                 const i32 j = argv[i][5] - 48;
                 if (!valid_panel(j))
                 {
-                    return {SOCKET_INVALID, fmt::format("invalid property {}", argv[i])};
+                    return {SOCKET_INVALID, std::format("invalid property {}", argv[i])};
                 }
-                return {SOCKET_SUCCESS, fmt::format("{}", xset_get_b_panel(j, XSetPanel::SHOW))};
+                return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(j, XSetPanel::SHOW))};
             }
             if (!valid)
             {
-                return {SOCKET_FAILURE, fmt::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
             }
             if (use_mode)
             {
                 return {SOCKET_SUCCESS,
-                        fmt::format("{}",
+                        std::format("{}",
                                     xset_get_b_panel_mode(panel,
                                                           xset_panel_var,
                                                           main_window->panel_context.at(panel)))};
             }
             else
             {
-                return {SOCKET_SUCCESS, fmt::format("{}", xset_get_b_panel(panel, xset_panel_var))};
+                return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(panel, xset_panel_var))};
             }
         }
         else if (ztd::same(socket_property, "panel_hslider_top") ||
@@ -7031,7 +7037,7 @@ main_window_socket_command(char* argv[])
             {
                 widget = file_browser->hpane;
             }
-            return {SOCKET_SUCCESS, fmt::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
+            return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
         }
         else if (ztd::same(socket_property, "column_width"))
         { // COLUMN
@@ -7085,11 +7091,11 @@ main_window_socket_command(char* argv[])
                 }
                 if (found)
                 {
-                    return {SOCKET_SUCCESS, fmt::format("{}", gtk_tree_view_column_get_width(col))};
+                    return {SOCKET_SUCCESS, std::format("{}", gtk_tree_view_column_get_width(col))};
                 }
                 else
                 {
-                    return {SOCKET_INVALID, fmt::format("invalid column name '{}'", argv[i + 1])};
+                    return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
                 }
             }
         }
@@ -7125,7 +7131,7 @@ main_window_socket_command(char* argv[])
             if (ztd::same(socket_property, "sort_ascend"))
             {
                 return {SOCKET_SUCCESS,
-                        fmt::format(
+                        std::format(
                             "{}",
                             file_browser->sort_type == GtkSortType::GTK_SORT_ASCENDING ? 1 : 0)};
             }
@@ -7138,7 +7144,7 @@ main_window_socket_command(char* argv[])
             else if (ztd::same(socket_property, "sort_alphanum"))
             {
                 return {SOCKET_SUCCESS,
-                        fmt::format("{}",
+                        std::format("{}",
                                     xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA)
                                         ? 1
                                         : 0)};
@@ -7147,7 +7153,7 @@ main_window_socket_command(char* argv[])
             {
                 return {
                     SOCKET_SUCCESS,
-                    fmt::format("{}",
+                    std::format("{}",
                                 xset_get_b_panel(file_browser->mypanel, XSetPanel::SORT_EXTRA) &&
                                         xset_get_int_panel(file_browser->mypanel,
                                                            XSetPanel::SORT_EXTRA,
@@ -7158,7 +7164,7 @@ main_window_socket_command(char* argv[])
             else if (ztd::same(socket_property, "sort_hidden_first"))
             {
                 return {SOCKET_SUCCESS,
-                        fmt::format("{}",
+                        std::format("{}",
                                     xset_get_int_panel(file_browser->mypanel,
                                                        XSetPanel::SORT_EXTRA,
                                                        XSetVar::Z) == XSetB::XSET_B_TRUE
@@ -7184,28 +7190,28 @@ main_window_socket_command(char* argv[])
             }
             else
             {
-                return {SOCKET_FAILURE, fmt::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
             }
         }
         else if (ztd::same(socket_property, "show_thumbnails"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", app_settings.get_show_thumbnail() ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", app_settings.get_show_thumbnail() ? 1 : 0)};
         }
         else if (ztd::same(socket_property, "large_icons"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", file_browser->large_icons ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", file_browser->large_icons ? 1 : 0)};
         }
         else if (ztd::same(socket_property, "statusbar_text"))
         {
             return {SOCKET_SUCCESS,
-                    fmt::format("{}", gtk_label_get_text(GTK_LABEL(file_browser->status_label)))};
+                    std::format("{}", gtk_label_get_text(GTK_LABEL(file_browser->status_label)))};
         }
         else if (ztd::same(socket_property, "pathbar_text"))
         {
             if (GTK_IS_WIDGET(file_browser->path_bar))
             {
                 return {SOCKET_SUCCESS,
-                        fmt::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)))};
+                        std::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)))};
             }
         }
         else if (ztd::same(socket_property, "clipboard_text") ||
@@ -7269,9 +7275,9 @@ main_window_socket_command(char* argv[])
             std::string str;
             for (const std::string_view path : pathv)
             {
-                str.append(fmt::format("{} ", ztd::shell::quote(path)));
+                str.append(std::format("{} ", ztd::shell::quote(path)));
             }
-            return {SOCKET_SUCCESS, fmt::format("({})", str)};
+            return {SOCKET_SUCCESS, std::format("({})", str)};
         }
         else if (ztd::same(socket_property, "selected_filenames") ||
                  ztd::same(socket_property, "selected_files"))
@@ -7292,29 +7298,30 @@ main_window_socket_command(char* argv[])
                 {
                     continue;
                 }
-                str.append(fmt::format("{} ", ztd::shell::quote(file->get_name())));
+                str.append(std::format("{} ", ztd::shell::quote(file->get_name())));
                 vfs_file_info_unref(file);
             }
             vfs_file_info_list_free(sel_files);
-            return {SOCKET_SUCCESS, fmt::format("({})", str)};
+            return {SOCKET_SUCCESS, std::format("({})", str)};
         }
         else if (ztd::same(socket_property, "selected_pattern"))
         {
         }
         else if (ztd::same(socket_property, "current_dir"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", ptk_file_browser_get_cwd(file_browser))};
+            return {SOCKET_SUCCESS,
+                    std::format("{}", ptk_file_browser_get_cwd(file_browser).string())};
         }
         else
         {
-            return {SOCKET_FAILURE, fmt::format("invalid property {}", argv[i])};
+            return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
         }
     }
     else if (ztd::same(socket_cmd, "set-task"))
     { // TASKNUM PROPERTY [VALUE]
         if (!(argv[i] && argv[i + 1]))
         {
-            return {SOCKET_FAILURE, fmt::format("{} requires two arguments", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
         }
 
         // find task
@@ -7326,7 +7333,7 @@ main_window_socket_command(char* argv[])
             do
             {
                 gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
-                const std::string str = fmt::format("{:p}", (void*)ptask);
+                const std::string str = std::format("{:p}", (void*)ptask);
                 if (ztd::same(str, argv[i]))
                 {
                     break;
@@ -7336,11 +7343,11 @@ main_window_socket_command(char* argv[])
         }
         if (!ptask)
         {
-            return {SOCKET_INVALID, fmt::format("invalid task '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid task '{}'", argv[i])};
         }
         if (ptask->task->type != VFSFileTaskType::EXEC)
         {
-            return {SOCKET_INVALID, fmt::format("internal task {} is read-only", argv[i])};
+            return {SOCKET_INVALID, std::format("internal task {} is read-only", argv[i])};
         }
 
         // set model value
@@ -7415,7 +7422,7 @@ main_window_socket_command(char* argv[])
         else if (ztd::same(argv[i + 1], "elapsed") || ztd::same(argv[i + 1], "started") ||
                  ztd::same(argv[i + 1], "status"))
         {
-            return {SOCKET_INVALID, fmt::format("task property '{}' is read-only", argv[i + 1])};
+            return {SOCKET_INVALID, std::format("task property '{}' is read-only", argv[i + 1])};
         }
         else if (ztd::same(argv[i + 1], "queue_state"))
         {
@@ -7440,7 +7447,7 @@ main_window_socket_command(char* argv[])
             }
             else
             {
-                return {SOCKET_INVALID, fmt::format("invalid queue_state '{}'", argv[i + 2])};
+                return {SOCKET_INVALID, std::format("invalid queue_state '{}'", argv[i + 2])};
             }
             main_task_start_queued(main_window->task_view, nullptr);
             return {SOCKET_SUCCESS, ""};
@@ -7460,7 +7467,7 @@ main_window_socket_command(char* argv[])
         }
         else
         {
-            return {SOCKET_INVALID, fmt::format("invalid task property '{}'", argv[i + 1])};
+            return {SOCKET_INVALID, std::format("invalid task property '{}'", argv[i + 1])};
         }
         gtk_list_store_set(GTK_LIST_STORE(model), &it, j, argv[i + 2], -1);
     }
@@ -7468,7 +7475,7 @@ main_window_socket_command(char* argv[])
     { // TASKNUM PROPERTY
         if (!(argv[i] && argv[i + 1]))
         {
-            return {SOCKET_FAILURE, fmt::format("{} requires two arguments", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
         }
 
         // find task
@@ -7480,7 +7487,7 @@ main_window_socket_command(char* argv[])
             do
             {
                 gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
-                const std::string str = fmt::format("{:p}", (void*)ptask);
+                const std::string str = std::format("{:p}", (void*)ptask);
                 if (ztd::same(str, argv[i]))
                 {
                     break;
@@ -7490,7 +7497,7 @@ main_window_socket_command(char* argv[])
         }
         if (!ptask)
         {
-            return {SOCKET_INVALID, fmt::format("invalid task '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid task '{}'", argv[i])};
         }
 
         // get model value
@@ -7500,7 +7507,7 @@ main_window_socket_command(char* argv[])
             ptk_file_task_lock(ptask);
             if (!ptask->task->exec_icon.empty())
             {
-                return {SOCKET_SUCCESS, fmt::format("{}", ptask->task->exec_icon)};
+                return {SOCKET_SUCCESS, std::format("{}", ptask->task->exec_icon)};
             }
             ptk_file_task_unlock(ptask);
             return {SOCKET_SUCCESS, ""};
@@ -7523,7 +7530,7 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(argv[i + 1], "progress"))
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", ptask->task->percent)};
+            return {SOCKET_SUCCESS, std::format("{}", ptask->task->percent)};
         }
         else if (ztd::same(argv[i + 1], "total"))
         {
@@ -7580,19 +7587,19 @@ main_window_socket_command(char* argv[])
         {
             if (ptask->pop_handler)
             {
-                return {SOCKET_SUCCESS, fmt::format("{}", ptask->pop_handler)};
+                return {SOCKET_SUCCESS, std::format("{}", ptask->pop_handler)};
             }
             return {SOCKET_SUCCESS, ""};
         }
         else
         {
-            return {SOCKET_INVALID, fmt::format("invalid task property '{}'", argv[i + 1])};
+            return {SOCKET_INVALID, std::format("invalid task property '{}'", argv[i + 1])};
         }
         char* str2;
         gtk_tree_model_get(model, &it, j, &str2, -1);
         if (str2)
         {
-            return {SOCKET_SUCCESS, fmt::format("{}", str2)};
+            return {SOCKET_SUCCESS, std::format("{}", str2)};
         }
         std::free(str2);
     }
@@ -7600,7 +7607,7 @@ main_window_socket_command(char* argv[])
     { // TYPE [OPTIONS] ...
         if (!(argv[i] && argv[i + 1]))
         {
-            return {SOCKET_FAILURE, fmt::format("{} requires two arguments", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
         }
 
         if (ztd::same(socket_property, "cmd") || ztd::same(socket_property, "command"))
@@ -7654,23 +7661,23 @@ main_window_socket_command(char* argv[])
                     opt_cwd = argv[++j];
                     if (!opt_cwd || !std::filesystem::is_directory(opt_cwd))
                     {
-                        return {SOCKET_INVALID, fmt::format("no such directory '{}'", opt_cwd)};
+                        return {SOCKET_INVALID, std::format("no such directory '{}'", opt_cwd)};
                     }
                 }
                 else
                 {
                     return {SOCKET_INVALID,
-                            fmt::format("invalid {} task option '{}'", socket_property, argv[j])};
+                            std::format("invalid {} task option '{}'", socket_property, argv[j])};
                 }
             }
             if (!argv[j])
             {
-                return {SOCKET_FAILURE, fmt::format("{} requires two arguments", socket_cmd)};
+                return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
             }
             std::string cmd;
             while (argv[++j])
             {
-                cmd.append(fmt::format(" {}", argv[j]));
+                cmd.append(std::format(" {}", argv[j]));
             }
 
             PtkFileTask* ptask =
@@ -7698,7 +7705,7 @@ main_window_socket_command(char* argv[])
             if (opt_task)
             {
                 return {SOCKET_SUCCESS,
-                        fmt::format("Note: $new_task_id not valid until approx one "
+                        std::format("Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
                                     "new_task_id={}",
                                     (void*)main_window,
@@ -7710,11 +7717,11 @@ main_window_socket_command(char* argv[])
             // edit FILE
             if (!argv[i + 1])
             {
-                return {SOCKET_FAILURE, fmt::format("{} requires two arguments", socket_cmd)};
+                return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
             }
             if (!std::filesystem::is_regular_file(argv[i + 1]))
             {
-                return {SOCKET_INVALID, fmt::format("no such file '{}'", argv[i + 1])};
+                return {SOCKET_INVALID, std::format("no such file '{}'", argv[i + 1])};
             }
             xset_edit(GTK_WIDGET(file_browser), argv[i + 1], false, true);
         }
@@ -7725,12 +7732,12 @@ main_window_socket_command(char* argv[])
             for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
             {
                 return {SOCKET_INVALID,
-                        fmt::format("invalid {} task option '{}'", socket_property, argv[j])};
+                        std::format("invalid {} task option '{}'", socket_property, argv[j])};
             }
             if (!argv[j])
             {
                 return {SOCKET_FAILURE,
-                        fmt::format("task type {} requires TARGET argument", socket_cmd)};
+                        std::format("task type {} requires TARGET argument", socket_cmd)};
             }
 
             // Resolve TARGET
@@ -7738,7 +7745,7 @@ main_window_socket_command(char* argv[])
 
             if (!std::filesystem::exists(real_path))
             {
-                return {SOCKET_INVALID, fmt::format("path does not exist '{}'", real_path)};
+                return {SOCKET_INVALID, std::format("path does not exist '{}'", real_path)};
             }
 
             const auto real_path_stat = ztd::stat(real_path);
@@ -7754,7 +7761,7 @@ main_window_socket_command(char* argv[])
                         vol = vfs_volume_get_by_device(real_path);
                         if (!vol)
                         {
-                            return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
+                            return {SOCKET_INVALID, std::format("invalid TARGET '{}'", argv[j])};
                         }
                     }
                 }
@@ -7766,7 +7773,7 @@ main_window_socket_command(char* argv[])
             }
             else
             {
-                return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
+                return {SOCKET_INVALID, std::format("invalid TARGET '{}'", argv[j])};
             }
 
             // Create command
@@ -7794,7 +7801,7 @@ main_window_socket_command(char* argv[])
 
             if (cmd.empty())
             {
-                return {SOCKET_INVALID, fmt::format("invalid TARGET '{}'", argv[j])};
+                return {SOCKET_INVALID, std::format("invalid TARGET '{}'", argv[j])};
             }
             // Task
             PtkFileTask* ptask = ptk_file_exec_new(socket_property,
@@ -7830,13 +7837,13 @@ main_window_socket_command(char* argv[])
                     opt_cwd = argv[++j];
                     if (!opt_cwd || !std::filesystem::is_directory(opt_cwd))
                     {
-                        return {SOCKET_INVALID, fmt::format("no such directory '{}'", opt_cwd)};
+                        return {SOCKET_INVALID, std::format("no such directory '{}'", opt_cwd)};
                     }
                 }
                 else
                 {
                     return {SOCKET_INVALID,
-                            fmt::format("invalid {} task option '{}'", socket_property, argv[j])};
+                            std::format("invalid {} task option '{}'", socket_property, argv[j])};
                 }
             }
             std::vector<std::filesystem::path> file_list;
@@ -7851,7 +7858,7 @@ main_window_socket_command(char* argv[])
                     {
                         g_list_foreach(l, (GFunc)std::free, nullptr);
                         g_list_free(l);
-                        return {SOCKET_INVALID, fmt::format("no such directory '{}'", argv[j])};
+                        return {SOCKET_INVALID, std::format("no such directory '{}'", argv[j])};
                     }
                     target_dir = argv[j];
                     break;
@@ -7871,7 +7878,7 @@ main_window_socket_command(char* argv[])
                             g_list_foreach(l, (GFunc)std::free, nullptr);
                             g_list_free(l);
                             return {SOCKET_INVALID,
-                                    fmt::format("relative path '{}' requires {} option --dir DIR",
+                                    std::format("relative path '{}' requires {} option --dir DIR",
                                                 argv[j],
                                                 argv[i])};
                         }
@@ -7883,7 +7890,7 @@ main_window_socket_command(char* argv[])
             if (file_list.empty() || (!ztd::same(socket_property, "delete") && !target_dir))
             {
                 return {SOCKET_INVALID,
-                        fmt::format("task type {} requires FILE argument(s)", argv[i])};
+                        std::format("task type {} requires FILE argument(s)", argv[i])};
             }
             VFSFileTaskType task_type;
             if (ztd::same(socket_property, "copy"))
@@ -7918,7 +7925,7 @@ main_window_socket_command(char* argv[])
                                   file_browser->task_view);
             ptk_file_task_run(ptask);
             return {SOCKET_SUCCESS,
-                    fmt::format("# Note: $new_task_id not valid until approx one "
+                    std::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
                                 "new_task_id={}",
                                 (void*)main_window,
@@ -7926,14 +7933,14 @@ main_window_socket_command(char* argv[])
         }
         else
         {
-            return {SOCKET_INVALID, fmt::format("invalid task type '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid task type '{}'", argv[i])};
         }
     }
     else if (ztd::same(socket_cmd, "emit-key"))
     { // KEYCODE [KEYMOD]
         if (!argv[i])
         {
-            return {SOCKET_FAILURE, fmt::format("command {} requires an argument", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("command {} requires an argument", socket_cmd)};
         }
         // this only handles keys assigned to menu items
         const auto event = (GdkEventKey*)gdk_event_new(GdkEventType::GDK_KEY_PRESS);
@@ -7947,7 +7954,7 @@ main_window_socket_command(char* argv[])
         else
         {
             gdk_event_free((GdkEvent*)event);
-            return {SOCKET_INVALID, fmt::format("invalid keycode '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid keycode '{}'", argv[i])};
         }
         gdk_event_free((GdkEvent*)event);
     }
@@ -7955,13 +7962,13 @@ main_window_socket_command(char* argv[])
     {
         if (!argv[i])
         {
-            return {SOCKET_FAILURE, fmt::format("command {} requires an argument", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("command {} requires an argument", socket_cmd)};
         }
         xset_t set = xset_find_custom(argv[i]);
         if (!set)
         {
             return {SOCKET_INVALID,
-                    fmt::format("custom command or submenu '{}' not found", argv[i])};
+                    std::format("custom command or submenu '{}' not found", argv[i])};
         }
         const xset_context_t context = xset_context_new();
         main_context_fill(file_browser, context);
@@ -7972,7 +7979,7 @@ main_window_socket_command(char* argv[])
                     ItemPropContextState::CONTEXT_SHOW)
             {
                 return {SOCKET_INVALID,
-                        fmt::format("item '{}' context hidden or disabled", argv[i])};
+                        std::format("item '{}' context hidden or disabled", argv[i])};
             }
         }
         if (set->menu_style == XSetMenu::SUBMENU)
@@ -7998,17 +8005,17 @@ main_window_socket_command(char* argv[])
 
         if (!(argv[i] && argv[i + 1]))
         {
-            return {SOCKET_FAILURE, fmt::format("{} requires two arguments", socket_cmd)};
+            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
         }
         if (!(set = xset_is(argv[i])))
         {
-            return {SOCKET_INVALID, fmt::format("invalid event type '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid event type '{}'", argv[i])};
         }
         // build command
         std::string str = (ztd::same(socket_cmd, "replace-event") ? "*" : "");
         for (i32 j = i + 1; argv[j]; ++j)
         {
-            str.append(fmt::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
+            str.append(std::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
         }
         // modify list
         GList* l = nullptr;
@@ -8018,7 +8025,7 @@ main_window_socket_command(char* argv[])
             if (!l)
             {
                 // remove replace event
-                const std::string str2 = fmt::format("*{}", str);
+                const std::string str2 = std::format("*{}", str);
                 l = g_list_find_custom((GList*)set->ob2_data,
                                        str2.data(),
                                        (GCompareFunc)ztd::compare);
@@ -8045,7 +8052,7 @@ main_window_socket_command(char* argv[])
     }
     else
     {
-        return {SOCKET_FAILURE, fmt::format("invalid socket method '{}'", socket_cmd)};
+        return {SOCKET_FAILURE, std::format("invalid socket method '{}'", socket_cmd)};
     }
     return {SOCKET_SUCCESS, ""};
 }
@@ -8104,7 +8111,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
             cmd = ztd::replace(cmd, "%v", change);
         }
         ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
-        const std::string command = fmt::format("{} -c {}", FISH_PATH, cmd);
+        const std::string command = std::format("{} -c {}", FISH_PATH, cmd);
         Glib::spawn_command_line_async(command);
         return false;
     }
@@ -8158,7 +8165,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     {
         if (!focus)
         {
-            rep = fmt::format("panel{}", panel);
+            rep = std::format("panel{}", panel);
             cmd = ztd::replace(cmd, "%f", rep);
         }
         else
@@ -8168,17 +8175,17 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     }
     else if (ztd::contains(replace, "%w"))
     {
-        rep = fmt::format("{:p}", (void*)main_window);
+        rep = std::format("{:p}", (void*)main_window);
         cmd = ztd::replace(cmd, "%w", rep);
     }
     else if (ztd::contains(replace, "%p"))
     {
-        rep = fmt::format("{}", panel);
+        rep = std::format("{}", panel);
         cmd = ztd::replace(cmd, "%p", rep);
     }
     else if (ztd::contains(replace, "%t"))
     {
-        rep = fmt::format("{}", tab);
+        rep = std::format("{}", tab);
         cmd = ztd::replace(cmd, "%t", rep);
     }
     else if (ztd::contains(replace, "%v"))
@@ -8187,17 +8194,17 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     }
     else if (ztd::contains(replace, "%k"))
     {
-        rep = fmt::format("{:#x}", keyval);
+        rep = std::format("{:#x}", keyval);
         cmd = ztd::replace(cmd, "%k", rep);
     }
     else if (ztd::contains(replace, "%b"))
     {
-        rep = fmt::format("{}", button);
+        rep = std::format("{}", button);
         cmd = ztd::replace(cmd, "%b", rep);
     }
     else if (ztd::contains(replace, "%m"))
     {
-        rep = fmt::format("{:#x}", state);
+        rep = std::format("{:#x}", state);
         cmd = ztd::replace(cmd, "%m", rep);
     }
     else if (ztd::contains(replace, "%d"))
@@ -8214,7 +8221,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
         if (event == XSetName::EVT_TAB_CLOSE)
         {
-            const std::string command = fmt::format("{} -c {}", FISH_PATH, cmd);
+            const std::string command = std::format("{} -c {}", FISH_PATH, cmd);
             // file_browser becomes invalid so spawn
             Glib::spawn_command_line_async(command);
         }
@@ -8238,7 +8245,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     ztd::logger::info("REPLACE_EVENT {} >>> {}", event_name, cmd);
 
     inhibit = false;
-    const std::string command = fmt::format("{} -c {}", FISH_PATH, cmd);
+    const std::string command = std::format("{} -c {}", FISH_PATH, cmd);
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
     if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)

@@ -16,11 +16,11 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <vector>
 
 #include <cassert>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -258,7 +258,7 @@ xset_design_job_set_app(xset_t set)
     {
         const std::string name = ztd::removeprefix(set->name, "open_all_type_");
         const std::string msg =
-            fmt::format("You are adding a custom command to the Default menu item.  This item will "
+            std::format("You are adding a custom command to the Default menu item.  This item will "
                         "automatically have a pre-context - it will only appear when the MIME type "
                         "of the first selected file matches the current type '{}'.\n\nAdd commands "
                         "or menus here which you only want to appear for this one MIME type.",
@@ -316,7 +316,7 @@ xset_design_job_set_command(xset_t set)
     {
         const std::string name = ztd::removeprefix(set->name, "open_all_type_");
         const std::string msg =
-            fmt::format("You are adding a custom command to the Default menu item.  This item will "
+            std::format("You are adding a custom command to the Default menu item.  This item will "
                         "automatically have a pre-context - it will only appear when the MIME type "
                         "of the first selected file matches the current type '{}'.\n\nAdd commands "
                         "or menus here which you only want to appear for this one MIME type.",
@@ -361,7 +361,7 @@ xset_design_job_set_submenu(xset_t set)
     {
         const std::string name = ztd::removeprefix(set->name, "open_all_type_");
         const std::string msg =
-            fmt::format("You are adding a custom submenu to the Default menu item.  This item will "
+            std::format("You are adding a custom submenu to the Default menu item.  This item will "
                         "automatically have a pre-context - it will only appear when the MIME type "
                         "of the first selected file matches the current type '{}'.\n\nAdd commands "
                         "or menus here which you only want to appear for this one MIME type.",
@@ -561,7 +561,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     {
         const std::string label = clean_label(set->menu_label, false, false);
         const std::string msg =
-            fmt::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir);
+            std::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir.string());
 
         const i32 response = xset_msg_dialog(parent,
                                              GtkMessageType::GTK_MESSAGE_WARNING,
@@ -578,7 +578,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 
     const std::string plug_dir_q = ztd::shell::quote(set->plug_dir.string());
 
-    ptask->task->exec_command = fmt::format("rm -rf {}", plug_dir_q);
+    ptask->task->exec_command = std::format("rm -rf {}", plug_dir_q);
     ptask->task->exec_sync = true;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
@@ -635,7 +635,7 @@ xset_design_job_set_remove(xset_t set)
     std::string msg;
     if (set->child && set->menu_style == XSetMenu::SUBMENU)
     {
-        msg = fmt::format(
+        msg = std::format(
             "Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis action "
             "will delete all settings and files associated with these items.",
             name);
@@ -643,7 +643,7 @@ xset_design_job_set_remove(xset_t set)
     }
     else
     {
-        msg = fmt::format("Permanently remove the '{}' item?\n\nThis action will delete "
+        msg = std::format("Permanently remove the '{}' item?\n\nThis action will delete "
                           "all settings and files associated with this item.",
                           name);
         buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;

@@ -30,6 +30,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -40,8 +42,6 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/keyfile.h>
@@ -71,7 +71,7 @@ static void
 update_desktop_database()
 {
     const auto path = vfs::user_dirs->data_dir() / "applications";
-    const std::string command = fmt::format("update-desktop-database {}", path);
+    const std::string command = std::format("update-desktop-database {}", path.string());
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
 }
@@ -442,7 +442,7 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
         kf->set_string("Desktop Entry", "NoDisplay", "true");
 
         const std::string name = ztd::removesuffix(desktop_id, desktop_ext);
-        cust_template = fmt::format("{}-usercustom-{}.desktop", name, replace_txt);
+        cust_template = std::format("{}-usercustom-{}.desktop", name, replace_txt);
 
         file_content = kf->to_data();
     }
@@ -450,9 +450,9 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
     {
         /* Make a user-created desktop file for the command */
         const auto name = std::filesystem::path(desktop_id).filename();
-        cust_template = fmt::format("{}-usercreated-{}.desktop", name, replace_txt);
+        cust_template = std::format("{}-usercreated-{}.desktop", name.string(), replace_txt);
 
-        file_content = fmt::format("[Desktop Entry]\n"
+        file_content = std::format("[Desktop Entry]\n"
                                    "Encoding=UTF-8\n"
                                    "Name={}\n"
                                    "Exec={}\n"
@@ -460,7 +460,7 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
                                    "Icon=exec\n"
                                    "Terminal=false\n"
                                    "NoDisplay=true\n",
-                                   name,
+                                   name.string(),
                                    desktop_id,
                                    mime_type);
     }
@@ -824,7 +824,7 @@ mime_type_update_association(const std::string_view type, const std::string_view
                 }
             }
             // copy other apps to new list preserving order
-            new_action = fmt::format("{}{};", new_action, apps.at(i).data());
+            new_action = std::format("{}{};", new_action, apps.at(i).data());
         }
 
         // update key string if needed
@@ -840,11 +840,11 @@ mime_type_update_association(const std::string_view type, const std::string_view
                     // add to front of Default or Added list
                     if (action == MimeTypeAction::DEFAULT)
                     {
-                        new_action = fmt::format("{};{}", desktop_id, new_action);
+                        new_action = std::format("{};{}", desktop_id, new_action);
                     }
                     else
                     { // if ( action == MimeTypeAction::APPEND )
-                        new_action = fmt::format("{}{};", new_action, desktop_id);
+                        new_action = std::format("{}{};", new_action, desktop_id);
                     }
                 }
                 if (!new_action.empty())
@@ -868,7 +868,7 @@ mime_type_update_association(const std::string_view type, const std::string_view
                 if (group_block == MimeTypeAction::REMOVE)
                 {
                     // add to end of Removed list
-                    new_action = fmt::format("{}{};", new_action, desktop_id);
+                    new_action = std::format("{}{};", new_action, desktop_id);
                 }
                 if (!new_action.empty())
                 {

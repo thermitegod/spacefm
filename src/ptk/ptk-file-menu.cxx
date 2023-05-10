@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -27,8 +29,6 @@
 #include <fstream>
 
 #include <fcntl.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -525,7 +525,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
         set = xset_get(XSetName::VIEW_COLUMNS);
         xset_set_var(set, XSetVar::DISABLE, "0");
-        desc = fmt::format("panel{}_detcol_size panel{}_detcol_type panel{}_detcol_perm "
+        desc = std::format("panel{}_detcol_size panel{}_detcol_type panel{}_detcol_perm "
                            "panel{}_detcol_owner panel{}_detcol_date separator view_reorder_col",
                            p,
                            p,
@@ -686,7 +686,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
 
     set = xset_get(XSetName::VIEW_LIST_STYLE);
-    desc = fmt::format("panel{}_list_detailed panel{}_list_compact panel{}_list_icons separator "
+    desc = std::format("panel{}_list_detailed panel{}_list_compact panel{}_list_icons separator "
                        "view_thumb panel{}_list_large rubberband",
                        p,
                        p,
@@ -695,7 +695,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     xset_set_var(set, XSetVar::DESC, desc);
     set = xset_get(XSetName::CON_VIEW);
     set->disable = !browser->file_list;
-    desc = fmt::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
+    desc = std::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
                        "panel{}_show_dirtree separator panel{}_show_hidden "
                        "view_list_style view_sortby view_columns separator view_refresh",
                        p,
@@ -1077,7 +1077,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
-        plain_type = fmt::format("open_all_type_{}", plain_type);
+        plain_type = std::format("open_all_type_{}", plain_type);
         set = xset_get(plain_type.data());
         xset_set_cb(set, (GFunc)on_popup_open_all, data);
         set->lock = true;
@@ -1137,7 +1137,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                 xset_set_cb(set, (GFunc)on_popup_open_in_new_tab_activate, data);
                 for (tab_t tab : TABS)
                 {
-                    const std::string name = fmt::format("opentab_{}", tab);
+                    const std::string name = std::format("opentab_{}", tab);
                     set = xset_get(name);
                     xset_set_cb(set, (GFunc)on_open_in_tab, data);
                     xset_set_ob1_int(set, "tab_num", tab);
@@ -1155,7 +1155,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
                 for (panel_t panel : PANELS)
                 {
-                    const std::string name = fmt::format("open_in_panel{}", panel);
+                    const std::string name = std::format("open_in_panel{}", panel);
                     set = xset_get(name);
                     xset_set_cb(set, (GFunc)on_open_in_panel, data);
                     xset_set_ob1_int(set, "panel_num", panel);
@@ -1238,7 +1238,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         for (tab_t tab : TABS)
         {
-            const std::string name = fmt::format("tab_{}", tab);
+            const std::string name = std::format("tab_{}", tab);
             set = xset_get(name);
             xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
             xset_set_ob1_int(set, "tab_num", tab);
@@ -1369,11 +1369,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         for (tab_t tab : TABS)
         {
-            const std::string copy_tab = fmt::format("copy_tab_{}", tab);
+            const std::string copy_tab = std::format("copy_tab_{}", tab);
             set = xset_get(copy_tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
 
-            const std::string move_tab = fmt::format("move_tab_{}", tab);
+            const std::string move_tab = std::format("move_tab_{}", tab);
             set = xset_get(move_tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
 
@@ -1384,11 +1384,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
             const bool b = main_window_panel_is_visible(browser, tab);
 
-            const std::string copy_panel = fmt::format("copy_panel_{}", tab);
+            const std::string copy_panel = std::format("copy_panel_{}", tab);
             set = xset_get(copy_panel);
             set->disable = (tab == p) || !b;
 
-            const std::string move_panel = fmt::format("move_panel_{}", tab);
+            const std::string move_panel = std::format("move_panel_{}", tab);
             set = xset_get(move_panel);
             set->disable = (tab == p) || !b;
         }
@@ -1597,7 +1597,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     // is a file handler
     if (handler_set)
     {
-        app = fmt::format("###{}", handler_set->name);
+        app = std::format("###{}", handler_set->name);
     }
     else
     {
@@ -1721,12 +1721,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 }
 
                 const std::string msg =
-                    fmt::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
+                    std::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
                                 "editing it, you can adjust the behavior and appearance of this "
                                 "application for the current user.\n\nCreate this copy now?",
-                                path,
+                                path.string(),
                                 share_desktop,
-                                path);
+                                path.string());
                 const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
                                                      GtkMessageType::GTK_MESSAGE_QUESTION,
                                                      "Copy Desktop File",
@@ -1739,7 +1739,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 }
 
                 // need to copy
-                command = fmt::format("cp -a  {} {}", share_desktop, path);
+                command = std::format("cp -a  {} {}", share_desktop, path.string());
                 Glib::spawn_command_line_sync(command);
                 if (!std::filesystem::exists(path))
                 {
@@ -1829,31 +1829,31 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             std::filesystem::create_directories(mime_path);
             std::filesystem::permissions(mime_path, std::filesystem::perms::owner_all);
             str2 = ztd::replace(mime_type->get_type(), "/", "-");
-            str2 = fmt::format("{}.xml", str2);
+            str2 = std::format("{}.xml", str2);
             const auto mime_file = vfs::user_dirs->data_dir() / "mime" / "packages" / str2;
             if (!std::filesystem::exists(mime_file))
             {
                 std::string msg;
-                const std::string xml_file = fmt::format("{}.xml", mime_type->get_type());
+                const std::string xml_file = std::format("{}.xml", mime_type->get_type());
                 const auto usr_path = std::filesystem::path() / "/usr/share/mime" / xml_file;
 
                 if (std::filesystem::exists(usr_path))
                 {
-                    msg = fmt::format("The file {} does not exist.\n\nBy copying '{}' to {} "
+                    msg = std::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
                                       "and editing it, you can adjust how MIME type '{}' files are "
                                       "recognized for the current user.\n\nCreate this copy now?",
-                                      mime_file,
-                                      usr_path,
-                                      mime_file,
+                                      mime_file.string(),
+                                      usr_path.string(),
+                                      mime_file.string(),
                                       mime_type->get_type());
                 }
                 else
                 {
-                    msg = fmt::format("The file {} does not exist.\n\nBy creating new file {} "
+                    msg = std::format("The file '{}' does not exist.\n\nBy creating new file '{}' "
                                       "and editing it, you can define how MIME type '{}' files are "
                                       "recognized for the current user.\n\nCreate this file now?",
-                                      mime_file,
-                                      mime_file,
+                                      mime_file.string(),
+                                      mime_file.string(),
                                       mime_type->get_type());
                 }
 
@@ -1871,7 +1871,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 // need to create
 
                 // clang-format off
-                msg = fmt::format(
+                msg = std::format(
                     "<?xml version='1.0' encoding='utf-8'?>\n"
                     "<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>\n"
                     "<mime-type type='{}'>\n\n"
@@ -1910,7 +1910,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 catch (const Glib::FileError& e)
                 {
                     const std::string what = e.what();
-                    ztd::logger::warn("Error reading {}: {}", usr_path, what);
+                    ztd::logger::warn("Error reading {}: {}", usr_path.string(), what);
                 }
 
                 if (!contents.empty())
@@ -1934,13 +1934,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     }
                     if (start)
                     {
-                        contents = fmt::format("{}\n\n{}</mime-info>\n", msg, start);
+                        contents = std::format("{}\n\n{}</mime-info>\n", msg, start);
                     }
                 }
 
                 if (contents.empty())
                 {
-                    contents = fmt::format("{}\n\n<!-- insert your patterns below "
+                    contents = std::format("{}\n\n<!-- insert your patterns below "
                                            "-->\n\n\n</mime-type>\n</mime-info>\n\n",
                                            msg);
                 }
@@ -1957,7 +1957,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case PTKFileMenuAppJob::APP_JOB_VIEW_TYPE:
         {
-            str2 = fmt::format("{}.xml", mime_type->get_type());
+            str2 = std::format("{}.xml", mime_type->get_type());
             const auto path = std::filesystem::path() / "/usr/share/mime" / str2;
             if (std::filesystem::exists(path))
             {
@@ -1996,12 +1996,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case PTKFileMenuAppJob::APP_JOB_UPDATE:
         {
-            command = fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
+            const auto data_dir = vfs::user_dirs->data_dir();
+            command = std::format("update-mime-database {}/mime", data_dir.string());
             ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
 
-            command =
-                fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
+            command = std::format("update-desktop-database {}/applications", data_dir.string());
             ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
             break;
@@ -2157,7 +2157,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         else
         {
             str = ztd::replace(desktop->get_name(), ".desktop", "._desktop");
-            str = fmt::format("{} (*copy)", str);
+            str = std::format("{} (*copy)", str);
         }
         newitem = app_menu_additem(app_menu, str, PTKFileMenuAppJob::APP_JOB_EDIT, app_item, data);
     }
@@ -2182,17 +2182,17 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 
     // *.xml (missing)
     str = ztd::replace(type, "/", "-");
-    str = fmt::format("{}.xml", str);
+    str = std::format("{}.xml", str);
     const auto usr_mime_path = vfs::user_dirs->data_dir() / "mime/packages" / str;
     if (std::filesystem::exists(usr_mime_path))
     {
         str = ztd::replace(type, "/", "-");
-        str = fmt::format("{}._xml", str);
+        str = std::format("{}._xml", str);
     }
     else
     {
         str = ztd::replace(type, "/", "-");
-        str = fmt::format("{}._xml (*new)", str);
+        str = std::format("{}._xml (*new)", str);
     }
     newitem = app_menu_additem(app_menu, str, PTKFileMenuAppJob::APP_JOB_EDIT_TYPE, app_item, data);
 
@@ -2241,9 +2241,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     gtk_container_add(GTK_CONTAINER(submenu), gtk_separator_menu_item_new());
 
     // /usr *.xml
-    str = fmt::format("{}.xml", type);
+    str = std::format("{}.xml", type);
     const auto sys_mime_path = std::filesystem::path() / "/usr/share/mime" / str;
-    str = fmt::format("{}._xml", type);
+    str = std::format("{}._xml", type);
     newitem = app_menu_additem(submenu, str, PTKFileMenuAppJob::APP_JOB_VIEW_TYPE, app_item, data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), std::filesystem::exists(sys_mime_path));
 

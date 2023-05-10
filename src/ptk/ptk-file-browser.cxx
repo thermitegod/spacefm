@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -940,7 +942,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     const std::string desc =
-        fmt::format("separator panel{}_icon_status status_middle", file_browser->mypanel);
+        std::format("separator panel{}_icon_status status_middle", file_browser->mypanel);
 
     xset_set_cb_panel(file_browser->mypanel,
                       XSetPanel::ICON_STATUS,
@@ -1794,7 +1796,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path
     {
         if (!inhibit_focus)
         {
-            const std::string msg = fmt::format("Directory does not exist\n\n{}", path);
+            const std::string msg = std::format("Directory does not exist\n\n{}", path.string());
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
@@ -1807,7 +1809,8 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path
         if (!inhibit_focus)
         {
             const std::string errno_msg = std::strerror(errno);
-            const std::string msg = fmt::format("Unable to access {}\n\n{}", path, errno_msg);
+            const std::string msg =
+                std::format("Unable to access {}\n\n{}", path.string(), errno_msg);
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
                            msg);
@@ -3764,7 +3767,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
 
     if (ztd::contains(key, "*") || ztd::contains(key, "?"))
     {
-        const std::string key2 = fmt::format("*{}*", key);
+        const std::string key2 = std::format("*{}*", key);
         no_match = !ztd::fnmatch(key2, name);
     }
     else
@@ -4585,7 +4588,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
         const auto full_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
         const std::string uri = Glib::filename_to_uri(full_path);
 
-        uri_list.append(fmt::format("{}\n", uri));
+        uri_list.append(std::format("{}\n", uri));
     }
 
     vfs_file_info_list_free(sel_files);
@@ -6058,7 +6061,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
 
     const std::string user1 = "1000";
     const std::string user2 = "1001";
-    const std::string myuser = fmt::format("{}", geteuid());
+    const std::string myuser = std::format("{}", geteuid());
 
     if (ztd::startswith(set->name, "perm_"))
     {
@@ -6193,27 +6196,27 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     }
     else if (ztd::same(name, "myuser"))
     {
-        cmd = fmt::format("{}:{}", myuser, myuser);
+        cmd = std::format("{}:{}", myuser, myuser);
     }
     else if (ztd::same(name, "myuser_users"))
     {
-        cmd = fmt::format("{}:users", myuser);
+        cmd = std::format("{}:users", myuser);
     }
     else if (ztd::same(name, "user1"))
     {
-        cmd = fmt::format("{}:{}", user1, user1);
+        cmd = std::format("{}:{}", user1, user1);
     }
     else if (ztd::same(name, "user1_users"))
     {
-        cmd = fmt::format("{}:users", user1);
+        cmd = std::format("{}:users", user1);
     }
     else if (ztd::same(name, "user2"))
     {
-        cmd = fmt::format("{}:{}", user2, user2);
+        cmd = std::format("{}:{}", user2, user2);
     }
     else if (ztd::same(name, "user2_users"))
     {
-        cmd = fmt::format("{}:users", user2);
+        cmd = std::format("{}:users", user2);
     }
     else if (ztd::same(name, "root"))
     {
@@ -6225,15 +6228,15 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     }
     else if (ztd::same(name, "root_myuser"))
     {
-        cmd = fmt::format("root:{}", myuser);
+        cmd = std::format("root:{}", myuser);
     }
     else if (ztd::same(name, "root_user1"))
     {
-        cmd = fmt::format("root:{}", user1);
+        cmd = std::format("root:{}", user1);
     }
     else if (ztd::same(name, "root_user2"))
     {
-        cmd = fmt::format("root:{}", user2);
+        cmd = std::format("root:{}", user2);
     }
     else
     {
@@ -6244,13 +6247,13 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     for (vfs::file_info file : sel_files)
     {
         const std::string file_path = ztd::shell::quote(file->get_name());
-        file_paths = fmt::format("{} {}", file_paths, file_path);
+        file_paths = std::format("{} {}", file_paths, file_path);
     }
 
     // task
     PtkFileTask* ptask =
         ptk_file_exec_new(set->menu_label, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
-    ptask->task->exec_command = ztd::strdup(fmt::format("{} {} {}", prog, cmd, file_paths));
+    ptask->task->exec_command = ztd::strdup(std::format("{} {} {}", prog, cmd, file_paths));
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_sync = true;
     ptask->task->exec_show_error = true;
@@ -6447,7 +6450,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname)
         if (i > 0 && i < 5)
         {
             xset_t set2;
-            const std::string fullxname = fmt::format("panel{}_", panel_num);
+            const std::string fullxname = std::format("panel{}_", panel_num);
             const std::string xname = ztd::removeprefix(set->name, fullxname);
             if (ztd::same(xname, "show_hidden")) // shared key
             {

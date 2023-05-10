@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -34,8 +36,6 @@
 #include <chrono>
 
 #include <system_error>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -369,7 +369,7 @@ VFSFileInfo::get_disp_owner() noexcept
         group_name = gr.name();
     }
 
-    this->disp_owner = fmt::format("{}:{}", user_name, group_name);
+    this->disp_owner = std::format("{}:{}", user_name, group_name);
 
     return this->disp_owner;
 }

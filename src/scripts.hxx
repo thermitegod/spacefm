@@ -29,6 +29,6 @@ enum class Scripts
 };
 
 bool script_exists(Scripts script) noexcept;
-bool script_exists(const std::string_view script) noexcept;
+bool script_exists(const std::filesystem::path& script) noexcept;
 
 const std::filesystem::path get_script_path(Scripts script) noexcept;

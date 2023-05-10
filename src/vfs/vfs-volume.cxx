@@ -19,6 +19,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -33,8 +35,6 @@
 #include <memory>
 
 #include <sys/sysmacros.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -679,7 +679,7 @@ VFSVolume::set_info() noexcept
 
         if (!this->mount_point.empty())
         {
-            disp_mount = fmt::format("{}", this->mount_point);
+            disp_mount = std::format("{}", this->mount_point);
         }
         else
         {
@@ -703,7 +703,7 @@ VFSVolume::set_info() noexcept
 
     disp_device = this->device_file;
     disp_fstype = this->fs_type;
-    disp_devnum = fmt::format("{}:{}", gnu_dev_major(this->devnum), gnu_dev_minor(this->devnum));
+    disp_devnum = std::format("{}:{}", gnu_dev_major(this->devnum), gnu_dev_minor(this->devnum));
 
     std::string parameter;
     const char* user_format = xset_get_s(XSetName::DEV_DISPNAME);
@@ -719,7 +719,7 @@ VFSVolume::set_info() noexcept
     }
     else
     {
-        parameter = fmt::format("{} {} {} {} {}",
+        parameter = std::format("{} {} {} {} {}",
                                 disp_device,
                                 disp_size,
                                 disp_fstype,
@@ -826,7 +826,7 @@ VFSVolume::device_mount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return fmt::format("{} {}", path, ztd::shell::quote(this->device_file));
+    return std::format("{} {}", path.string(), ztd::shell::quote(this->device_file));
 }
 
 const std::optional<std::string>
@@ -837,7 +837,7 @@ VFSVolume::device_unmount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return fmt::format("{} {}", path, ztd::shell::quote(this->mount_point));
+    return std::format("{} {}", path.string(), ztd::shell::quote(this->mount_point));
 }
 
 void

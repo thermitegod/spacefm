@@ -13,9 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
 #include <string>
 #include <string_view>
+
+#include <format>
+
+#include <filesystem>
 
 #include <span>
 
@@ -477,12 +480,12 @@ ptk_file_task_cancel(PtkFileTask* ptask)
             // ztd::logger::info("SIGTERM {}", ptask->task->exec_pid);
 
             const std::string command =
-                fmt::format("/usr/bin/kill -{} {}", SIGTERM, ptask->task->exec_pid);
+                std::format("/usr/bin/kill -{} {}", SIGTERM, ptask->task->exec_pid);
             ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
 
             const std::string command2 =
-                fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, ptask->task->exec_pid);
+                std::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, ptask->task->exec_pid);
             ztd::logger::info("COMMAND={}", command2);
             Glib::spawn_command_line_async(command2);
         }
@@ -586,7 +589,7 @@ ptk_file_task_pause(PtkFileTask* ptask, i32 state)
         {
             // send signal
             const std::string command =
-                fmt::format("/usr/bin/kill -{} {}", sig, ptask->task->exec_pid);
+                std::format("/usr/bin/kill -{} {}", sig, ptask->task->exec_pid);
             ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_async(command);
         }
@@ -1213,7 +1216,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             const std::string escaped_markup =
                 Glib::Markup::escape_text(task->current_file.string());
-            ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
+            ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
         }
 
         if (ptask->aborted)
@@ -1235,7 +1238,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (!ufile_path)
         {
             const std::string escaped_markup = Glib::Markup::escape_text(window_title);
-            ufile_path = ztd::strdup(fmt::format("<b>( {} )</b>", escaped_markup));
+            ufile_path = ztd::strdup(std::format("<b>( {} )</b>", escaped_markup));
         }
     }
     else if (!task->current_file.empty())
@@ -1245,7 +1248,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             // Copy: <src basename>
             const auto name = task->current_file.filename();
             const std::string escaped_markup = Glib::Markup::escape_text(name.string());
-            ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
+            ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
 
             // From: <src_dir>
             const auto current_parent = task->current_file.parent_path();
@@ -1275,7 +1278,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             const std::string escaped_markup =
                 Glib::Markup::escape_text(task->current_file.string());
-            ufile_path = ztd::strdup(fmt::format("<b>{}</b>", escaped_markup));
+            ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
         }
     }
     else
@@ -1308,7 +1311,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 task->percent = 100;
             }
             gtk_progress_bar_set_fraction(ptask->progress_bar, ((f64)task->percent) / 100);
-            const std::string percent_str = fmt::format("{} %", task->percent);
+            const std::string percent_str = std::format("{} %", task->percent);
             gtk_progress_bar_set_text(ptask->progress_bar, percent_str.data());
         }
         else
@@ -1347,7 +1350,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             if (ptask->pop_detail)
             {
-                stats = fmt::format("#{}  ({}) [{}] @avg {}",
+                stats = std::format("#{}  ({}) [{}] @avg {}",
                                     ptask->dsp_file_count,
                                     ptask->dsp_size_tally,
                                     ptask->dsp_elapsed,
@@ -1355,14 +1358,14 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
             else
             {
-                stats = fmt::format("{} ({})", ptask->dsp_size_tally, ptask->dsp_avgspeed);
+                stats = std::format("{} ({})", ptask->dsp_size_tally, ptask->dsp_avgspeed);
             }
         }
         else
         {
             if (ptask->pop_detail)
             {
-                stats = fmt::format("#{} ({}) [{}] @cur {} ({}) @avg {} ({})",
+                stats = std::format("#{} ({}) [{}] @cur {} ({}) @avg {} ({})",
                                     ptask->dsp_file_count,
                                     ptask->dsp_size_tally,
                                     ptask->dsp_elapsed,
@@ -1373,7 +1376,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
             else
             {
-                stats = fmt::format("{}  ({})  {} remaining",
+                stats = std::format("{}  ({})  {} remaining",
                                     ptask->dsp_size_tally,
                                     ptask->dsp_avgspeed,
                                     ptask->dsp_avgest);
@@ -1432,7 +1435,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 }
                 else
                 {
-                    errs = fmt::format("Stopped with {} error", task->err_count);
+                    errs = std::format("Stopped with {} error", task->err_count);
                 }
             }
             else
@@ -1446,7 +1449,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             {
                 if (task->err_count)
                 {
-                    errs = fmt::format("Finished with {} error", task->err_count);
+                    errs = std::format("Finished with {} error", task->err_count);
                 }
                 else
                 {
@@ -1457,7 +1460,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             {
                 if (task->exec_exit_status)
                 {
-                    errs = fmt::format("Finished with error  ( exit status {} )",
+                    errs = std::format("Finished with error  ( exit status {} )",
                                        task->exec_exit_status);
                 }
                 else if (task->exec_is_error)
@@ -1481,11 +1484,11 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             if (task->exec_pid)
             {
-                errs = fmt::format("Paused  ( pid {} )", task->exec_pid);
+                errs = std::format("Paused  ( pid {} )", task->exec_pid);
             }
             else
             {
-                errs = fmt::format("Paused  ( exit status {} )", task->exec_exit_status);
+                errs = std::format("Paused  ( exit status {} )", task->exec_exit_status);
                 set_button_states(ptask);
             }
         }
@@ -1500,11 +1503,11 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             if (task->exec_pid)
             {
-                errs = fmt::format("Queued  ( pid {} )", task->exec_pid);
+                errs = std::format("Queued  ( pid {} )", task->exec_pid);
             }
             else
             {
-                errs = fmt::format("Queued  ( exit status {} )", task->exec_exit_status);
+                errs = std::format("Queued  ( exit status {} )", task->exec_exit_status);
                 set_button_states(ptask);
             }
         }
@@ -1515,7 +1518,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             if (task->err_count)
             {
-                errs = fmt::format("Running with {} error", task->err_count);
+                errs = std::format("Running with {} error", task->err_count);
             }
             else
             {
@@ -1526,11 +1529,11 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         {
             if (task->exec_pid)
             {
-                errs = fmt::format("Running...  ( pid {} )", task->exec_pid);
+                errs = std::format("Running...  ( pid {} )", task->exec_pid);
             }
             else
             {
-                errs = fmt::format("Running...  ( exit status {} )", task->exec_exit_status);
+                errs = std::format("Running...  ( exit status {} )", task->exec_exit_status);
                 set_button_states(ptask);
             }
         }
@@ -1666,23 +1669,23 @@ ptk_file_task_update(PtkFileTask* ptask)
     std::string elapsed2;
     if (hours != 0)
     {
-        elapsed = fmt::format("{}", hours);
+        elapsed = std::format("{}", hours);
     }
     u32 mins = (timer_elapsed - (hours * 3600)) / 60;
     if (hours > 0)
     {
-        elapsed2 = fmt::format("{}:{:02d}", elapsed, mins);
+        elapsed2 = std::format("{}:{:02d}", elapsed, mins);
     }
     else if (mins > 0)
     {
-        elapsed2 = fmt::format("{}", mins);
+        elapsed2 = std::format("{}", mins);
     }
     else
     {
         elapsed2 = elapsed;
     }
     u32 secs = (timer_elapsed - (hours * 3600) - (mins * 60));
-    const std::string elapsed3 = fmt::format("{}:{:02d}", elapsed2, secs);
+    const std::string elapsed3 = std::format("{}:{:02d}", elapsed2, secs);
     ptask->dsp_elapsed = elapsed3;
 
     if (task->type != VFSFileTaskType::EXEC)
@@ -1707,7 +1710,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         {
             size_str2 = "??"; // total_size calculation timed out
         }
-        const std::string size_tally = fmt::format("{} / {}", size_str, size_str2);
+        const std::string size_tally = std::format("{} / {}", size_str, size_str2);
         // cur speed display
         if (task->last_speed != 0)
         {
@@ -1732,7 +1735,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         else
         {
             size_str = vfs_file_size_format(cur_speed);
-            speed1 = fmt::format("{}/s", size_str);
+            speed1 = std::format("{}/s", size_str);
         }
         // avg speed
         std::time_t avg_speed;
@@ -1745,7 +1748,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             avg_speed = 0;
         }
         size_str2 = vfs_file_size_format(avg_speed);
-        speed2 = fmt::format("{}/s", size_str2);
+        speed2 = std::format("{}/s", size_str2);
 
         // remain cur
         off_t remain;
@@ -1768,16 +1771,16 @@ ptk_file_task_update(PtkFileTask* ptask)
             {
                 hours++;
             }
-            remain1 = fmt::format("{}/h", hours);
+            remain1 = std::format("{}/h", hours);
         }
         else if (remain > 59)
         {
             remain1 =
-                fmt::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
+                std::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
         }
         else
         {
-            remain1 = fmt::format(":{:02}", remain);
+            remain1 = std::format(":{:02}", remain);
         }
 
         // remain avg
@@ -1800,16 +1803,16 @@ ptk_file_task_update(PtkFileTask* ptask)
             {
                 hours++;
             }
-            remain2 = fmt::format("{}/h", hours);
+            remain2 = std::format("{}/h", hours);
         }
         else if (remain > 59)
         {
             remain2 =
-                fmt::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
+                std::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
         }
         else
         {
-            remain2 = fmt::format(":{:02}", remain);
+            remain2 = std::format(":{:02}", remain);
         }
 
         ptask->dsp_file_count = file_count;
@@ -2323,7 +2326,7 @@ query_overwrite(PtkFileTask* ptask)
             else
             {
                 const std::string size_str = vfs_file_size_format(src_stat.size());
-                src_size = fmt::format("{}\t( {} bytes )", size_str, src_stat.size());
+                src_size = std::format("{}\t( {} bytes )", size_str, src_stat.size());
                 if (src_stat.size() > dest_stat.size())
                 {
                     src_rel_size = "larger";
@@ -2358,7 +2361,7 @@ query_overwrite(PtkFileTask* ptask)
             }
             const std::string size_str = vfs_file_size_format(dest_stat.size());
             const std::string dest_size =
-                fmt::format("{}\t( {} bytes )", size_str, dest_stat.size());
+                std::format("{}\t( {} bytes )", size_str, dest_stat.size());
             const time_t dest_mtime = dest_stat.mtime();
 
             std::tm* local_time = std::localtime(&dest_mtime);
@@ -2368,20 +2371,20 @@ query_overwrite(PtkFileTask* ptask)
             const std::string dest_time = dest_date.str();
 
             const std::string src_rel =
-                fmt::format("{}{}{}{}{}",
+                std::format("{}{}{}{}{}",
                             !src_rel_time.empty() || !src_rel_size.empty() ? "<b>( " : "",
                             !src_rel_time.empty() ? src_rel_time : "",
                             !src_rel_time.empty() && !src_rel_size.empty() ? " &amp; " : "",
                             !src_rel_size.empty() ? src_rel_size : "",
                             !src_rel_time.empty() || !src_rel_size.empty() ? " )</b> " : "");
 
-            from_size_str = fmt::format("\t{}\t{}{}{}{}",
+            from_size_str = std::format("\t{}\t{}{}{}{}",
                                         src_time,
                                         src_size,
                                         !src_rel.empty() ? "\t" : "",
                                         src_rel,
                                         src_link);
-            to_size_str = fmt::format("\t{}\t{}{}",
+            to_size_str = std::format("\t{}\t{}{}",
                                       dest_time,
                                       dest_size,
                                       !dest_link.empty() ? dest_link : link_warn);

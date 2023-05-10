@@ -16,9 +16,9 @@
 #include <string>
 #include <string_view>
 
-#include <unordered_map>
+#include <format>
 
-#include <fmt/format.h>
+#include <unordered_map>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -1742,7 +1742,7 @@ xset_get_name_from_xsetname(XSetName name)
     }
     catch (const std::out_of_range& e)
     {
-        const std::string msg = fmt::format("XSetName:: Not Implemented: {}", INT(name));
+        const std::string msg = std::format("XSetName:: Not Implemented: {}", INT(name));
         throw InvalidXSetName(msg);
     }
 }
@@ -1853,7 +1853,7 @@ xset_get_xsetvar_from_name(const std::string_view name)
     }
     catch (const std::out_of_range& e)
     {
-        const std::string err_msg = fmt::format("Unknown XSet var {}", name);
+        const std::string err_msg = std::format("Unknown XSet var {}", name);
         throw std::logic_error(err_msg);
     }
 }
@@ -1869,7 +1869,7 @@ xset_get_name_from_xsetvar(XSetVar name)
         }
     }
 
-    const std::string err_msg = fmt::format("NOT implemented XSetVar: {}", INT(name));
+    const std::string err_msg = std::format("NOT implemented XSetVar: {}", INT(name));
     throw std::logic_error(err_msg);
 }
 
@@ -1884,7 +1884,7 @@ xset_get_window_panel_mode(MainWindowPanel mode)
     }
     catch (const std::out_of_range& e)
     {
-        const std::string msg = fmt::format("MainWindowPanel:: Not Implemented: {}", INT(mode));
+        const std::string msg = std::format("MainWindowPanel:: Not Implemented: {}", INT(mode));
         throw InvalidXSetName(msg);
     }
 }

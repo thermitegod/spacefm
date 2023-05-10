@@ -20,8 +20,6 @@
 
 #include <map>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -48,18 +46,18 @@ script_exists(Scripts script) noexcept
 
     if (!std::filesystem::exists(script_name))
     {
-        ztd::logger::error("Missing script: {}", script_name);
+        ztd::logger::error("Missing script: {}", script_name.string());
         return false;
     }
     return true;
 }
 
 bool
-script_exists(const std::string_view script) noexcept
+script_exists(const std::filesystem::path& script) noexcept
 {
     if (!std::filesystem::exists(script))
     {
-        ztd::logger::error("Missing script {}", script);
+        ztd::logger::error("Missing script {}", script.string());
         return false;
     }
     return true;

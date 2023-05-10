@@ -16,8 +16,6 @@
 #include <string>
 #include <string_view>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 
 #include <gtk/gtk.h>

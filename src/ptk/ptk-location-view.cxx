@@ -19,6 +19,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -29,8 +31,6 @@
 
 #include <algorithm>
 #include <ranges>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -683,7 +683,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
         cmd = "unmount";
     }
     const std::string msg =
-        fmt::format("No handler is configured for this device type, or no {} command is set. "
+        std::format("No handler is configured for this device type, or no {} command is set. "
                     "Add a handler in Settings|Device Handlers or Protocol Handlers.",
                     cmd);
     xset_msg_dialog(view,
@@ -731,7 +731,7 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
     const auto& mount_command = check_mount_command.value();
 
-    const std::string task_name = fmt::format("Mount {}", vol->device_file);
+    const std::string task_name = std::format("Mount {}", vol->device_file);
     PtkFileTask* ptask =
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
     ptask->task->exec_command = mount_command;
@@ -775,7 +775,7 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
     const auto& unmount_command = check_unmount_command.value();
 
-    const std::string task_name = fmt::format("Unmount {}", vol->device_file);
+    const std::string task_name = std::format("Unmount {}", vol->device_file);
     PtkFileTask* ptask =
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
     ptask->task->exec_command = unmount_command;
@@ -821,7 +821,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         }
         const auto& unmount_command = check_unmount_command.value();
 
-        const std::string task_name = fmt::format("Remove {}", vol->device_file);
+        const std::string task_name = std::format("Remove {}", vol->device_file);
         PtkFileTask* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = unmount_command;
@@ -838,8 +838,8 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
              (vol->is_optical || vol->requires_eject))
     {
         // task
-        const std::string line = fmt::format("eject {}", vol->device_file);
-        const std::string task_name = fmt::format("Remove {}", vol->device_file);
+        const std::string line = std::format("eject {}", vol->device_file);
+        const std::string task_name = std::format("Remove {}", vol->device_file);
         PtkFileTask* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = line;
@@ -853,7 +853,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     {
         // task
         const std::string line = "sync";
-        const std::string task_name = fmt::format("Remove {}", vol->device_file);
+        const std::string task_name = std::format("Remove {}", vol->device_file);
         PtkFileTask* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = line;
@@ -922,7 +922,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
     }
     const auto& mount_command = check_mount_command.value();
 
-    const std::string task_name = fmt::format("Mount {}", vol->device_file);
+    const std::string task_name = std::format("Mount {}", vol->device_file);
     PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view);
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
@@ -995,7 +995,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         const auto& mount_command = check_mount_command.value();
 
         // task
-        const std::string task_name = fmt::format("Mount {}", vol->device_file);
+        const std::string task_name = std::format("Mount {}", vol->device_file);
         PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view);
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
@@ -1069,7 +1069,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         const auto& mount_command = check_mount_command.value();
 
         // task
-        const std::string task_name = fmt::format("Mount {}", vol->device_file);
+        const std::string task_name = std::format("Mount {}", vol->device_file);
         PtkFileTask* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
         ptask->task->exec_command = mount_command;
@@ -1122,7 +1122,7 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     {
         const std::string devid = ztd::removeprefix(vol->udi, "/");
 
-        msg = fmt::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
+        msg = std::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
                           set->desc,
                           vol->device_file,
                           vol->label,
@@ -1158,7 +1158,7 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     {
         const std::string devid = ztd::removeprefix(vol->udi, "/");
 
-        msg = fmt::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
+        msg = std::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
                           set->desc,
                           vol->device_file,
                           vol->label,
@@ -1405,7 +1405,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
 
     std::string menu_elements;
 
-    menu_elements = fmt::format("dev_menu_remove dev_menu_unmount separator "
+    menu_elements = std::format("dev_menu_remove dev_menu_unmount separator "
                                 "dev_menu_open dev_menu_tab dev_menu_mount{}",
                                 str);
     xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
@@ -1812,7 +1812,7 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     set = xset_get(XSetName::DEV_MENU_SETTINGS);
 
     const std::string desc =
-        fmt::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
+        std::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change{}",
                     file_browser ? " dev_newtab" : "");
     xset_set_var(set, XSetVar::DESC, desc.data());

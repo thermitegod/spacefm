@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -28,8 +30,6 @@
 #include <map>
 
 #include <optional>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/keyfile.h>
@@ -86,7 +86,7 @@ VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
 
     if (!load)
     {
-        ztd::logger::warn("Failed to load desktop file {}", desktop_file);
+        ztd::logger::warn("Failed to load desktop file {}", desktop_file.string());
         this->exec = this->file_name;
         return;
     }
@@ -380,7 +380,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         if (!ztd::endswith(this->exec, open_files_keys))
         {
             ztd::logger::error("Malformed desktop file, %F and %U must always be at the end : {}",
-                               this->full_path);
+                               this->full_path.string());
             return std::nullopt;
         }
 
@@ -410,7 +410,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         if (!ztd::endswith(this->exec, open_file_keys))
         {
             ztd::logger::error("Malformed desktop file, %f and %u must always be at the end : {}",
-                               this->full_path);
+                               this->full_path.string());
             return std::nullopt;
         }
 
@@ -440,7 +440,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
     {
         ztd::logger::warn(
             "Trying to open a desktop file with a file list without file/url keys : {}",
-            this->full_path);
+            this->full_path.string());
     }
 
     if (ztd::contains(this->exec, "%c"))
@@ -481,7 +481,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
             {
                 if (ztd::contains(arg, "%i"))
                 {
-                    argv[index] = fmt::format("--icon {}", this->get_icon_name());
+                    argv[index] = std::format("--icon {}", this->get_icon_name());
                     break;
                 }
             }
@@ -514,7 +514,7 @@ VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
 {
     if (this->exec.empty())
     {
-        const std::string msg = fmt::format("Command not found\n\n{}", this->file_name);
+        const std::string msg = std::format("Command not found\n\n{}", this->file_name);
         throw VFSAppDesktopException(msg);
     }
 

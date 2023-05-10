@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -23,8 +25,6 @@
 #include <array>
 #include <utility>
 #include <vector>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -170,9 +170,9 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         {
             // filename
             const auto name = std::filesystem::path((char*)l->data).filename();
-            fm_filenames.append(fmt::format("{}\n", ztd::shell::quote(name.string())));
+            fm_filenames.append(std::format("{}\n", ztd::shell::quote(name.string())));
             // file path
-            fm_filenames.append(fmt::format("{}\n", ztd::shell::quote((char*)l->data)));
+            fm_filenames.append(std::format("{}\n", ztd::shell::quote((char*)l->data)));
         }
     }
     fm_filenames.append(")\nfm_filename=\"$fm_filenames[0]\"\n");
@@ -185,7 +185,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     {
         if (multiple)
         {
-            command_final = fmt::format("{}{}{}", fm_filenames, fm_files, command);
+            command_final = std::format("{}{}{}", fm_filenames, fm_files, command);
         }
         else
         {
@@ -195,11 +195,11 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
 
             const auto name = std::filesystem::path((char*)l->data).filename();
             quoted = ztd::shell::quote(name.string());
-            str = fmt::format("fm_filename={}\n", quoted);
+            str = std::format("fm_filename={}\n", quoted);
             // file path
             quoted = ztd::shell::quote((char*)l->data);
             command_final =
-                fmt::format("{}{}{}fm_file={}\n{}", fm_filenames, fm_files, str, quoted, command);
+                std::format("{}{}{}fm_file={}\n{}", fm_filenames, fm_files, str, quoted, command);
         }
 
         // Run task
@@ -242,7 +242,7 @@ check_desktop_name(const std::string_view app_desktop)
     // Not a desktop entry name
     // If we are lucky enough, there might be a desktop entry
     // for this program
-    const std::string name = fmt::format("{}.desktop", app_desktop);
+    const std::string name = std::format("{}.desktop", app_desktop);
     if (std::filesystem::exists(name))
     {
         return name;
@@ -271,7 +271,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app
 
     const vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
-    ztd::logger::info("EXEC({})={}", desktop->get_full_path(), desktop->get_exec());
+    ztd::logger::info("EXEC({})={}", desktop->get_full_path().string(), desktop->get_exec());
 
     const std::vector<std::filesystem::path> open_files = glist_t_char_to_vector_t_path(files);
 
@@ -402,7 +402,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             if (!handlers.empty())
             {
                 const xset_t handler_set = handlers.front();
-                alloc_desktop = fmt::format("###{}", handler_set->name);
+                alloc_desktop = std::format("###{}", handler_set->name);
             }
 
             /* The file itself is a desktop entry file. */
@@ -433,15 +433,15 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                 // broken link?
                 try
                 {
-                    const std::string target_path = std::filesystem::read_symlink(full_path);
+                    const auto target_path = std::filesystem::read_symlink(full_path);
 
                     if (!std::filesystem::exists(target_path))
                     {
-                        const std::string msg = fmt::format("This symlink's target is missing or "
+                        const std::string msg = std::format("This symlink's target is missing or "
                                                             "you do not have permission "
                                                             "to access it:\n{}\n\nTarget: {}",
-                                                            full_path,
-                                                            target_path);
+                                                            full_path.string(),
+                                                            target_path.string());
                         toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
                                                 : nullptr;
                         ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.data());

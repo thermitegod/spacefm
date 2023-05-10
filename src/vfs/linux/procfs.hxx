@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <vector>
@@ -25,8 +27,6 @@
 
 #include <fcntl.h>
 #include <linux/kdev_t.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>

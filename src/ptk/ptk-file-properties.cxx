@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -26,8 +28,6 @@
 #include <sstream>
 
 #include <chrono>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -235,10 +235,10 @@ static bool
 on_update_labels(FilePropertiesDialogData* data)
 {
     const std::string size_str =
-        fmt::format("{} ( {} bytes )", vfs_file_size_format(data->total_size), data->total_size);
+        std::format("{} ( {} bytes )", vfs_file_size_format(data->total_size), data->total_size);
     gtk_label_set_text(data->total_size_label, size_str.c_str());
 
-    const std::string disk_str = fmt::format("{} ( {} bytes )",
+    const std::string disk_str = std::format("{} ( {} bytes )",
                                              vfs_file_size_format(data->size_on_disk),
                                              data->size_on_disk);
     gtk_label_set_text(data->size_on_disk_label, disk_str.c_str());
@@ -246,11 +246,11 @@ on_update_labels(FilePropertiesDialogData* data)
     std::string count;
     if (data->total_count_dir == 0)
     {
-        count = fmt::format("{} files", data->total_count);
+        count = std::format("{} files", data->total_count);
     }
     else
     {
-        count = fmt::format("{} file, {} directory", data->total_count, data->total_count_dir);
+        count = std::format("{} file, {} directory", data->total_count, data->total_count_dir);
     }
 
     gtk_label_set_text(data->count_label, count.c_str());
@@ -492,7 +492,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
     {
         vfs::mime_type mime = file->get_mime_type();
         const std::string file_type =
-            fmt::format("{}\n{}", mime->get_description(), mime->get_type());
+            std::format("{}\n{}", mime->get_description(), mime->get_type());
         gtk_label_set_text(GTK_LABEL(mime_type), file_type.data());
     }
     else
@@ -623,11 +623,11 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
             need_calc_size = false;
 
             const std::string size =
-                fmt::format("{}  ( {} bytes )", file->get_disp_size(), file->get_size());
+                std::format("{}  ( {} bytes )", file->get_disp_size(), file->get_size());
             gtk_label_set_text(data->total_size_label, size.data());
 
             const std::string on_disk =
-                fmt::format("{}  ( {} bytes )", file->get_disp_disk_size(), file->get_disk_size());
+                std::format("{}  ( {} bytes )", file->get_disp_disk_size(), file->get_disk_size());
             gtk_label_set_text(data->size_on_disk_label, on_disk.data());
 
             gtk_label_set_text(data->count_label, "1 file");
@@ -812,14 +812,14 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 {
                     const auto file_path = data->dir_path / file->name;
                     const std::string quoted_path = ztd::shell::quote(file_path.string());
-                    str.append(fmt::format(" {}", quoted_path));
+                    str.append(std::format(" {}", quoted_path));
                 }
 
                 std::string cmd;
                 if (new_mtime)
                 {
                     const std::string quoted_time = ztd::shell::quote(new_mtime);
-                    cmd = fmt::format("touch --no-dereference --no-create -m -d {}{}",
+                    cmd = std::format("touch --no-dereference --no-create -m -d {}{}",
                                       quoted_time,
                                       str);
                 }
@@ -827,7 +827,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 {
                     const std::string quoted_time = ztd::shell::quote(new_atime);
                     const std::string quoted_path = cmd; // temp str
-                    cmd = fmt::format("{}{}touch --no-dereference --no-create -a -d {}{}",
+                    cmd = std::format("{}{}touch --no-dereference --no-create -a -d {}{}",
                                       cmd,
                                       cmd.empty() ? "" : "\n",
                                       quoted_time,

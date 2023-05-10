@@ -23,6 +23,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -31,8 +33,6 @@
 #include <vector>
 
 #include <chrono>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -456,7 +456,7 @@ compose_command(FindFile* data)
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_lower)))
     {
         argv.emplace_back("-size");
-        tmp = fmt::format(
+        tmp = std::format(
             "+{}{}",
             gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_lower)),
             size_units.at(gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_lower_unit))));
@@ -467,7 +467,7 @@ compose_command(FindFile* data)
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->use_size_upper)))
     {
         argv.emplace_back("-size");
-        tmp = fmt::format(
+        tmp = std::format(
             "-{}{}",
             gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(data->size_upper)),
             size_units.at(gtk_combo_box_get_active(GTK_COMBO_BOX(data->size_upper_unit))));
@@ -501,13 +501,13 @@ compose_command(FindFile* data)
             argv.emplace_back("-mtime");
 
             /* date1 */
-            tmp = fmt::format("-{}", get_date_offset(GTK_CALENDAR(data->date1)));
+            tmp = std::format("-{}", get_date_offset(GTK_CALENDAR(data->date1)));
             argv.emplace_back(tmp);
 
             argv.emplace_back("-mtime");
 
             /* date2 */
-            tmp = fmt::format("+{}", get_date_offset(GTK_CALENDAR(data->date2)));
+            tmp = std::format("+{}", get_date_offset(GTK_CALENDAR(data->date2)));
             argv.emplace_back(tmp);
 
             argv.emplace_back(")");
@@ -586,12 +586,12 @@ finish_search(FindFile* data)
 {
     if (data->pid)
     {
-        const std::string command = fmt::format("/usr/bin/kill -{} {}", SIGTERM, data->pid);
+        const std::string command = std::format("/usr/bin/kill -{} {}", SIGTERM, data->pid);
         ztd::logger::info("COMMAND={}", command);
         Glib::spawn_command_line_async(command);
 
         const std::string command2 =
-            fmt::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, data->pid);
+            std::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, data->pid);
         ztd::logger::info("COMMAND={}", command2);
         Glib::spawn_command_line_async(command2);
 

@@ -262,21 +262,21 @@ VFSMimeType::get_icon(bool big) noexcept
             if (!icon)
             {
                 // maybe we can find a legacy icon named gnome-mime-foo-bar
-                icon_name = fmt::format("gnome-mime-{}-{}", split_mime, split_type);
+                icon_name = std::format("gnome-mime-{}-{}", split_mime, split_type);
                 icon = vfs_load_icon(icon_name, size);
             }
 
             // try gnome-mime-foo
             if (!icon)
             {
-                icon_name = fmt::format("gnome-mime-{}", split_mime);
+                icon_name = std::format("gnome-mime-{}", split_mime);
                 icon = vfs_load_icon(icon_name, size);
             }
 
             // try foo-x-generic
             if (!icon)
             {
-                icon_name = fmt::format("{}-x-generic", split_mime);
+                icon_name = std::format("{}-x-generic", split_mime);
                 icon = vfs_load_icon(icon_name, size);
             }
         }

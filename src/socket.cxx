@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <tuple>
@@ -26,8 +28,6 @@
 #include <sys/types.h>
 #include <sys/sysmacros.h>
 #include <linux/kdev_t.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -76,7 +76,7 @@ get_inode_tag()
     const auto statbuf = ztd::stat(vfs::user_dirs->home_dir());
     if (statbuf.is_valid())
     {
-        inode_tag = fmt::format("{}={}:{}-{}",
+        inode_tag = std::format("{}={}:{}-{}",
                                 getuid(),
                                 gnu_dev_major(statbuf.dev()),
                                 gnu_dev_minor(statbuf.dev()),
@@ -84,7 +84,7 @@ get_inode_tag()
     }
     else
     {
-        inode_tag = fmt::format("{}=", getuid());
+        inode_tag = std::format("{}=", getuid());
     }
 
     // ztd::logger::info("inode_tag={}", inode_tag);
@@ -229,7 +229,7 @@ get_socket_name()
     }
 
     const std::string socket_file =
-        fmt::format("{}-{}{}.socket", PACKAGE_NAME, Glib::get_user_name(), dpy);
+        std::format("{}-{}{}.socket", PACKAGE_NAME, Glib::get_user_name(), dpy);
 
     return vfs::user_dirs->runtime_dir() / socket_file;
 }
@@ -456,7 +456,7 @@ send_socket_command(std::span<const std::string_view> args)
     if (connect(sock_fd, (struct sockaddr*)&addr, addr_len) != 0)
     {
         return {EXIT_FAILURE,
-                fmt::format("failed to connect to socket ({})\nnot running or $DISPLAY not set",
+                std::format("failed to connect to socket ({})\nnot running or $DISPLAY not set",
                             addr.sun_path)};
     }
 

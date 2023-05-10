@@ -17,6 +17,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -64,7 +66,6 @@
 
 // FMT
 #include <fmt/format.h>
-#include <fmt/std.h>
 
 // SIGNALS
 #include <sigc++/sigc++.h>

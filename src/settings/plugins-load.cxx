@@ -16,9 +16,9 @@
 #include <string>
 #include <string_view>
 
-#include <filesystem>
+#include <format>
 
-#include <fmt/format.h>
+#include <filesystem>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -48,7 +48,7 @@ load_user_plugin(const std::filesystem::path& plug_dir, PluginUse* use,
     catch (const toml::syntax_error& e)
     {
         const std::string msg =
-            fmt::format("Plugin file parsing failed:\n\"{}\"\n{}", plugin, e.what());
+            std::format("Plugin file parsing failed:\n\"{}\"\n{}", plugin.string(), e.what());
         ztd::logger::error("{}", msg);
         ptk_show_error(nullptr, "Plugin Load Error", msg);
         return false;

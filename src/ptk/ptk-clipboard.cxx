@@ -16,12 +16,12 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
 #include <vector>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -92,12 +92,12 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
         if (use_uri)
         {
             const std::string uri_name = Glib::filename_to_uri(clipboard_file.string());
-            uri_list.append(fmt::format("{}\n", uri_name));
+            uri_list.append(std::format("{}\n", uri_name));
         }
         else
         {
             // Need to use .string() to avoid fmt adding double quotes when formating
-            uri_list.append(fmt::format("{}\n", clipboard_file.string()));
+            uri_list.append(std::format("{}\n", clipboard_file.string()));
         }
     }
 
@@ -131,7 +131,7 @@ ptk_clipboard_copy_as_text(const std::filesystem::path& working_dir,
     {
         const auto file_path = working_dir / file->get_name();
         const std::string quoted = ztd::shell::quote(file_path.string());
-        file_text = fmt::format("{} {}", file_text, quoted);
+        file_text = std::format("{} {}", file_text, quoted);
     }
     gtk_clipboard_set_text(clip, file_text.data(), -1);
     gtk_clipboard_set_text(clip_primary, file_text.data(), -1);
@@ -152,15 +152,15 @@ ptk_clipboard_copy_name(const std::filesystem::path& working_dir,
     {
         if (fcount == 0)
         {
-            file_text = fmt::format("{}", file->get_name());
+            file_text = std::format("{}", file->get_name());
         }
         else if (fcount == 1)
         {
-            file_text = fmt::format("{}\n{}\n", file_text, file->get_name());
+            file_text = std::format("{}\n{}\n", file_text, file->get_name());
         }
         else
         {
-            file_text = fmt::format("{}{}\n", file_text, file->get_name());
+            file_text = std::format("{}{}\n", file_text, file->get_name());
         }
         fcount++;
     }
@@ -547,7 +547,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
         if (missing_targets > 0)
         {
             const std::string msg =
-                fmt::format("{} target{} missing",
+                std::format("{} target{} missing",
                             missing_targets,
                             missing_targets > 1 ? ztd::strdup("s are") : ztd::strdup(" is"));
             ptk_show_error(parent_win ? GTK_WINDOW(parent_win) : nullptr, "Error", msg);

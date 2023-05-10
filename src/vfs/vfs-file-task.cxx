@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -354,9 +356,9 @@ VFSFileTask::check_dest_in_src(const std::filesystem::path& src_dir)
 
     // source is contained in destination dir
     const std::string err =
-        fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
-                    this->dest_dir,
-                    src_dir);
+        std::format("Destination directory \"{}\" is contained in source \"{}\"",
+                    this->dest_dir.string(),
+                    src_dir.string());
     this->append_add_log(err);
     if (this->state_cb)
     {
@@ -902,7 +904,7 @@ VFSFileTask::file_trash(const std::filesystem::path& src_file)
     if (!have_rw_access(src_file))
     {
         // this->task_error(errno, "Trashing", src_file);
-        ztd::logger::error("Trashing failed missing RW permissions '{}'", src_file);
+        ztd::logger::error("Trashing failed missing RW permissions '{}'", src_file.string());
         return;
     }
 
@@ -1452,7 +1454,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         // get script name
         while (true)
         {
-            const std::filesystem::path hexname = fmt::format("{}.fish", ztd::randhex());
+            const std::filesystem::path hexname = std::format("{}.fish", ztd::randhex());
             this->exec_script = tmp / hexname;
             if (!std::filesystem::exists(this->exec_script))
             {
@@ -1464,7 +1466,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         std::string buf;
 
         // build - header
-        buf.append(fmt::format("#!{}\nsource {}\n\n", FISH_PATH, FISH_FMLIB));
+        buf.append(std::format("#!{}\nsource {}\n\n", FISH_PATH, FISH_FMLIB));
 
         // build - exports
         if (this->exec_export && (this->exec_browser || this->exec_desktop))
@@ -1500,29 +1502,29 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         if (this->exec_export)
         {
             buf.append(
-                fmt::format("set fm_import {}\n", ztd::shell::quote(this->exec_script.string())));
+                std::format("set fm_import {}\n", ztd::shell::quote(this->exec_script.string())));
         }
         else
         {
-            buf.append(fmt::format("set fm_import\n"));
+            buf.append(std::format("set fm_import\n"));
         }
 
         buf.append(
-            fmt::format("set fm_source {}\n\n", ztd::shell::quote(this->exec_script.string())));
+            std::format("set fm_source {}\n\n", ztd::shell::quote(this->exec_script.string())));
 
         // build - trap rm
         if (!this->exec_keep_tmp && geteuid() != 0 && ztd::same(this->exec_as_user, "root"))
         {
             // run as root command, clean up
-            buf.append(fmt::format("trap \"rm -f {}; exit\" EXIT SIGINT SIGTERM SIGQUIT SIGHUP\n\n",
-                                   this->exec_script));
+            buf.append(std::format("trap \"rm -f {}; exit\" EXIT SIGINT SIGTERM SIGQUIT SIGHUP\n\n",
+                                   this->exec_script.string()));
         }
 
         // build - command
         ztd::logger::info("TASK_COMMAND({:p})={}", fmt::ptr(this->exec_ptask), this->exec_command);
 
-        buf.append(fmt::format("{}\n\n", this->exec_command));
-        buf.append(fmt::format("set fm_err $status\n\n"));
+        buf.append(std::format("{}\n\n", this->exec_command));
+        buf.append(std::format("set fm_err $status\n\n"));
 
         // build - press enter to close
         if (!terminal.empty() && this->exec_keep_terminal)
@@ -1537,7 +1539,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             }
         }
 
-        buf.append(fmt::format("exit $fm_err\n"));
+        buf.append(std::format("exit $fm_err\n"));
         // ztd::logger::debug(buf);
 
         const bool result = write_file(this->exec_script, buf);
@@ -1630,11 +1632,11 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         if (single_arg)
         {
             const std::string script =
-                fmt::format("{} {} {} {} {}",
+                std::format("{} {} {} {} {}",
                             FISH_PATH,
                             auth,
                             ztd::same(this->exec_as_user, "root") ? "root" : "",
-                            this->exec_script,
+                            this->exec_script.string(),
                             sum_script);
             argv.emplace_back(script);
         }
@@ -1706,11 +1708,11 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         }
         const std::string cmd = ztd::join(argv, " ");
         const std::string msg =
-            fmt::format("Error executing '{}'\nGlib Spawn Error Code {}, {}\nRun in a terminal "
+            std::format("Error executing '{}'\nGlib Spawn Error Code {}, {}\nRun in a terminal "
                         "for full debug info\n",
                         cmd,
-                        e.code(),
-                        std::string(Glib::strerror(e.code())));
+                        INT(e.code()),
+                        Glib::strerror(e.code()).c_str());
         this->task_error(errno, msg);
         call_state_callback(this, VFSFileTaskState::FINISH);
         // ztd::logger::info("vfs_file_task_exec DONE ERROR");
@@ -2178,12 +2180,12 @@ VFSFileTask::task_error(i32 errnox, const std::string_view action)
     if (errnox)
     {
         const std::string errno_msg = std::strerror(errnox);
-        const std::string msg = fmt::format("{}\n{}\n", action, errno_msg);
+        const std::string msg = std::format("{}\n{}\n", action, errno_msg);
         this->append_add_log(msg);
     }
     else
     {
-        const std::string msg = fmt::format("{}\n", action);
+        const std::string msg = std::format("{}\n", action);
         this->append_add_log(msg);
     }
 
@@ -2196,7 +2198,7 @@ VFSFileTask::task_error(i32 errnox, const std::string_view action,
 {
     this->error = errnox;
     const std::string errno_msg = std::strerror(errnox);
-    const std::string msg = fmt::format("\n{} {}\nError: {}\n", action, target, errno_msg);
+    const std::string msg = std::format("\n{} {}\nError: {}\n", action, target.string(), errno_msg);
     this->append_add_log(msg);
     call_state_callback(this, VFSFileTaskState::ERROR);
 }

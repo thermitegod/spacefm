@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <span>
@@ -114,7 +116,7 @@ open_file(const std::filesystem::path& path)
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (app_name.empty())
         {
-            ztd::logger::error("no application to open file: {}", path);
+            ztd::logger::error("no application to open file: {}", path.string());
             return;
         }
     }
@@ -129,7 +131,8 @@ open_file(const std::filesystem::path& path)
     }
     catch (const VFSAppDesktopException& e)
     {
-        const std::string msg = fmt::format("Unable to open file:\n{}\n{}", path, e.what());
+        const std::string msg =
+            std::format("Unable to open file:\n{}\n{}", path.string(), e.what());
         ptk_show_error(nullptr, "Error", msg);
     }
 
@@ -323,7 +326,7 @@ handle_parsed_commandline_args()
             }
             else
             {
-                const std::string err_msg = fmt::format("File does not exist:\n\n{}", real_path);
+                const std::string err_msg = std::format("File does not exist:\n\n{}", real_path);
                 ptk_show_error(nullptr, "Error", err_msg);
             }
         }
@@ -372,7 +375,7 @@ tmp_clean()
 {
     const auto tmp = vfs::user_dirs->program_tmp_dir();
     std::filesystem::remove_all(tmp);
-    ztd::logger::info("Removed {}", tmp);
+    ztd::logger::info("Removed {}", tmp.string());
 }
 
 int

@@ -21,6 +21,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <span>
 
 #include <array>
@@ -31,8 +33,6 @@
 #include <chrono>
 
 #include <cassert>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -101,7 +101,7 @@ archive_handler_get_first_extension(xset_t handler_xset)
                 if (!filename_extension.empty())
                 {
                     // add a dot to extension
-                    archive_extension = fmt::format(".{}", filename_extension);
+                    archive_extension = std::format(".{}", filename_extension);
                     break;
                 }
             }
@@ -234,7 +234,7 @@ on_format_changed(GtkComboBox* combo, void* user_data)
             extension = archive_handler_get_first_extension(handler_xset);
 
             // Appending extension to original filename
-            const std::string new_name = fmt::format("{}{}", name, extension);
+            const std::string new_name = std::format("{}{}", name.string(), extension);
 
             // Updating new archive filename
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), new_name.data());
@@ -409,7 +409,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
 
             // Adding to model
             const std::string extensions =
-                fmt::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
+                std::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
                                PTKFileArchiverCol::COL_XSET_NAME,
@@ -771,13 +771,14 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                  * being compressed, in the user-selected dir */
                 const auto dest_dir = std::filesystem::path(dest_file).parent_path();
                 // Need to use .string() to avoid fmt adding double quotes when formating
-                udest_file = fmt::format("{}/{}{}", dest_dir.string(), desc, ext);
+                udest_file = std::format("{}/{}{}", dest_dir.string(), desc, ext);
 
                 // Looping to find a path that doesnt exist
                 i32 c = 1;
                 while (std::filesystem::exists(udest_file))
                 {
-                    udest_file = fmt::format("{}/{}-{}{}{}", dest_dir, desc, "copy", ++c, ext);
+                    udest_file =
+                        std::format("{}/{}-{}{}{}", dest_dir.string(), desc, "copy", ++c, ext);
                 }
             }
             udest_quote = ztd::shell::quote(udest_file);
@@ -788,7 +789,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             {
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
-                s1 = fmt::format("./{}", desc);
+                s1 = std::format("./{}", desc);
                 desc = ztd::shell::quote(s1);
             }
             else
@@ -807,12 +808,12 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             // Appending to final command as appropriate
             if (i == 0)
             {
-                final_command = fmt::format("{}\nfm_check_exit_code\n", cmd_to_run);
+                final_command = std::format("{}\nfm_check_exit_code\n", cmd_to_run);
             }
             else
             {
                 final_command =
-                    fmt::format("{}\necho\n\n{}\nfm_check_exit_code\n", final_command, cmd_to_run);
+                    std::format("{}\necho\n\n{}\nfm_check_exit_code\n", final_command, cmd_to_run);
             }
 
             if (loop_once)
@@ -837,7 +838,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             {
                 // special handling for filename starting with a dash
                 // due to tar interpreting it as option
-                s1 = fmt::format("./{}", desc);
+                s1 = std::format("./{}", desc);
                 first = ztd::shell::quote(s1);
             }
             else
@@ -856,7 +857,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                     {
                         // special handling for filename starting with a dash
                         // due to tar interpreting it as option
-                        s1 = fmt::format("./{}", desc);
+                        s1 = std::format("./{}", desc);
                         desc = ztd::shell::quote(s1);
                     }
                     else
@@ -864,7 +865,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                         desc = ztd::shell::quote(desc);
                     }
 
-                    all = fmt::format("{}{}{}", all, all.at(0) ? " " : "", desc);
+                    all = std::format("{}{}{}", all, all.at(0) ? " " : "", desc);
                 }
             }
         }
@@ -878,7 +879,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         cmd_to_run = replace_archive_subs(command, first, all, udest_quote, "", "");
 
         // Enforce error check
-        final_command = fmt::format("{}\nfm_check_exit_code\n", cmd_to_run);
+        final_command = std::format("{}\nfm_check_exit_code\n", cmd_to_run);
     }
     std::free(dest_file);
 
@@ -891,7 +892,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         shell_err_func_setup.append("set fm_handle_err_run_in_terminal true\n");
     }
 
-    final_command = fmt::format("{}\n\n{}", shell_err_func_setup, final_command);
+    final_command = std::format("{}\n\n{}", shell_err_func_setup, final_command);
 
     /* Cleaning up - final_command does not need freeing, as this
      * is freed by the task */
@@ -1186,7 +1187,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         // Continuing to next file if a handler hasnt been found
         if (!handler_xset)
         {
-            ztd::logger::warn("No archive handler/command found for file: {}", full_path);
+            ztd::logger::warn("No archive handler/command found for file: {}", full_path.string());
             continue;
         }
         ztd::logger::info("Archive Handler Selected: {}", handler_xset->menu_label);
@@ -1250,7 +1251,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 }
 
                 // add a dot to extension
-                const std::string new_extension = fmt::format(".{}", filename_extension);
+                const std::string new_extension = std::format(".{}", filename_extension);
                 // Checking if the current extension is being used
                 if (ztd::endswith(filename, new_extension))
                 { // It is - determining filename without extension
@@ -1297,12 +1298,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 // Looping to find a path that doesnt exist
                 while (std::filesystem::exists(parent_path))
                 {
-                    parent_path = fmt::format("{}-copy{}", parent_path, ++n);
+                    parent_path = std::format("{}-copy{}", parent_path.string(), ++n);
                 }
 
                 // Generating shell command to make directory
                 parent_quote = ztd::shell::quote(parent_path.string());
-                mkparent = fmt::format("fm_util_mkcd {}\n", parent_quote);
+                mkparent = std::format("fm_util_mkcd {}\n", parent_quote);
 
                 // Dealing with the need to make extracted files writable if
                 // desired (e.g. a tar of files originally archived from a CD
@@ -1312,7 +1313,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 if (write_access && geteuid() != 0)
                 {
                     // deliberately omitting fm_handle_error - only a convenience function
-                    perm = fmt::format("chmod -R u+rwX {}\n", parent_quote);
+                    perm = std::format("chmod -R u+rwX {}\n", parent_quote);
                 }
                 parent_quote.clear();
             }
@@ -1353,7 +1354,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                 while (std::filesystem::exists(extract_target))
                 {
                     const auto new_filename =
-                        fmt::format("{}-{}{}.{}", filename, "copy", ++n, filename_extension);
+                        std::format("{}-{}{}.{}", filename, "copy", ++n, filename_extension);
                     if (create_parent)
                     {
                         const auto path = std::filesystem::path() / parent_path / new_filename;
@@ -1378,7 +1379,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         // one archive to list/extract. The mkparent command itself has error
         // checking - final error check not here as I want the code shared with
         // the list code flow
-        final_command = fmt::format("{}\nfm_util_cd {}\n{}{}\nfm_check_exit_code\n{}\n",
+        final_command = std::format("{}\nfm_util_cd {}\n{}{}\nfm_check_exit_code\n{}\n",
                                     final_command,
                                     dest_quote,
                                     mkparent,
@@ -1397,14 +1398,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     if (create_parent)
     {
         shell_err_func_setup.append(
-            fmt::format("set fm_handle_err_parent_path {}\n", parent_quote));
+            std::format("set fm_handle_err_parent_path {}\n", parent_quote));
     }
 
-    final_command = fmt::format("{}\n{}", shell_err_func_setup, final_command);
+    final_command = std::format("{}\n{}", shell_err_func_setup, final_command);
     std::free(choose_dir);
 
     // Creating task
-    const std::string task_name = fmt::format("Extract {}", sel_files.front()->get_name());
+    const std::string task_name = std::format("Extract {}", sel_files.front()->get_name());
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            dlgparent,

@@ -30,8 +30,6 @@
 
 #include <unistd.h>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -141,9 +139,9 @@ VFSTrash::trash(const std::filesystem::path& path) noexcept
     }
 
     if (path.string().ends_with("/Trash") ||
-        path.string().ends_with(fmt::format("/.Trash-{}", getuid())))
+        path.string().ends_with(std::format("/.Trash-{}", getuid())))
     {
-        ztd::logger::warn("Refusing to trash Trash Dir: {}", path);
+        ztd::logger::warn("Refusing to trash Trash Dir: {}", path.string());
         return true;
     }
 
@@ -198,7 +196,7 @@ VFSTrashDir::unique_name(const std::filesystem::path& path) const noexcept
 
     for (usize i = 1; true; ++i)
     {
-        const std::string check_to_trash_filename = fmt::format("{}_{}{}", basename, i, ext);
+        const std::string check_to_trash_filename = std::format("{}_{}{}", basename, i, ext);
         const auto check_to_trash_path = this->files_path / check_to_trash_filename;
         if (!std::filesystem::exists(check_to_trash_path))
         {
@@ -237,7 +235,7 @@ void
 VFSTrashDir::create_trash_info(const std::filesystem::path& path,
                                const std::string_view target_name) const noexcept
 {
-    const auto trash_info = this->info_path / fmt::format("{}.trashinfo", target_name);
+    const auto trash_info = this->info_path / std::format("{}.trashinfo", target_name);
 
     const std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
@@ -246,7 +244,7 @@ VFSTrashDir::create_trash_info(const std::filesystem::path& path,
     iso_time << std::put_time(local_time, "%FT%TZ");
 
     const std::string trash_info_content =
-        fmt::format("[Trash Info]\nPath={}\nDeletionDate={}", path, iso_time.str());
+        std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time.str());
 
     write_file(trash_info, trash_info_content);
 }

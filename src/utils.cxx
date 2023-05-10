@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <vector>
 
 #include <filesystem>
@@ -23,8 +25,6 @@
 #include <utility>
 
 #include <fcntl.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 
@@ -134,7 +134,7 @@ get_name_extension(const std::filesystem::path& filename) noexcept
             // Find the second last dot in the filename
             const auto split_second = ztd::rpartition(split[0], ".");
 
-            return std::make_pair(split_second[0], fmt::format("{}.{}", split_second[2], split[2]));
+            return std::make_pair(split_second[0], std::format("{}.{}", split_second[2], split[2]));
         }
         else
         {
@@ -152,7 +152,7 @@ open_in_prog(const std::filesystem::path& path) noexcept
 {
     const std::string exe = ztd::program::exe();
     const std::string qpath = ztd::shell::quote(path.string());
-    const std::string command = fmt::format("{} {}", exe, qpath);
+    const std::string command = std::format("{} {}", exe, qpath);
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_async(command);
 }

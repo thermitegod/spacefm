@@ -16,13 +16,13 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <vector>
 
 #include <map>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 

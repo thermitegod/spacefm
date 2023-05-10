@@ -24,6 +24,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <map>
@@ -34,9 +36,6 @@
 #include <ranges>
 
 #include <sys/inotify.h>
-
-#include <fmt/format.h>
-#include <fmt/std.h>
 
 #include <glibmm.h>
 
@@ -187,7 +186,7 @@ vfs_file_monitor_add(const std::filesystem::path& path, vfs::file_monitor_callba
                                              IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (wd < 0)
         {
-            ztd::logger::error("Failed to add watch on '{}' ({})", real_path, path);
+            ztd::logger::error("Failed to add watch on '{}' ({})", real_path, path.string());
             // const std::string errno_msg = std::strerror(errno);
             // ztd::logger::error("inotify_add_watch: {}", errno_msg);
             return nullptr;

@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <vector>
@@ -32,8 +34,6 @@
 #include <optional>
 
 #include <cassert>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -450,7 +450,7 @@ gethidden(const std::filesystem::path& path)
             const auto hidden_file = std::filesystem::path(ztd::strip(line));
             if (hidden_file.is_absolute())
             {
-                ztd::logger::warn("Absolute path ignored in {}", hidden_path);
+                ztd::logger::warn("Absolute path ignored in {}", hidden_path.string());
                 continue;
             }
 
@@ -466,7 +466,7 @@ bool
 vfs_dir_add_hidden(const std::filesystem::path& path, const std::filesystem::path& file_name)
 {
     const auto file_path = path / ".hidden";
-    const std::string data = fmt::format("{}\n", file_name);
+    const std::string data = std::format("{}\n", file_name.string());
 
     const bool result = write_file(file_path, data);
     if (!result)
@@ -855,13 +855,13 @@ on_mime_change_timer(void* user_data)
     (void)user_data;
 
     // ztd::logger::info("MIME-UPDATE on_timer");
-    const std::string command1 =
-        fmt::format("update-mime-database {}/mime", vfs::user_dirs->data_dir());
+    const auto data_dir = vfs::user_dirs->data_dir();
+    const std::string command1 = std::format("update-mime-database {}/mime", data_dir.string());
     ztd::logger::info("COMMAND={}", command1);
     Glib::spawn_command_line_async(command1);
 
     const std::string command2 =
-        fmt::format("update-desktop-database {}/applications", vfs::user_dirs->data_dir());
+        std::format("update-desktop-database {}/applications", data_dir.string());
     ztd::logger::info("COMMAND={}", command2);
     Glib::spawn_command_line_async(command2);
 

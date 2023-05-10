@@ -19,6 +19,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -34,8 +36,6 @@
 #include <cassert>
 
 #include <unistd.h>
-
-#include <fmt/format.h>
 
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -206,33 +206,33 @@ load_settings()
 
     if (git_backed_settings)
     {
-        const std::string command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
+        const auto command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
 
         if (script_exists(command_script))
         {
             const std::string command_args =
-                fmt::format("{} --config-dir {} --config-file {} --config-version {}",
-                            command_script,
-                            settings_config_dir,
+                std::format("{} --config-dir {} --config-file {} --config-version {}",
+                            command_script.string(),
+                            settings_config_dir.string(),
                             CONFIG_FILE_FILENAME,
                             CONFIG_FILE_VERSION);
 
-            ztd::logger::info("SCRIPT={}", command_script);
+            ztd::logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);
         }
     }
     else
     {
-        const std::string command_script = get_script_path(Scripts::CONFIG_UPDATE);
+        const auto command_script = get_script_path(Scripts::CONFIG_UPDATE);
 
         if (script_exists(command_script))
         {
-            const std::string command_args = fmt::format("{} --config-dir {} --config-file {}",
-                                                         command_script,
-                                                         settings_config_dir,
+            const std::string command_args = std::format("{} --config-dir {} --config-file {}",
+                                                         command_script.string(),
+                                                         settings_config_dir.string(),
                                                          CONFIG_FILE_FILENAME);
 
-            ztd::logger::info("SCRIPT={}", command_script);
+            ztd::logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);
         }
     }
@@ -362,7 +362,7 @@ save_settings(void* main_window_ptr)
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]),
                                                           i));
-                            tabs = fmt::format("{}{}{}",
+                            tabs = std::format("{}{}{}",
                                                tabs,
                                                CONFIG_FILE_TABS_DELIM,
                                                // Need to use .string() as libfmt will by default
@@ -502,7 +502,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                 std::string str = context->var[ItemPropContext::CONTEXT_MIME];
                 str = ztd::replace(str, "-", "_");
                 str = ztd::replace(str, " ", "");
-                open_all_set = xset_is(fmt::format("open_all_type_{}", str));
+                open_all_set = xset_is(std::format("open_all_type_{}", str));
             }
 
             // test context
@@ -944,7 +944,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     switch (set->menu_style)
     {
         case XSetMenu::CHECK:
-            value = fmt::format("{:d}", mset->b == XSetB::XSET_B_TRUE ? 1 : 0);
+            value = std::format("{:d}", mset->b == XSetB::XSET_B_TRUE ? 1 : 0);
             break;
         case XSetMenu::STRING:
             value = mset->s;
@@ -1271,12 +1271,12 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     }
     else
     {
-        editor = fmt::format("{} {}", editor, quoted_path);
+        editor = std::format("{} {}", editor, quoted_path);
     }
-    editor = fmt::format("{} {}", editor, quoted_path);
+    editor = std::format("{} {}", editor, quoted_path);
 
     // task
-    const std::string task_name = fmt::format("Edit {}", path);
+    const std::string task_name = std::format("Edit {}", path);
     const auto cwd = std::filesystem::path(path).parent_path();
     PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, dlgparent, nullptr);
     ptask->task->exec_command = editor;
@@ -1324,27 +1324,27 @@ xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
     {
         if (keymod & GdkModifierType::GDK_SUPER_MASK)
         {
-            mod = fmt::format("Super+{}", mod);
+            mod = std::format("Super+{}", mod);
         }
         if (keymod & GdkModifierType::GDK_HYPER_MASK)
         {
-            mod = fmt::format("Hyper+{}", mod);
+            mod = std::format("Hyper+{}", mod);
         }
         if (keymod & GdkModifierType::GDK_META_MASK)
         {
-            mod = fmt::format("Meta+{}", mod);
+            mod = std::format("Meta+{}", mod);
         }
         if (keymod & GdkModifierType::GDK_MOD1_MASK)
         {
-            mod = fmt::format("Alt+{}", mod);
+            mod = std::format("Alt+{}", mod);
         }
         if (keymod & GdkModifierType::GDK_CONTROL_MASK)
         {
-            mod = fmt::format("Ctrl+{}", mod);
+            mod = std::format("Ctrl+{}", mod);
         }
         if (keymod & GdkModifierType::GDK_SHIFT_MASK)
         {
-            mod = fmt::format("Shift+{}", mod);
+            mod = std::format("Shift+{}", mod);
         }
     }
     return mod;
@@ -1517,7 +1517,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     }
 
     const std::string keymsg =
-        fmt::format("Press your key combination for item '{}' then click Set.  To "
+        std::format("Press your key combination for item '{}' then click Set.  To "
                     "remove the current key assignment, click Unset.",
                     name);
     if (parent)
@@ -3064,7 +3064,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 static void
 set_gtk3_widget_padding(GtkWidget* widget, i32 left_right, i32 top_bottom)
 {
-    const std::string str = fmt::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
+    const std::string str = std::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
                                         "padding-top: {}px; padding-bottom: {}px; }}",
                                         left_right,
                                         left_right,

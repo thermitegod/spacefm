@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <filesystem>
 
 #include <array>
@@ -40,8 +42,6 @@
 #include <cassert>
 
 #include <fcntl.h>
-
-#include <fmt/format.h>
 
 #include <pugixml.hpp>
 
@@ -311,7 +311,8 @@ mime_type_get_desc_icon(const std::string_view type)
      * Since the spec really sucks, we do not follow it here.
      */
 
-    const std::string file_path = fmt::format("{}/mime/{}.xml", vfs::user_dirs->data_dir(), type);
+    const std::string file_path =
+        std::format("{}/mime/{}.xml", vfs::user_dirs->data_dir().string(), type);
     if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
     {
         const auto icon_data = mime_type_parse_xml_file(file_path, true);
@@ -324,7 +325,7 @@ mime_type_get_desc_icon(const std::string_view type)
     // look in system dirs
     for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const std::string sys_file_path = fmt::format("{}/mime/{}.xml", sys_dir, type);
+        const std::string sys_file_path = std::format("{}/mime/{}.xml", sys_dir, type);
         if (faccessat(0, sys_file_path.data(), F_OK, AT_EACCESS) != -1)
         {
             const auto icon_data = mime_type_parse_xml_file(sys_file_path, false);

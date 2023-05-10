@@ -21,8 +21,6 @@
 #include <algorithm>
 #include <ranges>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 #include <glibmm/convert.h>
 

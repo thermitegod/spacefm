@@ -16,13 +16,13 @@
 #include <string>
 #include <string_view>
 
+#include <format>
+
 #include <vector>
 
 #include <type_traits>
 
 #include <cassert>
-
-#include <fmt/format.h>
 
 #include <glib.h>
 
@@ -1280,7 +1280,7 @@ char*
 xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
 {
     // TODO
-    const std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = std::format("panel{}_{}", panel, name);
     return xset_get_s(fullname);
 }
 
@@ -1469,7 +1469,7 @@ xset_set_b(const std::string_view name, bool bval) noexcept
 void
 xset_set_b_panel(panel_t panel, const std::string_view name, bool bval) noexcept
 {
-    const std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = std::format("panel{}_{}", panel, name);
     xset_set_b(fullname, bval);
 }
 
@@ -1499,7 +1499,7 @@ xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode, bool 
 xset_t
 xset_get_panel(panel_t panel, const std::string_view name) noexcept
 {
-    const std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = std::format("panel{}_{}", panel, name);
     return xset_get(fullname);
 }
 
@@ -1513,7 +1513,7 @@ xset_t
 xset_get_panel_mode(panel_t panel, const std::string_view name, MainWindowPanel mode) noexcept
 {
     const std::string fullname =
-        fmt::format("panel{}_{}{}", panel, name, xset_get_window_panel_mode(mode));
+        std::format("panel{}_{}{}", panel, name, xset_get_window_panel_mode(mode));
     return xset_get(fullname);
 }
 
@@ -1604,7 +1604,7 @@ xset_get_int(const std::string_view name, XSetVar var) noexcept
 i32
 xset_get_int_panel(panel_t panel, const std::string_view name, XSetVar var) noexcept
 {
-    const std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = std::format("panel{}_{}", panel, name);
     return xset_get_int(fullname, var);
 }
 
@@ -1622,7 +1622,7 @@ void
 xset_set_panel(panel_t panel, const std::string_view name, XSetVar var,
                const std::string_view value) noexcept
 {
-    const std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = std::format("panel{}_{}", panel, name);
     const xset_t set = xset_get(fullname);
     xset_set_var(set, var, value);
 }
@@ -1663,7 +1663,7 @@ xset_set_cb(const std::string_view name, GFunc cb_func, void* cb_data) noexcept
 void
 xset_set_cb_panel(panel_t panel, const std::string_view name, GFunc cb_func, void* cb_data) noexcept
 {
-    const std::string fullname = fmt::format("panel{}_{}", panel, name);
+    const std::string fullname = std::format("panel{}_{}", panel, name);
     xset_set_cb(fullname, cb_func, cb_data);
 }
 
