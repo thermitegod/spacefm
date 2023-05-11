@@ -60,10 +60,10 @@ const std::string xset_get_keyname(xset_t set, i32 key_val, i32 key_mod);
 GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button,
                                  std::time_t time);
 
-GtkWidget* xset_get_image(const char* icon, GtkIconSize icon_size);
+GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size);
 
 void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-                   const char* elements);
+                   const std::string_view elements);
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, xset_t set);
 
@@ -75,7 +75,7 @@ void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidge
                        xset_t set_parent, bool show_tooltips);
 
 bool xset_opener(PtkFileBrowser* file_browser, char job);
-const char* xset_get_builtin_toolitem_label(xset::tool tool_type);
+const std::string xset_get_builtin_toolitem_label(xset::tool tool_type);
 
 ////////////////////////////////////////
 

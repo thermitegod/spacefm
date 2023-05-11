@@ -1123,16 +1123,18 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         const std::string devid = ztd::removeprefix(vol->udi, "/");
 
         msg = std::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
-                          set->desc,
+                          set->desc.value(),
                           vol->device_file,
                           vol->label,
                           devid);
     }
     else
     {
-        msg = set->desc;
+        msg = set->desc.value();
     }
-    const bool response = xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false);
+    const auto [response, answer] =
+        xset_text_dialog(view, set->title.value(), msg, "", set->s.value(), "", false);
+    set->s = answer;
     if (response)
     {
         update_all();
@@ -1159,17 +1161,19 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         const std::string devid = ztd::removeprefix(vol->udi, "/");
 
         msg = std::format("{}Currently Selected Device: {}\nVolume Label: {}\nDevice ID: {}",
-                          set->desc,
+                          set->desc.value(),
                           vol->device_file,
                           vol->label,
                           devid);
     }
     else
     {
-        msg = set->desc;
+        msg = set->desc.value();
     }
 
-    const bool response = xset_text_dialog(view, set->title, msg, "", set->s, &set->s, "", false);
+    const auto [response, answer] =
+        xset_text_dialog(view, set->title.value(), msg, "", set->s.value(), "", false);
+    set->s = answer;
     if (response)
     {
         // update view / automount all?
@@ -1408,7 +1412,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     menu_elements = std::format("dev_menu_remove dev_menu_unmount separator "
                                 "dev_menu_open dev_menu_tab dev_menu_mount{}",
                                 str);
-    xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
+    xset_add_menu(file_browser, popup, accel_group, menu_elements);
 
     // set = xset_get("dev_menu_root");
     // set->disable = !vol;
@@ -1450,7 +1454,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_var(set, xset::var::desc, menu_elements);
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
-    xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
+    xset_add_menu(file_browser, popup, accel_group, menu_elements);
 
     gtk_widget_show_all(GTK_WIDGET(popup));
 
@@ -1633,13 +1637,13 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     GtkWidget* popup = gtk_menu_new();
 
     set = xset_get(xset::name::dev_menu_remove);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label);
+    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(item, "activate", G_CALLBACK(on_eject), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
 
     set = xset_get(xset::name::dev_menu_unmount);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label);
+    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(item, "activate", G_CALLBACK(on_umount), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1648,7 +1652,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), gtk_separator_menu_item_new());
 
     set = xset_get(xset::name::dev_menu_open);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label);
+    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     if (file_browser)
@@ -1661,7 +1665,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     }
 
     set = xset_get(xset::name::dev_menu_mount);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label);
+    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(item, "activate", G_CALLBACK(on_mount), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);

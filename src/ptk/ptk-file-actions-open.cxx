@@ -133,7 +133,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     std::string str;
     std::string command_final;
 
-    ztd::logger::info("Selected File Handler '{}'", handler_set->menu_label);
+    ztd::logger::info("Selected File Handler '{}'", handler_set->menu_label.value());
 
     // get command - was already checked as non-empty
     std::string error_message;
@@ -204,7 +204,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
 
         // Run task
         PtkFileTask* ptask =
-            ptk_file_exec_new(handler_set->menu_label,
+            ptk_file_exec_new(handler_set->menu_label.value(),
                               parent->cwd,
                               parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
                               parent->file_browser ? parent->file_browser->task_view : nullptr);
@@ -213,7 +213,7 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
         ptask->task->exec_command = command_final;
         if (handler_set->icon)
         {
-            ptask->task->exec_icon = handler_set->icon;
+            ptask->task->exec_icon = handler_set->icon.value();
         }
         ptask->task->exec_terminal = handler_set->in_terminal;
         ptask->task->exec_keep_terminal = false;

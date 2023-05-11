@@ -292,8 +292,8 @@ xset_defaults()
     set->menu_style = xset::menu::string;
     xset_set_var(set, xset::var::title, "Change Detection Blacklist");
     xset_set_var(set, xset::var::icn, "gtk-edit");
-    set->s = ztd::strdup("cifs curlftpfs ftpfs fuse.sshfs nfs smbfs");
-    set->z = ztd::strdup(set->s);
+    set->s = "cifs curlftpfs ftpfs fuse.sshfs nfs smbfs";
+    set->z = set->s;
 
     set = xset_get(xset::name::dev_fs_cnf);
     xset_set_var(set, xset::var::menu_label, "_Device Handlers");
@@ -543,7 +543,6 @@ xset_defaults()
                  "mirrors.kernel.org\n\tsmb://user:pass@10.0.0.1:50/docs\n\tssh://"
                  "user@sys.domain\n\tmtp://\n\nIncluding a password is unsafe.  To bookmark a "
                  "URL, right-click on the mounted network in Devices and select Bookmark.\n");
-    set->line = nullptr;
 
     set = xset_get(xset::name::main_save_tabs);
     xset_set_var(set, xset::var::menu_label, "Save Ta_bs");
@@ -838,12 +837,12 @@ xset_defaults()
     // Note: xset_text_dialog uses the title passed to know this is an
     // icon chooser, so it adds a Choose button.  If you change the title,
     // change xset_text_dialog.
-    set->title = ztd::strdup("Set Window Icon");
-    set->desc = ztd::strdup("Enter an icon name, icon file path, or stock item name:\n\nOr click "
-                            "Choose to select an icon.  Not all icons may work properly due to "
-                            "various issues.\n\nProvided alternate SpaceFM "
-                            "icons:\n\tspacefm-[48|128]-[cube|pyramid]-[blue|green|red]\n\tspacefm-"
-                            "48-folder-[blue|red]\n\nFor example: spacefm-48-pyramid-green");
+    set->title = "Set Window Icon";
+    set->desc = "Enter an icon name, icon file path, or stock item name:\n\nOr click "
+                "Choose to select an icon.  Not all icons may work properly due to "
+                "various issues.\n\nProvided alternate SpaceFM "
+                "icons:\n\tspacefm-[48|128]-[cube|pyramid]-[blue|green|red]\n\tspacefm-"
+                "48-folder-[blue|red]\n\nFor example: spacefm-48-pyramid-green";
     // x and y store global icon chooser dialog size
 
     set = xset_get(xset::name::main_full);
@@ -919,81 +918,81 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Status");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("0");   // column position
-    set->y = ztd::strdup("130"); // column width
+    set->x = "0";   // column position
+    set->y = "130"; // column width
 
     set = xset_get(xset::name::task_col_count);
     xset_set_var(set, xset::var::menu_label, "_Count");
     set->menu_style = xset::menu::check;
-    set->x = ztd::strdup("1");
+    set->x = "1";
 
     set = xset_get(xset::name::task_col_path);
     xset_set_var(set, xset::var::menu_label, "_Directory");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("2");
+    set->x = "2";
 
     set = xset_get(xset::name::task_col_file);
     xset_set_var(set, xset::var::menu_label, "_Item");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("3");
+    set->x = "3";
 
     set = xset_get(xset::name::task_col_to);
     xset_set_var(set, xset::var::menu_label, "_To");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("4");
+    set->x = "4";
 
     set = xset_get(xset::name::task_col_progress);
     xset_set_var(set, xset::var::menu_label, "_Progress");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("5");
-    set->y = ztd::strdup("100");
+    set->x = "5";
+    set->y = "100";
 
     set = xset_get(xset::name::task_col_total);
     xset_set_var(set, xset::var::menu_label, "T_otal");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("6");
-    set->y = ztd::strdup("120");
+    set->x = "6";
+    set->y = "120";
 
     set = xset_get(xset::name::task_col_started);
     xset_set_var(set, xset::var::menu_label, "Sta_rted");
     set->menu_style = xset::menu::check;
-    set->x = ztd::strdup("7");
+    set->x = "7";
 
     set = xset_get(xset::name::task_col_elapsed);
     xset_set_var(set, xset::var::menu_label, "_Elapsed");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("8");
-    set->y = ztd::strdup("70");
+    set->x = "8";
+    set->y = "70";
 
     set = xset_get(xset::name::task_col_curspeed);
     xset_set_var(set, xset::var::menu_label, "C_urrent Speed");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("9");
+    set->x = "9";
 
     set = xset_get(xset::name::task_col_curest);
     xset_set_var(set, xset::var::menu_label, "Current Re_main");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-    set->x = ztd::strdup("10");
+    set->x = "10";
 
     set = xset_get(xset::name::task_col_avgspeed);
     xset_set_var(set, xset::var::menu_label, "_Average Speed");
     set->menu_style = xset::menu::check;
-    set->x = ztd::strdup("11");
-    set->y = ztd::strdup("60");
+    set->x = "11";
+    set->y = "60";
 
     set = xset_get(xset::name::task_col_avgest);
     xset_set_var(set, xset::var::menu_label, "A_verage Remain");
     set->menu_style = xset::menu::check;
-    set->x = ztd::strdup("12");
-    set->y = ztd::strdup("65");
+    set->x = "12";
+    set->y = "65";
 
     set = xset_get(xset::name::task_col_reorder);
     xset_set_var(set, xset::var::menu_label, "Reor_der");
@@ -1291,8 +1290,8 @@ xset_defaults()
     xset_set_var(set, xset::var::icn, "gtk-save-as");
 
     set = xset_get(xset::name::arc_dlg);
-    set->b = xset::b::xtrue;   // Extract To - Create Subdirectory
-    set->z = ztd::strdup("1"); // Extract To - Write Access
+    set->b = xset::b::xtrue; // Extract To - Create Subdirectory
+    set->z = "1";            // Extract To - Write Access
 
     set = xset_get(xset::name::tab_new);
     xset_set_var(set, xset::var::menu_label, "_Tab");
@@ -1922,14 +1921,14 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_name);
         xset_set_var(set, xset::var::menu_label, "_Name");
         set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;   // visible
-        set->x = ztd::strdup("0"); // position
+        set->b = xset::b::xtrue; // visible
+        set->x = "0";            // position
 
         set = xset_get_panel(p, xset::panel::detcol_size);
         xset_set_var(set, xset::var::menu_label, "_Size");
         set->menu_style = xset::menu::check;
         set->b = xset::b::xtrue;
-        set->x = ztd::strdup("1");
+        set->x = "1";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_size");
@@ -1938,7 +1937,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_type);
         xset_set_var(set, xset::var::menu_label, "_Type");
         set->menu_style = xset::menu::check;
-        set->x = ztd::strdup("2");
+        set->x = "2";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_type");
@@ -1947,7 +1946,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_perm);
         xset_set_var(set, xset::var::menu_label, "_Permission");
         set->menu_style = xset::menu::check;
-        set->x = ztd::strdup("3");
+        set->x = "3";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_perm");
@@ -1956,7 +1955,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_owner);
         xset_set_var(set, xset::var::menu_label, "_Owner");
         set->menu_style = xset::menu::check;
-        set->x = ztd::strdup("4");
+        set->x = "4";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_owner");
@@ -1965,17 +1964,17 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_date);
         xset_set_var(set, xset::var::menu_label, "_Modified");
         set->menu_style = xset::menu::check;
-        set->x = ztd::strdup("5");
+        set->x = "5";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_date");
         }
 
         set = xset_get_panel(p, xset::panel::sort_extra);
-        set->b = xset::b::xtrue;               // sort_natural
-        set->x = ztd::strdup(xset::b::xfalse); // sort_case
-        set->y = ztd::strdup("1");             // PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
-        set->z = ztd::strdup(xset::b::xtrue);  // sort_hidden_first
+        set->b = xset::b::xtrue;                       // sort_natural
+        set->x = std::to_string(INT(xset::b::xfalse)); // sort_case
+        set->y = "1";                                 // PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
+        set->z = std::to_string(INT(xset::b::xtrue)); // sort_hidden_first
 
         set = xset_get_panel(p, xset::panel::book_fol);
         xset_set_var(set, xset::var::menu_label, "Follow _Dir");

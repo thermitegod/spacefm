@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -73,9 +74,9 @@ clean_plugin_mirrors()
         {
             assert(set != nullptr);
 
-            if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
+            if (set->desc && ztd::same(set->desc.value(), "@plugin@mirror@"))
             {
-                if (!set->shared_key || !xset_is(set->shared_key))
+                if (!set->shared_key || !xset_is(set->shared_key.value()))
                 {
                     xset_remove(set);
                     redo = true;
@@ -111,23 +112,15 @@ xset_set_plugin_mirror(xset_t pset)
     {
         assert(set != nullptr);
 
-        if (set->desc && ztd::same(set->desc, "@plugin@mirror@"))
+        if (set->desc && ztd::same(set->desc.value(), "@plugin@mirror@"))
         {
             if (set->parent && set->child)
             {
-                if (ztd::same(set->child, pset->plug_name) &&
-                    ztd::same(set->parent, pset->plug_dir.string()))
+                if (ztd::same(set->child.value(), pset->plug_name) &&
+                    ztd::same(set->parent.value(), pset->plug_dir.string()))
                 {
-                    if (set->shared_key)
-                    {
-                        std::free(set->shared_key);
-                    }
-                    set->shared_key = ztd::strdup(pset->name);
-                    if (pset->shared_key)
-                    {
-                        std::free(pset->shared_key);
-                    }
-                    pset->shared_key = ztd::strdup(set->name);
+                    set->shared_key = pset->name;
+                    pset->shared_key = set->name;
                     return;
                 }
             }
@@ -148,14 +141,14 @@ xset_get_plugin_mirror(xset_t set)
     }
     if (set->shared_key)
     {
-        return xset_get(set->shared_key);
+        return xset_get(set->shared_key.value());
     }
 
     xset_t newset = xset_custom_new();
-    newset->desc = ztd::strdup("@plugin@mirror@");
-    newset->parent = ztd::strdup(set->plug_dir);
-    newset->child = ztd::strdup(set->plug_name);
-    newset->shared_key = ztd::strdup(set->name); // this will not be saved
+    newset->desc = "@plugin@mirror@";
+    newset->parent = set->plug_dir;
+    newset->child = set->plug_name;
+    newset->shared_key = set->name; // this will not be saved
     newset->task = set->task;
     newset->task_pop = set->task_pop;
     newset->task_err = set->task_err;
@@ -163,11 +156,11 @@ xset_get_plugin_mirror(xset_t set)
     newset->in_terminal = set->in_terminal;
     newset->keep_terminal = set->keep_terminal;
     newset->scroll_lock = set->scroll_lock;
-    newset->context = ztd::strdup(set->context);
+    newset->context = set->context;
     newset->opener = set->opener;
     newset->b = set->b;
-    newset->s = ztd::strdup(set->s);
-    set->shared_key = ztd::strdup(newset->name);
+    newset->s = set->s;
+    set->shared_key = newset->name;
     return newset;
 }
 
@@ -177,7 +170,7 @@ compare_plugin_sets(xset_t a, xset_t b)
     assert(a != nullptr);
     assert(b != nullptr);
 
-    return g_utf8_collate(a->menu_label, b->menu_label);
+    return g_utf8_collate(a->menu_label.value().data(), b->menu_label.value().data());
 }
 
 const std::vector<xset_t>
@@ -298,58 +291,50 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
         // map plug names to new set names (does not apply to handlers)
         if (set->prev && var == xset::var::prev)
         {
-            if (ztd::startswith(set->prev, "cstm_"))
+            if (ztd::startswith(set->prev.value(), "cstm_"))
             {
-                set2 = xset_get_by_plug_name(plug_dir, set->prev);
-                std::free(set->prev);
-                set->prev = ztd::strdup(set2->name);
+                set2 = xset_get_by_plug_name(plug_dir, set->prev.value());
+                set->prev = set2->name;
             }
             else
             {
-                std::free(set->prev);
-                set->prev = nullptr;
+                set->prev = std::nullopt;
             }
         }
         else if (set->next && var == xset::var::next)
         {
-            if (ztd::startswith(set->next, "cstm_"))
+            if (ztd::startswith(set->next.value(), "cstm_"))
             {
-                set2 = xset_get_by_plug_name(plug_dir, set->next);
-                std::free(set->next);
-                set->next = ztd::strdup(set2->name);
+                set2 = xset_get_by_plug_name(plug_dir, set->next.value());
+                set->next = set2->name;
             }
             else
             {
-                std::free(set->next);
-                set->next = nullptr;
+                set->next = std::nullopt;
             }
         }
         else if (set->parent && var == xset::var::parent)
         {
-            if (ztd::startswith(set->parent, "cstm_"))
+            if (ztd::startswith(set->parent.value(), "cstm_"))
             {
-                set2 = xset_get_by_plug_name(plug_dir, set->parent);
-                std::free(set->parent);
-                set->parent = ztd::strdup(set2->name);
+                set2 = xset_get_by_plug_name(plug_dir, set->parent.value());
+                set->parent = set2->name;
             }
             else
             {
-                std::free(set->parent);
-                set->parent = nullptr;
+                set->parent = std::nullopt;
             }
         }
         else if (set->child && var == xset::var::child)
         {
-            if (ztd::startswith(set->child, "cstm_"))
+            if (ztd::startswith(set->child.value(), "cstm_"))
             {
-                set2 = xset_get_by_plug_name(plug_dir, set->child);
-                std::free(set->child);
-                set->child = ztd::strdup(set2->name);
+                set2 = xset_get_by_plug_name(plug_dir, set->child.value());
+                set->child = set2->name;
             }
             else
             {
-                std::free(set->child);
-                set->child = nullptr;
+                set->child = std::nullopt;
             }
         }
     }
@@ -510,15 +495,14 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                 {
                     // paste after insert_set (plugin_data->set)
                     xset_t newset = xset_custom_copy(set, false, true);
-                    newset->prev = ztd::strdup(plugin_data->set->name);
-                    newset->next = plugin_data->set->next; // steal
+                    newset->prev = plugin_data->set->name;
+                    newset->next = plugin_data->set->next;
                     if (plugin_data->set->next)
                     {
-                        xset_t set_next = xset_get(plugin_data->set->next);
-                        std::free(set_next->prev);
-                        set_next->prev = ztd::strdup(newset->name);
+                        xset_t set_next = xset_get(plugin_data->set->next.value());
+                        set_next->prev = newset->name;
                     }
-                    plugin_data->set->next = ztd::strdup(newset->name);
+                    plugin_data->set->next = newset->name;
                     if (plugin_data->set->tool != xset::tool::NOT)
                     {
                         newset->tool = xset::tool::custom;
@@ -536,7 +520,8 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                     if (xset_get_b(xset::name::plug_cverb) || plugin_data->handler_dlg)
                     {
                         std::string msg;
-                        const std::string label = clean_label(set->menu_label, false, false);
+                        const std::string label =
+                            clean_label(set->menu_label.value(), false, false);
                         if (geteuid() == 0)
                         {
                             msg = std::format(

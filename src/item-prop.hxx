@@ -75,4 +75,5 @@ enum ItemPropContext
 };
 
 void xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page);
-i32 xset_context_test(const xset_context_t& context, char* rules, bool def_disable);
+i32 xset_context_test(const xset_context_t& context, const std::string_view rules,
+                      bool def_disable);

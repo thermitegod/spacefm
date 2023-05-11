@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <tuple>
+
 #include <gtk/gtk.h>
 
 #include "types.hxx"
@@ -29,9 +31,10 @@ i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string_
                     GtkButtonsType buttons, const std::string_view msg1 = "",
                     const std::string_view msg2 = "");
 
-bool xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
-                      const std::string_view msg2, const char* defstring, char** answer,
-                      const std::string_view defreset, bool edit_care);
+const std::tuple<bool, std::string>
+xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
+                 const std::string_view msg2, const std::string_view defstring,
+                 const std::string_view defreset, bool edit_care);
 
 char* xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                        const char* deffolder, const char* deffile);

@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <optional>
+
 #include <type_traits>
 
 #include <cassert>
@@ -58,66 +60,6 @@ xset::XSet::~XSet()
 {
     // ztd::logger::info("XSet Destructor");
 
-    if (this->s)
-    {
-        std::free(this->s);
-    }
-    if (this->x)
-    {
-        std::free(this->x);
-    }
-    if (this->y)
-    {
-        std::free(this->y);
-    }
-    if (this->z)
-    {
-        std::free(this->z);
-    }
-    if (this->menu_label)
-    {
-        std::free(this->menu_label);
-    }
-    if (this->shared_key)
-    {
-        std::free(this->shared_key);
-    }
-    if (this->icon)
-    {
-        std::free(this->icon);
-    }
-    if (this->desc)
-    {
-        std::free(this->desc);
-    }
-    if (this->title)
-    {
-        std::free(this->title);
-    }
-    if (this->next)
-    {
-        std::free(this->next);
-    }
-    if (this->parent)
-    {
-        std::free(this->parent);
-    }
-    if (this->child)
-    {
-        std::free(this->child);
-    }
-    if (this->prev)
-    {
-        std::free(this->prev);
-    }
-    if (this->line)
-    {
-        std::free(this->line);
-    }
-    if (this->context)
-    {
-        std::free(this->context);
-    }
     if (this->plugin)
     {
         if (this->plug_name)
@@ -207,11 +149,7 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
     switch (var)
     {
         case xset::var::s:
-            if (set->s)
-            {
-                std::free(set->s);
-            }
-            set->s = ztd::strdup(value.data());
+            set->s = value;
             break;
         case xset::var::b:
             if (ztd::same(value, "1"))
@@ -224,25 +162,13 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
             }
             break;
         case xset::var::x:
-            if (set->x)
-            {
-                std::free(set->x);
-            }
-            set->x = ztd::strdup(value.data());
+            set->x = value;
             break;
         case xset::var::y:
-            if (set->y)
-            {
-                std::free(set->y);
-            }
-            set->y = ztd::strdup(value.data());
+            set->y = value;
             break;
         case xset::var::z:
-            if (set->z)
-            {
-                std::free(set->z);
-            }
-            set->z = ztd::strdup(value.data());
+            set->z = value;
             break;
         case xset::var::key:
             set->key = std::stoul(value.data());
@@ -254,26 +180,14 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
             set->menu_style = xset::menu(std::stoi(value.data()));
             break;
         case xset::var::desc:
-            if (set->desc)
-            {
-                std::free(set->desc);
-            }
-            set->desc = ztd::strdup(value.data());
+            set->desc = value;
             break;
         case xset::var::title:
-            if (set->title)
-            {
-                std::free(set->title);
-            }
-            set->title = ztd::strdup(value.data());
+            set->title = value;
             break;
         case xset::var::menu_label:
             // lbl is only used >= 0.9.0 for changed lock default menu_label
-            if (set->menu_label)
-            {
-                std::free(set->menu_label);
-            }
-            set->menu_label = ztd::strdup(value.data());
+            set->menu_label = value;
             if (set->lock)
             {
                 // indicate that menu label is not default and should be saved
@@ -282,11 +196,7 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
             break;
         case xset::var::icn:
             // icn is only used >= 0.9.0 for changed lock default icon
-            if (set->icon)
-            {
-                std::free(set->icon);
-            }
-            set->icon = ztd::strdup(value.data());
+            set->icon = value;
             if (set->lock)
             {
                 // indicate that icon is not default and should be saved
@@ -296,13 +206,9 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
         case xset::var::menu_label_custom:
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
             // only save if custom or not default label
-            if (!set->lock || !ztd::same(set->menu_label, value))
+            if (!set->lock || !ztd::same(set->menu_label.value(), value))
             {
-                if (set->menu_label)
-                {
-                    std::free(set->menu_label);
-                }
-                set->menu_label = ztd::strdup(value.data());
+                set->menu_label = value;
                 if (set->lock)
                 {
                     // indicate that menu label is not default and should be saved
@@ -316,53 +222,25 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
             // also check that stock name does not match
             break;
         case xset::var::shared_key:
-            if (set->shared_key)
-            {
-                std::free(set->shared_key);
-            }
-            set->shared_key = ztd::strdup(value.data());
+            set->shared_key = value;
             break;
         case xset::var::next:
-            if (set->next)
-            {
-                std::free(set->next);
-            }
-            set->next = ztd::strdup(value.data());
+            set->next = value;
             break;
         case xset::var::prev:
-            if (set->prev)
-            {
-                std::free(set->prev);
-            }
-            set->prev = ztd::strdup(value.data());
+            set->prev = value;
             break;
         case xset::var::parent:
-            if (set->parent)
-            {
-                std::free(set->parent);
-            }
-            set->parent = ztd::strdup(value.data());
+            set->parent = value;
             break;
         case xset::var::child:
-            if (set->child)
-            {
-                std::free(set->child);
-            }
-            set->child = ztd::strdup(value.data());
+            set->child = value;
             break;
         case xset::var::context:
-            if (set->context)
-            {
-                std::free(set->context);
-            }
-            set->context = ztd::strdup(value.data());
+            set->context = value;
             break;
         case xset::var::line:
-            if (set->line)
-            {
-                std::free(set->line);
-            }
-            set->line = ztd::strdup(value.data());
+            set->line = value;
             break;
         case xset::var::tool:
             set->tool = xset::tool(std::stoi(value.data()));
@@ -489,28 +367,33 @@ xset_set(const std::string_view name, xset::var var, const std::string_view valu
  * S get
  */
 
-char*
+const char*
 xset_get_s(xset_t set) noexcept
 {
     assert(set != nullptr);
-    return set->s;
+    const auto value = set->s;
+    if (value)
+    {
+        return ztd::strdup(value.value().data());
+    }
+    return nullptr;
 }
 
-char*
+const char*
 xset_get_s(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_s(set);
 }
 
-char*
+const char*
 xset_get_s(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_s(set);
 }
 
-char*
+const char*
 xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
 {
     // TODO
@@ -518,7 +401,7 @@ xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
     return xset_get_s(fullname);
 }
 
-char*
+const char*
 xset_get_s_panel(panel_t panel, xset::panel name) noexcept
 {
     const xset_t set = xset_get(xset::get_xsetname_from_panel(panel, name));
@@ -529,21 +412,26 @@ xset_get_s_panel(panel_t panel, xset::panel name) noexcept
  * X get
  */
 
-char*
+const char*
 xset_get_x(xset_t set) noexcept
 {
     assert(set != nullptr);
-    return set->x;
+    const auto value = set->x;
+    if (value)
+    {
+        return ztd::strdup(value.value().data());
+    }
+    return nullptr;
 }
 
-char*
+const char*
 xset_get_x(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_x(set);
 }
 
-char*
+const char*
 xset_get_x(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
@@ -554,21 +442,26 @@ xset_get_x(const std::string_view name) noexcept
  * Y get
  */
 
-char*
+const char*
 xset_get_y(xset_t set) noexcept
 {
     assert(set != nullptr);
-    return set->y;
+    const auto value = set->y;
+    if (value)
+    {
+        return ztd::strdup(value.value().data());
+    }
+    return nullptr;
 }
 
-char*
+const char*
 xset_get_y(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_y(set);
 }
 
-char*
+const char*
 xset_get_y(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
@@ -579,21 +472,26 @@ xset_get_y(const std::string_view name) noexcept
  * Z get
  */
 
-char*
+const char*
 xset_get_z(xset_t set) noexcept
 {
     assert(set != nullptr);
-    return set->z;
+    const auto value = set->z;
+    if (value)
+    {
+        return ztd::strdup(value.value().data());
+    }
+    return nullptr;
 }
 
-char*
+const char*
 xset_get_z(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_z(set);
 }
 
-char*
+const char*
 xset_get_z(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
@@ -773,16 +671,16 @@ xset_get_int(xset_t set, xset::var var) noexcept
     switch (var)
     {
         case xset::var::s:
-            varstring = set->s;
+            varstring = xset_get_s(set);
             break;
         case xset::var::x:
-            varstring = set->x;
+            varstring = xset_get_x(set);
             break;
         case xset::var::y:
-            varstring = set->y;
+            varstring = xset_get_y(set);
             break;
         case xset::var::z:
-            varstring = set->z;
+            varstring = xset_get_z(set);
             break;
         case xset::var::key:
             return set->key;
@@ -821,7 +719,7 @@ xset_get_int(xset_t set, xset::var var) noexcept
     {
         return 0;
     }
-    return std::stol(varstring);
+    return std::stoi(varstring);
 }
 
 i32

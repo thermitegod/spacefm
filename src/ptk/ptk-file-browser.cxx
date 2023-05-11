@@ -259,8 +259,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         const i32 pos = gtk_paned_get_position(GTK_PANED(file_browser->hpane));
         if (!main_window->fullscreen)
         {
-            std::free(set->x);
-            set->x = ztd::strdup(pos);
+            set->x = std::to_string(pos);
         }
         main_window->panel_slide_x[p - 1] = pos;
         // ztd::logger::info("    slide_x = {}", pos);
@@ -273,8 +272,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_top));
         if (!main_window->fullscreen)
         {
-            std::free(set->y);
-            set->y = ztd::strdup(pos);
+            set->y = std::to_string(pos);
         }
         main_window->panel_slide_y[p - 1] = pos;
         // ztd::logger::info("    slide_y = {}  ", pos);
@@ -282,8 +280,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
         pos = gtk_paned_get_position(GTK_PANED(file_browser->side_vpane_bottom));
         if (!main_window->fullscreen)
         {
-            std::free(set->s);
-            set->s = ztd::strdup(pos);
+            set->s = std::to_string(pos);
         }
         main_window->panel_slide_s[p - 1] = pos;
         // ztd::logger::info("slide_s = {}", pos);
@@ -964,7 +961,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio->name.data());
 
-    xset_add_menu(file_browser, menu, accel_group, desc.data());
+    xset_add_menu(file_browser, menu, accel_group, desc);
     gtk_widget_show_all(menu);
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
@@ -1478,7 +1475,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                     {
                         // get column width for this panel context
                         set = xset_get_panel_mode(p, column_names.at(index), mode);
-                        const i32 width = set->y ? std::stol(set->y) : 100;
+                        const i32 width = set->y ? std::stoi(set->y.value()) : 100;
                         // ztd::logger::info("        {}\t{}", width, title );
                         if (width)
                         {
@@ -1579,18 +1576,18 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view, vo
     // gtk_widget_show_all( file_browser->folder_view_scroll );
 
     // set status bar icon
-    char* icon_name;
+    std::string icon_name;
     xset_t set = xset_get_panel(curpanel, xset::panel::icon_status);
-    if (set->icon && set->icon[0] != '\0')
+    if (set->icon)
     {
-        icon_name = set->icon;
+        icon_name = set->icon.value();
     }
     else
     {
-        icon_name = ztd::strdup("gtk-yes");
+        icon_name = "gtk-yes";
     }
     gtk_image_set_from_icon_name(GTK_IMAGE(file_browser->status_image),
-                                 icon_name,
+                                 icon_name.c_str(),
                                  GtkIconSize::GTK_ICON_SIZE_MENU);
 
     gtk_widget_show_all(GTK_WIDGET(file_browser));
@@ -2333,19 +2330,15 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
     (void)item;
     focus_folder_view(file_browser);
     const char* path = xset_get_s(xset::name::go_set_default);
-    if (path && path[0] != '\0')
+    if (path != nullptr)
     {
         ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
-    else if (geteuid() != 0)
+    else
     {
         ptk_file_browser_chdir(file_browser,
                                vfs::user_dirs->home_dir(),
                                PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
-    }
-    else
-    {
-        ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
 }
 
@@ -2512,7 +2505,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     {
         // get pattern from user  (store in ob1 so it is not saved)
         xset_t set = xset_get(xset::name::select_patt);
-        const bool response = xset_text_dialog(
+        const auto [response, answer] = xset_text_dialog(
             GTK_WIDGET(file_browser),
             "Select By Pattern",
             "Enter pattern to select files and directories:\n\nIf your pattern contains any "
@@ -2520,10 +2513,10 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar.",
             "",
             set->ob1,
-            &set->ob1,
             "",
             false);
 
+        set->ob1 = ztd::strdup(answer);
         if (!response || !set->ob1)
         {
             return;
@@ -3669,8 +3662,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                     const i32 width = gtk_tree_view_column_get_width(col);
                     if (width > 0)
                     {
-                        std::free(set->y);
-                        set->y = ztd::strdup(width);
+                        set->y = std::to_string(width);
                         // ztd::logger::info("        {}\t{}", width, title);
                     }
 
@@ -3709,8 +3701,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
             {
                 // save column position
                 xset_t set = xset_get_panel(file_browser->mypanel, column_names.at(index));
-                std::free(set->x);
-                set->x = ztd::strdup(i);
+                set->x = std::to_string(i);
 
                 break;
             }
@@ -4118,7 +4109,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
         xset_t set = xset_get_panel_mode(p, column_names.at(idx), mode);
-        const i32 width = set->y ? std::stol(set->y) : 100;
+        const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
             if (cols.at(idx) == PTKFileListCol::COL_FILE_NAME &&
@@ -5114,7 +5105,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
     else if (setname == xset::name::copy_loc_last)
     {
         xset_t set2 = xset_get(xset::name::copy_loc_last);
-        copy_dest = ztd::strdup(set2->desc);
+        copy_dest = ztd::strdup(set2->desc.value());
     }
     else if (setname == xset::name::move_tab_prev)
     {
@@ -5191,7 +5182,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
     else if (setname == xset::name::move_loc_last)
     {
         xset_t set2 = xset_get(xset::name::copy_loc_last);
-        move_dest = ztd::strdup(set2->desc);
+        move_dest = ztd::strdup(set2->desc.value());
     }
 
     if ((setname == xset::name::copy_loc || setname == xset::name::copy_loc_last ||
@@ -5202,7 +5193,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         xset_t set2 = xset_get(xset::name::copy_loc_last);
         if (set2->desc)
         {
-            folder = set2->desc;
+            folder = set2->desc.value();
         }
         else
         {
@@ -6253,8 +6244,10 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     }
 
     // task
-    PtkFileTask* ptask =
-        ptk_file_exec_new(set->menu_label, cwd, GTK_WIDGET(file_browser), file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new(set->menu_label.value(),
+                                           cwd,
+                                           GTK_WIDGET(file_browser),
+                                           file_browser->task_view);
     ptask->task->exec_command = ztd::strdup(std::format("{} {} {}", prog, cmd, file_paths));
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_sync = true;

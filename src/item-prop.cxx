@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -412,8 +413,9 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
 }
 
 i32
-xset_context_test(const xset_context_t& context, char* rules, bool def_disable)
+xset_context_test(const xset_context_t& context, const std::string_view rules, bool def_disable)
 {
+    ztd::logger::debug("xset_context_test={}", rules);
     // assumes valid xset_context and rules != nullptr and no global ignore
     i32 i;
     i32 sep_type;
@@ -434,23 +436,26 @@ xset_context_test(const xset_context_t& context, char* rules, bool def_disable)
     };
 
     // get valid action and match
-    char* elements = rules;
-    if (!(s = get_element_next(&elements)))
+    char* elements = ztd::strdup(rules.data());
+
+    s = get_element_next(&elements);
+    if (!s)
     {
         return 0;
     }
-    const i32 action = std::stol(s);
+    const i32 action = std::stoi(s);
     std::free(s);
     if (action < 0 || action > 3)
     {
         return 0;
     }
 
-    if (!(s = get_element_next(&elements)))
+    s = get_element_next(&elements);
+    if (!s)
     {
         return 0;
     }
-    const i32 match = std::stol(s);
+    const i32 match = std::stoi(s);
     std::free(s);
     if (match < 0 || match > 3)
     {
@@ -648,12 +653,10 @@ xset_context_test(const xset_context_t& context, char* rules, bool def_disable)
     return def_disable ? ItemPropContextState::CONTEXT_DISABLE : ItemPropContextState::CONTEXT_SHOW;
 }
 
-static char*
+static std::string
 context_build(ContextData* ctxt)
 {
     GtkTreeIter it;
-    char* value;
-    i32 sub, comp;
     std::string new_context;
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
@@ -664,6 +667,8 @@ context_build(ContextData* ctxt)
                                   gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_match)));
         do
         {
+            char* value;
+            i32 sub, comp;
             gtk_tree_model_get(model,
                                &it,
                                ItemPropContextCol::CONTEXT_COL_VALUE,
@@ -676,7 +681,7 @@ context_build(ContextData* ctxt)
             new_context = std::format("{}%%%%%{}%%%%%{}%%%%%{}", new_context, sub, comp, value);
         } while (gtk_tree_model_iter_next(model, &it));
     }
-    return ztd::strdup(new_context);
+    return new_context;
 }
 
 static void
@@ -693,9 +698,9 @@ enable_context(ContextData* ctxt)
     //                    gtk_tree_view_get_model( GTK_TREE_VIEW( ctxt->view ) ), &it ) );
     if (ctxt->context && ctxt->context->valid)
     {
-        char* rules = context_build(ctxt);
+        const std::string rules = context_build(ctxt);
         std::string text = "Current: Show";
-        if (rules)
+        if (!rules.empty())
         {
             const i32 action = xset_context_test(ctxt->context, rules, false);
             if (action == ItemPropContextState::CONTEXT_HIDE)
@@ -1033,15 +1038,15 @@ command_script_stat(ContextData* ctxt)
 }
 
 void
-load_text_view(GtkTextView* view, const char* line)
+load_text_view(GtkTextView* view, const std::string_view line)
 {
     GtkTextBuffer* buf = gtk_text_view_get_buffer(view);
-    if (!line)
+    if (line.empty())
     {
         gtk_text_buffer_set_text(buf, "", -1);
         return;
     }
-    std::string text = line;
+    std::string text = line.data();
     text = ztd::replace(text, "\\n", "\n");
     text = ztd::replace(text, "\\t", "\t");
     gtk_text_buffer_set_text(buf, text.data(), -1);
@@ -1341,7 +1346,7 @@ on_key_button_clicked(GtkWidget* widget, ContextData* ctxt)
     xset_t keyset;
     if (ctxt->set->shared_key)
     {
-        keyset = xset_get(ctxt->set->shared_key);
+        keyset = xset_get(ctxt->set->shared_key.value());
     }
     else
     {
@@ -1393,7 +1398,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 
     // load command data
-    if (rset->x && xset::cmd(std::stol(rset->x)) == xset::cmd::script)
+    if (rset->x && xset::cmd(std::stoi(rset->x.value())) == xset::cmd::script)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_script), true);
         gtk_widget_hide(ctxt->cmd_line_label);
@@ -1401,7 +1406,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
     else
     {
-        load_text_view(GTK_TEXT_VIEW(ctxt->cmd_script), rset->line);
+        load_text_view(GTK_TEXT_VIEW(ctxt->cmd_script), rset->line.value());
     }
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->cmd_script));
     GtkTextIter siter;
@@ -1416,7 +1421,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
                                  mset->in_terminal && !ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_keep_term),
                                  mset->keep_terminal || ctxt->reset_command);
-    gtk_entry_set_text(GTK_ENTRY(ctxt->cmd_user), rset->y ? rset->y : "");
+    gtk_entry_set_text(GTK_ENTRY(ctxt->cmd_user), rset->y.value_or("").c_str());
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task),
                                  mset->task || ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_task_pop),
@@ -1443,7 +1448,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_normal), true);
     }
-    load_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg), rset->desc);
+    load_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg), rset->desc.value());
     enable_options(ctxt);
     if (geteuid() == 0)
     {
@@ -1592,25 +1597,33 @@ replace_item_props(ContextData* ctxt)
 
         if (x != xset::cmd::invalid)
         {
-            std::free(rset->x);
             if (x == xset::cmd::line)
             {
-                rset->x = nullptr;
+                rset->x = std::nullopt;
             }
             else
             {
-                rset->x = ztd::strdup(INT(x));
+                rset->x = std::to_string(INT(x));
             }
         }
         if (!rset->plugin)
         {
             // target
-            char* str = multi_input_get_text(ctxt->item_target);
-            std::free(rset->z);
-            rset->z = str ? ztd::strdup(ztd::strip(str)) : nullptr;
+            const char* str = multi_input_get_text(ctxt->item_target);
+            if (str)
+            {
+                rset->z = ztd::strip(str);
+            }
+            else
+            {
+                rset->z = std::nullopt;
+            }
             // run as user
-            std::free(rset->y);
-            rset->y = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user)));
+            const char* text = gtk_entry_get_text(GTK_ENTRY(ctxt->cmd_user));
+            if (text)
+            {
+                rset->y = text;
+            }
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
             {
@@ -1629,15 +1642,13 @@ replace_item_props(ContextData* ctxt)
                 rset->menu_style = xset::menu::normal;
             }
             // style msg
-            std::free(rset->desc);
             rset->desc = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_msg));
         }
         // command line
-        std::free(rset->line);
         if (x == xset::cmd::line)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
-            if (rset->line && std::strlen(rset->line) > 2000)
+            if (rset->line && rset->line.value().size() > 2000)
             {
                 xset_msg_dialog(ctxt->dlg,
                                 GtkMessageType::GTK_MESSAGE_WARNING,
@@ -1650,7 +1661,10 @@ replace_item_props(ContextData* ctxt)
         }
         else
         {
-            rset->line = ztd::strdup(ctxt->temp_cmd_line);
+            if (ctxt->temp_cmd_line)
+            {
+                rset->line = ctxt->temp_cmd_line;
+            }
         }
 
         // run options
@@ -1688,23 +1702,22 @@ replace_item_props(ContextData* ctxt)
     {
         // name
         if (rset->lock &&
-            !ztd::same(rset->menu_label, gtk_entry_get_text(GTK_ENTRY(ctxt->item_name))))
+            !ztd::same(rset->menu_label.value(), gtk_entry_get_text(GTK_ENTRY(ctxt->item_name))))
         {
             // built-in label has been changed from default, save it
             rset->in_terminal = true;
         }
 
-        std::free(rset->menu_label);
         if (rset->tool > xset::tool::custom &&
             ztd::same(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                       xset_get_builtin_toolitem_label(rset->tool)))
         {
             // do not save default label of builtin toolitems
-            rset->menu_label = nullptr;
+            rset->menu_label = std::nullopt;
         }
         else
         {
-            rset->menu_label = ztd::strdup(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)));
+            rset->menu_label = gtk_entry_get_text(GTK_ENTRY(ctxt->item_name));
         }
     }
     // icon
@@ -1713,24 +1726,22 @@ replace_item_props(ContextData* ctxt)
     // toolbar checkbox items have icon
     //( rset->menu_style != xset::menu::CHECK || rset->tool ) )
     {
-        char* old_icon = ztd::strdup(mset->icon);
-        std::free(mset->icon);
+        const std::string old_icon = mset->icon.value();
         const char* icon_name = gtk_entry_get_text(GTK_ENTRY(ctxt->item_icon));
         if (icon_name && icon_name[0])
         {
-            mset->icon = ztd::strdup(icon_name);
+            mset->icon = icon_name;
         }
         else
         {
-            mset->icon = nullptr;
+            mset->icon = std::nullopt;
         }
 
-        if (rset->lock && !ztd::same(old_icon, mset->icon))
+        if (rset->lock && !ztd::same(old_icon, mset->icon.value()))
         {
             // built-in icon has been changed from default, save it
             rset->keep_terminal = true;
         }
-        std::free(old_icon);
     }
 
     // Ignore Context
@@ -2188,11 +2199,12 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         mset = xset_get_plugin_mirror(set);
         rset = set;
     }
-    else if (!set->lock && set->desc && ztd::same(set->desc, "@plugin@mirror@") && set->shared_key)
+    else if (!set->lock && set->desc && ztd::same(set->desc.value(), "@plugin@mirror@") &&
+             set->shared_key)
     {
         // set is plugin mirror
         mset = set;
-        rset = xset_get(set->shared_key);
+        rset = xset_get(set->shared_key.value());
         rset->browser = set->browser;
     }
     else
@@ -2203,7 +2215,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     ctxt->set = rset;
 
     // set match / action
-    char* elements = mset->context;
+    char* elements = ztd::strdup(mset->context.value());
     char* action = get_element_next(&elements);
     char* match = get_element_next(&elements);
     if (match && action)
@@ -2523,12 +2535,11 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     else
     {
         // custom command
-        xset::cmd x;
         for (const std::string_view item_type2 : item_types)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2.data());
         }
-        x = rset->x ? xset::cmd(std::stol(rset->x)) : xset::cmd::line;
+        xset::cmd x = rset->x ? xset::cmd(std::stol(rset->x.value())) : xset::cmd::line;
 
         switch (x)
         {
@@ -2559,7 +2570,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         gtk_widget_set_sensitive(ctxt->item_type, false);
     }
 
-    ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line) : nullptr;
+    ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line.value()) : nullptr;
     if (set->lock || rset->menu_style == xset::menu::submenu ||
         rset->menu_style == xset::menu::sep || set->tool > xset::tool::custom)
     {
@@ -2575,7 +2586,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         if (rset->z)
         {
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
-            gtk_text_buffer_set_text(buf, rset->z, -1);
+            gtk_text_buffer_set_text(buf, rset->z.value().data(), -1);
         }
     }
     ctxt->reset_command = true;
@@ -2585,12 +2596,12 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     {
         if (set->menu_label)
         {
-            gtk_entry_set_text(GTK_ENTRY(ctxt->item_name), set->menu_label);
+            gtk_entry_set_text(GTK_ENTRY(ctxt->item_name), set->menu_label.value().c_str());
         }
         else if (set->tool > xset::tool::custom)
         {
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name),
-                               xset_get_builtin_toolitem_label(set->tool));
+                               xset_get_builtin_toolitem_label(set->tool).c_str());
         }
     }
     else
@@ -2605,7 +2616,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         xset_t keyset;
         if (set->shared_key)
         {
-            keyset = xset_get(set->shared_key);
+            keyset = xset_get(set->shared_key.value());
         }
         else
         {
@@ -2621,7 +2632,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     // icon
     if (rset->icon || mset->icon)
     {
-        gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon), mset->icon ? mset->icon : rset->icon);
+        gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon),
+                           mset->icon ? mset->icon.value().c_str() : rset->icon.value().c_str());
     }
     gtk_widget_set_sensitive(ctxt->item_icon,
                              rset->menu_style != xset::menu::radio &&
@@ -2701,10 +2713,6 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         switch (response)
         {
             case GtkResponseType::GTK_RESPONSE_OK:
-                if (mset->context)
-                {
-                    std::free(mset->context);
-                }
                 mset->context = context_build(ctxt);
                 replace_item_props(ctxt);
                 exit_loop = true;

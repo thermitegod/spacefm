@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <optional>
+
 #include <glib.h>
 
 #include <ztd/ztd.hxx>
@@ -152,7 +154,7 @@ namespace xset
         xfalse
     };
 
-    struct XSet
+    class XSet
     {
       public:
         XSet() = delete;
@@ -163,12 +165,12 @@ namespace xset
         xset::name xset_name;
 
         xset::b b{xset::b::unset}; // saved, tri-state enum 0=unset(false) 1=true 2=false
-        char* s{nullptr};          // saved
-        char* x{nullptr};          // saved
-        char* y{nullptr};          // saved
-        char* z{nullptr};          // saved, for menu_string locked, stores default
-        bool disable{false};       // not saved
-        char* menu_label{nullptr}; // saved
+        std::optional<std::string> s{std::nullopt}; // saved
+        std::optional<std::string> x{std::nullopt}; // saved
+        std::optional<std::string> y{std::nullopt}; // saved
+        std::optional<std::string> z{std::nullopt}; // saved, for menu_string locked, stores default
+        bool disable{false};                        // not saved
+        std::optional<std::string> menu_label{std::nullopt}; // saved
         xset::menu menu_style{xset::menu::normal}; // saved if ( !lock ), or read if locked
         GFunc cb_func{nullptr};                    // not saved
         void* cb_data{nullptr};                    // not saved
@@ -179,20 +181,20 @@ namespace xset
         PtkFileBrowser* browser{nullptr};          // not saved - set automatically
         u32 key{0};                                // saved
         u32 keymod{0};                             // saved
-        char* shared_key{nullptr};                 // not saved
-        char* icon{nullptr};                       // saved
-        char* desc{nullptr};                       // saved if ( !lock ), or read if locked
-        char* title{nullptr};                      // saved if ( !lock ), or read if locked
-        char* next{nullptr};                       // saved
-        char* context{nullptr};                    // saved
-        xset::tool tool{xset::tool::NOT};          // saved
-        bool lock{true};                           // not saved
+        std::optional<std::string> shared_key{std::nullopt}; // not saved
+        std::optional<std::string> icon{std::nullopt};       // saved
+        std::optional<std::string> desc{std::nullopt};    // saved if ( !lock ), or read if locked
+        std::optional<std::string> title{std::nullopt};   // saved if ( !lock ), or read if locked
+        std::optional<std::string> next{std::nullopt};    // saved
+        std::optional<std::string> context{std::nullopt}; // saved
+        xset::tool tool{xset::tool::NOT};                 // saved
+        bool lock{true};                                  // not saved
 
         // Custom Command ( !lock )
-        char* prev{nullptr};   // saved
-        char* parent{nullptr}; // saved
-        char* child{nullptr};  // saved
-        char* line{nullptr};   // saved or help if lock
+        std::optional<std::string> prev{std::nullopt};   // saved
+        std::optional<std::string> parent{std::nullopt}; // saved
+        std::optional<std::string> child{std::nullopt};  // saved
+        std::optional<std::string> line{std::nullopt};   // saved or help if lock
         // x = xset::cmd::LINE..xset::cmd::BOOKMARK
         // y = user
         // z = custom executable
@@ -258,26 +260,26 @@ void xset_set_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_pa
                            bool bval) noexcept;
 
 // S
-char* xset_get_s(xset_t set) noexcept;
-char* xset_get_s(xset::name name) noexcept;
-char* xset_get_s(const std::string_view name) noexcept;
-char* xset_get_s_panel(panel_t panel, const std::string_view name) noexcept;
-char* xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
+const char* xset_get_s(xset_t set) noexcept;
+const char* xset_get_s(xset::name name) noexcept;
+const char* xset_get_s(const std::string_view name) noexcept;
+const char* xset_get_s_panel(panel_t panel, const std::string_view name) noexcept;
+const char* xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
 
 // X
-char* xset_get_x(xset_t set) noexcept;
-char* xset_get_x(xset::name name) noexcept;
-char* xset_get_x(const std::string_view name) noexcept;
+const char* xset_get_x(xset_t set) noexcept;
+const char* xset_get_x(xset::name name) noexcept;
+const char* xset_get_x(const std::string_view name) noexcept;
 
 // Y
-char* xset_get_y(xset_t set) noexcept;
-char* xset_get_y(xset::name name) noexcept;
-char* xset_get_y(const std::string_view name) noexcept;
+const char* xset_get_y(xset_t set) noexcept;
+const char* xset_get_y(xset::name name) noexcept;
+const char* xset_get_y(const std::string_view name) noexcept;
 
 // Z
-char* xset_get_z(xset_t set) noexcept;
-char* xset_get_z(xset::name name) noexcept;
-char* xset_get_z(const std::string_view name) noexcept;
+const char* xset_get_z(xset_t set) noexcept;
+const char* xset_get_z(xset::name name) noexcept;
+const char* xset_get_z(const std::string_view name) noexcept;
 
 // Panel
 xset_t xset_get_panel(panel_t panel, const std::string_view name) noexcept;

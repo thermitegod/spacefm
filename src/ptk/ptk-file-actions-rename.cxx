@@ -272,8 +272,6 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     if (widget == GTK_WIDGET(mset->buf_name) || widget == GTK_WIDGET(mset->entry_ext))
     {
         std::string full_name;
-        char* name;
-        char* ext;
 
         if (widget == GTK_WIDGET(mset->buf_name))
         {
@@ -286,18 +284,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         gtk_text_buffer_get_start_iter(mset->buf_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_name, &iter);
-        name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, false);
-        if (name[0] == '\0')
-        {
-            std::free(name);
-            name = nullptr;
-        }
-        ext = (char*)gtk_entry_get_text(mset->entry_ext);
-        if (ext[0] == '\0')
-        {
-            ext = nullptr;
-        }
-        else if (ext[0] == '.')
+        const char* name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, false);
+        const char* ext = (char*)gtk_entry_get_text(mset->entry_ext);
+        if (ext && ext[0] == '.')
         { // ignore leading dot in extension field
             ext++;
         }
@@ -320,10 +309,6 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             full_name = "";
         }
 
-        if (name)
-        {
-            std::free(name);
-        }
         gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
         // update full_path
@@ -2272,8 +2257,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
     else
     {
-        mset->full_path = ztd::strdup(get_unique_name(file_dir));
-        mset->new_path = ztd::strdup(mset->full_path);
+        mset->full_path = get_unique_name(file_dir);
+        mset->new_path = mset->full_path;
         mset->is_dir = false; // is_dir is dynamic for create
         mset->is_link = false;
         mset->clip_copy = false;
@@ -2293,15 +2278,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     const char* root_msg;
     if (mset->is_link)
     {
-        mset->desc = ztd::strdup("Link");
+        mset->desc = "Link";
     }
     else if (mset->is_dir)
     {
-        mset->desc = ztd::strdup("Directory");
+        mset->desc = "Directory";
     }
     else
     {
-        mset->desc = ztd::strdup("File");
+        mset->desc = "File";
     }
 
     mset->browser = file_browser;
@@ -3510,7 +3495,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
         set = xset_get(setname);
         if (set->desc)
         {
-            folder = set->desc;
+            folder = set->desc.value();
         }
         else
         {

@@ -17,6 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -1228,7 +1229,8 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& pa
         }
 
         // handler supports type or path ?
-        if (value_in_list(handler_set->s, type) || value_in_list(handler_set->x, under_path))
+        if (value_in_list(handler_set->s.value(), type) ||
+            value_in_list(handler_set->x.value(), under_path))
         {
             // test command
             if (test_cmd)
@@ -1270,14 +1272,6 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& pa
     return xset_handlers;
 }
 
-static void
-string_copy_free(char** s, const char* src)
-{
-    char* discard = *s;
-    *s = ztd::strdup(src);
-    std::free(discard);
-}
-
 void
 ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
 {
@@ -1307,7 +1301,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
     }
 
     set_conf = xset_get(handler_conf_xsets.at(mode));
-    list = ztd::strdup(set_conf->s);
+    list = ztd::strdup(set_conf->s.value());
 
     if (!list)
     {
@@ -1359,9 +1353,9 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
                     set = xset_get(handler->xset_name);
                 }
                 // set handler values to defaults
-                string_copy_free(&set->menu_label, handler->handler_name);
-                string_copy_free(&set->s, handler->type);
-                string_copy_free(&set->x, handler->ext);
+                set->menu_label = handler->handler_name;
+                set->s = handler->type;
+                set->x = handler->ext;
                 set->in_terminal = handler->compress_term;
                 // extract in terminal or (file handler) run as task
                 set->keep_terminal = handler->extract_term;
@@ -1377,7 +1371,6 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
         }
     }
     // update handler list
-    std::free(set_conf->s);
     set_conf->s = list;
 }
 
@@ -1406,10 +1399,10 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     xset_t new_handler_xset = add_new_handler(mode);
     new_handler_xset->b = set->b;
     new_handler_xset->disable = false; // not default - save in session
-    new_handler_xset->menu_label = ztd::strdup(set->menu_label);
-    new_handler_xset->icon = ztd::strdup(set->icon);
-    new_handler_xset->s = ztd::strdup(set->s); // Mime Type(s) or whitelist
-    new_handler_xset->x = ztd::strdup(set->x); // Extension(s) or blacklist
+    new_handler_xset->menu_label = set->menu_label;
+    new_handler_xset->icon = set->icon;
+    new_handler_xset->s = set->s; // Mime Type(s) or whitelist
+    new_handler_xset->x = set->x; // Extension(s) or blacklist
     new_handler_xset->in_terminal = set->in_terminal;
     new_handler_xset->keep_terminal = set->keep_terminal;
     new_handler_xset->scroll_lock = set->scroll_lock;
@@ -1516,7 +1509,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     const char* disabled =
         hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
     const std::string dis_name = std::format("{} {}",
-                                             new_handler_xset->menu_label,
+                                             new_handler_xset->menu_label.value(),
                                              new_handler_xset->b == xset::b::xtrue ? "" : disabled);
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                        &iter,
@@ -1571,10 +1564,11 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
                                  handler_xset->b == xset::b::xtrue);
 
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_name),
-                       handler_xset->menu_label ? handler_xset->menu_label : "");
-    gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_mime), handler_xset->s ? handler_xset->s : "");
+                       handler_xset->menu_label ? handler_xset->menu_label.value().data() : "");
+    gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_mime),
+                       handler_xset->s ? handler_xset->s.value().data() : "");
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_extension),
-                       handler_xset->x ? handler_xset->x : "");
+                       handler_xset->x ? handler_xset->x.value().data() : "");
 
     if (handler)
     {
@@ -1706,7 +1700,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                     hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
                 const std::string dis_name =
                     std::format("{} {}",
-                                handler_xset->menu_label,
+                                handler_xset->menu_label.value(),
                                 handler_xset->b == xset::b::xtrue ? "" : disabled);
                 gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                                    &iter,
@@ -2473,9 +2467,9 @@ restore_defaults(HandlerData* hnd, bool all)
 
         // create fake xset
         const auto set = new xset::XSet(ztd::strdup(handler->setname), xset::name::custom);
-        set->menu_label = (char*)handler->handler_name;
-        set->s = (char*)handler->type;
-        set->x = (char*)handler->ext;
+        set->menu_label = handler->handler_name;
+        set->s = handler->type;
+        set->x = handler->ext;
         set->in_terminal = handler->compress_term;
         set->keep_terminal = handler->extract_term;
         if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
@@ -2483,7 +2477,7 @@ restore_defaults(HandlerData* hnd, bool all)
             set->scroll_lock = handler->list_term;
         }
         set->b = xset::b::xtrue;
-        set->icon = nullptr;
+        set->icon = std::nullopt;
 
         // show fake xset values
         config_load_handler_settings(set, nullptr, handler, hnd);
@@ -2802,8 +2796,8 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // determine job
-    char* folder;
-    char* file;
+    const char* folder;
+    const char* file;
     xset_t save;
     switch (job)
     {
@@ -2812,11 +2806,12 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             save = xset_get(xset::name::plug_ifile);
             if (save->s)
             { //&& std::filesystem::is_directory(save->s)
-                folder = save->s;
+                folder = xset_get_s(save);
             }
             else
             {
-                if (!(folder = xset_get_s(xset::name::go_set_default)))
+                folder = xset_get_s(xset::name::go_set_default);
+                if (!folder)
                 {
                     folder = ztd::strdup("/");
                 }
@@ -2830,11 +2825,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             {
                 return;
             }
-            if (save->s)
-            {
-                std::free(save->s);
-            }
-            save->s = ztd::strdup(std::filesystem::path(file).parent_path());
+            save->s = std::filesystem::path(file).parent_path();
             break;
         case PtkHandlerJob::HANDLER_JOB_RESTORE_ALL:
             restore_defaults(hnd, true);
@@ -2875,7 +2866,6 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                         "Error Creating Temp Directory",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         "Unable to create temporary directory");
-        std::free(file);
         return;
     }
 
@@ -2891,7 +2881,6 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
 
     // Install plugin
     install_plugin_file(nullptr, hnd->dlg, file, plug_dir, PluginJob::COPY, nullptr);
-    std::free(file);
 }
 
 static void
@@ -3001,11 +2990,10 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 
             // temp remove unwanted items from Archive Defaults submenu
             set = xset_get(xset::name::arc_default);
-            char* old_desc = set->desc;
-            set->desc = ztd::strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
-                                    "arc_def_parent arc_def_write");
+            const auto old_desc = set->desc;
+            set->desc = "arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
+                        "arc_def_parent arc_def_write";
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
-            std::free(set->desc);
             set->desc = old_desc;
         }
         else if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FS)

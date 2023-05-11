@@ -81,8 +81,8 @@ archive_handler_get_first_extension(xset_t handler_xset)
     if (handler_xset && handler_xset->x)
     {
         // find first extension
-        const std::string s = handler_xset->x;
-        std::stringstream ss(s);
+        const std::string x = handler_xset->x.value();
+        std::stringstream ss(x);
         std::vector<std::string> pathnames;
 
         std::string tmp;
@@ -375,8 +375,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     GtkTreeIter iter;
     xset_t handler_xset;
     // Get xset name of last used handler
-    char* xset_name = xset_get_s(xset::name::arc_dlg); // do not free
-    i32 format = 4;                                    // default tar.gz
+    const char* xset_name = xset_get_s(xset::name::arc_dlg); // do not free
+    i32 format = 4;                                          // default tar.gz
     i32 n = 0;
     for (const std::string_view archive_handler : archive_handlers)
     {
@@ -401,15 +401,19 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
              * are displayed when the user chooses an archive name to
              * create. Note that the handler may be responsible for
              * multiple MIME types and extensions */
-            gtk_file_filter_add_mime_type(filter, handler_xset->s);
+            if (handler_xset->s)
+            {
+                gtk_file_filter_add_mime_type(filter, handler_xset->s.value().c_str());
+            }
 
             // Appending to combobox
             // Obtaining appending iterator for model
             gtk_list_store_append(GTK_LIST_STORE(list), &iter);
 
             // Adding to model
-            const std::string extensions =
-                std::format("{} ( {} ) ", handler_xset->menu_label, handler_xset->x);
+            const std::string extensions = std::format("{} ( {} ) ",
+                                                       handler_xset->menu_label.value(),
+                                                       handler_xset->x.value());
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
                                PTKFileArchiverCol::COL_XSET_NAME,
@@ -495,7 +499,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                 error_message.clear();
             }
         }
-        std::free(xset_name);
     }
     else
     {
@@ -591,7 +594,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                 handler_xset = xset_get(xset_name);
                 // Saving selected archive handler name as default
                 xset_set(xset::name::arc_dlg, xset::var::s, xset_name);
-                std::free(xset_name);
 
                 // run in the terminal or not
                 run_in_terminal = handler_xset->in_terminal;
@@ -929,7 +931,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     xset_t set = xset_get(xset::name::new_archive);
     if (set->icon)
     {
-        ptask->task->exec_icon = set->icon;
+        ptask->task->exec_icon = set->icon.value();
     }
 
     // Running task
@@ -1191,7 +1193,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             ztd::logger::warn("No archive handler/command found for file: {}", full_path.string());
             continue;
         }
-        ztd::logger::info("Archive Handler Selected: {}", handler_xset->menu_label);
+        ztd::logger::info("Archive Handler Selected: {}", handler_xset->menu_label.value());
 
         // Handler found - fetching the 'run in terminal' preference, if
         // the operation is listing then the terminal should be kept
@@ -1238,7 +1240,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             std::string filename_no_archive_ext;
 
             // Looping for all extensions registered with the current archive handler
-            const std::vector<std::string> pathnames = ztd::split(handler_xset->x, " ");
+            const std::vector<std::string> pathnames = ztd::split(handler_xset->x.value(), " ");
 
             for (const std::string_view pathname : pathnames)
             {
@@ -1433,7 +1435,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     xset_t set = xset_get(xset::name::arc_extract);
     if (set->icon)
     {
-        ptask->task->exec_icon = set->icon;
+        ptask->task->exec_icon = set->icon.value();
     }
 
     // Running task

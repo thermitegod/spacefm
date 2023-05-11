@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -971,7 +972,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         {
             for (const xset_t handler_set : handlers)
             {
-                app_menu_item = gtk_menu_item_new_with_label(handler_set->menu_label);
+                app_menu_item =
+                    gtk_menu_item_new_with_label(handler_set->menu_label.value().data());
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
                 g_signal_connect(G_OBJECT(app_menu_item),
                                  "activate",
@@ -1080,28 +1082,12 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_set_cb(set, (GFunc)on_popup_open_all, data);
         set->lock = true;
         set->menu_style = xset::menu::normal;
-        if (set->shared_key)
-        {
-            std::free(set->shared_key);
-        }
-        set->shared_key = ztd::strdup(xset::get_name_from_xsetname(xset::name::open_all));
+        set->shared_key = xset::get_name_from_xsetname(xset::name::open_all);
         set2 = xset_get(xset::name::open_all);
-        if (set->menu_label)
-        {
-            std::free(set->menu_label);
-        }
-        set->menu_label = ztd::strdup(set2->menu_label);
-        if (set->context)
-        {
-            std::free(set->context);
-            set->context = nullptr;
-        }
+        set->menu_label = set2->menu_label;
+        set->context = std::nullopt;
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
-        if (set->menu_label)
-        {
-            std::free(set->menu_label);
-        }
-        set->menu_label = nullptr; // do not bother to save this
+        set->menu_label = std::nullopt; // do not bother to save this
 
         // Edit / Dir
         if ((is_dir && browser) || (is_text && sel_files.size() == 1))

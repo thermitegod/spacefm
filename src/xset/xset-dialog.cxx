@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <tuple>
+
 #include <glibmm.h>
 
 #include <gtk/gtk.h>
@@ -200,9 +202,9 @@ xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string_view
     return res;
 }
 
-bool
+const std::tuple<bool, std::string>
 xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
-                 const std::string_view msg2, const char* defstring, char** answer,
+                 const std::string_view msg2, const std::string_view defstring,
                  const std::string_view defreset, bool edit_care)
 {
     GtkTextIter iter;
@@ -246,7 +248,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     // input view
     GtkScrolledWindow* scroll_input =
         GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    GtkTextView* input = multi_input_new(scroll_input, defstring);
+    GtkTextView* input = multi_input_new(scroll_input, defstring.data());
     GtkTextBuffer* buf = gtk_text_view_get_buffer(input);
 
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))),
@@ -311,6 +313,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
         }
     }
 
+    std::string answer;
     std::string ans;
     i32 response;
     bool ret = false;
@@ -328,28 +331,21 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                     ptk_show_error(GTK_WINDOW(dlgparent),
                                    "Error",
                                    "Your input is invalid because it contains linefeeds");
+                    break;
+                }
+
+                ans = ztd::strip(ans);
+                if (ans.empty())
+                {
+                    answer.clear();
                 }
                 else
                 {
-                    if (*answer)
-                    {
-                        std::free(*answer);
-                    }
-
-                    ans = ztd::strip(ans);
-                    if (ans.empty())
-                    {
-                        *answer = nullptr;
-                    }
-                    else
-                    {
-                        *answer = ztd::strdup(std::filesystem::path(ans));
-                    }
-
-                    ret = true;
-                    exit_loop = true;
-                    break;
+                    answer = std::filesystem::path(ans);
                 }
+
+                ret = true;
+                exit_loop = true;
 
                 break;
             case GtkResponseType::GTK_RESPONSE_YES:
@@ -397,14 +393,15 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
         xset_set(xset::name::text_dlg, xset::var::z, std::to_string(height));
     }
     gtk_widget_destroy(dlg);
-    return ret;
+
+    return std::make_tuple(ret, answer);
 }
 
 char*
 xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                  const char* deffolder, const char* deffile)
 {
-    char* path;
+    const char* path;
     /*  Actions:
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE
@@ -433,7 +430,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     else
     {
         path = xset_get_s(xset::name::go_set_default);
-        if (path && path[0] != '\0')
+        if (path)
         {
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
         }

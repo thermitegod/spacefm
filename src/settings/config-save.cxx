@@ -66,19 +66,23 @@ xset_pack_set(xset_t set)
 
     if (set->s)
     {
-        setvars.insert({xset::get_name_from_xsetvar(xset::var::s), std::format("{}", set->s)});
+        setvars.insert(
+            {xset::get_name_from_xsetvar(xset::var::s), std::format("{}", set->s.value())});
     }
     if (set->x)
     {
-        setvars.insert({xset::get_name_from_xsetvar(xset::var::x), std::format("{}", set->x)});
+        setvars.insert(
+            {xset::get_name_from_xsetvar(xset::var::x), std::format("{}", set->x.value())});
     }
     if (set->y)
     {
-        setvars.insert({xset::get_name_from_xsetvar(xset::var::y), std::format("{}", set->y)});
+        setvars.insert(
+            {xset::get_name_from_xsetvar(xset::var::y), std::format("{}", set->y.value())});
     }
     if (set->z)
     {
-        setvars.insert({xset::get_name_from_xsetvar(xset::var::z), std::format("{}", set->z)});
+        setvars.insert(
+            {xset::get_name_from_xsetvar(xset::var::z), std::format("{}", set->z.value())});
     }
     if (set->key)
     {
@@ -94,16 +98,16 @@ xset_pack_set(xset_t set)
     {
         if (set->lock)
         { // built-in
-            if (set->in_terminal && set->menu_label && set->menu_label[0])
+            if (set->in_terminal && set->menu_label)
             { // only save lbl if menu_label was customized
                 setvars.insert({xset::get_name_from_xsetvar(xset::var::menu_label),
-                                std::format("{}", set->menu_label)});
+                                std::format("{}", set->menu_label.value())});
             }
         }
         else
         { // custom
             setvars.insert({xset::get_name_from_xsetvar(xset::var::menu_label_custom),
-                            std::format("{}", set->menu_label)});
+                            std::format("{}", set->menu_label.value())});
         }
     }
     // icon
@@ -111,30 +115,30 @@ xset_pack_set(xset_t set)
     { // built-in
         if (set->keep_terminal)
         { // only save icn if icon was customized
-            setvars.insert(
-                {xset::get_name_from_xsetvar(xset::var::icn), std::format("{}", set->icon)});
+            setvars.insert({xset::get_name_from_xsetvar(xset::var::icn),
+                            std::format("{}", set->icon.value())});
         }
     }
     else if (set->icon)
     { // custom
         setvars.insert(
-            {xset::get_name_from_xsetvar(xset::var::icon), std::format("{}", set->icon)});
+            {xset::get_name_from_xsetvar(xset::var::icon), std::format("{}", set->icon.value())});
     }
 
     if (set->next)
     {
         setvars.insert(
-            {xset::get_name_from_xsetvar(xset::var::next), std::format("{}", set->next)});
+            {xset::get_name_from_xsetvar(xset::var::next), std::format("{}", set->next.value())});
     }
     if (set->child)
     {
         setvars.insert(
-            {xset::get_name_from_xsetvar(xset::var::child), std::format("{}", set->child)});
+            {xset::get_name_from_xsetvar(xset::var::child), std::format("{}", set->child.value())});
     }
     if (set->context)
     {
-        setvars.insert(
-            {xset::get_name_from_xsetvar(xset::var::context), std::format("{}", set->context)});
+        setvars.insert({xset::get_name_from_xsetvar(xset::var::context),
+                        std::format("{}", set->context.value())});
     }
     if (set->b != xset::b::unset)
     {
@@ -155,28 +159,28 @@ xset_pack_set(xset_t set)
         }
         if (set->desc)
         {
-            setvars.insert(
-                {xset::get_name_from_xsetvar(xset::var::desc), std::format("{}", set->desc)});
+            setvars.insert({xset::get_name_from_xsetvar(xset::var::desc),
+                            std::format("{}", set->desc.value())});
         }
         if (set->title)
         {
-            setvars.insert(
-                {xset::get_name_from_xsetvar(xset::var::title), std::format("{}", set->title)});
+            setvars.insert({xset::get_name_from_xsetvar(xset::var::title),
+                            std::format("{}", set->title.value())});
         }
         if (set->prev)
         {
-            setvars.insert(
-                {xset::get_name_from_xsetvar(xset::var::prev), std::format("{}", set->prev)});
+            setvars.insert({xset::get_name_from_xsetvar(xset::var::prev),
+                            std::format("{}", set->prev.value())});
         }
         if (set->parent)
         {
-            setvars.insert(
-                {xset::get_name_from_xsetvar(xset::var::parent), std::format("{}", set->parent)});
+            setvars.insert({xset::get_name_from_xsetvar(xset::var::parent),
+                            std::format("{}", set->parent.value())});
         }
         if (set->line)
         {
-            setvars.insert(
-                {xset::get_name_from_xsetvar(xset::var::line), std::format("{}", set->line)});
+            setvars.insert({xset::get_name_from_xsetvar(xset::var::line),
+                            std::format("{}", set->line.value())});
         }
         if (set->task)
         {
