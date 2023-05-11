@@ -75,9 +75,9 @@ void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidge
                        xset_t set_parent, bool show_tooltips);
 
 bool xset_opener(PtkFileBrowser* file_browser, char job);
-const char* xset_get_builtin_toolitem_label(XSetTool tool_type);
+const char* xset_get_builtin_toolitem_label(xset::tool tool_type);
 
 ////////////////////////////////////////
 
 void xset_custom_insert_after(xset_t target, xset_t set);
-xset_t xset_new_builtin_toolitem(XSetTool tool_type);
+xset_t xset_new_builtin_toolitem(xset::tool tool_type);

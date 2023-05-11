@@ -102,7 +102,7 @@ seek_path(GtkEntry* entry)
         edata->seek_timer = 0;
     }
 
-    if (!xset_get_b(XSetName::PATH_SEEK))
+    if (!xset_get_b(xset::name::path_seek))
     {
         return false;
     }
@@ -520,7 +520,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 
-    set = xset_get(XSetName::SEPARATOR);
+    set = xset_get(xset::name::separator);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
     const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
@@ -528,9 +528,9 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
                               ztd::startswith(text, "//")));
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
-    set = xset_get(XSetName::PATH_SEEK);
+    set = xset_get(xset::name::path_seek);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
-    set = xset_get(XSetName::PATH_HAND);
+    set = xset_get(xset::name::path_hand);
     xset_set_cb(set, (GFunc)on_protocol_handlers, file_browser);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));

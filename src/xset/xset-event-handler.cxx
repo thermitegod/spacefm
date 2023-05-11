@@ -26,17 +26,17 @@ XSetEventHandler::XSetEventHandler()
 {
     // ztd::logger::info("XSetEventHandler constructor");
 
-    this->win_focus = xset_get(XSetName::EVT_WIN_FOCUS);
-    this->win_move = xset_get(XSetName::EVT_WIN_MOVE);
-    this->win_click = xset_get(XSetName::EVT_WIN_CLICK);
-    this->win_key = xset_get(XSetName::EVT_WIN_KEY);
-    this->win_close = xset_get(XSetName::EVT_WIN_CLOSE);
-    this->pnl_show = xset_get(XSetName::EVT_PNL_SHOW);
-    this->pnl_focus = xset_get(XSetName::EVT_PNL_FOCUS);
-    this->pnl_sel = xset_get(XSetName::EVT_PNL_SEL);
-    this->tab_new = xset_get(XSetName::EVT_TAB_NEW);
-    this->tab_chdir = xset_get(XSetName::EVT_TAB_CHDIR);
-    this->tab_focus = xset_get(XSetName::EVT_TAB_FOCUS);
-    this->tab_close = xset_get(XSetName::EVT_TAB_CLOSE);
-    this->device = xset_get(XSetName::EVT_DEVICE);
+    this->win_focus = xset_get(xset::name::evt_win_focus);
+    this->win_move = xset_get(xset::name::evt_win_move);
+    this->win_click = xset_get(xset::name::evt_win_click);
+    this->win_key = xset_get(xset::name::evt_win_key);
+    this->win_close = xset_get(xset::name::evt_win_close);
+    this->pnl_show = xset_get(xset::name::evt_pnl_show);
+    this->pnl_focus = xset_get(xset::name::evt_pnl_focus);
+    this->pnl_sel = xset_get(xset::name::evt_pnl_sel);
+    this->tab_new = xset_get(xset::name::evt_tab_new);
+    this->tab_chdir = xset_get(xset::name::evt_tab_chdir);
+    this->tab_focus = xset_get(xset::name::evt_tab_focus);
+    this->tab_close = xset_get(xset::name::evt_tab_close);
+    this->device = xset_get(xset::name::evt_device);
 }

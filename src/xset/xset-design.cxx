@@ -101,8 +101,8 @@ xset_design_job_set_edit(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
-    if (cmd_type == XSetCMD::SCRIPT)
+    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
+    if (cmd_type == xset::cmd::script)
     {
         // script
         char* cscript = xset_custom_get_script(set, !set->plugin);
@@ -120,8 +120,8 @@ xset_design_job_set_edit_root(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
-    if (cmd_type == XSetCMD::SCRIPT)
+    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
+    if (cmd_type == xset::cmd::script)
     {
         // script
         char* cscript = xset_custom_get_script(set, !set->plugin);
@@ -139,13 +139,13 @@ xset_design_job_set_copyname(xset_t set)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
-    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
-    if (cmd_type == XSetCMD::LINE)
+    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
+    if (cmd_type == xset::cmd::line)
     {
         // line
         gtk_clipboard_set_text(clip, set->line, -1);
     }
-    else if (cmd_type == XSetCMD::SCRIPT)
+    else if (cmd_type == xset::cmd::script)
     {
         // script
         char* cscript = xset_custom_get_script(set, true);
@@ -156,7 +156,7 @@ xset_design_job_set_copyname(xset_t set)
         gtk_clipboard_set_text(clip, cscript, -1);
         std::free(cscript);
     }
-    else if (cmd_type == XSetCMD::APP)
+    else if (cmd_type == xset::cmd::app)
     {
         // custom
         gtk_clipboard_set_text(clip, set->z, -1);
@@ -178,7 +178,7 @@ xset_design_job_set_line(xset_t set)
                                            false);
     if (response)
     {
-        xset_set_var(set, XSetVar::X, "0");
+        xset_set_var(set, xset::var::x, "0");
     }
 }
 
@@ -187,7 +187,7 @@ xset_design_job_set_script(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    xset_set_var(set, XSetVar::X, "1");
+    xset_set_var(set, xset::var::x, "1");
     char* cscript = xset_custom_get_script(set, true);
     if (!cscript)
     {
@@ -223,8 +223,8 @@ xset_design_job_set_custom(xset_t set)
 
     if (custom_file)
     {
-        xset_set_var(set, XSetVar::X, "2");
-        xset_set_var(set, XSetVar::Z, custom_file);
+        xset_set_var(set, xset::var::x, "2");
+        xset_set_var(set, xset::var::z, custom_file);
         std::free(custom_file);
     }
 }
@@ -299,7 +299,7 @@ xset_design_job_set_app(xset_t set)
     {
         std::free(newset->x);
     }
-    newset->x = ztd::strdup("2"); // XSetCMD::APP
+    newset->x = ztd::strdup("2"); // xset::cmd::APP
     // unset these to save session space
     newset->task = false;
     newset->task_err = false;
@@ -398,7 +398,7 @@ xset_design_job_set_submenu(xset_t set)
     // add new submenu
     xset_t newset = xset_custom_new();
     newset->menu_label = name;
-    newset->menu_style = XSetMenu::SUBMENU;
+    newset->menu_style = xset::menu::submenu;
     xset_custom_insert_after(set, newset);
 
     // add submenu child
@@ -414,15 +414,15 @@ static void
 xset_design_job_set_sep(xset_t set)
 {
     xset_t newset = xset_custom_new();
-    newset->menu_style = XSetMenu::SEP;
+    newset->menu_style = xset::menu::sep;
     xset_custom_insert_after(set, newset);
 }
 
 static void
-xset_design_job_set_add_tool(xset_t set, XSetTool tool_type)
+xset_design_job_set_add_tool(xset_t set, xset::tool tool_type)
 {
-    if (tool_type < XSetTool::DEVICES || tool_type >= XSetTool::INVALID ||
-        set->tool == XSetTool::NOT)
+    if (tool_type < xset::tool::devices || tool_type >= xset::tool::invalid ||
+        set->tool == xset::tool::NOT)
     {
         return;
     }
@@ -440,14 +440,14 @@ xset_design_job_set_import_file(xset_t set)
 
     const char* folder;
 
-    xset_t save = xset_get(XSetName::PLUG_IFILE);
+    xset_t save = xset_get(xset::name::plug_ifile);
     if (save->s) //&& std::filesystem::is_directory(save->s)
     {
         folder = save->s;
     }
     else
     {
-        if (!(folder = xset_get_s(XSetName::GO_SET_DEFAULT)))
+        if (!(folder = xset_get_s(xset::name::go_set_default)))
         {
             folder = ztd::strdup("/");
         }
@@ -516,7 +516,7 @@ xset_design_job_set_paste(xset_t set)
     {
         return false;
     }
-    if (xset_set_clipboard->tool > XSetTool::CUSTOM && set->tool == XSetTool::NOT)
+    if (xset_set_clipboard->tool > xset::tool::custom && set->tool == xset::tool::NOT)
     {
         // failsafe - disallow pasting a builtin tool to a menu
         return false;
@@ -525,11 +525,11 @@ xset_design_job_set_paste(xset_t set)
     bool update_toolbars = false;
     if (xset_clipboard_is_cut)
     {
-        update_toolbars = !(xset_set_clipboard->tool == XSetTool::NOT);
+        update_toolbars = !(xset_set_clipboard->tool == xset::tool::NOT);
         if (!update_toolbars && xset_set_clipboard->parent)
         {
             xset_t newset = xset_get(xset_set_clipboard->parent);
-            if (!(newset->tool == XSetTool::NOT))
+            if (!(newset->tool == xset::tool::NOT))
             {
                 // we are cutting the first item in a tool submenu
                 update_toolbars = true;
@@ -614,7 +614,7 @@ xset_design_job_set_remove(xset_t set)
         return false;
     }
 
-    const auto cmd_type = XSetCMD(xset_get_int(set, XSetVar::X));
+    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
 
     if (set->menu_label)
     {
@@ -622,7 +622,8 @@ xset_design_job_set_remove(xset_t set)
     }
     else
     {
-        if (!set->lock && set->z && set->menu_style < XSetMenu::SUBMENU && cmd_type == XSetCMD::APP)
+        if (!set->lock && set->z && set->menu_style < xset::menu::submenu &&
+            cmd_type == xset::cmd::app)
         {
             name = ztd::strdup(set->z);
         }
@@ -633,7 +634,7 @@ xset_design_job_set_remove(xset_t set)
     }
 
     std::string msg;
-    if (set->child && set->menu_style == XSetMenu::SUBMENU)
+    if (set->child && set->menu_style == xset::menu::submenu)
     {
         msg = std::format(
             "Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis action "
@@ -649,10 +650,10 @@ xset_design_job_set_remove(xset_t set)
         buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;
     }
     std::free(name);
-    const bool is_app = !set->lock && set->menu_style < XSetMenu::SUBMENU &&
-                        cmd_type == XSetCMD::APP && set->tool <= XSetTool::CUSTOM;
-    if (!(set->menu_style == XSetMenu::SEP) && app_settings.get_confirm() && !is_app &&
-        set->tool <= XSetTool::CUSTOM)
+    const bool is_app = !set->lock && set->menu_style < xset::menu::submenu &&
+                        cmd_type == xset::cmd::app && set->tool <= xset::tool::custom;
+    if (!(set->menu_style == xset::menu::sep) && app_settings.get_confirm() && !is_app &&
+        set->tool <= xset::tool::custom)
     {
         if (parent)
         {
@@ -684,8 +685,8 @@ xset_design_job_set_remove(xset_t set)
 
     xset_t set_next;
 
-    if (set->parent && (set_next = xset_is(set->parent)) && set_next->tool == XSetTool::CUSTOM &&
-        set_next->menu_style == XSetMenu::SUBMENU)
+    if (set->parent && (set_next = xset_is(set->parent)) && set_next->tool == xset::tool::custom &&
+        set_next->menu_style == xset::menu::submenu)
     {
         // this set is first item in custom toolbar submenu
         update_toolbars = true;
@@ -693,7 +694,7 @@ xset_design_job_set_remove(xset_t set)
 
     xset_custom_remove(set);
 
-    if (!(set->tool == XSetTool::NOT))
+    if (!(set->tool == xset::tool::NOT))
     {
         update_toolbars = true;
         std::free(name);
@@ -726,7 +727,7 @@ xset_design_job_set_export(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    if ((!set->lock || set->xset_name == XSetName::MAIN_BOOK) && set->tool <= XSetTool::CUSTOM)
+    if ((!set->lock || set->xset_name == xset::name::main_book) && set->tool <= xset::tool::custom)
     {
         xset_custom_export(parent, set->browser, set);
     }
@@ -735,13 +736,13 @@ xset_design_job_set_export(xset_t set)
 static void
 xset_design_job_set_normal(xset_t set)
 {
-    set->menu_style = XSetMenu::NORMAL;
+    set->menu_style = xset::menu::normal;
 }
 
 static void
 xset_design_job_set_check(xset_t set)
 {
-    set->menu_style = XSetMenu::CHECK;
+    set->menu_style = xset::menu::check;
 }
 
 static void
@@ -765,7 +766,7 @@ xset_design_job_set_confirm(xset_t set)
                                            false);
     if (response)
     {
-        set->menu_style = XSetMenu::CONFIRM;
+        set->menu_style = xset::menu::confirm;
     }
 }
 
@@ -785,7 +786,7 @@ xset_design_job_set_dialog(xset_t set)
                                            false);
     if (response)
     {
-        set->menu_style = XSetMenu::STRING;
+        set->menu_style = xset::menu::string;
     }
 }
 
@@ -821,13 +822,13 @@ static void
 xset_design_job_set_ignore_context(xset_t set)
 {
     (void)set;
-    xset_set_b(XSetName::CONTEXT_DLG, !xset_get_b(XSetName::CONTEXT_DLG));
+    xset_set_b(xset::name::context_dlg, !xset_get_b(xset::name::context_dlg));
 }
 
 static void
 xset_design_job_set_browse_files(xset_t set)
 {
-    if (set->tool > XSetTool::CUSTOM)
+    if (set->tool > xset::tool::custom)
     {
         return;
     }
@@ -860,7 +861,7 @@ xset_design_job_set_browse_files(xset_t set)
 static void
 xset_design_job_set_browse_data(xset_t set)
 {
-    if (set->tool > XSetTool::CUSTOM)
+    if (set->tool > xset::tool::custom)
     {
         return;
     }
@@ -1006,156 +1007,156 @@ xset_design_job(GtkWidget* item, xset_t set)
 
     bool update_toolbars = false;
 
-    XSetTool tool_type;
-    const auto job = XSetJob(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
+    xset::tool tool_type;
+    const auto job = xset::job(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
     // ztd::logger::info("activate job {} {}", job, set->name);
     switch (job)
     {
-        case XSetJob::KEY:
+        case xset::job::key:
             xset_design_job_set_key(set);
             break;
-        case XSetJob::ICON:
+        case xset::job::icon:
             xset_design_job_set_icon(set);
             break;
-        case XSetJob::EDIT:
+        case xset::job::edit:
             xset_design_job_set_edit(set);
             break;
-        case XSetJob::EDIT_ROOT:
+        case xset::job::edit_root:
             xset_design_job_set_edit_root(set);
             break;
-        case XSetJob::COPYNAME:
+        case xset::job::copyname:
             xset_design_job_set_copyname(set);
             break;
-        case XSetJob::LINE:
+        case xset::job::line:
             xset_design_job_set_line(set);
             break;
-        case XSetJob::SCRIPT:
+        case xset::job::script:
             xset_design_job_set_script(set);
             break;
-        case XSetJob::CUSTOM:
+        case xset::job::custom:
             xset_design_job_set_custom(set);
             break;
-        case XSetJob::USER:
+        case xset::job::user:
             xset_design_job_set_user(set);
             break;
-        case XSetJob::BOOKMARK:
+        case xset::job::bookmark:
             break;
-        case XSetJob::APP:
+        case xset::job::app:
             xset_design_job_set_app(set);
             break;
-        case XSetJob::COMMAND:
+        case xset::job::command:
             xset_design_job_set_command(set);
             break;
-        case XSetJob::SUBMENU:
-        case XSetJob::SUBMENU_BOOK:
+        case xset::job::submenu:
+        case xset::job::submenu_book:
             xset_design_job_set_submenu(set);
             break;
-        case XSetJob::SEP:
+        case xset::job::sep:
             xset_design_job_set_sep(set);
             break;
-        case XSetJob::ADD_TOOL:
-            tool_type = XSetTool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
+        case xset::job::add_tool:
+            tool_type = xset::tool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
             xset_design_job_set_add_tool(set, tool_type);
             break;
-        case XSetJob::IMPORT_FILE:
+        case xset::job::import_file:
             xset_design_job_set_import_file(set);
             break;
-        case XSetJob::CUT:
+        case xset::job::cut:
             xset_design_job_set_cut(set);
             break;
-        case XSetJob::COPY:
+        case xset::job::copy:
             xset_design_job_set_copy(set);
             break;
-        case XSetJob::PASTE:
+        case xset::job::paste:
             update_toolbars = xset_design_job_set_paste(set);
             break;
-        case XSetJob::REMOVE:
-        case XSetJob::REMOVE_BOOK:
+        case xset::job::remove:
+        case xset::job::remove_book:
             update_toolbars = xset_design_job_set_remove(set);
             break;
-        case XSetJob::EXPORT:
+        case xset::job::EXPORT:
             xset_design_job_set_export(set);
             break;
-        case XSetJob::NORMAL:
+        case xset::job::normal:
             xset_design_job_set_normal(set);
             break;
-        case XSetJob::CHECK:
+        case xset::job::check:
             xset_design_job_set_check(set);
             break;
-        case XSetJob::CONFIRM:
+        case xset::job::confirm:
             xset_design_job_set_confirm(set);
             break;
-        case XSetJob::DIALOG:
+        case xset::job::dialog:
             xset_design_job_set_dialog(set);
             break;
-        case XSetJob::MESSAGE:
+        case xset::job::message:
             xset_design_job_set_message(set);
             break;
-        case XSetJob::PROP:
+        case xset::job::prop:
             xset_design_job_set_prop(set);
             break;
-        case XSetJob::PROP_CMD:
+        case xset::job::prop_cmd:
             xset_design_job_set_prop_cmd(set);
             break;
-        case XSetJob::IGNORE_CONTEXT:
+        case xset::job::ignore_context:
             xset_design_job_set_ignore_context(set);
             break;
-        case XSetJob::BROWSE_FILES:
+        case xset::job::browse_files:
             xset_design_job_set_browse_files(set);
             break;
-        case XSetJob::BROWSE_DATA:
+        case xset::job::browse_data:
             xset_design_job_set_browse_data(set);
             break;
-        case XSetJob::BROWSE_PLUGIN:
+        case xset::job::browse_plugin:
             xset_design_job_set_browse_plugins(set);
             break;
-        case XSetJob::TERM:
+        case xset::job::term:
             xset_design_job_set_term(set);
             break;
-        case XSetJob::KEEP:
+        case xset::job::keep:
             xset_design_job_set_keep(set);
             break;
-        case XSetJob::TASK:
+        case xset::job::task:
             xset_design_job_set_task(set);
             break;
-        case XSetJob::POP:
+        case xset::job::pop:
             xset_design_job_set_pop(set);
             break;
-        case XSetJob::ERR:
+        case xset::job::err:
             xset_design_job_set_err(set);
             break;
-        case XSetJob::OUT:
+        case xset::job::out:
             xset_design_job_set_out(set);
             break;
-        case XSetJob::SCROLL:
+        case xset::job::scroll:
             xset_design_job_set_scroll(set);
             break;
-        case XSetJob::TOOLTIPS:
-        case XSetJob::LABEL:
-        case XSetJob::HELP:
-        case XSetJob::HELP_NEW:
-        case XSetJob::HELP_ADD:
-        case XSetJob::HELP_BROWSE:
-        case XSetJob::HELP_STYLE:
-        case XSetJob::HELP_BOOK:
-        case XSetJob::INVALID:
+        case xset::job::tooltips:
+        case xset::job::label:
+        case xset::job::help:
+        case xset::job::help_new:
+        case xset::job::help_add:
+        case xset::job::help_browse:
+        case xset::job::help_style:
+        case xset::job::help_book:
+        case xset::job::invalid:
         default:
             break;
     }
 
     xset_t set_next;
-    if (set && (!set->lock || set->xset_name == XSetName::MAIN_BOOK))
+    if (set && (!set->lock || set->xset_name == xset::name::main_book))
     {
         if (set->parent && (set_next = xset_is(set->parent)) &&
-            set_next->tool == XSetTool::CUSTOM && set_next->menu_style == XSetMenu::SUBMENU)
+            set_next->tool == xset::tool::custom && set_next->menu_style == xset::menu::submenu)
         {
             // this set is first item in custom toolbar submenu
             update_toolbars = true;
         }
     }
 
-    if ((set && !set->lock && !(set->tool == XSetTool::NOT)) || update_toolbars)
+    if ((set && !set->lock && !(set->tool == xset::tool::NOT)) || update_toolbars)
     {
         main_window_rebuild_all_toolbars(set ? set->browser : nullptr);
     }

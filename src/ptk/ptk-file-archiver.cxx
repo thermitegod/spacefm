@@ -141,7 +141,7 @@ archive_handler_run_in_term(xset_t handler_xset, i32 operation)
                               operation);
             return false;
     }
-    return ret == XSetB::XSET_B_TRUE;
+    return ret == xset::b::xtrue;
 }
 
 static void
@@ -347,7 +347,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                                    nullptr);
 
     // Fetching available archive handlers
-    const std::string archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
+    const std::string archive_handlers_s = xset_get_s(xset::name::arc_conf2);
 
     // Dealing with possibility of no handlers
     if (ztd::compare(archive_handlers_s, "") <= 0)
@@ -375,8 +375,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     GtkTreeIter iter;
     xset_t handler_xset;
     // Get xset name of last used handler
-    char* xset_name = xset_get_s(XSetName::ARC_DLG); // do not free
-    i32 format = 4;                                  // default tar.gz
+    char* xset_name = xset_get_s(xset::name::arc_dlg); // do not free
+    i32 format = 4;                                    // default tar.gz
     i32 n = 0;
     for (const std::string_view archive_handler : archive_handlers)
     {
@@ -388,7 +388,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         // Fetching handler
         handler_xset = xset_is(archive_handler);
 
-        if (handler_xset && handler_xset->b == XSetB::XSET_B_TRUE)
+        if (handler_xset && handler_xset->b == xset::b::xtrue)
         /* Checking to see if handler is enabled, can cope with
          * compression and the extension is set - dealing with empty
          * command yet 'run in terminal' still ticked
@@ -539,8 +539,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.c_str());
 
     // Setting dimension and position
-    const i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
-    const i32 height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
+    const i32 width = xset_get_int(xset::name::arc_dlg, xset::var::x);
+    const i32 height = xset_get_int(xset::name::arc_dlg, xset::var::y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -590,7 +590,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
 
                 handler_xset = xset_get(xset_name);
                 // Saving selected archive handler name as default
-                xset_set(XSetName::ARC_DLG, XSetVar::S, xset_name);
+                xset_set(xset::name::arc_dlg, xset::var::s, xset_name);
                 std::free(xset_name);
 
                 // run in the terminal or not
@@ -721,8 +721,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     const i32 new_height = allocation.height;
     if (new_width && new_height)
     {
-        xset_set(XSetName::ARC_DLG, XSetVar::X, std::to_string(new_width));
-        xset_set(XSetName::ARC_DLG, XSetVar::Y, std::to_string(new_height));
+        xset_set(xset::name::arc_dlg, xset::var::x, std::to_string(new_width));
+        xset_set(xset::name::arc_dlg, xset::var::y, std::to_string(new_height));
     }
 
     // Destroying dialog
@@ -926,7 +926,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     ptask->task->exec_command = final_command;
     ptask->task->exec_show_error = true;
     ptask->task->exec_export = true; // Setup SpaceFM fish variables
-    xset_t set = xset_get(XSetName::NEW_ARCHIVE);
+    xset_t set = xset_get(xset::name::new_archive);
     if (set->icon)
     {
         ptask->task->exec_icon = set->icon;
@@ -1050,11 +1050,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         GtkWidget* chk_parent = gtk_check_button_new_with_mnemonic("Cre_ate subdirectories");
         GtkWidget* chk_write = gtk_check_button_new_with_mnemonic("Make contents "
                                                                   "user-_writable");
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_parent), xset_get_b(XSetName::ARC_DLG));
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_parent),
+                                     xset_get_b(xset::name::arc_dlg));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(chk_write),
-                                     xset_get_int(XSetName::ARC_DLG, XSetVar::Z) == 1 &&
+                                     xset_get_int(xset::name::arc_dlg, xset::var::z) == 1 &&
                                          geteuid() != 0);
-        gtk_widget_set_sensitive(chk_write, xset_get_b(XSetName::ARC_DLG) && geteuid() != 0);
+        gtk_widget_set_sensitive(chk_write, xset_get_b(xset::name::arc_dlg) && geteuid() != 0);
         g_signal_connect(G_OBJECT(chk_parent),
                          "toggled",
                          G_CALLBACK(on_create_subfolder_toggled),
@@ -1068,8 +1069,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), cwd.c_str());
 
         // Fetching saved dialog dimensions and applying
-        i32 width = xset_get_int(XSetName::ARC_DLG, XSetVar::X);
-        i32 height = xset_get_int(XSetName::ARC_DLG, XSetVar::Y);
+        i32 width = xset_get_int(xset::name::arc_dlg, xset::var::x);
+        i32 height = xset_get_int(xset::name::arc_dlg, xset::var::y);
         if (width && height)
         {
             // filechooser will not honor default size or size request ?
@@ -1095,8 +1096,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
                     create_parent = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_parent));
                     write_access =
                         create_parent && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(chk_write));
-                    xset_set_b(XSetName::ARC_DLG, create_parent);
-                    xset_set(XSetName::ARC_DLG, XSetVar::Z, write_access ? "1" : "0");
+                    xset_set_b(xset::name::arc_dlg, create_parent);
+                    xset_set(xset::name::arc_dlg, xset::var::z, write_access ? "1" : "0");
                     exit_loop = true;
                     break;
                 case GtkResponseType::GTK_RESPONSE_NONE:
@@ -1126,8 +1127,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         height = allocation.height;
         if (width && height)
         {
-            xset_set(XSetName::ARC_DLG, XSetVar::X, std::to_string(width));
-            xset_set(XSetName::ARC_DLG, XSetVar::Y, std::to_string(height));
+            xset_set(xset::name::arc_dlg, xset::var::x, std::to_string(width));
+            xset_set(xset::name::arc_dlg, xset::var::y, std::to_string(height));
         }
 
         // Destroying dialog
@@ -1143,8 +1144,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     else
     {
         // Extraction directory specified - loading defaults
-        create_parent = xset_get_b(XSetName::ARC_DEF_PARENT);
-        write_access = create_parent && xset_get_b(XSetName::ARC_DEF_WRITE);
+        create_parent = xset_get_b(xset::name::arc_def_parent);
+        write_access = create_parent && xset_get_b(xset::name::arc_def_write);
 
         dest = ztd::strdup(dest_dir.string());
     }
@@ -1154,7 +1155,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     const std::string dest_quote = ztd::shell::quote(!dest.empty() ? dest.string() : cwd.string());
 
     // Fetching available archive handlers and splitting
-    const std::string archive_handlers_s = xset_get_s(XSetName::ARC_CONF2);
+    const std::string archive_handlers_s = xset_get_s(xset::name::arc_conf2);
     const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
 
     xset_t handler_xset = nullptr;
@@ -1429,7 +1430,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     ptask->task->exec_export = true; // Setup SpaceFM fish variables
 
     // Setting custom icon
-    xset_t set = xset_get(XSetName::ARC_EXTRACT);
+    xset_t set = xset_get(xset::name::arc_extract);
     if (set->icon)
     {
         ptask->task->exec_icon = set->icon;

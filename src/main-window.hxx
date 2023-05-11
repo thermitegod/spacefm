@@ -61,7 +61,7 @@ struct MainWindow
     i32 panel_slide_x[4];
     i32 panel_slide_y[4];
     i32 panel_slide_s[4];
-    std::map<panel_t, MainWindowPanel> panel_context;
+    std::map<panel_t, xset::main_window_panel> panel_context;
     bool panel_change;
 
     panel_t curpanel;
@@ -142,7 +142,7 @@ void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
 void main_window_open_path_in_current_tab(MainWindow* main_window,
                                           const std::filesystem::path& path);
 void main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab);
-bool main_window_event(void* mw, xset_t preset, XSetName event, i64 panel, i64 tab,
+bool main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64 tab,
                        const char* focus, i32 keyval, i32 button, i32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);
 

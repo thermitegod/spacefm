@@ -93,7 +93,7 @@ xset_custom_delete(xset_t set, bool delete_next)
 {
     assert(set != nullptr);
 
-    if (set->menu_style == XSetMenu::SUBMENU && set->child)
+    if (set->menu_style == xset::menu::submenu && set->child)
     {
         xset_t set_child = xset_get(set->child);
         xset_custom_delete(set_child, true);
@@ -189,9 +189,9 @@ xset_custom_remove(xset_t set)
     if (!set->prev && !set->next && set->parent)
     {
         set_parent = xset_get(set->parent);
-        if (set->tool != XSetTool::NOT)
+        if (set->tool != xset::tool::NOT)
         {
-            set_child = xset_new_builtin_toolitem(XSetTool::HOME);
+            set_child = xset_new_builtin_toolitem(xset::tool::home);
         }
         else
         {
@@ -217,7 +217,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     char* menu_label = nullptr;
     GdkPixbuf* icon_new = nullptr;
 
-    if (!set->lock && XSetCMD(xset_get_int(set, XSetVar::X)) == XSetCMD::APP)
+    if (!set->lock && xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::app)
     {
         if (set->z && ztd::endswith(set->z, ".desktop"))
         {
@@ -260,7 +260,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     }
     else
     {
-        ztd::logger::warn("xset_custom_get_app_name_icon set is not XSetCMD::APP");
+        ztd::logger::warn("xset_custom_get_app_name_icon set is not xset::cmd::APP");
     }
 
     if (icon)
@@ -328,7 +328,7 @@ xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::filesystem::
     {
         return false;
     }
-    if (set->menu_style == XSetMenu::SUBMENU && set->child)
+    if (set->menu_style == xset::menu::submenu && set->child)
     {
         if (!xset_custom_export_write(xsetpak, xset_get(set->child), plug_dir))
         {
@@ -352,14 +352,14 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     std::string deffile;
 
     // get new plugin filename
-    xset_t save = xset_get(XSetName::PLUG_CFILE);
+    xset_t save = xset_get(xset::name::plug_cfile);
     if (save->s) //&& std::filesystem::is_directory(save->s)
     {
         deffolder = save->s;
     }
     else
     {
-        if (!(deffolder = xset_get_s(XSetName::GO_SET_DEFAULT)))
+        if (!(deffolder = xset_get_s(xset::name::go_set_default)))
         {
             deffolder = ztd::strdup("/");
         }
@@ -472,7 +472,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                             "Unable to create temporary files");
             return;
         }
-        if (set->menu_style == XSetMenu::SUBMENU && set->child)
+        if (set->menu_style == xset::menu::submenu && set->child)
         {
             if (!xset_custom_export_write(xsetpak, xset_get(set->child), plug_dir))
             {
@@ -737,7 +737,7 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     xset_custom_copy_files(set, newset);
     newset->tool = set->tool;
 
-    if (set->menu_style == XSetMenu::SUBMENU && set->child)
+    if (set->menu_style == xset::menu::submenu && set->child)
     {
         xset_t set_child = xset_get(set->child);
         // ztd::logger::info("    copy submenu {}", set_child->name);
@@ -774,9 +774,9 @@ xset_find_custom(const std::string_view search)
     {
         assert(set != nullptr);
 
-        if (!set->lock && ((set->menu_style == XSetMenu::SUBMENU && set->child) ||
-                           (set->menu_style < XSetMenu::SUBMENU &&
-                            XSetCMD(xset_get_int(set, XSetVar::X)) <= XSetCMD::BOOKMARK)))
+        if (!set->lock && ((set->menu_style == xset::menu::submenu && set->child) ||
+                           (set->menu_style < xset::menu::submenu &&
+                            xset::cmd(xset_get_int(set, xset::var::x)) <= xset::cmd::bookmark)))
         {
             // custom submenu or custom command - label or name matches?
             const std::string str = clean_label(set->menu_label, true, false);

@@ -280,18 +280,18 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         // date format
         char* etext = ztd::strdup(
             gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(data->date_format)))));
-        if (!ztd::same(etext, xset_get_s(XSetName::DATE_FORMAT)))
+        if (!ztd::same(etext, xset_get_s(xset::name::date_format)))
         {
             if (etext[0] == '\0')
             {
-                xset_set(XSetName::DATE_FORMAT, XSetVar::S, "%Y-%m-%d %H:%M");
+                xset_set(xset::name::date_format, xset::var::s, "%Y-%m-%d %H:%M");
             }
             else
             {
-                xset_set(XSetName::DATE_FORMAT, XSetVar::S, etext);
+                xset_set(xset::name::date_format, xset::var::s, etext);
             }
             std::free(etext);
-            app_settings.set_date_format(xset_get_s(XSetName::DATE_FORMAT));
+            app_settings.set_date_format(xset_get_s(xset::name::date_format));
             need_refresh = true;
         }
         if (need_refresh)
@@ -355,46 +355,46 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
 
         const std::string s =
             std::to_string(gtk_combo_box_get_active(GTK_COMBO_BOX(data->drag_action)));
-        xset_set(XSetName::DRAG_ACTION, XSetVar::X, s);
+        xset_set(xset::name::drag_action, xset::var::x, s);
 
         // terminal su command
         const i32 idx = gtk_combo_box_get_active(GTK_COMBO_BOX(data->su_command));
         if (idx > -1)
         {
-            xset_set(XSetName::SU_COMMAND, XSetVar::S, su_commands.at(idx));
+            xset_set(xset::name::su_command, xset::var::s, su_commands.at(idx));
         }
 
         // MOD editors
-        xset_set(XSetName::EDITOR, XSetVar::S, gtk_entry_get_text(GTK_ENTRY(data->editor)));
-        xset_set_b(XSetName::EDITOR,
+        xset_set(xset::name::editor, xset::var::s, gtk_entry_get_text(GTK_ENTRY(data->editor)));
+        xset_set_b(xset::name::editor,
                    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->editor_terminal)));
         const char* root_editor = gtk_entry_get_text(GTK_ENTRY(data->root_editor));
-        const char* old_root_editor = xset_get_s(XSetName::ROOT_EDITOR);
+        const char* old_root_editor = xset_get_s(xset::name::root_editor);
         if (!old_root_editor)
         {
             if (root_editor[0] != '\0')
             {
-                xset_set(XSetName::ROOT_EDITOR, XSetVar::S, root_editor);
+                xset_set(xset::name::root_editor, xset::var::s, root_editor);
             }
         }
         else if (!ztd::same(root_editor, old_root_editor))
         {
-            xset_set(XSetName::ROOT_EDITOR, XSetVar::S, root_editor);
+            xset_set(xset::name::root_editor, xset::var::s, root_editor);
         }
         if (!!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)) !=
-            !!xset_get_b(XSetName::ROOT_EDITOR))
+            !!xset_get_b(xset::name::root_editor))
         {
-            xset_set_b(XSetName::ROOT_EDITOR,
+            xset_set_b(xset::name::root_editor,
                        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal)));
         }
 
         // MOD terminal
-        const std::string old_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
+        const std::string old_terminal = xset_get_s(xset::name::main_terminal);
         const std::string new_terminal =
             gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->terminal));
         if (!ztd::same(new_terminal, old_terminal))
         {
-            xset_set(XSetName::MAIN_TERMINAL, XSetVar::S, new_terminal);
+            xset_set(xset::name::main_terminal, xset::var::s, new_terminal);
         }
         // report missing terminal
         const std::string terminal = Glib::find_program_in_path(new_terminal);
@@ -408,9 +408,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
         /* save to config file */
         save_settings(nullptr);
 
-        if (xset_get_b(XSetName::MAIN_TERMINAL))
+        if (xset_get_b(xset::name::main_terminal))
         {
-            xset_set_b(XSetName::MAIN_TERMINAL, false);
+            xset_set_b(xset::name::main_terminal, false);
         }
     }
     gtk_widget_destroy(GTK_WIDGET(dlg));
@@ -530,7 +530,7 @@ edit_preference(GtkWindow* parent, i32 page)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->terminal), terminal.data());
         }
 
-        const char* main_terminal = xset_get_s(XSetName::MAIN_TERMINAL);
+        const char* main_terminal = xset_get_s(xset::name::main_terminal);
         if (main_terminal)
         {
             bool set = false;
@@ -608,13 +608,13 @@ edit_preference(GtkWindow* parent, i32 page)
                                      app_settings.get_click_executes());
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_bar),
-                                     xset_get_b(XSetName::ROOT_BAR));
+                                     xset_get_b(xset::name::root_bar));
         gtk_widget_set_sensitive(data->root_bar, geteuid() == 0);
 
         i32 drag_action_set = 0;
         for (const i32 drag_action : drag_actions)
         {
-            if (drag_action == xset_get_int(XSetName::DRAG_ACTION, XSetVar::X))
+            if (drag_action == xset_get_int(xset::name::drag_action, xset::var::x))
             {
                 drag_action_set = drag_action;
                 break;
@@ -630,7 +630,7 @@ edit_preference(GtkWindow* parent, i32 page)
         // terminal su
         i32 idx;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
-        const std::string use_su = xset_get_s(XSetName::SU_COMMAND);
+        const std::string use_su = xset_get_s(xset::name::su_command);
         for (const auto [index, value] : ztd::enumerate(su_commands))
         {
             if (ztd::same(value, use_su))
@@ -653,7 +653,7 @@ edit_preference(GtkWindow* parent, i32 page)
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(data->date_format),
                                            date_format.data());
         }
-        const char* date_s = xset_get_s(XSetName::DATE_FORMAT);
+        const char* date_s = xset_get_s(xset::name::date_format);
         if (date_s)
         {
             bool set = false;
@@ -676,22 +676,22 @@ edit_preference(GtkWindow* parent, i32 page)
 
         // editors
         data->editor = GTK_WIDGET(gtk_builder_get_object(builder, "editor"));
-        if (xset_get_s(XSetName::EDITOR))
+        if (xset_get_s(xset::name::editor))
         {
-            gtk_entry_set_text(GTK_ENTRY(data->editor), xset_get_s(XSetName::EDITOR));
+            gtk_entry_set_text(GTK_ENTRY(data->editor), xset_get_s(xset::name::editor));
         }
         data->editor_terminal = GTK_WIDGET(gtk_builder_get_object(builder, "editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->editor_terminal),
-                                     xset_get_b(XSetName::EDITOR));
+                                     xset_get_b(xset::name::editor));
         data->root_editor = GTK_WIDGET(gtk_builder_get_object(builder, "root_editor"));
-        if (xset_get_s(XSetName::ROOT_EDITOR))
+        if (xset_get_s(xset::name::root_editor))
         {
-            gtk_entry_set_text(GTK_ENTRY(data->root_editor), xset_get_s(XSetName::ROOT_EDITOR));
+            gtk_entry_set_text(GTK_ENTRY(data->root_editor), xset_get_s(xset::name::root_editor));
         }
         data->root_editor_terminal =
             GTK_WIDGET(gtk_builder_get_object(builder, "root_editor_terminal"));
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->root_editor_terminal),
-                                     xset_get_b(XSetName::ROOT_EDITOR));
+                                     xset_get_b(xset::name::root_editor));
 
         g_signal_connect(dlg, "response", G_CALLBACK(on_response), data);
         g_object_unref(builder);

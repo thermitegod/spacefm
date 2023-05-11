@@ -160,7 +160,7 @@ open_in_tab(MainWindow** main_window, const char* real_path)
             // use first visible panel
             for (const panel_t p : PANELS)
             {
-                if (xset_get_b_panel(p, XSetPanel::SHOW))
+                if (xset_get_b_panel(p, xset::panel::show))
                 {
                     panel = p;
                     break;
@@ -169,9 +169,9 @@ open_in_tab(MainWindow** main_window, const char* real_path)
         }
 
         // set panel to load real_path on window creation
-        set = xset_get_panel(panel, XSetPanel::SHOW);
+        set = xset_get_panel(panel, xset::panel::show);
         set->ob1 = ztd::strdup(real_path);
-        set->b = XSetB::XSET_B_TRUE;
+        set->b = xset::b::xtrue;
 
         // create new window
         main_window_store_positions(nullptr);
@@ -187,17 +187,17 @@ open_in_tab(MainWindow** main_window, const char* real_path)
             if (!gtk_notebook_get_n_pages(GTK_NOTEBOOK((*main_window)->panel[cli_flags.panel - 1])))
             {
                 // set panel to load real_path on panel load
-                set = xset_get_panel(cli_flags.panel, XSetPanel::SHOW);
+                set = xset_get_panel(cli_flags.panel, xset::panel::show);
                 set->ob1 = ztd::strdup(real_path);
                 tab_added = true;
-                set->b = XSetB::XSET_B_TRUE;
+                set->b = xset::b::xtrue;
                 show_panels_all_windows(nullptr, *main_window);
             }
             else if (!gtk_widget_get_visible((*main_window)->panel[cli_flags.panel - 1]))
             {
                 // show panel
-                set = xset_get_panel(cli_flags.panel, XSetPanel::SHOW);
-                set->b = XSetB::XSET_B_TRUE;
+                set = xset_get_panel(cli_flags.panel, xset::panel::show);
+                set->b = xset::b::xtrue;
                 show_panels_all_windows(nullptr, *main_window);
             }
             (*main_window)->curpanel = cli_flags.panel;
@@ -351,8 +351,8 @@ handle_parsed_commandline_args()
             {
                 // show panel
                 xset_t set;
-                set = xset_get_panel(cli_flags.panel, XSetPanel::SHOW);
-                set->b = XSetB::XSET_B_TRUE;
+                set = xset_get_panel(cli_flags.panel, xset::panel::show);
+                set->b = xset::b::xtrue;
                 show_panels_all_windows(nullptr, main_window);
             }
             focus_panel(nullptr, (void*)main_window, cli_flags.panel);
@@ -502,7 +502,7 @@ main(int argc, char* argv[])
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
 
-    main_window_event(nullptr, nullptr, XSetName::EVT_START, 0, 0, nullptr, 0, 0, 0, false);
+    main_window_event(nullptr, nullptr, xset::name::evt_start, 0, 0, nullptr, 0, 0, 0, false);
 
     // handle the parsed result of command line args
     if (handle_parsed_commandline_args())
@@ -513,7 +513,7 @@ main(int argc, char* argv[])
         gtk_main();
     }
 
-    main_window_event(nullptr, nullptr, XSetName::EVT_EXIT, 0, 0, nullptr, 0, 0, 0, false);
+    main_window_event(nullptr, nullptr, xset::name::evt_exit, 0, 0, nullptr, 0, 0, 0, false);
 
     std::exit(EXIT_SUCCESS);
 }

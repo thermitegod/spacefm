@@ -226,7 +226,7 @@ xset_get_by_plug_name(const std::filesystem::path& plug_dir, const std::string_v
     // add new
     const std::string setname = xset_custom_new_name();
 
-    xset_t set = xset_new(setname, XSetName::CUSTOM);
+    xset_t set = xset_new(setname, xset::name::custom);
     set->plug_dir = plug_dir;
     set->plug_name = ztd::strdup(plug_name.data());
     set->plugin = true;
@@ -273,10 +273,10 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
         return;
     }
 
-    XSetVar var;
+    xset::var var;
     try
     {
-        var = xset_get_xsetvar_from_name(setvar);
+        var = xset::get_xsetvar_from_name(setvar);
     }
     catch (const std::logic_error& e)
     {
@@ -296,7 +296,7 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
     if (use >= PluginUse::BOOKMARKS)
     {
         // map plug names to new set names (does not apply to handlers)
-        if (set->prev && var == XSetVar::PREV)
+        if (set->prev && var == xset::var::prev)
         {
             if (ztd::startswith(set->prev, "cstm_"))
             {
@@ -310,7 +310,7 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
                 set->prev = nullptr;
             }
         }
-        else if (set->next && var == XSetVar::NEXT)
+        else if (set->next && var == xset::var::next)
         {
             if (ztd::startswith(set->next, "cstm_"))
             {
@@ -324,7 +324,7 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
                 set->next = nullptr;
             }
         }
-        else if (set->parent && var == XSetVar::PARENT)
+        else if (set->parent && var == xset::var::parent)
         {
             if (ztd::startswith(set->parent, "cstm_"))
             {
@@ -338,7 +338,7 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
                 set->parent = nullptr;
             }
         }
-        else if (set->child && var == XSetVar::CHILD)
+        else if (set->child && var == xset::var::child)
         {
             if (ztd::startswith(set->child, "cstm_"))
             {
@@ -435,7 +435,7 @@ xset_import_plugin(const std::filesystem::path& plug_dir, PluginUse* use)
         {
             set->key = 0;
             set->keymod = 0;
-            set->tool = XSetTool::NOT;
+            set->tool = xset::tool::NOT;
             set->opener = 0;
             xset_set_plugin_mirror(set);
             if ((set->plugin_top = top))
@@ -519,13 +519,13 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                         set_next->prev = ztd::strdup(newset->name);
                     }
                     plugin_data->set->next = ztd::strdup(newset->name);
-                    if (plugin_data->set->tool != XSetTool::NOT)
+                    if (plugin_data->set->tool != xset::tool::NOT)
                     {
-                        newset->tool = XSetTool::CUSTOM;
+                        newset->tool = xset::tool::custom;
                     }
                     else
                     {
-                        newset->tool = XSetTool::NOT;
+                        newset->tool = xset::tool::NOT;
                     }
                 }
                 else
@@ -533,7 +533,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                     // place on design clipboard
                     xset_set_clipboard = set;
                     xset_clipboard_is_cut = false;
-                    if (xset_get_b(XSetName::PLUG_CVERB) || plugin_data->handler_dlg)
+                    if (xset_get_b(xset::name::plug_cverb) || plugin_data->handler_dlg)
                     {
                         std::string msg;
                         const std::string label = clean_label(set->menu_label, false, false);

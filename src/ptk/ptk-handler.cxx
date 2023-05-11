@@ -94,11 +94,11 @@ inline constexpr std::array<const std::string_view, 4> handler_cust_prefixs{
     "hand_f_",
 };
 
-inline constexpr std::array<XSetName, 4> handler_conf_xsets{
-    XSetName::ARC_CONF2,
-    XSetName::DEV_FS_CNF,
-    XSetName::DEV_NET_CNF,
-    XSetName::OPEN_HAND,
+inline constexpr std::array<xset::name, 4> handler_conf_xsets{
+    xset::name::arc_conf2,
+    xset::name::dev_fs_cnf,
+    xset::name::dev_net_cnf,
+    xset::name::open_hand,
 };
 
 inline constexpr std::array<const std::string_view, 4> dialog_titles{
@@ -188,7 +188,7 @@ struct Handler
 {
     // enabled                                        set->b
     const char* setname{nullptr};      //                      set->name
-    XSetName xset_name;                //                      set->xset_name
+    xset::name xset_name;              //                      set->xset_name
     const char* handler_name{nullptr}; //                      set->menu_label
     const char* type{nullptr};         // or whitelist         set->s
     const char* ext{nullptr};          // or blacklist         set->x
@@ -224,7 +224,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
      */
     Handler{
         "hand_arc_+7z",
-        XSetName::HAND_ARC_7Z,
+        xset::name::hand_arc_7z,
         "7-Zip",
         "application/x-7z-compressed",
         "*.7z",
@@ -237,7 +237,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+rar",
-        XSetName::HAND_ARC_RAR,
+        xset::name::hand_arc_rar,
         "RAR",
         "application/x-rar",
         "*.rar *.RAR",
@@ -250,7 +250,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+tar",
-        XSetName::HAND_ARC_TAR,
+        xset::name::hand_arc_tar,
         "Tar",
         "application/x-tar",
         "*.tar",
@@ -263,7 +263,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+tar_bz2",
-        XSetName::HAND_ARC_TAR_BZ2,
+        xset::name::hand_arc_tar_bz2,
         "Tar bzip2",
         "application/x-bzip-compressed-tar",
         "*.tar.bz2",
@@ -276,7 +276,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+tar_gz",
-        XSetName::HAND_ARC_TAR_GZ,
+        xset::name::hand_arc_tar_gz,
         "Tar Gzip",
         "application/x-compressed-tar",
         "*.tar.gz *.tgz",
@@ -289,7 +289,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+tar_xz",
-        XSetName::HAND_ARC_TAR_XZ,
+        xset::name::hand_arc_tar_xz,
         "Tar xz",
         "application/x-xz-compressed-tar",
         "*.tar.xz *.txz",
@@ -302,7 +302,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+zip",
-        XSetName::HAND_ARC_ZIP,
+        xset::name::hand_arc_zip,
         "Zip",
         "application/x-zip application/zip",
         "*.zip *.ZIP",
@@ -315,7 +315,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+gz",
-        XSetName::HAND_ARC_GZ,
+        xset::name::hand_arc_gz,
         "Gzip",
         "application/x-gzip application/x-gzpdf application/gzip",
         "*.gz",
@@ -328,7 +328,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+xz",
-        XSetName::HAND_ARC_XZ,
+        xset::name::hand_arc_xz,
         "XZ",
         "application/x-xz",
         "*.xz",
@@ -341,7 +341,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+tar_lz4",
-        XSetName::HAND_ARC_TAR_LZ4,
+        xset::name::hand_arc_tar_lz4,
         "Tar Lz4",
         "application/x-lz4-compressed-tar",
         "*.tar.lz4",
@@ -354,7 +354,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+lz4",
-        XSetName::HAND_ARC_LZ4,
+        xset::name::hand_arc_lz4,
         "Lz4",
         "application/x-lz4",
         "*.lz4",
@@ -367,7 +367,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+tar_zst",
-        XSetName::HAND_ARC_TAR_ZST,
+        xset::name::hand_arc_tar_zst,
         "Tar Zstd",
         "application/x-zstd-compressed-tar",
         "*.tar.zst",
@@ -380,7 +380,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
     },
     Handler{
         "hand_arc_+zst",
-        XSetName::HAND_ARC_ZIP,
+        xset::name::hand_arc_zip,
         "Zstd",
         "application/zstd",
         "*.zst",
@@ -415,7 +415,7 @@ inline constexpr std::array<Handler, 3> handlers_fs{
      */
     Handler{
         "hand_fs_+fuseiso",
-        XSetName::HAND_FS_FUSEISO,
+        xset::name::hand_fs_fuseiso,
         "fuseiso unmount",
         "*fuseiso",
         "",
@@ -430,7 +430,7 @@ inline constexpr std::array<Handler, 3> handlers_fs{
     },
     Handler{
         "hand_fs_+udiso",
-        XSetName::HAND_FS_UDISO,
+        xset::name::hand_fs_udiso,
         "udevil iso unmount",
         "+iso9660 +dev=/dev/loop*",
         "optical=1 removable=1",
@@ -446,7 +446,7 @@ inline constexpr std::array<Handler, 3> handlers_fs{
     },
     Handler{
         "hand_fs_+def",
-        XSetName::HAND_FS_DEF,
+        xset::name::hand_fs_def,
         "Default",
         "*",
         "",
@@ -509,7 +509,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
      */
     Handler{
         "hand_net_+http",
-        XSetName::HAND_NET_HTTP,
+        xset::name::hand_net_http,
         "http & webdav",
         "http https webdav davfs davs dav mtab_fs=davfs*",
         "",
@@ -552,7 +552,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+ftp",
-        XSetName::HAND_NET_FTP,
+        xset::name::hand_net_ftp,
         "ftp",
         "ftp",
         "",
@@ -576,7 +576,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+ssh",
-        XSetName::HAND_NET_SSH,
+        xset::name::hand_net_ssh,
         "ssh",
         "ssh sftp mtab_fs=fuse.sshfs",
         "",
@@ -605,7 +605,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+mtp",
-        XSetName::HAND_NET_MTP,
+        xset::name::hand_net_mtp,
         "mtp",
         "mtp mtab_fs=fuse.jmtpfs mtab_fs=fuse.simple-mtpfs mtab_fs=fuse.mtpfs "
         "mtab_fs=fuse.DeviceFs(*",
@@ -636,7 +636,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+gphoto",
-        XSetName::HAND_NET_GPHOTO,
+        xset::name::hand_net_gphoto,
         "ptp",
         "ptp gphoto mtab_fs=fuse.gphotofs",
         "",
@@ -649,7 +649,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+ifuse",
-        XSetName::HAND_NET_IFUSE,
+        xset::name::hand_net_ifuse,
         "ifuse",
         "ifuse ios mtab_fs=fuse.ifuse",
         "",
@@ -662,7 +662,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+udevil",
-        XSetName::HAND_NET_UDEVIL,
+        xset::name::hand_net_udevil,
         "udevil",
         "ftp http https nfs ssh mtab_fs=fuse.sshfs mtab_fs=davfs*",
         "",
@@ -675,7 +675,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+udevilsmb",
-        XSetName::HAND_NET_UDEVILSMB,
+        xset::name::hand_net_udevilsmb,
         "udevil-smb",
         "smb mtab_fs=cifs",
         "",
@@ -689,7 +689,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+fusesmb",
-        XSetName::HAND_NET_FUSESMB,
+        xset::name::hand_net_fusesmb,
         "fusesmb",
         "smb mtab_fs=fuse.fusesmb",
         "",
@@ -702,7 +702,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
     },
     Handler{
         "hand_net_+fuse",
-        XSetName::HAND_NET_FUSE,
+        xset::name::hand_net_fuse,
         "fuse unmount",
         "mtab_fs=fuse.* mtab_fs=fuse",
         "",
@@ -721,7 +721,7 @@ inline constexpr std::array<Handler, 1> handlers_file{
      * For file handlers, extract_term is used for Run As Task. */
     Handler{
         "hand_f_+iso",
-        XSetName::HAND_F_ISO,
+        xset::name::hand_f_iso,
         "Mount ISO",
         "application/x-iso9660-image application/x-iso-image application/x-cd-image",
         "*.img *.iso *.mdf *.nrg",
@@ -1369,7 +1369,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
                 {
                     set->scroll_lock = handler->list_term;
                 }
-                set->b = XSetB::XSET_B_TRUE;
+                set->b = xset::b::xtrue;
                 set->lock = false;
                 // handler equals default, so do not save in session
                 set->disable = true;
@@ -1459,14 +1459,14 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     if (ztd::compare(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
     {
         // No handlers present - adding new handler
-        xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handler_xset->name);
+        xset_set(handler_conf_xsets.at(mode), xset::var::s, new_handler_xset->name);
     }
     else
     {
         // Adding new handler to handlers
         const std::string new_handlers_list =
             std::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
-        xset_set(handler_conf_xsets.at(mode), XSetVar::S, new_handlers_list);
+        xset_set(handler_conf_xsets.at(mode), xset::var::s, new_handlers_list);
     }
 
     // have handler dialog open?
@@ -1515,10 +1515,9 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     // Adding handler to model
     const char* disabled =
         hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
-    const std::string dis_name =
-        std::format("{} {}",
-                    new_handler_xset->menu_label,
-                    new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+    const std::string dis_name = std::format("{} {}",
+                                             new_handler_xset->menu_label,
+                                             new_handler_xset->b == xset::b::xtrue ? "" : disabled);
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                        &iter,
                        PtkHandlerCol::COL_XSET_NAME,
@@ -1569,7 +1568,7 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
      * extension warrant a warning
      * Commands are prefixed with '+' when they are ran in a terminal */
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_enabled),
-                                 handler_xset->b == XSetB::XSET_B_TRUE);
+                                 handler_xset->b == xset::b::xtrue);
 
     gtk_entry_set_text(GTK_ENTRY(hnd->entry_handler_name),
                        handler_xset->menu_label ? handler_xset->menu_label : "");
@@ -1708,7 +1707,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                 const std::string dis_name =
                     std::format("{} {}",
                                 handler_xset->menu_label,
-                                handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+                                handler_xset->b == xset::b::xtrue ? "" : disabled);
                 gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                                    &iter,
                                    PtkHandlerCol::COL_XSET_NAME,
@@ -1783,7 +1782,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(hnd->list), &iter));
 
     // Saving the new archive handlers list
-    xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, archive_handlers);
+    xset_set(handler_conf_xsets.at(hnd->mode), xset::var::s, archive_handlers);
 
     // Saving settings
     autosave_request_add();
@@ -1859,13 +1858,14 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         xset_t new_handler_xset = add_new_handler(hnd->mode);
         new_handler_xset->b =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_enabled))
-                ? XSetB::XSET_B_TRUE
-                : XSetB::XSET_B_FALSE;
+                ? xset::b::xtrue
+                : xset::b::xfalse;
         new_handler_xset->disable = false; // not default - save in session
-        xset_set_var(new_handler_xset, XSetVar::MENU_LABEL, handler_name);
-        xset_set_var(new_handler_xset, XSetVar::S,
+        xset_set_var(new_handler_xset, xset::var::menu_label, handler_name);
+        xset_set_var(new_handler_xset, xset::var::s,
                      handler_mime); // Mime Type(s) or whitelist
-        xset_set_var(new_handler_xset, XSetVar::X,
+        xset_set_var(new_handler_xset,
+                     xset::var::x,
                      handler_extension); // Extension(s) or blacklist
         new_handler_xset->in_terminal = handler_compress_term;
         new_handler_xset->keep_terminal = handler_extract_term;
@@ -1908,7 +1908,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         const std::string dis_name =
             std::format("{} {}",
                         handler_name,
-                        new_handler_xset->b == XSetB::XSET_B_TRUE ? "" : disabled);
+                        new_handler_xset->b == xset::b::xtrue ? "" : disabled);
         gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                            &iter,
                            PtkHandlerCol::COL_XSET_NAME,
@@ -1921,7 +1921,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (ztd::compare(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
         {
             // No handlers present - adding new handler
-            xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_handler_xset->name);
+            xset_set(handler_conf_xsets.at(hnd->mode), xset::var::s, new_handler_xset->name);
         }
         else
         {
@@ -1930,7 +1930,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                 std::format("{} {}",
                             new_handler_xset->name,
                             xset_get_s(handler_conf_xsets.at(hnd->mode)));
-            xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_handlers_list);
+            xset_set(handler_conf_xsets.at(hnd->mode), xset::var::s, new_handlers_list);
         }
 
         // Activating the new handler - the normal loading code
@@ -1986,12 +1986,12 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Saving archive handler
-        handler_xset->b = handler_enabled ? XSetB::XSET_B_TRUE : XSetB::XSET_B_UNSET;
+        handler_xset->b = handler_enabled ? xset::b::xtrue : xset::b::unset;
         const bool was_default = handler_xset->disable;
         handler_xset->disable = false; // not default - save in session
-        xset_set_var(handler_xset, XSetVar::MENU_LABEL, handler_name);
-        xset_set_var(handler_xset, XSetVar::S, handler_mime);
-        xset_set_var(handler_xset, XSetVar::X, handler_extension);
+        xset_set_var(handler_xset, xset::var::menu_label, handler_name);
+        xset_set_var(handler_xset, xset::var::s, handler_mime);
+        xset_set_var(handler_xset, xset::var::x, handler_extension);
         handler_xset->in_terminal = handler_compress_term;
         handler_xset->keep_terminal = handler_extract_term;
         if (hnd->compress_changed || was_default)
@@ -2081,7 +2081,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Finally updating handlers
-        xset_set(handler_conf_xsets.at(hnd->mode), XSetVar::S, new_archive_handlers_s);
+        xset_set(handler_conf_xsets.at(hnd->mode), xset::var::s, new_archive_handlers_s);
 
         // Deleting xset
         xset_custom_delete(handler_xset, false);
@@ -2472,7 +2472,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         // create fake xset
-        const auto set = new XSet(ztd::strdup(handler->setname), XSetName::CUSTOM);
+        const auto set = new xset::XSet(ztd::strdup(handler->setname), xset::name::custom);
         set->menu_label = (char*)handler->handler_name;
         set->s = (char*)handler->type;
         set->x = (char*)handler->ext;
@@ -2482,7 +2482,7 @@ restore_defaults(HandlerData* hnd, bool all)
         {
             set->scroll_lock = handler->list_term;
         }
-        set->b = XSetB::XSET_B_TRUE;
+        set->b = xset::b::xtrue;
         set->icon = nullptr;
 
         // show fake xset values
@@ -2637,8 +2637,8 @@ on_textview_popup(GtkTextView* input, GtkMenu* menu, HandlerData* hnd)
     (void)hnd;
     // uses same xsets as item-prop.c:on_script_popup()
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    xset_t set = xset_get(XSetName::SEPARATOR);
-    set->menu_style = XSetMenu::SEP;
+    xset_t set = xset_get(xset::name::separator);
+    set->menu_style = xset::menu::sep;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
 
@@ -2674,7 +2674,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
     xset_t set = xset_is(xset_name);
     std::free(xset_name);
-    if (!(set && !set->disable && set->b == XSetB::XSET_B_TRUE))
+    if (!(set && !set->disable && set->b == xset::b::xtrue))
     {
         return true;
     }
@@ -2809,14 +2809,14 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     {
         case PtkHandlerJob::HANDLER_JOB_IMPORT_FILE:
             // get file path
-            save = xset_get(XSetName::PLUG_IFILE);
+            save = xset_get(xset::name::plug_ifile);
             if (save->s)
             { //&& std::filesystem::is_directory(save->s)
                 folder = save->s;
             }
             else
             {
-                if (!(folder = xset_get_s(XSetName::GO_SET_DEFAULT)))
+                if (!(folder = xset_get_s(xset::name::go_set_default)))
                 {
                     folder = ztd::strdup("/");
                 }
@@ -2898,18 +2898,18 @@ static void
 on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
-    static constexpr std::array<XSetName, 4> arcnames{
-        XSetName::ARC_DEF_OPEN,
-        XSetName::ARC_DEF_EX,
-        XSetName::ARC_DEF_EXTO,
-        XSetName::ARC_DEF_LIST,
+    static constexpr std::array<xset::name, 4> arcnames{
+        xset::name::arc_def_open,
+        xset::name::arc_def_ex,
+        xset::name::arc_def_exto,
+        xset::name::arc_def_list,
     };
 
-    for (const XSetName arcname : arcnames)
+    for (const xset::name arcname : arcnames)
     {
         if (set->xset_name == arcname)
         {
-            set->b = XSetB::XSET_B_TRUE;
+            set->b = xset::b::xtrue;
         }
         else
         {
@@ -2978,29 +2978,29 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // Archive options
             xset_context_new();
             gtk_container_add(GTK_CONTAINER(popup), gtk_separator_menu_item_new());
-            set = xset_get(XSetName::ARC_DEF_OPEN);
+            set = xset_get(xset::name::arc_def_open);
             // do NOT use set = xset_set_cb here or wrong set is passed
-            xset_set_cb(XSetName::ARC_DEF_OPEN, (GFunc)on_archive_default, set);
+            xset_set_cb(xset::name::arc_def_open, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, nullptr);
             xset_t set_radio = set;
 
-            set = xset_get(XSetName::ARC_DEF_EX);
-            xset_set_cb(XSetName::ARC_DEF_EX, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::arc_def_ex);
+            xset_set_cb(xset::name::arc_def_ex, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name);
 
-            set = xset_get(XSetName::ARC_DEF_EXTO);
-            xset_set_cb(XSetName::ARC_DEF_EXTO, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::arc_def_exto);
+            xset_set_cb(xset::name::arc_def_exto, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name);
 
-            set = xset_get(XSetName::ARC_DEF_LIST);
-            xset_set_cb(XSetName::ARC_DEF_LIST, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::arc_def_list);
+            xset_set_cb(xset::name::arc_def_list, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name);
 
-            set = xset_get(XSetName::ARC_DEF_WRITE);
-            set->disable = geteuid() == 0 || !xset_get_b(XSetName::ARC_DEF_PARENT);
+            set = xset_get(xset::name::arc_def_write);
+            set->disable = geteuid() == 0 || !xset_get_b(xset::name::arc_def_parent);
 
             // temp remove unwanted items from Archive Defaults submenu
-            set = xset_get(XSetName::ARC_DEFAULT);
+            set = xset_get(xset::name::arc_default);
             char* old_desc = set->desc;
             set->desc = ztd::strdup("arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
                                     "arc_def_parent arc_def_write");
@@ -3016,7 +3016,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             xset_add_menuitem(hnd->browser,
                               popup,
                               accel_group,
-                              xset_get(XSetName::DEV_MOUNT_OPTIONS));
+                              xset_get(xset::name::dev_mount_options));
         }
     }
 
@@ -3059,8 +3059,9 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    i32 width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::X);
-    i32 height = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), XSetVar::Y);
+    i32 width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), xset::var::x);
+    i32 height =
+        xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), xset::var::y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
@@ -3578,10 +3579,10 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     {
         // They are - saving
         xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
-                 XSetVar::X,
+                 xset::var::x,
                  std::to_string(width));
         xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
-                 XSetVar::Y,
+                 xset::var::y,
                  std::to_string(height));
     }
 

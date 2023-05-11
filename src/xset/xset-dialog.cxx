@@ -224,8 +224,8 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     xset_set_window_icon(GTK_WINDOW(dlg));
     gtk_window_set_role(GTK_WINDOW(dlg), "text_dialog");
 
-    i32 width = xset_get_int(XSetName::TEXT_DLG, XSetVar::S);
-    i32 height = xset_get_int(XSetName::TEXT_DLG, XSetVar::Z);
+    i32 width = xset_get_int(xset::name::text_dlg, xset::var::s);
+    i32 height = xset_get_int(xset::name::text_dlg, xset::var::z);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
@@ -393,8 +393,8 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::TEXT_DLG, XSetVar::S, std::to_string(width));
-        xset_set(XSetName::TEXT_DLG, XSetVar::Z, std::to_string(height));
+        xset_set(xset::name::text_dlg, xset::var::s, std::to_string(width));
+        xset_set(xset::name::text_dlg, xset::var::z, std::to_string(height));
     }
     gtk_widget_destroy(dlg);
     return ret;
@@ -432,7 +432,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     }
     else
     {
-        path = xset_get_s(XSetName::GO_SET_DEFAULT);
+        path = xset_get_s(xset::name::go_set_default);
         if (path && path[0] != '\0')
         {
             gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
@@ -457,8 +457,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         }
     }
 
-    i32 width = xset_get_int(XSetName::FILE_DLG, XSetVar::X);
-    i32 height = xset_get_int(XSetName::FILE_DLG, XSetVar::Y);
+    i32 width = xset_get_int(xset::name::file_dlg, xset::var::x);
+    i32 height = xset_get_int(xset::name::file_dlg, xset::var::y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -480,8 +480,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::FILE_DLG, XSetVar::X, std::to_string(width));
-        xset_set(XSetName::FILE_DLG, XSetVar::Y, std::to_string(height));
+        xset_set(xset::name::file_dlg, xset::var::x, std::to_string(width));
+        xset_set(xset::name::file_dlg, xset::var::y, std::to_string(height));
     }
 
     if (response == GtkResponseType::GTK_RESPONSE_OK)

@@ -369,7 +369,7 @@ void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser, PtkFBSortOrde
 
 void ptk_file_browser_set_sort_type(PtkFileBrowser* file_browser, GtkSortType order);
 
-void ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, XSetName setname);
+void ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, xset::name setname);
 void ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser);
 
 const std::vector<vfs::file_info> ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser);
@@ -429,8 +429,8 @@ void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_brow
                                     const std::filesystem::path& cwd);
 void ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
                               const std::span<const vfs::file_info> sel_files,
-                              const std::filesystem::path& cwd, XSetName setname);
-void ptk_file_browser_on_action(PtkFileBrowser* browser, XSetName setname);
+                              const std::filesystem::path& cwd, xset::name setname);
+void ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname);
 GList* folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model);
 void ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem::path& path);
 void ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
@@ -438,8 +438,8 @@ void ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** file
 void ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::path& seek_dir,
                                 const std::filesystem::path& seek_name);
 void ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget);
-void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, XSetTool tool_type);
+void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset::tool tool_type);
 void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset_t set_ptr,
-                                             XSetTool tool_type);
+                                             xset::tool tool_type);
 void ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_history,
                                         GdkEventButton* event);

@@ -77,12 +77,12 @@ static bool
 open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_info> sel_files,
                            const std::filesystem::path& full_path, vfs::mime_type mime_type)
 {
-    if (xset_get_b(XSetName::ARC_DEF_OPEN))
+    if (xset_get_b(xset::name::arc_def_open))
     {                 // user has open archives with app option enabled
         return false; // do not handle these files
     }
 
-    const bool extract_here = xset_get_b(XSetName::ARC_DEF_EX);
+    const bool extract_here = xset_get_b(xset::name::arc_def_ex);
     std::filesystem::path dest_dir;
     i32 cmd;
 
@@ -93,12 +93,12 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
         cmd = PtkHandlerArchive::HANDLER_EXTRACT;
         dest_dir = parent->cwd;
     }
-    else if (extract_here || xset_get_b(XSetName::ARC_DEF_EXTO))
+    else if (extract_here || xset_get_b(xset::name::arc_def_exto))
     {
         // Extract Here but no write access or Extract To option
         cmd = PtkHandlerArchive::HANDLER_EXTRACT;
     }
-    else if (xset_get_b(XSetName::ARC_DEF_LIST))
+    else if (xset_get_b(xset::name::arc_def_list))
     {
         // List contents
         cmd = PtkHandlerArchive::HANDLER_LIST;

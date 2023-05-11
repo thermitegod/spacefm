@@ -279,6 +279,10 @@ preprocessor = [
     '-DG_LOG_DOMAIN="SpaceFM"',
     #'-DG_DEBUG=fatal_warnings',
 
+    # '-DMAGIC_ENUM_RANGE_MIN=0',
+    # '-DMAGIC_ENUM_RANGE_MAX=1000',
+    # '-DMAGIC_ENUM_RANGE_MAX=32767',
+
     '-DLIBDIR_PATH="@0@"'.format(libdir),
 
     '-DGTK_DISABLE_DEPRECATED',

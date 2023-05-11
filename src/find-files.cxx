@@ -736,8 +736,8 @@ on_start_search(GtkWidget* btn, FindFile* data)
     const i32 height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::MAIN_SEARCH, XSetVar::X, std::to_string(width));
-        xset_set(XSetName::MAIN_SEARCH, XSetVar::Y, std::to_string(height));
+        xset_set(xset::name::MAIN_SEARCH, xset::var::X, std::to_string(width));
+        xset_set(xset::name::MAIN_SEARCH, xset::var::Y, std::to_string(height));
     }
 
     gtk_widget_hide(data->search_criteria);
@@ -791,8 +791,8 @@ on_search_again(GtkWidget* btn, FindFile* data)
     const i32 height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::MAIN_SEARCH, XSetVar::X, std::to_string(width));
-        xset_set(XSetName::MAIN_SEARCH, XSetVar::Y, std::to_string(height));
+        xset_set(xset::name::MAIN_SEARCH, xset::var::X, std::to_string(width));
+        xset_set(xset::name::MAIN_SEARCH, xset::var::Y, std::to_string(height));
     }
 
     gtk_widget_show(data->search_criteria);
@@ -1254,8 +1254,8 @@ find_files(const std::vector<std::string>& search_dirs)
 
     g_signal_connect(data->win, "delete-event", G_CALLBACK(gtk_widget_destroy), nullptr);
 
-    const i32 width = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::X);
-    const i32 height = xset_get_int(XSetName::MAIN_SEARCH, XSetVar::Y);
+    const i32 width = xset_get_int(xset::name::MAIN_SEARCH, xset::var::X);
+    const i32 height = xset_get_int(xset::name::MAIN_SEARCH, xset::var::Y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(data->win), width, height);

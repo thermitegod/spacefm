@@ -375,7 +375,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     }
     if (vol->is_mounted && !vol->mount_point.empty())
     {
-        if (xset_get_b(XSetName::DEV_NEWTAB))
+        if (xset_get_b(xset::name::dev_newtab))
         {
             file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
                                                           PtkOpenAction::PTK_OPEN_NEW_TAB);
@@ -938,7 +938,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
     const auto ao = new AutoOpen(file_browser);
     ao->devnum = vol->devnum;
 
-    if (xset_get_b(XSetName::DEV_NEWTAB))
+    if (xset_get_b(xset::name::dev_newtab))
     {
         ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
     }
@@ -1117,7 +1117,7 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
-    xset_t set = xset_get(XSetName::DEV_SHOW_HIDE_VOLUMES);
+    xset_t set = xset_get(xset::name::dev_show_hide_volumes);
     if (vol)
     {
         const std::string devid = ztd::removeprefix(vol->udi, "/");
@@ -1153,7 +1153,7 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
-    xset_t set = xset_get(XSetName::DEV_AUTOMOUNT_VOLUMES);
+    xset_t set = xset_get(xset::name::dev_automount_volumes);
     if (vol)
     {
         const std::string devid = ztd::removeprefix(vol->udi, "/");
@@ -1191,11 +1191,11 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
         set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     }
 
-    if (set->xset_name == XSetName::DEV_FS_CNF)
+    if (set->xset_name == xset::name::dev_fs_cnf)
     {
         mode = PtkHandlerMode::HANDLER_MODE_FS;
     }
-    else if (set->xset_name == XSetName::DEV_NET_CNF)
+    else if (set->xset_name == xset::name::dev_net_cnf)
     {
         mode = PtkHandlerMode::HANDLER_MODE_NET;
     }
@@ -1214,19 +1214,19 @@ volume_is_visible(vfs::volume vol)
     // network
     if (vol->device_type == VFSVolumeDeviceType::NETWORK)
     {
-        return xset_get_b(XSetName::DEV_SHOW_NET);
+        return xset_get_b(xset::name::dev_show_net);
     }
 
     // other - eg fuseiso mounted file
     if (vol->device_type == VFSVolumeDeviceType::OTHER)
     {
-        return xset_get_b(XSetName::DEV_SHOW_FILE);
+        return xset_get_b(xset::name::dev_show_file);
     }
 
     // loop
     if (ztd::startswith(vol->device_file, "/dev/loop"))
     {
-        if (vol->is_mounted && xset_get_b(XSetName::DEV_SHOW_FILE))
+        if (vol->is_mounted && xset_get_b(xset::name::dev_show_file))
         {
             return true;
         }
@@ -1245,7 +1245,7 @@ volume_is_visible(vfs::volume vol)
     }
 
     // internal?
-    if (!vol->is_removable && !xset_get_b(XSetName::DEV_SHOW_INTERNAL_DRIVES))
+    if (!vol->is_removable && !xset_get_b(xset::name::dev_show_internal_drives))
     {
         return false;
     }
@@ -1257,7 +1257,7 @@ volume_is_visible(vfs::volume vol)
     }
 
     // has media?
-    if (!vol->is_mountable && !vol->is_mounted && !xset_get_b(XSetName::DEV_SHOW_EMPTY))
+    if (!vol->is_mountable && !vol->is_mounted && !xset_get_b(xset::name::dev_show_empty))
     {
         return false;
     }
@@ -1275,19 +1275,19 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
     }
     vfs::volume vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
 
-    if (set->xset_name == XSetName::DEV_SHOW_INTERNAL_DRIVES ||
-        set->xset_name == XSetName::DEV_SHOW_EMPTY ||
-        set->xset_name == XSetName::DEV_SHOW_PARTITION_TABLES ||
-        set->xset_name == XSetName::DEV_SHOW_NET || set->xset_name == XSetName::DEV_SHOW_FILE ||
-        set->xset_name == XSetName::DEV_IGNORE_UDISKS_HIDE ||
-        set->xset_name == XSetName::DEV_SHOW_HIDE_VOLUMES ||
-        set->xset_name == XSetName::DEV_AUTOMOUNT_OPTICAL ||
-        set->xset_name == XSetName::DEV_AUTOMOUNT_REMOVABLE ||
-        set->xset_name == XSetName::DEV_IGNORE_UDISKS_NOPOLICY)
+    if (set->xset_name == xset::name::dev_show_internal_drives ||
+        set->xset_name == xset::name::dev_show_empty ||
+        set->xset_name == xset::name::dev_show_partition_tables ||
+        set->xset_name == xset::name::dev_show_net || set->xset_name == xset::name::dev_show_file ||
+        set->xset_name == xset::name::dev_ignore_udisks_hide ||
+        set->xset_name == xset::name::dev_show_hide_volumes ||
+        set->xset_name == xset::name::dev_automount_optical ||
+        set->xset_name == xset::name::dev_automount_removable ||
+        set->xset_name == xset::name::dev_ignore_udisks_nopolicy)
     {
         update_all();
     }
-    else if (set->xset_name == XSetName::DEV_AUTOMOUNT_VOLUMES)
+    else if (set->xset_name == xset::name::dev_automount_volumes)
     {
         on_automountlist(nullptr, vol, view);
     }
@@ -1295,19 +1295,19 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
     {
         update_volume_icons();
     }
-    else if (set->xset_name == XSetName::DEV_DISPNAME)
+    else if (set->xset_name == xset::name::dev_dispname)
     {
         update_names();
     }
-    else if (set->xset_name == XSetName::DEV_FS_CNF)
+    else if (set->xset_name == xset::name::dev_fs_cnf)
     {
         on_handler_show_config(nullptr, view, set);
     }
-    else if (set->xset_name == XSetName::DEV_NET_CNF)
+    else if (set->xset_name == xset::name::dev_net_cnf)
     {
         on_handler_show_config(nullptr, view, set);
     }
-    else if (set->xset_name == XSetName::DEV_CHANGE)
+    else if (set->xset_name == xset::name::dev_change)
     {
         update_change_detection();
     }
@@ -1320,23 +1320,23 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
         // require vol != nullptr
         if (ztd::startswith(set->name, "dev_menu_"))
         {
-            if (set->xset_name == XSetName::DEV_MENU_REMOVE)
+            if (set->xset_name == xset::name::dev_menu_remove)
             {
                 on_eject(nullptr, vol, view);
             }
-            else if (set->xset_name == XSetName::DEV_MENU_UNMOUNT)
+            else if (set->xset_name == xset::name::dev_menu_unmount)
             {
                 on_umount(nullptr, vol, view);
             }
-            else if (set->xset_name == XSetName::DEV_MENU_OPEN)
+            else if (set->xset_name == xset::name::dev_menu_open)
             {
                 on_open(nullptr, vol, view);
             }
-            else if (set->xset_name == XSetName::DEV_MENU_TAB)
+            else if (set->xset_name == xset::name::dev_menu_tab)
             {
                 on_open_tab(nullptr, vol, view);
             }
-            else if (set->xset_name == XSetName::DEV_MENU_MOUNT)
+            else if (set->xset_name == xset::name::dev_menu_mount)
             {
                 on_mount(nullptr, vol, view);
             }
@@ -1357,39 +1357,39 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     const xset_context_t context = xset_context_new();
     main_context_fill(file_browser, context);
 
-    set = xset_get(XSetName::DEV_MENU_REMOVE);
+    set = xset_get(xset::name::dev_menu_remove);
     xset_set_cb(set, (GFunc)on_eject, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_get(XSetName::DEV_MENU_UNMOUNT);
+    set = xset_get(xset::name::dev_menu_unmount);
     xset_set_cb(set, (GFunc)on_umount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol; //!( vol && vol->is_mounted );
-    set = xset_get(XSetName::DEV_MENU_OPEN);
+    set = xset_get(xset::name::dev_menu_open);
     xset_set_cb(set, (GFunc)on_open, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_get(XSetName::DEV_MENU_TAB);
+    set = xset_get(xset::name::dev_menu_tab);
     xset_set_cb(set, (GFunc)on_open_tab, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
-    set = xset_get(XSetName::DEV_MENU_MOUNT);
+    set = xset_get(xset::name::dev_menu_mount);
     xset_set_cb(set, (GFunc)on_mount, vol);
     xset_set_ob1(set, "view", view);
     set->disable = !vol; // || ( vol && vol->is_mounted );
 
-    xset_set_cb(XSetName::DEV_SHOW_INTERNAL_DRIVES, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_EMPTY, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_PARTITION_TABLES, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_NET, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_FILE, (GFunc)update_all, nullptr);
-    // set->disable = xset_get_b(XSetName::DEV_SHOW_INTERNAL_DRIVES);
-    xset_set_cb(XSetName::DEV_IGNORE_UDISKS_HIDE, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_HIDE_VOLUMES, (GFunc)on_showhide, vol);
-    xset_set_cb(XSetName::DEV_AUTOMOUNT_OPTICAL, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_AUTOMOUNT_REMOVABLE, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_IGNORE_UDISKS_NOPOLICY, (GFunc)update_all, nullptr);
-    set = xset_get(XSetName::DEV_AUTOMOUNT_VOLUMES);
+    xset_set_cb(xset::name::dev_show_internal_drives, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_empty, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_partition_tables, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_net, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_file, (GFunc)update_all, nullptr);
+    // set->disable = xset_get_b(xset::name::DEV_SHOW_INTERNAL_DRIVES);
+    xset_set_cb(xset::name::dev_ignore_udisks_hide, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol);
+    xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
+    set = xset_get(xset::name::dev_automount_volumes);
     xset_set_cb(set, (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
@@ -1413,41 +1413,41 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     // set = xset_get("dev_menu_root");
     // set->disable = !vol;
 
-    xset_set_cb(XSetName::DEV_ICON_AUDIOCD, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_OPTICAL_MOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_OPTICAL_MEDIA, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_OPTICAL_NOMEDIA, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_FLOPPY_MOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_FLOPPY_UNMOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_REMOVE_MOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_REMOVE_UNMOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_INTERNAL_MOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_INTERNAL_UNMOUNTED, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(XSetName::DEV_ICON_NETWORK, (GFunc)update_all_icons, nullptr);
-    xset_set_cb(XSetName::DEV_DISPNAME, (GFunc)update_names, nullptr);
-    xset_set_cb(XSetName::DEV_CHANGE, (GFunc)update_change_detection, nullptr);
+    xset_set_cb(xset::name::dev_icon_audiocd, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_optical_mounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_optical_media, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_optical_nomedia, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_floppy_mounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_floppy_unmounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_remove_mounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_remove_unmounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_internal_mounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_internal_unmounted, (GFunc)update_volume_icons, nullptr);
+    xset_set_cb(xset::name::dev_icon_network, (GFunc)update_all_icons, nullptr);
+    xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
+    xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    const bool auto_optical = xset_get_b(XSetName::DEV_AUTOMOUNT_OPTICAL);
-    const bool auto_removable = xset_get_b(XSetName::DEV_AUTOMOUNT_REMOVABLE);
+    const bool auto_optical = xset_get_b(xset::name::dev_automount_optical);
+    const bool auto_removable = xset_get_b(xset::name::dev_automount_removable);
 
-    set = xset_get(XSetName::DEV_EXEC_FS);
+    set = xset_get(xset::name::dev_exec_fs);
     set->disable = !auto_optical && !auto_removable;
-    set = xset_get(XSetName::DEV_EXEC_AUDIO);
+    set = xset_get(xset::name::dev_exec_audio);
     set->disable = !auto_optical;
-    set = xset_get(XSetName::DEV_EXEC_VIDEO);
+    set = xset_get(xset::name::dev_exec_video);
     set->disable = !auto_optical;
 
-    set = xset_get(XSetName::DEV_FS_CNF);
+    set = xset_get(xset::name::dev_fs_cnf);
     xset_set_cb(set, (GFunc)on_handler_show_config, view);
     xset_set_ob1(set, "set", set);
-    set = xset_get(XSetName::DEV_NET_CNF);
+    set = xset_get(xset::name::dev_net_cnf);
     xset_set_cb(set, (GFunc)on_handler_show_config, view);
     xset_set_ob1(set, "set", set);
 
-    set = xset_get(XSetName::DEV_MENU_SETTINGS);
+    set = xset_get(xset::name::dev_menu_settings);
     menu_elements = "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change separator dev_single dev_newtab dev_icon";
-    xset_set_var(set, XSetVar::DESC, menu_elements);
+    xset_set_var(set, xset::var::desc, menu_elements);
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
     xset_add_menu(file_browser, popup, accel_group, menu_elements.data());
@@ -1480,7 +1480,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
     if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
         main_window_event(file_browser->main_window,
                           event_handler->win_click,
-                          XSetName::EVT_WIN_CLICK,
+                          xset::name::evt_win_click,
                           0,
                           0,
                           "devices",
@@ -1511,7 +1511,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
             // left button
             if (vol)
             {
-                if (xset_get_b(XSetName::DEV_SINGLE))
+                if (xset_get_b(xset::name::dev_single))
                 {
                     gtk_tree_view_row_activated(view, tree_path, nullptr);
                     ret = true;
@@ -1589,7 +1589,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     }
 
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
-    if (xset_get_b(XSetName::DEV_NEWTAB))
+    if (xset_get_b(xset::name::dev_newtab))
     {
         file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     }
@@ -1632,13 +1632,13 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     GtkWidget* item;
     GtkWidget* popup = gtk_menu_new();
 
-    set = xset_get(XSetName::DEV_MENU_REMOVE);
+    set = xset_get(xset::name::dev_menu_remove);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label);
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(item, "activate", G_CALLBACK(on_eject), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
 
-    set = xset_get(XSetName::DEV_MENU_UNMOUNT);
+    set = xset_get(xset::name::dev_menu_unmount);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label);
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(item, "activate", G_CALLBACK(on_umount), vol);
@@ -1647,7 +1647,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
 
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), gtk_separator_menu_item_new());
 
-    set = xset_get(XSetName::DEV_MENU_OPEN);
+    set = xset_get(xset::name::dev_menu_open);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label);
     g_object_set_data(G_OBJECT(item), "view", view);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1660,7 +1660,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
         g_signal_connect(item, "activate", G_CALLBACK(on_open), vol);
     }
 
-    set = xset_get(XSetName::DEV_MENU_MOUNT);
+    set = xset_get(xset::name::dev_menu_mount);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label);
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(item, "activate", G_CALLBACK(on_mount), vol);
@@ -1786,34 +1786,34 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     }
     g_signal_connect(menu, "key_press_event", G_CALLBACK(on_dev_menu_keypress), nullptr);
 
-    xset_set_cb(XSetName::DEV_SHOW_INTERNAL_DRIVES, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_EMPTY, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_PARTITION_TABLES, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_NET, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_FILE, (GFunc)update_all, nullptr);
-    // set->disable = xset_get_b(XSetName::DEV_SHOW_INTERNAL_DRIVES);
-    xset_set_cb(XSetName::DEV_IGNORE_UDISKS_HIDE, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_SHOW_HIDE_VOLUMES, (GFunc)on_showhide, vol);
-    xset_set_cb(XSetName::DEV_AUTOMOUNT_OPTICAL, (GFunc)update_all, nullptr);
-    // bool auto_optical = set->b == XSetB::XSET_B_TRUE;
-    xset_set_cb(XSetName::DEV_AUTOMOUNT_REMOVABLE, (GFunc)update_all, nullptr);
-    // bool auto_removable = set->b == XSetB::XSET_B_TRUE;
-    xset_set_cb(XSetName::DEV_IGNORE_UDISKS_NOPOLICY, (GFunc)update_all, nullptr);
-    xset_set_cb(XSetName::DEV_AUTOMOUNT_VOLUMES, (GFunc)on_automountlist, vol);
-    xset_set_cb(XSetName::DEV_CHANGE, (GFunc)update_change_detection, nullptr);
+    xset_set_cb(xset::name::dev_show_internal_drives, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_empty, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_partition_tables, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_net, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_file, (GFunc)update_all, nullptr);
+    // set->disable = xset_get_b(xset::name::DEV_SHOW_INTERNAL_DRIVES);
+    xset_set_cb(xset::name::dev_ignore_udisks_hide, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol);
+    xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
+    // bool auto_optical = set->b == xset::b::XSET_B_TRUE;
+    xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
+    // bool auto_removable = set->b == xset::b::XSET_B_TRUE;
+    xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
+    xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol);
+    xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    set = xset_get(XSetName::DEV_FS_CNF);
+    set = xset_get(xset::name::dev_fs_cnf);
     xset_set_cb(set, (GFunc)on_handler_show_config, parent);
     xset_set_ob1(set, "set", set);
-    set = xset_get(XSetName::DEV_NET_CNF);
+    set = xset_get(xset::name::dev_net_cnf);
     xset_set_cb(set, (GFunc)on_handler_show_config, parent);
     xset_set_ob1(set, "set", set);
 
-    set = xset_get(XSetName::DEV_MENU_SETTINGS);
+    set = xset_get(xset::name::dev_menu_settings);
 
     const std::string desc =
         std::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
                     "dev_mount_options dev_change{}",
                     file_browser ? " dev_newtab" : "");
-    xset_set_var(set, XSetVar::DESC, desc.data());
+    xset_set_var(set, xset::var::desc, desc.data());
 }

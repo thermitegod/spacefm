@@ -1426,7 +1426,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     if (this->exec_terminal)
     {
         // get terminal
-        terminal = Glib::find_program_in_path(xset_get_s(XSetName::MAIN_TERMINAL));
+        terminal = Glib::find_program_in_path(xset_get_s(xset::name::main_terminal));
         if (terminal.empty())
         {
             const std::string msg =
@@ -1582,7 +1582,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     {
         // terminal
         const auto terminal_args =
-            terminal_handlers->get_terminal_args(xset_get_s(XSetName::MAIN_TERMINAL));
+            terminal_handlers->get_terminal_args(xset_get_s(xset::name::main_terminal));
         argv.reserve(terminal_args.size());
         for (const std::string_view terminal_arg : terminal_args)
         {
@@ -1960,7 +1960,7 @@ vfs_file_task_thread(vfs::file_task task)
 
     if (task->state_pause == VFSFileTaskState::QUEUE)
     {
-        if (task->state != VFSFileTaskState::SIZE_TIMEOUT && xset_get_b(XSetName::TASK_Q_SMART))
+        if (task->state != VFSFileTaskState::SIZE_TIMEOUT && xset_get_b(xset::name::task_q_smart))
         {
             // make queue exception for smaller tasks
             off_t exlimit;

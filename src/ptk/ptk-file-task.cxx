@@ -78,11 +78,11 @@ PtkFileTask::PtkFileTask(VFSFileTaskType type,
     this->force_scroll = false;
     this->keep_dlg = false;
     this->err_count = 0;
-    if (xset_get_b(XSetName::TASK_ERR_ANY))
+    if (xset_get_b(xset::name::task_err_any))
     {
         this->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_ANY;
     }
-    else if (xset_get_b(XSetName::TASK_ERR_FIRST))
+    else if (xset_get_b(xset::name::task_err_first))
     {
         this->err_mode = PTKFileTaskPtaskError::PTASK_ERROR_FIRST;
     }
@@ -112,7 +112,7 @@ PtkFileTask::PtkFileTask(VFSFileTaskType type,
     // queue task
     if (this->task->exec_sync && this->task->type != VFSFileTaskType::EXEC &&
         this->task->type != VFSFileTaskType::LINK &&
-        this->task->type != VFSFileTaskType::CHMOD_CHOWN && xset_get_b(XSetName::TASK_Q_NEW))
+        this->task->type != VFSFileTaskType::CHMOD_CHOWN && xset_get_b(xset::name::task_q_new))
     {
         ptk_file_task_pause(this, VFSFileTaskState::QUEUE);
     }
@@ -279,21 +279,21 @@ save_progress_dialog_size(PtkFileTask* ptask)
     const std::string width = std::to_string(allocation.width);
     if (ptask->task->type == VFSFileTaskType::EXEC)
     {
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::S, width);
+        xset_set(xset::name::task_pop_top, xset::var::s, width);
     }
     else
     {
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::X, width);
+        xset_set(xset::name::task_pop_top, xset::var::x, width);
     }
 
     const std::string height = std::to_string(allocation.height);
     if (ptask->task->type == VFSFileTaskType::EXEC)
     {
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::Z, height);
+        xset_set(xset::name::task_pop_top, xset::var::z, height);
     }
     else
     {
-        xset_set(XSetName::TASK_POP_TOP, XSetVar::Y, height);
+        xset_set(xset::name::task_pop_top, xset::var::y, height);
     }
 #endif
 }
@@ -413,7 +413,7 @@ ptk_file_task_add_main(PtkFileTask* ptask)
         ptask->timeout = 0;
     }
 
-    if (ptask->task->exec_popup || xset_get_b(XSetName::TASK_POP_ALL))
+    if (ptask->task->exec_popup || xset_get_b(xset::name::task_pop_all))
     {
         // keep dlg if Popup Task is explicitly checked, otherwise close if no
         // error
@@ -702,7 +702,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     xset_context_new();
 
-    xset_t set = xset_get(XSetName::SEPARATOR);
+    xset_t set = xset_get(xset::name::separator);
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
@@ -833,11 +833,11 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_window_set_resizable(GTK_WINDOW(ptask->progress_dlg), false);
 
     // cache this value for speed
-    ptask->pop_detail = xset_get_b(XSetName::TASK_POP_DETAIL);
+    ptask->pop_detail = xset_get_b(xset::name::task_pop_detail);
 
     // Buttons
     // Pause
-    // xset_t set = xset_get(XSetName::TASK_PAUSE);
+    // xset_t set = xset_get(xset::name::TASK_PAUSE);
 
     ptask->progress_btn_pause = gtk_button_new_with_mnemonic("Pa_use");
 
@@ -1084,13 +1084,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     i32 win_width, win_height;
     if (task->type == VFSFileTaskType::EXEC)
     {
-        win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::S);
-        win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::Z);
+        win_width = xset_get_int(xset::name::task_pop_top, xset::var::s);
+        win_height = xset_get_int(xset::name::task_pop_top, xset::var::z);
     }
     else
     {
-        win_width = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::X);
-        win_height = xset_get_int(XSetName::TASK_POP_TOP, XSetVar::Y);
+        win_width = xset_get_int(xset::name::task_pop_top, xset::var::x);
+        win_height = xset_get_int(xset::name::task_pop_top, xset::var::y);
     }
     if (!win_width)
     {
@@ -1105,7 +1105,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     gtk_button_box_set_layout(GTK_BUTTON_BOX(ptask->progress_dlg),
                               GtkButtonBoxStyle::GTK_BUTTONBOX_END);
-    if (xset_get_b(XSetName::TASK_POP_TOP))
+    if (xset_get_b(xset::name::task_pop_top))
     {
         gtk_window_set_type_hint(GTK_WINDOW(ptask->progress_dlg),
                                  GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
@@ -1115,11 +1115,11 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         gtk_window_set_type_hint(GTK_WINDOW(ptask->progress_dlg),
                                  GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_NORMAL);
     }
-    if (xset_get_b(XSetName::TASK_POP_ABOVE))
+    if (xset_get_b(xset::name::task_pop_above))
     {
         gtk_window_set_keep_above(GTK_WINDOW(ptask->progress_dlg), true);
     }
-    if (xset_get_b(XSetName::TASK_POP_STICK))
+    if (xset_get_b(xset::name::task_pop_stick))
     {
         gtk_window_stick(GTK_WINDOW(ptask->progress_dlg));
     }
@@ -1138,11 +1138,11 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     //                  G_CALLBACK( on_progress_configure_event ), ptask );
 
     gtk_widget_show_all(ptask->progress_dlg);
-    if (ptask->overwrite_combo && !xset_get_b(XSetName::TASK_POP_OVER))
+    if (ptask->overwrite_combo && !xset_get_b(xset::name::task_pop_over))
     {
         gtk_widget_hide(ptask->overwrite_combo);
     }
-    if (ptask->error_combo && !xset_get_b(XSetName::TASK_POP_ERR))
+    if (ptask->error_combo && !xset_get_b(xset::name::task_pop_err))
     {
         gtk_widget_hide(ptask->error_combo);
     }
@@ -2012,7 +2012,7 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
 
             task->unlock();
 
-            if (xset_get_b(XSetName::TASK_Q_PAUSE))
+            if (xset_get_b(xset::name::task_q_pause))
             {
                 // pause all queued
                 main_task_pause_all_queued(ptask);
@@ -2188,11 +2188,11 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
     {
         const i32 has_overwrite_btn =
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
-        xset_set(XSetName::TASK_POPUPS,
-                 has_overwrite_btn ? XSetVar::X : XSetVar::S,
+        xset_set(xset::name::task_popups,
+                 has_overwrite_btn ? xset::var::x : xset::var::s,
                  std::to_string(allocation.width));
-        xset_set(XSetName::TASK_POPUPS,
-                 has_overwrite_btn ? XSetVar::Y : XSetVar::Z,
+        xset_set(xset::name::task_popups,
+                 has_overwrite_btn ? xset::var::y : xset::var::z,
                  std::to_string(allocation.height));
     }
 
@@ -2507,7 +2507,7 @@ query_overwrite(PtkFileTask* ptask)
                            GtkResponseType::GTK_RESPONSE_CANCEL,
                            nullptr);
 
-    // xset_t set = xset_get(XSetName::TASK_PAUSE);
+    // xset_t set = xset_get(xset::name::TASK_PAUSE);
     gtk_widget_set_sensitive(btn_pause, !!ptask->task_view);
 
     // labels

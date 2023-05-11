@@ -831,7 +831,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
         }
         else
         {
-            const i32 drag_action = xset_get_int(XSetName::DRAG_ACTION, XSetVar::X);
+            const i32 drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
             if (drag_action == 1)
             {
                 suggested_action = GdkDragAction::GDK_ACTION_COPY;

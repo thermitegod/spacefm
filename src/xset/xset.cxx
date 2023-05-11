@@ -45,7 +45,7 @@ xset_remove(xset_t set)
     delete set;
 }
 
-XSet::XSet(const std::string_view name, XSetName xset_name)
+xset::XSet::XSet(const std::string_view name, xset::name xset_name)
 {
     // ztd::logger::info("XSet Constructor");
 
@@ -53,7 +53,7 @@ XSet::XSet(const std::string_view name, XSetName xset_name)
     this->xset_name = xset_name;
 }
 
-XSet::~XSet()
+xset::XSet::~XSet()
 {
     // ztd::logger::info("XSet Destructor");
 
@@ -131,9 +131,9 @@ XSet::~XSet()
 }
 
 xset_t
-xset_new(const std::string_view name, XSetName xset_name) noexcept
+xset_new(const std::string_view name, xset::name xset_name) noexcept
 {
-    const xset_t set = new XSet(name, xset_name);
+    const xset_t set = new xset::XSet(name, xset_name);
     assert(set != nullptr);
     return set;
 }
@@ -150,13 +150,13 @@ xset_get(const std::string_view name) noexcept
         }
     }
 
-    xset_t set = xset_new(name, xset_get_xsetname_from_name(name));
+    xset_t set = xset_new(name, xset::get_xsetname_from_name(name));
     xsets.emplace_back(set);
     return set;
 }
 
 xset_t
-xset_get(XSetName name) noexcept
+xset_get(xset::name name) noexcept
 {
     for (xset_t set : xsets)
     { // check for existing xset
@@ -167,13 +167,13 @@ xset_get(XSetName name) noexcept
         }
     }
 
-    xset_t set = xset_new(xset_get_name_from_xsetname(name), name);
+    xset_t set = xset_new(xset::get_name_from_xsetname(name), name);
     xsets.emplace_back(set);
     return set;
 }
 
 xset_t
-xset_is(XSetName name) noexcept
+xset_is(xset::name name) noexcept
 {
     for (xset_t set : xsets)
     { // check for existing xset
@@ -203,74 +203,74 @@ xset_is(const std::string_view name) noexcept
 /////////////////
 
 void
-xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
+xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
 {
     assert(set != nullptr);
 
     switch (var)
     {
-        case XSetVar::S:
+        case xset::var::s:
             if (set->s)
             {
                 std::free(set->s);
             }
             set->s = ztd::strdup(value.data());
             break;
-        case XSetVar::B:
+        case xset::var::b:
             if (ztd::same(value, "1"))
             {
-                set->b = XSetB::XSET_B_TRUE;
+                set->b = xset::b::xtrue;
             }
             else
             {
-                set->b = XSetB::XSET_B_FALSE;
+                set->b = xset::b::xfalse;
             }
             break;
-        case XSetVar::X:
+        case xset::var::x:
             if (set->x)
             {
                 std::free(set->x);
             }
             set->x = ztd::strdup(value.data());
             break;
-        case XSetVar::Y:
+        case xset::var::y:
             if (set->y)
             {
                 std::free(set->y);
             }
             set->y = ztd::strdup(value.data());
             break;
-        case XSetVar::Z:
+        case xset::var::z:
             if (set->z)
             {
                 std::free(set->z);
             }
             set->z = ztd::strdup(value.data());
             break;
-        case XSetVar::KEY:
+        case xset::var::key:
             set->key = std::stoul(value.data());
             break;
-        case XSetVar::KEYMOD:
+        case xset::var::keymod:
             set->keymod = std::stoul(value.data());
             break;
-        case XSetVar::STYLE:
-            set->menu_style = XSetMenu(std::stoi(value.data()));
+        case xset::var::style:
+            set->menu_style = xset::menu(std::stoi(value.data()));
             break;
-        case XSetVar::DESC:
+        case xset::var::desc:
             if (set->desc)
             {
                 std::free(set->desc);
             }
             set->desc = ztd::strdup(value.data());
             break;
-        case XSetVar::TITLE:
+        case xset::var::title:
             if (set->title)
             {
                 std::free(set->title);
             }
             set->title = ztd::strdup(value.data());
             break;
-        case XSetVar::MENU_LABEL:
+        case xset::var::menu_label:
             // lbl is only used >= 0.9.0 for changed lock default menu_label
             if (set->menu_label)
             {
@@ -283,7 +283,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->in_terminal = true;
             }
             break;
-        case XSetVar::ICN:
+        case xset::var::icn:
             // icn is only used >= 0.9.0 for changed lock default icon
             if (set->icon)
             {
@@ -296,7 +296,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->keep_terminal = true;
             }
             break;
-        case XSetVar::MENU_LABEL_CUSTOM:
+        case xset::var::menu_label_custom:
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
             // only save if custom or not default label
             if (!set->lock || !ztd::same(set->menu_label, value))
@@ -313,64 +313,64 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 }
             }
             break;
-        case XSetVar::ICON:
+        case xset::var::icon:
             // pre-0.9.0 icon or >= 0.9.0 custom item icon
             // only save if custom or not default icon
             // also check that stock name does not match
             break;
-        case XSetVar::SHARED_KEY:
+        case xset::var::shared_key:
             if (set->shared_key)
             {
                 std::free(set->shared_key);
             }
             set->shared_key = ztd::strdup(value.data());
             break;
-        case XSetVar::NEXT:
+        case xset::var::next:
             if (set->next)
             {
                 std::free(set->next);
             }
             set->next = ztd::strdup(value.data());
             break;
-        case XSetVar::PREV:
+        case xset::var::prev:
             if (set->prev)
             {
                 std::free(set->prev);
             }
             set->prev = ztd::strdup(value.data());
             break;
-        case XSetVar::PARENT:
+        case xset::var::parent:
             if (set->parent)
             {
                 std::free(set->parent);
             }
             set->parent = ztd::strdup(value.data());
             break;
-        case XSetVar::CHILD:
+        case xset::var::child:
             if (set->child)
             {
                 std::free(set->child);
             }
             set->child = ztd::strdup(value.data());
             break;
-        case XSetVar::CONTEXT:
+        case xset::var::context:
             if (set->context)
             {
                 std::free(set->context);
             }
             set->context = ztd::strdup(value.data());
             break;
-        case XSetVar::LINE:
+        case xset::var::line:
             if (set->line)
             {
                 std::free(set->line);
             }
             set->line = ztd::strdup(value.data());
             break;
-        case XSetVar::TOOL:
-            set->tool = XSetTool(std::stoi(value.data()));
+        case xset::var::tool:
+            set->tool = xset::tool(std::stoi(value.data()));
             break;
-        case XSetVar::TASK:
+        case xset::var::task:
             if (std::stoi(value.data()) == 1)
             {
                 set->task = true;
@@ -380,7 +380,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->task = false;
             }
             break;
-        case XSetVar::TASK_POP:
+        case xset::var::task_pop:
             if (std::stoi(value.data()) == 1)
             {
                 set->task_pop = true;
@@ -390,7 +390,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->task_pop = false;
             }
             break;
-        case XSetVar::TASK_ERR:
+        case xset::var::task_err:
             if (std::stoi(value.data()) == 1)
             {
                 set->task_err = true;
@@ -400,7 +400,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->task_err = false;
             }
             break;
-        case XSetVar::TASK_OUT:
+        case xset::var::task_out:
             if (std::stoi(value.data()) == 1)
             {
                 set->task_out = true;
@@ -410,7 +410,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->task_out = false;
             }
             break;
-        case XSetVar::RUN_IN_TERMINAL:
+        case xset::var::run_in_terminal:
             if (std::stoi(value.data()) == 1)
             {
                 set->in_terminal = true;
@@ -420,7 +420,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->in_terminal = false;
             }
             break;
-        case XSetVar::KEEP_TERMINAL:
+        case xset::var::keep_terminal:
             if (std::stoi(value.data()) == 1)
             {
                 set->keep_terminal = true;
@@ -430,7 +430,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->keep_terminal = false;
             }
             break;
-        case XSetVar::SCROLL_LOCK:
+        case xset::var::scroll_lock:
             if (std::stoi(value.data()) == 1)
             {
                 set->scroll_lock = true;
@@ -440,7 +440,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->scroll_lock = false;
             }
             break;
-        case XSetVar::DISABLE:
+        case xset::var::disable:
             if (std::stoi(value.data()) == 1)
             {
                 set->disable = true;
@@ -450,7 +450,7 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
                 set->disable = false;
             }
             break;
-        case XSetVar::OPENER:
+        case xset::var::opener:
             set->opener = std::stoi(value.data());
             break;
         default:
@@ -463,26 +463,26 @@ xset_set_var(xset_t set, XSetVar var, const std::string_view value) noexcept
  */
 
 void
-xset_set(xset_t set, XSetVar var, const std::string_view value) noexcept
+xset_set(xset_t set, xset::var var, const std::string_view value) noexcept
 {
     assert(set != nullptr);
 
-    if (!set->lock || (var != XSetVar::STYLE && var != XSetVar::DESC && var != XSetVar::TITLE &&
-                       var != XSetVar::SHARED_KEY))
+    if (!set->lock || (var != xset::var::style && var != xset::var::desc &&
+                       var != xset::var::title && var != xset::var::shared_key))
     {
         xset_set_var(set, var, value);
     }
 }
 
 void
-xset_set(XSetName name, XSetVar var, const std::string_view value) noexcept
+xset_set(xset::name name, xset::var var, const std::string_view value) noexcept
 {
     const xset_t set = xset_get(name);
     xset_set(set, var, value);
 }
 
 void
-xset_set(const std::string_view name, XSetVar var, const std::string_view value) noexcept
+xset_set(const std::string_view name, xset::var var, const std::string_view value) noexcept
 {
     const xset_t set = xset_get(name);
     xset_set(set, var, value);
@@ -500,7 +500,7 @@ xset_get_s(xset_t set) noexcept
 }
 
 char*
-xset_get_s(XSetName name) noexcept
+xset_get_s(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_s(set);
@@ -522,9 +522,9 @@ xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
 }
 
 char*
-xset_get_s_panel(panel_t panel, XSetPanel name) noexcept
+xset_get_s_panel(panel_t panel, xset::panel name) noexcept
 {
-    const xset_t set = xset_get(xset_get_xsetname_from_panel(panel, name));
+    const xset_t set = xset_get(xset::get_xsetname_from_panel(panel, name));
     return xset_get_s(set);
 }
 
@@ -540,7 +540,7 @@ xset_get_x(xset_t set) noexcept
 }
 
 char*
-xset_get_x(XSetName name) noexcept
+xset_get_x(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_x(set);
@@ -565,7 +565,7 @@ xset_get_y(xset_t set) noexcept
 }
 
 char*
-xset_get_y(XSetName name) noexcept
+xset_get_y(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_y(set);
@@ -590,7 +590,7 @@ xset_get_z(xset_t set) noexcept
 }
 
 char*
-xset_get_z(XSetName name) noexcept
+xset_get_z(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_z(set);
@@ -611,11 +611,11 @@ bool
 xset_get_b(xset_t set) noexcept
 {
     assert(set != nullptr);
-    return (set->b == XSetB::XSET_B_TRUE);
+    return (set->b == xset::b::xtrue);
 }
 
 bool
-xset_get_b(XSetName name) noexcept
+xset_get_b(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_b(set);
@@ -636,23 +636,24 @@ xset_get_b_panel(panel_t panel, const std::string_view name) noexcept
 }
 
 bool
-xset_get_b_panel(panel_t panel, XSetPanel name) noexcept
+xset_get_b_panel(panel_t panel, xset::panel name) noexcept
 {
-    const xset_t set = xset_get(xset_get_xsetname_from_panel(panel, name));
+    const xset_t set = xset_get(xset::get_xsetname_from_panel(panel, name));
     return xset_get_b(set);
 }
 
 bool
-xset_get_b_panel_mode(panel_t panel, const std::string_view name, MainWindowPanel mode) noexcept
+xset_get_b_panel_mode(panel_t panel, const std::string_view name,
+                      xset::main_window_panel mode) noexcept
 {
     const xset_t set = xset_get_panel_mode(panel, name, mode);
     return xset_get_b(set);
 }
 
 bool
-xset_get_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcept
+xset_get_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode) noexcept
 {
-    const xset_t set = xset_get(xset_get_xsetname_from_panel_mode(panel, name, mode));
+    const xset_t set = xset_get(xset::get_xsetname_from_panel_mode(panel, name, mode));
     return xset_get_b(set);
 }
 
@@ -665,26 +666,26 @@ xset_set_b(xset_t set, bool bval) noexcept
     assert(set != nullptr);
     if (bval)
     {
-        set->b = XSetB::XSET_B_TRUE;
+        set->b = xset::b::xtrue;
     }
     else
     {
-        set->b = XSetB::XSET_B_FALSE;
+        set->b = xset::b::xfalse;
     }
 }
 
 void
-xset_set_b(XSetName name, bool bval) noexcept
+xset_set_b(xset::name name, bool bval) noexcept
 {
     xset_t set = xset_get(name);
 
     if (bval)
     {
-        set->b = XSetB::XSET_B_TRUE;
+        set->b = xset::b::xtrue;
     }
     else
     {
-        set->b = XSetB::XSET_B_FALSE;
+        set->b = xset::b::xfalse;
     }
 }
 
@@ -695,11 +696,11 @@ xset_set_b(const std::string_view name, bool bval) noexcept
 
     if (bval)
     {
-        set->b = XSetB::XSET_B_TRUE;
+        set->b = xset::b::xtrue;
     }
     else
     {
-        set->b = XSetB::XSET_B_FALSE;
+        set->b = xset::b::xfalse;
     }
 }
 
@@ -711,22 +712,23 @@ xset_set_b_panel(panel_t panel, const std::string_view name, bool bval) noexcept
 }
 
 void
-xset_set_b_panel(panel_t panel, XSetPanel name, bool bval) noexcept
+xset_set_b_panel(panel_t panel, xset::panel name, bool bval) noexcept
 {
-    xset_set_b(xset_get_xsetname_from_panel(panel, name), bval);
+    xset_set_b(xset::get_xsetname_from_panel(panel, name), bval);
 }
 
 void
-xset_set_b_panel_mode(panel_t panel, const std::string_view name, MainWindowPanel mode,
+xset_set_b_panel_mode(panel_t panel, const std::string_view name, xset::main_window_panel mode,
                       bool bval) noexcept
 {
     xset_set_b(xset_get_panel_mode(panel, name, mode), bval);
 }
 
 void
-xset_set_b_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode, bool bval) noexcept
+xset_set_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode,
+                      bool bval) noexcept
 {
-    xset_set_b(xset_get_xsetname_from_panel_mode(panel, name, mode), bval);
+    xset_set_b(xset::get_xsetname_from_panel_mode(panel, name, mode), bval);
 }
 
 /**
@@ -741,23 +743,24 @@ xset_get_panel(panel_t panel, const std::string_view name) noexcept
 }
 
 xset_t
-xset_get_panel(panel_t panel, XSetPanel name) noexcept
+xset_get_panel(panel_t panel, xset::panel name) noexcept
 {
-    return xset_get(xset_get_xsetname_from_panel(panel, name));
+    return xset_get(xset::get_xsetname_from_panel(panel, name));
 }
 
 xset_t
-xset_get_panel_mode(panel_t panel, const std::string_view name, MainWindowPanel mode) noexcept
+xset_get_panel_mode(panel_t panel, const std::string_view name,
+                    xset::main_window_panel mode) noexcept
 {
     const std::string fullname =
-        std::format("panel{}_{}{}", panel, name, xset_get_window_panel_mode(mode));
+        std::format("panel{}_{}{}", panel, name, xset::get_window_panel_mode(mode));
     return xset_get(fullname);
 }
 
 xset_t
-xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcept
+xset_get_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode) noexcept
 {
-    return xset_get(xset_get_xsetname_from_panel_mode(panel, name, mode));
+    return xset_get(xset::get_xsetname_from_panel_mode(panel, name, mode));
 }
 
 /**
@@ -765,54 +768,54 @@ xset_get_panel_mode(panel_t panel, XSetPanel name, MainWindowPanel mode) noexcep
  */
 
 i32
-xset_get_int(xset_t set, XSetVar var) noexcept
+xset_get_int(xset_t set, xset::var var) noexcept
 {
     assert(set != nullptr);
 
     const char* varstring = nullptr;
     switch (var)
     {
-        case XSetVar::S:
+        case xset::var::s:
             varstring = set->s;
             break;
-        case XSetVar::X:
+        case xset::var::x:
             varstring = set->x;
             break;
-        case XSetVar::Y:
+        case xset::var::y:
             varstring = set->y;
             break;
-        case XSetVar::Z:
+        case xset::var::z:
             varstring = set->z;
             break;
-        case XSetVar::KEY:
+        case xset::var::key:
             return set->key;
-        case XSetVar::KEYMOD:
+        case xset::var::keymod:
             return set->keymod;
-        case XSetVar::B:
-        case XSetVar::STYLE:
-        case XSetVar::DESC:
-        case XSetVar::TITLE:
-        case XSetVar::MENU_LABEL:
-        case XSetVar::ICN:
-        case XSetVar::MENU_LABEL_CUSTOM:
-        case XSetVar::ICON:
-        case XSetVar::SHARED_KEY:
-        case XSetVar::NEXT:
-        case XSetVar::PREV:
-        case XSetVar::PARENT:
-        case XSetVar::CHILD:
-        case XSetVar::CONTEXT:
-        case XSetVar::LINE:
-        case XSetVar::TOOL:
-        case XSetVar::TASK:
-        case XSetVar::TASK_POP:
-        case XSetVar::TASK_ERR:
-        case XSetVar::TASK_OUT:
-        case XSetVar::RUN_IN_TERMINAL:
-        case XSetVar::KEEP_TERMINAL:
-        case XSetVar::SCROLL_LOCK:
-        case XSetVar::DISABLE:
-        case XSetVar::OPENER:
+        case xset::var::b:
+        case xset::var::style:
+        case xset::var::desc:
+        case xset::var::title:
+        case xset::var::menu_label:
+        case xset::var::icn:
+        case xset::var::menu_label_custom:
+        case xset::var::icon:
+        case xset::var::shared_key:
+        case xset::var::next:
+        case xset::var::prev:
+        case xset::var::parent:
+        case xset::var::child:
+        case xset::var::context:
+        case xset::var::line:
+        case xset::var::tool:
+        case xset::var::task:
+        case xset::var::task_pop:
+        case xset::var::task_err:
+        case xset::var::task_out:
+        case xset::var::run_in_terminal:
+        case xset::var::keep_terminal:
+        case xset::var::scroll_lock:
+        case xset::var::disable:
+        case xset::var::opener:
         default:
             return -1;
     }
@@ -825,30 +828,30 @@ xset_get_int(xset_t set, XSetVar var) noexcept
 }
 
 i32
-xset_get_int(XSetName name, XSetVar var) noexcept
+xset_get_int(xset::name name, xset::var var) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_int(set, var);
 }
 
 i32
-xset_get_int(const std::string_view name, XSetVar var) noexcept
+xset_get_int(const std::string_view name, xset::var var) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_int(set, var);
 }
 
 i32
-xset_get_int_panel(panel_t panel, const std::string_view name, XSetVar var) noexcept
+xset_get_int_panel(panel_t panel, const std::string_view name, xset::var var) noexcept
 {
     const std::string fullname = std::format("panel{}_{}", panel, name);
     return xset_get_int(fullname, var);
 }
 
 i32
-xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept
+xset_get_int_panel(panel_t panel, xset::panel name, xset::var var) noexcept
 {
-    return xset_get_int(xset_get_xsetname_from_panel(panel, name), var);
+    return xset_get_int(xset::get_xsetname_from_panel(panel, name), var);
 }
 
 /**
@@ -856,7 +859,7 @@ xset_get_int_panel(panel_t panel, XSetPanel name, XSetVar var) noexcept
  */
 
 void
-xset_set_panel(panel_t panel, const std::string_view name, XSetVar var,
+xset_set_panel(panel_t panel, const std::string_view name, xset::var var,
                const std::string_view value) noexcept
 {
     const std::string fullname = std::format("panel{}_{}", panel, name);
@@ -865,9 +868,10 @@ xset_set_panel(panel_t panel, const std::string_view name, XSetVar var,
 }
 
 void
-xset_set_panel(panel_t panel, XSetPanel name, XSetVar var, const std::string_view value) noexcept
+xset_set_panel(panel_t panel, xset::panel name, xset::var var,
+               const std::string_view value) noexcept
 {
-    const xset_t set = xset_get(xset_get_xsetname_from_panel(panel, name));
+    const xset_t set = xset_get(xset::get_xsetname_from_panel(panel, name));
     xset_set_var(set, var, value);
 }
 
@@ -884,7 +888,7 @@ xset_set_cb(xset_t set, GFunc cb_func, void* cb_data) noexcept
 }
 
 void
-xset_set_cb(XSetName name, GFunc cb_func, void* cb_data) noexcept
+xset_set_cb(xset::name name, GFunc cb_func, void* cb_data) noexcept
 {
     xset_t set = xset_get(name);
     xset_set_cb(set, cb_func, cb_data);
@@ -905,9 +909,9 @@ xset_set_cb_panel(panel_t panel, const std::string_view name, GFunc cb_func, voi
 }
 
 void
-xset_set_cb_panel(panel_t panel, XSetPanel name, GFunc cb_func, void* cb_data) noexcept
+xset_set_cb_panel(panel_t panel, xset::panel name, GFunc cb_func, void* cb_data) noexcept
 {
-    xset_set_cb(xset_get_xsetname_from_panel(panel, name), cb_func, cb_data);
+    xset_set_cb(xset::get_xsetname_from_panel(panel, name), cb_func, cb_data);
 }
 
 void

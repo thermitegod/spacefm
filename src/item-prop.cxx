@@ -950,7 +950,8 @@ enable_options(ContextData* ctxt)
     gtk_widget_set_sensitive(
         ctxt->item_icon,
         !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)) &&
-            ctxt->set->menu_style != XSetMenu::SEP && ctxt->set->menu_style != XSetMenu::SUBMENU);
+            ctxt->set->menu_style != xset::menu::sep &&
+            ctxt->set->menu_style != xset::menu::submenu);
 
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm)))
     {
@@ -1392,7 +1393,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 
     // load command data
-    if (rset->x && XSetCMD(std::stol(rset->x)) == XSetCMD::SCRIPT)
+    if (rset->x && xset::cmd(std::stol(rset->x)) == xset::cmd::script)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_script), true);
         gtk_widget_hide(ctxt->cmd_line_label);
@@ -1426,15 +1427,15 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
                                  mset->task_out || ctxt->reset_command);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll),
                                  !mset->scroll_lock || ctxt->reset_command);
-    if (rset->menu_style == XSetMenu::CHECK)
+    if (rset->menu_style == xset::menu::check)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox), true);
     }
-    else if (rset->menu_style == XSetMenu::CONFIRM)
+    else if (rset->menu_style == xset::menu::confirm)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm), true);
     }
-    else if (rset->menu_style == XSetMenu::STRING)
+    else if (rset->menu_style == xset::menu::string)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input), true);
     }
@@ -1550,12 +1551,12 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 static void
 replace_item_props(ContextData* ctxt)
 {
-    XSetCMD x;
+    xset::cmd x;
     xset_t rset = ctxt->set;
     xset_t mset = xset_get_plugin_mirror(rset);
 
-    if (!rset->lock && rset->menu_style != XSetMenu::SUBMENU && rset->menu_style != XSetMenu::SEP &&
-        rset->tool <= XSetTool::CUSTOM)
+    if (!rset->lock && rset->menu_style != xset::menu::submenu &&
+        rset->menu_style != xset::menu::sep && rset->tool <= xset::tool::custom)
     {
         // custom bookmark, app, or command
         bool is_app = false;
@@ -1564,35 +1565,35 @@ replace_item_props(ContextData* ctxt)
         switch (item_type)
         {
             case ItemPropItemType::ITEM_TYPE_BOOKMARK:
-                x = XSetCMD::BOOKMARK;
+                x = xset::cmd::bookmark;
                 is_app = true;
                 break;
             case ItemPropItemType::ITEM_TYPE_APP:
-                x = XSetCMD::APP;
+                x = xset::cmd::app;
                 is_app = true;
                 break;
             case ItemPropItemType::ITEM_TYPE_COMMAND:
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
                 {
                     // line
-                    x = XSetCMD::LINE;
+                    x = xset::cmd::line;
                 }
                 else
                 {
                     // script
-                    x = XSetCMD::SCRIPT;
+                    x = xset::cmd::script;
                     save_command_script(ctxt, false);
                 }
                 break;
             default:
-                x = XSetCMD::INVALID;
+                x = xset::cmd::invalid;
                 break;
         }
 
-        if (x != XSetCMD::INVALID)
+        if (x != xset::cmd::invalid)
         {
             std::free(rset->x);
-            if (x == XSetCMD::LINE)
+            if (x == xset::cmd::line)
             {
                 rset->x = nullptr;
             }
@@ -1613,19 +1614,19 @@ replace_item_props(ContextData* ctxt)
             // menu style
             if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_checkbox)))
             {
-                rset->menu_style = XSetMenu::CHECK;
+                rset->menu_style = xset::menu::check;
             }
             else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_confirm)))
             {
-                rset->menu_style = XSetMenu::CONFIRM;
+                rset->menu_style = xset::menu::confirm;
             }
             else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_input)))
             {
-                rset->menu_style = XSetMenu::STRING;
+                rset->menu_style = xset::menu::string;
             }
             else
             {
-                rset->menu_style = XSetMenu::NORMAL;
+                rset->menu_style = xset::menu::normal;
             }
             // style msg
             std::free(rset->desc);
@@ -1633,7 +1634,7 @@ replace_item_props(ContextData* ctxt)
         }
         // command line
         std::free(rset->line);
-        if (x == XSetCMD::LINE)
+        if (x == xset::cmd::line)
         {
             rset->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
             if (rset->line && std::strlen(rset->line) > 2000)
@@ -1683,7 +1684,7 @@ replace_item_props(ContextData* ctxt)
             mset->opener = 0;
         }
     }
-    if (rset->menu_style != XSetMenu::SEP && !rset->plugin)
+    if (rset->menu_style != xset::menu::sep && !rset->plugin)
     {
         // name
         if (rset->lock &&
@@ -1694,7 +1695,7 @@ replace_item_props(ContextData* ctxt)
         }
 
         std::free(rset->menu_label);
-        if (rset->tool > XSetTool::CUSTOM &&
+        if (rset->tool > xset::tool::custom &&
             ztd::same(gtk_entry_get_text(GTK_ENTRY(ctxt->item_name)),
                       xset_get_builtin_toolitem_label(rset->tool)))
         {
@@ -1707,10 +1708,10 @@ replace_item_props(ContextData* ctxt)
         }
     }
     // icon
-    if (rset->menu_style != XSetMenu::RADIO && rset->menu_style != XSetMenu::SEP)
+    if (rset->menu_style != xset::menu::radio && rset->menu_style != xset::menu::sep)
     // checkbox items in 1.0.1 allow icon due to bookmark list showing
     // toolbar checkbox items have icon
-    //( rset->menu_style != XSetMenu::CHECK || rset->tool ) )
+    //( rset->menu_style != xset::menu::CHECK || rset->tool ) )
     {
         char* old_icon = ztd::strdup(mset->icon);
         std::free(mset->icon);
@@ -1733,7 +1734,7 @@ replace_item_props(ContextData* ctxt)
     }
 
     // Ignore Context
-    xset_set_b(XSetName::CONTEXT_DLG,
+    xset_set_b(xset::name::context_dlg,
                gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->ignore_context)));
 }
 
@@ -1743,8 +1744,8 @@ on_script_popup(GtkTextView* input, GtkMenu* menu, void* user_data)
     (void)input;
     (void)user_data;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    xset_t set = xset_get(XSetName::SEPARATOR);
-    set->menu_style = XSetMenu::SEP;
+    xset_t set = xset_get(xset::name::separator);
+    set->menu_style = xset::menu::sep;
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
 
@@ -1822,7 +1823,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
 
     // Dialog
     ctxt->dlg = gtk_dialog_new_with_buttons(
-        set->tool != XSetTool::NOT ? "Toolbar Item Properties" : "Menu Item Properties",
+        set->tool != xset::tool::NOT ? "Toolbar Item Properties" : "Menu Item Properties",
         GTK_WINDOW(ctxt->parent),
         GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
                        GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
@@ -1831,8 +1832,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     xset_set_window_icon(GTK_WINDOW(ctxt->dlg));
     gtk_window_set_role(GTK_WINDOW(ctxt->dlg), "context_dialog");
 
-    i32 width = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::X);
-    i32 height = xset_get_int(XSetName::CONTEXT_DLG, XSetVar::Y);
+    i32 width = xset_get_int(xset::name::context_dlg, xset::var::x);
+    i32 height = xset_get_int(xset::name::context_dlg, xset::var::y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
@@ -1869,7 +1870,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     gtk_notebook_append_page(
         GTK_NOTEBOOK(ctxt->notebook),
         vbox,
-        gtk_label_new_with_mnemonic(set->tool != XSetTool::NOT ? "_Toolbar Item" : "_Menu Item"));
+        gtk_label_new_with_mnemonic(set->tool != xset::tool::NOT ? "_Toolbar Item" : "_Menu Item"));
 
     GtkGrid* grid = GTK_GRID(gtk_grid_new());
     gtk_container_set_border_width(GTK_CONTAINER(grid), 0);
@@ -2167,7 +2168,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     ctxt->ignore_context =
         gtk_check_button_new_with_mnemonic("_Ignore Context / Show All  (global setting)");
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(ctxt->ignore_context), false, true, 0);
-    if (xset_get_b(XSetName::CONTEXT_DLG))
+    if (xset_get_b(xset::name::context_dlg))
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ctxt->ignore_context), true);
 
@@ -2501,16 +2502,16 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     i32 item_type = -1;
 
     std::string item_type_str;
-    if (set->tool > XSetTool::CUSTOM)
+    if (set->tool > xset::tool::custom)
     {
         item_type_str =
             std::format("Built-In Toolbar Item: {}", xset_get_builtin_toolitem_label(set->tool));
     }
-    else if (rset->menu_style == XSetMenu::SUBMENU)
+    else if (rset->menu_style == xset::menu::submenu)
     {
         item_type_str = "Submenu";
     }
-    else if (rset->menu_style == XSetMenu::SEP)
+    else if (rset->menu_style == xset::menu::sep)
     {
         item_type_str = "Separator";
     }
@@ -2522,26 +2523,26 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     else
     {
         // custom command
-        XSetCMD x;
+        xset::cmd x;
         for (const std::string_view item_type2 : item_types)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2.data());
         }
-        x = rset->x ? XSetCMD(std::stol(rset->x)) : XSetCMD::LINE;
+        x = rset->x ? xset::cmd(std::stol(rset->x)) : xset::cmd::line;
 
         switch (x)
         {
-            case XSetCMD::LINE:
-            case XSetCMD::SCRIPT:
+            case xset::cmd::line:
+            case xset::cmd::script:
                 item_type = ItemPropItemType::ITEM_TYPE_COMMAND;
                 break;
-            case XSetCMD::APP:
+            case xset::cmd::app:
                 item_type = ItemPropItemType::ITEM_TYPE_APP;
                 break;
-            case XSetCMD::BOOKMARK:
+            case xset::cmd::bookmark:
                 item_type = ItemPropItemType::ITEM_TYPE_BOOKMARK;
                 break;
-            case XSetCMD::INVALID:
+            case xset::cmd::invalid:
             default:
                 item_type = -1;
                 break;
@@ -2559,8 +2560,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     }
 
     ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line) : nullptr;
-    if (set->lock || rset->menu_style == XSetMenu::SUBMENU || rset->menu_style == XSetMenu::SEP ||
-        set->tool > XSetTool::CUSTOM)
+    if (set->lock || rset->menu_style == xset::menu::submenu ||
+        rset->menu_style == xset::menu::sep || set->tool > xset::tool::custom)
     {
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 2));
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 3));
@@ -2580,13 +2581,13 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     ctxt->reset_command = true;
 
     // name
-    if (rset->menu_style != XSetMenu::SEP)
+    if (rset->menu_style != xset::menu::sep)
     {
         if (set->menu_label)
         {
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name), set->menu_label);
         }
-        else if (set->tool > XSetTool::CUSTOM)
+        else if (set->tool > xset::tool::custom)
         {
             gtk_entry_set_text(GTK_ENTRY(ctxt->item_name),
                                xset_get_builtin_toolitem_label(set->tool));
@@ -2597,8 +2598,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         gtk_widget_set_sensitive(ctxt->item_name, false);
     }
     // key
-    if (rset->menu_style < XSetMenu::SUBMENU || set->tool == XSetTool::BACK_MENU ||
-        set->tool == XSetTool::FWD_MENU)
+    if (rset->menu_style < xset::menu::submenu || set->tool == xset::tool::back_menu ||
+        set->tool == xset::tool::fwd_menu)
     {
         std::string str2;
         xset_t keyset;
@@ -2623,13 +2624,13 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         gtk_entry_set_text(GTK_ENTRY(ctxt->item_icon), mset->icon ? mset->icon : rset->icon);
     }
     gtk_widget_set_sensitive(ctxt->item_icon,
-                             rset->menu_style != XSetMenu::RADIO &&
-                                 rset->menu_style != XSetMenu::SEP);
+                             rset->menu_style != xset::menu::radio &&
+                                 rset->menu_style != xset::menu::sep);
     // toolbar checkbox items have icon
-    //( rset->menu_style != XSetMenu::CHECK || rset->tool ) );
+    //( rset->menu_style != xset::menu::CHECK || rset->tool ) );
     gtk_widget_set_sensitive(ctxt->icon_choose_btn,
-                             rset->menu_style != XSetMenu::RADIO &&
-                                 rset->menu_style != XSetMenu::SEP);
+                             rset->menu_style != xset::menu::radio &&
+                                 rset->menu_style != xset::menu::sep);
 
     if (set->plugin)
     {
@@ -2646,12 +2647,12 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         gtk_widget_set_sensitive(ctxt->cmd_opt_script, false);
         gtk_widget_set_sensitive(ctxt->cmd_opt_line, false);
     }
-    if (set->tool != XSetTool::NOT)
+    if (set->tool != xset::tool::NOT)
     {
         // Hide Context tab
         gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 1));
         // gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ctxt->show_tool ),
-        //                              set->tool == XSetB::XSET_B_TRUE );
+        //                              set->tool == xset::b::XSET_B_TRUE );
     }
     // else
     //    gtk_widget_hide( ctxt->show_tool );
@@ -2724,8 +2725,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::CONTEXT_DLG, XSetVar::X, std::to_string(width));
-        xset_set(XSetName::CONTEXT_DLG, XSetVar::Y, std::to_string(height));
+        xset_set(xset::name::context_dlg, xset::var::x, std::to_string(width));
+        xset_set(xset::name::context_dlg, xset::var::y, std::to_string(height));
     }
 
     delete ctxt;

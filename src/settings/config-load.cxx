@@ -163,10 +163,10 @@ xset_parse(std::string& line)
     std::string value = line.substr(sep + 1, std::string::npos - 1);
     std::string token_var = line.substr(sep2 + 1, sep - sep2 - 1);
 
-    XSetVar var;
+    xset::var var;
     try
     {
-        var = xset_get_xsetvar_from_name(token_var);
+        var = xset::get_xsetvar_from_name(token_var);
     }
     catch (const std::logic_error& e)
     {
@@ -388,10 +388,10 @@ config_parse_xset(const toml::value& tbl, u64 version)
 
                 // ztd::logger::info("name: {} | var: {} | value: {}", name, setvar, value);
 
-                XSetVar var;
+                xset::var var;
                 try
                 {
-                    var = xset_get_xsetvar_from_name(setvar);
+                    var = xset::get_xsetvar_from_name(setvar);
                 }
                 catch (const std::logic_error& e)
                 {

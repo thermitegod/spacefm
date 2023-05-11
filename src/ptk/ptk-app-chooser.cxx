@@ -220,8 +220,8 @@ app_chooser_dialog_new(GtkWindow* parent, const vfs::mime_type& mime_type, bool 
 
     xset_set_window_icon(GTK_WINDOW(dlg));
 
-    const i32 width = xset_get_int(XSetName::APP_DLG, XSetVar::X);
-    const i32 height = xset_get_int(XSetName::APP_DLG, XSetVar::Y);
+    const i32 width = xset_get_int(xset::name::app_dlg, xset::var::x);
+    const i32 height = xset_get_int(xset::name::app_dlg, xset::var::y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
@@ -462,8 +462,8 @@ on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
     const i32 height = allocation.height;
     if (width && height)
     {
-        xset_set(XSetName::APP_DLG, XSetVar::X, std::to_string(width));
-        xset_set(XSetName::APP_DLG, XSetVar::Y, std::to_string(height));
+        xset_set(xset::name::app_dlg, xset::var::x, std::to_string(width));
+        xset_set(xset::name::app_dlg, xset::var::y, std::to_string(height));
     }
 
     if (id == GtkResponseType::GTK_RESPONSE_OK || id == GtkResponseType::GTK_RESPONSE_CANCEL ||
@@ -509,7 +509,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                         GtkButtonsType::GTK_BUTTONS_OK,
                         msg);
     }
-    else if (!xset_get_b(XSetName::ARC_DEF_OPEN))
+    else if (!xset_get_b(xset::name::arc_def_open))
     {
         // is archive handler set for this type?
         handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
