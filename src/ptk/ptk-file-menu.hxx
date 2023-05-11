@@ -59,7 +59,7 @@ void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
 void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, PtkFileMenu* data);
 
-void ptk_file_menu_action(PtkFileBrowser* browser, char* setname);
+void ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname);
 
 void on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, i32 order);
 void on_popup_list_detailed(GtkMenuItem* menuitem, PtkFileBrowser* browser);

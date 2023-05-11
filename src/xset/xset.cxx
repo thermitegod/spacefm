@@ -45,11 +45,12 @@ xset_remove(xset_t set)
     delete set;
 }
 
-xset::XSet::XSet(const std::string_view name, xset::name xset_name)
+xset::XSet::XSet(const std::string_view set_name, xset::name xset_name)
 {
     // ztd::logger::info("XSet Constructor");
+    assert(set_name.empty() != true);
 
-    this->name = ztd::strdup(name.data());
+    this->name = set_name;
     this->xset_name = xset_name;
 }
 
@@ -57,10 +58,6 @@ xset::XSet::~XSet()
 {
     // ztd::logger::info("XSet Destructor");
 
-    if (this->name)
-    {
-        std::free(this->name);
-    }
     if (this->s)
     {
         std::free(this->s);

@@ -567,10 +567,10 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set_radio = set;
     set = xset_get_panel(p, xset::panel::list_icons);
     xset_set_cb(set, (GFunc)on_popup_list_icons, browser);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set = xset_get_panel(p, xset::panel::list_compact);
     xset_set_cb(set, (GFunc)on_popup_list_compact, browser);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
 
     set = xset_get(xset::name::sortby_name);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
@@ -582,31 +582,31 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_get(xset::name::sortby_size);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_SIZE);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_SIZE ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set = xset_get(xset::name::sortby_type);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_TYPE);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_TYPE ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set = xset_get(xset::name::sortby_perm);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_PERM);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_PERM ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set = xset_get(xset::name::sortby_owner);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_OWNER);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_OWNER ? xset::b::xtrue
                                                                          : xset::b::xfalse;
     set = xset_get(xset::name::sortby_date);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_MTIME);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_MTIME ? xset::b::xtrue
                                                                          : xset::b::xfalse;
 
@@ -620,7 +620,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_get(xset::name::sortby_descend);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set, "sortorder", -2);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b =
         browser->sort_type == GtkSortType::GTK_SORT_DESCENDING ? xset::b::xtrue : xset::b::xfalse;
 
@@ -657,14 +657,14 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         set_radio = set;
         set = xset_get(xset::name::sortx_files);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
-        xset_set_ob2(set, nullptr, set_radio->name);
+        xset_set_ob2(set, nullptr, set_radio->name.data());
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST
                      ? xset::b::xtrue
                      : xset::b::xfalse;
         set = xset_get(xset::name::sortx_mix);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
-        xset_set_ob2(set, nullptr, set_radio->name);
+        xset_set_ob2(set, nullptr, set_radio->name.data());
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
                          PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED
                      ? xset::b::xtrue
@@ -678,7 +678,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         set_radio = set;
         set = xset_get(xset::name::sortx_hidlast);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
-        xset_set_ob2(set, nullptr, set_radio->name);
+        xset_set_ob2(set, nullptr, set_radio->name.data());
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_hidden_first ? xset::b::xfalse
                                                                                   : xset::b::xtrue;
     }
@@ -898,15 +898,15 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
             set = xset_get(xset::name::arc_def_ex);
             xset_set_cb(xset::name::arc_def_ex, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio->name);
+            xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::arc_def_exto);
             xset_set_cb(xset::name::arc_def_exto, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio->name);
+            xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::arc_def_list);
             xset_set_cb(xset::name::arc_def_list, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio->name);
+            xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::arc_def_write);
             set->disable = geteuid() == 0 || !xset_get_b(xset::name::arc_def_parent);
@@ -986,7 +986,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                                  "button-release-event",
                                  G_CALLBACK(on_app_button_press),
                                  (void*)data);
-                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", handler_set->name);
+                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", handler_set->name.data());
             }
             // add a separator
             item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
@@ -2733,9 +2733,9 @@ on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 void
-ptk_file_menu_action(PtkFileBrowser* browser, char* setname)
+ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
 {
-    if (!browser || !setname)
+    if (!browser)
     {
         return;
     }

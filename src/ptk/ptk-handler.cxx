@@ -1521,7 +1521,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                        &iter,
                        PtkHandlerCol::COL_XSET_NAME,
-                       new_handler_xset->name,
+                       new_handler_xset->name.c_str(),
                        PtkHandlerCol::COL_HANDLER_NAME,
                        dis_name.data(),
                        -1);
@@ -1912,7 +1912,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                            &iter,
                            PtkHandlerCol::COL_XSET_NAME,
-                           new_handler_xset->name,
+                           new_handler_xset->name.c_str(),
                            PtkHandlerCol::COL_HANDLER_NAME,
                            dis_name.data(),
                            -1);
@@ -2986,15 +2986,15 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
 
             set = xset_get(xset::name::arc_def_ex);
             xset_set_cb(xset::name::arc_def_ex, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio->name);
+            xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::arc_def_exto);
             xset_set_cb(xset::name::arc_def_exto, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio->name);
+            xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::arc_def_list);
             xset_set_cb(xset::name::arc_def_list, (GFunc)on_archive_default, set);
-            xset_set_ob2(set, nullptr, set_radio->name);
+            xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::arc_def_write);
             set->disable = geteuid() == 0 || !xset_get_b(xset::name::arc_def_parent);

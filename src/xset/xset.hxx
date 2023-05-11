@@ -156,10 +156,10 @@ namespace xset
     {
       public:
         XSet() = delete;
-        XSet(const std::string_view name, xset::name xset_name);
+        XSet(const std::string_view set_name, xset::name xset_name);
         ~XSet();
 
-        char* name{nullptr};
+        std::string name{};
         xset::name xset_name;
 
         xset::b b{xset::b::unset}; // saved, tri-state enum 0=unset(false) 1=true 2=false

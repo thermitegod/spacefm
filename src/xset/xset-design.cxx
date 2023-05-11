@@ -293,7 +293,7 @@ xset_design_job_set_app(xset_t set)
     xset_custom_insert_after(set, newset);
 
     newset->z = file;
-    newset->menu_label = set->name;
+    newset->menu_label = ztd::strdup(set->name);
     newset->browser = set->browser;
     if (newset->x)
     {

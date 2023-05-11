@@ -514,7 +514,7 @@ ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget)
             {
                 x = 7;
                 // attach set pointer to custom checkboxes so we can find it
-                g_object_set_data(G_OBJECT(widget), "set", set->name);
+                g_object_set_data(G_OBJECT(widget), "set", set->name.data());
             }
             else
             {
@@ -956,13 +956,13 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_t set_radio = set;
     set = xset_get(xset::name::status_path);
     xset_set_cb(xset::name::status_path, (GFunc)on_status_middle_click_config, set);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set = xset_get(xset::name::status_info);
     xset_set_cb(xset::name::status_info, (GFunc)on_status_middle_click_config, set);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set = xset_get(xset::name::status_hide);
     xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob2(set, nullptr, set_radio->name.data());
 
     xset_add_menu(file_browser, menu, accel_group, desc.data());
     gtk_widget_show_all(menu);

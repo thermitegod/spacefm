@@ -118,7 +118,7 @@ static void main_window_close(MainWindow* main_window);
 static void show_panels(GtkMenuItem* item, MainWindow* main_window);
 
 static GtkWidget* main_task_view_new(MainWindow* main_window);
-static void on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2);
+static void on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, const char* name2);
 static bool main_tasks_running(MainWindow* main_window);
 static void on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask2);
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
@@ -129,7 +129,7 @@ static PtkFileTask* get_selected_task(GtkWidget* view);
 static void main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser);
 static void set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
 static void on_task_column_selected(GtkMenuItem* item, GtkWidget* view);
-static void on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, char* name2);
+static void on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* name2);
 static void show_task_dialog(GtkWidget* widget, GtkWidget* view);
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
 static void update_window_title(GtkMenuItem* item, MainWindow* main_window);
@@ -3649,7 +3649,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                     if (browser)
                     {
                         const std::string new_set_name =
-                            std::format("panel{}{}", browser->mypanel, set->name + 6);
+                            std::format("panel{}{}", browser->mypanel, set->name.data() + 6);
                         set = xset_get(new_set_name);
                     }
                     else
@@ -3824,7 +3824,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
     {
         if (set->xset_name == xset::name::task_manager)
         {
-            on_task_popup_show(nullptr, main_window, set->name);
+            on_task_popup_show(nullptr, main_window, set->name.c_str());
         }
         else if (set->xset_name == xset::name::task_col_reorder)
         {
@@ -3865,7 +3865,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         }
         else if (ztd::startswith(set->name, "task_err_"))
         {
-            on_task_popup_errset(nullptr, main_window, set->name);
+            on_task_popup_errset(nullptr, main_window, set->name.c_str());
         }
     }
     else if (set->xset_name == xset::name::rubberband)
@@ -5024,15 +5024,15 @@ show_task_manager(MainWindow* main_window, bool show)
 }
 
 static void
-on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
+on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, const char* name2)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
-    char* name = nullptr;
+    const char* name = nullptr;
 
     if (item)
     {
-        name = (char*)g_object_get_data(G_OBJECT(item), "name");
+        name = static_cast<const char*>(g_object_get_data(G_OBJECT(item), "name"));
     }
     else
     {
@@ -5088,13 +5088,13 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, char* name2)
 }
 
 static void
-on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, char* name2)
+on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* name2)
 {
     (void)main_window;
-    char* name;
+    const char* name;
     if (item)
     {
-        name = (char*)g_object_get_data(G_OBJECT(item), "name");
+        name = static_cast<const char*>(g_object_get_data(G_OBJECT(item), "name"));
     }
     else
     {
@@ -5160,13 +5160,13 @@ main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* 
     GtkWidget* parent = main_window->task_view;
     set = xset_get(xset::name::task_show_manager);
     xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-    xset_set_ob1(set, "name", set->name);
+    xset_set_ob1(set, "name", set->name.data());
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
     set = xset_get(xset::name::task_hide_manager);
     xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-    xset_set_ob1(set, "name", set->name);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob1(set, "name", set->name.data());
+    xset_set_ob2(set, nullptr, set_radio->name.data());
 
     xset_set_cb(xset::name::task_col_count, (GFunc)on_task_column_selected, parent);
     xset_set_cb(xset::name::task_col_path, (GFunc)on_task_column_selected, parent);
@@ -5184,17 +5184,17 @@ main_task_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* 
 
     set = xset_get(xset::name::task_err_first);
     xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-    xset_set_ob1(set, "name", set->name);
+    xset_set_ob1(set, "name", set->name.data());
     xset_set_ob2(set, nullptr, nullptr);
     set_radio = set;
     set = xset_get(xset::name::task_err_any);
     xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-    xset_set_ob1(set, "name", set->name);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob1(set, "name", set->name.data());
+    xset_set_ob2(set, nullptr, set_radio->name.data());
     set = xset_get(xset::name::task_err_cont);
     xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-    xset_set_ob1(set, "name", set->name);
-    xset_set_ob2(set, nullptr, set_radio->name);
+    xset_set_ob1(set, "name", set->name.data());
+    xset_set_ob2(set, nullptr, set_radio->name.data());
 }
 
 static PtkFileTask*

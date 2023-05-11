@@ -3456,14 +3456,14 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
 
 void
 ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files,
-                      const char* cwd, const char* setname)
+                      const std::filesystem::path& cwd, const std::string_view setname)
 {
     /*
      * root_copy_loc    copy to location
      * root_move2       move to
      * root_delete      delete
      */
-    if (!setname || !file_browser)
+    if (!file_browser)
     {
         return;
     }
@@ -3477,7 +3477,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     i32 item_count = 0;
     for (vfs::file_info file : sel_files)
     {
-        const auto file_path = std::filesystem::path() / cwd / file->get_name();
+        const auto file_path = cwd / file->get_name();
         file_path_q = ztd::shell::quote(file_path.string());
         file_paths = std::format("{} {}", file_paths, file_path_q);
         item_count++;
@@ -3506,7 +3506,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     }
     else
     {
-        const char* folder;
+        std::filesystem::path folder;
         set = xset_get(setname);
         if (set->desc)
         {
@@ -3520,7 +3520,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
             xset_file_dialog(parent,
                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                              "Choose Location",
-                             folder,
+                             folder.c_str(),
                              nullptr);
         if (path && std::filesystem::is_directory(path))
         {
