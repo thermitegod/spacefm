@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -54,19 +55,6 @@ xset::XSet::XSet(const std::string_view set_name, xset::name xset_name)
 
     this->name = set_name;
     this->xset_name = xset_name;
-}
-
-xset::XSet::~XSet()
-{
-    // ztd::logger::info("XSet Destructor");
-
-    if (this->plugin)
-    {
-        if (this->plug_name)
-        {
-            std::free(this->plug_name);
-        }
-    }
 }
 
 xset_t

@@ -1284,10 +1284,10 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
         // Command Dir
         if (ctxt->set->plugin)
         {
-            folder = ctxt->set->plug_dir / "files";
+            folder = ctxt->set->plugin->path / "files";
             if (!std::filesystem::exists(folder))
             {
-                folder = ctxt->set->plug_dir / ctxt->set->plug_name;
+                folder = ctxt->set->plugin->path / ctxt->set->plugin->name;
             }
         }
         else
@@ -1321,9 +1321,9 @@ on_open_browser(GtkComboBox* box, ContextData* ctxt)
     else if (job == 2)
     {
         // Plugin Dir
-        if (ctxt->set->plugin && !ctxt->set->plug_dir.empty())
+        if (ctxt->set->plugin && !ctxt->set->plugin->path.empty())
         {
-            folder = ctxt->set->plug_dir;
+            folder = ctxt->set->plugin->path;
         }
     }
     else
@@ -2477,7 +2477,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     std::filesystem::path path;
     if (rset->plugin)
     {
-        path = rset->plug_dir / rset->plug_name;
+        path = rset->plugin->path / rset->plugin->name;
     }
     else
     {

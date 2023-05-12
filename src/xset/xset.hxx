@@ -22,6 +22,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <glib.h>
 
 #include <ztd/ztd.hxx>
@@ -154,12 +156,23 @@ namespace xset
         xfalse
     };
 
-    class XSet
+    struct XSetPlugin
+    { // not saved at all
+        XSetPlugin() = delete;
+        XSetPlugin(const std::string_view name, const std::filesystem::path& path)
+            : name(name), path(path){};
+        ~XSetPlugin() = default;
+
+        bool is_top{false};           // not saved
+        std::string name{};           // not saved
+        std::filesystem::path path{}; // not saved
+    };
+
+    struct XSet
     {
-      public:
         XSet() = delete;
         XSet(const std::string_view set_name, xset::name xset_name);
-        ~XSet();
+        ~XSet() = default;
 
         std::string name{};
         xset::name xset_name;
@@ -207,11 +220,7 @@ namespace xset
         bool scroll_lock{false};   // saved
         char opener{0};            // saved
 
-        // Plugin (not saved at all)
-        bool plugin{false};               // not saved
-        bool plugin_top{false};           // not saved
-        char* plug_name{nullptr};         // not saved
-        std::filesystem::path plug_dir{}; // not saved
+        std::unique_ptr<xset::XSetPlugin> plugin{nullptr};
     };
 } // namespace xset
 

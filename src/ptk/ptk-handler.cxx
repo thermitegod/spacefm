@@ -1410,7 +1410,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     new_handler_xset->scroll_lock = set->scroll_lock;
 
     // build copy scripts command
-    const auto path_src = set->plug_dir / set->plug_name;
+    const auto path_src = set->plugin->path / set->plugin->name;
     const auto path_dest_dir = vfs::user_dirs->program_config_dir() / "scripts";
     std::filesystem::create_directories(path_dest_dir);
     std::filesystem::permissions(path_dest_dir, std::filesystem::perms::owner_all);

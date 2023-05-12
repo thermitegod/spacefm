@@ -561,7 +561,7 @@ xset_design_job_set_paste(xset_t set)
 static void
 xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 {
-    if (!file_browser || !set || !set->plugin_top || set->plug_dir.empty())
+    if (!file_browser || !set || !set->plugin->is_top || set->plugin->path.empty())
     {
         return;
     }
@@ -570,7 +570,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     {
         const std::string label = clean_label(set->menu_label.value(), false, false);
         const std::string msg =
-            std::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plug_dir.string());
+            std::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plugin->path.string());
 
         const i32 response = xset_msg_dialog(parent,
                                              GtkMessageType::GTK_MESSAGE_WARNING,
@@ -585,7 +585,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view);
 
-    const std::string plug_dir_q = ztd::shell::quote(set->plug_dir.string());
+    const std::string plug_dir_q = ztd::shell::quote(set->plugin->path.string());
 
     ptask->task->exec_command = std::format("rm -rf {}", plug_dir_q);
     ptask->task->exec_sync = true;
@@ -596,7 +596,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     ptask->task->exec_as_user = "root";
 
     const auto plugin_data = new PluginData;
-    plugin_data->plug_dir = ztd::strdup(set->plug_dir);
+    plugin_data->plug_dir = set->plugin->path;
     plugin_data->set = set;
     plugin_data->job = PluginJob::REMOVE;
     ptask->complete_notify = (GFunc)on_install_plugin_cb;
@@ -825,10 +825,10 @@ xset_design_job_set_browse_files(xset_t set)
     std::filesystem::path folder;
     if (set->plugin)
     {
-        folder = std::filesystem::path() / set->plug_dir / "files";
+        folder = std::filesystem::path() / set->plugin->path / "files";
         if (!std::filesystem::exists(folder))
         {
-            folder = std::filesystem::path() / set->plug_dir / set->plug_name;
+            folder = std::filesystem::path() / set->plugin->path / set->plugin->name;
         }
     }
     else
@@ -880,11 +880,11 @@ xset_design_job_set_browse_data(xset_t set)
 static void
 xset_design_job_set_browse_plugins(xset_t set)
 {
-    if (set->plugin && !set->plug_dir.empty())
+    if (set->plugin && !set->plugin->path.empty())
     {
         if (set->browser)
         {
-            set->browser->run_event<EventType::OPEN_ITEM>(set->plug_dir,
+            set->browser->run_event<EventType::OPEN_ITEM>(set->plugin->path,
                                                           PtkOpenAction::PTK_OPEN_DIR);
         }
     }

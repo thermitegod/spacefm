@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <ranges>
 
+#include <memory>
+
 #include <cassert>
 
 #include <glibmm.h>
@@ -116,8 +118,8 @@ xset_set_plugin_mirror(xset_t pset)
         {
             if (set->parent && set->child)
             {
-                if (ztd::same(set->child.value(), pset->plug_name) &&
-                    ztd::same(set->parent.value(), pset->plug_dir.string()))
+                if (ztd::same(set->child.value(), pset->plugin->name) &&
+                    ztd::same(set->parent.value(), pset->plugin->path.string()))
                 {
                     set->shared_key = pset->name;
                     pset->shared_key = set->name;
@@ -146,8 +148,8 @@ xset_get_plugin_mirror(xset_t set)
 
     xset_t newset = xset_custom_new();
     newset->desc = "@plugin@mirror@";
-    newset->parent = set->plug_dir;
-    newset->child = set->plug_name;
+    newset->parent = set->plugin->path;
+    newset->child = set->plugin->name;
     newset->shared_key = set->name; // this will not be saved
     newset->task = set->task;
     newset->task_pop = set->task_pop;
@@ -182,7 +184,7 @@ xset_get_plugins()
     {
         assert(set != nullptr);
 
-        if (set->plugin && set->plugin_top && !set->plug_dir.empty())
+        if (set->plugin && set->plugin->is_top && !set->plugin->path.empty())
         {
             plugins.emplace_back(set);
         }
@@ -209,8 +211,8 @@ xset_get_by_plug_name(const std::filesystem::path& plug_dir, const std::string_v
     {
         assert(set != nullptr);
 
-        if (set->plugin && ztd::same(plug_name, set->plug_name) &&
-            std::filesystem::equivalent(plug_dir, set->plug_dir))
+        if (set->plugin && ztd::same(plug_name, set->plugin->name) &&
+            std::filesystem::equivalent(plug_dir, set->plugin->path))
         {
             return set;
         }
@@ -220,9 +222,7 @@ xset_get_by_plug_name(const std::filesystem::path& plug_dir, const std::string_v
     const std::string setname = xset_custom_new_name();
 
     xset_t set = xset_new(setname, xset::name::custom);
-    set->plug_dir = plug_dir;
-    set->plug_name = ztd::strdup(plug_name.data());
-    set->plugin = true;
+    set->plugin = std::make_unique<xset::XSetPlugin>(plug_name, plug_dir);
     set->lock = false;
     xsets.emplace_back(set);
 
@@ -390,7 +390,7 @@ xset_import_plugin(const std::filesystem::path& plug_dir, PluginUse* use)
         {
             assert(set != nullptr);
 
-            if (set->plugin && std::filesystem::equivalent(plug_dir, set->plug_dir))
+            if (set->plugin && std::filesystem::equivalent(plug_dir, set->plugin->path))
             {
                 xset_remove(set);
                 redo = true; // search list from start again due to changed list
@@ -416,14 +416,15 @@ xset_import_plugin(const std::filesystem::path& plug_dir, PluginUse* use)
     {
         assert(set != nullptr);
 
-        if (set->plugin && std::filesystem::equivalent(plug_dir, set->plug_dir))
+        if (set->plugin && std::filesystem::equivalent(plug_dir, set->plugin->path))
         {
             set->key = 0;
             set->keymod = 0;
             set->tool = xset::tool::NOT;
             set->opener = 0;
             xset_set_plugin_mirror(set);
-            if ((set->plugin_top = top))
+            set->plugin->is_top = top;
+            if (set->plugin->is_top)
             {
                 top = false;
                 rset = set;
@@ -468,7 +469,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
             else if (use != PluginUse::BOOKMARKS)
             {
                 // handler
-                set->plugin_top = false; // prevent being added to Plugins menu
+                set->plugin->is_top = false; // prevent being added to Plugins menu
                 if (plugin_data->job == PluginJob::INSTALL)
                 {
                     // This dialog should never be seen - failsafe
@@ -490,7 +491,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
             else if (plugin_data->job == PluginJob::COPY)
             {
                 // copy
-                set->plugin_top = false; // do not show tmp plugin in Plugins menu
+                set->plugin->is_top = false; // do not show tmp plugin in Plugins menu
                 if (plugin_data->set)
                 {
                     // paste after insert_set (plugin_data->set)

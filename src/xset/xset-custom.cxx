@@ -279,8 +279,8 @@ xset_custom_export_files(xset_t set, const std::filesystem::path& plug_dir)
 
     if (set->plugin)
     {
-        path_src = set->plug_dir / set->plug_name;
-        path_dest = plug_dir / set->plug_name;
+        path_src = set->plugin->path / set->plugin->name;
+        path_dest = plug_dir / set->plugin->name;
     }
     else
     {
@@ -380,7 +380,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     else
     {
-        const auto s1 = set->plug_dir.filename();
+        const auto s1 = set->plugin->path.filename();
         // Need to use .string() to avoid fmt adding double quotes when formating
         deffile = std::format("{}-{}-plugin.tar.xz", s1.string(), PACKAGE_NAME);
     }
@@ -477,7 +477,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     }
     else
     {
-        plug_dir = ztd::strdup(set->plug_dir);
+        plug_dir = set->plugin->path;
     }
 
     // tar and delete tmp files
@@ -545,7 +545,7 @@ xset_custom_get_script(xset_t set, bool create)
 
     if (set->plugin)
     {
-        path = set->plug_dir / set->plug_name / "exec.fish";
+        path = set->plugin->path / set->plugin->name / "exec.fish";
     }
     else
     {
@@ -596,7 +596,7 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 
     if (src->plugin)
     {
-        path_src = src->plug_dir / src->plug_name;
+        path_src = src->plugin->path / src->plugin->name;
     }
     else
     {

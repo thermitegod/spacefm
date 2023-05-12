@@ -4527,10 +4527,10 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
 
         if (set->plugin)
         {
-            path = set->plug_dir / "files";
+            path = set->plugin->path / "files";
             if (!std::filesystem::exists(path))
             {
-                path = set->plug_dir / set->plug_name;
+                path = set->plugin->path / set->plugin->name;
             }
         }
         else
@@ -4546,8 +4546,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         // plugin_dir
         if (set->plugin)
         {
-            buf.append(
-                std::format("set fm_plugin_dir {}\n", ztd::shell::quote(set->plug_dir.string())));
+            buf.append(std::format("set fm_plugin_dir {}\n",
+                                   ztd::shell::quote(set->plugin->path.string())));
         }
 
         // cmd_name

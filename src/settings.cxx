@@ -660,7 +660,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     {
         if (set->plugin)
         {
-            icon_file = set->plug_dir / set->plug_name / "icon";
+            icon_file = set->plugin->path / set->plugin->name / "icon";
         }
         else
         {
@@ -1091,7 +1091,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     ptask->task->exec_show_output = mset->task_out;
     ptask->task->exec_show_error = mset->task_err;
     ptask->task->exec_scroll_lock = mset->scroll_lock;
-    ptask->task->exec_checksum = set->plugin;
+    ptask->task->exec_checksum = !!set->plugin;
     ptask->task->exec_export = true;
     // ptask->task->exec_keep_tmp = true;
 
@@ -1618,11 +1618,11 @@ xset_job_is_valid(xset_t set, xset::job job)
 
     if (set->plugin)
     {
-        if (set->plug_dir.empty())
+        if (set->plugin->path.empty())
         {
             return false;
         }
-        if (!set->plugin_top)
+        if (!set->plugin->is_top)
         {
             no_remove = true;
         }
@@ -1887,9 +1887,9 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
 
     if (set->plugin)
     {
-        if (!set->plug_dir.empty())
+        if (!set->plugin->path.empty())
         {
-            if (!set->plugin_top)
+            if (!set->plugin->is_top)
             {
                 no_remove = true;
             }
