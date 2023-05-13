@@ -16,7 +16,11 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <tuple>
+
+#include <optional>
 
 #include <glibmm.h>
 
@@ -397,9 +401,10 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     return std::make_tuple(ret, answer);
 }
 
-char*
-xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
-                 const char* deffolder, const char* deffile)
+const std::optional<std::filesystem::path>
+xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
+                 const std::optional<std::filesystem::path>& deffolder,
+                 const std::optional<std::filesystem::path>& deffile)
 {
     /*  Actions:
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN
@@ -408,7 +413,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER
      */
     GtkWidget* dlgparent = parent ? gtk_widget_get_toplevel(parent) : nullptr;
-    GtkWidget* dlg = gtk_file_chooser_dialog_new(title,
+    GtkWidget* dlg = gtk_file_chooser_dialog_new(title.data(),
                                                  dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                                                  action,
                                                  "Cancel",
@@ -424,7 +429,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
 
     if (deffolder)
     {
-        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), deffolder);
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), deffolder.value().c_str());
     }
     else
     {
@@ -445,11 +450,11 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
         if (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE ||
             action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER)
         {
-            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile);
+            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile.value().c_str());
         }
         else
         {
-            const auto path2 = std::filesystem::path(deffolder, deffile);
+            const auto path2 = deffolder.value() / deffile.value();
             gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path2.c_str());
         }
     }
@@ -483,10 +488,14 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
 
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        char* dest = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+        const char* dest = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         gtk_widget_destroy(dlg);
-        return dest;
+        if (dest != nullptr)
+        {
+            return dest;
+        }
+        return std::nullopt;
     }
     gtk_widget_destroy(dlg);
-    return nullptr;
+    return std::nullopt;
 }

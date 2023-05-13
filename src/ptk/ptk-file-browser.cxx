@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -5032,8 +5033,8 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         return;
     }
 
-    char* copy_dest = nullptr;
-    char* move_dest = nullptr;
+    std::optional<std::filesystem::path> copy_dest;
+    std::optional<std::filesystem::path> move_dest;
 
     if (setname == xset::name::copy_tab_prev)
     {
@@ -5110,7 +5111,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
     else if (setname == xset::name::copy_loc_last)
     {
         xset_t set2 = xset_get(xset::name::copy_loc_last);
-        copy_dest = ztd::strdup(set2->desc.value());
+        copy_dest = set2->desc.value();
     }
     else if (setname == xset::name::move_tab_prev)
     {
@@ -5204,12 +5205,13 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         {
             folder = cwd;
         }
-        char* path = xset_file_dialog(GTK_WIDGET(file_browser),
-                                      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                      "Choose Location",
-                                      folder.c_str(),
-                                      nullptr);
-        if (path && std::filesystem::is_directory(path))
+        const auto path =
+            xset_file_dialog(GTK_WIDGET(file_browser),
+                             GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                             "Choose Location",
+                             folder,
+                             std::nullopt);
+        if (path && std::filesystem::is_directory(path.value()))
         {
             if (setname == xset::name::copy_loc || setname == xset::name::copy_loc_last)
             {
@@ -5220,7 +5222,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
                 move_dest = path;
             }
             set2 = xset_get(xset::name::copy_loc_last);
-            xset_set_var(set2, xset::var::desc, path);
+            xset_set_var(set2, xset::var::desc, path.value().string());
         }
         else
         {
@@ -5231,7 +5233,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
     if (copy_dest || move_dest)
     {
         VFSFileTaskType file_action;
-        char* dest_dir;
+        std::optional<std::filesystem::path> dest_dir;
 
         if (copy_dest)
         {
@@ -5244,14 +5246,13 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
             dest_dir = move_dest;
         }
 
-        if (std::filesystem::equivalent(dest_dir, cwd))
+        if (std::filesystem::equivalent(dest_dir.value(), cwd))
         {
             xset_msg_dialog(GTK_WIDGET(file_browser),
                             GtkMessageType::GTK_MESSAGE_ERROR,
                             "Invalid Destination",
                             GtkButtonsType::GTK_BUTTONS_OK,
                             "Destination same as source");
-            std::free(dest_dir);
             return;
         }
 
@@ -5268,11 +5269,10 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         PtkFileTask* ptask =
             ptk_file_task_new(file_action,
                               file_list,
-                              dest_dir,
+                              dest_dir.value(),
                               GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                               file_browser->task_view);
         ptk_file_task_run(ptask);
-        std::free(dest_dir);
     }
     else
     {

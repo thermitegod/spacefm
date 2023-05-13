@@ -261,7 +261,7 @@ static void
 on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 {
     xset_t set;
-    char* path = nullptr;
+    std::filesystem::path path;
     std::string msg;
     PluginJob job = PluginJob::INSTALL;
 
@@ -301,15 +301,16 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                 default_path = "/";
             }
         }
-        path = xset_file_dialog(GTK_WIDGET(main_window),
-                                GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                "Choose Plugin File",
-                                default_path.value().c_str(),
-                                nullptr);
-        if (!path)
+        const auto file = xset_file_dialog(GTK_WIDGET(main_window),
+                                           GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
+                                           "Choose Plugin File",
+                                           default_path.value(),
+                                           std::nullopt);
+        if (!file)
         {
             return;
         }
+        path = file.value();
         save->s = std::filesystem::path(path).filename();
     }
 
@@ -319,7 +320,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
         case PluginJob::INSTALL:
         {
             // install job
-            char* filename = ztd::strdup(std::filesystem::path(path).filename());
+            char* filename = ztd::strdup(path.filename());
             char* ext = strstr(filename, ".spacefm-plugin");
             if (!ext)
             {
@@ -345,7 +346,6 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                                 msg);
 
                 std::free(plug_dir_name);
-                std::free(path);
                 return;
             }
 
@@ -366,7 +366,6 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
                     std::free(plug_dir_name);
-                    std::free(path);
                     return;
                 }
             }
@@ -384,7 +383,6 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
                                 "Error Creating Temp Directory",
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 "Unable to create temporary directory");
-                std::free(path);
                 return;
             }
             while (true)
@@ -403,7 +401,6 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
     }
 
     install_plugin_file(main_window, nullptr, path, plug_dir, job, nullptr);
-    std::free(path);
 }
 
 static GtkWidget*

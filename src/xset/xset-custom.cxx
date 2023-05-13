@@ -385,16 +385,16 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         deffile = std::format("{}-{}-plugin.tar.xz", s1.string(), PACKAGE_NAME);
     }
 
-    char* path = xset_file_dialog(parent,
-                                  GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
-                                  "Save As Plugin File",
-                                  default_path.value().c_str(),
-                                  deffile.data());
+    const auto path = xset_file_dialog(parent,
+                                       GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
+                                       "Save As Plugin File",
+                                       default_path.value(),
+                                       deffile);
     if (!path)
     {
         return;
     }
-    save->s = std::filesystem::path(path).parent_path();
+    save->s = path.value().parent_path();
 
     // get or create tmp plugin dir
     std::filesystem::path plug_dir;
@@ -403,7 +403,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         const auto user_tmp = vfs::user_dirs->program_tmp_dir();
         if (!std::filesystem::is_directory(user_tmp))
         {
-            std::free(path);
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_ERROR,
                             "Export Error",
@@ -446,7 +445,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                 std::filesystem::remove_all(plug_dir);
                 ztd::logger::info("Removed {}", plug_dir);
             }
-            std::free(path);
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_ERROR,
                             "Export Error",
@@ -463,7 +461,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                     std::filesystem::remove_all(plug_dir);
                     ztd::logger::info("Removed {}", plug_dir);
                 }
-                std::free(path);
                 xset_msg_dialog(parent,
                                 GtkMessageType::GTK_MESSAGE_ERROR,
                                 "Export Error",
@@ -473,7 +470,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             }
         }
 
-        save_user_plugin(path, xsetpak);
+        save_user_plugin(path.value(), xsetpak);
     }
     else
     {
@@ -489,7 +486,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                               file_browser ? file_browser->task_view : nullptr);
 
     const std::string plug_dir_q = ztd::shell::quote(plug_dir.string());
-    const std::string path_q = ztd::shell::quote(path);
+    const std::string path_q = ztd::shell::quote(path.value().string());
     if (!set->plugin)
     {
         ptask->task->exec_command =
@@ -515,7 +512,6 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     ptask->task->exec_browser = file_browser;
     ptk_file_task_run(ptask);
 
-    std::free(path);
     return;
 }
 

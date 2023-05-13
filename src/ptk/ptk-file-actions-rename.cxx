@@ -3501,16 +3501,16 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
         {
             folder = cwd;
         }
-        const char* path =
+        const auto path =
             xset_file_dialog(parent,
                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                              "Choose Location",
-                             folder.c_str(),
-                             nullptr);
-        if (path && std::filesystem::is_directory(path))
+                             folder,
+                             std::nullopt);
+        if (path && std::filesystem::is_directory(path.value()))
         {
-            xset_set_var(set, xset::var::desc, path);
-            const std::string quote_path = ztd::shell::quote(path);
+            xset_set_var(set, xset::var::desc, path.value().string());
+            const std::string quote_path = ztd::shell::quote(path.value().string());
 
             if (ztd::same(setname, "root_move2"))
             {

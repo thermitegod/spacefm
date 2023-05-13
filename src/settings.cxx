@@ -2633,13 +2633,13 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         case xset::menu::filedlg:
             // test purpose only
             {
-                char* file = xset_file_dialog(parent,
-                                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
-                                              rset->title.value().data(),
-                                              rset->s.value().data(),
-                                              "foobar.xyz");
+                const auto file =
+                    xset_file_dialog(parent,
+                                     GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
+                                     rset->title.value(),
+                                     rset->s.value(),
+                                     "foobar.xyz");
                 // ztd::logger::info("file={}", file);
-                std::free(file);
             }
             break;
         case xset::menu::icon:

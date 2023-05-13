@@ -2799,7 +2799,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // determine job
-    const char* file;
+    std::optional<std::filesystem::path> file;
     xset_t save;
     switch (job)
     {
@@ -2823,13 +2823,13 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             file = xset_file_dialog(GTK_WIDGET(hnd->dlg),
                                     GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                     "Choose Handler Plugin File",
-                                    default_path.value().c_str(),
-                                    nullptr);
+                                    default_path.value(),
+                                    std::nullopt);
             if (!file)
             {
                 return;
             }
-            save->s = std::filesystem::path(file).parent_path();
+            save->s = file.value().parent_path();
             break;
         }
         case PtkHandlerJob::HANDLER_JOB_RESTORE_ALL:
@@ -2885,7 +2885,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // Install plugin
-    install_plugin_file(nullptr, hnd->dlg, file, plug_dir, PluginJob::COPY, nullptr);
+    install_plugin_file(nullptr, hnd->dlg, file.value(), plug_dir, PluginJob::COPY, nullptr);
 }
 
 static void

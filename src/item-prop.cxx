@@ -1492,22 +1492,21 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
     if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
     {
         // Bookmark Browse
-        char* add_path =
+        const auto add_path =
             xset_file_dialog(ctxt->dlg,
                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                              "Choose Directory",
-                             ctxt->context->var[ItemPropContext::CONTEXT_DIR].data(),
-                             nullptr);
-        if (add_path && add_path[0])
+                             ctxt->context->var[ItemPropContext::CONTEXT_DIR],
+                             std::nullopt);
+        if (add_path)
         {
             char* old_path = multi_input_get_text(ctxt->item_target);
             const std::string new_path = std::format("{}{}{}",
                                                      old_path && old_path[0] ? old_path : "",
                                                      old_path && old_path[0] ? "; " : "",
-                                                     add_path);
+                                                     add_path.value().string());
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
             gtk_text_buffer_set_text(buf, new_path.data(), -1);
-            std::free(add_path);
             std::free(old_path);
         }
     }
@@ -1538,16 +1537,16 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         else
         {
             // Browse
-            char* exec_path = xset_file_dialog(ctxt->dlg,
-                                               GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                               "Choose Executable",
-                                               "/usr/bin",
-                                               nullptr);
-            if (exec_path && exec_path[0])
+            const auto exec_path =
+                xset_file_dialog(ctxt->dlg,
+                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
+                                 "Choose Executable",
+                                 "/usr/bin",
+                                 std::nullopt);
+            if (exec_path)
             {
                 GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
-                gtk_text_buffer_set_text(buf, exec_path, -1);
-                std::free(exec_path);
+                gtk_text_buffer_set_text(buf, exec_path.value().c_str(), -1);
             }
         }
     }

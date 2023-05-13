@@ -227,17 +227,16 @@ xset_design_job_set_custom(xset_t set)
         folder = "/usr/bin";
     }
 
-    char* custom_file = xset_file_dialog(parent,
-                                         GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                         "Choose Custom Executable",
-                                         folder.data(),
-                                         file.data());
+    const auto custom_file = xset_file_dialog(parent,
+                                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
+                                              "Choose Custom Executable",
+                                              folder,
+                                              file);
 
     if (custom_file)
     {
         xset_set_var(set, xset::var::x, "2");
-        xset_set_var(set, xset::var::z, custom_file);
-        std::free(custom_file);
+        xset_set_var(set, xset::var::z, custom_file.value().string());
     }
 }
 
@@ -461,17 +460,17 @@ xset_design_job_set_import_file(xset_t set)
             default_path = "/";
         }
     }
-    char* file = xset_file_dialog(GTK_WIDGET(parent),
-                                  GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                  "Choose Plugin File",
-                                  default_path.value().c_str(),
-                                  nullptr);
+    const auto file = xset_file_dialog(GTK_WIDGET(parent),
+                                       GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
+                                       "Choose Plugin File",
+                                       default_path.value(),
+                                       std::nullopt);
     if (!file)
     {
         return;
     }
 
-    save->s = std::filesystem::path(file).parent_path();
+    save->s = file.value().parent_path();
 
     // Make Plugin Dir
     const auto user_tmp = vfs::user_dirs->program_tmp_dir();
@@ -482,7 +481,6 @@ xset_design_job_set_import_file(xset_t set)
                         "Error Creating Temp Directory",
                         GtkButtonsType::GTK_BUTTONS_OK,
                         "Unable to create temporary directory");
-        std::free(file);
         return;
     }
 
@@ -497,11 +495,10 @@ xset_design_job_set_import_file(xset_t set)
     }
     install_plugin_file(set->browser ? set->browser->main_window : nullptr,
                         nullptr,
-                        file,
+                        file.value(),
                         plug_dir.string(),
                         PluginJob::COPY,
                         set);
-    std::free(file);
 }
 
 static void
