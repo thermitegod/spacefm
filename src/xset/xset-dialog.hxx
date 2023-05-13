@@ -29,7 +29,7 @@
 #include "types.hxx"
 
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
-char* multi_input_get_text(GtkWidget* input);
+std::optional<std::string> multi_input_get_text(GtkWidget* input);
 
 i32 xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string_view title,
                     GtkButtonsType buttons, const std::string_view msg1 = "",

@@ -42,26 +42,24 @@
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
-char*
+std::optional<std::string>
 multi_input_get_text(GtkWidget* input)
-{ // returns a new allocated string or nullptr if input is empty
-    GtkTextIter iter, siter;
-
+{ // returns a string or nullopt if input is empty
     if (!GTK_IS_TEXT_VIEW(input))
     {
-        return nullptr;
+        return std::nullopt;
     }
 
+    GtkTextIter iter, siter;
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input));
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
-    char* ret = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-    if (ret && ret[0] == '\0')
+    const char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    if (text == nullptr)
     {
-        std::free(ret);
-        ret = nullptr;
+        return std::nullopt;
     }
-    return ret;
+    return text;
 }
 
 static void

@@ -1500,14 +1500,13 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                              std::nullopt);
         if (add_path)
         {
-            char* old_path = multi_input_get_text(ctxt->item_target);
+            const auto old_path = multi_input_get_text(ctxt->item_target);
             const std::string new_path = std::format("{}{}{}",
-                                                     old_path && old_path[0] ? old_path : "",
-                                                     old_path && old_path[0] ? "; " : "",
+                                                     old_path ? old_path.value() : "",
+                                                     old_path ? "; " : "",
                                                      add_path.value().string());
             GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
             gtk_text_buffer_set_text(buf, new_path.data(), -1);
-            std::free(old_path);
         }
     }
     else
@@ -1608,10 +1607,10 @@ replace_item_props(ContextData* ctxt)
         if (!rset->plugin)
         {
             // target
-            const char* str = multi_input_get_text(ctxt->item_target);
+            const auto str = multi_input_get_text(ctxt->item_target);
             if (str)
             {
-                rset->z = ztd::strip(str);
+                rset->z = ztd::strip(str.value());
             }
             else
             {

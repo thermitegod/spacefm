@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -2048,14 +2049,15 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
     if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
         // User pressed enter in rename/overwrite dialog
-        char* new_name = multi_input_get_text(widget);
-        const char* old_name = (const char*)g_object_get_data(G_OBJECT(widget), "old_name");
+        const auto new_name = multi_input_get_text(widget);
+        const char* old_name =
+            static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
         GtkWidget* dlg = gtk_widget_get_toplevel(widget);
         if (!GTK_IS_DIALOG(dlg))
         {
             return true;
         }
-        if (new_name && !ztd::same(new_name, old_name))
+        if (new_name && old_name && !ztd::same(new_name.value(), old_name))
         {
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_RENAME);
         }
@@ -2063,7 +2065,6 @@ on_query_input_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileTask* ptas
         {
             gtk_dialog_response(GTK_DIALOG(dlg), RESPONSE_AUTO_RENAME);
         }
-        std::free(new_name);
         return true;
     }
     return false;
@@ -2073,10 +2074,10 @@ static void
 on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 {
     (void)input_buf;
-    char* new_name = multi_input_get_text(query_input);
-    const char* old_name = (const char*)g_object_get_data(G_OBJECT(query_input), "old_name");
-    const bool can_rename = new_name && (!ztd::same(new_name, old_name));
-    std::free(new_name);
+    const auto new_name = multi_input_get_text(query_input);
+    const char* old_name =
+        static_cast<const char*>(g_object_get_data(G_OBJECT(query_input), "old_name"));
+    const bool can_rename = new_name && old_name && (!ztd::same(new_name.value(), old_name));
     GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
     if (!GTK_IS_DIALOG(dlg))
     {
@@ -2139,7 +2140,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
         case RESPONSE_AUTO_RENAME:
         case RESPONSE_RENAME:
         {
-            char* str;
+            std::optional<std::string> str;
             ptask->task->set_overwrite_mode(VFSFileTaskOverwriteMode::RENAME);
             if (response == RESPONSE_AUTO_RENAME)
             {
@@ -2153,14 +2154,13 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
                 str = multi_input_get_text(query_input);
             }
-            const auto file_name = std::filesystem::path(str);
+            const auto file_name = std::filesystem::path(str.value());
             if (str && !file_name.empty() && !ptask->task->current_dest.empty())
             {
                 const auto dir_name = ptask->task->current_dest.parent_path();
                 const auto path = dir_name / file_name;
                 *ptask->query_new_dest = ztd::strdup(path);
             }
-            std::free(str);
             break;
         }
         case RESPONSE_PAUSE:
