@@ -16,7 +16,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <optional>
 #include <string>
 #include <string_view>
 
@@ -35,6 +34,8 @@
 
 #include <algorithm>
 #include <ranges>
+
+#include <optional>
 
 #include <cassert>
 
@@ -257,21 +258,21 @@ load_settings()
     // MOD turn off fullscreen
     xset_set_b(xset::name::main_full, false);
 
-    const char* date_format = xset_get_s(xset::name::date_format);
-    if (!date_format)
+    const auto date_format = xset_get_s(xset::name::date_format);
+    if (date_format)
     {
-        xset_set(xset::name::date_format, xset::var::s, app_settings.get_date_format());
+        app_settings.set_date_format(date_format.value());
     }
     else
     {
-        app_settings.set_date_format(date_format);
+        xset_set(xset::name::date_format, xset::var::s, app_settings.get_date_format());
     }
 
     // MOD su command discovery (sets default)
     get_valid_su();
 
     // MOD terminal discovery
-    const char* main_terminal = xset_get_s(xset::name::main_terminal);
+    const auto main_terminal = xset_get_s(xset::name::main_terminal);
     if (!main_terminal)
     {
         const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
@@ -291,8 +292,8 @@ load_settings()
     }
 
     // MOD editor discovery
-    const char* app_name = xset_get_s(xset::name::editor);
-    if (app_name != nullptr)
+    const auto main_editor = xset_get_s(xset::name::editor);
+    if (main_editor)
     {
         vfs::mime_type mime_type = vfs_mime_type_get_from_type("text/plain");
         if (mime_type)
@@ -300,7 +301,7 @@ load_settings()
             const std::string default_app = mime_type->get_default_action();
             if (!default_app.empty())
             {
-                const vfs::desktop desktop = vfs_get_desktop(app_name);
+                const vfs::desktop desktop = vfs_get_desktop(main_editor.value());
                 xset_set(xset::name::editor, xset::var::s, desktop->get_exec());
             }
         }
@@ -1218,11 +1219,11 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
     }
 
-    std::string editor;
+    std::optional<std::string> editor_s;
     if (geteuid() != 0 && !force_root && (no_root || have_rw_access(path)))
     {
-        editor = xset_get_s(xset::name::editor);
-        if (editor.empty() || editor.at(0) == '\0')
+        editor_s = xset_get_s(xset::name::editor);
+        if (!editor_s)
         {
             ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                            "Editor Not Set",
@@ -1233,8 +1234,8 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
     }
     else
     {
-        editor = xset_get_s(xset::name::root_editor);
-        if (editor.empty() || editor.at(0) == '\0')
+        editor_s = xset_get_s(xset::name::root_editor);
+        if (!editor_s)
         {
             ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                            "Root Editor Not Set",
@@ -1245,6 +1246,7 @@ xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
         terminal = xset_get_b(xset::name::root_editor);
     }
     // replacements
+    std::string editor = editor_s.value();
     const std::string quoted_path = ztd::shell::quote(path);
     if (ztd::contains(editor, "%f"))
     {

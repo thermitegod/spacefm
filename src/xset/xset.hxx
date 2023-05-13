@@ -259,27 +259,32 @@ void xset_set_b_panel_mode(panel_t panel, const std::string_view name, xset::mai
 void xset_set_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode,
                            bool bval) noexcept;
 
+/**
+ * Oneshot lookup functions
+ */
+
 // S
-const char* xset_get_s(xset_t set) noexcept;
-const char* xset_get_s(xset::name name) noexcept;
-const char* xset_get_s(const std::string_view name) noexcept;
-const char* xset_get_s_panel(panel_t panel, const std::string_view name) noexcept;
-const char* xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
+const std::optional<std::string> xset_get_s(xset_t set) noexcept;
+const std::optional<std::string> xset_get_s(xset::name name) noexcept;
+const std::optional<std::string> xset_get_s(const std::string_view name) noexcept;
+const std::optional<std::string> xset_get_s_panel(panel_t panel,
+                                                  const std::string_view name) noexcept;
+const std::optional<std::string> xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
 
 // X
-const char* xset_get_x(xset_t set) noexcept;
-const char* xset_get_x(xset::name name) noexcept;
-const char* xset_get_x(const std::string_view name) noexcept;
+const std::optional<std::string> xset_get_x(xset_t set) noexcept;
+const std::optional<std::string> xset_get_x(xset::name name) noexcept;
+const std::optional<std::string> xset_get_x(const std::string_view name) noexcept;
 
 // Y
-const char* xset_get_y(xset_t set) noexcept;
-const char* xset_get_y(xset::name name) noexcept;
-const char* xset_get_y(const std::string_view name) noexcept;
+const std::optional<std::string> xset_get_y(xset_t set) noexcept;
+const std::optional<std::string> xset_get_y(xset::name name) noexcept;
+const std::optional<std::string> xset_get_y(const std::string_view name) noexcept;
 
 // Z
-const char* xset_get_z(xset_t set) noexcept;
-const char* xset_get_z(xset::name name) noexcept;
-const char* xset_get_z(const std::string_view name) noexcept;
+const std::optional<std::string> xset_get_z(xset_t set) noexcept;
+const std::optional<std::string> xset_get_z(xset::name name) noexcept;
+const std::optional<std::string> xset_get_z(const std::string_view name) noexcept;
 
 // Panel
 xset_t xset_get_panel(panel_t panel, const std::string_view name) noexcept;

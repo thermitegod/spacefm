@@ -401,7 +401,6 @@ char*
 xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* title,
                  const char* deffolder, const char* deffile)
 {
-    const char* path;
     /*  Actions:
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE
@@ -429,10 +428,11 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const char* tit
     }
     else
     {
-        path = xset_get_s(xset::name::go_set_default);
-        if (path)
+        const auto default_path = xset_get_s(xset::name::go_set_default);
+        if (default_path)
         {
-            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
+            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg),
+                                                default_path.value().c_str());
         }
         else
         {

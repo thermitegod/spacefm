@@ -706,10 +706,10 @@ VFSVolume::set_info() noexcept
     disp_devnum = std::format("{}:{}", gnu_dev_major(this->devnum), gnu_dev_minor(this->devnum));
 
     std::string parameter;
-    const char* user_format = xset_get_s(xset::name::dev_dispname);
+    const auto user_format = xset_get_s(xset::name::dev_dispname);
     if (user_format)
     {
-        parameter = user_format;
+        parameter = user_format.value();
         parameter = ztd::replace(parameter, "%v", disp_device);
         parameter = ztd::replace(parameter, "%s", disp_size);
         parameter = ztd::replace(parameter, "%t", disp_fstype);
@@ -1193,7 +1193,8 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     const std::string& fstype = check_fstype.value();
     // ztd::logger::debug("    fstype={}", fstype);
 
-    const auto blacklisted = ztd::split(xset_get_s(xset::name::dev_change), " ");
+    const auto dev_change = xset_get_s(xset::name::dev_change).value_or("");
+    const auto blacklisted = ztd::split(dev_change, " ");
     for (const auto& blacklist : blacklisted)
     {
         if (ztd::contains(fstype, blacklist))

@@ -13,13 +13,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <functional>
 #include <string>
 #include <string_view>
 
 #include <format>
 
 #include <vector>
+
+#include <functional>
+#include <optional>
 
 #include <cassert>
 
@@ -444,25 +446,25 @@ xset_design_job_set_import_file(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    const char* folder;
+    std::optional<std::string> default_path = std::nullopt;
 
     xset_t save = xset_get(xset::name::plug_ifile);
     if (save->s) //&& std::filesystem::is_directory(save->s)
     {
-        folder = xset_get_s(save);
+        default_path = save->s;
     }
     else
     {
-        folder = xset_get_s(xset::name::go_set_default);
-        if (!folder)
+        default_path = xset_get_s(xset::name::go_set_default);
+        if (!default_path)
         {
-            folder = ztd::strdup("/");
+            default_path = "/";
         }
     }
     char* file = xset_file_dialog(GTK_WIDGET(parent),
                                   GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                   "Choose Plugin File",
-                                  folder,
+                                  default_path.value().c_str(),
                                   nullptr);
     if (!file)
     {

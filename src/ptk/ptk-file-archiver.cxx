@@ -40,6 +40,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "ptk/ptk-error.hxx"
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
@@ -347,10 +348,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                                    nullptr);
 
     // Fetching available archive handlers
-    const std::string archive_handlers_s = xset_get_s(xset::name::arc_conf2);
+    const auto archive_handlers_s = xset_get_s(xset::name::arc_conf2);
 
     // Dealing with possibility of no handlers
-    if (ztd::compare(archive_handlers_s, "") <= 0)
+    if (archive_handlers_s && ztd::compare(archive_handlers_s.value(), "") <= 0)
     {
         /* Telling user to ensure handlers are available and bringing
          * up configuration */
@@ -366,7 +367,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     }
 
     // Splitting archive handlers
-    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
+    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s.value(), " ");
 
     // Debug code
     // ztd::logger::info("archive_handlers_s: {}", archive_handlers_s);
@@ -374,9 +375,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     // Looping for handlers (nullptr-terminated list)
     GtkTreeIter iter;
     xset_t handler_xset;
-    // Get xset name of last used handler
-    const char* xset_name = xset_get_s(xset::name::arc_dlg); // do not free
-    i32 format = 4;                                          // default tar.gz
+    i32 format = 4; // default tar.gz
     i32 n = 0;
     for (const std::string_view archive_handler : archive_handlers)
     {
@@ -422,8 +421,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                                extensions.data(),
                                -1);
 
+            // Get xset name of last used handler
+            const auto xset_name = xset_get_s(xset::name::arc_dlg);
+
             // Is last used handler?
-            if (ztd::same(xset_name, handler_xset->name))
+            if (xset_name && ztd::same(xset_name.value(), handler_xset->name))
             {
                 format = n;
             }
@@ -435,7 +437,6 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dlg), filter);
 
     // Restoring previous selected handler
-    xset_name = nullptr;
     n = gtk_tree_model_iter_n_children(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)), nullptr);
     if (format < 0 || format > n - 1)
     {
@@ -472,6 +473,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                                             &iter,
                                             std::to_string(format).data()))
     {
+        const char* xset_name = nullptr;
         gtk_tree_model_get(GTK_TREE_MODEL(list),
                            &iter,
                            PTKFileArchiverCol::COL_XSET_NAME,
@@ -568,6 +570,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         switch (res)
         {
             case GtkResponseType::GTK_RESPONSE_OK:
+            {
                 // Dialog OK'd - fetching archive filename
                 dest_file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
 
@@ -583,6 +586,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                 }
 
                 // Fetching model data
+                const char* xset_name = nullptr;
                 gtk_tree_model_get(GTK_TREE_MODEL(list),
                                    &iter,
                                    PTKFileArchiverCol::COL_XSET_NAME,
@@ -698,17 +702,22 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
                 autosave_request_add();
                 exit_loop = true;
                 break;
+            }
             case GtkResponseType::GTK_RESPONSE_NONE:
+            {
                 /* User wants to configure archive handlers - call up the
                  * config dialog then exit, as this dialog would need to be
                  * reconstructed if changes occur */
                 gtk_widget_destroy(dlg);
                 ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_ARC, file_browser, nullptr);
                 return;
+            }
             default:
+            {
                 // Destroying dialog
                 gtk_widget_destroy(dlg);
                 return;
+            }
         }
         if (exit_loop)
         {
@@ -1157,8 +1166,8 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     const std::string dest_quote = ztd::shell::quote(!dest.empty() ? dest.string() : cwd.string());
 
     // Fetching available archive handlers and splitting
-    const std::string archive_handlers_s = xset_get_s(xset::name::arc_conf2);
-    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
+    const auto archive_handlers_s = xset_get_s(xset::name::arc_conf2);
+    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s.value(), " ");
 
     xset_t handler_xset = nullptr;
 

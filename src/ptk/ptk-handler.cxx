@@ -17,7 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <optional>
 #include <string>
 #include <string_view>
 
@@ -32,6 +31,8 @@
 
 #include <algorithm>
 #include <ranges>
+
+#include <optional>
 
 #include <iostream>
 #include <fstream>
@@ -1209,7 +1210,8 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& pa
     }
 
     // parsing handlers space-separated list
-    const auto handlers = ztd::split(xset_get_s(handler_conf_xsets.at(mode)), " ");
+    const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(mode));
+    const auto handlers = ztd::split(archive_handlers_s.value(), " ");
     if (handlers.empty())
     {
         return xset_handlers;
@@ -1449,7 +1451,8 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     Glib::spawn_command_line_sync(chmod_command);
 
     // add to handler list
-    if (ztd::compare(xset_get_s(handler_conf_xsets.at(mode)), "") <= 0)
+    const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(mode));
+    if (ztd::compare(archive_handlers_s.value(), "") <= 0)
     {
         // No handlers present - adding new handler
         xset_set(handler_conf_xsets.at(mode), xset::var::s, new_handler_xset->name);
@@ -1458,7 +1461,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     {
         // Adding new handler to handlers
         const std::string new_handlers_list =
-            std::format("{} {}", new_handler_xset->name, xset_get_s(handler_conf_xsets.at(mode)));
+            std::format("{} {}", new_handler_xset->name, archive_handlers_s.value());
         xset_set(handler_conf_xsets.at(mode), xset::var::s, new_handlers_list);
     }
 
@@ -1668,7 +1671,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
 {
     /* Fetching available archive handlers (literally gets member s from
      * the xset) - user-defined order has already been set */
-    const char* archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
+    const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
 
     // Making sure archive handlers are available
     if (!archive_handlers_s)
@@ -1676,7 +1679,7 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
         return;
     }
 
-    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
+    const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s.value(), " ");
 
     // Debug code
     // ztd::logger::info("archive_handlers_s: {}", archive_handlers_s);
@@ -1912,7 +1915,8 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
                            -1);
 
         // Updating available archive handlers list
-        if (ztd::compare(xset_get_s(handler_conf_xsets.at(hnd->mode)), "") <= 0)
+        const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
+        if (ztd::compare(archive_handlers_s.value(), "") <= 0)
         {
             // No handlers present - adding new handler
             xset_set(handler_conf_xsets.at(hnd->mode), xset::var::s, new_handler_xset->name);
@@ -1921,9 +1925,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         {
             // Adding new handler to handlers
             const std::string new_handlers_list =
-                std::format("{} {}",
-                            new_handler_xset->name,
-                            xset_get_s(handler_conf_xsets.at(hnd->mode)));
+                std::format("{} {}", new_handler_xset->name, archive_handlers_s.value());
             xset_set(handler_conf_xsets.at(hnd->mode), xset::var::s, new_handlers_list);
         }
 
@@ -2046,8 +2048,9 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         }
 
         // Updating available archive handlers list - fetching current handlers
-        const std::string archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
-        const std::vector<std::string> archive_handlers = ztd::split(archive_handlers_s, " ");
+        const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(hnd->mode));
+        const std::vector<std::string> archive_handlers =
+            ztd::split(archive_handlers_s.value(), " ");
         std::string new_archive_handlers_s;
 
         // Looping for handlers (nullptr-terminated list)
@@ -2796,30 +2799,31 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // determine job
-    const char* folder;
     const char* file;
     xset_t save;
     switch (job)
     {
         case PtkHandlerJob::HANDLER_JOB_IMPORT_FILE:
+        {
+            std::optional<std::string> default_path = std::nullopt;
             // get file path
             save = xset_get(xset::name::plug_ifile);
             if (save->s)
             { //&& std::filesystem::is_directory(save->s)
-                folder = xset_get_s(save);
+                default_path = save->s;
             }
             else
             {
-                folder = xset_get_s(xset::name::go_set_default);
-                if (!folder)
+                default_path = xset_get_s(xset::name::go_set_default);
+                if (!default_path)
                 {
-                    folder = ztd::strdup("/");
+                    default_path = "/";
                 }
             }
             file = xset_file_dialog(GTK_WIDGET(hnd->dlg),
                                     GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                     "Choose Handler Plugin File",
-                                    folder,
+                                    default_path.value().c_str(),
                                     nullptr);
             if (!file)
             {
@@ -2827,6 +2831,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             }
             save->s = std::filesystem::path(file).parent_path();
             break;
+        }
         case PtkHandlerJob::HANDLER_JOB_RESTORE_ALL:
             restore_defaults(hnd, true);
             return;

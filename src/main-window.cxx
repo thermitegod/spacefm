@@ -27,6 +27,8 @@
 
 #include <chrono>
 
+#include <optional>
+
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
@@ -260,7 +262,6 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 {
     xset_t set;
     char* path = nullptr;
-    const char* deffolder;
     std::string msg;
     PluginJob job = PluginJob::INSTALL;
 
@@ -284,24 +285,26 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 
     if (ztd::endswith(set->name, "file"))
     {
+        std::optional<std::string> default_path = std::nullopt;
+
         // get file path
         xset_t save = xset_get(xset::name::plug_ifile);
         if (save->s)
         { //&& std::filesystem::is_directory(save->s)
-            deffolder = xset_get_s(save);
+            default_path = xset_get_s(save);
         }
         else
         {
-            deffolder = xset_get_s(xset::name::go_set_default);
-            if (!deffolder)
+            default_path = xset_get_s(xset::name::go_set_default);
+            if (!default_path)
             {
-                deffolder = ztd::strdup("/");
+                default_path = "/";
             }
         }
         path = xset_file_dialog(GTK_WIDGET(main_window),
                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
                                 "Choose Plugin File",
-                                deffolder,
+                                default_path.value().c_str(),
                                 nullptr);
         if (!path)
         {
@@ -514,10 +517,10 @@ on_open_url(GtkWidget* widget, MainWindow* main_window)
     (void)widget;
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    const char* url = xset_get_s(xset::name::main_save_session);
+    const auto url = xset_get_s(xset::name::main_save_session);
     if (file_browser && url)
     {
-        ptk_location_view_mount_network(file_browser, url, true, true);
+        ptk_location_view_mount_network(file_browser, url.value(), true, true);
     }
 }
 
@@ -571,7 +574,7 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
         return;
     }
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-    const char* main_term = xset_get_s(xset::name::main_terminal);
+    auto main_term = xset_get_s(xset::name::main_terminal);
     if (!main_term)
     {
         ptk_show_error(GTK_WINDOW(parent),
@@ -591,10 +594,10 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
                                            GTK_WIDGET(file_browser),
                                            file_browser->task_view);
 
-    const std::string terminal = Glib::find_program_in_path(main_term);
+    const std::string terminal = Glib::find_program_in_path(main_term.value());
     if (terminal.empty())
     {
-        ztd::logger::warn("Cannot locate terminal in $PATH : {}", main_term);
+        ztd::logger::warn("Cannot locate terminal in $PATH : {}", main_term.value());
         return;
     }
 
@@ -1229,10 +1232,10 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 {
                     // open default tab
                     std::filesystem::path folder_path;
-                    const auto s = xset_get_s(xset::name::go_set_default);
-                    if (s)
+                    const auto default_path = xset_get_s(xset::name::go_set_default);
+                    if (default_path)
                     {
-                        folder_path = s;
+                        folder_path = default_path.value();
                     }
                     else
                     {
@@ -2337,10 +2340,10 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     if (gtk_notebook_get_n_pages(notebook) == 0)
     {
         std::filesystem::path path;
-        const char* go_default = xset_get_s(xset::name::go_set_default);
-        if (go_default != nullptr)
+        const auto default_path = xset_get_s(xset::name::go_set_default);
+        if (default_path)
         {
-            path = go_default;
+            path = default_path.value();
         }
         else
         {
@@ -2984,11 +2987,11 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
         }
     }
 
-    const char* orig_fmt = xset_get_s(xset::name::main_title);
+    const auto orig_fmt = xset_get_s(xset::name::main_title);
     std::string fmt;
     if (orig_fmt)
     {
-        fmt = orig_fmt;
+        fmt = orig_fmt.value();
     }
     else
     {
@@ -3017,7 +3020,7 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     {
         fmt = ztd::replace(fmt, "%n", disp_name);
     }
-    if (orig_fmt && ztd::contains(orig_fmt, "%d"))
+    if (orig_fmt && ztd::contains(orig_fmt.value(), "%d"))
     {
         fmt = ztd::replace(fmt, "%d", disp_path.string());
     }
@@ -4511,8 +4514,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     buf.append(std::format("set fm_my_window_id {:p}\n", fmt::ptr(main_window)));
 
     // utils
-    buf.append(
-        std::format("set fm_editor {}\n", ztd::shell::quote(xset_get_s(xset::name::editor))));
+    buf.append(std::format("set fm_editor {}\n",
+                           ztd::shell::quote(xset_get_s(xset::name::editor).value_or(""))));
     buf.append(std::format("set fm_editor_terminal {}\n", xset_get_b(xset::name::editor) ? 1 : 0));
 
     // set

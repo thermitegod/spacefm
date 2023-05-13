@@ -2329,10 +2329,12 @@ ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     focus_folder_view(file_browser);
-    const char* path = xset_get_s(xset::name::go_set_default);
-    if (path != nullptr)
+    const auto default_path = xset_get_s(xset::name::go_set_default);
+    if (default_path)
     {
-        ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        ptk_file_browser_chdir(file_browser,
+                               default_path.value(),
+                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
     }
     else
     {
@@ -3575,9 +3577,10 @@ ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
     focus_folder_view(file_browser);
 
     std::filesystem::path dir_path;
-    if (xset_get_s(xset::name::go_set_default))
+    const auto default_path = xset_get_s(xset::name::go_set_default);
+    if (default_path)
     {
-        dir_path = xset_get_s(xset::name::go_set_default);
+        dir_path = default_path.value();
     }
     else
     {
@@ -3603,9 +3606,10 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
     auto dir_path = ptk_file_browser_get_cwd(file_browser);
     if (!std::filesystem::is_directory(dir_path))
     {
-        if (xset_get_s(xset::name::go_set_default))
+        const auto default_path = xset_get_s(xset::name::go_set_default);
+        if (default_path)
         {
-            dir_path = xset_get_s(xset::name::go_set_default);
+            dir_path = default_path.value();
         }
         else
         {
@@ -3880,16 +3884,17 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
 
             if (view_mode == PtkFBViewMode::PTK_FB_COMPACT_VIEW)
             {
-                g_object_set(G_OBJECT(renderer),
-                             "xalign",
-                             0.0,
-                             "yalign",
-                             0.5,
-                             "font",
-                             xset_get_s(xset::name::font_view_compact),
-                             "size-set",
-                             true,
-                             nullptr);
+                g_object_set(
+                    G_OBJECT(renderer),
+                    "xalign",
+                    0.0,
+                    "yalign",
+                    0.5,
+                    "font",
+                    xset_get_s(xset::name::font_view_compact).value_or("Monospace 9").c_str(),
+                    "size-set",
+                    true,
+                    nullptr);
             }
             else
             {
@@ -3908,7 +3913,7 @@ create_folder_view(PtkFileBrowser* file_browser, PtkFBViewMode view_mode)
                              "attributes",
                              attr_list,
                              "font",
-                             xset_get_s(xset::name::font_view_icon),
+                             xset_get_s(xset::name::font_view_icon).value_or("Monospace 9").c_str(),
                              "size-set",
                              true,
                              nullptr);

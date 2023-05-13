@@ -13,11 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <optional>
 #include <string>
 #include <string_view>
 
 #include <format>
+
+#include <optional>
 
 #include <cassert>
 
@@ -332,21 +333,21 @@ xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::filesystem::
 void
 xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
 {
-    const char* deffolder;
+    std::optional<std::string> default_path = std::nullopt;
     std::string deffile;
 
     // get new plugin filename
     xset_t save = xset_get(xset::name::plug_cfile);
     if (save->s) //&& std::filesystem::is_directory(save->s)
     {
-        deffolder = xset_get_s(save);
+        default_path = save->s;
     }
     else
     {
-        deffolder = xset_get_s(xset::name::go_set_default);
-        if (!deffolder)
+        default_path = xset_get_s(xset::name::go_set_default);
+        if (!default_path)
         {
-            deffolder = ztd::strdup("/");
+            default_path = "/";
         }
     }
 
@@ -387,7 +388,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     char* path = xset_file_dialog(parent,
                                   GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
                                   "Save As Plugin File",
-                                  deffolder,
+                                  default_path.value().c_str(),
                                   deffile.data());
     if (!path)
     {

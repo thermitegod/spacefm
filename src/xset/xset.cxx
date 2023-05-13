@@ -367,33 +367,28 @@ xset_set(const std::string_view name, xset::var var, const std::string_view valu
  * S get
  */
 
-const char*
+const std::optional<std::string>
 xset_get_s(xset_t set) noexcept
 {
     assert(set != nullptr);
-    const auto value = set->s;
-    if (value)
-    {
-        return ztd::strdup(value.value().data());
-    }
-    return nullptr;
+    return set->s;
 }
 
-const char*
+const std::optional<std::string>
 xset_get_s(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_s(set);
 }
 
-const char*
+const std::optional<std::string>
 xset_get_s(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_s(set);
 }
 
-const char*
+const std::optional<std::string>
 xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
 {
     // TODO
@@ -401,7 +396,7 @@ xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
     return xset_get_s(fullname);
 }
 
-const char*
+const std::optional<std::string>
 xset_get_s_panel(panel_t panel, xset::panel name) noexcept
 {
     const xset_t set = xset_get(xset::get_xsetname_from_panel(panel, name));
@@ -412,26 +407,21 @@ xset_get_s_panel(panel_t panel, xset::panel name) noexcept
  * X get
  */
 
-const char*
+const std::optional<std::string>
 xset_get_x(xset_t set) noexcept
 {
     assert(set != nullptr);
-    const auto value = set->x;
-    if (value)
-    {
-        return ztd::strdup(value.value().data());
-    }
-    return nullptr;
+    return set->x;
 }
 
-const char*
+const std::optional<std::string>
 xset_get_x(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_x(set);
 }
 
-const char*
+const std::optional<std::string>
 xset_get_x(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
@@ -442,26 +432,21 @@ xset_get_x(const std::string_view name) noexcept
  * Y get
  */
 
-const char*
+const std::optional<std::string>
 xset_get_y(xset_t set) noexcept
 {
     assert(set != nullptr);
-    const auto value = set->y;
-    if (value)
-    {
-        return ztd::strdup(value.value().data());
-    }
-    return nullptr;
+    return set->y;
 }
 
-const char*
+const std::optional<std::string>
 xset_get_y(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_y(set);
 }
 
-const char*
+const std::optional<std::string>
 xset_get_y(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
@@ -472,26 +457,21 @@ xset_get_y(const std::string_view name) noexcept
  * Z get
  */
 
-const char*
+const std::optional<std::string>
 xset_get_z(xset_t set) noexcept
 {
     assert(set != nullptr);
-    const auto value = set->z;
-    if (value)
-    {
-        return ztd::strdup(value.value().data());
-    }
-    return nullptr;
+    return set->z;
 }
 
-const char*
+const std::optional<std::string>
 xset_get_z(xset::name name) noexcept
 {
     const xset_t set = xset_get(name);
     return xset_get_z(set);
 }
 
-const char*
+const std::optional<std::string>
 xset_get_z(const std::string_view name) noexcept
 {
     const xset_t set = xset_get(name);
@@ -667,7 +647,7 @@ xset_get_int(xset_t set, xset::var var) noexcept
 {
     assert(set != nullptr);
 
-    const char* varstring = nullptr;
+    std::optional<std::string> varstring = std::nullopt;
     switch (var)
     {
         case xset::var::s:
@@ -715,11 +695,11 @@ xset_get_int(xset_t set, xset::var var) noexcept
             return -1;
     }
 
-    if (varstring == nullptr)
+    if (varstring == std::nullopt)
     {
         return 0;
     }
-    return std::stoi(varstring);
+    return std::stoi(varstring.value());
 }
 
 i32

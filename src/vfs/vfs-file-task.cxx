@@ -1426,7 +1426,12 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     if (this->exec_terminal)
     {
         // get terminal
-        terminal = Glib::find_program_in_path(xset_get_s(xset::name::main_terminal));
+        const auto terminal_s = xset_get_s(xset::name::main_terminal);
+        if (terminal_s)
+        {
+            terminal = Glib::find_program_in_path(terminal_s.value());
+        }
+
         if (terminal.empty())
         {
             const std::string msg =
@@ -1581,12 +1586,15 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     if (!terminal.empty())
     {
         // terminal
-        const auto terminal_args =
-            terminal_handlers->get_terminal_args(xset_get_s(xset::name::main_terminal));
-        argv.reserve(terminal_args.size());
-        for (const std::string_view terminal_arg : terminal_args)
+        const auto terminal_s = xset_get_s(xset::name::main_terminal);
+        if (terminal_s)
         {
-            argv.emplace_back(terminal_arg);
+            const auto terminal_args = terminal_handlers->get_terminal_args(terminal_s.value());
+            argv.reserve(terminal_args.size());
+            for (const std::string_view terminal_arg : terminal_args)
+            {
+                argv.emplace_back(terminal_arg);
+            }
         }
 
         use_su = su;
