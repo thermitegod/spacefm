@@ -873,7 +873,8 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_set_halign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_CENTER);
     gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-    ptask->from = GTK_LABEL(gtk_label_new(ptask->complete ? "" : task->current_file.c_str()));
+    ptask->from =
+        GTK_LABEL(gtk_label_new(ptask->complete ? "" : task->current_file.value_or("").c_str()));
     gtk_widget_set_halign(GTK_WIDGET(ptask->from), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(ptask->from), GtkAlign::GTK_ALIGN_CENTER);
     gtk_label_set_ellipsize(ptask->from, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -894,8 +895,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         gtk_label_set_ellipsize(ptask->src_dir, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
         gtk_label_set_selectable(ptask->src_dir, true);
         gtk_grid_attach(grid, GTK_WIDGET(ptask->src_dir), 1, row, 1, 1);
-        if (!task->dest_dir.empty())
+        if (task->dest_dir)
         {
+            const auto dest_dir = task->dest_dir.value();
             /* To: <Destination directory>
             ex. Copy file to..., Move file to...etc. */
             row++;
@@ -903,7 +905,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
             gtk_widget_set_halign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(label), GtkAlign::GTK_ALIGN_CENTER);
             gtk_grid_attach(grid, GTK_WIDGET(label), 0, row, 1, 1);
-            ptask->to = GTK_LABEL(gtk_label_new(task->dest_dir.c_str()));
+            ptask->to = GTK_LABEL(gtk_label_new(dest_dir.c_str()));
             gtk_widget_set_halign(GTK_WIDGET(ptask->to), GtkAlign::GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(ptask->to), GtkAlign::GTK_ALIGN_CENTER);
             gtk_label_set_ellipsize(ptask->to, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -1184,8 +1186,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         return;
     }
 
-    char* ufile_path;
-    const char* window_title;
+    std::string ufile_path;
 
     // ztd::logger::info("ptk_file_task_progress_update ptask={:p}", ptask);
 
@@ -1215,11 +1216,16 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
         else
         {
-            const std::string escaped_markup =
-                Glib::Markup::escape_text(task->current_file.string());
-            ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
+            if (task->current_file)
+            {
+                const auto current_file = task->current_file.value();
+
+                const std::string escaped_markup = Glib::Markup::escape_text(current_file.string());
+                ufile_path = std::format("<b>{}</b>", escaped_markup);
+            }
         }
 
+        std::string window_title;
         if (ptask->aborted)
         {
             window_title = "Stopped";
@@ -1235,63 +1241,62 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
                 window_title = "Done";
             }
         }
-        gtk_window_set_title(GTK_WINDOW(ptask->progress_dlg), window_title);
-        if (!ufile_path)
+        gtk_window_set_title(GTK_WINDOW(ptask->progress_dlg), window_title.c_str());
+        if (ufile_path.empty())
         {
             const std::string escaped_markup = Glib::Markup::escape_text(window_title);
             ufile_path = ztd::strdup(std::format("<b>( {} )</b>", escaped_markup));
         }
     }
-    else if (!task->current_file.empty())
+    else if (task->current_file)
     {
+        const auto current_file = task->current_file.value();
+
         if (task->type != VFSFileTaskType::EXEC)
         {
             // Copy: <src basename>
-            const auto name = task->current_file.filename();
+            const auto name = current_file.filename();
             const std::string escaped_markup = Glib::Markup::escape_text(name.string());
             ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
 
             // From: <src_dir>
-            const auto current_parent = task->current_file.parent_path();
+            const auto current_parent = current_file.parent_path();
             if (!std::filesystem::equivalent(current_parent, "/"))
             {
                 usrc_dir = current_parent;
             }
 
             // To: <dest_dir> OR <dest_file>
-            if (!task->current_dest.empty())
+            if (task->current_dest)
             {
-                const auto current_file = task->current_file.filename();
-                const auto current_dest = task->current_dest.filename();
-                if (!std::filesystem::equivalent(current_file, current_dest))
+                const auto current_dest = task->current_dest.value();
+
+                const auto current_file_filename = current_file.filename();
+                const auto current_dest_filename = current_dest.filename();
+                if (!std::filesystem::equivalent(current_file_filename, current_dest_filename))
                 {
                     // source and dest filenames differ, user renamed - show all
-                    udest = task->current_dest;
+                    udest = current_dest;
                 }
                 else
                 {
                     // source and dest filenames same - show dest dir only
-                    udest = task->current_dest.parent_path();
+                    udest = current_dest.parent_path();
                 }
             }
         }
         else
         {
-            const std::string escaped_markup =
-                Glib::Markup::escape_text(task->current_file.string());
+            const std::string escaped_markup = Glib::Markup::escape_text(current_file.string());
             ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
         }
     }
-    else
-    {
-        ufile_path = nullptr;
-    }
 
-    if (udest.empty() && !ptask->complete && !task->dest_dir.empty())
+    if (udest.empty() && !ptask->complete && task->dest_dir)
     {
-        udest = task->dest_dir;
+        udest = task->dest_dir.value();
     }
-    gtk_label_set_markup(ptask->from, ufile_path);
+    gtk_label_set_markup(ptask->from, ufile_path.c_str());
     if (ptask->src_dir)
     {
         gtk_label_set_text(ptask->src_dir, usrc_dir.c_str());
@@ -1300,7 +1305,6 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     {
         gtk_label_set_text(ptask->to, udest.c_str());
     }
-    std::free(ufile_path);
 
     // progress bar
     if (task->type != VFSFileTaskType::EXEC || ptask->task->custom_percent)
@@ -1966,7 +1970,7 @@ on_vfs_file_task_state_cb(vfs::file_task task, VFSFileTaskState state, void* sta
             task->lock();
             if (task->type != VFSFileTaskType::EXEC)
             {
-                task->current_file.clear();
+                task->current_file = std::nullopt;
             }
             ptask->progress_count = 50; // trigger fast display
             task->unlock();
@@ -2155,9 +2159,11 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                 str = multi_input_get_text(query_input);
             }
             const auto file_name = std::filesystem::path(str.value());
-            if (str && !file_name.empty() && !ptask->task->current_dest.empty())
+            if (str && !file_name.empty() && ptask->task->current_dest)
             {
-                const auto dir_name = ptask->task->current_dest.parent_path();
+                const auto current_dest = ptask->task->current_dest.value();
+
+                const auto dir_name = current_dest.parent_path();
                 const auto path = dir_name / file_name;
                 *ptask->query_new_dest = ztd::strdup(path);
             }
@@ -2276,14 +2282,21 @@ query_overwrite(PtkFileTask* ptask)
         from_disp = "Copying from directory:";
     }
 
-    const bool different_files =
-        (!std::filesystem::equivalent(ptask->task->current_file, ptask->task->current_dest));
+    if (!ptask->task->current_file || !ptask->task->current_dest)
+    {
+        return;
+    }
 
-    const auto src_stat = ztd::lstat(ptask->task->current_file);
-    const auto dest_stat = ztd::lstat(ptask->task->current_dest);
+    const auto current_file = ptask->task->current_file.value();
+    const auto current_dest = ptask->task->current_dest.value();
 
-    const bool is_src_dir = std::filesystem::is_directory(ptask->task->current_file);
-    const bool is_dest_dir = std::filesystem::is_directory(ptask->task->current_dest);
+    const bool different_files = (!std::filesystem::equivalent(current_file, current_dest));
+
+    const auto src_stat = ztd::lstat(current_file);
+    const auto dest_stat = ztd::lstat(current_dest);
+
+    const bool is_src_dir = std::filesystem::is_directory(current_file);
+    const bool is_dest_dir = std::filesystem::is_directory(current_dest);
 
     if (different_files && is_dest_dir == is_src_dir)
     {
@@ -2304,8 +2317,8 @@ query_overwrite(PtkFileTask* ptask)
             std::string dest_link;
             std::string link_warn;
 
-            const bool is_src_sym = std::filesystem::is_symlink(ptask->task->current_file);
-            const bool is_dest_sym = std::filesystem::is_symlink(ptask->task->current_dest);
+            const bool is_src_sym = std::filesystem::is_symlink(current_file);
+            const bool is_dest_sym = std::filesystem::is_symlink(current_dest);
 
             if (is_src_sym)
             {
@@ -2405,11 +2418,11 @@ query_overwrite(PtkFileTask* ptask)
     }
 
     // filenames
-    char* base_name = ztd::strdup(ptask->task->current_dest.filename());
+    char* base_name = ztd::strdup(current_dest.filename());
     char* base_name_disp = ztd::strdup(base_name); // auto free
-    char* src_dir = ztd::strdup(ptask->task->current_file.parent_path());
+    char* src_dir = ztd::strdup(current_file.parent_path());
     char* src_dir_disp = ztd::strdup(src_dir);
-    char* dest_dir = ztd::strdup(ptask->task->current_dest.parent_path());
+    char* dest_dir = ztd::strdup(current_dest.parent_path());
     char* dest_dir_disp = ztd::strdup(dest_dir);
 
     const auto [filename_no_extension, filename_extension] = get_name_extension(base_name);

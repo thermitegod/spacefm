@@ -4295,20 +4295,23 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         c->var[ItemPropContext::CONTEXT_TASK_TYPE] = job_titles.at(ptask->task->type).data();
         if (ptask->task->type == VFSFileTaskType::EXEC)
         {
-            c->var[ItemPropContext::CONTEXT_TASK_NAME] = ptask->task->current_file;
-            c->var[ItemPropContext::CONTEXT_TASK_DIR] = ptask->task->dest_dir;
+            if (ptask->task->current_file)
+            {
+                c->var[ItemPropContext::CONTEXT_TASK_NAME] = ptask->task->current_file.value();
+            }
+            if (ptask->task->dest_dir)
+            {
+                c->var[ItemPropContext::CONTEXT_TASK_DIR] = ptask->task->dest_dir.value();
+            }
         }
         else
         {
             c->var[ItemPropContext::CONTEXT_TASK_NAME] = "";
             ptk_file_task_lock(ptask);
-            if (!ptask->task->current_file.empty())
+            if (ptask->task->current_file)
             {
-                c->var[ItemPropContext::CONTEXT_TASK_DIR] = ptask->task->current_file.parent_path();
-            }
-            else
-            {
-                c->var[ItemPropContext::CONTEXT_TASK_DIR] = "";
+                const auto current_file = ptask->task->current_file.value();
+                c->var[ItemPropContext::CONTEXT_TASK_DIR] = current_file.parent_path();
             }
             ptk_file_task_unlock(ptask);
         }
@@ -4567,11 +4570,16 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
         buf.append("\n");
         buf.append(std::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
+
+        const auto dest_dir = ptask->task->dest_dir.value_or("");
+        const auto current_file = ptask->task->current_file.value_or("");
+        const auto current_dest = ptask->task->current_dest.value_or("");
+
         if (ptask->task->type == VFSFileTaskType::EXEC)
         {
             // clang-format off
-            buf.append(std::format("set fm_task_pwd {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
-            buf.append(std::format("set fm_task_name {}\n", ztd::shell::quote(ptask->task->current_file.string())));
+            buf.append(std::format("set fm_task_pwd {}\n", ztd::shell::quote(dest_dir.string())));
+            buf.append(std::format("set fm_task_name {}\n", ztd::shell::quote(current_file.string())));
             buf.append(std::format("set fm_task_command {}\n", ztd::shell::quote(ptask->task->exec_command)));
             buf.append(std::format("set fm_task_user {}\n", ztd::shell::quote(ptask->task->exec_as_user)));
             buf.append(std::format("set fm_task_icon {}\n", ztd::shell::quote(ptask->task->exec_icon)));
@@ -4581,9 +4589,9 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         else
         {
             // clang-format off
-            buf.append(std::format("set fm_task_dest_dir {}\n", ztd::shell::quote(ptask->task->dest_dir.string())));
-            buf.append(std::format("set fm_task_current_src_file {}\n", ztd::shell::quote(ptask->task->current_file.string())));
-            buf.append(std::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(ptask->task->current_dest.string())));
+            buf.append(std::format("set fm_task_dest_dir {}\n", ztd::shell::quote(dest_dir.string())));
+            buf.append(std::format("set fm_task_current_src_file {}\n", ztd::shell::quote(current_file.string())));
+            buf.append(std::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(current_dest.string())));
             // clang-format on
         }
         buf.append(std::format("set fm_task_id {:p}\n", fmt::ptr(ptask)));
@@ -5539,7 +5547,10 @@ main_task_view_update_task(PtkFileTask* ptask)
     std::filesystem::path dest_dir;
     if (ptask->task->type != VFSFileTaskType::EXEC)
     {
-        dest_dir = ptask->task->dest_dir;
+        if (ptask->task->dest_dir)
+        {
+            dest_dir = ptask->task->dest_dir.value();
+        }
     }
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -5588,16 +5599,19 @@ main_task_view_update_task(PtkFileTask* ptask)
         }
         if (ptask->task->type != VFSFileTaskType::EXEC)
         {
-            if (!ptask->task->current_file.empty())
+            if (ptask->task->current_file)
             {
-                path = ptask->task->current_file.parent_path();
-                file = ptask->task->current_file.filename();
+                const auto current_file = ptask->task->current_file.value();
+                path = current_file.parent_path();
+                file = current_file.filename();
             }
         }
         else
         {
-            path = ptask->task->dest_dir; // cwd
-            file = std::format("( {} )", ptask->task->current_file.string());
+            const auto current_file = ptask->task->current_file.value();
+
+            path = ptask->task->dest_dir.value(); // cwd
+            file = std::format("( {} )", current_file.string());
         }
 
         // status

@@ -25,6 +25,8 @@
 #include <array>
 #include <vector>
 
+#include <optional>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -181,9 +183,9 @@ class VFSFileTask
 
   public:
     VFSFileTaskType type;
-    std::vector<std::filesystem::path> src_paths{}; // All source files. This list will be freed
-                                                    // after file operation is completed.
-    std::filesystem::path dest_dir{};               // Destinaton directory
+    std::vector<std::filesystem::path> src_paths{};  // All source files. This list will be freed
+                                                     // after file operation is completed.
+    std::optional<std::filesystem::path> dest_dir{}; // Destinaton directory
     bool avoid_changes{false};
 
     VFSFileTaskOverwriteMode overwrite_mode;
@@ -210,8 +212,10 @@ class VFSFileTask
     ztd::timer timer;
     std::time_t start_time;
 
-    std::filesystem::path current_file{}; // copy of Current processed file
-    std::filesystem::path current_dest{}; // copy of Current destination file
+    // copy of Current processed file
+    std::optional<std::filesystem::path> current_file{std::nullopt};
+    // copy of Current destination file
+    std::optional<std::filesystem::path> current_dest{std::nullopt};
 
     i32 err_count{0};
     i32 error{0};
@@ -248,7 +252,7 @@ class VFSFileTask
     std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
                                           // for su commands, must use fish -c
                                           // as su does not execute binaries
-    std::filesystem::path exec_script{};
+    std::optional<std::filesystem::path> exec_script{};
     bool exec_keep_tmp{false}; // diagnostic to keep temp files
     void* exec_browser{nullptr};
     void* exec_desktop{nullptr};

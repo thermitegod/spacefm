@@ -218,8 +218,11 @@ VFSFileTask::check_overwrite(const std::filesystem::path& dest_file, bool* dest_
         *new_dest_file = nullptr;
         if (this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE_ALL)
         {
+            const auto checked_current_file = this->current_file.value_or("");
+            const auto checked_current_dest = this->current_dest.value_or("");
+
             *dest_exists = dest_file_stat.is_valid();
-            if (std::filesystem::equivalent(this->current_file, this->current_dest))
+            if (std::filesystem::equivalent(checked_current_file, checked_current_dest))
             {
                 // src and dest are same file - do not overwrite (truncates)
                 // occurs if user pauses task and changes overwrite mode
@@ -304,8 +307,11 @@ VFSFileTask::check_overwrite(const std::filesystem::path& dest_file, bool* dest_
                 if (this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE ||
                     this->overwrite_mode == VFSFileTaskOverwriteMode::OVERWRITE_ALL)
                 {
+                    const auto checked_current_file = this->current_file.value_or("");
+                    const auto checked_current_dest = this->current_dest.value_or("");
+
                     *dest_exists = dest_file_stat.is_valid();
-                    if (std::filesystem::equivalent(this->current_file, this->current_dest))
+                    if (std::filesystem::equivalent(checked_current_file, checked_current_dest))
                     {
                         // src and dest are same file - do not overwrite (truncates)
                         // occurs if user pauses task and changes overwrite mode
@@ -338,12 +344,14 @@ VFSFileTask::check_overwrite(const std::filesystem::path& dest_file, bool* dest_
 bool
 VFSFileTask::check_dest_in_src(const std::filesystem::path& src_dir)
 {
-    if (this->dest_dir.empty())
+    if (!this->dest_dir)
     {
         return false;
     }
 
-    const auto real_dest_path = std::filesystem::canonical(this->dest_dir);
+    const auto checked_dest_dir = this->dest_dir.value();
+
+    const auto real_dest_path = std::filesystem::canonical(checked_dest_dir);
     const auto real_src_path = std::filesystem::canonical(src_dir);
 
     // Need to have the + '/' to avoid erroring when moving a dir
@@ -357,7 +365,7 @@ VFSFileTask::check_dest_in_src(const std::filesystem::path& src_dir)
     // source is contained in destination dir
     const std::string err =
         std::format("Destination directory \"{}\" is contained in source \"{}\"",
-                    this->dest_dir.string(),
+                    checked_dest_dir.string(),
                     src_dir.string());
     this->append_add_log(err);
     if (this->state_cb)
@@ -394,7 +402,7 @@ void
 VFSFileTask::file_copy(const std::filesystem::path& src_file)
 {
     const auto file_name = src_file.filename();
-    const auto dest_file = this->dest_dir / file_name;
+    const auto dest_file = this->dest_dir.value() / file_name;
 
     this->do_file_copy(src_file, dest_file);
 }
@@ -741,10 +749,10 @@ VFSFileTask::file_move(const std::filesystem::path& src_file)
     this->unlock();
 
     const auto file_name = src_file.filename();
-    const auto dest_file = this->dest_dir / file_name;
+    const auto dest_file = this->dest_dir.value() / file_name;
 
     const auto src_stat = ztd::lstat(src_file);
-    const auto dest_stat = ztd::stat(this->dest_dir);
+    const auto dest_stat = ztd::stat(this->dest_dir.value());
 
     if (src_stat.is_valid() && dest_stat.is_valid())
     {
@@ -996,7 +1004,7 @@ VFSFileTask::file_link(const std::filesystem::path& src_file)
     }
 
     const auto file_name = src_file.filename();
-    const auto old_dest_file = this->dest_dir / file_name;
+    const auto old_dest_file = this->dest_dir.value() / file_name;
     auto dest_file = old_dest_file;
 
     // MOD  setup task for check overwrite
@@ -1238,11 +1246,12 @@ cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
         task->exec_exit_status = 0;
     }
 
-    if (!task->exec_keep_tmp)
+    if (!task->exec_keep_tmp && task->exec_script)
     {
-        if (std::filesystem::exists(task->exec_script))
+        const auto checked_exec_script = task->exec_script.value();
+        if (std::filesystem::exists(checked_exec_script))
         {
-            std::filesystem::remove(task->exec_script);
+            std::filesystem::remove(checked_exec_script);
         }
     }
 
@@ -1460,12 +1469,15 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         while (true)
         {
             const std::filesystem::path hexname = std::format("{}.fish", ztd::randhex());
-            this->exec_script = tmp / hexname;
-            if (!std::filesystem::exists(this->exec_script))
+            const auto new_exec_script = tmp / hexname;
+            if (!std::filesystem::exists(new_exec_script))
             {
+                this->exec_script = new_exec_script;
                 break;
             }
         }
+
+        const auto checked_exec_script = this->exec_script.value();
 
         // open buffer
         std::string buf;
@@ -1480,11 +1492,11 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             {
                 this->task_error(errno, "Error writing temporary file");
 
-                if (!this->exec_keep_tmp)
+                if (!this->exec_keep_tmp && this->exec_script)
                 {
-                    if (std::filesystem::exists(this->exec_script))
+                    if (std::filesystem::exists(checked_exec_script))
                     {
-                        std::filesystem::remove(this->exec_script);
+                        std::filesystem::remove(checked_exec_script);
                     }
                 }
                 call_state_callback(this, VFSFileTaskState::FINISH);
@@ -1492,7 +1504,11 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                 return;
             }
 
-            buf.append(main_write_exports(this, this->current_dest.string()));
+            if (this->current_dest)
+            {
+                const auto checked_current_dest = this->current_dest.value();
+                buf.append(main_write_exports(this, checked_current_dest.string()));
+            }
         }
         else
         {
@@ -1507,7 +1523,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         if (this->exec_export)
         {
             buf.append(
-                std::format("set fm_import {}\n", ztd::shell::quote(this->exec_script.string())));
+                std::format("set fm_import {}\n", ztd::shell::quote(checked_exec_script.string())));
         }
         else
         {
@@ -1515,14 +1531,14 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         }
 
         buf.append(
-            std::format("set fm_source {}\n\n", ztd::shell::quote(this->exec_script.string())));
+            std::format("set fm_source {}\n\n", ztd::shell::quote(checked_exec_script.string())));
 
         // build - trap rm
         if (!this->exec_keep_tmp && geteuid() != 0 && ztd::same(this->exec_as_user, "root"))
         {
             // run as root command, clean up
             buf.append(std::format("trap \"rm -f {}; exit\" EXIT SIGINT SIGTERM SIGQUIT SIGHUP\n\n",
-                                   this->exec_script.string()));
+                                   checked_exec_script.string()));
         }
 
         // build - command
@@ -1547,16 +1563,16 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         buf.append(std::format("exit $fm_err\n"));
         // ztd::logger::debug(buf);
 
-        const bool result = write_file(this->exec_script, buf);
+        const bool result = write_file(this->exec_script.value(), buf);
         if (!result)
         {
             this->task_error(errno, "Error writing temporary file");
 
             if (!this->exec_keep_tmp)
             {
-                if (std::filesystem::exists(this->exec_script))
+                if (std::filesystem::exists(checked_exec_script))
                 {
-                    std::filesystem::remove(this->exec_script);
+                    std::filesystem::remove(checked_exec_script);
                 }
             }
             call_state_callback(this, VFSFileTaskState::FINISH);
@@ -1565,13 +1581,13 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         }
 
         // set permissions
-        chmod(this->exec_script.c_str(), 0700);
+        chmod(checked_exec_script.c_str(), 0700);
 
         // use checksum
         if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
         {
             sum_script =
-                ztd::compute_checksum(ztd::checksum::type::md5, this->exec_script.string());
+                ztd::compute_checksum(ztd::checksum::type::md5, checked_exec_script.string());
         }
     }
 
@@ -1644,7 +1660,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                             FISH_PATH,
                             auth,
                             ztd::same(this->exec_as_user, "root") ? "root" : "",
-                            this->exec_script.string(),
+                            this->exec_script.value().string(),
                             sum_script);
             argv.emplace_back(script);
         }
@@ -1656,7 +1672,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             {
                 argv.emplace_back("root");
             }
-            argv.emplace_back(this->exec_script);
+            argv.emplace_back(this->exec_script.value());
             argv.emplace_back(sum_script);
         }
     }
@@ -1667,35 +1683,31 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     }
     else
     {
-        argv.emplace_back(this->exec_script);
+        argv.emplace_back(this->exec_script.value());
     }
 
     pid_t pid;
     i32 out, err;
     try
     {
-        if (this->exec_sync)
+        std::filesystem::path working_directory;
+        if (this->dest_dir)
         {
-            Glib::spawn_async_with_pipes(this->dest_dir,
-                                         argv,
-                                         Glib::SpawnFlags::DO_NOT_REAP_CHILD,
-                                         Glib::SlotSpawnChildSetup(),
-                                         &pid,
-                                         nullptr,
-                                         &out,
-                                         &err);
+            working_directory = this->dest_dir.value();
         }
         else
         {
-            Glib::spawn_async_with_pipes(this->dest_dir,
-                                         argv,
-                                         Glib::SpawnFlags::DO_NOT_REAP_CHILD,
-                                         Glib::SlotSpawnChildSetup(),
-                                         &pid,
-                                         nullptr,
-                                         nullptr,
-                                         nullptr);
+            working_directory = vfs::user_dirs->home_dir();
         }
+
+        Glib::spawn_async_with_pipes(working_directory,
+                                     argv,
+                                     Glib::SpawnFlags::DO_NOT_REAP_CHILD,
+                                     Glib::SlotSpawnChildSetup(),
+                                     &pid,
+                                     nullptr,
+                                     this->exec_sync ? &out : nullptr,
+                                     this->exec_sync ? &err : nullptr);
     }
     catch (const Glib::SpawnError& e)
     {
@@ -1707,11 +1719,12 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             ztd::logger::info("    result={} ( {} )", errno, errno_msg);
         }
 
-        if (!this->exec_keep_tmp && this->exec_sync)
+        if (!this->exec_keep_tmp && this->exec_sync && this->exec_script)
         {
-            if (std::filesystem::exists(this->exec_script))
+            const auto checked_exec_script = this->exec_script.value();
+            if (std::filesystem::exists(checked_exec_script))
             {
-                std::filesystem::remove(this->exec_script);
+                std::filesystem::remove(checked_exec_script);
             }
         }
         const std::string cmd = ztd::join(argv, " ");
@@ -1733,11 +1746,17 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     {
         // catch termination to waitpid and delete tmp if needed
         // task can be destroyed while this watch is still active
-        g_child_watch_add(pid,
-                          (GChildWatchFunc)cb_exec_child_cleanup,
-                          !this->exec_keep_tmp && !this->exec_direct && this->exec_script.c_str()
-                              ? ztd::strdup(this->exec_script)
-                              : nullptr);
+        if (!this->exec_keep_tmp && !this->exec_direct && this->exec_script)
+        {
+            const auto checked_exec_script = this->exec_script.value();
+            g_child_watch_add(pid,
+                              (GChildWatchFunc)cb_exec_child_cleanup,
+                              ztd::strdup(checked_exec_script));
+        }
+        else
+        {
+            g_child_watch_add(pid, (GChildWatchFunc)cb_exec_child_cleanup, nullptr);
+        }
         call_state_callback(this, VFSFileTaskState::FINISH);
         return;
     }
@@ -1881,10 +1900,10 @@ vfs_file_task_thread(vfs::file_task task)
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
         if (task->type != VFSFileTaskType::CHMOD_CHOWN)
         {
-            const auto file_stat = ztd::lstat(task->dest_dir);
-            if (!(!task->dest_dir.empty() && file_stat.is_valid()))
+            const auto file_stat = ztd::lstat(task->dest_dir.value());
+            if (!(task->dest_dir && file_stat.is_valid()))
             {
-                task->task_error(errno, "Accessing", task->dest_dir);
+                task->task_error(errno, "Accessing", task->dest_dir.value());
                 task->abort = true;
                 task->state = VFSFileTaskState::RUNNING;
                 if (size_timeout)
@@ -2074,7 +2093,15 @@ VFSFileTask::run_task()
         }
         else
         {
-            this->avoid_changes = vfs_volume_dir_avoid_changes(this->dest_dir);
+            if (this->dest_dir)
+            {
+                const auto checked_dest_dir = this->dest_dir.value();
+                this->avoid_changes = vfs_volume_dir_avoid_changes(checked_dest_dir);
+            }
+            else
+            {
+                this->avoid_changes = false;
+            }
         }
 
         this->thread = g_thread_new("task_run", (GThreadFunc)vfs_file_task_thread, this);
