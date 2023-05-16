@@ -374,21 +374,22 @@ VFSFileTask::check_dest_in_src(std::string_view src_dir)
         return false;
     }
 
-    const std::string real_dest_path = std::filesystem::canonical(this->dest_dir);
-    const std::string real_src_path = std::filesystem::canonical(src_dir);
+    const auto real_dest_path = std::filesystem::canonical(this->dest_dir);
+    const auto real_src_path = std::filesystem::canonical(src_dir);
 
-    if (!ztd::startswith(real_dest_path, real_src_path))
+    // Need to have the + '/' to avoid erroring when moving a dir
+    // into another dir when the target starts the whole name of the source.
+    // i.e. moving './new' into './new2'
+    if (!ztd::startswith(real_dest_path.string() + '/', real_src_path.string() + '/'))
     {
         return false;
     }
 
     // source is contained in destination dir
-    const std::string disp_src = Glib::filename_display_name(src_dir.data());
-    const std::string disp_dest = Glib::filename_display_name(this->dest_dir);
     const std::string err =
         fmt::format("Destination directory \"{}\" is contained in source \"{}\"",
-                    disp_dest,
-                    disp_src);
+                    this->dest_dir,
+                    src_dir);
     this->append_add_log(err);
     if (this->state_cb)
     {
