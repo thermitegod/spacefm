@@ -261,6 +261,8 @@ ptk_file_exec_new(std::string_view item_name, std::string_view dest_dir, GtkWidg
 static void
 save_progress_dialog_size(PtkFileTask* ptask)
 {
+    (void)ptask;
+#if 0
     // save dialog size  - do this here now because as of GTK 3.8,
     // allocation == 1,1 in destroy event
     GtkAllocation allocation;
@@ -286,6 +288,7 @@ save_progress_dialog_size(PtkFileTask* ptask)
     {
         xset_set(XSetName::TASK_POP_TOP, XSetVar::Y, height);
     }
+#endif
 }
 
 void
@@ -811,11 +814,16 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     vfs::file_task task = ptask->task;
 
-    ptask->progress_dlg = gtk_dialog_new_with_buttons(titles.at(task->type).data(),
-                                                      nullptr /*was task->parent_window*/,
-                                                      (GtkDialogFlags)0,
-                                                      nullptr,
-                                                      nullptr);
+    // create dialog
+    ptask->progress_dlg =
+        gtk_dialog_new_with_buttons(titles.at(task->type).data(),
+                                    ptask->parent_window,
+                                    GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
+                                                   GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
+                                    nullptr,
+                                    nullptr);
+
+    gtk_window_set_resizable(GTK_WINDOW(ptask->progress_dlg), false);
 
     // cache this value for speed
     ptask->pop_detail = xset_get_b(XSetName::TASK_POP_DETAIL);
@@ -953,10 +961,22 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     // Error log
     ptask->scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    gtk_widget_set_halign(GTK_WIDGET(ptask->scroll), GtkAlign::GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(ptask->scroll), GtkAlign::GTK_ALIGN_END);
+    // gtk_widget_set_hexpand(GTK_WIDGET(ptask->scroll), false);
+    // gtk_widget_set_vexpand(GTK_WIDGET(ptask->scroll), false);
+    gtk_widget_set_margin_top(GTK_WIDGET(ptask->scroll), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(ptask->scroll), 0);
+    gtk_widget_set_margin_start(GTK_WIDGET(ptask->scroll), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(ptask->scroll), 5);
     ptask->error_view = gtk_text_view_new_with_buffer(ptask->log_buf);
+    // gtk_widget_set_halign(GTK_WIDGET(ptask->error_view), GtkAlign::GTK_ALIGN_END);
+    // gtk_widget_set_valign(GTK_WIDGET(ptask->error_view), GtkAlign::GTK_ALIGN_END);
+    // gtk_widget_set_hexpand(GTK_WIDGET(ptask->error_view), false);
+    // gtk_widget_set_vexpand(GTK_WIDGET(ptask->error_view), false);
     // ubuntu shows input too small so use mininum height
-    gtk_widget_set_size_request(GTK_WIDGET(ptask->error_view), -1, 70);
-    gtk_widget_set_size_request(GTK_WIDGET(ptask->scroll), -1, 70);
+    gtk_widget_set_size_request(GTK_WIDGET(ptask->error_view), 600, 300);
+    gtk_widget_set_size_request(GTK_WIDGET(ptask->scroll), 600, 300);
     gtk_container_add(GTK_CONTAINER(ptask->scroll), ptask->error_view);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ptask->scroll),
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
@@ -965,15 +985,6 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ptask->error_view), false);
 
     g_signal_connect(ptask->error_view, "populate-popup", G_CALLBACK(on_view_popup), nullptr);
-
-    gtk_widget_set_halign(GTK_WIDGET(ptask->scroll), GtkAlign::GTK_ALIGN_END);
-    gtk_widget_set_valign(GTK_WIDGET(ptask->scroll), GtkAlign::GTK_ALIGN_END);
-    gtk_widget_set_hexpand(GTK_WIDGET(ptask->scroll), true);
-    gtk_widget_set_vexpand(GTK_WIDGET(ptask->scroll), true);
-    gtk_widget_set_margin_top(GTK_WIDGET(ptask->scroll), 0);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(ptask->scroll), 0);
-    gtk_widget_set_margin_start(GTK_WIDGET(ptask->scroll), 5);
-    gtk_widget_set_margin_end(GTK_WIDGET(ptask->scroll), 5);
 
     // Overwrite & Error
     GtkWidget* overwrite_box = nullptr;
@@ -1062,6 +1073,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         gtk_box_pack_start(GTK_BOX(progress_dlg), GTK_WIDGET(overwrite_box), false, true, 5);
     }
 
+#if 0
     i32 win_width, win_height;
     if (task->type == VFSFileTaskType::EXEC)
     {
@@ -1082,6 +1094,8 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         win_height = -1;
     }
     gtk_window_set_default_size(GTK_WINDOW(ptask->progress_dlg), win_width, win_height);
+#endif
+
     gtk_button_box_set_layout(GTK_BUTTON_BOX(ptask->progress_dlg),
                               GtkButtonBoxStyle::GTK_BUTTONBOX_END);
     if (xset_get_b(XSetName::TASK_POP_TOP))
