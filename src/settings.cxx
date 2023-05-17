@@ -100,6 +100,8 @@
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set);
 static void xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* event);
 
+// clang-format off
+
 // must match xset::tool:: enum
 const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_name{
     {xset::tool::NOT, std::nullopt},
@@ -124,48 +126,52 @@ const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_na
 };
 
 // must match xset::tool:: enum
-inline constexpr std::array<const char*, 18> builtin_tool_icon{
-    nullptr,
-    nullptr,
-    "gtk-harddisk",
-    "gtk-jump-to",
-    "gtk-directory",
-    "gtk-home",
-    "gtk-home",
-    "gtk-go-up",
-    "gtk-go-back",
-    "gtk-go-back",
-    "gtk-go-forward",
-    "gtk-go-forward",
-    "gtk-refresh",
-    "gtk-add",
-    "gtk-add",
-    "gtk-apply",
-    nullptr,
-    "zoom-in",
+const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_icon{
+    {xset::tool::NOT, std::nullopt},
+    {xset::tool::custom, std::nullopt},
+    {xset::tool::devices, "gtk-harddisk"},
+    {xset::tool::bookmarks, "gtk-jump-to"},
+    {xset::tool::tree, "gtk-directory"},
+    {xset::tool::home, "gtk-home"},
+    {xset::tool::DEFAULT, "gtk-home"},
+    {xset::tool::up, "gtk-go-up"},
+    {xset::tool::back, "gtk-go-back"},
+    {xset::tool::back_menu, "gtk-go-back"},
+    {xset::tool::fwd, "gtk-go-forward"},
+    {xset::tool::fwd_menu, "gtk-go-forward"},
+    {xset::tool::refresh, "gtk-refresh"},
+    {xset::tool::new_tab, "gtk-add"},
+    {xset::tool::new_tab_here, "gtk-add"},
+    {xset::tool::show_hidden, "gtk-apply"},
+    {xset::tool::show_thumb, std::nullopt},
+    {xset::tool::large_icons, "zoom-in"},
+    {xset::tool::invalid, std::nullopt},
 };
 
 // must match xset::tool:: enum
-inline constexpr std::array<const char*, 18> builtin_tool_shared_key{
-    nullptr,
-    nullptr,
-    "panel1_show_devmon",
-    "panel1_show_book",
-    "panel1_show_dirtree",
-    "go_home",
-    "go_default",
-    "go_up",
-    "go_back",
-    "go_back",
-    "go_forward",
-    "go_forward",
-    "view_refresh",
-    "tab_new",
-    "tab_new_here",
-    "panel1_show_hidden",
-    "view_thumb",
-    "panel1_list_large",
+const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_shared_key{
+    {xset::tool::NOT, std::nullopt},
+    {xset::tool::custom, std::nullopt},
+    {xset::tool::devices, "panel1_show_devmon"},
+    {xset::tool::bookmarks, "panel1_show_book"},
+    {xset::tool::tree, "panel1_show_dirtree"},
+    {xset::tool::home, "go_home"},
+    {xset::tool::DEFAULT, "go_default"},
+    {xset::tool::up, "go_up"},
+    {xset::tool::back, "go_back"},
+    {xset::tool::back_menu, "go_back"},
+    {xset::tool::fwd, "go_forward"},
+    {xset::tool::fwd_menu, "go_forward"},
+    {xset::tool::refresh, "view_refresh"},
+    {xset::tool::new_tab, "tab_new"},
+    {xset::tool::new_tab_here, "tab_new_here"},
+    {xset::tool::show_hidden, "panel1_show_hidden"},
+    {xset::tool::show_thumb, "view_thumb"},
+    {xset::tool::large_icons, "panel1_list_large"},
+    {xset::tool::invalid, std::nullopt},
 };
+
+// clang-format on
 
 void
 load_settings()
@@ -3131,7 +3137,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     }
     if (set->tool > xset::tool::custom && set->tool < xset::tool::invalid && !set->shared_key)
     {
-        set->shared_key = builtin_tool_shared_key[INT(set->tool)];
+        set->shared_key = builtin_tool_shared_key.at(set->tool);
     }
 
     // builtin toolitems do not have menu_style set
@@ -3208,8 +3214,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 }
                 else if (set->tool > xset::tool::custom && set->tool < xset::tool::invalid)
                 {
-                    image =
-                        xset_get_image(builtin_tool_icon[INT(set->tool)], (GtkIconSize)icon_size);
+                    image = xset_get_image(builtin_tool_icon.at(set->tool).value(),
+                                           (GtkIconSize)icon_size);
                 }
             }
             else if (!set->lock && cmd_type == xset::cmd::app)
@@ -3276,7 +3282,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (!icon_name && set->tool > xset::tool::custom && set->tool < xset::tool::invalid)
             {
                 // builtin tool item
-                image = xset_get_image(builtin_tool_icon[INT(set->tool)], (GtkIconSize)icon_size);
+                image =
+                    xset_get_image(builtin_tool_icon.at(set->tool).value(), (GtkIconSize)icon_size);
             }
             else
             {
@@ -3342,7 +3349,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             else if (!icon_name && set->tool > xset::tool::custom &&
                      set->tool < xset::tool::invalid)
             {
-                icon_name = builtin_tool_icon[INT(set->tool)];
+                icon_name = builtin_tool_icon.at(set->tool);
             }
             else if (!icon_name && set_child && set->tool == xset::tool::custom)
             {
