@@ -1464,7 +1464,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
             for (const auto i : ztd::range(column_titles.size()))
             {
                 GtkTreeViewColumn* col =
-                    gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), i);
+                    gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), static_cast<i32>(i));
                 if (!col)
                 {
                     break;
@@ -3330,8 +3330,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
             case PtkFBViewMode::PTK_FB_LIST_VIEW:
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
-                                              event->x,
-                                              event->y,
+                                              static_cast<i32>(event->x),
+                                              static_cast<i32>(event->y),
                                               &tree_path,
                                               &col,
                                               nullptr,
@@ -3511,8 +3511,8 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEventButton* event,
             {
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
-                                              event->x,
-                                              event->y,
+                                              static_cast<i32>(event->x),
+                                              static_cast<i32>(event->y),
                                               &tree_path,
                                               nullptr,
                                               nullptr,
@@ -3652,7 +3652,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
         // p, mode);
         for (const auto i : ztd::range(column_titles.size()))
         {
-            GtkTreeViewColumn* col = gtk_tree_view_get_column(view, i);
+            GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
             if (!col)
             {
                 return;
@@ -3694,7 +3694,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
 
     for (const auto i : ztd::range(column_titles.size()))
     {
-        GtkTreeViewColumn* col = gtk_tree_view_get_column(view, i);
+        GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
         if (!col)
         {
             return;
@@ -4596,7 +4596,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
                            type,
                            8,
                            (const unsigned char*)uri_list.data(),
-                           uri_list.size());
+                           static_cast<i32>(uri_list.size()));
 }
 
 static void
@@ -5391,7 +5391,7 @@ ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show)
 }
 
 static bool
-on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* file_browser)
+on_dir_tree_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBrowser* file_browser)
 {
     ptk_file_browser_focus_me(file_browser);
 
@@ -5403,14 +5403,14 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
                           0,
                           "dirtree",
                           0,
-                          evt->button,
-                          evt->state,
+                          event->button,
+                          event->state,
                           true))
     {
         return false;
     }
 
-    if (evt->type == GdkEventType::GDK_BUTTON_PRESS && evt->button == 2) /* middle click */
+    if (event->type == GdkEventType::GDK_BUTTON_PRESS && event->button == 2) /* middle click */
     {
         /* left and right click handled in ptk-dir-tree-view.c
          * on_dir_tree_view_button_press() */
@@ -5419,8 +5419,8 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* f
 
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          evt->x,
-                                          evt->y,
+                                          static_cast<i32>(event->x),
+                                          static_cast<i32>(event->y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,

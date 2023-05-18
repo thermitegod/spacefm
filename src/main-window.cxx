@@ -4619,7 +4619,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
 
     for (const auto i : ztd::range(task_names.size()))
     {
-        GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), i);
+        GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), static_cast<i32>(i));
         if (!col)
         {
             return;
@@ -5277,8 +5277,8 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                 return false;
             }
             if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                               event->x,
-                                               event->y,
+                                               static_cast<i32>(event->x),
+                                               static_cast<i32>(event->y),
                                                &tree_path,
                                                &col,
                                                nullptr,
@@ -5327,8 +5327,8 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             if ((is_tasks = gtk_tree_model_get_iter_first(model, &it)))
             {
                 if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                                  event->x,
-                                                  event->y,
+                                                  static_cast<i32>(event->x),
+                                                  static_cast<i32>(event->y),
                                                   &tree_path,
                                                   &col,
                                                   nullptr,
@@ -6530,7 +6530,7 @@ main_window_socket_command(char* argv[])
                 GtkTreeViewColumn* col;
                 for (const auto [index, value] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), index);
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), static_cast<i32>(index));
                     if (!col)
                     {
                         continue;
@@ -7034,7 +7034,7 @@ main_window_socket_command(char* argv[])
                 GtkTreeViewColumn* col;
                 for (const auto [index, value] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), index);
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), static_cast<i32>(index));
                     if (!col)
                     {
                         continue;
@@ -8047,7 +8047,7 @@ main_window_socket_command(char* argv[])
 
 static bool
 run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, xset::name event,
-          i32 panel, i32 tab, const char* focus, i32 keyval, i32 button, i32 state, bool visible,
+          panel_t panel, tab_t tab, const char* focus, u32 keyval, u32 button, u32 state, bool visible,
           xset_t set, char* ucmd)
 {
     bool inhibit;
@@ -8250,7 +8250,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
 
 bool
 main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64 tab, const char* focus,
-                  i32 keyval, i32 button, i32 state, bool visible)
+                  u32 keyval, u32 button, u32 state, bool visible)
 {
     xset_t set;
     bool inhibit = false;

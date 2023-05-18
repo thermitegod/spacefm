@@ -1465,13 +1465,13 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
 }
 
 static bool
-on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
+on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
 {
     (void)user_data;
     vfs::volume vol = nullptr;
     bool ret = false;
 
-    if (evt->type != GdkEventType::GDK_BUTTON_PRESS)
+    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
@@ -1489,8 +1489,8 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
                           0,
                           "devices",
                           0,
-                          evt->button,
-                          evt->state,
+                          event->button,
+                          event->state,
                           true))
     {
         return false;
@@ -1498,7 +1498,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
 
     // get selected vol
     GtkTreePath* tree_path = nullptr;
-    if (gtk_tree_view_get_path_at_pos(view, evt->x, evt->y, &tree_path, nullptr, nullptr, nullptr))
+    if (gtk_tree_view_get_path_at_pos(view, static_cast<i32>(event->x), static_cast<i32>(event->y), &tree_path, nullptr, nullptr, nullptr))
     {
         GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
         GtkTreeIter it;
@@ -1509,7 +1509,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
         }
     }
 
-    switch (evt->button)
+    switch (event->button)
     {
         case 1:
             // left button
@@ -1534,7 +1534,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data)
             break;
         case 3:
             // right button
-            show_devices_menu(view, vol, file_browser, evt->button, evt->time);
+            show_devices_menu(view, vol, file_browser, event->button, event->time);
             ret = true;
             break;
         default:

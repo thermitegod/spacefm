@@ -177,7 +177,7 @@ VFSMimeType::~VFSMimeType()
 GdkPixbuf*
 VFSMimeType::get_icon(bool big) noexcept
 {
-    i32 size;
+    i32 icon_size;
 
     if (big)
     {
@@ -185,7 +185,7 @@ VFSMimeType::get_icon(bool big) noexcept
         { /* big icon */
             return g_object_ref(this->big_icon);
         }
-        size = big_icon_size;
+        icon_size = big_icon_size;
     }
     else /* small icon */
     {
@@ -193,21 +193,21 @@ VFSMimeType::get_icon(bool big) noexcept
         {
             return g_object_ref(this->small_icon);
         }
-        size = small_icon_size;
+        icon_size = small_icon_size;
     }
 
     GdkPixbuf* icon = nullptr;
 
     if (ztd::same(this->type, XDG_MIME_TYPE_DIRECTORY))
     {
-        icon = vfs_load_icon("gtk-directory", size);
+        icon = vfs_load_icon("gtk-directory", icon_size);
         if (!icon)
         {
-            icon = vfs_load_icon("gnome-fs-directory", size);
+            icon = vfs_load_icon("gnome-fs-directory", icon_size);
         }
         if (!icon)
         {
-            icon = vfs_load_icon("folder", size);
+            icon = vfs_load_icon("folder", icon_size);
         }
         if (big)
         {
@@ -226,7 +226,7 @@ VFSMimeType::get_icon(bool big) noexcept
 
     if (!mime_icon.empty())
     {
-        icon = vfs_load_icon(mime_icon, size);
+        icon = vfs_load_icon(mime_icon, icon_size);
     }
     if (!mime_desc.empty())
     {
@@ -258,26 +258,26 @@ VFSMimeType::get_icon(bool big) noexcept
             std::string icon_name = ztd::replace(this->type, "/", "-");
 
             // is there an icon named foo-bar?
-            icon = vfs_load_icon(icon_name, size);
+            icon = vfs_load_icon(icon_name, icon_size);
             if (!icon)
             {
                 // maybe we can find a legacy icon named gnome-mime-foo-bar
                 icon_name = std::format("gnome-mime-{}-{}", split_mime, split_type);
-                icon = vfs_load_icon(icon_name, size);
+                icon = vfs_load_icon(icon_name, icon_size);
             }
 
             // try gnome-mime-foo
             if (!icon)
             {
                 icon_name = std::format("gnome-mime-{}", split_mime);
-                icon = vfs_load_icon(icon_name, size);
+                icon = vfs_load_icon(icon_name, icon_size);
             }
 
             // try foo-x-generic
             if (!icon)
             {
                 icon_name = std::format("{}-x-generic", split_mime);
-                icon = vfs_load_icon(icon_name, size);
+                icon = vfs_load_icon(icon_name, icon_size);
             }
         }
     }
@@ -293,7 +293,7 @@ VFSMimeType::get_icon(bool big) noexcept
         }
         else /* unknown */
         {
-            icon = vfs_load_icon("unknown", size);
+            icon = vfs_load_icon("unknown", icon_size);
         }
     }
 

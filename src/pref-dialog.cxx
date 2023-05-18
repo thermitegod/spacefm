@@ -98,9 +98,9 @@ inline constexpr std::array<GtkIconSize, 7> tool_icon_sizes{
 };
 // also change max_icon_size in settings.c & lists in prefdlg.ui prefdlg2.ui
 // see create_size in vfs-thumbnail-loader.c:_vfs_thumbnail_load()
-inline constexpr std::array<i32, 13> big_icon_sizes{
+inline constexpr std::array<u64, 13> big_icon_sizes{
     512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22};
-inline constexpr std::array<i32, 15> small_icon_sizes{
+inline constexpr std::array<u64, 15> small_icon_sizes{
     512, 384, 256, 192, 128, 96, 72, 64, 48, 36, 32, 24, 22, 16, 12};
 inline constexpr std::array<const std::string_view, 3> date_formats{
     "%Y-%m-%d %H:%M",
@@ -140,7 +140,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         show_thumbnail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail));
-        max_thumb = ((i32)gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size))) << 10;
+        max_thumb = static_cast<u64>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size))) << 10;
 
         /* interface settings */
 
@@ -632,7 +632,7 @@ edit_preference(GtkWindow* parent, i32 page)
         // Advanced Tab ==================================================
 
         // terminal su
-        i32 idx = 0;
+        i32 su_index = 0;
         data->su_command = GTK_WIDGET(gtk_builder_get_object(builder, "su_command"));
         const auto use_su = xset_get_s(xset::name::su_command);
         if (use_su)
@@ -641,12 +641,12 @@ edit_preference(GtkWindow* parent, i32 page)
             {
                 if (ztd::same(value, use_su.value()))
                 {
-                    idx = index;
+                    su_index = static_cast<i32>(index);
                     break;
                 }
             }
         }
-        gtk_combo_box_set_active(GTK_COMBO_BOX(data->su_command), idx);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(data->su_command), su_index);
 
         // date format
         data->date_format = GTK_WIDGET(gtk_builder_get_object(builder, "date_format"));

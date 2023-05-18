@@ -429,19 +429,19 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 }
 
 static bool
-on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrowser* browser)
+on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBrowser* browser)
 {
     GtkTreePath* tree_path;
     GtkTreeViewColumn* tree_col;
     GtkTreeIter it;
 
-    if (evt->type == GdkEventType::GDK_BUTTON_PRESS && (evt->button == 1 || evt->button == 3))
+    if (event->type == GdkEventType::GDK_BUTTON_PRESS && (event->button == 1 || event->button == 3))
     {
         // middle click 2 handled in ptk-file-browser.c on_dir_tree_button_press
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          evt->x,
-                                          evt->y,
+                                          static_cast<i32>(event->x),
+                                          static_cast<i32>(event->y),
                                           &tree_path,
                                           &tree_col,
                                           nullptr,
@@ -451,7 +451,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
             {
                 gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), tree_path, tree_col, false);
 
-                if (evt->button == 3)
+                if (event->button == 3)
                 {
                     // right click
                     char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
@@ -480,12 +480,12 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
             gtk_tree_path_free(tree_path);
         }
     }
-    else if (evt->type == GdkEventType::GDK_2BUTTON_PRESS && evt->button == 1)
+    else if (event->type == GdkEventType::GDK_2BUTTON_PRESS && event->button == 1)
     {
         // f64 click - expand/collapse
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          evt->x,
-                                          evt->y,
+                                          static_cast<i32>(event->x),
+                                          static_cast<i32>(event->y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,
@@ -507,7 +507,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* evt, PtkFileBrows
 }
 
 static bool
-on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* browser)
+on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* browser)
 {
     GtkTreeModel* model;
     GtkTreeIter iter;
@@ -519,13 +519,13 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
     }
 
     const i32 keymod =
-        (evt->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
+        (event->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
                        GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
                        GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
 
     GtkTreePath* path = gtk_tree_model_get_path(model, &iter);
 
-    switch (evt->keyval)
+    switch (event->keyval)
     {
         case GDK_KEY_Left:
         {
@@ -562,7 +562,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* evt, PtkFileBrowser* br
         case GDK_KEY_F10:
         case GDK_KEY_Menu:
         {
-            if (evt->keyval == GDK_KEY_F10 && keymod != GdkModifierType::GDK_SHIFT_MASK)
+            if (event->keyval == GDK_KEY_F10 && keymod != GdkModifierType::GDK_SHIFT_MASK)
             {
                 gtk_tree_path_free(path);
                 return false;

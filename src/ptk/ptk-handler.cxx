@@ -2286,7 +2286,7 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
 }
 
 static bool
-on_handlers_button_press(GtkWidget* view, GdkEventButton* evt, HandlerData* hnd)
+on_handlers_button_press(GtkWidget* view, GdkEventButton* event, HandlerData* hnd)
 {
     GtkTreeModel* model;
     GtkTreePath* tree_path = nullptr;
@@ -2297,8 +2297,8 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* evt, HandlerData* hnd)
 
     // get clicked item
     if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                      evt->x,
-                                      evt->y,
+                                      static_cast<i32>(event->x),
+                                      static_cast<i32>(event->y),
                                       &tree_path,
                                       nullptr,
                                       nullptr,
@@ -2339,7 +2339,7 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* evt, HandlerData* hnd)
         }
         ret = true;
     }
-    else if (evt->button == 3)
+    else if (event->button == 3)
     {
         // right click - Move cursor or unselect
         if (item_clicked)

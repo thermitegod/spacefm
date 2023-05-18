@@ -63,6 +63,7 @@ if get_option('buildtype') == 'release'
 endif
 
 default_warning_flags = [
+    # '-Wconversion',
     '-Wchar-subscripts',
     '-Wcomment',
     '-Wdisabled-optimization',

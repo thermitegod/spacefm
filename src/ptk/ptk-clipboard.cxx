@@ -105,7 +105,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
                            gtk_selection_data_get_target(selection_data),
                            8,
                            (const unsigned char*)uri_list.data(),
-                           uri_list.size());
+                           static_cast<i32>(uri_list.size()));
     // ztd::logger::debug("clipboard data: \n\n{}\n\n", list);
 }
 

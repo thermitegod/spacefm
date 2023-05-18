@@ -1033,18 +1033,18 @@ init_search_result(FindFile* data)
 }
 
 static bool
-on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
+on_view_button_press(GtkTreeView* view, GdkEventButton* event, FindFile* data)
 {
-    if (evt->type == GdkEventType::GDK_BUTTON_PRESS)
+    if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if (evt->button == 3) /* right single click */
+        if (event->button == 3) /* right single click */
         {
             // sfm if current item not selected, unselect all and select it
             GtkTreePath* tree_path;
             GtkTreeSelection* tree_sel;
             gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          evt->x,
-                                          evt->y,
+                                          static_cast<i32>(event->x),
+                                          static_cast<i32>(event->y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,
@@ -1081,9 +1081,9 @@ on_view_button_press(GtkTreeView* view, GdkEventButton* evt, FindFile* data)
             return true;
         }
     }
-    else if (evt->type == GdkEventType::GDK_2BUTTON_PRESS)
+    else if (event->type == GdkEventType::GDK_2BUTTON_PRESS)
     {
-        if (evt->button == 1) /* left f64 click */
+        if (event->button == 1) /* left f64 click */
         {
             on_open_files(nullptr, data);
             return true;
