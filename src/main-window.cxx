@@ -3781,7 +3781,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         }
         else
         {
-            i = std::stol(set->name);
+            i = std::stoi(set->name);
         }
         focus_panel(nullptr, main_window, i);
     }
@@ -6239,8 +6239,8 @@ main_window_socket_command(char* argv[])
                     return {SOCKET_INVALID, std::format("invalid size format {}", argv[i + 1])};
                 }
                 const auto size = ztd::split(argv[i + 1], "x");
-                width = std::stol(size[0]);
-                height = std::stol(size[1]);
+                width = std::stoi(size[0]);
+                height = std::stoi(size[1]);
             }
             if (height < 1 || width < 1)
             {
@@ -6282,7 +6282,7 @@ main_window_socket_command(char* argv[])
             i32 width = -1;
             if (argv[i + 1])
             {
-                width = std::stol(argv[i + 1]);
+                width = std::stoi(argv[i + 1]);
             }
             if (width < 0)
             {
@@ -6328,7 +6328,7 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    width = std::stol(argv[i + 1]);
+                    width = std::stoi(argv[i + 1]);
                 }
             }
             if (!valid_panel(width) || !valid_panel_code(width))
@@ -6383,7 +6383,7 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    width = std::stol(argv[i + 1]);
+                    width = std::stoi(argv[i + 1]);
                 }
             }
             if (!valid_tab_code(width) || width == 0 ||
@@ -6490,7 +6490,7 @@ main_window_socket_command(char* argv[])
             i32 width = -1;
             if (argv[i + 1])
             {
-                width = std::stol(argv[i + 1]);
+                width = std::stoi(argv[i + 1]);
             }
             if (width < 0)
             {
@@ -6518,7 +6518,7 @@ main_window_socket_command(char* argv[])
             i32 width = 0;
             if (argv[i + 1] && argv[i + 2])
             {
-                width = std::stol(argv[i + 2]);
+                width = std::stoi(argv[i + 2]);
             }
             if (width < 1)
             {
@@ -6735,8 +6735,8 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    width = std::stol(argv[i + 2]);
-                    height = argv[i + 3] ? std::stol(argv[i + 3]) : -1;
+                    width = std::stoi(argv[i + 2]);
+                    height = argv[i + 3] ? std::stoi(argv[i + 3]) : -1;
                 }
                 gtk_editable_set_position(GTK_EDITABLE(file_browser->path_bar), -1);
                 gtk_editable_select_region(GTK_EDITABLE(file_browser->path_bar), width, height);

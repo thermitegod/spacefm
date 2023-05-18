@@ -2649,7 +2649,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     // click apply to save handler
     on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     // open in editor
-    const i32 action = std::stol(uri);
+    const i32 action = std::stoi(uri);
     if (action > PtkHandlerArchive::HANDLER_LIST || action < 0)
     {
         return true;

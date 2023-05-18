@@ -6351,7 +6351,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname)
             }
             else
             {
-                i = std::stol(set->name);
+                i = std::stoi(set->name);
             }
             ptk_file_browser_go_tab(nullptr, browser, i);
         }

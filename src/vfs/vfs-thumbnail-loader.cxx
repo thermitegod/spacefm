@@ -344,7 +344,10 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
             w = gdk_pixbuf_get_width(thumbnail);
             h = gdk_pixbuf_get_height(thumbnail);
             const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
-            embeded_mtime = std::stol(thumb_mtime);
+            if (thumb_mtime != nullptr)
+            {
+                embeded_mtime = std::stol(thumb_mtime);
+            }
         }
     }
 

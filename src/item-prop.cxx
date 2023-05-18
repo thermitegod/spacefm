@@ -392,14 +392,14 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
     {
         return false;
     }
-    *sub = std::stol(vs);
+    *sub = std::stoi(vs);
     std::free(vs);
     if (*sub < 0 || *sub >= (i32)context_subs.size())
     {
         return false;
     }
     vs = get_element_next(s);
-    *comp = std::stol(vs);
+    *comp = std::stoi(vs);
     std::free(vs);
     if (*comp < 0 || *comp >= (i32)context_comps.size())
     {
@@ -528,10 +528,10 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
                     test = !ztd::endswith(context->var[sub], eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_LESS:
-                    test = std::stol(context->var[sub]) < std::stol(eleval);
+                    test = std::stoi(context->var[sub]) < std::stoi(eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_GREATER:
-                    test = std::stol(context->var[sub]) > std::stol(eleval);
+                    test = std::stoi(context->var[sub]) > std::stoi(eleval);
                     break;
                 case ItemPropContextComp::CONTEXT_COMP_MATCH:
                 case ItemPropContextComp::CONTEXT_COMP_NMATCH:
@@ -830,7 +830,7 @@ on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
     char* def_comp = get_element_next(&elements);
     if (def_comp)
     {
-        gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_comp), std::stol(def_comp));
+        gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_comp), std::stoi(def_comp));
         std::free(def_comp);
     }
     while ((value = get_element_next(&elements)))
@@ -2218,13 +2218,13 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     char* match = get_element_next(&elements);
     if (match && action)
     {
-        i32 i = std::stol(match);
+        i32 i = std::stoi(match);
         if (i < 0 || i > 3)
         {
             i = 0;
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_match), i);
-        i = std::stol(action);
+        i = std::stoi(action);
         if (i < 0 || i > 3)
         {
             i = 0;
@@ -2537,7 +2537,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         {
             gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->item_type), item_type2.data());
         }
-        xset::cmd x = rset->x ? xset::cmd(std::stol(rset->x.value())) : xset::cmd::line;
+        xset::cmd x = rset->x ? xset::cmd(std::stoi(rset->x.value())) : xset::cmd::line;
 
         switch (x)
         {
