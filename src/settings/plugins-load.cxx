@@ -34,7 +34,7 @@
 #include "settings/plugins-load.hxx"
 
 bool
-load_user_plugin(const std::filesystem::path& plug_dir, PluginUse* use,
+load_user_plugin(const std::filesystem::path& plug_dir, plugin::use* use,
                  const std::filesystem::path& plugin, plugin_func_t plugin_func)
 {
     toml::value tbl;

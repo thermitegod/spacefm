@@ -30,19 +30,22 @@
 
 #define PTK_FILE_TASK(obj) (static_cast<PtkFileTask*>(obj))
 
-enum PTKFileTaskPtaskError
+namespace ptk::file_task
 {
-    PTASK_ERROR_FIRST,
-    PTASK_ERROR_ANY,
-    PTASK_ERROR_CONT
-};
+    enum class ptask_error
+    {
+        first,
+        any,
+        cont
+    };
+}
 
 struct PtkFileTask
 {
     PtkFileTask() = delete;
     ~PtkFileTask();
 
-    PtkFileTask(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
+    PtkFileTask(vfs::file_task_type type, const std::span<const std::filesystem::path> src_files,
                 const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                 GtkWidget* task_view);
 
@@ -69,7 +72,7 @@ struct PtkFileTask
     GtkTextMark* log_end{nullptr};
     bool log_appended{false};
     i32 err_count{0};
-    PTKFileTaskPtaskError err_mode{PTKFileTaskPtaskError::PTASK_ERROR_FIRST};
+    ptk::file_task::ptask_error err_mode{ptk::file_task::ptask_error::first};
 
     bool complete{false};
     bool aborted{false};
@@ -105,11 +108,11 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type,
+PtkFileTask* ptk_file_task_new(vfs::file_task_type type,
                                const std::span<const std::filesystem::path> src_files,
                                GtkWindow* parent_window, GtkWidget* task_view);
 
-PtkFileTask* ptk_file_task_new(VFSFileTaskType type,
+PtkFileTask* ptk_file_task_new(vfs::file_task_type type,
                                const std::span<const std::filesystem::path> src_files,
                                const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                                GtkWidget* task_view);
@@ -132,6 +135,6 @@ void ptk_file_task_run(PtkFileTask* ptask);
 
 bool ptk_file_task_cancel(PtkFileTask* ptask);
 
-void ptk_file_task_pause(PtkFileTask* ptask, i32 state);
+void ptk_file_task_pause(PtkFileTask* ptask, vfs::file_task_state state);
 
 void ptk_file_task_progress_open(PtkFileTask* ptask);

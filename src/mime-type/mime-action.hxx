@@ -24,12 +24,15 @@
 
 #include <vector>
 
-enum class MimeTypeAction
+namespace mime_type
 {
-    DEFAULT,
-    APPEND,
-    REMOVE,
-};
+    enum class action
+    {
+        DEFAULT,
+        append,
+        remove,
+    };
+}
 
 /*
  *  Get a list of applications supporting this mime-type
@@ -61,14 +64,14 @@ const char* mime_type_get_default_action(const std::string_view type);
  * Set applications used to open or never used to open this mime-type
  * desktop_id is the name of *.desktop file.
  * action ==
- *     MimeTypeAction::DEFAULT - make desktop_id the default app
- *     MimeTypeAction::APPEND  - add desktop_id to Default and Added apps
- *     MimeTypeAction::REMOVE  - add desktop id to Removed apps
+ *     mime_type::action::DEFAULT - make desktop_id the default app
+ *     mime_type::action::APPEND  - add desktop_id to Default and Added apps
+ *     mime_type::action::REMOVE  - add desktop id to Removed apps
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
 void mime_type_update_association(const std::string_view type, const std::string_view desktop_id,
-                                  MimeTypeAction action);
+                                  mime_type::action action);
 
 /* Locate the file path of desktop file by desktop_id */
 const char* mime_type_locate_desktop_file(const std::string_view desktop_id);

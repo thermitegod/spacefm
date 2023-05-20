@@ -39,28 +39,30 @@
 #define PTK_FILE_LIST(obj)             (static_cast<PtkFileList*>(obj))
 #define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<PtkFileList*>(obj))
 
-/* Columns of directory view */
-enum PTKFileListCol
+namespace ptk::file_list
 {
-    COL_FILE_BIG_ICON,
-    COL_FILE_SMALL_ICON,
-    COL_FILE_NAME,
-    COL_FILE_SIZE,
-    COL_FILE_DESC,
-    COL_FILE_PERM,
-    COL_FILE_OWNER,
-    COL_FILE_MTIME,
-    COL_FILE_INFO,
-};
+    enum class column
+    { // Columns of directory view
+        big_icon,
+        small_icon,
+        name,
+        size,
+        desc,
+        perm,
+        owner,
+        mtime,
+        info,
+    };
 
-// sort_dir of directory view - do not change order, saved
-// see also: main-window.c main_window_socket_command() get sort_first
-enum PTKFileListSortDir
-{
-    PTK_LIST_SORT_DIR_MIXED,
-    PTK_LIST_SORT_DIR_FIRST,
-    PTK_LIST_SORT_DIR_LAST
-};
+    // sort_dir of directory view - do not change order, saved
+    // see also: main-window.c main_window_socket_command() get sort_first
+    enum class sort_dir
+    {
+        mixed,
+        first,
+        last
+    };
+} // namespace ptk::file_list
 
 struct PtkFileList
 {
@@ -74,13 +76,13 @@ struct PtkFileList
     bool big_thumbnail{true};
     i32 max_thumbnail{0};
 
-    i32 sort_col{0};
+    ptk::file_list::column sort_col{ptk::file_list::column::name};
     GtkSortType sort_order;
     bool sort_alphanum{false};
     bool sort_natural{false};
     bool sort_case{false};
     bool sort_hidden_first{false};
-    PTKFileListSortDir sort_dir{PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED};
+    ptk::file_list::sort_dir sort_dir{ptk::file_list::sort_dir::mixed};
 
     // Random integer to check whether an iter belongs to our model
     const i32 stamp{std::rand()};

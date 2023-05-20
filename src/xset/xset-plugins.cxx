@@ -231,7 +231,7 @@ xset_get_by_plug_name(const std::filesystem::path& plug_dir, const std::string_v
 
 static void
 xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view name,
-                  const std::string_view setvar, const std::string_view value, PluginUse use)
+                  const std::string_view setvar, const std::string_view value, plugin::use use)
 {
     if (value.empty())
     {
@@ -242,21 +242,20 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
     std::string prefix;
     switch (use)
     {
-        case PluginUse::HAND_ARC:
+        case plugin::use::hand_arc:
             prefix = "hand_arc_";
             break;
-        case PluginUse::HAND_FS:
+        case plugin::use::hand_fs:
             prefix = "hand_fs_";
             break;
-        case PluginUse::HAND_NET:
+        case plugin::use::hand_net:
             prefix = "hand_net_";
             break;
-        case PluginUse::HAND_FILE:
+        case plugin::use::hand_file:
             prefix = "hand_f_";
             break;
-        case PluginUse::BOOKMARKS:
-        case PluginUse::NORMAL:
-        default:
+        case plugin::use::bookmarks:
+        case plugin::use::normal:
             prefix = "cstm_";
             break;
     }
@@ -286,7 +285,7 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
     set = xset_get_by_plug_name(plug_dir, name);
     xset_set_var(set, var, value.data());
 
-    if (use >= PluginUse::BOOKMARKS)
+    if (use >= plugin::use::bookmarks)
     {
         // map plug names to new set names (does not apply to handlers)
         if (set->prev && var == xset::var::prev)
@@ -341,43 +340,43 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
 }
 
 static void
-xset_import_plugin_parse(const std::filesystem::path& plug_dir, PluginUse* use,
+xset_import_plugin_parse(const std::filesystem::path& plug_dir, plugin::use* use,
                          const std::string_view name, const std::string_view var,
                          const std::string_view value)
 {
     // ztd::logger::info("name: {} | var: {} | value: {}", name, var, value);
 
-    if (use && *use == PluginUse::NORMAL)
+    if (use && *use == plugin::use::normal)
     {
         if (ztd::startswith(name, "hand_"))
         {
             if (ztd::startswith(name, "hand_fs_"))
             {
-                *use = PluginUse::HAND_FS;
+                *use = plugin::use::hand_fs;
             }
             else if (ztd::startswith(name, "hand_arc_"))
             {
-                *use = PluginUse::HAND_ARC;
+                *use = plugin::use::hand_arc;
             }
             else if (ztd::startswith(name, "hand_net_"))
             {
-                *use = PluginUse::HAND_NET;
+                *use = plugin::use::hand_net;
             }
             else if (ztd::startswith(name, "hand_f_"))
             {
-                *use = PluginUse::HAND_FILE;
+                *use = plugin::use::hand_file;
             }
         }
     }
-    xset_parse_plugin(plug_dir, name, var, value, use ? *use : PluginUse::NORMAL);
+    xset_parse_plugin(plug_dir, name, var, value, use ? *use : plugin::use::normal);
 }
 
 xset_t
-xset_import_plugin(const std::filesystem::path& plug_dir, PluginUse* use)
+xset_import_plugin(const std::filesystem::path& plug_dir, plugin::use* use)
 {
     if (use)
     {
-        *use = PluginUse::NORMAL;
+        *use = plugin::use::normal;
     }
 
     // clear all existing plugin sets with this plug_dir
@@ -440,7 +439,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
     (void)task;
     xset_t set;
     // ztd::logger::info("on_install_plugin_cb");
-    if (plugin_data->job == PluginJob::REMOVE) // uninstall
+    if (plugin_data->job == plugin::job::remove) // uninstall
     {
         if (!std::filesystem::exists(plugin_data->plug_dir))
         {
@@ -453,7 +452,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
         const auto plugin = plugin_data->plug_dir / PLUGIN_FILE_FILENAME;
         if (std::filesystem::exists(plugin))
         {
-            PluginUse use = PluginUse::NORMAL;
+            plugin::use use = plugin::use::normal;
             set = xset_import_plugin(plugin_data->plug_dir, &use);
             if (!set)
             {
@@ -466,11 +465,11 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                                 GtkButtonsType::GTK_BUTTONS_OK,
                                 msg);
             }
-            else if (use != PluginUse::BOOKMARKS)
+            else if (use != plugin::use::bookmarks)
             {
                 // handler
                 set->plugin->is_top = false; // prevent being added to Plugins menu
-                if (plugin_data->job == PluginJob::INSTALL)
+                if (plugin_data->job == plugin::job::install)
                 {
                     // This dialog should never be seen - failsafe
                     xset_msg_dialog(plugin_data->main_window ? GTK_WIDGET(plugin_data->main_window)
@@ -485,10 +484,12 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
                 else
                 {
                     // TODO
-                    ptk_handler_import(INT(use), plugin_data->handler_dlg, set);
+                    ptk_handler_import(magic_enum::enum_integer(use),
+                                       plugin_data->handler_dlg,
+                                       set);
                 }
             }
-            else if (plugin_data->job == PluginJob::COPY)
+            else if (plugin_data->job == plugin::job::copy)
             {
                 // copy
                 set->plugin->is_top = false; // do not show tmp plugin in Plugins menu
@@ -562,7 +563,7 @@ on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data)
 
 void
 install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesystem::path& path,
-                    const std::filesystem::path& plug_dir, PluginJob job, xset_t insert_set)
+                    const std::filesystem::path& plug_dir, plugin::job job, xset_t insert_set)
 {
     std::string own;
     const std::string plug_dir_q = ztd::shell::quote(plug_dir.string());
@@ -576,26 +577,25 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesyste
 
     switch (job)
     {
-        case PluginJob::INSTALL:
+        case plugin::job::install:
             // install
             own =
                 std::format("chown -R root:root {} && chmod -R go+rX-w {}", plug_dir_q, plug_dir_q);
             ptask->task->exec_as_user = "root";
             break;
-        case PluginJob::COPY:
+        case plugin::job::copy:
             // copy to clipboard or import to menu
             own = std::format("chmod -R go+rX-w {}", plug_dir_q);
             break;
-        case PluginJob::REMOVE:
-        default:
+        case plugin::job::remove:
             break;
     }
 
     std::string book;
-    if (job == PluginJob::INSTALL || !insert_set)
+    if (job == plugin::job::install || !insert_set)
     {
         // prevent install of exported bookmarks or handler as plugin or design clipboard
-        if (job == PluginJob::INSTALL)
+        if (job == plugin::job::install)
         {
             book = " || [ -e main_book ] || [ -d hand_* ]";
         }

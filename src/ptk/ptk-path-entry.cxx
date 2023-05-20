@@ -43,11 +43,14 @@
 
 #include "ptk/ptk-path-entry.hxx"
 
-enum PTKPathEntryCol
+namespace ptk::path_entry
 {
-    COL_NAME,
-    COL_PATH,
-};
+    enum column
+    {
+        name,
+        path,
+    };
+}
 
 EntryData::EntryData(PtkFileBrowser* file_browser)
 {
@@ -182,7 +185,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
 
     key = (const char*)g_object_get_data(G_OBJECT(completion), "fn");
-    gtk_tree_model_get(model, it, PTKPathEntryCol::COL_NAME, &name, -1);
+    gtk_tree_model_get(model, it, ptk::path_entry::column::name, &name, -1);
 
     if (!name)
     {
@@ -251,9 +254,9 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             gtk_list_store_append(list, &it);
             gtk_list_store_set(list,
                                &it,
-                               PTKPathEntryCol::COL_NAME,
+                               ptk::path_entry::column::name,
                                disp_name.c_str(),
-                               PTKPathEntryCol::COL_PATH,
+                               ptk::path_entry::column::path,
                                name.c_str(),
                                -1);
         }
@@ -417,7 +420,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
     (void)completion;
 
     char* path = nullptr;
-    gtk_tree_model_get(model, iter, PTKPathEntryCol::COL_PATH, &path, -1);
+    gtk_tree_model_get(model, iter, ptk::path_entry::column::path, &path, -1);
     if (path && path[0])
     {
         g_signal_handlers_block_matched(G_OBJECT(entry),
@@ -454,24 +457,25 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
     (void)user_data;
 
     GtkEntryCompletion* completion = gtk_entry_completion_new();
-    GtkListStore* list =
-        gtk_list_store_new(magic_enum::enum_count<PTKPathEntryCol>(), G_TYPE_STRING, G_TYPE_STRING);
+    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<ptk::path_entry::column>(),
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING);
 
     gtk_entry_completion_set_minimum_key_length(completion, 1);
     gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(list));
     g_object_unref(list);
 
-    /* gtk_entry_completion_set_text_column( completion, PTKPathEntryCol::COL_PATH ); */
+    /* gtk_entry_completion_set_text_column( completion, ptk::path_entry::column::path ); */
 
     // Following line causes GTK3 to show both columns, so skip this and use
-    // custom match-selected handler to insert PTKPathEntryCol::COL_PATH
-    // g_object_set(completion, "text-column", PTKPathEntryCol::COL_PATH, nullptr);
+    // custom match-selected handler to insert ptk::path_entry::column::path
+    // g_object_set(completion, "text-column", ptk::path_entry::column::path, nullptr);
     GtkCellRenderer* render = gtk_cell_renderer_text_new();
     gtk_cell_layout_pack_start((GtkCellLayout*)completion, render, true);
     gtk_cell_layout_add_attribute((GtkCellLayout*)completion,
                                   render,
                                   "text",
-                                  PTKPathEntryCol::COL_NAME);
+                                  ptk::path_entry::column::name);
 
     // gtk_entry_completion_set_inline_completion(completion, true);
     gtk_entry_completion_set_popup_set_width(completion, true);
@@ -502,7 +506,7 @@ static void
 on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_NET, file_browser, nullptr);
+    ptk_handler_show_config(ptk::handler::mode::net, file_browser, nullptr);
 }
 
 static void

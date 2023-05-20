@@ -289,8 +289,8 @@ xset_design_job_set_app(xset_t set)
     }
 
     vfs::mime_type mime_type = vfs_mime_type_get_from_type(
-        xset_context && !xset_context->var[ItemPropContext::CONTEXT_MIME].empty()
-            ? xset_context->var[ItemPropContext::CONTEXT_MIME].data()
+        xset_context && !xset_context->var[item_prop::context::item::mime].empty()
+            ? xset_context->var[item_prop::context::item::mime].data()
             : XDG_MIME_TYPE_UNKNOWN);
     char* file =
         ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, true, false, false, false);
@@ -307,7 +307,7 @@ xset_design_job_set_app(xset_t set)
     newset->z = file;
     newset->menu_label = set->name;
     newset->browser = set->browser;
-    newset->x = std::to_string(INT(xset::cmd::app));
+    newset->x = std::to_string(magic_enum::enum_integer(xset::cmd::app));
     // unset these to save session space
     newset->task = false;
     newset->task_err = false;
@@ -497,7 +497,7 @@ xset_design_job_set_import_file(xset_t set)
                         nullptr,
                         file.value(),
                         plug_dir.string(),
-                        PluginJob::COPY,
+                        plugin::job::copy,
                         set);
 }
 
@@ -595,7 +595,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     const auto plugin_data = new PluginData;
     plugin_data->plug_dir = set->plugin->path;
     plugin_data->set = set;
-    plugin_data->job = PluginJob::REMOVE;
+    plugin_data->job = plugin::job::remove;
     ptask->complete_notify = (GFunc)on_install_plugin_cb;
     ptask->user_data = plugin_data;
 
@@ -840,7 +840,7 @@ xset_design_job_set_browse_files(xset_t set)
 
     if (set->browser)
     {
-        set->browser->run_event<EventType::OPEN_ITEM>(folder, PtkOpenAction::PTK_OPEN_DIR);
+        set->browser->run_event<spacefm::signal::open_item>(folder, ptk::open_action::dir);
     }
 }
 
@@ -870,7 +870,7 @@ xset_design_job_set_browse_data(xset_t set)
 
     if (set->browser)
     {
-        set->browser->run_event<EventType::OPEN_ITEM>(folder, PtkOpenAction::PTK_OPEN_DIR);
+        set->browser->run_event<spacefm::signal::open_item>(folder, ptk::open_action::dir);
     }
 }
 
@@ -881,8 +881,8 @@ xset_design_job_set_browse_plugins(xset_t set)
     {
         if (set->browser)
         {
-            set->browser->run_event<EventType::OPEN_ITEM>(set->plugin->path,
-                                                          PtkOpenAction::PTK_OPEN_DIR);
+            set->browser->run_event<spacefm::signal::open_item>(set->plugin->path,
+                                                                ptk::open_action::dir);
         }
     }
 }
@@ -1127,7 +1127,6 @@ xset_design_job(GtkWidget* item, xset_t set)
         case xset::job::help_style:
         case xset::job::help_book:
         case xset::job::invalid:
-        default:
             break;
     }
 

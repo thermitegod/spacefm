@@ -18,12 +18,18 @@
 #include <string>
 #include <string_view>
 
+#include <map>
+
 #include <chrono>
 
 #include <cassert>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include <magic_enum.hpp>
+
+#include "type-conversion.hxx"
 
 #include "ptk/ptk-file-list.hxx"
 
@@ -100,7 +106,7 @@ static void on_thumbnail_loaded(vfs::file_info file, PtkFileList* list);
 
 static GObjectClass* parent_class = nullptr;
 
-static GType column_types[magic_enum::enum_count<PTKFileListCol>()];
+static std::map<ptk::file_list::column, GType> column_types;
 
 GType
 ptk_file_list_get_type()
@@ -157,7 +163,7 @@ ptk_file_list_init(PtkFileList* list)
     list->n_files = 0;
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
-    list->sort_col = -1;
+    list->sort_col = ptk::file_list::column::name;
 }
 
 static void
@@ -187,16 +193,16 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     iface->iter_nth_child = ptk_file_list_iter_nth_child;
     iface->iter_parent = ptk_file_list_iter_parent;
 
-    column_types[PTKFileListCol::COL_FILE_BIG_ICON] = GDK_TYPE_PIXBUF;
-    column_types[PTKFileListCol::COL_FILE_SMALL_ICON] = GDK_TYPE_PIXBUF;
-    column_types[PTKFileListCol::COL_FILE_NAME] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_DESC] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_SIZE] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_DESC] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_PERM] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_OWNER] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_MTIME] = G_TYPE_STRING;
-    column_types[PTKFileListCol::COL_FILE_INFO] = G_TYPE_POINTER;
+    column_types[ptk::file_list::column::big_icon] = GDK_TYPE_PIXBUF;
+    column_types[ptk::file_list::column::small_icon] = GDK_TYPE_PIXBUF;
+    column_types[ptk::file_list::column::name] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::desc] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::size] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::desc] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::perm] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::owner] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::mtime] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::info] = G_TYPE_POINTER;
 }
 
 static void
@@ -319,11 +325,11 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
     g_object_ref(list->dir);
 
     list->signal_file_created =
-        list->dir->add_event<EventType::FILE_CREATED>(on_file_list_file_created, list);
+        list->dir->add_event<spacefm::signal::file_created>(on_file_list_file_created, list);
     list->signal_file_deleted =
-        list->dir->add_event<EventType::FILE_DELETED>(on_file_list_file_deleted, list);
+        list->dir->add_event<spacefm::signal::file_deleted>(on_file_list_file_deleted, list);
     list->signal_file_changed =
-        list->dir->add_event<EventType::FILE_CHANGED>(on_file_list_file_changed, list);
+        list->dir->add_event<spacefm::signal::file_changed>(on_file_list_file_changed, list);
 
     if (dir && !dir->file_list.empty())
     {
@@ -350,7 +356,7 @@ static i32
 ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    return magic_enum::enum_count<PTKFileListCol>();
+    return magic_enum::enum_count<ptk::file_list::column>();
 }
 
 static GType
@@ -359,7 +365,7 @@ ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     // assert(index > (i32)G_N_ELEMENTS(column_types));
-    return column_types[index];
+    return column_types[ptk::file_list::column(index)];
 }
 
 static gboolean
@@ -422,18 +428,18 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
     assert(iter != nullptr);
     // assert(column > (i32)G_N_ELEMENTS(column_types));
 
-    g_value_init(value, column_types[column]);
+    g_value_init(value, column_types[ptk::file_list::column(column)]);
 
     vfs::file_info file = VFS_FILE_INFO(iter->user_data2);
 
     GdkPixbuf* icon;
 
-    switch (column)
+    switch (ptk::file_list::column(column))
     {
-        case PTKFileListCol::COL_FILE_BIG_ICON:
+        case ptk::file_list::column::big_icon:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (file->flags == VFSFileInfoFlag::NONE &&
+            if (file->flags == vfs::file_info_flags::none &&
                 (list->max_thumbnail > file->get_size() ||
                  (list->max_thumbnail != 0 && file->is_video())))
             {
@@ -450,7 +456,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                 g_object_unref(icon);
             }
             break;
-        case PTKFileListCol::COL_FILE_SMALL_ICON:
+        case ptk::file_list::column::small_icon:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
             if (list->max_thumbnail > file->get_size() ||
@@ -468,10 +474,10 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                 g_object_unref(icon);
             }
             break;
-        case PTKFileListCol::COL_FILE_NAME:
+        case ptk::file_list::column::name:
             g_value_set_string(value, file->get_disp_name().data());
             break;
-        case PTKFileListCol::COL_FILE_SIZE:
+        case ptk::file_list::column::size:
             if ((file->is_directory() || file->is_symlink()) &&
                 ztd::same(file->mime_type->get_type(), XDG_MIME_TYPE_DIRECTORY))
             {
@@ -482,22 +488,20 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                 g_value_set_string(value, file->get_disp_size().data());
             }
             break;
-        case PTKFileListCol::COL_FILE_DESC:
+        case ptk::file_list::column::desc:
             g_value_set_string(value, file->get_mime_type_desc().data());
             break;
-        case PTKFileListCol::COL_FILE_PERM:
+        case ptk::file_list::column::perm:
             g_value_set_string(value, file->get_disp_perm().data());
             break;
-        case PTKFileListCol::COL_FILE_OWNER:
+        case ptk::file_list::column::owner:
             g_value_set_string(value, file->get_disp_owner().data());
             break;
-        case PTKFileListCol::COL_FILE_MTIME:
+        case ptk::file_list::column::mtime:
             g_value_set_string(value, file->get_disp_mtime().data());
             break;
-        case PTKFileListCol::COL_FILE_INFO:
+        case ptk::file_list::column::info:
             g_value_set_pointer(value, vfs_file_info_ref(file));
-            break;
-        default:
             break;
     }
 }
@@ -598,7 +602,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
     }
 
     /* special case: if parent == nullptr, set iter to n-th top-level row */
-    if (UINT(n) >= list->n_files)
+    if (static_cast<u32>(n) >= list->n_files)
     { //  || n < 0)
         return false;
     }
@@ -628,7 +632,7 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (sort_column_id)
     {
-        *sort_column_id = list->sort_col;
+        *sort_column_id = magic_enum::enum_integer(list->sort_col);
     }
     if (order)
     {
@@ -641,11 +645,11 @@ static void
 ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, GtkSortType order)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
-    if (list->sort_col == sort_column_id && list->sort_order == order)
+    if (list->sort_col == ptk::file_list::column(sort_column_id) && list->sort_order == order)
     {
         return;
     }
-    list->sort_col = sort_column_id;
+    list->sort_col = ptk::file_list::column(sort_column_id);
     list->sort_order = order;
     gtk_tree_sortable_sort_column_changed(sortable);
     ptk_file_list_sort(list);
@@ -684,19 +688,19 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     i32 result;
 
     // dirs before/after files
-    if (list->sort_dir != PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED)
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
     {
         result = file_a->is_directory() - file_b->is_directory();
         if (result != 0)
         {
-            return list->sort_dir == PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST ? -result : result;
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
         }
     }
 
     // by column
     switch (list->sort_col)
     {
-        case PTKFileListCol::COL_FILE_SIZE:
+        case ptk::file_list::column::size:
             if (file_a->get_size() > file_b->get_size())
             {
                 result = 1;
@@ -710,7 +714,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
                 result = -1;
             }
             break;
-        case PTKFileListCol::COL_FILE_MTIME:
+        case ptk::file_list::column::mtime:
             if (file_a->get_mtime() > file_b->get_mtime())
             {
                 result = 1;
@@ -724,18 +728,21 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
                 result = -1;
             }
             break;
-        case PTKFileListCol::COL_FILE_DESC:
+        case ptk::file_list::column::desc:
             result = g_ascii_strcasecmp(file_a->get_mime_type_desc().data(),
                                         file_b->get_mime_type_desc().data());
             break;
-        case PTKFileListCol::COL_FILE_PERM:
+        case ptk::file_list::column::perm:
             result = ztd::compare(file_a->get_disp_perm(), file_b->get_disp_perm());
             break;
-        case PTKFileListCol::COL_FILE_OWNER:
+        case ptk::file_list::column::owner:
             result = g_ascii_strcasecmp(file_a->get_disp_owner().data(),
                                         file_b->get_disp_owner().data());
             break;
-        default:
+        case ptk::file_list::column::big_icon:
+        case ptk::file_list::column::small_icon:
+        case ptk::file_list::column::name:
+        case ptk::file_list::column::info:
             result = 0;
     }
 
@@ -1068,7 +1075,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     }
 
     list->signal_file_thumbnail_loaded =
-        list->dir->add_event<EventType::FILE_THUMBNAIL_LOADED>(on_thumbnail_loaded, list);
+        list->dir->add_event<spacefm::signal::file_thumbnail_loaded>(on_thumbnail_loaded, list);
 
     for (GList* l = list->files; l; l = g_list_next(l))
     {

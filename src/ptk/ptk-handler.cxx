@@ -17,6 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <magic_enum.hpp>
 #include <string>
 #include <string_view>
 
@@ -65,20 +66,22 @@
     "MOUNT\n# mount | grep \" on %a \"\n# echo\n# echo PROCESSES\n# /usr/bin/lsof -w \"%a\" | " \
     "head -n 500\n"
 
-enum PtkHandlerJob
+namespace ptk::handler
 {
-    HANDLER_JOB_EXPORT,
-    HANDLER_JOB_IMPORT_FILE,
-    HANDLER_JOB_RESTORE_ALL,
-    HANDLER_JOB_REMOVE,
-};
+    enum class job
+    {
+        export_job,
+        import_file,
+        restore_all,
+        remove,
+    };
 
-// Archive handlers treeview model enum
-enum PtkHandlerCol
-{
-    COL_XSET_NAME,
-    COL_HANDLER_NAME,
-};
+    enum class column
+    { // Archive handlers treeview model enum
+        xset_name,
+        handler_name,
+    };
+} // namespace ptk::handler
 
 // xset name prefixes of default handlers
 inline constexpr std::array<const std::string_view, 4> handler_def_prefixs{
@@ -861,39 +864,35 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
 
         switch (mode)
         {
-            case PtkHandlerMode::HANDLER_MODE_ARC:
+            case ptk::handler::mode::arc:
                 nelements = handlers_arc.size();
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FS:
+            case ptk::handler::mode::fs:
                 nelements = handlers_fs.size();
                 break;
-            case PtkHandlerMode::HANDLER_MODE_NET:
+            case ptk::handler::mode::net:
                 nelements = handlers_net.size();
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FILE:
+            case ptk::handler::mode::file:
                 nelements = handlers_file.size();
                 break;
-            default:
-                return nullptr;
         }
 
         for (usize i = 0; i < nelements; ++i)
         {
             switch (mode)
             {
-                case PtkHandlerMode::HANDLER_MODE_ARC:
+                case ptk::handler::mode::arc:
                     handler = &handlers_arc[i];
                     break;
-                case PtkHandlerMode::HANDLER_MODE_FS:
+                case ptk::handler::mode::fs:
                     handler = &handlers_fs[i];
                     break;
-                case PtkHandlerMode::HANDLER_MODE_NET:
+                case ptk::handler::mode::net:
                     handler = &handlers_net[i];
                     break;
-                case PtkHandlerMode::HANDLER_MODE_FILE:
+                case ptk::handler::mode::file:
                     handler = &handlers_file[i];
-                    break;
-                default:
                     break;
             }
 
@@ -902,16 +901,14 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
                 // found default handler
                 switch (cmd)
                 {
-                    case PtkHandlerArchive::HANDLER_COMPRESS:
+                    case ptk::handler::archive::compress:
                         command = handler->compress_cmd;
                         break;
-                    case PtkHandlerArchive::HANDLER_EXTRACT:
+                    case ptk::handler::archive::extract:
                         command = handler->extract_cmd;
                         break;
-                    case PtkHandlerArchive::HANDLER_LIST:
+                    case ptk::handler::archive::list:
                         command = handler->list_cmd;
-                        break;
-                    default:
                         break;
                 }
 
@@ -932,7 +929,7 @@ ptk_handler_get_command(i32 mode, i32 cmd, xset_t handler_set)
     const std::string str =
         std::format("/hand-{}-{}.fish",
                     modes.at(mode),
-                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
+                    mode == ptk::handler::mode::arc ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     const std::string script = ztd::replace(def_script, "/exec.fish", str);
     std::free(def_script);
     if (std::filesystem::exists(script))
@@ -992,7 +989,7 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     const std::string script_name =
         std::format("/hand-{}-{}.fish",
                     modes.at(mode),
-                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
+                    mode == ptk::handler::mode::arc ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     script = ztd::replace(def_script, "/exec.fish", script_name);
     std::free(def_script);
     // load script
@@ -1072,7 +1069,7 @@ ptk_handler_save_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     const std::string str =
         std::format("/hand-{}-{}.fish",
                     modes.at(mode),
-                    mode == PtkHandlerMode::HANDLER_MODE_ARC ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
+                    mode == ptk::handler::mode::arc ? cmds_arc.at(cmd) : cmds_mnt.at(cmd));
     const std::string script = ztd::replace(def_script, "/exec.fish", str);
     std::free(def_script);
     // get text
@@ -1286,20 +1283,18 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
 
     switch (mode)
     {
-        case PtkHandlerMode::HANDLER_MODE_ARC:
+        case ptk::handler::mode::arc:
             nelements = handlers_arc.size();
             break;
-        case PtkHandlerMode::HANDLER_MODE_FS:
+        case ptk::handler::mode::fs:
             nelements = handlers_fs.size();
             break;
-        case PtkHandlerMode::HANDLER_MODE_NET:
+        case ptk::handler::mode::net:
             nelements = handlers_net.size();
             break;
-        case PtkHandlerMode::HANDLER_MODE_FILE:
+        case ptk::handler::mode::file:
             nelements = handlers_file.size();
             break;
-        default:
-            return;
     }
 
     set_conf = xset_get(handler_conf_xsets.at(mode));
@@ -1316,20 +1311,18 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
     {
         switch (mode)
         {
-            case PtkHandlerMode::HANDLER_MODE_ARC:
+            case ptk::handler::mode::arc:
                 handler = &handlers_arc[i];
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FS:
+            case ptk::handler::mode::fs:
                 handler = &handlers_fs[i];
                 break;
-            case PtkHandlerMode::HANDLER_MODE_NET:
+            case ptk::handler::mode::net:
                 handler = &handlers_net[i];
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FILE:
+            case ptk::handler::mode::file:
                 handler = &handlers_file[i];
                 break;
-            default:
-                return;
         }
 
         // add a space to end of list and end of name before testing to avoid
@@ -1361,7 +1354,7 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
                 set->in_terminal = handler->compress_term;
                 // extract in terminal or (file handler) run as task
                 set->keep_terminal = handler->extract_term;
-                if (mode != PtkHandlerMode::HANDLER_MODE_FILE)
+                if (mode != ptk::handler::mode::file)
                 {
                     set->scroll_lock = handler->list_term;
                 }
@@ -1475,20 +1468,18 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
         const char* mode_name;
         switch (mode)
         {
-            case PtkHandlerMode::HANDLER_MODE_ARC:
+            case ptk::handler::mode::arc:
                 mode_name = "Archive";
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FS:
+            case ptk::handler::mode::fs:
                 mode_name = "Device";
                 break;
-            case PtkHandlerMode::HANDLER_MODE_NET:
+            case ptk::handler::mode::net:
                 mode_name = "Protocol";
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FILE:
+            case ptk::handler::mode::file:
                 mode_name = "File";
                 break;
-            default:
-                return;
         }
         const std::string msg =
             std::format("The selected {} Handler file has been imported to the {} Handlers list.",
@@ -1509,16 +1500,15 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
     gtk_list_store_prepend(GTK_LIST_STORE(hnd->list), &iter);
 
     // Adding handler to model
-    const char* disabled =
-        hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
+    const char* disabled = hnd->mode == ptk::handler::mode::file ? "(optional)" : "(disabled)";
     const std::string dis_name = std::format("{} {}",
                                              new_handler_xset->menu_label.value(),
                                              new_handler_xset->b == xset::b::xtrue ? "" : disabled);
     gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                        &iter,
-                       PtkHandlerCol::COL_XSET_NAME,
+                       ptk::handler::column::xset_name,
                        new_handler_xset->name.c_str(),
-                       PtkHandlerCol::COL_HANDLER_NAME,
+                       ptk::handler::column::handler_name,
                        dis_name.data(),
                        -1);
 
@@ -1579,7 +1569,7 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
         // load commands from const handler
         ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_compress),
                                    handler->compress_cmd);
-        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
+        if (hnd->mode != ptk::handler::mode::file)
         {
             ptk_handler_load_text_view(GTK_TEXT_VIEW(hnd->view_handler_extract),
                                        handler->extract_cmd);
@@ -1593,17 +1583,17 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
         std::string error_message;
 
         error = ptk_handler_load_script(hnd->mode,
-                                        PtkHandlerArchive::HANDLER_COMPRESS,
+                                        ptk::handler::archive::compress,
                                         handler_xset,
                                         GTK_TEXT_VIEW(hnd->view_handler_compress),
                                         command,
                                         error_message);
-        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
+        if (hnd->mode != ptk::handler::mode::file)
         {
             if (!error)
             {
                 error = ptk_handler_load_script(hnd->mode,
-                                                PtkHandlerArchive::HANDLER_EXTRACT,
+                                                ptk::handler::archive::extract,
                                                 handler_xset,
                                                 GTK_TEXT_VIEW(hnd->view_handler_extract),
                                                 command,
@@ -1612,7 +1602,7 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
             if (!error)
             {
                 error = ptk_handler_load_script(hnd->mode,
-                                                PtkHandlerArchive::HANDLER_LIST,
+                                                ptk::handler::archive::list,
                                                 handler_xset,
                                                 GTK_TEXT_VIEW(hnd->view_handler_list),
                                                 command,
@@ -1647,7 +1637,7 @@ config_unload_handler_settings(HandlerData* hnd)
     gtk_widget_set_sensitive(GTK_WIDGET(hnd->btn_defaults0), false);
 
     // Unchecking handler
-    if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
+    if (hnd->mode != ptk::handler::mode::file)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hnd->chkbtn_handler_enabled), false);
     }
@@ -1701,16 +1691,16 @@ populate_archive_handlers(HandlerData* hnd, xset_t def_handler_set)
                 gtk_list_store_append(GTK_LIST_STORE(hnd->list), &iter);
                 // Adding handler to model
                 const std::string disabled =
-                    hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
+                    hnd->mode == ptk::handler::mode::file ? "(optional)" : "(disabled)";
                 const std::string dis_name =
                     std::format("{} {}",
                                 handler_xset->menu_label.value(),
                                 handler_xset->b == xset::b::xtrue ? "" : disabled);
                 gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                                    &iter,
-                                   PtkHandlerCol::COL_XSET_NAME,
+                                   ptk::handler::column::xset_name,
                                    archive_handler.data(),
-                                   PtkHandlerCol::COL_HANDLER_NAME,
+                                   ptk::handler::column::handler_name,
                                    dis_name.data(),
                                    -1);
                 if (def_handler_set == handler_xset)
@@ -1764,7 +1754,7 @@ on_configure_drag_end(GtkWidget* widget, GdkDragContext* drag_context, HandlerDa
     {
         gtk_tree_model_get(GTK_TREE_MODEL(hnd->list),
                            &iter,
-                           PtkHandlerCol::COL_XSET_NAME,
+                           ptk::handler::column::xset_name,
                            &xset_name,
                            -1);
 
@@ -1822,9 +1812,9 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         // Fetching data from the model based on the iterator.
         gtk_tree_model_get(model,
                            &it,
-                           PtkHandlerCol::COL_XSET_NAME,
+                           ptk::handler::column::xset_name,
                            &xset_name,
-                           PtkHandlerCol::COL_HANDLER_NAME,
+                           ptk::handler::column::handler_name,
                            &handler_name_from_model,
                            -1);
 
@@ -1869,18 +1859,18 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         new_handler_xset->keep_terminal = handler_extract_term;
 
         error = ptk_handler_save_script(hnd->mode,
-                                        PtkHandlerArchive::HANDLER_COMPRESS,
+                                        ptk::handler::archive::compress,
                                         new_handler_xset,
                                         GTK_TEXT_VIEW(hnd->view_handler_compress),
                                         command,
                                         error_message);
-        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
+        if (hnd->mode != ptk::handler::mode::file)
         {
             new_handler_xset->scroll_lock = handler_list_term;
             if (!error)
             {
                 error = ptk_handler_save_script(hnd->mode,
-                                                PtkHandlerArchive::HANDLER_EXTRACT,
+                                                ptk::handler::archive::extract,
                                                 new_handler_xset,
                                                 GTK_TEXT_VIEW(hnd->view_handler_extract),
                                                 command,
@@ -1889,7 +1879,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             if (!error)
             {
                 error = ptk_handler_save_script(hnd->mode,
-                                                PtkHandlerArchive::HANDLER_LIST,
+                                                ptk::handler::archive::list,
                                                 new_handler_xset,
                                                 GTK_TEXT_VIEW(hnd->view_handler_list),
                                                 command,
@@ -1901,17 +1891,16 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         gtk_list_store_prepend(GTK_LIST_STORE(hnd->list), &iter);
 
         // Adding handler to model
-        const char* disabled =
-            hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
+        const char* disabled = hnd->mode == ptk::handler::mode::file ? "(optional)" : "(disabled)";
         const std::string dis_name =
             std::format("{} {}",
                         handler_name,
                         new_handler_xset->b == xset::b::xtrue ? "" : disabled);
         gtk_list_store_set(GTK_LIST_STORE(hnd->list),
                            &iter,
-                           PtkHandlerCol::COL_XSET_NAME,
+                           ptk::handler::column::xset_name,
                            new_handler_xset->name.c_str(),
-                           PtkHandlerCol::COL_HANDLER_NAME,
+                           ptk::handler::column::handler_name,
                            dis_name.data(),
                            -1);
 
@@ -1970,14 +1959,14 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         {
             // It has - updating model
             const char* disabled =
-                hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE ? "(optional)" : "(disabled)";
+                hnd->mode == ptk::handler::mode::file ? "(optional)" : "(disabled)";
             const std::string dis_name =
                 std::format("{} {}", handler_name, handler_enabled ? "" : disabled);
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
-                               PtkHandlerCol::COL_XSET_NAME,
+                               ptk::handler::column::xset_name,
                                xset_name,
-                               PtkHandlerCol::COL_HANDLER_NAME,
+                               ptk::handler::column::handler_name,
                                dis_name.data(),
                                -1);
         }
@@ -1994,19 +1983,19 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
         if (hnd->compress_changed || was_default)
         {
             error = ptk_handler_save_script(hnd->mode,
-                                            PtkHandlerArchive::HANDLER_COMPRESS,
+                                            ptk::handler::archive::compress,
                                             handler_xset,
                                             GTK_TEXT_VIEW(hnd->view_handler_compress),
                                             command,
                                             error_message);
         }
-        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
+        if (hnd->mode != ptk::handler::mode::file)
         {
             handler_xset->scroll_lock = handler_list_term;
             if (hnd->extract_changed || was_default)
             {
                 error = ptk_handler_save_script(hnd->mode,
-                                                PtkHandlerArchive::HANDLER_EXTRACT,
+                                                ptk::handler::archive::extract,
                                                 handler_xset,
                                                 GTK_TEXT_VIEW(hnd->view_handler_extract),
                                                 command,
@@ -2015,7 +2004,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             if (hnd->list_changed || was_default)
             {
                 error = ptk_handler_save_script(hnd->mode,
-                                                PtkHandlerArchive::HANDLER_LIST,
+                                                ptk::handler::archive::list,
                                                 handler_xset,
                                                 GTK_TEXT_VIEW(hnd->view_handler_list),
                                                 command,
@@ -2197,7 +2186,7 @@ on_configure_changed(GtkTreeSelection* selection, HandlerData* hnd)
 
     // Fetching data from the model based on the iterator.
     char* xset_name;
-    gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
+    gtk_tree_model_get(model, &it, ptk::handler::column::xset_name, &xset_name, -1);
 
     // Loading new archive handler values
     config_load_handler_settings(nullptr, xset_name, nullptr, hnd);
@@ -2227,7 +2216,7 @@ on_configure_handler_enabled_check(GtkToggleButton* togglebutton, HandlerData* h
         gtk_widget_set_sensitive(hnd->btn_apply, gtk_widget_get_sensitive(hnd->btn_remove));
     }
 
-    if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FILE)
+    if (hnd->mode == ptk::handler::mode::file)
     {
         return;
     }
@@ -2412,7 +2401,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         char* xset_name;
-        gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
+        gtk_tree_model_get(model, &it, ptk::handler::column::xset_name, &xset_name, -1);
         // a default handler is selected?
         if (!(xset_name && ztd::startswith(xset_name, handler_def_prefixs.at(hnd->mode))))
         {
@@ -2426,20 +2415,18 @@ restore_defaults(HandlerData* hnd, bool all)
 
         switch (hnd->mode)
         {
-            case PtkHandlerMode::HANDLER_MODE_ARC:
+            case ptk::handler::mode::arc:
                 nelements = handlers_arc.size();
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FS:
+            case ptk::handler::mode::fs:
                 nelements = handlers_fs.size();
                 break;
-            case PtkHandlerMode::HANDLER_MODE_NET:
+            case ptk::handler::mode::net:
                 nelements = handlers_net.size();
                 break;
-            case PtkHandlerMode::HANDLER_MODE_FILE:
+            case ptk::handler::mode::file:
                 nelements = handlers_file.size();
                 break;
-            default:
-                return;
         }
 
         bool found_handler = false;
@@ -2447,20 +2434,18 @@ restore_defaults(HandlerData* hnd, bool all)
         {
             switch (hnd->mode)
             {
-                case PtkHandlerMode::HANDLER_MODE_ARC:
+                case ptk::handler::mode::arc:
                     handler = &handlers_arc[i];
                     break;
-                case PtkHandlerMode::HANDLER_MODE_FS:
+                case ptk::handler::mode::fs:
                     handler = &handlers_fs[i];
                     break;
-                case PtkHandlerMode::HANDLER_MODE_NET:
+                case ptk::handler::mode::net:
                     handler = &handlers_net[i];
                     break;
-                case PtkHandlerMode::HANDLER_MODE_FILE:
+                case ptk::handler::mode::file:
                     handler = &handlers_file[i];
                     return;
-                default:
-                    break;
             }
 
             if (ztd::same(handler->setname, xset_name))
@@ -2483,7 +2468,7 @@ restore_defaults(HandlerData* hnd, bool all)
         set->x = handler->ext;
         set->in_terminal = handler->compress_term;
         set->keep_terminal = handler->extract_term;
-        if (hnd->mode != PtkHandlerMode::HANDLER_MODE_FILE)
+        if (hnd->mode != ptk::handler::mode::file)
         {
             set->scroll_lock = handler->list_term;
         }
@@ -2500,7 +2485,7 @@ restore_defaults(HandlerData* hnd, bool all)
 static bool
 validate_archive_handler(HandlerData* hnd)
 {
-    if (hnd->mode != PtkHandlerMode::HANDLER_MODE_ARC)
+    if (hnd->mode != ptk::handler::mode::arc)
     {
         // only archive handlers currently have validity checks
         return true;
@@ -2658,7 +2643,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     // open in editor
     const i32 action = std::stoi(uri);
-    if (action > PtkHandlerArchive::HANDLER_LIST || action < 0)
+    if (action > ptk::handler::archive::list || action < 0)
     {
         return true;
     }
@@ -2676,7 +2661,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     }
 
     char* xset_name = nullptr;
-    gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
+    gtk_tree_model_get(model, &it, ptk::handler::column::xset_name, &xset_name, -1);
     xset_t set = xset_is(xset_name);
     std::free(xset_name);
     if (!(set && !set->disable && set->b == xset::b::xtrue))
@@ -2791,7 +2776,8 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
         on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
     }
 
-    const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
+    const ptk::handler::job job =
+        ptk::handler::job(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
     // Determine handler selected
     xset_t set_sel = nullptr;
@@ -2801,7 +2787,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     GtkTreeModel* model;
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
-        gtk_tree_model_get(model, &it, PtkHandlerCol::COL_XSET_NAME, &xset_name, -1);
+        gtk_tree_model_get(model, &it, ptk::handler::column::xset_name, &xset_name, -1);
         set_sel = xset_is(xset_name);
         std::free(xset_name);
     }
@@ -2811,7 +2797,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     xset_t save;
     switch (job)
     {
-        case PtkHandlerJob::HANDLER_JOB_IMPORT_FILE:
+        case ptk::handler::job::import_file:
         {
             std::optional<std::string> default_path = std::nullopt;
             // get file path
@@ -2840,13 +2826,13 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
             save->s = file.value().parent_path();
             break;
         }
-        case PtkHandlerJob::HANDLER_JOB_RESTORE_ALL:
+        case ptk::handler::job::restore_all:
             restore_defaults(hnd, true);
             return;
-        case PtkHandlerJob::HANDLER_JOB_REMOVE:
+        case ptk::handler::job::remove:
             on_configure_button_press(GTK_BUTTON(hnd->btn_remove), hnd);
             return;
-        case PtkHandlerJob::HANDLER_JOB_EXPORT:
+        case ptk::handler::job::export_job:
             // export
             if (!set_sel)
             {
@@ -2865,8 +2851,6 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
                 }
             }
             xset_custom_export(hnd->dlg, nullptr, set_sel);
-            return;
-        default:
             return;
     }
 
@@ -2893,7 +2877,7 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     }
 
     // Install plugin
-    install_plugin_file(nullptr, hnd->dlg, file.value(), plug_dir, PluginJob::COPY, nullptr);
+    install_plugin_file(nullptr, hnd->dlg, file.value(), plug_dir, plugin::job::copy, nullptr);
 }
 
 static void
@@ -2922,13 +2906,13 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
 
 static GtkWidget*
 add_popup_menuitem(GtkWidget* popup, GtkAccelGroup* accel_group, const std::string_view label,
-                   PtkHandlerJob job, HandlerData* hnd)
+                   ptk::handler::job job, HandlerData* hnd)
 {
     (void)accel_group;
     GtkWidget* item = gtk_menu_item_new_with_mnemonic(label.data());
     gtk_container_add(GTK_CONTAINER(popup), item);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_option_cb), (void*)hnd);
-    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
+    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
     return item;
 }
 
@@ -2948,32 +2932,23 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
     if (!btn)
     {
         // menu is shown from right-click on list
-        item = add_popup_menuitem(popup,
-                                  accel_group,
-                                  "_Remove",
-                                  PtkHandlerJob::HANDLER_JOB_REMOVE,
-                                  hnd);
+        item = add_popup_menuitem(popup, accel_group, "_Remove", ptk::handler::job::remove, hnd);
         gtk_widget_set_sensitive(item, handler_selected);
     }
 
-    item =
-        add_popup_menuitem(popup, accel_group, "_Export", PtkHandlerJob::HANDLER_JOB_EXPORT, hnd);
+    item = add_popup_menuitem(popup, accel_group, "_Export", ptk::handler::job::export_job, hnd);
     gtk_widget_set_sensitive(item, handler_selected);
 
-    add_popup_menuitem(popup,
-                       accel_group,
-                       "Import _File",
-                       PtkHandlerJob::HANDLER_JOB_IMPORT_FILE,
-                       hnd);
+    add_popup_menuitem(popup, accel_group, "Import _File", ptk::handler::job::import_file, hnd);
     add_popup_menuitem(popup,
                        accel_group,
                        "Restore _Default Handlers",
-                       PtkHandlerJob::HANDLER_JOB_RESTORE_ALL,
+                       ptk::handler::job::restore_all,
                        hnd);
     if (btn)
     {
         // menu is shown from Options button
-        if (hnd->mode == PtkHandlerMode::HANDLER_MODE_ARC)
+        if (hnd->mode == ptk::handler::mode::arc)
         {
             xset_t set;
 
@@ -3009,7 +2984,7 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
             set->desc = old_desc;
         }
-        else if (hnd->mode == PtkHandlerMode::HANDLER_MODE_FS)
+        else if (hnd->mode == ptk::handler::mode::fs)
         {
             // Device handler options
             xset_context_new();
@@ -3060,9 +3035,8 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     xset_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    i32 width = xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), xset::var::x);
-    i32 height =
-        xset_get_int(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC), xset::var::y);
+    i32 width = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::x);
+    i32 height = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
@@ -3147,7 +3121,11 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     gtk_tree_view_column_pack_start(col, renderer, true);
 
     // Tie model data to the column
-    gtk_tree_view_column_add_attribute(col, renderer, "text", PtkHandlerCol::COL_HANDLER_NAME);
+    gtk_tree_view_column_add_attribute(
+        col,
+        renderer,
+        "text",
+        magic_enum::enum_integer(ptk::handler::column::handler_name));
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(hnd->view_handlers), col);
 
@@ -3193,8 +3171,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     // Generating right-hand side of dialog
     hnd->chkbtn_handler_enabled = gtk_check_button_new_with_mnemonic(
-        mode == PtkHandlerMode::HANDLER_MODE_FILE ? "Ena_ble as a default opener"
-                                                  : "Ena_ble Handler");
+        mode == ptk::handler::mode::file ? "Ena_ble as a default opener" : "Ena_ble Handler");
     gtk_widget_set_focus_on_click(GTK_WIDGET(hnd->chkbtn_handler_enabled), false);
     g_signal_connect(G_OBJECT(hnd->chkbtn_handler_enabled),
                      "toggled",
@@ -3205,23 +3182,21 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_name), GtkAlign::GTK_ALIGN_CENTER);
     GtkWidget* lbl_handler_mime = gtk_label_new(nullptr);
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_mime),
-                                       mode == PtkHandlerMode::HANDLER_MODE_ARC ||
-                                               mode == PtkHandlerMode::HANDLER_MODE_FILE
-                                           ? "MIM_E Type:"
-                                           : "Whit_elist:");
+    gtk_label_set_markup_with_mnemonic(
+        GTK_LABEL(lbl_handler_mime),
+        mode == ptk::handler::mode::arc || mode == ptk::handler::mode::file ? "MIM_E Type:"
+                                                                            : "Whit_elist:");
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_mime), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_mime), GtkAlign::GTK_ALIGN_CENTER);
     GtkWidget* lbl_handler_extension = gtk_label_new(nullptr);
-    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_extension),
-                                       mode == PtkHandlerMode::HANDLER_MODE_ARC ||
-                                               mode == PtkHandlerMode::HANDLER_MODE_FILE
-                                           ? "P_athname:"
-                                           : "Bl_acklist:");
+    gtk_label_set_markup_with_mnemonic(
+        GTK_LABEL(lbl_handler_extension),
+        mode == ptk::handler::mode::arc || mode == ptk::handler::mode::file ? "P_athname:"
+                                                                            : "Bl_acklist:");
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_extension), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_extension), GtkAlign::GTK_ALIGN_END);
     GtkWidget* lbl_handler_icon;
-    if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
+    if (mode == ptk::handler::mode::file)
     {
         lbl_handler_icon = gtk_label_new(nullptr);
         gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_icon), "_Icon:");
@@ -3235,11 +3210,11 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     std::string str;
     GtkWidget* lbl_handler_compress = gtk_label_new(nullptr);
-    if (mode == PtkHandlerMode::HANDLER_MODE_ARC)
+    if (mode == ptk::handler::mode::arc)
     {
         str = "<b>Co_mpress:</b>";
     }
-    else if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
+    else if (mode == ptk::handler::mode::file)
     {
         str = "<b>Open Co_mmand:</b>";
     }
@@ -3251,15 +3226,15 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_compress), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_compress), GtkAlign::GTK_ALIGN_END);
     GtkWidget* lbl_handler_extract = gtk_label_new(nullptr);
-    gtk_label_set_markup_with_mnemonic(
-        GTK_LABEL(lbl_handler_extract),
-        mode == PtkHandlerMode::HANDLER_MODE_ARC ? "<b>Ex_tract:</b>" : "<b>Unmoun_t:</b>");
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_extract),
+                                       mode == ptk::handler::mode::arc ? "<b>Ex_tract:</b>"
+                                                                       : "<b>Unmoun_t:</b>");
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_extract), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_extract), GtkAlign::GTK_ALIGN_END);
     GtkWidget* lbl_handler_list = gtk_label_new(nullptr);
-    gtk_label_set_markup_with_mnemonic(
-        GTK_LABEL(lbl_handler_list),
-        mode == PtkHandlerMode::HANDLER_MODE_ARC ? "<b>Li_st:</b>" : "<b>Propertie_s:</b>");
+    gtk_label_set_markup_with_mnemonic(GTK_LABEL(lbl_handler_list),
+                                       mode == ptk::handler::mode::arc ? "<b>Li_st:</b>"
+                                                                       : "<b>Propertie_s:</b>");
     gtk_widget_set_halign(GTK_WIDGET(lbl_handler_list), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(lbl_handler_list), GtkAlign::GTK_ALIGN_END);
     hnd->entry_handler_name = gtk_entry_new();
@@ -3370,7 +3345,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     hnd->chkbtn_handler_compress_term = gtk_check_button_new_with_label("Run In Terminal");
     hnd->chkbtn_handler_extract_term = gtk_check_button_new_with_label(
-        mode == PtkHandlerMode::HANDLER_MODE_FILE ? "Run As Task" : "Run In Terminal");
+        mode == ptk::handler::mode::file ? "Run As Task" : "Run In Terminal");
     hnd->chkbtn_handler_list_term = gtk_check_button_new_with_label("Run In Terminal");
     gtk_widget_set_focus_on_click(GTK_WIDGET(hnd->chkbtn_handler_compress_term), false);
     g_signal_connect(G_OBJECT(hnd->chkbtn_handler_compress_term),
@@ -3464,7 +3439,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
                        true,
                        true,
                        4);
-    if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
+    if (mode == ptk::handler::mode::file)
     {
         // for file handlers, extract_term is used for Run As Task
         gtk_box_pack_start(GTK_BOX(hbox_compress_header),
@@ -3491,7 +3466,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
                        true,
                        true,
                        4);
-    if (mode != PtkHandlerMode::HANDLER_MODE_FILE)
+    if (mode != ptk::handler::mode::file)
     {
         gtk_box_pack_start(GTK_BOX(hbox_extract_header),
                            hnd->chkbtn_handler_extract_term,
@@ -3525,7 +3500,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
 
     // Show All
     gtk_widget_show_all(GTK_WIDGET(hnd->dlg));
-    if (mode == PtkHandlerMode::HANDLER_MODE_FILE)
+    if (mode == ptk::handler::mode::file)
     {
         gtk_widget_hide(hbox_extract_header);
         gtk_widget_hide(hbox_list_header);
@@ -3579,10 +3554,10 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     if (width && height)
     {
         // They are - saving
-        xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
+        xset_set(handler_conf_xsets.at(ptk::handler::mode::arc),
                  xset::var::x,
                  std::to_string(width));
-        xset_set(handler_conf_xsets.at(PtkHandlerMode::HANDLER_MODE_ARC),
+        xset_set(handler_conf_xsets.at(ptk::handler::mode::arc),
                  xset::var::y,
                  std::to_string(height));
     }

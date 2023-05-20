@@ -21,14 +21,17 @@
 
 #include <exception>
 
-enum class Scripts
+namespace spacefm
 {
-    SPACEFM_AUTH,
-    CONFIG_UPDATE,
-    CONFIG_UPDATE_GIT,
-};
+    enum class script
+    {
+        spacefm_auth,
+        config_update,
+        config_update_git,
+    };
+}
 
-bool script_exists(Scripts script) noexcept;
+bool script_exists(spacefm::script script) noexcept;
 bool script_exists(const std::filesystem::path& script) noexcept;
 
-const std::filesystem::path get_script_path(Scripts script) noexcept;
+const std::filesystem::path get_script_path(spacefm::script script) noexcept;

@@ -38,6 +38,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
@@ -360,7 +362,7 @@ on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, i32 order)
                        xset::panel::list_detailed,
                        xset::var::x,
                        std::to_string(sort_order));
-        ptk_file_browser_set_sort_order(file_browser, (PtkFBSortOrder)sort_order);
+        ptk_file_browser_set_sort_order(file_browser, (ptk::file_browser::sort_order)sort_order);
     }
 }
 
@@ -368,7 +370,7 @@ static void
 on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
 {
     (void)menuitem;
-    if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+    if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
     {
         // get visiblity for correct mode
         MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
@@ -440,7 +442,7 @@ static void
 on_archive_show_config(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_ARC, data->browser, nullptr);
+    ptk_handler_show_config(ptk::handler::mode::arc, data->browser, nullptr);
 }
 
 static void
@@ -504,7 +506,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set->disable = !show_side;
     xset_set_cb_panel(p, xset::panel::show_hidden, (GFunc)on_popup_show_hidden, browser);
 
-    if (browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+    if (browser->view_mode == ptk::file_browser::view_mode::list_view)
     {
         set = xset_get_panel(p, xset::panel::detcol_size);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
@@ -548,7 +550,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     xset_set_cb(set, (GFunc)main_window_toggle_thumbnails_all_windows, nullptr);
     set->b = app_settings.get_show_thumbnail() ? xset::b::xtrue : xset::b::unset;
 
-    if (browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW)
+    if (browser->view_mode == ptk::file_browser::view_mode::icon_view)
     {
         set = xset_get_panel(p, xset::panel::list_large);
         xset_set_b(set, true);
@@ -575,40 +577,52 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     set = xset_get(xset::name::sortby_name);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-    xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_NAME);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::name));
     xset_set_ob2(set, nullptr, nullptr);
-    set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_NAME ? xset::b::xtrue
+    set->b = browser->sort_order == ptk::file_browser::sort_order::name ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set_radio = set;
     set = xset_get(xset::name::sortby_size);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-    xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_SIZE);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::size));
     xset_set_ob2(set, nullptr, set_radio->name.data());
-    set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_SIZE ? xset::b::xtrue
+    set->b = browser->sort_order == ptk::file_browser::sort_order::size ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set = xset_get(xset::name::sortby_type);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-    xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_TYPE);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::type));
     xset_set_ob2(set, nullptr, set_radio->name.data());
-    set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_TYPE ? xset::b::xtrue
+    set->b = browser->sort_order == ptk::file_browser::sort_order::type ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set = xset_get(xset::name::sortby_perm);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-    xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_PERM);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::perm));
     xset_set_ob2(set, nullptr, set_radio->name.data());
-    set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_PERM ? xset::b::xtrue
+    set->b = browser->sort_order == ptk::file_browser::sort_order::perm ? xset::b::xtrue
                                                                         : xset::b::xfalse;
     set = xset_get(xset::name::sortby_owner);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-    xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_OWNER);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::owner));
     xset_set_ob2(set, nullptr, set_radio->name.data());
-    set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_OWNER ? xset::b::xtrue
+    set->b = browser->sort_order == ptk::file_browser::sort_order::owner ? xset::b::xtrue
                                                                          : xset::b::xfalse;
     set = xset_get(xset::name::sortby_date);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-    xset_set_ob1_int(set, "sortorder", PtkFBSortOrder::PTK_FB_SORT_BY_MTIME);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::mtime));
     xset_set_ob2(set, nullptr, set_radio->name.data());
-    set->b = browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_MTIME ? xset::b::xtrue
+    set->b = browser->sort_order == ptk::file_browser::sort_order::mtime ? xset::b::xtrue
                                                                          : xset::b::xfalse;
 
     set = xset_get(xset::name::sortby_ascend);
@@ -652,7 +666,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
-                         PTKFileListSortDir::PTK_LIST_SORT_DIR_FIRST
+                         ptk::file_list::sort_dir::first
                      ? xset::b::xtrue
                      : xset::b::xfalse;
         set_radio = set;
@@ -660,14 +674,14 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio->name.data());
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
-                         PTKFileListSortDir::PTK_LIST_SORT_DIR_LAST
+                         ptk::file_list::sort_dir::last
                      ? xset::b::xtrue
                      : xset::b::xfalse;
         set = xset_get(xset::name::sortx_mix);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio->name.data());
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list)->sort_dir ==
-                         PTKFileListSortDir::PTK_LIST_SORT_DIR_MIXED
+                         ptk::file_list::sort_dir::mixed
                      ? xset::b::xtrue
                      : xset::b::xfalse;
 
@@ -798,36 +812,36 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     {
         mime_type = file->get_mime_type();
         apps = mime_type->get_actions();
-        context->var[ItemPropContext::CONTEXT_MIME] = mime_type->get_type();
+        context->var[item_prop::context::item::mime] = mime_type->get_type();
     }
     else
     {
         mime_type = nullptr;
-        context->var[ItemPropContext::CONTEXT_MIME] = "";
+        context->var[item_prop::context::item::mime] = "";
     }
 
     // context
     if (file_path)
     {
-        context->var[ItemPropContext::CONTEXT_NAME] =
+        context->var[item_prop::context::item::name] =
             std::filesystem::path(file_path).parent_path();
     }
 
-    context->var[ItemPropContext::CONTEXT_DIR] = cwd;
-    context->var[ItemPropContext::CONTEXT_READ_ACCESS] = no_read_access ? "false" : "true";
-    context->var[ItemPropContext::CONTEXT_WRITE_ACCESS] = no_write_access ? "false" : "true";
-    context->var[ItemPropContext::CONTEXT_IS_TEXT] = is_text ? "true" : "false";
-    context->var[ItemPropContext::CONTEXT_IS_DIR] = is_dir ? "true" : "false";
-    context->var[ItemPropContext::CONTEXT_MUL_SEL] = sel_files.size() > 1 ? "true" : "false";
-    context->var[ItemPropContext::CONTEXT_CLIP_FILES] = is_clip ? "true" : "false";
+    context->var[item_prop::context::item::dir] = cwd;
+    context->var[item_prop::context::item::read_access] = no_read_access ? "false" : "true";
+    context->var[item_prop::context::item::write_access] = no_write_access ? "false" : "true";
+    context->var[item_prop::context::item::is_text] = is_text ? "true" : "false";
+    context->var[item_prop::context::item::is_dir] = is_dir ? "true" : "false";
+    context->var[item_prop::context::item::mul_sel] = sel_files.size() > 1 ? "true" : "false";
+    context->var[item_prop::context::item::clip_files] = is_clip ? "true" : "false";
 
     if (file)
     {
-        context->var[ItemPropContext::CONTEXT_IS_LINK] = file->is_symlink() ? "true" : "false";
+        context->var[item_prop::context::item::is_link] = file->is_symlink() ? "true" : "false";
     }
     else
     {
-        context->var[ItemPropContext::CONTEXT_IS_LINK] = "false";
+        context->var[item_prop::context::item::is_link] = "false";
     }
 
     if (browser)
@@ -854,7 +868,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         // Execute
         if (!is_dir && file && file_path &&
-            (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY ||
+            (file->flags & vfs::file_info_flags::desktop_entry ||
              // Note: network filesystems may become unresponsive here
              file->is_executable(file_path)))
         {
@@ -869,8 +883,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_t set_arc_extract = nullptr;
         xset_t set_arc_extractto;
         xset_t set_arc_list;
-        handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                 PtkHandlerArchive::HANDLER_EXTRACT,
+        handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,
+                                                 ptk::handler::archive::extract,
                                                  file_path,
                                                  mime_type,
                                                  false,
@@ -959,8 +973,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
 
         // file handlers
-        handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
-                                                 PtkHandlerMount::HANDLER_MOUNT,
+        handlers = ptk_handler_file_has_handlers(ptk::handler::mode::file,
+                                                 ptk::handler::mount::mount,
                                                  file_path,
                                                  mime_type,
                                                  false,
@@ -1554,7 +1568,7 @@ static void
 on_popup_handlers_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_FILE, data->browser, nullptr);
+    ptk_handler_show_config(ptk::handler::mode::file, data->browser, nullptr);
 }
 
 static void
@@ -1609,24 +1623,27 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
 }
 
-enum PTKFileMenuAppJob
+namespace ptk::file_menu
 {
-    APP_JOB_DEFAULT,
-    APP_JOB_REMOVE,
-    APP_JOB_EDIT,
-    APP_JOB_EDIT_LIST,
-    APP_JOB_ADD,
-    APP_JOB_BROWSE,
-    APP_JOB_BROWSE_SHARED,
-    APP_JOB_EDIT_TYPE,
-    APP_JOB_VIEW,
-    APP_JOB_VIEW_TYPE,
-    APP_JOB_VIEW_OVER,
-    APP_JOB_UPDATE,
-    APP_JOB_BROWSE_MIME,
-    APP_JOB_BROWSE_MIME_USR,
-    APP_JOB_USR
-};
+    enum class app_job
+    {
+        DEFAULT,
+        remove,
+        edit,
+        edit_list,
+        add,
+        browse,
+        browse_shared,
+        edit_type,
+        view,
+        view_type,
+        view_over,
+        update,
+        browse_mime,
+        browse_mime_usr,
+        usr
+    };
+}
 
 static const char*
 get_shared_desktop_file_location(const std::string_view name)
@@ -1671,16 +1688,16 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
     }
 
-    switch (job)
+    switch (ptk::file_menu::app_job(job))
     {
-        case PTKFileMenuAppJob::APP_JOB_DEFAULT:
+        case ptk::file_menu::app_job::DEFAULT:
         {
             mime_type->set_default_action(desktop->get_name());
             ptk_app_chooser_has_handler_warn(data->browser ? GTK_WIDGET(data->browser) : nullptr,
                                              mime_type);
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_REMOVE:
+        case ptk::file_menu::app_job::remove:
         {
             // for text files, spacefm displays both the actions for the type
             // and the actions for text/plain, so removing an app may appear to not
@@ -1706,7 +1723,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             }
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_EDIT:
+        case ptk::file_menu::app_job::edit:
         {
             const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->get_name();
             if (!std::filesystem::exists(path))
@@ -1746,7 +1763,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_VIEW:
+        case ptk::file_menu::app_job::view:
         {
             const char* desktop_path = get_shared_desktop_file_location(desktop->get_name());
             if (desktop_path)
@@ -1755,14 +1772,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             }
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_EDIT_LIST:
+        case ptk::file_menu::app_job::edit_list:
         {
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
             const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
             xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_ADD:
+        case ptk::file_menu::app_job::add:
         {
             str = ptk_choose_app_for_mime_type(
                 data->browser ? GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)))
@@ -1788,7 +1805,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             std::free(str);
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_BROWSE:
+        case ptk::file_menu::app_job::browse:
         {
             const auto path = vfs::user_dirs->data_dir() / "applications";
             std::filesystem::create_directories(path);
@@ -1796,12 +1813,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
             if (data->browser)
             {
-                data->browser->run_event<EventType::OPEN_ITEM>(path,
-                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<spacefm::signal::open_item>(path,
+                                                                     ptk::open_action::new_tab);
             }
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED:
+        case ptk::file_menu::app_job::browse_shared:
         {
             std::filesystem::path path;
             const char* desktop_path = get_shared_desktop_file_location(desktop->get_name());
@@ -1815,12 +1832,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             }
             if (data->browser)
             {
-                data->browser->run_event<EventType::OPEN_ITEM>(path,
-                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<spacefm::signal::open_item>(path,
+                                                                     ptk::open_action::new_tab);
             }
         }
         break;
-        case PTKFileMenuAppJob::APP_JOB_EDIT_TYPE:
+        case ptk::file_menu::app_job::edit_type:
         {
             const auto mime_path = vfs::user_dirs->data_dir() / "mime" / "packages";
             std::filesystem::create_directories(mime_path);
@@ -1956,7 +1973,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             vfs_dir_monitor_mime();
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_VIEW_TYPE:
+        case ptk::file_menu::app_job::view_type:
         {
             str2 = std::format("{}.xml", mime_type->get_type());
             const auto path = std::filesystem::path() / "/usr/share/mime" / str2;
@@ -1966,36 +1983,36 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             }
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_VIEW_OVER:
+        case ptk::file_menu::app_job::view_over:
         {
             const std::filesystem::path path = "/usr/share/mime/packages/Overrides.xml";
             xset_edit(GTK_WIDGET(data->browser), path.c_str(), true, false);
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME_USR:
+        case ptk::file_menu::app_job::browse_mime_usr:
         {
             if (data->browser)
             {
                 const std::filesystem::path path = "/usr/share/mime/packages";
-                data->browser->run_event<EventType::OPEN_ITEM>(path,
-                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<spacefm::signal::open_item>(path,
+                                                                     ptk::open_action::new_tab);
             }
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_BROWSE_MIME:
+        case ptk::file_menu::app_job::browse_mime:
         {
             const auto path = vfs::user_dirs->data_dir() / "mime" / "packages";
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
             {
-                data->browser->run_event<EventType::OPEN_ITEM>(path,
-                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<spacefm::signal::open_item>(path,
+                                                                     ptk::open_action::new_tab);
             }
             vfs_dir_monitor_mime();
             break;
         }
-        case PTKFileMenuAppJob::APP_JOB_UPDATE:
+        case ptk::file_menu::app_job::update:
         {
             const auto data_dir = vfs::user_dirs->data_dir();
             command = std::format("update-mime-database {}/mime", data_dir.string());
@@ -2007,7 +2024,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             Glib::spawn_command_line_async(command);
             break;
         }
-        default:
+        case ptk::file_menu::app_job::usr:
             break;
     }
 }
@@ -2015,8 +2032,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 static bool
 app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
 {
-    i32 job = -1;
-
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (!item)
     {
@@ -2031,6 +2046,8 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
 
     const u32 keymod = ptk_get_keymod(event->state);
 
+    ptk::file_menu::app_job job;
+    bool job_set = false;
     if (keymod == 0)
     {
         switch (event->keyval)
@@ -2040,22 +2057,25 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
                 show_app_menu(menu, item, data, 0, event->time);
                 return true;
             case GDK_KEY_F4:
-                job = PTKFileMenuAppJob::APP_JOB_EDIT;
+                job = ptk::file_menu::app_job::edit;
+                job_set = true;
                 break;
             case GDK_KEY_Delete:
-                job = PTKFileMenuAppJob::APP_JOB_REMOVE;
+                job = ptk::file_menu::app_job::remove;
+                job_set = true;
                 break;
             case GDK_KEY_Insert:
-                job = PTKFileMenuAppJob::APP_JOB_ADD;
+                job = ptk::file_menu::app_job::add;
+                job_set = true;
                 break;
             default:
                 break;
         }
     }
-    if (job != -1)
+    if (job_set)
     {
         gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
-        g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
+        g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
         g_object_set_data(G_OBJECT(item), "data", data);
         app_job(item, item);
         return true;
@@ -2071,12 +2091,12 @@ on_app_menu_hide(GtkWidget* widget, GtkWidget* app_menu)
 }
 
 static GtkWidget*
-app_menu_additem(GtkWidget* menu, const std::string_view label, i32 job, GtkWidget* app_item,
-                 PtkFileMenu* data)
+app_menu_additem(GtkWidget* menu, const std::string_view label, ptk::file_menu::app_job job,
+                 GtkWidget* app_item, PtkFileMenu* data)
 {
     GtkWidget* item = gtk_menu_item_new_with_mnemonic(label.data());
 
-    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
+    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
     g_object_set_data(G_OBJECT(item), "data", data);
     gtk_container_add(GTK_CONTAINER(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(app_job), app_item);
@@ -2109,7 +2129,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     {
         // is a file handler - open file handler config
         gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
-        ptk_handler_show_config(PtkHandlerMode::HANDLER_MODE_FILE, data->browser, handler_set);
+        ptk_handler_show_config(ptk::handler::mode::file, data->browser, handler_set);
         return;
     }
 
@@ -2133,16 +2153,16 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // Set Default
     newitem = app_menu_additem(app_menu,
                                "_Set As Default",
-                               PTKFileMenuAppJob::APP_JOB_DEFAULT,
+                               ptk::file_menu::app_job::DEFAULT,
                                app_item,
                                data);
 
     // Remove
     newitem =
-        app_menu_additem(app_menu, "_Remove", PTKFileMenuAppJob::APP_JOB_REMOVE, app_item, data);
+        app_menu_additem(app_menu, "_Remove", ptk::file_menu::app_job::remove, app_item, data);
 
     // Add
-    newitem = app_menu_additem(app_menu, "_Add...", PTKFileMenuAppJob::APP_JOB_ADD, app_item, data);
+    newitem = app_menu_additem(app_menu, "_Add...", ptk::file_menu::app_job::add, app_item, data);
 
     // Separator
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
@@ -2160,20 +2180,20 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
             str = ztd::replace(desktop->get_name(), ".desktop", "._desktop");
             str = std::format("{} (*copy)", str);
         }
-        newitem = app_menu_additem(app_menu, str, PTKFileMenuAppJob::APP_JOB_EDIT, app_item, data);
+        newitem = app_menu_additem(app_menu, str, ptk::file_menu::app_job::edit, app_item, data);
     }
 
     // mimeapps.list
     newitem = app_menu_additem(app_menu,
                                "_mimeapps.list",
-                               PTKFileMenuAppJob::APP_JOB_EDIT_LIST,
+                               ptk::file_menu::app_job::edit_list,
                                app_item,
                                data);
 
     // applications/
     newitem = app_menu_additem(app_menu,
                                "appli_cations/",
-                               PTKFileMenuAppJob::APP_JOB_BROWSE,
+                               ptk::file_menu::app_job::browse,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!data->browser);
@@ -2195,12 +2215,12 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         str = ztd::replace(type, "/", "-");
         str = std::format("{}._xml (*new)", str);
     }
-    newitem = app_menu_additem(app_menu, str, PTKFileMenuAppJob::APP_JOB_EDIT_TYPE, app_item, data);
+    newitem = app_menu_additem(app_menu, str, ptk::file_menu::app_job::edit_type, app_item, data);
 
     // mime/packages/
     newitem = app_menu_additem(app_menu,
                                "mime/pac_kages/",
-                               PTKFileMenuAppJob::APP_JOB_BROWSE_MIME,
+                               ptk::file_menu::app_job::browse_mime,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!data->browser);
@@ -2213,7 +2233,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     submenu = gtk_menu_new();
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
     gtk_container_add(GTK_CONTAINER(app_menu), newitem);
-    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(PTKFileMenuAppJob::APP_JOB_USR));
+    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(ptk::file_menu::app_job::usr));
     g_object_set_data(G_OBJECT(newitem), "data", data);
     g_signal_connect(submenu, "key_press_event", G_CALLBACK(app_menu_keypress), data);
 
@@ -2222,7 +2242,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     {
         newitem = app_menu_additem(submenu,
                                    desktop->get_name(),
-                                   PTKFileMenuAppJob::APP_JOB_VIEW,
+                                   ptk::file_menu::app_job::view,
                                    app_item,
                                    data);
 
@@ -2233,7 +2253,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // /usr applications/
     newitem = app_menu_additem(submenu,
                                "appli_cations/",
-                               PTKFileMenuAppJob::APP_JOB_BROWSE_SHARED,
+                               ptk::file_menu::app_job::browse_shared,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!data->browser);
@@ -2245,13 +2265,13 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     str = std::format("{}.xml", type);
     const auto sys_mime_path = std::filesystem::path() / "/usr/share/mime" / str;
     str = std::format("{}._xml", type);
-    newitem = app_menu_additem(submenu, str, PTKFileMenuAppJob::APP_JOB_VIEW_TYPE, app_item, data);
+    newitem = app_menu_additem(submenu, str, ptk::file_menu::app_job::view_type, app_item, data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem), std::filesystem::exists(sys_mime_path));
 
     // /usr *Overrides.xml
     newitem = app_menu_additem(submenu,
                                "_Overrides.xml",
-                               PTKFileMenuAppJob::APP_JOB_VIEW_OVER,
+                               ptk::file_menu::app_job::view_over,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem),
@@ -2260,7 +2280,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // mime/packages/
     newitem = app_menu_additem(submenu,
                                "mime/pac_kages/",
-                               PTKFileMenuAppJob::APP_JOB_BROWSE_MIME_USR,
+                               ptk::file_menu::app_job::browse_mime_usr,
                                app_item,
                                data);
     gtk_widget_set_sensitive(GTK_WIDGET(newitem),
@@ -2359,14 +2379,14 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
             const auto full_path = data->cwd / file->get_name();
             if (data->browser && std::filesystem::is_directory(full_path))
             {
-                data->browser->run_event<EventType::OPEN_ITEM>(full_path,
-                                                               PtkOpenAction::PTK_OPEN_NEW_TAB);
+                data->browser->run_event<spacefm::signal::open_item>(full_path,
+                                                                     ptk::open_action::new_tab);
             }
         }
     }
     else if (data->browser)
     {
-        data->browser->run_event<EventType::OPEN_ITEM>(data->cwd, PtkOpenAction::PTK_OPEN_NEW_TAB);
+        data->browser->run_event<spacefm::signal::open_item>(data->cwd, ptk::open_action::new_tab);
     }
 }
 
@@ -2376,8 +2396,8 @@ on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
     if (data->browser && std::filesystem::is_directory(data->cwd))
     {
-        data->browser->run_event<EventType::OPEN_ITEM>(data->file_path,
-                                                       PtkOpenAction::PTK_OPEN_NEW_TAB);
+        data->browser->run_event<spacefm::signal::open_item>(data->file_path,
+                                                             ptk::open_action::new_tab);
     }
 }
 
@@ -2552,7 +2572,7 @@ on_popup_extract_to_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
                               data->sel_files,
                               data->cwd,
                               "",
-                              PtkHandlerArchive::HANDLER_EXTRACT,
+                              ptk::handler::archive::extract,
                               menuitem ? true : false);
 }
 
@@ -2564,7 +2584,7 @@ on_popup_extract_here_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
                               data->sel_files,
                               data->cwd,
                               data->cwd,
-                              PtkHandlerArchive::HANDLER_EXTRACT,
+                              ptk::handler::archive::extract,
                               menuitem ? true : false);
 }
 
@@ -2576,7 +2596,7 @@ on_popup_extract_list_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
                               data->sel_files,
                               data->cwd,
                               "",
-                              PtkHandlerArchive::HANDLER_LIST,
+                              ptk::handler::archive::list,
                               menuitem ? true : false);
 }
 
@@ -2612,7 +2632,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             {
                 ptk_file_browser_chdir(ao->file_browser,
                                        ao->path,
-                                       PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+                                       ptk::file_browser::chdir_mode::add_history);
             }
             else
             {
@@ -2629,7 +2649,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
 }
 
 static void
-create_new_file(PtkFileMenu* data, i32 create_new)
+create_new_file(PtkFileMenu* data, ptk::rename_mode create_new)
 {
     if (data->cwd.empty())
     {
@@ -2650,13 +2670,8 @@ create_new_file(PtkFileMenu* data, i32 create_new)
         file = data->sel_files.front();
     }
 
-    const i32 result = ptk_rename_file(data->browser,
-                                       data->cwd.c_str(),
-                                       file,
-                                       nullptr,
-                                       false,
-                                       (PtkRenameMode)create_new,
-                                       ao);
+    const i32 result =
+        ptk_rename_file(data->browser, data->cwd.c_str(), file, nullptr, false, create_new, ao);
     if (result == 0)
     {
         delete ao;
@@ -2667,21 +2682,21 @@ static void
 on_popup_new_folder_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    create_new_file(data, PtkRenameMode::PTK_RENAME_NEW_DIR);
+    create_new_file(data, ptk::rename_mode::new_dir);
 }
 
 static void
 on_popup_new_text_file_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    create_new_file(data, PtkRenameMode::PTK_RENAME_NEW_FILE);
+    create_new_file(data, ptk::rename_mode::new_file);
 }
 
 static void
 on_popup_new_link_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    create_new_file(data, PtkRenameMode::PTK_RENAME_NEW_LINK);
+    create_new_file(data, ptk::rename_mode::new_link);
 }
 
 static void

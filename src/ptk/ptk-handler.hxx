@@ -36,27 +36,30 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-enum PtkHandlerArchive
+namespace ptk::handler
 {
-    HANDLER_COMPRESS,
-    HANDLER_EXTRACT,
-    HANDLER_LIST
-};
+    enum archive
+    {
+        compress,
+        extract,
+        list,
+    };
 
-enum PtkHandlerMount
-{
-    HANDLER_MOUNT,
-    HANDLER_UNMOUNT,
-    HANDLER_PROP
-};
+    enum mount
+    {
+        mount,
+        unmount,
+        prop,
+    };
 
-enum PtkHandlerMode
-{
-    HANDLER_MODE_ARC,
-    HANDLER_MODE_FS,
-    HANDLER_MODE_NET,
-    HANDLER_MODE_FILE
-};
+    enum mode
+    {
+        arc,
+        fs,
+        net,
+        file,
+    };
+} // namespace ptk::handler
 
 void ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing);
 void ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set);

@@ -46,11 +46,14 @@
 static void* thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader);
 static bool on_thumbnail_idle(vfs::thumbnail_loader loader);
 
-enum VFSThumbnailSize
+namespace vfs
 {
-    BIG,
-    SMALL,
-};
+    enum class thumbnail_size
+    {
+        big,
+        small,
+    };
+}
 
 struct VFSThumbnailRequest
 {
@@ -58,7 +61,7 @@ struct VFSThumbnailRequest
     ~VFSThumbnailRequest();
 
     vfs::file_info file{nullptr};
-    std::array<i32, magic_enum::enum_count<VFSThumbnailSize>()> n_requests;
+    std::map<vfs::thumbnail_size, i32> n_requests;
 };
 
 VFSThumbnailRequest::VFSThumbnailRequest(vfs::file_info file)
@@ -176,12 +179,12 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         bool need_update = false;
         for (const auto [index, value] : ztd::enumerate(req->n_requests))
         {
-            if (value == 0)
+            if (value.second == 0)
             {
                 continue;
             }
 
-            const bool load_big = (index == VFSThumbnailSize::BIG);
+            const bool load_big = (value.first == vfs::thumbnail_size::big);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
                 const auto full_path =
@@ -282,7 +285,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
         dir->thumbnail_loader->queue.emplace_back(req);
     }
 
-    ++req->n_requests[is_big ? VFSThumbnailSize::BIG : VFSThumbnailSize::SMALL];
+    ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
 
     if (new_task)
     {

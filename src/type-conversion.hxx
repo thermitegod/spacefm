@@ -24,6 +24,8 @@
 
 #include <glib.h>
 
+#include "vfs/vfs-file-info.hxx"
+
 // std::filesystem::path
 std::vector<std::filesystem::path> glist_t_char_to_vector_t_path(GList* list);
 

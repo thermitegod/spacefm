@@ -15,25 +15,28 @@
 
 #pragma once
 
-enum class EventType
+namespace spacefm
 {
-    // VFSDir
-    FILE_CREATED,
-    FILE_CHANGED,
-    FILE_DELETED,
-    FILE_LISTED,
-    FILE_THUMBNAIL_LOADED,
-    // FILE_LOAD_COMPLETE,
+    enum class signal
+    {
+        // VFSDir
+        file_created,
+        file_changed,
+        file_deleted,
+        file_listed,
+        file_thumbnail_loaded,
+        // file_load_complete,
 
-    // VFSFileTask
-    TASK_FINISH,
+        // VFSFileTask
+        task_finish,
 
-    // PTKFileBrowser
-    CHDIR_BEFORE,
-    CHDIR_BEGIN,
-    CHDIR_AFTER,
-    OPEN_ITEM,
-    CHANGE_CONTENT,
-    CHANGE_SEL,
-    CHANGE_PANE,
-};
+        // PTKFileBrowser
+        chdir_before,
+        chdir_begin,
+        chdir_after,
+        open_item,
+        change_content,
+        change_sel,
+        change_pane,
+    };
+}

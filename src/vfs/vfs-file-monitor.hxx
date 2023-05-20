@@ -33,20 +33,20 @@
 struct VFSFileMonitor;
 struct VFSFileMonitorCallbackEntry;
 
-enum class VFSFileMonitorEvent
-{
-    CREATE,
-    DELETE,
-    CHANGE,
-};
-
 namespace vfs
 {
+    enum class file_monitor_event
+    {
+        created,
+        deleted,
+        changed,
+    };
+
     using file_monitor = std::shared_ptr<VFSFileMonitor>;
 
     // Callback function which will be called when monitored events happen
     using file_monitor_callback = void (*)(const vfs::file_monitor& monitor,
-                                           VFSFileMonitorEvent event,
+                                           vfs::file_monitor_event event,
                                            const std::filesystem::path& file_name, void* user_data);
 
     using file_monitor_callback_entry = std::shared_ptr<VFSFileMonitorCallbackEntry>;

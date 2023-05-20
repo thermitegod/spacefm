@@ -80,7 +80,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
         return true;
     }
 
-    gtk_tree_model_get(model, iter, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
+    gtk_tree_model_get(model, iter, ptk::dir_tree::column::info, &file, -1);
     if (file)
     {
         const std::string& name = file->get_name();
@@ -141,16 +141,16 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "pixbuf",
-                                        PTKDirTreeCol::COL_DIR_TREE_ICON,
+                                        ptk::dir_tree::column::icon,
                                         "info",
-                                        PTKDirTreeCol::COL_DIR_TREE_INFO,
+                                        ptk::dir_tree::column::info,
                                         nullptr);
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(col, renderer, true);
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        PTKDirTreeCol::COL_DIR_TREE_DISP_NAME,
+                                        ptk::dir_tree::column::disp_name,
                                         nullptr);
 
     gtk_tree_view_append_column(dir_tree_view, col);
@@ -283,7 +283,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
         vfs::file_info file;
         do
         {
-            gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
+            gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (!file)
             {
                 continue;
@@ -383,7 +383,7 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
     {
         return false;
     }
-    gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
+    gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
     if (!file)
     {
         return false;
@@ -457,7 +457,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBro
                     char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
                     if (ptk_file_browser_chdir(browser,
                                                dir_path,
-                                               PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
+                                               ptk::file_browser::chdir_mode::add_history))
                     {
                         /* show right-click menu
                          * This simulates a right-click in the file list when
@@ -520,8 +520,8 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
 
     const i32 keymod =
         (event->state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
-                       GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
-                       GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
+                         GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
+                         GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
 
     GtkTreePath* path = gtk_tree_model_get_path(model, &iter);
 
@@ -569,7 +569,9 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
             }
 
             const char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-            if (ptk_file_browser_chdir(browser, dir_path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
+            if (ptk_file_browser_chdir(browser,
+                                       dir_path,
+                                       ptk::file_browser::chdir_mode::add_history))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
@@ -621,7 +623,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
-            gtk_tree_model_get(model, &it, PTKDirTreeCol::COL_DIR_TREE_INFO, &file, -1);
+            gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (file)
             {
                 dest_path = ptk_dir_view_get_dir_path(model, &it);
@@ -721,17 +723,17 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 }
                 g_strfreev(list);
 
-                VFSFileTaskType file_action;
+                vfs::file_task_type file_action;
                 switch (gdk_drag_context_get_selected_action(drag_context))
                 {
                     case GdkDragAction::GDK_ACTION_COPY:
-                        file_action = VFSFileTaskType::COPY;
+                        file_action = vfs::file_task_type::copy;
                         break;
                     case GdkDragAction::GDK_ACTION_MOVE:
-                        file_action = VFSFileTaskType::MOVE;
+                        file_action = vfs::file_task_type::move;
                         break;
                     case GdkDragAction::GDK_ACTION_LINK:
-                        file_action = VFSFileTaskType::LINK;
+                        file_action = vfs::file_task_type::link;
                         break;
                     case GdkDragAction::GDK_ACTION_DEFAULT:
                     case GdkDragAction::GDK_ACTION_PRIVATE:

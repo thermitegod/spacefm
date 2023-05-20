@@ -37,40 +37,47 @@
 #define PTK_TYPE_FILE_BROWSER    (ptk_file_browser_get_type())
 #define PTK_IS_FILE_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_BROWSER))
 
-enum PtkFBViewMode
+namespace ptk
 {
-    PTK_FB_ICON_VIEW,
-    PTK_FB_LIST_VIEW,
-    PTK_FB_COMPACT_VIEW
-};
+    enum class open_action
+    {
+        dir,
+        new_tab,
+        new_window,
+        terminal,
+        file,
+    };
+}
 
-enum PtkFBSortOrder
+namespace ptk::file_browser
 {
-    PTK_FB_SORT_BY_NAME,
-    PTK_FB_SORT_BY_SIZE,
-    PTK_FB_SORT_BY_MTIME,
-    PTK_FB_SORT_BY_TYPE,
-    PTK_FB_SORT_BY_PERM,
-    PTK_FB_SORT_BY_OWNER
-};
+    enum class view_mode
+    {
+        icon_view,
+        list_view,
+        compact_view,
+    };
 
-enum PtkFBChdirMode
-{
-    PTK_FB_CHDIR_NORMAL,
-    PTK_FB_CHDIR_ADD_HISTORY,
-    PTK_FB_CHDIR_NO_HISTORY,
-    PTK_FB_CHDIR_BACK,
-    PTK_FB_CHDIR_FORWARD
-};
+    enum class sort_order
+    {
+        name,
+        size,
+        mtime,
+        type,
+        perm,
+        owner,
+    };
 
-enum PtkOpenAction
-{
-    PTK_OPEN_DIR,
-    PTK_OPEN_NEW_TAB,
-    PTK_OPEN_NEW_WINDOW,
-    PTK_OPEN_TERMINAL,
-    PTK_OPEN_FILE
-};
+    enum class chdir_mode
+    {
+        normal,
+        add_history,
+        no_history,
+        back,
+        forward,
+    };
+
+} // namespace ptk::file_browser
 
 // forward declare
 struct PtkFileBrowser;
@@ -105,8 +112,8 @@ struct PtkFileBrowser
     GtkToggleToolButton* dir_tree_btn{nullptr};
 
     GtkSortType sort_type;
-    PtkFBSortOrder sort_order{PtkFBSortOrder::PTK_FB_SORT_BY_PERM};
-    PtkFBViewMode view_mode{PtkFBViewMode::PTK_FB_COMPACT_VIEW};
+    ptk::file_browser::sort_order sort_order{ptk::file_browser::sort_order::perm};
+    ptk::file_browser::view_mode view_mode{ptk::file_browser::view_mode::compact_view};
 
     bool single_click{true};
     bool show_hidden_files{true};
@@ -164,130 +171,130 @@ struct PtkFileBrowser
     using evt_chdir_before_t = void(PtkFileBrowser*, MainWindow*);
     using evt_chdir_begin_t = void(PtkFileBrowser*, MainWindow*);
     using evt_chdir_after_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_open_file_t = void(PtkFileBrowser*, const std::filesystem::path&, PtkOpenAction,
+    using evt_open_file_t = void(PtkFileBrowser*, const std::filesystem::path&, ptk::open_action,
                                  MainWindow*);
     using evt_change_content_t = void(PtkFileBrowser*, MainWindow*);
     using evt_change_sel_t = void(PtkFileBrowser*, MainWindow*);
     using evt_change_pane_mode_t = void(PtkFileBrowser*, MainWindow*);
 
     // Signals Add Event
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHDIR_BEFORE, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::chdir_before, sigc::connection>::type
     add_event(evt_chdir_before_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::CHDIR_BEFORE");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_before");
         this->evt_data_window = window;
         return this->evt_chdir_before.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHDIR_BEGIN, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::chdir_begin, sigc::connection>::type
     add_event(evt_chdir_begin_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::CHDIR_BEGIN");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_begin");
         this->evt_data_window = window;
         return this->evt_chdir_begin.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHDIR_AFTER, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::chdir_after, sigc::connection>::type
     add_event(evt_chdir_after_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::CHDIR_AFTER");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_after");
         this->evt_data_window = window;
         return this->evt_chdir_after.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::OPEN_ITEM, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::open_item, sigc::connection>::type
     add_event(evt_open_file_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::OPEN_ITEM");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::open_item");
         this->evt_data_window = window;
         return this->evt_open_file.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHANGE_CONTENT, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::change_content, sigc::connection>::type
     add_event(evt_change_content_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::CHANGE_CONTENT");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::change_content");
         this->evt_data_window = window;
         return this->evt_change_content.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHANGE_SEL, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::change_sel, sigc::connection>::type
     add_event(evt_change_sel_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::CHANGE_SEL");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::change_sel");
         this->evt_data_window = window;
         return this->evt_change_sel.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHANGE_PANE, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::change_pane, sigc::connection>::type
     add_event(evt_change_pane_mode_t fun, MainWindow* window)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::CHANGE_PANE");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::change_pane");
         this->evt_data_window = window;
         return this->evt_change_pane_mode.connect(sigc::ptr_fun(fun));
     }
 
     // Signals Run Event
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHDIR_BEFORE, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::chdir_before, void>::type
     run_event()
     {
-        // ztd::logger::trace("Signal Execute   : EventType::CHDIR_BEFORE");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_before");
         this->evt_chdir_before.emit(this, this->evt_data_window);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHDIR_BEGIN, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::chdir_begin, void>::type
     run_event()
     {
-        // ztd::logger::trace("Signal Execute   : EventType::CHDIR_BEGIN");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_begin");
         this->evt_chdir_begin.emit(this, this->evt_data_window);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHDIR_AFTER, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::chdir_after, void>::type
     run_event()
     {
-        // ztd::logger::trace("Signal Execute   : EventType::CHDIR_AFTER");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_after");
         this->evt_chdir_after.emit(this, this->evt_data_window);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::OPEN_ITEM, void>::type
-    run_event(const std::filesystem::path& path, PtkOpenAction action)
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::open_item, void>::type
+    run_event(const std::filesystem::path& path, ptk::open_action action)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::OPEN_ITEM");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::open_item");
         this->evt_open_file.emit(this, path, action, this->evt_data_window);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHANGE_CONTENT, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::change_content, void>::type
     run_event()
     {
-        // ztd::logger::trace("Signal Execute   : EventType::CHANGE_CONTENT");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::change_content");
         this->evt_change_content.emit(this, this->evt_data_window);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHANGE_SEL, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::change_sel, void>::type
     run_event()
     {
-        // ztd::logger::trace("Signal Execute   : EventType::CHANGE_SEL");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::change_sel");
         this->evt_change_sel.emit(this, this->evt_data_window);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::CHANGE_PANE, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::change_pane, void>::type
     run_event()
     {
-        // ztd::logger::trace("Signal Execute   : EventType::CHANGE_PANE");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::change_pane");
         this->evt_change_pane_mode.emit(this, this->evt_data_window);
     }
 
@@ -338,7 +345,7 @@ GtkWidget* ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* ta
  * folder_path should be encodede in on-disk encoding
  */
 bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path& folder_path,
-                            PtkFBChdirMode mode);
+                            ptk::file_browser::chdir_mode mode);
 
 /*
  * returned path should be encodede in on-disk encoding
@@ -365,7 +372,8 @@ void ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single
 void ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, u32 timeout);
 
 /* Sorting files */
-void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser, PtkFBSortOrder order);
+void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser,
+                                     ptk::file_browser::sort_order order);
 
 void ptk_file_browser_set_sort_type(PtkFileBrowser* file_browser, GtkSortType order);
 

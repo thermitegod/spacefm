@@ -149,7 +149,7 @@ vfs_async_task_finish(vfs::async_task task, bool is_cancelled)
 {
     (void)task;
     (void)is_cancelled;
-    // default handler of EventType::TASK_FINISH signal.
+    // default handler of spacefm::signal::task_finish signal.
 }
 
 void*
@@ -227,7 +227,7 @@ VFSAsyncTask::cleanup(bool finalize)
         // Emitting signal on an object during destruction is not allowed.
         if (!finalize)
         {
-            this->run_event<EventType::TASK_FINISH>(this->thread_cancelled);
+            this->run_event<spacefm::signal::task_finish>(this->thread_cancelled);
         }
     }
 }

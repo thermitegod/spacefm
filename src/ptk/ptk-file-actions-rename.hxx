@@ -37,16 +37,19 @@ struct AutoOpenCreate
     bool open_file{false};
 };
 
-enum PtkRenameMode
+namespace ptk
 {
-    PTK_RENAME,
-    PTK_RENAME_NEW_FILE,
-    PTK_RENAME_NEW_DIR,
-    PTK_RENAME_NEW_LINK
-};
+    enum class rename_mode
+    {
+        rename,
+        new_file,
+        new_dir,
+        new_link
+    };
+}
 
 i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_info file,
-                    const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
+                    const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
                     AutoOpenCreate* auto_open);
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path& cwd,

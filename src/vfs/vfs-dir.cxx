@@ -90,7 +90,8 @@ gethidden(const std::filesystem::path& path);
 static void vfs_dir_load(vfs::dir dir);
 static void* vfs_dir_load_thread(vfs::async_task task, vfs::dir dir);
 
-static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
+static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor,
+                                     vfs::file_monitor_event event,
                                      const std::filesystem::path& file_name, void* user_data);
 
 static bool notify_file_change(void* user_data);
@@ -282,7 +283,7 @@ vfs_dir_emit_file_deleted(vfs::dir dir, const std::filesystem::path& file_name, 
         vfs_file_info_list_free(dir->file_list);
         dir->file_list.clear();
 
-        dir->run_event<EventType::FILE_DELETED>(file);
+        dir->run_event<spacefm::signal::file_deleted>(file);
 
         return;
     }
@@ -327,7 +328,7 @@ vfs_dir_emit_file_changed(vfs::dir dir, const std::filesystem::path& file_name, 
     if (std::filesystem::equivalent(file_name, dir->path))
     {
         // Special Case: The directory itself was changed
-        dir->run_event<EventType::FILE_CHANGED>(nullptr);
+        dir->run_event<spacefm::signal::file_changed>(nullptr);
         return;
     }
 
@@ -361,7 +362,7 @@ vfs_dir_emit_file_changed(vfs::dir dir, const std::filesystem::path& file_name, 
                                                                nullptr,
                                                                nullptr);
                 }
-                dir->run_event<EventType::FILE_CHANGED>(file_found);
+                dir->run_event<spacefm::signal::file_changed>(file_found);
             }
         }
         else
@@ -389,7 +390,7 @@ vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
 
     if (file)
     {
-        dir->run_event<EventType::FILE_THUMBNAIL_LOADED>(file);
+        dir->run_event<spacefm::signal::file_thumbnail_loaded>(file);
         vfs_file_info_unref(file);
     }
 }
@@ -416,7 +417,7 @@ on_list_task_finished(vfs::dir dir, bool is_cancelled)
 {
     g_object_unref(dir->task);
     dir->task = nullptr;
-    dir->run_event<EventType::FILE_LISTED>(is_cancelled);
+    dir->run_event<spacefm::signal::file_listed>(is_cancelled);
     dir->file_listed = true;
     dir->load_complete = true;
 }
@@ -488,7 +489,7 @@ vfs_dir_load(vfs::dir dir)
     dir->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, dir);
 
     dir->signal_task_load_dir =
-        dir->task->add_event<EventType::TASK_FINISH>(on_list_task_finished, dir);
+        dir->task->add_event<spacefm::signal::task_finish>(on_list_task_finished, dir);
 
     dir->task->run_thread();
 }
@@ -596,7 +597,7 @@ update_file_info(vfs::dir dir, vfs::file_info file)
             ztd::remove(dir->file_list, file);
             if (file)
             {
-                dir->run_event<EventType::FILE_DELETED>(file);
+                dir->run_event<spacefm::signal::file_deleted>(file);
                 vfs_file_info_unref(file);
             }
         }
@@ -622,7 +623,7 @@ update_changed_files(const std::filesystem::path& key, vfs::dir dir)
     {
         if (update_file_info(dir, file))
         {
-            dir->run_event<EventType::FILE_CHANGED>(file);
+            dir->run_event<spacefm::signal::file_changed>(file);
             vfs_file_info_unref(file);
         }
         // else was deleted, signaled, and unrefed in update_file_info
@@ -657,7 +658,7 @@ update_created_files(const std::filesystem::path& key, vfs::dir dir)
                 file->load_special_info(full_path);
                 dir->file_list.emplace_back(vfs_file_info_ref(file));
 
-                dir->run_event<EventType::FILE_CREATED>(file);
+                dir->run_event<spacefm::signal::file_created>(file);
             }
             // else file does not exist in filesystem
             vfs_file_info_unref(file);
@@ -668,7 +669,7 @@ update_created_files(const std::filesystem::path& key, vfs::dir dir)
             file = vfs_file_info_ref(file_found);
             if (update_file_info(dir, file))
             {
-                dir->run_event<EventType::FILE_CHANGED>(file);
+                dir->run_event<spacefm::signal::file_changed>(file);
                 vfs_file_info_unref(file);
             }
             // else was deleted, signaled, and unrefed in update_file_info
@@ -710,7 +711,7 @@ vfs_dir_flush_notify_cache()
 
 /* Callback function which will be called when monitored events happen */
 static void
-vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
+vfs_dir_monitor_callback(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
                          const std::filesystem::path& file_name, void* user_data)
 {
     (void)monitor;
@@ -718,17 +719,15 @@ vfs_dir_monitor_callback(const vfs::file_monitor& monitor, VFSFileMonitorEvent e
 
     switch (event)
     {
-        case VFSFileMonitorEvent::CREATE:
+        case vfs::file_monitor_event::created:
             vfs_dir_emit_file_created(dir, file_name, false);
             break;
-        case VFSFileMonitorEvent::DELETE:
+        case vfs::file_monitor_event::deleted:
             vfs_dir_emit_file_deleted(dir, file_name, nullptr);
             break;
-        case VFSFileMonitorEvent::CHANGE:
+        case vfs::file_monitor_event::changed:
             vfs_dir_emit_file_changed(dir, file_name, nullptr, false);
             break;
-        default:
-            ztd::logger::warn("Error: unrecognized file monitor signal!");
     }
 }
 
@@ -784,7 +783,7 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
     }
 
     const auto action = [dir](vfs::file_info file)
-    { dir->run_event<EventType::FILE_CHANGED>(file); };
+    { dir->run_event<spacefm::signal::file_changed>(file); };
     std::ranges::for_each(dir->file_list, action);
 }
 
@@ -830,7 +829,7 @@ vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
 
         /* This is a desktop entry file, so the icon needs reload
              FIXME: This is not a good way to do things, but there is no better way now.  */
-        if (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY)
+        if (file->flags & vfs::file_info_flags::desktop_entry)
         {
             const auto file_path = std::filesystem::path() / dir->path / file->name;
             file->load_special_info(file_path);
@@ -909,8 +908,8 @@ vfs_dir_monitor_mime()
     }
 
     // ztd::logger::info("MIME-UPDATE watch started");
-    mime_dir->add_event<EventType::FILE_LISTED>(mime_change);
-    mime_dir->add_event<EventType::FILE_CHANGED>(mime_change);
-    mime_dir->add_event<EventType::FILE_DELETED>(mime_change);
-    mime_dir->add_event<EventType::FILE_CHANGED>(mime_change);
+    mime_dir->add_event<spacefm::signal::file_listed>(mime_change);
+    mime_dir->add_event<spacefm::signal::file_changed>(mime_change);
+    mime_dir->add_event<spacefm::signal::file_deleted>(mime_change);
+    mime_dir->add_event<spacefm::signal::file_changed>(mime_change);
 }

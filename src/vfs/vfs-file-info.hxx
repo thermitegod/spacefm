@@ -38,17 +38,19 @@
 
 #define VFS_FILE_INFO(obj) (static_cast<vfs::file_info>(obj))
 
-// For future use, not all supported now
-enum VFSFileInfoFlag
+namespace vfs
 {
-    NONE = 0,
-    HOME_DIR = (1 << 0),    // Not implemented
-    DESKTOP_DIR = (1 << 1), // Not implemented
-    DESKTOP_ENTRY = (1 << 2),
-    MOUNT_POINT = (1 << 3), // Not implemented
-    REMOTE = (1 << 4),      // Not implemented
-    VIRTUAL = (1 << 5),     // Not implemented
-};
+    enum file_info_flags
+    { // For future use, not all supported now
+        none = 0,
+        home_dir = (1 << 0),    // Not implemented
+        desktop_dir = (1 << 1), // Not implemented
+        desktop_entry = (1 << 2),
+        mount_point = (1 << 3), // Not implemented
+        remote = (1 << 4),      // Not implemented
+        // VIRTUAL = (1 << 5),     // Not implemented
+    };
+}
 
 struct VFSFileInfo
 {
@@ -59,20 +61,20 @@ struct VFSFileInfo
     std::filesystem::file_status status;
 
   public:
-    std::filesystem::path path{};                 // real path on file system
-    std::string name{};                           // real name on file system
-    std::string disp_name{};                      // displayed name (in UTF-8)
-    std::string collate_key{};                    // sfm sort key
-    std::string collate_icase_key{};              // sfm case folded sort key
-    std::string disp_size{};                      // displayed human-readable file size
-    std::string disp_disk_size{};                 // displayed human-readable file size on disk
-    std::string disp_owner{};                     // displayed owner:group pair
-    std::string disp_mtime{};                     // displayed last modification time
-    std::string disp_perm{};                      // displayed permission in string form
-    vfs::mime_type mime_type{};                   // mime type related information
-    GdkPixbuf* big_thumbnail{};                   // thumbnail of the file
-    GdkPixbuf* small_thumbnail{};                 // thumbnail of the file
-    VFSFileInfoFlag flags{VFSFileInfoFlag::NONE}; // if it is a special file
+    std::filesystem::path path{};    // real path on file system
+    std::string name{};              // real name on file system
+    std::string disp_name{};         // displayed name (in UTF-8)
+    std::string collate_key{};       // sfm sort key
+    std::string collate_icase_key{}; // sfm case folded sort key
+    std::string disp_size{};         // displayed human-readable file size
+    std::string disp_disk_size{};    // displayed human-readable file size on disk
+    std::string disp_owner{};        // displayed owner:group pair
+    std::string disp_mtime{};        // displayed last modification time
+    std::string disp_perm{};         // displayed permission in string form
+    vfs::mime_type mime_type{};      // mime type related information
+    GdkPixbuf* big_thumbnail{};      // thumbnail of the file
+    GdkPixbuf* small_thumbnail{};    // thumbnail of the file
+    vfs::file_info_flags flags{vfs::file_info_flags::none}; // if it is a special file
 
   public:
     const std::string& get_name() const noexcept;

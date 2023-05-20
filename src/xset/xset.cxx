@@ -805,7 +805,6 @@ xset_get_int(xset_t set, xset::var var) noexcept
         case xset::var::scroll_lock:
         case xset::var::disable:
         case xset::var::opener:
-        default:
             return -1;
     }
 

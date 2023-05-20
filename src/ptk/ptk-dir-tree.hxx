@@ -26,6 +26,8 @@
 
 #include <cstdlib>
 
+#include <ztd/ztd.hxx>
+
 #include <sys/types.h>
 
 #include <magic_enum.hpp>
@@ -34,12 +36,15 @@
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<PtkDirTree*>(obj))
 
 /* Columns of folder view */
-enum PTKDirTreeCol
+namespace ptk::dir_tree
 {
-    COL_DIR_TREE_ICON,
-    COL_DIR_TREE_DISP_NAME,
-    COL_DIR_TREE_INFO,
-};
+    enum class column
+    {
+        icon,
+        disp_name,
+        info,
+    };
+}
 
 struct PtkDirTreeNode;
 

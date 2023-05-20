@@ -29,13 +29,15 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-// Archive operations enum
-enum PTKFileArchiverArc
+namespace ptk::file_archiver
 {
-    ARC_COMPRESS,
-    ARC_EXTRACT,
-    ARC_LIST
-};
+    enum archive // TODO class
+    {            // Archive operations enum
+        compress,
+        extract,
+        list,
+    };
+}
 
 // Pass file_browser or desktop depending on where you are calling from
 void ptk_file_archiver_create(PtkFileBrowser* file_browser,

@@ -41,34 +41,64 @@
 
 #include "xset/xset.hxx"
 
-enum VFSFileTaskType
+namespace vfs
 {
-    MOVE,
-    COPY,
-    TRASH,
-    DELETE,
-    LINK,
-    CHMOD_CHOWN, // These two kinds of operation have lots in common,
-                 // so put them together to reduce duplicated disk I/O
-    EXEC,
-    LAST,
-};
+    enum class file_task_type
+    {
+        move,
+        copy,
+        trash,
+        DELETE,
+        link,
+        chmod_chown, // These two kinds of operation have lots in common,
+                     // so put them together to reduce duplicated disk I/O
+        exec,
+        last,
+    };
 
-enum ChmodActionType
-{
-    OWNER_R,
-    OWNER_W,
-    OWNER_X,
-    GROUP_R,
-    GROUP_W,
-    GROUP_X,
-    OTHER_R,
-    OTHER_W,
-    OTHER_X,
-    SET_UID,
-    SET_GID,
-    STICKY,
-};
+    enum class file_task_state
+    {
+        running,
+        size_timeout,
+        query_overwrite,
+        error,
+        pause,
+        queue,
+        finish,
+    };
+
+    enum class file_task_overwrite_mode
+    {                  // do not reposition first four values
+        overwrite,     // Overwrite current dest file / Ask
+        overwrite_all, // Overwrite all existing files without prompt
+        skip_all,      // Do not try to overwrite any files
+        auto_rename,   // Assign a new unique name
+        skip,          // Do not overwrite current file
+        rename,        // Rename file
+    };
+
+    enum class exec_type
+    {
+        normal,
+        custom,
+    };
+
+    enum chmod_action
+    {
+        owner_r,
+        owner_w,
+        owner_x,
+        group_r,
+        group_w,
+        group_x,
+        other_r,
+        other_w,
+        other_x,
+        set_uid,
+        set_gid,
+        sticky,
+    };
+} // namespace vfs
 
 inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
     // User
@@ -93,34 +123,6 @@ inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
     std::filesystem::perms::sticky_bit,
 };
 
-enum VFSFileTaskState
-{
-    RUNNING,
-    SIZE_TIMEOUT,
-    QUERY_OVERWRITE,
-    ERROR,
-    PAUSE,
-    QUEUE,
-    FINISH,
-};
-
-enum VFSFileTaskOverwriteMode
-{
-    // do not reposition first four values
-    OVERWRITE,     // Overwrite current dest file / Ask
-    OVERWRITE_ALL, // Overwrite all existing files without prompt
-    SKIP_ALL,      // Do not try to overwrite any files
-    AUTO_RENAME,   // Assign a new unique name
-    SKIP,          // Do not overwrite current file
-    RENAME,        // Rename file
-};
-
-enum VFSExecType
-{
-    NORMAL,
-    CUSTOM,
-};
-
 class VFSFileTask;
 
 namespace vfs
@@ -128,14 +130,14 @@ namespace vfs
     using file_task = ztd::raw_ptr<VFSFileTask>;
 }
 
-using VFSFileTaskStateCallback = bool (*)(vfs::file_task task, VFSFileTaskState state,
+using VFSFileTaskStateCallback = bool (*)(vfs::file_task task, vfs::file_task_state state,
                                           void* state_data, void* user_data);
 
 class VFSFileTask
 {
   public:
     VFSFileTask() = delete;
-    VFSFileTask(VFSFileTaskType type, const std::span<const std::filesystem::path> src_files,
+    VFSFileTask(vfs::file_task_type type, const std::span<const std::filesystem::path> src_files,
                 const std::filesystem::path& dest_dir);
     ~VFSFileTask();
 
@@ -148,7 +150,7 @@ class VFSFileTask
     void set_chown(uid_t new_uid, gid_t new_gid);
 
     void set_recursive(bool recursive);
-    void set_overwrite_mode(VFSFileTaskOverwriteMode mode);
+    void set_overwrite_mode(vfs::file_task_overwrite_mode mode);
 
     void run_task();
     void try_abort_task();
@@ -182,13 +184,13 @@ class VFSFileTask
     void task_error(i32 errnox, const std::string_view action, const std::filesystem::path& target);
 
   public:
-    VFSFileTaskType type;
+    vfs::file_task_type type;
     std::vector<std::filesystem::path> src_paths{};  // All source files. This list will be freed
                                                      // after file operation is completed.
     std::optional<std::filesystem::path> dest_dir{}; // Destinaton directory
     bool avoid_changes{false};
 
-    VFSFileTaskOverwriteMode overwrite_mode;
+    vfs::file_task_overwrite_mode overwrite_mode;
     bool is_recursive{false}; // Apply operation to all files under directories
                               // recursively. This is default to copy/delete,
                               // and should be set manually for chown/chmod.
@@ -222,8 +224,8 @@ class VFSFileTask
     bool error_first{true};
 
     GThread* thread{nullptr};
-    VFSFileTaskState state;
-    VFSFileTaskState state_pause{VFSFileTaskState::RUNNING};
+    vfs::file_task_state state;
+    vfs::file_task_state state_pause{vfs::file_task_state::running};
     bool abort{false};
     GCond* pause_cond{nullptr};
     bool queue_start{false};
@@ -238,7 +240,7 @@ class VFSFileTask
     GtkTextMark* add_log_end{nullptr};
 
     // MOD run task
-    VFSExecType exec_type{VFSExecType::NORMAL};
+    vfs::exec_type exec_type{vfs::exec_type::normal};
     std::string exec_action{};
     std::string exec_command{};
     bool exec_sync{true};
@@ -271,7 +273,7 @@ class VFSFileTask
     void* exec_ptask{nullptr};
 };
 
-vfs::file_task vfs_task_new(VFSFileTaskType task_type,
+vfs::file_task vfs_task_new(vfs::file_task_type task_type,
                             const std::span<const std::filesystem::path> src_files,
                             const std::filesystem::path& dest_dir);
 

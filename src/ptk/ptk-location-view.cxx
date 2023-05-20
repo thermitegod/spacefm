@@ -65,7 +65,7 @@ static i32 n_vols = 0;
 
 static void ptk_location_view_init_model(GtkListStore* list);
 
-static void on_volume_event(vfs::volume vol, VFSVolumeState state, void* user_data);
+static void on_volume_event(vfs::volume vol, vfs::volume_state state, void* user_data);
 
 static void add_volume(vfs::volume vol, bool set_icon);
 static void remove_volume(vfs::volume vol);
@@ -79,13 +79,16 @@ static bool try_mount(GtkTreeView* view, vfs::volume vol);
 static void on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2);
 static void on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2);
 
-enum PtkLocationViewCol
+namespace ptk::location_view
 {
-    COL_ICON,
-    COL_NAME,
-    COL_PATH,
-    COL_DATA,
-};
+    enum class column
+    {
+        icon,
+        name,
+        path,
+        data,
+    };
+}
 
 struct AutoOpen
 {
@@ -97,7 +100,7 @@ struct AutoOpen
     char* device_file{nullptr};
     char* mount_point{nullptr};
     bool keep_point{false};
-    PtkOpenAction job{PtkOpenAction::PTK_OPEN_DIR};
+    ptk::open_action job{ptk::open_action::dir};
 };
 
 AutoOpen::AutoOpen(PtkFileBrowser* file_browser)
@@ -155,13 +158,13 @@ update_volume_icons()
         do
         {
             vfs::volume vol = nullptr;
-            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
+            gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
             if (vol)
             {
                 GdkPixbuf* icon = vfs_load_icon(vol->get_icon(), icon_size);
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
-                                   PtkLocationViewCol::COL_ICON,
+                                   ptk::location_view::column::icon,
                                    icon,
                                    -1);
                 if (icon)
@@ -230,7 +233,7 @@ update_all()
             {
                 do
                 {
-                    gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
+                    gtk_tree_model_get(model, &it, ptk::location_view::column::data, &v, -1);
                 } while (v != volume && gtk_tree_model_iter_next(model, &it));
                 havevol = (v == volume);
             }
@@ -268,7 +271,7 @@ update_names()
         {
             do
             {
-                gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
+                gtk_tree_model_get(model, &it, ptk::location_view::column::data, &v, -1);
             } while (v != volume && gtk_tree_model_iter_next(model, &it));
             if (v == volume)
             {
@@ -293,7 +296,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
         do
         {
             vfs::volume vol;
-            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
+            gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
             const std::string mount_point = vol->get_mount_point();
             if (std::filesystem::equivalent(cur_dir, mount_point))
             {
@@ -322,7 +325,7 @@ ptk_location_view_get_selected_vol(GtkTreeView* location_view)
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
     {
         vfs::volume vol;
-        gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
+        gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
         return vol;
     }
     return nullptr;
@@ -346,7 +349,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     }
 
     vfs::volume vol;
-    gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
+    gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
     if (!vol)
     {
         return;
@@ -357,7 +360,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         return;
     }
 
-    if (!vol->is_mounted && vol->device_type == VFSVolumeDeviceType::BLOCK)
+    if (!vol->is_mounted && vol->device_type == vfs::volume_device_type::block)
     {
         try_mount(view, vol);
         if (vol->is_mounted)
@@ -367,7 +370,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
             {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
-                                   PtkLocationViewCol::COL_PATH,
+                                   ptk::location_view::column::path,
                                    mount_point.data(),
                                    -1);
             }
@@ -377,8 +380,8 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     {
         if (xset_get_b(xset::name::dev_newtab))
         {
-            file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
-                                                          PtkOpenAction::PTK_OPEN_NEW_TAB);
+            file_browser->run_event<spacefm::signal::open_item>(vol->mount_point,
+                                                                ptk::open_action::new_tab);
             ptk_location_view_chdir(view, ptk_file_browser_get_cwd(file_browser));
         }
         else
@@ -388,7 +391,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
             {
                 ptk_file_browser_chdir(file_browser,
                                        vol->mount_point,
-                                       PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+                                       ptk::file_browser::chdir_mode::add_history);
             }
         }
     }
@@ -440,11 +443,12 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 {
     if (!model)
     {
-        GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PtkLocationViewCol>(),
-                                                GDK_TYPE_PIXBUF,
-                                                G_TYPE_STRING,
-                                                G_TYPE_STRING,
-                                                G_TYPE_POINTER);
+        GtkListStore* list =
+            gtk_list_store_new(magic_enum::enum_count<ptk::location_view::column>(),
+                               GDK_TYPE_PIXBUF,
+                               G_TYPE_STRING,
+                               G_TYPE_STRING,
+                               G_TYPE_POINTER);
         g_object_weak_ref(G_OBJECT(list), on_model_destroy, nullptr);
         model = GTK_TREE_MODEL(list);
         ptk_location_view_init_model(list);
@@ -468,24 +472,25 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "pixbuf",
-                                        PtkLocationViewCol::COL_ICON,
+                                        ptk::location_view::column::icon,
                                         nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    // g_signal_connect( renderer, "edited", G_CALLBACK(on_bookmark_edited), view );  //MOD
+    // g_signal_connect( renderer, "edited", G_CALLBACK(on_bookmark_edited), view );
     gtk_tree_view_column_pack_start(col, renderer, true);
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        PtkLocationViewCol::COL_NAME,
+                                        ptk::location_view::column::name,
                                         nullptr);
     gtk_tree_view_column_set_min_width(col, 10);
 
     if (GTK_IS_TREE_SORTABLE(model))
     { // why is this needed to stop error on new tab?
-        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
-                                             PtkLocationViewCol::COL_NAME,
-                                             GtkSortType::GTK_SORT_ASCENDING); // MOD
+        gtk_tree_sortable_set_sort_column_id(
+            GTK_TREE_SORTABLE(model),
+            magic_enum::enum_integer(ptk::location_view::column::name),
+            GtkSortType::GTK_SORT_ASCENDING);
     }
 
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
@@ -502,18 +507,18 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 }
 
 static void
-on_volume_event(vfs::volume vol, VFSVolumeState state, void* user_data)
+on_volume_event(vfs::volume vol, vfs::volume_state state, void* user_data)
 {
     (void)user_data;
     switch (state)
     {
-        case VFSVolumeState::ADDED:
+        case vfs::volume_state::added:
             add_volume(vol, true);
             break;
-        case VFSVolumeState::REMOVED:
+        case vfs::volume_state::removed:
             remove_volume(vol);
             break;
-        case VFSVolumeState::CHANGED: // CHANGED may occur before ADDED !
+        case vfs::volume_state::changed: // CHANGED may occur before ADDED !
             if (!volume_is_visible(vol))
             {
                 remove_volume(vol);
@@ -523,10 +528,9 @@ on_volume_event(vfs::volume vol, VFSVolumeState state, void* user_data)
                 update_volume(vol);
             }
             break;
-        case VFSVolumeState::MOUNTED:
-        case VFSVolumeState::UNMOUNTED:
-        case VFSVolumeState::EJECT:
-        default:
+        case vfs::volume_state::mounted:
+        case vfs::volume_state::unmounted:
+        case vfs::volume_state::eject:
             break;
     }
 }
@@ -546,7 +550,7 @@ add_volume(vfs::volume vol, bool set_icon)
     {
         do
         {
-            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
+            gtk_tree_model_get(model, &it, ptk::location_view::column::data, &v, -1);
         } while (v != vol && gtk_tree_model_iter_next(model, &it));
     }
     if (v == vol)
@@ -561,11 +565,11 @@ add_volume(vfs::volume vol, bool set_icon)
     gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                       &it,
                                       0,
-                                      PtkLocationViewCol::COL_NAME,
+                                      ptk::location_view::column::name,
                                       vol->get_disp_name().data(),
-                                      PtkLocationViewCol::COL_PATH,
+                                      ptk::location_view::column::path,
                                       mnt.data(),
-                                      PtkLocationViewCol::COL_DATA,
+                                      ptk::location_view::column::data,
                                       vol,
                                       -1);
     if (set_icon)
@@ -577,7 +581,7 @@ add_volume(vfs::volume vol, bool set_icon)
         }
 
         GdkPixbuf* icon = vfs_load_icon(vol->get_icon(), icon_size);
-        gtk_list_store_set(GTK_LIST_STORE(model), &it, PtkLocationViewCol::COL_ICON, icon, -1);
+        gtk_list_store_set(GTK_LIST_STORE(model), &it, ptk::location_view::column::icon, icon, -1);
         if (icon)
         {
             g_object_unref(icon);
@@ -600,7 +604,7 @@ remove_volume(vfs::volume vol)
     {
         do
         {
-            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
+            gtk_tree_model_get(model, &it, ptk::location_view::column::data, &v, -1);
         } while (v != vol && gtk_tree_model_iter_next(model, &it));
     }
     if (v != vol)
@@ -625,7 +629,7 @@ update_volume(vfs::volume vol)
     {
         do
         {
-            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &v, -1);
+            gtk_tree_model_get(model, &it, ptk::location_view::column::data, &v, -1);
         } while (v != vol && gtk_tree_model_iter_next(model, &it));
     }
     if (v != vol)
@@ -643,11 +647,11 @@ update_volume(vfs::volume vol)
     GdkPixbuf* icon = vfs_load_icon(vol->get_icon(), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),
                        &it,
-                       PtkLocationViewCol::COL_ICON,
+                       ptk::location_view::column::icon,
                        icon,
-                       PtkLocationViewCol::COL_NAME,
+                       ptk::location_view::column::name,
                        vol->get_disp_name().data(),
-                       PtkLocationViewCol::COL_PATH,
+                       ptk::location_view::column::path,
                        vol->get_mount_point().data(),
                        -1);
     if (icon)
@@ -834,7 +838,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         ptk_file_task_run(ptask);
     }
-    else if (vol->device_type == VFSVolumeDeviceType::BLOCK &&
+    else if (vol->device_type == vfs::volume_device_type::block &&
              (vol->is_optical || vol->requires_eject))
     {
         // task
@@ -879,7 +883,8 @@ on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
                 PtkFileBrowser* file_browser = ao->file_browser;
                 if (GTK_IS_WIDGET(file_browser))
                 {
-                    file_browser->run_event<EventType::OPEN_ITEM>(volume->mount_point, ao->job);
+                    file_browser->run_event<spacefm::signal::open_item>(volume->mount_point,
+                                                                        ao->job);
                 }
                 else
                 {
@@ -889,7 +894,7 @@ on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
             break;
         }
     }
-    if (GTK_IS_WIDGET(ao->file_browser) && ao->job == PtkOpenAction::PTK_OPEN_NEW_TAB &&
+    if (GTK_IS_WIDGET(ao->file_browser) && ao->job == ptk::open_action::new_tab &&
         ao->file_browser->side_dev)
     {
         ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
@@ -940,11 +945,11 @@ try_mount(GtkTreeView* view, vfs::volume vol)
 
     if (xset_get_b(xset::name::dev_newtab))
     {
-        ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
+        ao->job = ptk::open_action::new_tab;
     }
     else
     {
-        ao->job = PtkOpenAction::PTK_OPEN_DIR;
+        ao->job = ptk::open_action::dir;
     }
 
     ptask->complete_notify = (GFunc)on_autoopen_cb;
@@ -1010,7 +1015,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         // autoopen
         const auto ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum;
-        ao->job = PtkOpenAction::PTK_OPEN_NEW_TAB;
+        ao->job = ptk::open_action::new_tab;
 
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
@@ -1019,8 +1024,8 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
     else
     {
-        file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
-                                                      PtkOpenAction::PTK_OPEN_NEW_TAB);
+        file_browser->run_event<spacefm::signal::open_item>(vol->mount_point,
+                                                            ptk::open_action::new_tab);
     }
 }
 
@@ -1085,7 +1090,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         // autoopen
         const auto ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum;
-        ao->job = PtkOpenAction::PTK_OPEN_DIR;
+        ao->job = ptk::open_action::dir;
 
         ptask->complete_notify = (GFunc)on_autoopen_cb;
         ptask->user_data = ao;
@@ -1094,8 +1099,8 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
     else if (file_browser)
     {
-        file_browser->run_event<EventType::OPEN_ITEM>(vol->mount_point,
-                                                      PtkOpenAction::PTK_OPEN_DIR);
+        file_browser->run_event<spacefm::signal::open_item>(vol->mount_point,
+                                                            ptk::open_action::dir);
     }
     else
     {
@@ -1197,11 +1202,11 @@ on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
 
     if (set->xset_name == xset::name::dev_fs_cnf)
     {
-        mode = PtkHandlerMode::HANDLER_MODE_FS;
+        mode = ptk::handler::mode::fs;
     }
     else if (set->xset_name == xset::name::dev_net_cnf)
     {
-        mode = PtkHandlerMode::HANDLER_MODE_NET;
+        mode = ptk::handler::mode::net;
     }
     else
     {
@@ -1216,13 +1221,13 @@ static bool
 volume_is_visible(vfs::volume vol)
 {
     // network
-    if (vol->device_type == VFSVolumeDeviceType::NETWORK)
+    if (vol->device_type == vfs::volume_device_type::network)
     {
         return xset_get_b(xset::name::dev_show_net);
     }
 
     // other - eg fuseiso mounted file
-    if (vol->device_type == VFSVolumeDeviceType::OTHER)
+    if (vol->device_type == vfs::volume_device_type::other)
     {
         return xset_get_b(xset::name::dev_show_file);
     }
@@ -1397,7 +1402,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(set, (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
-    if (vol && vol->device_type == VFSVolumeDeviceType::NETWORK &&
+    if (vol && vol->device_type == vfs::volume_device_type::network &&
         (ztd::startswith(vol->device_file, "//") || ztd::contains(vol->device_file, ":/")))
     {
         str = ztd::strdup(" dev_menu_mark");
@@ -1498,14 +1503,20 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
 
     // get selected vol
     GtkTreePath* tree_path = nullptr;
-    if (gtk_tree_view_get_path_at_pos(view, static_cast<i32>(event->x), static_cast<i32>(event->y), &tree_path, nullptr, nullptr, nullptr))
+    if (gtk_tree_view_get_path_at_pos(view,
+                                      static_cast<i32>(event->x),
+                                      static_cast<i32>(event->y),
+                                      &tree_path,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr))
     {
         GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
         GtkTreeIter it;
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
             gtk_tree_selection_select_iter(tree_sel, &it);
-            gtk_tree_model_get(model, &it, PtkLocationViewCol::COL_DATA, &vol, -1);
+            gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
         }
     }
 
@@ -1536,8 +1547,6 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
             // right button
             show_devices_menu(view, vol, file_browser, event->button, event->time);
             ret = true;
-            break;
-        default:
             break;
     }
 

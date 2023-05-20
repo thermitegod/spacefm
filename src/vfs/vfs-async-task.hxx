@@ -97,39 +97,39 @@ struct VFSAsyncTask
     using evt_task_finished__load_dir_t = void(vfs::dir, bool);
 
     // Signals Add Event
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
     add_event(evt_task_finished__find_file_t fun, FindFile* file)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
         this->evt_data_find_file = file;
         return this->evt_task_finished__find_file.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
     add_event(evt_task_finished__load_app_t fun, GtkWidget* app)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
         this->evt_data_load_app = app;
         return this->evt_task_finished__load_app.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::TASK_FINISH, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
     add_event(evt_task_finished__load_dir_t fun, vfs::dir dir)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
         this->evt_data_load_dir = dir;
         return this->evt_task_finished__load_dir.connect(sigc::ptr_fun(fun));
     }
 
     // Signals Run Event
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::TASK_FINISH, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::task_finish, void>::type
     run_event(bool is_cancelled)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::TASK_FINISH");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::task_finish");
         this->evt_task_finished__find_file.emit(this->evt_data_find_file);
         this->evt_task_finished__load_app.emit(this, is_cancelled, this->evt_data_load_app);
         this->evt_task_finished__load_dir.emit(this->evt_data_load_dir, is_cancelled);

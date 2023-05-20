@@ -116,7 +116,7 @@ vfs_file_info_clear(vfs::file_info file)
     {
         file->mime_type = nullptr;
     }
-    file->flags = VFSFileInfoFlag::NONE;
+    file->flags = vfs::file_info_flags::none;
 }
 
 vfs::file_info
@@ -259,7 +259,7 @@ GdkPixbuf*
 VFSFileInfo::get_big_icon() noexcept
 {
     // get special icons for special files, especially for some desktop icons
-    if (this->flags == VFSFileInfoFlag::NONE)
+    if (this->flags == vfs::file_info_flags::none)
     {
         if (!this->mime_type)
         {
@@ -316,7 +316,7 @@ VFSFileInfo::get_big_icon() noexcept
 GdkPixbuf*
 VFSFileInfo::get_small_icon() noexcept
 {
-    if (this->flags & VFSFileInfoFlag::DESKTOP_ENTRY && this->small_thumbnail)
+    if (this->flags & vfs::file_info_flags::desktop_entry && this->small_thumbnail)
     {
         return g_object_ref(this->small_thumbnail);
     }
@@ -633,7 +633,7 @@ VFSFileInfo::is_video() const noexcept
 bool
 VFSFileInfo::is_desktop_entry() const noexcept
 {
-    return 0 != (this->flags & VFSFileInfoFlag::DESKTOP_ENTRY);
+    return 0 != (this->flags & vfs::file_info_flags::desktop_entry);
 }
 
 bool
@@ -759,7 +759,7 @@ VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
 
     const auto file_dir = file_path.parent_path();
 
-    this->flags = (VFSFileInfoFlag)(this->flags | VFSFileInfoFlag::DESKTOP_ENTRY);
+    this->flags = (vfs::file_info_flags)(this->flags | vfs::file_info_flags::desktop_entry);
     const vfs::desktop desktop = vfs_get_desktop(file_path.string());
 
     // MOD  display real filenames of .desktop files not in desktop directory

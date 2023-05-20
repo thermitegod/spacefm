@@ -36,6 +36,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "mime-type/mime-type.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
@@ -61,36 +63,40 @@ const char* enter_command_use =
     " %l device label\n\t%b\tselected bookmark\n\t%t\tselected task directory;  %p task "
     "pid\n\t%a\tmenu item value\n\t$fm_panel, $fm_tab, etc";
 
-enum ItemPropContextCol
+namespace item_prop::context
 {
-    CONTEXT_COL_DISP,
-    CONTEXT_COL_SUB,
-    CONTEXT_COL_COMP,
-    CONTEXT_COL_VALUE
-};
+    enum class column
+    {
+        disp,
+        sub,
+        comp,
+        value,
+    };
 
-enum ItemPropContextComp
-{
-    CONTEXT_COMP_EQUALS,
-    CONTEXT_COMP_NEQUALS,
-    CONTEXT_COMP_CONTAINS,
-    CONTEXT_COMP_NCONTAINS,
-    CONTEXT_COMP_BEGINS,
-    CONTEXT_COMP_NBEGINS,
-    CONTEXT_COMP_ENDS,
-    CONTEXT_COMP_NENDS,
-    CONTEXT_COMP_LESS,
-    CONTEXT_COMP_GREATER,
-    CONTEXT_COMP_MATCH,
-    CONTEXT_COMP_NMATCH
-};
+    enum class comparison
+    {
+        equals,
+        nequals,
+        contains,
+        ncontains,
+        begins,
+        nbegins,
+        ends,
+        nends,
+        less,
+        greater,
+        match,
+        nmatch,
+    };
 
-enum ItemPropItemType
-{
-    ITEM_TYPE_BOOKMARK,
-    ITEM_TYPE_APP,
-    ITEM_TYPE_COMMAND
-};
+    enum class item_type
+    {
+        bookmark,
+        app,
+        command,
+        invalid // Must be last
+    };
+} // namespace item_prop::context
 
 struct ContextData
 {
@@ -334,20 +340,20 @@ inline constexpr  std::array<const std::string_view, 38> context_sub_lists
     "0%%%%%dev/sdb1%%%%%/dev/sdc1%%%%%/dev/sdd1%%%%%/dev/sr0"  //"Panel 4 Device"
 };
 
-inline constexpr std::array<const std::string_view, 12> context_comps
+const std::map<item_prop::context::comparison, const std::string_view> context_comparisons
 {
-    "equals",
-    "does not equal",
-    "contains",
-    "does not contain",
-    "begins with",
-    "does not begin with",
-    "ends with",
-    "does not end with",
-    "is less than",
-    "is greater than",
-    "matches",
-    "does not match",
+    {item_prop::context::comparison::equals, "equals"},
+    {item_prop::context::comparison::nequals, "does not equal"},
+    {item_prop::context::comparison::contains, "contains"},
+    {item_prop::context::comparison::ncontains, "does not contain"},
+    {item_prop::context::comparison::begins, "begins with"},
+    {item_prop::context::comparison::nbegins, "does not begin with"},
+    {item_prop::context::comparison::ends, "ends with"},
+    {item_prop::context::comparison::nends, "does not end with"},
+    {item_prop::context::comparison::less, "is less than"},
+    {item_prop::context::comparison::greater, "is greater than"},
+    {item_prop::context::comparison::match, "matches"},
+    {item_prop::context::comparison::nmatch, "does not match"},
 };
 
 inline constexpr std::array<const std::string_view, 3> item_types
@@ -401,7 +407,7 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
     vs = get_element_next(s);
     *comp = std::stoi(vs);
     std::free(vs);
-    if (*comp < 0 || *comp >= (i32)context_comps.size())
+    if (*comp < 0 || *comp >= (i32)context_comparisons.size())
     {
         return false;
     }
@@ -412,27 +418,24 @@ get_rule_next(char** s, i32* sub, i32* comp, char** value)
     return true;
 }
 
-i32
+item_prop::context::state
 xset_context_test(const xset_context_t& context, const std::string_view rules, bool def_disable)
 {
     ztd::logger::debug("xset_context_test={}", rules);
     // assumes valid xset_context and rules != nullptr and no global ignore
     i32 i;
     i32 sep_type;
-    i32 sub;
-    i32 comp;
-    char* value;
     char* s;
     char* eleval;
     char* sep;
     bool test;
 
-    enum ItemPropContextTest
+    enum context_test
     {
-        ANY,
-        ALL,
-        NANY,
-        NALL
+        any,
+        all,
+        nany,
+        nall
     };
 
     // get valid action and match
@@ -441,34 +444,39 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
     s = get_element_next(&elements);
     if (!s)
     {
-        return 0;
+        return item_prop::context::state::show;
     }
-    const i32 action = std::stoi(s);
+    const i32 check_action = std::stoi(s);
     std::free(s);
-    if (action < 0 || action > 3)
+    if (check_action < 0 || check_action > 3)
     {
-        return 0;
+        return item_prop::context::state::show;
     }
+    const item_prop::context::state action = item_prop::context::state(check_action);
 
     s = get_element_next(&elements);
     if (!s)
     {
-        return 0;
+        return item_prop::context::state::show;
     }
     const i32 match = std::stoi(s);
     std::free(s);
     if (match < 0 || match > 3)
     {
-        return 0;
+        return item_prop::context::state::show;
     }
 
-    if (action != ItemPropContextState::CONTEXT_HIDE &&
-        action != ItemPropContextState::CONTEXT_SHOW && def_disable)
+    if (action != item_prop::context::state::hide && action != item_prop::context::state::show &&
+        def_disable)
     {
-        return ItemPropContextState::CONTEXT_DISABLE;
+        return item_prop::context::state::disable;
     }
 
     // parse rules
+    i32 sub;
+    i32 comp;
+    char* value;
+
     bool is_rules = false;
     bool all_match = true;
     bool no_match = true;
@@ -501,40 +509,40 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
                 }
             }
 
-            switch (comp)
+            switch (item_prop::context::comparison(comp))
             {
-                case ItemPropContextComp::CONTEXT_COMP_EQUALS:
+                case item_prop::context::comparison::equals:
                     test = ztd::same(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_NEQUALS:
+                case item_prop::context::comparison::nequals:
                     test = !ztd::same(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_CONTAINS:
+                case item_prop::context::comparison::contains:
                     test = ztd::contains(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_NCONTAINS:
+                case item_prop::context::comparison::ncontains:
                     test = !ztd::contains(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_BEGINS:
+                case item_prop::context::comparison::begins:
                     test = ztd::startswith(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_NBEGINS:
+                case item_prop::context::comparison::nbegins:
                     test = !ztd::startswith(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_ENDS:
+                case item_prop::context::comparison::ends:
                     test = ztd::endswith(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_NENDS:
+                case item_prop::context::comparison::nends:
                     test = !ztd::endswith(context->var[sub], eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_LESS:
+                case item_prop::context::comparison::less:
                     test = std::stoi(context->var[sub]) < std::stoi(eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_GREATER:
+                case item_prop::context::comparison::greater:
                     test = std::stoi(context->var[sub]) > std::stoi(eleval);
                     break;
-                case ItemPropContextComp::CONTEXT_COMP_MATCH:
-                case ItemPropContextComp::CONTEXT_COMP_NMATCH:
+                case item_prop::context::comparison::match:
+                case item_prop::context::comparison::nmatch:
                     s = g_utf8_strdown(eleval, -1);
                     if (ztd::compare(eleval, s))
                     {
@@ -548,14 +556,14 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
                         test = !ztd::fnmatch(s, str);
                     }
                     std::free(s);
-                    if (comp == ItemPropContextComp::CONTEXT_COMP_MATCH)
+                    if (item_prop::context::comparison(comp) ==
+                        item_prop::context::comparison::match)
                     {
                         test = !test;
                     }
                     break;
                 default:
-                    test = match == ItemPropContextTest::NANY ||
-                           match == ItemPropContextTest::NALL; // failsafe
+                    test = match == context_test::nany || match == context_test::nall; // failsafe
             }
 
             if (sep)
@@ -591,8 +599,8 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
         {
             any_match = true;
             no_match = false;
-            if (match == ItemPropContextTest::ANY || match == ItemPropContextTest::NANY ||
-                match == ItemPropContextTest::NALL)
+            if (match == context_test::any || match == context_test::nany ||
+                match == context_test::nall)
             {
                 break;
             }
@@ -600,7 +608,7 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
         else
         {
             all_match = false;
-            if (match == ItemPropContextTest::ALL)
+            if (match == context_test::all)
             {
                 break;
             }
@@ -609,48 +617,43 @@ xset_context_test(const xset_context_t& context, const std::string_view rules, b
 
     if (!is_rules)
     {
-        return ItemPropContextState::CONTEXT_SHOW;
+        return item_prop::context::state::show;
     }
 
     bool is_match;
     switch (match)
     {
-        case ItemPropContextTest::ALL:
+        case context_test::all:
             is_match = all_match;
             break;
-        case ItemPropContextTest::NALL:
+        case context_test::nall:
             is_match = !any_match;
             break;
-        case ItemPropContextTest::NANY:
+        case context_test::nany:
             is_match = no_match;
             break;
-        case ItemPropContextTest::ANY:
+        case context_test::any:
             is_match = !no_match;
-            break;
-        default:
             break;
     }
 
     switch (action)
     {
-        case ItemPropContextState::CONTEXT_SHOW:
-            return is_match ? ItemPropContextState::CONTEXT_SHOW
-                            : ItemPropContextState::CONTEXT_HIDE;
-        case ItemPropContextState::CONTEXT_ENABLE:
-            return is_match ? ItemPropContextState::CONTEXT_SHOW
-                            : ItemPropContextState::CONTEXT_DISABLE;
-        case ItemPropContextState::CONTEXT_DISABLE:
-            return is_match ? ItemPropContextState::CONTEXT_DISABLE
-                            : ItemPropContextState::CONTEXT_SHOW;
-        default:
+        case item_prop::context::state::show:
+            return is_match ? item_prop::context::state::show : item_prop::context::state::hide;
+        case item_prop::context::state::enable:
+            return is_match ? item_prop::context::state::show : item_prop::context::state::disable;
+        case item_prop::context::state::disable:
+            return is_match ? item_prop::context::state::disable : item_prop::context::state::show;
+        case item_prop::context::state::hide:
             break;
     }
-    // ItemPropContextState::CONTEXT_HIDE
+    // item_prop::context::state::hide
     if (is_match)
     {
-        return ItemPropContextState::CONTEXT_HIDE;
+        return item_prop::context::state::hide;
     }
-    return def_disable ? ItemPropContextState::CONTEXT_DISABLE : ItemPropContextState::CONTEXT_SHOW;
+    return def_disable ? item_prop::context::state::disable : item_prop::context::state::show;
 }
 
 static std::string
@@ -671,11 +674,11 @@ context_build(ContextData* ctxt)
             i32 sub, comp;
             gtk_tree_model_get(model,
                                &it,
-                               ItemPropContextCol::CONTEXT_COL_VALUE,
+                               item_prop::context::column::value,
                                &value,
-                               ItemPropContextCol::CONTEXT_COL_SUB,
+                               item_prop::context::column::sub,
                                &sub,
-                               ItemPropContextCol::CONTEXT_COL_COMP,
+                               item_prop::context::column::comp,
                                &comp,
                                -1);
             new_context = std::format("{}%%%%%{}%%%%%{}%%%%%{}", new_context, sub, comp, value);
@@ -702,18 +705,18 @@ enable_context(ContextData* ctxt)
         std::string text = "Current: Show";
         if (!rules.empty())
         {
-            const i32 action = xset_context_test(ctxt->context, rules, false);
-            if (action == ItemPropContextState::CONTEXT_HIDE)
+            const item_prop::context::state action = xset_context_test(ctxt->context, rules, false);
+            if (action == item_prop::context::state::hide)
             {
                 text = "Current: Hide";
             }
-            else if (action == ItemPropContextState::CONTEXT_DISABLE)
+            else if (action == item_prop::context::state::disable)
             {
                 text = "Current: Disable";
             }
-            else if (action == ItemPropContextState::CONTEXT_SHOW &&
+            else if (action == item_prop::context::state::show &&
                      gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->box_action)) ==
-                         ItemPropContextState::CONTEXT_DISABLE)
+                         magic_enum::enum_integer(item_prop::context::state::disable))
             {
                 text = "Current: Enable";
             }
@@ -735,11 +738,17 @@ context_display(i32 sub, i32 comp, const char* value)
     std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
     {
-        disp = std::format("{} {} \"{}\"", context_subs.at(sub), context_comps.at(comp), value);
+        disp = std::format("{} {} \"{}\"",
+                           context_subs.at(sub),
+                           context_comparisons.at(item_prop::context::comparison(comp)),
+                           value);
     }
     else
     {
-        disp = std::format("{} {} {}", context_subs.at(sub), context_comps.at(comp), value);
+        disp = std::format("{} {} {}",
+                           context_subs.at(sub),
+                           context_comparisons.at(item_prop::context::comparison(comp)),
+                           value);
     }
     return ztd::strdup(disp);
 }
@@ -776,13 +785,13 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
         char* disp = context_display(sub, comp, value);
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
-                           ItemPropContextCol::CONTEXT_COL_DISP,
+                           item_prop::context::column::disp,
                            disp,
-                           ItemPropContextCol::CONTEXT_COL_SUB,
+                           item_prop::context::column::sub,
                            sub,
-                           ItemPropContextCol::CONTEXT_COL_COMP,
+                           item_prop::context::column::comp,
                            comp,
-                           ItemPropContextCol::CONTEXT_COL_VALUE,
+                           item_prop::context::column::value,
                            value,
                            -1);
         std::free(disp);
@@ -864,11 +873,11 @@ on_context_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewC
     }
     gtk_tree_model_get(model,
                        &it,
-                       ItemPropContextCol::CONTEXT_COL_VALUE,
+                       item_prop::context::column::value,
                        &value,
-                       ItemPropContextCol::CONTEXT_COL_SUB,
+                       item_prop::context::column::sub,
                        &sub,
-                       ItemPropContextCol::CONTEXT_COL_COMP,
+                       item_prop::context::column::comp,
                        &comp,
                        -1);
     gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->box_sub), sub);
@@ -1361,17 +1370,18 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
 {
     xset_t rset = ctxt->set;
     xset_t mset = xset_get_plugin_mirror(rset);
-    const i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+    const item_prop::context::item_type job =
+        item_prop::context::item_type(gtk_combo_box_get_active(GTK_COMBO_BOX(box)));
     switch (job)
     {
-        case ItemPropItemType::ITEM_TYPE_BOOKMARK:
-        case ItemPropItemType::ITEM_TYPE_APP:
+        case item_prop::context::item_type::bookmark:
+        case item_prop::context::item_type::app:
             // Bookmark or App
             gtk_widget_show(ctxt->target_vbox);
             gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 2));
             gtk_widget_hide(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 3));
 
-            if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
+            if (job == item_prop::context::item_type::bookmark)
             {
                 gtk_widget_hide(ctxt->item_choose);
                 gtk_widget_hide(ctxt->hbox_opener);
@@ -1386,14 +1396,14 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
                                    "Target:  (a .desktop or executable file)");
             }
             break;
-        case ItemPropItemType::ITEM_TYPE_COMMAND:
+        case item_prop::context::item_type::command:
             // Command
             gtk_widget_hide(ctxt->target_vbox);
             gtk_widget_show(ctxt->hbox_opener);
             gtk_widget_show(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 2));
             gtk_widget_show(gtk_notebook_get_nth_page(GTK_NOTEBOOK(ctxt->notebook), 3));
             break;
-        default:
+        case item_prop::context::item_type::invalid:
             break;
     }
 
@@ -1457,7 +1467,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
     }
 
     // TODO switch?
-    if (job < ItemPropItemType::ITEM_TYPE_COMMAND)
+    if (job < item_prop::context::item_type::command)
     {
         // Bookmark or App
         buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
@@ -1470,7 +1480,7 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
         // gtk_button_clicked( GTK_BUTTON( ctxt->item_browse ) );
     }
 
-    if (job == ItemPropItemType::ITEM_TYPE_COMMAND || job == ItemPropItemType::ITEM_TYPE_APP)
+    if (job == item_prop::context::item_type::command || job == item_prop::context::item_type::app)
     {
         // Opener
         if (mset->opener > 2 || mset->opener < 0)
@@ -1488,15 +1498,16 @@ on_type_changed(GtkComboBox* box, ContextData* ctxt)
 static void
 on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
 {
-    const i32 job = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
-    if (job == ItemPropItemType::ITEM_TYPE_BOOKMARK)
+    const item_prop::context::item_type job =
+        item_prop::context::item_type(gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type)));
+    if (job == item_prop::context::item_type::bookmark)
     {
         // Bookmark Browse
         const auto add_path =
             xset_file_dialog(ctxt->dlg,
                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
                              "Choose Directory",
-                             ctxt->context->var[ItemPropContext::CONTEXT_DIR],
+                             ctxt->context->var[item_prop::context::item::dir],
                              std::nullopt);
         if (add_path)
         {
@@ -1516,8 +1527,8 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
         {
             // Choose
             vfs::mime_type mime_type = vfs_mime_type_get_from_type(
-                !ctxt->context->var[ItemPropContext::CONTEXT_MIME].empty()
-                    ? ctxt->context->var[ItemPropContext::CONTEXT_MIME]
+                !ctxt->context->var[item_prop::context::item::mime].empty()
+                    ? ctxt->context->var[item_prop::context::item::mime]
                     : XDG_MIME_TYPE_UNKNOWN);
             char* app = (char*)ptk_choose_app_for_mime_type(
                 GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(ctxt->dlg))),
@@ -1563,19 +1574,20 @@ replace_item_props(ContextData* ctxt)
     {
         // custom bookmark, app, or command
         bool is_app = false;
-        const i32 item_type = gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type));
+        const item_prop::context::item_type item_type =
+            item_prop::context::item_type(gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->item_type)));
 
         switch (item_type)
         {
-            case ItemPropItemType::ITEM_TYPE_BOOKMARK:
+            case item_prop::context::item_type::bookmark:
                 x = xset::cmd::bookmark;
                 is_app = true;
                 break;
-            case ItemPropItemType::ITEM_TYPE_APP:
+            case item_prop::context::item_type::app:
                 x = xset::cmd::app;
                 is_app = true;
                 break;
-            case ItemPropItemType::ITEM_TYPE_COMMAND:
+            case item_prop::context::item_type::command:
                 if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->cmd_opt_line)))
                 {
                     // line
@@ -1588,7 +1600,7 @@ replace_item_props(ContextData* ctxt)
                     save_command_script(ctxt, false);
                 }
                 break;
-            default:
+            case item_prop::context::item_type::invalid:
                 x = xset::cmd::invalid;
                 break;
         }
@@ -1601,7 +1613,7 @@ replace_item_props(ContextData* ctxt)
             }
             else
             {
-                rset->x = std::to_string(INT(x));
+                rset->x = std::to_string(magic_enum::enum_integer(x));
             }
         }
         if (!rset->plugin)
@@ -1681,8 +1693,8 @@ replace_item_props(ContextData* ctxt)
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ctxt->opt_scroll)) || is_app;
 
         // Opener
-        if ((item_type == ItemPropItemType::ITEM_TYPE_COMMAND ||
-             item_type == ItemPropItemType::ITEM_TYPE_APP))
+        if ((item_type == item_prop::context::item_type::command ||
+             item_type == item_prop::context::item_type::app))
         {
             if (gtk_combo_box_get_active(GTK_COMBO_BOX(ctxt->opener)) > -1)
             {
@@ -2014,7 +2026,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        ItemPropContextCol::CONTEXT_COL_DISP,
+                                        item_prop::context::column::disp,
                                         nullptr);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ctxt->view), col);
     gtk_tree_view_column_set_expand(col, true);
@@ -2052,9 +2064,10 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_comp), false);
-    for (const std::string_view context_comp : context_comps)
+    for (const auto context_comparison : context_comparisons)
     {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp), context_comp.data());
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp),
+                                       context_comparison.second.data());
     }
 
     ctxt->box_value = gtk_combo_box_text_new_with_entry();
@@ -2257,13 +2270,13 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         gtk_list_store_append(GTK_LIST_STORE(list), &it);
         gtk_list_store_set(GTK_LIST_STORE(list),
                            &it,
-                           ItemPropContextCol::CONTEXT_COL_DISP,
+                           item_prop::context::column::disp,
                            disp,
-                           ItemPropContextCol::CONTEXT_COL_SUB,
+                           item_prop::context::column::sub,
                            sub,
-                           ItemPropContextCol::CONTEXT_COL_COMP,
+                           item_prop::context::column::comp,
                            comp,
-                           ItemPropContextCol::CONTEXT_COL_VALUE,
+                           item_prop::context::column::value,
                            value,
                            -1);
         std::free(disp);
@@ -2509,7 +2522,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
 
     // load values  ========================================================
     // type
-    i32 item_type = -1;
+    item_prop::context::item_type item_type = item_prop::context::item_type::invalid;
 
     std::string item_type_str;
     if (set->tool > xset::tool::custom)
@@ -2543,21 +2556,23 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         {
             case xset::cmd::line:
             case xset::cmd::script:
-                item_type = ItemPropItemType::ITEM_TYPE_COMMAND;
+                item_type = item_prop::context::item_type::command;
                 break;
             case xset::cmd::app:
-                item_type = ItemPropItemType::ITEM_TYPE_APP;
+                item_type = item_prop::context::item_type::app;
                 break;
             case xset::cmd::bookmark:
-                item_type = ItemPropItemType::ITEM_TYPE_BOOKMARK;
+                item_type = item_prop::context::item_type::bookmark;
                 break;
             case xset::cmd::invalid:
-            default:
-                item_type = -1;
+                item_type = item_prop::context::item_type::invalid;
                 break;
         }
 
-        gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->item_type), item_type);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(ctxt->item_type),
+                                 item_type != item_prop::context::item_type::invalid
+                                     ? magic_enum::enum_integer(item_type)
+                                     : -1);
         // g_signal_connect( G_OBJECT( ctxt->item_type ), "changed",
         //                  G_CALLBACK( on_item_type_changed ), ctxt );
     }

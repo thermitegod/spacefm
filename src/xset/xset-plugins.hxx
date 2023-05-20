@@ -32,22 +32,25 @@
 
 #include "xset/xset.hxx"
 
-enum class PluginJob
+namespace plugin
 {
-    INSTALL,
-    COPY,
-    REMOVE
-};
+    enum class job
+    {
+        install,
+        copy,
+        remove
+    };
 
-enum class PluginUse
-{
-    HAND_ARC,
-    HAND_FS,
-    HAND_NET,
-    HAND_FILE,
-    BOOKMARKS,
-    NORMAL
-};
+    enum class use
+    {
+        hand_arc,
+        hand_fs,
+        hand_net,
+        hand_file,
+        bookmarks,
+        normal
+    };
+} // namespace plugin
 
 struct MainWindow;
 
@@ -57,7 +60,7 @@ struct PluginData
     GtkWidget* handler_dlg{nullptr};
     std::filesystem::path plug_dir{};
     xset_t set{nullptr};
-    PluginJob job;
+    plugin::job job;
 };
 
 const std::vector<xset_t> xset_get_plugins();
@@ -66,7 +69,7 @@ void xset_clear_plugins(const std::span<const xset_t> plugins);
 void on_install_plugin_cb(vfs::file_task task, PluginData* plugin_data);
 
 void install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesystem::path& path,
-                         const std::filesystem::path& plug_dir, PluginJob job, xset_t insert_set);
+                         const std::filesystem::path& plug_dir, plugin::job job, xset_t insert_set);
 
 void clean_plugin_mirrors();
 

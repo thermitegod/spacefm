@@ -21,6 +21,7 @@
 
 #include <filesystem>
 
+#include <map>
 #include <array>
 
 #include <algorithm>
@@ -34,6 +35,8 @@
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include <magic_enum.hpp>
 
 #include "types.hxx"
 
@@ -123,7 +126,7 @@ static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
 
 /* signal handlers */
 
-static void on_file_monitor_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
+static void on_file_monitor_event(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
                                   const std::filesystem::path& file_name, void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
@@ -131,7 +134,7 @@ static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* p
 
 static GObjectClass* parent_class = nullptr;
 
-static std::array<GType, magic_enum::enum_count<PTKDirTreeCol>()> column_types;
+static std::map<ptk::dir_tree::column, GType> column_types;
 
 PtkDirTreeNode::PtkDirTreeNode()
 {
@@ -252,9 +255,9 @@ ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface)
     iface->iter_nth_child = ptk_dir_tree_iter_nth_child;
     iface->iter_parent = ptk_dir_tree_iter_parent;
 
-    column_types[PTKDirTreeCol::COL_DIR_TREE_ICON] = GDK_TYPE_PIXBUF;
-    column_types[PTKDirTreeCol::COL_DIR_TREE_DISP_NAME] = G_TYPE_STRING;
-    column_types[PTKDirTreeCol::COL_DIR_TREE_INFO] = G_TYPE_POINTER;
+    column_types[ptk::dir_tree::column::icon] = GDK_TYPE_PIXBUF;
+    column_types[ptk::dir_tree::column::disp_name] = G_TYPE_STRING;
+    column_types[ptk::dir_tree::column::info] = G_TYPE_POINTER;
 }
 
 static void
@@ -304,7 +307,7 @@ static i32
 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
 {
     (void)tree_model;
-    return magic_enum::enum_count<PTKDirTreeCol>();
+    return magic_enum::enum_count<ptk::dir_tree::column>();
 }
 
 static GType
@@ -313,7 +316,7 @@ ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index)
     (void)tree_model;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     // assert(index > (i32)G_N_ELEMENTS(column_types));
-    return column_types[index];
+    return column_types[ptk::dir_tree::column(index)];
 }
 
 static PtkDirTreeNode*
@@ -430,11 +433,11 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
     assert(node != nullptr);
 
-    g_value_init(value, column_types[column]);
+    g_value_init(value, column_types[ptk::dir_tree::column(column)]);
     vfs::file_info file = node->file;
-    switch (column)
+    switch (ptk::dir_tree::column(column))
     {
-        case PTKDirTreeCol::COL_DIR_TREE_ICON:
+        case ptk::dir_tree::column::icon:
             if (!file)
             {
                 return;
@@ -463,7 +466,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
                 g_object_unref(icon);
             }
             break;
-        case PTKDirTreeCol::COL_DIR_TREE_DISP_NAME:
+        case ptk::dir_tree::column::disp_name:
             if (file)
             {
                 g_value_set_string(value, file->get_disp_name().data());
@@ -473,14 +476,12 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
                 g_value_set_string(value, "( no subdirectory )"); // no sub directory
             }
             break;
-        case PTKDirTreeCol::COL_DIR_TREE_INFO:
+        case ptk::dir_tree::column::info:
             if (!file)
             {
                 return;
             }
             g_value_set_pointer(value, vfs_file_info_ref(file));
-            break;
-        default:
             break;
     }
 }
@@ -920,7 +921,7 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
 }
 
 static void
-on_file_monitor_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
+on_file_monitor_event(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
                       const std::filesystem::path& file_name, void* user_data)
 {
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);
@@ -928,7 +929,7 @@ on_file_monitor_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent even
 
     PtkDirTreeNode* child = find_node(node, file_name.string());
 
-    if (event == VFSFileMonitorEvent::CREATE)
+    if (event == vfs::file_monitor_event::created)
     {
         if (!child)
         {
@@ -952,7 +953,7 @@ on_file_monitor_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent even
             }
         }
     }
-    else if (event == VFSFileMonitorEvent::DELETE)
+    else if (event == vfs::file_monitor_event::deleted)
     {
         if (child)
         {

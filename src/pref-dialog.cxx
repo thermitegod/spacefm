@@ -34,6 +34,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
 #include "types.hxx"
 
 #include "settings/app.hxx"
@@ -140,7 +142,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         show_thumbnail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->show_thumbnail));
-        max_thumb = static_cast<u64>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size))) << 10;
+        max_thumb =
+            static_cast<u64>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(data->max_thumb_size)))
+            << 10;
 
         /* interface settings */
 
@@ -463,7 +467,7 @@ on_show_thumbnail_toggled(GtkWidget* widget, FMPrefDlg* fm_data)
 }
 
 bool
-edit_preference(GtkWindow* parent, i32 page)
+edit_preference(GtkWindow* parent, preference_dialog::page page)
 {
     i32 ibig_icon = -1;
     i32 ismall_icon = -1;
@@ -708,13 +712,13 @@ edit_preference(GtkWindow* parent, i32 page)
     }
 
     // Set current Preferences page
-    const i32 desktop_page_num = 2;
-    // notebook page number 3 is permanently hidden Volume Management
-    if (page > desktop_page_num)
-    {
-        page++;
-    }
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(data->notebook), page);
+    // const i32 desktop_page_num = 2;
+    // // notebook page number 3 is permanently hidden Volume Management
+    // if (page > desktop_page_num)
+    // {
+    //     page++;
+    // }
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(data->notebook), magic_enum::enum_integer(page));
 
     gtk_window_present(GTK_WINDOW(data->dlg));
     return true;

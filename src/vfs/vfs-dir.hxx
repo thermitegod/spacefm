@@ -100,157 +100,157 @@ struct VFSDir
     using evt_mime_change_t = void();
 
     // Signals Add Event
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
     add_event(evt_file_created__run_first__t fun, PtkFileBrowser* browser)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         this->evt_data_browser = browser;
         return this->evt_file_created__first.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
     add_event(evt_file_created__run_last__t fun, PtkFileList* list)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         this->evt_data_list = list;
         return this->evt_file_created__last.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CREATED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
     add_event(evt_file_changed__run_first__t fun, PtkFileBrowser* browser)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         this->evt_data_browser = browser;
         return this->evt_file_changed__first.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
     add_event(evt_file_changed__run_last__t fun, PtkFileList* list)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         this->evt_data_list = list;
         return this->evt_file_changed__last.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CHANGED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
     add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         this->evt_data_browser = browser;
         return this->evt_file_deleted__first.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
     add_event(evt_file_deleted__run_last__t fun, PtkFileList* list)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         this->evt_data_list = list;
         return this->evt_file_deleted__last.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_DELETED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
     add_event(evt_file_listed_t fun, PtkFileBrowser* browser)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_LISTED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
         // this->evt_data_listed_browser = browser;
         this->evt_data_browser = browser;
         return this->evt_file_listed.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_LISTED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
     add_event(evt_mime_change_t fun)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_LISTED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, sigc::connection>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, sigc::connection>::type
     add_event(evt_file_thumbnail_loaded_t fun, PtkFileList* list)
     {
-        // ztd::logger::trace("Signal Connect   : EventType::FILE_THUMBNAIL_LOADED");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_thumbnail_loaded");
         // this->evt_data_thumb_list = list;
         this->evt_data_list = list;
         return this->evt_file_thumbnail_loaded.connect(sigc::ptr_fun(fun));
     }
 
     // Signals Run Event
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CREATED, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_created, void>::type
     run_event(vfs::file_info file)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::FILE_CREATED");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
         this->evt_mime_change.emit();
         this->evt_file_created__first.emit(file, this->evt_data_browser);
         this->evt_file_created__last.emit(file, this->evt_data_list);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_CHANGED, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_changed, void>::type
     run_event(vfs::file_info file)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::FILE_CHANGED");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
         this->evt_mime_change.emit();
         this->evt_file_changed__first.emit(file, this->evt_data_browser);
         this->evt_file_changed__last.emit(file, this->evt_data_list);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_DELETED, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_deleted, void>::type
     run_event(vfs::file_info file)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::FILE_DELETED");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
         this->evt_mime_change.emit();
         this->evt_file_deleted__first.emit(file, this->evt_data_browser);
         this->evt_file_deleted__last.emit(file, this->evt_data_list);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_LISTED, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_listed, void>::type
     run_event(bool is_cancelled)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::FILE_LISTED");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_listed");
         this->evt_mime_change.emit();
         this->evt_file_listed.emit(this->evt_data_browser, is_cancelled);
     }
 
-    template<EventType evt>
-    typename std::enable_if<evt == EventType::FILE_THUMBNAIL_LOADED, void>::type
+    template<spacefm::signal evt>
+    typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, void>::type
     run_event(vfs::file_info file)
     {
-        // ztd::logger::trace("Signal Execute   : EventType::FILE_THUMBNAIL_LOADED");
+        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
         this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);
     }
 

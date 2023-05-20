@@ -35,13 +35,16 @@
 
 #include "ptk/ptk-app-chooser.hxx"
 
-enum PTKAppChooser
+namespace app_chooser
 {
-    COL_APP_ICON,
-    COL_APP_NAME,
-    COL_DESKTOP_FILE,
-    COL_FULL_PATH,
-};
+    enum class column
+    {
+        app_icon,
+        app_name,
+        desktop_file,
+        full_path,
+    };
+}
 
 static void load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
                                  vfs::async_task task);
@@ -58,7 +61,7 @@ init_list_view(GtkTreeView* view)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "pixbuf",
-                                        PTKAppChooser::COL_APP_ICON,
+                                        app_chooser::column::app_icon,
                                         nullptr);
 
     renderer = gtk_cell_renderer_text_new();
@@ -66,13 +69,14 @@ init_list_view(GtkTreeView* view)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        PTKAppChooser::COL_APP_NAME,
+                                        app_chooser::column::app_name,
                                         nullptr);
 
     gtk_tree_view_append_column(view, col);
 
     // add tooltip
-    gtk_tree_view_set_tooltip_column(view, PTKAppChooser::COL_FULL_PATH);
+    gtk_tree_view_set_tooltip_column(view,
+                                     magic_enum::enum_integer(app_chooser::column::full_path));
 }
 
 static i32
@@ -81,11 +85,11 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
     (void)user_data;
     char* name_a;
     i32 ret = 0;
-    gtk_tree_model_get(model, a, PTKAppChooser::COL_APP_NAME, &name_a, -1);
+    gtk_tree_model_get(model, a, app_chooser::column::app_name, &name_a, -1);
     if (name_a)
     {
         char* name_b;
-        gtk_tree_model_get(model, b, PTKAppChooser::COL_APP_NAME, &name_b, -1);
+        gtk_tree_model_get(model, b, app_chooser::column::app_name, &name_b, -1);
         if (name_b)
         {
             ret = g_ascii_strcasecmp(name_a, name_b);
@@ -109,7 +113,7 @@ add_list_item(GtkListStore* list, const std::string_view path)
             char* file = nullptr;
             gtk_tree_model_get(GTK_TREE_MODEL(list),
                                &it,
-                               PTKAppChooser::COL_DESKTOP_FILE,
+                               app_chooser::column::desktop_file,
                                &file,
                                -1);
             if (file)
@@ -139,13 +143,13 @@ add_list_item(GtkListStore* list, const std::string_view path)
     gtk_list_store_append(list, &it);
     gtk_list_store_set(list,
                        &it,
-                       PTKAppChooser::COL_APP_ICON,
+                       app_chooser::column::app_icon,
                        icon,
-                       PTKAppChooser::COL_APP_NAME,
+                       app_chooser::column::app_name,
                        desktop->get_disp_name().data(),
-                       PTKAppChooser::COL_DESKTOP_FILE,
+                       app_chooser::column::desktop_file,
                        desktop->get_name().data(),
-                       PTKAppChooser::COL_FULL_PATH,
+                       app_chooser::column::full_path,
                        tooltip.data(),
                        -1);
     if (icon)
@@ -157,7 +161,7 @@ add_list_item(GtkListStore* list, const std::string_view path)
 static GtkTreeModel*
 create_model_from_mime_type(vfs::mime_type mime_type)
 {
-    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PTKAppChooser>(),
+    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser::column>(),
                                             GDK_TYPE_PIXBUF,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
@@ -295,12 +299,12 @@ on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dlg)
     GtkTreeView* view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(task), "view"));
 
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(model),
-                                    PTKAppChooser::COL_APP_NAME,
+                                    magic_enum::enum_integer(app_chooser::column::app_name),
                                     sort_by_name,
                                     nullptr,
                                     nullptr);
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
-                                         PTKAppChooser::COL_APP_NAME,
+                                         magic_enum::enum_integer(app_chooser::column::app_name),
                                          GtkSortType::GTK_SORT_ASCENDING);
 
     gtk_tree_view_set_model(view, model);
@@ -333,7 +337,7 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, vo
                 busy);
             g_object_unref(busy);
 
-            GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<PTKAppChooser>(),
+            GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser::column>(),
                                                     GDK_TYPE_PIXBUF,
                                                     G_TYPE_STRING,
                                                     G_TYPE_STRING,
@@ -343,7 +347,7 @@ on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, vo
             g_object_set_data(G_OBJECT(task), "view", view);
             g_object_set_data(G_OBJECT(dlg), "task", task);
 
-            task->add_event<EventType::TASK_FINISH>(on_load_all_apps_finish, dlg);
+            task->add_event<spacefm::signal::task_finish>(on_load_all_apps_finish, dlg);
 
             task->run_thread();
             g_signal_connect(G_OBJECT(view),
@@ -382,7 +386,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
     GtkTreeIter it;
     if (gtk_tree_selection_get_selected(tree_sel, &model, &it))
     {
-        gtk_tree_model_get(model, &it, PTKAppChooser::COL_DESKTOP_FILE, &app, -1);
+        gtk_tree_model_get(model, &it, app_chooser::column::desktop_file, &app, -1);
     }
     else
     {
@@ -477,7 +481,7 @@ on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
             // see note in vfs-async-task.c: vfs_async_task_real_cancel()
             task->cancel();
             // The GtkListStore will be freed in
-            // EventType::TASK_FINISH handler of task - on_load_all_app_finish()
+            // spacefm::signal::task_finish handler of task - on_load_all_app_finish()
             g_object_unref(task);
         }
     }
@@ -487,8 +491,8 @@ void
 ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_type)
 {
     // is file handler set for this type?
-    std::vector<xset_t> handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
-                                                                 PtkHandlerMount::HANDLER_MOUNT,
+    std::vector<xset_t> handlers = ptk_handler_file_has_handlers(ptk::handler::mode::file,
+                                                                 ptk::handler::mount::mount,
                                                                  "",
                                                                  mime_type,
                                                                  false,
@@ -512,8 +516,8 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
     else if (!xset_get_b(xset::name::arc_def_open))
     {
         // is archive handler set for this type?
-        handlers = ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                                 PtkHandlerArchive::HANDLER_EXTRACT,
+        handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,
+                                                 ptk::handler::archive::extract,
                                                  "",
                                                  mime_type,
                                                  false,

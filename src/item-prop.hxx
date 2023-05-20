@@ -22,58 +22,62 @@
 
 #include "settings.hxx"
 
-enum ItemPropContextState
+namespace item_prop::context
 {
-    CONTEXT_SHOW,
-    CONTEXT_ENABLE,
-    CONTEXT_HIDE,
-    CONTEXT_DISABLE
-};
+    enum item
+    {
+        mime,
+        name,
+        dir,
+        read_access,
+        write_access,
+        is_text,
+        is_dir,
+        is_link,
+        is_root,
+        mul_sel,
+        clip_files,
+        clip_text,
+        panel,
+        panel_count,
+        tab,
+        tab_count,
+        bookmark,
+        device,
+        device_mount_point,
+        device_label,
+        device_fstype,
+        device_udi,
+        device_prop,
+        task_count,
+        task_dir,
+        task_type,
+        task_name,
+        panel1_dir,
+        panel2_dir,
+        panel3_dir,
+        panel4_dir,
+        panel1_sel,
+        panel2_sel,
+        panel3_sel,
+        panel4_sel,
+        panel1_device,
+        panel2_device,
+        panel3_device,
+        panel4_device,
+        end // Must be last
+    };
 
-enum ItemPropContext
-{
-    CONTEXT_MIME,
-    CONTEXT_NAME,
-    CONTEXT_DIR,
-    CONTEXT_READ_ACCESS,
-    CONTEXT_WRITE_ACCESS,
-    CONTEXT_IS_TEXT,
-    CONTEXT_IS_DIR,
-    CONTEXT_IS_LINK,
-    CONTEXT_IS_ROOT,
-    CONTEXT_MUL_SEL,
-    CONTEXT_CLIP_FILES,
-    CONTEXT_CLIP_TEXT,
-    CONTEXT_PANEL,
-    CONTEXT_PANEL_COUNT,
-    CONTEXT_TAB,
-    CONTEXT_TAB_COUNT,
-    CONTEXT_BOOKMARK,
-    CONTEXT_DEVICE,
-    CONTEXT_DEVICE_MOUNT_POINT,
-    CONTEXT_DEVICE_LABEL,
-    CONTEXT_DEVICE_FSTYPE,
-    CONTEXT_DEVICE_UDI,
-    CONTEXT_DEVICE_PROP,
-    CONTEXT_TASK_COUNT,
-    CONTEXT_TASK_DIR,
-    CONTEXT_TASK_TYPE,
-    CONTEXT_TASK_NAME,
-    CONTEXT_PANEL1_DIR,
-    CONTEXT_PANEL2_DIR,
-    CONTEXT_PANEL3_DIR,
-    CONTEXT_PANEL4_DIR,
-    CONTEXT_PANEL1_SEL,
-    CONTEXT_PANEL2_SEL,
-    CONTEXT_PANEL3_SEL,
-    CONTEXT_PANEL4_SEL,
-    CONTEXT_PANEL1_DEVICE,
-    CONTEXT_PANEL2_DEVICE,
-    CONTEXT_PANEL3_DEVICE,
-    CONTEXT_PANEL4_DEVICE,
-    CONTEXT_END
-};
+    enum class state
+    {
+        show,
+        enable,
+        hide,
+        disable // Must be last
+    };
+
+} // namespace item_prop::context
 
 void xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page);
-i32 xset_context_test(const xset_context_t& context, const std::string_view rules,
-                      bool def_disable);
+item_prop::context::state xset_context_test(const xset_context_t& context,
+                                            const std::string_view rules, bool def_disable);

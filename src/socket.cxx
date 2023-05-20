@@ -42,22 +42,22 @@
 
 #include "socket.hxx"
 
-enum SocketEvent
+enum socket_event
 {
-    CMD_OPEN = 1,
-    CMD_OPEN_TAB,
-    CMD_REUSE_TAB,
-    CMD_FIND_FILES,
-    CMD_OPEN_PANEL1,
-    CMD_OPEN_PANEL2,
-    CMD_OPEN_PANEL3,
-    CMD_OPEN_PANEL4,
-    CMD_PANEL1,
-    CMD_PANEL2,
-    CMD_PANEL3,
-    CMD_PANEL4,
-    CMD_NO_TABS,
-    CMD_SOCKET_CMD,
+    open = 1,
+    open_tab,
+    reuse_tab,
+    find_files,
+    open_panel1,
+    open_panel2,
+    open_panel3,
+    open_panel4,
+    panel1,
+    panel2,
+    panel3,
+    panel4,
+    no_tabs,
+    socket_cmd,
 };
 
 CliFlags cli_flags = CliFlags();
@@ -115,15 +115,15 @@ on_socket_event(Glib::IOCondition condition)
     while ((r = read(client, buf, sizeof(buf))) > 0)
     {
         args.append(buf, r);
-        if (args[0] == SocketEvent::CMD_SOCKET_CMD && args.size() > 1 &&
+        if (args[0] == socket_event::socket_cmd && args.size() > 1 &&
             args[args.size() - 2] == '\n' && args[args.size() - 1] == '\n')
         {
-            // because SocketEvent::CMD_SOCKET_CMD does not immediately close the socket
+            // because socket_event::SOCKET_CMD does not immediately close the socket
             // data is terminated by two linefeeds to prevent read blocking
             break;
         }
     }
-    if (args[0] == SocketEvent::CMD_SOCKET_CMD)
+    if (args[0] == socket_event::socket_cmd)
     {
         receive_socket_command(client, args);
     }
@@ -136,59 +136,57 @@ on_socket_event(Glib::IOCondition condition)
     cli_flags.no_tabs = false;
 
     usize argx = 0;
-    if (args[argx] == SocketEvent::CMD_NO_TABS)
+    if (args[argx] == socket_event::no_tabs)
     {
         cli_flags.reuse_tab = false;
         cli_flags.no_tabs = true;
-        argx++; // another command follows SocketEvent::CMD_NO_TABS
+        argx++; // another command follows socket_event::NO_TABS
     }
-    if (args[argx] == SocketEvent::CMD_REUSE_TAB)
+    if (args[argx] == socket_event::reuse_tab)
     {
         cli_flags.reuse_tab = true;
         cli_flags.new_tab = false;
-        argx++; // another command follows SocketEvent::CMD_REUSE_TAB
+        argx++; // another command follows socket_event::REUSE_TAB
     }
 
     switch (args[argx])
     {
-        case SocketEvent::CMD_PANEL1:
+        case socket_event::panel1:
             cli_flags.panel = 1;
             break;
-        case SocketEvent::CMD_PANEL2:
+        case socket_event::panel2:
             cli_flags.panel = 2;
             break;
-        case SocketEvent::CMD_PANEL3:
+        case socket_event::panel3:
             cli_flags.panel = 3;
             break;
-        case SocketEvent::CMD_PANEL4:
+        case socket_event::panel4:
             cli_flags.panel = 4;
             break;
-        case SocketEvent::CMD_OPEN:
+        case socket_event::open:
             cli_flags.new_tab = false;
             break;
-        case SocketEvent::CMD_OPEN_PANEL1:
+        case socket_event::open_panel1:
             cli_flags.new_tab = false;
             cli_flags.panel = 1;
             break;
-        case SocketEvent::CMD_OPEN_PANEL2:
+        case socket_event::open_panel2:
             cli_flags.new_tab = false;
             cli_flags.panel = 2;
             break;
-        case SocketEvent::CMD_OPEN_PANEL3:
+        case socket_event::open_panel3:
             cli_flags.new_tab = false;
             cli_flags.panel = 3;
             break;
-        case SocketEvent::CMD_OPEN_PANEL4:
+        case socket_event::open_panel4:
             cli_flags.new_tab = false;
             cli_flags.panel = 4;
             break;
-        case SocketEvent::CMD_FIND_FILES:
+        case socket_event::find_files:
             cli_flags.find_files = true;
             return true;
-        case SocketEvent::CMD_SOCKET_CMD:
+        case socket_event::socket_cmd:
             return true;
-        default:
-            break;
     }
 
     if (args[argx + 1])
@@ -262,47 +260,47 @@ single_instance_check()
     if (sock_fd && connect(sock_fd, (struct sockaddr*)&addr, addr_len) == 0)
     {
         // connected successfully
-        char cmd = SocketEvent::CMD_OPEN_TAB;
+        char cmd = socket_event::open_tab;
 
         if (cli_flags.no_tabs)
         {
-            cmd = SocketEvent::CMD_NO_TABS;
+            cmd = socket_event::no_tabs;
             (void)write(sock_fd, &cmd, sizeof(char));
-            // another command always follows SocketEvent::CMD_NO_TABS
-            cmd = SocketEvent::CMD_OPEN_TAB;
+            // another command always follows socket_event::no_tabs
+            cmd = socket_event::open_tab;
         }
         if (cli_flags.reuse_tab)
         {
-            cmd = SocketEvent::CMD_REUSE_TAB;
+            cmd = socket_event::reuse_tab;
             (void)write(sock_fd, &cmd, sizeof(char));
-            // another command always follows SocketEvent::CMD_REUSE_TAB
-            cmd = SocketEvent::CMD_OPEN;
+            // another command always follows socket_event::REUSE_TAB
+            cmd = socket_event::open;
         }
 
         if (cli_flags.new_window)
         {
             if (cli_flags.panel > 0 && cli_flags.panel < 5)
             {
-                cmd = SocketEvent::CMD_OPEN_PANEL1 + cli_flags.panel - 1;
+                cmd = socket_event::open_panel1 + cli_flags.panel - 1;
             }
             else
             {
-                cmd = SocketEvent::CMD_OPEN;
+                cmd = socket_event::open;
             }
         }
         else if (cli_flags.find_files)
         {
-            cmd = SocketEvent::CMD_FIND_FILES;
+            cmd = socket_event::find_files;
         }
         else if (cli_flags.panel > 0 && cli_flags.panel < 5)
         {
-            cmd = SocketEvent::CMD_PANEL1 + cli_flags.panel - 1;
+            cmd = socket_event::panel1 + cli_flags.panel - 1;
         }
 
         // open a new window if no file spec
-        if (cmd == SocketEvent::CMD_OPEN_TAB && !cli_flags.files)
+        if (cmd == socket_event::open_tab && !cli_flags.files)
         {
-            cmd = SocketEvent::CMD_OPEN;
+            cmd = socket_event::open;
         }
 
         (void)write(sock_fd, &cmd, sizeof(char));
@@ -463,7 +461,7 @@ send_socket_command(std::span<const std::string_view> args)
     }
 
     // send command
-    char cmd = SocketEvent::CMD_SOCKET_CMD;
+    char cmd = socket_event::socket_cmd;
     (void)write(sock_fd, &cmd, sizeof(char));
 
     // send inode tag

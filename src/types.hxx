@@ -19,8 +19,6 @@
 
 #include <ztd/ztd.hxx>
 
-#define INT(obj)        (static_cast<i32>(obj))
-#define UINT(obj)       (static_cast<u32>(obj))
 #define CHAR(obj)       (static_cast<char*>(obj))
 #define CONST_CHAR(obj) (static_cast<const char*>(obj))
 

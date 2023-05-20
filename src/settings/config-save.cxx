@@ -27,6 +27,8 @@
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <toml.hpp> // toml11
 
 #include <ztd/ztd.hxx>
@@ -142,12 +144,13 @@ xset_pack_set(xset_t set)
     }
     if (set->b != xset::b::unset)
     {
-        setvars.insert({xset::get_name_from_xsetvar(xset::var::b), std::format("{}", INT(set->b))});
+        setvars.insert({xset::get_name_from_xsetvar(xset::var::b),
+                        std::format("{}", magic_enum::enum_integer(set->b))});
     }
     if (set->tool != xset::tool::NOT)
     {
-        setvars.insert(
-            {xset::get_name_from_xsetvar(xset::var::tool), std::format("{}", INT(set->tool))});
+        setvars.insert({xset::get_name_from_xsetvar(xset::var::tool),
+                        std::format("{}", magic_enum::enum_integer(set->tool))});
     }
 
     if (!set->lock)
@@ -155,7 +158,7 @@ xset_pack_set(xset_t set)
         if (set->menu_style != xset::menu::normal)
         {
             setvars.insert({xset::get_name_from_xsetvar(xset::var::style),
-                            std::format("{}", INT(set->menu_style))});
+                            std::format("{}", magic_enum::enum_integer(set->menu_style))});
         }
         if (set->desc)
         {

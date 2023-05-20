@@ -18,10 +18,13 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-enum PrefDlgPage
+namespace preference_dialog
 {
-    PREF_GENERAL,
-    PREF_ADVANCED
-};
+    enum class page
+    {
+        general,
+        advanced,
+    };
+}
 
-bool edit_preference(GtkWindow* parent, i32 page);
+bool edit_preference(GtkWindow* parent, preference_dialog::page page);

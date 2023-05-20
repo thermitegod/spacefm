@@ -102,7 +102,7 @@ vfs_mime_type_reload()
 }
 
 static void
-on_mime_cache_changed(const vfs::file_monitor& monitor, VFSFileMonitorEvent event,
+on_mime_cache_changed(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
                       const std::filesystem::path& file_name, void* user_data)
 {
     (void)monitor;
@@ -375,13 +375,13 @@ VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
 
     mime_type_update_association(this->type,
                                  custom_desktop.empty() ? desktop_id : custom_desktop,
-                                 MimeTypeAction::DEFAULT);
+                                 mime_type::action::DEFAULT);
 }
 
 void
 VFSMimeType::remove_action(const std::string_view desktop_id) noexcept
 {
-    mime_type_update_association(this->type, desktop_id, MimeTypeAction::REMOVE);
+    mime_type_update_association(this->type, desktop_id, mime_type::action::remove);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
@@ -478,5 +478,5 @@ vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
 void
 vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id)
 {
-    mime_type_update_association(type, desktop_id, MimeTypeAction::APPEND);
+    mime_type_update_association(type, desktop_id, mime_type::action::append);
 }

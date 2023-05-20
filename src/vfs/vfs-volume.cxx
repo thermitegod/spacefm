@@ -56,7 +56,7 @@
 
 static vfs::volume vfs_volume_read_by_device(const libudev::device& udevice);
 static void vfs_volume_device_removed(const libudev::device& udevice);
-static void call_callbacks(vfs::volume vol, VFSVolumeState state);
+static void call_callbacks(vfs::volume vol, vfs::volume_state state);
 
 struct VFSVolumeCallbackData
 {
@@ -755,7 +755,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
     const auto volume = new VFSVolume();
 
     volume->devnum = device->devnum;
-    volume->device_type = VFSVolumeDeviceType::BLOCK;
+    volume->device_type = vfs::volume_device_type::block;
     volume->device_file = device->devnode;
     volume->udi = device->device_by_id;
     volume->is_optical = device->device_is_optical_disc;
@@ -895,7 +895,7 @@ VFSVolume::device_added() noexcept
                 }
             }
 
-            call_callbacks(volume, VFSVolumeState::CHANGED);
+            call_callbacks(volume, vfs::volume_state::changed);
 
             // refresh tabs containing changed mount point
             if (!changed_mount_point.empty())
@@ -911,7 +911,7 @@ VFSVolume::device_added() noexcept
 
     // add as new volume
     volumes.emplace_back(this);
-    call_callbacks(this, VFSVolumeState::ADDED);
+    call_callbacks(this, vfs::volume_state::added);
 
     // refresh tabs containing changed mount point
     if (this->is_mounted && !this->mount_point.empty())
@@ -932,11 +932,11 @@ vfs_volume_device_removed(const libudev::device& udevice)
 
     for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
-        if (volume->device_type == VFSVolumeDeviceType::BLOCK && volume->devnum == devnum)
+        if (volume->device_type == vfs::volume_device_type::block && volume->devnum == devnum)
         { // remove volume
             // ztd::logger::debug("remove volume {}", volume->device_file);
             volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
-            call_callbacks(volume, VFSVolumeState::REMOVED);
+            call_callbacks(volume, vfs::volume_state::removed);
             if (volume->is_mounted && !volume->mount_point.empty())
             {
                 main_window_refresh_all_tabs_matching(volume->mount_point);
@@ -1086,7 +1086,7 @@ vfs_volume_get_by_device(const std::string_view device_file)
 }
 
 static void
-call_callbacks(vfs::volume vol, VFSVolumeState state)
+call_callbacks(vfs::volume vol, vfs::volume_state state)
 {
     for (const auto& callback : callbacks)
     {

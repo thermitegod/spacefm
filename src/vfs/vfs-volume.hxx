@@ -31,22 +31,25 @@
 
 #define VFS_VOLUME(obj) (static_cast<vfs::volume>(obj))
 
-enum VFSVolumeState
+namespace vfs
 {
-    ADDED,
-    REMOVED,
-    MOUNTED,   // Not implemented
-    UNMOUNTED, // Not implemented
-    EJECT,
-    CHANGED,
-};
+    enum volume_state
+    {
+        added,
+        removed,
+        mounted,   // Not implemented
+        unmounted, // Not implemented
+        eject,
+        changed,
+    };
 
-enum VFSVolumeDeviceType
-{
-    BLOCK,
-    NETWORK,
-    OTHER, // eg fuseiso mounted file
-};
+    enum volume_device_type
+    {
+        block,
+        network,
+        other, // eg fuseiso mounted file
+    };
+} // namespace vfs
 
 // forward declare types
 struct VFSVolume;
@@ -63,7 +66,7 @@ struct VFSVolume
     VFSVolume() = default;
     ~VFSVolume() = default;
 
-    VFSVolumeDeviceType device_type;
+    vfs::volume_device_type device_type;
 
     dev_t devnum{0};
     std::string device_file{};
@@ -102,7 +105,7 @@ struct VFSVolume
     void device_added() noexcept;
 };
 
-using VFSVolumeCallback = void (*)(vfs::volume vol, VFSVolumeState state, void* user_data);
+using VFSVolumeCallback = void (*)(vfs::volume vol, vfs::volume_state state, void* user_data);
 
 bool vfs_volume_init();
 void vfs_volume_finalize();

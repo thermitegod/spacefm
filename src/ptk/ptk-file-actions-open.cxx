@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <magic_enum.hpp>
 #include <string>
 #include <string_view>
 
@@ -84,24 +85,24 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
 
     const bool extract_here = xset_get_b(xset::name::arc_def_ex);
     std::filesystem::path dest_dir;
-    i32 cmd;
+    ptk::handler::archive cmd;
 
     // determine default archive action in this dir
     if (extract_here && have_rw_access(parent->cwd))
     {
         // Extract Here
-        cmd = PtkHandlerArchive::HANDLER_EXTRACT;
+        cmd = ptk::handler::archive::extract;
         dest_dir = parent->cwd;
     }
     else if (extract_here || xset_get_b(xset::name::arc_def_exto))
     {
         // Extract Here but no write access or Extract To option
-        cmd = PtkHandlerArchive::HANDLER_EXTRACT;
+        cmd = ptk::handler::archive::extract;
     }
     else if (xset_get_b(xset::name::arc_def_list))
     {
         // List contents
-        cmd = PtkHandlerArchive::HANDLER_LIST;
+        cmd = ptk::handler::archive::list;
     }
     else
     {
@@ -111,8 +112,8 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
     // type or pathname has archive handler? - do not test command non-empty
     // here because only applies to first file
     const std::vector<xset_t> handlers =
-        ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_ARC,
-                                      cmd,
+        ptk_handler_file_has_handlers(ptk::handler::mode::arc,
+                                      magic_enum::enum_integer(cmd),
                                       full_path,
                                       mime_type,
                                       false,
@@ -123,7 +124,12 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
         return false; // do not handle these files
     }
 
-    ptk_file_archiver_extract(parent->file_browser, sel_files, parent->cwd, dest_dir, cmd, true);
+    ptk_file_archiver_extract(parent->file_browser,
+                              sel_files,
+                              parent->cwd,
+                              dest_dir,
+                              magic_enum::enum_integer(cmd),
+                              true);
     return true; // all files handled
 }
 
@@ -138,8 +144,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     // get command - was already checked as non-empty
     std::string error_message;
     std::string command;
-    const bool error = ptk_handler_load_script(PtkHandlerMode::HANDLER_MODE_FILE,
-                                               PtkHandlerMount::HANDLER_MOUNT,
+    const bool error = ptk_handler_load_script(ptk::handler::mode::file,
+                                               ptk::handler::mount::mount,
                                                handler_set,
                                                nullptr,
                                                command,
@@ -355,9 +361,9 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                 {
                     if (file_browser)
                     {
-                        file_browser->run_event<EventType::OPEN_ITEM>(
+                        file_browser->run_event<spacefm::signal::open_item>(
                             full_path,
-                            PtkOpenAction::PTK_OPEN_NEW_TAB);
+                            ptk::open_action::new_tab);
                     }
                 }
                 continue;
@@ -370,8 +376,8 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                 Glib::spawn_command_line_async(full_path);
                 if (file_browser)
                 {
-                    file_browser->run_event<EventType::OPEN_ITEM>(full_path,
-                                                                  PtkOpenAction::PTK_OPEN_FILE);
+                    file_browser->run_event<spacefm::signal::open_item>(full_path,
+                                                                        ptk::open_action::file);
                 }
                 continue;
             }
@@ -392,8 +398,8 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
             // if has file handler, set alloc_desktop = ###XSETNAME
             const std::vector<xset_t> handlers =
-                ptk_handler_file_has_handlers(PtkHandlerMode::HANDLER_MODE_FILE,
-                                              PtkHandlerMount::HANDLER_MOUNT,
+                ptk_handler_file_has_handlers(ptk::handler::mode::file,
+                                              ptk::handler::mount::mount,
                                               full_path,
                                               mime_type,
                                               true,
@@ -410,7 +416,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
              */
             if (alloc_desktop.empty())
             {
-                if (file->flags & VFSFileInfoFlag::DESKTOP_ENTRY &&
+                if (file->flags & vfs::file_info_flags::desktop_entry &&
                     (app_settings.get_click_executes() || xforce))
                 {
                     alloc_desktop = full_path;
@@ -513,7 +519,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
     {
         if (file_browser)
         {
-            file_browser->run_event<EventType::OPEN_ITEM>(full_path, PtkOpenAction::PTK_OPEN_DIR);
+            file_browser->run_event<spacefm::signal::open_item>(full_path, ptk::open_action::dir);
         }
         std::free(new_dir);
     }

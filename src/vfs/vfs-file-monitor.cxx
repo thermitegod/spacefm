@@ -237,7 +237,7 @@ vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_call
 }
 
 static void
-vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, VFSFileMonitorEvent evt,
+vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
                                 const std::filesystem::path& file_name)
 {
     // Call the callback functions
@@ -249,7 +249,7 @@ vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, VFSFileMonitor
     for (const vfs::file_monitor_callback_entry& cb : monitor->callbacks)
     {
         vfs::file_monitor_callback func = cb->callback;
-        func(monitor, evt, file_name, cb->user_data);
+        func(monitor, event, file_name, cb->user_data);
     }
 }
 
@@ -295,10 +295,10 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
             {
                 const std::filesystem::path file_name = (const char*)event->name;
 
-                VFSFileMonitorEvent monitor_event;
+                vfs::file_monitor_event monitor_event;
                 if (event->mask & (IN_CREATE | IN_MOVED_TO))
                 {
-                    monitor_event = VFSFileMonitorEvent::CREATE;
+                    monitor_event = vfs::file_monitor_event::created;
 #if defined(VFS_FILE_MONITOR_DEBUG)
                     const auto path = monitor->path / file_name;
                     ztd::logger::debug("inotify-event MASK={} CREATE={}", event->mask, path);
@@ -306,7 +306,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 }
                 else if (event->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
                 {
-                    monitor_event = VFSFileMonitorEvent::DELETE;
+                    monitor_event = vfs::file_monitor_event::deleted;
 #if defined(VFS_FILE_MONITOR_DEBUG)
                     const auto path = monitor->path / file_name;
                     ztd::logger::debug("inotify-event MASK={} DELETE={}", event->mask, path);
@@ -314,7 +314,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 }
                 else if (event->mask & (IN_MODIFY | IN_ATTRIB))
                 {
-                    monitor_event = VFSFileMonitorEvent::CHANGE;
+                    monitor_event = vfs::file_monitor_event::changed;
 #if defined(VFS_FILE_MONITOR_DEBUG)
                     const auto path = monitor->path / file_name;
                     ztd::logger::debug("inotify-event MASK={} CHANGE={}", event->mask, path);
@@ -322,7 +322,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 }
                 else
                 { // IN_IGNORED not handled
-                    monitor_event = VFSFileMonitorEvent::CHANGE;
+                    monitor_event = vfs::file_monitor_event::changed;
 #if defined(VFS_FILE_MONITOR_DEBUG)
                     const auto path = monitor->path / file_name;
                     ztd::logger::debug("inotify-event MASK={} OTHER={}", event->mask, path);

@@ -100,7 +100,7 @@ static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* pag
                                            void* user_data);
 static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
 static void on_file_browser_open_item(PtkFileBrowser* file_browser,
-                                      const std::filesystem::path& path, PtkOpenAction action,
+                                      const std::filesystem::path& path, ptk::open_action action,
                                       MainWindow* main_window);
 static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
 static void on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window);
@@ -263,7 +263,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
     xset_t set;
     std::filesystem::path path;
     std::string msg;
-    PluginJob job = PluginJob::INSTALL;
+    plugin::job job = plugin::job::install;
 
     if (!item)
     {
@@ -280,7 +280,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
 
     if (ztd::endswith(set->name, "cfile") || ztd::endswith(set->name, "curl"))
     {
-        job = PluginJob::COPY;
+        job = plugin::job::copy;
     }
 
     if (ztd::endswith(set->name, "file"))
@@ -317,7 +317,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
     std::filesystem::path plug_dir;
     switch (job)
     {
-        case PluginJob::INSTALL:
+        case plugin::job::install:
         {
             // install job
             char* filename = ztd::strdup(path.filename());
@@ -372,7 +372,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
             std::free(plug_dir_name);
             break;
         }
-        case PluginJob::COPY:
+        case plugin::job::copy:
         {
             // copy job
             const auto user_tmp = vfs::user_dirs->program_tmp_dir();
@@ -395,8 +395,7 @@ on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
             }
             break;
         }
-        case PluginJob::REMOVE:
-        default:
+        case plugin::job::remove:
             break;
     }
 
@@ -577,7 +576,7 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
-        edit_preference(GTK_WINDOW(parent), PrefDlgPage::PREF_ADVANCED);
+        edit_preference(GTK_WINDOW(parent), preference_dialog::page::advanced);
         main_term = xset_get_s(xset::name::main_terminal);
         if (!main_term)
         {
@@ -646,7 +645,7 @@ main_window_rubberband_all()
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
-                if (a_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+                if (a_browser->view_mode == ptk::file_browser::view_mode::list_view)
                 {
                     gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(a_browser->folder_view),
                                                      xset_get_b(xset::name::rubberband));
@@ -1026,7 +1025,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                                   cur_tabx));
                     if (file_browser)
                     {
-                        if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+                        if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
                         {
                             ptk_file_browser_save_column_widths(
                                 GTK_TREE_VIEW(file_browser->folder_view),
@@ -1075,7 +1074,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 horiz = show[panel_4];
                 vert = show[panel_1] || show[panel_2];
                 break;
-            default:
+            case 4:
                 horiz = show[panel_3];
                 vert = show[panel_1] || show[panel_2];
                 break;
@@ -1941,7 +1940,7 @@ main_window_store_positions(MainWindow* main_window)
             {
                 a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), page_x));
-                if (a_browser && a_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+                if (a_browser && a_browser->view_mode == ptk::file_browser::view_mode::list_view)
                 {
                     ptk_file_browser_save_column_widths(GTK_TREE_VIEW(a_browser->folder_view),
                                                         a_browser);
@@ -2694,10 +2693,11 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
         file_browser,
         app_settings.get_show_thumbnail() ? app_settings.get_max_thumb_size() : 0);
 
-    ptk_file_browser_set_sort_order(file_browser,
-                                    (PtkFBSortOrder)xset_get_int_panel(file_browser->mypanel,
-                                                                       xset::panel::list_detailed,
-                                                                       xset::var::x));
+    ptk_file_browser_set_sort_order(
+        file_browser,
+        (ptk::file_browser::sort_order)xset_get_int_panel(file_browser->mypanel,
+                                                          xset::panel::list_detailed,
+                                                          xset::var::x));
     ptk_file_browser_set_sort_type(file_browser,
                                    (GtkSortType)xset_get_int_panel(file_browser->mypanel,
                                                                    xset::panel::list_detailed,
@@ -2705,13 +2705,15 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 
-    // file_browser->add_event<EventType::CHDIR_BEFORE>(on_file_browser_before_chdir, main_window);
-    file_browser->add_event<EventType::CHDIR_BEGIN>(on_file_browser_begin_chdir, main_window);
-    file_browser->add_event<EventType::CHDIR_AFTER>(on_file_browser_after_chdir, main_window);
-    file_browser->add_event<EventType::OPEN_ITEM>(on_file_browser_open_item, main_window);
-    file_browser->add_event<EventType::CHANGE_CONTENT>(on_file_browser_content_change, main_window);
-    file_browser->add_event<EventType::CHANGE_SEL>(on_file_browser_sel_change, main_window);
-    file_browser->add_event<EventType::CHANGE_PANE>(on_file_browser_panel_change, main_window);
+    // file_browser->add_event<spacefm::signal::chdir_before>(on_file_browser_before_chdir, main_window);
+    file_browser->add_event<spacefm::signal::chdir_begin>(on_file_browser_begin_chdir, main_window);
+    file_browser->add_event<spacefm::signal::chdir_after>(on_file_browser_after_chdir, main_window);
+    file_browser->add_event<spacefm::signal::open_item>(on_file_browser_open_item, main_window);
+    file_browser->add_event<spacefm::signal::change_content>(on_file_browser_content_change,
+                                                             main_window);
+    file_browser->add_event<spacefm::signal::change_sel>(on_file_browser_sel_change, main_window);
+    file_browser->add_event<spacefm::signal::change_pane>(on_file_browser_panel_change,
+                                                          main_window);
 
     GtkWidget* tab_label = main_window_create_tab_label(main_window, file_browser);
     const i32 idx =
@@ -2734,9 +2736,9 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
 
     if (!ptk_file_browser_chdir(file_browser,
                                 folder_path,
-                                PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY))
+                                ptk::file_browser::chdir_mode::add_history))
     {
-        ptk_file_browser_chdir(file_browser, "/", PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        ptk_file_browser_chdir(file_browser, "/", ptk::file_browser::chdir_mode::add_history);
     }
 
     if (event_handler->tab_new->s || event_handler->tab_new->ob2_data)
@@ -2802,7 +2804,7 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 main_window_preference(MainWindow* main_window)
 {
-    edit_preference(GTK_WINDOW(main_window), PrefDlgPage::PREF_GENERAL);
+    edit_preference(GTK_WINDOW(main_window), preference_dialog::page::general);
 }
 
 static void
@@ -2936,7 +2938,7 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (xset_get_b(xset::name::main_full))
     {
-        if (file_browser && file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        if (file_browser && file_browser->view_mode == ptk::file_browser::view_mode::list_view)
         {
             ptk_file_browser_save_column_widths(GTK_TREE_VIEW(file_browser->folder_view),
                                                 file_browser);
@@ -3051,7 +3053,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     if (curfb)
     {
         ptk_file_browser_slider_release(nullptr, nullptr, curfb);
-        if (curfb->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        if (curfb->view_mode == ptk::file_browser::view_mode::list_view)
         {
             ptk_file_browser_save_column_widths(GTK_TREE_VIEW(curfb->folder_view), curfb);
         }
@@ -3098,7 +3100,7 @@ main_window_open_path_in_current_tab(MainWindow* main_window, const std::filesys
     {
         return;
     }
-    ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+    ptk_file_browser_chdir(file_browser, path, ptk::file_browser::chdir_mode::add_history);
 }
 
 void
@@ -3115,7 +3117,7 @@ main_window_open_network(MainWindow* main_window, const std::string_view url, bo
 
 static void
 on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::path& path,
-                          PtkOpenAction action, MainWindow* main_window)
+                          ptk::open_action action, MainWindow* main_window)
 {
     if (path.empty())
     {
@@ -3124,16 +3126,15 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
 
     switch (action)
     {
-        case PtkOpenAction::PTK_OPEN_DIR:
-            ptk_file_browser_chdir(file_browser, path, PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+        case ptk::open_action::dir:
+            ptk_file_browser_chdir(file_browser, path, ptk::file_browser::chdir_mode::add_history);
             break;
-        case PtkOpenAction::PTK_OPEN_NEW_TAB:
+        case ptk::open_action::new_tab:
             main_window_add_new_tab(main_window, path);
             break;
-        case PtkOpenAction::PTK_OPEN_NEW_WINDOW:
-        case PtkOpenAction::PTK_OPEN_TERMINAL:
-        case PtkOpenAction::PTK_OPEN_FILE:
-        default:
+        case ptk::open_action::new_window:
+        case ptk::open_action::terminal:
+        case ptk::open_action::file:
             break;
     }
 }
@@ -3963,42 +3964,45 @@ main_window_get_on_current_desktop()
     return invalid ? main_window_get_last_active() : nullptr;
 }
 
-enum MainWindowTaskCol
+namespace main_window
 {
-    TASK_COL_STATUS,
-    TASK_COL_COUNT,
-    TASK_COL_PATH,
-    TASK_COL_FILE,
-    TASK_COL_TO,
-    TASK_COL_PROGRESS,
-    TASK_COL_TOTAL,
-    TASK_COL_STARTED,
-    TASK_COL_ELAPSED,
-    TASK_COL_CURSPEED,
-    TASK_COL_CUREST,
-    TASK_COL_AVGSPEED,
-    TASK_COL_AVGEST,
-    TASK_COL_STARTTIME,
-    TASK_COL_ICON,
-    TASK_COL_DATA
-};
+    enum column
+    {
+        status,
+        count,
+        path,
+        file,
+        to,
+        progress,
+        total,
+        started,
+        elapsed,
+        curspeed,
+        curest,
+        avgspeed,
+        avgest,
+        starttime,
+        icon,
+        data
+    };
+}
 
-inline constexpr std::array<const std::string_view, 14> task_titles{
+const std::map<main_window::column, const std::string_view> task_titles{
     // If you change "Status", also change it in on_task_button_press_event
-    "Status",
-    "#",
-    "Directory",
-    "Item",
-    "To",
-    "Progress",
-    "Total",
-    "Started",
-    "Elapsed",
-    "Current",
-    "CRemain",
-    "Average",
-    "Remain",
-    "StartTime",
+    {main_window::column::status, "Status"},
+    {main_window::column::count, "#"},
+    {main_window::column::path, "Directory"},
+    {main_window::column::file, "Item"},
+    {main_window::column::to, "To"},
+    {main_window::column::progress, "Progress"},
+    {main_window::column::total, "Total"},
+    {main_window::column::started, "Started"},
+    {main_window::column::elapsed, "Elapsed"},
+    {main_window::column::curspeed, "Current"},
+    {main_window::column::curest, "CRemain"},
+    {main_window::column::avgspeed, "Average"},
+    {main_window::column::avgest, "Remain"},
+    {main_window::column::starttime, "StartTime"},
 };
 
 inline constexpr std::array<xset::name, 13> task_names{
@@ -4052,14 +4056,14 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         return;
     }
 
-    if (!c->var[ItemPropContext::CONTEXT_NAME].empty())
+    if (!c->var[item_prop::context::item::name].empty())
     {
         // if name is set, assume we do not need all selected files info
-        c->var[ItemPropContext::CONTEXT_DIR] = ptk_file_browser_get_cwd(file_browser);
-        // if (c->var[ItemPropContext::CONTEXT_DIR])
+        c->var[item_prop::context::item::dir] = ptk_file_browser_get_cwd(file_browser);
+        // if (c->var[item_prop::context::item::dir])
         //{
-        c->var[ItemPropContext::CONTEXT_WRITE_ACCESS] =
-            ptk_file_browser_write_access(c->var[ItemPropContext::CONTEXT_DIR]) ? "false" : "true";
+        c->var[item_prop::context::item::write_access] =
+            ptk_file_browser_write_access(c->var[item_prop::context::item::dir]) ? "false" : "true";
         // }
 
         const std::vector<vfs::file_info> sel_files =
@@ -4068,40 +4072,40 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         {
             vfs::file_info file = vfs_file_info_ref(sel_files.front());
 
-            c->var[ItemPropContext::CONTEXT_NAME] = file->get_name();
-            const auto path = std::filesystem::path() / c->var[ItemPropContext::CONTEXT_DIR] /
-                              c->var[ItemPropContext::CONTEXT_NAME];
-            c->var[ItemPropContext::CONTEXT_IS_DIR] =
+            c->var[item_prop::context::item::name] = file->get_name();
+            const auto path = std::filesystem::path() / c->var[item_prop::context::item::dir] /
+                              c->var[item_prop::context::item::name];
+            c->var[item_prop::context::item::is_dir] =
                 std::filesystem::is_directory(path) ? "true" : "false";
-            c->var[ItemPropContext::CONTEXT_IS_TEXT] = file->is_text(path) ? "true" : "false";
-            c->var[ItemPropContext::CONTEXT_IS_LINK] = file->is_symlink() ? "true" : "false";
+            c->var[item_prop::context::item::is_text] = file->is_text(path) ? "true" : "false";
+            c->var[item_prop::context::item::is_link] = file->is_symlink() ? "true" : "false";
 
             mime_type = file->get_mime_type();
             if (mime_type)
             {
-                c->var[ItemPropContext::CONTEXT_MIME] = mime_type->get_type();
+                c->var[item_prop::context::item::mime] = mime_type->get_type();
             }
 
-            c->var[ItemPropContext::CONTEXT_MUL_SEL] = sel_files.size() > 1 ? "true" : "false";
+            c->var[item_prop::context::item::mul_sel] = sel_files.size() > 1 ? "true" : "false";
 
             vfs_file_info_unref(file);
         }
         else
         {
-            c->var[ItemPropContext::CONTEXT_NAME] = "";
-            c->var[ItemPropContext::CONTEXT_IS_DIR] = "false";
-            c->var[ItemPropContext::CONTEXT_IS_TEXT] = "false";
-            c->var[ItemPropContext::CONTEXT_IS_LINK] = "false";
-            c->var[ItemPropContext::CONTEXT_MIME] = "";
-            c->var[ItemPropContext::CONTEXT_MUL_SEL] = "false";
+            c->var[item_prop::context::item::name] = "";
+            c->var[item_prop::context::item::is_dir] = "false";
+            c->var[item_prop::context::item::is_text] = "false";
+            c->var[item_prop::context::item::is_link] = "false";
+            c->var[item_prop::context::item::mime] = "";
+            c->var[item_prop::context::item::mul_sel] = "false";
         }
 
         vfs_file_info_list_free(sel_files);
     }
 
-    c->var[ItemPropContext::CONTEXT_IS_ROOT] = geteuid() == 0 ? "true" : "false";
+    c->var[item_prop::context::item::is_root] = geteuid() == 0 ? "true" : "false";
 
-    if (c->var[ItemPropContext::CONTEXT_CLIP_FILES].empty())
+    if (c->var[item_prop::context::item::clip_files].empty())
     {
         clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
         if (!gtk_clipboard_wait_is_target_available(
@@ -4109,21 +4113,21 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
                 gdk_atom_intern("x-special/gnome-copied-files", false)) &&
             !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
         {
-            c->var[ItemPropContext::CONTEXT_CLIP_FILES] = "false";
+            c->var[item_prop::context::item::clip_files] = "false";
         }
         else
         {
-            c->var[ItemPropContext::CONTEXT_CLIP_FILES] = "true";
+            c->var[item_prop::context::item::clip_files] = "true";
         }
     }
 
-    if (c->var[ItemPropContext::CONTEXT_CLIP_TEXT].empty())
+    if (c->var[item_prop::context::item::clip_text].empty())
     {
         if (!clip)
         {
             clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
         }
-        c->var[ItemPropContext::CONTEXT_CLIP_TEXT] =
+        c->var[item_prop::context::item::clip_text] =
             gtk_clipboard_wait_is_text_available(clip) ? "true" : "false";
     }
 
@@ -4139,11 +4143,11 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
     if (file_browser->side_dev &&
         (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev))))
     {
-        c->var[ItemPropContext::CONTEXT_DEVICE] = vol->device_file;
-        c->var[ItemPropContext::CONTEXT_DEVICE_LABEL] = vol->label;
-        c->var[ItemPropContext::CONTEXT_DEVICE_MOUNT_POINT] = vol->mount_point;
-        c->var[ItemPropContext::CONTEXT_DEVICE_UDI] = vol->udi;
-        c->var[ItemPropContext::CONTEXT_DEVICE_FSTYPE] = vol->fs_type;
+        c->var[item_prop::context::item::device] = vol->device_file;
+        c->var[item_prop::context::item::device_label] = vol->label;
+        c->var[item_prop::context::item::device_mount_point] = vol->mount_point;
+        c->var[item_prop::context::item::device_udi] = vol->udi;
+        c->var[item_prop::context::item::device_fstype] = vol->fs_type;
 
         std::string flags;
         if (vol->is_removable)
@@ -4183,7 +4187,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             flags = std::format("{} no_media", flags);
         }
 
-        c->var[ItemPropContext::CONTEXT_DEVICE_PROP] = flags;
+        c->var[item_prop::context::item::device_prop] = flags;
     }
 
     // panels
@@ -4210,121 +4214,121 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         }
 
         panel_count++;
-        c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = ptk_file_browser_get_cwd(a_browser);
+        c->var[item_prop::context::item::panel1_dir + p - 1] = ptk_file_browser_get_cwd(a_browser);
 
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
         {
-            c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = vol->device_file;
+            c->var[item_prop::context::item::panel1_device + p - 1] = vol->device_file;
         }
 
         // panel has files selected?
-        if (a_browser->view_mode == PtkFBViewMode::PTK_FB_ICON_VIEW ||
-            a_browser->view_mode == PtkFBViewMode::PTK_FB_COMPACT_VIEW)
+        if (a_browser->view_mode == ptk::file_browser::view_mode::icon_view ||
+            a_browser->view_mode == ptk::file_browser::view_mode::compact_view)
         {
             GList* sel_files = folder_view_get_selected_items(a_browser, &model);
             if (sel_files)
             {
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "true";
+                c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
             }
             else
             {
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+                c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
             }
             g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
             g_list_free(sel_files);
         }
-        else if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+        else if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
         {
             GtkTreeSelection* tree_sel =
                 gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view));
             if (gtk_tree_selection_count_selected_rows(tree_sel) > 0)
             {
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "true";
+                c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
             }
             else
             {
-                c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+                c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
             }
         }
         else
         {
-            c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+            c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
         }
 
         if (file_browser == a_browser)
         {
-            c->var[ItemPropContext::CONTEXT_TAB] = std::to_string(i + 1);
-            c->var[ItemPropContext::CONTEXT_TAB_COUNT] =
+            c->var[item_prop::context::item::tab] = std::to_string(i + 1);
+            c->var[item_prop::context::item::tab_count] =
                 std::to_string(gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])));
         }
     }
-    c->var[ItemPropContext::CONTEXT_PANEL_COUNT] = panel_count;
-    c->var[ItemPropContext::CONTEXT_PANEL] = file_browser->mypanel;
+    c->var[item_prop::context::item::panel_count] = panel_count;
+    c->var[item_prop::context::item::panel] = file_browser->mypanel;
 
     for (const panel_t p : PANELS)
     {
-        if (c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1].empty())
+        if (c->var[item_prop::context::item::panel1_dir + p - 1].empty())
         {
-            c->var[ItemPropContext::CONTEXT_PANEL1_DIR + p - 1] = "";
+            c->var[item_prop::context::item::panel1_dir + p - 1] = "";
         }
-        if (c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1].empty())
+        if (c->var[item_prop::context::item::panel1_sel + p - 1].empty())
         {
-            c->var[ItemPropContext::CONTEXT_PANEL1_SEL + p - 1] = "false";
+            c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
         }
-        if (c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1].empty())
+        if (c->var[item_prop::context::item::panel1_device + p - 1].empty())
         {
-            c->var[ItemPropContext::CONTEXT_PANEL1_DEVICE + p - 1] = "";
+            c->var[item_prop::context::item::panel1_device + p - 1] = "";
         }
     }
 
     // tasks
-    static constexpr std::array<const std::string_view, 7> job_titles{
-        "move",
-        "copy",
-        "trash",
-        "delete",
-        "link",
-        "change",
-        "run",
+    const std::map<vfs::file_task_type, const std::string_view> job_titles{
+        {vfs::file_task_type::move, "move"},
+        {vfs::file_task_type::copy, "copy"},
+        {vfs::file_task_type::trash, "trash"},
+        {vfs::file_task_type::DELETE, "delete"},
+        {vfs::file_task_type::link, "link"},
+        {vfs::file_task_type::chmod_chown, "change"},
+        {vfs::file_task_type::exec, "run"},
     };
 
     PtkFileTask* ptask = get_selected_task(file_browser->task_view);
     if (ptask)
     {
-        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = job_titles.at(ptask->task->type).data();
-        if (ptask->task->type == VFSFileTaskType::EXEC)
+        c->var[item_prop::context::item::task_type] = job_titles.at(ptask->task->type).data();
+        if (ptask->task->type == vfs::file_task_type::exec)
         {
             if (ptask->task->current_file)
             {
-                c->var[ItemPropContext::CONTEXT_TASK_NAME] = ptask->task->current_file.value();
+                c->var[item_prop::context::item::task_name] = ptask->task->current_file.value();
             }
             if (ptask->task->dest_dir)
             {
-                c->var[ItemPropContext::CONTEXT_TASK_DIR] = ptask->task->dest_dir.value();
+                c->var[item_prop::context::item::task_dir] = ptask->task->dest_dir.value();
             }
         }
         else
         {
-            c->var[ItemPropContext::CONTEXT_TASK_NAME] = "";
+            c->var[item_prop::context::item::task_name] = "";
             ptk_file_task_lock(ptask);
             if (ptask->task->current_file)
             {
                 const auto current_file = ptask->task->current_file.value();
-                c->var[ItemPropContext::CONTEXT_TASK_DIR] = current_file.parent_path();
+                c->var[item_prop::context::item::task_dir] = current_file.parent_path();
             }
             ptk_file_task_unlock(ptask);
         }
     }
     else
     {
-        c->var[ItemPropContext::CONTEXT_TASK_TYPE] = "";
-        c->var[ItemPropContext::CONTEXT_TASK_NAME] = "";
-        c->var[ItemPropContext::CONTEXT_TASK_DIR] = "";
+        c->var[item_prop::context::item::task_type] = "";
+        c->var[item_prop::context::item::task_name] = "";
+        c->var[item_prop::context::item::task_dir] = "";
     }
     if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
     {
-        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = "0";
+        c->var[item_prop::context::item::task_count] = "0";
     }
     else
     {
@@ -4338,7 +4342,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
                 task_count++;
             }
         }
-        c->var[ItemPropContext::CONTEXT_TASK_COUNT] = std::to_string(task_count);
+        c->var[item_prop::context::item::task_count] = std::to_string(task_count);
     }
 
     c->valid = true;
@@ -4566,8 +4570,16 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     PtkFileTask* ptask = get_selected_task(file_browser->task_view);
     if (ptask)
     {
-        static constexpr std::array<const std::string_view, 7>
-            job_titles{"move", "copy", "trash", "delete", "link", "change", "run"};
+        const std::map<vfs::file_task_type, const std::string_view> job_titles{
+            {vfs::file_task_type::move, "move"},
+            {vfs::file_task_type::copy, "copy"},
+            {vfs::file_task_type::trash, "trash"},
+            {vfs::file_task_type::DELETE, "delete"},
+            {vfs::file_task_type::link, "link"},
+            {vfs::file_task_type::chmod_chown, "change"},
+            {vfs::file_task_type::exec, "run"},
+        };
+
         buf.append("\n");
         buf.append(std::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
 
@@ -4575,7 +4587,7 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         const auto current_file = ptask->task->current_file.value_or("");
         const auto current_dest = ptask->task->current_dest.value_or("");
 
-        if (ptask->task->type == VFSFileTaskType::EXEC)
+        if (ptask->task->type == vfs::file_task_type::exec)
         {
             // clang-format off
             buf.append(std::format("set fm_task_pwd {}\n", ztd::shell::quote(dest_dir.string())));
@@ -4627,7 +4639,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         const char* title = gtk_tree_view_column_get_title(col);
         for (const auto [index, value] : ztd::enumerate(task_names))
         {
-            if (ztd::same(title, task_titles.at(index)))
+            if (ztd::same(title, task_titles.at(main_window::column(index))))
             {
                 xset_t set = xset_get(value);
                 // save column position
@@ -4712,11 +4724,11 @@ main_task_pause_all_queued(PtkFileTask* ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &qtask, -1);
+            gtk_tree_model_get(model, &it, main_window::column::data, &qtask, -1);
             if (qtask && qtask != ptask && qtask->task && !qtask->complete &&
-                qtask->task->state_pause == VFSFileTaskState::QUEUE)
+                qtask->task->state_pause == vfs::file_task_state::queue)
             {
-                ptk_file_task_pause(qtask, VFSFileTaskState::PAUSE);
+                ptk_file_task_pause(qtask, vfs::file_task_state::pause);
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
@@ -4740,15 +4752,15 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &qtask, -1);
+            gtk_tree_model_get(model, &it, main_window::column::data, &qtask, -1);
             if (qtask && qtask->task && !qtask->complete &&
-                qtask->task->state == VFSFileTaskState::RUNNING)
+                qtask->task->state == vfs::file_task_state::running)
             {
-                if (qtask->task->state_pause == VFSFileTaskState::QUEUE)
+                if (qtask->task->state_pause == vfs::file_task_state::queue)
                 {
                     queued = g_slist_append(queued, qtask);
                 }
-                else if (qtask->task->state_pause == VFSFileTaskState::RUNNING)
+                else if (qtask->task->state_pause == vfs::file_task_state::running)
                 {
                     running = g_slist_append(running, qtask);
                 }
@@ -4757,8 +4769,8 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     }
 
     if (new_ptask && new_ptask->task && !new_ptask->complete &&
-        new_ptask->task->state_pause == VFSFileTaskState::QUEUE &&
-        new_ptask->task->state == VFSFileTaskState::RUNNING)
+        new_ptask->task->state_pause == vfs::file_task_state::queue &&
+        new_ptask->task->state == vfs::file_task_state::running)
     {
         queued = g_slist_append(queued, new_ptask);
     }
@@ -4772,7 +4784,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 
     if (!smart)
     {
-        ptk_file_task_pause(PTK_FILE_TASK(queued->data), VFSFileTaskState::RUNNING);
+        ptk_file_task_pause(PTK_FILE_TASK(queued->data), vfs::file_task_state::running);
 
         g_slist_free(queued);
         g_slist_free(running);
@@ -4787,7 +4799,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
         {
             // qtask has no devices so run it
             running = g_slist_append(running, qtask);
-            ptk_file_task_pause(qtask, VFSFileTaskState::RUNNING);
+            ptk_file_task_pause(qtask, vfs::file_task_state::running);
             continue;
         }
     }
@@ -4803,14 +4815,14 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
     PtkFileTask* ptask = nullptr;
     xset_t set;
 
-    enum class MainWindowJob
+    enum class main_window_job
     {
-        JOB_STOP,
-        JOB_PAUSE,
-        JOB_QUEUE,
-        JOB_RESUME
+        stop,
+        pause,
+        queue,
+        resume
     };
-    MainWindowJob job;
+    main_window_job job;
 
     if (item)
     {
@@ -4828,19 +4840,19 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
 
     if (ztd::startswith(set->name, "task_stop"))
     {
-        job = MainWindowJob::JOB_STOP;
+        job = main_window_job::stop;
     }
     else if (ztd::startswith(set->name, "task_pause"))
     {
-        job = MainWindowJob::JOB_PAUSE;
+        job = main_window_job::pause;
     }
     else if (ztd::startswith(set->name, "task_que"))
     {
-        job = MainWindowJob::JOB_QUEUE;
+        job = main_window_job::queue;
     }
     else if (ztd::startswith(set->name, "task_resume"))
     {
-        job = MainWindowJob::JOB_RESUME;
+        job = main_window_job::resume;
     }
     else
     {
@@ -4875,27 +4887,25 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
         {
             if (model)
             {
-                gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+                gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
             }
             if (ptask && ptask->task && !ptask->complete &&
-                (ptask->task->type != VFSFileTaskType::EXEC || ptask->task->exec_pid ||
-                 job == MainWindowJob::JOB_STOP))
+                (ptask->task->type != vfs::file_task_type::exec || ptask->task->exec_pid ||
+                 job == main_window_job::stop))
             {
                 switch (job)
                 {
-                    case MainWindowJob::JOB_STOP:
+                    case main_window_job::stop:
                         ptk_file_task_cancel(ptask);
                         break;
-                    case MainWindowJob::JOB_PAUSE:
-                        ptk_file_task_pause(ptask, VFSFileTaskState::PAUSE);
+                    case main_window_job::pause:
+                        ptk_file_task_pause(ptask, vfs::file_task_state::pause);
                         break;
-                    case MainWindowJob::JOB_QUEUE:
-                        ptk_file_task_pause(ptask, VFSFileTaskState::QUEUE);
+                    case main_window_job::queue:
+                        ptk_file_task_pause(ptask, vfs::file_task_state::queue);
                         break;
-                    case MainWindowJob::JOB_RESUME:
-                        ptk_file_task_pause(ptask, VFSFileTaskState::RUNNING);
-                        break;
-                    default:
+                    case main_window_job::resume:
+                        ptk_file_task_pause(ptask, vfs::file_task_state::running);
                         break;
                 }
             }
@@ -5197,7 +5207,7 @@ get_selected_task(GtkWidget* view)
     tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
     {
-        gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+        gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
     }
     return ptask;
 }
@@ -5214,7 +5224,7 @@ show_task_dialog(GtkWidget* widget, GtkWidget* view)
 
     ptk_file_task_lock(ptask);
     ptk_file_task_progress_open(ptask);
-    if (ptask->task->state_pause != VFSFileTaskState::RUNNING)
+    if (ptask->task->state_pause != vfs::file_task_state::running)
     {
         // update dlg
         ptask->pause_change = true;
@@ -5288,7 +5298,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             }
             if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
             {
-                gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+                gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
             }
             gtk_tree_path_free(tree_path);
 
@@ -5303,18 +5313,17 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             xset::name sname;
             switch (ptask->task->state_pause)
             {
-                case VFSFileTaskState::PAUSE:
+                case vfs::file_task_state::pause:
                     sname = xset::name::task_que;
                     break;
-                case VFSFileTaskState::QUEUE:
+                case vfs::file_task_state::queue:
                     sname = xset::name::task_resume;
                     break;
-                case VFSFileTaskState::RUNNING:
-                case VFSFileTaskState::SIZE_TIMEOUT:
-                case VFSFileTaskState::QUERY_OVERWRITE:
-                case VFSFileTaskState::ERROR:
-                case VFSFileTaskState::FINISH:
-                default:
+                case vfs::file_task_state::running:
+                case vfs::file_task_state::size_timeout:
+                case vfs::file_task_state::query_overwrite:
+                case vfs::file_task_state::error:
+                case vfs::file_task_state::finish:
                     sname = xset::name::task_pause;
             }
             set = xset_get(sname);
@@ -5337,11 +5346,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                 {
                     if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
                     {
-                        gtk_tree_model_get(model,
-                                           &it,
-                                           MainWindowTaskCol::TASK_COL_DATA,
-                                           &ptask,
-                                           -1);
+                        gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
                     }
                     gtk_tree_path_free(tree_path);
                 }
@@ -5370,20 +5375,23 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             set = xset_get(xset::name::task_pause);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
-            set->disable = (!ptask || ptask->task->state_pause == VFSFileTaskState::PAUSE ||
-                            (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid));
+            set->disable =
+                (!ptask || ptask->task->state_pause == vfs::file_task_state::pause ||
+                 (ptask->task->type == vfs::file_task_type::exec && !ptask->task->exec_pid));
 
             set = xset_get(xset::name::task_que);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
-            set->disable = (!ptask || ptask->task->state_pause == VFSFileTaskState::QUEUE ||
-                            (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid));
+            set->disable =
+                (!ptask || ptask->task->state_pause == vfs::file_task_state::queue ||
+                 (ptask->task->type == vfs::file_task_type::exec && !ptask->task->exec_pid));
 
             set = xset_get(xset::name::task_resume);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
-            set->disable = (!ptask || ptask->task->state_pause == VFSFileTaskState::RUNNING ||
-                            (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_pid));
+            set->disable =
+                (!ptask || ptask->task->state_pause == vfs::file_task_state::running ||
+                 (ptask->task->type == vfs::file_task_type::exec && !ptask->task->exec_pid));
 
             xset_set_cb(xset::name::task_stop_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_pause_all, (GFunc)on_task_stop, view);
@@ -5444,7 +5452,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         return;
     }
 
-    gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+    gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
     if (ptask)
     {
         if (ptask->pop_handler)
@@ -5487,7 +5495,7 @@ main_task_view_remove_task(PtkFileTask* ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptaskt, -1);
+            gtk_tree_model_get(model, &it, main_window::column::data, &ptaskt, -1);
         } while (ptaskt != ptask && gtk_tree_model_iter_next(model, &it));
     }
     if (ptaskt == ptask)
@@ -5518,14 +5526,14 @@ main_task_view_update_task(PtkFileTask* ptask)
     xset_t set;
 
     // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
-    static constexpr std::array<const std::string_view, 7> job_titles{
-        "moving",
-        "copying",
-        "trashing",
-        "deleting",
-        "linking",
-        "changing",
-        "running",
+    const std::map<vfs::file_task_type, const std::string_view> job_titles{
+        {vfs::file_task_type::move, "moving"},
+        {vfs::file_task_type::copy, "copying"},
+        {vfs::file_task_type::trash, "trashing"},
+        {vfs::file_task_type::DELETE, "deleting"},
+        {vfs::file_task_type::link, "linking"},
+        {vfs::file_task_type::chmod_chown, "changing"},
+        {vfs::file_task_type::exec, "running"},
     };
 
     if (!ptask)
@@ -5546,7 +5554,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     }
 
     std::filesystem::path dest_dir;
-    if (ptask->task->type != VFSFileTaskType::EXEC)
+    if (ptask->task->type != vfs::file_task_type::exec)
     {
         if (ptask->task->dest_dir)
         {
@@ -5559,7 +5567,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptaskt, -1);
+            gtk_tree_model_get(model, &it, main_window::column::data, &ptaskt, -1);
         } while (ptaskt != ptask && gtk_tree_model_iter_next(model, &it));
     }
     if (ptaskt != ptask)
@@ -5572,18 +5580,18 @@ main_task_view_update_task(PtkFileTask* ptask)
         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                           &it,
                                           0,
-                                          MainWindowTaskCol::TASK_COL_TO,
+                                          main_window::column::to,
                                           dest_dir.empty() ? nullptr : dest_dir.c_str(),
-                                          MainWindowTaskCol::TASK_COL_STARTED,
+                                          main_window::column::started,
                                           started.str().data(),
-                                          MainWindowTaskCol::TASK_COL_STARTTIME,
+                                          main_window::column::starttime,
                                           (i64)ptask->task->start_time,
-                                          MainWindowTaskCol::TASK_COL_DATA,
+                                          main_window::column::data,
                                           ptask,
                                           -1);
     }
 
-    if (ptask->task->state_pause == VFSFileTaskState::RUNNING || ptask->pause_change_view)
+    if (ptask->task->state_pause == vfs::file_task_state::running || ptask->pause_change_view)
     {
         // update row
         std::string path;
@@ -5598,7 +5606,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         {
             percent = 100;
         }
-        if (ptask->task->type != VFSFileTaskType::EXEC)
+        if (ptask->task->type != vfs::file_task_type::exec)
         {
             if (ptask->task->current_file)
             {
@@ -5618,7 +5626,7 @@ main_task_view_update_task(PtkFileTask* ptask)
         // status
         std::string status;
         char* status3;
-        if (ptask->task->type != VFSFileTaskType::EXEC)
+        if (ptask->task->type != vfs::file_task_type::exec)
         {
             if (!ptask->err_count)
             {
@@ -5643,12 +5651,12 @@ main_task_view_update_task(PtkFileTask* ptask)
             }
         }
 
-        if (ptask->task->state_pause == VFSFileTaskState::PAUSE)
+        if (ptask->task->state_pause == vfs::file_task_state::pause)
         {
             const std::string str = std::format("paused {}", status);
             status3 = ztd::strdup(str);
         }
-        else if (ptask->task->state_pause == VFSFileTaskState::QUEUE)
+        else if (ptask->task->state_pause == vfs::file_task_state::queue)
         {
             const std::string str = std::format("queued {}", status);
             status3 = ztd::strdup(str);
@@ -5664,29 +5672,33 @@ main_task_view_update_task(PtkFileTask* ptask)
         {
             // icon
             std::string iname;
-            if (ptask->task->state_pause == VFSFileTaskState::PAUSE)
+            if (ptask->task->state_pause == vfs::file_task_state::pause)
             {
                 set = xset_get(xset::name::task_pause);
                 iname = set->icon ? set->icon.value() : "media-playback-pause";
             }
-            else if (ptask->task->state_pause == VFSFileTaskState::QUEUE)
+            else if (ptask->task->state_pause == vfs::file_task_state::queue)
             {
                 set = xset_get(xset::name::task_que);
                 iname = set->icon ? set->icon.value() : "list-add";
             }
-            else if (ptask->err_count && ptask->task->type != VFSFileTaskType::EXEC)
+            else if (ptask->err_count && ptask->task->type != vfs::file_task_type::exec)
             {
                 iname = "error";
             }
-            else if (ptask->task->type == 0 || ptask->task->type == 1 || ptask->task->type == 4)
+            else if (ptask->task->type == vfs::file_task_type::move ||
+                     ptask->task->type == vfs::file_task_type::copy ||
+                     ptask->task->type == vfs::file_task_type::link)
             {
                 iname = "stock_copy";
             }
-            else if (ptask->task->type == 2 || ptask->task->type == 3)
+            else if (ptask->task->type == vfs::file_task_type::trash ||
+                     ptask->task->type == vfs::file_task_type::DELETE)
             {
                 iname = "stock_delete";
             }
-            else if (ptask->task->type == VFSFileTaskType::EXEC && !ptask->task->exec_icon.empty())
+            else if (ptask->task->type == vfs::file_task_type::exec &&
+                     !ptask->task->exec_icon.empty())
             {
                 iname = ptask->task->exec_icon;
             }
@@ -5721,35 +5733,35 @@ main_task_view_update_task(PtkFileTask* ptask)
             ptask->pause_change_view = false;
         }
 
-        if (ptask->task->type != VFSFileTaskType::EXEC || ptaskt != ptask /* new task */)
+        if (ptask->task->type != vfs::file_task_type::exec || ptaskt != ptask /* new task */)
         {
             if (pixbuf)
             {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
-                                   MainWindowTaskCol::TASK_COL_ICON,
+                                   main_window::column::icon,
                                    pixbuf,
-                                   MainWindowTaskCol::TASK_COL_STATUS,
+                                   main_window::column::status,
                                    status3,
-                                   MainWindowTaskCol::TASK_COL_COUNT,
+                                   main_window::column::count,
                                    ptask->dsp_file_count.data(),
-                                   MainWindowTaskCol::TASK_COL_PATH,
+                                   main_window::column::path,
                                    path.data(),
-                                   MainWindowTaskCol::TASK_COL_FILE,
+                                   main_window::column::file,
                                    file.data(),
-                                   MainWindowTaskCol::TASK_COL_PROGRESS,
+                                   main_window::column::progress,
                                    percent,
-                                   MainWindowTaskCol::TASK_COL_TOTAL,
+                                   main_window::column::total,
                                    ptask->dsp_size_tally.data(),
-                                   MainWindowTaskCol::TASK_COL_ELAPSED,
+                                   main_window::column::elapsed,
                                    ptask->dsp_elapsed.data(),
-                                   MainWindowTaskCol::TASK_COL_CURSPEED,
+                                   main_window::column::curspeed,
                                    ptask->dsp_curspeed.data(),
-                                   MainWindowTaskCol::TASK_COL_CUREST,
+                                   main_window::column::curest,
                                    ptask->dsp_curest.data(),
-                                   MainWindowTaskCol::TASK_COL_AVGSPEED,
+                                   main_window::column::avgspeed,
                                    ptask->dsp_avgspeed.data(),
-                                   MainWindowTaskCol::TASK_COL_AVGEST,
+                                   main_window::column::avgest,
                                    ptask->dsp_avgest.data(),
                                    -1);
             }
@@ -5757,27 +5769,27 @@ main_task_view_update_task(PtkFileTask* ptask)
             {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
-                                   MainWindowTaskCol::TASK_COL_STATUS,
+                                   main_window::column::status,
                                    status3,
-                                   MainWindowTaskCol::TASK_COL_COUNT,
+                                   main_window::column::count,
                                    ptask->dsp_file_count.data(),
-                                   MainWindowTaskCol::TASK_COL_PATH,
+                                   main_window::column::path,
                                    path.data(),
-                                   MainWindowTaskCol::TASK_COL_FILE,
+                                   main_window::column::file,
                                    file.data(),
-                                   MainWindowTaskCol::TASK_COL_PROGRESS,
+                                   main_window::column::progress,
                                    percent,
-                                   MainWindowTaskCol::TASK_COL_TOTAL,
+                                   main_window::column::total,
                                    ptask->dsp_size_tally.data(),
-                                   MainWindowTaskCol::TASK_COL_ELAPSED,
+                                   main_window::column::elapsed,
                                    ptask->dsp_elapsed.data(),
-                                   MainWindowTaskCol::TASK_COL_CURSPEED,
+                                   main_window::column::curspeed,
                                    ptask->dsp_curspeed.data(),
-                                   MainWindowTaskCol::TASK_COL_CUREST,
+                                   main_window::column::curest,
                                    ptask->dsp_curest.data(),
-                                   MainWindowTaskCol::TASK_COL_AVGSPEED,
+                                   main_window::column::avgspeed,
                                    ptask->dsp_avgspeed.data(),
-                                   MainWindowTaskCol::TASK_COL_AVGEST,
+                                   main_window::column::avgest,
                                    ptask->dsp_avgest.data(),
                                    -1);
             }
@@ -5786,13 +5798,13 @@ main_task_view_update_task(PtkFileTask* ptask)
         {
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
-                               MainWindowTaskCol::TASK_COL_ICON,
+                               main_window::column::icon,
                                pixbuf,
-                               MainWindowTaskCol::TASK_COL_STATUS,
+                               main_window::column::status,
                                status3,
-                               MainWindowTaskCol::TASK_COL_PROGRESS,
+                               main_window::column::progress,
                                percent,
-                               MainWindowTaskCol::TASK_COL_ELAPSED,
+                               main_window::column::elapsed,
                                ptask->dsp_elapsed.data(),
                                -1);
         }
@@ -5800,11 +5812,11 @@ main_task_view_update_task(PtkFileTask* ptask)
         {
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
-                               MainWindowTaskCol::TASK_COL_STATUS,
+                               main_window::column::status,
                                status3,
-                               MainWindowTaskCol::TASK_COL_PROGRESS,
+                               main_window::column::progress,
                                percent,
-                               MainWindowTaskCol::TASK_COL_ELAPSED,
+                               main_window::column::elapsed,
                                ptask->dsp_elapsed.data(),
                                -1);
         }
@@ -5828,17 +5840,17 @@ main_task_view_update_task(PtkFileTask* ptask)
         // task is paused
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
-                           MainWindowTaskCol::TASK_COL_TOTAL,
+                           main_window::column::total,
                            ptask->dsp_size_tally.data(),
-                           MainWindowTaskCol::TASK_COL_ELAPSED,
+                           main_window::column::elapsed,
                            ptask->dsp_elapsed.data(),
-                           MainWindowTaskCol::TASK_COL_CURSPEED,
+                           main_window::column::curspeed,
                            ptask->dsp_curspeed.data(),
-                           MainWindowTaskCol::TASK_COL_CUREST,
+                           main_window::column::curest,
                            ptask->dsp_curest.data(),
-                           MainWindowTaskCol::TASK_COL_AVGSPEED,
+                           main_window::column::avgspeed,
                            ptask->dsp_avgspeed.data(),
-                           MainWindowTaskCol::TASK_COL_AVGEST,
+                           main_window::column::avgest,
                            ptask->dsp_avgest.data(),
                            -1);
     }
@@ -5852,23 +5864,23 @@ main_task_view_new(MainWindow* main_window)
     GtkCellRenderer* renderer;
     GtkCellRenderer* pix_renderer;
 
-    static constexpr std::array<MainWindowTaskCol, 16> cols{
-        MainWindowTaskCol::TASK_COL_STATUS,
-        MainWindowTaskCol::TASK_COL_COUNT,
-        MainWindowTaskCol::TASK_COL_PATH,
-        MainWindowTaskCol::TASK_COL_FILE,
-        MainWindowTaskCol::TASK_COL_TO,
-        MainWindowTaskCol::TASK_COL_PROGRESS,
-        MainWindowTaskCol::TASK_COL_TOTAL,
-        MainWindowTaskCol::TASK_COL_STARTED,
-        MainWindowTaskCol::TASK_COL_ELAPSED,
-        MainWindowTaskCol::TASK_COL_CURSPEED,
-        MainWindowTaskCol::TASK_COL_CUREST,
-        MainWindowTaskCol::TASK_COL_AVGSPEED,
-        MainWindowTaskCol::TASK_COL_AVGEST,
-        MainWindowTaskCol::TASK_COL_STARTTIME,
-        MainWindowTaskCol::TASK_COL_ICON,
-        MainWindowTaskCol::TASK_COL_DATA,
+    static constexpr std::array<main_window::column, 16> cols{
+        main_window::column::status,
+        main_window::column::count,
+        main_window::column::path,
+        main_window::column::file,
+        main_window::column::to,
+        main_window::column::progress,
+        main_window::column::total,
+        main_window::column::started,
+        main_window::column::elapsed,
+        main_window::column::curspeed,
+        main_window::column::curest,
+        main_window::column::avgspeed,
+        main_window::column::avgest,
+        main_window::column::starttime,
+        main_window::column::icon,
+        main_window::column::data,
     };
 
     // Model
@@ -5931,7 +5943,7 @@ main_task_view_new(MainWindow* main_window)
 
         switch (cols.at(j))
         {
-            case MainWindowTaskCol::TASK_COL_STATUS:
+            case main_window::column::status:
                 // Icon and Text
                 renderer = gtk_cell_renderer_text_new();
                 pix_renderer = gtk_cell_renderer_pixbuf_new();
@@ -5940,12 +5952,12 @@ main_task_view_new(MainWindow* main_window)
                 gtk_tree_view_column_set_attributes(col,
                                                     pix_renderer,
                                                     "pixbuf",
-                                                    MainWindowTaskCol::TASK_COL_ICON,
+                                                    main_window::column::icon,
                                                     nullptr);
                 gtk_tree_view_column_set_attributes(col,
                                                     renderer,
                                                     "text",
-                                                    MainWindowTaskCol::TASK_COL_STATUS,
+                                                    main_window::column::status,
                                                     nullptr);
                 gtk_tree_view_column_set_expand(col, false);
                 gtk_tree_view_column_set_sizing(
@@ -5953,15 +5965,15 @@ main_task_view_new(MainWindow* main_window)
                     GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
                 gtk_tree_view_column_set_min_width(col, 60);
                 break;
-            case MainWindowTaskCol::TASK_COL_PROGRESS:
+            case main_window::column::progress:
                 // Progress Bar
                 renderer = gtk_cell_renderer_progress_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
                 gtk_tree_view_column_set_attributes(col, renderer, "value", cols.at(j), nullptr);
                 break;
-            case MainWindowTaskCol::TASK_COL_PATH:
-            case MainWindowTaskCol::TASK_COL_FILE:
-            case MainWindowTaskCol::TASK_COL_TO:
+            case main_window::column::path:
+            case main_window::column::file:
+            case main_window::column::to:
                 // Text Column
                 renderer = gtk_cell_renderer_text_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
@@ -5974,18 +5986,17 @@ main_task_view_new(MainWindow* main_window)
                 g_object_set_property(G_OBJECT(renderer), "ellipsize", &val);
                 g_value_unset(&val);
                 break;
-            case MainWindowTaskCol::TASK_COL_COUNT:
-            case MainWindowTaskCol::TASK_COL_TOTAL:
-            case MainWindowTaskCol::TASK_COL_STARTED:
-            case MainWindowTaskCol::TASK_COL_ELAPSED:
-            case MainWindowTaskCol::TASK_COL_CURSPEED:
-            case MainWindowTaskCol::TASK_COL_CUREST:
-            case MainWindowTaskCol::TASK_COL_AVGSPEED:
-            case MainWindowTaskCol::TASK_COL_AVGEST:
-            case MainWindowTaskCol::TASK_COL_STARTTIME:
-            case MainWindowTaskCol::TASK_COL_ICON:
-            case MainWindowTaskCol::TASK_COL_DATA:
-            default:
+            case main_window::column::count:
+            case main_window::column::total:
+            case main_window::column::started:
+            case main_window::column::elapsed:
+            case main_window::column::curspeed:
+            case main_window::column::curest:
+            case main_window::column::avgspeed:
+            case main_window::column::avgest:
+            case main_window::column::starttime:
+            case main_window::column::icon:
+            case main_window::column::data:
                 // Text Column
                 renderer = gtk_cell_renderer_text_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
@@ -5994,11 +6005,11 @@ main_task_view_new(MainWindow* main_window)
         }
 
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-        gtk_tree_view_column_set_title(col, task_titles.at(j).data());
+        gtk_tree_view_column_set_title(col, task_titles.at(main_window::column(j)).data());
         gtk_tree_view_column_set_reorderable(col, true);
         gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
-        if (j == MainWindowTaskCol::TASK_COL_FILE) //|| j == MainWindowTaskCol::TASK_COL_PATH || j
-                                                   //== MainWindowTaskCol::TASK_COL_TO
+        if (j == main_window::column::file) //|| j == main_window::column::path || j
+                                            //== main_window::column::to
         {
             gtk_tree_view_column_set_sizing(col,
                                             GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
@@ -6017,7 +6028,7 @@ main_task_view_new(MainWindow* main_window)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        MainWindowTaskCol::TASK_COL_STARTTIME,
+                                        main_window::column::starttime,
                                         nullptr);
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     gtk_tree_view_column_set_title(col, "StartTime");
@@ -6028,7 +6039,7 @@ main_task_view_new(MainWindow* main_window)
     if (GTK_IS_TREE_SORTABLE(list))
     {
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
-                                             MainWindowTaskCol::TASK_COL_STARTTIME,
+                                             main_window::column::starttime,
                                              GtkSortType::GTK_SORT_ASCENDING);
     }
 
@@ -6525,13 +6536,14 @@ main_window_socket_command(char* argv[])
             {
                 return {SOCKET_INVALID, "invalid column width"};
             }
-            if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+            if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
             {
                 bool found = false;
                 GtkTreeViewColumn* col;
                 for (const auto [index, value] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), static_cast<i32>(index));
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
+                                                   static_cast<i32>(index));
                     if (!col)
                     {
                         continue;
@@ -6585,33 +6597,33 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
-            PtkFBSortOrder j = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
+            ptk::file_browser::sort_order j = ptk::file_browser::sort_order::name;
             if (!argv[i + 1])
             {
             }
             else if (ztd::same(argv[i + 1], "name"))
             {
-                j = PtkFBSortOrder::PTK_FB_SORT_BY_NAME;
+                j = ptk::file_browser::sort_order::name;
             }
             else if (ztd::same(argv[i + 1], "size"))
             {
-                j = PtkFBSortOrder::PTK_FB_SORT_BY_SIZE;
+                j = ptk::file_browser::sort_order::size;
             }
             else if (ztd::same(argv[i + 1], "type"))
             {
-                j = PtkFBSortOrder::PTK_FB_SORT_BY_TYPE;
+                j = ptk::file_browser::sort_order::type;
             }
             else if (ztd::same(argv[i + 1], "permission"))
             {
-                j = PtkFBSortOrder::PTK_FB_SORT_BY_PERM;
+                j = ptk::file_browser::sort_order::perm;
             }
             else if (ztd::same(argv[i + 1], "owner"))
             {
-                j = PtkFBSortOrder::PTK_FB_SORT_BY_OWNER;
+                j = ptk::file_browser::sort_order::owner;
             }
             else if (ztd::same(argv[i + 1], "modified"))
             {
-                j = PtkFBSortOrder::PTK_FB_SORT_BY_MTIME;
+                j = ptk::file_browser::sort_order::mtime;
             }
             else
             {
@@ -6691,7 +6703,7 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(socket_property, "large_icons"))
         {
-            if (file_browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
+            if (file_browser->view_mode != ptk::file_browser::view_mode::icon_view)
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
@@ -6826,7 +6838,7 @@ main_window_socket_command(char* argv[])
             }
             ptk_file_browser_chdir(file_browser,
                                    argv[i + 1],
-                                   PtkFBChdirMode::PTK_FB_CHDIR_ADD_HISTORY);
+                                   ptk::file_browser::chdir_mode::add_history);
         }
         else
         {
@@ -7029,13 +7041,14 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(socket_property, "column_width"))
         { // COLUMN
-            if (file_browser->view_mode == PtkFBViewMode::PTK_FB_LIST_VIEW)
+            if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
             {
                 bool found = false;
                 GtkTreeViewColumn* col;
                 for (const auto [index, value] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view), static_cast<i32>(index));
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
+                                                   static_cast<i32>(index));
                     if (!col)
                     {
                         continue;
@@ -7089,27 +7102,27 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
-            if (file_browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_NAME)
+            if (file_browser->sort_order == ptk::file_browser::sort_order::name)
             {
                 return {SOCKET_SUCCESS, "name"};
             }
-            else if (file_browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_SIZE)
+            else if (file_browser->sort_order == ptk::file_browser::sort_order::size)
             {
                 return {SOCKET_SUCCESS, "size"};
             }
-            else if (file_browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_TYPE)
+            else if (file_browser->sort_order == ptk::file_browser::sort_order::type)
             {
                 return {SOCKET_SUCCESS, "type"};
             }
-            else if (file_browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_PERM)
+            else if (file_browser->sort_order == ptk::file_browser::sort_order::perm)
             {
                 return {SOCKET_SUCCESS, "permission"};
             }
-            else if (file_browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_OWNER)
+            else if (file_browser->sort_order == ptk::file_browser::sort_order::owner)
             {
                 return {SOCKET_SUCCESS, "owner"};
             }
-            else if (file_browser->sort_order == PtkFBSortOrder::PTK_FB_SORT_BY_MTIME)
+            else if (file_browser->sort_order == ptk::file_browser::sort_order::mtime)
             {
                 return {SOCKET_SUCCESS, "modified"};
             }
@@ -7321,7 +7334,7 @@ main_window_socket_command(char* argv[])
         {
             do
             {
-                gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+                gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
                 const std::string str = std::format("{:p}", (void*)ptask);
                 if (ztd::same(str, argv[i]))
                 {
@@ -7334,7 +7347,7 @@ main_window_socket_command(char* argv[])
         {
             return {SOCKET_INVALID, std::format("invalid task '{}'", argv[i])};
         }
-        if (ptask->task->type != VFSFileTaskType::EXEC)
+        if (ptask->task->type != vfs::file_task_type::exec)
         {
             return {SOCKET_INVALID, std::format("internal task {} is read-only", argv[i])};
         }
@@ -7351,19 +7364,19 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(argv[i + 1], "count"))
         {
-            j = MainWindowTaskCol::TASK_COL_COUNT;
+            j = main_window::column::count;
         }
         else if (ztd::same(argv[i + 1], "directory") || ztd::same(argv[i + 1], "from"))
         {
-            j = MainWindowTaskCol::TASK_COL_PATH;
+            j = main_window::column::path;
         }
         else if (ztd::same(argv[i + 1], "item"))
         {
-            j = MainWindowTaskCol::TASK_COL_FILE;
+            j = main_window::column::file;
         }
         else if (ztd::same(argv[i + 1], "to"))
         {
-            j = MainWindowTaskCol::TASK_COL_TO;
+            j = main_window::column::to;
         }
         else if (ztd::same(argv[i + 1], "progress"))
         {
@@ -7390,23 +7403,23 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(argv[i + 1], "total"))
         {
-            j = MainWindowTaskCol::TASK_COL_TOTAL;
+            j = main_window::column::total;
         }
         else if (ztd::same(argv[i + 1], "curspeed"))
         {
-            j = MainWindowTaskCol::TASK_COL_CURSPEED;
+            j = main_window::column::curspeed;
         }
         else if (ztd::same(argv[i + 1], "curremain"))
         {
-            j = MainWindowTaskCol::TASK_COL_CUREST;
+            j = main_window::column::curest;
         }
         else if (ztd::same(argv[i + 1], "avgspeed"))
         {
-            j = MainWindowTaskCol::TASK_COL_AVGSPEED;
+            j = main_window::column::avgspeed;
         }
         else if (ztd::same(argv[i + 1], "avgremain"))
         {
-            j = MainWindowTaskCol::TASK_COL_AVGEST;
+            j = main_window::column::avgest;
         }
         else if (ztd::same(argv[i + 1], "elapsed") || ztd::same(argv[i + 1], "started") ||
                  ztd::same(argv[i + 1], "status"))
@@ -7417,15 +7430,15 @@ main_window_socket_command(char* argv[])
         {
             if (!argv[i + 2] || ztd::same(argv[i + 2], "run"))
             {
-                ptk_file_task_pause(ptask, VFSFileTaskState::RUNNING);
+                ptk_file_task_pause(ptask, vfs::file_task_state::running);
             }
             else if (ztd::same(argv[i + 2], "pause"))
             {
-                ptk_file_task_pause(ptask, VFSFileTaskState::PAUSE);
+                ptk_file_task_pause(ptask, vfs::file_task_state::pause);
             }
             else if (ztd::same(argv[i + 2], "queue") || ztd::same(argv[i + 2], "queued"))
             {
-                ptk_file_task_pause(ptask, VFSFileTaskState::QUEUE);
+                ptk_file_task_pause(ptask, vfs::file_task_state::queue);
             }
             else if (ztd::same(argv[i + 2], "stop"))
             {
@@ -7475,7 +7488,7 @@ main_window_socket_command(char* argv[])
         {
             do
             {
-                gtk_tree_model_get(model, &it, MainWindowTaskCol::TASK_COL_DATA, &ptask, -1);
+                gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
                 const std::string str = std::format("{:p}", (void*)ptask);
                 if (ztd::same(str, argv[i]))
                 {
@@ -7503,19 +7516,19 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(argv[i + 1], "count"))
         {
-            j = MainWindowTaskCol::TASK_COL_COUNT;
+            j = main_window::column::count;
         }
         else if (ztd::same(argv[i + 1], "directory") || ztd::same(argv[i + 1], "from"))
         {
-            j = MainWindowTaskCol::TASK_COL_PATH;
+            j = main_window::column::path;
         }
         else if (ztd::same(argv[i + 1], "item"))
         {
-            j = MainWindowTaskCol::TASK_COL_FILE;
+            j = main_window::column::file;
         }
         else if (ztd::same(argv[i + 1], "to"))
         {
-            j = MainWindowTaskCol::TASK_COL_TO;
+            j = main_window::column::to;
         }
         else if (ztd::same(argv[i + 1], "progress"))
         {
@@ -7523,47 +7536,47 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(argv[i + 1], "total"))
         {
-            j = MainWindowTaskCol::TASK_COL_TOTAL;
+            j = main_window::column::total;
         }
         else if (ztd::same(argv[i + 1], "curspeed"))
         {
-            j = MainWindowTaskCol::TASK_COL_CURSPEED;
+            j = main_window::column::curspeed;
         }
         else if (ztd::same(argv[i + 1], "curremain"))
         {
-            j = MainWindowTaskCol::TASK_COL_CUREST;
+            j = main_window::column::curest;
         }
         else if (ztd::same(argv[i + 1], "avgspeed"))
         {
-            j = MainWindowTaskCol::TASK_COL_AVGSPEED;
+            j = main_window::column::avgspeed;
         }
         else if (ztd::same(argv[i + 1], "avgremain"))
         {
-            j = MainWindowTaskCol::TASK_COL_AVGEST;
+            j = main_window::column::avgest;
         }
         else if (ztd::same(argv[i + 1], "elapsed"))
         {
-            j = MainWindowTaskCol::TASK_COL_ELAPSED;
+            j = main_window::column::elapsed;
         }
         else if (ztd::same(argv[i + 1], "started"))
         {
-            j = MainWindowTaskCol::TASK_COL_STARTED;
+            j = main_window::column::started;
         }
         else if (ztd::same(argv[i + 1], "status"))
         {
-            j = MainWindowTaskCol::TASK_COL_STATUS;
+            j = main_window::column::status;
         }
         else if (ztd::same(argv[i + 1], "queue_state"))
         {
-            if (ptask->task->state_pause == VFSFileTaskState::RUNNING)
+            if (ptask->task->state_pause == vfs::file_task_state::running)
             {
                 return {SOCKET_SUCCESS, "run"};
             }
-            else if (ptask->task->state_pause == VFSFileTaskState::PAUSE)
+            else if (ptask->task->state_pause == vfs::file_task_state::pause)
             {
                 return {SOCKET_SUCCESS, "pause"};
             }
-            else if (ptask->task->state_pause == VFSFileTaskState::QUEUE)
+            else if (ptask->task->state_pause == vfs::file_task_state::queue)
             {
                 return {SOCKET_SUCCESS, "queue"};
             }
@@ -7881,26 +7894,26 @@ main_window_socket_command(char* argv[])
                 return {SOCKET_INVALID,
                         std::format("task type {} requires FILE argument(s)", argv[i])};
             }
-            VFSFileTaskType task_type;
+            vfs::file_task_type task_type;
             if (ztd::same(socket_property, "copy"))
             {
-                task_type = VFSFileTaskType::COPY;
+                task_type = vfs::file_task_type::copy;
             }
             else if (ztd::same(socket_property, "move"))
             {
-                task_type = VFSFileTaskType::MOVE;
+                task_type = vfs::file_task_type::move;
             }
             else if (ztd::same(socket_property, "link"))
             {
-                task_type = VFSFileTaskType::LINK;
+                task_type = vfs::file_task_type::link;
             }
             else if (ztd::same(socket_property, "delete"))
             {
-                task_type = VFSFileTaskType::DELETE;
+                task_type = vfs::file_task_type::DELETE;
             }
             else if (ztd::same(socket_property, "trash"))
             {
-                task_type = VFSFileTaskType::TRASH;
+                task_type = vfs::file_task_type::trash;
             }
             else
             { // failsafe
@@ -7965,7 +7978,7 @@ main_window_socket_command(char* argv[])
         {
             if (!xset_get_b(xset::name::context_dlg) &&
                 xset_context_test(context, set->context.value(), false) !=
-                    ItemPropContextState::CONTEXT_SHOW)
+                    item_prop::context::state::show)
             {
                 return {SOCKET_INVALID,
                         std::format("item '{}' context hidden or disabled", argv[i])};
@@ -8047,8 +8060,8 @@ main_window_socket_command(char* argv[])
 
 static bool
 run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, xset::name event,
-          panel_t panel, tab_t tab, const char* focus, u32 keyval, u32 button, u32 state, bool visible,
-          xset_t set, char* ucmd)
+          panel_t panel, tab_t tab, const char* focus, u32 keyval, u32 button, u32 state,
+          bool visible, xset_t set, char* ucmd)
 {
     bool inhibit;
     i32 exit_status;
@@ -8086,13 +8099,13 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
             std::string change;
             switch (state)
             {
-                case VFSVolumeState::ADDED:
+                case vfs::volume_state::added:
                     change = "added";
                     break;
-                case VFSVolumeState::REMOVED:
+                case vfs::volume_state::removed:
                     change = "removed";
                     break;
-                default:
+                case vfs::volume_state::changed:
                     change = "changed";
                     break;
             }

@@ -688,15 +688,15 @@ mime_type_get_default_action(const std::string_view mime_type)
  * Set applications used to open or never used to open this mime-type
  * desktop_id is the name of *.desktop file.
  * action ==
- *     MimeTypeAction::DEFAULT - make desktop_id the default app
- *     MimeTypeAction::APPEND  - add desktop_id to Default and Added apps
- *     MimeTypeAction::REMOVE  - add desktop id to Removed apps
+ *     mime_type::action::DEFAULT - make desktop_id the default app
+ *     mime_type::action::APPEND  - add desktop_id to Default and Added apps
+ *     mime_type::action::REMOVE  - add desktop id to Removed apps
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
 void
 mime_type_update_association(const std::string_view type, const std::string_view desktop_id,
-                             MimeTypeAction action)
+                             mime_type::action action)
 {
     if (type.empty() || desktop_id.empty())
     {
@@ -745,18 +745,18 @@ mime_type_update_association(const std::string_view type, const std::string_view
             return;
         }
 
-        MimeTypeAction group_block;
-        if (ztd::same(group, "Default Applications"))
+        mime_type::action group_block;
+        if (ztd::same(group, groups[0]))
         {
-            group_block = MimeTypeAction::DEFAULT;
+            group_block = mime_type::action::DEFAULT;
         }
-        else if (ztd::same(group, "Default Applications"))
+        else if (ztd::same(group, groups[1]))
         {
-            group_block = MimeTypeAction::APPEND;
+            group_block = mime_type::action::append;
         }
         else
-        { // if (ztd::same(group, "Default Applications"))
-            group_block = MimeTypeAction::REMOVE;
+        { // if (ztd::same(group, groups[2]))
+            group_block = mime_type::action::remove;
         }
 
         for (const auto i : ztd::range(apps.size()))
@@ -770,9 +770,9 @@ mime_type_update_association(const std::string_view type, const std::string_view
             {
                 switch (action)
                 {
-                    case MimeTypeAction::DEFAULT:
+                    case mime_type::action::DEFAULT:
                         // found desktop_id already in group list
-                        if (group_block == MimeTypeAction::REMOVE)
+                        if (group_block == mime_type::action::remove)
                         {
                             // Removed Associations - remove it
                             is_present = true;
@@ -791,8 +791,8 @@ mime_type_update_association(const std::string_view type, const std::string_view
                             continue;
                         }
                         break;
-                    case MimeTypeAction::APPEND:
-                        if (group_block == MimeTypeAction::REMOVE)
+                    case mime_type::action::append:
+                        if (group_block == mime_type::action::remove)
                         {
                             // Removed Associations - remove it
                             is_present = true;
@@ -805,8 +805,8 @@ mime_type_update_association(const std::string_view type, const std::string_view
                             break;
                         }
                         break;
-                    case MimeTypeAction::REMOVE:
-                        if (group_block == MimeTypeAction::REMOVE)
+                    case mime_type::action::remove:
+                        if (group_block == mime_type::action::remove)
                         {
                             // Removed Associations - already present
                             is_present = true;
@@ -819,8 +819,6 @@ mime_type_update_association(const std::string_view type, const std::string_view
                             continue;
                         }
                         break;
-                    default:
-                        break;
                 }
             }
             // copy other apps to new list preserving order
@@ -828,22 +826,22 @@ mime_type_update_association(const std::string_view type, const std::string_view
         }
 
         // update key string if needed
-        if (action < MimeTypeAction::REMOVE)
+        if (action < mime_type::action::remove)
         {
-            if (((group_block == MimeTypeAction::DEFAULT ||
-                  group_block == MimeTypeAction::APPEND) &&
+            if (((group_block == mime_type::action::DEFAULT ||
+                  group_block == mime_type::action::append) &&
                  !is_present) ||
-                (group_block == MimeTypeAction::REMOVE && is_present))
+                (group_block == mime_type::action::remove && is_present))
             {
-                if (group_block < MimeTypeAction::REMOVE)
+                if (group_block < mime_type::action::remove)
                 {
                     // add to front of Default or Added list
-                    if (action == MimeTypeAction::DEFAULT)
+                    if (action == mime_type::action::DEFAULT)
                     {
                         new_action = std::format("{};{}", desktop_id, new_action);
                     }
                     else
-                    { // if ( action == MimeTypeAction::APPEND )
+                    { // if ( action == mime_type::action::APPEND )
                         new_action = std::format("{}{};", new_action, desktop_id);
                     }
                 }
@@ -858,14 +856,14 @@ mime_type_update_association(const std::string_view type, const std::string_view
                 data_changed = true;
             }
         }
-        else // if ( action == MimeTypeAction::REMOVE )
+        else // if ( action == mime_type::action::REMOVE )
         {
-            if (((group_block == MimeTypeAction::DEFAULT ||
-                  group_block == MimeTypeAction::APPEND) &&
+            if (((group_block == mime_type::action::DEFAULT ||
+                  group_block == mime_type::action::append) &&
                  is_present) ||
-                (group_block == MimeTypeAction::REMOVE && !is_present))
+                (group_block == mime_type::action::remove && !is_present))
             {
-                if (group_block == MimeTypeAction::REMOVE)
+                if (group_block == mime_type::action::remove)
                 {
                     // add to end of Removed list
                     new_action = std::format("{}{};", new_action, desktop_id);

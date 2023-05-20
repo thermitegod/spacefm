@@ -217,7 +217,7 @@ load_settings()
 
     if (git_backed_settings)
     {
-        const auto command_script = get_script_path(Scripts::CONFIG_UPDATE_GIT);
+        const auto command_script = get_script_path(spacefm::script::config_update_git);
 
         if (script_exists(command_script))
         {
@@ -234,7 +234,7 @@ load_settings()
     }
     else
     {
-        const auto command_script = get_script_path(Scripts::CONFIG_UPDATE);
+        const auto command_script = get_script_path(spacefm::script::config_update);
 
         if (script_exists(command_script))
         {
@@ -314,10 +314,10 @@ load_settings()
     }
 
     // add default handlers
-    ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_ARC, false, false);
-    ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_FS, false, false);
-    ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_NET, false, false);
-    ptk_handler_add_defaults(PtkHandlerMode::HANDLER_MODE_FILE, false, false);
+    ptk_handler_add_defaults(ptk::handler::mode::arc, false, false);
+    ptk_handler_add_defaults(ptk::handler::mode::fs, false, false);
+    ptk_handler_add_defaults(ptk::handler::mode::net, false, false);
+    ptk_handler_add_defaults(ptk::handler::mode::file, false, false);
 
     // set default keys
     xset_default_keys();
@@ -493,7 +493,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
                 }
 
                 // get mime type open_all_type set
-                std::string str = context->var[ItemPropContext::CONTEXT_MIME];
+                std::string str = context->var[item_prop::context::item::mime];
                 str = ztd::replace(str, "-", "_");
                 str = ztd::replace(str, " ", "");
                 open_all_set = xset_is(std::format("open_all_type_{}", str));
@@ -502,9 +502,10 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             // test context
             if (mset->context)
             {
-                const i32 context_action = xset_context_test(context, mset->context.value(), false);
-                if (context_action == ItemPropContextState::CONTEXT_HIDE ||
-                    context_action == ItemPropContextState::CONTEXT_DISABLE)
+                const item_prop::context::state context_action =
+                    xset_context_test(context, mset->context.value(), false);
+                if (context_action == item_prop::context::state::hide ||
+                    context_action == item_prop::context::state::disable)
                 {
                     continue;
                 }
@@ -646,7 +647,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     xset_t set_next;
     std::string icon_name;
     std::optional<std::string> context = std::nullopt;
-    i32 context_action = ItemPropContextState::CONTEXT_SHOW;
+    item_prop::context::state context_action = item_prop::context::state::show;
     xset_t mset;
     // ztd::logger::info("xset_add_menuitem {}", set->name);
 
@@ -691,7 +692,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         context_action = xset_context_test(xset_context, context.value(), set->disable);
     }
 
-    if (context_action != ItemPropContextState::CONTEXT_HIDE)
+    if (context_action != item_prop::context::state::hide)
     {
         if (set->tool != xset::tool::NOT && set->menu_style != xset::menu::submenu)
         {
@@ -786,7 +787,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 case xset::menu::reserved_08:
                 case xset::menu::reserved_09:
                 case xset::menu::reserved_10:
-                default:
                     break;
             }
         }
@@ -873,7 +873,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         g_signal_connect(item, "button-release-event", G_CALLBACK(xset_design_cb), set);
 
         gtk_widget_set_sensitive(item,
-                                 context_action != ItemPropContextState::CONTEXT_DISABLE &&
+                                 context_action != item_prop::context::state::disable &&
                                      !set->disable);
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
@@ -968,7 +968,6 @@ xset_custom_activate(GtkWidget* item, xset_t set)
         case xset::menu::reserved_10:
         case xset::menu::submenu:
         case xset::menu::sep:
-        default:
             if (set->menu_label)
             {
                 value = set->menu_label.value();
@@ -1064,7 +1063,6 @@ xset_custom_activate(GtkWidget* item, xset_t set)
         }
         case xset::cmd::bookmark:
         case xset::cmd::invalid:
-        default:
             return;
     }
 
@@ -1731,7 +1729,6 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::help_book:
         case xset::job::tooltips:
         case xset::job::invalid:
-        default:
             break;
     }
     return false;
@@ -1865,7 +1862,7 @@ xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job
     GtkWidget* item;
     item = gtk_menu_item_new_with_mnemonic(label.data());
 
-    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(INT(job)));
+    g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
     gtk_container_add(GTK_CONTAINER(menu), item);
     g_signal_connect(item, "activate", G_CALLBACK(xset_design_job), set);
     return item;
@@ -2062,7 +2059,9 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                                               it.second.value(),
                                               xset::job::add_tool,
                                               insert_set);
-                g_object_set_data(G_OBJECT(newitem), "tool_type", GINT_TO_POINTER(INT(it.first)));
+                g_object_set_data(G_OBJECT(newitem),
+                                  "tool_type",
+                                  GINT_TO_POINTER(magic_enum::enum_integer(it.first)));
             }
         }
     }
@@ -2687,7 +2686,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         case xset::menu::reserved_09:
         case xset::menu::reserved_10:
         case xset::menu::submenu:
-        default:
             if (cb_func)
             {
                 cb_func(item, cb_data);
@@ -2815,7 +2813,7 @@ xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* eve
             main_window_toggle_thumbnails_all_windows();
             break;
         case xset::tool::large_icons:
-            if (file_browser->view_mode != PtkFBViewMode::PTK_FB_ICON_VIEW)
+            if (file_browser->view_mode != ptk::file_browser::view_mode::icon_view)
             {
                 xset_set_b_panel(p, xset::panel::list_large, !file_browser->large_icons);
                 on_popup_list_large(nullptr, file_browser);
@@ -2824,7 +2822,6 @@ xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* eve
         case xset::tool::NOT:
         case xset::tool::custom:
         case xset::tool::invalid:
-        default:
             ztd::logger::warn("xset_builtin_tool_activate invalid tool_type");
     }
 }
@@ -3168,7 +3165,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         case xset::tool::new_tab:
         case xset::tool::new_tab_here:
         case xset::tool::invalid:
-        default:
             menu_style = set->menu_style;
     }
 
@@ -3367,7 +3363,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                     case xset::cmd::script:
                     case xset::cmd::line:
                     case xset::cmd::invalid:
-                    default:
                         icon_name = "gtk-execute";
                         break;
                 }
@@ -3411,7 +3406,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                     case xset::tool::show_thumb:
                     case xset::tool::large_icons:
                     case xset::tool::invalid:
-                    default:
                         if (!set->menu_label)
                         {
                             menu_label = xset_get_builtin_toolitem_label(set->tool);
@@ -3568,7 +3562,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         case xset::menu::reserved_08:
         case xset::menu::reserved_09:
         case xset::menu::reserved_10:
-        default:
             return nullptr;
     }
 

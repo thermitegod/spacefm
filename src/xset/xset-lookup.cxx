@@ -20,6 +20,8 @@
 
 #include <unordered_map>
 
+#include <cassert>
+
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
@@ -1777,6 +1779,8 @@ xset::get_name_from_xsetname(xset::name name)
 xset::name
 xset::get_xsetname_from_panel(panel_t panel, xset::panel name)
 {
+    assert(panel == 1 || panel == 2 || panel == 3 || panel == 4);
+
     switch (panel)
     {
         case 1:
@@ -1812,6 +1816,8 @@ xset::get_name_from_panel(panel_t panel, xset::panel name)
 xset::name
 xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode)
 {
+    assert(panel == 1 || panel == 2 || panel == 3 || panel == 4);
+
     switch (panel)
     {
         case 1:

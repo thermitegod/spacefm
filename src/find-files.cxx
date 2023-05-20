@@ -62,16 +62,19 @@
 
 #include "find-files.hxx"
 
-enum FindFilesCol
+namespace file_files
 {
-    COL_ICON,
-    COL_NAME,
-    COL_DIR,
-    COL_SIZE,
-    COL_TYPE,
-    COL_MTIME,
-    COL_INFO,
-};
+    enum column
+    {
+        icon,
+        name,
+        dir,
+        size,
+        type,
+        mtime,
+        info,
+    };
+}
 
 struct FindFile
 {
@@ -249,8 +252,8 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
             const auto full_path = std::filesystem::path() / dir / file->get_name();
             if (std::filesystem::is_directory(full_path))
             {
-                file_browser->run_event<EventType::OPEN_ITEM>(full_path,
-                                                              PtkOpenAction::PTK_OPEN_NEW_TAB);
+                file_browser->run_event<spacefm::signal::open_item>(full_path,
+                                                              ptk::open_action::PTK_OPEN_NEW_TAB);
             }
         }
     }
@@ -309,15 +312,15 @@ on_open_files(GAction* action, FindFile* data)
             { /* open files */
                 gtk_tree_model_get(model,
                                    &it,
-                                   FindFilesCol::COL_INFO,
+                                   file_files::column::info,
                                    &file,
-                                   FindFilesCol::COL_DIR,
+                                   file_files::column::dir,
                                    &dir,
                                    -1);
             }
             else
             { /* open containing directories */
-                gtk_tree_model_get(model, &it, FindFilesCol::COL_DIR, &dir, -1);
+                gtk_tree_model_get(model, &it, file_files::column::dir, &dir, -1);
             }
 
             if (open_files)
@@ -645,19 +648,19 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
         icon = ff->file->get_small_icon();
         gtk_list_store_set(data->result_list,
                            &it,
-                           FindFilesCol::COL_ICON,
+                           file_files::column::icon,
                            icon,
-                           FindFilesCol::COL_NAME,
+                           file_files::column::name,
                            ff->file->get_disp_name().data(),
-                           FindFilesCol::COL_DIR,
+                           file_files::column::dir,
                            ff->dir_path.data(), /* FIXME: non-UTF8? */
-                           FindFilesCol::COL_TYPE,
+                           file_files::column::type,
                            ff->file->get_mime_type_desc().data(),
-                           FindFilesCol::COL_SIZE,
+                           file_files::column::size,
                            ff->file->get_disp_size().data(),
-                           FindFilesCol::COL_MTIME,
+                           file_files::column::mtime,
                            ff->file->get_disp_mtime().data(),
-                           FindFilesCol::COL_INFO,
+                           file_files::column::info,
                            ff->file,
                            -1);
         g_object_unref(icon);
@@ -761,7 +764,7 @@ on_start_search(GtkWidget* btn, FindFile* data)
 
     data->task = vfs_async_task_new((VFSAsyncFunc)search_thread, data);
 
-    data->signal_task = data->task->add_event<EventType::TASK_FINISH>(on_search_finish, data);
+    data->signal_task = data->task->add_event<spacefm::signal::task_finish>(on_search_finish, data);
 
     data->task->run_thread();
 
@@ -968,7 +971,7 @@ init_search_result(FindFile* data)
 
     gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view)),
                                 GtkSelectionMode::GTK_SELECTION_MULTIPLE);
-    data->result_list = gtk_list_store_new(magic_enum::enum_count<FindFilesCol>(),
+    data->result_list = gtk_list_store_new(magic_enum::enum_count<file_files::column>(),
                                            GDK_TYPE_PIXBUF, /* icon */
                                            G_TYPE_STRING,   /* name */
                                            G_TYPE_STRING,   /* dir */
@@ -983,11 +986,11 @@ init_search_result(FindFile* data)
     gtk_tree_view_column_set_title(col, "Name");
     render = gtk_cell_renderer_pixbuf_new();
     gtk_tree_view_column_pack_start(col, render, false);
-    gtk_tree_view_column_set_attributes(col, render, "pixbuf", FindFilesCol::COL_ICON, nullptr);
+    gtk_tree_view_column_set_attributes(col, render, "pixbuf", file_files::column::icon, nullptr);
     render = gtk_cell_renderer_text_new();
     g_object_set(render, "ellipsize", PangoEllipsizeMode::PANGO_ELLIPSIZE_END, nullptr);
     gtk_tree_view_column_pack_start(col, render, true);
-    gtk_tree_view_column_set_attributes(col, render, "text", FindFilesCol::COL_NAME, nullptr);
+    gtk_tree_view_column_set_attributes(col, render, "text", file_files::column::name, nullptr);
     gtk_tree_view_column_set_expand(col, true);
     gtk_tree_view_column_set_min_width(col, 200);
     gtk_tree_view_column_set_resizable(col, true);
@@ -998,7 +1001,7 @@ init_search_result(FindFile* data)
     col = gtk_tree_view_column_new_with_attributes("Directory",
                                                    render,
                                                    "text",
-                                                   FindFilesCol::COL_DIR,
+                                                   file_files::column::dir,
                                                    nullptr);
     gtk_tree_view_column_set_expand(col, true);
     gtk_tree_view_column_set_resizable(col, true);
@@ -1008,7 +1011,7 @@ init_search_result(FindFile* data)
     col = gtk_tree_view_column_new_with_attributes("Size",
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
-                                                   FindFilesCol::COL_SIZE,
+                                                   file_files::column::size,
                                                    nullptr);
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);
@@ -1016,7 +1019,7 @@ init_search_result(FindFile* data)
     col = gtk_tree_view_column_new_with_attributes("Type",
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
-                                                   FindFilesCol::COL_TYPE,
+                                                   file_files::column::type,
                                                    nullptr);
     gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_fixed_width(col, 120);
@@ -1026,7 +1029,7 @@ init_search_result(FindFile* data)
     col = gtk_tree_view_column_new_with_attributes("Last Modified",
                                                    gtk_cell_renderer_text_new(),
                                                    "text",
-                                                   FindFilesCol::COL_MTIME,
+                                                   file_files::column::mtime,
                                                    nullptr);
     gtk_tree_view_column_set_resizable(col, true);
     gtk_tree_view_append_column(GTK_TREE_VIEW(data->result_view), col);

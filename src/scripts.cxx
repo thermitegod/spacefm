@@ -33,14 +33,14 @@
 
 using namespace std::literals::string_view_literals;
 
-static const std::map<Scripts, const std::string_view> script_map{
-    {Scripts::SPACEFM_AUTH, "spacefm-auth"sv},
-    {Scripts::CONFIG_UPDATE, "config-update"sv},
-    {Scripts::CONFIG_UPDATE_GIT, "config-update-git"sv},
+static const std::map<spacefm::script, const std::string_view> script_map{
+    {spacefm::script::spacefm_auth, "spacefm-auth"sv},
+    {spacefm::script::config_update, "config-update"sv},
+    {spacefm::script::config_update_git, "config-update-git"sv},
 };
 
 bool
-script_exists(Scripts script) noexcept
+script_exists(spacefm::script script) noexcept
 {
     const auto script_name = get_script_path(script);
 
@@ -64,7 +64,7 @@ script_exists(const std::filesystem::path& script) noexcept
 }
 
 const std::filesystem::path
-get_script_path(Scripts script) noexcept
+get_script_path(spacefm::script script) noexcept
 {
     return std::filesystem::path() / PACKAGE_SCRIPTS_PATH / script_map.at(script);
 }

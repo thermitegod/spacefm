@@ -37,6 +37,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include <magic_enum.hpp>
+
+#include "ptk/ptk-file-menu.hxx"
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
@@ -69,7 +72,7 @@ struct MoveSet
     bool is_dir{false};
     bool is_link{false};
     bool clip_copy{false};
-    PtkRenameMode create_new;
+    ptk::rename_mode create_new;
 
     GtkWidget* dlg{nullptr};
     GtkWidget* parent{nullptr};
@@ -238,7 +241,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
                                     nullptr);
 
     // change is_dir to reflect state of new directory or link option
-    if (mset->create_new)
+    if (mset->create_new != ptk::rename_mode::rename)
     {
         const bool new_folder =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
@@ -500,7 +503,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     if (!ec && equivalent)
     {
         full_path_same = true;
-        if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
+        if (mset->create_new != ptk::rename_mode::rename &&
+            gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
         {
             const auto file_stat = ztd::lstat(full_path);
             if (file_stat.is_valid())
@@ -566,8 +570,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         mset->full_path_same = full_path_same;
         mset->mode_change = false;
 
-        if (full_path_same && (mset->create_new == PtkRenameMode::PTK_RENAME ||
-                               mset->create_new == PtkRenameMode::PTK_RENAME_NEW_LINK))
+        if (full_path_same && (mset->create_new == ptk::rename_mode::rename ||
+                               mset->create_new == ptk::rename_mode::new_link))
         {
             gtk_widget_set_sensitive(
                 mset->next,
@@ -649,7 +653,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
     }
 
-    if (is_move != mset->is_move && !mset->create_new)
+    if (is_move != mset->is_move && mset->create_new == ptk::rename_mode::rename)
     {
         mset->is_move = is_move;
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move)))
@@ -658,7 +662,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         }
     }
 
-    if (mset->create_new && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
+    if (mset->create_new != ptk::rename_mode::rename &&
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
     {
         path = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
         path = ztd::strip(path.string());
@@ -1012,11 +1017,11 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_widget_destroy(dlg);
 }
 
-enum PTKFileMiscMode
+enum class file_misc_mode
 {
-    MODE_FILENAME,
-    MODE_PARENT,
-    MODE_PATH
+    filename,
+    parent,
+    path
 };
 
 static void
@@ -1026,18 +1031,25 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 
     GtkWidget** mode = (GtkWidget**)g_object_get_data(G_OBJECT(dlg), "mode");
 
-    for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
+    const std::array<file_misc_mode, 3> misc_modes{
+        file_misc_mode::filename,
+        file_misc_mode::parent,
+        file_misc_mode::path,
+    };
+
+    for (const auto [index, value] : ztd::enumerate(misc_modes))
     {
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
         {
-            const i32 action = i == MODE_PARENT
-                                   ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-                                   : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
+            const GtkFileChooserAction action =
+                value == file_misc_mode::parent
+                    ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+                    : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
             GtkAllocation allocation;
             gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
             const i32 width = allocation.width;
             const i32 height = allocation.height;
-            gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), (GtkFileChooserAction)action);
+            gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), action);
             if (width && height)
             {
                 // under some circumstances, changing the action changes the size
@@ -1061,12 +1073,12 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     (void)widget;
     GtkTextIter iter;
     GtkTextIter siter;
-    i32 mode_default = MODE_PARENT;
+    file_misc_mode mode_default = file_misc_mode::parent;
 
     xset_t set = xset_get(xset::name::move_dlg_help);
     if (set->z)
     {
-        mode_default = xset_get_int(xset::name::move_dlg_help, xset::var::z);
+        mode_default = file_misc_mode(xset_get_int(xset::name::move_dlg_help, xset::var::z));
     }
 
     // action create directory does not work properly so not used:
@@ -1075,8 +1087,9 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     GtkWidget* dlg = gtk_file_chooser_dialog_new(
         "Browse",
         mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
-        mode_default == MODE_PARENT ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-                                    : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
+        mode_default == file_misc_mode::parent
+            ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
+            : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
         "Cancel",
         GtkResponseType::GTK_RESPONSE_CANCEL,
         "OK",
@@ -1090,7 +1103,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
     std::free(path);
 
-    if (mode_default != MODE_PARENT)
+    if (mode_default != file_misc_mode::parent)
     {
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
@@ -1102,22 +1115,36 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
 
     // Mode
+    const std::array<file_misc_mode, 3> misc_modes{
+        file_misc_mode::filename,
+        file_misc_mode::parent,
+        file_misc_mode::path,
+    };
+
+    // std::map<FileMiscMode, GtkWidget*> mode;
     GtkWidget* mode[3];
+
     GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
-    mode[MODE_FILENAME] = gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
-    mode[MODE_PARENT] =
-        gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mode[MODE_FILENAME]),
-                                                       "Pa_rent");
-    mode[MODE_PATH] =
-        gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mode[MODE_FILENAME]),
-                                                       "P_ath");
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[mode_default]), true);
+    mode[magic_enum::enum_integer(file_misc_mode::filename)] =
+        gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
+    mode[magic_enum::enum_integer(file_misc_mode::parent)] =
+        gtk_radio_button_new_with_mnemonic_from_widget(
+            GTK_RADIO_BUTTON(mode[magic_enum::enum_integer(file_misc_mode::filename)]),
+            "Pa_rent");
+    mode[magic_enum::enum_integer(file_misc_mode::path)] =
+        gtk_radio_button_new_with_mnemonic_from_widget(
+            GTK_RADIO_BUTTON(mode[magic_enum::enum_integer(file_misc_mode::filename)]),
+            "P_ath");
+
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[magic_enum::enum_integer(mode_default)]),
+                                 true);
     gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new("Insert as"), false, true, 2);
-    for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
+
+    for (const auto [index, value] : ztd::enumerate(misc_modes))
     {
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mode[i]), false);
-        g_signal_connect(G_OBJECT(mode[i]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
-        gtk_box_pack_start(GTK_BOX(hbox), mode[i], false, true, 2);
+        gtk_widget_set_focus_on_click(GTK_WIDGET(mode[index]), false);
+        g_signal_connect(G_OBJECT(mode[index]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
+        gtk_box_pack_start(GTK_BOX(hbox), mode[index], false, true, 2);
     }
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), hbox, false, true, 6);
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
@@ -1142,29 +1169,29 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     // bogus GTK warning here: Unable to retrieve the file info for...
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
+        for (const auto [index, value] : ztd::enumerate(misc_modes))
         {
-            if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
+            if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
             {
                 continue;
             }
 
-            switch (i)
+            switch (value)
             {
-                case MODE_FILENAME:
+                case file_misc_mode::filename:
                 {
                     path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
                     const auto name = std::filesystem::path(path).filename();
                     gtk_text_buffer_set_text(mset->buf_full_name, name.c_str(), -1);
                     break;
                 }
-                case MODE_PARENT:
+                case file_misc_mode::parent:
                 {
                     path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dlg));
                     gtk_text_buffer_set_text(mset->buf_path, path, -1);
                     break;
                 }
-                default:
+                case file_misc_mode::path:
                 {
                     path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
                     gtk_text_buffer_set_text(mset->buf_full_path, path, -1);
@@ -1188,11 +1215,13 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     }
 
     // save mode
-    for (i32 i = MODE_FILENAME; i <= MODE_PATH; ++i)
+    for (const auto [index, value] : ztd::enumerate(misc_modes))
     {
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[i])))
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
         {
-            xset_set(xset::name::move_dlg_help, xset::var::z, std::to_string(i));
+            xset_set(xset::name::move_dlg_help,
+                     xset::var::z,
+                     std::to_string(magic_enum::enum_integer(value)));
             break;
         }
     }
@@ -1219,7 +1248,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
 
     std::string desc;
-    if (mset->create_new)
+    if (mset->create_new != ptk::rename_mode::rename)
     {
         btn_label = ztd::strdup("Create");
         action = ztd::strdup("Create New");
@@ -1294,7 +1323,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     {
         win_icon = ztd::strdup("gtk-dialog-warning");
     }
-    else if (mset->create_new)
+    else if (mset->create_new != ptk::rename_mode::rename)
     {
         win_icon = ztd::strdup("gtk-new");
     }
@@ -1328,7 +1357,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     mset->full_path_same = false;
     mset->mode_change = true;
     on_move_change(GTK_WIDGET(mset->buf_full_path), mset);
-    if (mset->create_new)
+    if (mset->create_new != ptk::rename_mode::rename)
     {
         on_toggled(nullptr, mset);
     }
@@ -1478,7 +1507,8 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(GTK_WIDGET(mset->scroll_full_path));
     }
 
-    if (!mset->is_link && !mset->create_new && xset_get_b(xset::name::move_type))
+    if (!mset->is_link && (mset->create_new == ptk::rename_mode::rename) &&
+        xset_get_b(xset::name::move_type))
     {
         gtk_widget_show(mset->hbox_type);
     }
@@ -1490,7 +1520,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     bool new_file = false;
     bool new_folder = false;
     bool new_link = false;
-    if (mset->create_new)
+    if (mset->create_new != ptk::rename_mode::rename)
     {
         new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
         new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
@@ -1590,23 +1620,23 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_type);
     xset_set_cb(set, (GFunc)on_toggled, mset);
-    set->disable = (mset->create_new || mset->is_link);
+    set->disable = (mset->create_new != ptk::rename_mode::rename || mset->is_link);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_target);
     xset_set_cb(set, (GFunc)on_toggled, mset);
-    set->disable = mset->create_new || !mset->is_link;
+    set->disable = mset->create_new != ptk::rename_mode::rename || !mset->is_link;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_template);
     xset_set_cb(set, (GFunc)on_toggled, mset);
-    set->disable = !mset->create_new;
+    set->disable = mset->create_new == ptk::rename_mode::rename;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     set = xset_get(xset::name::move_copy);
     xset_set_cb(set, (GFunc)on_toggled, mset);
-    set->disable = mset->clip_copy || mset->create_new;
+    set->disable = mset->clip_copy || mset->create_new != ptk::rename_mode::rename;
     set = xset_get(xset::name::move_link);
     xset_set_cb(set, (GFunc)on_toggled, mset);
-    set->disable = mset->create_new;
+    set->disable = mset->create_new != ptk::rename_mode::rename;
     set = xset_get(xset::name::move_copyt);
     xset_set_cb(set, (GFunc)on_toggled, mset);
     set->disable = !mset->is_link;
@@ -1822,7 +1852,6 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
         case GtkDirectionType::GTK_DIR_DOWN:
         case GtkDirectionType::GTK_DIR_LEFT:
         case GtkDirectionType::GTK_DIR_RIGHT:
-        default:
             break;
     }
 
@@ -2191,7 +2220,7 @@ update_new_display(const std::filesystem::path& path)
 
 i32
 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_info file,
-                const char* dest_dir, bool clip_copy, PtkRenameMode create_new,
+                const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
                 AutoOpenCreate* auto_open)
 {
     // TODO convert to gtk_builder (glade file)
@@ -2207,7 +2236,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
     const auto mset = new MoveSet;
 
-    if (!create_new)
+    if (create_new == ptk::rename_mode::rename)
     {
         if (!file)
         {
@@ -2242,7 +2271,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             mset->new_path = mset->full_path;
         }
     }
-    else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK && file)
+    else if (create_new == ptk::rename_mode::new_link && file)
     {
         std::string full_name = file->get_disp_name();
         if (full_name.empty())
@@ -2341,7 +2370,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->next), false);
     gtk_button_set_label(GTK_BUTTON(mset->next), "_Rename");
 
-    if (create_new && auto_open)
+    if (create_new != ptk::rename_mode::rename && auto_open)
     {
         mset->open = gtk_button_new_with_mnemonic("& _Open");
         gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
@@ -2423,7 +2452,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     g_signal_connect(G_OBJECT(mset->label_type), "focus", G_CALLBACK(on_label_focus), mset);
 
     // Target
-    if (mset->is_link || create_new)
+    if (mset->is_link || create_new != ptk::rename_mode::rename)
     {
         mset->label_target = GTK_LABEL(gtk_label_new(nullptr));
         gtk_label_set_markup_with_mnemonic(mset->label_target, "<b>_Target:</b>");
@@ -2446,7 +2475,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                          G_CALLBACK(on_move_entry_keypress),
                          mset);
 
-        if (create_new)
+        if (create_new != ptk::rename_mode::rename)
         {
             // Target Browse button
             mset->browse_target = gtk_button_new();
@@ -2474,7 +2503,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
 
     // Template
-    if (create_new)
+    if (create_new != ptk::rename_mode::rename)
     {
         mset->label_template = GTK_LABEL(gtk_label_new(nullptr));
         gtk_label_set_markup_with_mnemonic(mset->label_template, "<b>_Template:</b>");
@@ -2767,7 +2796,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                            false,
                            true,
                            0);
-        if (!create_new)
+        if (create_new == ptk::rename_mode::rename)
         {
             gtk_box_pack_start(GTK_BOX(mset->hbox_target),
                                GTK_WIDGET(gtk_label_new(" ")),
@@ -2779,7 +2808,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                            GTK_WIDGET(mset->entry_target),
                            true,
                            true,
-                           create_new ? 3 : 0);
+                           create_new != ptk::rename_mode::rename ? 3 : 0);
         if (mset->browse_target)
         {
             gtk_box_pack_start(GTK_BOX(mset->hbox_target),
@@ -2818,7 +2847,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
 
     GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
-    if (create_new)
+    if (create_new != ptk::rename_mode::rename)
     {
         gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("New")), false, true, 3);
         gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_file), false, true, 3);
@@ -2845,12 +2874,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_copy), true);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), false);
     }
-    else if (create_new == PtkRenameMode::PTK_RENAME_NEW_DIR)
+    else if (create_new == ptk::rename_mode::new_dir)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder), true);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), false);
     }
-    else if (create_new == PtkRenameMode::PTK_RENAME_NEW_LINK)
+    else if (create_new == ptk::rename_mode::new_link)
     {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_link), true);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_new_file), false);
@@ -2933,7 +2962,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ret = 2;
             }
 
-            if (!create_new &&
+            if (create_new == ptk::rename_mode::rename &&
                 (mset->full_path_same || std::filesystem::equivalent(full_path, mset->full_path)))
             {
                 // not changed, proceed to next file
@@ -3027,7 +3056,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 overwrite = true;
             }
 
-            if (create_new && new_link)
+            if (create_new != ptk::rename_mode::rename && new_link)
             {
                 // new link task
                 const std::string task_name = std::format("Create Link{}", root_msg);
@@ -3076,7 +3105,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
-            else if (create_new && new_file)
+            else if (create_new != ptk::rename_mode::rename && new_file)
             {
                 // new file task
                 if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))))
@@ -3144,7 +3173,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
-            else if (create_new)
+            else if (create_new != ptk::rename_mode::rename)
             {
                 // new directory task
                 if (!new_folder)
@@ -3414,7 +3443,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
                              file,
                              cwd.c_str(),
                              !is_cut,
-                             PtkRenameMode::PTK_RENAME,
+                             ptk::rename_mode::rename,
                              nullptr))
         {
             vfs_file_info_unref(file);
