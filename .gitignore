@@ -1,20 +1,8 @@
-##translations
-po/.intltool-merge-cache
-po/POTFILES
-po/*.gmo
-po/stamp-it
-
-##meson
+# meson
 build/
-build2/
-build3/
 
-##test
-conf2.sh
-conf3.sh
-
-##other
-TODO
+# meson subprojects
+subprojects/packagecache/
 
 #cppcheck
 spacefm.cppcheck

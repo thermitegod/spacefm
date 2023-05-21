@@ -203,8 +203,23 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 # ztd use system or subproject
 ztd_dep = dependency('ztd', required : false)
 if not ztd_dep.found() # using subproject
-  ztd_proj = subproject('ztd')
+  ztd_proj = subproject('ztd', required : true)
   ztd_dep = ztd_proj.get_variable('ztd_dep')
+endif
+
+# magic_enum use system or subproject
+magic_enum_dep = dependency('magic_enum', required : false)
+if not magic_enum_dep.found() # using subproject
+  magic_enum_proj = subproject('magic_enum', required : true)
+  magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
+endif
+
+# toml11 use system or subproject
+toml11_dep = dependency('toml11', required : false)
+if not toml11_dep.found() # using subproject
+  cmake = import('cmake')
+  toml11_proj = cmake.subproject('toml11', required : true)
+  toml11_dep = toml11_proj.dependency('toml11')
 endif
 
 libudev_dep = dependency('libudev', required : true)
@@ -216,8 +231,6 @@ exo_dep = dependency('exo-2', required : true)
 spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
-magic_enum_dep = dependency('magic_enum', required : true)
-toml11_dep = dependency('toml11', required : true)
 pugixml_dep = dependency('pugixml', required : true)
 
 #gtk_dep = dependency('gtk4', required : true)
@@ -238,11 +251,12 @@ dependencies = [
     # x11_dep,
     exo_dep,
 
+    magic_enum_dep,
+    toml11_dep,
+
     spdlog_dep,
     fmt_dep,
     sigc_dep,
-    magic_enum_dep,
-    toml11_dep,
     pugixml_dep,
 
     libudev_dep,

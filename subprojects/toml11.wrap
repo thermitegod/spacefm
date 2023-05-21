@@ -1,0 +1,8 @@
+[wrap-file]
+directory = toml11-3.7.1
+source_url = https://github.com/ToruNiina/toml11/archive/refs/tags/v3.7.1.tar.gz
+source_filename = toml11-3.7.1.tar.gz
+source_hash = afeaa9aa0416d4b6b2cd3897ca55d9317084103077b32a852247d8efd4cf6068
+
+[provide]
+dependency_names = toml11
