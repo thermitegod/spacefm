@@ -54,6 +54,10 @@ namespace vfs
 
 struct VFSFileInfo
 {
+  public:
+    VFSFileInfo(const std::filesystem::path& file_path);
+    ~VFSFileInfo();
+
   public: // TODO private
     // cached copy of struct stat()
     ztd::lstat file_stat;
@@ -135,6 +139,8 @@ struct VFSFileInfo
     // Full path of the file is required by this function
     bool is_text(const std::filesystem::path& file_path = "") const noexcept;
 
+    bool update(const std::filesystem::path& file_path) noexcept;
+
   private:
     void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;
     void load_thumbnail_big(const std::filesystem::path& full_path) noexcept;
@@ -153,11 +159,9 @@ namespace vfs
     using file_info = ztd::raw_ptr<VFSFileInfo>;
 } // namespace vfs
 
-vfs::file_info vfs_file_info_new();
+vfs::file_info vfs_file_info_new(const std::filesystem::path& file_path);
 vfs::file_info vfs_file_info_ref(vfs::file_info file);
 void vfs_file_info_unref(vfs::file_info file);
-
-bool vfs_file_info_get(vfs::file_info file, const std::filesystem::path& file_path);
 
 void vfs_file_info_list_free(const std::span<const vfs::file_info> list);
 

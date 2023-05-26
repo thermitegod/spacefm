@@ -547,18 +547,12 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
             }
         }
 
-        vfs::file_info file = vfs_file_info_new();
-        if (vfs_file_info_get(file, full_path))
-        {
-            /* Special processing for desktop directory */
-            file->load_special_info(full_path);
+        vfs::file_info file = vfs_file_info_new(full_path);
 
-            dir->file_list.emplace_back(file);
-        }
-        else
-        {
-            vfs_file_info_unref(file);
-        }
+        /* Special processing for desktop directory */
+        file->load_special_info(full_path);
+
+        dir->file_list.emplace_back(file);
     }
 
     return nullptr;
@@ -575,17 +569,10 @@ update_file_info(vfs::dir dir, vfs::file_info file)
 {
     bool ret = false;
 
-    /* FIXME: Dirty hack: steal the string to prevent memory allocation */
-    const std::string file_name = file->name;
-    if (ztd::same(file->name, file->disp_name))
-    {
-        file->disp_name.clear();
-    }
-    file->name.clear();
+    const auto full_path = std::filesystem::path() / dir->path / file->name;
 
-    const auto full_path = std::filesystem::path() / dir->path / file_name;
-
-    if (vfs_file_info_get(file, full_path))
+    const bool is_file_valid = file->update(full_path);
+    if (is_file_valid)
     {
         ret = true;
         file->load_special_info(full_path);
@@ -645,28 +632,28 @@ update_created_files(const std::filesystem::path& key, vfs::dir dir)
 
     for (const std::string_view created_file : dir->created_files)
     {
-        vfs::file_info file;
         vfs::file_info file_found = vfs_dir_find_file(dir, created_file, nullptr);
         if (!file_found)
         {
             // file is not in dir file_list
             const auto full_path = std::filesystem::path() / dir->path / created_file;
-            file = vfs_file_info_new();
-            if (vfs_file_info_get(file, full_path))
+            if (std::filesystem::exists(full_path))
             {
+                vfs::file_info file = vfs_file_info_new(full_path);
                 // add new file to dir file_list
                 file->load_special_info(full_path);
                 dir->file_list.emplace_back(vfs_file_info_ref(file));
 
                 dir->run_event<spacefm::signal::file_created>(file);
+
+                vfs_file_info_unref(file);
             }
             // else file does not exist in filesystem
-            vfs_file_info_unref(file);
         }
         else
         {
             // file already exists in dir file_list
-            file = vfs_file_info_ref(file_found);
+            vfs::file_info file = vfs_file_info_ref(file_found);
             if (update_file_info(dir, file))
             {
                 dir->run_event<spacefm::signal::file_changed>(file);

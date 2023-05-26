@@ -5298,8 +5298,7 @@ ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page)
     const auto cwd = ptk_file_browser_get_cwd(file_browser);
     if (sel_files.empty())
     {
-        vfs::file_info file = vfs_file_info_new();
-        vfs_file_info_get(file, ptk_file_browser_get_cwd(file_browser));
+        vfs::file_info file = vfs_file_info_new(ptk_file_browser_get_cwd(file_browser));
         sel_files.emplace_back(file);
         dir_name = cwd.parent_path();
     }

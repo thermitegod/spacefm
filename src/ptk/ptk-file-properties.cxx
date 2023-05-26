@@ -972,8 +972,7 @@ ptk_show_file_properties(GtkWindow* parent_win, const std::filesystem::path& cwd
     else
     {
         // no files selected, use cwd as file
-        vfs::file_info file = vfs_file_info_new();
-        vfs_file_info_get(file, cwd);
+        vfs::file_info file = vfs_file_info_new(cwd);
         // sel_files.emplace_back(vfs_file_info_ref(file));
         sel_files.emplace_back(file);
         const auto parent_dir = cwd.parent_path();

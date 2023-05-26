@@ -620,16 +620,10 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
 
     if (path)
     {
-        file = vfs_file_info_new();
-        if (vfs_file_info_get(file, path))
-        {
-            ff = new FoundFile(file, std::filesystem::path(path).filename());
-            g_queue_push_tail(queue, ff);
-        }
-        else
-        {
-            vfs_file_info_unref(file);
-        }
+        file = vfs_file_info_new(path);
+
+        ff = new FoundFile(file, std::filesystem::path(path).filename());
+        g_queue_push_tail(queue, ff);
 
         /* we queue the found files, and not add them to the tree view direclty.
          * when we queued more than 10 files, we add them at once. I think

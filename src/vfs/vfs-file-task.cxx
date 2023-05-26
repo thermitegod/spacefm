@@ -386,8 +386,7 @@ update_file_display(const std::filesystem::path& path)
     vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
     if (vdir && vdir->avoid_changes)
     {
-        vfs::file_info file = vfs_file_info_new();
-        vfs_file_info_get(file, path);
+        vfs::file_info file = vfs_file_info_new(path);
         vfs_dir_emit_file_created(vdir, file->get_name(), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();

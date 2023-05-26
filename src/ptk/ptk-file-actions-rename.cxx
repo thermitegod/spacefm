@@ -2195,8 +2195,7 @@ update_new_display_delayed(const char* path)
     vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
     if (vdir && vdir->avoid_changes)
     {
-        vfs::file_info file = vfs_file_info_new();
-        vfs_file_info_get(file, path);
+        vfs::file_info file = vfs_file_info_new(path);
         vfs_dir_emit_file_created(vdir, file->get_name(), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
@@ -3434,8 +3433,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
 
     for (const auto& file_path : files)
     {
-        vfs::file_info file = vfs_file_info_new();
-        vfs_file_info_get(file, file_path);
+        vfs::file_info file = vfs_file_info_new(file_path);
         const std::string file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,

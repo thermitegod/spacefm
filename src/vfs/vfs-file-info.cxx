@@ -60,63 +60,11 @@ static u32 big_thumb_size = 48;
 static u32 small_thumb_size = 20;
 
 vfs::file_info
-vfs_file_info_new()
+vfs_file_info_new(const std::filesystem::path& file_path)
 {
-    const auto fi = new VFSFileInfo();
+    const auto fi = new VFSFileInfo(file_path);
     fi->ref_inc();
     return fi;
-}
-
-static void
-vfs_file_info_clear(vfs::file_info file)
-{
-    if (!file->disp_name.empty() && !ztd::same(file->disp_name, file->name))
-    {
-        file->disp_name.clear();
-    }
-    if (!file->name.empty())
-    {
-        file->name.clear();
-    }
-    if (!file->collate_key.empty())
-    {
-        file->collate_key.clear();
-    }
-    if (!file->collate_icase_key.empty())
-    {
-        file->collate_icase_key.clear();
-    }
-    if (!file->disp_size.empty())
-    {
-        file->disp_size.clear();
-    }
-    if (!file->disp_owner.empty())
-    {
-        file->disp_owner.clear();
-    }
-    if (!file->disp_mtime.empty())
-    {
-        file->disp_mtime.clear();
-    }
-    if (!file->disp_perm.empty())
-    {
-        file->disp_perm.clear();
-    }
-    if (file->big_thumbnail)
-    {
-        g_object_unref(file->big_thumbnail);
-        file->big_thumbnail = nullptr;
-    }
-    if (file->small_thumbnail)
-    {
-        g_object_unref(file->small_thumbnail);
-        file->small_thumbnail = nullptr;
-    }
-    if (file->mime_type)
-    {
-        file->mime_type = nullptr;
-    }
-    file->flags = vfs::file_info_flags::none;
 }
 
 vfs::file_info
@@ -132,51 +80,66 @@ vfs_file_info_unref(vfs::file_info file)
     file->ref_dec();
     if (file->ref_count() == 0)
     {
-        vfs_file_info_clear(file);
-
         delete file;
     }
 }
 
-bool
-vfs_file_info_get(vfs::file_info file, const std::filesystem::path& file_path)
+VFSFileInfo::VFSFileInfo(const std::filesystem::path& file_path)
 {
-    vfs_file_info_clear(file);
+    this->update(file_path);
+}
 
-    file->name = file_path.filename();
-    file->disp_name = file_path.filename();
-
-    file->file_stat = ztd::lstat(file_path);
-    if (file->file_stat.is_valid())
+VFSFileInfo::~VFSFileInfo()
+{
+    if (this->big_thumbnail)
     {
-        // ztd::logger::info("VFSFileInfo name={}  size={}", file->name, file->file_stat.size());
+        g_object_unref(this->big_thumbnail);
+        this->big_thumbnail = nullptr;
+    }
+    if (this->small_thumbnail)
+    {
+        g_object_unref(this->small_thumbnail);
+        this->small_thumbnail = nullptr;
+    }
+}
+
+bool
+VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
+{
+    this->name = file_path.filename();
+    this->disp_name = file_path.filename();
+    this->path = file_path;
+
+    this->file_stat = ztd::lstat(this->path);
+    if (this->file_stat.is_valid())
+    {
+        // ztd::logger::debug("VFSFileInfo name={}  size={}", this->name, this->file_stat.size());
 
         // file->status = std::filesystem::status(file_path);
-        file->status = std::filesystem::symlink_status(file_path);
+        this->status = std::filesystem::symlink_status(this->path);
 
-        file->mime_type = vfs_mime_type_get_from_file(file_path);
+        this->mime_type = vfs_mime_type_get_from_file(this->path);
 
         // file size formated
-        const std::string file_size = vfs_file_size_format(file->get_size());
-        file->disp_size = file_size;
+        const std::string file_size = vfs_file_size_format(this->get_size());
+        this->disp_size = file_size;
 
         // disk file size formated
-        const std::string disk_size = vfs_file_size_format(file->get_disk_size());
-        file->disp_disk_size = disk_size;
+        const std::string disk_size = vfs_file_size_format(this->get_disk_size());
+        this->disp_disk_size = disk_size;
 
         // collate keys
-        file->collate_key = g_utf8_collate_key_for_filename(file->disp_name.data(), -1);
-        const std::string str = g_utf8_casefold(file->disp_name.data(), -1);
-        file->collate_icase_key = g_utf8_collate_key_for_filename(str.data(), -1);
+        this->collate_key = g_utf8_collate_key_for_filename(this->disp_name.data(), -1);
+        const std::string str = g_utf8_casefold(this->disp_name.data(), -1);
+        this->collate_icase_key = g_utf8_collate_key_for_filename(str.data(), -1);
 
         return true;
     }
     else
     {
-        file->mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        this->mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        return false;
     }
-
-    return false;
 }
 
 const std::string&
