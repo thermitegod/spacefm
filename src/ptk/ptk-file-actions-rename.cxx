@@ -2178,8 +2178,7 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
     const char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
 
-    if (std::filesystem::exists(full_path) ||
-        std::filesystem::is_symlink(full_path)) // need to see broken symlinks
+    if (ztd::lstat(full_path).is_valid()) // need to see broken symlinks
     {
         const std::string dir = Glib::path_get_dirname(full_path);
         const std::string unique_path = get_unique_name(dir, ext);
@@ -3034,8 +3033,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                 }
             }
-            else if (std::filesystem::exists(full_path) ||
-                     std::filesystem::is_symlink(full_path)) // need to see broken symlinks
+            else if (ztd::lstat(full_path).is_valid()) // need to see broken symlinks
             {
                 // overwrite
                 if (std::filesystem::is_directory(full_path))
