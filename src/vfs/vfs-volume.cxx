@@ -654,6 +654,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
 
         main_window_close_all_invalid_tabs();
     }
+
     return true;
 }
 
