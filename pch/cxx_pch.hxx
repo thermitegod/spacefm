@@ -52,6 +52,8 @@
 #include <mutex>
 #include <future>
 
+#include <system_error>
+
 #include <cassert>
 #include <exception>
 

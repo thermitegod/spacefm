@@ -33,6 +33,8 @@
 
 #include <chrono>
 
+#include <system_error>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -563,24 +565,16 @@ VFSFileInfo::is_directory() const noexcept
 {
     // return std::filesystem::is_directory(this->status);
 
-    if (std::filesystem::is_directory(this->status))
+    if (std::filesystem::is_symlink(this->status))
     {
-        return true;
-    }
-    else if (std::filesystem::is_symlink(this->status))
-    {
-        std::string symlink_path;
-        try
+        std::error_code ec;
+        const auto symlink_path = std::filesystem::read_symlink(this->path, ec);
+        if (!ec)
         {
-            symlink_path = std::filesystem::read_symlink(this->name);
+            return std::filesystem::is_directory(symlink_path);
         }
-        catch (const std::exception& e)
-        {
-            return false;
-        }
-        return std::filesystem::is_directory(symlink_path);
     }
-    return false;
+    return std::filesystem::is_directory(this->status);
 }
 
 bool
