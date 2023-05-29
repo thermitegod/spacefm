@@ -1589,8 +1589,7 @@ VFSFileTask::file_exec(std::string_view src_file)
         // use checksum
         if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
         {
-            auto check = ztd::Checksum();
-            sum_script = check.compute_checksum(ztd::Checksum::Type::MD5, this->exec_script);
+            sum_script = ztd::compute_checksum(ztd::checksum::type::md5, this->exec_script);
         }
     }
 

@@ -307,8 +307,7 @@ vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
 static GdkPixbuf*
 vfs_thumbnail_load(std::string_view file_path, std::string_view file_uri, i32 thumb_size)
 {
-    auto hash = ztd::Checksum();
-    const std::string file_hash = hash.compute_checksum(ztd::Checksum::Type::MD5, file_uri);
+    const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file_uri);
     const std::string file_name = fmt::format("{}.png", file_hash);
 
     const std::string thumbnail_file =
