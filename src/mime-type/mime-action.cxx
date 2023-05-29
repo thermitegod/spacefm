@@ -425,7 +425,7 @@ make_custom_desktop_file(std::string_view desktop_id, std::string_view mime_type
         }
         catch (const Glib::FileError& e)
         {
-            return nullptr;
+            return "";
         }
 
         // FIXME: If the source desktop_id refers to a custom desktop file, and
