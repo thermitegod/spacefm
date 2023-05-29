@@ -343,11 +343,6 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model)
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    if (!PTK_IS_FILE_LIST(tree_model))
-    {
-        ztd::logger::error("!PTK_IS_FILE_LIST(tree_model)");
-        return (GtkTreeModelFlags)0;
-    }
     return GtkTreeModelFlags(GTK_TREE_MODEL_LIST_ONLY | GTK_TREE_MODEL_ITERS_PERSIST);
 }
 
