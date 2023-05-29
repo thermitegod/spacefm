@@ -847,8 +847,8 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             }
 
             /* Set default action for mimetype */
-            GtkWidget* open_with;
-            if ((open_with = GTK_WIDGET(g_object_get_data(G_OBJECT(dialog), "open_with"))))
+            GtkWidget* open_with = GTK_WIDGET(g_object_get_data(G_OBJECT(dialog), "open_with"));
+            if (open_with)
             {
                 GtkTreeModel* model = gtk_combo_box_get_model(GTK_COMBO_BOX(open_with));
                 GtkTreeIter it;

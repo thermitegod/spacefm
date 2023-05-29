@@ -1914,15 +1914,19 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 {
                     char* contents2 = ztd::strdup(contents);
                     char* start = nullptr;
-                    if ((str = strstr(contents2, "\n<mime-type ")))
+                    str = strstr(contents2, "\n<mime-type ");
+                    if (str)
                     {
-                        if ((str = strstr(str, ">\n")))
+                        str = strstr(str, ">\n");
+                        if (str)
                         {
                             str[1] = '\0';
                             start = contents2;
-                            if ((str = strstr(str + 2, "<!--Created automatically")))
+                            str = strstr(str + 2, "<!--Created automatically");
+                            if (str)
                             {
-                                if ((str = strstr(str, "-->")))
+                                str = strstr(str, "-->");
+                                if (str)
                                 {
                                     start = str + 4;
                                 }

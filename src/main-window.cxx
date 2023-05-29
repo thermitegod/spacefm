@@ -5324,7 +5324,8 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
         case 3:
             // get selected task
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
-            if ((is_tasks = gtk_tree_model_get_iter_first(model, &it)))
+            is_tasks = gtk_tree_model_get_iter_first(model, &it);
+            if (is_tasks)
             {
                 if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                                   static_cast<i32>(event->x),
@@ -7989,13 +7990,12 @@ main_window_socket_command(char* argv[])
     else if (ztd::same(socket_cmd, "add-event") || ztd::same(socket_cmd, "replace-event") ||
              ztd::same(socket_cmd, "remove-event"))
     {
-        xset_t set;
-
         if (!(argv[i] && argv[i + 1]))
         {
             return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
         }
-        if (!(set = xset_is(argv[i])))
+        xset_t set = xset_is(argv[i]);
+        if (!set)
         {
             return {SOCKET_INVALID, std::format("invalid event type '{}'", argv[i])};
         }

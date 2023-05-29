@@ -605,11 +605,8 @@ VFSFileTask::do_file_copy(const std::filesystem::path& src_file,
     }
     else
     {
-        char buffer[4096];
-        i32 rfd;
-        i32 wfd;
-
-        if ((rfd = open(src_file.c_str(), O_RDONLY)) >= 0)
+        const i32 rfd = open(src_file.c_str(), O_RDONLY);
+        if (rfd >= 0)
         {
             if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
             {
@@ -645,12 +642,13 @@ VFSFileTask::do_file_copy(const std::filesystem::path& src_file,
                 }
             }
 
-            if ((wfd = creat(actual_dest_file.c_str(), file_stat.mode() | S_IWUSR)) >= 0)
+            const i32 wfd = creat(actual_dest_file.c_str(), file_stat.mode() | S_IWUSR);
+            if (wfd >= 0)
             {
                 // sshfs becomes unresponsive with this, nfs is okay with it
                 // if (this->avoid_changes)
                 //    emit_created(actual_dest_file);
-                struct utimbuf times;
+                char buffer[4096];
                 isize rsize;
                 while ((rsize = read(rfd, buffer, sizeof(buffer))) > 0)
                 {
@@ -690,6 +688,7 @@ VFSFileTask::do_file_copy(const std::filesystem::path& src_file,
                     if (!std::filesystem::is_symlink(actual_dest_file))
                     {
                         chmod(actual_dest_file.c_str(), file_stat.mode());
+                        struct utimbuf times;
                         times.actime = file_stat.atime();
                         times.modtime = file_stat.mtime();
                         utime(actual_dest_file.c_str(), &times);

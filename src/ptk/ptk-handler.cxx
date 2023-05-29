@@ -1543,7 +1543,8 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
     // Fetching actual xset if only the name has been passed
     if (!handler_xset)
     {
-        if (!(handler_xset = xset_is(handler_xset_name)))
+        handler_xset = xset_is(handler_xset_name);
+        if (!handler_xset)
         {
             return;
         }
@@ -2291,7 +2292,6 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* event, HandlerData* hn
     GtkTreeModel* model;
     GtkTreePath* tree_path = nullptr;
     GtkTreeIter it;
-    GtkTreeSelection* selection;
     bool item_clicked = false;
     bool ret = false;
 
@@ -2332,10 +2332,14 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* event, HandlerData* hn
             // select clicked item
             gtk_tree_view_set_cursor(GTK_TREE_VIEW(hnd->view_handlers), tree_path, nullptr, false);
         }
-        else if ((selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers))))
+        else
         {
-            // unselect all
-            gtk_tree_selection_unselect_all(selection);
+            GtkTreeSelection* selection =
+                gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
+            if (selection)
+            { // unselect all
+                gtk_tree_selection_unselect_all(selection);
+            }
         }
         ret = true;
     }
@@ -2347,10 +2351,14 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* event, HandlerData* hn
             // select clicked item
             gtk_tree_view_set_cursor(GTK_TREE_VIEW(hnd->view_handlers), tree_path, nullptr, false);
         }
-        else if ((selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers))))
+        else
         {
-            // unselect all
-            gtk_tree_selection_unselect_all(selection);
+            GtkTreeSelection* selection =
+                gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
+            if (selection)
+            { // unselect all
+                gtk_tree_selection_unselect_all(selection);
+            }
         }
 
         // show menu

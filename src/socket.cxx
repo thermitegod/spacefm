@@ -244,7 +244,8 @@ single_instance_check_fatal(i32 ret)
 bool
 single_instance_check()
 {
-    if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+    sock_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock_fd == -1)
     {
         ztd::logger::error("failed to create socket");
         single_instance_check_fatal(EXIT_FAILURE);
@@ -441,7 +442,8 @@ send_socket_command(std::span<const std::string_view> args)
     }
 
     // create socket
-    if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+    sock_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock_fd == -1)
     {
         return {EXIT_FAILURE, "failed to create socket"};
     }

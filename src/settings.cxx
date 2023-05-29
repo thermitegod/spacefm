@@ -473,7 +473,8 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
 
             if (!context)
             {
-                if (!(context = xset_context_new()))
+                context = xset_context_new();
+                if (!context)
                 {
                     return false;
                 }
