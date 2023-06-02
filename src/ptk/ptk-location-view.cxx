@@ -1738,11 +1738,13 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, vfs::volume vol
     return true;
 }
 
+#if 0
 static i32
 cmp_dev_name(vfs::volume a, vfs::volume b)
 {
     return ztd::compare(a->get_disp_name(), b->get_disp_name());
 }
+#endif
 
 void
 ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* menu)
@@ -1765,8 +1767,9 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     }
 
     vfs::volume vol;
-
+#if 0 // BUG
     std::ranges::sort(names, cmp_dev_name);
+#endif
     for (const auto volume : names)
     {
         vol = volume;
