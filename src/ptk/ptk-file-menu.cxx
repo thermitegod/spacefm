@@ -1040,7 +1040,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 #endif
 
                 const vfs::desktop desktop = vfs_get_desktop(app);
-                const std::string app_name = desktop->get_disp_name();
+                const auto app_name = desktop->display_name();
                 if (!app_name.empty())
                 {
                     app_menu_item = gtk_menu_item_new_with_label(app_name.data());
@@ -1612,7 +1612,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
     }
     else
     {
-        app = desktop->get_name();
+        app = desktop->name();
     }
 
     std::vector<vfs::file_info> sel_files = data->sel_files;
@@ -1670,7 +1670,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     const vfs::desktop desktop = vfs_get_desktop(desktop_file);
-    if (desktop->get_name().empty())
+    if (desktop->name().empty())
     {
         return;
     }
@@ -1692,7 +1692,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     {
         case ptk::file_menu::app_job::DEFAULT:
         {
-            mime_type->set_default_action(desktop->get_name());
+            mime_type->set_default_action(desktop->name());
             ptk_app_chooser_has_handler_warn(data->browser ? GTK_WIDGET(data->browser) : nullptr,
                                              mime_type);
             break;
@@ -1702,7 +1702,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // for text files, spacefm displays both the actions for the type
             // and the actions for text/plain, so removing an app may appear to not
             // work if that app is still associated with text/plain
-            mime_type->remove_action(desktop->get_name());
+            mime_type->remove_action(desktop->name());
             if (!ztd::same(mime_type->type(), "text/plain") &&
                 ztd::startswith(mime_type->type(), "text/"))
             {
@@ -1725,10 +1725,10 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::edit:
         {
-            const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->get_name();
+            const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->name();
             if (!std::filesystem::exists(path))
             {
-                const char* share_desktop = vfs_mime_type_locate_desktop_file(desktop->get_name());
+                const char* share_desktop = vfs_mime_type_locate_desktop_file(desktop->name());
                 if (!(share_desktop && std::filesystem::equivalent(share_desktop, path)))
                 {
                     return;
@@ -1765,7 +1765,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::view:
         {
-            const char* desktop_path = get_shared_desktop_file_location(desktop->get_name());
+            const char* desktop_path = get_shared_desktop_file_location(desktop->name());
             if (desktop_path)
             {
                 xset_edit(GTK_WIDGET(data->browser), desktop_path, false, true);
@@ -1821,7 +1821,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         case ptk::file_menu::app_job::browse_shared:
         {
             std::filesystem::path path;
-            const char* desktop_path = get_shared_desktop_file_location(desktop->get_name());
+            const char* desktop_path = get_shared_desktop_file_location(desktop->name());
             if (desktop_path)
             {
                 path = std::filesystem::path(desktop_path).parent_path();
@@ -2168,16 +2168,16 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());
 
     // *.desktop (missing)
-    if (!desktop->get_name().empty())
+    if (!desktop->name().empty())
     {
-        const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->get_name();
+        const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->name();
         if (std::filesystem::exists(path))
         {
-            str = ztd::replace(desktop->get_name(), ".desktop", "._desktop");
+            str = ztd::replace(desktop->name(), ".desktop", "._desktop");
         }
         else
         {
-            str = ztd::replace(desktop->get_name(), ".desktop", "._desktop");
+            str = ztd::replace(desktop->name(), ".desktop", "._desktop");
             str = std::format("{} (*copy)", str);
         }
         newitem = app_menu_additem(app_menu, str, ptk::file_menu::app_job::edit, app_item, data);
@@ -2238,15 +2238,15 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     g_signal_connect(submenu, "key_press_event", G_CALLBACK(app_menu_keypress), data);
 
     // View /usr .desktop
-    if (!desktop->get_name().empty())
+    if (!desktop->name().empty())
     {
         newitem = app_menu_additem(submenu,
-                                   desktop->get_name(),
+                                   desktop->name(),
                                    ptk::file_menu::app_job::view,
                                    app_item,
                                    data);
 
-        const char* desk_path = get_shared_desktop_file_location(desktop->get_name());
+        const char* desk_path = get_shared_desktop_file_location(desktop->name());
         gtk_widget_set_sensitive(GTK_WIDGET(newitem), !!desk_path);
     }
 

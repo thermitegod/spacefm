@@ -119,7 +119,7 @@ add_list_item(GtkListStore* list, const std::string_view path)
             if (file)
             {
                 const vfs::desktop desktop = vfs_get_desktop(path);
-                if (ztd::same(file, desktop->get_name()))
+                if (ztd::same(file, desktop->name()))
                 {
                     // already exists
                     std::free(file);
@@ -134,21 +134,21 @@ add_list_item(GtkListStore* list, const std::string_view path)
 
     // tooltip
     const std::string tooltip = std::format("{}\nName={}\nExec={}{}",
-                                            desktop->get_full_path().string(),
-                                            desktop->get_disp_name(),
-                                            desktop->get_exec(),
+                                            desktop->full_path().string(),
+                                            desktop->display_name(),
+                                            desktop->exec(),
                                             desktop->use_terminal() ? "\nTerminal=true" : "");
 
-    GdkPixbuf* icon = desktop->get_icon(20);
+    GdkPixbuf* icon = desktop->icon(20);
     gtk_list_store_append(list, &it);
     gtk_list_store_set(list,
                        &it,
                        app_chooser::column::app_icon,
                        icon,
                        app_chooser::column::app_name,
-                       desktop->get_disp_name().data(),
+                       desktop->display_name().data(),
                        app_chooser::column::desktop_file,
-                       desktop->get_name().data(),
+                       desktop->name().data(),
                        app_chooser::column::full_path,
                        tooltip.data(),
                        -1);

@@ -308,7 +308,7 @@ load_settings()
             if (!default_app.empty())
             {
                 const vfs::desktop desktop = vfs_get_desktop(main_editor.value());
-                xset_set(xset::name::editor, xset::var::s, desktop->get_exec());
+                xset_set(xset::name::editor, xset::var::s, desktop->exec());
             }
         }
     }
@@ -1019,7 +1019,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
             else if (ztd::endswith(set->z.value(), ".desktop"))
             {
                 const vfs::desktop desktop = vfs_get_desktop(set->z.value());
-                if (!desktop->get_exec().empty())
+                if (!desktop->exec().empty())
                 {
                     // get file list
                     std::vector<vfs::file_info> sel_files;

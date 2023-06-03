@@ -277,7 +277,7 @@ open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app
 
     const vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
-    ztd::logger::info("EXEC({})={}", desktop->get_full_path().string(), desktop->get_exec());
+    ztd::logger::info("EXEC({})={}", desktop->full_path().string(), desktop->exec());
 
     const std::vector<std::filesystem::path> open_files = glist_t_char_to_vector_t_path(files);
 

@@ -777,10 +777,10 @@ VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
     // MOD  display real filenames of .desktop files not in desktop directory
     if (std::filesystem::equivalent(file_dir, vfs::user_dirs->desktop_dir()))
     {
-        this->update_display_name(desktop->get_disp_name());
+        this->update_display_name(desktop->display_name());
     }
 
-    if (desktop->get_icon_name().empty())
+    if (desktop->icon_name().empty())
     {
         return;
     }
@@ -789,7 +789,7 @@ VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
     const i32 small_size = vfs_mime_type_get_icon_size_small();
     if (this->big_thumbnail_ == nullptr)
     {
-        GdkPixbuf* icon = desktop->get_icon(big_size);
+        GdkPixbuf* icon = desktop->icon(big_size);
         if (icon)
         {
             this->big_thumbnail_ = icon;
@@ -797,7 +797,7 @@ VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
     }
     if (this->small_thumbnail_ == nullptr)
     {
-        GdkPixbuf* icon = desktop->get_icon(small_size);
+        GdkPixbuf* icon = desktop->icon(small_size);
         if (icon)
         {
             this->small_thumbnail_ = icon;

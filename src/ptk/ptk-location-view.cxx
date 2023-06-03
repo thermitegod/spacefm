@@ -1756,7 +1756,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, vfs::volume vol
 static i32
 cmp_dev_name(vfs::volume a, vfs::volume b)
 {
-    return ztd::compare(a->get_disp_name(), b->get_disp_name());
+    return ztd::compare(a->display_name(), b->display_name());
 }
 #endif
 

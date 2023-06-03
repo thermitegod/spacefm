@@ -211,7 +211,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 
             if (!set->menu_label)
             {
-                menu_label = desktop->get_disp_name();
+                menu_label = desktop->display_name();
             }
             if (set->icon)
             {
@@ -219,7 +219,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
             }
             if (!icon_new)
             {
-                icon_new = desktop->get_icon(icon_size);
+                icon_new = desktop->icon(icon_size);
             }
         }
         else

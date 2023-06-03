@@ -358,14 +358,14 @@ on_combo_change(GtkComboBox* combo, void* user_data)
                     const vfs::desktop desktop = vfs_get_desktop(action);
 
                     GdkPixbuf* icon;
-                    icon = desktop->get_icon(20);
+                    icon = desktop->icon(20);
                     gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                                       &it,
                                                       0,
                                                       0,
                                                       icon,
                                                       1,
-                                                      desktop->get_disp_name().data(),
+                                                      desktop->display_name().data(),
                                                       2,
                                                       action,
                                                       -1);
@@ -533,13 +533,13 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
                 const vfs::desktop desktop = vfs_get_desktop(action);
                 GdkPixbuf* icon;
                 gtk_list_store_append(model, &it);
-                icon = desktop->get_icon(20);
+                icon = desktop->icon(20);
                 gtk_list_store_set(model,
                                    &it,
                                    0,
                                    icon,
                                    1,
-                                   desktop->get_disp_name().data(),
+                                   desktop->display_name().data(),
                                    2,
                                    action.data(),
                                    -1);

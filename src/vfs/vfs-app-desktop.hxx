@@ -45,15 +45,15 @@ class VFSAppDesktop
 
     VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept;
 
-    const std::string& get_name() const noexcept;
-    const std::string& get_disp_name() const noexcept;
-    const std::string& get_exec() const noexcept;
-    const std::filesystem::path& get_full_path() const noexcept;
-    const std::string& get_icon_name() const noexcept;
-    GdkPixbuf* get_icon(i32 size) const noexcept;
+    const std::string_view name() const noexcept;
+    const std::string_view display_name() const noexcept;
+    const std::string_view exec() const noexcept;
+    const std::filesystem::path& full_path() const noexcept;
+    const std::string_view icon_name() const noexcept;
+    GdkPixbuf* icon(i32 size) const noexcept;
     bool use_terminal() const noexcept;
     bool open_multiple_files() const noexcept;
-    bool open_files(const std::filesystem::path& working_dir,
+    void open_files(const std::filesystem::path& working_dir,
                     const std::span<const std::filesystem::path> file_paths) const;
 
   private:
@@ -66,26 +66,26 @@ class VFSAppDesktop
                       const std::span<const std::filesystem::path> file_paths) const noexcept;
 
   private:
-    std::string file_name{};
-    std::filesystem::path full_path{};
+    std::string file_name_{};
+    std::filesystem::path full_path_{};
 
     // desktop entry spec keys
-    std::string type{};
-    std::string name{};
-    std::string generic_name{};
-    bool no_display{false};
-    std::string comment{};
-    std::string icon{};
-    std::string exec{};
-    std::string try_exec{};
-    std::string path{}; // working dir
-    bool terminal{false};
-    std::string actions{};
-    std::string mime_type{};
-    std::string categories{};
-    std::string keywords{};
-    bool startup_notify{false};
-    std::string startup_wm_class{};
+    std::string type_{};
+    std::string name_{};
+    std::string generic_name_{};
+    bool no_display_{false};
+    std::string comment_{};
+    std::string icon_{};
+    std::string exec_{};
+    std::string try_exec_{};
+    std::string path_{}; // working dir
+    bool terminal_{false};
+    std::string actions_{};
+    std::string mime_type_{};
+    std::string categories_{};
+    std::string keywords_{};
+    bool startup_notify_{false};
+    std::string startup_wm_class_{};
 };
 
 namespace vfs
