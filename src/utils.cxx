@@ -60,15 +60,37 @@ replace_line_subs(std::string_view line) noexcept
 }
 
 bool
-have_x_access(std::string_view path) noexcept
+have_x_access(const std::filesystem::path& path) noexcept
 {
-    return (faccessat(0, path.data(), R_OK | X_OK, AT_EACCESS) == 0);
+    const auto status = std::filesystem::status(path);
+
+    return ((status.permissions() & std::filesystem::perms::owner_exec) !=
+                std::filesystem::perms::none ||
+            (status.permissions() & std::filesystem::perms::group_exec) !=
+                std::filesystem::perms::none ||
+            (status.permissions() & std::filesystem::perms::others_exec) !=
+                std::filesystem::perms::none);
 }
 
 bool
-have_rw_access(std::string_view path) noexcept
+have_rw_access(const std::filesystem::path& path) noexcept
 {
-    return (faccessat(0, path.data(), R_OK | W_OK, AT_EACCESS) == 0);
+    const auto status = std::filesystem::status(path);
+
+    return ((status.permissions() & std::filesystem::perms::owner_read) !=
+                std::filesystem::perms::none &&
+            (status.permissions() & std::filesystem::perms::owner_write) !=
+                std::filesystem::perms::none) ||
+
+           ((status.permissions() & std::filesystem::perms::group_read) !=
+                std::filesystem::perms::none &&
+            (status.permissions() & std::filesystem::perms::group_write) !=
+                std::filesystem::perms::none) ||
+
+           ((status.permissions() & std::filesystem::perms::others_read) !=
+                std::filesystem::perms::none &&
+            (status.permissions() & std::filesystem::perms::others_write) !=
+                std::filesystem::perms::none);
 }
 
 bool

@@ -18,12 +18,14 @@
 #include <string>
 #include <string_view>
 
+#include <filesystem>
+
 #include <vector>
 
 #include <utility>
 
-bool have_rw_access(std::string_view path) noexcept;
-bool have_x_access(std::string_view path) noexcept;
+bool have_rw_access(const std::filesystem::path& path) noexcept;
+bool have_x_access(const std::filesystem::path& path) noexcept;
 
 bool dir_has_files(std::string_view path) noexcept;
 
