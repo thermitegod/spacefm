@@ -229,10 +229,10 @@ VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
     this->load_special_info(full_path);
 }
 
-const std::string
+const std::string_view
 VFSFileInfo::mime_type_description() const noexcept
 {
-    return mime_type_->get_description();
+    return mime_type_->description();
 }
 
 GdkPixbuf*
@@ -245,7 +245,7 @@ VFSFileInfo::big_icon() noexcept
         {
             return nullptr;
         }
-        return this->mime_type_->get_icon(true);
+        return this->mime_type_->icon(true);
     }
 
     i32 w = 0;
@@ -305,7 +305,7 @@ VFSFileInfo::small_icon() noexcept
     {
         return nullptr;
     }
-    return this->mime_type_->get_icon(false);
+    return this->mime_type_->icon(false);
 }
 
 GdkPixbuf*
@@ -632,14 +632,14 @@ bool
 VFSFileInfo::is_image() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
-    return ztd::startswith(this->mime_type_->get_type(), "image/");
+    return ztd::startswith(this->mime_type_->type(), "image/");
 }
 
 bool
 VFSFileInfo::is_video() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
-    return ztd::startswith(this->mime_type_->get_type(), "video/");
+    return ztd::startswith(this->mime_type_->type(), "video/");
 }
 
 bool
@@ -651,21 +651,21 @@ VFSFileInfo::is_desktop_entry() const noexcept
 bool
 VFSFileInfo::is_unknown_type() const noexcept
 {
-    return ztd::same(this->mime_type_->get_type(), XDG_MIME_TYPE_UNKNOWN);
+    return ztd::same(this->mime_type_->type(), XDG_MIME_TYPE_UNKNOWN);
 }
 
 // full path of the file is required by this function
 bool
 VFSFileInfo::is_executable(const std::filesystem::path& file_path) const noexcept
 {
-    return mime_type_is_executable_file(file_path, this->mime_type_->get_type());
+    return mime_type_is_executable_file(file_path, this->mime_type_->type());
 }
 
 // full path of the file is required by this function
 bool
 VFSFileInfo::is_text(const std::filesystem::path& file_path) const noexcept
 {
-    return mime_type_is_text_file(file_path, this->mime_type_->get_type());
+    return mime_type_is_text_file(file_path, this->mime_type_->type());
 }
 
 std::filesystem::perms

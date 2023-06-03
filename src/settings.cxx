@@ -304,7 +304,7 @@ load_settings()
         vfs::mime_type mime_type = vfs_mime_type_get_from_type("text/plain");
         if (mime_type)
         {
-            const std::string default_app = mime_type->get_default_action();
+            const std::string default_app = mime_type->default_action();
             if (!default_app.empty())
             {
                 const vfs::desktop desktop = vfs_get_desktop(main_editor.value());

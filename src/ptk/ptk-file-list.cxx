@@ -479,7 +479,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             break;
         case ptk::file_list::column::size:
             if ((file->is_directory() || file->is_symlink()) &&
-                ztd::same(file->mime_type()->get_type(), XDG_MIME_TYPE_DIRECTORY))
+                ztd::same(file->mime_type()->type(), XDG_MIME_TYPE_DIRECTORY))
             {
                 g_value_set_string(value, nullptr);
             }

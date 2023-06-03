@@ -36,20 +36,20 @@ struct VFSMimeType
     VFSMimeType(const std::string_view type_name);
     ~VFSMimeType();
 
-    GdkPixbuf* get_icon(bool big) noexcept;
+    GdkPixbuf* icon(bool big) noexcept;
 
     // Get mime-type string
-    const std::string get_type() const noexcept;
+    const std::string_view type() const noexcept;
 
     // Get human-readable description of mime-type
-    const std::string get_description() noexcept;
+    const std::string_view description() noexcept;
 
     // Get available actions (applications) for this mime-type
     // returned vector should be freed with g_strfreev when not needed.
-    const std::vector<std::string> get_actions() const noexcept;
+    const std::vector<std::string> actions() const noexcept;
 
     // returned string should be freed with g_strfreev when not needed.
-    const std::string get_default_action() const noexcept;
+    const std::string default_action() const noexcept;
 
     void set_default_action(const std::string_view desktop_id) noexcept;
 
@@ -62,10 +62,10 @@ struct VFSMimeType
     void free_cached_small_icons() noexcept;
 
   private:
-    std::string type{};        // mime_type-type string
-    std::string description{}; // description of the mimele type
-    GdkPixbuf* big_icon{nullptr};
-    GdkPixbuf* small_icon{nullptr};
+    std::string type_{};        // mime_type-type string
+    std::string description_{}; // description of the mimele type
+    GdkPixbuf* big_icon_{nullptr};
+    GdkPixbuf* small_icon_{nullptr};
 };
 
 namespace vfs

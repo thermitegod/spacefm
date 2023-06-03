@@ -811,8 +811,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     if (file)
     {
         mime_type = file->mime_type();
-        apps = mime_type->get_actions();
-        context->var[item_prop::context::item::mime] = mime_type->get_type();
+        apps = mime_type->actions();
+        context->var[item_prop::context::item::mime] = mime_type->type();
     }
     else
     {
@@ -1018,7 +1018,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         if (is_text)
         {
             vfs::mime_type txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-            const std::vector<std::string> txt_apps = txt_type->get_actions();
+            const std::vector<std::string> txt_apps = txt_type->actions();
             if (!txt_apps.empty())
             {
                 apps = ztd::merge(apps, txt_apps);
@@ -1087,7 +1087,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         std::string plain_type;
         if (mime_type)
         {
-            plain_type = ztd::strdup(mime_type->get_type());
+            plain_type = ztd::strdup(mime_type->type().data());
         }
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
@@ -1703,8 +1703,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // and the actions for text/plain, so removing an app may appear to not
             // work if that app is still associated with text/plain
             mime_type->remove_action(desktop->get_name());
-            if (!ztd::same(mime_type->get_type(), "text/plain") &&
-                ztd::startswith(mime_type->get_type(), "text/"))
+            if (!ztd::same(mime_type->type(), "text/plain") &&
+                ztd::startswith(mime_type->type(), "text/"))
             {
                 xset_msg_dialog(
                     GTK_WIDGET(data->browser),
@@ -1800,7 +1800,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             if (ztd::endswith(path.string(), ".desktop") && !ztd::contains(path.string(), "/") &&
                 mime_type)
             {
-                vfs_mime_type_append_action(mime_type->get_type(), path.string());
+                vfs_mime_type_append_action(mime_type->type(), path.string());
             }
             std::free(str);
             break;
@@ -1842,13 +1842,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             const auto mime_path = vfs::user_dirs->data_dir() / "mime" / "packages";
             std::filesystem::create_directories(mime_path);
             std::filesystem::permissions(mime_path, std::filesystem::perms::owner_all);
-            str2 = ztd::replace(mime_type->get_type(), "/", "-");
+            str2 = ztd::replace(mime_type->type(), "/", "-");
             str2 = std::format("{}.xml", str2);
             const auto mime_file = vfs::user_dirs->data_dir() / "mime" / "packages" / str2;
             if (!std::filesystem::exists(mime_file))
             {
                 std::string msg;
-                const std::string xml_file = std::format("{}.xml", mime_type->get_type());
+                const std::string xml_file = std::format("{}.xml", mime_type->type());
                 const auto usr_path = std::filesystem::path() / "/usr/share/mime" / xml_file;
 
                 if (std::filesystem::exists(usr_path))
@@ -1859,7 +1859,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                       mime_file.string(),
                                       usr_path.string(),
                                       mime_file.string(),
-                                      mime_type->get_type());
+                                      mime_type->type());
                 }
                 else
                 {
@@ -1868,7 +1868,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                       "recognized for the current user.\n\nCreate this file now?",
                                       mime_file.string(),
                                       mime_file.string(),
-                                      mime_type->get_type());
+                                      mime_type->type());
                 }
 
                 const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
@@ -1911,7 +1911,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     "            <match type=\"string\" value=\"\\x89PNG\" offset=\"0\"/>\n"
                     "        </magic>\n"
                     "-->",
-                    mime_type->get_type());
+                    mime_type->type());
                 // clang-format on
 
                 // build from /usr/share/mime type ?
@@ -1975,7 +1975,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::view_type:
         {
-            str2 = std::format("{}.xml", mime_type->get_type());
+            str2 = std::format("{}.xml", mime_type->type());
             const auto path = std::filesystem::path() / "/usr/share/mime" / str2;
             if (std::filesystem::exists(path))
             {
@@ -2137,7 +2137,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     vfs::mime_type mime_type = data->file->mime_type();
     if (mime_type)
     {
-        type = mime_type->get_type();
+        type = mime_type->type();
     }
     else
     {

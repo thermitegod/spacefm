@@ -1191,7 +1191,7 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& pa
     std::string type;
     if (mime_type)
     {
-        type = mime_type->get_type();
+        type = mime_type->type();
     }
 
     // replace spaces in path with underscores for matching

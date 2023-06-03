@@ -491,8 +491,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
     if (same_type)
     {
         vfs::mime_type mime = file->mime_type();
-        const std::string file_type =
-            std::format("{}\n{}", mime->get_description(), mime->get_type());
+        const std::string file_type = std::format("{}\n{}", mime->description(), mime->type());
         gtk_label_set_text(GTK_LABEL(mime_type), file_type.data());
     }
     else
@@ -516,7 +515,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         GtkTreeIter it;
 
         vfs::mime_type mime = file->mime_type();
-        const std::vector<std::string> actions = mime->get_actions();
+        const std::vector<std::string> actions = mime->actions();
         GtkCellRenderer* renderer;
         GtkListStore* model;
         gtk_cell_layout_clear(GTK_CELL_LAYOUT(open_with));
@@ -569,7 +568,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
                                              nullptr);
         gtk_combo_box_set_active(GTK_COMBO_BOX(open_with), 0);
 
-        char* mime_data = ztd::strdup(file->mime_type()->get_type());
+        char* mime_data = ztd::strdup(file->mime_type()->type().data());
 
         g_signal_connect(open_with, "changed", G_CALLBACK(on_combo_change), mime_data);
 

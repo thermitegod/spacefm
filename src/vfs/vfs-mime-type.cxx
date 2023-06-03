@@ -85,7 +85,7 @@ vfs_mime_type_get_from_type(const std::string_view type)
     }
 
     vfs::mime_type mime_type = vfs_mime_type_new(type);
-    mime_map.insert({mime_type->get_type(), mime_type});
+    mime_map.insert({mime_type->type().data(), mime_type});
 
     return mime_type;
 }
@@ -158,47 +158,58 @@ vfs_mime_type_finalize()
 
 /////////////////////////////////////
 
-VFSMimeType::VFSMimeType(const std::string_view type_name) : type(type_name)
+VFSMimeType::VFSMimeType(const std::string_view type_name) : type_(type_name)
 {
+    const auto icon_data = mime_type_get_desc_icon(this->type_);
+    this->description_ = icon_data[1];
+    if (this->description_.empty() && !ztd::same(this->type_, XDG_MIME_TYPE_UNKNOWN))
+    {
+        ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
+        const auto mime_unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        if (mime_unknown)
+        {
+            this->description_ = mime_unknown->description();
+        }
+    }
 }
 
 VFSMimeType::~VFSMimeType()
 {
-    if (this->big_icon)
+    if (this->big_icon_)
     {
-        g_object_unref(this->big_icon);
+        g_object_unref(this->big_icon_);
     }
-    if (this->small_icon)
+    if (this->small_icon_)
     {
-        g_object_unref(this->small_icon);
+        g_object_unref(this->small_icon_);
     }
 }
 
 GdkPixbuf*
-VFSMimeType::get_icon(bool big) noexcept
+VFSMimeType::icon(bool big) noexcept
 {
     i32 icon_size;
 
     if (big)
     {
-        if (this->big_icon)
+        if (this->big_icon_)
         { /* big icon */
-            return g_object_ref(this->big_icon);
+            return g_object_ref(this->big_icon_);
         }
         icon_size = big_icon_size;
     }
     else /* small icon */
     {
-        if (this->small_icon)
+        if (this->small_icon_)
         {
-            return g_object_ref(this->small_icon);
+            return g_object_ref(this->small_icon_);
         }
         icon_size = small_icon_size;
     }
 
     GdkPixbuf* icon = nullptr;
 
-    if (ztd::same(this->type, XDG_MIME_TYPE_DIRECTORY))
+    if (ztd::same(this->type_, XDG_MIME_TYPE_DIRECTORY))
     {
         icon = vfs_load_icon("gtk-directory", icon_size);
         if (!icon)
@@ -211,18 +222,18 @@ VFSMimeType::get_icon(bool big) noexcept
         }
         if (big)
         {
-            this->big_icon = icon;
+            this->big_icon_ = icon;
         }
         else
         {
-            this->small_icon = icon;
+            this->small_icon_ = icon;
         }
         return icon ? g_object_ref(icon) : nullptr;
     }
 
     // get description and icon from freedesktop XML - these are fetched
     // together for performance.
-    const auto [mime_icon, mime_desc] = mime_type_get_desc_icon(this->type);
+    const auto [mime_icon, mime_desc] = mime_type_get_desc_icon(this->type_);
 
     if (!mime_icon.empty())
     {
@@ -230,32 +241,32 @@ VFSMimeType::get_icon(bool big) noexcept
     }
     if (!mime_desc.empty())
     {
-        if (this->description.empty())
+        if (this->description_.empty())
         {
-            this->description = mime_desc;
+            this->description_ = mime_desc;
         }
     }
-    if (this->description.empty())
+    if (this->description_.empty())
     {
-        ztd::logger::warn("mime-type {} has no description (comment)", this->type);
+        ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
         vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
-            this->description = vfs_mime->get_description();
+            this->description_ = vfs_mime->description();
         }
     }
 
     if (!icon)
     {
         // guess icon
-        const auto mime_parts = ztd::partition(this->type, "/");
+        const auto mime_parts = ztd::partition(this->type_, "/");
         const std::string& split_mime = mime_parts[0];
         const std::string& split_type = mime_parts[2];
 
-        if (ztd::contains(this->type, "/"))
+        if (ztd::contains(this->type_, "/"))
         {
             // convert mime-type foo/bar to foo-bar
-            std::string icon_name = ztd::replace(this->type, "/", "-");
+            std::string icon_name = ztd::replace(this->type_, "/", "-");
 
             // is there an icon named foo-bar?
             icon = vfs_load_icon(icon_name, icon_size);
@@ -285,11 +296,11 @@ VFSMimeType::get_icon(bool big) noexcept
     if (!icon)
     {
         /* prevent endless recursion of XDG_MIME_TYPE_UNKNOWN */
-        if (!ztd::same(this->type, XDG_MIME_TYPE_UNKNOWN))
+        if (!ztd::same(this->type_, XDG_MIME_TYPE_UNKNOWN))
         {
             /* FIXME: fallback to icon of parent mime-type */
             vfs::mime_type unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
-            icon = unknown->get_icon(big);
+            icon = unknown->icon(big);
         }
         else /* unknown */
         {
@@ -299,52 +310,38 @@ VFSMimeType::get_icon(bool big) noexcept
 
     if (big)
     {
-        this->big_icon = icon;
+        this->big_icon_ = icon;
     }
     else
     {
-        this->small_icon = icon;
+        this->small_icon_ = icon;
     }
     return icon ? g_object_ref(icon) : nullptr;
 }
 
-const std::string
-VFSMimeType::get_type() const noexcept
+const std::string_view
+VFSMimeType::type() const noexcept
 {
-    return this->type;
+    return this->type_;
 }
 
 /* Get human-readable description of mime type */
-const std::string
-VFSMimeType::get_description() noexcept
+const std::string_view
+VFSMimeType::description() noexcept
 {
-    if (this->description.empty())
-    {
-        const auto icon_data = mime_type_get_desc_icon(this->type);
-        this->description = icon_data[1];
-        if (this->description.empty())
-        {
-            ztd::logger::warn("mime-type {} has no description (comment)", this->type);
-            vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
-            if (vfs_mime)
-            {
-                this->description = vfs_mime->get_description();
-            }
-        }
-    }
-    return this->description;
+    return this->description_;
 }
 
 const std::vector<std::string>
-VFSMimeType::get_actions() const noexcept
+VFSMimeType::actions() const noexcept
 {
-    return mime_type_get_actions(this->type);
+    return mime_type_get_actions(this->type_);
 }
 
 const std::string
-VFSMimeType::get_default_action() const noexcept
+VFSMimeType::default_action() const noexcept
 {
-    const char* def = mime_type_get_default_action(this->type);
+    const char* def = mime_type_get_default_action(this->type_);
 
     /* FIXME:
      * If default app is not set, choose one from all availble actions.
@@ -356,7 +353,7 @@ VFSMimeType::get_default_action() const noexcept
         return def;
     }
 
-    const std::vector<std::string> actions = mime_type_get_actions(this->type);
+    const std::vector<std::string> actions = mime_type_get_actions(this->type_);
     if (!actions.empty())
     {
         return actions.at(0).data();
@@ -371,9 +368,9 @@ VFSMimeType::get_default_action() const noexcept
 void
 VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
 {
-    const std::string custom_desktop = this->add_action(desktop_id);
+    const auto custom_desktop = this->add_action(desktop_id);
 
-    mime_type_update_association(this->type,
+    mime_type_update_association(this->type_,
                                  custom_desktop.empty() ? desktop_id : custom_desktop,
                                  mime_type::action::DEFAULT);
 }
@@ -381,7 +378,7 @@ VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
 void
 VFSMimeType::remove_action(const std::string_view desktop_id) noexcept
 {
-    mime_type_update_association(this->type, desktop_id, mime_type::action::remove);
+    mime_type_update_association(this->type_, desktop_id, mime_type::action::remove);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
@@ -391,7 +388,7 @@ VFSMimeType::add_action(const std::string_view desktop_id) noexcept
     // MOD  do not create custom desktop file if desktop_id is not a command
     if (!ztd::endswith(desktop_id, ".desktop"))
     {
-        return mime_type_add_action(this->type, desktop_id);
+        return mime_type_add_action(this->type_, desktop_id);
     }
     return desktop_id.data();
 }
@@ -399,23 +396,21 @@ VFSMimeType::add_action(const std::string_view desktop_id) noexcept
 void
 VFSMimeType::free_cached_big_icons() noexcept
 {
-    if (!this->big_icon)
+    if (this->big_icon_)
     {
-        return;
+        g_object_unref(this->big_icon_);
+        this->big_icon_ = nullptr;
     }
-    g_object_unref(this->big_icon);
-    this->big_icon = nullptr;
 }
 
 void
 VFSMimeType::free_cached_small_icons() noexcept
 {
-    if (!this->small_icon)
+    if (this->small_icon_)
     {
-        return;
+        g_object_unref(this->small_icon_);
+        this->small_icon_ = nullptr;
     }
-    g_object_unref(this->small_icon);
-    this->small_icon = nullptr;
 }
 
 void

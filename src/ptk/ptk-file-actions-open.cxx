@@ -423,15 +423,15 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                 }
                 else
                 {
-                    alloc_desktop = mime_type->get_default_action();
+                    alloc_desktop = mime_type->default_action();
                 }
             }
 
-            if (alloc_desktop.empty() && mime_type_is_text_file(full_path, mime_type->get_type()))
+            if (alloc_desktop.empty() && mime_type_is_text_file(full_path, mime_type->type()))
             {
                 /* FIXME: special handling for plain text file */
                 mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-                alloc_desktop = mime_type->get_default_action();
+                alloc_desktop = mime_type->default_action();
             }
 
             if (alloc_desktop.empty() && file->is_symlink())

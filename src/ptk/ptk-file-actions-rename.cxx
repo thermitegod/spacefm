@@ -2418,8 +2418,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         vfs::mime_type mime_type = file->mime_type();
         if (mime_type)
         {
-            mset->mime_type = ztd::strdup(mime_type->get_type());
-            type = std::format(" {} ( {} )", mime_type->get_description(), mset->mime_type);
+            mset->mime_type = ztd::strdup(mime_type->type().data());
+            type = std::format(" {} ( {} )", mime_type->description(), mset->mime_type);
         }
         else
         {

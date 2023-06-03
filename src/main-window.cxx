@@ -4128,7 +4128,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             mime_type = file->mime_type();
             if (mime_type)
             {
-                c->var[item_prop::context::item::mime] = mime_type->get_type();
+                c->var[item_prop::context::item::mime] = mime_type->type();
             }
 
             c->var[item_prop::context::item::mul_sel] = sel_files.size() > 1 ? "true" : "false";

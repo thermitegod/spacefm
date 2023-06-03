@@ -168,8 +168,8 @@ create_model_from_mime_type(vfs::mime_type mime_type)
                                             G_TYPE_STRING);
     if (mime_type)
     {
-        std::vector<std::string> apps = mime_type->get_actions();
-        const std::string type = mime_type->get_type();
+        std::vector<std::string> apps = mime_type->actions();
+        const auto type = mime_type->type();
         if (apps.empty() && mime_type_is_text_file("", type))
         {
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
@@ -236,13 +236,13 @@ app_chooser_dialog_new(GtkWindow* parent, const vfs::mime_type& mime_type, bool 
     }
 
     const std::string mime_desc =
-        std::format(" {}\n ( {} )", mime_type->get_description(), mime_type->get_type());
+        std::format(" {}\n ( {} )", mime_type->description(), mime_type->type());
     gtk_label_set_text(GTK_LABEL(file_type), mime_desc.data());
 
     /* Do not set default handler for directories and files with unknown type */
     if (!show_default ||
-        /*  ztd::same(mime_type->get_type(), XDG_MIME_TYPE_UNKNOWN) || */
-        (ztd::same(mime_type->get_type(), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
+        /*  ztd::same(mime_type->type(), XDG_MIME_TYPE_UNKNOWN) || */
+        (ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
     {
         gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(builder, "set_default")));
     }
@@ -505,7 +505,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
             "than with your associated MIME application.\n\nYou may also need to disable this "
             "handler in Open|File Handlers for this type to be opened with your associated "
             "application by default.",
-            mime_type->get_type(),
+            mime_type->type(),
             handlers.front()->menu_label.value());
         xset_msg_dialog(parent,
                         GtkMessageType::GTK_MESSAGE_INFO,
@@ -531,7 +531,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                 "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
                 "global option Open|Archive Defaults|Open With App, for this type to be opened "
                 "with your associated application by default.",
-                mime_type->get_type(),
+                mime_type->type(),
                 handlers.front()->menu_label.value());
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_INFO,
@@ -580,7 +580,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
             }
             else if (/* !ztd::same(mime_type->get_type(),
                                                     XDG_MIME_TYPE_UNKNOWN) && */
-                     (dir_default || !ztd::same(mime_type->get_type(), XDG_MIME_TYPE_DIRECTORY)))
+                     (dir_default || !ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY)))
             {
                 const std::string custom = mime_type->add_action(app);
                 std::free(app);
