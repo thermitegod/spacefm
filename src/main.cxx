@@ -107,7 +107,7 @@ static void
 open_file(const std::filesystem::path& path)
 {
     vfs::file_info file = vfs_file_info_new(path);
-    vfs::mime_type mime_type = file->get_mime_type();
+    vfs::mime_type mime_type = file->mime_type();
 
     std::string app_name = mime_type->get_default_action();
     if (app_name.empty())

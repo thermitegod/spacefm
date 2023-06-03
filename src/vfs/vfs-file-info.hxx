@@ -58,64 +58,51 @@ struct VFSFileInfo
     VFSFileInfo(const std::filesystem::path& file_path);
     ~VFSFileInfo();
 
-  public: // TODO private
-    // cached copy of struct stat()
-    ztd::lstat file_stat;
+    const std::string_view name() const noexcept;
+    const std::string_view display_name() const noexcept;
 
-    std::filesystem::file_status status;
+    void update_display_name(const std::string_view new_display_name) noexcept;
 
-  public:
-    std::filesystem::path path{};    // real path on file system
-    std::string name{};              // real name on file system
-    std::string disp_name{};         // displayed name (in UTF-8)
-    std::string collate_key{};       // sfm sort key
-    std::string collate_icase_key{}; // sfm case folded sort key
-    std::string disp_size{};         // displayed human-readable file size
-    std::string disp_disk_size{};    // displayed human-readable file size on disk
-    std::string disp_owner{};        // displayed owner:group pair
-    std::string disp_mtime{};        // displayed last modification time
-    std::string disp_perm{};         // displayed permission in string form
-    vfs::mime_type mime_type{};      // mime type related information
-    GdkPixbuf* big_thumbnail{};      // thumbnail of the file
-    GdkPixbuf* small_thumbnail{};    // thumbnail of the file
-    vfs::file_info_flags flags{vfs::file_info_flags::none}; // if it is a special file
+    const std::filesystem::path& path() const noexcept;
 
-  public:
-    const std::string& get_name() const noexcept;
-    const std::string& get_disp_name() const noexcept;
+    const std::string_view collate_key() const noexcept;
+    const std::string_view collate_icase_key() const noexcept;
 
-    void set_disp_name(const std::string_view new_disp_name) noexcept;
+    off_t size() const noexcept;
+    off_t disk_size() const noexcept;
 
-    off_t get_size() const noexcept;
-    off_t get_disk_size() const noexcept;
+    const std::string_view display_size() const noexcept;
+    const std::string_view display_disk_size() const noexcept;
 
-    const std::string& get_disp_size() const noexcept;
-    const std::string& get_disp_disk_size() const noexcept;
+    blkcnt_t blocks() const noexcept;
 
-    blkcnt_t get_blocks() const noexcept;
+    std::filesystem::perms permissions() const noexcept;
 
-    std::filesystem::perms get_permissions() const noexcept;
-
-    vfs::mime_type get_mime_type() const noexcept;
+    vfs::mime_type mime_type() const noexcept;
     void reload_mime_type(const std::filesystem::path& full_path) noexcept;
 
-    const std::string get_mime_type_desc() const noexcept;
+    const std::string mime_type_description() const noexcept;
 
-    const std::string& get_disp_owner() noexcept;
-    const std::string& get_disp_mtime() noexcept;
-    const std::string& get_disp_perm() noexcept;
+    const std::string_view display_owner() noexcept;
+    const std::string_view display_mtime() noexcept;
+    const std::string_view display_permissions() noexcept;
 
-    std::time_t get_mtime() noexcept;
-    std::time_t get_atime() noexcept;
+    std::time_t mtime() noexcept;
+    std::time_t atime() noexcept;
 
     void load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
 
-    GdkPixbuf* get_big_icon() noexcept;
-    GdkPixbuf* get_small_icon() noexcept;
+    GdkPixbuf* big_icon() noexcept;
+    GdkPixbuf* small_icon() noexcept;
 
-    GdkPixbuf* get_big_thumbnail() const noexcept;
-    GdkPixbuf* get_small_thumbnail() const noexcept;
+    GdkPixbuf* big_thumbnail() const noexcept;
+    GdkPixbuf* small_thumbnail() const noexcept;
+
+    void unload_big_thumbnail() noexcept;
+    void unload_small_thumbnail() noexcept;
+
+    vfs::file_info_flags flags() const noexcept;
 
     void load_special_info(const std::filesystem::path& file_path) noexcept;
 
@@ -128,7 +115,7 @@ struct VFSFileInfo
     bool is_character_file() const noexcept;
     bool is_other() const noexcept;
 
-    bool is_hidden() const noexcept; // filename starts with '.'
+    bool is_hidden() const noexcept;
 
     bool is_image() const noexcept;
     bool is_video() const noexcept;
@@ -144,13 +131,31 @@ struct VFSFileInfo
     bool update(const std::filesystem::path& file_path) noexcept;
 
   private:
-    bool hidden{false};
+    ztd::lstat file_stat_; // cached copy of struct stat()
+    std::filesystem::file_status status_;
+
+    std::filesystem::path path_{};    // real path on file system
+    std::string name_{};              // real name on file system
+    std::string display_name_{};      // displayed name (in UTF-8)
+    std::string collate_key_{};       // sfm sort key
+    std::string collate_icase_key_{}; // sfm case folded sort key
+    std::string display_size_{};      // displayed human-readable file size
+    std::string display_disk_size_{}; // displayed human-readable file size on disk
+    std::string display_owner_{};     // displayed owner:group pair
+    std::string display_mtime_{};     // displayed last modification time
+    std::string display_perm_{};      // displayed permission in string form
+    vfs::mime_type mime_type_{};      // mime type related information
+    GdkPixbuf* big_thumbnail_{};      // thumbnail of the file
+    GdkPixbuf* small_thumbnail_{};    // thumbnail of the file
+    vfs::file_info_flags flags_{vfs::file_info_flags::none}; // if it is a special file
+
+    bool is_hidden_{false}; // if the filename starts with '.'
 
   private:
     void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;
     void load_thumbnail_big(const std::filesystem::path& full_path) noexcept;
 
-  public:
+  public: // TODO need to remove manual ref counting
     void ref_inc();
     void ref_dec();
     u32 ref_count();
@@ -165,6 +170,7 @@ namespace vfs
 } // namespace vfs
 
 vfs::file_info vfs_file_info_new(const std::filesystem::path& file_path);
+
 vfs::file_info vfs_file_info_ref(vfs::file_info file);
 void vfs_file_info_unref(vfs::file_info file);
 

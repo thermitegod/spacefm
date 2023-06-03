@@ -325,7 +325,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                const std::string& file_name = file->get_name();
+                const auto file_name = file->name();
                 if (ztd::same(file_name, name))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
@@ -2573,13 +2573,16 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             }
 
             // test name
-            std::string name = file->get_disp_name();
+            const auto name = file->display_name();
+            bool select = false;
             if (icase)
             {
-                name = ztd::lower(name);
+                select = ztd::fnmatch(key, ztd::lower(name));
             }
-
-            const bool select = ztd::fnmatch(key, name);
+            else
+            {
+                select = ztd::fnmatch(key, name);
+            }
 
             // do selection and scroll to first selected
             path = gtk_tree_model_get_path(
@@ -2749,7 +2752,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
             }
 
             // test name
-            const std::string name = file->get_disp_name();
+            const auto name = file->display_name();
             char** test_name = filename;
             while (*test_name)
             {
@@ -2991,7 +2994,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
             }
 
             // test name
-            const std::string name = file->get_disp_name();
+            const auto name = file->display_name();
             if (std::filesystem::equivalent(name, seek_name))
             {
                 // exact match (may be file or dir)
@@ -3127,8 +3130,8 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                file_browser->sel_size += file->get_size();
-                file_browser->sel_disk_size += file->get_disk_size();
+                file_browser->sel_size += file->size();
+                file_browser->sel_disk_size += file->disk_size();
                 vfs_file_info_unref(file);
             }
             ++file_browser->n_sel_files;
@@ -3176,7 +3179,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     else
     {
         file = vfs_file_info_ref(sel_files.front());
-        file_path = cwd / file->get_name();
+        file_path = cwd / file->name();
     }
 
     /*
@@ -3333,7 +3336,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
         {
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
-            file_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
+            file_path = ptk_file_browser_get_cwd(file_browser) / file->name();
         }
         else /* no item is clicked */
         {
@@ -4221,7 +4224,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
         gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
         if (file)
         {
-            cursor_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
+            cursor_path = ptk_file_browser_get_cwd(file_browser) / file->name();
         }
     }
     gtk_tree_path_free(tree_path);
@@ -4377,7 +4380,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
         {
             if (file->is_directory())
             {
-                dest_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
+                dest_path = ptk_file_browser_get_cwd(file_browser) / file->name();
             }
             else /* Drop on a file, not directory */
             {
@@ -4550,9 +4553,9 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     // drag_context->suggested_action = GdkDragAction::GDK_ACTION_MOVE;
 
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const auto full_path = ptk_file_browser_get_cwd(file_browser) / file->get_name();
+        const auto full_path = ptk_file_browser_get_cwd(file_browser) / file->name();
         const std::string uri = Glib::filename_to_uri(full_path);
 
         uri_list.append(std::format("{}\n", uri));
@@ -4895,7 +4898,7 @@ ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
     gtk_widget_grab_focus(file_browser->folder_view);
     gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
         if (!ptk_rename_file(file_browser,
                              cwd.c_str(),
@@ -5218,9 +5221,9 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
         // rebuild sel_files with full paths
         std::vector<std::filesystem::path> file_list;
         file_list.reserve(sel_files.size());
-        for (vfs::file_info file : sel_files)
+        for (const vfs::file_info file : sel_files)
         {
-            const auto file_path = cwd / file->get_name();
+            const auto file_path = cwd / file->name();
             file_list.emplace_back(file_path);
         }
 
@@ -5271,9 +5274,9 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
         return;
     }
 
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        if (!vfs_dir_add_hidden(cwd, file->get_name()))
+        if (!vfs_dir_add_hidden(cwd, file->name()))
         {
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",
@@ -6198,9 +6201,9 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
     }
 
     std::string file_paths;
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const std::string file_path = ztd::shell::quote(file->get_name());
+        const std::string file_path = ztd::shell::quote(file->name());
         file_paths = std::format("{} {}", file_paths, file_path);
     }
 

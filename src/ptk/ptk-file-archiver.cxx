@@ -534,7 +534,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         // Fetching first extension handler deals with
         vfs::file_info file = sel_files.front();
         const std::string ext = archive_handler_get_first_extension(handler_xset);
-        dest_file = g_strjoin(nullptr, file->get_disp_name().data(), ext.data(), nullptr);
+        dest_file = g_strjoin(nullptr, file->display_name().data(), ext.data(), nullptr);
         gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), dest_file);
         std::free(dest_file);
         dest_file = nullptr;
@@ -759,9 +759,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
          * when '%N' is present, only the first otherwise */
         i32 i = 0;
         const bool loop_once = ztd::contains(command, "%N");
-        for (vfs::file_info file : sel_files)
+        for (const vfs::file_info file : sel_files)
         {
-            desc = file->get_name();
+            desc = file->name();
 
             /* In %O mode, every source file is output to its own archive,
              * so the resulting archive name is based on the filename and
@@ -841,7 +841,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         std::string first;
         if (!sel_files.empty())
         {
-            desc = sel_files.front()->get_name();
+            desc = sel_files.front()->name();
             if (desc[0] == '-')
             {
                 // special handling for filename starting with a dash
@@ -858,9 +858,9 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
              * '%N' is present */
             if (ztd::contains(command, "%N"))
             {
-                for (vfs::file_info file : sel_files)
+                for (const vfs::file_info file : sel_files)
                 {
-                    desc = file->get_name();
+                    desc = file->name();
                     if (desc[0] == '-')
                     {
                         // special handling for filename starting with a dash
@@ -992,11 +992,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         bool archive_found = false;
 
         // Looping for all files to attempt to list/extract
-        for (vfs::file_info file : sel_files)
+        for (const vfs::file_info file : sel_files)
         {
             // Fetching file details
-            vfs::mime_type mime_type = file->get_mime_type();
-            const auto full_path = cwd / file->get_name();
+            vfs::mime_type mime_type = file->mime_type();
+            const auto full_path = cwd / file->name();
 
             // Checking for enabled handler with non-empty command
             const std::vector<xset_t> handlers =
@@ -1170,12 +1170,12 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     std::string final_command;
     std::string error_message;
     // Looping for all files to attempt to list/extract
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
         // Fetching file details
-        vfs::mime_type mime_type = file->get_mime_type();
+        vfs::mime_type mime_type = file->mime_type();
         // Determining file paths
-        const auto full_path = cwd / file->get_name();
+        const auto full_path = cwd / file->name();
 
         // Get handler with non-empty command
         const std::vector<xset_t> handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,
@@ -1239,7 +1239,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             // needed if a parent directory must be created, and if the
             // extraction target is a file without the handler extension
             // filename is strdup'd to get rid of the const
-            const std::string filename = file->get_name();
+            const auto filename = file->name();
             std::string filename_no_archive_ext;
 
             // Looping for all extensions registered with the current archive handler
@@ -1411,7 +1411,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     std::free(choose_dir);
 
     // Creating task
-    const std::string task_name = std::format("Extract {}", sel_files.front()->get_name());
+    const std::string task_name = std::format("Extract {}", sel_files.front()->name());
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            dlgparent,

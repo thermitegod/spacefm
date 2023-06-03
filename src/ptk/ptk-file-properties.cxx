@@ -218,13 +218,13 @@ static void*
 calc_size(void* user_data)
 {
     FilePropertiesDialogData* data = FILE_PROPERTIES_DIALOG_DATA(user_data);
-    for (vfs::file_info file : data->file_list)
+    for (const vfs::file_info file : data->file_list)
     {
         if (data->cancel)
         {
             break;
         }
-        const auto path = data->dir_path / file->get_name();
+        const auto path = data->dir_path / file->name();
         calc_total_size_of_files(path, data);
     }
     data->done = true;
@@ -463,12 +463,12 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
     // MOD
     vfs::mime_type type;
     vfs::mime_type type2 = nullptr;
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        type = file->get_mime_type();
+        type = file->mime_type();
         if (!type2)
         {
-            type2 = file->get_mime_type();
+            type2 = file->mime_type();
         }
         if (file->is_directory())
         {
@@ -490,7 +490,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
     vfs::file_info file = sel_files.front();
     if (same_type)
     {
-        vfs::mime_type mime = file->get_mime_type();
+        vfs::mime_type mime = file->mime_type();
         const std::string file_type =
             std::format("{}\n{}", mime->get_description(), mime->get_type());
         gtk_label_set_text(GTK_LABEL(mime_type), file_type.data());
@@ -515,7 +515,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
     {
         GtkTreeIter it;
 
-        vfs::mime_type mime = file->get_mime_type();
+        vfs::mime_type mime = file->mime_type();
         const std::vector<std::string> actions = mime->get_actions();
         GtkCellRenderer* renderer;
         GtkListStore* model;
@@ -569,7 +569,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
                                              nullptr);
         gtk_combo_box_set_active(GTK_COMBO_BOX(open_with), 0);
 
-        char* mime_data = ztd::strdup(file->get_mime_type()->get_type());
+        char* mime_data = ztd::strdup(file->mime_type()->get_type());
 
         g_signal_connect(open_with, "changed", G_CALLBACK(on_combo_change), mime_data);
 
@@ -602,7 +602,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         /* special processing for files with special display names */
         if (file->is_desktop_entry())
         {
-            gtk_entry_set_text(GTK_ENTRY(name), file->name.c_str());
+            gtk_entry_set_text(GTK_ENTRY(name), file->name().data());
         }
         else
         {
@@ -611,7 +611,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
                 gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name),
                                                    "<b>Directory _Name:</b>");
             }
-            gtk_entry_set_text(GTK_ENTRY(name), file->get_disp_name().data());
+            gtk_entry_set_text(GTK_ENTRY(name), file->display_name().data());
         }
 
         gtk_editable_set_editable(GTK_EDITABLE(name), false);
@@ -623,11 +623,11 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
             need_calc_size = false;
 
             const std::string size =
-                std::format("{}  ( {} bytes )", file->get_disp_size(), file->get_size());
+                std::format("{}  ( {} bytes )", file->display_size(), file->size());
             gtk_label_set_text(data->total_size_label, size.data());
 
             const std::string on_disk =
-                std::format("{}  ( {} bytes )", file->get_disp_disk_size(), file->get_disk_size());
+                std::format("{}  ( {} bytes )", file->display_disk_size(), file->disk_size());
             gtk_label_set_text(data->size_on_disk_label, on_disk.data());
 
             gtk_label_set_text(data->count_label, "1 file");
@@ -636,8 +636,8 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         // Modified / Accessed
         const std::string time_format = "%Y-%m-%d %H:%M:%S";
 
-        // gtk_entry_set_text(GTK_ENTRY(mtime), file->get_disp_mtime());
-        const time_t mtime = file->get_mtime();
+        // gtk_entry_set_text(GTK_ENTRY(mtime), file->display_mtime());
+        const time_t mtime = file->mtime();
         std::tm* local_mtime = std::localtime(&mtime);
         std::ostringstream mtime_formated;
         mtime_formated << std::put_time(local_mtime, time_format.data());
@@ -645,7 +645,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         gtk_entry_set_text(GTK_ENTRY(data->mtime), mtime_formated.str().data());
         data->orig_mtime = ztd::strdup(mtime_formated.str());
 
-        const time_t atime = file->get_atime();
+        const time_t atime = file->atime();
         std::tm* local_atime = std::localtime(&atime);
         std::ostringstream atime_formated;
         atime_formated << std::put_time(local_atime, time_format.data());
@@ -653,7 +653,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         data->orig_atime = ztd::strdup(mtime_formated.str());
 
         // Permissions
-        const auto owner_group = ztd::partition(file->get_disp_owner(), ":");
+        const auto owner_group = ztd::partition(file->display_owner(), ":");
         const std::string& group = owner_group[0];
         const std::string& owner = owner_group[2];
 
@@ -667,9 +667,8 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
             if (data->chmod_states[i] != 2) /* allow to touch this bit */
             {
                 data->chmod_states[i] =
-                    ((file->get_permissions() & chmod_flags.at(i)) != std::filesystem::perms::none
-                         ? 1
-                         : 0);
+                    ((file->permissions() & chmod_flags.at(i)) != std::filesystem::perms::none ? 1
+                                                                                               : 0);
                 gtk_toggle_button_set_active(data->chmod_btns[i], data->chmod_states[i]);
             }
         }
@@ -678,7 +677,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         if (file->is_symlink())
         {
             gtk_label_set_markup_with_mnemonic(GTK_LABEL(label_name), "<b>Link _Name:</b>");
-            const auto disp_sym_path = dir_path / file->name;
+            const auto disp_sym_path = dir_path / file->name();
 
             try
             {
@@ -808,9 +807,9 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             if ((new_mtime || new_atime) && !data->file_list.empty())
             {
                 std::string str;
-                for (vfs::file_info file : data->file_list)
+                for (const vfs::file_info file : data->file_list)
                 {
-                    const auto file_path = data->dir_path / file->name;
+                    const auto file_path = data->dir_path / file->name();
                     const std::string quoted_path = ztd::shell::quote(file_path.string());
                     str.append(std::format(" {}", quoted_path));
                 }
@@ -860,7 +859,7 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                     if (action)
                     {
                         vfs::file_info file = data->file_list.front();
-                        vfs::mime_type mime = file->get_mime_type();
+                        vfs::mime_type mime = file->mime_type();
                         mime->set_default_action(action);
                         std::free(action);
                     }
@@ -912,9 +911,9 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
             {
                 std::vector<std::filesystem::path> file_list;
                 file_list.reserve(data->file_list.size());
-                for (vfs::file_info file : data->file_list)
+                for (const vfs::file_info file : data->file_list)
                 {
-                    const auto file_path = data->dir_path / file->get_name();
+                    const auto file_path = data->dir_path / file->name();
                     file_list.emplace_back(file_path);
                 }
 
@@ -962,7 +961,7 @@ ptk_show_file_properties(GtkWindow* parent_win, const std::filesystem::path& cwd
     if (!sel_files.empty())
     {
         /* Make a copy of the list */
-        // for (vfs::file_info file: sel_files)
+        // for (const vfs::file_info file: sel_files)
         // {
         //     vfs_file_info_ref(file);
         // }

@@ -3266,7 +3266,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 
             if (file->is_symlink())
             {
-                const auto file_path = cwd / file->get_name();
+                const auto file_path = cwd / file->name();
                 const auto target = std::filesystem::absolute(file_path);
                 if (!target.empty())
                 {
@@ -3318,7 +3318,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
             }
             else
             {
-                statusbar_txt.append(std::format("  {}", file->get_name()));
+                statusbar_txt.append(std::format("  {}", file->name()));
             }
 
             vfs_file_info_unref(file);
@@ -3333,9 +3333,8 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
             u32 count_block = 0;
             u32 count_char = 0;
 
-            for (vfs::file_info file : sel_files)
+            for (const vfs::file_info file : sel_files)
             {
-                file = vfs_file_info_ref(file);
                 if (!file)
                 {
                     continue;
@@ -3369,8 +3368,6 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                 {
                     ++count_char;
                 }
-
-                vfs_file_info_unref(file);
             }
 
             if (count_dir)
@@ -4120,7 +4117,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         {
             vfs::file_info file = vfs_file_info_ref(sel_files.front());
 
-            c->var[item_prop::context::item::name] = file->get_name();
+            c->var[item_prop::context::item::name] = file->name();
             const auto path = std::filesystem::path() / c->var[item_prop::context::item::dir] /
                               c->var[item_prop::context::item::name];
             c->var[item_prop::context::item::is_dir] =
@@ -4128,7 +4125,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             c->var[item_prop::context::item::is_text] = file->is_text(path) ? "true" : "false";
             c->var[item_prop::context::item::is_link] = file->is_symlink() ? "true" : "false";
 
-            mime_type = file->get_mime_type();
+            mime_type = file->mime_type();
             if (mime_type)
             {
                 c->var[item_prop::context::item::mime] = mime_type->get_type();
@@ -4460,9 +4457,9 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         {
             // create fish array
             buf.append(std::format("set fm_panel{}_files (echo ", p));
-            for (vfs::file_info file : sel_files)
+            for (const vfs::file_info file : sel_files)
             {
-                const auto path = cwd / file->get_name();
+                const auto path = cwd / file->name();
                 buf.append(std::format("{} ", ztd::shell::quote(path.string())));
             }
             buf.append(std::format(")\n"));
@@ -4471,9 +4468,9 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             {
                 // create fish array
                 buf.append(std::format("set fm_filenames (echo "));
-                for (vfs::file_info file : sel_files)
+                for (const vfs::file_info file : sel_files)
                 {
-                    buf.append(std::format("{} ", ztd::shell::quote(file->get_name())));
+                    buf.append(std::format("{} ", ztd::shell::quote(file->name())));
                 }
                 buf.append(std::format(")\n"));
             }
@@ -7341,15 +7338,13 @@ main_window_socket_command(char* argv[])
 
             // build fish array
             std::string str;
-            for (vfs::file_info file : sel_files)
+            for (const vfs::file_info file : sel_files)
             {
-                file = vfs_file_info_ref(file);
                 if (!file)
                 {
                     continue;
                 }
-                str.append(std::format("{} ", ztd::shell::quote(file->get_name())));
-                vfs_file_info_unref(file);
+                str.append(std::format("{} ", ztd::shell::quote(file->name())));
             }
             vfs_file_info_list_free(sel_files);
             return {SOCKET_SUCCESS, std::format("({})", str)};

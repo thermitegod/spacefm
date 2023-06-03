@@ -168,7 +168,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         {
             break;
         }
-        // ztd::logger::debug("pop: {}", req->file->name);
+        // ztd::logger::debug("pop: {}", req->file->name());
 
         // Only we have the reference. That means, no body is using the file
         if (req->file->ref_count() == 1)
@@ -188,10 +188,10 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             if (!req->file->is_thumbnail_loaded(load_big))
             {
                 const auto full_path =
-                    std::filesystem::path() / loader->dir->path / req->file->get_name();
+                    std::filesystem::path() / loader->dir->path / req->file->name();
 
                 // ztd::logger::info("loader->dir->path    = {}", loader->dir->path);
-                // ztd::logger::info("req->file->get_name  = {}", req->file->get_name());
+                // ztd::logger::info("req->file->name()    = {}", req->file->name());
                 // ztd::logger::info("full_path            = {}", full_path);
 
                 req->file->load_thumbnail(full_path, load_big);
@@ -250,7 +250,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 {
     bool new_task = false;
 
-    // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name, is_big);
+    // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name(), is_big);
     if (!dir->thumbnail_loader)
     {
         dir->thumbnail_loader = vfs_thumbnail_loader_new(dir);
@@ -270,9 +270,9 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     for (const vfs::thumbnail::request& queued_req : loader->queue)
     {
         req = queued_req;
-        // ztd::logger::info("req->file->name={} | file->name={}", req->file->name, file->name);
+        // ztd::logger::info("req->file->name={} | file->name={}", req->file->name(), file->name());
         // If file with the same name is already in our queue
-        if (req->file == file || ztd::same(req->file->name, file->name))
+        if (req->file == file || ztd::same(req->file->name(), file->name()))
         {
             break;
         }

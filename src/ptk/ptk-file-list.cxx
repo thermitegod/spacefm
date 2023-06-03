@@ -263,8 +263,8 @@ on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
     // See also desktop-window.c:on_file_changed()
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    if (list->max_thumbnail != 0 && ((file->is_video() && (now - file->get_mtime() > 5)) ||
-                                     (file->get_size() < list->max_thumbnail && file->is_image())))
+    if (list->max_thumbnail != 0 && ((file->is_video() && (now - file->mtime() > 5)) ||
+                                     (file->size() < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
         {
@@ -280,7 +280,7 @@ on_file_list_file_created(vfs::file_info file, PtkFileList* list)
 
     /* check if reloading of thumbnail is needed. */
     if (list->max_thumbnail != 0 &&
-        (file->is_video() || (file->get_size() < list->max_thumbnail && file->is_image())))
+        (file->is_video() || (file->size() < list->max_thumbnail && file->is_image())))
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
         {
@@ -333,7 +333,7 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
 
     if (dir && !dir->file_list.empty())
     {
-        for (vfs::file_info file : dir->file_list)
+        for (const vfs::file_info file : dir->file_list)
         {
             if (list->show_hidden || !file->is_hidden())
             {
@@ -439,16 +439,16 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case ptk::file_list::column::big_icon:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (file->flags == vfs::file_info_flags::none &&
-                (list->max_thumbnail > file->get_size() ||
+            if (file->flags() == vfs::file_info_flags::none &&
+                (list->max_thumbnail > file->size() ||
                  (list->max_thumbnail != 0 && file->is_video())))
             {
-                icon = file->get_big_thumbnail();
+                icon = file->big_thumbnail();
             }
 
             if (!icon)
             {
-                icon = file->get_big_icon();
+                icon = file->big_icon();
             }
             if (icon)
             {
@@ -459,14 +459,14 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case ptk::file_list::column::small_icon:
             icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
-            if (list->max_thumbnail > file->get_size() ||
+            if (list->max_thumbnail > file->size() ||
                 (list->max_thumbnail != 0 && file->is_video()))
             {
-                icon = file->get_small_thumbnail();
+                icon = file->small_thumbnail();
             }
             if (!icon)
             {
-                icon = file->get_small_icon();
+                icon = file->small_icon();
             }
             if (icon)
             {
@@ -475,30 +475,30 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             }
             break;
         case ptk::file_list::column::name:
-            g_value_set_string(value, file->get_disp_name().data());
+            g_value_set_string(value, file->display_name().data());
             break;
         case ptk::file_list::column::size:
             if ((file->is_directory() || file->is_symlink()) &&
-                ztd::same(file->mime_type->get_type(), XDG_MIME_TYPE_DIRECTORY))
+                ztd::same(file->mime_type()->get_type(), XDG_MIME_TYPE_DIRECTORY))
             {
                 g_value_set_string(value, nullptr);
             }
             else
             {
-                g_value_set_string(value, file->get_disp_size().data());
+                g_value_set_string(value, file->display_size().data());
             }
             break;
         case ptk::file_list::column::desc:
-            g_value_set_string(value, file->get_mime_type_desc().data());
+            g_value_set_string(value, file->mime_type_description().data());
             break;
         case ptk::file_list::column::perm:
-            g_value_set_string(value, file->get_disp_perm().data());
+            g_value_set_string(value, file->display_permissions().data());
             break;
         case ptk::file_list::column::owner:
-            g_value_set_string(value, file->get_disp_owner().data());
+            g_value_set_string(value, file->display_owner().data());
             break;
         case ptk::file_list::column::mtime:
-            g_value_set_string(value, file->get_disp_mtime().data());
+            g_value_set_string(value, file->display_mtime().data());
             break;
         case ptk::file_list::column::info:
             g_value_set_pointer(value, vfs_file_info_ref(file));
@@ -701,11 +701,11 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     switch (list->sort_col)
     {
         case ptk::file_list::column::size:
-            if (file_a->get_size() > file_b->get_size())
+            if (file_a->size() > file_b->size())
             {
                 result = 1;
             }
-            else if (file_a->get_size() == file_b->get_size())
+            else if (file_a->size() == file_b->size())
             {
                 result = 0;
             }
@@ -715,11 +715,11 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
             }
             break;
         case ptk::file_list::column::mtime:
-            if (file_a->get_mtime() > file_b->get_mtime())
+            if (file_a->mtime() > file_b->mtime())
             {
                 result = 1;
             }
-            else if (file_a->get_mtime() == file_b->get_mtime())
+            else if (file_a->mtime() == file_b->mtime())
             {
                 result = 0;
             }
@@ -729,15 +729,15 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
             }
             break;
         case ptk::file_list::column::desc:
-            result = g_ascii_strcasecmp(file_a->get_mime_type_desc().data(),
-                                        file_b->get_mime_type_desc().data());
+            result = g_ascii_strcasecmp(file_a->mime_type_description().data(),
+                                        file_b->mime_type_description().data());
             break;
         case ptk::file_list::column::perm:
-            result = ztd::compare(file_a->get_disp_perm(), file_b->get_disp_perm());
+            result = ztd::compare(file_a->display_permissions(), file_b->display_permissions());
             break;
         case ptk::file_list::column::owner:
-            result = g_ascii_strcasecmp(file_a->get_disp_owner().data(),
-                                        file_b->get_disp_owner().data());
+            result =
+                g_ascii_strcasecmp(file_a->display_owner().data(), file_b->display_owner().data());
             break;
         case ptk::file_list::column::big_icon:
         case ptk::file_list::column::small_icon:
@@ -773,8 +773,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         // TODO - option to enable/disable numbers first
 
         // numbers before letters
-        const bool num_a = std::isdigit(file_a->get_disp_name().at(0));
-        const bool num_b = std::isdigit(file_b->get_disp_name().at(0));
+        const bool num_a = std::isdigit(file_a->display_name().at(0));
+        const bool num_b = std::isdigit(file_b->display_name().at(0));
         if (num_a && !num_b)
         {
             result = -1;
@@ -791,11 +791,12 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         // alphanumeric
         if (list->sort_case)
         {
-            result = ztd::sort::alphanumeric(file_a->collate_key, file_b->collate_key);
+            result = ztd::sort::alphanumeric(file_a->collate_key(), file_b->collate_key());
         }
         else
         {
-            result = ztd::sort::alphanumeric(file_a->collate_icase_key, file_b->collate_icase_key);
+            result =
+                ztd::sort::alphanumeric(file_a->collate_icase_key(), file_b->collate_icase_key());
         }
     }
 #if 0
@@ -818,7 +819,7 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
          * case insensitive when used on utf8
          * FIXME: No case sensitive mode here because no function compare
          * UTF-8 strings case sensitively without collating (natural) */
-        result = g_ascii_strcasecmp(file_a->get_disp_name().data(), file_b->get_disp_name().data());
+        result = g_ascii_strcasecmp(file_a->display_name().data(), file_b->display_name().data());
     }
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
@@ -862,7 +863,7 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info file1
     for (GList* l = list->files; l; l = g_list_next(l))
     {
         vfs::file_info file2 = VFS_FILE_INFO(l->data);
-        if (file1 == file2 || ztd::same(file1->get_name(), file2->get_name()))
+        if (file1 == file2 || ztd::same(file1->name(), file2->name()))
         {
             it->stamp = list->stamp;
             it->user_data = l;
@@ -897,7 +898,7 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
         const bool is_desktop2 = file2->is_desktop_entry();
         if (is_desktop || is_desktop2)
         {
-            if (ztd::same(file->name, file2->name))
+            if (ztd::same(file->name(), file2->name()))
             {
                 return;
             }
@@ -911,7 +912,7 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
             {
                 return;
             }
-            else if (ztd::same(file->name, file2->name))
+            else if (ztd::same(file->name(), file2->name()))
             {
                 return;
             }
@@ -1033,7 +1034,7 @@ ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 static void
 on_thumbnail_loaded(vfs::file_info file, PtkFileList* list)
 {
-    // ztd::logger::debug("LOADED: {}", file->name);
+    // ztd::logger::debug("LOADED: {}", file->name());
     ptk_file_list_file_changed(file, list);
 }
 
@@ -1081,7 +1082,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
     {
         vfs::file_info file = VFS_FILE_INFO(l->data);
         if (list->max_thumbnail != 0 &&
-            (file->is_video() || (file->get_size() < list->max_thumbnail && file->is_image())))
+            (file->is_video() || (file->size() < list->max_thumbnail && file->is_image())))
         {
             if (file->is_thumbnail_loaded(is_big))
             {
@@ -1090,7 +1091,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
             else
             {
                 vfs_thumbnail_loader_request(list->dir, file, is_big);
-                // ztd::logger::debug("REQUEST: {}", file->name);
+                // ztd::logger::debug("REQUEST: {}", file->name());
             }
         }
     }

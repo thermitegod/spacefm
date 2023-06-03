@@ -333,14 +333,14 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
     const auto parent = new ParentInfo(file_browser, cwd);
 
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
         if (!file)
         {
             continue;
         }
 
-        full_path = cwd / file->get_name();
+        full_path = cwd / file->name();
 
         if (!app_desktop.empty())
         { // specified app to open all files
@@ -386,7 +386,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
              * This string is freed when hash table is destroyed. */
             std::string alloc_desktop;
 
-            vfs::mime_type mime_type = file->get_mime_type();
+            vfs::mime_type mime_type = file->mime_type();
 
             // has archive handler?
             if (!sel_files.empty() &&
@@ -412,11 +412,11 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             }
 
             /* The file itself is a desktop entry file. */
-            /* was: if(ztd::endswith(file->get_name(), ".desktop"))
+            /* was: if(ztd::endswith(file->name(), ".desktop"))
              */
             if (alloc_desktop.empty())
             {
-                if (file->flags & vfs::file_info_flags::desktop_entry &&
+                if (file->flags() & vfs::file_info_flags::desktop_entry &&
                     (app_settings.get_click_executes() || xforce))
                 {
                     alloc_desktop = full_path;

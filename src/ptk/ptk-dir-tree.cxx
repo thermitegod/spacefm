@@ -224,7 +224,7 @@ ptk_dir_tree_init(PtkDirTree* tree)
     tree->root->tree = tree;
     tree->root->n_children = 1;
     PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/");
-    child->file->set_disp_name("File System");
+    child->file->update_display_name("File System");
     tree->root->children = child;
 }
 
@@ -444,7 +444,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
             }
             i32 icon_size;
             GdkPixbuf* icon;
-            // icon = file->get_small_icon();
+            // icon = file->small_icon();
             icon_size = app_settings.get_icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
             {
@@ -469,7 +469,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
         case ptk::dir_tree::column::disp_name:
             if (file)
             {
-                g_value_set_string(value, file->get_disp_name().data());
+                g_value_set_string(value, file->display_name().data());
             }
             else
             {
@@ -650,8 +650,7 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
         return 0;
     }
     /* FIXME: UTF-8 strings should not be treated as ASCII when sorted  */
-    const i32 ret =
-        g_ascii_strcasecmp(file2->get_disp_name().data(), file1->get_disp_name().data());
+    const i32 ret = g_ascii_strcasecmp(file2->display_name().data(), file1->display_name().data());
     return ret;
 }
 
@@ -687,9 +686,9 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
             g_slist_free(names);
             return nullptr;
         }
-        const std::string name = node->file->get_name();
+        const auto name = node->file->name();
 
-        names = g_slist_prepend(names, ztd::strdup(name));
+        names = g_slist_prepend(names, ztd::strdup(name.data()));
         node = node->parent;
     }
 
@@ -911,7 +910,7 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
     PtkDirTreeNode* child;
     for (child = parent->children; child; child = child->next)
     {
-        if (child->file && ztd::same(child->file->get_name(), name))
+        if (child->file && ztd::same(child->file->name(), name))
         {
             return child;
         }

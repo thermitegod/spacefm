@@ -1034,9 +1034,9 @@ xset_custom_activate(GtkWidget* item, xset_t set)
 
                     std::vector<std::filesystem::path> open_files;
                     open_files.reserve(sel_files.size());
-                    for (vfs::file_info file : sel_files)
+                    for (const vfs::file_info file : sel_files)
                     {
-                        const auto open_file = cwd / file->get_name();
+                        const auto open_file = cwd / file->name();
                         open_files.emplace_back(open_file);
                     }
 

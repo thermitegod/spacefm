@@ -2196,7 +2196,7 @@ update_new_display_delayed(const char* path)
     if (vdir && vdir->avoid_changes)
     {
         vfs::file_info file = vfs_file_info_new(path);
-        vfs_dir_emit_file_created(vdir, file->get_name(), true);
+        vfs_dir_emit_file_created(vdir, file->name(), true);
         vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
     }
@@ -2246,15 +2246,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         // special processing for files with inconsistent real name and display name
         if (file->is_desktop_entry())
         {
-            full_name = file->name;
+            full_name = file->name();
         }
         if (full_name.empty())
         {
-            full_name = file->get_disp_name();
+            full_name = file->display_name();
         }
         if (full_name.empty())
         {
-            full_name = file->get_name();
+            full_name = file->name();
         }
 
         mset->is_dir = file->is_directory();
@@ -2272,11 +2272,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
     else if (create_new == ptk::rename_mode::new_link && file)
     {
-        std::string full_name = file->get_disp_name();
-        if (full_name.empty())
-        {
-            full_name = file->get_name();
-        }
+        const auto full_name = file->name();
         mset->full_path = std::filesystem::path() / file_dir / full_name;
         mset->new_path = mset->full_path;
         mset->is_dir = file->is_directory(); // is_dir is dynamic for create
@@ -2419,7 +2415,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     }
     else if (file)
     {
-        vfs::mime_type mime_type = file->get_mime_type();
+        vfs::mime_type mime_type = file->mime_type();
         if (mime_type)
         {
             mset->mime_type = ztd::strdup(mime_type->get_type());
@@ -3487,9 +3483,9 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     std::string file_paths;
     std::string file_path_q;
     i32 item_count = 0;
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const auto file_path = cwd / file->get_name();
+        const auto file_path = cwd / file->name();
         file_path_q = ztd::shell::quote(file_path.string());
         file_paths = std::format("{} {}", file_paths, file_path_q);
         item_count++;

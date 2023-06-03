@@ -249,7 +249,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
                 continue;
             }
 
-            const auto full_path = std::filesystem::path() / dir / file->get_name();
+            const auto full_path = std::filesystem::path() / dir / file->name();
             if (std::filesystem::is_directory(full_path))
             {
                 file_browser->run_event<spacefm::signal::open_item>(full_path,
@@ -639,21 +639,21 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
     while ((ff = FOUND_FILE(g_queue_pop_head(queue))))
     {
         gtk_list_store_append(data->result_list, &it);
-        icon = ff->file->get_small_icon();
+        icon = ff->file->small_icon();
         gtk_list_store_set(data->result_list,
                            &it,
                            file_files::column::icon,
                            icon,
                            file_files::column::name,
-                           ff->file->get_disp_name().data(),
+                           ff->file->display_name().data(),
                            file_files::column::dir,
                            ff->dir_path.data(), /* FIXME: non-UTF8? */
                            file_files::column::type,
-                           ff->file->get_mime_type_desc().data(),
+                           ff->file->mime_type_description().data(),
                            file_files::column::size,
-                           ff->file->get_disp_size().data(),
+                           ff->file->display_size().data(),
                            file_files::column::mtime,
-                           ff->file->get_disp_mtime().data(),
+                           ff->file->display_mtime().data(),
                            file_files::column::info,
                            ff->file,
                            -1);

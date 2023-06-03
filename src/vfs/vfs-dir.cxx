@@ -230,13 +230,13 @@ vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec*
 static vfs::file_info
 vfs_dir_find_file(vfs::dir dir, const std::filesystem::path& file_name, vfs::file_info file)
 {
-    for (vfs::file_info file2 : dir->file_list)
+    for (const vfs::file_info file2 : dir->file_list)
     {
         if (file == file2)
         {
             return file2;
         }
-        if (ztd::same(file2->name, file_name.string()))
+        if (ztd::same(file2->name(), file_name.string()))
         {
             return file2;
         }
@@ -377,7 +377,7 @@ vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file)
 {
     std::lock_guard<std::mutex> lock(dir->mutex);
 
-    vfs::file_info file_found = vfs_dir_find_file(dir, file->name, file);
+    vfs::file_info file_found = vfs_dir_find_file(dir, file->name(), file);
     if (file_found)
     {
         assert(file == file_found);
@@ -569,7 +569,7 @@ update_file_info(vfs::dir dir, vfs::file_info file)
 {
     bool ret = false;
 
-    const auto full_path = std::filesystem::path() / dir->path / file->name;
+    const auto full_path = std::filesystem::path() / dir->path / file->name();
 
     const bool is_file_valid = file->update(full_path);
     if (is_file_valid)
@@ -606,7 +606,7 @@ update_changed_files(const std::filesystem::path& key, vfs::dir dir)
         return;
     }
 
-    for (vfs::file_info file : dir->changed_files)
+    for (const vfs::file_info file : dir->changed_files)
     {
         if (update_file_info(dir, file))
         {
@@ -762,9 +762,9 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
         return;
     }
 
-    for (vfs::file_info file : dir->file_list)
+    for (const vfs::file_info file : dir->file_list)
     {
-        const auto full_path = std::filesystem::path() / dir->path / file->get_name();
+        const auto full_path = std::filesystem::path() / dir->path / file->name();
         file->reload_mime_type(full_path);
         // ztd::logger::debug("reload {}", full_path);
     }
@@ -795,30 +795,22 @@ vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big)
 {
     std::lock_guard<std::mutex> lock(dir->mutex);
 
-    for (vfs::file_info file : dir->file_list)
+    for (const vfs::file_info file : dir->file_list)
     {
         if (is_big)
         {
-            if (file->big_thumbnail)
-            {
-                g_object_unref(file->big_thumbnail);
-                file->big_thumbnail = nullptr;
-            }
+            file->unload_big_thumbnail();
         }
         else
         {
-            if (file->small_thumbnail)
-            {
-                g_object_unref(file->small_thumbnail);
-                file->small_thumbnail = nullptr;
-            }
+            file->unload_small_thumbnail();
         }
 
         /* This is a desktop entry file, so the icon needs reload
              FIXME: This is not a good way to do things, but there is no better way now.  */
-        if (file->flags & vfs::file_info_flags::desktop_entry)
+        if (file->flags() & vfs::file_info_flags::desktop_entry)
         {
-            const auto file_path = std::filesystem::path() / dir->path / file->name;
+            const auto file_path = std::filesystem::path() / dir->path / file->name();
             file->load_special_info(file_path);
         }
     }

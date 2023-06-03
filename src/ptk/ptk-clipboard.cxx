@@ -127,9 +127,9 @@ ptk_clipboard_copy_as_text(const std::filesystem::path& working_dir,
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const auto file_path = working_dir / file->get_name();
+        const auto file_path = working_dir / file->name();
         const std::string quoted = ztd::shell::quote(file_path.string());
         file_text = std::format("{} {}", file_text, quoted);
     }
@@ -148,19 +148,19 @@ ptk_clipboard_copy_name(const std::filesystem::path& working_dir,
     i32 fcount = 0;
 
     std::string file_text;
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
         if (fcount == 0)
         {
-            file_text = std::format("{}", file->get_name());
+            file_text = std::format("{}", file->name());
         }
         else if (fcount == 1)
         {
-            file_text = std::format("{}\n{}\n", file_text, file->get_name());
+            file_text = std::format("{}\n{}\n", file_text, file->name());
         }
         else
         {
-            file_text = std::format("{}{}\n", file_text, file->get_name());
+            file_text = std::format("{}{}\n", file_text, file->name());
         }
         fcount++;
     }
@@ -200,9 +200,9 @@ ptk_clipboard_cut_or_copy_files(const std::filesystem::path& working_dir,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(sel_files.size());
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const auto file_path = working_dir / file->get_name();
+        const auto file_path = working_dir / file->name();
         file_list.emplace_back(file_path);
     }
 

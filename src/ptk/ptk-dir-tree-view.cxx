@@ -288,7 +288,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
                 continue;
             }
 
-            if (ztd::same(file->get_name(), dir.data()))
+            if (ztd::same(file->name(), dir.data()))
             {
                 tree_path = gtk_tree_model_get_path(model, &it);
 

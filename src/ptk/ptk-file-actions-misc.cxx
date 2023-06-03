@@ -74,9 +74,9 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(sel_files.size());
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const auto file_path = cwd / file->get_name();
+        const auto file_path = cwd / file->name();
         file_list.emplace_back(file_path);
     }
 
@@ -108,9 +108,9 @@ ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(sel_files.size());
-    for (vfs::file_info file : sel_files)
+    for (const vfs::file_info file : sel_files)
     {
-        const auto file_path = cwd / file->get_name();
+        const auto file_path = cwd / file->name();
         file_list.emplace_back(file_path);
     }
 
