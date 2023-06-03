@@ -125,17 +125,42 @@ FilePropertiesDialogData::~FilePropertiesDialogData()
 
 static void on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data);
 
+const std::vector<std::filesystem::path>
+find_subdirectories(const std::filesystem::path& directory, FilePropertiesDialogData* data)
+{
+    if (data->cancel)
+    {
+        return {};
+    }
+
+    std::vector<std::filesystem::path> subdirectories;
+
+    for (const auto& entry : std::filesystem::directory_iterator(directory))
+    {
+        if (entry.is_directory() && !entry.is_symlink())
+        {
+            const std::filesystem::path& subdirectory = entry.path();
+
+            subdirectories.emplace_back(subdirectory);
+            const auto nested_subdirectories = find_subdirectories(subdirectory, data);
+            subdirectories.insert(subdirectories.cend(),
+                                  nested_subdirectories.cbegin(),
+                                  nested_subdirectories.cend());
+        }
+    }
+
+    return subdirectories;
+}
+
 /*
- * void get_total_size_of_dir(const char* path, off_t* size)
  * Recursively count total size of all files in the specified directory.
  * If the path specified is a file, the size of the file is directly returned.
  * cancel is used to cancel the operation. This function will check the value
  * pointed by cancel in every iteration. If cancel is set to true, the
  * calculation is cancelled.
- * NOTE: path is encoded in on-disk encoding and not necessarily UTF-8.
  */
 static void
-calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
+calc_total_size_of_files(const std::filesystem::path& path, FilePropertiesDialogData* data)
 {
     if (data->cancel)
     {
@@ -149,33 +174,43 @@ calc_total_size_of_files(std::string_view path, FilePropertiesDialogData* data)
     }
 
     data->total_size += file_stat.size();
-    data->size_on_disk += (file_stat.blocks() * ztd::BLOCK_SIZE);
+    data->size_on_disk += file_stat.blocks() * ztd::BLOCK_SIZE;
+    // ++data->total_count;
 
-    if (std::filesystem::is_directory(path))
+    if (!std::filesystem::is_directory(path))
     {
-        for (const auto& file : std::filesystem::directory_iterator(path))
+        return;
+    }
+
+    // recursion time
+    std::vector<std::filesystem::path> subdirectories{path};
+    const auto found_subdirectories = find_subdirectories(path, data);
+    subdirectories.insert(subdirectories.cend(),
+                          found_subdirectories.cbegin(),
+                          found_subdirectories.cend());
+
+    for (const auto& directory : subdirectories)
+    {
+        if (data->cancel)
         {
-            const std::string file_name = std::filesystem::path(file).filename();
+            return;
+        }
 
-            const std::string full_path = Glib::build_filename(path.data(), file_name);
+        for (const auto& directory_file : std::filesystem::directory_iterator(directory))
+        {
+            if (data->cancel)
+            {
+                return;
+            }
 
-            const auto full_file_stat = ztd::lstat(full_path);
-            if (std::filesystem::is_directory(full_path))
-            {
-                calc_total_size_of_files(full_path, data);
-            }
-            else
-            {
-                data->total_size += full_file_stat.size();
-                data->size_on_disk += full_file_stat.blocks() * 512; /* block x 512 */
-                ++data->total_count;
-            }
+            const auto directory_file_stat = ztd::lstat(directory_file);
+
+            data->total_size += directory_file_stat.size();
+            data->size_on_disk += directory_file_stat.blocks() * ztd::BLOCK_SIZE;
+            ++data->total_count;
         }
     }
-    else
-    {
-        ++data->total_count;
-    }
+    return;
 }
 
 static void*
@@ -200,26 +235,24 @@ on_update_labels(FilePropertiesDialogData* data)
 {
     const std::string size_str =
         fmt::format("{} ( {} bytes )", vfs_file_size_format(data->total_size), data->total_size);
-    gtk_label_set_text(data->total_size_label, size_str.data());
+    gtk_label_set_text(data->total_size_label, size_str.c_str());
 
     const std::string disk_str = fmt::format("{} ( {} bytes )",
                                              vfs_file_size_format(data->size_on_disk),
                                              data->size_on_disk);
-    gtk_label_set_text(data->size_on_disk_label, disk_str.data());
+    gtk_label_set_text(data->size_on_disk_label, disk_str.c_str());
 
     std::string count;
-    std::string count_dir;
-    if (data->total_count_dir)
-    {
-        count_dir = fmt::format("{} directory", data->total_count_dir);
-        count = fmt::format("{} file, {}", data->total_count, count_dir);
-    }
-    else
+    if (data->total_count_dir == 0)
     {
         count = fmt::format("{} files", data->total_count);
     }
+    else
+    {
+        count = fmt::format("{} file, {} directory", data->total_count, data->total_count_dir);
+    }
 
-    gtk_label_set_text(data->count_label, count.data());
+    gtk_label_set_text(data->count_label, count.c_str());
 
     if (data->done)
     {
