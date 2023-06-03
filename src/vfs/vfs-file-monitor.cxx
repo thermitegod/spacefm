@@ -260,7 +260,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
     }
 
     char buffer[BUF_LEN];
-    const i32 length = read(inotify_fd, buffer, BUF_LEN);
+    const auto length = read(inotify_fd, buffer, BUF_LEN);
     if (length < 0)
     {
         ztd::logger::warn("Error reading inotify event: {}", std::strerror(errno));

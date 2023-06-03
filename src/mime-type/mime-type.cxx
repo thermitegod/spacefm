@@ -193,8 +193,8 @@ mime_type_get_by_file(std::string_view filepath)
             // mime header size
             std::array<char8_t, 512> data;
 
-            const i32 len = read(fd, data.data(), data.size());
-            if (len == -1)
+            const auto length = read(fd, data.data(), data.size());
+            if (length == -1)
             {
                 return XDG_MIME_TYPE_UNKNOWN.data();
             }
@@ -449,8 +449,8 @@ mime_type_is_text_file(std::string_view file_path, std::string_view mime_type)
             if (file_stat.is_regular_file())
             {
                 std::array<char8_t, TEXT_MAX_EXTENT> data;
-                const i32 len = read(fd, data.data(), data.size());
-                if (len == -1)
+                const auto length = read(fd, data.data(), data.size());
+                if (length == -1)
                 {
                     ztd::logger::error("failed to read {}", file_path);
                     ret = false;

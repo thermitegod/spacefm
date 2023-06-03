@@ -407,7 +407,7 @@ main(int argc, char* argv[])
     // libffmpegthumbnailer CLI program and not the C++ interface. Not a solution that I want to do.
     //
     // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
-    freopen("/dev/null", "w", stderr);
+    (void)freopen("/dev/null", "w", stderr);
 
     // separate instance options
     if (args.size() > 1)

@@ -80,14 +80,13 @@ MimeCache::load_mime_file()
 {
     // Open the file and map it into memory
     const i32 fd = open(this->file_path.data(), O_RDONLY, 0);
-
-    if (fd < 0)
+    if (fd == -1)
     {
+        ztd::logger::error("failed to open {}", this->file_path);
         return;
     }
 
     const auto mime_stat = ztd::stat(fd);
-
     if (!mime_stat.is_valid())
     {
         close(fd);
@@ -95,7 +94,13 @@ MimeCache::load_mime_file()
     }
 
     char* buf = (char*)g_malloc(mime_stat.size());
-    read(fd, buf, mime_stat.size());
+    const auto length = read(fd, buf, mime_stat.size());
+    if (length == -1)
+    {
+        ztd::logger::error("failed to read {}", this->file_path);
+        close(fd);
+        return;
+    }
     close(fd);
 
     const u16 majv = VAL16(buf, MAJOR_VERSION);

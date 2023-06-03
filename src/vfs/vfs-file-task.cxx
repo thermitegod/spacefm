@@ -680,7 +680,8 @@ VFSFileTask::do_file_copy(std::string_view src_file, std::string_view dest_file)
                         break;
                     }
 
-                    if (write(wfd, buffer, rsize) > 0)
+                    const auto length = write(wfd, buffer, rsize);
+                    if (length > 0)
                     {
                         this->lock();
                         this->progress += rsize;

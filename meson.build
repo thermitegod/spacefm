@@ -117,7 +117,6 @@ default_warning_flags = [
 
     # TODO - fix these warnings
     '-Wno-deprecated-declarations',
-    '-Wno-unused-result',
 
     # Sanitizer
     # '-fsanitize=undefined,address',

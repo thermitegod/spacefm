@@ -127,7 +127,7 @@ on_socket_event(Glib::IOCondition condition)
     {
         receive_socket_command(client, args);
     }
-    shutdown(client, 2);
+    shutdown(client, SHUT_RDWR);
     close(client);
 
     cli_flags.new_tab = true;
@@ -269,14 +269,14 @@ single_instance_check()
         if (cli_flags.no_tabs)
         {
             cmd = SocketEvent::CMD_NO_TABS;
-            write(sock_fd, &cmd, sizeof(char));
+            (void)write(sock_fd, &cmd, sizeof(char));
             // another command always follows SocketEvent::CMD_NO_TABS
             cmd = SocketEvent::CMD_OPEN_TAB;
         }
         if (cli_flags.reuse_tab)
         {
             cmd = SocketEvent::CMD_REUSE_TAB;
-            write(sock_fd, &cmd, sizeof(char));
+            (void)write(sock_fd, &cmd, sizeof(char));
             // another command always follows SocketEvent::CMD_REUSE_TAB
             cmd = SocketEvent::CMD_OPEN;
         }
@@ -307,7 +307,7 @@ single_instance_check()
             cmd = SocketEvent::CMD_OPEN;
         }
 
-        write(sock_fd, &cmd, sizeof(char));
+        (void)write(sock_fd, &cmd, sizeof(char));
 
         if (cli_flags.files)
         {
@@ -326,8 +326,8 @@ single_instance_check()
                     // $PWDs resolution would not work.
                     real_path = std::filesystem::absolute(*file);
                 }
-                write(sock_fd, real_path.data(), real_path.length());
-                write(sock_fd, "\n", 1);
+                (void)write(sock_fd, real_path.data(), real_path.length());
+                (void)write(sock_fd, "\n", 1);
             }
         }
 
@@ -336,7 +336,7 @@ single_instance_check()
             ztd::logger::warn("Option --config ignored - an instance is already running");
         }
 
-        shutdown(sock_fd, 2);
+        shutdown(sock_fd, SHUT_RDWR);
         close(sock_fd);
         single_instance_check_fatal(EXIT_SUCCESS);
     }
@@ -376,7 +376,7 @@ single_instance_check()
 void
 single_instance_finalize()
 {
-    shutdown(sock_fd, 2);
+    shutdown(sock_fd, SHUT_RDWR);
     close(sock_fd);
 
     const std::string lock_file = get_socket_name();
@@ -387,10 +387,22 @@ static void
 write_socket_response(i32 client, char cmd, std::string_view reply)
 {
     // send response and exit status
-    write(client, &cmd, sizeof(char));
+    const auto length = write(client, &cmd, sizeof(char));
+    if (length == -1)
+    {
+        ztd::logger::error("failed to write to fd {}", sock_fd);
+        return;
+    }
+
     if (!reply.empty())
-    { // send reply or error msg
-        write(client, reply.data(), reply.size());
+    {
+        // send reply or error msg
+        const auto reply_length = write(client, reply.data(), reply.size());
+        if (reply_length == -1)
+        {
+            ztd::logger::error("failed to write to fd {}", sock_fd);
+            return;
+        }
     }
 }
 
@@ -453,20 +465,20 @@ send_socket_command(std::span<const std::string_view> args)
 
     // send command
     char cmd = SocketEvent::CMD_SOCKET_CMD;
-    write(sock_fd, &cmd, sizeof(char));
+    (void)write(sock_fd, &cmd, sizeof(char));
 
     // send inode tag
     const std::string inode_tag = get_inode_tag();
-    write(sock_fd, inode_tag.data(), inode_tag.size());
-    write(sock_fd, "\n", 1);
+    (void)write(sock_fd, inode_tag.data(), inode_tag.size());
+    (void)write(sock_fd, "\n", 1);
 
     // send arguments
     for (const auto i : ztd::range(2, args.size()))
     {
-        write(sock_fd, args[i].data(), std::strlen(args[i].data()));
-        write(sock_fd, "\n", 1);
+        (void)write(sock_fd, args[i].data(), std::strlen(args[i].data()));
+        (void)write(sock_fd, "\n", 1);
     }
-    write(sock_fd, "\n", 1);
+    (void)write(sock_fd, "\n", 1);
 
     // get response
     std::string sock_reply;
@@ -478,7 +490,7 @@ send_socket_command(std::span<const std::string_view> args)
     }
 
     // close socket
-    shutdown(sock_fd, 2);
+    shutdown(sock_fd, SHUT_RDWR);
     close(sock_fd);
 
     // set reply
