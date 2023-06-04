@@ -78,6 +78,11 @@ MimeCache::MimeCache(const std::filesystem::path& file_path) : file_path_(file_p
 void
 MimeCache::load_mime_file()
 {
+    if (!std::filesystem::exists(this->file_path_))
+    {
+        return;
+    }
+
     // Open the file and map it into memory
     const i32 fd = open(this->file_path_.c_str(), O_RDONLY, 0);
     if (fd == -1)
