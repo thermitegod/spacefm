@@ -355,9 +355,9 @@ mime_type_init()
     const mime_cache_t cache = std::make_shared<MimeCache>(user_mime_cache);
     caches.emplace_back(cache);
 
-    if (cache->get_magic_max_extent() > mime_cache_max_extent)
+    if (cache->magic_max_extent() > mime_cache_max_extent)
     {
-        mime_cache_max_extent = cache->get_magic_max_extent();
+        mime_cache_max_extent = cache->magic_max_extent();
     }
 
     caches.reserve(vfs::user_dirs->system_data_dirs().size());
@@ -367,9 +367,9 @@ mime_type_init()
         const mime_cache_t dir_cache = std::make_shared<MimeCache>(sys_mime_cache);
         caches.emplace_back(dir_cache);
 
-        if (dir_cache->get_magic_max_extent() > mime_cache_max_extent)
+        if (dir_cache->magic_max_extent() > mime_cache_max_extent)
         {
-            mime_cache_max_extent = dir_cache->get_magic_max_extent();
+            mime_cache_max_extent = dir_cache->magic_max_extent();
         }
     }
 }
@@ -391,9 +391,9 @@ mime_cache_reload(const mime_cache_t& cache)
     /* recalculate max magic extent */
     for (const mime_cache_t& mcache : caches)
     {
-        if (mcache->get_magic_max_extent() > mime_cache_max_extent)
+        if (mcache->magic_max_extent() > mime_cache_max_extent)
         {
-            mime_cache_max_extent = mcache->get_magic_max_extent();
+            mime_cache_max_extent = mcache->magic_max_extent();
         }
     }
 }

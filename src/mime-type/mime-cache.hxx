@@ -49,8 +49,8 @@ class MimeCache
     const std::vector<std::string> lookup_parents(const std::string_view mime_type);
     const char* lookup_alias(const std::string_view mime_type);
 
-    const std::filesystem::path& get_file_path();
-    u32 get_magic_max_extent();
+    const std::filesystem::path& file_path();
+    u32 magic_max_extent();
 
   private:
     void load_mime_file();
@@ -63,7 +63,7 @@ class MimeCache
                                             const char** suffix_pos);
 
   private:
-    std::filesystem::path file_path{};
+    std::filesystem::path file_path_{};
 
     usize buffer_size{0};
     const char* buffer{nullptr};
@@ -86,7 +86,7 @@ class MimeCache
     u32 n_magics{0};
     const char* magics{nullptr};
 
-    u32 magic_max_extent{0};
+    u32 magic_max_extent_{0};
 };
 
 using mime_cache_t = std::shared_ptr<MimeCache>;

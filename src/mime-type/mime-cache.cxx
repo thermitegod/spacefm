@@ -68,7 +68,7 @@ inline constexpr u64 MAGIC_LIST     = 24;
 // inline constexpr u64 NAMESPACE_LIST = 28;
 // clang-format on
 
-MimeCache::MimeCache(const std::filesystem::path& file_path) : file_path(file_path)
+MimeCache::MimeCache(const std::filesystem::path& file_path) : file_path_(file_path)
 {
     // ztd::logger::info("MimeCache Constructor");
 
@@ -79,10 +79,10 @@ void
 MimeCache::load_mime_file()
 {
     // Open the file and map it into memory
-    const i32 fd = open(this->file_path.c_str(), O_RDONLY, 0);
+    const i32 fd = open(this->file_path_.c_str(), O_RDONLY, 0);
     if (fd == -1)
     {
-        ztd::logger::error("failed to open {}", this->file_path);
+        ztd::logger::error("failed to open {}", this->file_path_);
         return;
     }
 
@@ -97,7 +97,7 @@ MimeCache::load_mime_file()
     const auto length = read(fd, buf, mime_stat.size());
     if (length == -1)
     {
-        ztd::logger::error("failed to read {}", this->file_path);
+        ztd::logger::error("failed to read {}", this->file_path_);
         close(fd);
         return;
     }
@@ -145,7 +145,7 @@ MimeCache::load_mime_file()
 
     offset = VAL32(this->buffer, MAGIC_LIST);
     this->n_magics = VAL32(this->buffer, offset);
-    this->magic_max_extent = VAL32(this->buffer + offset, 4);
+    this->magic_max_extent_ = VAL32(this->buffer + offset, 4);
     this->magics = this->buffer + VAL32(this->buffer + offset, 8);
 }
 
@@ -305,15 +305,15 @@ MimeCache::lookup_alias(const std::string_view mime_type)
 }
 
 const std::filesystem::path&
-MimeCache::get_file_path()
+MimeCache::file_path()
 {
-    return this->file_path;
+    return this->file_path_;
 }
 
 u32
-MimeCache::get_magic_max_extent()
+MimeCache::magic_max_extent()
 {
-    return this->magic_max_extent;
+    return this->magic_max_extent_;
 }
 
 const char*
