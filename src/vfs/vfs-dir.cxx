@@ -44,8 +44,6 @@
 #include <malloc.h>
 #endif
 
-#include <glibmm.h>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -813,78 +811,4 @@ VFSDir::emit_thumbnail_loaded(vfs::file_info file) noexcept
         this->run_event<spacefm::signal::file_thumbnail_loaded>(file);
         vfs_file_info_unref(file);
     }
-}
-
-
-/*
-* Global mime type file watcher
-*/
-
-static u32 mime_change_timer = 0;
-static vfs::dir mime_dir = nullptr;
-
-static bool
-on_mime_change_timer(void* user_data)
-{
-    (void)user_data;
-
-    // ztd::logger::info("MIME-UPDATE on_timer");
-    const auto data_dir = vfs::user_dirs->data_dir();
-    const std::string command1 = std::format("update-mime-database {}/mime", data_dir.string());
-    ztd::logger::info("COMMAND={}", command1);
-    Glib::spawn_command_line_async(command1);
-
-    const std::string command2 =
-        std::format("update-desktop-database {}/applications", data_dir.string());
-    ztd::logger::info("COMMAND={}", command2);
-    Glib::spawn_command_line_async(command2);
-
-    g_source_remove(mime_change_timer);
-    mime_change_timer = 0;
-    return false;
-}
-
-static void
-mime_change()
-{
-    if (mime_change_timer)
-    {
-        // timer is already running, so ignore request
-        // ztd::logger::info("MIME-UPDATE already set");
-        return;
-    }
-    if (mime_dir)
-    {
-        // update mime database in 2 seconds
-        mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
-        // ztd::logger::info("MIME-UPDATE timer started");
-    }
-}
-
-void
-vfs_dir_monitor_mime()
-{
-    // start watching for changes
-    if (mime_dir)
-    {
-        return;
-    }
-
-    const auto path = vfs::user_dirs->data_dir() / "mime" / "packages";
-    if (!std::filesystem::is_directory(path))
-    {
-        return;
-    }
-
-    mime_dir = vfs_dir_get_by_path(path);
-    if (!mime_dir)
-    {
-        return;
-    }
-
-    // ztd::logger::info("MIME-UPDATE watch started");
-    mime_dir->add_event<spacefm::signal::file_listed>(mime_change);
-    mime_dir->add_event<spacefm::signal::file_changed>(mime_change);
-    mime_dir->add_event<spacefm::signal::file_deleted>(mime_change);
-    mime_dir->add_event<spacefm::signal::file_changed>(mime_change);
 }

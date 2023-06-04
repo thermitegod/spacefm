@@ -48,6 +48,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-mime-monitor.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-actions-open.hxx"
@@ -1970,7 +1971,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 xset_edit(GTK_WIDGET(data->browser), mime_file.c_str(), false, false);
             }
 
-            vfs_dir_monitor_mime();
+            vfs_mime_monitor();
             break;
         }
         case ptk::file_menu::app_job::view_type:
@@ -2009,7 +2010,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 data->browser->run_event<spacefm::signal::open_item>(path,
                                                                      ptk::open_action::new_tab);
             }
-            vfs_dir_monitor_mime();
+            vfs_mime_monitor();
             break;
         }
         case ptk::file_menu::app_job::update:
