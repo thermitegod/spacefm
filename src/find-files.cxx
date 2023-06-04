@@ -876,7 +876,7 @@ on_add_search_volumes(GtkWidget* menu, FindFile* data)
     {
         if (volume->is_mounted)
         {
-            path = volume->get_mount_point();
+            path = volume->mount_point();
             if (path && path[0] != '\0')
             {
                 add_search_dir(data, path);

@@ -4188,14 +4188,14 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
     if (file_browser->side_dev &&
         (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev))))
     {
-        c->var[item_prop::context::item::device] = vol->device_file;
-        c->var[item_prop::context::item::device_label] = vol->label;
-        c->var[item_prop::context::item::device_mount_point] = vol->mount_point;
-        c->var[item_prop::context::item::device_udi] = vol->udi;
-        c->var[item_prop::context::item::device_fstype] = vol->fs_type;
+        c->var[item_prop::context::item::device] = vol->device_file();
+        c->var[item_prop::context::item::device_label] = vol->label();
+        c->var[item_prop::context::item::device_mount_point] = vol->mount_point();
+        c->var[item_prop::context::item::device_udi] = vol->udi();
+        c->var[item_prop::context::item::device_fstype] = vol->fstype();
 
         std::string flags;
-        if (vol->is_removable)
+        if (vol->is_removable())
         {
             flags = std::format("{} removable", flags);
         }
@@ -4204,26 +4204,26 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             flags = std::format("{} internal", flags);
         }
 
-        if (vol->requires_eject)
+        if (vol->requires_eject())
         {
             flags = std::format("{} ejectable", flags);
         }
 
-        if (vol->is_optical)
+        if (vol->is_optical())
         {
             flags = std::format("{} optical", flags);
         }
 
-        if (!vol->is_user_visible)
+        if (!vol->is_user_visible())
         {
             flags = std::format("{} policy_hide", flags);
         }
 
-        if (vol->is_mounted)
+        if (vol->is_mounted())
         {
             flags = std::format("{} mounted", flags);
         }
-        else if (vol->is_mountable)
+        else if (vol->is_mountable())
         {
             flags = std::format("{} mountable", flags);
         }
@@ -4264,7 +4264,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
         {
-            c->var[item_prop::context::item::panel1_device + p - 1] = vol->device_file;
+            c->var[item_prop::context::item::panel1_device + p - 1] = vol->device_file();
         }
 
         // panel has files selected?
@@ -4488,33 +4488,33 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
                 if (file_browser == a_browser)
                 {
                     // clang-format off
-                    buf.append(std::format("set fm_device {}\n", ztd::shell::quote(vol->device_file)));
-                    buf.append(std::format("set fm_device_udi {}\n", ztd::shell::quote(vol->udi)));
-                    buf.append(std::format("set fm_device_mount_point {}\n", ztd::shell::quote(vol->mount_point)));
-                    buf.append(std::format("set fm_device_label {}\n", ztd::shell::quote(vol->label)));
-                    buf.append(std::format("set fm_device_fstype {}\n", ztd::shell::quote(vol->fs_type)));
-                    buf.append(std::format("set fm_device_size {}\n", vol->size));
-                    buf.append(std::format("set fm_device_display_name {}\n", ztd::shell::quote(vol->disp_name)));
-                    buf.append(std::format("set fm_device_icon {}\n", ztd::shell::quote(vol->icon)));
-                    buf.append(std::format("set fm_device_is_mounted {}\n", vol->is_mounted ? 1 : 0));
-                    buf.append(std::format("set fm_device_is_optical {}\n", vol->is_optical ? 1 : 0));
-                    buf.append(std::format("set fm_device_is_removable {}\n", vol->is_removable ? 1 : 0));
-                    buf.append(std::format("set fm_device_is_mountable {}\n", vol->is_mountable ? 1 : 0));
+                    buf.append(std::format("set fm_device {}\n", ztd::shell::quote(vol->device_file())));
+                    buf.append(std::format("set fm_device_udi {}\n", ztd::shell::quote(vol->udi())));
+                    buf.append(std::format("set fm_device_mount_point {}\n", ztd::shell::quote(vol->mount_point())));
+                    buf.append(std::format("set fm_device_label {}\n", ztd::shell::quote(vol->label())));
+                    buf.append(std::format("set fm_device_fstype {}\n", ztd::shell::quote(vol->fstype())));
+                    buf.append(std::format("set fm_device_size {}\n", vol->size()));
+                    buf.append(std::format("set fm_device_display_name {}\n", ztd::shell::quote(vol->display_name())));
+                    buf.append(std::format("set fm_device_icon {}\n", ztd::shell::quote(vol->icon())));
+                    buf.append(std::format("set fm_device_is_mounted {}\n", vol->is_mounted() ? 1 : 0));
+                    buf.append(std::format("set fm_device_is_optical {}\n", vol->is_optical() ? 1 : 0));
+                    buf.append(std::format("set fm_device_is_removable {}\n", vol->is_removable() ? 1 : 0));
+                    buf.append(std::format("set fm_device_is_mountable {}\n", vol->is_mountable() ? 1 : 0));
                     // clang-format on
                 }
                 // clang-format off
-                buf.append(std::format("set fm_panel{}_device {}\n", p, ztd::shell::quote(vol->device_file)));
-                buf.append(std::format("set fm_panel{}_device_udi {}\n", p, ztd::shell::quote(vol->udi)));
-                buf.append(std::format("set fm_panel{}_device_mount_point {}\n", p, ztd::shell::quote(vol->mount_point)));
-                buf.append(std::format("set fm_panel{}_device_label {}\n", p, ztd::shell::quote(vol->label)));
-                buf.append(std::format("set fm_panel{}_device_fstype {}\n", p, ztd::shell::quote(vol->fs_type)));
-                buf.append(std::format("set fm_panel{}_device_size {}\n", p, vol->size));
-                buf.append(std::format("set fm_panel{}_device_display_name {}\n", p, ztd::shell::quote(vol->disp_name)));
-                buf.append(std::format("set fm_panel{}_device_icon {}\n", p, ztd::shell::quote(vol->icon)));
-                buf.append(std::format("set fm_panel{}_device_is_mounted {}\n", p, vol->is_mounted ? 1 : 0));
-                buf.append(std::format("set fm_panel{}_device_is_optical {}\n", p, vol->is_optical ? 1 : 0));
-                buf.append(std::format("set fm_panel{}_device_is_removable{}\n", p, vol->is_removable ? 1 : 0));
-                buf.append(std::format("set fm_panel{}_device_is_mountable{}\n", p, vol->is_mountable ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device {}\n", p, ztd::shell::quote(vol->device_file())));
+                buf.append(std::format("set fm_panel{}_device_udi {}\n", p, ztd::shell::quote(vol->udi())));
+                buf.append(std::format("set fm_panel{}_device_mount_point {}\n", p, ztd::shell::quote(vol->mount_point())));
+                buf.append(std::format("set fm_panel{}_device_label {}\n", p, ztd::shell::quote(vol->label())));
+                buf.append(std::format("set fm_panel{}_device_fstype {}\n", p, ztd::shell::quote(vol->fstype())));
+                buf.append(std::format("set fm_panel{}_device_size {}\n", p, vol->size()));
+                buf.append(std::format("set fm_panel{}_device_display_name {}\n", p, ztd::shell::quote(vol->display_name())));
+                buf.append(std::format("set fm_panel{}_device_icon {}\n", p, ztd::shell::quote(vol->icon())));
+                buf.append(std::format("set fm_panel{}_device_is_mounted {}\n", p, vol->is_mounted() ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device_is_optical {}\n", p, vol->is_optical() ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device_is_removable{}\n", p, vol->is_removable() ? 1 : 0));
+                buf.append(std::format("set fm_panel{}_device_is_mountable{}\n", p, vol->is_mountable() ? 1 : 0));
                 // clang-format on
             }
         }

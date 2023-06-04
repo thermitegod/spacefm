@@ -34,8 +34,6 @@
 
 #include <memory>
 
-#include <sys/sysmacros.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -47,6 +45,8 @@
 #include "main-window.hxx"
 
 #include "vfs/vfs-utils.hxx"
+
+#include "vfs/vfs-device.hxx"
 
 #include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/procfs.hxx"
@@ -61,13 +61,13 @@ static void call_callbacks(vfs::volume vol, vfs::volume_state state);
 struct VFSVolumeCallbackData
 {
     VFSVolumeCallbackData() = delete;
-    VFSVolumeCallbackData(VFSVolumeCallback callback, void* callback_data);
+    VFSVolumeCallbackData(vfs::volume_callback callback, void* callback_data);
 
-    VFSVolumeCallback cb{nullptr};
+    vfs::volume_callback cb{nullptr};
     void* user_data{nullptr};
 };
 
-VFSVolumeCallbackData::VFSVolumeCallbackData(VFSVolumeCallback callback, void* callback_data)
+VFSVolumeCallbackData::VFSVolumeCallbackData(vfs::volume_callback callback, void* callback_data)
 {
     this->cb = callback;
     this->user_data = callback_data;
@@ -77,6 +77,16 @@ using volume_callback_data_t = std::shared_ptr<VFSVolumeCallbackData>;
 
 static std::vector<vfs::volume> volumes;
 static std::vector<volume_callback_data_t> callbacks;
+
+static libudev::udev udev;
+static libudev::monitor umonitor;
+
+static Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
+static Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
+
+/*
+ * DeviceMount
+ */
 
 struct DeviceMount
 {
@@ -100,271 +110,6 @@ DeviceMount::DeviceMount(dev_t major, dev_t minor)
 using devmount_t = std::shared_ptr<DeviceMount>;
 
 static std::vector<devmount_t> devmounts;
-
-static libudev::udev udev;
-static libudev::monitor umonitor;
-
-static Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
-static Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
-
-/**
- * device info
- */
-
-struct Device
-{
-    Device() = delete;
-    Device(const libudev::device& udevice);
-    ~Device() = default;
-
-    libudev::device udevice;
-
-    dev_t devnum{0};
-
-    std::string devnode{};
-    std::string native_path{};
-    std::string mount_points{};
-
-    bool device_is_system_internal{true};
-    bool device_is_removable{false};
-    bool device_is_media_available{false};
-    bool device_is_optical_disc{false};
-    bool device_is_mounted{false};
-
-    std::string device_by_id{};
-    u64 device_size{0};
-    u64 device_block_size{0};
-    std::string id_label{};
-
-    bool drive_is_media_ejectable{false};
-
-    std::string filesystem{};
-};
-
-Device::Device(const libudev::device& udevice) : udevice(udevice)
-{
-}
-
-using device_t = std::shared_ptr<Device>;
-
-static const std::optional<std::string>
-info_mount_points(const device_t& device)
-{
-    const dev_t dmajor = gnu_dev_major(device->devnum);
-    const dev_t dminor = gnu_dev_minor(device->devnum);
-
-    // if we have the mount point list, use this instead of reading mountinfo
-    if (!devmounts.empty())
-    {
-        for (const devmount_t& devmount : devmounts)
-        {
-            if (devmount->major == dmajor && devmount->minor == dminor)
-            {
-                return devmount->mount_points;
-            }
-        }
-        return std::nullopt;
-    }
-
-    std::vector<std::string> device_mount_points;
-
-    for (const auto& mount : vfs::linux::procfs::mountinfo())
-    {
-        // ignore mounts where only a subtree of a filesystem is mounted
-        // this function is only used for block devices.
-        if (ztd::same(mount.root, "/"))
-        {
-            continue;
-        }
-
-        if (mount.major != dmajor || mount.minor != dminor)
-        {
-            continue;
-        }
-
-        if (!ztd::contains(device_mount_points, mount.mount_point))
-        {
-            device_mount_points.emplace_back(mount.mount_point);
-        }
-    }
-
-    if (device_mount_points.empty())
-    {
-        return std::nullopt;
-    }
-
-    // Sort the list to ensure that shortest mount paths appear first
-    std::ranges::sort(device_mount_points, ztd::compare);
-
-    return ztd::join(device_mount_points, ",");
-}
-
-static bool
-device_get_info(const device_t& device)
-{
-    const auto device_syspath = device->udevice.get_syspath();
-    const auto device_devnode = device->udevice.get_devnode();
-    const auto device_devnum = device->udevice.get_devnum();
-    if (!device_syspath || !device_devnode || device_devnum == 0)
-    {
-        return false;
-    }
-
-    device->native_path = device_syspath.value();
-    device->devnode = device_devnode.value();
-    device->devnum = device_devnum;
-
-    const auto prop_id_fs_usage = device->udevice.get_property("ID_FS_USAGE");
-    const auto prop_id_fs_uuid = device->udevice.get_property("ID_FS_UUID");
-
-    const auto prop_id_fs_type = device->udevice.get_property("ID_FS_TYPE");
-    if (prop_id_fs_type)
-    {
-        device->filesystem = prop_id_fs_type.value();
-    }
-    const auto prop_id_fs_label = device->udevice.get_property("ID_FS_LABEL");
-    if (prop_id_fs_label)
-    {
-        device->id_label = prop_id_fs_label.value();
-    }
-
-    // device_is_media_available
-    bool media_available = false;
-
-    if (prop_id_fs_usage || prop_id_fs_type || prop_id_fs_uuid || prop_id_fs_label)
-    {
-        media_available = true;
-    }
-    else if (ztd::startswith(device->devnode, "/dev/loop"))
-    {
-        media_available = false;
-    }
-    else if (device->device_is_removable)
-    {
-        bool is_cd;
-
-        const auto prop_id_cdrom = device->udevice.get_property("ID_CDROM");
-        if (prop_id_cdrom)
-        {
-            is_cd = std::stol(prop_id_cdrom.value()) != 0;
-        }
-        else
-        {
-            is_cd = false;
-        }
-
-        if (!is_cd)
-        {
-            // this test is limited for non-root - user may not have read
-            // access to device file even if media is present
-            const i32 fd = open(device->devnode.data(), O_RDONLY);
-            if (fd >= 0)
-            {
-                media_available = true;
-                close(fd);
-            }
-        }
-        else
-        {
-            const auto prop_id_cdrom_media = device->udevice.get_property("ID_CDROM_MEDIA");
-            if (prop_id_cdrom_media)
-            {
-                media_available = (std::stol(prop_id_cdrom_media.value()) == 1);
-            }
-        }
-    }
-    else
-    {
-        const auto prop_id_cdrom_media = device->udevice.get_property("ID_CDROM_MEDIA");
-        if (prop_id_cdrom_media)
-        {
-            media_available = (std::stol(prop_id_cdrom_media.value()) == 1);
-        }
-        else
-        {
-            media_available = true;
-        }
-    }
-
-    device->device_is_media_available = media_available;
-
-    if (device->device_is_media_available)
-    {
-        const auto check_size = vfs::linux::sysfs::get_u64(device->native_path, "size");
-        if (check_size)
-        {
-            device->device_size = check_size.value() * ztd::BLOCK_SIZE;
-        }
-
-        //  This is not available on all devices so fall back to 512 if unavailable.
-        //
-        //  Another way to get this information is the BLKSSZGET ioctl but we do not want
-        //  to open the device. Ideally vol_id would export it.
-        const auto check_block_size =
-            vfs::linux::sysfs::get_u64(device->native_path, "queue/hw_sector_size");
-        if (check_block_size)
-        {
-            if (check_block_size.value() != 0)
-            {
-                device->device_block_size = check_block_size.value();
-            }
-            else
-            {
-                device->device_block_size = ztd::BLOCK_SIZE;
-            }
-        }
-        else
-        {
-            device->device_block_size = ztd::BLOCK_SIZE;
-        }
-    }
-
-    // links
-    const auto entrys = device->udevice.get_devlinks();
-    for (const std::string_view entry : entrys)
-    {
-        if (ztd::startswith(entry, "/dev/disk/by-id/") ||
-            ztd::startswith(entry, "/dev/disk/by-uuid/"))
-        {
-            device->device_by_id = entry;
-            break;
-        }
-    }
-
-    if (device->native_path.empty() || device->devnum == 0)
-    {
-        return false;
-    }
-
-    device->device_is_removable = device->udevice.is_removable();
-
-    // is_ejectable
-    bool drive_is_ejectable = false;
-    const auto prop_id_drive_ejectable = device->udevice.get_property("ID_DRIVE_EJECTABLE");
-    if (prop_id_drive_ejectable)
-    {
-        drive_is_ejectable = std::stol(prop_id_drive_ejectable.value()) != 0;
-    }
-    else
-    {
-        drive_is_ejectable = device->udevice.has_property("ID_CDROM");
-    }
-    device->drive_is_media_ejectable = drive_is_ejectable;
-
-    // devices with removable media are never system internal
-    device->device_is_system_internal = !device->device_is_removable;
-
-    device->mount_points = info_mount_points(device).value_or("");
-    device->device_is_mounted = !device->mount_points.empty();
-
-    const auto prop_id_cdrom = device->udevice.get_property("ID_CDROM");
-    if (prop_id_cdrom && std::stol(prop_id_cdrom.value()) != 0)
-    {
-        device->device_is_optical_disc = true;
-    }
-
-    return true;
-}
 
 /**
  * udev & mount monitors
@@ -658,85 +403,6 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
     return true;
 }
 
-void
-VFSVolume::set_info() noexcept
-{
-    std::string disp_device;
-    std::string disp_label;
-    std::string disp_size;
-    std::string disp_mount;
-    std::string disp_fstype;
-    std::string disp_devnum;
-
-    // set display name
-    if (this->is_mounted)
-    {
-        disp_label = this->label;
-
-        if (this->size > 0)
-        {
-            disp_size = vfs_file_size_format(this->size, false);
-        }
-
-        if (!this->mount_point.empty())
-        {
-            disp_mount = std::format("{}", this->mount_point);
-        }
-        else
-        {
-            disp_mount = "???";
-        }
-    }
-    else if (this->is_mountable)
-    { // has_media
-        disp_label = this->label;
-
-        if (this->size > 0)
-        {
-            disp_size = vfs_file_size_format(this->size, false);
-        }
-        disp_mount = "---";
-    }
-    else
-    {
-        disp_label = "[no media]";
-    }
-
-    disp_device = this->device_file;
-    disp_fstype = this->fs_type;
-    disp_devnum = std::format("{}:{}", gnu_dev_major(this->devnum), gnu_dev_minor(this->devnum));
-
-    std::string parameter;
-    const auto user_format = xset_get_s(xset::name::dev_dispname);
-    if (user_format)
-    {
-        parameter = user_format.value();
-        parameter = ztd::replace(parameter, "%v", disp_device);
-        parameter = ztd::replace(parameter, "%s", disp_size);
-        parameter = ztd::replace(parameter, "%t", disp_fstype);
-        parameter = ztd::replace(parameter, "%l", disp_label);
-        parameter = ztd::replace(parameter, "%m", disp_mount);
-        parameter = ztd::replace(parameter, "%n", disp_devnum);
-    }
-    else
-    {
-        parameter = std::format("{} {} {} {} {}",
-                                disp_device,
-                                disp_size,
-                                disp_fstype,
-                                disp_label,
-                                disp_mount);
-    }
-
-    parameter = ztd::replace(parameter, "  ", " ");
-
-    this->disp_name = parameter;
-    if (this->udi.empty())
-    {
-        this->udi = this->device_file;
-    }
-}
-
 static vfs::volume
 vfs_volume_read_by_device(const libudev::device& udevice)
 { // uses udev to read device parameters into returned volume
@@ -745,63 +411,15 @@ vfs_volume_read_by_device(const libudev::device& udevice)
         return nullptr;
     }
 
-    const device_t device = std::make_shared<Device>(udevice);
-    if (!device_get_info(device) || device->devnode.empty() || device->devnum == 0 ||
-        !ztd::startswith(device->devnode, "/dev/"))
+    const vfs::device_t device = std::make_shared<VFSDevice>(udevice);
+    if (!device->is_valid() || device->devnode().empty() || device->devnum() == 0 ||
+        !ztd::startswith(device->devnode(), "/dev/"))
     {
         return nullptr;
     }
 
     // translate device info to VFSVolume
-    const auto volume = new VFSVolume();
-
-    volume->devnum = device->devnum;
-    volume->device_type = vfs::volume_device_type::block;
-    volume->device_file = device->devnode;
-    volume->udi = device->device_by_id;
-    volume->is_optical = device->device_is_optical_disc;
-    volume->is_removable = !device->device_is_system_internal;
-    volume->requires_eject = device->drive_is_media_ejectable;
-    volume->is_mountable = device->device_is_media_available;
-    volume->is_mounted = device->device_is_mounted;
-    volume->is_user_visible = device->udevice.is_partition() ||
-                              (device->udevice.is_removable() && !device->udevice.is_disk());
-    volume->ever_mounted = false;
-    if (!device->mount_points.empty())
-    {
-        if (ztd::contains(device->mount_points.data(), ","))
-        {
-            volume->mount_point = ztd::partition(device->mount_points, ",")[0];
-        }
-        else
-        {
-            volume->mount_point = device->mount_points;
-        }
-    }
-    volume->size = device->device_size;
-    volume->label = device->id_label;
-    volume->fs_type = device->filesystem;
-
-    // adjustments
-    volume->ever_mounted = volume->is_mounted;
-
-    volume->set_info();
-
-    // ztd::logger::debug("====devnum={}:{}", gnu_dev_major(volume->devnum), gnu_dev_minor(volume->devnum));
-    // ztd::logger::debug("    device_file={}", volume->device_file);
-    // ztd::logger::debug("    udi={}", volume->udi);
-    // ztd::logger::debug("    label={}", volume->label);
-    // ztd::logger::debug("    icon={}", volume->icon);
-    // ztd::logger::debug("    is_mounted={}", volume->is_mounted);
-    // ztd::logger::debug("    is_mountable={}", volume->is_mountable);
-    // ztd::logger::debug("    is_optical={}", volume->is_optical);
-    // ztd::logger::debug("    is_removable={}", volume->is_removable);
-    // ztd::logger::debug("    requires_eject={}", volume->requires_eject);
-    // ztd::logger::debug("    is_user_visible={}", volume->is_user_visible);
-    // ztd::logger::debug("    mount_point={}", volume->mount_point);
-    // ztd::logger::debug("    size={}", volume->size);
-    // ztd::logger::debug("    disp_name={}", volume->disp_name);
-
+    const auto volume = new VFSVolume(device);
     return volume;
 }
 
@@ -819,108 +437,6 @@ is_path_mountpoint(const std::filesystem::path& path)
     return (path_stat_dev == path_statvfs_fsid);
 }
 
-const std::optional<std::string>
-VFSVolume::device_mount_cmd() noexcept
-{
-    const std::filesystem::path path = Glib::find_program_in_path("udiskie-mount");
-    if (path.empty())
-    {
-        return std::nullopt;
-    }
-    return std::format("{} {}", path.string(), ztd::shell::quote(this->device_file));
-}
-
-const std::optional<std::string>
-VFSVolume::device_unmount_cmd() noexcept
-{
-    const std::filesystem::path path = Glib::find_program_in_path("udiskie-umount");
-    if (path.empty())
-    {
-        return std::nullopt;
-    }
-    return std::format("{} {}", path.string(), ztd::shell::quote(this->mount_point));
-}
-
-void
-VFSVolume::device_added() noexcept
-{ // frees volume if needed
-    if (this->udi.empty() || this->device_file.empty())
-    {
-        return;
-    }
-
-    // check if we already have this volume device file
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
-    {
-        if (volume->devnum == this->devnum)
-        {
-            // update existing volume
-            const bool was_mounted = volume->is_mounted;
-
-            // detect changed mount point
-            std::string changed_mount_point;
-            if (!was_mounted && this->is_mounted)
-            {
-                changed_mount_point = this->mount_point;
-            }
-            else if (was_mounted && !this->is_mounted)
-            {
-                changed_mount_point = volume->mount_point;
-            }
-
-            volume->udi = this->udi;
-            volume->device_file = this->device_file;
-            volume->label = this->label;
-            volume->mount_point = this->mount_point;
-            volume->icon = this->icon;
-            volume->disp_name = this->disp_name;
-            volume->is_mounted = this->is_mounted;
-            volume->is_mountable = this->is_mountable;
-            volume->is_optical = this->is_optical;
-            volume->requires_eject = this->requires_eject;
-            volume->is_removable = this->is_removable;
-            volume->is_user_visible = this->is_user_visible;
-            volume->size = this->size;
-            volume->fs_type = this->fs_type;
-
-            // Mount and ejection detect for automount
-            if (this->is_mounted)
-            {
-                volume->ever_mounted = true;
-            }
-            else
-            {
-                if (this->is_removable && !this->is_mountable)
-                { // ejected
-                    volume->ever_mounted = false;
-                }
-            }
-
-            call_callbacks(volume, vfs::volume_state::changed);
-
-            // refresh tabs containing changed mount point
-            if (!changed_mount_point.empty())
-            {
-                main_window_refresh_all_tabs_matching(changed_mount_point);
-            }
-
-            volume->set_info();
-
-            return;
-        }
-    }
-
-    // add as new volume
-    volumes.emplace_back(this);
-    call_callbacks(this, vfs::volume_state::added);
-
-    // refresh tabs containing changed mount point
-    if (this->is_mounted && !this->mount_point.empty())
-    {
-        main_window_refresh_all_tabs_matching(this->mount_point);
-    }
-}
-
 static void
 vfs_volume_device_removed(const libudev::device& udevice)
 {
@@ -933,14 +449,14 @@ vfs_volume_device_removed(const libudev::device& udevice)
 
     for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
-        if (volume->device_type == vfs::volume_device_type::block && volume->devnum == devnum)
+        if (volume->is_device_type(vfs::volume_device_type::block) && volume->devnum() == devnum)
         { // remove volume
             // ztd::logger::debug("remove volume {}", volume->device_file);
             volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
             call_callbacks(volume, vfs::volume_state::removed);
-            if (volume->is_mounted && !volume->mount_point.empty())
+            if (volume->is_mounted() && !volume->mount_point().empty())
             {
-                main_window_refresh_all_tabs_matching(volume->mount_point);
+                main_window_refresh_all_tabs_matching(volume->mount_point());
             }
             delete volume;
 
@@ -1078,7 +594,7 @@ vfs_volume_get_by_device(const std::string_view device_file)
 {
     for (const vfs::volume volume : vfs_volume_get_all_volumes())
     {
-        if (ztd::same(device_file, volume->device_file))
+        if (ztd::same(device_file, volume->device_file()))
         {
             return volume;
         }
@@ -1101,7 +617,7 @@ call_callbacks(vfs::volume vol, vfs::volume_state state)
                           xset::name::evt_device,
                           0,
                           0,
-                          vol->device_file.data(),
+                          vol->device_file().data(),
                           0,
                           0,
                           state,
@@ -1110,7 +626,7 @@ call_callbacks(vfs::volume vol, vfs::volume_state state)
 }
 
 void
-vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data)
+vfs_volume_add_callback(vfs::volume_callback cb, void* user_data)
 {
     if (cb == nullptr)
     {
@@ -1123,7 +639,7 @@ vfs_volume_add_callback(VFSVolumeCallback cb, void* user_data)
 }
 
 void
-vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
+vfs_volume_remove_callback(vfs::volume_callback cb, void* user_data)
 {
     for (const auto& callback : callbacks)
     {
@@ -1133,35 +649,6 @@ vfs_volume_remove_callback(VFSVolumeCallback cb, void* user_data)
             break;
         }
     }
-}
-
-const std::string
-VFSVolume::get_disp_name() const noexcept
-{
-    return this->disp_name;
-}
-
-const std::string
-VFSVolume::get_mount_point() const noexcept
-{
-    return this->mount_point;
-}
-
-const std::string
-VFSVolume::get_device_file() const noexcept
-{
-    return this->device_file;
-}
-const std::string
-VFSVolume::get_fstype() const noexcept
-{
-    return this->fs_type;
-}
-
-const std::string
-VFSVolume::get_icon() const noexcept
-{
-    return this->icon;
 }
 
 bool
@@ -1206,4 +693,340 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     }
     // ztd::logger::debug("    fstype does not match any blacklisted filesystems");
     return false;
+}
+
+/*
+ * VFSVolume
+ */
+
+VFSVolume::VFSVolume(const vfs::device_t& device)
+{
+    this->devnum_ = device->devnum();
+    this->device_type_ = vfs::volume_device_type::block;
+    this->device_file_ = device->devnode();
+    this->udi_ = device->id();
+    this->is_optical_ = device->is_optical_disc();
+    this->is_removable_ = !device->is_system_internal();
+    this->requires_eject_ = device->is_media_ejectable();
+    this->is_mountable_ = device->is_media_available();
+    this->is_mounted_ = device->is_mounted();
+    this->is_user_visible_ = device->udevice.is_partition() ||
+                             (device->udevice.is_removable() && !device->udevice.is_disk());
+    this->ever_mounted_ = false;
+    if (!device->mount_points().empty())
+    {
+        if (ztd::contains(device->mount_points(), ","))
+        {
+            this->mount_point_ = ztd::partition(device->mount_points(), ",")[0];
+        }
+        else
+        {
+            this->mount_point_ = device->mount_points();
+        }
+    }
+    this->size_ = device->size();
+    this->label_ = device->id_label();
+    this->fstype_ = device->fstype();
+
+    // adjustments
+    this->ever_mounted_ = this->is_mounted();
+
+    this->set_info();
+
+    // ztd::logger::debug("====devnum={}:{}", gnu_dev_major(this->devnum_), gnu_dev_minor(this->devnum_));
+    // ztd::logger::debug("    device_file={}", this->device_file_);
+    // ztd::logger::debug("    udi={}", this->udi_);
+    // ztd::logger::debug("    label={}", this->label_);
+    // ztd::logger::debug("    icon={}", this->icon_);
+    // ztd::logger::debug("    is_mounted={}", this->is_mounted_);
+    // ztd::logger::debug("    is_mountable={}", this->is_mountable_);
+    // ztd::logger::debug("    is_optical={}", this->is_optical_);
+    // ztd::logger::debug("    is_removable={}", this->is_removable_);
+    // ztd::logger::debug("    requires_eject={}", this->requires_eject_);
+    // ztd::logger::debug("    is_user_visible={}", this->is_user_visible_);
+    // ztd::logger::debug("    mount_point={}", this->mount_point_);
+    // ztd::logger::debug("    size={}", this->size_);
+    // ztd::logger::debug("    disp_name={}", this->disp_name_);
+}
+
+const std::optional<std::string>
+VFSVolume::device_mount_cmd() noexcept
+{
+    const std::filesystem::path path = Glib::find_program_in_path("udiskie-mount");
+    if (path.empty())
+    {
+        return std::nullopt;
+    }
+    return std::format("{} {}", path.string(), ztd::shell::quote(this->device_file_));
+}
+
+const std::optional<std::string>
+VFSVolume::device_unmount_cmd() noexcept
+{
+    const std::filesystem::path path = Glib::find_program_in_path("udiskie-umount");
+    if (path.empty())
+    {
+        return std::nullopt;
+    }
+    return std::format("{} {}", path.string(), ztd::shell::quote(this->mount_point_));
+}
+
+const std::string_view
+VFSVolume::display_name() const noexcept
+{
+    return this->disp_name_;
+}
+
+const std::string_view
+VFSVolume::mount_point() const noexcept
+{
+    return this->mount_point_;
+}
+
+const std::string_view
+VFSVolume::device_file() const noexcept
+{
+    return this->device_file_;
+}
+const std::string_view
+VFSVolume::fstype() const noexcept
+{
+    return this->fstype_;
+}
+
+const std::string_view
+VFSVolume::icon() const noexcept
+{
+    return this->icon_;
+}
+
+const std::string_view
+VFSVolume::udi() const noexcept
+{
+    return this->udi_;
+}
+
+const std::string_view
+VFSVolume::label() const noexcept
+{
+    return this->label_;
+}
+
+dev_t
+VFSVolume::devnum() const noexcept
+{
+    return this->devnum_;
+}
+
+dev_t
+VFSVolume::size() const noexcept
+{
+    return this->size_;
+}
+
+bool
+VFSVolume::is_device_type(vfs::volume_device_type type) const noexcept
+{
+    return type == this->device_type_;
+}
+
+bool
+VFSVolume::is_mounted() const noexcept
+{
+    return this->is_mounted_;
+}
+
+bool
+VFSVolume::is_removable() const noexcept
+{
+    return this->is_removable_;
+}
+
+bool
+VFSVolume::is_mountable() const noexcept
+{
+    return this->is_mountable_;
+}
+
+bool
+VFSVolume::is_user_visible() const noexcept
+{
+    return this->is_user_visible_;
+}
+
+bool
+VFSVolume::is_optical() const noexcept
+{
+    return this->is_optical_;
+}
+
+bool
+VFSVolume::requires_eject() const noexcept
+{
+    return this->requires_eject_;
+}
+
+bool
+VFSVolume::ever_mounted() const noexcept
+{
+    return this->ever_mounted_;
+}
+
+void
+VFSVolume::device_added() noexcept
+{ // frees volume if needed
+    if (this->udi_.empty() || this->device_file_.empty())
+    {
+        return;
+    }
+
+    // check if we already have this volume device file
+    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    {
+        if (volume->devnum() == this->devnum_)
+        {
+            // update existing volume
+            const bool was_mounted = volume->is_mounted();
+
+            // detect changed mount point
+            std::string changed_mount_point;
+            if (!was_mounted && this->is_mounted())
+            {
+                changed_mount_point = this->mount_point_;
+            }
+            else if (was_mounted && !this->is_mounted())
+            {
+                changed_mount_point = volume->mount_point();
+            }
+
+            volume->udi_ = this->udi_;
+            volume->device_file_ = this->device_file_;
+            volume->label_ = this->label_;
+            volume->mount_point_ = this->mount_point_;
+            volume->icon_ = this->icon_;
+            volume->disp_name_ = this->disp_name_;
+            volume->is_mounted_ = this->is_mounted_;
+            volume->is_mountable_ = this->is_mountable_;
+            volume->is_optical_ = this->is_optical_;
+            volume->requires_eject_ = this->requires_eject_;
+            volume->is_removable_ = this->is_removable_;
+            volume->is_user_visible_ = this->is_user_visible_;
+            volume->size_ = this->size_;
+            volume->fstype_ = this->fstype_;
+
+            // Mount and ejection detect for automount
+            if (this->is_mounted())
+            {
+                volume->ever_mounted_ = true;
+            }
+            else
+            {
+                if (this->is_removable() && !this->is_mountable())
+                { // ejected
+                    volume->ever_mounted_ = false;
+                }
+            }
+
+            call_callbacks(volume, vfs::volume_state::changed);
+
+            // refresh tabs containing changed mount point
+            if (!changed_mount_point.empty())
+            {
+                main_window_refresh_all_tabs_matching(changed_mount_point);
+            }
+
+            volume->set_info();
+
+            return;
+        }
+    }
+
+    // add as new volume
+    volumes.emplace_back(this);
+    call_callbacks(this, vfs::volume_state::added);
+
+    // refresh tabs containing changed mount point
+    if (this->is_mounted() && !this->mount_point_.empty())
+    {
+        main_window_refresh_all_tabs_matching(this->mount_point_);
+    }
+}
+
+void
+VFSVolume::set_info() noexcept
+{
+    std::string disp_device;
+    std::string disp_label;
+    std::string disp_size;
+    std::string disp_mount;
+    std::string disp_fstype;
+    std::string disp_devnum;
+
+    // set display name
+    if (this->is_mounted())
+    {
+        disp_label = this->label_;
+
+        if (this->size_ > 0)
+        {
+            disp_size = vfs_file_size_format(this->size_, false);
+        }
+
+        if (!this->mount_point_.empty())
+        {
+            disp_mount = std::format("{}", this->mount_point_);
+        }
+        else
+        {
+            disp_mount = "???";
+        }
+    }
+    else if (this->is_mountable())
+    { // has_media
+        disp_label = this->label_;
+
+        if (this->size_ > 0)
+        {
+            disp_size = vfs_file_size_format(this->size_, false);
+        }
+        disp_mount = "---";
+    }
+    else
+    {
+        disp_label = "[no media]";
+    }
+
+    disp_device = this->device_file_;
+    disp_fstype = this->fstype_;
+    disp_devnum = std::format("{}:{}", gnu_dev_major(this->devnum_), gnu_dev_minor(this->devnum_));
+
+    std::string parameter;
+    const auto user_format = xset_get_s(xset::name::dev_dispname);
+    if (user_format)
+    {
+        parameter = user_format.value();
+        parameter = ztd::replace(parameter, "%v", disp_device);
+        parameter = ztd::replace(parameter, "%s", disp_size);
+        parameter = ztd::replace(parameter, "%t", disp_fstype);
+        parameter = ztd::replace(parameter, "%l", disp_label);
+        parameter = ztd::replace(parameter, "%m", disp_mount);
+        parameter = ztd::replace(parameter, "%n", disp_devnum);
+    }
+    else
+    {
+        parameter = std::format("{} {} {} {} {}",
+                                disp_device,
+                                disp_size,
+                                disp_fstype,
+                                disp_label,
+                                disp_mount);
+    }
+
+    parameter = ztd::replace(parameter, "  ", " ");
+
+    this->disp_name_ = parameter;
+    if (this->udi_.empty())
+    {
+        this->udi_ = this->device_file_;
+    }
 }

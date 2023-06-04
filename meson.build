@@ -402,6 +402,7 @@ sources = files(
 
     'src/vfs/vfs-app-desktop.cxx',
     'src/vfs/vfs-async-task.cxx',
+    'src/vfs/vfs-device.cxx',
     'src/vfs/vfs-dir.cxx',
     'src/vfs/vfs-file-info.cxx',
     'src/vfs/vfs-file-monitor.cxx',
