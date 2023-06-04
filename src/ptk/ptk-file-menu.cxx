@@ -2618,7 +2618,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         if (std::filesystem::equivalent(cwd, ptk_file_browser_get_cwd(ao->file_browser)))
         {
             file = vfs_file_info_new(ao->path);
-            vfs_dir_emit_file_created(ao->file_browser->dir, file->name(), true);
+            ao->file_browser->dir->emit_file_created(file->name(), true);
             vfs_file_info_unref(file);
             vfs_dir_flush_notify_cache();
             ptk_file_browser_select_file(ao->file_browser, ao->path);

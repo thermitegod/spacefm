@@ -135,7 +135,7 @@ on_thumbnail_idle(vfs::thumbnail_loader loader)
         vfs::file_info file = loader->update_queue.front();
         loader->update_queue.pop_front();
 
-        vfs_dir_emit_thumbnail_loaded(loader->dir, file);
+        loader->dir->emit_thumbnail_loaded(file);
         vfs_file_info_unref(file);
     }
 

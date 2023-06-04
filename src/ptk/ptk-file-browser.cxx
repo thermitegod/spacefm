@@ -1926,7 +1926,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path
 
     file_browser->run_event<spacefm::signal::chdir_begin>();
 
-    if (vfs_dir_is_file_listed(file_browser->dir))
+    if (file_browser->dir->is_file_listed())
     {
         on_dir_file_listed(file_browser, false);
         file_browser->busy = false;
@@ -4260,7 +4260,7 @@ ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser)
 
     file_browser->run_event<spacefm::signal::chdir_begin>();
 
-    if (vfs_dir_is_file_listed(file_browser->dir))
+    if (file_browser->dir->is_file_listed())
     {
         on_dir_file_listed(file_browser, false);
         if (std::filesystem::exists(cursor_path))
@@ -5251,6 +5251,8 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
                                const std::span<const vfs::file_info> sel_files,
                                const std::filesystem::path& cwd)
 {
+    (void)cwd;
+
     const i32 response = xset_msg_dialog(
         GTK_WIDGET(file_browser),
         GtkMessageType::GTK_MESSAGE_INFO,
@@ -5276,7 +5278,7 @@ ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
 
     for (const vfs::file_info file : sel_files)
     {
-        if (!vfs_dir_add_hidden(cwd, file->name()))
+        if (!file_browser->dir->add_hidden(file))
         {
             ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
                            "Error",

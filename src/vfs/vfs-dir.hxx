@@ -55,6 +55,7 @@ namespace vfs
 
 struct VFSDir
 {
+  public:
     GObject parent;
 
     std::string path{};
@@ -77,9 +78,33 @@ struct VFSDir
     vfs::thumbnail_loader thumbnail_loader{nullptr};
 
     std::vector<vfs::file_info> changed_files{};
-    std::vector<std::string> created_files{};
+    std::vector<std::filesystem::path> created_files{};
 
     i64 xhidden_count{0};
+
+  public:
+    void load() noexcept;
+
+    bool is_file_listed() const noexcept;
+
+    /* emit signals */
+    void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
+    void emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info file) noexcept;
+    void emit_file_changed(const std::filesystem::path& file_name, vfs::file_info file,
+                           bool force) noexcept;
+    void emit_thumbnail_loaded(vfs::file_info file) noexcept;
+
+    void update_created_files(const std::filesystem::path& key) noexcept;
+    void update_changed_files(const std::filesystem::path& key) noexcept;
+
+    void unload_thumbnails(bool is_big) noexcept;
+
+    bool add_hidden(vfs::file_info file) const noexcept;
+
+  private:
+    vfs::file_info find_file(const std::filesystem::path& file_name,
+                             vfs::file_info file) const noexcept;
+    bool update_file_info(vfs::file_info file) noexcept;
 
     // Signals
   public:
@@ -102,7 +127,7 @@ struct VFSDir
     // Signals Add Event
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
-    add_event(evt_file_created__run_first__t fun, PtkFileBrowser* browser)
+    add_event(evt_file_created__run_first__t fun, PtkFileBrowser* browser) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         this->evt_data_browser = browser;
@@ -111,7 +136,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
-    add_event(evt_file_created__run_last__t fun, PtkFileList* list)
+    add_event(evt_file_created__run_last__t fun, PtkFileList* list) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         this->evt_data_list = list;
@@ -120,7 +145,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
-    add_event(evt_mime_change_t fun)
+    add_event(evt_mime_change_t fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
@@ -128,7 +153,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
-    add_event(evt_file_changed__run_first__t fun, PtkFileBrowser* browser)
+    add_event(evt_file_changed__run_first__t fun, PtkFileBrowser* browser) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         this->evt_data_browser = browser;
@@ -137,7 +162,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
-    add_event(evt_file_changed__run_last__t fun, PtkFileList* list)
+    add_event(evt_file_changed__run_last__t fun, PtkFileList* list) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         this->evt_data_list = list;
@@ -146,7 +171,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
-    add_event(evt_mime_change_t fun)
+    add_event(evt_mime_change_t fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
@@ -154,7 +179,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
-    add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser)
+    add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         this->evt_data_browser = browser;
@@ -163,7 +188,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
-    add_event(evt_file_deleted__run_last__t fun, PtkFileList* list)
+    add_event(evt_file_deleted__run_last__t fun, PtkFileList* list) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         this->evt_data_list = list;
@@ -172,7 +197,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
-    add_event(evt_mime_change_t fun)
+    add_event(evt_mime_change_t fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
@@ -180,7 +205,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
-    add_event(evt_file_listed_t fun, PtkFileBrowser* browser)
+    add_event(evt_file_listed_t fun, PtkFileBrowser* browser) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
         // this->evt_data_listed_browser = browser;
@@ -190,7 +215,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
-    add_event(evt_mime_change_t fun)
+    add_event(evt_mime_change_t fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
         return this->evt_mime_change.connect(sigc::ptr_fun(fun));
@@ -198,7 +223,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, sigc::connection>::type
-    add_event(evt_file_thumbnail_loaded_t fun, PtkFileList* list)
+    add_event(evt_file_thumbnail_loaded_t fun, PtkFileList* list) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_thumbnail_loaded");
         // this->evt_data_thumb_list = list;
@@ -209,7 +234,7 @@ struct VFSDir
     // Signals Run Event
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_created, void>::type
-    run_event(vfs::file_info file)
+    run_event(vfs::file_info file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
         this->evt_mime_change.emit();
@@ -219,7 +244,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_changed, void>::type
-    run_event(vfs::file_info file)
+    run_event(vfs::file_info file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
         this->evt_mime_change.emit();
@@ -229,7 +254,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_deleted, void>::type
-    run_event(vfs::file_info file)
+    run_event(vfs::file_info file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
         this->evt_mime_change.emit();
@@ -239,7 +264,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_listed, void>::type
-    run_event(bool is_cancelled)
+    run_event(bool is_cancelled) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_listed");
         this->evt_mime_change.emit();
@@ -248,7 +273,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, void>::type
-    run_event(vfs::file_info file)
+    run_event(vfs::file_info file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
         this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);
@@ -293,20 +318,7 @@ GType vfs_dir_get_type();
 vfs::dir vfs_dir_get_by_path(const std::filesystem::path& path);
 vfs::dir vfs_dir_get_by_path_soft(const std::filesystem::path& path);
 
-bool vfs_dir_is_file_listed(vfs::dir dir);
-
-void vfs_dir_unload_thumbnails(vfs::dir dir, bool is_big);
-
-/* emit signals */
-void vfs_dir_emit_file_created(vfs::dir dir, const std::filesystem::path& file_name, bool force);
-void vfs_dir_emit_file_deleted(vfs::dir dir, const std::filesystem::path& file_name,
-                               vfs::file_info file);
-void vfs_dir_emit_file_changed(vfs::dir dir, const std::filesystem::path& file_name,
-                               vfs::file_info file, bool force);
-void vfs_dir_emit_thumbnail_loaded(vfs::dir dir, vfs::file_info file);
 void vfs_dir_flush_notify_cache();
-
-bool vfs_dir_add_hidden(const std::filesystem::path& path, const std::filesystem::path& file_name);
 
 /* call function "func" for every VFSDir instances */
 void vfs_dir_foreach(VFSDirForeachFunc func, bool user_data);

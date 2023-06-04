@@ -1070,7 +1070,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
 
             /* Thumbnails are being disabled so ensure the large thumbnails are
              * freed - with up to 256x256 images this is a lot of memory */
-            vfs_dir_unload_thumbnails(list->dir, is_big);
+            list->dir->unload_thumbnails(is_big);
         }
         return;
     }
