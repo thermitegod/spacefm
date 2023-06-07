@@ -1198,8 +1198,7 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& pa
     std::string under_path;
     if (ztd::contains(path.string(), " "))
     {
-        const std::filesystem::path& cleaned = ztd::replace(path.string(), " ", "_");
-        under_path = ztd::strdup(cleaned);
+        under_path = ztd::replace(path.string(), " ", "_");
     }
     else
     {
@@ -2462,7 +2461,7 @@ restore_defaults(HandlerData* hnd, bool all)
         }
 
         // create fake xset
-        const auto set = new xset::XSet(ztd::strdup(handler->setname), xset::name::custom);
+        const auto set = new xset::XSet(handler->setname, xset::name::custom);
         set->menu_label = handler->handler_name;
         set->s = handler->type;
         set->x = handler->ext;

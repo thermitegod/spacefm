@@ -677,7 +677,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 
         if (std::filesystem::exists(icon_file))
         {
-            icon_name = ztd::strdup(icon_file);
+            icon_name = icon_file;
         }
     }
     if (!context)
@@ -1136,7 +1136,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
         xset_t target_next = xset_get(target->next.value());
         target_next->prev = set->name;
     }
-    target->next = ztd::strdup(set->name);
+    target->next = set->name;
     if (target->tool != xset::tool::NOT)
     {
         if (set->tool < xset::tool::custom)
@@ -1316,8 +1316,8 @@ xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
 #if 0
     if (mod && mod[0] && !mod[1] && g_ascii_isalpha(mod[0]))
         mod[0] = g_ascii_toupper(mod[0]);
-    else if (!mod)
-        mod = ztd::strdup("NA");
+    else if (mod.empty())
+        mod = "NA";
 #endif
 
     if (keymod)
@@ -2563,7 +2563,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         {
             std::string title;
             std::string msg = rset->desc.value();
-            char* default_str = nullptr;
+            std::string default_str;
             if (rset->title && rset->lock)
             {
                 title = rset->title.value();
@@ -2574,7 +2574,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             }
             if (rset->lock)
             {
-                default_str = ztd::strdup(rset->z.value());
+                default_str = rset->z.value();
             }
             else
             {

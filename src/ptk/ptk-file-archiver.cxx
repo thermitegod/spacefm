@@ -880,7 +880,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
         else
         {
             // no files selected!
-            first = ztd::strdup("");
+            first = "";
         }
 
         // Replace sub vars  %n %N %o
@@ -906,12 +906,11 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
      * is freed by the task */
 
     // Creating task
-    char* task_name = ztd::strdup("Archive");
+    const std::string task_name = "Archive";
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            file_browser ? GTK_WIDGET(file_browser) : nullptr,
                                            file_browser ? file_browser->task_view : nullptr);
-    std::free(task_name);
 
     /* Setting correct exec reference */
     if (file_browser)
@@ -1153,7 +1152,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         create_parent = xset_get_b(xset::name::arc_def_parent);
         write_access = create_parent && xset_get_b(xset::name::arc_def_write);
 
-        dest = ztd::strdup(dest_dir.string());
+        dest = dest_dir;
     }
 
     // Quoting destination directory (doing this outside of the later

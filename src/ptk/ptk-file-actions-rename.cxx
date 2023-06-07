@@ -1233,8 +1233,6 @@ static void
 on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 {
     (void)item;
-    const char* action;
-    char* btn_label = nullptr;
 
     const bool move = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_move));
     const bool copy = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy));
@@ -1247,11 +1245,13 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
     const bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
 
+    std::string action;
+    std::string btn_label;
     std::string desc;
     if (mset->create_new != ptk::rename_mode::rename)
     {
-        btn_label = ztd::strdup("Create");
-        action = ztd::strdup("Create New");
+        btn_label = "Create";
+        action = "Create New";
         if (new_file)
         {
             desc = "File";
@@ -1280,59 +1280,55 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 
         if (move)
         {
-            btn_label = rename ? ztd::strdup("Rename") : ztd::strdup("Move");
-            action = ztd::strdup("Move");
+            btn_label = rename ? "Rename" : "Move";
+            action = "Move";
         }
         else if (copy)
         {
-            btn_label = ztd::strdup("C_opy");
-            action = ztd::strdup("Copy");
+            btn_label = "C_opy";
+            action = "Copy";
         }
         else if (link)
         {
-            btn_label = ztd::strdup("_Link");
-            action = ztd::strdup("Create Link To");
+            btn_label = "_Link";
+            action = "Create Link To";
         }
         else if (copy_target)
         {
-            btn_label = ztd::strdup("C_opy");
-            action = ztd::strdup("Copy");
+            btn_label = "C_opy";
+            action = "Copy";
             desc = "Link Target";
         }
         else if (link_target)
         {
-            btn_label = ztd::strdup("_Link");
-            action = ztd::strdup("Create Link To");
+            btn_label = "_Link";
+            action = "Create Link To";
             desc = "Target";
         }
     }
 
-    const char* root_msg;
+    std::string root_msg;
     if (as_root)
     {
-        root_msg = ztd::strdup(" As Root");
-    }
-    else
-    {
-        root_msg = ztd::strdup("");
+        root_msg = " As Root";
     }
 
     // Window Icon
-    const char* win_icon;
+    std::string win_icon;
     if (as_root)
     {
-        win_icon = ztd::strdup("gtk-dialog-warning");
+        win_icon = "gtk-dialog-warning";
     }
     else if (mset->create_new != ptk::rename_mode::rename)
     {
-        win_icon = ztd::strdup("gtk-new");
+        win_icon = "gtk-new";
     }
     else
     {
-        win_icon = ztd::strdup("gtk-edit");
+        win_icon = "gtk-edit";
     }
     GdkPixbuf* pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-                                                 win_icon,
+                                                 win_icon.c_str(),
                                                  16,
                                                  GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                                                  nullptr);
@@ -1349,9 +1345,9 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const std::string title = std::format("{} {}{}", action, desc, root_msg);
     gtk_window_set_title(GTK_WINDOW(mset->dlg), title.data());
 
-    if (btn_label)
+    if (!btn_label.empty())
     {
-        gtk_button_set_label(GTK_BUTTON(mset->next), btn_label);
+        gtk_button_set_label(GTK_BUTTON(mset->next), btn_label.c_str());
     }
 
     mset->full_path_same = false;
@@ -2396,7 +2392,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         {
             const auto target_path = std::filesystem::read_symlink(mset->full_path);
 
-            mset->mime_type = ztd::strdup(target_path);
+            mset->mime_type = target_path;
             if (std::filesystem::exists(target_path))
             {
                 type = std::format("Link-> {}", target_path.string());
@@ -2409,8 +2405,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         }
         catch (const std::filesystem::filesystem_error& e)
         {
-            mset->mime_type = ztd::strdup("inode/symlink");
-            type = ztd::strdup("symbolic link ( inode/symlink )");
+            mset->mime_type = "inode/symlink";
+            type = "symbolic link ( inode/symlink )";
         }
     }
     else if (file)
@@ -2418,19 +2414,19 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         vfs::mime_type mime_type = file->mime_type();
         if (mime_type)
         {
-            mset->mime_type = ztd::strdup(mime_type->type().data());
+            mset->mime_type = mime_type->type();
             type = std::format(" {} ( {} )", mime_type->description(), mset->mime_type);
         }
         else
         {
-            mset->mime_type = ztd::strdup("?");
+            mset->mime_type = "?";
             type = mset->mime_type;
         }
     }
     else // create
     {
-        mset->mime_type = ztd::strdup("?");
-        type = ztd::strdup(mset->mime_type);
+        mset->mime_type = "?";
+        type = mset->mime_type;
     }
     mset->label_mime = GTK_LABEL(gtk_label_new(type.data()));
     gtk_label_set_ellipsize(mset->label_mime, PANGO_ELLIPSIZE_MIDDLE);
@@ -3092,7 +3088,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 if (auto_open)
                 {
-                    auto_open->path = ztd::strdup(full_path);
+                    auto_open->path = full_path;
                     auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
                     ptask->complete_notify = auto_open->callback;
                     ptask->user_data = auto_open;
@@ -3160,7 +3156,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 if (auto_open)
                 {
-                    auto_open->path = ztd::strdup(full_path);
+                    auto_open->path = full_path;
                     auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
                     ptask->complete_notify = auto_open->callback;
                     ptask->user_data = auto_open;
@@ -3225,7 +3221,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 if (auto_open)
                 {
-                    auto_open->path = ztd::strdup(full_path);
+                    auto_open->path = full_path;
                     auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
                     ptask->complete_notify = auto_open->callback;
                     ptask->user_data = auto_open;
@@ -3238,7 +3234,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 // copy task
                 const std::string task_name = std::format("Copy{}", root_msg);
                 PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
-                char* over_opt = nullptr;
                 to_path = ztd::shell::quote(full_path.string());
                 if (copy || !mset->is_link)
                 {
@@ -3256,13 +3251,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                     from_path = ztd::shell::quote(real_path.string());
                 }
+
+                std::string over_opt;
                 if (overwrite)
                 {
-                    over_opt = ztd::strdup(" --remove-destination");
-                }
-                if (!over_opt)
-                {
-                    over_opt = ztd::strdup("");
+                    over_opt = " --remove-destination";
                 }
 
                 if (mset->is_dir)
@@ -3275,7 +3268,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     ptask->task->exec_command =
                         std::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
                 }
-                std::free(over_opt);
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;

@@ -333,7 +333,7 @@ insert_complete(GtkEntry* entry)
             count++;
             if (long_prefix.empty())
             {
-                long_prefix = ztd::strdup(file_name);
+                long_prefix = file_name;
             }
             else
             {

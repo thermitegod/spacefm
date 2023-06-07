@@ -1360,7 +1360,6 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     (void)button;
     (void)time;
     xset_t set;
-    char* str;
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     const xset_context_t context = xset_context_new();
@@ -1402,14 +1401,11 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(set, (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
+    std::string str;
     if (vol && vol->is_device_type(vfs::volume_device_type::network) &&
         (ztd::startswith(vol->device_file(), "//") || ztd::contains(vol->device_file(), ":/")))
     {
-        str = ztd::strdup(" dev_menu_mark");
-    }
-    else
-    {
-        str = ztd::strdup("");
+        str = " dev_menu_mark";
     }
 
     std::string menu_elements;

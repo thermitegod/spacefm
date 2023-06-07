@@ -1254,7 +1254,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         if (ufile_path.empty())
         {
             const std::string escaped_markup = Glib::Markup::escape_text(window_title);
-            ufile_path = ztd::strdup(std::format("<b>( {} )</b>", escaped_markup));
+            ufile_path = std::format("<b>( {} )</b>", escaped_markup);
         }
     }
     else if (task->current_file)
@@ -1266,7 +1266,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             // Copy: <src basename>
             const auto name = current_file.filename();
             const std::string escaped_markup = Glib::Markup::escape_text(name.string());
-            ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
+            ufile_path = std::format("<b>{}</b>", escaped_markup);
 
             // From: <src_dir>
             const auto current_parent = current_file.parent_path();
@@ -1297,7 +1297,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         else
         {
             const std::string escaped_markup = Glib::Markup::escape_text(current_file.string());
-            ufile_path = ztd::strdup(std::format("<b>{}</b>", escaped_markup));
+            ufile_path = std::format("<b>{}</b>", escaped_markup);
         }
     }
 
@@ -1512,7 +1512,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     {
         if (task->type != vfs::file_task_type::exec)
         {
-            errs = ztd::strdup("Queued");
+            errs = "Queued";
         }
         else
         {

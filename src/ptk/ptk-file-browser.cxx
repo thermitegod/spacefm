@@ -5150,7 +5150,7 @@ ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
     else if (setname == xset::name::move_loc_last)
     {
         xset_t set2 = xset_get(xset::name::copy_loc_last);
-        move_dest = ztd::strdup(set2->desc.value());
+        move_dest = set2->desc.value();
     }
 
     if ((setname == xset::name::copy_loc || setname == xset::name::copy_loc_last ||
@@ -6214,7 +6214,7 @@ ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
                                            cwd,
                                            GTK_WIDGET(file_browser),
                                            file_browser->task_view);
-    ptask->task->exec_command = ztd::strdup(std::format("{} {} {}", prog, cmd, file_paths));
+    ptask->task->exec_command = std::format("{} {} {}", prog, cmd, file_paths);
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_sync = true;
     ptask->task->exec_show_error = true;

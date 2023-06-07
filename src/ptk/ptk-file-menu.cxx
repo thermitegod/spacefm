@@ -1088,7 +1088,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         std::string plain_type;
         if (mime_type)
         {
-            plain_type = ztd::strdup(mime_type->type().data());
+            plain_type = mime_type->type().data();
         }
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
@@ -2776,10 +2776,10 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
     }
 
     const auto data = new PtkFileMenu;
-    data->cwd = ztd::strdup(cwd);
+    data->cwd = cwd;
     data->browser = browser;
     data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
-    data->file_path = ztd::strdup(file_path);
+    data->file_path = file_path;
     if (file)
     {
         data->file = vfs_file_info_ref(file);

@@ -441,7 +441,7 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
     data->file_list = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
     data->dlg = dlg;
 
-    data->dir_path = ztd::strdup(dir_path.string());
+    data->dir_path = dir_path;
 
     gtk_entry_set_text(GTK_ENTRY(location), dir_path.c_str());
 

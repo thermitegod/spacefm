@@ -5321,7 +5321,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
     {
         case 1:
         case 2:
-            // left or middle click
+        { // left or middle click
             // get selected task
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
             // ztd::logger::info("x = {}  y = {}", event->x, event->y);
@@ -5376,7 +5376,9 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             on_task_stop(nullptr, view, set, ptask);
             return true;
             break;
+        }
         case 3:
+        {
             // get selected task
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
             is_tasks = gtk_tree_model_get_iter_first(model, &it);
@@ -5446,12 +5448,11 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             set = xset_get(xset::name::task_all);
             set->disable = !is_tasks;
 
-            const char* showout;
-            showout = ztd::strdup("");
+            std::string showout;
             if (ptask && ptask->pop_handler)
             {
                 xset_set_cb(xset::name::task_showout, (GFunc)show_task_dialog, view);
-                showout = ztd::strdup(" task_showout");
+                showout = " task_showout";
             }
 
             main_task_prepare_menu(main_window, popup, accel_group);
@@ -5469,6 +5470,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             // right click
             break;
+        }
         default:
             break;
     }
@@ -5671,7 +5673,7 @@ main_task_view_update_task(PtkFileTask* ptask)
 
         // status
         std::string status;
-        char* status3;
+        std::string status_final;
         if (ptask->task->type != vfs::file_task_type::exec)
         {
             if (!ptask->err_count)
@@ -5699,17 +5701,15 @@ main_task_view_update_task(PtkFileTask* ptask)
 
         if (ptask->task->state_pause == vfs::file_task_state::pause)
         {
-            const std::string str = std::format("paused {}", status);
-            status3 = ztd::strdup(str);
+            status_final = std::format("paused {}", status);
         }
         else if (ptask->task->state_pause == vfs::file_task_state::queue)
         {
-            const std::string str = std::format("queued {}", status);
-            status3 = ztd::strdup(str);
+            status_final = std::format("queued {}", status);
         }
         else
         {
-            status3 = ztd::strdup(status);
+            status_final = status;
         }
 
         // update icon if queue state changed
@@ -5788,7 +5788,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                    main_window::column::icon,
                                    pixbuf,
                                    main_window::column::status,
-                                   status3,
+                                   status_final.data(),
                                    main_window::column::count,
                                    ptask->dsp_file_count.data(),
                                    main_window::column::path,
@@ -5816,7 +5816,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
                                    main_window::column::status,
-                                   status3,
+                                   status_final.data(),
                                    main_window::column::count,
                                    ptask->dsp_file_count.data(),
                                    main_window::column::path,
@@ -5847,7 +5847,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                main_window::column::icon,
                                pixbuf,
                                main_window::column::status,
-                               status3,
+                               status_final.data(),
                                main_window::column::progress,
                                percent,
                                main_window::column::elapsed,
@@ -5859,7 +5859,7 @@ main_task_view_update_task(PtkFileTask* ptask)
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
                                main_window::column::status,
-                               status3,
+                               status_final.data(),
                                main_window::column::progress,
                                percent,
                                main_window::column::elapsed,
@@ -5868,7 +5868,6 @@ main_task_view_update_task(PtkFileTask* ptask)
         }
 
         // Clearing up
-        std::free(status3);
         if (pixbuf)
         {
             g_object_unref(pixbuf);
