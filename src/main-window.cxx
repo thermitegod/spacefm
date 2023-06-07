@@ -44,6 +44,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "ptk/ptk-file-browser.hxx"
 #include "types.hxx"
 
 #include "ptk/ptk-location-view.hxx"
@@ -2082,12 +2083,12 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
     return true;
 }
 
-char*
+const std::optional<std::filesystem::path>
 main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
 {
     if (!file_browser)
     {
-        return nullptr;
+        return std::nullopt;
     }
     i32 page_x;
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
@@ -2113,19 +2114,19 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
 
     if (page_x > -1 && page_x < pages)
     {
-        return ztd::strdup(ptk_file_browser_get_cwd(PTK_FILE_BROWSER_REINTERPRET(
-            gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x))));
+        return ptk_file_browser_get_cwd(PTK_FILE_BROWSER_REINTERPRET(
+            gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x)));
     }
 
-    return nullptr;
+    return std::nullopt;
 }
 
-char*
+const std::optional<std::filesystem::path>
 main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 {
     if (!file_browser)
     {
-        return nullptr;
+        return std::nullopt;
     }
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     panel_t panel_x = file_browser->mypanel;
@@ -2142,7 +2143,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
                 }
                 if (panel_x == file_browser->mypanel)
                 {
-                    return nullptr;
+                    return std::nullopt;
                 }
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
@@ -2156,7 +2157,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
                 }
                 if (panel_x == file_browser->mypanel)
                 {
-                    return nullptr;
+                    return std::nullopt;
                 }
             } while (!gtk_widget_get_visible(main_window->panel[panel_x - 1]));
             break;
@@ -2164,15 +2165,15 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
             panel_x = panel_num;
             if (!gtk_widget_get_visible(main_window->panel[panel_x - 1]))
             {
-                return nullptr;
+                return std::nullopt;
             }
             break;
     }
 
     GtkWidget* notebook = main_window->panel[panel_x - 1];
     const i32 page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-    return ztd::strdup(ptk_file_browser_get_cwd(
-        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x))));
+    return ptk_file_browser_get_cwd(
+        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x)));
 }
 
 void

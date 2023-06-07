@@ -128,8 +128,10 @@ void main_window_close_all_invalid_tabs();
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
 const std::string main_write_exports(vfs::file_task vtask, const std::string_view value);
 void on_reorder(GtkWidget* item, GtkWidget* parent);
-char* main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num);
-char* main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num);
+const std::optional<std::filesystem::path> main_window_get_tab_cwd(PtkFileBrowser* file_browser,
+                                                                   tab_t tab_num);
+const std::optional<std::filesystem::path> main_window_get_panel_cwd(PtkFileBrowser* file_browser,
+                                                                     panel_t panel_num);
 const std::array<i64, 3> main_window_get_counts(PtkFileBrowser* file_browser);
 bool main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel);
 void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
