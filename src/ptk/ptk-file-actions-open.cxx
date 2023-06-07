@@ -14,6 +14,7 @@
  */
 
 #include <magic_enum.hpp>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -384,7 +385,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
             /* Find app to open this file and place copy in alloc_desktop.
              * This string is freed when hash table is destroyed. */
-            std::string alloc_desktop;
+            std::optional<std::string> alloc_desktop = std::nullopt;
 
             vfs::mime_type mime_type = file->mime_type();
 
@@ -414,7 +415,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             /* The file itself is a desktop entry file. */
             /* was: if(ztd::endswith(file->name(), ".desktop"))
              */
-            if (alloc_desktop.empty())
+            if (!alloc_desktop)
             {
                 if (file->flags() & vfs::file_info_flags::desktop_entry &&
                     (app_settings.get_click_executes() || xforce))
@@ -427,14 +428,14 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                 }
             }
 
-            if (alloc_desktop.empty() && mime_type_is_text_file(full_path, mime_type->type()))
+            if (!alloc_desktop && mime_type_is_text_file(full_path, mime_type->type()))
             {
                 /* FIXME: special handling for plain text file */
                 mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
                 alloc_desktop = mime_type->default_action();
             }
 
-            if (alloc_desktop.empty() && file->is_symlink())
+            if (!alloc_desktop && file->is_symlink())
             {
                 // broken link?
                 try
@@ -459,19 +460,24 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                     ztd::logger::warn("{}", e.what());
                 }
             }
-            if (alloc_desktop.empty())
+            if (!alloc_desktop)
             {
                 /* Let the user choose an application */
                 toplevel =
                     file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
-                alloc_desktop = ztd::null_check(ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
-                                                                             mime_type,
-                                                                             true,
-                                                                             true,
-                                                                             true,
-                                                                             !file_browser));
+                const char* ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
+                                                                   mime_type,
+                                                                   true,
+                                                                   true,
+                                                                   true,
+                                                                   !file_browser);
+
+                if (ptk_app != nullptr)
+                {
+                    alloc_desktop = ptk_app;
+                }
             }
-            if (alloc_desktop.empty())
+            if (!alloc_desktop)
             {
                 continue;
             }
@@ -485,17 +491,18 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             }
             else
             { // get existing file list for this app
-                files_to_open = (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.data());
+                files_to_open =
+                    (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.value().data());
             }
 
-            if (!ztd::same(alloc_desktop, full_path.string()))
+            if (!ztd::same(alloc_desktop.value(), full_path.string()))
             { /* it is not a desktop file itself - add file to list.
                * Otherwise use full_path as hash table key, which will
                * be freed when hash table is destroyed. */
                 files_to_open = g_list_append(files_to_open, ztd::strdup(full_path));
             }
             // update file list in hash table
-            g_hash_table_replace(file_list_hash, ztd::strdup(alloc_desktop), files_to_open);
+            g_hash_table_replace(file_list_hash, ztd::strdup(alloc_desktop.value()), files_to_open);
         }
     }
 

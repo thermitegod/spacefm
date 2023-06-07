@@ -109,8 +109,9 @@ open_file(const std::filesystem::path& path)
     vfs::file_info file = vfs_file_info_new(path);
     vfs::mime_type mime_type = file->mime_type();
 
-    std::string app_name = mime_type->default_action();
-    if (app_name.empty())
+    std::string app_name;
+    const auto check_app_name = mime_type->default_action();
+    if (!check_app_name)
     {
         app_name = ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (app_name.empty())
@@ -118,6 +119,10 @@ open_file(const std::filesystem::path& path)
             ztd::logger::error("no application to open file: {}", path.string());
             return;
         }
+    }
+    else
+    {
+        app_name = check_app_name.value();
     }
 
     const vfs::desktop desktop = vfs_get_desktop(app_name);

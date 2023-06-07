@@ -265,9 +265,10 @@ mime_type_get_actions(const std::string_view mime_type)
     remove_actions(mime_type, actions);
 
     /* ensure default app is in the list */
-    const std::string default_app = ztd::null_check(mime_type_get_default_action(mime_type));
-    if (!default_app.empty())
+    const auto check_default_app = mime_type_get_default_action(mime_type);
+    if (check_default_app)
     {
+        const auto& default_app = check_default_app.value();
         if (!ztd::contains(actions, default_app))
         {
             // default app is not in the list, add it!
@@ -583,7 +584,7 @@ mime_type_locate_desktop_file(const std::string_view desktop_id)
     return std::nullopt;
 }
 
-static char*
+static const std::optional<std::string>
 get_default_action(const std::filesystem::path& dir, const std::string_view type)
 {
     // ztd::logger::info("get_default_action( {}, {} )", dir, type);
@@ -608,7 +609,7 @@ get_default_action(const std::filesystem::path& dir, const std::string_view type
         }
         catch (const Glib::FileError& e)
         {
-            return nullptr;
+            return std::nullopt;
         }
 
         for (const std::string_view group : groups)
@@ -638,7 +639,7 @@ get_default_action(const std::filesystem::path& dir, const std::string_view type
                 if (mime_type_locate_desktop_file(app.data()))
                 {
                     // ztd::logger::info("            EXISTS");
-                    return ztd::strdup(app);
+                    return app.data();
                 }
             }
 
@@ -653,7 +654,7 @@ get_default_action(const std::filesystem::path& dir, const std::string_view type
             break; // no defaults.list in ~/.config
         }
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 /*
@@ -666,14 +667,13 @@ get_default_action(const std::filesystem::path& dir, const std::string_view type
  *
  * The old defaults.list is also checked.
  */
-const char*
+const std::optional<std::string>
 mime_type_get_default_action(const std::string_view mime_type)
 {
     /* FIXME: need to check parent types if default action of current type is not set. */
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    const char* home_default_action =
-        get_default_action(vfs::user_dirs->config_dir(), mime_type.data());
+    auto home_default_action = get_default_action(vfs::user_dirs->config_dir(), mime_type.data());
     if (home_default_action)
     {
         return home_default_action;
@@ -681,7 +681,7 @@ mime_type_get_default_action(const std::string_view mime_type)
 
     // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
     const auto data_app_dir = vfs::user_dirs->data_dir() / "applications";
-    const char* data_default_action = get_default_action(data_app_dir, mime_type.data());
+    auto data_default_action = get_default_action(data_app_dir, mime_type.data());
     if (data_default_action)
     {
         return data_default_action;
@@ -691,14 +691,14 @@ mime_type_get_default_action(const std::string_view mime_type)
     for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const auto sys_app_dir = std::filesystem::path() / sys_dir / "applications";
-        const char* sys_default_action = get_default_action(sys_app_dir, mime_type.data());
+        auto sys_default_action = get_default_action(sys_app_dir, mime_type.data());
         if (sys_default_action)
         {
             return sys_default_action;
         }
     }
 
-    return nullptr;
+    return std::nullopt;
 }
 
 /*

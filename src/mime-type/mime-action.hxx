@@ -60,7 +60,7 @@ const std::string mime_type_add_action(const std::string_view type,
  *
  * The old defaults.list is also checked.
  */
-const char* mime_type_get_default_action(const std::string_view type);
+const std::optional<std::string> mime_type_get_default_action(const std::string_view type);
 
 /*
  * Set applications used to open or never used to open this mime-type

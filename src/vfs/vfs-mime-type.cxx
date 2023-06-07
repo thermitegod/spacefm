@@ -340,17 +340,17 @@ VFSMimeType::actions() const noexcept
     return mime_type_get_actions(this->type_);
 }
 
-const std::string
+const std::optional<std::string>
 VFSMimeType::default_action() const noexcept
 {
-    const char* def = mime_type_get_default_action(this->type_);
+    auto def = mime_type_get_default_action(this->type_);
 
     /* FIXME:
      * If default app is not set, choose one from all availble actions.
      * Is there any better way to do this?
      * Should we put this fallback handling here, or at API of higher level?
      */
-    if (def != nullptr)
+    if (def)
     {
         return def;
     }
@@ -360,7 +360,7 @@ VFSMimeType::default_action() const noexcept
     {
         return actions.at(0).data();
     }
-    return "";
+    return std::nullopt;
 }
 
 /*

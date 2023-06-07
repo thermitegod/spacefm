@@ -53,7 +53,7 @@ struct VFSMimeType
     const std::vector<std::string> actions() const noexcept;
 
     // returned string should be freed with g_strfreev when not needed.
-    const std::string default_action() const noexcept;
+    const std::optional<std::string> default_action() const noexcept;
 
     void set_default_action(const std::string_view desktop_id) noexcept;
 
