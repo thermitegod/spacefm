@@ -34,6 +34,8 @@
 
 #include <filesystem>
 
+#include <optional>
+
 #include <array>
 #include <vector>
 
@@ -301,7 +303,12 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
 
     if (is_desktop)
     {
-        const Glib::ustring filename = mime_type_locate_desktop_file(desktop_id);
+        const auto check_filename = mime_type_locate_desktop_file(desktop_id);
+        if (!check_filename)
+        {
+            return false;
+        }
+        const auto& filename = check_filename.value();
 
         const auto kf = Glib::KeyFile::create();
         try
@@ -365,7 +372,12 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
         }
         else /* Then, try to match by "Exec" and "Name" keys */
         {
-            const Glib::ustring filename = mime_type_locate_desktop_file(action);
+            const auto check_filename = mime_type_locate_desktop_file(action);
+            if (!check_filename)
+            {
+                return false;
+            }
+            const auto& filename = check_filename.value();
 
             const auto kf = Glib::KeyFile::create();
             try
@@ -415,7 +427,12 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
 
     if (ztd::endswith(desktop_id, desktop_ext))
     {
-        const Glib::ustring filename = mime_type_locate_desktop_file(desktop_id);
+        const auto check_filename = mime_type_locate_desktop_file(desktop_id);
+        if (!check_filename)
+        {
+            return "";
+        }
+        const auto& filename = check_filename.value();
 
         const auto kf = Glib::KeyFile::create();
         try
@@ -507,13 +524,13 @@ mime_type_add_action(const std::string_view type, const std::string_view desktop
     return make_custom_desktop_file(desktop_id, type);
 }
 
-static char*
-_locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id)
+static const std::optional<std::filesystem::path>
+locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id)
 {
     const auto desktop_path = dir / "applications" / desktop_id;
     if (std::filesystem::is_regular_file(desktop_path))
     {
-        return ztd::strdup(desktop_path);
+        return desktop_path;
     }
 
     // ztd::logger::info("desktop_id={}", desktop_id);
@@ -530,40 +547,40 @@ _locate_desktop_file(const std::filesystem::path& dir, const std::string_view de
         // ztd::logger::info("new_desktop_id={}", new_desktop_id);
         if (std::filesystem::is_regular_file(new_desktop_path))
         {
-            return ztd::strdup(new_desktop_path);
+            return new_desktop_path;
         }
     }
 
-    return nullptr;
+    return std::nullopt;
 }
 
-const char*
+const std::optional<std::filesystem::path>
 mime_type_locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id)
 {
-    return _locate_desktop_file(dir, desktop_id);
+    return locate_desktop_file(dir, desktop_id);
 }
 
-const char*
+const std::optional<std::filesystem::path>
 mime_type_locate_desktop_file(const std::string_view desktop_id)
 {
     const auto data_dir = vfs::user_dirs->data_dir();
 
-    const char* data_desktop = _locate_desktop_file(data_dir, desktop_id);
+    const auto data_desktop = locate_desktop_file(data_dir, desktop_id);
     if (data_desktop)
     {
-        return data_desktop;
+        return data_desktop.value();
     }
 
     for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const char* sys_desktop = _locate_desktop_file(sys_dir, desktop_id);
+        const auto sys_desktop = locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)
         {
-            return sys_desktop;
+            return sys_desktop.value();
         }
     }
 
-    return nullptr;
+    return std::nullopt;
 }
 
 static char*

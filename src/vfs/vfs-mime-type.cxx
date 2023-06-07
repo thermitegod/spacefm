@@ -33,6 +33,8 @@
 #include <mutex>
 #include <chrono>
 
+#include <optional>
+
 #include <memory>
 
 #include <glibmm.h>
@@ -457,13 +459,13 @@ vfs_mime_type_get_icon_size_small()
     return small_icon_size;
 }
 
-const char*
+const std::optional<std::filesystem::path>
 vfs_mime_type_locate_desktop_file(const std::string_view desktop_id)
 {
     return mime_type_locate_desktop_file(desktop_id);
 }
 
-const char*
+const std::optional<std::filesystem::path>
 vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
                                   const std::string_view desktop_id)
 {

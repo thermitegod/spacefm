@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <optional>
+
 namespace mime_type
 {
     enum class action
@@ -74,6 +76,7 @@ void mime_type_update_association(const std::string_view type, const std::string
                                   mime_type::action action);
 
 /* Locate the file path of desktop file by desktop_id */
-const char* mime_type_locate_desktop_file(const std::string_view desktop_id);
-const char* mime_type_locate_desktop_file(const std::filesystem::path& dir,
-                                          const std::string_view desktop_id);
+const std::optional<std::filesystem::path>
+mime_type_locate_desktop_file(const std::string_view desktop_id);
+const std::optional<std::filesystem::path>
+mime_type_locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id);
