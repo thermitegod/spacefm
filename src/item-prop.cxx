@@ -100,158 +100,82 @@ namespace item_prop::context
 
 struct ContextData
 {
-    ContextData();
+    ContextData() = default;
     ~ContextData();
 
-    GtkWidget* dlg;
-    GtkWidget* parent;
-    GtkWidget* notebook;
-    xset_context_t context;
-    xset_t set;
-    char* temp_cmd_line;
+    GtkWidget* dlg{nullptr};
+    GtkWidget* parent{nullptr};
+    GtkWidget* notebook{nullptr};
+    xset_context_t context{nullptr};
+    xset_t set{nullptr};
+    std::string temp_cmd_line{};
     ztd::stat script_stat;
-    bool script_stat_valid;
-    bool reset_command;
+    bool script_stat_valid{false};
+    bool reset_command{false};
 
     // Menu Item Page
-    GtkWidget* item_type;
-    GtkWidget* item_name;
-    GtkWidget* item_key;
-    GtkWidget* item_icon;
-    GtkWidget* target_vbox;
-    GtkWidget* target_label;
-    GtkWidget* item_target;
-    GtkWidget* item_choose;
-    GtkWidget* item_browse;
-    GtkWidget* icon_choose_btn;
+    GtkWidget* item_type{nullptr};
+    GtkWidget* item_name{nullptr};
+    GtkWidget* item_key{nullptr};
+    GtkWidget* item_icon{nullptr};
+    GtkWidget* target_vbox{nullptr};
+    GtkWidget* target_label{nullptr};
+    GtkWidget* item_target{nullptr};
+    GtkWidget* item_choose{nullptr};
+    GtkWidget* item_browse{nullptr};
+    GtkWidget* icon_choose_btn{nullptr};
 
     // Context Page
-    GtkWidget* vbox_context;
-    GtkWidget* view;
-    GtkButton* btn_remove;
-    GtkButton* btn_add;
-    GtkButton* btn_apply;
-    GtkButton* btn_ok;
+    GtkWidget* vbox_context{nullptr};
+    GtkWidget* view{nullptr};
+    GtkButton* btn_remove{nullptr};
+    GtkButton* btn_add{nullptr};
+    GtkButton* btn_apply{nullptr};
+    GtkButton* btn_ok{nullptr};
 
-    GtkWidget* box_sub;
-    GtkWidget* box_comp;
-    GtkWidget* box_value;
-    GtkWidget* box_match;
-    GtkWidget* box_action;
-    GtkLabel* current_value;
-    GtkLabel* test;
+    GtkWidget* box_sub{nullptr};
+    GtkWidget* box_comp{nullptr};
+    GtkWidget* box_value{nullptr};
+    GtkWidget* box_match{nullptr};
+    GtkWidget* box_action{nullptr};
+    GtkLabel* current_value{nullptr};
+    GtkLabel* test{nullptr};
 
-    GtkWidget* hbox_match;
-    GtkFrame* frame;
-    GtkWidget* ignore_context;
-    GtkWidget* hbox_opener;
-    GtkWidget* opener;
+    GtkWidget* hbox_match{nullptr};
+    GtkFrame* frame{nullptr};
+    GtkWidget* ignore_context{nullptr};
+    GtkWidget* hbox_opener{nullptr};
+    GtkWidget* opener{nullptr};
 
     // Command Page
-    GtkWidget* cmd_opt_line;
-    GtkWidget* cmd_opt_script;
-    GtkWidget* cmd_edit;
-    GtkWidget* cmd_edit_root;
-    GtkWidget* cmd_line_label;
-    GtkWidget* cmd_scroll_script;
-    GtkWidget* cmd_script;
-    GtkWidget* cmd_opt_normal;
-    GtkWidget* cmd_opt_checkbox;
-    GtkWidget* cmd_opt_confirm;
-    GtkWidget* cmd_opt_input;
-    GtkWidget* cmd_vbox_msg;
-    GtkWidget* cmd_scroll_msg;
-    GtkWidget* cmd_msg;
-    GtkWidget* opt_terminal;
-    GtkWidget* opt_keep_term;
-    GtkWidget* cmd_user;
-    GtkWidget* opt_task;
-    GtkWidget* opt_task_pop;
-    GtkWidget* opt_task_err;
-    GtkWidget* opt_task_out;
-    GtkWidget* opt_scroll;
-    GtkWidget* opt_hbox_task;
-    GtkWidget* open_browser;
+    GtkWidget* cmd_opt_line{nullptr};
+    GtkWidget* cmd_opt_script{nullptr};
+    GtkWidget* cmd_edit{nullptr};
+    GtkWidget* cmd_edit_root{nullptr};
+    GtkWidget* cmd_line_label{nullptr};
+    GtkWidget* cmd_scroll_script{nullptr};
+    GtkWidget* cmd_script{nullptr};
+    GtkWidget* cmd_opt_normal{nullptr};
+    GtkWidget* cmd_opt_checkbox{nullptr};
+    GtkWidget* cmd_opt_confirm{nullptr};
+    GtkWidget* cmd_opt_input{nullptr};
+    GtkWidget* cmd_vbox_msg{nullptr};
+    GtkWidget* cmd_scroll_msg{nullptr};
+    GtkWidget* cmd_msg{nullptr};
+    GtkWidget* opt_terminal{nullptr};
+    GtkWidget* opt_keep_term{nullptr};
+    GtkWidget* cmd_user{nullptr};
+    GtkWidget* opt_task{nullptr};
+    GtkWidget* opt_task_pop{nullptr};
+    GtkWidget* opt_task_err{nullptr};
+    GtkWidget* opt_task_out{nullptr};
+    GtkWidget* opt_scroll{nullptr};
+    GtkWidget* opt_hbox_task{nullptr};
+    GtkWidget* open_browser{nullptr};
 };
-
-ContextData::ContextData()
-{
-    this->dlg = nullptr;
-    this->parent = nullptr;
-    this->notebook = nullptr;
-    this->context = nullptr;
-    this->set = nullptr;
-    this->temp_cmd_line = nullptr;
-    this->script_stat_valid = false;
-    this->reset_command = false;
-
-    // Menu Item Page
-    this->item_type = nullptr;
-    this->item_name = nullptr;
-    this->item_key = nullptr;
-    this->item_icon = nullptr;
-    this->target_vbox = nullptr;
-    this->target_label = nullptr;
-    this->item_target = nullptr;
-    this->item_choose = nullptr;
-    this->item_browse = nullptr;
-    this->icon_choose_btn = nullptr;
-
-    // Context Page
-    this->vbox_context = nullptr;
-    this->view = nullptr;
-    this->btn_remove = nullptr;
-    this->btn_add = nullptr;
-    this->btn_apply = nullptr;
-    this->btn_ok = nullptr;
-
-    this->box_sub = nullptr;
-    this->box_comp = nullptr;
-    this->box_value = nullptr;
-    this->box_match = nullptr;
-    this->box_action = nullptr;
-    this->current_value = nullptr;
-    this->test = nullptr;
-
-    this->hbox_match = nullptr;
-    this->frame = nullptr;
-    this->ignore_context = nullptr;
-    this->hbox_opener = nullptr;
-    this->opener = nullptr;
-
-    // Command Page
-    this->cmd_opt_line = nullptr;
-    this->cmd_opt_script = nullptr;
-    this->cmd_edit = nullptr;
-    this->cmd_edit_root = nullptr;
-    this->cmd_line_label = nullptr;
-    this->cmd_scroll_script = nullptr;
-    this->cmd_script = nullptr;
-    this->cmd_opt_normal = nullptr;
-    this->cmd_opt_checkbox = nullptr;
-    this->cmd_opt_confirm = nullptr;
-    this->cmd_opt_input = nullptr;
-    this->cmd_vbox_msg = nullptr;
-    this->cmd_scroll_msg = nullptr;
-    this->cmd_msg = nullptr;
-    this->opt_terminal = nullptr;
-    this->opt_keep_term = nullptr;
-    this->cmd_user = nullptr;
-    this->opt_task = nullptr;
-    this->opt_task_pop = nullptr;
-    this->opt_task_err = nullptr;
-    this->opt_task_out = nullptr;
-    this->opt_scroll = nullptr;
-    this->opt_hbox_task = nullptr;
-    this->open_browser = nullptr;
-}
 
 ContextData::~ContextData()
 {
-    if (this->temp_cmd_line)
-    {
-        std::free(this->temp_cmd_line);
-    }
     gtk_widget_destroy(this->dlg);
 }
 
@@ -732,25 +656,23 @@ on_context_action_changed(GtkComboBox* box, ContextData* ctxt)
     enable_context(ctxt);
 }
 
-static char*
+static const std::string
 context_display(i32 sub, i32 comp, const char* value)
 {
-    std::string disp;
     if (value[0] == '\0' || value[0] == ' ' || ztd::endswith(value, " "))
     {
-        disp = std::format("{} {} \"{}\"",
+        return std::format("{} {} \"{}\"",
                            context_subs.at(sub),
                            context_comparisons.at(item_prop::context::comparison(comp)),
                            value);
     }
     else
     {
-        disp = std::format("{} {} {}",
+        return std::format("{} {} {}",
                            context_subs.at(sub),
                            context_comparisons.at(item_prop::context::comparison(comp)),
                            value);
     }
-    return ztd::strdup(disp);
 }
 
 static void
@@ -782,11 +704,11 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
             }
         }
         char* value = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(ctxt->box_value));
-        char* disp = context_display(sub, comp, value);
+        const std::string disp = context_display(sub, comp, value);
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
                            item_prop::context::column::disp,
-                           disp,
+                           disp.c_str(),
                            item_prop::context::column::sub,
                            sub,
                            item_prop::context::column::comp,
@@ -794,7 +716,6 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
                            item_prop::context::column::value,
                            value,
                            -1);
-        std::free(disp);
         std::free(value);
         gtk_widget_set_sensitive(GTK_WIDGET(ctxt->btn_ok), true);
         if (widget == GTK_WIDGET(ctxt->btn_add))
@@ -1061,7 +982,7 @@ load_text_view(GtkTextView* view, const std::string_view line)
     gtk_text_buffer_set_text(buf, text.data(), -1);
 }
 
-char*
+const std::string
 get_text_view(GtkTextView* view)
 {
     GtkTextBuffer* buf = gtk_text_view_get_buffer(view);
@@ -1074,11 +995,10 @@ get_text_view(GtkTextView* view)
         std::free(text);
         return nullptr;
     }
-    std::string text2 = text;
-    text2 = ztd::replace(text2, "\\n", "\n");
-    text2 = ztd::replace(text2, "\\t", "\t");
-
-    return ztd::strdup(text2);
+    std::string text_view = text;
+    text_view = ztd::replace(text_view, "\\n", "\n");
+    text_view = ztd::replace(text_view, "\\t", "\t");
+    return text_view;
 }
 
 static void
@@ -1197,13 +1117,12 @@ on_script_toggled(GtkWidget* item, ContextData* ctxt)
         save_command_script(ctxt, true);
         gtk_widget_show(ctxt->cmd_line_label);
         gtk_widget_show(ctxt->cmd_edit_root);
-        load_text_view(GTK_TEXT_VIEW(ctxt->cmd_script), ctxt->temp_cmd_line);
+        load_text_view(GTK_TEXT_VIEW(ctxt->cmd_script), ctxt->temp_cmd_line.c_str());
     }
     else
     {
         // set to script
         gtk_widget_hide(ctxt->cmd_line_label);
-        std::free(ctxt->temp_cmd_line);
         ctxt->temp_cmd_line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
         load_command_script(ctxt, ctxt->set);
     }
@@ -1671,7 +1590,7 @@ replace_item_props(ContextData* ctxt)
         }
         else
         {
-            if (ctxt->temp_cmd_line)
+            if (!ctxt->temp_cmd_line.empty())
             {
                 rset->line = ctxt->temp_cmd_line;
             }
@@ -2262,16 +2181,15 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     // set rules
     i32 sub, comp;
     char* value;
-    char* disp;
     GtkTreeIter it;
     while (get_rule_next(&elements, &sub, &comp, &value))
     {
-        disp = context_display(sub, comp, value);
+        const std::string disp = context_display(sub, comp, value);
         gtk_list_store_append(GTK_LIST_STORE(list), &it);
         gtk_list_store_set(GTK_LIST_STORE(list),
                            &it,
                            item_prop::context::column::disp,
-                           disp,
+                           disp.c_str(),
                            item_prop::context::column::sub,
                            sub,
                            item_prop::context::column::comp,
@@ -2279,7 +2197,6 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
                            item_prop::context::column::value,
                            value,
                            -1);
-        std::free(disp);
         if (value)
         {
             std::free(value);
@@ -2583,7 +2500,10 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         gtk_widget_set_sensitive(ctxt->item_type, false);
     }
 
-    ctxt->temp_cmd_line = !set->lock ? ztd::strdup(rset->line.value()) : nullptr;
+    if (!set->lock)
+    {
+        ctxt->temp_cmd_line = rset->line.value();
+    }
     if (set->lock || rset->menu_style == xset::menu::submenu ||
         rset->menu_style == xset::menu::sep || set->tool > xset::tool::custom)
     {
