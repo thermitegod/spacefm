@@ -63,13 +63,20 @@ struct VFSFileMonitor
     void remove_user() noexcept;
     bool has_users() const noexcept;
 
-    std::filesystem::path path{};
+    const std::filesystem::path& path() const noexcept;
+    i32 wd() const noexcept;
 
-    // TODO private
-    i32 wd{0};
-    std::vector<vfs::file_monitor_callback_entry> callbacks{};
+    void add_callback(vfs::file_monitor_callback callback, void* user_data) noexcept;
+    void remove_callback(vfs::file_monitor_callback callback, void* user_data) noexcept;
+
+    const std::vector<vfs::file_monitor_callback_entry> callbacks() const noexcept;
 
   private:
+    std::filesystem::path path_{};
+    i32 wd_{0};
+    std::vector<vfs::file_monitor_callback_entry> callbacks_{};
+
+    // user ref count
     i32 user_count{1};
 };
 

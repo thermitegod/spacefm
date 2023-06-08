@@ -47,8 +47,8 @@
 // #define VFS_FILE_MONITOR_DEBUG
 
 // clang-format off
-inline constexpr u64 EVENT_SIZE = (sizeof(struct inotify_event));
-inline constexpr u64 BUF_LEN    = (1024 * (EVENT_SIZE + 16));
+inline constexpr u32 EVENT_SIZE = (sizeof(struct inotify_event));
+inline constexpr u32 BUF_LEN    = (1024 * (EVENT_SIZE + 16));
 // clang-format on
 
 static std::map<std::filesystem::path, vfs::file_monitor> monitor_map;
@@ -63,35 +63,47 @@ struct VFSFileMonitorCallbackEntry
 {
     VFSFileMonitorCallbackEntry() = delete;
     ~VFSFileMonitorCallbackEntry() = default;
-    // ~VFSFileMonitorCallbackEntry() { ztd::logger::info("VFSFileMonitorCallbackEntry Destructor");
-    // };
+    // ~VFSFileMonitorCallbackEntry(){ztd::logger::info("VFSFileMonitorCallbackEntry Destructor");};
 
     VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback, void* user_data);
 
-    vfs::file_monitor_callback callback{nullptr};
-    void* user_data{nullptr};
+    vfs::file_monitor_callback callback() const noexcept;
+    void* user_data() const noexcept;
+
+  private:
+    vfs::file_monitor_callback callback_{nullptr};
+    void* user_data_{nullptr};
 };
 
 VFSFileMonitorCallbackEntry::VFSFileMonitorCallbackEntry(vfs::file_monitor_callback callback,
                                                          void* user_data)
+    : callback_(callback), user_data_(user_data)
 {
     // ztd::logger::info("VFSFileMonitorCallbackEntry Constructor");
+}
 
-    this->callback = callback;
-    this->user_data = user_data;
+vfs::file_monitor_callback
+VFSFileMonitorCallbackEntry::callback() const noexcept
+{
+    return this->callback_;
+}
+
+void*
+VFSFileMonitorCallbackEntry::user_data() const noexcept
+{
+    return this->user_data_;
 }
 
 VFSFileMonitor::VFSFileMonitor(const std::filesystem::path& real_path, i32 wd)
+    : path_(real_path), wd_(wd)
 {
     // ztd::logger::info("VFSFileMonitor Constructor {}", real_path);
-    this->path = real_path;
-    this->wd = wd;
 }
 
 VFSFileMonitor::~VFSFileMonitor()
 {
     // ztd::logger::info("VFSFileMonitor Destructor {}", this->wd);
-    inotify_rm_watch(inotify_fd, this->wd);
+    inotify_rm_watch(inotify_fd, this->wd_);
 }
 
 void
@@ -110,6 +122,46 @@ bool
 VFSFileMonitor::has_users() const noexcept
 {
     return (this->user_count != 0);
+}
+
+const std::filesystem::path&
+VFSFileMonitor::path() const noexcept
+{
+    return this->path_;
+}
+
+i32
+VFSFileMonitor::wd() const noexcept
+{
+    return this->wd_;
+}
+
+void
+VFSFileMonitor::add_callback(vfs::file_monitor_callback callback, void* user_data) noexcept
+{
+    const auto cb_ent = std::make_shared<VFSFileMonitorCallbackEntry>(callback, user_data);
+
+    this->callbacks_.emplace_back(cb_ent);
+}
+
+void
+VFSFileMonitor::remove_callback(vfs::file_monitor_callback callback, void* user_data) noexcept
+{
+    for (const auto& installed_callback : this->callbacks_)
+    {
+        if (installed_callback->callback() == callback &&
+            installed_callback->user_data() == user_data)
+        {
+            ztd::remove(this->callbacks_, installed_callback);
+            return;
+        }
+    }
+}
+
+const std::vector<vfs::file_monitor_callback_entry>
+VFSFileMonitor::callbacks() const noexcept
+{
+    return this->callbacks_;
 }
 
 static bool
@@ -169,7 +221,7 @@ vfs_file_monitor_add(const std::filesystem::path& path, vfs::file_monitor_callba
                      void* user_data)
 {
     // inotify does not follow symlinks, need to get real path
-    const std::string real_path = std::filesystem::absolute(path);
+    const auto real_path = std::filesystem::absolute(path);
 
     vfs::file_monitor monitor;
 
@@ -181,7 +233,7 @@ vfs_file_monitor_add(const std::filesystem::path& path, vfs::file_monitor_callba
     else
     {
         const i32 wd = inotify_add_watch(inotify_fd,
-                                         real_path.data(),
+                                         real_path.c_str(),
                                          IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF |
                                              IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
         if (wd < 0)
@@ -194,15 +246,13 @@ vfs_file_monitor_add(const std::filesystem::path& path, vfs::file_monitor_callba
         // ztd::logger::info("vfs_file_monitor_add  {} ({}) {}", real_path, path, wd);
 
         monitor = std::make_shared<VFSFileMonitor>(real_path, wd);
-        monitor_map.insert({monitor->path, monitor});
+        monitor_map.insert({monitor->path(), monitor});
     }
 
     // ztd::logger::debug("monitor installed for: {}", path);
     if (callback)
     { // Install a callback
-        const vfs::file_monitor_callback_entry cb_ent =
-            std::make_shared<VFSFileMonitorCallbackEntry>(callback, user_data);
-        monitor->callbacks.emplace_back(cb_ent);
+        monitor->add_callback(callback, user_data);
     }
 
     return monitor;
@@ -217,21 +267,14 @@ vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_call
         return;
     }
 
-    for (const vfs::file_monitor_callback_entry& installed_callback : monitor->callbacks)
-    {
-        if (installed_callback->callback == callback && installed_callback->user_data == user_data)
-        {
-            ztd::remove(monitor->callbacks, installed_callback);
-            break;
-        }
-    }
+    monitor->remove_callback(callback, user_data);
 
-    if (monitor_map.contains(monitor->path))
+    if (monitor_map.contains(monitor->path()))
     {
         monitor->remove_user();
         if (!monitor->has_users())
         {
-            monitor_map.erase(monitor->path);
+            monitor_map.erase(monitor->path());
         }
     }
 }
@@ -241,15 +284,10 @@ vfs_file_monitor_dispatch_event(const vfs::file_monitor& monitor, vfs::file_moni
                                 const std::filesystem::path& file_name)
 {
     // Call the callback functions
-    if (monitor->callbacks.empty())
+    for (const vfs::file_monitor_callback_entry& cb : monitor->callbacks())
     {
-        return;
-    }
-
-    for (const vfs::file_monitor_callback_entry& cb : monitor->callbacks)
-    {
-        vfs::file_monitor_callback func = cb->callback;
-        func(monitor, event, file_name, cb->user_data);
+        vfs::file_monitor_callback func = cb->callback();
+        func(monitor, event, file_name, cb->user_data());
     }
 }
 
@@ -270,7 +308,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
         return false;
     }
 
-    i32 i = 0;
+    u32 i = 0;
     while (i < length)
     {
         const auto event = (struct inotify_event*)&buffer[i];
@@ -282,7 +320,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
 
             for (const auto& fm : monitor_map)
             {
-                if (fm.second->wd != event->wd)
+                if (fm.second->wd() != event->wd)
                 {
                     continue;
                 }
@@ -300,7 +338,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 {
                     monitor_event = vfs::file_monitor_event::created;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    const auto path = monitor->path / file_name;
+                    const auto path = monitor->path() / file_name;
                     ztd::logger::debug("inotify-event MASK={} CREATE={}", event->mask, path);
 #endif
                 }
@@ -308,7 +346,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 {
                     monitor_event = vfs::file_monitor_event::deleted;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    const auto path = monitor->path / file_name;
+                    const auto path = monitor->path() / file_name;
                     ztd::logger::debug("inotify-event MASK={} DELETE={}", event->mask, path);
 #endif
                 }
@@ -316,7 +354,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 {
                     monitor_event = vfs::file_monitor_event::changed;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    const auto path = monitor->path / file_name;
+                    const auto path = monitor->path() / file_name;
                     ztd::logger::debug("inotify-event MASK={} CHANGE={}", event->mask, path);
 #endif
                 }
@@ -324,7 +362,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 { // IN_IGNORED not handled
                     monitor_event = vfs::file_monitor_event::changed;
 #if defined(VFS_FILE_MONITOR_DEBUG)
-                    const auto path = monitor->path / file_name;
+                    const auto path = monitor->path() / file_name;
                     ztd::logger::debug("inotify-event MASK={} OTHER={}", event->mask, path);
 #endif
                 }

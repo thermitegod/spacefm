@@ -940,10 +940,10 @@ on_file_monitor_event(const vfs::file_monitor& monitor, vfs::file_monitor_event 
             {
                 child = nullptr;
             }
-            const auto file_path = monitor->path / file_name;
+            const auto file_path = monitor->path() / file_name;
             if (std::filesystem::is_directory(file_path))
             {
-                ptk_dir_tree_insert_child(node->tree, node, monitor->path, file_name);
+                ptk_dir_tree_insert_child(node->tree, node, monitor->path(), file_name);
                 if (child)
                 {
                     ptk_dir_tree_delete_child(node->tree, child);
