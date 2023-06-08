@@ -50,21 +50,16 @@ class VFSTrashDir
     // Move a file or directory into the trash directory
     void move(const std::filesystem::path& path, const std::string_view target_name) const noexcept;
 
-  protected:
+  private:
     // Create a directory if it does not exist
     static void check_dir_exists(const std::filesystem::path& dir) noexcept;
 
-    // Data Members
-
-    // the device (as returned from stat()) for this trash directory
-    dev_t trash_device;
-
     // the full path for this trash directory
-    std::filesystem::path trash_path{};
+    std::filesystem::path trash_path_{};
     // the path of the "files" subdirectory of this trash dir
-    std::filesystem::path files_path{};
+    std::filesystem::path files_path_{};
     // the path of the "info" subdirectory of this trash dir
-    std::filesystem::path info_path{};
+    std::filesystem::path info_path_{};
 };
 
 // This class implements some of the XDG VFSTrash specification:
@@ -107,6 +102,6 @@ class VFSTrash
     std::shared_ptr<VFSTrashDir> trash_dir(const std::filesystem::path& path) noexcept;
 
     // Data Members
-    std::map<dev_t, std::shared_ptr<VFSTrashDir>> trash_dirs;
+    std::map<dev_t, std::shared_ptr<VFSTrashDir>> trash_dirs_;
 
 }; // class VFSTrash

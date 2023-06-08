@@ -63,7 +63,7 @@ VFSTrash::VFSTrash() noexcept
     const dev_t home_device = device(vfs::user_dirs->home_dir()).value();
     const auto user_trash = vfs::user_dirs->data_dir() / "Trash";
     std::shared_ptr<VFSTrashDir> home_trash = std::make_shared<VFSTrashDir>(user_trash);
-    this->trash_dirs[home_device] = home_trash;
+    this->trash_dirs_[home_device] = home_trash;
 }
 
 std::optional<dev_t>
@@ -110,9 +110,9 @@ VFSTrash::trash_dir(const std::filesystem::path& path) noexcept
 {
     const dev_t dev = device(path).value();
 
-    if (this->trash_dirs.count(dev))
+    if (this->trash_dirs_.contains(dev))
     {
-        return this->trash_dirs[dev];
+        return this->trash_dirs_[dev];
     }
 
     // on another device, cannot use $HOME trashcan
@@ -124,7 +124,7 @@ VFSTrash::trash_dir(const std::filesystem::path& path) noexcept
         std::format("{}/.Trash-{}", top_dir.string(), getuid());
 
     std::shared_ptr<VFSTrashDir> trash_dir = std::make_shared<VFSTrashDir>(trash_path);
-    this->trash_dirs[dev] = trash_dir;
+    this->trash_dirs_[dev] = trash_dir;
 
     return trash_dir;
 }
@@ -172,9 +172,9 @@ VFSTrash::empty() noexcept
 
 VFSTrashDir::VFSTrashDir(const std::filesystem::path& path) noexcept
 {
-    this->trash_path = path;
-    this->files_path = this->trash_path / "files";
-    this->info_path = this->trash_path / "info";
+    this->trash_path_ = path;
+    this->files_path_ = this->trash_path_ / "files";
+    this->info_path_ = this->trash_path_ / "info";
 
     create_trash_dir();
 }
@@ -187,7 +187,7 @@ VFSTrashDir::unique_name(const std::filesystem::path& path) const noexcept
     const std::string ext = path.extension();
 
     std::string to_trash_filename = filename;
-    const std::string to_trash_path = this->files_path / to_trash_filename;
+    const std::string to_trash_path = this->files_path_ / to_trash_filename;
 
     if (!std::filesystem::exists(to_trash_path))
     {
@@ -197,7 +197,7 @@ VFSTrashDir::unique_name(const std::filesystem::path& path) const noexcept
     for (usize i = 1; true; ++i)
     {
         const std::string check_to_trash_filename = std::format("{}_{}{}", basename, i, ext);
-        const auto check_to_trash_path = this->files_path / check_to_trash_filename;
+        const auto check_to_trash_path = this->files_path_ / check_to_trash_filename;
         if (!std::filesystem::exists(check_to_trash_path))
         {
             to_trash_filename = check_to_trash_filename;
@@ -226,16 +226,16 @@ VFSTrashDir::create_trash_dir() const noexcept
 {
     // ztd::logger::debug("create trash dirs {}", trash_path());
 
-    this->check_dir_exists(this->trash_path);
-    this->check_dir_exists(this->files_path);
-    this->check_dir_exists(this->info_path);
+    this->check_dir_exists(this->trash_path_);
+    this->check_dir_exists(this->files_path_);
+    this->check_dir_exists(this->info_path_);
 }
 
 void
 VFSTrashDir::create_trash_info(const std::filesystem::path& path,
                                const std::string_view target_name) const noexcept
 {
-    const auto trash_info = this->info_path / std::format("{}.trashinfo", target_name);
+    const auto trash_info = this->info_path_ / std::format("{}.trashinfo", target_name);
 
     const std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
@@ -253,7 +253,7 @@ void
 VFSTrashDir::move(const std::filesystem::path& path,
                   const std::string_view target_name) const noexcept
 {
-    const auto target_path = this->files_path / target_name;
+    const auto target_path = this->files_path_ / target_name;
 
     // ztd::logger::info("fp {}", this->files_path);
     // ztd::logger::info("ip {}", this->info_path);
