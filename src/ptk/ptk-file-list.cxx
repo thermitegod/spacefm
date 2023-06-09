@@ -20,6 +20,9 @@
 
 #include <map>
 
+#include <algorithm>
+#include <ranges>
+
 #include <chrono>
 
 #include <cassert>
@@ -33,6 +36,7 @@
 
 #include "ptk/ptk-file-list.hxx"
 
+#include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 #include "types.hxx"
@@ -196,9 +200,9 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     column_types[ptk::file_list::column::big_icon] = GDK_TYPE_PIXBUF;
     column_types[ptk::file_list::column::small_icon] = GDK_TYPE_PIXBUF;
     column_types[ptk::file_list::column::name] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::desc] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::type] = G_TYPE_STRING;
     column_types[ptk::file_list::column::size] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::desc] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::type] = G_TYPE_STRING;
     column_types[ptk::file_list::column::perm] = G_TYPE_STRING;
     column_types[ptk::file_list::column::owner] = G_TYPE_STRING;
     column_types[ptk::file_list::column::mtime] = G_TYPE_STRING;
@@ -488,7 +492,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                 g_value_set_string(value, file->display_size().data());
             }
             break;
-        case ptk::file_list::column::desc:
+        case ptk::file_list::column::type:
             g_value_set_string(value, file->mime_type_description().data());
             break;
         case ptk::file_list::column::perm:
@@ -680,11 +684,8 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
 }
 
 static i32
-ptk_file_list_compare(const void* a, const void* b, void* user_data)
+compare_file_info_name(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
 {
-    const auto file_a = (vfs::file_info)(a);
-    const auto file_b = (vfs::file_info)(b);
-    PtkFileList* list = PTK_FILE_LIST(user_data);
     i32 result;
 
     // dirs before/after files
@@ -697,131 +698,213 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
         }
     }
 
-    // by column
-    switch (list->sort_col)
-    {
-        case ptk::file_list::column::size:
-            if (file_a->size() > file_b->size())
-            {
-                result = 1;
-            }
-            else if (file_a->size() == file_b->size())
-            {
-                result = 0;
-            }
-            else
-            {
-                result = -1;
-            }
-            break;
-        case ptk::file_list::column::mtime:
-            if (file_a->mtime() > file_b->mtime())
-            {
-                result = 1;
-            }
-            else if (file_a->mtime() == file_b->mtime())
-            {
-                result = 0;
-            }
-            else
-            {
-                result = -1;
-            }
-            break;
-        case ptk::file_list::column::desc:
-            result = g_ascii_strcasecmp(file_a->mime_type_description().data(),
-                                        file_b->mime_type_description().data());
-            break;
-        case ptk::file_list::column::perm:
-            result = ztd::compare(file_a->display_permissions(), file_b->display_permissions());
-            break;
-        case ptk::file_list::column::owner:
-            result =
-                g_ascii_strcasecmp(file_a->display_owner().data(), file_b->display_owner().data());
-            break;
-        case ptk::file_list::column::big_icon:
-        case ptk::file_list::column::small_icon:
-        case ptk::file_list::column::name:
-        case ptk::file_list::column::info:
-            result = 0;
-    }
-
-    if (result != 0)
-    {
-        return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
-    }
-
-    // hidden first/last
-    const bool hidden_a = file_a->is_hidden();
-    const bool hidden_b = file_b->is_hidden();
-    if (hidden_a && !hidden_b)
-    {
-        result = list->sort_hidden_first ? -1 : 1;
-    }
-    else if (!hidden_a && hidden_b)
-    {
-        result = list->sort_hidden_first ? 1 : -1;
-    }
-    if (result != 0)
-    {
-        return result;
-    }
-
     // by display name
     if (list->sort_alphanum)
     {
-        // TODO - option to enable/disable numbers first
-
-        // numbers before letters
-        const bool num_a = std::isdigit(file_a->display_name().at(0));
-        const bool num_b = std::isdigit(file_b->display_name().at(0));
-        if (num_a && !num_b)
-        {
-            result = -1;
-        }
-        else if (!num_a && num_b)
-        {
-            result = 1;
-        }
-        if (result != 0)
-        {
-            return result;
-        }
-
-        // alphanumeric
-        if (list->sort_case)
-        {
-            result = ztd::sort::alphanumeric(file_a->collate_key(), file_b->collate_key());
-        }
-        else
-        {
-            result =
-                ztd::sort::alphanumeric(file_a->collate_icase_key(), file_b->collate_icase_key());
-        }
-    }
-#if 0
-    // TODO support both alphanum and natural sort
-    else if (list->sort_natural)
-    {
         // natural
         if (list->sort_case)
-            result = ztd::same(file_a->collate_key, file_b->collate_key);
+        {
+            result = ztd::sort::compare(file_a->collate_key(), file_b->collate_key());
+        }
         else
-            result = ztd::same(file_a->collate_icase_key, file_b->collate_icase_key);
+        {
+            result = ztd::sort::compare(file_a->collate_icase_key(), file_b->collate_icase_key());
+        }
+        // result = ztd::sort::compare(file_a->display_name(), file_b->display_name());
     }
-#endif
     else
     {
         // non-natural
-        /* FIXME: do not compare utf8 as ascii ?  This is done to avoid casefolding
-         * and caching expenses and seems to work
-         * NOTE: both g_ascii_strcasecmp and g_ascii_strncasecmp appear to be
-         * case insensitive when used on utf8
-         * FIXME: No case sensitive mode here because no function compare
-         * UTF-8 strings case sensitively without collating (natural) */
-        result = g_ascii_strcasecmp(file_a->display_name().data(), file_b->display_name().data());
+        result = ztd::sort::compare(file_a->display_name(), file_b->display_name());
     }
+
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
+compare_file_info_size(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    if (file_a->size() > file_b->size())
+    {
+        result = 1;
+    }
+    else if (file_a->size() == file_b->size())
+    {
+        result = 0;
+    }
+    else
+    {
+        result = -1;
+    }
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
+compare_file_info_type(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    result = ztd::sort::compare(file_a->mime_type_description(), file_b->mime_type_description());
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
+compare_file_info_perm(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    result = ztd::sort::compare(file_a->display_permissions(), file_b->display_permissions());
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
+compare_file_info_owner(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    result = ztd::sort::compare(file_a->display_owner(), file_b->display_owner());
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
+compare_file_info_mtime(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    if (file_a->mtime() > file_b->mtime())
+    {
+        result = 1;
+    }
+    else if (file_a->mtime() == file_b->mtime())
+    {
+        result = 0;
+    }
+    else
+    {
+        result = -1;
+    }
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static GList*
+ptk_file_info_list_sort(PtkFileList* list)
+{
+    auto file_list = glist_to_vector_vfs_file_info(list->files);
+
+    switch (list->sort_col)
+    {
+        case ptk::file_list::column::name:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_name(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::size:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_size(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::type:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_type(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::perm:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_perm(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::owner:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_owner(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::mtime:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_mtime(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::big_icon:
+        case ptk::file_list::column::small_icon:
+        case ptk::file_list::column::info:
+            break;
+    }
+
+    return vector_to_glist_vfs_file_info(file_list);
 }
 
 void
@@ -833,7 +916,8 @@ ptk_file_list_sort(PtkFileList* list)
     }
 
     /* sort the list */
-    list->files = g_list_sort_with_data(list->files, ptk_file_list_compare, list);
+    // list->files = g_list_sort_with_data(list->files, ptk_file_info_list_sort, list);
+    list->files = ptk_file_info_list_sort(list);
 
     GtkTreePath* path = gtk_tree_path_new();
     gtk_tree_model_rows_reordered(GTK_TREE_MODEL(list), path, nullptr, nullptr);

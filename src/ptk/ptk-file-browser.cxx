@@ -1833,7 +1833,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path
     if (file_browser->curhistsel)
     {
         file_browser->curhistsel->data =
-            vector_to_glist_VFSFileInfo(ptk_file_browser_get_selected_files(file_browser));
+            vector_to_glist_vfs_file_info(ptk_file_browser_get_selected_files(file_browser));
 
         // ztd::logger::debug("set curhistsel {}", g_list_position(file_browser->histsel,
         // file_browser->curhistsel)); if (file_browser->curhistsel->data)
@@ -2104,7 +2104,7 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
         case ptk::file_list::column::mtime:
             sort_order = ptk::file_browser::sort_order::mtime;
             break;
-        case ptk::file_list::column::desc:
+        case ptk::file_list::column::type:
             sort_order = ptk::file_browser::sort_order::type;
             break;
         case ptk::file_list::column::perm:
@@ -4057,7 +4057,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
     static constexpr std::array<ptk::file_list::column, 6> cols{
         ptk::file_list::column::name,
         ptk::file_list::column::size,
-        ptk::file_list::column::desc,
+        ptk::file_list::column::type,
         ptk::file_list::column::perm,
         ptk::file_list::column::owner,
         ptk::file_list::column::mtime,
@@ -5441,7 +5441,7 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
             col = ptk::file_list::column::mtime;
             break;
         case ptk::file_browser::sort_order::type:
-            col = ptk::file_list::column::desc;
+            col = ptk::file_list::column::type;
             break;
         case ptk::file_browser::sort_order::perm:
             col = ptk::file_list::column::perm;

@@ -138,6 +138,9 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     const std::string str = g_utf8_casefold(this->display_name_.data(), -1);
     this->collate_icase_key_ = g_utf8_collate_key_for_filename(str.data(), -1);
 
+    // this->collate_key_ = Glib::ustring(this->display_name_).collate_key();
+    // this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
+
     return true;
 }
 
@@ -159,9 +162,13 @@ VFSFileInfo::update_display_name(const std::string_view new_display_name) noexce
 {
     this->display_name_ = new_display_name.data();
     // sfm get new collate keys
+
     this->collate_key_ = g_utf8_collate_key_for_filename(this->display_name_.data(), -1);
     const std::string str = g_utf8_casefold(this->display_name_.data(), -1);
     this->collate_icase_key_ = g_utf8_collate_key_for_filename(str.data(), -1);
+
+    //this->collate_key_ = Glib::ustring(this->display_name_).collate_key();
+    //this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
 }
 
 const std::filesystem::path&

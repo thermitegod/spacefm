@@ -233,7 +233,7 @@ open_file(char* dir, GList* files, PtkFileBrowser* file_browser)
         return false;
     }
 
-    const std::vector<vfs::file_info> sel_files = glist_to_vector_VFSFileInfo(files);
+    const std::vector<vfs::file_info> sel_files = glist_to_vector_vfs_file_info(files);
 
     /*igtodo test passing file_browser here? */
     ptk_open_files_with_app(dir, sel_files, "", nullptr, false, true);

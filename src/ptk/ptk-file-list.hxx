@@ -47,7 +47,7 @@ namespace ptk::file_list
         small_icon,
         name,
         size,
-        desc,
+        type,
         perm,
         owner,
         mtime,

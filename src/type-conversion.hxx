@@ -20,6 +20,7 @@
 
 #include <filesystem>
 
+#include <span>
 #include <vector>
 
 #include <glib.h>
@@ -33,5 +34,5 @@ std::vector<std::filesystem::path> glist_t_char_to_vector_t_path(GList* list);
 std::vector<std::string> glist_t_char_to_vector_t_string(GList* list);
 
 // VFSFileInfo
-std::vector<vfs::file_info> glist_to_vector_VFSFileInfo(GList* list);
-GList* vector_to_glist_VFSFileInfo(const std::vector<vfs::file_info>& list);
+std::vector<vfs::file_info> glist_to_vector_vfs_file_info(GList* list);
+GList* vector_to_glist_vfs_file_info(const std::span<const vfs::file_info> list);

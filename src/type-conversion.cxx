@@ -63,7 +63,7 @@ glist_t_char_to_vector_t_string(GList* list)
  */
 
 std::vector<vfs::file_info>
-glist_to_vector_VFSFileInfo(GList* list)
+glist_to_vector_vfs_file_info(GList* list)
 {
     std::vector<vfs::file_info> vec;
     vec.reserve(g_list_length(list));
@@ -76,7 +76,7 @@ glist_to_vector_VFSFileInfo(GList* list)
 }
 
 GList*
-vector_to_glist_VFSFileInfo(const std::vector<vfs::file_info>& list)
+vector_to_glist_vfs_file_info(const std::span<const vfs::file_info> list)
 {
     GList* l = nullptr;
     for (const vfs::file_info file : list)
