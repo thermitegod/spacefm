@@ -52,6 +52,7 @@ inline constexpr u32 BUF_LEN    = (1024 * (EVENT_SIZE + 16));
 // clang-format on
 
 static std::map<std::filesystem::path, vfs::file_monitor> monitor_map;
+static std::mutex monitor_mutex;
 
 static i32 inotify_fd = -1;
 static Glib::RefPtr<Glib::IOChannel> inotify_io_channel = nullptr;
@@ -201,6 +202,8 @@ vfs_file_monitor_disconnect_from_inotify()
 void
 vfs_file_monitor_clean()
 {
+    std::lock_guard<std::mutex> lock(monitor_mutex);
+
     vfs_file_monitor_disconnect_from_inotify();
 
     monitor_map.clear();
@@ -220,6 +223,8 @@ vfs::file_monitor
 vfs_file_monitor_add(const std::filesystem::path& path, vfs::file_monitor_callback callback,
                      void* user_data)
 {
+    std::lock_guard<std::mutex> lock(monitor_mutex);
+
     // inotify does not follow symlinks, need to get real path
     const auto real_path = std::filesystem::absolute(path);
 
@@ -262,6 +267,8 @@ void
 vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_callback callback,
                         void* user_data)
 {
+    std::lock_guard<std::mutex> lock(monitor_mutex);
+
     if (!monitor || !callback)
     {
         return;
@@ -307,6 +314,8 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
         ztd::logger::warn("Error reading inotify event: {}", std::strerror(errno));
         return false;
     }
+
+    std::lock_guard<std::mutex> lock(monitor_mutex);
 
     u32 i = 0;
     while (i < length)
