@@ -832,29 +832,12 @@ ptk_file_list_sort(PtkFileList* list)
         return;
     }
 
-    GHashTable* old_order = g_hash_table_new(g_direct_hash, g_direct_equal);
-    /* save old order */
-    i32 i;
-    GList* l;
-    for (i = 0, l = list->files; l; l = g_list_next(l), ++i)
-    {
-        g_hash_table_insert(old_order, l, GINT_TO_POINTER(i));
-    }
-
     /* sort the list */
     list->files = g_list_sort_with_data(list->files, ptk_file_list_compare, list);
 
-    /* save new order */
-    i32* new_order = g_new(i32, list->n_files);
-    for (i = 0, l = list->files; l; l = g_list_next(l), ++i)
-    {
-        new_order[i] = GPOINTER_TO_INT(g_hash_table_lookup(old_order, l));
-    }
-    g_hash_table_destroy(old_order);
     GtkTreePath* path = gtk_tree_path_new();
-    gtk_tree_model_rows_reordered(GTK_TREE_MODEL(list), path, nullptr, new_order);
+    gtk_tree_model_rows_reordered(GTK_TREE_MODEL(list), path, nullptr, nullptr);
     gtk_tree_path_free(path);
-    std::free(new_order);
 }
 
 bool
@@ -882,71 +865,12 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
         return;
     }
 
-    GList* ll = nullptr;
-
-    GList* l;
-    for (l = list->files; l; l = g_list_next(l))
-    {
-        vfs::file_info file2 = VFS_FILE_INFO(l->data);
-        if (file == file2)
-        {
-            /* The file is already in the list */
-            return;
-        }
-
-        const bool is_desktop = file->is_desktop_entry();
-        const bool is_desktop2 = file2->is_desktop_entry();
-        if (is_desktop || is_desktop2)
-        {
-            if (ztd::same(file->name(), file2->name()))
-            {
-                return;
-            }
-        }
-        else if (ptk_file_list_compare(file2, file, list) == 0)
-        {
-            // disp_name matches ?
-            // ptk_file_list_compare may return 0 on differing display names
-            // if case-insensitive - need to compare filenames
-            if ((list->sort_alphanum || list->sort_natural) && list->sort_case)
-            {
-                return;
-            }
-            else if (ztd::same(file->name(), file2->name()))
-            {
-                return;
-            }
-        }
-
-        if (!ll && ptk_file_list_compare(file2, file, list) > 0)
-        {
-            if (!is_desktop && !is_desktop2)
-            {
-                break;
-            }
-            else
-            {
-                ll = l; // store insertion location based on disp_name
-            }
-        }
-    }
-
-    if (ll)
-    {
-        l = ll;
-    }
-
-    list->files = g_list_insert_before(list->files, l, vfs_file_info_ref(file));
+    list->files = g_list_append(list->files, vfs_file_info_ref(file));
     ++list->n_files;
 
-    if (l)
-    {
-        l = l->prev;
-    }
-    else
-    {
-        l = g_list_last(list->files);
-    }
+    ptk_file_list_sort(list);
+
+    GList* l = g_list_find(list->files, file);
 
     GtkTreeIter it;
     it.stamp = list->stamp;
@@ -954,24 +878,19 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
     it.user_data2 = file;
 
     GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
-
     gtk_tree_model_row_inserted(GTK_TREE_MODEL(list), path, &it);
-
     gtk_tree_path_free(path);
 }
 
 static void
 on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
 {
-    GList* l;
-    GtkTreePath* path;
-
     /* If there is no file info, that means the dir itself was deleted. */
     if (!file)
     {
         /* Clear the whole list */
-        path = gtk_tree_path_new_from_indices(0, -1);
-        for (l = list->files; l; l = list->files)
+        GtkTreePath* path = gtk_tree_path_new_from_indices(0, -1);
+        for (GList* l = list->files; l; l = list->files)
         {
             gtk_tree_model_row_deleted(GTK_TREE_MODEL(list), path);
             file = VFS_FILE_INFO(l->data);
@@ -988,16 +907,14 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
         return;
     }
 
-    l = g_list_find(list->files, file);
+    GList* l = g_list_find(list->files, file);
     if (!l)
     {
         return;
     }
 
-    path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
-
+    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
     gtk_tree_model_row_deleted(GTK_TREE_MODEL(list), path);
-
     gtk_tree_path_free(path);
 
     list->files = g_list_delete_link(list->files, l);
@@ -1025,9 +942,7 @@ ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
     it.user_data2 = l->data;
 
     GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
-
     gtk_tree_model_row_changed(GTK_TREE_MODEL(list), path, &it);
-
     gtk_tree_path_free(path);
 }
 
