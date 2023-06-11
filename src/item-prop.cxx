@@ -1010,30 +1010,28 @@ load_command_script(ContextData* ctxt, xset_t set)
     gtk_text_buffer_set_text(buf, "", -1);
     if (script)
     {
-        std::string line;
         std::ifstream file(script);
-        if (!file.is_open())
+        if (!file)
         {
-            const std::string errno_msg = std::strerror(errno);
-            ztd::logger::warn("error reading file {}: {}", script, errno_msg);
+            ztd::logger::error("Failed to open the file: {}", script);
+            return;
         }
-        else
+
+        std::string line;
+        while (std::getline(file, line))
         {
-            while (std::getline(file, line))
+            // read file one line at a time to prevent splitting UTF-8 characters
+            if (!g_utf8_validate(line.data(), -1, nullptr))
             {
-                // read file one line at a time to prevent splitting UTF-8 characters
-                if (!g_utf8_validate(line.data(), -1, nullptr))
-                {
-                    file.close();
-                    gtk_text_buffer_set_text(buf, "", -1);
-                    modified = true;
-                    ztd::logger::warn("file '{}' contents are not valid UTF-8", script);
-                    break;
-                }
-                gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);
+                file.close();
+                gtk_text_buffer_set_text(buf, "", -1);
+                modified = true;
+                ztd::logger::warn("file '{}' contents are not valid UTF-8", script);
+                break;
             }
-            file.close();
+            gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);
         }
+        file.close();
     }
     const bool have_access = script && have_rw_access(script);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ctxt->cmd_script), !set->plugin && have_access);

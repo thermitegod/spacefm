@@ -277,21 +277,24 @@ get_hidden_files(const std::filesystem::path& path) noexcept
         return std::nullopt;
     }
 
-    std::string line;
     std::ifstream file(hidden_path);
-    if (file.is_open())
+    if (!file)
     {
-        while (std::getline(file, line))
-        {
-            const auto hidden_file = std::filesystem::path(ztd::strip(line));
-            if (hidden_file.is_absolute())
-            {
-                ztd::logger::warn("Absolute path ignored in {}", hidden_path.string());
-                continue;
-            }
+        ztd::logger::error("Failed to open the file: {}", hidden_path);
+        return std::nullopt;
+    }
 
-            hidden.push_back(hidden_file);
+    std::string line;
+    while (std::getline(file, line))
+    {
+        const auto hidden_file = std::filesystem::path(ztd::strip(line));
+        if (hidden_file.is_absolute())
+        {
+            ztd::logger::warn("Absolute path ignored in {}", hidden_path);
+            continue;
         }
+
+        hidden.push_back(hidden_file);
     }
     file.close();
 

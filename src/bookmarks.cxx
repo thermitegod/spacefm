@@ -87,14 +87,17 @@ load_bookmarks() noexcept
         return;
     }
 
-    std::string line;
     std::ifstream file(bookmark_file);
-    if (file.is_open())
+    if (!file)
     {
-        while (std::getline(file, line))
-        {
-            parse_bookmarks(line);
-        }
+        ztd::logger::error("Failed to open the file: {}", bookmark_file);
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        parse_bookmarks(line);
     }
     file.close();
 }

@@ -993,46 +993,45 @@ ptk_handler_load_script(i32 mode, i32 cmd, xset_t handler_set, GtkTextView* view
     script = ztd::replace(def_script, "/exec.fish", script_name);
     std::free(def_script);
     // load script
-    // bool modified = false;
-    bool start = true;
 
-    if (std::filesystem::exists(script))
+    if (!std::filesystem::exists(script))
     {
-        std::string line;
-        std::ifstream file(script);
-        if (!file.is_open())
+        return true;
+    }
+
+    std::ifstream file(script);
+    if (!file)
+    {
+        ztd::logger::error("Failed to open the file: {}", script);
+        return true;
+    }
+
+    bool start = true;
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (start)
         {
-            const std::string errno_msg = std::strerror(errno);
-            error_message = std::format("Error reading file '{}':\n\n{}", script, errno_msg);
-            return true;
+            // skip script header
+            if (ztd::same(line, std::format("#!{}\n", FISH_PATH)))
+            {
+                continue;
+            }
+
+            start = false;
+        }
+        // add line to buffer
+        if (view)
+        {
+            gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);
         }
         else
         {
-            while (std::getline(file, line))
-            {
-                if (start)
-                {
-                    // skip script header
-                    if (ztd::same(line, std::format("#!{}\n", FISH_PATH)))
-                    {
-                        continue;
-                    }
-
-                    start = false;
-                }
-                // add line to buffer
-                if (view)
-                {
-                    gtk_text_buffer_insert_at_cursor(buf, line.data(), -1);
-                }
-                else
-                {
-                    script.append(line);
-                }
-            }
-            file.close();
+            script.append(line);
         }
     }
+    file.close();
+
     // success
     return false;
 }

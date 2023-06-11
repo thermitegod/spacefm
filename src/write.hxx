@@ -28,18 +28,31 @@
 
 template<class T>
 bool
-write_file(const std::filesystem::path& path, const T data)
+write_file(const std::filesystem::path& path, const T& data)
 {
     std::ofstream file(path);
-    if (file.is_open())
+    if (!file.is_open())
     {
-        file << data;
+        ztd::logger::error("Failed to open file: {}", path);
+        return false;
     }
 
-    const bool result = file.good();
-    if (!result)
+    file << data;
+
+    if (file.fail())
     {
         ztd::logger::error("Failed to write file: {}", path);
+        file.close();
+        return false;
     }
-    return result;
+
+    file.close();
+
+    if (file.fail())
+    {
+        ztd::logger::error("Failed to close file: {}", path);
+        return false;
+    }
+
+    return true;
 }

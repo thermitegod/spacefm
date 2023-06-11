@@ -36,10 +36,11 @@ const std::vector<vfs::linux::procfs::MountInfoEntry>
 vfs::linux::procfs::mountinfo()
 {
     std::vector<MountInfoEntry> mounts;
+
     std::ifstream file(MOUNTINFO);
     if (!file)
     {
-        ztd::logger::error("Failed to open {}", MOUNTINFO);
+        ztd::logger::error("Failed to open the file: {}", MOUNTINFO);
         return mounts;
     }
 
