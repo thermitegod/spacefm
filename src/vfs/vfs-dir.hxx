@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <memory>
+
 #include <mutex>
 
 #include <sigc++/sigc++.h>
@@ -86,13 +88,7 @@ struct VFSDir
     void load() noexcept;
 
     bool is_file_listed() const noexcept;
-
-    /* emit signals */
-    void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
-    void emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info file) noexcept;
-    void emit_file_changed(const std::filesystem::path& file_name, vfs::file_info file,
-                           bool force) noexcept;
-    void emit_thumbnail_loaded(vfs::file_info file) noexcept;
+    bool is_directory_empty() const noexcept;
 
     void update_created_files(const std::filesystem::path& key) noexcept;
     void update_changed_files(const std::filesystem::path& key) noexcept;
@@ -100,6 +96,13 @@ struct VFSDir
     void unload_thumbnails(bool is_big) noexcept;
 
     bool add_hidden(vfs::file_info file) const noexcept;
+
+    /* emit signals */
+    void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
+    void emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info file) noexcept;
+    void emit_file_changed(const std::filesystem::path& file_name, vfs::file_info file,
+                           bool force) noexcept;
+    void emit_thumbnail_loaded(vfs::file_info file) noexcept;
 
   private:
     vfs::file_info find_file(const std::filesystem::path& file_name,

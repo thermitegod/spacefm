@@ -158,20 +158,18 @@ vfs_dir_finalize(GObject* obj)
     {
         vfs_file_monitor_remove(dir->monitor, vfs_dir_monitor_callback, dir);
     }
-    if (!dir->path.empty())
-    {
-        dir_map.erase(dir->path.c_str());
 
-        /* There is no VFSDir instance */
-        if (dir_map.size() == 0)
+    dir_map.erase(dir->path.c_str());
+    /* There is no VFSDir instance */
+    if (dir_map.size() == 0)
+    {
+        if (change_notify_timeout)
         {
-            if (change_notify_timeout)
-            {
-                g_source_remove(change_notify_timeout);
-                change_notify_timeout = 0;
-            }
+            g_source_remove(change_notify_timeout);
+            change_notify_timeout = 0;
         }
     }
+
     // ztd::logger::debug("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
     if (dir->thumbnail_loader)
     {
@@ -180,22 +178,8 @@ vfs_dir_finalize(GObject* obj)
         dir->thumbnail_loader = nullptr;
     }
 
-    if (!dir->file_list.empty())
-    {
-        vfs_file_info_list_free(dir->file_list);
-        dir->file_list.clear();
-    }
-
-    if (!dir->changed_files.empty())
-    {
-        vfs_file_info_list_free(dir->changed_files);
-        dir->changed_files.clear();
-    }
-
-    if (!dir->created_files.empty())
-    {
-        dir->created_files.clear();
-    }
+    vfs_file_info_list_free(dir->file_list);
+    vfs_file_info_list_free(dir->changed_files);
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 }
@@ -227,6 +211,7 @@ vfs_dir_new(const std::string_view path)
     vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
     assert(dir != nullptr);
 
+    assert(path.empty() != true);
     dir->path = path.data();
     dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
 
@@ -251,19 +236,14 @@ vfs_dir_get_by_path_soft(const std::filesystem::path& path)
 vfs::dir
 vfs_dir_get_by_path(const std::filesystem::path& path)
 {
-    if (dir_map.contains(path.c_str()))
+    vfs::dir dir = vfs_dir_get_by_path_soft(path);
+    if (dir == nullptr)
     {
-        vfs::dir dir = dir_map.at(path.c_str());
+        dir = vfs_dir_new(path.c_str());
         assert(dir != nullptr);
-        g_object_ref(dir);
-        return dir;
+        dir->load(); /* asynchronous operation */
+        dir_map.insert({dir->path.c_str(), dir});
     }
-
-    vfs::dir dir = vfs_dir_new(path.c_str());
-    assert(dir != nullptr);
-    dir->load(); /* asynchronous operation */
-    dir_map.insert({dir->path.c_str(), dir});
-
     return dir;
 }
 
@@ -328,10 +308,6 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
     dir->file_listed = false;
     dir->load_complete = false;
     dir->xhidden_count = 0;
-    if (dir->path.empty())
-    {
-        return nullptr;
-    }
 
     /* Install file alteration monitor */
     dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
@@ -442,7 +418,7 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
 
     std::lock_guard<std::mutex> lock(dir->mutex);
 
-    if (!dir || dir->file_list.empty())
+    if (!dir || dir->is_directory_empty())
     {
         return;
     }
@@ -526,6 +502,12 @@ bool
 VFSDir::is_file_listed() const noexcept
 {
     return this->file_listed;
+}
+
+bool
+VFSDir::is_directory_empty() const noexcept
+{
+    return this->file_list.empty();
 }
 
 bool
@@ -800,14 +782,6 @@ VFSDir::emit_thumbnail_loaded(vfs::file_info file) noexcept
     {
         assert(file == file_found);
         file = vfs_file_info_ref(file_found);
-    }
-    else
-    {
-        file = nullptr;
-    }
-
-    if (file)
-    {
         this->run_event<spacefm::signal::file_thumbnail_loaded>(file);
         vfs_file_info_unref(file);
     }
