@@ -83,8 +83,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
     gtk_tree_model_get(model, iter, ptk::dir_tree::column::info, &file, -1);
     if (file)
     {
-        const std::string& name = file->get_name();
-        if (ztd::startswith(name, "."))
+        if (file->is_hidden())
         {
             vfs_file_info_unref(file);
             return false;

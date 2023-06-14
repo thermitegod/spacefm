@@ -335,7 +335,7 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
     {
         for (vfs::file_info file : dir->file_list)
         {
-            if (list->show_hidden || file->disp_name.at(0) != '.')
+            if (list->show_hidden || !file->is_hidden())
             {
                 list->files = g_list_prepend(list->files, vfs_file_info_ref(file));
                 ++list->n_files;
@@ -752,8 +752,8 @@ ptk_file_list_compare(const void* a, const void* b, void* user_data)
     }
 
     // hidden first/last
-    const bool hidden_a = ztd::startswith(file_a->get_disp_name(), ".");
-    const bool hidden_b = ztd::startswith(file_b->get_disp_name(), ".");
+    const bool hidden_a = file_a->is_hidden();
+    const bool hidden_b = file_b->is_hidden();
     if (hidden_a && !hidden_b)
     {
         result = list->sort_hidden_first ? -1 : 1;
@@ -876,7 +876,7 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info file1
 static void
 ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
 {
-    if (!list->show_hidden && file->get_name()[0] == '.')
+    if (!list->show_hidden && file->is_hidden())
     {
         return;
     }
@@ -982,7 +982,7 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
         return;
     }
 
-    if (!list->show_hidden && file->get_name()[0] == '.')
+    if (!list->show_hidden && file->is_hidden())
     {
         return;
     }
@@ -1007,7 +1007,7 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
 void
 ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 {
-    if (!list->show_hidden && file->get_name()[0] == '.')
+    if (!list->show_hidden && file->is_hidden())
     {
         return;
     }

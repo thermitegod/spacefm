@@ -128,6 +128,8 @@ struct VFSFileInfo
     bool is_character_file() const noexcept;
     bool is_other() const noexcept;
 
+    bool is_hidden() const noexcept; // filename starts with '.'
+
     bool is_image() const noexcept;
     bool is_video() const noexcept;
     bool is_desktop_entry() const noexcept;
@@ -140,6 +142,9 @@ struct VFSFileInfo
     bool is_text(const std::filesystem::path& file_path = "") const noexcept;
 
     bool update(const std::filesystem::path& file_path) noexcept;
+
+  private:
+    bool hidden{false};
 
   private:
     void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;

@@ -128,6 +128,9 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
         const std::string disk_size = vfs_file_size_format(this->get_disk_size());
         this->disp_disk_size = disk_size;
 
+        // hidden
+        this->hidden = ztd::startswith(this->name, ".");
+
         // collate keys
         this->collate_key = g_utf8_collate_key_for_filename(this->disp_name.data(), -1);
         const std::string str = g_utf8_casefold(this->disp_name.data(), -1);
@@ -577,6 +580,12 @@ bool
 VFSFileInfo::is_other() const noexcept
 {
     return (!this->is_directory() && !this->is_regular_file() && !this->is_symlink());
+}
+
+bool
+VFSFileInfo::is_hidden() const noexcept
+{
+    return this->hidden;
 }
 
 bool
