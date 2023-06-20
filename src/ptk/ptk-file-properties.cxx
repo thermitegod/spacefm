@@ -236,24 +236,16 @@ on_update_labels(FilePropertiesDialogData* data)
 {
     const std::string size_str =
         std::format("{} ( {} bytes )", vfs_file_size_format(data->total_size), data->total_size);
-    gtk_label_set_text(data->total_size_label, size_str.c_str());
+    gtk_label_set_text(data->total_size_label, size_str.data());
 
     const std::string disk_str = std::format("{} ( {} bytes )",
                                              vfs_file_size_format(data->size_on_disk),
                                              data->size_on_disk);
-    gtk_label_set_text(data->size_on_disk_label, disk_str.c_str());
+    gtk_label_set_text(data->size_on_disk_label, disk_str.data());
 
-    std::string count;
-    if (data->total_count_dir == 0)
-    {
-        count = std::format("{} files", data->total_count);
-    }
-    else
-    {
-        count = std::format("{} file, {} directory", data->total_count, data->total_count_dir);
-    }
-
-    gtk_label_set_text(data->count_label, count.c_str());
+    const std::string count =
+        std::format("{} files, {} directories", data->total_count, data->total_count_dir);
+    gtk_label_set_text(data->count_label, count.data());
 
     if (data->done)
     {
