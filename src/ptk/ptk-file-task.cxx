@@ -1558,7 +1558,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_set_chmod(PtkFileTask* ptask, unsigned char* chmod_actions)
+ptk_file_task_set_chmod(PtkFileTask* ptask, std::array<u8, 12> chmod_actions)
 {
     ptask->task->set_chmod(chmod_actions);
 }

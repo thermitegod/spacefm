@@ -146,7 +146,7 @@ class VFSFileTask
 
     void set_state_callback(VFSFileTaskStateCallback cb, void* user_data);
 
-    void set_chmod(unsigned char* new_chmod_actions);
+    void set_chmod(std::array<u8, 12> new_chmod_actions);
     void set_chown(uid_t new_uid, gid_t new_gid);
 
     void set_recursive(bool recursive);
@@ -200,7 +200,7 @@ class VFSFileTask
     gid_t gid{0};
 
     // For chmod. If chmod is not needed, this should be nullptr
-    unsigned char* chmod_actions{nullptr};
+    std::optional<std::array<u8, 12>> chmod_actions{std::nullopt};
 
     off_t total_size{0}; // Total size of the files to be processed, in bytes
     off_t progress{0};   // Total size of current processed files, in btytes

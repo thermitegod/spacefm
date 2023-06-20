@@ -105,12 +105,6 @@ VFSFileTask::VFSFileTask(vfs::file_task_type type,
 
 VFSFileTask::~VFSFileTask()
 {
-    if (this->chmod_actions)
-    {
-        g_slice_free1(sizeof(unsigned char) * magic_enum::enum_count<vfs::chmod_action>(),
-                      this->chmod_actions);
-    }
-
     g_mutex_clear(this->mutex);
     std::free(this->mutex);
 
@@ -137,16 +131,10 @@ VFSFileTask::set_state_callback(VFSFileTaskStateCallback cb, void* user_data)
     this->state_cb_data = user_data;
 }
 
-// Set some actions for chmod, this array will be copied
-// and stored in VFSFileTask
 void
-VFSFileTask::set_chmod(unsigned char* new_chmod_actions)
+VFSFileTask::set_chmod(std::array<u8, 12> new_chmod_actions)
 {
-    this->chmod_actions = (unsigned char*)g_slice_alloc(
-        sizeof(unsigned char) * magic_enum::enum_count<vfs::chmod_action>());
-    memcpy((void*)this->chmod_actions,
-           (void*)new_chmod_actions,
-           sizeof(unsigned char) * magic_enum::enum_count<vfs::chmod_action>());
+    this->chmod_actions = new_chmod_actions;
 }
 
 void
@@ -1120,13 +1108,15 @@ VFSFileTask::file_chown_chmod(const std::filesystem::path& src_file)
             const std::filesystem::perms orig_perms =
                 std::filesystem::status(src_file).permissions();
 
+            const auto new_chmod_actions = chmod_actions.value();
+
             for (const auto i : ztd::range(magic_enum::enum_count<vfs::chmod_action>()))
             {
-                if (this->chmod_actions[i] == 2)
+                if (new_chmod_actions[i] == 2)
                 { /* Do not change */
                     continue;
                 }
-                if (this->chmod_actions[i] == 0)
+                if (new_chmod_actions[i] == 0)
                 { /* Remove this bit */
                     new_perms &= ~chmod_flags.at(i);
                 }

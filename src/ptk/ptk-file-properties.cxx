@@ -82,8 +82,8 @@ struct FilePropertiesDialogData
     std::string orig_mtime{};
     std::string orig_atime{};
 
-    GtkToggleButton* chmod_btns[magic_enum::enum_count<vfs::chmod_action>()];
-    unsigned char chmod_states[magic_enum::enum_count<vfs::chmod_action>()];
+    std::array<GtkToggleButton*, 12> chmod_btns;
+    std::array<u8, 12> chmod_states;
 
     GtkLabel* total_size_label{nullptr};
     GtkLabel* size_on_disk_label{nullptr};

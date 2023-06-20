@@ -21,6 +21,8 @@
 
 #include <span>
 
+#include <array>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -125,7 +127,7 @@ PtkFileTask* ptk_file_exec_new(const std::string_view item_name,
 
 void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);
 
-void ptk_file_task_set_chmod(PtkFileTask* ptask, unsigned char* chmod_actions);
+void ptk_file_task_set_chmod(PtkFileTask* ptask, std::array<u8, 12> chmod_actions);
 
 void ptk_file_task_set_chown(PtkFileTask* ptask, uid_t uid, gid_t gid);
 
