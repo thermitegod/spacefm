@@ -68,22 +68,19 @@ static constexpr std::array<const std::string_view, 12> chmod_names{
 
 struct FilePropertiesDialogData
 {
-    FilePropertiesDialogData() = default;
-    ~FilePropertiesDialogData();
-
     std::filesystem::path dir_path{};
     std::vector<vfs::file_info> file_list{};
     GtkWidget* dlg{nullptr};
 
     GtkEntry* owner{nullptr};
     GtkEntry* group{nullptr};
-    char* owner_name{nullptr};
-    char* group_name{nullptr};
+    std::string owner_name{};
+    std::string group_name{};
 
     GtkEntry* mtime{nullptr};
-    char* orig_mtime{nullptr};
     GtkEntry* atime{nullptr};
-    char* orig_atime{nullptr};
+    std::string orig_mtime{};
+    std::string orig_atime{};
 
     GtkToggleButton* chmod_btns[magic_enum::enum_count<vfs::chmod_action>()];
     unsigned char chmod_states[magic_enum::enum_count<vfs::chmod_action>()];
@@ -101,26 +98,6 @@ struct FilePropertiesDialogData
     u32 update_label_timer{0};
     GtkWidget* recurse{nullptr};
 };
-
-FilePropertiesDialogData::~FilePropertiesDialogData()
-{
-    if (this->owner_name)
-    {
-        std::free(this->owner_name);
-    }
-    if (this->group_name)
-    {
-        std::free(this->group_name);
-    }
-    if (this->orig_mtime)
-    {
-        std::free(this->orig_mtime);
-    }
-    if (this->orig_atime)
-    {
-        std::free(this->orig_atime);
-    }
-}
 
 #define FILE_PROPERTIES_DIALOG_DATA(obj) (static_cast<FilePropertiesDialogData*>(obj))
 
@@ -575,9 +552,6 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         gtk_widget_set_sensitive(name, false);
         gtk_entry_set_text(GTK_ENTRY(name), multiple_files.data());
 
-        data->orig_mtime = nullptr;
-        data->orig_atime = nullptr;
-
         for (const auto i : ztd::range(magic_enum::enum_count<vfs::chmod_action>()))
         {
             gtk_toggle_button_set_inconsistent(data->chmod_btns[i], true);
@@ -633,25 +607,24 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         std::ostringstream mtime_formated;
         mtime_formated << std::put_time(local_mtime, time_format.data());
 
-        gtk_entry_set_text(GTK_ENTRY(data->mtime), mtime_formated.str().data());
-        data->orig_mtime = ztd::strdup(mtime_formated.str());
+        data->orig_mtime = mtime_formated.str();
+        gtk_entry_set_text(GTK_ENTRY(data->mtime), data->orig_mtime.data());
 
         const time_t atime = file->atime();
         std::tm* local_atime = std::localtime(&atime);
         std::ostringstream atime_formated;
         atime_formated << std::put_time(local_atime, time_format.data());
-        gtk_entry_set_text(GTK_ENTRY(data->atime), atime_formated.str().data());
-        data->orig_atime = ztd::strdup(mtime_formated.str());
+
+        data->orig_atime = mtime_formated.str();
+        gtk_entry_set_text(GTK_ENTRY(data->atime), data->orig_atime.data());
 
         // Permissions
         const auto owner_group = ztd::partition(file->display_owner(), ":");
-        const std::string& group = owner_group[0];
-        const std::string& owner = owner_group[2];
 
-        data->owner_name = ztd::strdup(owner);
-        gtk_entry_set_text(GTK_ENTRY(data->owner), data->owner_name);
-        data->group_name = ztd::strdup(group);
-        gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name);
+        data->group_name = owner_group[0];
+        gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name.data());
+        data->owner_name = owner_group[2];
+        gtk_entry_set_text(GTK_ENTRY(data->owner), data->owner_name.data());
 
         for (const auto i : ztd::range(magic_enum::enum_count<vfs::chmod_action>()))
         {
@@ -750,8 +723,6 @@ static void
 on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
 {
     (void)user_data;
-    uid_t uid;
-    gid_t gid;
 
     GtkAllocation allocation;
 
@@ -857,10 +828,13 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 }
             }
 
+            uid_t uid;
+            gid_t gid;
+
             /* Check if we need chown */
             const char* owner_name = gtk_entry_get_text(data->owner);
-            if (owner_name && *owner_name &&
-                (!data->owner_name || !ztd::same(owner_name, data->owner_name)))
+            if (owner_name &&
+                (data->owner_name.empty() || !ztd::same(owner_name, data->owner_name)))
             {
                 uid = uid_from_name(owner_name);
                 if (!uid)
@@ -870,8 +844,8 @@ on_dlg_response(GtkDialog* dialog, i32 response_id, void* user_data)
                 }
             }
             const char* group_name = gtk_entry_get_text(data->group);
-            if (group_name && *group_name &&
-                (!data->group_name || !ztd::same(group_name, data->group_name)))
+            if (group_name &&
+                (data->group_name.empty() || !ztd::same(group_name, data->group_name)))
             {
                 gid = gid_from_name(group_name);
                 if (!gid)
