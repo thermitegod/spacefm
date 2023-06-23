@@ -2831,9 +2831,14 @@ xset_get_builtin_toolitem_label(xset::tool tool_type)
 {
     assert(tool_type != xset::tool::NOT);
     assert(tool_type != xset::tool::custom);
-    assert(tool_type != xset::tool::devices);
+    // assert(tool_type != xset::tool::devices);
 
-    return builtin_tool_name.at(tool_type).value();
+    const auto tool_name = builtin_tool_name.at(tool_type);
+    if (tool_name)
+    {
+        return tool_name.value();
+    }
+    return "";
 }
 
 xset_t
