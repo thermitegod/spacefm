@@ -29,6 +29,8 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "settings/upgrade/config-upgrade.hxx"
+
 #include "settings/app.hxx"
 #include "settings/config-load.hxx"
 #include "settings/disk-format.hxx"
@@ -239,7 +241,8 @@ config_parse_xset(const toml::value& tbl, u64 version)
                     return;
                 }
 
-                if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "hand_"))
+                if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "handler_") ||
+                    ztd::startswith(set->name, "custom_handler_"))
                 { // custom
                     if (set->lock)
                     {
@@ -272,6 +275,9 @@ load_user_confing(const std::filesystem::path& session)
         config_parse_window(tbl, version);
         config_parse_interface(tbl, version);
         config_parse_xset(tbl, version);
+
+        // upgrade config
+        config_upgrade(version);
     }
     catch (const toml::syntax_error& e)
     {

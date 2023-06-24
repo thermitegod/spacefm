@@ -85,18 +85,18 @@ namespace ptk::handler
 
 // xset name prefixes of default handlers
 inline constexpr std::array<const std::string_view, 4> handler_def_prefixs{
-    "hand_arc_+",
-    "hand_fs_+",
-    "hand_net_+",
-    "hand_f_+",
+    "handler_archive_",
+    "handler_filesystem_",
+    "handler_network_",
+    "handler_file_",
 };
 
 // xset name prefixes of custom handlers
 inline constexpr std::array<const std::string_view, 4> handler_cust_prefixs{
-    "hand_arc_",
-    "hand_fs_",
-    "hand_net_",
-    "hand_f_",
+    "custom_handler_archive_",
+    "custom_handler_filesystem_",
+    "custom_handler_network_",
+    "custom_handler_file_",
 };
 
 inline constexpr std::array<xset::name, 4> handler_conf_xsets{
@@ -228,8 +228,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
      * Plus standard fish variables are accepted.
      */
     Handler{
-        "hand_arc_+7z",
-        xset::name::hand_arc_7z,
+        "handler_archive_7z",
+        xset::name::handler_archive_7z,
         "7-Zip",
         "application/x-7z-compressed",
         "*.7z",
@@ -241,8 +241,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+rar",
-        xset::name::hand_arc_rar,
+        "handler_archive_rar",
+        xset::name::handler_archive_rar,
         "RAR",
         "application/x-rar",
         "*.rar *.RAR",
@@ -254,8 +254,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+tar",
-        xset::name::hand_arc_tar,
+        "handler_archive_tar",
+        xset::name::handler_archive_tar,
         "Tar",
         "application/x-tar",
         "*.tar",
@@ -267,8 +267,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+tar_bz2",
-        xset::name::hand_arc_tar_bz2,
+        "handler_archive_tar_bz2",
+        xset::name::handler_archive_tar_bz2,
         "Tar bzip2",
         "application/x-bzip-compressed-tar",
         "*.tar.bz2",
@@ -280,8 +280,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+tar_gz",
-        xset::name::hand_arc_tar_gz,
+        "handler_archive_tar_gz",
+        xset::name::handler_archive_tar_gz,
         "Tar Gzip",
         "application/x-compressed-tar",
         "*.tar.gz *.tgz",
@@ -293,8 +293,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+tar_xz",
-        xset::name::hand_arc_tar_xz,
+        "handler_archive_tar_xz",
+        xset::name::handler_archive_tar_xz,
         "Tar xz",
         "application/x-xz-compressed-tar",
         "*.tar.xz *.txz",
@@ -306,8 +306,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+zip",
-        xset::name::hand_arc_zip,
+        "handler_archive_zip",
+        xset::name::handler_archive_zip,
         "Zip",
         "application/x-zip application/zip",
         "*.zip *.ZIP",
@@ -319,8 +319,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+gz",
-        xset::name::hand_arc_gz,
+        "handler_archive_gz",
+        xset::name::handler_archive_gz,
         "Gzip",
         "application/x-gzip application/x-gzpdf application/gzip",
         "*.gz",
@@ -332,8 +332,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+xz",
-        xset::name::hand_arc_xz,
+        "handler_archive_xz",
+        xset::name::handler_archive_xz,
         "XZ",
         "application/x-xz",
         "*.xz",
@@ -345,8 +345,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+tar_lz4",
-        xset::name::hand_arc_tar_lz4,
+        "handler_archive_tar_lz4",
+        xset::name::handler_archive_tar_lz4,
         "Tar Lz4",
         "application/x-lz4-compressed-tar",
         "*.tar.lz4",
@@ -358,8 +358,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+lz4",
-        xset::name::hand_arc_lz4,
+        "handler_archive_lz4",
+        xset::name::handler_archive_lz4,
         "Lz4",
         "application/x-lz4",
         "*.lz4",
@@ -371,8 +371,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+tar_zst",
-        xset::name::hand_arc_tar_zst,
+        "handler_archive_tar_zst",
+        xset::name::handler_archive_tar_zst,
         "Tar Zstd",
         "application/x-zstd-compressed-tar",
         "*.tar.zst",
@@ -384,8 +384,8 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         false,
     },
     Handler{
-        "hand_arc_+zst",
-        xset::name::hand_arc_zip,
+        "handler_archive_zst",
+        xset::name::handler_archive_zip,
         "Zstd",
         "application/zstd",
         "*.zst",
@@ -419,8 +419,8 @@ inline constexpr std::array<Handler, 3> handlers_fs{
      *      eg: +ext3 dev=/dev/sdb* id=ata-* label=Label_With_Spaces
      */
     Handler{
-        "hand_fs_+fuseiso",
-        xset::name::hand_fs_fuseiso,
+        "handler_filesystem_fuseiso",
+        xset::name::handler_filesystem_fuseiso,
         "fuseiso unmount",
         "*fuseiso",
         "",
@@ -434,8 +434,8 @@ inline constexpr std::array<Handler, 3> handlers_fs{
         false,
     },
     Handler{
-        "hand_fs_+udiso",
-        xset::name::hand_fs_udiso,
+        "handler_filesystem_udiso",
+        xset::name::handler_filesystem_udiso,
         "udevil iso unmount",
         "+iso9660 +dev=/dev/loop*",
         "optical=1 removable=1",
@@ -450,8 +450,8 @@ inline constexpr std::array<Handler, 3> handlers_fs{
         false,
     },
     Handler{
-        "hand_fs_+def",
-        xset::name::hand_fs_def,
+        "handler_filesystem_default",
+        xset::name::handler_filesystem_default,
         "Default",
         "*",
         "",
@@ -513,8 +513,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
      *      eg: +ssh url=ssh://...
      */
     Handler{
-        "hand_net_+http",
-        xset::name::hand_net_http,
+        "handler_network_http",
+        xset::name::handler_network_http,
         "http & webdav",
         "http https webdav davfs davs dav mtab_fs=davfs*",
         "",
@@ -556,8 +556,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+ftp",
-        xset::name::hand_net_ftp,
+        "handler_network_ftp",
+        xset::name::handler_network_ftp,
         "ftp",
         "ftp",
         "",
@@ -580,8 +580,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+ssh",
-        xset::name::hand_net_ssh,
+        "handler_network_ssh",
+        xset::name::handler_network_ssh,
         "ssh",
         "ssh sftp mtab_fs=fuse.sshfs",
         "",
@@ -609,8 +609,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+mtp",
-        xset::name::hand_net_mtp,
+        "handler_network_mtp",
+        xset::name::handler_network_mtp,
         "mtp",
         "mtp mtab_fs=fuse.jmtpfs mtab_fs=fuse.simple-mtpfs mtab_fs=fuse.mtpfs "
         "mtab_fs=fuse.DeviceFs(*",
@@ -640,8 +640,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+gphoto",
-        xset::name::hand_net_gphoto,
+        "handler_network_gphoto",
+        xset::name::handler_network_gphoto,
         "ptp",
         "ptp gphoto mtab_fs=fuse.gphotofs",
         "",
@@ -653,8 +653,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+ifuse",
-        xset::name::hand_net_ifuse,
+        "handler_network_ifuse",
+        xset::name::handler_network_ifuse,
         "ifuse",
         "ifuse ios mtab_fs=fuse.ifuse",
         "",
@@ -666,8 +666,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+udevil",
-        xset::name::hand_net_udevil,
+        "handler_network_udevil",
+        xset::name::handler_network_udevil,
         "udevil",
         "ftp http https nfs ssh mtab_fs=fuse.sshfs mtab_fs=davfs*",
         "",
@@ -679,8 +679,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+udevilsmb",
-        xset::name::hand_net_udevilsmb,
+        "handler_network_udevilsmb",
+        xset::name::handler_network_udevilsmb,
         "udevil-smb",
         "smb mtab_fs=cifs",
         "",
@@ -693,8 +693,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+fusesmb",
-        xset::name::hand_net_fusesmb,
+        "handler_network_fusesmb",
+        xset::name::handler_network_fusesmb,
         "fusesmb",
         "smb mtab_fs=fuse.fusesmb",
         "",
@@ -706,8 +706,8 @@ inline constexpr std::array<Handler, 10> handlers_net{
         false,
     },
     Handler{
-        "hand_net_+fuse",
-        xset::name::hand_net_fuse,
+        "handler_network_fuse",
+        xset::name::handler_network_fuse,
         "fuse unmount",
         "mtab_fs=fuse.* mtab_fs=fuse",
         "",
@@ -725,8 +725,8 @@ inline constexpr std::array<Handler, 1> handlers_file{
      * Plus standard fish variables are accepted.
      * For file handlers, extract_term is used for Run As Task. */
     Handler{
-        "hand_f_+iso",
-        xset::name::hand_f_iso,
+        "handler_file_iso",
+        xset::name::handler_file_iso,
         "Mount ISO",
         "application/x-iso9660-image application/x-iso-image application/x-cd-image",
         "*.img *.iso *.mdf *.nrg",
@@ -1296,6 +1296,10 @@ ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing)
     }
 
     set_conf = xset_get(handler_conf_xsets.at(mode));
+    if (!set_conf->s)
+    {
+        return;
+    }
     list = ztd::strdup(set_conf->s.value());
 
     if (!list)

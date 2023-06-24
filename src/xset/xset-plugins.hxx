@@ -43,10 +43,10 @@ namespace plugin
 
     enum class use
     {
-        hand_arc,
-        hand_fs,
-        hand_net,
-        hand_file,
+        handler_archive,
+        handler_filesystem,
+        handler_network,
+        handler_file,
         bookmarks,
         normal
     };

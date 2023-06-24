@@ -355,19 +355,19 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     {
         const std::string s1 = clean_label(set->menu_label.value(), true, false);
         std::string type;
-        if (ztd::startswith(set->name, "hand_arc_"))
+        if (ztd::startswith(set->name, "handler_archive_"))
         {
             type = "archive-handler";
         }
-        else if (ztd::startswith(set->name, "hand_fs_"))
+        else if (ztd::startswith(set->name, "handler_filesystem_"))
         {
             type = "device-handler";
         }
-        else if (ztd::startswith(set->name, "hand_net_"))
+        else if (ztd::startswith(set->name, "handler_network_"))
         {
             type = "protocol-handler";
         }
-        else if (ztd::startswith(set->name, "hand_f_"))
+        else if (ztd::startswith(set->name, "handler_file_"))
         {
             type = "file-handler";
         }

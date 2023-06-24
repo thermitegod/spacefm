@@ -375,6 +375,8 @@ sources = files(
     'src/settings/plugins-load.cxx',
     'src/settings/plugins-save.cxx',
 
+    'src/settings/upgrade/config-upgrade.cxx',
+
     'src/mime-type/mime-action.cxx',
     'src/mime-type/mime-cache.cxx',
     'src/mime-type/mime-type.cxx',

@@ -41,7 +41,7 @@ using xsetpak_t = std::map<std::string, setvars_t>;
  */
 
 // TOML config file
-inline constexpr u64 CONFIG_FILE_VERSION{1}; // 3.0.0-dev
+inline constexpr u64 CONFIG_FILE_VERSION{2}; // 3.0.0-dev
 const std::string CONFIG_FILE_FILENAME{"session.toml"};
 
 // TOML config on disk names - TOML sections

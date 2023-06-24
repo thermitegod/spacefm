@@ -242,17 +242,17 @@ xset_parse_plugin(const std::filesystem::path& plug_dir, const std::string_view 
     std::string prefix;
     switch (use)
     {
-        case plugin::use::hand_arc:
-            prefix = "hand_arc_";
+        case plugin::use::handler_archive:
+            prefix = "handler_archive_";
             break;
-        case plugin::use::hand_fs:
-            prefix = "hand_fs_";
+        case plugin::use::handler_filesystem:
+            prefix = "handler_filesystem_";
             break;
-        case plugin::use::hand_net:
-            prefix = "hand_net_";
+        case plugin::use::handler_network:
+            prefix = "handler_network_";
             break;
-        case plugin::use::hand_file:
-            prefix = "hand_f_";
+        case plugin::use::handler_file:
+            prefix = "handler_file_";
             break;
         case plugin::use::bookmarks:
         case plugin::use::normal:
@@ -348,23 +348,23 @@ xset_import_plugin_parse(const std::filesystem::path& plug_dir, plugin::use* use
 
     if (use && *use == plugin::use::normal)
     {
-        if (ztd::startswith(name, "hand_"))
+        if (ztd::startswith(name, "handler_"))
         {
-            if (ztd::startswith(name, "hand_fs_"))
+            if (ztd::startswith(name, "handler_filesystem_"))
             {
-                *use = plugin::use::hand_fs;
+                *use = plugin::use::handler_filesystem;
             }
-            else if (ztd::startswith(name, "hand_arc_"))
+            else if (ztd::startswith(name, "handler_archive_"))
             {
-                *use = plugin::use::hand_arc;
+                *use = plugin::use::handler_archive;
             }
-            else if (ztd::startswith(name, "hand_net_"))
+            else if (ztd::startswith(name, "handler_network_"))
             {
-                *use = plugin::use::hand_net;
+                *use = plugin::use::handler_network;
             }
-            else if (ztd::startswith(name, "hand_f_"))
+            else if (ztd::startswith(name, "handler_file_"))
             {
-                *use = plugin::use::hand_file;
+                *use = plugin::use::handler_file;
             }
         }
     }
