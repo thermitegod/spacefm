@@ -649,7 +649,7 @@ process_found_files(FindFile* data, GQueue* queue, const char* path)
                            file_files::column::dir,
                            ff->dir_path.data(), /* FIXME: non-UTF8? */
                            file_files::column::type,
-                           ff->file->mime_type_description().data(),
+                           ff->file->mime_type()->description().data(),
                            file_files::column::size,
                            ff->file->display_size().data(),
                            file_files::column::mtime,

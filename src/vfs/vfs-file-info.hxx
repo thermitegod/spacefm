@@ -81,8 +81,6 @@ struct VFSFileInfo
     vfs::mime_type mime_type() const noexcept;
     void reload_mime_type(const std::filesystem::path& full_path) noexcept;
 
-    const std::string_view mime_type_description() const noexcept;
-
     const std::string_view display_owner() noexcept;
     const std::string_view display_mtime() noexcept;
     const std::string_view display_permissions() noexcept;

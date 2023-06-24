@@ -236,12 +236,6 @@ VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
     this->load_special_info(full_path);
 }
 
-const std::string_view
-VFSFileInfo::mime_type_description() const noexcept
-{
-    return mime_type_->description();
-}
-
 GdkPixbuf*
 VFSFileInfo::big_icon() noexcept
 {

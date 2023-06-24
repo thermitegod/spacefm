@@ -493,7 +493,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             }
             break;
         case ptk::file_list::column::type:
-            g_value_set_string(value, file->mime_type_description().data());
+            g_value_set_string(value, file->mime_type()->description().data());
             break;
         case ptk::file_list::column::perm:
             g_value_set_string(value, file->display_permissions().data());
@@ -767,7 +767,8 @@ compare_file_info_type(vfs::file_info file_a, vfs::file_info file_b, PtkFileList
         }
     }
 
-    result = ztd::sort::compare(file_a->mime_type_description(), file_b->mime_type_description());
+    result =
+        ztd::sort::compare(file_a->mime_type()->description(), file_b->mime_type()->description());
 
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
