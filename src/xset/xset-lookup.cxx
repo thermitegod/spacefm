@@ -1705,17 +1705,6 @@ static const std::unordered_map<std::string_view, xset::var> xset_var_map{
     {"scroll_lock"sv,       xset::var::scroll_lock},
     {"disable"sv,           xset::var::disable},
     {"opener"sv,            xset::var::opener},
-
-    // Deprecated ini only config keys
-#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
-    {"lbl"sv,               xset::var::menu_label},
-    {"label"sv,             xset::var::menu_label_custom},
-    {"cxt"sv,               xset::var::context},
-    {"term"sv,              xset::var::run_in_terminal},
-    {"keep"sv,              xset::var::keep_terminal},
-    {"scroll"sv,            xset::var::scroll_lock},
-    {"op"sv,                xset::var::opener},
-#endif
 };
 
 static const std::unordered_map<xset::main_window_panel, std::string_view> main_window_panel_mode_map{

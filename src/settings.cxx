@@ -183,21 +183,7 @@ load_settings()
     // MOD extra settings
     xset_defaults();
 
-#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
-    // choose which config file to load
-    const auto conf_ini = settings_config_dir / CONFIG_FILE_INI_FILENAME;
-    const auto conf_toml = settings_config_dir / CONFIG_FILE_FILENAME;
-    const auto session = conf_toml;
-    bool load_deprecated_ini_config = false;
-    if (std::filesystem::exists(conf_ini) && !std::filesystem::exists(conf_toml))
-    {
-        ztd::logger::warn("INI config files are deprecated, loading support will be removed");
-        load_deprecated_ini_config = true;
-        session = conf_ini;
-    }
-#else
     const auto session = std::filesystem::path() / settings_config_dir / CONFIG_FILE_FILENAME;
-#endif
 
     if (!std::filesystem::exists(settings_config_dir))
     {
@@ -250,11 +236,7 @@ load_settings()
 
     if (std::filesystem::is_regular_file(session))
     {
-#if defined(HAVE_DEPRECATED_INI_CONFIG_LOADING)
-        load_user_confing(session, load_deprecated_ini_config);
-#else
         load_user_confing(session);
-#endif
     }
     else
     {
