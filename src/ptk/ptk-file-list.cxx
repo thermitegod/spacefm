@@ -436,12 +436,11 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 
     vfs::file_info file = VFS_FILE_INFO(iter->user_data2);
 
-    GdkPixbuf* icon;
+    GdkPixbuf* icon = nullptr;
 
     switch (ptk::file_list::column(column))
     {
         case ptk::file_list::column::big_icon:
-            icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
             if (file->flags() == vfs::file_info_flags::none &&
                 (list->max_thumbnail > file->size() ||
@@ -461,7 +460,6 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             }
             break;
         case ptk::file_list::column::small_icon:
-            icon = nullptr;
             /* special file can use special icons saved as thumbnails*/
             if (list->max_thumbnail > file->size() ||
                 (list->max_thumbnail != 0 && file->is_video()))
@@ -482,15 +480,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             g_value_set_string(value, file->display_name().data());
             break;
         case ptk::file_list::column::size:
-            if ((file->is_directory() || file->is_symlink()) &&
-                ztd::same(file->mime_type()->type(), XDG_MIME_TYPE_DIRECTORY))
-            {
-                g_value_set_string(value, nullptr);
-            }
-            else
-            {
-                g_value_set_string(value, file->display_size().data());
-            }
+            g_value_set_string(value, file->display_size().data());
             break;
         case ptk::file_list::column::type:
             g_value_set_string(value, file->mime_type()->description().data());
