@@ -31,6 +31,8 @@ const std::string CONFIG_FILE_TABS_DELIM = "///";
  *  TOML data structure types for serialization
  */
 
+// toml11 does not work with std::string_view
+
 // map<var, value>
 using setvars_t = std::map<std::string, std::string>;
 // map<xset_name, setvars_t>

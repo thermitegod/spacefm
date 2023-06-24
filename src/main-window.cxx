@@ -8109,7 +8109,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     bool inhibit;
     i32 exit_status;
 
-    const std::string event_name = xset::get_name_from_xsetname(event);
+    const auto event_name = xset::get_name_from_xsetname(event);
 
     if (!ucmd)
     {
