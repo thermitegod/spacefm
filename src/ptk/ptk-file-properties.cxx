@@ -74,8 +74,8 @@ struct FilePropertiesDialogData
 
     GtkEntry* owner{nullptr};
     GtkEntry* group{nullptr};
-    std::string owner_name{};
-    std::string group_name{};
+    std::string_view owner_name{};
+    std::string_view group_name{};
 
     GtkEntry* mtime{nullptr};
     GtkEntry* atime{nullptr};
@@ -619,11 +619,9 @@ file_properties_dlg_new(GtkWindow* parent, const std::filesystem::path& dir_path
         gtk_entry_set_text(GTK_ENTRY(data->atime), data->orig_atime.data());
 
         // Permissions
-        const auto owner_group = ztd::partition(file->display_owner(), ":");
-
-        data->group_name = owner_group[0];
+        data->group_name = file->display_group();
         gtk_entry_set_text(GTK_ENTRY(data->group), data->group_name.data());
-        data->owner_name = owner_group[2];
+        data->owner_name = file->display_owner();
         gtk_entry_set_text(GTK_ENTRY(data->owner), data->owner_name.data());
 
         for (const auto i : ztd::range(magic_enum::enum_count<vfs::chmod_action>()))

@@ -682,6 +682,43 @@ const std::unordered_map<xset::panel, panel_lookup_data> xset_panel_lookup{
         },
     },
     {
+        xset::panel::detcol_group,
+        {
+            {
+                xset::name::panel1_detcol_group,
+                xset::name::panel2_detcol_group,
+                xset::name::panel3_detcol_group,
+                xset::name::panel4_detcol_group,
+            },
+            {{
+                {
+                    xset::name::panel1_detcol_group0,
+                    xset::name::panel1_detcol_group1,
+                    xset::name::panel1_detcol_group2,
+                    xset::name::panel1_detcol_group3,
+                },
+                {
+                    xset::name::panel2_detcol_group0,
+                    xset::name::panel2_detcol_group1,
+                    xset::name::panel2_detcol_group2,
+                    xset::name::panel2_detcol_group3,
+                },
+                {
+                    xset::name::panel3_detcol_group0,
+                    xset::name::panel3_detcol_group1,
+                    xset::name::panel3_detcol_group2,
+                    xset::name::panel3_detcol_group3,
+                },
+                {
+                    xset::name::panel4_detcol_group0,
+                    xset::name::panel4_detcol_group1,
+                    xset::name::panel4_detcol_group2,
+                    xset::name::panel4_detcol_group3,
+                },
+            }},
+        },
+    },
+    {
         xset::panel::detcol_date,
         {
             {

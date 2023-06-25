@@ -141,6 +141,30 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     // this->collate_key_ = Glib::ustring(this->display_name_).collate_key();
     // this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
 
+    if (cached_uid.contains(this->file_stat_.uid()))
+    {
+        const auto pw = cached_uid.at(this->file_stat_.uid());
+        this->display_owner_ = pw.name();
+    }
+    else
+    {
+        const auto pw = ztd::passwd(this->file_stat_.uid());
+        cached_uid.insert({this->file_stat_.uid(), pw});
+        this->display_owner_ = pw.name();
+    }
+
+    if (cached_gid.contains(this->file_stat_.gid()))
+    {
+        const auto gr = cached_gid.at(this->file_stat_.gid());
+        this->display_group_ = gr.name();
+    }
+    else
+    {
+        const auto gr = ztd::group(this->file_stat_.gid());
+        cached_gid.insert({this->file_stat_.gid(), gr});
+        this->display_group_ = gr.name();
+    }
+
     return true;
 }
 
@@ -344,35 +368,13 @@ VFSFileInfo::unload_small_thumbnail() noexcept
 const std::string_view
 VFSFileInfo::display_owner() noexcept
 {
-    std::string user_name;
-    if (cached_uid.contains(this->file_stat_.uid()))
-    {
-        const auto pw = cached_uid.at(this->file_stat_.uid());
-        user_name = pw.name();
-    }
-    else
-    {
-        const auto pw = ztd::passwd(this->file_stat_.uid());
-        cached_uid.insert({this->file_stat_.uid(), pw});
-        user_name = pw.name();
-    }
-
-    std::string group_name;
-    if (cached_gid.contains(this->file_stat_.gid()))
-    {
-        const auto gr = cached_gid.at(this->file_stat_.gid());
-        group_name = gr.name();
-    }
-    else
-    {
-        const auto gr = ztd::group(this->file_stat_.gid());
-        cached_gid.insert({this->file_stat_.gid(), gr});
-        group_name = gr.name();
-    }
-
-    this->display_owner_ = std::format("{}:{}", user_name, group_name);
-
     return this->display_owner_;
+}
+
+const std::string_view
+VFSFileInfo::display_group() noexcept
+{
+    return this->display_group_;
 }
 
 const std::string_view

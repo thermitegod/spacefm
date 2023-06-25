@@ -180,21 +180,23 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 std::vector<std::string> xset_cmd_history;
 
 // must match main-window.c  main_window_socket_command
-inline constexpr std::array<const std::string_view, 6> column_titles{
+inline constexpr std::array<const std::string_view, 7> column_titles{
     "Name",
     "Size",
     "Type",
     "Permission",
     "Owner",
+    "Group",
     "Modified",
 };
 
-inline constexpr std::array<xset::panel, 6> column_names{
+inline constexpr std::array<xset::panel, 7> column_names{
     xset::panel::detcol_name,
     xset::panel::detcol_size,
     xset::panel::detcol_type,
     xset::panel::detcol_perm,
     xset::panel::detcol_owner,
+    xset::panel::detcol_group,
     xset::panel::detcol_date,
 };
 
@@ -2091,7 +2093,7 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     i32 col;
     gtk_tree_sortable_get_sort_column_id(sortable, &col, &file_browser->sort_type);
 
-    ptk::file_list::column column = ptk::file_list::column(col);
+    const auto column = ptk::file_list::column(col);
     ptk::file_browser::sort_order sort_order = ptk::file_browser::sort_order::name;
     switch (column)
     {
@@ -2113,10 +2115,11 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
         case ptk::file_list::column::owner:
             sort_order = ptk::file_browser::sort_order::owner;
             break;
+        case ptk::file_list::column::group:
+            sort_order = ptk::file_browser::sort_order::group;
+            break;
         case ptk::file_list::column::big_icon:
-            [[fallthrough]];
         case ptk::file_list::column::small_icon:
-            [[fallthrough]];
         case ptk::file_list::column::info:
             break;
     }
@@ -4054,12 +4057,13 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
     GtkTreeViewColumn* col;
     GtkCellRenderer* pix_renderer;
 
-    static constexpr std::array<ptk::file_list::column, 6> cols{
+    static constexpr std::array<ptk::file_list::column, 7> cols{
         ptk::file_list::column::name,
         ptk::file_list::column::size,
         ptk::file_list::column::type,
         ptk::file_list::column::perm,
         ptk::file_list::column::owner,
+        ptk::file_list::column::group,
         ptk::file_list::column::mtime,
     };
 
@@ -5449,6 +5453,9 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
         case ptk::file_browser::sort_order::owner:
             col = ptk::file_list::column::owner;
             break;
+        case ptk::file_browser::sort_order::group:
+            col = ptk::file_list::column::group;
+            break;
     }
     return magic_enum::enum_integer(col);
 }
@@ -6375,6 +6382,10 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname)
         else if (set->xset_name == xset::name::sortby_owner)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::owner);
+        }
+        else if (set->xset_name == xset::name::sortby_group)
+        {
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::group);
         }
         else if (set->xset_name == xset::name::sortby_date)
         {

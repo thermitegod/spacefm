@@ -82,6 +82,7 @@ struct VFSFileInfo
     void reload_mime_type(const std::filesystem::path& full_path) noexcept;
 
     const std::string_view display_owner() noexcept;
+    const std::string_view display_group() noexcept;
     const std::string_view display_mtime() noexcept;
     const std::string_view display_permissions() noexcept;
 
@@ -139,7 +140,8 @@ struct VFSFileInfo
     std::string collate_icase_key_{}; // sfm case folded sort key
     std::string display_size_{};      // displayed human-readable file size
     std::string display_disk_size_{}; // displayed human-readable file size on disk
-    std::string display_owner_{};     // displayed owner:group pair
+    std::string display_owner_{};     // displayed owner
+    std::string display_group_{};     // displayed group
     std::string display_mtime_{};     // displayed last modification time
     std::string display_perm_{};      // displayed permission in string form
     vfs::mime_type mime_type_{};      // mime type related information

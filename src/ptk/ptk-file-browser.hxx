@@ -66,6 +66,7 @@ namespace ptk::file_browser
         type,
         perm,
         owner,
+        group,
     };
 
     enum class chdir_mode
