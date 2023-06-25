@@ -81,13 +81,16 @@ struct VFSFileInfo
     vfs::mime_type mime_type() const noexcept;
     void reload_mime_type(const std::filesystem::path& full_path) noexcept;
 
-    const std::string_view display_owner() noexcept;
-    const std::string_view display_group() noexcept;
-    const std::string_view display_mtime() noexcept;
+    const std::string_view display_owner() const noexcept;
+    const std::string_view display_group() const noexcept;
+    const std::string_view display_atime() const noexcept;
+    const std::string_view display_mtime() const noexcept;
+    const std::string_view display_ctime() const noexcept;
     const std::string_view display_permissions() noexcept;
 
-    std::time_t mtime() noexcept;
     std::time_t atime() noexcept;
+    std::time_t mtime() noexcept;
+    std::time_t ctime() noexcept;
 
     void load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
@@ -142,7 +145,9 @@ struct VFSFileInfo
     std::string display_disk_size_{}; // displayed human-readable file size on disk
     std::string display_owner_{};     // displayed owner
     std::string display_group_{};     // displayed group
-    std::string display_mtime_{};     // displayed last modification time
+    std::string display_atime_{};     // displayed accessed time
+    std::string display_mtime_{};     // displayed modification time
+    std::string display_ctime_{};     // displayed created time
     std::string display_perm_{};      // displayed permission in string form
     vfs::mime_type mime_type_{};      // mime type related information
     GdkPixbuf* big_thumbnail_{};      // thumbnail of the file

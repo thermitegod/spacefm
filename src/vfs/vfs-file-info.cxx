@@ -141,6 +141,7 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     // this->collate_key_ = Glib::ustring(this->display_name_).collate_key();
     // this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
 
+    // owner
     if (cached_uid.contains(this->file_stat_.uid()))
     {
         const auto pw = cached_uid.at(this->file_stat_.uid());
@@ -153,6 +154,7 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
         this->display_owner_ = pw.name();
     }
 
+    // group
     if (cached_gid.contains(this->file_stat_.gid()))
     {
         const auto gr = cached_gid.at(this->file_stat_.gid());
@@ -164,6 +166,31 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
         cached_gid.insert({this->file_stat_.gid(), gr});
         this->display_group_ = gr.name();
     }
+
+    // time
+    std::tm* local_time;
+    char buffer[100];
+
+    // atime
+    const time_t atime = this->file_stat_.atime();
+    local_time = std::localtime(&atime);
+    std::strftime(buffer, sizeof(buffer), app_settings.get_date_format().data(), local_time);
+    this->display_atime_ = buffer;
+    std::memset(buffer, 0, sizeof(buffer));
+
+    // mtime
+    const time_t mtime = this->file_stat_.mtime();
+    local_time = std::localtime(&mtime);
+    std::strftime(buffer, sizeof(buffer), app_settings.get_date_format().data(), local_time);
+    this->display_mtime_ = buffer;
+    std::memset(buffer, 0, sizeof(buffer));
+
+    // ctime
+    const time_t ctime = this->file_stat_.ctime();
+    local_time = std::localtime(&ctime);
+    std::strftime(buffer, sizeof(buffer), app_settings.get_date_format().data(), local_time);
+    this->display_ctime_ = buffer;
+    std::memset(buffer, 0, sizeof(buffer));
 
     return true;
 }
@@ -366,31 +393,39 @@ VFSFileInfo::unload_small_thumbnail() noexcept
 }
 
 const std::string_view
-VFSFileInfo::display_owner() noexcept
+VFSFileInfo::display_owner() const noexcept
 {
     return this->display_owner_;
 }
 
 const std::string_view
-VFSFileInfo::display_group() noexcept
+VFSFileInfo::display_group() const noexcept
 {
     return this->display_group_;
 }
 
 const std::string_view
-VFSFileInfo::display_mtime() noexcept
+VFSFileInfo::display_atime() const noexcept
 {
-    if (this->display_mtime_.empty())
-    {
-        const time_t mtime = this->file_stat_.mtime();
+    return this->display_atime_;
+}
 
-        std::tm* local_time = std::localtime(&mtime);
-        std::ostringstream date;
-        date << std::put_time(local_time, app_settings.get_date_format().data());
-
-        this->display_mtime_ = date.str();
-    }
+const std::string_view
+VFSFileInfo::display_mtime() const noexcept
+{
     return this->display_mtime_;
+}
+
+const std::string_view
+VFSFileInfo::display_ctime() const noexcept
+{
+    return this->display_ctime_;
+}
+
+std::time_t
+VFSFileInfo::atime() noexcept
+{
+    return this->file_stat_.atime();
 }
 
 std::time_t
@@ -400,9 +435,9 @@ VFSFileInfo::mtime() noexcept
 }
 
 std::time_t
-VFSFileInfo::atime() noexcept
+VFSFileInfo::ctime() noexcept
 {
-    return this->file_stat_.atime();
+    return this->file_stat_.ctime();
 }
 
 vfs::file_info_flags

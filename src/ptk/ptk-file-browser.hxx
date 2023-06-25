@@ -62,11 +62,13 @@ namespace ptk::file_browser
     {
         name,
         size,
-        mtime,
         type,
         perm,
         owner,
         group,
+        atime,
+        mtime,
+        ctime,
     };
 
     enum class chdir_mode

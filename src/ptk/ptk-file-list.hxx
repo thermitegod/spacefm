@@ -51,7 +51,9 @@ namespace ptk::file_list
         perm,
         owner,
         group,
+        atime,
         mtime,
+        ctime,
         info,
     };
 

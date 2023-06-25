@@ -180,24 +180,28 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 std::vector<std::string> xset_cmd_history;
 
 // must match main-window.c  main_window_socket_command
-inline constexpr std::array<const std::string_view, 7> column_titles{
+inline constexpr std::array<const std::string_view, 9> column_titles{
     "Name",
     "Size",
     "Type",
-    "Permission",
+    "Permissions",
     "Owner",
     "Group",
+    "Accessed",
     "Modified",
+    "Created",
 };
 
-inline constexpr std::array<xset::panel, 7> column_names{
+inline constexpr std::array<xset::panel, 9> column_names{
     xset::panel::detcol_name,
     xset::panel::detcol_size,
     xset::panel::detcol_type,
     xset::panel::detcol_perm,
     xset::panel::detcol_owner,
     xset::panel::detcol_group,
-    xset::panel::detcol_date,
+    xset::panel::detcol_atime,
+    xset::panel::detcol_mtime,
+    xset::panel::detcol_ctime,
 };
 
 GType
@@ -2103,9 +2107,6 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
         case ptk::file_list::column::size:
             sort_order = ptk::file_browser::sort_order::size;
             break;
-        case ptk::file_list::column::mtime:
-            sort_order = ptk::file_browser::sort_order::mtime;
-            break;
         case ptk::file_list::column::type:
             sort_order = ptk::file_browser::sort_order::type;
             break;
@@ -2117,6 +2118,15 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
             break;
         case ptk::file_list::column::group:
             sort_order = ptk::file_browser::sort_order::group;
+            break;
+        case ptk::file_list::column::atime:
+            sort_order = ptk::file_browser::sort_order::atime;
+            break;
+        case ptk::file_list::column::mtime:
+            sort_order = ptk::file_browser::sort_order::mtime;
+            break;
+        case ptk::file_list::column::ctime:
+            sort_order = ptk::file_browser::sort_order::ctime;
             break;
         case ptk::file_list::column::big_icon:
         case ptk::file_list::column::small_icon:
@@ -4057,14 +4067,16 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
     GtkTreeViewColumn* col;
     GtkCellRenderer* pix_renderer;
 
-    static constexpr std::array<ptk::file_list::column, 7> cols{
+    static constexpr std::array<ptk::file_list::column, 9> cols{
         ptk::file_list::column::name,
         ptk::file_list::column::size,
         ptk::file_list::column::type,
         ptk::file_list::column::perm,
         ptk::file_list::column::owner,
         ptk::file_list::column::group,
+        ptk::file_list::column::atime,
         ptk::file_list::column::mtime,
+        ptk::file_list::column::ctime,
     };
 
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
@@ -4172,10 +4184,10 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                                              xset_get_b_panel_mode(p, column_names.at(idx), mode));
         }
 
-        if (cols.at(idx) == ptk::file_list::column::size)
-        {
-            gtk_cell_renderer_set_alignment(renderer, 1, 0.5);
-        }
+        // if (cols.at(idx) == ptk::file_list::column::size)
+        // {
+        //     gtk_cell_renderer_set_alignment(renderer, 1, 0.5);
+        // }
 
         gtk_tree_view_column_pack_start(col, renderer, true);
         gtk_tree_view_column_set_attributes(col, renderer, "text", cols.at(idx), nullptr);
@@ -5441,9 +5453,6 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
         case ptk::file_browser::sort_order::size:
             col = ptk::file_list::column::size;
             break;
-        case ptk::file_browser::sort_order::mtime:
-            col = ptk::file_list::column::mtime;
-            break;
         case ptk::file_browser::sort_order::type:
             col = ptk::file_list::column::type;
             break;
@@ -5455,6 +5464,15 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
             break;
         case ptk::file_browser::sort_order::group:
             col = ptk::file_list::column::group;
+            break;
+        case ptk::file_browser::sort_order::atime:
+            col = ptk::file_list::column::atime;
+            break;
+        case ptk::file_browser::sort_order::mtime:
+            col = ptk::file_list::column::mtime;
+            break;
+        case ptk::file_browser::sort_order::ctime:
+            col = ptk::file_list::column::ctime;
             break;
     }
     return magic_enum::enum_integer(col);
@@ -6387,9 +6405,17 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::group);
         }
-        else if (set->xset_name == xset::name::sortby_date)
+        else if (set->xset_name == xset::name::sortby_atime)
+        {
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::atime);
+        }
+        else if (set->xset_name == xset::name::sortby_mtime)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::mtime);
+        }
+        else if (set->xset_name == xset::name::sortby_ctime)
+        {
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::ctime);
         }
         else if (set->xset_name == xset::name::sortby_ascend)
         {

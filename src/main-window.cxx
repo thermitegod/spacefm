@@ -1117,9 +1117,17 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_group));
                 xset_set_b_panel_mode(p,
-                                      xset::panel::detcol_date,
+                                      xset::panel::detcol_atime,
                                       mode,
-                                      xset_get_b_panel(p, xset::panel::detcol_date));
+                                      xset_get_b_panel(p, xset::panel::detcol_atime));
+                xset_set_b_panel_mode(p,
+                                      xset::panel::detcol_mtime,
+                                      mode,
+                                      xset_get_b_panel(p, xset::panel::detcol_mtime));
+                xset_set_b_panel_mode(p,
+                                      xset::panel::detcol_ctime,
+                                      mode,
+                                      xset_get_b_panel(p, xset::panel::detcol_ctime));
                 const xset_t set_old = xset_get_panel(p, xset::panel::slider_positions);
                 set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
                 set->x = set_old->x ? set_old->x : "0";
@@ -6160,14 +6168,16 @@ main_window_socket_command(char* argv[])
     const char* window = nullptr;
 
     // must match file-browser.c
-    static constexpr std::array<const std::string_view, 7> column_titles{
+    static constexpr std::array<const std::string_view, 9> column_titles{
         "Name",
         "Size",
         "Type",
-        "Permission",
+        "Permissions",
         "Owner",
         "Group",
+        "Accessed",
         "Modified",
+        "Created",
     };
 
     // cmd options
@@ -6626,7 +6636,17 @@ main_window_socket_command(char* argv[])
                         found = true;
                         break;
                     }
+                    else if (ztd::same(argv[i + 1], "accessed") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
                     else if (ztd::same(argv[i + 1], "modified") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
+                    else if (ztd::same(argv[i + 1], "created") && ztd::same(title, value))
                     {
                         found = true;
                         break;
@@ -6644,7 +6664,7 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
-            ptk::file_browser::sort_order j = ptk::file_browser::sort_order::name;
+            auto j = ptk::file_browser::sort_order::name;
             if (!argv[i + 1])
             {
             }
@@ -6672,10 +6692,19 @@ main_window_socket_command(char* argv[])
             {
                 j = ptk::file_browser::sort_order::group;
             }
+            else if (ztd::same(argv[i + 1], "accessed"))
+            {
+                j = ptk::file_browser::sort_order::atime;
+            }
             else if (ztd::same(argv[i + 1], "modified"))
             {
                 j = ptk::file_browser::sort_order::mtime;
             }
+            else if (ztd::same(argv[i + 1], "created"))
+            {
+                j = ptk::file_browser::sort_order::ctime;
+            }
+
             else
             {
                 return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
@@ -7140,7 +7169,17 @@ main_window_socket_command(char* argv[])
                         found = true;
                         break;
                     }
+                    else if (ztd::same(argv[i + 1], "accessed") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
                     else if (ztd::same(argv[i + 1], "modified") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
+                    else if (ztd::same(argv[i + 1], "created") && ztd::same(title, value))
                     {
                         found = true;
                         break;
@@ -7172,8 +7211,12 @@ main_window_socket_command(char* argv[])
                     return {SOCKET_SUCCESS, "owner"};
                 case ptk::file_browser::sort_order::group:
                     return {SOCKET_SUCCESS, "group"};
+                case ptk::file_browser::sort_order::atime:
+                    return {SOCKET_SUCCESS, "accessed"};
                 case ptk::file_browser::sort_order::mtime:
                     return {SOCKET_SUCCESS, "modified"};
+                case ptk::file_browser::sort_order::ctime:
+                    return {SOCKET_SUCCESS, "created"};
             }
         }
         else if (ztd::startswith(socket_property, "sort_"))
