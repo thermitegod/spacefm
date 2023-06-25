@@ -972,7 +972,6 @@ static void
 show_panels(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
-    i32 cur_tabx;
     std::array<bool, 5> show; // start at 1 for clarity
 
     // save column widths and side sliders of visible panels
@@ -982,7 +981,8 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
         {
             if (gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
             {
-                cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+                const tab_t cur_tabx =
+                    gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
                 if (cur_tabx != -1)
                 {
                     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
@@ -1169,7 +1169,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     if (set->x && !set->ob1)
                     {
                         // set current tab
-                        cur_tabx = std::stoi(set->x.value());
+                        const tab_t cur_tabx = std::stoi(set->x.value());
                         if (cur_tabx >= 0 && cur_tabx < gtk_notebook_get_n_pages(GTK_NOTEBOOK(
                                                             main_window->panel[p - 1])))
                         {
@@ -1261,18 +1261,14 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
     // current panel hidden?
     if (!xset_get_b_panel(main_window->curpanel, xset::panel::show))
     {
-        panel_t p = main_window->curpanel + 1;
-        if (!valid_panel(p))
-        {
-            p = 1;
-        }
-        while (p != main_window->curpanel)
+        for (const panel_t p : PANELS)
         {
             if (xset_get_b_panel(p, xset::panel::show))
             {
                 main_window->curpanel = p;
                 main_window->notebook = main_window->panel[p - 1];
-                cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
+                const tab_t cur_tabx =
+                    gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
                 PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->notebook), cur_tabx));
                 if (!file_browser)
@@ -1283,11 +1279,6 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 gtk_widget_grab_focus(file_browser->folder_view);
                 break;
             }
-            p++;
-            if (!valid_panel(p))
-            {
-                p = 1;
-            }
         }
     }
     set_panel_focus(main_window, nullptr);
@@ -1297,7 +1288,8 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
     {
         if (show[p])
         {
-            cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
+            const tab_t cur_tabx =
+                gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
             if (cur_tabx != -1)
             {
                 PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
