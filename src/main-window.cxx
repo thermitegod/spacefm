@@ -7139,29 +7139,20 @@ main_window_socket_command(char* argv[])
         }
         else if (ztd::same(socket_property, "sort_by"))
         { // COLUMN
-            if (file_browser->sort_order == ptk::file_browser::sort_order::name)
+            switch (file_browser->sort_order)
             {
-                return {SOCKET_SUCCESS, "name"};
-            }
-            else if (file_browser->sort_order == ptk::file_browser::sort_order::size)
-            {
-                return {SOCKET_SUCCESS, "size"};
-            }
-            else if (file_browser->sort_order == ptk::file_browser::sort_order::type)
-            {
-                return {SOCKET_SUCCESS, "type"};
-            }
-            else if (file_browser->sort_order == ptk::file_browser::sort_order::perm)
-            {
-                return {SOCKET_SUCCESS, "permission"};
-            }
-            else if (file_browser->sort_order == ptk::file_browser::sort_order::owner)
-            {
-                return {SOCKET_SUCCESS, "owner"};
-            }
-            else if (file_browser->sort_order == ptk::file_browser::sort_order::mtime)
-            {
-                return {SOCKET_SUCCESS, "modified"};
+                case ptk::file_browser::sort_order::name:
+                    return {SOCKET_SUCCESS, "name"};
+                case ptk::file_browser::sort_order::size:
+                    return {SOCKET_SUCCESS, "size"};
+                case ptk::file_browser::sort_order::type:
+                    return {SOCKET_SUCCESS, "type"};
+                case ptk::file_browser::sort_order::perm:
+                    return {SOCKET_SUCCESS, "permission"};
+                case ptk::file_browser::sort_order::owner:
+                    return {SOCKET_SUCCESS, "owner"};
+                case ptk::file_browser::sort_order::mtime:
+                    return {SOCKET_SUCCESS, "modified"};
             }
         }
         else if (ztd::startswith(socket_property, "sort_"))
