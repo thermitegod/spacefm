@@ -123,8 +123,8 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     this->mime_type_ = vfs_mime_type_get_from_file(this->path_);
 
     // file size formated
-    const std::string file_size = vfs_file_size_format(this->size());
-    this->display_size_ = file_size;
+    this->display_size_ = vfs_file_size_format(this->size());
+    this->display_size_bytes_ = std::format("{:L}", this->size());
 
     // disk file size formated
     const std::string disk_size = vfs_file_size_format(this->disk_size());
@@ -256,6 +256,12 @@ const std::string_view
 VFSFileInfo::display_size() const noexcept
 {
     return this->display_size_;
+}
+
+const std::string_view
+VFSFileInfo::display_size_bytes() const noexcept
+{
+    return this->display_size_bytes_;
 }
 
 const std::string_view

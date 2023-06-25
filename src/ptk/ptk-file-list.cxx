@@ -201,6 +201,7 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     column_types[ptk::file_list::column::small_icon] = GDK_TYPE_PIXBUF;
     column_types[ptk::file_list::column::name] = G_TYPE_STRING;
     column_types[ptk::file_list::column::size] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::bytes] = G_TYPE_STRING;
     column_types[ptk::file_list::column::type] = G_TYPE_STRING;
     column_types[ptk::file_list::column::perm] = G_TYPE_STRING;
     column_types[ptk::file_list::column::owner] = G_TYPE_STRING;
@@ -483,6 +484,9 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             break;
         case ptk::file_list::column::size:
             g_value_set_string(value, file->display_size().data());
+            break;
+        case ptk::file_list::column::bytes:
+            g_value_set_string(value, file->display_size_bytes().data());
             break;
         case ptk::file_list::column::type:
             g_value_set_string(value, file->mime_type()->description().data());
@@ -943,6 +947,7 @@ ptk_file_info_list_sort(PtkFileList* list)
             break;
         }
         case ptk::file_list::column::size:
+        case ptk::file_list::column::bytes:
         {
             std::ranges::sort(file_list.begin(),
                               file_list.end(),

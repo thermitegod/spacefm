@@ -1101,6 +1101,10 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_size));
                 xset_set_b_panel_mode(p,
+                                      xset::panel::detcol_bytes,
+                                      mode,
+                                      xset_get_b_panel(p, xset::panel::detcol_bytes));
+                xset_set_b_panel_mode(p,
                                       xset::panel::detcol_type,
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_type));
@@ -6168,9 +6172,10 @@ main_window_socket_command(char* argv[])
     const char* window = nullptr;
 
     // must match file-browser.c
-    static constexpr std::array<const std::string_view, 9> column_titles{
+    static constexpr std::array<const std::string_view, 10> column_titles{
         "Name",
         "Size",
+        "Bytes",
         "Type",
         "Permissions",
         "Owner",
@@ -6616,6 +6621,11 @@ main_window_socket_command(char* argv[])
                         found = true;
                         break;
                     }
+                    else if (ztd::same(argv[i + 1], "bytes") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
                     else if (ztd::same(argv[i + 1], "type") && ztd::same(title, value))
                     {
                         found = true;
@@ -6675,6 +6685,10 @@ main_window_socket_command(char* argv[])
             else if (ztd::same(argv[i + 1], "size"))
             {
                 j = ptk::file_browser::sort_order::size;
+            }
+            else if (ztd::same(argv[i + 1], "bytes"))
+            {
+                j = ptk::file_browser::sort_order::bytes;
             }
             else if (ztd::same(argv[i + 1], "type"))
             {
@@ -7149,6 +7163,11 @@ main_window_socket_command(char* argv[])
                         found = true;
                         break;
                     }
+                    else if (ztd::same(argv[i + 1], "bytes") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
                     else if (ztd::same(argv[i + 1], "type") && ztd::same(title, value))
                     {
                         found = true;
@@ -7203,6 +7222,8 @@ main_window_socket_command(char* argv[])
                     return {SOCKET_SUCCESS, "name"};
                 case ptk::file_browser::sort_order::size:
                     return {SOCKET_SUCCESS, "size"};
+                case ptk::file_browser::sort_order::bytes:
+                    return {SOCKET_SUCCESS, "bytes"};
                 case ptk::file_browser::sort_order::type:
                     return {SOCKET_SUCCESS, "type"};
                 case ptk::file_browser::sort_order::perm:

@@ -1420,8 +1420,8 @@ xset_defaults()
     xset_set_var(
         set,
         xset::var::desc,
-        "sortby_name sortby_size sortby_type sortby_perm sortby_owner sortby_group "
-        "sortby_atime sortby_mtime sortby_ctime "
+        "sortby_name sortby_size sortby_bytes sortby_type sortby_perm "
+        "sortby_owner sortby_group sortby_atime sortby_mtime sortby_ctime "
         "separator sortby_ascend sortby_descend separator sortx_alphanum sortx_case separator "
         "sortx_directories sortx_files sortx_mix separator sortx_hidfirst sortx_hidlast");
 
@@ -1431,6 +1431,10 @@ xset_defaults()
 
     set = xset_get(xset::name::sortby_size);
     xset_set_var(set, xset::var::menu_label, "_Size");
+    set->menu_style = xset::menu::radio;
+
+    set = xset_get(xset::name::sortby_bytes);
+    xset_set_var(set, xset::var::menu_label, "_Bytes");
     set->menu_style = xset::menu::radio;
 
     set = xset_get(xset::name::sortby_type);
@@ -1949,10 +1953,20 @@ xset_defaults()
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_size");
         }
 
+        set = xset_get_panel(p, xset::panel::detcol_bytes);
+        xset_set_var(set, xset::var::menu_label, "_Bytes");
+        set->menu_style = xset::menu::check;
+        set->b = xset::b::xtrue;
+        set->x = "2";
+        if (p != 1)
+        {
+            xset_set_var(set, xset::var::shared_key, "panel1_detcol_bytes");
+        }
+
         set = xset_get_panel(p, xset::panel::detcol_type);
         xset_set_var(set, xset::var::menu_label, "_Type");
         set->menu_style = xset::menu::check;
-        set->x = "2";
+        set->x = "3";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_type");
@@ -1961,7 +1975,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_perm);
         xset_set_var(set, xset::var::menu_label, "_Permissions");
         set->menu_style = xset::menu::check;
-        set->x = "3";
+        set->x = "4";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_perm");
@@ -1970,7 +1984,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_owner);
         xset_set_var(set, xset::var::menu_label, "_Owner");
         set->menu_style = xset::menu::check;
-        set->x = "4";
+        set->x = "5";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_owner");
@@ -1979,7 +1993,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_group);
         xset_set_var(set, xset::var::menu_label, "_Group");
         set->menu_style = xset::menu::check;
-        set->x = "5";
+        set->x = "6";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_group");
@@ -1988,7 +2002,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_atime);
         xset_set_var(set, xset::var::menu_label, "_Accessed");
         set->menu_style = xset::menu::check;
-        set->x = "6";
+        set->x = "7";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_atime");
@@ -1997,7 +2011,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_mtime);
         xset_set_var(set, xset::var::menu_label, "_Modified");
         set->menu_style = xset::menu::check;
-        set->x = "7";
+        set->x = "8";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_mtime");
@@ -2006,7 +2020,7 @@ xset_defaults()
         set = xset_get_panel(p, xset::panel::detcol_ctime);
         xset_set_var(set, xset::var::menu_label, "_Created");
         set->menu_style = xset::menu::check;
-        set->x = "8";
+        set->x = "9";
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_detcol_ctime");

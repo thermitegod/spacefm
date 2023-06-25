@@ -179,29 +179,65 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 // instance-wide command history
 std::vector<std::string> xset_cmd_history;
 
-// must match main-window.c  main_window_socket_command
-inline constexpr std::array<const std::string_view, 9> column_titles{
-    "Name",
-    "Size",
-    "Type",
-    "Permissions",
-    "Owner",
-    "Group",
-    "Accessed",
-    "Modified",
-    "Created",
+struct column_data
+{
+    std::string_view title;
+    xset::panel xset_name;
+    ptk::file_list::column column;
 };
 
-inline constexpr std::array<xset::panel, 9> column_names{
-    xset::panel::detcol_name,
-    xset::panel::detcol_size,
-    xset::panel::detcol_type,
-    xset::panel::detcol_perm,
-    xset::panel::detcol_owner,
-    xset::panel::detcol_group,
-    xset::panel::detcol_atime,
-    xset::panel::detcol_mtime,
-    xset::panel::detcol_ctime,
+// must match main-window.c  main_window_socket_command
+static constexpr std::array<column_data, 10> columns{
+    {{
+         "Name",
+         xset::panel::detcol_name,
+         ptk::file_list::column::name,
+     },
+     {
+         "Size",
+         xset::panel::detcol_size,
+         ptk::file_list::column::size,
+     },
+     {
+         "Bytes",
+         xset::panel::detcol_bytes,
+         ptk::file_list::column::bytes,
+     },
+     {
+         "Type",
+         xset::panel::detcol_type,
+         ptk::file_list::column::type,
+     },
+     {
+         "Permissions",
+         xset::panel::detcol_perm,
+         ptk::file_list::column::perm,
+     },
+     {
+         "Owner",
+         xset::panel::detcol_owner,
+         ptk::file_list::column::owner,
+     },
+     {
+         "Group",
+         xset::panel::detcol_group,
+         ptk::file_list::column::group,
+     },
+     {
+         "Accessed",
+         xset::panel::detcol_atime,
+         ptk::file_list::column::atime,
+     },
+     {
+         "Modified",
+         xset::panel::detcol_mtime,
+         ptk::file_list::column::mtime,
+     },
+     {
+         "Created",
+         xset::panel::detcol_ctime,
+         ptk::file_list::column::ctime,
+     }},
 };
 
 GType
@@ -1466,7 +1502,7 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
         if (GTK_IS_TREE_VIEW(file_browser->folder_view))
         {
             // ztd::logger::info("    set widths   mode = {}", mode);
-            for (const auto i : ztd::range(column_titles.size()))
+            for (const auto i : ztd::range(columns.size()))
             {
                 GtkTreeViewColumn* col =
                     gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
@@ -1476,18 +1512,18 @@ ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser)
                     break;
                 }
                 const char* title = gtk_tree_view_column_get_title(col);
-                for (const auto [index, value] : ztd::enumerate(column_titles))
+                for (const auto [index, column] : ztd::enumerate(columns))
                 {
-                    if (ztd::same(title, value))
+                    if (ztd::same(title, column.title))
                     {
                         // get column width for this panel context
-                        set = xset_get_panel_mode(p, column_names.at(index), mode);
+                        set = xset_get_panel_mode(p, column.xset_name, mode);
                         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
                         // ztd::logger::info("        {}\t{}", width, title );
                         if (width)
                         {
                             gtk_tree_view_column_set_fixed_width(col, width);
-                            // ztd::logger::info("upd set_width {} {}", column_names.at(j), width);
+                            // ztd::logger::info("upd set_width {} {}", magic_enum::enum_name(columns.at(j).xset_name), width);
                         }
                         // set column visibility
                         gtk_tree_view_column_set_visible(col,
@@ -2098,7 +2134,7 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     gtk_tree_sortable_get_sort_column_id(sortable, &col, &file_browser->sort_type);
 
     const auto column = ptk::file_list::column(col);
-    ptk::file_browser::sort_order sort_order = ptk::file_browser::sort_order::name;
+    auto sort_order = ptk::file_browser::sort_order::name;
     switch (column)
     {
         case ptk::file_list::column::name:
@@ -2106,6 +2142,9 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
             break;
         case ptk::file_list::column::size:
             sort_order = ptk::file_browser::sort_order::size;
+            break;
+        case ptk::file_list::column::bytes:
+            sort_order = ptk::file_browser::sort_order::bytes;
             break;
         case ptk::file_list::column::type:
             sort_order = ptk::file_browser::sort_order::type;
@@ -3638,7 +3677,7 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
         const xset::main_window_panel mode = main_window->panel_context.at(p);
         // ztd::logger::info("save_columns  fb={:p} (panel {})  mode = {}", fmt::ptr(file_browser),
         // p, mode);
-        for (const auto i : ztd::range(column_titles.size()))
+        for (const auto i : ztd::range(columns.size()))
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
             if (!col)
@@ -3646,12 +3685,12 @@ ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_brow
                 return;
             }
             const char* title = gtk_tree_view_column_get_title(col);
-            for (const auto [index, value] : ztd::enumerate(column_titles))
+            for (const auto column : columns)
             {
-                if (ztd::same(title, value))
+                if (ztd::same(title, column.title))
                 {
                     // save column width for this panel context
-                    xset_t set = xset_get_panel_mode(p, column_names.at(index), mode);
+                    xset_t set = xset_get_panel_mode(p, column.xset_name, mode);
                     const i32 width = gtk_tree_view_column_get_width(col);
                     if (width > 0)
                     {
@@ -3680,7 +3719,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
         return;
     }
 
-    for (const auto i : ztd::range(column_titles.size()))
+    for (const auto i : ztd::range(columns.size()))
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
         if (!col)
@@ -3688,12 +3727,12 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
             return;
         }
         const char* title = gtk_tree_view_column_get_title(col);
-        for (const auto [index, value] : ztd::enumerate(column_titles))
+        for (const auto column : columns)
         {
-            if (ztd::same(title, value))
+            if (ztd::same(title, column.title))
             {
                 // save column position
-                xset_t set = xset_get_panel(file_browser->mypanel, column_names.at(index));
+                xset_t set = xset_get_panel(file_browser->mypanel, column.xset_name);
                 set->x = std::to_string(i);
 
                 break;
@@ -3732,7 +3771,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
     char* lower_name = nullptr;
     bool no_match;
 
-    const ptk::file_list::column column = ptk::file_list::column(col);
+    const auto column = ptk::file_list::column(col);
     if (column != ptk::file_list::column::name)
     {
         return true;
@@ -4064,39 +4103,24 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
 static void
 init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
 {
-    GtkTreeViewColumn* col;
-    GtkCellRenderer* pix_renderer;
-
-    static constexpr std::array<ptk::file_list::column, 9> cols{
-        ptk::file_list::column::name,
-        ptk::file_list::column::size,
-        ptk::file_list::column::type,
-        ptk::file_list::column::perm,
-        ptk::file_list::column::owner,
-        ptk::file_list::column::group,
-        ptk::file_list::column::atime,
-        ptk::file_list::column::mtime,
-        ptk::file_list::column::ctime,
-    };
-
     MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
     const panel_t p = file_browser->mypanel;
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
-    for (const auto [index, value] : ztd::enumerate(cols))
+    for (const auto column : columns)
     {
-        col = gtk_tree_view_column_new();
+        GtkTreeViewColumn* col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
 
         GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 
         // column order
         usize idx;
-        for (const auto [order_index, order_value] : ztd::enumerate(cols))
+        for (const auto [order_index, order_value] : ztd::enumerate(columns))
         {
             idx = order_index;
-            if (xset_get_int_panel(p, column_names.at(order_index), xset::var::x) ==
-                static_cast<i32>(index))
+            if (xset_get_int_panel(p, columns.at(order_index).xset_name, xset::var::x) ==
+                magic_enum::enum_integer(column.column))
             {
                 break;
             }
@@ -4105,11 +4129,11 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         // column width
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
-        xset_t set = xset_get_panel_mode(p, column_names.at(idx), mode);
+        xset_t set = xset_get_panel_mode(p, columns.at(idx).xset_name, mode);
         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
-            if (cols.at(idx) == ptk::file_list::column::name &&
+            if (column.column == ptk::file_list::column::name &&
                 !app_settings.get_always_show_tabs() &&
                 file_browser->view_mode == ptk::file_browser::view_mode::list_view &&
                 gtk_notebook_get_n_pages(GTK_NOTEBOOK(file_browser->mynotebook)) == 1)
@@ -4144,11 +4168,11 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             else
             {
                 gtk_tree_view_column_set_fixed_width(col, width);
-                // ztd::logger::info("init set_width {} {}", column_names.at(j), width);
+                // ztd::logger::info("init set_width {} {}", magic_enum::enum_name(columns.at(index).xset_name), width);
             }
         }
 
-        if (cols.at(idx) == ptk::file_list::column::name)
+        if (column.column == ptk::file_list::column::name)
         {
             g_object_set(G_OBJECT(renderer),
                          /* "editable", true, */
@@ -4159,6 +4183,8 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
             g_signal_connect( renderer, "editing-started",
                               G_CALLBACK( on_filename_editing_started ), nullptr );
             */
+
+            GtkCellRenderer* pix_renderer;
             file_browser->icon_render = pix_renderer = gtk_cell_renderer_pixbuf_new();
 
             gtk_tree_view_column_pack_start(col, pix_renderer, false);
@@ -4180,21 +4206,21 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         else
         {
             gtk_tree_view_column_set_reorderable(col, true);
-            gtk_tree_view_column_set_visible(col,
-                                             xset_get_b_panel_mode(p, column_names.at(idx), mode));
+            gtk_tree_view_column_set_visible(col, xset_get_b_panel_mode(p, column.xset_name, mode));
         }
 
-        // if (cols.at(idx) == ptk::file_list::column::size)
-        // {
-        //     gtk_cell_renderer_set_alignment(renderer, 1, 0.5);
-        // }
+        if (column.column == ptk::file_list::column::size ||
+            column.column == ptk::file_list::column::bytes)
+        { // right align text
+            gtk_cell_renderer_set_alignment(renderer, 1, 0.5);
+        }
 
         gtk_tree_view_column_pack_start(col, renderer, true);
-        gtk_tree_view_column_set_attributes(col, renderer, "text", cols.at(idx), nullptr);
+        gtk_tree_view_column_set_attributes(col, renderer, "text", column.column, nullptr);
         gtk_tree_view_append_column(list_view, col);
-        gtk_tree_view_column_set_title(col, column_titles.at(idx).data());
+        gtk_tree_view_column_set_title(col, column.title.data());
         gtk_tree_view_column_set_sort_indicator(col, true);
-        gtk_tree_view_column_set_sort_column_id(col, magic_enum::enum_integer(cols.at(idx)));
+        gtk_tree_view_column_set_sort_column_id(col, magic_enum::enum_integer(column.column));
         gtk_tree_view_column_set_sort_order(col, GtkSortType::GTK_SORT_DESCENDING);
     }
 }
@@ -5453,6 +5479,9 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
         case ptk::file_browser::sort_order::size:
             col = ptk::file_list::column::size;
             break;
+        case ptk::file_browser::sort_order::bytes:
+            col = ptk::file_list::column::bytes;
+            break;
         case ptk::file_browser::sort_order::type:
             col = ptk::file_list::column::type;
             break;
@@ -6389,6 +6418,10 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::size);
         }
+        else if (set->xset_name == xset::name::sortby_bytes)
+        {
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::bytes);
+        }
         else if (set->xset_name == xset::name::sortby_type)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::type);
@@ -6430,7 +6463,7 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname)
                                                                             : xset::b::xfalse;
         }
         if (i > 0)
-        {
+        { // always want to show name
             set->b = browser->sort_order == ptk::file_browser::sort_order(i) ? xset::b::xtrue
                                                                              : xset::b::xfalse;
         }

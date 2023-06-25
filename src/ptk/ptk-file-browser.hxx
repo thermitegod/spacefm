@@ -62,6 +62,7 @@ namespace ptk::file_browser
     {
         name,
         size,
+        bytes,
         type,
         perm,
         owner,
