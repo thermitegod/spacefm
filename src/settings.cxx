@@ -100,78 +100,130 @@
 static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set);
 static void xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* event);
 
-// clang-format off
-
-// must match xset::tool:: enum
-const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_name{
-    {xset::tool::NOT, std::nullopt},
-    {xset::tool::custom, std::nullopt},
-    {xset::tool::devices, "Show Devices"},
-    {xset::tool::bookmarks, "Show Bookmarks"},
-    {xset::tool::tree, "Show Tree"},
-    {xset::tool::home, "Home"},
-    {xset::tool::DEFAULT, "Default"},
-    {xset::tool::up, "Up"},
-    {xset::tool::back, "Back"},
-    {xset::tool::back_menu, "Back History"},
-    {xset::tool::fwd, "Forward"},
-    {xset::tool::fwd_menu, "Forward History"},
-    {xset::tool::refresh, "Refresh"},
-    {xset::tool::new_tab, "New Tab"},
-    {xset::tool::new_tab_here, "New Tab Here"},
-    {xset::tool::show_hidden, "Show Hidden"},
-    {xset::tool::show_thumb, "Show Thumbnails"},
-    {xset::tool::large_icons, "Large Icons"},
-    {xset::tool::invalid, std::nullopt},
+struct builtin_tool_data
+{
+    std::optional<std::string> name;
+    std::optional<std::string> icon;
+    std::optional<std::string> shared_key;
 };
 
 // must match xset::tool:: enum
-const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_icon{
-    {xset::tool::NOT, std::nullopt},
-    {xset::tool::custom, std::nullopt},
-    {xset::tool::devices, "gtk-harddisk"},
-    {xset::tool::bookmarks, "gtk-jump-to"},
-    {xset::tool::tree, "gtk-directory"},
-    {xset::tool::home, "gtk-home"},
-    {xset::tool::DEFAULT, "gtk-home"},
-    {xset::tool::up, "gtk-go-up"},
-    {xset::tool::back, "gtk-go-back"},
-    {xset::tool::back_menu, "gtk-go-back"},
-    {xset::tool::fwd, "gtk-go-forward"},
-    {xset::tool::fwd_menu, "gtk-go-forward"},
-    {xset::tool::refresh, "gtk-refresh"},
-    {xset::tool::new_tab, "gtk-add"},
-    {xset::tool::new_tab_here, "gtk-add"},
-    {xset::tool::show_hidden, "gtk-apply"},
-    {xset::tool::show_thumb, std::nullopt},
-    {xset::tool::large_icons, "zoom-in"},
-    {xset::tool::invalid, std::nullopt},
+const std::unordered_map<xset::tool, builtin_tool_data> builtin_tools{
+    {xset::tool::NOT,
+     {
+         std::nullopt,
+         std::nullopt,
+         std::nullopt,
+     }},
+    {xset::tool::custom,
+     {
+         std::nullopt,
+         std::nullopt,
+         std::nullopt,
+     }},
+    {xset::tool::devices,
+     {
+         "Show Devices",
+         "gtk-harddisk",
+         "panel1_show_devmon",
+     }},
+    {xset::tool::bookmarks,
+     {
+         "Show Bookmarks",
+         "gtk-jump-to",
+         "panel1_show_book",
+     }},
+    {xset::tool::tree,
+     {
+         "Show Tree",
+         "gtk-directory",
+         "panel1_show_dirtree",
+     }},
+    {xset::tool::home,
+     {
+         "Home",
+         "gtk-home",
+         "go_home",
+     }},
+    {xset::tool::DEFAULT,
+     {
+         "Default",
+         "gtk-home",
+         "go_default",
+     }},
+    {xset::tool::up,
+     {
+         "Up",
+         "gtk-go-up",
+         "go_up",
+     }},
+    {xset::tool::back,
+     {
+         "Back",
+         "gtk-go-back",
+         "go_back",
+     }},
+    {xset::tool::back_menu,
+     {
+         "Back History",
+         "gtk-go-back",
+         "go_back",
+     }},
+    {xset::tool::fwd,
+     {
+         "Forward",
+         "gtk-go-forward",
+         "go_forward",
+     }},
+    {xset::tool::fwd_menu,
+     {
+         "Forward History",
+         "gtk-go-forward",
+         "go_forward",
+     }},
+    {xset::tool::refresh,
+     {
+         "Refresh",
+         "gtk-refresh",
+         "view_refresh",
+     }},
+    {xset::tool::new_tab,
+     {
+         "New Tab",
+         "gtk-add",
+         "tab_new",
+     }},
+    {xset::tool::new_tab_here,
+     {
+         "New Tab Here",
+         "gtk-add",
+         "tab_new_here",
+     }},
+    {xset::tool::show_hidden,
+     {
+         "Show Hidden",
+         "gtk-apply",
+         "panel1_show_hidden",
+     }},
+    {xset::tool::show_thumb,
+     {
+         "Show Thumbnails",
+         std::nullopt,
+         "view_thumb",
+     }},
+    {xset::tool::large_icons,
+     {
+         "Large Icons",
+         "zoom-in",
+         "panel1_list_large",
+     }},
+    {xset::tool::invalid,
+     {
+         std::nullopt,
+         std::nullopt,
+         std::nullopt,
+     }},
 };
-
-// must match xset::tool:: enum
-const std::unordered_map<xset::tool, std::optional<std::string>> builtin_tool_shared_key{
-    {xset::tool::NOT, std::nullopt},
-    {xset::tool::custom, std::nullopt},
-    {xset::tool::devices, "panel1_show_devmon"},
-    {xset::tool::bookmarks, "panel1_show_book"},
-    {xset::tool::tree, "panel1_show_dirtree"},
-    {xset::tool::home, "go_home"},
-    {xset::tool::DEFAULT, "go_default"},
-    {xset::tool::up, "go_up"},
-    {xset::tool::back, "go_back"},
-    {xset::tool::back_menu, "go_back"},
-    {xset::tool::fwd, "go_forward"},
-    {xset::tool::fwd_menu, "go_forward"},
-    {xset::tool::refresh, "view_refresh"},
-    {xset::tool::new_tab, "tab_new"},
-    {xset::tool::new_tab_here, "tab_new_here"},
-    {xset::tool::show_hidden, "panel1_show_hidden"},
-    {xset::tool::show_thumb, "view_thumb"},
-    {xset::tool::large_icons, "panel1_list_large"},
-    {xset::tool::invalid, std::nullopt},
-};
-
-// clang-format on
 
 void
 load_settings()
@@ -2033,14 +2085,13 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
         g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(xset::job::help_add));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
-        for (const auto& it : builtin_tool_name)
+        for (const auto& it : builtin_tools)
         {
-            if (it.second)
+            const auto name = it.second.name;
+            if (name)
             {
-                newitem = xset_design_additem(submenu,
-                                              it.second.value(),
-                                              xset::job::add_tool,
-                                              insert_set);
+                newitem =
+                    xset_design_additem(submenu, name.value(), xset::job::add_tool, insert_set);
                 g_object_set_data(G_OBJECT(newitem),
                                   "tool_type",
                                   GINT_TO_POINTER(magic_enum::enum_integer(it.first)));
@@ -2815,7 +2866,7 @@ xset_get_builtin_toolitem_label(xset::tool tool_type)
     assert(tool_type != xset::tool::custom);
     // assert(tool_type != xset::tool::devices);
 
-    const auto tool_name = builtin_tool_name.at(tool_type);
+    const auto tool_name = builtin_tools.at(tool_type).name;
     if (tool_name)
     {
         return tool_name.value();
@@ -3122,7 +3173,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     }
     if (set->tool > xset::tool::custom && set->tool < xset::tool::invalid && !set->shared_key)
     {
-        set->shared_key = builtin_tool_shared_key.at(set->tool);
+        set->shared_key = builtin_tools.at(set->tool).shared_key;
     }
 
     // builtin toolitems do not have menu_style set
@@ -3198,7 +3249,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 }
                 else if (set->tool > xset::tool::custom && set->tool < xset::tool::invalid)
                 {
-                    image = xset_get_image(builtin_tool_icon.at(set->tool).value(),
+                    image = xset_get_image(builtin_tools.at(set->tool).icon.value(),
                                            (GtkIconSize)icon_size);
                 }
             }
@@ -3266,8 +3317,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             if (!icon_name && set->tool > xset::tool::custom && set->tool < xset::tool::invalid)
             {
                 // builtin tool item
-                image =
-                    xset_get_image(builtin_tool_icon.at(set->tool).value(), (GtkIconSize)icon_size);
+                image = xset_get_image(builtin_tools.at(set->tool).icon.value(),
+                                       (GtkIconSize)icon_size);
             }
             else
             {
@@ -3333,7 +3384,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             else if (!icon_name && set->tool > xset::tool::custom &&
                      set->tool < xset::tool::invalid)
             {
-                icon_name = builtin_tool_icon.at(set->tool);
+                icon_name = builtin_tools.at(set->tool).icon;
             }
             else if (!icon_name && set_child && set->tool == xset::tool::custom)
             {
@@ -3366,10 +3417,10 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
                 switch (set->tool)
                 {
                     case xset::tool::back_menu:
-                        menu_label = builtin_tool_name.at(xset::tool::back);
+                        menu_label = builtin_tools.at(xset::tool::back).name;
                         break;
                     case xset::tool::fwd_menu:
-                        menu_label = builtin_tool_name.at(xset::tool::fwd);
+                        menu_label = builtin_tools.at(xset::tool::fwd).name;
                         break;
                     case xset::tool::custom:
                         if (set_child)
