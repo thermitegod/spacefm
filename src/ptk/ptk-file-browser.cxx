@@ -187,7 +187,7 @@ struct column_data
 };
 
 // must match main-window.c  main_window_socket_command
-static constexpr std::array<column_data, 10> columns{
+static constexpr std::array<column_data, 11> columns{
     {{
          "Name",
          xset::panel::detcol_name,
@@ -199,7 +199,7 @@ static constexpr std::array<column_data, 10> columns{
          ptk::file_list::column::size,
      },
      {
-         "Bytes",
+         "Size in Bytes",
          xset::panel::detcol_bytes,
          ptk::file_list::column::bytes,
      },
@@ -207,6 +207,11 @@ static constexpr std::array<column_data, 10> columns{
          "Type",
          xset::panel::detcol_type,
          ptk::file_list::column::type,
+     },
+     {
+         "MIME Type",
+         xset::panel::detcol_mime,
+         ptk::file_list::column::mime,
      },
      {
          "Permissions",
@@ -224,17 +229,17 @@ static constexpr std::array<column_data, 10> columns{
          ptk::file_list::column::group,
      },
      {
-         "Accessed",
+         "Date Accessed",
          xset::panel::detcol_atime,
          ptk::file_list::column::atime,
      },
      {
-         "Modified",
+         "Date Modified",
          xset::panel::detcol_mtime,
          ptk::file_list::column::mtime,
      },
      {
-         "Created",
+         "Date Created",
          xset::panel::detcol_ctime,
          ptk::file_list::column::ctime,
      }},
@@ -2148,6 +2153,9 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
             break;
         case ptk::file_list::column::type:
             sort_order = ptk::file_browser::sort_order::type;
+            break;
+        case ptk::file_list::column::mime:
+            sort_order = ptk::file_browser::sort_order::mime;
             break;
         case ptk::file_list::column::perm:
             sort_order = ptk::file_browser::sort_order::perm;
@@ -5485,6 +5493,9 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
         case ptk::file_browser::sort_order::type:
             col = ptk::file_list::column::type;
             break;
+        case ptk::file_browser::sort_order::mime:
+            col = ptk::file_list::column::mime;
+            break;
         case ptk::file_browser::sort_order::perm:
             col = ptk::file_list::column::perm;
             break;
@@ -6425,6 +6436,10 @@ ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname)
         else if (set->xset_name == xset::name::sortby_type)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::type);
+        }
+        else if (set->xset_name == xset::name::sortby_mime)
+        {
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::mime);
         }
         else if (set->xset_name == xset::name::sortby_perm)
         {

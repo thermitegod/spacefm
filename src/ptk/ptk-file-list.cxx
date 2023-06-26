@@ -203,6 +203,7 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     column_types[ptk::file_list::column::size] = G_TYPE_STRING;
     column_types[ptk::file_list::column::bytes] = G_TYPE_STRING;
     column_types[ptk::file_list::column::type] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::mime] = G_TYPE_STRING;
     column_types[ptk::file_list::column::perm] = G_TYPE_STRING;
     column_types[ptk::file_list::column::owner] = G_TYPE_STRING;
     column_types[ptk::file_list::column::group] = G_TYPE_STRING;
@@ -490,6 +491,9 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             break;
         case ptk::file_list::column::type:
             g_value_set_string(value, file->mime_type()->description().data());
+            break;
+        case ptk::file_list::column::mime:
+            g_value_set_string(value, file->mime_type()->type().data());
             break;
         case ptk::file_list::column::perm:
             g_value_set_string(value, file->display_permissions().data());
@@ -779,6 +783,27 @@ compare_file_info_type(vfs::file_info file_a, vfs::file_info file_b, PtkFileList
 }
 
 static i32
+compare_file_info_mime(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    result =
+        ztd::sort::compare(file_a->mime_type()->description(), file_b->mime_type()->description());
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
 compare_file_info_perm(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
 {
     i32 result;
@@ -961,6 +986,14 @@ ptk_file_info_list_sort(PtkFileList* list)
                               file_list.end(),
                               [&list](vfs::file_info file_a, vfs::file_info file_b)
                               { return compare_file_info_type(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::mime:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_mime(file_a, file_b, list) < 0; });
             break;
         }
         case ptk::file_list::column::perm:

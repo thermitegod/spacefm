@@ -1109,6 +1109,10 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_type));
                 xset_set_b_panel_mode(p,
+                                      xset::panel::detcol_mime,
+                                      mode,
+                                      xset_get_b_panel(p, xset::panel::detcol_mime));
+                xset_set_b_panel_mode(p,
                                       xset::panel::detcol_perm,
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_perm));
@@ -6172,17 +6176,18 @@ main_window_socket_command(char* argv[])
     const char* window = nullptr;
 
     // must match file-browser.c
-    static constexpr std::array<const std::string_view, 10> column_titles{
+    static constexpr std::array<const std::string_view, 11> column_titles{
         "Name",
         "Size",
-        "Bytes",
+        "Size in Bytes",
         "Type",
+        "MIME Type",
         "Permissions",
         "Owner",
         "Group",
-        "Accessed",
-        "Modified",
-        "Created",
+        "Date Accessed",
+        "Date Modified",
+        "Date Created",
     };
 
     // cmd options
@@ -6631,6 +6636,11 @@ main_window_socket_command(char* argv[])
                         found = true;
                         break;
                     }
+                    else if (ztd::same(argv[i + 1], "mime") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
                     else if (ztd::same(argv[i + 1], "permission") && ztd::same(title, value))
                     {
                         found = true;
@@ -6693,6 +6703,10 @@ main_window_socket_command(char* argv[])
             else if (ztd::same(argv[i + 1], "type"))
             {
                 j = ptk::file_browser::sort_order::type;
+            }
+            else if (ztd::same(argv[i + 1], "mime"))
+            {
+                j = ptk::file_browser::sort_order::mime;
             }
             else if (ztd::same(argv[i + 1], "permission"))
             {
@@ -7173,6 +7187,11 @@ main_window_socket_command(char* argv[])
                         found = true;
                         break;
                     }
+                    else if (ztd::same(argv[i + 1], "mime") && ztd::same(title, value))
+                    {
+                        found = true;
+                        break;
+                    }
                     else if (ztd::same(argv[i + 1], "permission") && ztd::same(title, value))
                     {
                         found = true;
@@ -7226,6 +7245,8 @@ main_window_socket_command(char* argv[])
                     return {SOCKET_SUCCESS, "bytes"};
                 case ptk::file_browser::sort_order::type:
                     return {SOCKET_SUCCESS, "type"};
+                case ptk::file_browser::sort_order::mime:
+                    return {SOCKET_SUCCESS, "mime"};
                 case ptk::file_browser::sort_order::perm:
                     return {SOCKET_SUCCESS, "permission"};
                 case ptk::file_browser::sort_order::owner:

@@ -49,6 +49,7 @@ namespace ptk::file_list
         size,
         bytes,
         type,
+        mime,
         perm,
         owner,
         group,

@@ -64,6 +64,7 @@ namespace ptk::file_browser
         size,
         bytes,
         type,
+        mime,
         perm,
         owner,
         group,
