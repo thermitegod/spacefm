@@ -389,6 +389,9 @@ main(int argc, char* argv[])
     const std::vector<std::string_view> args(argv,
                                              std::next(argv, static_cast<std::ptrdiff_t>(argc)));
 
+    // set locale to system default
+    std::locale::global(std::locale(""));
+
     // logging init
     ztd::Logger->initialize();
 
