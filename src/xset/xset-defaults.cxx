@@ -300,10 +300,18 @@ xset_defaults()
     set = xset_get(xset::name::dev_fs_cnf);
     xset_set_var(set, xset::var::menu_label, "_Device Handlers");
     xset_set_var(set, xset::var::icon, "gtk-preferences");
+    xset_set_var(set,
+                 xset::var::s,
+                 "handler_filesystem_fuseiso handler_filesystem_udiso handler_filesystem_def");
 
     set = xset_get(xset::name::dev_net_cnf);
     xset_set_var(set, xset::var::menu_label, "_Protocol Handlers");
     xset_set_var(set, xset::var::icon, "gtk-preferences");
+    xset_set_var(set,
+                 xset::var::s,
+                 "handler_network_http handler_network_ftp handler_network_ssh handler_network_mtp "
+                 "handler_network_gphoto handler_network_ifuse handler_network_udevil "
+                 "handler_network_udevilsmb handler_network_fusesmb handler_network_fuse");
 
     // dev icons
     set = xset_get(xset::name::dev_icon);
@@ -1169,6 +1177,7 @@ xset_defaults()
     set = xset_get(xset::name::open_hand);
     xset_set_var(set, xset::var::menu_label, "File _Handlers...");
     xset_set_var(set, xset::var::icn, "gtk-preferences");
+    xset_set_var(set, xset::var::s, "handler_file_iso");
 
     set = xset_get(xset::name::open_all);
     xset_set_var(set, xset::var::menu_label, "Open With _Default"); // virtual
@@ -1260,6 +1269,13 @@ xset_defaults()
     set = xset_get(xset::name::arc_conf2);
     xset_set_var(set, xset::var::menu_label, "Archive _Handlers");
     xset_set_var(set, xset::var::icon, "gtk-preferences");
+    xset_set_var(
+        set,
+        xset::var::s,
+        "handler_archive_7z handler_archive_rar handler_archive_tar handler_archive_tar_bz2 "
+        "handler_archive_tar_gz handler_archive_tar_xz handler_archive_zip handler_archive_gz "
+        "handler_archive_xz handler_archive_tar_lz4 handler_archive_lz4 handler_archive_tar_zst "
+        "handler_archive_zst");
 
     set = xset_get(xset::name::open_new);
     xset_set_var(set, xset::var::menu_label, "_New");

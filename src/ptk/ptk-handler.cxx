@@ -1206,6 +1206,12 @@ ptk_handler_file_has_handlers(i32 mode, i32 cmd, const std::filesystem::path& pa
 
     // parsing handlers space-separated list
     const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(mode));
+    if (!archive_handlers_s)
+    {
+        ztd::logger::warn("File handlers are empty for {}",
+                          magic_enum::enum_name(handler_conf_xsets.at(mode)));
+        return xset_handlers;
+    }
     const auto handlers = ztd::split(archive_handlers_s.value(), " ");
     if (handlers.empty())
     {
