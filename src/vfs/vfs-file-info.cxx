@@ -104,8 +104,20 @@ VFSFileInfo::~VFSFileInfo()
 bool
 VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
 {
-    this->name_ = file_path.filename();
-    this->display_name_ = file_path.filename();
+    if (std::filesystem::equivalent(file_path, "/"))
+    {
+        // special case, using std::filesystem::path::filename() on the root
+        // directory returns an empty string. that causes subtle bugs
+        // so hard code "/" as the value for root.
+        this->name_ = "/";
+        this->display_name_ = "/";
+    }
+    else
+    {
+        this->name_ = file_path.filename();
+        this->display_name_ = file_path.filename();
+    }
+
     this->path_ = file_path;
 
     this->file_stat_ = ztd::lstat(this->path_);
