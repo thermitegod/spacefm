@@ -6892,6 +6892,18 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             ptk_file_browser_chdir(file_browser, value, ptk::file_browser::chdir_mode::add_history);
         }
+        else if (ztd::same(property, "thumbnailer"))
+        {
+            const std::string subproperty = json["subproperty"];
+            if (ztd::same(subproperty, "api"))
+            {
+                app_settings.thumbnailer_use_api(true);
+            }
+            else // if (ztd::same(subproperty, "cli"))
+            {
+                app_settings.thumbnailer_use_api(false);
+            }
+        }
         else
         {
             return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
@@ -7344,6 +7356,10 @@ main_window_socket_command(const std::string_view socket_commands_json)
         {
             return {SOCKET_SUCCESS,
                     std::format("{}", ptk_file_browser_get_cwd(file_browser).string())};
+        }
+        else if (ztd::same(property, "thumbnailer"))
+        {
+            return {SOCKET_SUCCESS, app_settings.thumbnailer_use_api() ? "api" : "cli"};
         }
         else
         {

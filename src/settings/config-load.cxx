@@ -146,6 +146,12 @@ config_parse_general(const toml::value& tbl, u64 version)
         const auto confirm_trash = toml::find<bool>(section, TOML_KEY_CONFIRM_TRASH);
         app_settings.confirm_trash(confirm_trash);
     }
+
+    if (section.contains(TOML_KEY_THUMBNAILER_BACKEND))
+    {
+        const auto thumbnailer_backend = toml::find<bool>(section, TOML_KEY_THUMBNAILER_BACKEND);
+        app_settings.thumbnailer_use_api(thumbnailer_backend);
+    }
 }
 
 static void

@@ -32,13 +32,13 @@
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
-#if !defined(HAVE_USE_FFMPEGTHUMBNAILER_CLI)
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
-#endif
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include "settings/app.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
@@ -364,33 +364,42 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
         }
 
         // create new thumbnail
-#if defined(HAVE_USE_FFMPEGTHUMBNAILER_CLI)
-        const std::string command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
-                                                thumb_size,
-                                                ztd::shell::quote(file_path),
-                                                ztd::shell::quote(thumbnail_file));
-        // ztd::logger::info("COMMAND={}", command);
-        Glib::spawn_command_line_sync(command);
-#else
-        try
+        if (app_settings.thumbnailer_use_api())
         {
-            ffmpegthumbnailer::VideoThumbnailer video_thumb;
-            // video_thumb.setLogCallback(nullptr);
-            // video_thumb.clearFilters();
-            video_thumb.setSeekPercentage(25);
-            video_thumb.setThumbnailSize(thumb_size);
-            video_thumb.setMaintainAspectRatio(true);
-            video_thumb.generateThumbnail(file_path,
-                                          ThumbnailerImageType::Png,
-                                          thumbnail_file,
-                                          nullptr);
+            try
+            {
+                ffmpegthumbnailer::VideoThumbnailer video_thumb;
+                // video_thumb.setLogCallback(nullptr);
+                // video_thumb.clearFilters();
+                video_thumb.setSeekPercentage(25);
+                video_thumb.setThumbnailSize(thumb_size);
+                video_thumb.setMaintainAspectRatio(true);
+                video_thumb.generateThumbnail(file_path,
+                                              ThumbnailerImageType::Png,
+                                              thumbnail_file,
+                                              nullptr);
+            }
+            catch (const std::logic_error& e)
+            {
+                // file cannot be opened
+                return nullptr;
+            }
         }
-        catch (...) // std::logic_error
+        else
         {
-            // file cannot be opened
-            return nullptr;
+            const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
+                                             thumb_size,
+                                             ztd::shell::quote(file_path.string()),
+                                             ztd::shell::quote(thumbnail_file.string()));
+            // ztd::logger::info("COMMAND={}", command);
+            Glib::spawn_command_line_sync(command);
+
+            if (!std::filesystem::exists(thumbnail_file))
+            {
+                return nullptr;
+            }
         }
-#endif
+
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
     }
 

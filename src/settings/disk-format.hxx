@@ -70,6 +70,7 @@ const std::string TOML_KEY_CLICK_EXECUTE{"click_executes"};
 const std::string TOML_KEY_CONFIRM{"confirm"};
 const std::string TOML_KEY_CONFIRM_DELETE{"confirm_delete"};
 const std::string TOML_KEY_CONFIRM_TRASH{"confirm_trash"};
+const std::string TOML_KEY_THUMBNAILER_BACKEND{"thumbnailer_backend"};
 
 const std::string TOML_KEY_HEIGHT{"height"};
 const std::string TOML_KEY_WIDTH{"width"};

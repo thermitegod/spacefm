@@ -86,6 +86,9 @@ struct AppSettings
     [[nodiscard]] bool use_si_prefix() const noexcept;
     void use_si_prefix(bool val) noexcept;
 
+    [[nodiscard]] bool thumbnailer_use_api() const noexcept;
+    void thumbnailer_use_api(bool val) noexcept;
+
     [[nodiscard]] bool git_backed_settings() const noexcept;
     void git_backed_settings(bool val) noexcept;
 
@@ -128,6 +131,9 @@ struct AppSettings
 
     // Units
     bool use_si_prefix_{false};
+
+    // thumbnailer backend cli/api
+    bool thumbnailer_use_api_{true};
 
     // Git
     bool git_backed_settings_{true};

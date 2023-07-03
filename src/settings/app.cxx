@@ -284,6 +284,18 @@ AppSettings::use_si_prefix(bool val) noexcept
 }
 
 bool
+AppSettings::thumbnailer_use_api() const noexcept
+{
+    return this->thumbnailer_use_api_;
+}
+
+void
+AppSettings::thumbnailer_use_api(bool val) noexcept
+{
+    this->thumbnailer_use_api_ = val;
+}
+
+bool
 AppSettings::git_backed_settings() const noexcept
 {
     return this->git_backed_settings_;

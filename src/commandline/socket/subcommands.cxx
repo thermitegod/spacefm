@@ -77,6 +77,7 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::statusbar_text(sub, opt);
     commandline::socket::set::pathbar_text(sub, opt);
     commandline::socket::set::current_dir(sub, opt);
+    commandline::socket::set::thumbnailer(sub, opt);
     commandline::socket::set::selected_files(sub, opt);
     commandline::socket::set::selected_filenames(sub, opt);
     commandline::socket::set::selected_pattern(sub, opt);
@@ -142,6 +143,7 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::get::statusbar_text(sub, opt);
     commandline::socket::get::pathbar_text(sub, opt);
     commandline::socket::get::current_dir(sub, opt);
+    commandline::socket::get::thumbnailer(sub, opt);
     commandline::socket::get::selected_files(sub, opt);
     commandline::socket::get::selected_filenames(sub, opt);
     commandline::socket::get::selected_pattern(sub, opt);

@@ -1072,6 +1072,42 @@ commandline::socket::set::current_dir(CLI::App* app, const socket_subcommand_dat
 }
 
 /*
+ * subcommand thumbnailer
+ */
+
+void
+setup_subcommand_thumbnailer_api(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("api", "Set thumbnailer api");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "api"; };
+    sub->callback(run_subcommand);
+}
+
+void
+setup_subcommand_thumbnailer_cli(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("cli", "Set thumbnailer cli");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "cli"; };
+    sub->callback(run_subcommand);
+}
+
+void
+commandline::socket::set::thumbnailer(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("thumbnailer", "Get property thumbnailer");
+
+    const auto run_subcommand = [opt]() { opt->property = "thumbnailer"; };
+    sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_thumbnailer_api(sub, opt);
+    setup_subcommand_thumbnailer_cli(sub, opt);
+}
+
+/*
  * subcommand selected-files
  */
 

@@ -329,10 +329,6 @@ if get_option('nonlatin')
   features += '-DHAVE_NONLATIN_KEYBOARD_SUPPORT'
 endif
 
-if get_option('ffmpegthumbnailer-cli')
-  features += '-DHAVE_USE_FFMPEGTHUMBNAILER_CLI'
-endif
-
 foreach a : features
     add_project_arguments(a, language : ['c', 'cpp'])
 endforeach

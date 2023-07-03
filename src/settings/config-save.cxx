@@ -314,6 +314,7 @@ save_user_confing()
              {TOML_KEY_CONFIRM, app_settings.confirm()},
              {TOML_KEY_CONFIRM_DELETE, app_settings.confirm_delete()},
              {TOML_KEY_CONFIRM_TRASH, app_settings.confirm_trash()},
+             {TOML_KEY_THUMBNAILER_BACKEND, app_settings.thumbnailer_use_api()},
          }},
 
         {TOML_SECTION_WINDOW,
