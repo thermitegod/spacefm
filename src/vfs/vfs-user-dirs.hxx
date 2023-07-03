@@ -47,10 +47,10 @@ struct VFSUserDirs
 
     const std::filesystem::path& current_dir() const noexcept;
 
-    void program_config_dir(const std::string_view config_dir) noexcept;
+    void program_config_dir(const std::filesystem::path& config_dir) noexcept;
     const std::filesystem::path& program_config_dir() const noexcept;
 
-    void program_tmp_dir(const std::string_view tmp_dir) noexcept;
+    void program_tmp_dir(const std::filesystem::path& tmp_dir) noexcept;
     const std::filesystem::path& program_tmp_dir() const noexcept;
 
   private:

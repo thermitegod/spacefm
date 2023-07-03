@@ -540,13 +540,13 @@ inline constexpr std::array<Handler, 10> handlers_net{
         "    [[ -z \"$fm_url_user$fm_url_password\" ]] && msg=\"\" || \\\n"
         "            msg=\"Warning: user:password in URL is not supported by davfs.\"\n"
         "    # attempt davfs mount in terminal\n"
-        "    spacefm -s run-task cmd --terminal \\\n"
+        "    spacefm socket run-task cmd --terminal \\\n"
         "        \"echo $msg; echo 'udevil mount $url'; udevil mount '$url' || \" \\\n"
         "                        \"( echo; echo 'Press Enter to close:'; read )\"\n"
         "    exit\n"
         "fi\n"
         "# open in web browser\n"
-        "spacefm -s run-task web \"$fm_url\"\n",
+        "spacefm socket run-task web \"$fm_url\"\n",
         // clang-format on
         false,
         "# Note: Unmount is usually performed by the 'fuse unmount' handler.\n\nudevil umount "
@@ -600,7 +600,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
         "#                    uncheck Run In Terminal\n"
         "# # Run sshfs in a terminal without SpaceFM task.  sshfs disconnects when the\n"
         "# # terminal is closed\n"
-        "# spacefm -s run-task cmd --terminal \"echo 'Connecting to $fm_url'; echo; sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a; if [ $status -ne 0 ];then echo; echo '[ Finished ] Press Enter to close'; else echo; echo 'Press Enter to close (closing this window may unmount sshfs)'; fi; read\" & sleep 1\n",
+        "# spacefm socket run-task cmd --terminal \"echo 'Connecting to $fm_url'; echo; sshfs -p $fm_url_port $fm_url_user$fm_url_host:$fm_url_path %a; if [ $status -ne 0 ];then echo; echo '[ Finished ] Press Enter to close'; else echo; echo 'Press Enter to close (closing this window may unmount sshfs)'; fi; read\" & sleep 1\n",
         // clang-format on
         true,
         "fusermount -u \"%a\"",
@@ -685,7 +685,7 @@ inline constexpr std::array<Handler, 10> handlers_net{
         "smb mtab_fs=cifs",
         "",
         "UDEVIL_RESULT=\"$(udevil mount \"$fm_url\" | grep Mounted)\"\n"
-        "[ -n \"$UDEVIL_RESULT\" ] && spacefm -s set new_tab \"${UDEVIL_RESULT#* at }\"",
+        "[ -n \"$UDEVIL_RESULT\" ] && spacefm socket set new_tab \"${UDEVIL_RESULT#* at }\"",
         true,
         "udevil umount \"%a\"",
         false,

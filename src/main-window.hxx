@@ -148,4 +148,5 @@ bool main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64
                        const char* focus, u32 keyval, u32 button, u32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);
 
-const std::tuple<char, std::string> main_window_socket_command(char* argv[]);
+const std::tuple<char, std::string>
+main_window_socket_command(const std::string_view socket_commands_json);

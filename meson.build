@@ -229,6 +229,12 @@ spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 pugixml_dep = dependency('pugixml', required : true)
+nlohmann_json_dep = dependency('nlohmann_json', required : true)
+cli11_dep = dependency('CLI11', required : true)
+
+# zmqpp does not provide a pkgconfig file
+libzmq_dep = dependency('libzmq', required : true)
+libzmqpp_dep = cc.find_library('zmqpp', has_headers: ['zmqpp/zmqpp.hpp'], required: true)
 
 #gtk_dep = dependency('gtk4', required : true)
 gtk_dep = dependency('gtk+-3.0', required : true)
@@ -255,6 +261,11 @@ dependencies = [
     fmt_dep,
     sigc_dep,
     pugixml_dep,
+    nlohmann_json_dep,
+    cli11_dep,
+
+    libzmq_dep,
+    libzmqpp_dep,
 
     libudev_dep,
     libffmpegthumbnailer_dep,
@@ -283,6 +294,8 @@ preprocessor = [
     '-DMAGIC_ENUM_RANGE_MIN=0',
     '-DMAGIC_ENUM_RANGE_MAX=2000',
     # '-DMAGIC_ENUM_RANGE_MAX=32767',
+
+    '-DZMQ_PORT=59172',
 
     '-DLIBDIR_PATH="@0@"'.format(libdir),
 
@@ -344,6 +357,7 @@ sources = files(
     'src/autosave.cxx',
     'src/bookmarks.cxx',
     'src/find-files.cxx',
+    'src/ipc.cxx',
     'src/item-prop.cxx',
     'src/main.cxx',
     'src/main-window.cxx',
@@ -351,12 +365,21 @@ sources = files(
     'src/program-timer.cxx',
     'src/scripts.cxx',
     'src/settings.cxx',
-    'src/socket.cxx',
+    'src/single-instance.cxx',
     'src/terminal-handlers.cxx',
     'src/type-conversion.cxx',
     'src/types.cxx',
     'src/utils.cxx',
     'src/window-reference.cxx',
+
+    'src/commandline/commandline.cxx',
+    'src/commandline/socket.cxx',
+    'src/commandline/socket/subcommands.cxx',
+    'src/commandline/socket/get/subcommands.cxx',
+    'src/commandline/socket/get-task/subcommands.cxx',
+    'src/commandline/socket/run-task/subcommands.cxx',
+    'src/commandline/socket/set/subcommands.cxx',
+    'src/commandline/socket/set-task/subcommands.cxx',
 
     'src/xset/xset.cxx',
     'src/xset/xset-context.cxx',

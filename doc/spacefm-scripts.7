@@ -70,7 +70,7 @@ Shell variables usable in custom commands
  "$fm_command"             current command
  "$fm_value"               menu item value             ( same as %a )
  "$fm_user"                original user who ran this command
- "$fm_my_task"             current task's id  (see 'spacefm -s help')
+ "$fm_my_task"             current task's id  (see 'spacefm socket help')
  "$fm_my_window"           current task's window id
  "$fm_cmd_name"            menu name of current command
  "$fm_cmd_dir"             command files directory (for read only)
@@ -128,7 +128,7 @@ Shell variables usable in custom commands
    # See http://ignorantguru.github.io/spacefm/spacefm-manual-en.html#sockets
    while (( 1 )); do
        sleep 0.7
-       spacefm -s set-task $fm_my_task item "$(date)"
+       spacefm socket set-task $fm_my_task item "$(date)"
    done
 
 .SH Bash Scripting Guide

@@ -15,30 +15,5 @@
 
 #pragma once
 
-#include <string>
-
-#include <ztd/ztd.hxx>
-
-struct CliFlags
-{
-    char** files{nullptr};
-    bool new_tab{true};
-    bool reuse_tab{false};
-    bool no_tabs{false};
-    bool new_window{false};
-    bool socket_cmd{false};
-    bool version_opt{false};
-
-    i32 panel{0};
-
-    bool find_files{false};
-    char* config_dir{nullptr};
-    bool disable_git_settings{false};
-};
-
-extern CliFlags cli_flags;
-
-bool single_instance_check();
-void single_instance_finalize();
-
-const std::tuple<i32, std::string> send_socket_command(std::span<const std::string_view> args);
+[[nodiscard]] bool single_instance_check() noexcept;
+void single_instance_finalize() noexcept;

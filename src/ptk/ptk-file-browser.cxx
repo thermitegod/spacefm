@@ -5973,7 +5973,7 @@ ptk_file_browser_focus_me(PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 t)
+ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, tab_t t)
 {
     // ztd::logger::info("ptk_file_browser_go_tab fb={:p}", fmt::ptr(file_browser));
     GtkWidget* notebook = file_browser->mynotebook;

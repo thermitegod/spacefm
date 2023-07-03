@@ -655,19 +655,21 @@ xset_defaults()
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever a new SpaceFM "
         "window is opened:\n\nUse:\n\t%%e\tevent type  (evt_win_new)\n\t%%w\twindow id  (see "
-        "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, etc) "
+        "spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, "
+        "etc) "
         "can be used in this command.");
 
     set = xset_get(xset::name::evt_win_focus);
     xset_set_var(set, xset::var::menu_label, "_Focus");
     set->menu_style = xset::menu::string;
     xset_set_var(set, xset::var::title, "Set Window Focus Command");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically whenever a SpaceFM "
-                 "window gets focus:\n\nUse:\n\t%%e\tevent type  (evt_win_focus)\n\t%%w\twindow "
-                 "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables "
-                 "(eg $fm_pwd, etc) can be used in this command.");
+    xset_set_var(
+        set,
+        xset::var::desc,
+        "Enter program or fish command line to be run automatically whenever a SpaceFM "
+        "window gets focus:\n\nUse:\n\t%%e\tevent type  (evt_win_focus)\n\t%%w\twindow "
+        "id  (see spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables "
+        "(eg $fm_pwd, etc) can be used in this command.");
 
     set = xset_get(xset::name::evt_win_move);
     xset_set_var(set, xset::var::menu_label, "_Move/Resize");
@@ -678,7 +680,8 @@ xset_defaults()
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever a SpaceFM window is "
         "moved or resized:\n\nUse:\n\t%%e\tevent type  (evt_win_move)\n\t%%w\twindow id  (see "
-        "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, etc) "
+        "spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, "
+        "etc) "
         "can be used in this command.\n\nNote: This command may be run multiple times during "
         "resize.");
 
@@ -690,7 +693,8 @@ xset_defaults()
         set,
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever the mouse is "
-        "clicked:\n\nUse:\n\t%%e\tevent type  (evt_win_click)\n\t%%w\twindow id  (see spacefm -s "
+        "clicked:\n\nUse:\n\t%%e\tevent type  (evt_win_click)\n\t%%w\twindow id  (see spacefm "
+        "socket "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%b\tbutton  (mouse button pressed)\n\t%%m\tmodifier "
         " (modifier keys)\n\t%%f\tfocus  (element which received the click)\n\nExported fish "
         "variables (eg $fm_pwd, etc) can be used in this command when no asterisk prefix is "
@@ -706,7 +710,7 @@ xset_defaults()
         set,
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever a key is "
-        "pressed:\n\nUse:\n\t%%e\tevent type  (evt_win_key)\n\t%%w\twindow id  (see spacefm -s "
+        "pressed:\n\nUse:\n\t%%e\tevent type  (evt_win_key)\n\t%%w\twindow id  (see spacefm socket "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%k\tkey code  (key pressed)\n\t%%m\tmodifier  "
         "(modifier keys)\n\nExported fish variables (eg $fm_pwd, etc) can be used in this "
         "command when no asterisk prefix is used.\n\nPrefix your command with an asterisk (*) "
@@ -718,12 +722,13 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "Cl_ose");
     set->menu_style = xset::menu::string;
     xset_set_var(set, xset::var::title, "Set Window Close Command");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically whenever a SpaceFM "
-                 "window is closed:\n\nUse:\n\t%%e\tevent type  (evt_win_close)\n\t%%w\twindow "
-                 "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables "
-                 "(eg $fm_pwd, etc) can be used in this command.");
+    xset_set_var(
+        set,
+        xset::var::desc,
+        "Enter program or fish command line to be run automatically whenever a SpaceFM "
+        "window is closed:\n\nUse:\n\t%%e\tevent type  (evt_win_close)\n\t%%w\twindow "
+        "id  (see spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables "
+        "(eg $fm_pwd, etc) can be used in this command.");
 
     set = xset_get(xset::name::auto_pnl);
     xset_set_var(set, xset::var::menu_label, "_Panel");
@@ -734,12 +739,13 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Focus");
     set->menu_style = xset::menu::string;
     xset_set_var(set, xset::var::title, "Set Panel Focus Command");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically whenever a panel "
-                 "gets focus:\n\nUse:\n\t%%e\tevent type  (evt_pnl_focus)\n\t%%w\twindow id  "
-                 "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
-                 "$fm_pwd, etc) can be used in this command.");
+    xset_set_var(
+        set,
+        xset::var::desc,
+        "Enter program or fish command line to be run automatically whenever a panel "
+        "gets focus:\n\nUse:\n\t%%e\tevent type  (evt_pnl_focus)\n\t%%w\twindow id  "
+        "(see spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
+        "$fm_pwd, etc) can be used in this command.");
 
     set = xset_get(xset::name::evt_pnl_show);
     xset_set_var(set, xset::var::menu_label, "_Show");
@@ -750,7 +756,7 @@ xset_defaults()
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever a panel or panel "
         "element is shown or hidden:\n\nUse:\n\t%%e\tevent type  (evt_pnl_show)\n\t%%w\twindow "
-        "id  (see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%f\tfocus  (element shown or "
+        "id  (see spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%f\tfocus  (element shown or "
         "hidden)\n\t%%v\tvisible  (1 or 0)\n\nExported fish variables (eg $fm_pwd, etc) can be "
         "used in this command.");
 
@@ -762,7 +768,7 @@ xset_defaults()
         set,
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever the file selection "
-        "changes:\n\nUse:\n\t%%e\tevent type  (evt_pnl_sel)\n\t%%w\twindow id  (see spacefm -s "
+        "changes:\n\nUse:\n\t%%e\tevent type  (evt_pnl_sel)\n\t%%w\twindow id  (see spacefm socket "
         "help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg $fm_pwd, etc) can be "
         "used in this command.\n\nPrefix your command with an asterisk (*) and conditionally "
         "return exit status 0 to inhibit the default handler.");
@@ -780,7 +786,7 @@ xset_defaults()
                  xset::var::desc,
                  "Enter program or fish command line to be run automatically whenever a new tab "
                  "is opened:\n\nUse:\n\t%%e\tevent type  (evt_tab_new)\n\t%%w\twindow id  (see "
-                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
+                 "spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
     set = xset_get(xset::name::evt_tab_chdir);
@@ -792,7 +798,8 @@ xset_defaults()
         xset::var::desc,
         "Enter program or fish command line to be run automatically whenever a tab changes to a "
         "different directory:\n\nUse:\n\t%%e\tevent type  (evt_tab_chdir)\n\t%%w\twindow id  "
-        "(see spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%d\tnew directory\n\nExported fish "
+        "(see spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\t%%d\tnew directory\n\nExported "
+        "fish "
         "variables (eg $fm_pwd, etc) can be used in this command.");
 
     set = xset_get(xset::name::evt_tab_focus);
@@ -803,7 +810,7 @@ xset_defaults()
                  xset::var::desc,
                  "Enter program or fish command line to be run automatically whenever a tab gets "
                  "focus:\n\nUse:\n\t%%e\tevent type  (evt_tab_focus)\n\t%%w\twindow id  (see "
-                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
+                 "spacefm socket help)\n\t%%p\tpanel\n\t%%t\ttab\n\nExported fish variables (eg "
                  "$fm_pwd, etc) can be used in this command.");
 
     set = xset_get(xset::name::evt_tab_close);
@@ -814,7 +821,7 @@ xset_defaults()
                  xset::var::desc,
                  "Enter program or fish command line to be run automatically whenever a tab is "
                  "closed:\n\nUse:\n\t%%e\tevent type  (evt_tab_close)\n\t%%w\twindow id  (see "
-                 "spacefm -s help)\n\t%%p\tpanel\n\t%%t\tclosed tab");
+                 "spacefm socket help)\n\t%%p\tpanel\n\t%%t\tclosed tab");
 
     set = xset_get(xset::name::evt_device);
     xset_set_var(set, xset::var::menu_label, "_Device");

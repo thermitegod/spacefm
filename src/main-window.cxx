@@ -29,20 +29,19 @@
 
 #include <optional>
 
-#include <glibmm.h>
-#include <glibmm/convert.h>
-
-// #include <gdk/gdkx.h>
-// #include <X11/Xatom.h>
-
 #include <malloc.h>
 
 #include <cassert>
 
 #include <fmt/format.h>
 
+#include <glibmm.h>
+#include <glibmm/convert.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include <nlohmann/json.hpp>
 
 #include "ptk/ptk-file-browser.hxx"
 #include "types.hxx"
@@ -846,7 +845,14 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
     }
     else
     {
-        panel_num = p;
+        if (p == INVALID_PANEL)
+        {
+            panel_num = main_window->curpanel;
+        }
+        else
+        {
+            panel_num = p;
+        }
     }
 
     switch (panel_num)
@@ -6112,23 +6118,26 @@ main_task_view_new(MainWindow* main_window)
     return view;
 }
 
-// ============== socket commands
+/**
+ *
+ * socket commands
+ *
+ */
 
 static bool
 get_bool(const std::string_view value)
 {
-    if (ztd::same(ztd::lower(value), "yes") || ztd::same(value, "1"))
+    if (ztd::same(ztd::lower(value), "true") || ztd::same(value, "1"))
     {
         return true;
     }
-    else if (ztd::same(ztd::lower(value), "no") || ztd::same(value, "0"))
+    else if (ztd::same(ztd::lower(value), "false") || ztd::same(value, "0"))
     {
         return false;
     }
 
-    // throw std::logic_error("");
     ztd::logger::warn("socket command defaulting to false, invalid value: {}", value);
-    ztd::logger::info("supported socket command values are 'yes|1|no|0");
+    ztd::logger::info("supported socket bool values are 'true|1|false|0");
     return false;
 }
 
@@ -6165,16 +6174,18 @@ delayed_show_menu(GtkWidget* menu)
 #define SOCKET_INVALID 2 // Invalid request exit status.
 
 const std::tuple<char, std::string>
-main_window_socket_command(char* argv[])
+main_window_socket_command(const std::string_view socket_commands_json)
 {
-    if (!(argv && argv[0]))
-    {
-        return {1, "invalid socket command"};
-    }
+    const nlohmann::json json = nlohmann::json::parse(socket_commands_json);
 
-    panel_t panel = 0;
-    tab_t tab = 0;
-    const char* window = nullptr;
+    // socket flags
+    panel_t panel = json["panel"];
+    tab_t tab = json["tab"];
+    std::string window = json["window"];
+    // socket commands
+    // subproperty and data are only retrived in the properties that need them
+    const std::string command = json["command"];
+    const std::string property = json["property"];
 
     // must match file-browser.c
     static constexpr std::array<const std::string_view, 11> column_titles{
@@ -6191,48 +6202,9 @@ main_window_socket_command(char* argv[])
         "Date Created",
     };
 
-    // cmd options
-    i64 i = 1;
-    while (argv[i] && argv[i][0] == '-')
-    {
-        const std::string socket_property = argv[i];
-
-        if (ztd::same(socket_property, "--window"))
-        {
-            if (!argv[i + 1])
-            {
-                return {SOCKET_FAILURE, std::format("option {} requires an argument", argv[i])};
-            }
-            window = argv[i + 1];
-            i += 2;
-            continue;
-        }
-        else if (ztd::same(socket_property, "--panel"))
-        {
-            if (!argv[i + 1])
-            {
-                return {SOCKET_FAILURE, std::format("option {} requires an argument", argv[i])};
-            }
-            panel = std::stol(argv[i + 1]);
-            i += 2;
-            continue;
-        }
-        else if (ztd::same(socket_property, "--tab"))
-        {
-            if (!argv[i + 1])
-            {
-                return {SOCKET_FAILURE, std::format("option {} requires an argument", argv[i])};
-            }
-            tab = std::stol(argv[i + 1]);
-            i += 2;
-            continue;
-        }
-        return {SOCKET_FAILURE, std::format("invalid option '{}'", argv[i])};
-    }
-
     // window
     MainWindow* main_window = nullptr;
-    if (!window)
+    if (window.empty())
     {
         main_window = main_window_get_last_active();
         if (main_window == nullptr)
@@ -6258,7 +6230,7 @@ main_window_socket_command(char* argv[])
     }
 
     // panel
-    if (!panel)
+    if (panel == 0)
     {
         panel = main_window->curpanel;
     }
@@ -6273,7 +6245,7 @@ main_window_socket_command(char* argv[])
     }
 
     // tab
-    if (!tab)
+    if (tab == 0)
     {
         tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) + 1;
     }
@@ -6285,43 +6257,34 @@ main_window_socket_command(char* argv[])
         gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[panel - 1]), tab - 1));
 
     // command
-    const std::string socket_cmd = argv[i - 1];
-    const std::string socket_property = argv[i];
 
-    // ztd::logger::info("argv[i-2]={}", argv[i-2]);
-    // ztd::logger::info("argv[i-1]={}", argv[i-1]);
-    // ztd::logger::info("argv[i+0]={}", argv[i]);
-    // ztd::logger::info("argv[i+1]={}", argv[i+1]);
-    // ztd::logger::info("argv[i+2]={}", argv[i+2]);
-    // ztd::logger::info("argv[i+3]={}", argv[i+3]);
+    i8 i = 0; // socket commands index
 
-    if (ztd::same(socket_cmd, "set"))
+    if (ztd::same(command, "set"))
     {
-        if (!argv[i])
+        const std::vector<std::string> data = json["data"];
+
+        if (ztd::same(property, "window-size") || ztd::same(property, "window-position"))
         {
-            return {SOCKET_FAILURE, "command set requires an argument"};
-        }
-        if (ztd::same(socket_property, "window_size") ||
-            ztd::same(socket_property, "window_position"))
-        {
+            const std::string_view value = data[0];
+
             i32 height = 0;
             i32 width = 0;
-            if (argv[i + 1])
+
+            // size format '620x480'
+            if (!ztd::contains(value, "x"))
             {
-                // size format '620x480'
-                if (!ztd::contains(argv[i + 1], "x"))
-                {
-                    return {SOCKET_INVALID, std::format("invalid size format {}", argv[i + 1])};
-                }
-                const auto size = ztd::split(argv[i + 1], "x");
-                width = std::stoi(size[0]);
-                height = std::stoi(size[1]);
+                return {SOCKET_INVALID, std::format("invalid size format {}", value)};
             }
+            const auto size = ztd::split(value, "x");
+            width = std::stoi(size[0]);
+            height = std::stoi(size[1]);
+
             if (height < 1 || width < 1)
             {
-                return {SOCKET_INVALID, std::format("invalid {} value", argv[i])};
+                return {SOCKET_INVALID, std::format("invalid size {}", value)};
             }
-            if (ztd::same(socket_property, "window_size"))
+            if (ztd::same(property, "window-size"))
             {
                 gtk_window_resize(GTK_WINDOW(main_window), width, height);
             }
@@ -6330,9 +6293,11 @@ main_window_socket_command(char* argv[])
                 gtk_window_move(GTK_WINDOW(main_window), width, height);
             }
         }
-        else if (ztd::same(socket_property, "window_maximized"))
+        else if (ztd::same(property, "window-maximized"))
         {
-            if (get_bool(argv[i + 1]))
+            const std::string_view value = data[0];
+
+            if (get_bool(value))
             {
                 gtk_window_maximize(GTK_WINDOW(main_window));
             }
@@ -6341,39 +6306,35 @@ main_window_socket_command(char* argv[])
                 gtk_window_unmaximize(GTK_WINDOW(main_window));
             }
         }
-        else if (ztd::same(socket_property, "window_fullscreen"))
+        else if (ztd::same(property, "window-fullscreen"))
         {
-            xset_set_b(xset::name::main_full, get_bool(argv[i + 1]));
+            const std::string_view value = data[0];
+
+            xset_set_b(xset::name::main_full, get_bool(value));
             on_fullscreen_activate(nullptr, main_window);
         }
-        else if (ztd::same(socket_property, "screen_size"))
+        else if (ztd::same(property, "window-vslider-top") ||
+                 ztd::same(property, "window-vslider-bottom") ||
+                 ztd::same(property, "window-hslider") || ztd::same(property, "window-tslider"))
         {
-        }
-        else if (ztd::same(socket_property, "window_vslider_top") ||
-                 ztd::same(socket_property, "window_vslider_bottom") ||
-                 ztd::same(socket_property, "window_hslider") ||
-                 ztd::same(socket_property, "window_tslider"))
-        {
-            i32 width = -1;
-            if (argv[i + 1])
-            {
-                width = std::stoi(argv[i + 1]);
-            }
+            const std::string_view value = data[0];
+
+            const i32 width = std::stoi(value.data());
             if (width < 0)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
             }
 
             GtkWidget* widget;
-            if (ztd::same(socket_property, "window_vslider_top"))
+            if (ztd::same(property, "window-vslider-top"))
             {
                 widget = main_window->hpane_top;
             }
-            else if (ztd::same(socket_property, "window_vslider_bottom"))
+            else if (ztd::same(property, "window-vslider-bottom"))
             {
                 widget = main_window->hpane_bottom;
             }
-            else if (ztd::same(socket_property, "window_hslider"))
+            else if (ztd::same(property, "window-hslider"))
             {
                 widget = main_window->vpane;
             }
@@ -6384,199 +6345,235 @@ main_window_socket_command(char* argv[])
 
             gtk_paned_set_position(GTK_PANED(widget), width);
         }
-        else if (ztd::same(socket_property, "focused_panel"))
+        else if (ztd::same(property, "focused-panel"))
         {
+            const std::string subproperty = json["subproperty"];
+
             i32 width = 0;
-            if (argv[i + 1])
+
+            if (ztd::same(subproperty, "prev"))
             {
-                if (ztd::same(argv[i + 1], "prev"))
-                {
-                    width = panel_control_code_prev;
-                }
-                else if (ztd::same(argv[i + 1], "next"))
-                {
-                    width = panel_control_code_next;
-                }
-                else if (ztd::same(argv[i + 1], "hide"))
-                {
-                    width = panel_control_code_hide;
-                }
-                else
-                {
-                    width = std::stoi(argv[i + 1]);
-                }
+                width = panel_control_code_prev;
             }
+            else if (ztd::same(subproperty, "next"))
+            {
+                width = panel_control_code_next;
+            }
+            else if (ztd::same(subproperty, "hide"))
+            {
+                width = panel_control_code_hide;
+            }
+            else if (ztd::same(subproperty, "panel1"))
+            {
+                width = panel_1;
+            }
+            else if (ztd::same(subproperty, "panel2"))
+            {
+                width = panel_2;
+            }
+            else if (ztd::same(subproperty, "panel3"))
+            {
+                width = panel_3;
+            }
+            else if (ztd::same(subproperty, "panel4"))
+            {
+                width = panel_4;
+            }
+
             if (!valid_panel(width) || !valid_panel_code(width))
             {
                 return {SOCKET_INVALID, "invalid panel number"};
             }
             focus_panel(nullptr, (void*)main_window, width);
         }
-        else if (ztd::same(socket_property, "focused_pane"))
+        else if (ztd::same(property, "focused-pane"))
         {
+            const std::string subproperty = json["subproperty"];
+
             GtkWidget* widget = nullptr;
-            if (argv[i + 1])
+
+            if (ztd::same(subproperty, "filelist"))
             {
-                if (ztd::same(argv[i + 1], "filelist"))
-                {
-                    widget = file_browser->folder_view;
-                }
-                else if (ztd::same(argv[i + 1], "devices"))
-                {
-                    widget = file_browser->side_dev;
-                }
-                else if (ztd::same(argv[i + 1], "dirtree"))
-                {
-                    widget = file_browser->side_dir;
-                }
-                else if (ztd::same(argv[i + 1], "pathbar"))
-                {
-                    widget = file_browser->path_bar;
-                }
+                widget = file_browser->folder_view;
             }
+            else if (ztd::same(subproperty, "devices"))
+            {
+                widget = file_browser->side_dev;
+            }
+            else if (ztd::same(subproperty, "dirtree"))
+            {
+                widget = file_browser->side_dir;
+            }
+            else if (ztd::same(subproperty, "pathbar"))
+            {
+                widget = file_browser->path_bar;
+            }
+
             if (GTK_IS_WIDGET(widget))
             {
                 gtk_widget_grab_focus(widget);
             }
         }
-        else if (ztd::same(socket_property, "current_tab"))
+        else if (ztd::same(property, "current-tab"))
         {
-            i32 width = 0;
-            if (argv[i + 1])
+            const std::string subproperty = json["subproperty"];
+
+            tab_t new_tab = INVALID_TAB;
+
+            if (ztd::same(subproperty, "prev"))
             {
-                if (ztd::same(argv[i + 1], "prev"))
-                {
-                    width = tab_control_code_prev;
-                }
-                else if (ztd::same(argv[i + 1], "next"))
-                {
-                    width = tab_control_code_next;
-                }
-                else if (ztd::same(argv[i + 1], "close"))
-                {
-                    width = tab_control_code_close;
-                }
-                else
-                {
-                    width = std::stoi(argv[i + 1]);
-                }
+                new_tab = tab_control_code_prev;
             }
-            if (!valid_tab_code(width) || width == 0 ||
-                width > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
+            else if (ztd::same(subproperty, "next"))
             {
-                return {SOCKET_INVALID, "invalid tab number"};
+                new_tab = tab_control_code_next;
             }
-            ptk_file_browser_go_tab(nullptr, file_browser, width);
+            else if (ztd::same(subproperty, "close"))
+            {
+                new_tab = tab_control_code_close;
+            }
+            else if (ztd::same(subproperty, "restore"))
+            {
+                new_tab = tab_control_code_restore;
+            }
+            else if (ztd::same(subproperty, "tab1"))
+            {
+                new_tab = tab_1;
+            }
+            else if (ztd::same(subproperty, "tab2"))
+            {
+                new_tab = tab_2;
+            }
+            else if (ztd::same(subproperty, "tab3"))
+            {
+                new_tab = tab_3;
+            }
+            else if (ztd::same(subproperty, "tab4"))
+            {
+                new_tab = tab_4;
+            }
+            else if (ztd::same(subproperty, "tab5"))
+            {
+                new_tab = tab_5;
+            }
+            else if (ztd::same(subproperty, "tab6"))
+            {
+                new_tab = tab_6;
+            }
+            else if (ztd::same(subproperty, "tab7"))
+            {
+                new_tab = tab_7;
+            }
+            else if (ztd::same(subproperty, "tab8"))
+            {
+                new_tab = tab_8;
+            }
+            else if (ztd::same(subproperty, "tab9"))
+            {
+                new_tab = tab_9;
+            }
+            else if (ztd::same(subproperty, "tab10"))
+            {
+                new_tab = tab_10;
+            }
+
+            if (!(valid_tab(new_tab) || valid_tab_code(new_tab)) || new_tab == INVALID_TAB ||
+                new_tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
+            {
+                return {SOCKET_INVALID, std::format("invalid tab number: {}", new_tab)};
+            }
+            ptk_file_browser_go_tab(nullptr, file_browser, new_tab);
         }
-        else if (ztd::same(socket_property, "tab_count"))
+        else if (ztd::same(property, "new-tab"))
         {
-        }
-        else if (ztd::same(socket_property, "new_tab"))
-        {
+            const std::string_view value = data[0];
+
+            if (!std::filesystem::is_directory(value))
+            {
+                return {SOCKET_FAILURE, std::format("not a directory: '{}'", value)};
+            }
+
             focus_panel(nullptr, (void*)main_window, panel);
-            if (!(argv[i + 1] && std::filesystem::is_directory(argv[i + 1])))
-            {
-                ptk_file_browser_new_tab(nullptr, file_browser);
-            }
-            else
-            {
-                main_window_add_new_tab(main_window, argv[i + 1]);
-            }
-
-            const auto counts = main_window_get_counts(file_browser);
-            // const panel_t panel_count = counts[0];
-            const tab_t tab_count = counts[1];
-            const tab_t tab_num = counts[2];
-
-            return {SOCKET_SUCCESS,
-                    std::format("new_tab_window={}\nnew_tab_panel={}\n"
-                                "new_tab_number={}\nnew_tab_path={}",
-                                (void*)main_window,
-                                panel,
-                                tab_num,
-                                argv[tab_count + 1])};
+            main_window_add_new_tab(main_window, value);
         }
-        else if (ztd::endswith(socket_property, "_visible"))
+        else if (ztd::endswith(property, "-visible"))
         {
+            const std::string_view value = data[0];
+
             bool valid = false;
             bool use_mode = false;
             xset::panel xset_panel_var;
-            if (ztd::startswith(socket_property, "devices_"))
+            if (ztd::startswith(property, "devices-"))
             {
                 xset_panel_var = xset::panel::show_devmon;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "dirtree_"))
+            else if (ztd::startswith(property, "dirtree-"))
             {
                 xset_panel_var = xset::panel::show_dirtree;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "toolbar_"))
+            else if (ztd::startswith(property, "toolbar-"))
             {
                 xset_panel_var = xset::panel::show_toolbox;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "sidetoolbar_"))
+            else if (ztd::startswith(property, "sidetoolbar-"))
             {
                 xset_panel_var = xset::panel::show_sidebar;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "hidden_files_"))
+            else if (ztd::startswith(property, "hidden-files-"))
             {
                 xset_panel_var = xset::panel::show_hidden;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "panel"))
+            else if (ztd::startswith(property, "panel"))
             {
-                const i32 j = argv[i][5] - 48;
-                if (!valid_panel(j))
-                {
-                    return {SOCKET_INVALID, std::format("invalid property {}", argv[i])};
-                }
-                xset_set_b_panel(j, xset::panel::show, get_bool(argv[i + 1]));
+                const i32 j = property[5] - 48;
+                xset_set_b_panel(j, xset::panel::show, get_bool(value));
                 show_panels_all_windows(nullptr, main_window);
                 return {SOCKET_SUCCESS, ""};
             }
             if (!valid)
             {
-                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("unknown property '{}'", value)};
             }
             if (use_mode)
             {
                 xset_set_b_panel_mode(panel,
                                       xset_panel_var,
                                       main_window->panel_context.at(panel),
-                                      get_bool(argv[i + 1]));
+                                      get_bool(value));
             }
             else
             {
-                xset_set_b_panel(panel, xset_panel_var, get_bool(argv[i + 1]));
+                xset_set_b_panel(panel, xset_panel_var, get_bool(value));
             }
             update_views_all_windows(nullptr, file_browser);
         }
-        else if (ztd::same(socket_property, "panel_hslider_top") ||
-                 ztd::same(socket_property, "panel_hslider_bottom") ||
-                 ztd::same(socket_property, "panel_vslider"))
+        else if (ztd::same(property, "panel-hslider-top") ||
+                 ztd::same(property, "panel-hslider-bottom") ||
+                 ztd::same(property, "panel-vslider"))
         {
-            i32 width = -1;
-            if (argv[i + 1])
-            {
-                width = std::stoi(argv[i + 1]);
-            }
+            const std::string_view value = data[0];
+
+            const i32 width = std::stoi(value.data());
+
             if (width < 0)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
             }
             GtkWidget* widget;
-            if (ztd::same(socket_property, "panel_hslider_top"))
+            if (ztd::same(property, "panel-hslider-top"))
             {
                 widget = file_browser->side_vpane_top;
             }
-            else if (ztd::same(socket_property, "panel_hslider_bottom"))
+            else if (ztd::same(property, "panel-hslider-bottom"))
             {
                 widget = file_browser->side_vpane_bottom;
             }
@@ -6588,13 +6585,13 @@ main_window_socket_command(char* argv[])
             ptk_file_browser_slider_release(nullptr, nullptr, file_browser);
             update_views_all_windows(nullptr, file_browser);
         }
-        else if (ztd::same(socket_property, "column_width"))
+        else if (ztd::same(property, "column-width"))
         { // COLUMN WIDTH
-            i32 width = 0;
-            if (argv[i + 1] && argv[i + 2])
-            {
-                width = std::stoi(argv[i + 2]);
-            }
+            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
+
+            const i32 width = std::stoi(value.data());
+
             if (width < 1)
             {
                 return {SOCKET_INVALID, "invalid column width"};
@@ -6603,7 +6600,7 @@ main_window_socket_command(char* argv[])
             {
                 bool found = false;
                 GtkTreeViewColumn* col;
-                for (const auto [index, value] : ztd::enumerate(column_titles))
+                for (const auto [index, column_title] : ztd::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
                                                    static_cast<i32>(index));
@@ -6612,62 +6609,19 @@ main_window_socket_command(char* argv[])
                         continue;
                     }
                     const char* title = gtk_tree_view_column_get_title(col);
-                    if (ztd::same(argv[i + 1], title))
+                    if (ztd::same(subproperty, title))
                     {
                         found = true;
                         break;
                     }
-                    if (ztd::same(argv[i + 1], "name") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "size") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "bytes") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "type") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "mime") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "permission") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "owner") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "group") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "accessed") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "modified") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "created") && ztd::same(title, value))
+
+                    if (ztd::same(title, column_title) &&
+                        (ztd::same(subproperty, "name") || ztd::same(subproperty, "size") ||
+                         ztd::same(subproperty, "bytes") || ztd::same(subproperty, "type") ||
+                         ztd::same(subproperty, "mime") || ztd::same(subproperty, "permission") ||
+                         ztd::same(subproperty, "owner") || ztd::same(subproperty, "group") ||
+                         ztd::same(subproperty, "accessed") || ztd::same(subproperty, "modified") ||
+                         ztd::same(subproperty, "created")))
                     {
                         found = true;
                         break;
@@ -6679,96 +6633,96 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
+                    return {SOCKET_INVALID, std::format("invalid column name '{}'", value)};
                 }
             }
         }
-        else if (ztd::same(socket_property, "sort_by"))
+        else if (ztd::same(property, "sort-by"))
         { // COLUMN
+            const std::string subproperty = json["subproperty"];
+
             auto j = ptk::file_browser::sort_order::name;
-            if (!argv[i + 1])
-            {
-            }
-            else if (ztd::same(argv[i + 1], "name"))
+            if (ztd::same(subproperty, "name"))
             {
                 j = ptk::file_browser::sort_order::name;
             }
-            else if (ztd::same(argv[i + 1], "size"))
+            else if (ztd::same(subproperty, "size"))
             {
                 j = ptk::file_browser::sort_order::size;
             }
-            else if (ztd::same(argv[i + 1], "bytes"))
+            else if (ztd::same(subproperty, "bytes"))
             {
                 j = ptk::file_browser::sort_order::bytes;
             }
-            else if (ztd::same(argv[i + 1], "type"))
+            else if (ztd::same(subproperty, "type"))
             {
                 j = ptk::file_browser::sort_order::type;
             }
-            else if (ztd::same(argv[i + 1], "mime"))
+            else if (ztd::same(subproperty, "mime"))
             {
                 j = ptk::file_browser::sort_order::mime;
             }
-            else if (ztd::same(argv[i + 1], "permission"))
+            else if (ztd::same(subproperty, "permission"))
             {
                 j = ptk::file_browser::sort_order::perm;
             }
-            else if (ztd::same(argv[i + 1], "owner"))
+            else if (ztd::same(subproperty, "owner"))
             {
                 j = ptk::file_browser::sort_order::owner;
             }
-            else if (ztd::same(argv[i + 1], "group"))
+            else if (ztd::same(subproperty, "group"))
             {
                 j = ptk::file_browser::sort_order::group;
             }
-            else if (ztd::same(argv[i + 1], "accessed"))
+            else if (ztd::same(subproperty, "accessed"))
             {
                 j = ptk::file_browser::sort_order::atime;
             }
-            else if (ztd::same(argv[i + 1], "modified"))
+            else if (ztd::same(subproperty, "modified"))
             {
                 j = ptk::file_browser::sort_order::mtime;
             }
-            else if (ztd::same(argv[i + 1], "created"))
+            else if (ztd::same(subproperty, "created"))
             {
                 j = ptk::file_browser::sort_order::ctime;
             }
 
             else
             {
-                return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
+                return {SOCKET_INVALID, std::format("invalid column name '{}'", subproperty)};
             }
             ptk_file_browser_set_sort_order(file_browser, j);
         }
-        else if (ztd::startswith(socket_property, "sort_"))
+        else if (ztd::startswith(property, "sort-"))
         {
+            const std::string_view value = data[0];
+
             xset::name xset_name;
-            if (ztd::same(socket_property, "sort_ascend"))
+            if (ztd::same(property, "sort-ascend"))
             {
                 ptk_file_browser_set_sort_type(file_browser,
-                                               get_bool(argv[i + 1])
-                                                   ? GtkSortType::GTK_SORT_ASCENDING
-                                                   : GtkSortType::GTK_SORT_DESCENDING);
+                                               get_bool(value) ? GtkSortType::GTK_SORT_ASCENDING
+                                                               : GtkSortType::GTK_SORT_DESCENDING);
                 return {SOCKET_SUCCESS, ""};
             }
-            else if (ztd::same(socket_property, "sort_alphanum"))
+            else if (ztd::same(property, "sort-alphanum"))
             {
                 xset_name = xset::name::sortx_alphanum;
-                xset_set_b(xset_name, get_bool(argv[i + 1]));
+                xset_set_b(xset_name, get_bool(value));
             }
-            // else if (ztd::same(socket_property, "sort_natural"))
+            // else if (ztd::same(property, "sort-natural"))
             //{
             //     xset_name = xset::name::sortx_natural;
-            //     xset_set_b(xset_name, get_bool(argv[i + 1]));
+            //     xset_set_b(xset_name, get_bool(value));
             // }
-            else if (ztd::same(socket_property, "sort_case"))
+            else if (ztd::same(property, "sort-case"))
             {
                 xset_name = xset::name::sortx_case;
-                xset_set_b(xset_name, get_bool(argv[i + 1]));
+                xset_set_b(xset_name, get_bool(value));
             }
-            else if (ztd::same(socket_property, "sort_hidden_first"))
+            else if (ztd::same(property, "sort-hidden-first"))
             {
-                if (get_bool(argv[i + 1]))
+                if (get_bool(value))
                 {
                     xset_name = xset::name::sortx_hidfirst;
                 }
@@ -6778,250 +6732,236 @@ main_window_socket_command(char* argv[])
                 }
                 xset_set_b(xset_name, true);
             }
-            else if (ztd::same(socket_property, "sort_first"))
+            else if (ztd::same(property, "sort-first"))
             {
-                if (ztd::same(argv[i + 1], "files"))
+                if (ztd::same(value, "files"))
                 {
                     xset_name = xset::name::sortx_files;
                 }
-                else if (ztd::same(argv[i + 1], "directories"))
+                else if (ztd::same(value, "directories"))
                 {
                     xset_name = xset::name::sortx_directories;
                 }
-                else if (ztd::same(argv[i + 1], "mixed"))
+                else if (ztd::same(value, "mixed"))
                 {
                     xset_name = xset::name::sortx_mix;
                 }
                 else
                 {
-                    return {SOCKET_INVALID, std::format("invalid {} value", argv[i])};
+                    return {SOCKET_INVALID, std::format("invalid {} value", value)};
                 }
             }
             else
             {
-                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
             }
             ptk_file_browser_set_sort_extra(file_browser, xset_name);
         }
-        else if (ztd::same(socket_property, "show_thumbnails"))
+        else if (ztd::same(property, "show-thumbnails"))
         {
-            if (app_settings.get_show_thumbnail() != get_bool(argv[i + 1]))
+            const std::string_view value = data[0];
+
+            if (app_settings.get_show_thumbnail() != get_bool(value))
             {
                 main_window_toggle_thumbnails_all_windows();
             }
         }
-        else if (ztd::same(socket_property, "large_icons"))
+        else if (ztd::same(property, "large-icons"))
         {
+            const std::string_view value = data[0];
+
             if (file_browser->view_mode != ptk::file_browser::view_mode::icon_view)
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
                                       main_window->panel_context.at(panel),
-                                      get_bool(argv[i + 1]));
+                                      get_bool(value));
                 update_views_all_windows(nullptr, file_browser);
             }
         }
-        else if (ztd::same(socket_property, "statusbar_text"))
+        else if (ztd::same(property, "statusbar-text"))
         {
-            if (!(argv[i + 1] && argv[i + 1][0]))
-            {
-                std::free(file_browser->status_bar_custom);
-                file_browser->status_bar_custom = nullptr;
-            }
-            else
-            {
-                std::free(file_browser->status_bar_custom);
-                file_browser->status_bar_custom = ztd::strdup(argv[i + 1]);
-            }
+            const std::string_view value = data[0];
+
+            std::free(file_browser->status_bar_custom);
+            file_browser->status_bar_custom = ztd::strdup(value.data());
+
             main_window_update_status_bar(main_window, file_browser);
         }
-        else if (ztd::same(socket_property, "pathbar_text"))
+        else if (ztd::same(property, "pathbar-text"))
         { // TEXT [[SELSTART] SELEND]
+            const std::string_view value = data[0];
+
             if (!GTK_IS_WIDGET(file_browser->path_bar))
             {
                 return {SOCKET_SUCCESS, ""};
             }
-            if (!(argv[i + 1] && argv[i + 1][0]))
-            {
-                gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), "");
-            }
-            else
-            {
-                i32 width;
-                i32 height;
-                gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), argv[i + 1]);
-                if (!argv[i + 2])
-                {
-                    width = 0;
-                    height = -1;
-                }
-                else
-                {
-                    width = std::stoi(argv[i + 2]);
-                    height = argv[i + 3] ? std::stoi(argv[i + 3]) : -1;
-                }
-                gtk_editable_set_position(GTK_EDITABLE(file_browser->path_bar), -1);
-                gtk_editable_select_region(GTK_EDITABLE(file_browser->path_bar), width, height);
-                gtk_widget_grab_focus(file_browser->path_bar);
-            }
+
+            gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), value.data());
+
+            gtk_editable_set_position(GTK_EDITABLE(file_browser->path_bar), -1);
+            // gtk_editable_select_region(GTK_EDITABLE(file_browser->path_bar), width, height);
+            gtk_widget_grab_focus(file_browser->path_bar);
         }
-        else if (ztd::same(socket_property, "clipboard_text") ||
-                 ztd::same(socket_property, "clipboard_primary_text"))
+        else if (ztd::same(property, "clipboard-text") ||
+                 ztd::same(property, "clipboard-primary-text"))
         {
-            if (argv[i + 1] && !g_utf8_validate(argv[i + 1], -1, nullptr))
+            const std::string_view value = data[0];
+
+            if (!g_utf8_validate(value.data(), -1, nullptr))
             {
                 return {SOCKET_INVALID, "text is not valid UTF-8"};
             }
-            GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_text")
-                                                       ? GDK_SELECTION_CLIPBOARD
-                                                       : GDK_SELECTION_PRIMARY);
-            const std::string str = unescape(argv[i + 1] ? argv[i + 1] : "");
+            GtkClipboard* clip =
+                gtk_clipboard_get(ztd::same(property, "clipboard-text") ? GDK_SELECTION_CLIPBOARD
+                                                                        : GDK_SELECTION_PRIMARY);
+            const std::string str = unescape(value);
             gtk_clipboard_set_text(clip, str.data(), -1);
         }
-        else if (ztd::same(socket_property, "clipboard_from_file") ||
-                 ztd::same(socket_property, "clipboard_primary_from_file"))
+        else if (ztd::same(property, "clipboard-from-file") ||
+                 ztd::same(property, "clipboard-primary-from-file"))
         {
-            if (!argv[i + 1])
-            {
-                return {SOCKET_FAILURE, std::format("{} requires a file path", argv[i])};
-            }
+            const std::string_view value = data[0];
+
             std::string contents;
             try
             {
-                contents = Glib::file_get_contents(argv[i + 1]);
+                contents = Glib::file_get_contents(value.data());
             }
             catch (const Glib::FileError& e)
             {
-                return {SOCKET_INVALID, std::format("error reading file '{}'", argv[i + 1])};
+                return {SOCKET_INVALID, std::format("error reading file '{}'", value)};
             }
             if (!g_utf8_validate(contents.data(), -1, nullptr))
             {
                 return {SOCKET_INVALID,
-                        std::format("file '{}' does not contain valid UTF-8 text", argv[i + 1])};
+                        std::format("file '{}' does not contain valid UTF-8 text", value)};
             }
-            GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_from_file")
+            GtkClipboard* clip = gtk_clipboard_get(ztd::same(property, "clipboard-from-file")
                                                        ? GDK_SELECTION_CLIPBOARD
                                                        : GDK_SELECTION_PRIMARY);
             gtk_clipboard_set_text(clip, contents.data(), -1);
         }
-        else if (ztd::same(socket_property, "clipboard_cut_files") ||
-                 ztd::same(socket_property, "clipboard_copy_files"))
+        else if (ztd::same(property, "clipboard-cut-files") ||
+                 ztd::same(property, "clipboard-copy-files"))
         {
-            ptk_clipboard_copy_file_list(argv + i + 1,
-                                         ztd::same(socket_property, "clipboard_copy_files"));
+            return {SOCKET_INVALID, "Not Implemented"};
+
+            // ptk_clipboard_copy_file_list(argv + i + 1, ztd::same(property, "clipboard_copy_files"));
         }
-        else if (ztd::same(socket_property, "selected_filenames") ||
-                 ztd::same(socket_property, "selected_files"))
+        else if (ztd::same(property, "selected-filenames") || ztd::same(property, "selected-files"))
         {
-            if (!argv[i + 1] || argv[i + 1][0] == '\0')
+            const std::string_view value = data[0];
+
+            if (value.empty())
             {
                 // unselect all
                 ptk_file_browser_select_file_list(file_browser, nullptr, false);
             }
             else
             {
-                ptk_file_browser_select_file_list(file_browser, argv + i + 1, true);
+                return {SOCKET_INVALID, "Not Implemented"};
+                // ptk_file_browser_select_file_list(file_browser, argv + i + 1, true);
             }
         }
-        else if (ztd::same(socket_property, "selected_pattern"))
+        else if (ztd::same(property, "selected-pattern"))
         {
-            if (!argv[i + 1])
+            const std::string_view value = data[0];
+
+            if (value.empty())
             {
                 // unselect all
                 ptk_file_browser_select_file_list(file_browser, nullptr, false);
             }
             else
             {
-                ptk_file_browser_select_pattern(nullptr, file_browser, argv[i + 1]);
+                ptk_file_browser_select_pattern(nullptr, file_browser, value.data());
             }
         }
-        else if (ztd::same(socket_property, "current_dir"))
+        else if (ztd::same(property, "current-dir"))
         {
-            if (!argv[i + 1])
+            const std::string_view value = data[0];
+
+            if (value.empty())
             {
-                return {SOCKET_FAILURE, std::format("{} requires a directory path", argv[i])};
+                return {SOCKET_FAILURE, std::format("{} requires a directory path", property)};
             }
-            if (!std::filesystem::is_directory(argv[i + 1]))
+            if (!std::filesystem::is_directory(value))
             {
-                return {SOCKET_FAILURE, std::format("directory '{}' does not exist", argv[i + 1])};
+                return {SOCKET_FAILURE, std::format("directory '{}' does not exist", value)};
             }
-            ptk_file_browser_chdir(file_browser,
-                                   argv[i + 1],
-                                   ptk::file_browser::chdir_mode::add_history);
+            ptk_file_browser_chdir(file_browser, value, ptk::file_browser::chdir_mode::add_history);
         }
         else
         {
-            return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
+            return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
         }
     }
-    else if (ztd::same(socket_cmd, "get"))
+    else if (ztd::same(command, "get"))
     {
         // get
-        if (!argv[i])
-        {
-            return {SOCKET_FAILURE, std::format("command {} requires an argument", socket_cmd)};
-        }
-
-        if (ztd::same(socket_property, "window_size") ||
-            ztd::same(socket_property, "window_position"))
+        if (ztd::same(property, "window-size"))
         {
             i32 width;
             i32 height;
-            if (ztd::same(socket_property, "window_size"))
-            {
-                gtk_window_get_size(GTK_WINDOW(main_window), &width, &height);
-            }
-            else
-            {
-                gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
-            }
+            gtk_window_get_size(GTK_WINDOW(main_window), &width, &height);
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
         }
-        else if (ztd::same(socket_property, "window_maximized"))
+        else if (ztd::same(property, "window-position"))
+        {
+            i32 width;
+            i32 height;
+            gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
+            return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
+        }
+        else if (ztd::same(property, "window-maximized"))
         {
             return {SOCKET_SUCCESS, std::format("{}", !!main_window->maximized)};
         }
-        else if (ztd::same(socket_property, "window_fullscreen"))
+        else if (ztd::same(property, "window-fullscreen"))
         {
             return {SOCKET_SUCCESS, std::format("{}", !!main_window->fullscreen)};
         }
-        else if (ztd::same(socket_property, "screen_size"))
+        else if (ztd::same(property, "screen-size"))
         {
             GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
             return {SOCKET_SUCCESS, std::format("{}x{}", workarea.width, workarea.height)};
         }
-        else if (ztd::same(socket_property, "window_vslider_top") ||
-                 ztd::same(socket_property, "window_vslider_bottom") ||
-                 ztd::same(socket_property, "window_hslider") ||
-                 ztd::same(socket_property, "window_tslider"))
+        else if (ztd::same(property, "window-vslider-top") ||
+                 ztd::same(property, "window-vslider-bottom") ||
+                 ztd::same(property, "window-hslider") || ztd::same(property, "window-tslider"))
         {
-            GtkWidget* widget;
+            GtkWidget* widget = nullptr;
 
-            if (ztd::same(socket_property, "window_vslider_top"))
+            if (ztd::same(property, "window-vslider-top"))
             {
                 widget = main_window->hpane_top;
             }
-            else if (ztd::same(socket_property, "window_vslider_bottom"))
+            else if (ztd::same(property, "window-vslider-bottom"))
             {
                 widget = main_window->hpane_bottom;
             }
-            else if (ztd::same(socket_property, "window_hslider"))
+            else if (ztd::same(property, "window-hslider"))
             {
                 widget = main_window->vpane;
             }
-            else
+            else if (ztd::same(property, "window-tslider"))
             {
                 widget = main_window->task_vpane;
             }
+            else
+            {
+                return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
+            }
             return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
         }
-        else if (ztd::same(socket_property, "focused_panel"))
+        else if (ztd::same(property, "focused-panel"))
         {
             return {SOCKET_SUCCESS, std::format("{}", main_window->curpanel)};
         }
-        else if (ztd::same(socket_property, "focused_pane"))
+        else if (ztd::same(property, "focused-pane"))
         {
             if (file_browser->folder_view && gtk_widget_is_focus(file_browser->folder_view))
             {
@@ -7040,7 +6980,7 @@ main_window_socket_command(char* argv[])
                 return {SOCKET_SUCCESS, "pathbar"};
             }
         }
-        else if (ztd::same(socket_property, "current_tab"))
+        else if (ztd::same(property, "current-tab"))
         {
             return {SOCKET_SUCCESS,
                     std::format("{}",
@@ -7048,7 +6988,7 @@ main_window_socket_command(char* argv[])
                                                       GTK_WIDGET(file_browser)) +
                                     1)};
         }
-        else if (ztd::same(socket_property, "panel_count"))
+        else if (ztd::same(property, "panel-count"))
         {
             const auto counts = main_window_get_counts(file_browser);
             const panel_t panel_count = counts[0];
@@ -7057,7 +6997,7 @@ main_window_socket_command(char* argv[])
 
             return {SOCKET_SUCCESS, std::format("{}", panel_count)};
         }
-        else if (ztd::same(socket_property, "tab_count"))
+        else if (ztd::same(property, "tab-count"))
         {
             const auto counts = main_window_get_counts(file_browser);
             // const panel_t panel_count = counts[0];
@@ -7066,55 +7006,53 @@ main_window_socket_command(char* argv[])
 
             return {SOCKET_SUCCESS, std::format("{}", tab_count)};
         }
-        else if (ztd::same(socket_property, "new_tab"))
-        {
-        }
-        else if (ztd::endswith(socket_property, "_visible"))
+        else if (ztd::same(property, "devices-visible") || ztd::same(property, "dirtree-visible") ||
+                 ztd::same(property, "toolbar-visible") ||
+                 ztd::same(property, "sidetoolbar-visible") ||
+                 ztd::same(property, "hidden-files-visible") ||
+                 ztd::same(property, "panel1-visible") || ztd::same(property, "panel2-visible") ||
+                 ztd::same(property, "panel3-visible") || ztd::same(property, "panel4-visible"))
         {
             bool valid = false;
             bool use_mode = false;
             xset::panel xset_panel_var;
-            if (ztd::startswith(socket_property, "devices_"))
+            if (ztd::same(property, "devices-visible"))
             {
                 xset_panel_var = xset::panel::show_devmon;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "dirtree_"))
+            else if (ztd::same(property, "dirtree-visible"))
             {
                 xset_panel_var = xset::panel::show_dirtree;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "toolbar_"))
+            else if (ztd::same(property, "toolbar-visible"))
             {
                 xset_panel_var = xset::panel::show_toolbox;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "sidetoolbar_"))
+            else if (ztd::same(property, "sidetoolbar-visible"))
             {
                 xset_panel_var = xset::panel::show_sidebar;
                 use_mode = true;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "hidden_files_"))
+            else if (ztd::same(property, "hidden-files-visible"))
             {
                 xset_panel_var = xset::panel::show_hidden;
                 valid = true;
             }
-            else if (ztd::startswith(socket_property, "panel"))
+            else if (ztd::startswith(property, "panel"))
             {
-                const i32 j = argv[i][5] - 48;
-                if (!valid_panel(j))
-                {
-                    return {SOCKET_INVALID, std::format("invalid property {}", argv[i])};
-                }
+                const i32 j = property[5] - 48;
                 return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(j, xset::panel::show))};
             }
             if (!valid)
             {
-                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
             }
             if (use_mode)
             {
@@ -7129,32 +7067,38 @@ main_window_socket_command(char* argv[])
                 return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(panel, xset_panel_var))};
             }
         }
-        else if (ztd::same(socket_property, "panel_hslider_top") ||
-                 ztd::same(socket_property, "panel_hslider_bottom") ||
-                 ztd::same(socket_property, "panel_vslider"))
+        else if (ztd::same(property, "panel-hslider-top") ||
+                 ztd::same(property, "panel-hslider-bottom") ||
+                 ztd::same(property, "panel-vslider"))
         {
             GtkWidget* widget;
-            if (ztd::same(socket_property, "panel_hslider_top"))
+            if (ztd::same(property, "panel-hslider-top"))
             {
                 widget = file_browser->side_vpane_top;
             }
-            else if (ztd::same(socket_property, "panel_hslider_bottom"))
+            else if (ztd::same(property, "panel-hslider-bottom"))
             {
                 widget = file_browser->side_vpane_bottom;
             }
-            else
+            else if (ztd::same(property, "panel-vslider"))
             {
                 widget = file_browser->hpane;
             }
+            else
+            {
+                return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
+            }
             return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
         }
-        else if (ztd::same(socket_property, "column_width"))
+        else if (ztd::same(property, "column-width"))
         { // COLUMN
+            const std::string subproperty = json["subproperty"];
+
             if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
             {
                 bool found = false;
-                GtkTreeViewColumn* col;
-                for (const auto [index, value] : ztd::enumerate(column_titles))
+                GtkTreeViewColumn* col = nullptr;
+                for (const auto [index, column_title] : ztd::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
                                                    static_cast<i32>(index));
@@ -7163,62 +7107,18 @@ main_window_socket_command(char* argv[])
                         continue;
                     }
                     const char* title = gtk_tree_view_column_get_title(col);
-                    if (ztd::same(argv[i + 1], title))
+                    if (ztd::same(subproperty, title))
                     {
                         found = true;
                         break;
                     }
-                    if (ztd::same(argv[i + 1], "name") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "size") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "bytes") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "type") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "mime") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "permission") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "owner") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "group") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "accessed") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "modified") && ztd::same(title, value))
-                    {
-                        found = true;
-                        break;
-                    }
-                    else if (ztd::same(argv[i + 1], "created") && ztd::same(title, value))
+                    if (ztd::same(title, column_title) &&
+                        (ztd::same(subproperty, "name") || ztd::same(subproperty, "size") ||
+                         ztd::same(subproperty, "bytes") || ztd::same(subproperty, "type") ||
+                         ztd::same(subproperty, "mime") || ztd::same(subproperty, "permission") ||
+                         ztd::same(subproperty, "owner") || ztd::same(subproperty, "group") ||
+                         ztd::same(subproperty, "accessed") || ztd::same(subproperty, "modified") ||
+                         ztd::same(subproperty, "created")))
                     {
                         found = true;
                         break;
@@ -7230,11 +7130,11 @@ main_window_socket_command(char* argv[])
                 }
                 else
                 {
-                    return {SOCKET_INVALID, std::format("invalid column name '{}'", argv[i + 1])};
+                    return {SOCKET_INVALID, std::format("invalid column name '{}'", subproperty)};
                 }
             }
         }
-        else if (ztd::same(socket_property, "sort_by"))
+        else if (ztd::same(property, "sort-by"))
         { // COLUMN
             switch (file_browser->sort_order)
             {
@@ -7262,9 +7162,12 @@ main_window_socket_command(char* argv[])
                     return {SOCKET_SUCCESS, "created"};
             }
         }
-        else if (ztd::startswith(socket_property, "sort_"))
+        else if (ztd::same(property, "sort-ascend") || ztd::same(property, "sort-natural") ||
+                 ztd::same(property, "sort-alphanum") || ztd::same(property, "sort-case") ||
+                 ztd::same(property, "sort-hidden-first") || ztd::same(property, "sort-first") ||
+                 ztd::same(property, "panel-hslider-top"))
         {
-            if (ztd::same(socket_property, "sort_ascend"))
+            if (ztd::same(property, "sort-ascend"))
             {
                 return {SOCKET_SUCCESS,
                         std::format(
@@ -7272,12 +7175,12 @@ main_window_socket_command(char* argv[])
                             file_browser->sort_type == GtkSortType::GTK_SORT_ASCENDING ? 1 : 0)};
             }
 #if 0
-            else if (ztd::same(socket_property, "sort_natural"))
+            else if (ztd::same(property, "sort-natural"))
             {
 
             }
 #endif
-            else if (ztd::same(socket_property, "sort_alphanum"))
+            else if (ztd::same(property, "sort-alphanum"))
             {
                 return {SOCKET_SUCCESS,
                         std::format("{}",
@@ -7285,7 +7188,7 @@ main_window_socket_command(char* argv[])
                                         ? 1
                                         : 0)};
             }
-            else if (ztd::same(socket_property, "sort_case"))
+            else if (ztd::same(property, "sort-case"))
             {
                 return {
                     SOCKET_SUCCESS,
@@ -7297,7 +7200,7 @@ main_window_socket_command(char* argv[])
                                     ? 1
                                     : 0)};
             }
-            else if (ztd::same(socket_property, "sort_hidden_first"))
+            else if (ztd::same(property, "sort-hidden-first"))
             {
                 return {SOCKET_SUCCESS,
                         std::format("{}",
@@ -7307,7 +7210,7 @@ main_window_socket_command(char* argv[])
                                         ? 1
                                         : 0)};
             }
-            else if (ztd::same(socket_property, "sort_first"))
+            else if (ztd::same(property, "sort-first"))
             {
                 const i32 result = xset_get_int_panel(file_browser->mypanel,
                                                       xset::panel::sort_extra,
@@ -7327,23 +7230,23 @@ main_window_socket_command(char* argv[])
             }
             else
             {
-                return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
+                return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
             }
         }
-        else if (ztd::same(socket_property, "show_thumbnails"))
+        else if (ztd::same(property, "show-thumbnails"))
         {
             return {SOCKET_SUCCESS, std::format("{}", app_settings.get_show_thumbnail() ? 1 : 0)};
         }
-        else if (ztd::same(socket_property, "large_icons"))
+        else if (ztd::same(property, "large-icons"))
         {
             return {SOCKET_SUCCESS, std::format("{}", file_browser->large_icons ? 1 : 0)};
         }
-        else if (ztd::same(socket_property, "statusbar_text"))
+        else if (ztd::same(property, "statusbar-text"))
         {
             return {SOCKET_SUCCESS,
                     std::format("{}", gtk_label_get_text(GTK_LABEL(file_browser->status_label)))};
         }
-        else if (ztd::same(socket_property, "pathbar_text"))
+        else if (ztd::same(property, "pathbar-text"))
         {
             if (GTK_IS_WIDGET(file_browser->path_bar))
             {
@@ -7351,20 +7254,16 @@ main_window_socket_command(char* argv[])
                         std::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)))};
             }
         }
-        else if (ztd::same(socket_property, "clipboard_text") ||
-                 ztd::same(socket_property, "clipboard_primary_text"))
+        else if (ztd::same(property, "clipboard-text") ||
+                 ztd::same(property, "clipboard-primary-text"))
         {
-            GtkClipboard* clip = gtk_clipboard_get(ztd::same(socket_property, "clipboard_text")
-                                                       ? GDK_SELECTION_CLIPBOARD
-                                                       : GDK_SELECTION_PRIMARY);
+            GtkClipboard* clip =
+                gtk_clipboard_get(ztd::same(property, "clipboard-text") ? GDK_SELECTION_CLIPBOARD
+                                                                        : GDK_SELECTION_PRIMARY);
             return {SOCKET_SUCCESS, gtk_clipboard_wait_for_text(clip)};
         }
-        else if (ztd::same(socket_property, "clipboard_from_file") ||
-                 ztd::same(socket_property, "clipboard_primary_from_file"))
-        {
-        }
-        else if (ztd::same(socket_property, "clipboard_cut_files") ||
-                 ztd::same(socket_property, "clipboard_copy_files"))
+        else if (ztd::same(property, "clipboard-cut-files") ||
+                 ztd::same(property, "clipboard-copy-files"))
         {
             GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
             GdkAtom gnome_target;
@@ -7390,13 +7289,13 @@ main_window_socket_command(char* argv[])
             }
             if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
             {
-                if (ztd::same(socket_property, "clipboard_copy_files"))
+                if (ztd::same(property, "clipboard-copy-files"))
                 {
                     gtk_selection_data_free(sel_data);
                     return {SOCKET_SUCCESS, ""};
                 }
             }
-            else if (ztd::same(socket_property, "clipboard_cut_files"))
+            else if (ztd::same(property, "clipboard-cut-files"))
             {
                 gtk_selection_data_free(sel_data);
                 return {SOCKET_SUCCESS, ""};
@@ -7416,8 +7315,7 @@ main_window_socket_command(char* argv[])
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }
-        else if (ztd::same(socket_property, "selected_filenames") ||
-                 ztd::same(socket_property, "selected_files"))
+        else if (ztd::same(property, "selected-filenames") || ztd::same(property, "selected-files"))
         {
             const std::vector<vfs::file_info> sel_files =
                 ptk_file_browser_get_selected_files(file_browser);
@@ -7439,25 +7337,24 @@ main_window_socket_command(char* argv[])
             vfs_file_info_list_free(sel_files);
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }
-        else if (ztd::same(socket_property, "selected_pattern"))
+        else if (ztd::same(property, "selected-pattern"))
         {
         }
-        else if (ztd::same(socket_property, "current_dir"))
+        else if (ztd::same(property, "current-dir"))
         {
             return {SOCKET_SUCCESS,
                     std::format("{}", ptk_file_browser_get_cwd(file_browser).string())};
         }
         else
         {
-            return {SOCKET_FAILURE, std::format("invalid property {}", argv[i])};
+            return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
         }
     }
-    else if (ztd::same(socket_cmd, "set-task"))
+    else if (ztd::same(command, "set-task"))
     { // TASKNUM PROPERTY [VALUE]
-        if (!(argv[i] && argv[i + 1]))
-        {
-            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
-        }
+        const std::string subproperty = json["subproperty"];
+        const std::vector<std::string> data = json["data"];
+        const std::string_view value = data[0];
 
         // find task
         GtkTreeIter it;
@@ -7469,7 +7366,7 @@ main_window_socket_command(char* argv[])
             {
                 gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
                 const std::string str = std::format("{:p}", (void*)ptask);
-                if (ztd::same(str, argv[i]))
+                if (ztd::same(str, data[i]))
                 {
                     break;
                 }
@@ -7478,48 +7375,48 @@ main_window_socket_command(char* argv[])
         }
         if (!ptask)
         {
-            return {SOCKET_INVALID, std::format("invalid task '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid task '{}'", data[i])};
         }
         if (ptask->task->type != vfs::file_task_type::exec)
         {
-            return {SOCKET_INVALID, std::format("internal task {} is read-only", argv[i])};
+            return {SOCKET_INVALID, std::format("internal task {} is read-only", data[i])};
         }
 
         // set model value
         i32 j;
-        if (ztd::same(argv[i + 1], "icon"))
+        if (ztd::same(property, "icon"))
         {
             ptk_file_task_lock(ptask);
-            ptask->task->exec_icon = argv[i + 2];
+            ptask->task->exec_icon = value;
             ptask->pause_change_view = ptask->pause_change = true;
             ptk_file_task_unlock(ptask);
             return {SOCKET_SUCCESS, ""};
         }
-        else if (ztd::same(argv[i + 1], "count"))
+        else if (ztd::same(property, "count"))
         {
             j = main_window::column::count;
         }
-        else if (ztd::same(argv[i + 1], "directory") || ztd::same(argv[i + 1], "from"))
+        else if (ztd::same(property, "directory") || ztd::same(subproperty, "from"))
         {
             j = main_window::column::path;
         }
-        else if (ztd::same(argv[i + 1], "item"))
+        else if (ztd::same(property, "item"))
         {
             j = main_window::column::file;
         }
-        else if (ztd::same(argv[i + 1], "to"))
+        else if (ztd::same(property, "to"))
         {
             j = main_window::column::to;
         }
-        else if (ztd::same(argv[i + 1], "progress"))
+        else if (ztd::same(property, "progress"))
         {
-            if (!argv[i + 2])
+            if (value.empty())
             {
                 ptask->task->percent = 50;
             }
             else
             {
-                j = std::stoi(argv[i + 2]);
+                j = std::stoi(value.data());
                 if (j < 0)
                 {
                     j = 0;
@@ -7530,50 +7427,45 @@ main_window_socket_command(char* argv[])
                 }
                 ptask->task->percent = j;
             }
-            ptask->task->custom_percent = !!argv[i + 2];
+            ptask->task->custom_percent = get_bool(value);
             ptask->pause_change_view = ptask->pause_change = true;
             return {SOCKET_SUCCESS, ""};
         }
-        else if (ztd::same(argv[i + 1], "total"))
+        else if (ztd::same(property, "total"))
         {
             j = main_window::column::total;
         }
-        else if (ztd::same(argv[i + 1], "curspeed"))
+        else if (ztd::same(property, "curspeed"))
         {
             j = main_window::column::curspeed;
         }
-        else if (ztd::same(argv[i + 1], "curremain"))
+        else if (ztd::same(property, "curremain"))
         {
             j = main_window::column::curest;
         }
-        else if (ztd::same(argv[i + 1], "avgspeed"))
+        else if (ztd::same(property, "avgspeed"))
         {
             j = main_window::column::avgspeed;
         }
-        else if (ztd::same(argv[i + 1], "avgremain"))
+        else if (ztd::same(property, "avgremain"))
         {
             j = main_window::column::avgest;
         }
-        else if (ztd::same(argv[i + 1], "elapsed") || ztd::same(argv[i + 1], "started") ||
-                 ztd::same(argv[i + 1], "status"))
+        else if (ztd::same(property, "queue_state"))
         {
-            return {SOCKET_INVALID, std::format("task property '{}' is read-only", argv[i + 1])};
-        }
-        else if (ztd::same(argv[i + 1], "queue_state"))
-        {
-            if (!argv[i + 2] || ztd::same(argv[i + 2], "run"))
+            if (ztd::same(subproperty, "run"))
             {
                 ptk_file_task_pause(ptask, vfs::file_task_state::running);
             }
-            else if (ztd::same(argv[i + 2], "pause"))
+            else if (ztd::same(subproperty, "pause"))
             {
                 ptk_file_task_pause(ptask, vfs::file_task_state::pause);
             }
-            else if (ztd::same(argv[i + 2], "queue") || ztd::same(argv[i + 2], "queued"))
+            else if (ztd::same(subproperty, "queue") || ztd::same(subproperty, "queued"))
             {
                 ptk_file_task_pause(ptask, vfs::file_task_state::queue);
             }
-            else if (ztd::same(argv[i + 2], "stop"))
+            else if (ztd::same(subproperty, "stop"))
             {
                 on_task_stop(nullptr,
                              main_window->task_view,
@@ -7582,37 +7474,32 @@ main_window_socket_command(char* argv[])
             }
             else
             {
-                return {SOCKET_INVALID, std::format("invalid queue_state '{}'", argv[i + 2])};
+                return {SOCKET_INVALID, std::format("invalid queue_state '{}'", subproperty)};
             }
             main_task_start_queued(main_window->task_view, nullptr);
             return {SOCKET_SUCCESS, ""};
         }
-        else if (ztd::same(argv[i + 1], "popup_handler"))
+        else if (ztd::same(property, "popup-handler"))
         {
             std::free(ptask->pop_handler);
-            if (argv[i + 2] && argv[i + 2][0] != '\0')
+            if (value.empty())
             {
-                ptask->pop_handler = ztd::strdup(argv[i + 2]);
+                ptask->pop_handler = nullptr;
             }
             else
             {
-                ptask->pop_handler = nullptr;
+                ptask->pop_handler = ztd::strdup(value.data());
             }
             return {SOCKET_SUCCESS, ""};
         }
         else
         {
-            return {SOCKET_INVALID, std::format("invalid task property '{}'", argv[i + 1])};
+            return {SOCKET_INVALID, std::format("invalid task property '{}'", subproperty)};
         }
-        gtk_list_store_set(GTK_LIST_STORE(model), &it, j, argv[i + 2], -1);
+        gtk_list_store_set(GTK_LIST_STORE(model), &it, j, value.data(), -1);
     }
-    else if (ztd::same(socket_cmd, "get-task"))
+    else if (ztd::same(command, "get-task"))
     { // TASKNUM PROPERTY
-        if (!(argv[i] && argv[i + 1]))
-        {
-            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
-        }
-
         // find task
         GtkTreeIter it;
         PtkFileTask* ptask = nullptr;
@@ -7623,7 +7510,7 @@ main_window_socket_command(char* argv[])
             {
                 gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
                 const std::string str = std::format("{:p}", (void*)ptask);
-                if (ztd::same(str, argv[i]))
+                if (ztd::same(str, property))
                 {
                     break;
                 }
@@ -7632,12 +7519,12 @@ main_window_socket_command(char* argv[])
         }
         if (!ptask)
         {
-            return {SOCKET_INVALID, std::format("invalid task '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid task '{}'", property)};
         }
 
         // get model value
         i32 j;
-        if (ztd::same(argv[i + 1], "icon"))
+        if (ztd::same(property, "icon"))
         {
             ptk_file_task_lock(ptask);
             if (!ptask->task->exec_icon.empty())
@@ -7647,59 +7534,59 @@ main_window_socket_command(char* argv[])
             ptk_file_task_unlock(ptask);
             return {SOCKET_SUCCESS, ""};
         }
-        else if (ztd::same(argv[i + 1], "count"))
+        else if (ztd::same(property, "count"))
         {
             j = main_window::column::count;
         }
-        else if (ztd::same(argv[i + 1], "directory") || ztd::same(argv[i + 1], "from"))
+        else if (ztd::same(property, "directory") || ztd::same(property, "from"))
         {
             j = main_window::column::path;
         }
-        else if (ztd::same(argv[i + 1], "item"))
+        else if (ztd::same(property, "item"))
         {
             j = main_window::column::file;
         }
-        else if (ztd::same(argv[i + 1], "to"))
+        else if (ztd::same(property, "to"))
         {
             j = main_window::column::to;
         }
-        else if (ztd::same(argv[i + 1], "progress"))
+        else if (ztd::same(property, "progress"))
         {
             return {SOCKET_SUCCESS, std::format("{}", ptask->task->percent)};
         }
-        else if (ztd::same(argv[i + 1], "total"))
+        else if (ztd::same(property, "total"))
         {
             j = main_window::column::total;
         }
-        else if (ztd::same(argv[i + 1], "curspeed"))
+        else if (ztd::same(property, "curspeed"))
         {
             j = main_window::column::curspeed;
         }
-        else if (ztd::same(argv[i + 1], "curremain"))
+        else if (ztd::same(property, "curremain"))
         {
             j = main_window::column::curest;
         }
-        else if (ztd::same(argv[i + 1], "avgspeed"))
+        else if (ztd::same(property, "avgspeed"))
         {
             j = main_window::column::avgspeed;
         }
-        else if (ztd::same(argv[i + 1], "avgremain"))
+        else if (ztd::same(property, "avgremain"))
         {
             j = main_window::column::avgest;
         }
-        else if (ztd::same(argv[i + 1], "elapsed"))
+        else if (ztd::same(property, "elapsed"))
         {
             j = main_window::column::elapsed;
         }
-        else if (ztd::same(argv[i + 1], "started"))
+        else if (ztd::same(property, "started"))
         {
             j = main_window::column::started;
         }
-        else if (ztd::same(argv[i + 1], "status"))
+        else if (ztd::same(property, "status"))
         {
             j = main_window::column::status;
         }
-        else if (ztd::same(argv[i + 1], "queue_state"))
+        else if (ztd::same(property, "queue_state"))
         {
             if (ptask->task->state_pause == vfs::file_task_state::running)
             {
@@ -7718,7 +7605,7 @@ main_window_socket_command(char* argv[])
                 return {SOCKET_SUCCESS, "stop"};
             }
         }
-        else if (ztd::same(argv[i + 1], "popup_handler"))
+        else if (ztd::same(property, "popup-handler"))
         {
             if (ptask->pop_handler)
             {
@@ -7728,7 +7615,7 @@ main_window_socket_command(char* argv[])
         }
         else
         {
-            return {SOCKET_INVALID, std::format("invalid task property '{}'", argv[i + 1])};
+            return {SOCKET_INVALID, std::format("invalid task property '{}'", property)};
         }
         char* str2;
         gtk_tree_model_get(model, &it, j, &str2, -1);
@@ -7738,88 +7625,46 @@ main_window_socket_command(char* argv[])
         }
         std::free(str2);
     }
-    else if (ztd::same(socket_cmd, "run-task"))
+    else if (ztd::same(command, "run-task"))
     { // TYPE [OPTIONS] ...
-        if (!(argv[i] && argv[i + 1]))
-        {
-            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
-        }
-
-        if (ztd::same(socket_property, "cmd") || ztd::same(socket_property, "command"))
+        if (ztd::same(property, "cmd") || ztd::same(property, "command"))
         {
             // custom command task
             // cmd [--task [--popup] [--scroll]] [--terminal]
             //                     [--user USER] [--title TITLE]
             //                     [--icon ICON] [--dir DIR] COMMAND
-            // get opts
-            bool opt_task = false;
-            bool opt_popup = false;
-            bool opt_scroll = false;
-            bool opt_terminal = false;
-            const char* opt_user = nullptr;
-            const char* opt_title = nullptr;
-            const char* opt_icon = nullptr;
-            const char* opt_cwd = nullptr;
 
-            i32 j;
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
+            const std::vector<std::string> data = json["data"];
+
+            const nlohmann::json cmd_json = nlohmann::json::parse(data[0]);
+
+            // flags
+            bool opt_task = json["task"];
+            bool opt_popup = json["popup"];
+            bool opt_scroll = json["scroll"];
+            bool opt_terminal = json["terminal"];
+            const std::string opt_user = json["user"];
+            const std::string opt_title = json["title"];
+            const std::string opt_icon = json["icon"];
+            const std::string opt_cwd = json["cwd"];
+            // actual command to be run
+            const std::vector<std::string> opt_cmd = json["cmd"];
+
+            if (opt_cmd.empty())
             {
-                if (ztd::same(argv[j], "--task"))
-                {
-                    opt_task = true;
-                }
-                else if (ztd::same(argv[j], "--popup"))
-                {
-                    opt_popup = opt_task = true;
-                }
-                else if (ztd::same(argv[j], "--scroll"))
-                {
-                    opt_scroll = opt_task = true;
-                }
-                else if (ztd::same(argv[j], "--terminal"))
-                {
-                    opt_terminal = true;
-                    // disabled due to potential misuse of password caching su programs
-                    // else if (ztd::same(argv[j], "--user"))
-                    //     opt_user = argv[++j];
-                }
-                else if (ztd::same(argv[j], "--title"))
-                {
-                    opt_title = argv[++j];
-                }
-                else if (ztd::same(argv[j], "--icon"))
-                {
-                    opt_icon = argv[++j];
-                }
-                else if (ztd::same(argv[j], "--dir"))
-                {
-                    opt_cwd = argv[++j];
-                    if (!opt_cwd || !std::filesystem::is_directory(opt_cwd))
-                    {
-                        return {SOCKET_INVALID, std::format("no such directory '{}'", opt_cwd)};
-                    }
-                }
-                else
-                {
-                    return {SOCKET_INVALID,
-                            std::format("invalid {} task option '{}'", socket_property, argv[j])};
-                }
-            }
-            if (!argv[j])
-            {
-                return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
+                return {SOCKET_FAILURE, std::format("{} requires a command", command)};
             }
             std::string cmd;
-            while (argv[++j])
+            for (const std::string_view c : opt_cmd)
             {
-                cmd.append(std::format(" {}", argv[j]));
+                cmd.append(std::format(" {}", c));
             }
 
-            PtkFileTask* ptask =
-                ptk_file_exec_new(opt_title ? opt_title : cmd,
-                                  opt_cwd ? opt_cwd : ptk_file_browser_get_cwd(file_browser),
-                                  GTK_WIDGET(file_browser),
-                                  file_browser->task_view);
+            PtkFileTask* ptask = ptk_file_exec_new(
+                !opt_title.empty() ? opt_title : cmd,
+                !opt_cwd.empty() ? opt_cwd.data() : ptk_file_browser_get_cwd(file_browser),
+                GTK_WIDGET(file_browser),
+                file_browser->task_view);
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_as_user = opt_user;
@@ -7847,56 +7692,42 @@ main_window_socket_command(char* argv[])
                                     (void*)ptask)};
             }
         }
-        else if (ztd::same(socket_property, "edit"))
-        {
-            // edit FILE
-            if (!argv[i + 1])
+        else if (ztd::same(property, "edit"))
+        { // edit FILE
+            const std::vector<std::string> data = json["data"];
+            const std::string_view value = data[0];
+
+            if (!std::filesystem::is_regular_file(value))
             {
-                return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
+                return {SOCKET_INVALID, std::format("no such file '{}'", value)};
             }
-            if (!std::filesystem::is_regular_file(argv[i + 1]))
-            {
-                return {SOCKET_INVALID, std::format("no such file '{}'", argv[i + 1])};
-            }
-            xset_edit(GTK_WIDGET(file_browser), argv[i + 1], false, true);
+            xset_edit(GTK_WIDGET(file_browser), value.data(), false, true);
         }
-        else if (ztd::same(socket_property, "mount") || ztd::same(socket_property, "unmount"))
-        {
-            // mount or unmount TARGET
-            i32 j;
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
-            {
-                return {SOCKET_INVALID,
-                        std::format("invalid {} task option '{}'", socket_property, argv[j])};
-            }
-            if (!argv[j])
-            {
-                return {SOCKET_FAILURE,
-                        std::format("task type {} requires TARGET argument", socket_cmd)};
-            }
+        else if (ztd::same(property, "mount") || ztd::same(property, "umount"))
+        { // mount or unmount TARGET
+            const std::vector<std::string> data = json["data"];
+            const std::string_view value = data[0];
 
             // Resolve TARGET
-            char* real_path = argv[j];
-
-            if (!std::filesystem::exists(real_path))
+            if (!std::filesystem::exists(value))
             {
-                return {SOCKET_INVALID, std::format("path does not exist '{}'", real_path)};
+                return {SOCKET_INVALID, std::format("path does not exist '{}'", value)};
             }
 
-            const auto real_path_stat = ztd::stat(real_path);
+            const auto real_path_stat = ztd::stat(value);
             vfs::volume vol = nullptr;
-            if (ztd::same(socket_property, "unmount") && std::filesystem::is_directory(real_path))
+            if (ztd::same(property, "umount") && std::filesystem::is_directory(value))
             {
-                // unmount DIR
-                if (is_path_mountpoint(real_path))
+                // umount DIR
+                if (is_path_mountpoint(value))
                 {
                     if (!real_path_stat.is_valid() || !real_path_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
-                        vol = vfs_volume_get_by_device(real_path);
+                        vol = vfs_volume_get_by_device(value);
                         if (!vol)
                         {
-                            return {SOCKET_INVALID, std::format("invalid TARGET '{}'", argv[j])};
+                            return {SOCKET_INVALID, std::format("invalid TARGET '{}'", value)};
                         }
                     }
                 }
@@ -7904,11 +7735,11 @@ main_window_socket_command(char* argv[])
             else if (real_path_stat.is_valid() && real_path_stat.is_block_file())
             {
                 // block device eg /dev/sda1
-                vol = vfs_volume_get_by_device(real_path);
+                vol = vfs_volume_get_by_device(value);
             }
             else
             {
-                return {SOCKET_INVALID, std::format("invalid TARGET '{}'", argv[j])};
+                return {SOCKET_INVALID, std::format("invalid TARGET '{}'", value)};
             }
 
             // Create command
@@ -7916,7 +7747,7 @@ main_window_socket_command(char* argv[])
             if (vol)
             {
                 // mount/unmount vol
-                if (ztd::same(socket_property, "mount"))
+                if (ztd::same(property, "mount"))
                 {
                     const auto check_mount_command = vol->device_mount_cmd();
                     if (check_mount_command)
@@ -7936,10 +7767,10 @@ main_window_socket_command(char* argv[])
 
             if (cmd.empty())
             {
-                return {SOCKET_INVALID, std::format("invalid TARGET '{}'", argv[j])};
+                return {SOCKET_INVALID, std::format("invalid mount TARGET '{}'", value)};
             }
             // Task
-            PtkFileTask* ptask = ptk_file_exec_new(socket_property,
+            PtkFileTask* ptask = ptk_file_exec_new(property,
                                                    ptk_file_browser_get_cwd(file_browser),
                                                    GTK_WIDGET(file_browser),
                                                    file_browser->task_view);
@@ -7953,9 +7784,9 @@ main_window_socket_command(char* argv[])
             ptask->task->exec_scroll_lock = false;
             ptk_file_task_run(ptask);
         }
-        else if (ztd::same(socket_property, "copy") || ztd::same(socket_property, "move") ||
-                 ztd::same(socket_property, "link") || ztd::same(socket_property, "delete") ||
-                 ztd::same(socket_property, "trash"))
+        else if (ztd::same(property, "copy") || ztd::same(property, "move") ||
+                 ztd::same(property, "link") || ztd::same(property, "delete") ||
+                 ztd::same(property, "trash"))
         {
             // built-in task
             // copy SOURCE FILENAME [...] TARGET
@@ -7963,94 +7794,91 @@ main_window_socket_command(char* argv[])
             // link SOURCE FILENAME [...] TARGET
             // delete SOURCE FILENAME [...]
             // get opts
-            const char* opt_cwd = nullptr;
-            i32 j;
-            for (j = i + 1; argv[j] && argv[j][0] == '-'; ++j)
+
+            const std::vector<std::string> data = json["data"];
+
+            const nlohmann::json cmd_json = nlohmann::json::parse(data[0]);
+
+            // flags
+            const std::filesystem::path opt_cwd = json["dir"];
+            // file list
+            const std::vector<std::string> opt_file_list = json["files"];
+
+            if (opt_file_list.empty())
             {
-                if (ztd::same(argv[j], "--dir"))
-                {
-                    opt_cwd = argv[++j];
-                    if (!opt_cwd || !std::filesystem::is_directory(opt_cwd))
-                    {
-                        return {SOCKET_INVALID, std::format("no such directory '{}'", opt_cwd)};
-                    }
-                }
-                else
+                return {SOCKET_INVALID, std::format("{} failed, missing file list", property)};
+            }
+
+            if (!opt_cwd.empty() && !std::filesystem::is_directory(opt_cwd))
+            {
+                return {SOCKET_INVALID, std::format("no such directory '{}'", opt_cwd.string())};
+            }
+
+            // last argument is the TARGET
+            const std::filesystem::path& target_dir = opt_file_list.back();
+            if (!ztd::same(property, "delete") || !ztd::same(property, "trash"))
+            {
+                if (!ztd::startswith(target_dir.string(), "/"))
                 {
                     return {SOCKET_INVALID,
-                            std::format("invalid {} task option '{}'", socket_property, argv[j])};
+                            std::format("TARGET must be absolute '{}'", target_dir.string())};
                 }
             }
+
             std::vector<std::filesystem::path> file_list;
-            GList* l = nullptr; // file list
-            char* target_dir = nullptr;
-            for (; argv[j]; ++j)
+            for (const std::string_view file : opt_file_list)
             {
-                if (!ztd::same(socket_property, "delete") && !argv[j + 1])
-                {
-                    // last argument - use as TARGET
-                    if (argv[j][0] != '/')
-                    {
-                        g_list_foreach(l, (GFunc)std::free, nullptr);
-                        g_list_free(l);
-                        return {SOCKET_INVALID, std::format("no such directory '{}'", argv[j])};
-                    }
-                    target_dir = argv[j];
-                    break;
+                if (ztd::startswith(file, "/"))
+                { // absolute path
+                    file_list.emplace_back(file);
                 }
                 else
-                {
-                    std::filesystem::path str;
-                    if (ztd::startswith(argv[j], "/"))
-                    { // absolute path
-                        str = argv[j];
-                    }
-                    else
+                { // relative path
+                    if (opt_cwd.empty())
                     {
-                        // relative path
-                        if (!opt_cwd)
-                        {
-                            g_list_foreach(l, (GFunc)std::free, nullptr);
-                            g_list_free(l);
-                            return {SOCKET_INVALID,
-                                    std::format("relative path '{}' requires {} option --dir DIR",
-                                                argv[j],
-                                                argv[i])};
-                        }
-                        str = std::filesystem::path() / opt_cwd / argv[j];
+                        return {SOCKET_INVALID,
+                                std::format("relative path '{}' requires option --dir DIR", file)};
                     }
-                    file_list.emplace_back(str);
+                    file_list.emplace_back(opt_cwd / file);
                 }
             }
-            if (file_list.empty() || (!ztd::same(socket_property, "delete") && !target_dir))
+
+            if (!ztd::same(property, "delete") || !ztd::same(property, "trash"))
+            {
+                // remove TARGET from file list
+                file_list.pop_back();
+            }
+
+            if (file_list.empty() ||
+                (!ztd::same(property, "delete") && !ztd::same(property, "trash")))
             {
                 return {SOCKET_INVALID,
-                        std::format("task type {} requires FILE argument(s)", argv[i])};
+                        std::format("task type {} requires FILE argument(s)", data[i])};
             }
             vfs::file_task_type task_type;
-            if (ztd::same(socket_property, "copy"))
+            if (ztd::same(property, "copy"))
             {
                 task_type = vfs::file_task_type::copy;
             }
-            else if (ztd::same(socket_property, "move"))
+            else if (ztd::same(property, "move"))
             {
                 task_type = vfs::file_task_type::move;
             }
-            else if (ztd::same(socket_property, "link"))
+            else if (ztd::same(property, "link"))
             {
                 task_type = vfs::file_task_type::link;
             }
-            else if (ztd::same(socket_property, "delete"))
+            else if (ztd::same(property, "delete"))
             {
                 task_type = vfs::file_task_type::DELETE;
             }
-            else if (ztd::same(socket_property, "trash"))
+            else if (ztd::same(property, "trash"))
             {
                 task_type = vfs::file_task_type::trash;
             }
             else
             { // failsafe
-                return {SOCKET_FAILURE, ""};
+                return {SOCKET_FAILURE, std::format("invalid task type '{}'", property)};
             }
             PtkFileTask* ptask =
                 ptk_file_task_new(task_type,
@@ -8068,19 +7896,17 @@ main_window_socket_command(char* argv[])
         }
         else
         {
-            return {SOCKET_INVALID, std::format("invalid task type '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid task type '{}'", property)};
         }
     }
-    else if (ztd::same(socket_cmd, "emit-key"))
+    else if (ztd::same(command, "emit-key"))
     { // KEYCODE [KEYMOD]
-        if (!argv[i])
-        {
-            return {SOCKET_FAILURE, std::format("command {} requires an argument", socket_cmd)};
-        }
+        const std::vector<std::string> data = json["data"];
+
         // this only handles keys assigned to menu items
         const auto event = (GdkEventKey*)gdk_event_new(GdkEventType::GDK_KEY_PRESS);
-        event->keyval = std::stoul(socket_property, nullptr, 0);
-        event->state = argv[i + 1] ? std::stoul(argv[i + 1], nullptr, 0) : 0;
+        event->keyval = std::stoul(data[i].data(), nullptr, 0);
+        event->state = !data[i + 1].empty() ? std::stoul(data[i + 1], nullptr, 0) : 0;
         if (event->keyval)
         {
             gtk_window_present(GTK_WINDOW(main_window));
@@ -8089,21 +7915,19 @@ main_window_socket_command(char* argv[])
         else
         {
             gdk_event_free((GdkEvent*)event);
-            return {SOCKET_INVALID, std::format("invalid keycode '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid keycode '{}'", data[i])};
         }
         gdk_event_free((GdkEvent*)event);
     }
-    else if (ztd::same(socket_cmd, "activate"))
+    else if (ztd::same(command, "activate"))
     {
-        if (!argv[i])
-        {
-            return {SOCKET_FAILURE, std::format("command {} requires an argument", socket_cmd)};
-        }
-        xset_t set = xset_find_custom(argv[i]);
+        const std::vector<std::string> data = json["data"];
+
+        xset_t set = xset_find_custom(data[i]);
         if (!set)
         {
             return {SOCKET_INVALID,
-                    std::format("custom command or submenu '{}' not found", argv[i])};
+                    std::format("custom command or submenu '{}' not found", data[i])};
         }
         const xset_context_t context = xset_context_new();
         main_context_fill(file_browser, context);
@@ -8114,7 +7938,7 @@ main_window_socket_command(char* argv[])
                     item_prop::context::state::show)
             {
                 return {SOCKET_INVALID,
-                        std::format("item '{}' context hidden or disabled", argv[i])};
+                        std::format("item '{}' context hidden or disabled", data[i])};
             }
         }
         if (set->menu_style == xset::menu::submenu)
@@ -8133,27 +7957,28 @@ main_window_socket_command(char* argv[])
             on_main_window_keypress(nullptr, nullptr, set);
         }
     }
-    else if (ztd::same(socket_cmd, "add-event") || ztd::same(socket_cmd, "replace-event") ||
-             ztd::same(socket_cmd, "remove-event"))
+    else if (ztd::same(command, "add-event") || ztd::same(command, "replace-event") ||
+             ztd::same(command, "remove-event"))
     {
-        if (!(argv[i] && argv[i + 1]))
-        {
-            return {SOCKET_FAILURE, std::format("{} requires two arguments", socket_cmd)};
-        }
-        xset_t set = xset_is(argv[i]);
+        const std::vector<std::string> data = json["data"];
+
+        xset_t set = xset_is(data[i]);
         if (!set)
         {
-            return {SOCKET_INVALID, std::format("invalid event type '{}'", argv[i])};
+            return {SOCKET_INVALID, std::format("invalid event type '{}'", data[i])};
         }
         // build command
-        std::string str = (ztd::same(socket_cmd, "replace-event") ? "*" : "");
-        for (i32 j = i + 1; argv[j]; ++j)
+        std::string str = (ztd::same(command, "replace-event") ? "*" : "");
+        // the first value in data is ignored as it is the xset name
+        const std::vector<std::string> event_cmds = {data.cbegin() + 1, data.cend()};
+        for (const std::string_view event_cmd : event_cmds)
         {
-            str.append(std::format("{}{}", j == i + 1 ? "" : " ", argv[j]));
+            str.append(std::format(" {}", event_cmd));
         }
+        str = ztd::strip(str); // can not have any extra whitespace
         // modify list
         GList* l = nullptr;
-        if (ztd::same(socket_cmd, "remove-event"))
+        if (ztd::same(command, "remove-event"))
         {
             l = g_list_find_custom((GList*)set->ob2_data, str.data(), (GCompareFunc)ztd::compare);
             if (!l)
@@ -8176,17 +8001,17 @@ main_window_socket_command(char* argv[])
         }
         set->ob2_data = (void*)l;
     }
-    else if (ztd::same(socket_cmd, "help"))
+    else if (ztd::same(command, "help"))
     {
         return {SOCKET_SUCCESS, "For help run, 'man spacefm-socket'"};
     }
-    else if (ztd::same(socket_cmd, "ping"))
+    else if (ztd::same(command, "ping"))
     {
         return {SOCKET_SUCCESS, "pong"};
     }
     else
     {
-        return {SOCKET_FAILURE, std::format("invalid socket method '{}'", socket_cmd)};
+        return {SOCKET_FAILURE, std::format("invalid socket method '{}'", command)};
     }
     return {SOCKET_SUCCESS, ""};
 }

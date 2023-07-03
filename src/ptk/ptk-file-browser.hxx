@@ -427,7 +427,7 @@ void ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 t);
+void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, tab_t t);
 void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 job2);
 void ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_browser);
 
