@@ -237,13 +237,6 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
         return false;
     }
 
-    const std::vector<std::string> dirs = ztd::split(path.string(), "/");
-
-    if (dirs.empty())
-    {
-        return false;
-    }
-
     GtkTreeModel* model = gtk_tree_view_get_model(dir_tree_view);
 
     if (!gtk_tree_model_iter_children(model, &parent_it, nullptr))
@@ -252,7 +245,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
     }
 
     // special case: root dir
-    if (dirs.size() == 1)
+    if (std::filesystem::equivalent(path, "/"))
     {
         it = parent_it;
         tree_path = gtk_tree_model_get_path(model, &parent_it);
@@ -266,6 +259,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
         return true;
     }
 
+    const std::vector<std::string> dirs = ztd::split(path.string(), "/");
     for (const std::string_view dir : dirs)
     {
         if (dir.empty())
@@ -288,7 +282,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
                 continue;
             }
 
-            if (ztd::same(file->name(), dir.data()))
+            if (ztd::same(file->name(), dir))
             {
                 tree_path = gtk_tree_model_get_path(model, &it);
 
