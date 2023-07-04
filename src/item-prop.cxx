@@ -1981,7 +1981,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
 
     ctxt->box_comp = gtk_combo_box_text_new();
     gtk_widget_set_focus_on_click(GTK_WIDGET(ctxt->box_comp), false);
-    for (const auto context_comparison : context_comparisons)
+    for (const auto& context_comparison : context_comparisons)
     {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ctxt->box_comp),
                                        context_comparison.second.data());
