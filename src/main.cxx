@@ -84,11 +84,11 @@ init_folder()
     vfs_volume_init();
     vfs_thumbnail_init();
 
-    vfs_mime_type_set_icon_size_big(app_settings.get_icon_size_big());
-    vfs_mime_type_set_icon_size_small(app_settings.get_icon_size_small());
+    vfs_mime_type_set_icon_size_big(app_settings.icon_size_big());
+    vfs_mime_type_set_icon_size_small(app_settings.icon_size_small());
 
-    vfs_file_info_set_thumbnail_size_big(app_settings.get_icon_size_big());
-    vfs_file_info_set_thumbnail_size_small(app_settings.get_icon_size_small());
+    vfs_file_info_set_thumbnail_size_big(app_settings.icon_size_big());
+    vfs_file_info_set_thumbnail_size_small(app_settings.icon_size_small());
 
     folder_initialized = true;
 }
@@ -217,7 +217,7 @@ open_in_tab(MainWindow** main_window, const std::filesystem::path& real_path,
 static bool
 handle_parsed_commandline_args(const commandline_opt_data_t& opt)
 {
-    app_settings.set_load_saved_tabs(!opt->no_tabs);
+    app_settings.load_saved_tabs(!opt->no_tabs);
 
     // get the last active window on this desktop, if available
     MainWindow* main_window = nullptr;
@@ -463,7 +463,7 @@ main(int argc, char* argv[])
     // handle the parsed result of command line args
     if (handle_parsed_commandline_args(opt))
     {
-        app_settings.set_load_saved_tabs(true);
+        app_settings.load_saved_tabs(true);
 
         // run the main loop
         gtk_main();

@@ -445,7 +445,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
             i32 icon_size;
             GdkPixbuf* icon;
             // icon = file->small_icon();
-            icon_size = app_settings.get_icon_size_small();
+            icon_size = app_settings.icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
             {
                 icon_size = PANE_MAX_ICON_SIZE;

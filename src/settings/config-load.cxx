@@ -66,85 +66,85 @@ config_parse_general(const toml::value& tbl, u64 version)
     if (section.contains(TOML_KEY_SHOW_THUMBNAIL))
     {
         const auto show_thumbnail = toml::find<bool>(section, TOML_KEY_SHOW_THUMBNAIL);
-        app_settings.set_show_thumbnail(show_thumbnail);
+        app_settings.show_thumbnail(show_thumbnail);
     }
 
     if (section.contains(TOML_KEY_MAX_THUMB_SIZE))
     {
         const auto max_thumb_size = toml::find<u64>(section, TOML_KEY_MAX_THUMB_SIZE);
-        app_settings.set_max_thumb_size(max_thumb_size << 10);
+        app_settings.max_thumb_size(max_thumb_size << 10);
     }
 
     if (section.contains(TOML_KEY_ICON_SIZE_BIG))
     {
         const auto icon_size_big = toml::find<u64>(section, TOML_KEY_ICON_SIZE_BIG);
-        app_settings.set_icon_size_big(icon_size_big);
+        app_settings.icon_size_big(icon_size_big);
     }
 
     if (section.contains(TOML_KEY_ICON_SIZE_SMALL))
     {
         const auto icon_size_small = toml::find<u64>(section, TOML_KEY_ICON_SIZE_SMALL);
-        app_settings.set_icon_size_small(icon_size_small);
+        app_settings.icon_size_small(icon_size_small);
     }
 
     if (section.contains(TOML_KEY_ICON_SIZE_TOOL))
     {
         const auto icon_size_tool = toml::find<u64>(section, TOML_KEY_ICON_SIZE_TOOL);
-        app_settings.set_icon_size_tool(icon_size_tool);
+        app_settings.icon_size_tool(icon_size_tool);
     }
 
     if (section.contains(TOML_KEY_SINGLE_CLICK))
     {
         const auto single_click = toml::find<bool>(section, TOML_KEY_SINGLE_CLICK);
-        app_settings.set_single_click(single_click);
+        app_settings.single_click(single_click);
     }
 
     if (section.contains(TOML_KEY_SINGLE_HOVER))
     {
         const auto single_hover = toml::find<bool>(section, TOML_KEY_SINGLE_HOVER);
-        app_settings.set_single_hover(single_hover);
+        app_settings.single_hover(single_hover);
     }
 
     if (section.contains(TOML_KEY_SORT_ORDER))
     {
         const auto sort_order = toml::find<u64>(section, TOML_KEY_SORT_ORDER);
-        app_settings.set_sort_order(sort_order);
+        app_settings.sort_order(sort_order);
     }
 
     if (section.contains(TOML_KEY_SORT_TYPE))
     {
         const auto sort_type = toml::find<u64>(section, TOML_KEY_SORT_TYPE);
-        app_settings.set_sort_type(sort_type);
+        app_settings.sort_type(sort_type);
     }
 
     if (section.contains(TOML_KEY_USE_SI_PREFIX))
     {
         const auto use_si_prefix = toml::find<bool>(section, TOML_KEY_USE_SI_PREFIX);
-        app_settings.set_use_si_prefix(use_si_prefix);
+        app_settings.use_si_prefix(use_si_prefix);
     }
 
     if (section.contains(TOML_KEY_CLICK_EXECUTE))
     {
         const auto click_executes = toml::find<bool>(section, TOML_KEY_CLICK_EXECUTE);
-        app_settings.set_click_executes(click_executes);
+        app_settings.click_executes(click_executes);
     }
 
     if (section.contains(TOML_KEY_CONFIRM))
     {
         const auto confirm = toml::find<bool>(section, TOML_KEY_CONFIRM);
-        app_settings.set_confirm(confirm);
+        app_settings.confirm(confirm);
     }
 
     if (section.contains(TOML_KEY_CONFIRM_DELETE))
     {
         const auto confirm_delete = toml::find<bool>(section, TOML_KEY_CONFIRM_DELETE);
-        app_settings.set_confirm_delete(confirm_delete);
+        app_settings.confirm_delete(confirm_delete);
     }
 
     if (section.contains(TOML_KEY_CONFIRM_TRASH))
     {
         const auto confirm_trash = toml::find<bool>(section, TOML_KEY_CONFIRM_TRASH);
-        app_settings.set_confirm_trash(confirm_trash);
+        app_settings.confirm_trash(confirm_trash);
     }
 }
 
@@ -164,19 +164,19 @@ config_parse_window(const toml::value& tbl, u64 version)
     if (section.contains(TOML_KEY_HEIGHT))
     {
         const auto height = toml::find<u64>(section, TOML_KEY_HEIGHT);
-        app_settings.set_height(height);
+        app_settings.height(height);
     }
 
     if (section.contains(TOML_KEY_WIDTH))
     {
         const auto width = toml::find<u64>(section, TOML_KEY_WIDTH);
-        app_settings.set_width(width);
+        app_settings.width(width);
     }
 
     if (section.contains(TOML_KEY_MAXIMIZED))
     {
         const auto maximized = toml::find<bool>(section, TOML_KEY_MAXIMIZED);
-        app_settings.set_maximized(maximized);
+        app_settings.maximized(maximized);
     }
 }
 
@@ -196,13 +196,13 @@ config_parse_interface(const toml::value& tbl, u64 version)
     if (section.contains(TOML_KEY_SHOW_TABS))
     {
         const auto always_show_tabs = toml::find<bool>(section, TOML_KEY_SHOW_TABS);
-        app_settings.set_always_show_tabs(always_show_tabs);
+        app_settings.always_show_tabs(always_show_tabs);
     }
 
     if (section.contains(TOML_KEY_SHOW_CLOSE))
     {
         const auto show_close_tab_buttons = toml::find<bool>(section, TOML_KEY_SHOW_CLOSE);
-        app_settings.set_show_close_tab_buttons(show_close_tab_buttons);
+        app_settings.show_close_tab_buttons(show_close_tab_buttons);
     }
 }
 

@@ -563,7 +563,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
         return;
     }
 
-    if (app_settings.get_confirm())
+    if (app_settings.confirm())
     {
         const std::string label = clean_label(set->menu_label.value(), false, false);
         const std::string msg =
@@ -657,7 +657,7 @@ xset_design_job_set_remove(xset_t set)
     }
     const bool is_app = !set->lock && set->menu_style < xset::menu::submenu &&
                         cmd_type == xset::cmd::app && set->tool <= xset::tool::custom;
-    if (!(set->menu_style == xset::menu::sep) && app_settings.get_confirm() && !is_app &&
+    if (!(set->menu_style == xset::menu::sep) && app_settings.confirm() && !is_app &&
         set->tool <= xset::tool::custom)
     {
         if (parent)

@@ -62,7 +62,7 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
         return;
     }
 
-    if (app_settings.get_confirm_delete())
+    if (app_settings.confirm_delete())
     {
         const std::string msg = std::format("Delete {} selected item ?", sel_files.size());
         const bool ret = action_dialog(parent_win, "Confirm Delete", msg);
@@ -96,7 +96,7 @@ ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
         return;
     }
 
-    if (app_settings.get_confirm_trash())
+    if (app_settings.confirm_trash())
     {
         const std::string msg = std::format("Trash {} selected item ?", sel_files.size());
         const bool ret = action_dialog(parent_win, "Confirm Trash", msg);

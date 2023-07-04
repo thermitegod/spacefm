@@ -42,9 +42,9 @@ run_commandline(const commandline_opt_data_t& opt)
         vfs::user_dirs->program_config_dir(opt->config_dir);
     }
 
-    if (opt->git_backed_settings != app_settings.get_git_backed_settings())
+    if (opt->git_backed_settings != app_settings.git_backed_settings())
     {
-        app_settings.set_git_backed_settings(opt->git_backed_settings);
+        app_settings.git_backed_settings(opt->git_backed_settings);
     }
 
     if (opt->version)

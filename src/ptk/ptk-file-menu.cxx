@@ -603,7 +603,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
     set = xset_get(xset::name::view_thumb);
     xset_set_cb(set, (GFunc)main_window_toggle_thumbnails_all_windows, nullptr);
-    set->b = app_settings.get_show_thumbnail() ? xset::b::xtrue : xset::b::unset;
+    set->b = app_settings.show_thumbnail() ? xset::b::xtrue : xset::b::unset;
 
     if (browser->view_mode == ptk::file_browser::view_mode::icon_view)
     {

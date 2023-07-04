@@ -147,7 +147,7 @@ update_volume_icons()
     GtkTreeIter it;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    i32 icon_size = app_settings.get_icon_size_small();
+    i32 icon_size = app_settings.icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
     {
         icon_size = PANE_MAX_ICON_SIZE;
@@ -204,7 +204,7 @@ update_change_detection()
                     // update thumbnail visibility
                     ptk_file_browser_show_thumbnails(
                         file_browser,
-                        app_settings.get_show_thumbnail() ? app_settings.get_max_thumb_size() : 0);
+                        app_settings.show_thumbnail() ? app_settings.max_thumb_size() : 0);
                 }
             }
         }
@@ -574,7 +574,7 @@ add_volume(vfs::volume vol, bool set_icon)
                                       -1);
     if (set_icon)
     {
-        i32 icon_size = app_settings.get_icon_size_small();
+        i32 icon_size = app_settings.icon_size_small();
         if (icon_size > PANE_MAX_ICON_SIZE)
         {
             icon_size = PANE_MAX_ICON_SIZE;
@@ -638,7 +638,7 @@ update_volume(vfs::volume vol)
         return;
     }
 
-    i32 icon_size = app_settings.get_icon_size_small();
+    i32 icon_size = app_settings.icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
     {
         icon_size = PANE_MAX_ICON_SIZE;

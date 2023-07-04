@@ -186,21 +186,21 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     // atime
     const time_t atime = this->file_stat_.atime();
     local_time = std::localtime(&atime);
-    std::strftime(buffer, sizeof(buffer), app_settings.get_date_format().data(), local_time);
+    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
     this->display_atime_ = buffer;
     std::memset(buffer, 0, sizeof(buffer));
 
     // mtime
     const time_t mtime = this->file_stat_.mtime();
     local_time = std::localtime(&mtime);
-    std::strftime(buffer, sizeof(buffer), app_settings.get_date_format().data(), local_time);
+    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
     this->display_mtime_ = buffer;
     std::memset(buffer, 0, sizeof(buffer));
 
     // ctime
     const time_t ctime = this->file_stat_.ctime();
     local_time = std::localtime(&ctime);
-    std::strftime(buffer, sizeof(buffer), app_settings.get_date_format().data(), local_time);
+    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
     this->display_ctime_ = buffer;
     std::memset(buffer, 0, sizeof(buffer));
 

@@ -372,7 +372,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
             /* If this file is an executable file, run it. */
             if (!xnever && file->is_executable(full_path) &&
-                (app_settings.get_click_executes() || xforce))
+                (app_settings.click_executes() || xforce))
             {
                 Glib::spawn_command_line_async(full_path);
                 if (file_browser)
@@ -418,7 +418,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             if (!alloc_desktop)
             {
                 if (file->flags() & vfs::file_info_flags::desktop_entry &&
-                    (app_settings.get_click_executes() || xforce))
+                    (app_settings.click_executes() || xforce))
                 {
                     alloc_desktop = full_path;
                 }

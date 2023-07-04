@@ -3485,7 +3485,7 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
 
     if (ztd::same(setname, "root_delete"))
     {
-        if (app_settings.get_confirm_delete())
+        if (app_settings.confirm_delete())
         {
             const std::string msg = std::format("Delete {} selected item as root ?", item_count);
 

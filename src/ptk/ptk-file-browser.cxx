@@ -676,7 +676,7 @@ ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset::tool
             break;
         case xset::tool::show_thumb:
             x = 8;
-            b = app_settings.get_show_thumbnail();
+            b = app_settings.show_thumbnail();
             break;
         case xset::tool::large_icons:
             x = 9;
@@ -770,11 +770,11 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     file_browser->toolbar = gtk_toolbar_new();
     gtk_box_pack_start(GTK_BOX(file_browser->toolbox), file_browser->toolbar, true, true, 0);
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->toolbar), GtkToolbarStyle::GTK_TOOLBAR_ICONS);
-    if (app_settings.get_icon_size_tool() > 0 &&
-        app_settings.get_icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
+    if (app_settings.icon_size_tool() > 0 &&
+        app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
     {
         gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->toolbar),
-                                  (GtkIconSize)app_settings.get_icon_size_tool());
+                                  (GtkIconSize)app_settings.icon_size_tool());
     }
 
     // fill left toolbar
@@ -833,11 +833,11 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
                        0);
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->side_toolbar),
                           GtkToolbarStyle::GTK_TOOLBAR_ICONS);
-    if (app_settings.get_icon_size_tool() > 0 &&
-        app_settings.get_icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
+    if (app_settings.icon_size_tool() > 0 &&
+        app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
     {
         gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->side_toolbar),
-                                  (GtkIconSize)app_settings.get_icon_size_tool());
+                                  (GtkIconSize)app_settings.icon_size_tool());
     }
     // fill side toolbar
     xset_fill_toolbar(GTK_WIDGET(file_browser),
@@ -1823,7 +1823,7 @@ ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path
     file_browser->is_drag = false;
     file_browser->menu_shown = false;
     if (file_browser->view_mode == ptk::file_browser::view_mode::list_view ||
-        app_settings.get_single_click())
+        app_settings.single_click())
     {
         /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
@@ -2183,7 +2183,7 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
     }
     file_browser->sort_order = sort_order;
     // MOD enable following to make column click permanent sort
-    //    app_settings.set_sort_order(col);
+    //    app_settings.sort_order(col);
     //    if (file_browser)
     //        ptk_file_browser_set_sort_order(file_browser),
     //        app_settings.get_sort_order());
@@ -3483,7 +3483,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
              * activated or user clicked on non-row */
             ret = true;
         }
-        else if (!app_settings.get_single_click())
+        else if (!app_settings.single_click())
         {
             /* sfm 1.0.6 set skip_release for Icon/Compact to prevent file
              * under cursor being selected when entering dir with double-click.
@@ -3901,7 +3901,7 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
             exo_icon_view_set_single_click(EXO_ICON_VIEW(folder_view), file_browser->single_click);
             exo_icon_view_set_single_click_timeout(
                 EXO_ICON_VIEW(folder_view),
-                app_settings.get_single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
+                app_settings.single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
 
             gtk_cell_layout_clear(GTK_CELL_LAYOUT(folder_view));
 
@@ -4142,8 +4142,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
-            if (column.column == ptk::file_list::column::name &&
-                !app_settings.get_always_show_tabs() &&
+            if (column.column == ptk::file_list::column::name && !app_settings.always_show_tabs() &&
                 file_browser->view_mode == ptk::file_browser::view_mode::list_view &&
                 gtk_notebook_get_n_pages(GTK_NOTEBOOK(file_browser->mynotebook)) == 1)
             {

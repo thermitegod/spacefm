@@ -2377,7 +2377,7 @@ query_overwrite(PtkFileTask* ptask)
 
                 std::tm* local_time = std::localtime(&src_mtime);
                 std::ostringstream src_date;
-                src_date << std::put_time(local_time, app_settings.get_date_format().data());
+                src_date << std::put_time(local_time, app_settings.date_format().data());
 
                 src_time = src_date.str();
 
@@ -2397,7 +2397,7 @@ query_overwrite(PtkFileTask* ptask)
 
             std::tm* local_time = std::localtime(&dest_mtime);
             std::ostringstream dest_date;
-            dest_date << std::put_time(local_time, app_settings.get_date_format().data());
+            dest_date << std::put_time(local_time, app_settings.date_format().data());
 
             const std::string dest_time = dest_date.str();
 

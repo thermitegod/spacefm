@@ -802,7 +802,7 @@ void
 main_window_toggle_thumbnails_all_windows()
 {
     // toggle
-    app_settings.set_show_thumbnail(!app_settings.get_show_thumbnail());
+    app_settings.show_thumbnail(!app_settings.show_thumbnail());
 
     // update all windows/all panels/all browsers
     for (MainWindow* window : all_windows)
@@ -817,7 +817,7 @@ main_window_toggle_thumbnails_all_windows()
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 ptk_file_browser_show_thumbnails(
                     file_browser,
-                    app_settings.get_show_thumbnail() ? app_settings.get_max_thumb_size() : 0);
+                    app_settings.show_thumbnail() ? app_settings.max_thumb_size() : 0);
             }
         }
     }
@@ -1160,15 +1160,15 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                 // load saved tabs
                 bool tab_added = false;
                 set = xset_get_panel(p, xset::panel::show);
-                if ((set->s && app_settings.get_load_saved_tabs()) || set->ob1)
+                if ((set->s && app_settings.load_saved_tabs()) || set->ob1)
                 {
                     // set->ob1 is preload path
 
-                    const std::string tabs_add = std::format(
-                        "{}{}{}",
-                        set->s && app_settings.get_load_saved_tabs() ? set->s.value() : "",
-                        set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
-                        set->ob1 ? set->ob1 : "");
+                    const std::string tabs_add =
+                        std::format("{}{}{}",
+                                    set->s && app_settings.load_saved_tabs() ? set->s.value() : "",
+                                    set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
+                                    set->ob1 ? set->ob1 : "");
 
                     const std::vector<std::string> tab_dirs =
                         ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
@@ -1657,8 +1657,8 @@ main_window_init(MainWindow* main_window)
 {
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
-    main_window->opened_maximized = app_settings.get_maximized();
-    main_window->maximized = app_settings.get_maximized();
+    main_window->opened_maximized = app_settings.maximized();
+    main_window->maximized = app_settings.maximized();
 
     /* this is used to limit the scope of gtk_grab and modal dialogs */
     main_window->wgroup = gtk_window_group_new();
@@ -1827,9 +1827,9 @@ main_window_init(MainWindow* main_window)
 
     // show window
     gtk_window_set_default_size(GTK_WINDOW(main_window),
-                                app_settings.get_width(),
-                                app_settings.get_height());
-    if (app_settings.get_maximized())
+                                app_settings.width(),
+                                app_settings.height());
+    if (app_settings.maximized())
     {
         gtk_window_maximize(GTK_WINDOW(main_window));
     }
@@ -1952,8 +1952,8 @@ main_window_store_positions(MainWindow* main_window)
 
         if (!main_window->maximized && allocation.width > 0)
         {
-            app_settings.set_width(allocation.width);
-            app_settings.set_height(allocation.height);
+            app_settings.width(allocation.width);
+            app_settings.height(allocation.height);
         }
         if (GTK_IS_PANED(main_window->hpane_top))
         {
@@ -2028,7 +2028,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
     main_window_store_positions(main_window);
 
     // save settings
-    app_settings.set_maximized(main_window->maximized);
+    app_settings.maximized(main_window->maximized);
     autosave_request_cancel();
     save_settings(main_window);
 
@@ -2087,7 +2087,7 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
         ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
 
     main_window->maximized = maximized;
-    app_settings.set_maximized(maximized);
+    app_settings.maximized(maximized);
 
     if (!main_window->maximized)
     {
@@ -2393,7 +2393,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     // gtk_notebook_remove_page( notebook, gtk_notebook_get_current_page( notebook ) );
     gtk_widget_destroy(GTK_WIDGET(file_browser));
 
-    if (!app_settings.get_always_show_tabs())
+    if (!app_settings.always_show_tabs())
     {
         if (gtk_notebook_get_n_pages(notebook) == 1)
         {
@@ -2653,7 +2653,7 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     gtk_label_set_max_width_chars(GTK_LABEL(tab_text), 30);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_text, false, false, 4);
 
-    if (app_settings.get_show_close_tab_buttons())
+    if (app_settings.show_close_tab_buttons())
     {
         close_btn = gtk_button_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
@@ -2752,14 +2752,14 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     // ztd::logger::info("New tab panel={} path={}", main_window->curpanel, folder_path);
 
     // ztd::logger::info("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
-    ptk_file_browser_set_single_click(file_browser, app_settings.get_single_click());
+    ptk_file_browser_set_single_click(file_browser, app_settings.single_click());
     // FIXME: this should not be hard-code
     ptk_file_browser_set_single_click_timeout(file_browser,
-                                              app_settings.get_single_hover() ? SINGLE_CLICK_TIMEOUT
-                                                                              : 0);
-    ptk_file_browser_show_thumbnails(
-        file_browser,
-        app_settings.get_show_thumbnail() ? app_settings.get_max_thumb_size() : 0);
+                                              app_settings.single_hover() ? SINGLE_CLICK_TIMEOUT
+                                                                          : 0);
+    ptk_file_browser_show_thumbnails(file_browser,
+                                     app_settings.show_thumbnail() ? app_settings.max_thumb_size()
+                                                                   : 0);
 
     ptk_file_browser_set_sort_order(
         file_browser,
@@ -2789,7 +2789,7 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), true);
     gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), idx);
 
-    if (app_settings.get_always_show_tabs())
+    if (app_settings.always_show_tabs())
     {
         gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), true);
     }
@@ -2918,8 +2918,8 @@ main_window_add_new_window(MainWindow* main_window)
         gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
         if (allocation.width > 0)
         {
-            app_settings.set_width(allocation.width);
-            app_settings.set_height(allocation.height);
+            app_settings.width(allocation.width);
+            app_settings.height(allocation.height);
         }
     }
     // GtkWidget* new_win = main_window_new();
@@ -5772,7 +5772,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                 iname = "gtk-execute";
             }
 
-            i32 icon_size = app_settings.get_icon_size_small();
+            i32 icon_size = app_settings.icon_size_small();
             if (icon_size > PANE_MAX_ICON_SIZE)
             {
                 icon_size = PANE_MAX_ICON_SIZE;
@@ -6761,7 +6761,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         {
             const std::string_view value = data[0];
 
-            if (app_settings.get_show_thumbnail() != get_bool(value))
+            if (app_settings.show_thumbnail() != get_bool(value))
             {
                 main_window_toggle_thumbnails_all_windows();
             }
@@ -7235,7 +7235,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "show-thumbnails"))
         {
-            return {SOCKET_SUCCESS, std::format("{}", app_settings.get_show_thumbnail() ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", app_settings.show_thumbnail() ? 1 : 0)};
         }
         else if (ztd::same(property, "large-icons"))
         {

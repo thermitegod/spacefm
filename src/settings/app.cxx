@@ -24,273 +24,273 @@
 AppSettings app_settings = AppSettings();
 
 bool
-AppSettings::get_show_thumbnail() const noexcept
+AppSettings::show_thumbnail() const noexcept
 {
-    return this->show_thumbnail;
+    return this->show_thumbnail_;
 }
 
 void
-AppSettings::set_show_thumbnail(bool val) noexcept
+AppSettings::show_thumbnail(bool val) noexcept
 {
-    this->show_thumbnail = val;
+    this->show_thumbnail_ = val;
 }
 
 u64
-AppSettings::get_max_thumb_size() const noexcept
+AppSettings::max_thumb_size() const noexcept
 {
-    return this->max_thumb_size;
+    return this->max_thumb_size_;
 }
 
 void
-AppSettings::set_max_thumb_size(u64 val) noexcept
+AppSettings::max_thumb_size(u64 val) noexcept
 {
-    this->max_thumb_size = val;
+    this->max_thumb_size_ = val;
 }
 
 u64
-AppSettings::get_icon_size_big() const noexcept
+AppSettings::icon_size_big() const noexcept
 {
-    return this->icon_size_big;
+    return this->icon_size_big_;
 }
 
 void
-AppSettings::set_icon_size_big(u64 val) noexcept
+AppSettings::icon_size_big(u64 val) noexcept
 {
-    this->icon_size_big = val;
+    this->icon_size_big_ = val;
 }
 
 u64
-AppSettings::get_icon_size_small() const noexcept
+AppSettings::icon_size_small() const noexcept
 {
-    return this->icon_size_small;
+    return this->icon_size_small_;
 }
 
 void
-AppSettings::set_icon_size_small(u64 val) noexcept
+AppSettings::icon_size_small(u64 val) noexcept
 {
-    this->icon_size_small = val;
+    this->icon_size_small_ = val;
 }
 
 u64
-AppSettings::get_icon_size_tool() const noexcept
+AppSettings::icon_size_tool() const noexcept
 {
-    return this->icon_size_tool;
+    return this->icon_size_tool_;
 }
 
 void
-AppSettings::set_icon_size_tool(u64 val) noexcept
+AppSettings::icon_size_tool(u64 val) noexcept
 {
-    this->icon_size_tool = val;
+    this->icon_size_tool_ = val;
 }
 
 bool
-AppSettings::get_single_click() const noexcept
+AppSettings::single_click() const noexcept
 {
-    return this->single_click;
+    return this->single_click_;
 }
 
 void
-AppSettings::set_single_click(bool val) noexcept
+AppSettings::single_click(bool val) noexcept
 {
-    this->single_click = val;
+    this->single_click_ = val;
 }
 
 bool
-AppSettings::get_single_hover() const noexcept
+AppSettings::single_hover() const noexcept
 {
-    return this->single_hover;
+    return this->single_hover_;
 }
 
 void
-AppSettings::set_single_hover(bool val) noexcept
+AppSettings::single_hover(bool val) noexcept
 {
-    this->single_hover = val;
+    this->single_hover_ = val;
 }
 
 bool
-AppSettings::get_click_executes() const noexcept
+AppSettings::click_executes() const noexcept
 {
-    return this->click_executes;
+    return this->click_executes_;
 }
 
 void
-AppSettings::set_click_executes(bool val) noexcept
+AppSettings::click_executes(bool val) noexcept
 {
-    this->click_executes = val;
+    this->click_executes_ = val;
 }
 
 bool
-AppSettings::get_confirm() const noexcept
+AppSettings::confirm() const noexcept
 {
-    return this->confirm;
+    return this->confirm_;
 }
 
 void
-AppSettings::set_confirm(bool val) noexcept
+AppSettings::confirm(bool val) noexcept
 {
-    this->confirm = val;
+    this->confirm_ = val;
 }
 
 bool
-AppSettings::get_confirm_delete() const noexcept
+AppSettings::confirm_delete() const noexcept
 {
-    return this->confirm_delete;
+    return this->confirm_delete_;
 }
 
 void
-AppSettings::set_confirm_delete(bool val) noexcept
+AppSettings::confirm_delete(bool val) noexcept
 {
-    this->confirm_delete = val;
+    this->confirm_delete_ = val;
 }
 
 bool
-AppSettings::get_confirm_trash() const noexcept
+AppSettings::confirm_trash() const noexcept
 {
-    return this->confirm_trash;
+    return this->confirm_trash_;
 }
 
 void
-AppSettings::set_confirm_trash(bool val) noexcept
+AppSettings::confirm_trash(bool val) noexcept
 {
-    this->confirm_trash = val;
+    this->confirm_trash_ = val;
 }
 
 bool
-AppSettings::get_load_saved_tabs() const noexcept
+AppSettings::load_saved_tabs() const noexcept
 {
-    return this->load_saved_tabs;
+    return this->load_saved_tabs_;
 }
 
 void
-AppSettings::set_load_saved_tabs(bool val) noexcept
+AppSettings::load_saved_tabs(bool val) noexcept
 {
-    this->load_saved_tabs = val;
+    this->load_saved_tabs_ = val;
 }
 
-const std::string&
-AppSettings::get_date_format() const noexcept
+const std::string_view
+AppSettings::date_format() const noexcept
 {
-    if (this->date_format_custom.empty())
+    if (this->date_format_custom_.empty())
     {
-        return this->date_format_default;
+        return this->date_format_default_;
     }
-    return this->date_format_custom;
+    return this->date_format_custom_;
 }
 
 void
-AppSettings::set_date_format(const std::string_view val) noexcept
+AppSettings::date_format(const std::string_view val) noexcept
 {
     if (val.empty())
     {
         return;
     }
-    this->date_format_custom = val.data();
+    this->date_format_custom_ = val.data();
 }
 
 u64
-AppSettings::get_sort_order() const noexcept
+AppSettings::sort_order() const noexcept
 {
-    return this->sort_order;
+    return this->sort_order_;
 }
 
 void
-AppSettings::set_sort_order(u64 val) noexcept
+AppSettings::sort_order(u64 val) noexcept
 {
-    this->sort_order = val;
+    this->sort_order_ = val;
 }
 
 u64
-AppSettings::get_sort_type() const noexcept
+AppSettings::sort_type() const noexcept
 {
-    return this->sort_type;
+    return this->sort_type_;
 }
 
 void
-AppSettings::set_sort_type(u64 val) noexcept
+AppSettings::sort_type(u64 val) noexcept
 {
-    this->sort_type = val;
+    this->sort_type_ = val;
 }
 
 u64
-AppSettings::get_width() const noexcept
+AppSettings::width() const noexcept
 {
-    return this->width;
+    return this->width_;
 }
 
 void
-AppSettings::set_width(u64 val) noexcept
+AppSettings::width(u64 val) noexcept
 {
-    this->width = val;
+    this->width_ = val;
 }
 
 u64
-AppSettings::get_height() const noexcept
+AppSettings::height() const noexcept
 {
-    return this->height;
+    return this->height_;
 }
 
 void
-AppSettings::set_height(u64 val) noexcept
+AppSettings::height(u64 val) noexcept
 {
-    this->height = val;
+    this->height_ = val;
 }
 
 bool
-AppSettings::get_maximized() const noexcept
+AppSettings::maximized() const noexcept
 {
-    return this->maximized;
+    return this->maximized_;
 }
 
 void
-AppSettings::set_maximized(bool val) noexcept
+AppSettings::maximized(bool val) noexcept
 {
-    this->maximized = val;
+    this->maximized_ = val;
 }
 
 bool
-AppSettings::get_always_show_tabs() const noexcept
+AppSettings::always_show_tabs() const noexcept
 {
-    return this->always_show_tabs;
+    return this->always_show_tabs_;
 }
 
 void
-AppSettings::set_always_show_tabs(bool val) noexcept
+AppSettings::always_show_tabs(bool val) noexcept
 {
-    this->always_show_tabs = val;
+    this->always_show_tabs_ = val;
 }
 
 bool
-AppSettings::get_show_close_tab_buttons() const noexcept
+AppSettings::show_close_tab_buttons() const noexcept
 {
-    return this->show_close_tab_buttons;
+    return this->show_close_tab_buttons_;
 }
 
 void
-AppSettings::set_show_close_tab_buttons(bool val) noexcept
+AppSettings::show_close_tab_buttons(bool val) noexcept
 {
-    this->show_close_tab_buttons = val;
+    this->show_close_tab_buttons_ = val;
 }
 
 bool
-AppSettings::get_use_si_prefix() const noexcept
+AppSettings::use_si_prefix() const noexcept
 {
-    return this->use_si_prefix;
+    return this->use_si_prefix_;
 }
 
 void
-AppSettings::set_use_si_prefix(bool val) noexcept
+AppSettings::use_si_prefix(bool val) noexcept
 {
-    this->use_si_prefix = val;
+    this->use_si_prefix_ = val;
 }
 
 bool
-AppSettings::get_git_backed_settings() const noexcept
+AppSettings::git_backed_settings() const noexcept
 {
-    return this->git_backed_settings;
+    return this->git_backed_settings_;
 }
 
 void
-AppSettings::set_git_backed_settings(bool val) noexcept
+AppSettings::git_backed_settings(bool val) noexcept
 {
-    this->git_backed_settings = val;
+    this->git_backed_settings_ = val;
 }

@@ -230,7 +230,7 @@ load_settings()
 {
     const auto settings_config_dir = vfs::user_dirs->program_config_dir();
 
-    app_settings.set_load_saved_tabs(true);
+    app_settings.load_saved_tabs(true);
 
     // MOD extra settings
     xset_defaults();
@@ -243,7 +243,7 @@ load_settings()
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    bool git_backed_settings = app_settings.get_git_backed_settings();
+    bool git_backed_settings = app_settings.git_backed_settings();
     if (git_backed_settings)
     {
         if (Glib::find_program_in_path("git").empty())
@@ -301,11 +301,11 @@ load_settings()
     const auto date_format = xset_get_s(xset::name::date_format);
     if (date_format)
     {
-        app_settings.set_date_format(date_format.value());
+        app_settings.date_format(date_format.value());
     }
     else
     {
-        xset_set(xset::name::date_format, xset::var::s, app_settings.get_date_format());
+        xset_set(xset::name::date_format, xset::var::s, app_settings.date_format());
     }
 
     // MOD su command discovery (sets default)
