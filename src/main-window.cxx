@@ -74,6 +74,7 @@
 #include "find-files.hxx"
 
 #include "autosave.hxx"
+#include "terminal-handlers.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
@@ -6923,6 +6924,31 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 xset_set(xset::name::editor, xset::var::s, editor.string());
             }
         }
+        else if (ztd::same(property, "terminal"))
+        {
+            const std::string_view value = data[0];
+
+            std::filesystem::path terminal = value;
+            if (terminal.is_absolute())
+            {
+                terminal = terminal.filename();
+            }
+
+            const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
+            for (const std::string_view supported_terminal : supported_terminals)
+            {
+                if (ztd::same(terminal.string(), supported_terminal))
+                {
+                    xset_set(xset::name::main_terminal, xset::var::s, terminal.string());
+                    return {SOCKET_SUCCESS, ""};
+                }
+            }
+
+            return {SOCKET_FAILURE,
+                    std::format("Terminal is not supported '{}'\nSupported List:\n{}",
+                                value,
+                                ztd::join(supported_terminals, "\n"))};
+        }
         else
         {
             return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
@@ -7390,6 +7416,18 @@ main_window_socket_command(const std::string_view socket_commands_json)
             else
             {
                 return {SOCKET_SUCCESS, "No editor has been set"};
+            }
+        }
+        else if (ztd::same(property, "terminal"))
+        {
+            const auto terminal = xset_get_s(xset::name::main_terminal);
+            if (terminal)
+            {
+                return {SOCKET_SUCCESS, terminal.value()};
+            }
+            else
+            {
+                return {SOCKET_SUCCESS, "No terminal has been set"};
             }
         }
         else

@@ -88,6 +88,7 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::clipboard_copy_files(sub, opt);
     commandline::socket::set::clipboard_cut_files(sub, opt);
     commandline::socket::set::editor(sub, opt);
+    commandline::socket::set::terminal(sub, opt);
 }
 
 /*
@@ -153,6 +154,7 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::get::clipboard_copy_files(sub, opt);
     commandline::socket::get::clipboard_cut_files(sub, opt);
     commandline::socket::get::editor(sub, opt);
+    commandline::socket::get::terminal(sub, opt);
 }
 
 /*

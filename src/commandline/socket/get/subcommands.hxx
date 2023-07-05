@@ -70,4 +70,5 @@ namespace commandline::socket::get
     void clipboard_copy_files(CLI::App* app, const socket_subcommand_data_t& opt);
     void clipboard_cut_files(CLI::App* app, const socket_subcommand_data_t& opt);
     void editor(CLI::App* app, const socket_subcommand_data_t& opt);
+    void terminal(CLI::App* app, const socket_subcommand_data_t& opt);
 } // namespace commandline::socket::get

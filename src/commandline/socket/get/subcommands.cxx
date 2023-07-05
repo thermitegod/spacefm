@@ -756,3 +756,16 @@ commandline::socket::get::editor(CLI::App* app, const socket_subcommand_data_t& 
     const auto run_subcommand = [opt]() { opt->property = "editor"; };
     sub->callback(run_subcommand);
 }
+
+/*
+ * subcommand terminal
+ */
+
+void
+commandline::socket::get::terminal(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("terminal", "Get property terminal");
+
+    const auto run_subcommand = [opt]() { opt->property = "terminal"; };
+    sub->callback(run_subcommand);
+}
