@@ -1661,10 +1661,10 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
     g_list_free(children);
 
     /* TODO: Change the icon */
+    const auto cwd = ptk_file_browser_get_cwd(file_browser);
 
-    const std::string name = ptk_file_browser_get_cwd(file_browser).filename();
+    const std::string name = std::filesystem::equivalent(cwd, "/") ? "/" : cwd.filename();
     gtk_label_set_text(text, name.data());
-    gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (name.size() < 30)
     {
         gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
@@ -1672,6 +1672,7 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
     }
     else
     {
+        gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
         gtk_label_set_width_chars(text, 30);
     }
 }

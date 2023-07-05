@@ -2706,7 +2706,8 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 
     // TODO: Change the icon
 
-    const std::string name = path.filename();
+    const std::string name = std::filesystem::equivalent(path, "/") ? "/" : path.filename();
+
     gtk_label_set_text(text, name.data());
     gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
     if (name.size() < 30)
@@ -3035,7 +3036,7 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
     if (file_browser->dir)
     {
         disp_path = file_browser->dir->path;
-        disp_name = disp_path.filename();
+        disp_name = std::filesystem::equivalent(disp_path, "/") ? "/" : disp_path.filename();
     }
     else
     {
@@ -3043,7 +3044,7 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
         if (!cwd.empty())
         {
             disp_path = cwd;
-            disp_name = disp_path.filename();
+            disp_name = std::filesystem::equivalent(disp_path, "/") ? "/" : disp_path.filename();
         }
     }
 
