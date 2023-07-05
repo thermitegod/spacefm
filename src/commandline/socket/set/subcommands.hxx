@@ -55,6 +55,7 @@ namespace commandline::socket::set
     void sort_hidden_first(CLI::App* app, const socket_subcommand_data_t& opt);
     void sort_first(CLI::App* app, const socket_subcommand_data_t& opt);
     void show_thumbnails(CLI::App* app, const socket_subcommand_data_t& opt);
+    void max_thumbnail_size(CLI::App* app, const socket_subcommand_data_t& opt);
     void large_icons(CLI::App* app, const socket_subcommand_data_t& opt);
     void statusbar_text(CLI::App* app, const socket_subcommand_data_t& opt);
     void pathbar_text(CLI::App* app, const socket_subcommand_data_t& opt);

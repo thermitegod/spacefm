@@ -588,6 +588,19 @@ commandline::socket::get::show_thumbnails(CLI::App* app, const socket_subcommand
 }
 
 /*
+ * subcommand max-thumbnail-size
+ */
+
+void
+commandline::socket::get::max_thumbnail_size(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("max-thumbnail-size", "Get property max-thumbnail-size");
+
+    const auto run_subcommand = [opt]() { opt->property = "max-thumbnail-size"; };
+    sub->callback(run_subcommand);
+}
+
+/*
  * subcommand large-icons
  */
 

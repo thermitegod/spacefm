@@ -6767,6 +6767,12 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 main_window_toggle_thumbnails_all_windows();
             }
         }
+        else if (ztd::same(property, "max-thumbnail-size"))
+        {
+            const std::string_view value = data[0];
+
+            app_settings.max_thumb_size(std::stoi(value.data()));
+        }
         else if (ztd::same(property, "large-icons"))
         {
             const std::string_view value = data[0];
@@ -7293,6 +7299,10 @@ main_window_socket_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "show-thumbnails"))
         {
             return {SOCKET_SUCCESS, std::format("{}", app_settings.show_thumbnail() ? 1 : 0)};
+        }
+        else if (ztd::same(property, "max-thumbnail-size"))
+        {
+            return {SOCKET_SUCCESS, std::format("{} B", app_settings.max_thumb_size())};
         }
         else if (ztd::same(property, "large-icons"))
         {

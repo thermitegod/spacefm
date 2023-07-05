@@ -1012,6 +1012,21 @@ commandline::socket::set::show_thumbnails(CLI::App* app, const socket_subcommand
 }
 
 /*
+ * subcommand max-thumbnail-size
+ */
+
+void
+commandline::socket::set::max_thumbnail_size(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("max-thumbnail-size", "Set property max-thumbnail-size");
+
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+
+    const auto run_subcommand = [opt]() { opt->property = "max-thumbnail-size"; };
+    sub->callback(run_subcommand);
+}
+
+/*
  * subcommand large-icons
  */
 

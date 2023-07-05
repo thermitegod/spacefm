@@ -73,6 +73,7 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::sort_hidden_first(sub, opt);
     commandline::socket::set::sort_first(sub, opt);
     commandline::socket::set::show_thumbnails(sub, opt);
+    commandline::socket::set::max_thumbnail_size(sub, opt);
     commandline::socket::set::large_icons(sub, opt);
     commandline::socket::set::statusbar_text(sub, opt);
     commandline::socket::set::pathbar_text(sub, opt);
@@ -141,6 +142,7 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::get::sort_hidden_first(sub, opt);
     commandline::socket::get::sort_first(sub, opt);
     commandline::socket::get::show_thumbnails(sub, opt);
+    commandline::socket::get::max_thumbnail_size(sub, opt);
     commandline::socket::get::large_icons(sub, opt);
     commandline::socket::get::statusbar_text(sub, opt);
     commandline::socket::get::pathbar_text(sub, opt);
