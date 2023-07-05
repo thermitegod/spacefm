@@ -301,14 +301,14 @@ static void
 on_file_edit(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    xset_edit(GTK_WIDGET(data->browser), data->file_path.c_str(), false, true);
+    xset_edit(GTK_WIDGET(data->browser), data->file_path, false, true);
 }
 
 static void
 on_file_root_edit(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    xset_edit(GTK_WIDGET(data->browser), data->file_path.c_str(), true, false);
+    xset_edit(GTK_WIDGET(data->browser), data->file_path, true, false);
 }
 
 static void
@@ -1868,7 +1868,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     return;
                 }
             }
-            xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, false);
+            xset_edit(GTK_WIDGET(data->browser), path, false, false);
             break;
         }
         case ptk::file_menu::app_job::view:
@@ -1876,10 +1876,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             const auto desktop_path = get_shared_desktop_file_location(desktop->name());
             if (desktop_path)
             {
-                xset_edit(GTK_WIDGET(data->browser),
-                          desktop_path.value().string().data(),
-                          false,
-                          true);
+                xset_edit(GTK_WIDGET(data->browser), desktop_path.value(), false, true);
             }
             break;
         }
@@ -1887,7 +1884,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         {
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
             const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
-            xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
+            xset_edit(GTK_WIDGET(data->browser), path, false, true);
             break;
         }
         case ptk::file_menu::app_job::add:
@@ -2078,7 +2075,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             }
             if (std::filesystem::exists(mime_file))
             {
-                xset_edit(GTK_WIDGET(data->browser), mime_file.c_str(), false, false);
+                xset_edit(GTK_WIDGET(data->browser), mime_file, false, false);
             }
 
             vfs_mime_monitor();
@@ -2090,14 +2087,14 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             const auto path = std::filesystem::path() / "/usr/share/mime" / str2;
             if (std::filesystem::exists(path))
             {
-                xset_edit(GTK_WIDGET(data->browser), path.c_str(), false, true);
+                xset_edit(GTK_WIDGET(data->browser), path, false, true);
             }
             break;
         }
         case ptk::file_menu::app_job::view_over:
         {
             const std::filesystem::path path = "/usr/share/mime/packages/Overrides.xml";
-            xset_edit(GTK_WIDGET(data->browser), path.c_str(), true, false);
+            xset_edit(GTK_WIDGET(data->browser), path, true, false);
             break;
         }
         case ptk::file_menu::app_job::browse_mime_usr:
@@ -2896,11 +2893,11 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
     {
         if (set->xset_name == xset::name::open_edit)
         {
-            xset_edit(GTK_WIDGET(data->browser), data->file_path.c_str(), false, true);
+            xset_edit(GTK_WIDGET(data->browser), data->file_path, false, true);
         }
         else if (set->xset_name == xset::name::open_edit_root)
         {
-            xset_edit(GTK_WIDGET(data->browser), data->file_path.c_str(), true, false);
+            xset_edit(GTK_WIDGET(data->browser), data->file_path, true, false);
         }
         else if (set->xset_name == xset::name::open_other)
         {

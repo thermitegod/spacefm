@@ -743,3 +743,16 @@ commandline::socket::get::clipboard_cut_files(CLI::App* app, const socket_subcom
     const auto run_subcommand = [opt]() { opt->property = "clipboard-cut-files"; };
     sub->callback(run_subcommand);
 }
+
+/*
+ * subcommand editor
+ */
+
+void
+commandline::socket::get::editor(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("editor", "Get property editor");
+
+    const auto run_subcommand = [opt]() { opt->property = "editor"; };
+    sub->callback(run_subcommand);
+}

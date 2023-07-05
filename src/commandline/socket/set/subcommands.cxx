@@ -1244,3 +1244,18 @@ commandline::socket::set::clipboard_cut_files(CLI::App* app, const socket_subcom
     const auto run_subcommand = [opt]() { opt->property = "clipboard-cut-files"; };
     sub->callback(run_subcommand);
 }
+
+/*
+ * subcommand editor
+ */
+
+void
+commandline::socket::set::editor(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("editor", "Set property editor");
+
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+
+    const auto run_subcommand = [opt]() { opt->property = "editor"; };
+    sub->callback(run_subcommand);
+}

@@ -333,16 +333,16 @@ load_settings()
 
     // MOD editor discovery
     const auto main_editor = xset_get_s(xset::name::editor);
-    if (main_editor)
+    if (!main_editor)
     {
         vfs::mime_type mime_type = vfs_mime_type_get_from_type("text/plain");
         if (mime_type)
         {
             const auto default_app = mime_type->default_action();
-            if (!default_app)
+            if (default_app)
             {
-                const vfs::desktop desktop = vfs_get_desktop(main_editor.value());
-                xset_set(xset::name::editor, xset::var::s, desktop->exec());
+                const vfs::desktop desktop = vfs_get_desktop(default_app.value());
+                xset_set(xset::name::editor, xset::var::s, desktop->full_path().string());
             }
         }
     }
@@ -1239,88 +1239,48 @@ xset_clipboard_in_set(xset_t set)
 }
 
 void
-xset_edit(GtkWidget* parent, const char* path, bool force_root, bool no_root)
+xset_edit(GtkWidget* parent, const std::filesystem::path& path, bool force_root, bool no_root)
 {
-    bool as_root = false;
-    bool terminal;
-    GtkWidget* dlgparent = nullptr;
-    if (!path)
-    {
-        return;
-    }
-    if (force_root && no_root)
-    {
-        return;
-    }
+    (void)force_root;
+    (void)no_root;
 
+    GtkWidget* dlgparent = nullptr;
     if (parent)
     {
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
     }
 
-    std::optional<std::string> editor_s;
-    if (geteuid() != 0 && !force_root && (no_root || have_rw_access(path)))
+    const auto check_editor = xset_get_s(xset::name::editor);
+    if (!check_editor)
     {
-        editor_s = xset_get_s(xset::name::editor);
-        if (!editor_s)
-        {
-            ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
-                           "Editor Not Set",
-                           "Please set your editor in View|Preferences|Advanced");
-            return;
-        }
-        terminal = xset_get_b(xset::name::editor);
+        ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+                       "Editor Not Set",
+                       "Please set your editor in View|Preferences|Advanced");
+        return;
     }
-    else
-    {
-        editor_s = xset_get_s(xset::name::root_editor);
-        if (!editor_s)
-        {
-            ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
-                           "Root Editor Not Set",
-                           "Please set root's editor in View|Preferences|Advanced");
-            return;
-        }
-        as_root = true;
-        terminal = xset_get_b(xset::name::root_editor);
-    }
-    // replacements
-    std::string editor = editor_s.value();
-    const std::string quoted_path = ztd::shell::quote(path);
-    if (ztd::contains(editor, "%f"))
-    {
-        editor = ztd::replace(editor, "%f", quoted_path);
-    }
-    else if (ztd::contains(editor, "%F"))
-    {
-        editor = ztd::replace(editor, "%F", quoted_path);
-    }
-    else if (ztd::contains(editor, "%u"))
-    {
-        editor = ztd::replace(editor, "%u", quoted_path);
-    }
-    else if (ztd::contains(editor, "%U"))
-    {
-        editor = ztd::replace(editor, "%U", quoted_path);
-    }
-    else
-    {
-        editor = std::format("{} {}", editor, quoted_path);
-    }
-    editor = std::format("{} {}", editor, quoted_path);
+    const auto& editor = check_editor.value();
 
-    // task
-    const std::string task_name = std::format("Edit {}", path);
-    const auto cwd = std::filesystem::path(path).parent_path();
-    PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, dlgparent, nullptr);
-    ptask->task->exec_command = editor;
-    ptask->task->exec_sync = false;
-    ptask->task->exec_terminal = terminal;
-    if (as_root)
+    vfs::desktop desktop;
+    if (ztd::endswith(editor, ".desktop"))
     {
-        ptask->task->exec_as_user = "root";
+        desktop = vfs_get_desktop(editor);
     }
-    ptk_file_task_run(ptask);
+    else
+    { // this might work
+        ztd::logger::warn("Editor is not set to a .desktop file");
+        desktop = vfs_get_desktop(fmt::format("{}.desktop", editor));
+    }
+
+    const std::vector<std::filesystem::path> open_files{path};
+    try
+    {
+        desktop->open_files(path.parent_path(), open_files);
+    }
+    catch (const VFSAppDesktopException& e)
+    {
+        const auto msg = std::format("Unable to open file:\n{}\n{}", path.string(), e.what());
+        ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr, "Error", msg);
+    }
 }
 
 const std::string

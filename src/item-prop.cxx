@@ -1195,7 +1195,7 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
 
     if (mime_type_is_text_file(path, ""))
     {
-        xset_edit(ctxt->dlg, path.data(), btn == ctxt->cmd_edit_root, btn != ctxt->cmd_edit_root);
+        xset_edit(ctxt->dlg, path, btn == ctxt->cmd_edit_root, btn != ctxt->cmd_edit_root);
     }
 }
 

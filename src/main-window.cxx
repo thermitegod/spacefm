@@ -6904,6 +6904,25 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 app_settings.thumbnailer_use_api(false);
             }
         }
+        else if (ztd::same(property, "editor"))
+        {
+            const std::string_view value = data[0];
+
+            if (!ztd::endswith(value, ".desktop"))
+            {
+                return {SOCKET_FAILURE, std::format("Must be a .desktop file '{}'", value)};
+            }
+
+            const std::filesystem::path editor = value;
+            if (editor.is_absolute())
+            {
+                xset_set(xset::name::editor, xset::var::s, editor.filename().string());
+            }
+            else
+            {
+                xset_set(xset::name::editor, xset::var::s, editor.string());
+            }
+        }
         else
         {
             return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
@@ -7361,6 +7380,18 @@ main_window_socket_command(const std::string_view socket_commands_json)
         {
             return {SOCKET_SUCCESS, app_settings.thumbnailer_use_api() ? "api" : "cli"};
         }
+        else if (ztd::same(property, "editor"))
+        {
+            const auto editor = xset_get_s(xset::name::editor);
+            if (editor)
+            {
+                return {SOCKET_SUCCESS, editor.value()};
+            }
+            else
+            {
+                return {SOCKET_SUCCESS, "No editor has been set"};
+            }
+        }
         else
         {
             return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
@@ -7717,7 +7748,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, std::format("no such file '{}'", value)};
             }
-            xset_edit(GTK_WIDGET(file_browser), value.data(), false, true);
+            xset_edit(GTK_WIDGET(file_browser), value, false, true);
         }
         else if (ztd::same(property, "mount") || ztd::same(property, "umount"))
         { // mount or unmount TARGET
