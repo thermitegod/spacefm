@@ -264,7 +264,7 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
         }
         gtk_window_present(GTK_WINDOW(main_window));
 
-        if (valid_panel(opt->panel))
+        if (is_valid_panel(opt->panel))
         {
             // user specified a panel with no file, let's show the panel
             if (!gtk_widget_get_visible(main_window->panel[opt->panel - 1]))

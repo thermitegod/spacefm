@@ -878,7 +878,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             panel = main_window->curpanel + 1;
             do
             {
-                if (!valid_panel(panel))
+                if (!is_valid_panel(panel))
                 {
                     panel = 1;
                 }
@@ -895,7 +895,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
             panel = main_window->curpanel + 1;
             do
             {
-                if (!valid_panel(panel))
+                if (!is_valid_panel(panel))
                 {
                     panel = 1;
                 }
@@ -2169,7 +2169,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
             // next
             do
             {
-                if (!valid_panel(++panel_x))
+                if (!is_valid_panel(++panel_x))
                 {
                     panel_x = 1;
                 }
@@ -2225,7 +2225,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             // next
             do
             {
-                if (!valid_panel(++panel_x))
+                if (!is_valid_panel(++panel_x))
                 {
                     panel_x = 1;
                 }
@@ -2240,7 +2240,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             break;
     }
 
-    if (!valid_panel(panel_x))
+    if (!is_valid_panel(panel_x))
     {
         return;
     }
@@ -2274,7 +2274,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
 bool
 main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
 {
-    if (!valid_panel(panel))
+    if (!is_valid_panel(panel))
     {
         return false;
     }
@@ -6234,7 +6234,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
     {
         panel = main_window->curpanel;
     }
-    if (!valid_panel(panel))
+    if (!is_valid_panel(panel))
     {
         return {SOCKET_INVALID, std::format("invalid panel {}", panel)};
     }
@@ -6380,7 +6380,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 width = panel_4;
             }
 
-            if (!valid_panel(width) || !valid_panel_code(width))
+            if (!is_valid_panel(width) || !is_valid_panel_code(width))
             {
                 return {SOCKET_INVALID, "invalid panel number"};
             }
@@ -6477,7 +6477,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 new_tab = tab_10;
             }
 
-            if (!(valid_tab(new_tab) || valid_tab_code(new_tab)) || new_tab == INVALID_TAB ||
+            if (!(is_valid_tab(new_tab) || is_valid_tab_code(new_tab)) || new_tab == INVALID_TAB ||
                 new_tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
             {
                 return {SOCKET_INVALID, std::format("invalid tab number: {}", new_tab)};

@@ -62,8 +62,8 @@ inline constexpr panel_t MAX_PANELS    =  4;
 
 inline constexpr std::array<panel_t, MAX_PANELS> PANELS{panel_1, panel_2, panel_3, panel_4};
 
-bool valid_panel(panel_t p);
-bool valid_panel_code(panel_t p);
+bool is_valid_panel(panel_t p);
+bool is_valid_panel_code(panel_t p);
 
 // need too use signed type because neg values are treated
 // as control codes and not a tab number
@@ -93,7 +93,7 @@ inline constexpr tab_t MAX_TABS    = 10; // only max tabs with keybinding suppor
 
 inline constexpr std::array<panel_t, MAX_TABS> TABS{tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7, tab_8, tab_9, tab_10};
 
-bool valid_tab(tab_t t);
-bool valid_tab_code(tab_t t);
+bool is_valid_tab(tab_t t);
+bool is_valid_tab_code(tab_t t);
 
 // clang-format on

@@ -16,26 +16,26 @@
 #include "types.hxx"
 
 bool
-valid_panel(panel_t p)
+is_valid_panel(panel_t p)
 {
     return (p != INVALID_PANEL || p >= MIN_PANELS || p <= MAX_PANELS);
 }
 
 bool
-valid_panel_code(panel_t p)
+is_valid_panel_code(panel_t p)
 {
     return (p == panel_control_code_prev || p == panel_control_code_next ||
             p == panel_control_code_hide);
 }
 
 bool
-valid_tab(tab_t t)
+is_valid_tab(tab_t t)
 {
     return (t != INVALID_TAB || t >= MIN_TABS);
 }
 
 bool
-valid_tab_code(tab_t t)
+is_valid_tab_code(tab_t t)
 {
     return (t == tab_control_code_prev || t == tab_control_code_next ||
             t == tab_control_code_close || t == tab_control_code_restore);
