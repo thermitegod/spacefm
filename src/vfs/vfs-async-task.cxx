@@ -171,7 +171,7 @@ VFSAsyncTask::is_finished()
 }
 
 bool
-VFSAsyncTask::is_cancelled()
+VFSAsyncTask::is_canceled()
 {
     return this->thread_cancel;
 }

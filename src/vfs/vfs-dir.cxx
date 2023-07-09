@@ -320,7 +320,7 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
 
     for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
     {
-        if (dir->task->is_cancelled())
+        if (dir->task->is_canceled())
         {
             break;
         }

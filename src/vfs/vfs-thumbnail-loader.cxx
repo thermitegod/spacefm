@@ -155,7 +155,7 @@ on_thumbnail_idle(vfs::thumbnail_loader loader)
 static void*
 thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 {
-    while (!task->is_cancelled())
+    while (!task->is_canceled())
     {
         if (loader->queue.empty())
         {
@@ -204,7 +204,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             need_update = true;
         }
 
-        if (!task->is_cancelled() && need_update)
+        if (!task->is_canceled() && need_update)
         {
             loader->update_queue.emplace_back(vfs_file_info_ref(req->file));
             if (loader->idle_handler == 0)
@@ -218,7 +218,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         // ztd::logger::debug("NEED_UPDATE: {}", need_update);
     }
 
-    if (task->is_cancelled())
+    if (task->is_canceled())
     {
         // ztd::logger::debug("THREAD CANCELLED!!!");
         if (loader->idle_handler)

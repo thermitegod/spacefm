@@ -672,14 +672,14 @@ search_thread(vfs::async_task task, FindFile* data)
     std::string path;
     GQueue* queue = g_queue_new();
 
-    while (!data->task->is_cancelled() && (rlen = read(data->stdo, buf, sizeof(buf) - 1)) > 0)
+    while (!data->task->is_canceled() && (rlen = read(data->stdo, buf, sizeof(buf) - 1)) > 0)
     {
         char* pbuf;
         char* eol;
         buf[rlen] = '\0';
         pbuf = buf;
 
-        while (!data->task->is_cancelled())
+        while (!data->task->is_canceled())
         {
             if ((eol = strchr(pbuf, '\n'))) /* end of line is reached */
             {
@@ -687,7 +687,7 @@ search_thread(vfs::async_task task, FindFile* data)
                 path.append(pbuf);
 
                 /* we get a complete file path */
-                if (!data->task->is_cancelled())
+                if (!data->task->is_canceled())
                 {
                     process_found_files(data, queue, path.data());
                 }
@@ -706,7 +706,7 @@ search_thread(vfs::async_task task, FindFile* data)
     /* end of stream (EOF) is reached */
     if (!path.empty()) /* this is the last line without eol character '\n' */
     {
-        if (!data->task->is_cancelled())
+        if (!data->task->is_canceled())
         {
             process_found_files(data, queue, path.data());
             process_found_files(data, queue, nullptr);

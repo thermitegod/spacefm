@@ -78,7 +78,7 @@ struct VFSAsyncTask
     void run_thread();
 
     bool is_finished();
-    bool is_cancelled();
+    bool is_canceled();
 
     // Cancel the async task running in another thread.
     // NOTE: Only can be called from main thread.

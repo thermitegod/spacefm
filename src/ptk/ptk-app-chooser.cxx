@@ -604,7 +604,7 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
 
     for (const auto& file : std::filesystem::directory_iterator(dir_path))
     {
-        if (task->is_cancelled())
+        if (task->is_canceled())
         {
             break;
         }
@@ -622,7 +622,7 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
             continue;
         }
 
-        if (task->is_cancelled())
+        if (task->is_canceled())
         {
             break;
         }
