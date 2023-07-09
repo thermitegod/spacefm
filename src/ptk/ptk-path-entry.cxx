@@ -154,7 +154,7 @@ seek_path(GtkEntry* entry)
         }
     }
 
-    ptk_file_browser_seek_path(edata->browser, is_unique ? seek_dir : "", seek_name);
+    edata->browser->seek_path(is_unique ? seek_dir : "", seek_name);
 
     return false;
 }

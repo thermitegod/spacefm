@@ -459,9 +459,9 @@ on_devices_show(GtkMenuItem* item, MainWindow* main_window)
     {
         return;
     }
-    const xset::main_window_panel mode = main_window->panel_context[file_browser->mypanel - 1];
+    const xset::main_window_panel mode = main_window->panel_context[file_browser->panel() - 1];
 
-    xset_set_b_panel_mode(file_browser->mypanel,
+    xset_set_b_panel_mode(file_browser->panel(),
                           xset::panel::show_devmon,
                           mode,
                           !file_browser->side_dev);
@@ -492,7 +492,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
     MainWindow* main_window = MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    const auto cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = file_browser->cwd();
 
     const std::vector<std::filesystem::path> search_dirs{cwd};
 
@@ -512,11 +512,11 @@ on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
     }
     // root task
     PtkFileTask* ptask = ptk_file_exec_new("Open Root Window",
-                                           ptk_file_browser_get_cwd(file_browser),
+                                           file_browser->cwd(),
                                            GTK_WIDGET(file_browser),
-                                           file_browser->task_view);
+                                           file_browser->task_view());
     const std::string exe = ztd::program::exe();
-    const std::string cwd = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser).string());
+    const std::string cwd = ztd::shell::quote(file_browser->cwd().string());
     ptask->task->exec_command = std::format("HOME=/root {} {}", exe, cwd);
     ptask->task->exec_as_user = "root";
     ptask->task->exec_sync = false;
@@ -551,9 +551,9 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
 
     // task
     PtkFileTask* ptask = ptk_file_exec_new("Open Terminal",
-                                           ptk_file_browser_get_cwd(file_browser),
+                                           file_browser->cwd(),
                                            GTK_WIDGET(file_browser),
-                                           file_browser->task_view);
+                                           file_browser->task_view());
 
     const std::string terminal = Glib::find_program_in_path(main_term.value());
     if (terminal.empty())
@@ -610,9 +610,9 @@ main_window_rubberband_all()
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
-                if (a_browser->view_mode == ptk::file_browser::view_mode::list_view)
+                if (a_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
                 {
-                    gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(a_browser->folder_view),
+                    gtk_tree_view_set_rubber_banding(GTK_TREE_VIEW(a_browser->folder_view()),
                                                      xset_get_b(xset::name::rubberband));
                 }
             }
@@ -633,7 +633,7 @@ main_window_refresh_all()
             {
                 PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i));
-                ptk_file_browser_refresh(nullptr, a_browser);
+                a_browser->refresh();
             }
         }
     }
@@ -715,7 +715,7 @@ main_window_close_all_invalid_tabs()
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
 
                 // will close all tabs that no longer exist on the filesystem
-                ptk_file_browser_refresh(nullptr, browser);
+                browser->refresh();
             }
         }
     }
@@ -740,7 +740,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
     // do this browser first
     if (file_browser)
     {
-        ptk_file_browser_rebuild_toolbars(file_browser);
+        file_browser->rebuild_toolbars();
     }
 
     // do all windows all panels all tabs
@@ -756,7 +756,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
                 if (a_browser != file_browser)
                 {
-                    ptk_file_browser_rebuild_toolbars(a_browser);
+                    a_browser->rebuild_toolbars();
                 }
             }
         }
@@ -774,9 +774,9 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
     {
         return;
     }
-    const panel_t p = file_browser->mypanel;
+    const panel_t p = file_browser->panel();
 
-    ptk_file_browser_update_views(nullptr, file_browser);
+    file_browser->update_views();
 
     // do other windows
     for (MainWindow* window : all_windows)
@@ -791,7 +791,7 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
                 if (a_browser != file_browser)
                 {
-                    ptk_file_browser_update_views(nullptr, a_browser);
+                    a_browser->update_views();
                 }
             }
         }
@@ -816,8 +816,7 @@ main_window_toggle_thumbnails_all_windows()
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                ptk_file_browser_show_thumbnails(
-                    file_browser,
+                file_browser->show_thumbnails(
                     app_settings.show_thumbnail() ? app_settings.max_thumb_size() : 0);
             }
         }
@@ -927,7 +926,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
             {
-                gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
+                gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
                 set_panel_focus(main_window, file_browser);
             }
         }
@@ -942,7 +941,7 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
             {
-                gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
+                gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
                 set_panel_focus(main_window, file_browser);
             }
         }
@@ -997,13 +996,12 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                                   cur_tabx));
                     if (file_browser)
                     {
-                        if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
+                        if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
                         {
-                            ptk_file_browser_save_column_widths(
-                                GTK_TREE_VIEW(file_browser->folder_view),
-                                file_browser);
+                            file_browser->save_column_widths(
+                                GTK_TREE_VIEW(file_browser->folder_view()));
                         }
-                        // ptk_file_browser_slider_release( nullptr, nullptr, file_browser );
+                        // file_browser->slider_release(nullptr);
                     }
                 }
             }
@@ -1210,7 +1208,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                             // ztd::logger::info("call delayed (showpanels) #{} {:p} window={:p}",
                             // cur_tabx, fmt::ptr(file_browser->folder_view),
                             // fmt::ptr(main_window));
-                            g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view);
+                            g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view());
                         }
                     }
                     std::free(set->ob1);
@@ -1303,7 +1301,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     continue;
                 }
                 // if (file_browser->folder_view)
-                gtk_widget_grab_focus(file_browser->folder_view);
+                gtk_widget_grab_focus(file_browser->folder_view());
                 break;
             }
         }
@@ -1323,7 +1321,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), cur_tabx));
                 if (file_browser)
                 {
-                    ptk_file_browser_update_views(nullptr, file_browser);
+                    file_browser->update_views();
                 }
             }
         }
@@ -1359,7 +1357,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 
         const auto file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
-        const auto main_window = static_cast<MainWindow*>(file_browser->main_window);
+        MainWindow* main_window = file_browser->main_window();
 
         main_window_add_new_tab(main_window, file_path);
 
@@ -2008,10 +2006,9 @@ main_window_store_positions(MainWindow* main_window)
             {
                 a_browser = PTK_FILE_BROWSER_REINTERPRET(
                     gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), page_x));
-                if (a_browser && a_browser->view_mode == ptk::file_browser::view_mode::list_view)
+                if (a_browser && a_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
                 {
-                    ptk_file_browser_save_column_widths(GTK_TREE_VIEW(a_browser->folder_view),
-                                                        a_browser);
+                    a_browser->save_column_widths(GTK_TREE_VIEW(a_browser->folder_view()));
                 }
             }
         }
@@ -2110,8 +2107,8 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
         return std::nullopt;
     }
     i32 page_x;
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
-    GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
+    const MainWindow* main_window = file_browser->main_window();
+    GtkWidget* notebook = main_window->panel[file_browser->panel() - 1];
     const i32 pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
     const i32 page_num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser));
 
@@ -2133,8 +2130,9 @@ main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
 
     if (page_x > -1 && page_x < pages)
     {
-        return ptk_file_browser_get_cwd(PTK_FILE_BROWSER_REINTERPRET(
-            gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x)));
+        const PtkFileBrowser* tab_file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x));
+        return tab_file_browser->cwd();
     }
 
     return std::nullopt;
@@ -2147,8 +2145,8 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
     {
         return std::nullopt;
     }
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
-    panel_t panel_x = file_browser->mypanel;
+    const MainWindow* main_window = file_browser->main_window();
+    panel_t panel_x = file_browser->panel();
 
     switch (panel_num)
     {
@@ -2160,7 +2158,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
                 {
                     panel_x = 4;
                 }
-                if (panel_x == file_browser->mypanel)
+                if (panel_x == file_browser->panel())
                 {
                     return std::nullopt;
                 }
@@ -2174,7 +2172,7 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
                 {
                     panel_x = 1;
                 }
-                if (panel_x == file_browser->mypanel)
+                if (panel_x == file_browser->panel())
                 {
                     return std::nullopt;
                 }
@@ -2191,8 +2189,10 @@ main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 
     GtkWidget* notebook = main_window->panel[panel_x - 1];
     const i32 page_x = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
-    return ptk_file_browser_get_cwd(
-        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x)));
+
+    const PtkFileBrowser* panel_file_browser =
+        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), page_x));
+    return panel_file_browser->cwd();
 }
 
 void
@@ -2203,8 +2203,8 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
     {
         return;
     }
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
-    panel_t panel_x = file_browser->mypanel;
+    MainWindow* main_window = file_browser->main_window();
+    panel_t panel_x = file_browser->panel();
 
     switch (panel_num)
     {
@@ -2216,7 +2216,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
                 {
                     panel_x = 4;
                 }
-                if (panel_x == file_browser->mypanel)
+                if (panel_x == file_browser->panel())
                 {
                     return;
                 }
@@ -2230,7 +2230,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
                 {
                     panel_x = 1;
                 }
-                if (panel_x == file_browser->mypanel)
+                if (panel_x == file_browser->panel())
                 {
                     return;
                 }
@@ -2279,7 +2279,7 @@ main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
     {
         return false;
     }
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
+    const MainWindow* main_window = file_browser->main_window();
     return gtk_widget_get_visible(main_window->panel[panel - 1]);
 }
 
@@ -2291,8 +2291,8 @@ main_window_get_counts(PtkFileBrowser* file_browser)
         return {0, 0, 0};
     }
 
-    const MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
-    const GtkWidget* notebook = main_window->panel[file_browser->mypanel - 1];
+    const MainWindow* main_window = file_browser->main_window();
+    const GtkWidget* notebook = main_window->panel[file_browser->panel() - 1];
     const tab_t tab_count = gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook));
 
     // tab_num starts counting from 1
@@ -2316,7 +2316,7 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
 {
     (void)btn;
 
-    const panel_t panel = file_browser->mypanel;
+    const panel_t panel = file_browser->panel();
 
     if (closed_tabs_restore[panel].empty())
     {
@@ -2334,7 +2334,7 @@ on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         return;
     }
 
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = file_browser->main_window();
     main_window_add_new_tab(main_window, file_path);
 }
 
@@ -2344,7 +2344,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     (void)btn;
     PtkFileBrowser* a_browser;
 
-    closed_tabs_restore[file_browser->mypanel].emplace_back(ptk_file_browser_get_cwd(file_browser));
+    closed_tabs_restore[file_browser->panel()].emplace_back(file_browser->cwd());
     // ztd::logger::info("on_close_notebook_page path={}",
     // closed_tabs_restore[file_browser->mypanel].back());
 
@@ -2355,9 +2355,9 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     }
     GtkNotebook* notebook =
         GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(file_browser), GTK_TYPE_NOTEBOOK));
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
+    MainWindow* main_window = file_browser->main_window();
 
-    main_window->curpanel = file_browser->mypanel;
+    main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
     if (event_handler->tab_close->s || event_handler->tab_close->ob2_data)
@@ -2366,7 +2366,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             main_window,
             event_handler->tab_close,
             xset::name::evt_tab_close,
-            file_browser->mypanel,
+            file_browser->panel(),
             gtk_notebook_page_num(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(file_browser)) +
                 1,
             nullptr,
@@ -2377,11 +2377,11 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
     }
 
     // save solumns and slider positions of tab to be closed
-    ptk_file_browser_slider_release(nullptr, nullptr, file_browser);
-    ptk_file_browser_save_column_widths(GTK_TREE_VIEW(file_browser->folder_view), file_browser);
+    file_browser->slider_release(nullptr);
+    file_browser->save_column_widths(GTK_TREE_VIEW(file_browser->folder_view()));
 
     // without this signal blocked, on_close_notebook_page is called while
-    // ptk_file_browser_update_views is still in progress causing segfault
+    // file_browser->update_views() is still in progress causing segfault
     g_signal_handlers_block_matched(main_window->notebook,
                                     GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                     0,
@@ -2418,7 +2418,7 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
         if (GTK_IS_WIDGET(a_browser))
         {
-            ptk_file_browser_update_views(nullptr, a_browser);
+            a_browser->update_views();
         }
 
         g_signal_handlers_unblock_matched(main_window->notebook,
@@ -2445,11 +2445,11 @@ on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser)
         a_browser = PTK_FILE_BROWSER_REINTERPRET(
             gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
 
-        ptk_file_browser_update_views(nullptr, a_browser);
+        a_browser->update_views();
         if (GTK_IS_WIDGET(a_browser))
         {
             main_window_update_status_bar(main_window, a_browser);
-            g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view);
+            g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
         }
         if (event_handler->tab_focus->s || event_handler->tab_focus->ob2_data)
         {
@@ -2486,9 +2486,10 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
                  PtkFileBrowser* file_browser) // MOD added
 {
     (void)widget;
-    on_file_browser_panel_change(file_browser, MAIN_WINDOW(file_browser->main_window));
+    MainWindow* main_window = file_browser->main_window();
+    on_file_browser_panel_change(file_browser, main_window);
     if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-        main_window_event(file_browser->main_window,
+        main_window_event(main_window,
                           event_handler->win_click,
                           xset::name::evt_win_click,
                           0,
@@ -2561,21 +2562,20 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
 
     // main_window_update_tab_label(main_window, file_browser, file_browser->dir->path);
 
-    if (file_browser->inhibit_focus)
+    if (file_browser->inhibit_focus_)
     {
-        // complete ptk_file_browser.c ptk_file_browser_seek_path()
-        file_browser->inhibit_focus = false;
-        if (file_browser->seek_name)
+        // complete ptk_file_browser.c PtkFileBrowser::seek_path()
+        file_browser->inhibit_focus_ = false;
+        if (file_browser->seek_name_)
         {
-            ptk_file_browser_seek_path(file_browser, "", file_browser->seek_name);
-            std::free(file_browser->seek_name);
-            file_browser->seek_name = nullptr;
+            file_browser->seek_path("", file_browser->seek_name_.value());
+            file_browser->seek_name_ = std::nullopt;
         }
     }
     else
     {
-        ptk_file_browser_select_last(file_browser);                   // MOD restore last selections
-        gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view)); // MOD
+        file_browser->select_last();                                    // restore last selections
+        gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view())); // MOD
     }
     if (xset_get_b(xset::name::main_save_tabs))
     {
@@ -2614,7 +2614,7 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
 
     tab_label = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-    xset_t set = xset_get_panel(file_browser->mypanel, xset::panel::icon_tab);
+    xset_t set = xset_get_panel(file_browser->panel(), xset::panel::icon_tab);
     if (set->icon)
     {
         pixbuf = vfs_load_icon(set->icon.value(), 16);
@@ -2634,10 +2634,10 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
     }
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
-    const auto cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = file_browser->cwd();
     if (!cwd.empty())
     {
-        const auto name = ptk_file_browser_get_cwd(file_browser).filename();
+        const auto name = file_browser->cwd().filename();
         tab_text = gtk_label_new(name.c_str());
     }
 
@@ -2735,14 +2735,14 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
 {
     GtkWidget* notebook = main_window->notebook;
 
-    PtkFileBrowser* curfb =
+    PtkFileBrowser* current_file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    if (GTK_IS_WIDGET(curfb))
+    if (GTK_IS_WIDGET(current_file_browser))
     {
         // save sliders of current fb ( new tab while task manager is shown changes vals )
-        ptk_file_browser_slider_release(nullptr, nullptr, curfb);
+        current_file_browser->slider_release(nullptr);
         // save column widths of fb so new tab has same
-        ptk_file_browser_save_column_widths(GTK_TREE_VIEW(curfb->folder_view), curfb);
+        current_file_browser->save_column_widths(GTK_TREE_VIEW(current_file_browser->folder_view_));
     }
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
         ptk_file_browser_new(main_window->curpanel, notebook, main_window->task_view, main_window));
@@ -2753,21 +2753,18 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     // ztd::logger::info("New tab panel={} path={}", main_window->curpanel, folder_path);
 
     // ztd::logger::info("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
-    ptk_file_browser_set_single_click(file_browser, app_settings.single_click());
+    file_browser->set_single_click(app_settings.single_click());
 
-    ptk_file_browser_show_thumbnails(file_browser,
-                                     app_settings.show_thumbnail() ? app_settings.max_thumb_size()
-                                                                   : 0);
+    file_browser->show_thumbnails(app_settings.show_thumbnail() ? app_settings.max_thumb_size()
+                                                                : 0);
 
-    ptk_file_browser_set_sort_order(
-        file_browser,
-        (ptk::file_browser::sort_order)xset_get_int_panel(file_browser->mypanel,
+    file_browser->set_sort_order(
+        (ptk::file_browser::sort_order)xset_get_int_panel(file_browser->panel(),
                                                           xset::panel::list_detailed,
                                                           xset::var::x));
-    ptk_file_browser_set_sort_type(file_browser,
-                                   (GtkSortType)xset_get_int_panel(file_browser->mypanel,
-                                                                   xset::panel::list_detailed,
-                                                                   xset::var::y));
+    file_browser->set_sort_type((GtkSortType)xset_get_int_panel(file_browser->panel(),
+                                                                xset::panel::list_detailed,
+                                                                xset::var::y));
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 
@@ -2800,11 +2797,9 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
         gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), false);
     }
 
-    if (!ptk_file_browser_chdir(file_browser,
-                                folder_path,
-                                ptk::file_browser::chdir_mode::add_history))
+    if (!file_browser->chdir(folder_path, ptk::file_browser::chdir_mode::add_history))
     {
-        ptk_file_browser_chdir(file_browser, "/", ptk::file_browser::chdir_mode::add_history);
+        file_browser->chdir("/", ptk::file_browser::chdir_mode::add_history);
     }
 
     if (event_handler->tab_new->s || event_handler->tab_new->ob2_data)
@@ -2954,12 +2949,12 @@ delayed_focus(GtkWidget* widget)
 static bool
 delayed_focus_file_browser(PtkFileBrowser* file_browser)
 {
-    if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view))
+    if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
     {
         // ztd::logger::info("delayed_focus_file_browser fb={:p}", fmt::ptr(file_browser));
-        if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view))
+        if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
         {
-            gtk_widget_grab_focus(file_browser->folder_view);
+            gtk_widget_grab_focus(file_browser->folder_view());
             set_panel_focus(nullptr, file_browser);
         }
     }
@@ -2975,9 +2970,9 @@ set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
     }
 
     MainWindow* mw = main_window;
-    if (!mw)
+    if (mw == nullptr)
     {
-        mw = MAIN_WINDOW(file_browser->main_window);
+        mw = file_browser->main_window();
     }
 
     update_window_title(nullptr, mw);
@@ -3004,10 +2999,9 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (xset_get_b(xset::name::main_full))
     {
-        if (file_browser && file_browser->view_mode == ptk::file_browser::view_mode::list_view)
+        if (file_browser && file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
         {
-            ptk_file_browser_save_column_widths(GTK_TREE_VIEW(file_browser->folder_view),
-                                                file_browser);
+            file_browser->save_column_widths(GTK_TREE_VIEW(file_browser->folder_view()));
         }
         gtk_widget_hide(main_window->menu_bar);
         gtk_window_fullscreen(GTK_WINDOW(main_window));
@@ -3037,14 +3031,14 @@ set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
         return;
     }
 
-    if (file_browser->dir)
+    if (file_browser->dir_)
     {
-        disp_path = file_browser->dir->path;
+        disp_path = file_browser->dir_->path;
         disp_name = std::filesystem::equivalent(disp_path, "/") ? "/" : disp_path.filename();
     }
     else
     {
-        const auto cwd = ptk_file_browser_get_cwd(file_browser);
+        const auto cwd = file_browser->cwd();
         if (!cwd.empty())
         {
             disp_path = cwd;
@@ -3114,21 +3108,22 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     PtkFileBrowser* file_browser;
 
     // save sliders of current fb ( new tab while task manager is shown changes vals )
-    PtkFileBrowser* curfb =
+    PtkFileBrowser* current_file_browser =
         PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    if (curfb)
+    if (current_file_browser)
     {
-        ptk_file_browser_slider_release(nullptr, nullptr, curfb);
-        if (curfb->view_mode == ptk::file_browser::view_mode::list_view)
+        current_file_browser->slider_release(nullptr);
+        if (current_file_browser->view_mode_ == ptk::file_browser::view_mode::list_view)
         {
-            ptk_file_browser_save_column_widths(GTK_TREE_VIEW(curfb->folder_view), curfb);
+            current_file_browser->save_column_widths(
+                GTK_TREE_VIEW(current_file_browser->folder_view_));
         }
     }
 
     file_browser = PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_num));
     // ztd::logger::info("on_folder_notebook_switch_pape fb={:p}   panel={}   page={}",
     // file_browser, file_browser->mypanel, page_num);
-    main_window->curpanel = file_browser->mypanel;
+    main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
     main_window_update_status_bar(main_window, file_browser);
@@ -3149,11 +3144,11 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
                           true);
     }
 
-    ptk_file_browser_update_views(nullptr, file_browser);
+    file_browser->update_views();
 
     if (GTK_IS_WIDGET(file_browser))
     {
-        g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view);
+        g_idle_add((GSourceFunc)delayed_focus, file_browser->folder_view());
     }
 }
 
@@ -3166,7 +3161,7 @@ main_window_open_path_in_current_tab(MainWindow* main_window, const std::filesys
     {
         return;
     }
-    ptk_file_browser_chdir(file_browser, path, ptk::file_browser::chdir_mode::add_history);
+    file_browser->chdir(path, ptk::file_browser::chdir_mode::add_history);
 }
 
 void
@@ -3193,7 +3188,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
     switch (action)
     {
         case ptk::open_action::dir:
-            ptk_file_browser_chdir(file_browser, path, ptk::file_browser::chdir_mode::add_history);
+            file_browser->chdir(path, ptk::file_browser::chdir_mode::add_history);
             break;
         case ptk::open_action::new_tab:
             main_window_add_new_tab(main_window, path);
@@ -3214,15 +3209,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         return;
     }
 
-    if (file_browser->status_bar_custom)
-    {
-        gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar),
-                           0,
-                           file_browser->status_bar_custom);
-        return;
-    }
-
-    const auto cwd = ptk_file_browser_get_cwd(file_browser);
+    const auto cwd = file_browser->cwd();
     if (cwd.empty())
     {
         return;
@@ -3243,10 +3230,9 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
     }
 
     // Show Reading... while sill loading
-    if (file_browser->busy)
+    if (file_browser->is_busy())
     {
-        statusbar_txt.append(
-            std::format("Reading {} ...", ptk_file_browser_get_cwd(file_browser).string()));
+        statusbar_txt.append(std::format("Reading {} ...", file_browser->cwd().string()));
         gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.data());
         return;
     }
@@ -3255,14 +3241,13 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
     u64 total_on_disk_size;
 
     // note: total size will not include content changes since last selection change
-    const u32 num_sel = ptk_file_browser_get_n_sel(file_browser, &total_size, &total_on_disk_size);
-    const u32 num_vis = ptk_file_browser_get_n_visible_files(file_browser);
+    const u32 num_sel = file_browser->get_n_sel(&total_size, &total_on_disk_size);
+    const u32 num_vis = file_browser->get_n_visible_files();
 
     if (num_sel > 0)
     {
-        const std::vector<vfs::file_info> sel_files =
-            ptk_file_browser_get_selected_files(file_browser);
-        if (sel_files.empty())
+        const auto selected_files = file_browser->selected_files();
+        if (selected_files.empty())
         {
             return;
         }
@@ -3276,7 +3261,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
         {
-            vfs::file_info file = vfs_file_info_ref(sel_files.front());
+            const vfs::file_info file = selected_files.front();
             if (!file)
             {
                 return;
@@ -3338,8 +3323,6 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
             {
                 statusbar_txt.append(std::format("  {}", file->name()));
             }
-
-            vfs_file_info_unref(file);
         }
         else
         {
@@ -3351,7 +3334,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
             u32 count_block = 0;
             u32 count_char = 0;
 
-            for (const vfs::file_info file : sel_files)
+            for (const vfs::file_info file : selected_files)
             {
                 if (!file)
                 {
@@ -3417,6 +3400,8 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                 statusbar_txt.append(std::format("  Character Devices ({})", count_char));
             }
         }
+
+        vfs_file_info_list_free(selected_files);
     }
     else
     {
@@ -3438,8 +3423,8 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         const std::string disk_size = vfs_file_size_format(disk_size_disk);
 
         // count for .hidden files
-        const u32 num_hid = ptk_file_browser_get_n_all_files(file_browser) - num_vis;
-        const u32 num_hidx = file_browser->dir ? file_browser->dir->xhidden_count : 0;
+        const u32 num_hid = file_browser->get_n_all_files() - num_vis;
+        const u32 num_hidx = file_browser->dir_ ? file_browser->dir_->xhidden_count : 0;
         if (num_hid || num_hidx)
         {
             statusbar_txt.append(std::format("{} visible ({} hidden)  ({} / {})",
@@ -3480,7 +3465,7 @@ static void
 on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // ztd::logger::info("panel_change  panel {}", file_browser->mypanel);
-    main_window->curpanel = file_browser->mypanel;
+    main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
     // set_window_title( main_window, file_browser );
     set_panel_focus(main_window, file_browser);
@@ -3551,11 +3536,11 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
         }
         if (event->button == 4 || event->button == 8)
         {
-            ptk_file_browser_go_back(nullptr, file_browser);
+            file_browser->go_back();
         }
         else
         {
-            ptk_file_browser_go_forward(nullptr, file_browser);
+            file_browser->go_forward();
         }
         return true;
     }
@@ -3623,7 +3608,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
          gdk_keyval_to_unicode(event->keyval))) // visible char
     {
         browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-        if (browser && browser->path_bar && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar)))
+        if (browser && browser->path_bar() && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar())))
         {
             return false; // send to pathbar
         }
@@ -3682,7 +3667,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                     if (browser)
                     {
                         const std::string new_set_name =
-                            std::format("panel{}{}", browser->mypanel, set->name.data() + 6);
+                            std::format("panel{}{}", browser->panel(), set->name.data() + 6);
                         set = xset_get(new_set_name);
                     }
                     else
@@ -3741,7 +3726,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
     if (set->xset_name == xset::name::edit_cut || set->xset_name == xset::name::edit_copy ||
         set->xset_name == xset::name::edit_delete || set->xset_name == xset::name::select_all)
     {
-        if (!gtk_widget_is_focus(browser->folder_view))
+        if (!gtk_widget_is_focus(browser->folder_view()))
         {
             return false;
         }
@@ -3750,7 +3735,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
     {
         const bool side_dir_focus =
             (browser->side_dir && gtk_widget_is_focus(GTK_WIDGET(browser->side_dir)));
-        if (!gtk_widget_is_focus(GTK_WIDGET(browser->folder_view)) && !side_dir_focus)
+        if (!gtk_widget_is_focus(GTK_WIDGET(browser->folder_view())) && !side_dir_focus)
         {
             return false;
         }
@@ -3861,7 +3846,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         }
         else if (set->xset_name == xset::name::task_col_reorder)
         {
-            on_reorder(nullptr, GTK_WIDGET(browser->task_view));
+            on_reorder(nullptr, GTK_WIDGET(browser->task_view()));
         }
         else if (set->xset_name == xset::name::task_col_status ||
                  set->xset_name == xset::name::task_col_count ||
@@ -3878,7 +3863,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
                  set->xset_name == xset::name::task_col_avgest ||
                  set->xset_name == xset::name::task_col_reorder)
         {
-            on_task_column_selected(nullptr, browser->task_view);
+            on_task_column_selected(nullptr, browser->task_view());
         }
         else if (set->xset_name == xset::name::task_stop ||
                  set->xset_name == xset::name::task_stop_all ||
@@ -3889,12 +3874,12 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
                  set->xset_name == xset::name::task_resume ||
                  set->xset_name == xset::name::task_resume_all)
         {
-            PtkFileTask* ptask = get_selected_task(browser->task_view);
-            on_task_stop(nullptr, browser->task_view, set, ptask);
+            PtkFileTask* ptask = get_selected_task(browser->task_view());
+            on_task_stop(nullptr, browser->task_view(), set, ptask);
         }
         else if (set->xset_name == xset::name::task_showout)
         {
-            show_task_dialog(nullptr, browser->task_view);
+            show_task_dialog(nullptr, browser->task_view());
         }
         else if (ztd::startswith(set->name, "task_err_"))
         {
@@ -3907,7 +3892,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
     }
     else
     {
-        ptk_file_browser_on_action(browser, set->xset_name);
+        browser->on_action(set->xset_name);
     }
 
     return true;
@@ -4113,7 +4098,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         return;
     }
 
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
+    const MainWindow* main_window = file_browser->main_window();
     if (main_window == nullptr)
     {
         return;
@@ -4122,18 +4107,17 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
     if (!c->var[item_prop::context::item::name].empty())
     {
         // if name is set, assume we do not need all selected files info
-        c->var[item_prop::context::item::dir] = ptk_file_browser_get_cwd(file_browser);
+        c->var[item_prop::context::item::dir] = file_browser->cwd();
         // if (c->var[item_prop::context::item::dir])
         //{
         c->var[item_prop::context::item::write_access] =
             ptk_file_browser_write_access(c->var[item_prop::context::item::dir]) ? "false" : "true";
         // }
 
-        const std::vector<vfs::file_info> sel_files =
-            ptk_file_browser_get_selected_files(file_browser);
-        if (!sel_files.empty())
+        const auto selected_files = file_browser->selected_files();
+        if (!selected_files.empty())
         {
-            vfs::file_info file = vfs_file_info_ref(sel_files.front());
+            const vfs::file_info file = selected_files.front();
 
             c->var[item_prop::context::item::name] = file->name();
             const auto path = std::filesystem::path() / c->var[item_prop::context::item::dir] /
@@ -4149,9 +4133,8 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
                 c->var[item_prop::context::item::mime] = mime_type->type();
             }
 
-            c->var[item_prop::context::item::mul_sel] = sel_files.size() > 1 ? "true" : "false";
-
-            vfs_file_info_unref(file);
+            c->var[item_prop::context::item::mul_sel] =
+                selected_files.size() > 1 ? "true" : "false";
         }
         else
         {
@@ -4163,7 +4146,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             c->var[item_prop::context::item::mul_sel] = "false";
         }
 
-        vfs_file_info_list_free(sel_files);
+        vfs_file_info_list_free(selected_files);
     }
 
     c->var[item_prop::context::item::is_root] = geteuid() == 0 ? "true" : "false";
@@ -4194,7 +4177,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             gtk_clipboard_wait_is_text_available(clip) ? "true" : "false";
     }
 
-    // hack - Due to ptk_file_browser_update_views main iteration, fb tab may be destroyed
+    // hack - Due to file_browser->update_views() main iteration, fb tab may be destroyed
     // asynchronously - common if gui thread is blocked on stat
     // NOTE:  this is no longer needed
     if (!GTK_IS_WIDGET(file_browser))
@@ -4277,7 +4260,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         }
 
         panel_count++;
-        c->var[item_prop::context::item::panel1_dir + p - 1] = ptk_file_browser_get_cwd(a_browser);
+        c->var[item_prop::context::item::panel1_dir + p - 1] = a_browser->cwd();
 
         if (a_browser->side_dev &&
             (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
@@ -4286,11 +4269,11 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         }
 
         // panel has files selected?
-        if (a_browser->view_mode == ptk::file_browser::view_mode::icon_view ||
-            a_browser->view_mode == ptk::file_browser::view_mode::compact_view)
+        if (a_browser->is_view_mode(ptk::file_browser::view_mode::icon_view) ||
+            a_browser->is_view_mode(ptk::file_browser::view_mode::compact_view))
         {
-            GList* sel_files = folder_view_get_selected_items(a_browser, &model);
-            if (sel_files)
+            GList* selected_files = a_browser->selected_items(&model);
+            if (selected_files)
             {
                 c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
             }
@@ -4298,13 +4281,13 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
             {
                 c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
             }
-            g_list_foreach(sel_files, (GFunc)gtk_tree_path_free, nullptr);
-            g_list_free(sel_files);
+            g_list_foreach(selected_files, (GFunc)gtk_tree_path_free, nullptr);
+            g_list_free(selected_files);
         }
-        else if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
+        else if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
         {
             GtkTreeSelection* selection =
-                gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view));
+                gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view()));
             if (gtk_tree_selection_count_selected_rows(selection) > 0)
             {
                 c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
@@ -4327,7 +4310,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         }
     }
     c->var[item_prop::context::item::panel_count] = panel_count;
-    c->var[item_prop::context::item::panel] = file_browser->mypanel;
+    c->var[item_prop::context::item::panel] = file_browser->panel();
 
     for (const panel_t p : PANELS)
     {
@@ -4356,7 +4339,7 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         {vfs::file_task_type::exec, "run"},
     };
 
-    PtkFileTask* ptask = get_selected_task(file_browser->task_view);
+    PtkFileTask* ptask = get_selected_task(file_browser->task_view());
     if (ptask)
     {
         c->var[item_prop::context::item::task_type] = job_titles.at(ptask->task->type).data();
@@ -4428,7 +4411,7 @@ const std::string
 main_write_exports(vfs::file_task vtask, const std::string_view value)
 {
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
-    MainWindow* main_window = MAIN_WINDOW(file_browser->main_window);
+    const MainWindow* main_window = file_browser->main_window();
 
     const xset_t set = vtask->exec_set;
 
@@ -4464,18 +4447,17 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         }
 
         // cwd
-        const auto cwd = ptk_file_browser_get_cwd(a_browser);
+        const auto cwd = a_browser->cwd();
         buf.append(std::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd.string())));
         buf.append(std::format("set fm_tab_panel[{}] {}\n", p, current_page + 1));
 
         // selected files
-        const std::vector<vfs::file_info> sel_files =
-            ptk_file_browser_get_selected_files(a_browser);
-        if (!sel_files.empty())
+        const auto selected_files = a_browser->selected_files();
+        if (!selected_files.empty())
         {
             // create fish array
             buf.append(std::format("set fm_panel{}_files (echo ", p));
-            for (const vfs::file_info file : sel_files)
+            for (const vfs::file_info file : selected_files)
             {
                 const auto path = cwd / file->name();
                 buf.append(std::format("{} ", ztd::shell::quote(path.string())));
@@ -4486,14 +4468,14 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             {
                 // create fish array
                 buf.append(std::format("set fm_filenames (echo "));
-                for (const vfs::file_info file : sel_files)
+                for (const vfs::file_info file : selected_files)
                 {
                     buf.append(std::format("{} ", ztd::shell::quote(file->name())));
                 }
                 buf.append(std::format(")\n"));
             }
 
-            vfs_file_info_list_free(sel_files);
+            vfs_file_info_list_free(selected_files);
         }
 
         // device
@@ -4543,10 +4525,9 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-            const std::string path =
-                ztd::shell::quote(ptk_file_browser_get_cwd(t_browser).string());
+            const std::string path = ztd::shell::quote(t_browser->cwd().string());
             buf.append(std::format("set fm_pwd_panel{}_tab[{}] {}\n", p, i + 1, path));
-            if (p == file_browser->mypanel)
+            if (p == file_browser->panel())
             {
                 buf.append(std::format("set fm_pwd_tab[{}] {}\n", i + 1, path));
             }
@@ -4562,8 +4543,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
 
     // my selected files
     buf.append("\n");
-    buf.append(std::format("set fm_files (echo $fm_panel{}_files)\n", file_browser->mypanel));
-    buf.append(std::format("set fm_file $fm_panel{}_files[1]\n", file_browser->mypanel));
+    buf.append(std::format("set fm_files (echo $fm_panel{}_files)\n", file_browser->panel()));
+    buf.append(std::format("set fm_file $fm_panel{}_files[1]\n", file_browser->panel()));
     buf.append(std::format("set fm_filename $fm_filenames[1]\n"));
     buf.append("\n");
 
@@ -4630,7 +4611,7 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
                            ztd::shell::quote(vfs::user_dirs->program_tmp_dir().string())));
 
     // tasks
-    PtkFileTask* ptask = get_selected_task(file_browser->task_view);
+    PtkFileTask* ptask = get_selected_task(file_browser->task_view());
     if (ptask)
     {
         const std::map<vfs::file_task_type, const std::string_view> job_titles{
@@ -5068,7 +5049,7 @@ show_task_manager(MainWindow* main_window, bool show)
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
             {
-                gtk_widget_grab_focus(file_browser->folder_view);
+                gtk_widget_grab_focus(file_browser->folder_view());
             }
         }
     }
@@ -6391,7 +6372,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
 
             if (ztd::same(subproperty, "filelist"))
             {
-                widget = file_browser->folder_view;
+                widget = file_browser->folder_view();
             }
             else if (ztd::same(subproperty, "devices"))
             {
@@ -6403,7 +6384,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             else if (ztd::same(subproperty, "pathbar"))
             {
-                widget = file_browser->path_bar;
+                widget = file_browser->path_bar();
             }
 
             if (GTK_IS_WIDGET(widget))
@@ -6479,7 +6460,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, std::format("invalid tab number: {}", new_tab)};
             }
-            ptk_file_browser_go_tab(nullptr, file_browser, new_tab);
+            file_browser->go_tab(new_tab);
         }
         else if (ztd::same(property, "new-tab"))
         {
@@ -6579,7 +6560,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 widget = file_browser->hpane;
             }
             gtk_paned_set_position(GTK_PANED(widget), width);
-            ptk_file_browser_slider_release(nullptr, nullptr, file_browser);
+            file_browser->slider_release(nullptr);
             update_views_all_windows(nullptr, file_browser);
         }
         else if (ztd::same(property, "column-width"))
@@ -6593,13 +6574,13 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, "invalid column width"};
             }
-            if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
+            if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col;
                 for (const auto [index, column_title] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
                                                    static_cast<i32>(index));
                     if (!col)
                     {
@@ -6688,7 +6669,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, std::format("invalid column name '{}'", subproperty)};
             }
-            ptk_file_browser_set_sort_order(file_browser, j);
+            file_browser->set_sort_order(j);
         }
         else if (ztd::startswith(property, "sort-"))
         {
@@ -6697,9 +6678,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
             xset::name xset_name;
             if (ztd::same(property, "sort-ascend"))
             {
-                ptk_file_browser_set_sort_type(file_browser,
-                                               get_bool(value) ? GtkSortType::GTK_SORT_ASCENDING
-                                                               : GtkSortType::GTK_SORT_DESCENDING);
+                file_browser->set_sort_type(get_bool(value) ? GtkSortType::GTK_SORT_ASCENDING
+                                                            : GtkSortType::GTK_SORT_DESCENDING);
                 return {SOCKET_SUCCESS, ""};
             }
             else if (ztd::same(property, "sort-alphanum"))
@@ -6752,7 +6732,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
             }
-            ptk_file_browser_set_sort_extra(file_browser, xset_name);
+            file_browser->set_sort_extra(xset_name);
         }
         else if (ztd::same(property, "show-thumbnails"))
         {
@@ -6773,7 +6753,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         {
             const std::string_view value = data[0];
 
-            if (file_browser->view_mode != ptk::file_browser::view_mode::icon_view)
+            if (!file_browser->is_view_mode(ptk::file_browser::view_mode::icon_view))
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
@@ -6782,29 +6762,21 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 update_views_all_windows(nullptr, file_browser);
             }
         }
-        else if (ztd::same(property, "statusbar-text"))
-        {
-            const std::string_view value = data[0];
-
-            std::free(file_browser->status_bar_custom);
-            file_browser->status_bar_custom = ztd::strdup(value.data());
-
-            main_window_update_status_bar(main_window, file_browser);
-        }
         else if (ztd::same(property, "pathbar-text"))
         { // TEXT [[SELSTART] SELEND]
             const std::string_view value = data[0];
 
-            if (!GTK_IS_WIDGET(file_browser->path_bar))
+            GtkWidget* path_bar = file_browser->path_bar();
+            if (!GTK_IS_WIDGET(path_bar))
             {
                 return {SOCKET_SUCCESS, ""};
             }
 
-            gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar), value.data());
+            gtk_entry_set_text(GTK_ENTRY(path_bar), value.data());
 
-            gtk_editable_set_position(GTK_EDITABLE(file_browser->path_bar), -1);
-            // gtk_editable_select_region(GTK_EDITABLE(file_browser->path_bar), width, height);
-            gtk_widget_grab_focus(file_browser->path_bar);
+            gtk_editable_set_position(GTK_EDITABLE(path_bar), -1);
+            // gtk_editable_select_region(GTK_EDITABLE(path_bar), width, height);
+            gtk_widget_grab_focus(path_bar);
         }
         else if (ztd::same(property, "clipboard-text") ||
                  ztd::same(property, "clipboard-primary-text"))
@@ -6859,12 +6831,12 @@ main_window_socket_command(const std::string_view socket_commands_json)
             if (value.empty())
             {
                 // unselect all
-                ptk_file_browser_select_file_list(file_browser, nullptr, false);
+                file_browser->select_file_list(nullptr, false);
             }
             else
             {
                 return {SOCKET_INVALID, "Not Implemented"};
-                // ptk_file_browser_select_file_list(file_browser, argv + i + 1, true);
+                // file_browser->select_file_list(argv + i + 1, true);
             }
         }
         else if (ztd::same(property, "selected-pattern"))
@@ -6874,11 +6846,11 @@ main_window_socket_command(const std::string_view socket_commands_json)
             if (value.empty())
             {
                 // unselect all
-                ptk_file_browser_select_file_list(file_browser, nullptr, false);
+                file_browser->select_file_list(nullptr, false);
             }
             else
             {
-                ptk_file_browser_select_pattern(nullptr, file_browser, value.data());
+                file_browser->select_pattern(value.data());
             }
         }
         else if (ztd::same(property, "current-dir"))
@@ -6893,7 +6865,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_FAILURE, std::format("directory '{}' does not exist", value)};
             }
-            ptk_file_browser_chdir(file_browser, value, ptk::file_browser::chdir_mode::add_history);
+            file_browser->chdir(value, ptk::file_browser::chdir_mode::add_history);
         }
         else if (ztd::same(property, "thumbnailer"))
         {
@@ -7022,7 +6994,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "focused-pane"))
         {
-            if (file_browser->folder_view && gtk_widget_is_focus(file_browser->folder_view))
+            if (file_browser->folder_view() && gtk_widget_is_focus(file_browser->folder_view()))
             {
                 return {SOCKET_SUCCESS, "filelist"};
             }
@@ -7034,7 +7006,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_SUCCESS, "dirtree"};
             }
-            else if (file_browser->path_bar && gtk_widget_is_focus(file_browser->path_bar))
+            else if (file_browser->path_bar() && gtk_widget_is_focus(file_browser->path_bar()))
             {
                 return {SOCKET_SUCCESS, "pathbar"};
             }
@@ -7153,13 +7125,13 @@ main_window_socket_command(const std::string_view socket_commands_json)
         { // COLUMN
             const std::string subproperty = json["subproperty"];
 
-            if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
+            if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
                 for (const auto [index, column_title] : ztd::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view),
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
                                                    static_cast<i32>(index));
                     if (!col)
                     {
@@ -7195,7 +7167,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "sort-by"))
         { // COLUMN
-            switch (file_browser->sort_order)
+            switch (file_browser->sort_order())
             {
                 case ptk::file_browser::sort_order::name:
                     return {SOCKET_SUCCESS, "name"};
@@ -7231,7 +7203,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 return {SOCKET_SUCCESS,
                         std::format(
                             "{}",
-                            file_browser->sort_type == GtkSortType::GTK_SORT_ASCENDING ? 1 : 0)};
+                            file_browser->is_sort_type(GtkSortType::GTK_SORT_ASCENDING) ? 1 : 0)};
             }
 #if 0
             else if (ztd::same(property, "sort-natural"))
@@ -7243,7 +7215,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_SUCCESS,
                         std::format("{}",
-                                    xset_get_b_panel(file_browser->mypanel, xset::panel::sort_extra)
+                                    xset_get_b_panel(file_browser->panel(), xset::panel::sort_extra)
                                         ? 1
                                         : 0)};
             }
@@ -7252,8 +7224,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 return {
                     SOCKET_SUCCESS,
                     std::format("{}",
-                                xset_get_b_panel(file_browser->mypanel, xset::panel::sort_extra) &&
-                                        xset_get_int_panel(file_browser->mypanel,
+                                xset_get_b_panel(file_browser->panel(), xset::panel::sort_extra) &&
+                                        xset_get_int_panel(file_browser->panel(),
                                                            xset::panel::sort_extra,
                                                            xset::var::x) == xset::b::xtrue
                                     ? 1
@@ -7263,7 +7235,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_SUCCESS,
                         std::format("{}",
-                                    xset_get_int_panel(file_browser->mypanel,
+                                    xset_get_int_panel(file_browser->panel(),
                                                        xset::panel::sort_extra,
                                                        xset::var::z) == xset::b::xtrue
                                         ? 1
@@ -7271,7 +7243,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             else if (ztd::same(property, "sort-first"))
             {
-                const i32 result = xset_get_int_panel(file_browser->mypanel,
+                const i32 result = xset_get_int_panel(file_browser->panel(),
                                                       xset::panel::sort_extra,
                                                       xset::var::y);
                 if (result == 0)
@@ -7302,7 +7274,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "large-icons"))
         {
-            return {SOCKET_SUCCESS, std::format("{}", file_browser->large_icons ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", file_browser->using_large_icons() ? 1 : 0)};
         }
         else if (ztd::same(property, "statusbar-text"))
         {
@@ -7311,10 +7283,10 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "pathbar-text"))
         {
-            if (GTK_IS_WIDGET(file_browser->path_bar))
+            const GtkWidget* path_bar = file_browser->path_bar();
+            if (GTK_IS_WIDGET(path_bar))
             {
-                return {SOCKET_SUCCESS,
-                        std::format("{}", gtk_entry_get_text(GTK_ENTRY(file_browser->path_bar)))};
+                return {SOCKET_SUCCESS, std::format("{}", gtk_entry_get_text(GTK_ENTRY(path_bar)))};
             }
         }
         else if (ztd::same(property, "clipboard-text") ||
@@ -7380,16 +7352,15 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "selected-filenames") || ztd::same(property, "selected-files"))
         {
-            const std::vector<vfs::file_info> sel_files =
-                ptk_file_browser_get_selected_files(file_browser);
-            if (sel_files.empty())
+            const auto selected_files = file_browser->selected_files();
+            if (selected_files.empty())
             {
                 return {SOCKET_SUCCESS, ""};
             }
 
             // build fish array
             std::string str;
-            for (const vfs::file_info file : sel_files)
+            for (const vfs::file_info file : selected_files)
             {
                 if (!file)
                 {
@@ -7397,7 +7368,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 }
                 str.append(std::format("{} ", ztd::shell::quote(file->name())));
             }
-            vfs_file_info_list_free(sel_files);
+            vfs_file_info_list_free(selected_files);
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }
         else if (ztd::same(property, "selected-pattern"))
@@ -7405,8 +7376,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "current-dir"))
         {
-            return {SOCKET_SUCCESS,
-                    std::format("{}", ptk_file_browser_get_cwd(file_browser).string())};
+            return {SOCKET_SUCCESS, std::format("{}", file_browser->cwd().string())};
         }
         else if (ztd::same(property, "thumbnailer"))
         {
@@ -7751,11 +7721,11 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 cmd.append(std::format(" {}", c));
             }
 
-            PtkFileTask* ptask = ptk_file_exec_new(
-                !opt_title.empty() ? opt_title : cmd,
-                !opt_cwd.empty() ? opt_cwd.data() : ptk_file_browser_get_cwd(file_browser),
-                GTK_WIDGET(file_browser),
-                file_browser->task_view);
+            PtkFileTask* ptask =
+                ptk_file_exec_new(!opt_title.empty() ? opt_title : cmd,
+                                  !opt_cwd.empty() ? opt_cwd.data() : file_browser->cwd(),
+                                  GTK_WIDGET(file_browser),
+                                  file_browser->task_view());
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_as_user = opt_user;
@@ -7862,9 +7832,9 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             // Task
             PtkFileTask* ptask = ptk_file_exec_new(property,
-                                                   ptk_file_browser_get_cwd(file_browser),
+                                                   file_browser->cwd(),
                                                    GTK_WIDGET(file_browser),
-                                                   file_browser->task_view);
+                                                   file_browser->task_view());
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_terminal = false;
@@ -7976,7 +7946,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                                   file_list,
                                   target_dir,
                                   GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                                  file_browser->task_view);
+                                  file_browser->task_view());
             ptk_file_task_run(ptask);
             return {SOCKET_SUCCESS,
                     std::format("# Note: $new_task_id not valid until approx one "
@@ -8261,7 +8231,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     {
         if (file_browser)
         {
-            rep = ztd::shell::quote(ptk_file_browser_get_cwd(file_browser).string());
+            rep = ztd::shell::quote(file_browser->cwd().string());
             cmd = ztd::replace(cmd, "%d", rep);
         }
     }
@@ -8279,7 +8249,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
         {
             // task
             PtkFileTask* ptask = ptk_file_exec_new(event_name,
-                                                   ptk_file_browser_get_cwd(file_browser),
+                                                   file_browser->cwd(),
                                                    GTK_WIDGET(file_browser),
                                                    main_window->task_view);
             ptask->task->exec_browser = file_browser;
@@ -8357,7 +8327,7 @@ main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64 tab,
         }
         if (!tab)
         {
-            tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[file_browser->mypanel - 1]),
+            tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[file_browser->panel() - 1]),
                                         GTK_WIDGET(file_browser)) +
                   1;
         }

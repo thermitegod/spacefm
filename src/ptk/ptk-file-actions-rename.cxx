@@ -2314,7 +2314,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     if (file_browser)
     {
         mset->parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-        task_view = file_browser->task_view;
+        task_view = file_browser->task_view();
     }
 
     mset->dlg =
@@ -3547,8 +3547,10 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     }
 
     // root task
-    PtkFileTask* ptask =
-        ptk_file_exec_new(task_name, cwd, parent, file_browser ? file_browser->task_view : nullptr);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name,
+                                           cwd,
+                                           parent,
+                                           file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = cmd;
     ptask->task->exec_sync = true;
     ptask->task->exec_popup = false;

@@ -295,7 +295,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
      * ptk-handler.c:ptk_handler_show_config about GTK failure to
      * identify top-level widget */
     GtkWidget* top_level =
-        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window)) : nullptr;
+        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window())) : nullptr;
     GtkWidget* dlg = gtk_file_chooser_dialog_new("Create Archive",
                                                  top_level ? GTK_WINDOW(top_level) : nullptr,
                                                  GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -910,7 +910,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            file_browser ? GTK_WIDGET(file_browser) : nullptr,
-                                           file_browser ? file_browser->task_view : nullptr);
+                                           file_browser ? file_browser->task_view() : nullptr);
 
     /* Setting correct exec reference */
     if (file_browser)
@@ -1022,7 +1022,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     // Determining parent of dialog
     if (file_browser)
     {
-        dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window));
+        dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window()));
     }
 
     // Checking if extract to directory has not been specified
@@ -1414,7 +1414,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     PtkFileTask* ptask = ptk_file_exec_new(task_name,
                                            cwd,
                                            dlgparent,
-                                           file_browser ? file_browser->task_view : nullptr);
+                                           file_browser ? file_browser->task_view() : nullptr);
 
     // Setting correct exec reference
     if (file_browser)

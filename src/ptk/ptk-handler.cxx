@@ -3021,7 +3021,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
      * compilation warning */
     if (file_browser)
     {
-        hnd->parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window));
+        hnd->parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser->main_window()));
     }
 
     hnd->browser = file_browser;

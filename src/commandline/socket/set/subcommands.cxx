@@ -1042,21 +1042,6 @@ commandline::socket::set::large_icons(CLI::App* app, const socket_subcommand_dat
 }
 
 /*
- * subcommand statusbar-text
- */
-
-void
-commandline::socket::set::statusbar_text(CLI::App* app, const socket_subcommand_data_t& opt)
-{
-    auto* sub = app->add_subcommand("statusbar-text", "Set property statusbar-text");
-
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
-    const auto run_subcommand = [opt]() { opt->property = "statusbar-text"; };
-    sub->callback(run_subcommand);
-}
-
-/*
  * subcommand pathbar-text
  */
 

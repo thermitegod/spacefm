@@ -75,7 +75,6 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::show_thumbnails(sub, opt);
     commandline::socket::set::max_thumbnail_size(sub, opt);
     commandline::socket::set::large_icons(sub, opt);
-    commandline::socket::set::statusbar_text(sub, opt);
     commandline::socket::set::pathbar_text(sub, opt);
     commandline::socket::set::current_dir(sub, opt);
     commandline::socket::set::thumbnailer(sub, opt);

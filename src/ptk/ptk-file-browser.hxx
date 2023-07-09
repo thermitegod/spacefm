@@ -22,6 +22,8 @@
 
 #include <span>
 
+#include <optional>
+
 #include <sigc++/sigc++.h>
 
 #include <gtk/gtk.h>
@@ -94,60 +96,61 @@ struct PtkFileBrowser
     GtkBox parent;
 
     /* <private> */
-    GList* history{nullptr};
-    GList* curHistory{nullptr};
-    GList* histsel{nullptr};
-    GList* curhistsel{nullptr};
+    GList* history_{nullptr};
+    GList* curHistory_{nullptr};
+    GList* histsel_{nullptr};
+    GList* curhistsel_{nullptr};
 
-    vfs::dir dir{nullptr};
-    GtkTreeModel* file_list{nullptr};
-    i32 max_thumbnail{0};
-    i32 n_sel_files{0};
-    off_t sel_size{0};
-    off_t sel_disk_size{0};
-    u32 sel_change_idle{0};
+    vfs::dir dir_{nullptr};
+    GtkTreeModel* file_list_{nullptr};
+    i32 max_thumbnail_{0};
+    i32 n_sel_files_{0};
+    off_t sel_size_{0};
+    off_t sel_disk_size_{0};
+    u32 sel_change_idle_{0};
 
     // path bar auto seek
-    bool inhibit_focus{false};
-    char* seek_name{nullptr};
+    bool inhibit_focus_{false};
+    std::optional<std::filesystem::path> seek_name_{std::nullopt};
 
     /* side pane */
-    GtkWidget* side_pane_buttons{nullptr};
-    GtkToggleToolButton* location_btn{nullptr};
-    GtkToggleToolButton* dir_tree_btn{nullptr};
+    GtkWidget* side_pane_buttons_{nullptr};
+    GtkToggleToolButton* location_btn_{nullptr};
+    GtkToggleToolButton* dir_tree_btn_{nullptr};
 
-    GtkSortType sort_type;
-    ptk::file_browser::sort_order sort_order{ptk::file_browser::sort_order::perm};
-    ptk::file_browser::view_mode view_mode{ptk::file_browser::view_mode::compact_view};
+    // sorting
+    GtkSortType sort_type_;
+    ptk::file_browser::sort_order sort_order_{ptk::file_browser::sort_order::perm};
+    ptk::file_browser::view_mode view_mode_{ptk::file_browser::view_mode::compact_view};
 
-    bool single_click{true};
-    bool show_hidden_files{true};
-    bool large_icons{true};
-    bool busy{true};
-    bool pending_drag_status{true};
-    dev_t drag_source_dev{0};
-    ino_t drag_source_inode{0};
-    i32 drag_x{0};
-    i32 drag_y{0};
-    bool pending_drag_status_tree{true};
-    dev_t drag_source_dev_tree{0};
-    bool is_drag{true};
-    bool skip_release{true};
-    bool menu_shown{true};
-    char* book_set_name{nullptr};
+    bool single_click_{true};
+    bool show_hidden_files_{true};
+    bool large_icons_{true};
+    bool busy_{false};
+    bool pending_drag_status_{true};
+    dev_t drag_source_dev_{0};
+    ino_t drag_source_inode_{0};
+    i32 drag_x_{0};
+    i32 drag_y_{0};
+    bool pending_drag_status_tree_{true};
+    dev_t drag_source_dev_tree_{0};
+    bool is_drag_{true};
+    bool skip_release_{true};
+    bool menu_shown_{true};
 
     /* directory view */
-    GtkWidget* folder_view{nullptr};
-    GtkWidget* folder_view_scroll{nullptr};
-    GtkCellRenderer* icon_render{nullptr};
+    GtkWidget* folder_view_{nullptr};
+    GtkWidget* folder_view_scroll_{nullptr};
+    GtkCellRenderer* icon_render_{nullptr};
 
     // MOD
-    panel_t mypanel{0};
-    GtkWidget* mynotebook{nullptr};
-    GtkWidget* task_view{nullptr};
-    void* main_window{nullptr};
-    GtkWidget* toolbox{nullptr};
-    GtkWidget* path_bar{nullptr};
+    panel_t panel_{0};
+
+    MainWindow* main_window_{nullptr};
+    GtkWidget* notebook_{nullptr};
+    GtkWidget* task_view_{nullptr};
+    GtkWidget* toolbox_{nullptr};
+    GtkWidget* path_bar_{nullptr};
     GtkWidget* hpane{nullptr};
     GtkWidget* side_vbox{nullptr};
     GtkWidget* side_toolbox{nullptr};
@@ -165,9 +168,129 @@ struct PtkFileBrowser
     GtkWidget* side_toolbar{nullptr};
     GSList* toolbar_widgets[10];
 
-    GtkTreeIter book_iter_inserted;
-    char* select_path{nullptr};
-    char* status_bar_custom{nullptr};
+    std::optional<std::filesystem::path> select_path_{std::nullopt};
+
+  public:
+    // folder_path should be encodede in on-disk encoding
+    bool chdir(const std::filesystem::path& folder_path,
+               const ptk::file_browser::chdir_mode mode) noexcept;
+
+    const std::filesystem::path cwd() const noexcept;
+    void canon(const std::filesystem::path& path) noexcept;
+
+    u64 get_n_all_files() const noexcept;
+    u64 get_n_visible_files() const noexcept;
+    u64 get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept;
+
+    void go_home() noexcept;
+    void go_default() noexcept;
+    void go_tab(tab_t tab) noexcept;
+    void go_back() noexcept;
+    void go_forward() noexcept;
+    void go_up() noexcept;
+    void refresh() noexcept;
+
+    void show_hidden_files(bool show) noexcept;
+    void set_single_click(bool single_click) noexcept;
+
+    void new_tab() noexcept;
+    void new_tab_here() noexcept;
+    void open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept;
+    void set_default_folder() const noexcept;
+
+    const std::vector<vfs::file_info> selected_files() noexcept;
+
+    void open_selected_files() noexcept;
+    void open_selected_files_with_app(const std::string_view app_desktop = "") noexcept;
+
+    void rename_selected_files(const std::span<const vfs::file_info> selected_files,
+                               const std::filesystem::path& cwd) noexcept;
+    void hide_selected(const std::span<const vfs::file_info> selected_files,
+                       const std::filesystem::path& cwd) noexcept;
+
+    void copycmd(const std::span<const vfs::file_info> selected_files,
+                 const std::filesystem::path& cwd, xset::name setname) noexcept;
+
+    void set_sort_order(ptk::file_browser::sort_order order) noexcept;
+    void set_sort_type(GtkSortType order) noexcept;
+    void set_sort_extra(xset::name setname) const noexcept;
+    void read_sort_extra() const noexcept;
+
+    void paste_link() const noexcept;
+    void paste_target() const noexcept;
+
+    void select_all() const noexcept;
+    void unselect_all() const noexcept;
+    void select_last() noexcept;
+    void select_pattern(const char* search_key) noexcept;
+    void invert_selection() noexcept;
+
+    void file_properties(i32 page) noexcept; // TODO const
+
+    void view_as_icons() noexcept;
+    void view_as_compact_list() noexcept;
+    void view_as_list() noexcept;
+
+    void show_thumbnails(i32 max_file_size) noexcept; // sets icons size using this->large_icons_
+    void show_thumbnails(i32 max_file_size, bool large_icons) noexcept;
+
+    void update_views() noexcept;
+    void focus(i32 job) noexcept;
+    void focus_me() noexcept;
+    void save_column_widths(GtkTreeView* view) noexcept;
+    bool slider_release(GtkWidget* widget) noexcept;
+
+    void rebuild_toolbars() noexcept;
+
+    GList* selected_items(GtkTreeModel** model) noexcept;
+    void select_file(const std::filesystem::path& path) noexcept;
+    void select_file_list(char** filename, bool do_select) noexcept;
+    void seek_path(const std::filesystem::path& seek_dir,
+                   const std::filesystem::path& seek_name) noexcept;
+    void update_toolbar_widgets(xset::tool tool_type) noexcept;
+    void update_toolbar_widgets(xset_t set_ptr, xset::tool tool_type) noexcept;
+
+    void show_history_menu(bool is_back_history, GdkEventButton* event) noexcept;
+
+    void on_permission(GtkMenuItem* item, const std::span<const vfs::file_info> selected_files,
+                       const std::filesystem::path& cwd) noexcept;
+    void on_action(xset::name setname) noexcept;
+
+    void focus_folder_view() noexcept;
+    void enable_toolbar() noexcept;
+
+    ////////////////
+
+    bool using_large_icons() const noexcept;
+    bool is_busy() const noexcept;
+
+    bool pending_drag_status_tree() const noexcept;
+    void pending_drag_status_tree(bool val) noexcept;
+
+    // sorting
+
+    GtkSortType sort_type() const noexcept;
+    bool is_sort_type(GtkSortType type) const noexcept;
+
+    ptk::file_browser::sort_order sort_order() const noexcept;
+    bool is_sort_order(ptk::file_browser::sort_order type) const noexcept;
+
+    ptk::file_browser::view_mode view_mode() const noexcept;
+    bool is_view_mode(ptk::file_browser::view_mode type) const noexcept;
+
+    // directory view
+
+    GtkWidget* folder_view() const noexcept;
+    void folder_view(GtkWidget* new_folder_view) noexcept;
+
+    GtkWidget* folder_view_scroll() const noexcept;
+    GtkCellRenderer* icon_render() const noexcept;
+
+    // other
+    panel_t panel() const noexcept;
+    GtkWidget* task_view() const noexcept;
+    MainWindow* main_window() const noexcept;
+    GtkWidget* path_bar() const noexcept;
 
     // Signals
   public:
@@ -343,114 +466,33 @@ struct PtkFileBrowserClass
 GType ptk_file_browser_get_type();
 
 GtkWidget* ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
-                                void* main_window);
+                                MainWindow* main_window);
 
-/*
- * folder_path should be encodede in on-disk encoding
- */
-bool ptk_file_browser_chdir(PtkFileBrowser* file_browser, const std::filesystem::path& folder_path,
-                            ptk::file_browser::chdir_mode mode);
+bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
+bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
 
-/*
- * returned path should be encodede in on-disk encoding
- * returned path should be encodede in UTF-8
- */
-const std::filesystem::path ptk_file_browser_get_cwd(PtkFileBrowser* file_browser);
+void ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget);
 
-u32 ptk_file_browser_get_n_all_files(PtkFileBrowser* file_browser);
-u32 ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser);
+// MOD
 
-u32 ptk_file_browser_get_n_sel(PtkFileBrowser* file_browser, u64* sel_size, u64* sel_disk_size);
-
+// xset callback wrapper functions
+void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_go_back(GtkWidget* item, PtkFileBrowser* file_browser);
-
 void ptk_file_browser_go_forward(GtkWidget* item, PtkFileBrowser* file_browser);
-
 void ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser);
 
 void ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser);
 
-void ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show);
-
-void ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_click);
-
-/* Sorting files */
-void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser,
-                                     ptk::file_browser::sort_order order);
-
-void ptk_file_browser_set_sort_type(PtkFileBrowser* file_browser, GtkSortType order);
-
-void ptk_file_browser_set_sort_extra(PtkFileBrowser* file_browser, xset::name setname);
-void ptk_file_browser_read_sort_extra(PtkFileBrowser* file_browser);
-
-const std::vector<vfs::file_info> ptk_file_browser_get_selected_files(PtkFileBrowser* file_browser);
-
-/* Return a list of selected filenames (full paths in on-disk encoding) */
-void ptk_file_browser_open_selected_files(PtkFileBrowser* file_browser);
-
-void ptk_file_browser_paste_link(PtkFileBrowser* file_browser);
-void ptk_file_browser_paste_target(PtkFileBrowser* file_browser);
-
-void ptk_file_browser_select_all(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_select_last(PtkFileBrowser* file_browser);
-void ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
-                                     const char* search_key);
-void ptk_file_browser_canon(PtkFileBrowser* file_browser, const std::filesystem::path& path);
-
-void ptk_file_browser_rename_selected_files(PtkFileBrowser* file_browser,
-                                            const std::span<const vfs::file_info> sel_files,
-                                            const std::filesystem::path& cwd);
-
-void ptk_file_browser_file_properties(PtkFileBrowser* file_browser, i32 page);
-
-void ptk_file_browser_view_as_icons(PtkFileBrowser* file_browser);
-void ptk_file_browser_view_as_compact_list(PtkFileBrowser* file_browser);
-void ptk_file_browser_view_as_list(PtkFileBrowser* file_browser);
-
-void ptk_file_browser_hide_selected(PtkFileBrowser* file_browser,
-                                    const std::span<const vfs::file_info> sel_files,
-                                    const std::filesystem::path& cwd);
-
-void ptk_file_browser_show_thumbnails(PtkFileBrowser* file_browser, i32 max_file_size);
-
-// MOD
-bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
-bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
-
-void ptk_file_browser_update_views(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser, tab_t t);
-void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser, i32 job2);
-void ptk_file_browser_save_column_widths(GtkTreeView* view, PtkFileBrowser* file_browser);
 
+void ptk_file_browser_select_all(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser);
+
+void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser);
 bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
                                      PtkFileBrowser* file_browser);
-void ptk_file_browser_rebuild_toolbars(PtkFileBrowser* file_browser);
-void ptk_file_browser_focus_me(PtkFileBrowser* file_browser);
-void ptk_file_browser_open_in_tab(PtkFileBrowser* file_browser, tab_t tab_num,
-                                  const std::filesystem::path& file_path);
-void ptk_file_browser_on_permission(GtkMenuItem* item, PtkFileBrowser* file_browser,
-                                    const std::span<const vfs::file_info> sel_files,
-                                    const std::filesystem::path& cwd);
-void ptk_file_browser_copycmd(PtkFileBrowser* file_browser,
-                              const std::span<const vfs::file_info> sel_files,
-                              const std::filesystem::path& cwd, xset::name setname);
-void ptk_file_browser_on_action(PtkFileBrowser* browser, xset::name setname);
-GList* folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model);
-void ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem::path& path);
-void ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
-                                       bool do_select);
-void ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::path& seek_dir,
-                                const std::filesystem::path& seek_name);
-void ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget);
-void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset::tool tool_type);
-void ptk_file_browser_update_toolbar_widgets(PtkFileBrowser* file_browser, xset_t set_ptr,
-                                             xset::tool tool_type);
-void ptk_file_browser_show_history_menu(PtkFileBrowser* file_browser, bool is_back_history,
-                                        GdkEventButton* event);

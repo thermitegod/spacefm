@@ -42,7 +42,7 @@ ptk_bookmark_view_add_bookmark(PtkFileBrowser* file_browser)
         return;
     }
 
-    add_bookmarks(ptk_file_browser_get_cwd(file_browser));
+    add_bookmarks(file_browser->cwd());
 }
 
 void

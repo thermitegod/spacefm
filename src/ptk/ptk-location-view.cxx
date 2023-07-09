@@ -198,12 +198,11 @@ update_change_detection()
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 if (file_browser)
                 {
-                    const auto cwd = ptk_file_browser_get_cwd(file_browser);
+                    const auto cwd = file_browser->cwd();
                     // update current dir change detection
-                    file_browser->dir->avoid_changes = vfs_volume_dir_avoid_changes(cwd);
+                    file_browser->dir_->avoid_changes = vfs_volume_dir_avoid_changes(cwd);
                     // update thumbnail visibility
-                    ptk_file_browser_show_thumbnails(
-                        file_browser,
+                    file_browser->show_thumbnails(
                         app_settings.show_thumbnail() ? app_settings.max_thumb_size() : 0);
                 }
             }
@@ -382,16 +381,13 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         {
             file_browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
                                                                 ptk::open_action::new_tab);
-            ptk_location_view_chdir(view, ptk_file_browser_get_cwd(file_browser));
+            ptk_location_view_chdir(view, file_browser->cwd());
         }
         else
         {
-            if (!std::filesystem::equivalent(vol->mount_point(),
-                                             ptk_file_browser_get_cwd(file_browser)))
+            if (!std::filesystem::equivalent(vol->mount_point(), file_browser->cwd()))
             {
-                ptk_file_browser_chdir(file_browser,
-                                       vol->mount_point(),
-                                       ptk::file_browser::chdir_mode::add_history);
+                file_browser->chdir(vol->mount_point(), ptk::file_browser::chdir_mode::add_history);
             }
         }
     }
@@ -737,7 +733,7 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
     PtkFileTask* ptask =
-        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
+        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
     ptask->task->exec_export = !!file_browser;
@@ -781,7 +777,7 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
     const std::string task_name = std::format("Unmount {}", vol->device_file());
     PtkFileTask* ptask =
-        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
+        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = unmount_command;
     ptask->task->exec_sync = true;
     ptask->task->exec_export = !!file_browser;
@@ -827,7 +823,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         const std::string task_name = std::format("Remove {}", vol->device_file());
         PtkFileTask* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = unmount_command;
         ptask->task->exec_sync = true;
         ptask->task->exec_export = !!file_browser;
@@ -845,7 +841,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         const std::string line = std::format("eject {}", vol->device_file());
         const std::string task_name = std::format("Remove {}", vol->device_file());
         PtkFileTask* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
         ptask->task->exec_show_error = false;
@@ -859,7 +855,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         const std::string line = "sync";
         const std::string task_name = std::format("Remove {}", vol->device_file());
         PtkFileTask* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
         ptask->task->exec_show_error = false;
@@ -897,8 +893,7 @@ on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
     if (GTK_IS_WIDGET(ao->file_browser) && ao->job == ptk::open_action::new_tab &&
         ao->file_browser->side_dev)
     {
-        ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
-                                ptk_file_browser_get_cwd(ao->file_browser));
+        ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev), ao->file_browser->cwd());
     }
 
     delete ao;
@@ -928,7 +923,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
     const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
-    PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view());
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
     ptask->task->exec_export = true;
@@ -1001,7 +996,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
-        PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view);
+        PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view());
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
         ptask->task->exec_export = true;
@@ -1076,7 +1071,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
         PtkFileTask* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view : nullptr);
+            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
         ptask->task->exec_export = !!file_browser;
@@ -1480,10 +1475,10 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
     // ztd::logger::info("on_button_press_event   view = {}", view);
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
-    ptk_file_browser_focus_me(file_browser);
+    file_browser->focus_me();
 
     if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-        main_window_event(file_browser->main_window,
+        main_window_event(file_browser->main_window(),
                           event_handler->win_click,
                           xset::name::evt_win_click,
                           0,

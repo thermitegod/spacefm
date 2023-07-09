@@ -408,7 +408,7 @@ save_settings(void* main_window_ptr)
                                                // Need to use .string() as libfmt will by default
                                                // format paths with double quotes surrounding them
                                                // which will break config file parsing.
-                                               ptk_file_browser_get_cwd(file_browser).string());
+                                               file_browser->cwd().string());
                         }
                         set->s = tabs;
 
@@ -944,8 +944,8 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     if (set->browser)
     {
         parent = GTK_WIDGET(set->browser);
-        task_view = set->browser->task_view;
-        cwd = ptk_file_browser_get_cwd(set->browser);
+        task_view = set->browser->task_view();
+        cwd = set->browser->cwd();
     }
     else
     {
@@ -1056,10 +1056,10 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                 if (!desktop->exec().empty())
                 {
                     // get file list
-                    std::vector<vfs::file_info> sel_files;
+                    std::vector<vfs::file_info> selected_files;
                     if (set->browser)
                     {
-                        sel_files = ptk_file_browser_get_selected_files(set->browser);
+                        selected_files = set->browser->selected_files();
                     }
                     else
                     {
@@ -1067,8 +1067,8 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                     }
 
                     std::vector<std::filesystem::path> open_files;
-                    open_files.reserve(sel_files.size());
-                    for (const vfs::file_info file : sel_files)
+                    open_files.reserve(selected_files.size());
+                    for (const vfs::file_info file : selected_files)
                     {
                         const auto open_file = cwd / file->name();
                         open_files.emplace_back(open_file);
@@ -1084,7 +1084,7 @@ xset_custom_activate(GtkWidget* item, xset_t set)
                         ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr, "Error", e.what());
                     }
 
-                    vfs_file_info_list_free(sel_files);
+                    vfs_file_info_list_free(selected_files);
                 }
                 return;
             }
@@ -2548,7 +2548,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             }
             if (set->tool == xset::tool::custom)
             {
-                ptk_file_browser_update_toolbar_widgets(set->browser, set, xset::tool::invalid);
+                set->browser->update_toolbar_widgets(set, xset::tool::invalid);
             }
             break;
         case xset::menu::string:
@@ -2744,7 +2744,7 @@ xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* eve
     {
         file_browser =
             PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-        p = file_browser->mypanel;
+        p = file_browser->panel();
         mode = main_window->panel_context.at(p);
     }
     if (!PTK_IS_FILE_BROWSER(file_browser))
@@ -2768,47 +2768,47 @@ xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* eve
             update_views_all_windows(nullptr, file_browser);
             break;
         case xset::tool::home:
-            ptk_file_browser_go_home(nullptr, file_browser);
+            file_browser->go_home();
             break;
         case xset::tool::DEFAULT:
-            ptk_file_browser_go_default(nullptr, file_browser);
+            file_browser->go_default();
             break;
         case xset::tool::up:
-            ptk_file_browser_go_up(nullptr, file_browser);
+            file_browser->go_up();
             break;
         case xset::tool::back:
-            ptk_file_browser_go_back(nullptr, file_browser);
+            file_browser->go_back();
             break;
         case xset::tool::back_menu:
-            ptk_file_browser_show_history_menu(file_browser, true, event);
+            file_browser->show_history_menu(true, event);
             break;
         case xset::tool::fwd:
-            ptk_file_browser_go_forward(nullptr, file_browser);
+            file_browser->go_forward();
             break;
         case xset::tool::fwd_menu:
-            ptk_file_browser_show_history_menu(file_browser, false, event);
+            file_browser->show_history_menu(false, event);
             break;
         case xset::tool::refresh:
-            ptk_file_browser_refresh(nullptr, file_browser);
+            file_browser->refresh();
             break;
         case xset::tool::new_tab:
-            ptk_file_browser_new_tab(nullptr, file_browser);
+            file_browser->new_tab();
             break;
         case xset::tool::new_tab_here:
-            ptk_file_browser_new_tab_here(nullptr, file_browser);
+            file_browser->new_tab_here();
             break;
         case xset::tool::show_hidden:
             set2 = xset_get_panel(p, xset::panel::show_hidden);
             set2->b = set2->b == xset::b::xtrue ? xset::b::unset : xset::b::xtrue;
-            ptk_file_browser_show_hidden_files(file_browser, set2->b);
+            file_browser->show_hidden_files(set2->b);
             break;
         case xset::tool::show_thumb:
             main_window_toggle_thumbnails_all_windows();
             break;
         case xset::tool::large_icons:
-            if (file_browser->view_mode != ptk::file_browser::view_mode::icon_view)
+            if (!file_browser->is_view_mode(ptk::file_browser::view_mode::icon_view))
             {
-                xset_set_b_panel(p, xset::panel::list_large, !file_browser->large_icons);
+                xset_set_b_panel(p, xset::panel::list_large, !file_browser->using_large_icons());
                 on_popup_list_large(nullptr, file_browser);
             }
             break;
@@ -2871,7 +2871,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     {
         return true;
     }
-    ptk_file_browser_focus_me(file_browser);
+    file_browser->focus_me();
     set->browser = file_browser;
 
     // get context
@@ -3031,7 +3031,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     {
         return true;
     }
-    ptk_file_browser_focus_me(file_browser);
+    file_browser->focus_me();
 
     // get context
     const xset_context_t context = xset_context_new();

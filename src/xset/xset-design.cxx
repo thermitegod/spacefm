@@ -493,7 +493,7 @@ xset_design_job_set_import_file(xset_t set)
             break;
         }
     }
-    install_plugin_file(set->browser ? set->browser->main_window : nullptr,
+    install_plugin_file(set->browser ? set->browser->main_window() : nullptr,
                         nullptr,
                         file.value(),
                         plug_dir.string(),
@@ -580,7 +580,7 @@ xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             return;
         }
     }
-    PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view);
+    PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view());
 
     const std::string plug_dir_q = ztd::shell::quote(set->plugin->path.string());
 

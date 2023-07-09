@@ -483,7 +483,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     ptask = ptk_file_exec_new("Export Plugin",
                               plug_dir,
                               parent,
-                              file_browser ? file_browser->task_view : nullptr);
+                              file_browser ? file_browser->task_view() : nullptr);
 
     const std::string plug_dir_q = ztd::shell::quote(plug_dir.string());
     const std::string path_q = ztd::shell::quote(path.value().string());

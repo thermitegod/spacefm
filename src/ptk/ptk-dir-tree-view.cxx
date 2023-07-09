@@ -422,7 +422,7 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 }
 
 static bool
-on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBrowser* browser)
+on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBrowser* file_browser)
 {
     GtkTreePath* tree_path;
     GtkTreeViewColumn* tree_col;
@@ -448,15 +448,14 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBro
                 {
                     // right click
                     char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-                    if (ptk_file_browser_chdir(browser,
-                                               dir_path,
-                                               ptk::file_browser::chdir_mode::add_history))
+                    if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
                     {
                         /* show right-click menu
                          * This simulates a right-click in the file list when
                          * no files are selected (even if some are) since
                          * actions are to be taken on the dir itself. */
-                        GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path);
+                        GtkWidget* popup =
+                            ptk_file_menu_new(file_browser, nullptr, nullptr, dir_path);
                         if (popup)
                         {
                             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
@@ -500,7 +499,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBro
 }
 
 static bool
-on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* browser)
+on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* file_browser)
 {
     GtkTreeModel* model;
     GtkTreeIter iter;
@@ -562,15 +561,13 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
             }
 
             const char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-            if (ptk_file_browser_chdir(browser,
-                                       dir_path,
-                                       ptk::file_browser::chdir_mode::add_history))
+            if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
                  * no files are selected (even if some are) since
                  * actions are to be taken on the dir itself. */
-                GtkWidget* popup = ptk_file_menu_new(browser, nullptr, nullptr, dir_path);
+                GtkWidget* popup = ptk_file_menu_new(file_browser, nullptr, nullptr, dir_path);
                 if (popup)
                 {
                     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
@@ -648,15 +645,15 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             char** list;
             char** puri;
             puri = list = gtk_selection_data_get_uris(sel_data);
-            if (file_browser->pending_drag_status_tree)
+            if (file_browser->pending_drag_status_tree())
             {
                 // We only want to update drag status, not really want to drop
                 const auto dest_statbuf = ztd::stat(dest_dir);
                 if (dest_statbuf.is_valid())
                 {
-                    if (file_browser->drag_source_dev_tree == 0)
+                    if (file_browser->drag_source_dev_tree_ == 0)
                     {
-                        file_browser->drag_source_dev_tree = dest_statbuf.dev();
+                        file_browser->drag_source_dev_tree_ = dest_statbuf.dev();
                         for (; *puri; ++puri)
                         {
                             const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
@@ -664,12 +661,12 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                             const auto statbuf = ztd::stat(file_path);
                             if (statbuf.is_valid() && statbuf.dev() != dest_statbuf.dev())
                             {
-                                file_browser->drag_source_dev_tree = statbuf.dev();
+                                file_browser->drag_source_dev_tree_ = statbuf.dev();
                                 break;
                             }
                         }
                     }
-                    if (file_browser->drag_source_dev_tree != dest_statbuf.dev())
+                    if (file_browser->drag_source_dev_tree_ != dest_statbuf.dev())
                     { // src and dest are on different devices
                         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                     }
@@ -685,7 +682,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
                 std::free(dest_dir);
                 g_strfreev(list);
-                file_browser->pending_drag_status_tree = false;
+                file_browser->pending_drag_status_tree(false);
                 return;
             }
 
@@ -743,7 +740,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                                                file_list,
                                                                dest_dir,
                                                                GTK_WINDOW(parent_win),
-                                                               file_browser->task_view);
+                                                               file_browser->task_view());
                         ptk_file_task_run(ptask);
                     }
                 }
@@ -759,10 +756,10 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
         }
     }
     /* If we are only getting drag status, not finished. */
-    if (file_browser->pending_drag_status_tree)
+    if (file_browser->pending_drag_status_tree())
     {
         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
-        file_browser->pending_drag_status_tree = false;
+        file_browser->pending_drag_status_tree(false);
         return;
     }
     gtk_drag_finish(drag_context, false, false, time);
@@ -842,7 +839,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
             else
             {
                 // automatic
-                file_browser->pending_drag_status_tree = true;
+                file_browser->pending_drag_status_tree(true);
                 gtk_drag_get_data(widget, drag_context, target, time);
                 suggested_action = gdk_drag_context_get_selected_action(drag_context);
             }
@@ -893,6 +890,6 @@ on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32
     (void)widget;
     (void)drag_context;
     (void)time;
-    file_browser->drag_source_dev_tree = 0;
+    file_browser->drag_source_dev_tree_ = 0;
     return false;
 }

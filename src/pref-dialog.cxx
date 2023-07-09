@@ -188,7 +188,9 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         tab_label = main_window_create_tab_label(window, file_browser);
                         gtk_notebook_set_tab_label(notebook, GTK_WIDGET(file_browser), tab_label);
-                        main_window_update_tab_label(window, file_browser, file_browser->dir->path);
+                        main_window_update_tab_label(window,
+                                                     file_browser,
+                                                     file_browser->dir_->path);
                     }
                 }
             }
@@ -252,14 +254,14 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         // update views
-                        gtk_widget_destroy(file_browser->folder_view);
-                        file_browser->folder_view = nullptr;
+                        gtk_widget_destroy(file_browser->folder_view());
+                        file_browser->folder_view(nullptr);
                         if (file_browser->side_dir)
                         {
                             gtk_widget_destroy(file_browser->side_dir);
                             file_browser->side_dir = nullptr;
                         }
-                        ptk_file_browser_update_views(nullptr, file_browser);
+                        file_browser->update_views();
                     }
                 }
             }
@@ -323,8 +325,7 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        ptk_file_browser_set_single_click(file_browser,
-                                                          app_settings.single_click());
+                        file_browser->set_single_click(app_settings.single_click());
                     }
                 }
             }
