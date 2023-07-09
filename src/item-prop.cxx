@@ -679,7 +679,7 @@ static void
 on_context_button_press(GtkWidget* widget, ContextData* ctxt)
 {
     GtkTreeIter it;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     GtkTreeModel* model;
 
     if (widget == GTK_WIDGET(ctxt->btn_add) || widget == GTK_WIDGET(ctxt->btn_apply))
@@ -697,8 +697,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
         }
         else
         {
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view));
-            if (!gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view));
+            if (!gtk_tree_selection_get_selected(selection, nullptr, &it))
             {
                 return;
             }
@@ -729,8 +729,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
 
     // remove
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(ctxt->view));
-    tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view));
-    if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ctxt->view));
+    if (gtk_tree_selection_get_selected(selection, nullptr, &it))
     {
         gtk_list_store_remove(GTK_LIST_STORE(model), &it);
     }
@@ -841,9 +841,9 @@ on_context_entry_insert(GtkEntryBuffer* buf, u32 position, char* chars, u32 n_ch
 }
 
 static bool
-on_context_selection_change(GtkTreeSelection* tree_sel, ContextData* ctxt)
+on_context_selection_change(GtkTreeSelection* selection, ContextData* ctxt)
 {
-    (void)tree_sel;
+    (void)selection;
     enable_context(ctxt);
     return false;
 }

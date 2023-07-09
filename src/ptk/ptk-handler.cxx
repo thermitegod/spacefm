@@ -1810,7 +1810,7 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
     xset_t handler_xset = nullptr;
 
     // Fetching selection from treeview
-    GtkTreeSelection* selection;
+    GtkTreeSelection* selection = nullptr;
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
 
     // Getting selection fails if there are no handlers
@@ -2397,7 +2397,7 @@ restore_defaults(HandlerData* hnd, bool all)
     else
     {
         // Fetching selection from treeview
-        GtkTreeSelection* selection;
+        GtkTreeSelection* selection = nullptr;
         selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
 
         // Exiting if no handler is selected
@@ -2657,7 +2657,7 @@ on_activate_link(GtkLabel* label, const char* uri, HandlerData* hnd)
     }
 
     // Fetching selection from treeview
-    GtkTreeSelection* selection;
+    GtkTreeSelection* selection = nullptr;
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
 
     // Exiting if no handler is selected

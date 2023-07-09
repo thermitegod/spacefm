@@ -340,7 +340,7 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
 void
 ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem::path& path)
 {
-    GtkTreeSelection* tree_sel = nullptr;
+    GtkTreeSelection* selection = nullptr;
     GtkTreeModel* model = nullptr;
 
     switch (file_browser->view_mode)
@@ -352,8 +352,8 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem
             break;
         case ptk::file_browser::view_mode::list_view:
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(file_browser->folder_view));
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            gtk_tree_selection_unselect_all(tree_sel);
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            gtk_tree_selection_unselect_all(selection);
             break;
     }
 
@@ -406,7 +406,7 @@ ptk_file_browser_select_file(PtkFileBrowser* file_browser, const std::filesystem
 
                 break;
             case ptk::file_browser::view_mode::list_view:
-                gtk_tree_selection_select_path(tree_sel, tree_path);
+                gtk_tree_selection_select_path(selection, tree_path);
                 gtk_tree_view_set_cursor(GTK_TREE_VIEW(file_browser->folder_view),
                                          tree_path,
                                          nullptr,
@@ -1770,11 +1770,11 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
 
     // ztd::logger::info("    select files");
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(file_browser->file_list);
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     bool firstsel = true;
     if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
     {
-        tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
     }
 
     for (l = (GList*)element->data; l; l = g_list_next(l))
@@ -1812,7 +1812,7 @@ ptk_file_browser_select_last(PtkFileBrowser* file_browser) // MOD added
                     }
                     break;
                 case ptk::file_browser::view_mode::list_view:
-                    gtk_tree_selection_select_path(tree_sel, tp);
+                    gtk_tree_selection_select_path(selection, tp);
                     if (firstsel)
                     {
                         gtk_tree_view_set_cursor(GTK_TREE_VIEW(file_browser->folder_view),
@@ -2445,7 +2445,7 @@ void
 ptk_file_browser_select_all(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     switch (file_browser->view_mode)
     {
@@ -2454,8 +2454,8 @@ ptk_file_browser_select_all(GtkWidget* item, PtkFileBrowser* file_browser)
             exo_icon_view_select_all(EXO_ICON_VIEW(file_browser->folder_view));
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            gtk_tree_selection_select_all(tree_sel);
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            gtk_tree_selection_select_all(selection);
             break;
     }
 }
@@ -2464,7 +2464,7 @@ void
 ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     switch (file_browser->view_mode)
     {
@@ -2473,8 +2473,8 @@ ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser)
             exo_icon_view_unselect_all(EXO_ICON_VIEW(file_browser->folder_view));
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            gtk_tree_selection_unselect_all(tree_sel);
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            gtk_tree_selection_unselect_all(selection);
             break;
     }
 }
@@ -2485,7 +2485,7 @@ invert_selection(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* it,
 {
     (void)model;
     (void)it;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     switch (file_browser->view_mode)
     {
@@ -2501,14 +2501,14 @@ invert_selection(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* it,
             }
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            if (gtk_tree_selection_path_is_selected(tree_sel, path))
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            if (gtk_tree_selection_path_is_selected(selection, path))
             {
-                gtk_tree_selection_unselect_path(tree_sel, path);
+                gtk_tree_selection_unselect_path(selection, path);
             }
             else
             {
-                gtk_tree_selection_select_path(tree_sel, path);
+                gtk_tree_selection_select_path(selection, path);
             }
             break;
     }
@@ -2520,7 +2520,7 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     GtkTreeModel* model;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     switch (file_browser->view_mode)
     {
@@ -2545,8 +2545,8 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
             on_folder_view_item_sel_change(EXO_ICON_VIEW(file_browser->folder_view), file_browser);
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            g_signal_handlers_block_matched(tree_sel,
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            g_signal_handlers_block_matched(selection,
                                             GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
@@ -2555,14 +2555,14 @@ ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser)
                                             nullptr);
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(file_browser->folder_view));
             gtk_tree_model_foreach(model, (GtkTreeModelForeachFunc)invert_selection, file_browser);
-            g_signal_handlers_unblock_matched(tree_sel,
+            g_signal_handlers_unblock_matched(selection,
                                               GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(selection), file_browser);
             break;
     }
 }
@@ -2575,7 +2575,7 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
     GtkTreeModel* model;
     GtkTreePath* path;
     GtkTreeIter it;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     vfs::file_info file;
     const char* key;
 
@@ -2631,8 +2631,8 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                                             nullptr);
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            g_signal_handlers_block_matched(tree_sel,
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            g_signal_handlers_block_matched(selection,
                                             GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
@@ -2709,16 +2709,16 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
                     break;
                 case ptk::file_browser::view_mode::list_view:
                     // select
-                    if (gtk_tree_selection_path_is_selected(tree_sel, path))
+                    if (gtk_tree_selection_path_is_selected(selection, path))
                     {
                         if (!select)
                         {
-                            gtk_tree_selection_unselect_path(tree_sel, path);
+                            gtk_tree_selection_unselect_path(selection, path);
                         }
                     }
                     else if (select)
                     {
-                        gtk_tree_selection_select_path(tree_sel, path);
+                        gtk_tree_selection_select_path(selection, path);
                     }
 
                     // scroll to first and set cursor
@@ -2757,14 +2757,14 @@ ptk_file_browser_select_pattern(GtkWidget* item, PtkFileBrowser* file_browser,
             on_folder_view_item_sel_change(EXO_ICON_VIEW(file_browser->folder_view), file_browser);
             break;
         case ptk::file_browser::view_mode::list_view:
-            g_signal_handlers_unblock_matched(tree_sel,
+            g_signal_handlers_unblock_matched(selection,
                                               GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(selection), file_browser);
             break;
     }
     focus_folder_view(file_browser);
@@ -2777,7 +2777,7 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
     // if !do_select, unselect filenames, leave others unchanged
     // If !*filename select or unselect all
     GtkTreeModel* model;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     if (!filename || !*filename)
     {
@@ -2807,8 +2807,8 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                                             nullptr);
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            g_signal_handlers_block_matched(tree_sel,
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            g_signal_handlers_block_matched(selection,
                                             GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
@@ -2896,16 +2896,16 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
                     break;
                 case ptk::file_browser::view_mode::list_view:
                     // select
-                    if (gtk_tree_selection_path_is_selected(tree_sel, path))
+                    if (gtk_tree_selection_path_is_selected(selection, path))
                     {
                         if (!select)
                         {
-                            gtk_tree_selection_unselect_path(tree_sel, path);
+                            gtk_tree_selection_unselect_path(selection, path);
                         }
                     }
                     else if (select && do_select)
                     {
-                        gtk_tree_selection_select_path(tree_sel, path);
+                        gtk_tree_selection_select_path(selection, path);
                     }
 
                     // scroll to first and set cursor
@@ -2944,21 +2944,21 @@ ptk_file_browser_select_file_list(PtkFileBrowser* file_browser, char** filename,
             on_folder_view_item_sel_change(EXO_ICON_VIEW(file_browser->folder_view), file_browser);
             break;
         case ptk::file_browser::view_mode::list_view:
-            g_signal_handlers_unblock_matched(tree_sel,
+            g_signal_handlers_unblock_matched(selection,
                                               GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(selection), file_browser);
             break;
     }
     focus_folder_view(file_browser);
 }
 
 static void
-ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* tree_sel)
+ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* selection)
 {
     // restore signals and trigger sel change
     switch (file_browser->view_mode)
@@ -2975,14 +2975,14 @@ ptk_file_browser_restore_sig(PtkFileBrowser* file_browser, GtkTreeSelection* tre
             on_folder_view_item_sel_change(EXO_ICON_VIEW(file_browser->folder_view), file_browser);
             break;
         case ptk::file_browser::view_mode::list_view:
-            g_signal_handlers_unblock_matched(tree_sel,
+            g_signal_handlers_unblock_matched(selection,
                                               GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                               0,
                                               0,
                                               nullptr,
                                               (void*)on_folder_view_item_sel_change,
                                               nullptr);
-            on_folder_view_item_sel_change(EXO_ICON_VIEW(tree_sel), file_browser);
+            on_folder_view_item_sel_change(EXO_ICON_VIEW(selection), file_browser);
             break;
     }
 }
@@ -3026,7 +3026,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
     // get model, treesel, and stop signals
     GtkTreeModel* model;
     GtkTreeIter it;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     switch (file_browser->view_mode)
     {
@@ -3042,8 +3042,8 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
                                             nullptr);
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            g_signal_handlers_block_matched(tree_sel,
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            g_signal_handlers_block_matched(selection,
                                             GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                             0,
                                             0,
@@ -3056,7 +3056,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
 
     if (!GTK_IS_TREE_MODEL(model))
     {
-        ptk_file_browser_restore_sig(file_browser, tree_sel);
+        ptk_file_browser_restore_sig(file_browser, selection);
         return;
     }
 
@@ -3113,7 +3113,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
     }
     if (!it.stamp)
     {
-        ptk_file_browser_restore_sig(file_browser, tree_sel);
+        ptk_file_browser_restore_sig(file_browser, selection);
         return;
     }
 
@@ -3124,7 +3124,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
                                 &it);
     if (!path)
     {
-        ptk_file_browser_restore_sig(file_browser, tree_sel);
+        ptk_file_browser_restore_sig(file_browser, selection);
         return;
     }
 
@@ -3148,7 +3148,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
             break;
         case ptk::file_browser::view_mode::list_view:
             // select
-            gtk_tree_selection_select_path(tree_sel, path);
+            gtk_tree_selection_select_path(selection, path);
 
             // scroll and set cursor
             gtk_tree_view_set_cursor(GTK_TREE_VIEW(file_browser->folder_view),
@@ -3165,7 +3165,7 @@ ptk_file_browser_seek_path(PtkFileBrowser* file_browser, const std::filesystem::
     }
     gtk_tree_path_free(path);
 
-    ptk_file_browser_restore_sig(file_browser, tree_sel);
+    ptk_file_browser_restore_sig(file_browser, selection);
 }
 
 /* signal handlers */
@@ -3318,7 +3318,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
     GtkTreeModel* model = nullptr;
     GtkTreePath* tree_path = nullptr;
     GtkTreeViewColumn* col = nullptr;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     bool ret = false;
 
     if (file_browser->menu_shown)
@@ -3400,7 +3400,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
                                               &col,
                                               nullptr,
                                               nullptr);
-                tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+                selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 
                 if (col &&
                     ptk::file_list::column(gtk_tree_view_column_get_sort_column_id(col)) !=
@@ -3453,10 +3453,10 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
                     }
                     break;
                 case ptk::file_browser::view_mode::list_view:
-                    if (tree_path && !gtk_tree_selection_path_is_selected(tree_sel, tree_path))
+                    if (tree_path && !gtk_tree_selection_path_is_selected(selection, tree_path))
                     {
-                        gtk_tree_selection_unselect_all(tree_sel);
-                        gtk_tree_selection_select_path(tree_sel, tree_path);
+                        gtk_tree_selection_unselect_all(selection);
+                        gtk_tree_selection_select_path(selection, tree_path);
                     }
                     break;
             }
@@ -3871,7 +3871,7 @@ static GtkWidget*
 create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode view_mode)
 {
     GtkWidget* folder_view = nullptr;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     GtkCellRenderer* renderer;
 
     i32 icon_size = 0;
@@ -4016,8 +4016,8 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
 
             init_list_view(file_browser, GTK_TREE_VIEW(folder_view));
 
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(folder_view));
-            gtk_tree_selection_set_mode(tree_sel, GtkSelectionMode::GTK_SELECTION_MULTIPLE);
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(folder_view));
+            gtk_tree_selection_set_mode(selection, GtkSelectionMode::GTK_SELECTION_MULTIPLE);
 
             if (xset_get_b(xset::name::rubberband))
             {
@@ -4060,7 +4060,7 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                              G_CALLBACK(on_folder_view_row_activated),
                              file_browser);
 
-            g_signal_connect_after((void*)tree_sel,
+            g_signal_connect_after((void*)selection,
                                    "changed",
                                    G_CALLBACK(on_folder_view_item_sel_change),
                                    file_browser);
@@ -4370,7 +4370,7 @@ ptk_file_browser_get_n_visible_files(PtkFileBrowser* file_browser)
 GList*
 folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** model)
 {
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
 
     switch (file_browser->view_mode)
     {
@@ -4380,8 +4380,8 @@ folder_view_get_selected_items(PtkFileBrowser* file_browser, GtkTreeModel** mode
             return exo_icon_view_get_selected_items(EXO_ICON_VIEW(file_browser->folder_view));
             break;
         case ptk::file_browser::view_mode::list_view:
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
-            return gtk_tree_selection_get_selected_rows(tree_sel, model);
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view));
+            return gtk_tree_selection_get_selected_rows(selection, model);
             break;
     }
     return nullptr;
@@ -5485,7 +5485,7 @@ static GtkWidget*
 ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser)
 {
     GtkWidget* dir_tree = ptk_dir_tree_view_new(file_browser, file_browser->show_hidden_files);
-    // GtkTreeSelection* dir_tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(dir_tree));
+    // GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dir_tree));
     g_signal_connect(dir_tree,
                      "row-activated",
                      G_CALLBACK(on_dir_tree_row_activated),

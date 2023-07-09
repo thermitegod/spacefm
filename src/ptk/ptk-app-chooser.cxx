@@ -380,11 +380,11 @@ app_chooser_dialog_get_selected_app(GtkWidget* dlg)
     const i32 idx = gtk_notebook_get_current_page(notebook);
     GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(notebook, idx));
     GtkTreeView* view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
-    GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(view);
 
     GtkTreeModel* model;
     GtkTreeIter it;
-    if (gtk_tree_selection_get_selected(tree_sel, &model, &it))
+    if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
         gtk_tree_model_get(model, &it, app_chooser::column::desktop_file, &app, -1);
     }

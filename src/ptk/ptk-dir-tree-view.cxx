@@ -106,7 +106,7 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     GtkTreeViewColumn* col;
     GtkCellRenderer* renderer;
     GtkTreeModel* model;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     GtkTreePath* tree_path;
     GtkTreeModel* filter;
 
@@ -154,8 +154,8 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
 
     gtk_tree_view_append_column(dir_tree_view, col);
 
-    tree_sel = gtk_tree_view_get_selection(dir_tree_view);
-    gtk_tree_selection_set_select_function(tree_sel,
+    selection = gtk_tree_view_get_selection(dir_tree_view);
+    gtk_tree_selection_set_select_function(selection,
                                            (GtkTreeSelectionFunc)sel_func,
                                            nullptr,
                                            nullptr);
@@ -337,8 +337,8 @@ ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
     GtkTreeModel* model;
     GtkTreeIter it;
 
-    GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(dir_tree_view);
-    if (gtk_tree_selection_get_selected(tree_sel, &model, &it))
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(dir_tree_view);
+    if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
         return ptk_dir_view_get_dir_path(model, &it);
     }
@@ -504,9 +504,9 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
 {
     GtkTreeModel* model;
     GtkTreeIter iter;
-    GtkTreeSelection* select = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
-    if (!gtk_tree_selection_get_selected(select, &model, &iter))
+    if (!gtk_tree_selection_get_selected(selection, &model, &iter))
     {
         return false;
     }
@@ -528,7 +528,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
             }
             else if (gtk_tree_path_up(path))
             {
-                gtk_tree_selection_select_path(select, path);
+                gtk_tree_selection_select_path(selection, path);
                 gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, nullptr, false);
             }
             else
@@ -547,7 +547,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
             else
             {
                 gtk_tree_path_down(path);
-                gtk_tree_selection_select_path(select, path);
+                gtk_tree_selection_select_path(selection, path);
                 gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), path, nullptr, false);
             }
             break;

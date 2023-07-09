@@ -4306,9 +4306,9 @@ main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
         }
         else if (file_browser->view_mode == ptk::file_browser::view_mode::list_view)
         {
-            GtkTreeSelection* tree_sel =
+            GtkTreeSelection* selection =
                 gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view));
-            if (gtk_tree_selection_count_selected_rows(tree_sel) > 0)
+            if (gtk_tree_selection_count_selected_rows(selection) > 0)
             {
                 c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
             }
@@ -5255,7 +5255,7 @@ static PtkFileTask*
 get_selected_task(GtkWidget* view)
 {
     GtkTreeModel* model;
-    GtkTreeSelection* tree_sel;
+    GtkTreeSelection* selection = nullptr;
     GtkTreeIter it;
     PtkFileTask* ptask = nullptr;
 
@@ -5270,8 +5270,8 @@ get_selected_task(GtkWidget* view)
     }
 
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
-    tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-    if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    if (gtk_tree_selection_get_selected(selection, nullptr, &it))
     {
         gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
     }

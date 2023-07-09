@@ -273,7 +273,7 @@ static void
 on_open_files(GAction* action, FindFile* data)
 {
     GtkTreeModel* model;
-    GtkTreeSelection* sel;
+    GtkTreeSelection* selection = nullptr;
     GtkTreeIter it;
     GList* row;
     GList* rows;
@@ -289,8 +289,8 @@ on_open_files(GAction* action, FindFile* data)
         open_files = ztd::same(g_action_get_name(action), "OpenAction");
     }
 
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view));
-    rows = gtk_tree_selection_get_selected_rows(sel, &model);
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->result_view));
+    rows = gtk_tree_selection_get_selected_rows(selection, &model);
     if (!rows)
     {
         return;
@@ -935,8 +935,8 @@ on_remove_search_folder(GtkWidget* btn, FindFile* data)
 {
     (void)btn;
     GtkTreeIter it;
-    GtkTreeSelection* sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->places_view));
-    if (gtk_tree_selection_get_selected(sel, nullptr, &it))
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->places_view));
+    if (gtk_tree_selection_get_selected(selection, nullptr, &it))
     {
         gtk_list_store_remove(data->places_list, &it);
     }
@@ -1038,7 +1038,7 @@ on_view_button_press(GtkTreeView* view, GdkEventButton* event, FindFile* data)
         {
             // sfm if current item not selected, unselect all and select it
             GtkTreePath* tree_path;
-            GtkTreeSelection* tree_sel;
+            GtkTreeSelection* selection = nullptr;
             gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                           static_cast<i32>(event->x),
                                           static_cast<i32>(event->y),
@@ -1046,12 +1046,12 @@ on_view_button_press(GtkTreeView* view, GdkEventButton* event, FindFile* data)
                                           nullptr,
                                           nullptr,
                                           nullptr);
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
-            if (tree_path && tree_sel && !gtk_tree_selection_path_is_selected(tree_sel, tree_path))
+            if (tree_path && selection && !gtk_tree_selection_path_is_selected(selection, tree_path))
             {
-                gtk_tree_selection_unselect_all(tree_sel);
-                gtk_tree_selection_select_path(tree_sel, tree_path);
+                gtk_tree_selection_unselect_all(selection);
+                gtk_tree_selection_select_path(selection, tree_path);
             }
             gtk_tree_path_free(tree_path);
 

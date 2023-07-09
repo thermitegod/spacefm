@@ -289,7 +289,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
         return false;
     }
 
-    GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(location_view);
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(location_view);
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -300,7 +300,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
             const auto mount_point = vol->mount_point();
             if (std::filesystem::equivalent(cur_dir, mount_point))
             {
-                gtk_tree_selection_select_iter(tree_sel, &it);
+                gtk_tree_selection_select_iter(selection, &it);
                 GtkTreePath* path = gtk_tree_model_get_path(model, &it);
                 if (path)
                 {
@@ -311,7 +311,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
-    gtk_tree_selection_unselect_all(tree_sel);
+    gtk_tree_selection_unselect_all(selection);
     return false;
 }
 
@@ -321,8 +321,8 @@ ptk_location_view_get_selected_vol(GtkTreeView* location_view)
     // ztd::logger::info("ptk_location_view_get_selected_vol    view = {}", location_view);
     GtkTreeIter it;
 
-    GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
-    if (gtk_tree_selection_get_selected(tree_sel, nullptr, &it))
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
+    if (gtk_tree_selection_get_selected(selection, nullptr, &it))
     {
         vfs::volume vol;
         gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
@@ -461,8 +461,8 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
     GtkWidget* view = gtk_tree_view_new_with_model(model);
     g_object_unref(G_OBJECT(model));
     // ztd::logger::info("ptk_location_view_new   view = {}", view);
-    GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-    gtk_tree_selection_set_mode(tree_sel, GtkSelectionMode::GTK_SELECTION_SINGLE);
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+    gtk_tree_selection_set_mode(selection, GtkSelectionMode::GTK_SELECTION_SINGLE);
 
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), false);
 
@@ -1507,11 +1507,11 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
                                       nullptr,
                                       nullptr))
     {
-        GtkTreeSelection* tree_sel = gtk_tree_view_get_selection(view);
+        GtkTreeSelection* selection = gtk_tree_view_get_selection(view);
         GtkTreeIter it;
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
-            gtk_tree_selection_select_iter(tree_sel, &it);
+            gtk_tree_selection_select_iter(selection, &it);
             gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
         }
     }
