@@ -3921,10 +3921,8 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                 nullptr,
                 nullptr);
 
-            exo_icon_view_set_single_click(EXO_ICON_VIEW(folder_view), file_browser->single_click);
-            exo_icon_view_set_single_click_timeout(
-                EXO_ICON_VIEW(folder_view),
-                app_settings.single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
+            gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(folder_view),
+                                                       file_browser->single_click);
 
             gtk_cell_layout_clear(GTK_CELL_LAYOUT(folder_view));
 
@@ -4034,10 +4032,8 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                 nullptr,
                 nullptr);
 
-            // gtk_tree_view_set_single_click(GTK_TREE_VIEW(folder_view),
-            // file_browser->single_click); gtk_tree_view_set_single_click_timeout(
-            //    GTK_TREE_VIEW(folder_view),
-            //    app_settings.get_single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
+            gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(folder_view),
+                                                       file_browser->single_click);
 
             icon_size = file_browser->large_icons ? big_icon_size : small_icon_size;
 
@@ -5867,39 +5863,16 @@ ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_clic
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
-            exo_icon_view_set_single_click(EXO_ICON_VIEW(file_browser->folder_view), single_click);
+            gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(file_browser->folder_view),
+                                                       single_click);
             break;
         case ptk::file_browser::view_mode::list_view:
-            // gtk_tree_view_set_single_click(GTK_TREE_VIEW(file_browser->folder_view),
-            // single_click);
+            gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(file_browser->folder_view),
+                                                       single_click);
             break;
     }
 
     file_browser->single_click = single_click;
-}
-
-void
-ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, u32 timeout)
-{
-    if (timeout == file_browser->single_click_timeout)
-    {
-        return;
-    }
-
-    switch (file_browser->view_mode)
-    {
-        case ptk::file_browser::view_mode::icon_view:
-        case ptk::file_browser::view_mode::compact_view:
-            exo_icon_view_set_single_click_timeout(EXO_ICON_VIEW(file_browser->folder_view),
-                                                   timeout);
-            break;
-        case ptk::file_browser::view_mode::list_view:
-            // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(file_browser->folder_view),
-            //                                       timeout);
-            break;
-    }
-
-    file_browser->single_click_timeout = timeout;
 }
 
 ////////////////////////////////////////////////////////////////////////////

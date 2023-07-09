@@ -2754,10 +2754,7 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
 
     // ztd::logger::info("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
     ptk_file_browser_set_single_click(file_browser, app_settings.single_click());
-    // FIXME: this should not be hard-code
-    ptk_file_browser_set_single_click_timeout(file_browser,
-                                              app_settings.single_hover() ? SINGLE_CLICK_TIMEOUT
-                                                                          : 0);
+
     ptk_file_browser_show_thumbnails(file_browser,
                                      app_settings.show_thumbnail() ? app_settings.max_thumb_size()
                                                                    : 0);
@@ -5972,9 +5969,8 @@ main_task_view_new(MainWindow* main_window)
     gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(list));
     // gtk_tree_view_set_model adds a ref
     g_object_unref(list);
-    // gtk_tree_view_set_single_click(GTK_TREE_VIEW(view), true);
+    gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(view), true);
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(view), false);
-    // gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(view), SINGLE_CLICK_TIMEOUT);
 
     // Columns
     for (const auto i : ztd::range(task_names.size()))

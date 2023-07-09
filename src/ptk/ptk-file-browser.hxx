@@ -140,7 +140,6 @@ struct PtkFileBrowser
     GtkWidget* folder_view{nullptr};
     GtkWidget* folder_view_scroll{nullptr};
     GtkCellRenderer* icon_render{nullptr};
-    u32 single_click_timeout{0};
 
     // MOD
     panel_t mypanel{0};
@@ -374,7 +373,6 @@ void ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_show_hidden_files(PtkFileBrowser* file_browser, bool show);
 
 void ptk_file_browser_set_single_click(PtkFileBrowser* file_browser, bool single_click);
-void ptk_file_browser_set_single_click_timeout(PtkFileBrowser* file_browser, u32 timeout);
 
 /* Sorting files */
 void ptk_file_browser_set_sort_order(PtkFileBrowser* file_browser,

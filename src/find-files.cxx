@@ -1213,14 +1213,9 @@ find_files(const std::vector<std::string>& search_dirs)
     data->search_result = GTK_WIDGET(gtk_builder_get_object(builder, "search_result"));
     /* replace the problematic GtkTreeView with GtkTreeView */
     data->result_view = gtk_tree_view_new();
-    /*
-    if (app_settings.get_single_click())
-    {
-        gtk_tree_view_set_single_click(GTK_TREE_VIEW(data->result_view), true);
-        gtk_tree_view_set_single_click_timeout(GTK_TREE_VIEW(data->result_view),
-                                               SINGLE_CLICK_TIMEOUT);
-    }
-     */
+
+    gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(data->result_view), app_settings.single_click());
+
     gtk_widget_show(data->result_view);
     gtk_container_add(GTK_CONTAINER(gtk_builder_get_object(builder, "result_scroll")),
                       data->result_view);

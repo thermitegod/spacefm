@@ -347,9 +347,6 @@ on_response(GtkDialog* dlg, i32 response, FMPrefDlg* user_data)
                     {
                         file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        ptk_file_browser_set_single_click_timeout(
-                            file_browser,
-                            app_settings.single_hover() ? SINGLE_CLICK_TIMEOUT : 0);
                     }
                 }
             }

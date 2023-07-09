@@ -41,9 +41,6 @@
 #include "xset/xset.hxx"
 #include "xset/xset-lookup.hxx"
 
-// this determines time before item is selected by hover in single-click mode
-inline constexpr u32 SINGLE_CLICK_TIMEOUT = 150;
-
 // This limits the small icon size for side panes and task list
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
