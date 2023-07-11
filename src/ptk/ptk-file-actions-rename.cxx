@@ -2363,7 +2363,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
     if (create_new != ptk::rename_mode::rename && auto_open)
     {
-        mset->open = gtk_button_new_with_mnemonic("& _Open");
+        mset->open = gtk_button_new_with_mnemonic("_Open");
         gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
                                      mset->open,
                                      GtkResponseType::GTK_RESPONSE_APPLY);
