@@ -26,17 +26,20 @@ struct AppSettings
     [[nodiscard]] bool show_thumbnail() const noexcept;
     void show_thumbnail(bool val) noexcept;
 
-    [[nodiscard]] u64 max_thumb_size() const noexcept;
-    void max_thumb_size(u64 val) noexcept;
+    [[nodiscard]] bool thumbnail_size_limit() const noexcept;
+    void thumbnail_size_limit(bool val) noexcept;
 
-    [[nodiscard]] u64 icon_size_big() const noexcept;
-    void icon_size_big(u64 val) noexcept;
+    [[nodiscard]] u32 max_thumb_size() const noexcept;
+    void max_thumb_size(u32 val) noexcept;
 
-    [[nodiscard]] u64 icon_size_small() const noexcept;
-    void icon_size_small(u64 val) noexcept;
+    [[nodiscard]] i32 icon_size_big() const noexcept;
+    void icon_size_big(i32 val) noexcept;
 
-    [[nodiscard]] u64 icon_size_tool() const noexcept;
-    void icon_size_tool(u64 val) noexcept;
+    [[nodiscard]] i32 icon_size_small() const noexcept;
+    void icon_size_small(i32 val) noexcept;
+
+    [[nodiscard]] i32 icon_size_tool() const noexcept;
+    void icon_size_tool(i32 val) noexcept;
 
     [[nodiscard]] bool single_click() const noexcept;
     void single_click(bool val) noexcept;
@@ -94,12 +97,13 @@ struct AppSettings
 
   private:
     // General Settings
-    bool show_thumbnail_{false};
-    u64 max_thumb_size_{8 << 20};
+    bool show_thumbnails_{false};
+    bool thumbnail_size_limit_{true};
+    u32 thumbnail_max_size_{8 << 20}; // 8 MiB
 
-    u64 icon_size_big_{48};
-    u64 icon_size_small_{22};
-    u64 icon_size_tool_{22};
+    i32 icon_size_big_{48};
+    i32 icon_size_small_{22};
+    i32 icon_size_tool_{22};
 
     bool single_click_{false};
     bool single_hover_{false};

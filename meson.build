@@ -344,7 +344,7 @@ sources = files(
     'src/item-prop.cxx',
     'src/main.cxx',
     'src/main-window.cxx',
-    'src/pref-dialog.cxx',
+    'src/preference-dialog.cxx',
     'src/program-timer.cxx',
     'src/scripts.cxx',
     'src/settings.cxx',

@@ -54,9 +54,9 @@
 #include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-keyboard.hxx"
-
-#include "pref-dialog.hxx"
 #include "ptk/ptk-file-menu.hxx"
+
+#include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
@@ -541,12 +541,7 @@ main_window_open_terminal(MainWindow* main_window, bool as_root)
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
-        edit_preference(GTK_WINDOW(parent), preference_dialog::page::advanced);
-        main_term = xset_get_s(xset::name::main_terminal);
-        if (!main_term)
-        {
-            return;
-        }
+        return;
     }
 
     // task
@@ -800,11 +795,8 @@ update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser)
 }
 
 void
-main_window_toggle_thumbnails_all_windows()
+main_window_reload_thumbnails_all_windows()
 {
-    // toggle
-    app_settings.show_thumbnail(!app_settings.show_thumbnail());
-
     // update all windows/all panels/all browsers
     for (MainWindow* window : all_windows)
     {
@@ -828,6 +820,15 @@ main_window_toggle_thumbnails_all_windows()
 #if defined(__GLIBC__)
     malloc_trim(0);
 #endif
+}
+
+void
+main_window_toggle_thumbnails_all_windows()
+{
+    // toggle
+    app_settings.show_thumbnail(!app_settings.show_thumbnail());
+
+    main_window_reload_thumbnails_all_windows();
 }
 
 void
@@ -2865,7 +2866,7 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 static void
 main_window_preference(MainWindow* main_window)
 {
-    edit_preference(GTK_WINDOW(main_window), preference_dialog::page::general);
+    show_preference_dialog(GTK_WINDOW(main_window));
 }
 
 static void

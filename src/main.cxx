@@ -63,7 +63,6 @@
 #include "autosave.hxx"
 
 #include "find-files.hxx"
-#include "pref-dialog.hxx"
 #include "ipc.hxx"
 #include "settings.hxx"
 

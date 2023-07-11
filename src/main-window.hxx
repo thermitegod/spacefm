@@ -122,6 +122,7 @@ void on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
 // void show_panels(GtkMenuItem* item, MainWindow* main_window);
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
+void main_window_reload_thumbnails_all_windows();
 void main_window_toggle_thumbnails_all_windows();
 void main_window_refresh_all_tabs_matching(const std::filesystem::path& path);
 void main_window_close_all_invalid_tabs();

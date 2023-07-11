@@ -153,7 +153,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     // Create the label for total size
     const auto total_size = std::format("Total Size: {}", vfs_file_size_format(total_size_bytes));
     GtkWidget* total_size_label = gtk_label_new(total_size.c_str());
-    gtk_box_pack_start(GTK_BOX(box), total_size_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), total_size_label, false, false, 0);
 
     gtk_widget_show_all(dialog);
 

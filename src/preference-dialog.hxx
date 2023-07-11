@@ -16,15 +16,5 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include <glib.h>
 
-namespace preference_dialog
-{
-    enum class page
-    {
-        general,
-        advanced,
-    };
-}
-
-bool edit_preference(GtkWindow* parent, preference_dialog::page page);
+void show_preference_dialog(GtkWindow* parent) noexcept;

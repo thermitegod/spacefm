@@ -26,59 +26,71 @@ AppSettings app_settings = AppSettings();
 bool
 AppSettings::show_thumbnail() const noexcept
 {
-    return this->show_thumbnail_;
+    return this->show_thumbnails_;
 }
 
 void
 AppSettings::show_thumbnail(bool val) noexcept
 {
-    this->show_thumbnail_ = val;
+    this->show_thumbnails_ = val;
 }
 
-u64
-AppSettings::max_thumb_size() const noexcept
+bool
+AppSettings::thumbnail_size_limit() const noexcept
 {
-    return this->max_thumb_size_;
+    return this->thumbnail_size_limit_;
 }
 
 void
-AppSettings::max_thumb_size(u64 val) noexcept
+AppSettings::thumbnail_size_limit(bool val) noexcept
 {
-    this->max_thumb_size_ = val;
+    this->thumbnail_size_limit_ = val;
 }
 
-u64
+u32
+AppSettings::max_thumb_size() const noexcept
+{
+    return this->thumbnail_max_size_;
+}
+
+void
+AppSettings::max_thumb_size(u32 val) noexcept
+{
+    this->thumbnail_max_size_ = val;
+}
+
+i32
 AppSettings::icon_size_big() const noexcept
 {
     return this->icon_size_big_;
 }
 
 void
-AppSettings::icon_size_big(u64 val) noexcept
+AppSettings::icon_size_big(i32 val) noexcept
 {
     this->icon_size_big_ = val;
 }
 
-u64
+i32
 AppSettings::icon_size_small() const noexcept
 {
     return this->icon_size_small_;
 }
 
 void
-AppSettings::icon_size_small(u64 val) noexcept
+AppSettings::icon_size_small(i32 val) noexcept
 {
     this->icon_size_small_ = val;
 }
 
-u64
+i32
 AppSettings::icon_size_tool() const noexcept
 {
     return this->icon_size_tool_;
 }
 
 void
-AppSettings::icon_size_tool(u64 val) noexcept
+AppSettings::icon_size_tool(i32 val) noexcept
 {
     this->icon_size_tool_ = val;
 }
