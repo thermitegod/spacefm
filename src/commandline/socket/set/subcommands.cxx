@@ -20,6 +20,28 @@
 #include "commandline/socket/set/subcommands.hxx"
 
 /*
+ * Bool subcommand values
+ */
+
+void
+setup_subcommand_value_true(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("true", "Set value true");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "true"; };
+    sub->callback(run_subcommand);
+}
+
+void
+setup_subcommand_value_false(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("false", "Set value false");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "false"; };
+    sub->callback(run_subcommand);
+}
+
+/*
  * subcommand window-size
  */
 
@@ -58,10 +80,13 @@ commandline::socket::set::window_maximized(CLI::App* app, const socket_subcomman
 {
     auto* sub = app->add_subcommand("window-maximized", "Set property window-maximized");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "window-maximized"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -73,10 +98,13 @@ commandline::socket::set::window_fullscreen(CLI::App* app, const socket_subcomma
 {
     auto* sub = app->add_subcommand("window-fullscreen", "Set property window-fullscreen");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "window-fullscreen"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -461,10 +489,13 @@ commandline::socket::set::devices_visible(CLI::App* app, const socket_subcommand
 {
     auto* sub = app->add_subcommand("devices-visible", "Set property devices-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "devices-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -476,10 +507,13 @@ commandline::socket::set::dirtree_visible(CLI::App* app, const socket_subcommand
 {
     auto* sub = app->add_subcommand("dirtree-visible", "Set property dirtree-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "dirtree-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -491,10 +525,13 @@ commandline::socket::set::toolbar_visible(CLI::App* app, const socket_subcommand
 {
     auto* sub = app->add_subcommand("toolbar-visible", "Set property toolbar-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "toolbar-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -506,10 +543,13 @@ commandline::socket::set::sidetoolbar_visible(CLI::App* app, const socket_subcom
 {
     auto* sub = app->add_subcommand("sidetoolbar-visible", "Set property sidetoolbar-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sidetoolbar-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -521,10 +561,13 @@ commandline::socket::set::hidden_files_visible(CLI::App* app, const socket_subco
 {
     auto* sub = app->add_subcommand("hidden-files-visible", "Set property hidden-files-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "hidden-files-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -536,10 +579,13 @@ commandline::socket::set::panel1_visible(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("panel1-visible", "Set property panel1-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "panel1-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -551,10 +597,13 @@ commandline::socket::set::panel2_visible(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("panel2-visible", "Set property panel2-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "panel2-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -566,10 +615,13 @@ commandline::socket::set::panel3_visible(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("panel3-visible", "Set property panel3-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "panel3-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -581,10 +633,13 @@ commandline::socket::set::panel4_visible(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("panel4-visible", "Set property panel4-visible");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "panel4-visible"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -915,10 +970,13 @@ commandline::socket::set::sort_ascend(CLI::App* app, const socket_subcommand_dat
 {
     auto* sub = app->add_subcommand("sort-ascend", "Set property sort-ascend");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sort-ascend"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -930,10 +988,13 @@ commandline::socket::set::sort_alphanum(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("sort-alphanum", "Set property sort-alphanum");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sort-alphanum"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -945,10 +1006,13 @@ commandline::socket::set::sort_natural(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("sort-natural", "Set property sort-natural");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sort-natural"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -960,10 +1024,13 @@ commandline::socket::set::sort_case(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("sort-case", "Set property sort-case");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sort-case"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -975,10 +1042,13 @@ commandline::socket::set::sort_hidden_first(CLI::App* app, const socket_subcomma
 {
     auto* sub = app->add_subcommand("sort-hidden-first", "Set property sort-hidden-first");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sort-hidden-first"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -986,14 +1056,45 @@ commandline::socket::set::sort_hidden_first(CLI::App* app, const socket_subcomma
  */
 
 void
+setup_subcommand_set_sort_first_files(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("files", "Set property files");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "files"; };
+    sub->callback(run_subcommand);
+}
+
+void
+setup_subcommand_set_sort_first_directories(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("directories", "Set property directories");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "directories"; };
+    sub->callback(run_subcommand);
+}
+
+void
+setup_subcommand_set_sort_first_mixed(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("mixed", "Set property mixed");
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "mixed"; };
+    sub->callback(run_subcommand);
+}
+
+void
 commandline::socket::set::sort_first(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("sort-first", "Set property sort-first");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "sort-first"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_set_sort_first_files(sub, opt);
+    setup_subcommand_set_sort_first_directories(sub, opt);
+    setup_subcommand_set_sort_first_mixed(sub, opt);
 }
 
 /*
@@ -1005,10 +1106,13 @@ commandline::socket::set::show_thumbnails(CLI::App* app, const socket_subcommand
 {
     auto* sub = app->add_subcommand("show-thumbnails", "Set property show-thumbnails");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "show-thumbnails"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*
@@ -1035,10 +1139,13 @@ commandline::socket::set::large_icons(CLI::App* app, const socket_subcommand_dat
 {
     auto* sub = app->add_subcommand("large-icons", "Set property large-icons");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
     const auto run_subcommand = [opt]() { opt->property = "large-icons"; };
     sub->callback(run_subcommand);
+
+    sub->require_subcommand();
+
+    setup_subcommand_value_true(sub, opt);
+    setup_subcommand_value_false(sub, opt);
 }
 
 /*

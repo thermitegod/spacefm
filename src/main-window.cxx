@@ -6102,23 +6102,6 @@ main_task_view_new(MainWindow* main_window)
  *
  */
 
-static bool
-get_bool(const std::string_view value)
-{
-    if (ztd::same(ztd::lower(value), "true") || ztd::same(value, "1"))
-    {
-        return true;
-    }
-    else if (ztd::same(ztd::lower(value), "false") || ztd::same(value, "0"))
-    {
-        return false;
-    }
-
-    ztd::logger::warn("socket command defaulting to false, invalid value: {}", value);
-    ztd::logger::info("supported socket bool values are 'true|1|false|0");
-    return false;
-}
-
 static const std::string
 unescape(const std::string_view t)
 {
@@ -6273,9 +6256,9 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "window-maximized"))
         {
-            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
 
-            if (get_bool(value))
+            if (ztd::same(subproperty, "true"))
             {
                 gtk_window_maximize(GTK_WINDOW(main_window));
             }
@@ -6286,9 +6269,9 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "window-fullscreen"))
         {
-            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
 
-            xset_set_b(xset::name::main_full, get_bool(value));
+            xset_set_b(xset::name::main_full, ztd::same(subproperty, "true"));
             on_fullscreen_activate(nullptr, main_window);
         }
         else if (ztd::same(property, "window-vslider-top") ||
@@ -6474,65 +6457,80 @@ main_window_socket_command(const std::string_view socket_commands_json)
             focus_panel(nullptr, (void*)main_window, panel);
             main_window_add_new_tab(main_window, value);
         }
-        else if (ztd::endswith(property, "-visible"))
+        else if (ztd::same(property, "devices-visible"))
         {
-            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
 
-            bool valid = false;
-            bool use_mode = false;
-            xset::panel xset_panel_var;
-            if (ztd::startswith(property, "devices-"))
-            {
-                xset_panel_var = xset::panel::show_devmon;
-                use_mode = true;
-                valid = true;
-            }
-            else if (ztd::startswith(property, "dirtree-"))
-            {
-                xset_panel_var = xset::panel::show_dirtree;
-                use_mode = true;
-                valid = true;
-            }
-            else if (ztd::startswith(property, "toolbar-"))
-            {
-                xset_panel_var = xset::panel::show_toolbox;
-                use_mode = true;
-                valid = true;
-            }
-            else if (ztd::startswith(property, "sidetoolbar-"))
-            {
-                xset_panel_var = xset::panel::show_sidebar;
-                use_mode = true;
-                valid = true;
-            }
-            else if (ztd::startswith(property, "hidden-files-"))
-            {
-                xset_panel_var = xset::panel::show_hidden;
-                valid = true;
-            }
-            else if (ztd::startswith(property, "panel"))
-            {
-                const i32 j = property[5] - 48;
-                xset_set_b_panel(j, xset::panel::show, get_bool(value));
-                show_panels_all_windows(nullptr, main_window);
-                return {SOCKET_SUCCESS, ""};
-            }
-            if (!valid)
-            {
-                return {SOCKET_FAILURE, std::format("unknown property '{}'", value)};
-            }
-            if (use_mode)
-            {
-                xset_set_b_panel_mode(panel,
-                                      xset_panel_var,
-                                      main_window->panel_context.at(panel),
-                                      get_bool(value));
-            }
-            else
-            {
-                xset_set_b_panel(panel, xset_panel_var, get_bool(value));
-            }
+            xset_set_b_panel_mode(panel,
+                                  xset::panel::show_devmon,
+                                  main_window->panel_context.at(panel),
+                                  ztd::same(subproperty, "true"));
             update_views_all_windows(nullptr, file_browser);
+        }
+        else if (ztd::same(property, "dirtree-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel_mode(panel,
+                                  xset::panel::show_dirtree,
+                                  main_window->panel_context.at(panel),
+                                  ztd::same(subproperty, "true"));
+            update_views_all_windows(nullptr, file_browser);
+        }
+        else if (ztd::same(property, "toolbar-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel_mode(panel,
+                                  xset::panel::show_toolbox,
+                                  main_window->panel_context.at(panel),
+                                  ztd::same(subproperty, "true"));
+            update_views_all_windows(nullptr, file_browser);
+        }
+        else if (ztd::same(property, "sidetoolbar-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel_mode(panel,
+                                  xset::panel::show_sidebar,
+                                  main_window->panel_context.at(panel),
+                                  ztd::same(subproperty, "true"));
+            update_views_all_windows(nullptr, file_browser);
+        }
+        else if (ztd::same(property, "hidden-files-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel(panel, xset::panel::show_hidden, ztd::same(subproperty, "true"));
+            update_views_all_windows(nullptr, file_browser);
+        }
+        else if (ztd::same(property, "panel1-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel(panel_1, xset::panel::show, ztd::same(subproperty, "true"));
+            show_panels_all_windows(nullptr, main_window);
+        }
+        else if (ztd::same(property, "panel2-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel(panel_2, xset::panel::show, ztd::same(subproperty, "true"));
+            show_panels_all_windows(nullptr, main_window);
+        }
+        else if (ztd::same(property, "panel3-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel(panel_3, xset::panel::show, ztd::same(subproperty, "true"));
+            show_panels_all_windows(nullptr, main_window);
+        }
+        else if (ztd::same(property, "panel4-visible"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b_panel(panel_4, xset::panel::show, ztd::same(subproperty, "true"));
+            show_panels_all_windows(nullptr, main_window);
         }
         else if (ztd::same(property, "panel-hslider-top") ||
                  ztd::same(property, "panel-hslider-bottom") ||
@@ -6671,74 +6669,72 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             file_browser->set_sort_order(j);
         }
-        else if (ztd::startswith(property, "sort-"))
+        else if (ztd::same(property, "sort-ascend"))
         {
-            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
 
-            xset::name xset_name;
-            if (ztd::same(property, "sort-ascend"))
+            file_browser->set_sort_type(ztd::same(subproperty, "true")
+                                            ? GtkSortType::GTK_SORT_ASCENDING
+                                            : GtkSortType::GTK_SORT_DESCENDING);
+        }
+        else if (ztd::same(property, "sort-alphanum"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b(xset::name::sortx_alphanum, ztd::same(subproperty, "true"));
+            file_browser->set_sort_extra(xset::name::sortx_alphanum);
+        }
+        // else if (ztd::same(property, "sort-natural"))
+        // {
+        //     const std::string subproperty = json["subproperty"];
+        //
+        //     xset_set_b(xset::name::sortx_alphanum, ztd::same(subproperty, "true"));
+        //     file_browser->set_sort_extra(xset::name::sortx_alphanum);
+        // }
+        else if (ztd::same(property, "sort-case"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset_set_b(xset::name::sortx_case, ztd::same(subproperty, "true"));
+            file_browser->set_sort_extra(xset::name::sortx_case);
+        }
+        else if (ztd::same(property, "sort-hidden-first"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            const xset::name name = ztd::same(subproperty, "true") ? xset::name::sortx_hidfirst
+                                                                   : xset::name::sortx_hidlast;
+            xset_set_b(name, true);
+            file_browser->set_sort_extra(name);
+        }
+        else if (ztd::same(property, "sort-first"))
+        {
+            const std::string subproperty = json["subproperty"];
+
+            xset::name name;
+            if (ztd::same(subproperty, "files"))
             {
-                file_browser->set_sort_type(get_bool(value) ? GtkSortType::GTK_SORT_ASCENDING
-                                                            : GtkSortType::GTK_SORT_DESCENDING);
-                return {SOCKET_SUCCESS, ""};
+                name = xset::name::sortx_files;
             }
-            else if (ztd::same(property, "sort-alphanum"))
+            else if (ztd::same(subproperty, "directories"))
             {
-                xset_name = xset::name::sortx_alphanum;
-                xset_set_b(xset_name, get_bool(value));
+                name = xset::name::sortx_directories;
             }
-            // else if (ztd::same(property, "sort-natural"))
-            //{
-            //     xset_name = xset::name::sortx_natural;
-            //     xset_set_b(xset_name, get_bool(value));
-            // }
-            else if (ztd::same(property, "sort-case"))
+            else if (ztd::same(subproperty, "mixed"))
             {
-                xset_name = xset::name::sortx_case;
-                xset_set_b(xset_name, get_bool(value));
-            }
-            else if (ztd::same(property, "sort-hidden-first"))
-            {
-                if (get_bool(value))
-                {
-                    xset_name = xset::name::sortx_hidfirst;
-                }
-                else
-                {
-                    xset_name = xset::name::sortx_hidlast;
-                }
-                xset_set_b(xset_name, true);
-            }
-            else if (ztd::same(property, "sort-first"))
-            {
-                if (ztd::same(value, "files"))
-                {
-                    xset_name = xset::name::sortx_files;
-                }
-                else if (ztd::same(value, "directories"))
-                {
-                    xset_name = xset::name::sortx_directories;
-                }
-                else if (ztd::same(value, "mixed"))
-                {
-                    xset_name = xset::name::sortx_mix;
-                }
-                else
-                {
-                    return {SOCKET_INVALID, std::format("invalid {} value", value)};
-                }
+                name = xset::name::sortx_mix;
             }
             else
             {
-                return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
+                return {SOCKET_INVALID, std::format("invalid {} value", subproperty)};
             }
-            file_browser->set_sort_extra(xset_name);
+            file_browser->set_sort_extra(name);
         }
         else if (ztd::same(property, "show-thumbnails"))
         {
-            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
 
-            if (app_settings.show_thumbnail() != get_bool(value))
+            if (app_settings.show_thumbnail() != ztd::same(subproperty, "true"))
             {
                 main_window_toggle_thumbnails_all_windows();
             }
@@ -6751,14 +6747,14 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "large-icons"))
         {
-            const std::string_view value = data[0];
+            const std::string subproperty = json["subproperty"];
 
             if (!file_browser->is_view_mode(ptk::file_browser::view_mode::icon_view))
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
                                       main_window->panel_context.at(panel),
-                                      get_bool(value));
+                                      ztd::same(subproperty, "true"));
                 update_views_all_windows(nullptr, file_browser);
             }
         }
@@ -7488,7 +7484,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 }
                 ptask->task->percent = j;
             }
-            ptask->task->custom_percent = get_bool(value);
+            ptask->task->custom_percent = !ztd::same(value, "0");
             ptask->pause_change_view = ptask->pause_change = true;
             return {SOCKET_SUCCESS, ""};
         }
