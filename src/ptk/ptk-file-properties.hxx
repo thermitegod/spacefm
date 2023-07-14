@@ -17,16 +17,13 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
-
 #include <filesystem>
 
-#include <vector>
+#include <span>
 
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-file-info.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                              std::vector<vfs::file_info>& sel_files, i32 page);
+void ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
+                              const std::span<const vfs::file_info> selected_files, i32 page);
