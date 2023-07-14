@@ -21,63 +21,174 @@
 #include <span>
 #include <vector>
 
+#include <gtk/gtk.h>
+
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "settings/app.hxx"
+
+#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-file-task.hxx"
 
 #include "ptk/ptk-file-actions-misc.hxx"
 
 static bool
-action_dialog(GtkWindow* parent_win, const std::string_view title, const std::string_view message)
+create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
+                          const std::span<const vfs::file_info> selected_files) noexcept
 {
-    GtkWidget* dlg = gtk_message_dialog_new(parent_win,
-                                            GtkDialogFlags::GTK_DIALOG_MODAL,
-                                            GtkMessageType::GTK_MESSAGE_WARNING,
-                                            GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                            message.data(),
-                                            nullptr);
-    gtk_dialog_set_default_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_YES);
-    gtk_window_set_title(GTK_WINDOW(dlg), title.data());
-    // xset_set_window_icon(GTK_WINDOW(dlg));
-
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
-    gtk_widget_destroy(dlg);
-
-    if (response != GtkResponseType::GTK_RESPONSE_YES)
+    enum class file_action_column
     {
-        return false;
+        name,
+        size,
+    };
+
+    GtkWidget* dialog =
+        gtk_dialog_new_with_buttons("Confirm File Action",
+                                    parent,
+                                    GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
+                                                   GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
+                                    "Confirm",
+                                    GtkResponseType::GTK_RESPONSE_ACCEPT,
+                                    "Cancel",
+                                    GtkResponseType::GTK_RESPONSE_CANCEL,
+                                    nullptr);
+
+    gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
+    gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
+    // gtk_window_set_role(GTK_WINDOW(dialog), "dialog");
+
+    gtk_widget_set_size_request(GTK_WIDGET(dialog), 800, 500);
+    // gtk_window_set_resizable(GTK_WINDOW(dialog), true);
+    gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+    gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+
+    // Set "Confirm" as the default button
+    // TODO - The first column in the GtkTreeView is the active widget
+    // whe the dialog is opened, should be the "Confirm" button
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GtkResponseType::GTK_RESPONSE_ACCEPT);
+
+    GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    GtkWidget* box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_add(GTK_CONTAINER(content_area), box);
+
+    // header label
+    GtkWidget* header_label = gtk_label_new(header_text.data());
+    PangoAttrList* attr_list = pango_attr_list_new();
+    PangoAttribute* attr = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
+    pango_attr_list_insert(attr_list, attr);
+    gtk_label_set_attributes(GTK_LABEL(header_label), attr_list);
+    gtk_box_pack_start(GTK_BOX(box), header_label, false, false, 0);
+
+    GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                   GTK_POLICY_AUTOMATIC,
+                                   GTK_POLICY_AUTOMATIC);
+    // gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window), GtkShadowType::GTK_SHADOW_ETCHED_IN);
+    gtk_widget_set_hexpand(scrolled_window, true);
+    gtk_widget_set_vexpand(scrolled_window, true);
+
+    GtkListStore* list_store = gtk_list_store_new(magic_enum::enum_count<file_action_column>(),
+                                                  G_TYPE_STRING,
+                                                  G_TYPE_STRING);
+    usize total_size_bytes = 0;
+    for (const vfs::file_info file : selected_files)
+    {
+        total_size_bytes += file->size();
+
+        GtkTreeIter iter;
+        gtk_list_store_append(list_store, &iter);
+        gtk_list_store_set(list_store,
+                           &iter,
+                           file_action_column::name,
+                           file->path().c_str(),
+                           file_action_column::size,
+                           file->display_size().data(),
+                           -1);
     }
-    return true;
+
+    GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
+    gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
+    gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
+
+    // tree view is non-selectable
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
+    gtk_tree_selection_set_mode(selection, GtkSelectionMode::GTK_SELECTION_NONE);
+
+    // add the name and size columns to the tree view
+    GtkCellRenderer* cell_renderer = nullptr;
+    GtkTreeViewColumn* column = nullptr;
+
+    cell_renderer = gtk_cell_renderer_text_new();
+    column =
+        gtk_tree_view_column_new_with_attributes("File Name",
+                                                 cell_renderer,
+                                                 "text",
+                                                 magic_enum::enum_integer(file_action_column::name),
+                                                 nullptr);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+    gtk_tree_view_column_set_expand(column, true);
+
+    cell_renderer = gtk_cell_renderer_text_new();
+    gtk_cell_renderer_set_alignment(cell_renderer, 1, 0.5); // right align file sizes
+    column =
+        gtk_tree_view_column_new_with_attributes("Size",
+                                                 cell_renderer,
+                                                 "text",
+                                                 magic_enum::enum_integer(file_action_column::size),
+                                                 nullptr);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+
+    // Add the tree view to the scrolled window
+    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+
+    // Add the scrolled window to the box
+    gtk_box_pack_start(GTK_BOX(box), scrolled_window, true, true, 0);
+
+    // Create the label for total size
+    const auto total_size = std::format("Total Size: {}", vfs_file_size_format(total_size_bytes));
+    GtkWidget* total_size_label = gtk_label_new(total_size.c_str());
+    gtk_box_pack_start(GTK_BOX(box), total_size_label, FALSE, FALSE, 0);
+
+    gtk_widget_show_all(dialog);
+
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+    return response == GtkResponseType::GTK_RESPONSE_ACCEPT;
 }
 
 void
 ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                 const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view)
+                 const std::span<const vfs::file_info> selected_files, GtkTreeView* task_view)
 {
-    if (sel_files.empty())
+    (void)cwd;
+
+    if (selected_files.empty())
     {
+        ztd::logger::warn("Trying to delete an empty file list");
         return;
     }
 
     if (app_settings.confirm_delete())
     {
-        const std::string msg = std::format("Delete {} selected item ?", sel_files.size());
-        const bool ret = action_dialog(parent_win, "Confirm Delete", msg);
-        if (!ret)
+        const bool confirmed =
+            create_file_action_dialog(parent_win, "Delete selected files?", selected_files);
+        if (!confirmed)
         {
             return;
         }
     }
 
     std::vector<std::filesystem::path> file_list;
-    file_list.reserve(sel_files.size());
-    for (const vfs::file_info file : sel_files)
+    file_list.reserve(selected_files.size());
+    for (const vfs::file_info file : selected_files)
     {
-        const auto file_path = cwd / file->name();
-        file_list.emplace_back(file_path);
+        file_list.emplace_back(file->path());
     }
 
     PtkFileTask* ptask = ptk_file_task_new(vfs::file_task_type::DELETE,
@@ -89,29 +200,31 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
 void
 ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                const std::span<const vfs::file_info> sel_files, GtkTreeView* task_view)
+                const std::span<const vfs::file_info> selected_files, GtkTreeView* task_view)
 {
-    if (sel_files.empty())
+    (void)cwd;
+
+    if (selected_files.empty())
     {
+        ztd::logger::warn("Trying to trash an empty file list");
         return;
     }
 
     if (app_settings.confirm_trash())
     {
-        const std::string msg = std::format("Trash {} selected item ?", sel_files.size());
-        const bool ret = action_dialog(parent_win, "Confirm Trash", msg);
-        if (!ret)
+        const bool confirmed =
+            create_file_action_dialog(parent_win, "Trash selected files?", selected_files);
+        if (!confirmed)
         {
             return;
         }
     }
 
     std::vector<std::filesystem::path> file_list;
-    file_list.reserve(sel_files.size());
-    for (const vfs::file_info file : sel_files)
+    file_list.reserve(selected_files.size());
+    for (const vfs::file_info file : selected_files)
     {
-        const auto file_path = cwd / file->name();
-        file_list.emplace_back(file_path);
+        file_list.emplace_back(file->path());
     }
 
     PtkFileTask* ptask = ptk_file_task_new(vfs::file_task_type::trash,
