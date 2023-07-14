@@ -56,6 +56,7 @@
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
 
+#include "about.hxx"
 #include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
@@ -85,7 +86,6 @@
 #include "ptk/ptk-handler.hxx"
 
 static void rebuild_menus(MainWindow* main_window);
-static void main_window_preference(MainWindow* main_window);
 
 static void main_window_class_init(MainWindowClass* klass);
 static void main_window_init(MainWindow* main_window);
@@ -2860,12 +2860,6 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
-    main_window_preference(main_window);
-}
-
-static void
-main_window_preference(MainWindow* main_window)
-{
     show_preference_dialog(GTK_WINDOW(main_window));
 }
 
@@ -2873,33 +2867,8 @@ static void
 on_about_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
-    static GtkWidget* about_dlg = nullptr;
-    if (!about_dlg)
-    {
-        GtkBuilder* builder = gtk_builder_new();
-
-        builder = ptk_gtk_builder_new_from_file(PTK_DLG_ABOUT);
-        about_dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
-        g_object_unref(builder);
-        gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), PACKAGE_VERSION);
-
-        std::string name;
-        xset_t set = xset_get(xset::name::main_icon);
-        if (set->icon)
-        {
-            name = set->icon.value();
-        }
-        else
-        {
-            name = "spacefm";
-        }
-        gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(about_dlg), name.c_str());
-
-        // g_object_add_weak_pointer(G_OBJECT(about_dlg), (void*)&about_dlg);
-        g_signal_connect(about_dlg, "response", G_CALLBACK(gtk_widget_destroy), nullptr);
-    }
-    gtk_window_set_transient_for(GTK_WINDOW(about_dlg), GTK_WINDOW(user_data));
-    gtk_window_present(GTK_WINDOW(about_dlg));
+    MainWindow* main_window = MAIN_WINDOW(user_data);
+    show_about_dialog(GTK_WINDOW(main_window));
 }
 
 static void

@@ -337,6 +337,7 @@ endforeach
 ## Source files
 
 sources = files(
+    'src/about.cxx',
     'src/autosave.cxx',
     'src/bookmarks.cxx',
     'src/find-files.cxx',
