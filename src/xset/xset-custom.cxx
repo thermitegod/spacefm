@@ -117,13 +117,13 @@ xset_custom_delete(xset_t set, bool delete_next)
     if (std::filesystem::exists(path1))
     {
         std::filesystem::remove_all(path1);
-        ztd::logger::info("Removed {}", path1);
+        ztd::logger::info("Removed {}", path1.string());
     }
 
     if (std::filesystem::exists(path2))
     {
         std::filesystem::remove_all(path2);
-        ztd::logger::info("Removed {}", path2);
+        ztd::logger::info("Removed {}", path2.string());
     }
 
     xset_remove(set);
@@ -443,7 +443,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
             if (!set->plugin)
             {
                 std::filesystem::remove_all(plug_dir);
-                ztd::logger::info("Removed {}", plug_dir);
+                ztd::logger::info("Removed {}", plug_dir.string());
             }
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_ERROR,
@@ -459,7 +459,7 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
                 if (!set->plugin)
                 {
                     std::filesystem::remove_all(plug_dir);
-                    ztd::logger::info("Removed {}", plug_dir);
+                    ztd::logger::info("Removed {}", plug_dir.string());
                 }
                 xset_msg_dialog(parent,
                                 GtkMessageType::GTK_MESSAGE_ERROR,

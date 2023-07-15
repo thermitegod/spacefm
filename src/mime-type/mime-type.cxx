@@ -455,7 +455,7 @@ mime_type_is_text_file(const std::filesystem::path& file_path, const std::string
                 const auto length = read(fd, data.data(), data.size());
                 if (length == -1)
                 {
-                    ztd::logger::error("failed to read {}", file_path);
+                    ztd::logger::error("failed to read {}", file_path.string());
                     ret = false;
                 }
                 else

@@ -33,7 +33,7 @@ write_file(const std::filesystem::path& path, const T& data)
     std::ofstream file(path);
     if (!file.is_open())
     {
-        ztd::logger::error("Failed to open file: {}", path);
+        ztd::logger::error("Failed to open file: {}", path.string());
         return false;
     }
 
@@ -41,7 +41,7 @@ write_file(const std::filesystem::path& path, const T& data)
 
     if (file.fail())
     {
-        ztd::logger::error("Failed to write file: {}", path);
+        ztd::logger::error("Failed to write file: {}", path.string());
         file.close();
         return false;
     }
@@ -50,7 +50,7 @@ write_file(const std::filesystem::path& path, const T& data)
 
     if (file.fail())
     {
-        ztd::logger::error("Failed to close file: {}", path);
+        ztd::logger::error("Failed to close file: {}", path.string());
         return false;
     }
 

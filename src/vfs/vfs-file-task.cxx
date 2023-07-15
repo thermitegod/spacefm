@@ -1699,7 +1699,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     }
     catch (const Glib::SpawnError& e)
     {
-        ztd::logger::error("    glib_error_code={}", e.code());
+        ztd::logger::error("    glib_error_code={}", magic_enum::enum_integer(e.code()));
 
         if (errno)
         {

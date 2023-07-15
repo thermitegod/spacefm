@@ -90,7 +90,7 @@ load_bookmarks() noexcept
     std::ifstream file(bookmark_file);
     if (!file)
     {
-        ztd::logger::error("Failed to open the file: {}", bookmark_file);
+        ztd::logger::error("Failed to open the file: {}", bookmark_file.string());
         return;
     }
 

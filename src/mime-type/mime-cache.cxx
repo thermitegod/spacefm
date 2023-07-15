@@ -87,7 +87,7 @@ MimeCache::load_mime_file()
     const i32 fd = open(this->file_path_.c_str(), O_RDONLY, 0);
     if (fd == -1)
     {
-        ztd::logger::error("failed to open {}", this->file_path_);
+        ztd::logger::error("failed to open {}", this->file_path_.string());
         return;
     }
 
@@ -102,7 +102,7 @@ MimeCache::load_mime_file()
     const auto length = read(fd, buf, mime_stat.size());
     if (length == -1)
     {
-        ztd::logger::error("failed to read {}", this->file_path_);
+        ztd::logger::error("failed to read {}", this->file_path_.string());
         close(fd);
         return;
     }

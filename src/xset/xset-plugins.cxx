@@ -99,7 +99,7 @@ clean_plugin_mirrors()
             {
                 const auto plugin_path = path / file_name;
                 std::filesystem::remove_all(plugin_path);
-                ztd::logger::info("Removed {}/{}", path, file_name);
+                ztd::logger::info("Removed {}", plugin_path.string());
             }
         }
     }

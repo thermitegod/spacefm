@@ -403,7 +403,7 @@ main(int argc, char* argv[])
         {
             if (!std::filesystem::is_directory(file))
             {
-                ztd::logger::error("Not a directory: '{}'", file);
+                ztd::logger::error("Not a directory: '{}'", file.string());
                 continue;
             }
             const auto command = std::format("{} socket set new-tab {}",
