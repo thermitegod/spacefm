@@ -724,13 +724,19 @@ mime_type_update_association(const std::string_view type, const std::string_view
     bool data_changed = false;
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
+    const auto mimeapps = vfs::user_dirs->config_dir() / "mimeapps.list";
+
+    if (!std::filesystem::exists(mimeapps))
+    {
+        ztd::logger::info("Creating empty mime list: {}", mimeapps);
+        save_to_file(mimeapps, "[Default Applications]\n");
+    }
 
     // Load current mimeapps.list content, if available
     const auto kf = Glib::KeyFile::create();
     try
     {
-        kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
+        kf->load_from_file(mimeapps, Glib::KeyFile::Flags::NONE);
     }
     catch (const Glib::FileError& e)
     {
@@ -754,12 +760,12 @@ mime_type_update_association(const std::string_view type, const std::string_view
             apps = kf->get_string_list(group.data(), type.data());
             if (apps.empty())
             {
-                return;
+                continue;
             }
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
-            return;
+            continue;
         }
 
         mime_type::action group_block;
@@ -902,6 +908,6 @@ mime_type_update_association(const std::string_view type, const std::string_view
     if (data_changed)
     {
         const Glib::ustring data = kf->to_data();
-        save_to_file(path, data);
+        save_to_file(mimeapps, data);
     }
 }

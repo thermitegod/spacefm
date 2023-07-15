@@ -292,19 +292,14 @@ xset_design_job_set_app(xset_t set)
         xset_context && !xset_context->var[item_prop::context::item::mime].empty()
             ? xset_context->var[item_prop::context::item::mime].data()
             : XDG_MIME_TYPE_UNKNOWN);
-    char* file =
+    const auto app =
         ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, true, false, false, false);
-
-    if (!(file && file[0]))
-    {
-        std::free(file);
-    }
 
     // add new menu item
     xset_t newset = xset_custom_new();
     xset_custom_insert_after(set, newset);
 
-    newset->z = file;
+    newset->z = app;
     newset->menu_label = set->name;
     newset->browser = set->browser;
     newset->x = std::to_string(magic_enum::enum_integer(xset::cmd::app));

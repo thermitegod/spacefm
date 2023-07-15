@@ -20,63 +20,80 @@
 
 #include <filesystem>
 
-#include <glibmm.h>
+#include <optional>
+
+#include <cassert>
 
 #include <magic_enum.hpp>
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-builder.hxx"
+#include "vfs/vfs-async-task.hxx"
+
 #include "ptk/ptk-handler.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 
-namespace app_chooser
+enum class app_chooser_column
 {
-    enum class column
-    {
-        app_icon,
-        app_name,
-        desktop_file,
-        full_path,
-    };
-}
+    app_icon,
+    app_name,
+    desktop_file,
+    full_path,
+};
 
-static void load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
-                                 vfs::async_task task);
+struct app_chooser_dialog_data
+{
+    GtkWidget* notebook{nullptr};
+
+    GtkWidget* entry_command{nullptr};
+
+    GtkWidget* btn_open_in_terminal{nullptr};
+    GtkWidget* btn_set_as_default{nullptr};
+
+    GtkWidget* btn_ok{nullptr};
+    GtkWidget* btn_cancel{nullptr};
+};
+
 static void* load_all_known_apps_thread(vfs::async_task task);
 
 static void
-init_list_view(GtkTreeView* view)
+init_list_view(GtkTreeView* tree_view)
 {
-    GtkTreeViewColumn* col = gtk_tree_view_column_new();
     GtkCellRenderer* renderer;
+    GtkTreeViewColumn* column = gtk_tree_view_column_new();
+
+    gtk_tree_view_column_set_title(column, "Applications");
 
     renderer = gtk_cell_renderer_pixbuf_new();
-    gtk_tree_view_column_pack_start(col, renderer, false);
-    gtk_tree_view_column_set_attributes(col,
+    gtk_tree_view_column_pack_start(column, renderer, false);
+    gtk_tree_view_column_set_attributes(column,
                                         renderer,
                                         "pixbuf",
-                                        app_chooser::column::app_icon,
+                                        app_chooser_column::app_icon,
                                         nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_column_pack_start(col, renderer, true);
-    gtk_tree_view_column_set_attributes(col,
+    gtk_tree_view_column_pack_start(column, renderer, true);
+    gtk_tree_view_column_set_attributes(column,
                                         renderer,
                                         "text",
-                                        app_chooser::column::app_name,
+                                        app_chooser_column::app_name,
                                         nullptr);
 
-    gtk_tree_view_append_column(view, col);
+    gtk_tree_view_append_column(tree_view, column);
 
     // add tooltip
-    gtk_tree_view_set_tooltip_column(view,
-                                     magic_enum::enum_integer(app_chooser::column::full_path));
+    gtk_tree_view_set_tooltip_column(tree_view,
+                                     magic_enum::enum_integer(app_chooser_column::full_path));
 }
 
 static i32
@@ -85,11 +102,11 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
     (void)user_data;
     char* name_a;
     i32 ret = 0;
-    gtk_tree_model_get(model, a, app_chooser::column::app_name, &name_a, -1);
+    gtk_tree_model_get(model, a, app_chooser_column::app_name, &name_a, -1);
     if (name_a)
     {
         char* name_b;
-        gtk_tree_model_get(model, b, app_chooser::column::app_name, &name_b, -1);
+        gtk_tree_model_get(model, b, app_chooser_column::app_name, &name_b, -1);
         if (name_b)
         {
             ret = g_ascii_strcasecmp(name_a, name_b);
@@ -101,19 +118,19 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
 }
 
 static void
-add_list_item(GtkListStore* list, const std::string_view path)
+add_list_item(GtkListStore* list_store, const std::string_view path)
 {
-    GtkTreeIter it;
+    GtkTreeIter iter;
 
     // desktop file already in list?
-    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(list), &it))
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(list_store), &iter))
     {
         do
         {
             char* file = nullptr;
-            gtk_tree_model_get(GTK_TREE_MODEL(list),
-                               &it,
-                               app_chooser::column::desktop_file,
+            gtk_tree_model_get(GTK_TREE_MODEL(list_store),
+                               &iter,
+                               app_chooser_column::desktop_file,
                                &file,
                                -1);
             if (file)
@@ -127,29 +144,29 @@ add_list_item(GtkListStore* list, const std::string_view path)
                 }
                 std::free(file);
             }
-        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list), &it));
+        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list_store), &iter));
     }
 
     const vfs::desktop desktop = vfs_get_desktop(path);
 
     // tooltip
-    const std::string tooltip = std::format("{}\nName={}\nExec={}{}",
+    const std::string tooltip = std::format("{}\nName={}\nExec={}\nTerminal={}",
                                             desktop->full_path().string(),
                                             desktop->display_name(),
                                             desktop->exec(),
-                                            desktop->use_terminal() ? "\nTerminal=true" : "");
+                                            desktop->use_terminal());
 
     GdkPixbuf* icon = desktop->icon(20);
-    gtk_list_store_append(list, &it);
-    gtk_list_store_set(list,
-                       &it,
-                       app_chooser::column::app_icon,
+    gtk_list_store_append(list_store, &iter);
+    gtk_list_store_set(list_store,
+                       &iter,
+                       app_chooser_column::app_icon,
                        icon,
-                       app_chooser::column::app_name,
+                       app_chooser_column::app_name,
                        desktop->display_name().data(),
-                       app_chooser::column::desktop_file,
+                       app_chooser_column::desktop_file,
                        desktop->name().data(),
-                       app_chooser::column::full_path,
+                       app_chooser_column::full_path,
                        tooltip.data(),
                        -1);
     if (icon)
@@ -158,14 +175,68 @@ add_list_item(GtkListStore* list, const std::string_view path)
     }
 }
 
-static GtkTreeModel*
-create_model_from_mime_type(vfs::mime_type mime_type)
+static void
+on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* column,
+                      GtkWidget* dialog)
 {
-    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser::column>(),
-                                            GDK_TYPE_PIXBUF,
-                                            G_TYPE_STRING,
-                                            G_TYPE_STRING,
-                                            G_TYPE_STRING);
+    (void)tree_view;
+    (void)path;
+    (void)column;
+    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
+    assert(data != nullptr);
+    gtk_button_clicked(GTK_BUTTON(data->btn_ok));
+}
+
+static void
+on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dialog)
+{
+    GtkTreeModel* model = GTK_TREE_MODEL(task->get_data());
+    if (is_cancelled)
+    {
+        g_object_unref(model);
+        return;
+    }
+
+    GtkTreeView* tree_view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(task), "view"));
+
+    gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(model),
+                                    magic_enum::enum_integer(app_chooser_column::app_name),
+                                    sort_by_name,
+                                    nullptr,
+                                    nullptr);
+    gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
+                                         magic_enum::enum_integer(app_chooser_column::app_name),
+                                         GtkSortType::GTK_SORT_ASCENDING);
+
+    gtk_tree_view_set_model(tree_view, model);
+    g_object_unref(model);
+
+    gdk_window_set_cursor(gtk_widget_get_window(dialog), nullptr);
+}
+
+GtkWidget*
+init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
+{
+    GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC,
+                                   GtkPolicyType::GTK_POLICY_AUTOMATIC);
+    // gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window), GtkShadowType::GTK_SHADOW_ETCHED_IN);
+    gtk_widget_set_hexpand(scrolled_window, true);
+    gtk_widget_set_vexpand(scrolled_window, true);
+
+    GtkListStore* list_store = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
+                                                  GDK_TYPE_PIXBUF,
+                                                  G_TYPE_STRING,
+                                                  G_TYPE_STRING,
+                                                  G_TYPE_STRING);
+
+    GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
+    gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
+    gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
+
+    init_list_view(GTK_TREE_VIEW(tree_view));
+
     if (mime_type)
     {
         std::vector<std::string> apps = mime_type->actions();
@@ -178,303 +249,269 @@ create_model_from_mime_type(vfs::mime_type mime_type)
         {
             for (const std::string_view app : apps)
             {
-                add_list_item(list, app);
+                add_list_item(list_store, app);
             }
         }
     }
-    return GTK_TREE_MODEL(list);
+
+    g_signal_connect(G_OBJECT(tree_view),
+                     "row_activated",
+                     G_CALLBACK(on_view_row_activated),
+                     dialog);
+
+    // Add the tree view to the scrolled window
+    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+
+    return GTK_WIDGET(scrolled_window);
 }
 
-static bool
-on_cmdline_keypress(GtkWidget* widget, GdkEventKey* event, GtkNotebook* notebook)
+GtkWidget*
+init_all_apps_tab(GtkWidget* dialog)
 {
-    (void)event;
-    gtk_widget_set_sensitive(GTK_WIDGET(notebook),
-                             gtk_entry_get_text_length(GTK_ENTRY(widget)) == 0);
-    return false;
-}
+    GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                   GTK_POLICY_AUTOMATIC,
+                                   GTK_POLICY_AUTOMATIC);
+    // gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window), GtkShadowType::GTK_SHADOW_ETCHED_IN);
+    gtk_widget_set_hexpand(scrolled_window, true);
+    gtk_widget_set_vexpand(scrolled_window, true);
 
-static void
-on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* col,
-                      GtkWidget* dlg)
-{
-    (void)tree_view;
-    (void)path;
-    (void)col;
-    GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(dlg), "builder"));
-    GtkWidget* ok = GTK_WIDGET(gtk_builder_get_object(builder, "okbutton"));
-    gtk_button_clicked(GTK_BUTTON(ok));
+    GtkListStore* list_store = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
+                                                  GDK_TYPE_PIXBUF,
+                                                  G_TYPE_STRING,
+                                                  G_TYPE_STRING,
+                                                  G_TYPE_STRING);
+
+    GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
+    gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
+    gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
+
+    init_list_view(GTK_TREE_VIEW(tree_view));
+
+    gtk_widget_grab_focus(GTK_WIDGET(tree_view));
+    GdkCursor* busy = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(tree_view)),
+                                                 GdkCursorType::GDK_WATCH);
+    gdk_window_set_cursor(
+        gtk_widget_get_window(GTK_WIDGET(gtk_widget_get_toplevel(GTK_WIDGET(tree_view)))),
+        busy);
+    g_object_unref(busy);
+
+    GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
+                                            GDK_TYPE_PIXBUF,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING);
+    vfs::async_task task = vfs_async_task_new((VFSAsyncFunc)load_all_known_apps_thread, list);
+    g_object_set_data(G_OBJECT(task), "view", tree_view);
+    g_object_set_data(G_OBJECT(dialog), "task", task);
+
+    task->add_event<spacefm::signal::task_finish>(on_load_all_apps_finish, dialog);
+
+    task->run_thread();
+
+    g_signal_connect(G_OBJECT(tree_view),
+                     "row_activated",
+                     G_CALLBACK(on_view_row_activated),
+                     dialog);
+
+    // Add the tree view to the scrolled window
+    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+
+    return GTK_WIDGET(scrolled_window);
 }
 
 static GtkWidget*
-app_chooser_dialog_new(GtkWindow* parent, const vfs::mime_type& mime_type, bool focus_all_apps,
-                       bool show_command, bool show_default, bool dir_default)
+app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focus_all_apps,
+                   bool show_command, bool show_default, bool dir_default)
 {
-    /*
-    focus_all_apps      Focus All Apps tab by default
-    show_command        Show custom Command entry
-    show_default        Show 'Set as default' checkbox
-    dir_default         Show 'Set as default' also for type dir
-    */
-    GtkBuilder* builder = ptk_gtk_builder_new_from_file(PTK_DLG_APP_CHOOSER);
-    GtkWidget* dlg = GTK_WIDGET(gtk_builder_get_object(builder, "dlg"));
-    GtkWidget* file_type = GTK_WIDGET(gtk_builder_get_object(builder, "file_type"));
+    // focus_all_apps      Focus All Apps tab by default
+    // show_command        Show custom Command entry
+    // show_default        Show 'Set as default' checkbox
+    // dir_default         Show 'Set as default' also for type dir
 
-    g_object_set_data_full(G_OBJECT(dlg), "builder", builder, (GDestroyNotify)g_object_unref);
+    GtkWidget* dialog =
+        gtk_dialog_new_with_buttons("App Chooser",
+                                    parent,
+                                    GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
+                                                   GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
+                                    // "Cancel",
+                                    // GtkResponseType::GTK_RESPONSE_CANCEL,
+                                    // "OK",
+                                    // GtkResponseType::GTK_RESPONSE_OK,
+                                    nullptr,
+                                    nullptr);
 
-    xset_set_window_icon(GTK_WINDOW(dlg));
+    // dialog widgets
+    const auto data = new app_chooser_dialog_data;
+    assert(data != nullptr);
+    g_object_set_data(G_OBJECT(dialog), "data", data);
 
-    const i32 width = xset_get_int(xset::name::app_dlg, xset::var::x);
-    const i32 height = xset_get_int(xset::name::app_dlg, xset::var::y);
-    if (width && height)
+    data->btn_cancel =
+        gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL);
+    data->btn_ok =
+        gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", GtkResponseType::GTK_RESPONSE_OK);
+
+    gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
+    gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
+    // gtk_window_set_role(GTK_WINDOW(dialog), "dialog");
+
+    gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 600);
+    // gtk_window_set_resizable(GTK_WINDOW(dialog), true);
+    gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+    gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+
+    // Create a vertical box to hold the dialog contents
+    GtkWidget* content_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget* vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_add(GTK_CONTAINER(content_box), vbox);
+
+    // Bold Text
+    PangoAttrList* attr_list = pango_attr_list_new();
+    PangoAttribute* attr = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
+    pango_attr_list_insert(attr_list, attr);
+
+    // Create the header label
+    GtkWidget* label_title = gtk_label_new("Choose an application or enter a command:");
+    gtk_label_set_xalign(GTK_LABEL(label_title), 0.0);
+    gtk_label_set_yalign(GTK_LABEL(label_title), 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox), label_title, false, false, 0);
+
+    // Create the file type label
+    GtkWidget* label_file_type_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkWidget* label_file_type = gtk_label_new("File Type:");
+    gtk_label_set_attributes(GTK_LABEL(label_file_type), attr_list);
+    gtk_label_set_xalign(GTK_LABEL(label_file_type), 0.0);
+    gtk_label_set_yalign(GTK_LABEL(label_file_type), 0.5);
+
+    const auto mime_desc = std::format(" {}\n ( {} )", mime_type->description(), mime_type->type());
+    GtkWidget* label_file_type_content = gtk_label_new(mime_desc.data());
+    gtk_label_set_xalign(GTK_LABEL(label_file_type), 0.0);
+    gtk_label_set_yalign(GTK_LABEL(label_file_type), 0.5);
+
+    gtk_box_pack_start(GTK_BOX(label_file_type_box), label_file_type, false, false, 0);
+    gtk_box_pack_start(GTK_BOX(label_file_type_box), label_file_type_content, false, false, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), label_file_type_box, false, false, 0);
+
+    // Create the label with an entry box
+    GtkWidget* label_entry_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkWidget* label_entry_label = gtk_label_new("Command:");
+    gtk_label_set_attributes(GTK_LABEL(label_entry_label), attr_list);
+    gtk_label_set_xalign(GTK_LABEL(label_entry_label), 0.0);
+    gtk_label_set_yalign(GTK_LABEL(label_entry_label), 0.5);
+
+    data->entry_command = gtk_entry_new();
+    // gtk_widget_set_hexpand(GTK_WIDGET(entry), true);
+    gtk_box_pack_start(GTK_BOX(label_entry_box), label_entry_label, false, false, 0);
+    gtk_box_pack_start(GTK_BOX(label_entry_box), data->entry_command, true, true, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), label_entry_box, false, false, 0);
+
+    if (!show_command)
     {
-        gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
-    }
-    else
-    {
-        gtk_window_set_default_size(GTK_WINDOW(dlg), 600, 600);
+        // TODO - hide
+        gtk_widget_hide(GTK_WIDGET(label_entry_box));
+        gtk_label_set_text(GTK_LABEL(label_title), "Please choose an application:");
     }
 
-    const std::string mime_desc =
-        std::format(" {}\n ( {} )", mime_type->description(), mime_type->type());
-    gtk_label_set_text(GTK_LABEL(file_type), mime_desc.data());
+    // Create the notebook with two tabs
+    data->notebook = gtk_notebook_new();
+    gtk_notebook_append_page(GTK_NOTEBOOK(data->notebook),
+                             init_associated_apps_tab(dialog, mime_type),
+                             gtk_label_new("Associated Apps"));
+    gtk_notebook_append_page(GTK_NOTEBOOK(data->notebook),
+                             init_all_apps_tab(dialog),
+                             gtk_label_new("All Apps"));
+    gtk_box_pack_start(GTK_BOX(vbox), data->notebook, true, true, 0);
 
-    /* Do not set default handler for directories and files with unknown type */
+    // Create the first checked button
+    data->btn_open_in_terminal = gtk_check_button_new_with_label("Open in a terminal");
+    gtk_box_pack_start(GTK_BOX(vbox), data->btn_open_in_terminal, false, false, 0);
+
+    // Create the second checked button
+    data->btn_set_as_default =
+        gtk_check_button_new_with_label("Set as the default application for this file type");
+    gtk_box_pack_start(GTK_BOX(vbox), data->btn_set_as_default, false, false, 0);
+    // Do not set default handler for directories and files with unknown type
     if (!show_default ||
         /*  ztd::same(mime_type->type(), XDG_MIME_TYPE_UNKNOWN) || */
         (ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
     {
-        gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(builder, "set_default")));
-    }
-    if (!show_command)
-    {
-        gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(builder, "hbox_command")));
-        gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(builder, "label_command")),
-                           "Please choose an application:");
+        gtk_widget_hide(GTK_WIDGET(data->btn_set_as_default));
     }
 
-    GtkTreeView* view =
-        GTK_TREE_VIEW(GTK_WIDGET(gtk_builder_get_object(builder, "recommended_apps")));
-    GtkNotebook* notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-    GtkEntry* entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "cmdline")));
-
-    GtkTreeModel* model = create_model_from_mime_type(mime_type);
-    gtk_tree_view_set_model(view, model);
-    g_object_unref(G_OBJECT(model));
-    init_list_view(view);
-    gtk_widget_grab_focus(GTK_WIDGET(view));
-
-    g_signal_connect(entry, "key_release_event", G_CALLBACK(on_cmdline_keypress), notebook);
-    g_signal_connect(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")),
-                     "switch_page",
-                     G_CALLBACK(on_notebook_switch_page),
-                     dlg);
-    g_signal_connect(GTK_WIDGET(gtk_builder_get_object(builder, "browse_btn")),
-                     "clicked",
-                     G_CALLBACK(on_browse_btn_clicked),
-                     dlg);
-    g_signal_connect(G_OBJECT(view), "row_activated", G_CALLBACK(on_view_row_activated), dlg);
-
-    gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
+    gtk_widget_show_all(GTK_WIDGET(dialog));
 
     if (focus_all_apps)
     {
         // select All Apps tab
-        gtk_widget_show(dlg);
-        gtk_notebook_next_page(notebook);
-    }
-    return dlg;
-}
-
-static void
-on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dlg)
-{
-    GtkTreeModel* model = GTK_TREE_MODEL(task->get_data());
-    if (is_cancelled)
-    {
-        g_object_unref(model);
-        return;
+        gtk_notebook_next_page(GTK_NOTEBOOK(data->notebook));
     }
 
-    GtkTreeView* view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(task), "view"));
+    gtk_widget_grab_focus(GTK_WIDGET(data->notebook));
 
-    gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(model),
-                                    magic_enum::enum_integer(app_chooser::column::app_name),
-                                    sort_by_name,
-                                    nullptr,
-                                    nullptr);
-    gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
-                                         magic_enum::enum_integer(app_chooser::column::app_name),
-                                         GtkSortType::GTK_SORT_ASCENDING);
-
-    gtk_tree_view_set_model(view, model);
-    g_object_unref(model);
-
-    gdk_window_set_cursor(gtk_widget_get_window(dlg), nullptr);
-}
-
-void
-on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, void* user_data)
-{
-    (void)notebook;
-    (void)page;
-    GtkWidget* dlg = GTK_WIDGET(user_data);
-
-    GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(dlg), "builder"));
-
-    /* Load all known apps installed on the system */
-    if (page_num == 1)
-    {
-        GtkTreeView* view = GTK_TREE_VIEW(GTK_WIDGET(gtk_builder_get_object(builder, "all_apps")));
-        if (!gtk_tree_view_get_model(view))
-        {
-            init_list_view(view);
-            gtk_widget_grab_focus(GTK_WIDGET(view));
-            GdkCursor* busy = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(view)),
-                                                         GdkCursorType::GDK_WATCH);
-            gdk_window_set_cursor(
-                gtk_widget_get_window(GTK_WIDGET(gtk_widget_get_toplevel(GTK_WIDGET(view)))),
-                busy);
-            g_object_unref(busy);
-
-            GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser::column>(),
-                                                    GDK_TYPE_PIXBUF,
-                                                    G_TYPE_STRING,
-                                                    G_TYPE_STRING,
-                                                    G_TYPE_STRING);
-            vfs::async_task task =
-                vfs_async_task_new((VFSAsyncFunc)load_all_known_apps_thread, list);
-            g_object_set_data(G_OBJECT(task), "view", view);
-            g_object_set_data(G_OBJECT(dlg), "task", task);
-
-            task->add_event<spacefm::signal::task_finish>(on_load_all_apps_finish, dlg);
-
-            task->run_thread();
-            g_signal_connect(G_OBJECT(view),
-                             "row_activated",
-                             G_CALLBACK(on_view_row_activated),
-                             dlg);
-        }
-    }
+    return dialog;
 }
 
 /*
- * Return selected application in a ``newly allocated'' string.
+ * Return selected application.
  * Returned string is the file name of the *.desktop file or a command line.
  * These two can be separated by check if the returned string is ended
  * with ".desktop" postfix.
  */
-static char*
-app_chooser_dialog_get_selected_app(GtkWidget* dlg)
+const std::optional<std::string>
+app_chooser_dialog_get_selected_app(GtkWidget* dialog)
 {
-    GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(dlg), "builder"));
-    GtkEntry* entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "cmdline")));
+    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
+    assert(data != nullptr);
 
-    char* app = (char*)gtk_entry_get_text(entry);
-    if (app && *app)
+    const std::string app = gtk_entry_get_text(GTK_ENTRY(data->entry_command));
+    if (!app.empty())
     {
-        return ztd::strdup(app);
+        return app;
     }
 
-    GtkNotebook* notebook = GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-    const i32 idx = gtk_notebook_get_current_page(notebook);
-    GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(notebook, idx));
-    GtkTreeView* view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
-    GtkTreeSelection* selection = gtk_tree_view_get_selection(view);
+    const i32 idx = gtk_notebook_get_current_page(GTK_NOTEBOOK(data->notebook));
+    GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(GTK_NOTEBOOK(data->notebook), idx));
+    GtkTreeView* tree_view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(tree_view);
 
     GtkTreeModel* model;
     GtkTreeIter it;
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
-        gtk_tree_model_get(model, &it, app_chooser::column::desktop_file, &app, -1);
+        char* c_app = nullptr;
+        gtk_tree_model_get(model, &it, app_chooser_column::desktop_file, &c_app, -1);
+        if (c_app != nullptr)
+        {
+            const std::string selected_app = c_app;
+            std::free(c_app);
+            return selected_app;
+        }
     }
-    else
-    {
-        app = nullptr;
-    }
-    return app;
+
+    return std::nullopt;
 }
 
 /*
  * Check if the user set the selected app default handler.
  */
 static bool
-app_chooser_dialog_get_set_default(GtkWidget* dlg)
+app_chooser_dialog_get_set_default(GtkWidget* dialog)
 {
-    GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(dlg), "builder"));
-    GtkWidget* check = GTK_WIDGET(gtk_builder_get_object(builder, "set_default"));
-    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check));
-}
-
-void
-on_browse_btn_clicked(GtkButton* button, void* user_data)
-{
-    (void)button;
-    GtkWidget* parent = GTK_WIDGET(user_data);
-    GtkWidget* dlg = gtk_file_chooser_dialog_new(nullptr,
-                                                 GTK_WINDOW(parent),
-                                                 GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                 "Cancel",
-                                                 GtkResponseType::GTK_RESPONSE_CANCEL,
-                                                 "document-open",
-                                                 GtkResponseType::GTK_RESPONSE_OK,
-                                                 nullptr);
-
-    xset_set_window_icon(GTK_WINDOW(dlg));
-
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), "/usr/bin");
-
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
-
-    if (response == GtkResponseType::GTK_RESPONSE_OK)
-    {
-        char* filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-        if (filename)
-        {
-            GtkBuilder* builder = GTK_BUILDER(g_object_get_data(G_OBJECT(parent), "builder"));
-            GtkEntry* entry = GTK_ENTRY(GTK_WIDGET(gtk_builder_get_object(builder, "cmdline")));
-            GtkNotebook* notebook =
-                GTK_NOTEBOOK(GTK_WIDGET(gtk_builder_get_object(builder, "notebook")));
-            /* FIXME: path should not be hard-coded */
-            if (ztd::startswith(filename, "/usr/share/applications") &&
-                ztd::endswith(filename, ".desktop"))
-            {
-                const auto app_name = std::filesystem::path(filename).filename();
-                gtk_entry_set_text(entry, app_name.c_str());
-            }
-            else
-            {
-                gtk_entry_set_text(entry, filename);
-            }
-            std::free(filename);
-            gtk_widget_set_sensitive(GTK_WIDGET(notebook), gtk_entry_get_text_length(entry) == 0);
-            gtk_widget_grab_focus(GTK_WIDGET(entry));
-            gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-        }
-    }
-    gtk_widget_destroy(dlg);
+    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
+    assert(data != nullptr);
+    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->btn_set_as_default));
 }
 
 static void
-on_dlg_response(GtkDialog* dlg, i32 id, void* user_data)
+on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
 {
     (void)user_data;
-    GtkAllocation allocation;
-
-    gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    const i32 width = allocation.width;
-    const i32 height = allocation.height;
-    if (width && height)
-    {
-        xset_set(xset::name::app_dlg, xset::var::x, std::to_string(width));
-        xset_set(xset::name::app_dlg, xset::var::y, std::to_string(height));
-    }
 
     if (id == GtkResponseType::GTK_RESPONSE_OK || id == GtkResponseType::GTK_RESPONSE_CANCEL ||
         id == GtkResponseType::GTK_RESPONSE_NONE ||
         id == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
     {
-        vfs::async_task task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dlg), "task"));
+        vfs::async_task task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dialog), "task"));
         if (task)
         {
             // ztd::logger::info("app-chooser.cxx -> vfs_async_task_cancel");
@@ -507,6 +544,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
             "application by default.",
             mime_type->type(),
             handlers.front()->menu_label.value());
+
         xset_msg_dialog(parent,
                         GtkMessageType::GTK_MESSAGE_INFO,
                         "MIME Type Has Handler",
@@ -533,6 +571,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                 "with your associated application by default.",
                 mime_type->type(),
                 handlers.front()->menu_label.value());
+
             xset_msg_dialog(parent,
                             GtkMessageType::GTK_MESSAGE_INFO,
                             "MIME Type Has Handler",
@@ -542,7 +581,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
     }
 }
 
-char*
+const std::optional<std::string>
 ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
                              bool focus_all_apps, bool show_command, bool show_default,
                              bool dir_default)
@@ -553,43 +592,46 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
     show_default        Show 'Set as default' checkbox
     dir_default         Show 'Set as default' also for type dir
     */
-    char* app = nullptr;
 
-    GtkWidget* dlg = app_chooser_dialog_new(parent,
-                                            mime_type,
-                                            focus_all_apps,
-                                            show_command,
-                                            show_default,
-                                            dir_default);
+    GtkWidget* dialog = app_chooser_dialog(parent,
+                                           mime_type,
+                                           focus_all_apps,
+                                           show_command,
+                                           show_default,
+                                           dir_default);
 
-    g_signal_connect(dlg, "response", G_CALLBACK(on_dlg_response), nullptr);
+    g_signal_connect(dialog, "response", G_CALLBACK(on_dialog_response), nullptr);
 
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    std::optional<std::string> app = std::nullopt;
 
+    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        app = app_chooser_dialog_get_selected_app(dlg);
-        if (app)
+        app = app_chooser_dialog_get_selected_app(dialog);
+        if (app && !app.value().empty())
         {
-            /* The selected app is set to default action */
-            /* TODO: full-featured mime editor??? */
-            if (app_chooser_dialog_get_set_default(dlg))
+            // The selected app is set to default action
+            // TODO: full-featured mime editor?
+            if (app_chooser_dialog_get_set_default(dialog))
             {
-                mime_type->set_default_action(app);
-                ptk_app_chooser_has_handler_warn(dlg, mime_type);
+                mime_type->set_default_action(app.value());
+                ptk_app_chooser_has_handler_warn(dialog, mime_type);
             }
-            else if (/* !ztd::same(mime_type->get_type(),
-                                                    XDG_MIME_TYPE_UNKNOWN) && */
+            else if (/* !ztd::same(mime_type->get_type(), XDG_MIME_TYPE_UNKNOWN) && */
                      (dir_default || !ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY)))
             {
-                const std::string custom = mime_type->add_action(app);
-                std::free(app);
-                app = ztd::strdup(custom);
+                const std::string custom = mime_type->add_action(app.value());
+                app = custom;
             }
         }
     }
 
-    gtk_widget_destroy(dlg);
+    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
+    assert(data != nullptr);
+    delete data;
+
+    gtk_widget_destroy(dialog);
+
     return app;
 }
 

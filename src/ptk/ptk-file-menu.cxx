@@ -1656,7 +1656,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
     }
-    char* app = ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
+    const auto app = ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
     if (app)
     {
         std::vector<vfs::file_info> sel_files = data->sel_files;
@@ -1664,8 +1664,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
         {
             sel_files.emplace_back(data->file);
         }
-        ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
-        std::free(app);
+        ptk_open_files_with_app(data->cwd, sel_files, app.value(), data->browser, false, false);
     }
 }
 
@@ -1888,7 +1887,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::add:
         {
-            str = ptk_choose_app_for_mime_type(
+            const auto app = ptk_choose_app_for_mime_type(
                 data->browser ? GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)))
                               : GTK_WINDOW(data->browser),
                 mime_type,
@@ -1898,18 +1897,16 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 true);
             // ptk_choose_app_for_mime_type returns either a bare command that
             // was already set as default, or a (custom or shared) desktop file
-            if (!str)
+            if (!app)
             {
                 break;
             }
 
-            std::filesystem::path path = str;
-            if (ztd::endswith(path.string(), ".desktop") && !ztd::contains(path.string(), "/") &&
+            if (ztd::endswith(app.value(), ".desktop") && !ztd::contains(app.value(), "/") &&
                 mime_type)
             {
-                vfs_mime_type_append_action(mime_type->type(), path.string());
+                vfs_mime_type_append_action(mime_type->type(), app.value());
             }
-            std::free(str);
             break;
         }
         case ptk::file_menu::app_job::browse:

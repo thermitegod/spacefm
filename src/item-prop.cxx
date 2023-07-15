@@ -1447,19 +1447,18 @@ on_browse_button_clicked(GtkWidget* widget, ContextData* ctxt)
                 !ctxt->context->var[item_prop::context::item::mime].empty()
                     ? ctxt->context->var[item_prop::context::item::mime]
                     : XDG_MIME_TYPE_UNKNOWN);
-            char* app = (char*)ptk_choose_app_for_mime_type(
+            const auto app = ptk_choose_app_for_mime_type(
                 GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(ctxt->dlg))),
                 mime_type,
                 true,
                 false,
                 false,
                 false);
-            if (app && app[0])
+            if (app)
             {
                 GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ctxt->item_target));
-                gtk_text_buffer_set_text(buf, app, -1);
+                gtk_text_buffer_set_text(buf, app.value().data(), -1);
             }
-            std::free(app);
         }
         else
         {

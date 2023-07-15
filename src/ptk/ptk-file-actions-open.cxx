@@ -465,14 +465,14 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                 /* Let the user choose an application */
                 toplevel =
                     file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
-                const char* ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
-                                                                   mime_type,
-                                                                   true,
-                                                                   true,
-                                                                   true,
-                                                                   !file_browser);
+                const auto ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
+                                                                  mime_type,
+                                                                  true,
+                                                                  true,
+                                                                  true,
+                                                                  !file_browser);
 
-                if (ptk_app != nullptr)
+                if (ptk_app)
                 {
                     alloc_desktop = ptk_app;
                 }

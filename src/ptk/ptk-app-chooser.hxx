@@ -20,28 +20,18 @@
 #include <string>
 #include <string_view>
 
+#include <optional>
+
 #include <gtk/gtk.h>
+
 #include "vfs/vfs-mime-type.hxx"
 
-/* Let the user choose a application */
-char* ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
-                                   bool focus_all_apps, bool show_command, bool show_default,
-                                   bool dir_default);
+// Let the user choose a application
+const std::optional<std::string> ptk_choose_app_for_mime_type(GtkWindow* parent,
+                                                              const vfs::mime_type& mime_type,
+                                                              bool focus_all_apps,
+                                                              bool show_command, bool show_default,
+                                                              bool dir_default);
 
-/*
- * Return selected application in a ``newly allocated'' string.
- * Returned string is the file name of the *.desktop file or a command line.
- * These two can be separated by check if the returned string is ended
- * with ".desktop".
- */
-// char* app_chooser_dialog_get_selected_app(GtkWidget* dlg);
-
-/*
- * Check if the user set the selected app default handler.
- */
-// bool app_chooser_dialog_get_set_default(GtkWidget* dlg);
+// Check if the user set the selected app default handler.
 void ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_type);
-
-void on_notebook_switch_page(GtkNotebook* notebook, GtkWidget* page, u32 page_num, void* user_data);
-
-void on_browse_btn_clicked(GtkButton* button, void* user_data);
