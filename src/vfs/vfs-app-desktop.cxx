@@ -375,7 +375,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         // %F and %U must always be at the end
         if (!ztd::endswith(this->exec_, open_files_keys))
         {
-            ztd::logger::error("Malformed desktop file, %F and %U must always be at the end : {}",
+            ztd::logger::error("Malformed desktop file, %F and %U must always be at the end: {}",
                                this->full_path_.string());
             return std::nullopt;
         }
@@ -405,7 +405,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         // %f and %u must always be at the end
         if (!ztd::endswith(this->exec_, open_file_keys))
         {
-            ztd::logger::error("Malformed desktop file, %f and %u must always be at the end : {}",
+            ztd::logger::error("Malformed desktop file, %f and %u must always be at the end: {}",
                                this->full_path_.string());
             return std::nullopt;
         }
@@ -434,9 +434,9 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
 
     if (!add_files && !file_list.empty())
     {
-        ztd::logger::warn(
-            "Trying to open a desktop file with a file list without file/url keys : {}",
-            this->full_path_.string());
+        ztd::logger::error("Malformed desktop file, trying to open a desktop file without file/url "
+                           "keys with a file list: {}",
+                           this->full_path_.string());
     }
 
     if (ztd::contains(this->exec_, "%c"))
@@ -445,7 +445,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         {
             for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                if (!ztd::contains(arg, "%c"))
+                if (!ztd::same(arg, "%c"))
                 {
                     argv[index] = this->display_name();
                     break;
@@ -460,7 +460,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         {
             for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                if (ztd::contains(arg, "%k"))
+                if (ztd::same(arg, "%k"))
                 {
                     argv[index] = this->full_path();
                     break;
@@ -475,7 +475,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         {
             for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                if (ztd::contains(arg, "%i"))
+                if (ztd::same(arg, "%i"))
                 {
                     argv[index] = std::format("--icon {}", this->icon_name());
                     break;
@@ -533,16 +533,17 @@ void
 VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
                             const std::span<const std::filesystem::path> file_paths) const noexcept
 {
-    const auto desktop_commands =
+    const auto check_desktop_commands =
         this->app_exec_generate_desktop_argv(file_paths, this->use_terminal());
-    if (!desktop_commands)
+    if (!check_desktop_commands)
     {
         return;
     }
+    const auto& desktop_commands = check_desktop_commands.value();
 
     if (this->use_terminal())
     {
-        for (const auto& argv : desktop_commands.value())
+        for (const auto& argv : desktop_commands)
         {
             const std::string command = ztd::join(argv, " ");
             this->exec_in_terminal(!this->path_.empty() ? this->path_ : working_dir.string(),
@@ -551,7 +552,7 @@ VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
     }
     else
     {
-        for (const auto& argv : desktop_commands.value())
+        for (const auto& argv : desktop_commands)
         {
             Glib::spawn_async_with_pipes(!this->path_.empty() ? this->path_ : working_dir.string(),
                                          argv,
