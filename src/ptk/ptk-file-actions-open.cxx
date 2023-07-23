@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <magic_enum.hpp>
-#include <optional>
 #include <string>
 #include <string_view>
 
@@ -25,8 +23,13 @@
 #include <span>
 
 #include <array>
-#include <utility>
 #include <vector>
+
+#include <memory>
+
+#include <optional>
+
+#include <magic_enum.hpp>
 
 #include <glibmm.h>
 
@@ -41,15 +44,11 @@
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-file-archiver.hxx"
-#include "ptk/ptk-location-view.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 
 #include "ptk/ptk-handler.hxx"
-
-#include "type-conversion.hxx"
 
 #include "settings/app.hxx"
 
@@ -57,27 +56,16 @@
 
 #include "ptk/ptk-file-actions-open.hxx"
 
-using namespace std::literals::string_view_literals;
-
-#define PARENT_INFO(obj) (static_cast<ParentInfo*>(obj))
-
 struct ParentInfo
 {
-    ParentInfo(PtkFileBrowser* file_browser, const std::filesystem::path& cwd);
-
     PtkFileBrowser* file_browser{nullptr};
     std::filesystem::path cwd{};
 };
 
-ParentInfo::ParentInfo(PtkFileBrowser* file_browser, const std::filesystem::path& cwd)
-{
-    this->file_browser = file_browser;
-    this->cwd = cwd;
-}
-
 static bool
-open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_info> sel_files,
-                           const std::filesystem::path& full_path, vfs::mime_type mime_type)
+open_archives_with_handler(const std::shared_ptr<ParentInfo>& parent,
+                           const std::span<const vfs::file_info> selected_files,
+                           const std::filesystem::path& full_path, const vfs::mime_type& mime_type)
 {
     if (xset_get_b(xset::name::arc_def_open))
     {                 // user has open archives with app option enabled
@@ -126,7 +114,7 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
     }
 
     ptk_file_archiver_extract(parent->file_browser,
-                              sel_files,
+                              selected_files,
                               parent->cwd,
                               dest_dir,
                               magic_enum::enum_integer(cmd),
@@ -135,7 +123,8 @@ open_archives_with_handler(ParentInfo* parent, const std::span<const vfs::file_i
 }
 
 static void
-open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
+open_files_with_handler(const std::shared_ptr<ParentInfo>& parent,
+                        const std::span<const std::filesystem::path> open_files, xset_t handler_set)
 {
     std::string str;
     std::string command_final;
@@ -173,13 +162,13 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     const bool multiple = ztd::contains(command, keys);
     if (multiple)
     {
-        for (GList* l = files; l; l = g_list_next(l))
+        for (const auto& file : open_files)
         {
             // filename
-            const auto name = std::filesystem::path((char*)l->data).filename();
+            const auto name = file.filename();
             fm_filenames.append(std::format("{}\n", ztd::shell::quote(name.string())));
             // file path
-            fm_filenames.append(std::format("{}\n", ztd::shell::quote((char*)l->data)));
+            fm_filenames.append(std::format("{}\n", ztd::shell::quote(file.string())));
         }
     }
     fm_filenames.append(")\nfm_filename=\"$fm_filenames[0]\"\n");
@@ -188,7 +177,8 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
     command = replace_line_subs(command);
 
     // start task(s)
-    for (GList* l = files; l; l = g_list_next(l))
+
+    for (const auto& file : open_files)
     {
         if (multiple)
         {
@@ -200,11 +190,11 @@ open_files_with_handler(ParentInfo* parent, GList* files, xset_t handler_set)
             // filename
             std::string quoted;
 
-            const auto name = std::filesystem::path((char*)l->data).filename();
+            const auto name = file.filename();
             quoted = ztd::shell::quote(name.string());
             str = std::format("fm_filename={}\n", quoted);
             // file path
-            quoted = ztd::shell::quote((char*)l->data);
+            quoted = ztd::shell::quote(file.string());
             command_final =
                 std::format("{}{}{}fm_file={}\n{}", fm_filenames, fm_files, str, quoted, command);
         }
@@ -260,15 +250,19 @@ check_desktop_name(const std::string_view app_desktop)
 }
 
 static bool
-open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app_desktop)
+open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
+                    const std::span<const std::filesystem::path> open_files,
+                    const std::string_view app_desktop)
 {
-    xset_t handler_set;
-
-    if (ztd::startswith(app_desktop, "###") && (handler_set = xset_is(app_desktop.substr(3))) &&
-        files)
+    if (ztd::startswith(app_desktop, "###") && !open_files.empty())
     {
+        const xset_t handler_set = xset_is(ztd::removeprefix(app_desktop, "###"));
+        if (handler_set == nullptr)
+        {
+            return false;
+        }
         // is a handler
-        open_files_with_handler(parent, files, handler_set);
+        open_files_with_handler(parent, open_files, handler_set);
         return true;
     }
     if (app_desktop.empty())
@@ -279,8 +273,6 @@ open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app
     const vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
 
     ztd::logger::info("EXEC({})={}", desktop->full_path().string(), desktop->exec());
-
-    const std::vector<std::filesystem::path> open_files = glist_t_char_to_vector_t_path(files);
 
     try
     {
@@ -297,239 +289,178 @@ open_files_with_app(ParentInfo* parent, GList* files, const std::string_view app
     return true;
 }
 
-static void
-open_files_with_each_app(void* key, void* value, void* user_data)
-{
-    char* app_desktop = (char*)key; // is const unless handler
-    GList* files = (GList*)value;
-    ParentInfo* parent = PARENT_INFO(user_data);
-    open_files_with_app(parent, files, app_desktop);
-}
-
-static void
-free_file_list_hash(void* key, void* value, void* user_data)
-{
-    (void)key;
-    (void)user_data;
-
-    GList* files = (GList*)value;
-    g_list_foreach(files, (GFunc)std::free, nullptr);
-    g_list_free(files);
-}
-
 void
 ptk_open_files_with_app(const std::filesystem::path& cwd,
-                        const std::span<const vfs::file_info> sel_files,
+                        const std::span<const vfs::file_info> selected_files,
                         const std::string_view app_desktop, PtkFileBrowser* file_browser,
                         bool xforce, bool xnever)
 {
-    // if xnever, never execute an executable
-    // if xforce, force execute of executable ignoring app_settings.click_executes
+    const auto parent = std::make_shared<ParentInfo>(file_browser, cwd);
 
-    std::filesystem::path full_path;
-    GList* files_to_open = nullptr;
-    GHashTable* file_list_hash = nullptr;
-    char* new_dir = nullptr;
-    GtkWidget* toplevel;
-
-    const auto parent = new ParentInfo(file_browser, cwd);
-
-    for (const vfs::file_info file : sel_files)
+    if (!app_desktop.empty())
     {
-        if (!file)
+        std::vector<std::filesystem::path> files_to_open;
+        files_to_open.reserve(selected_files.size());
+        for (const vfs::file_info file : selected_files)
+        {
+            files_to_open.emplace_back(file->path());
+        }
+
+        open_files_with_app(parent, files_to_open, app_desktop);
+        return;
+    }
+
+    // No app specified - Use default app for each file
+
+    std::vector<std::filesystem::path> dirs_to_open;
+    std::map<std::string, std::vector<std::filesystem::path>> files_to_open;
+    for (const vfs::file_info file : selected_files)
+    {
+        // Is a dir?  Open in browser
+        if (file->is_directory())
+        {
+            dirs_to_open.emplace_back(file->path());
+            continue;
+        }
+
+        // If this file is an executable file, run it.
+        if (!xnever && file->is_executable(file->path()) &&
+            (app_settings.click_executes() || xforce))
+        {
+            Glib::spawn_command_line_async(file->path());
+            if (file_browser)
+            {
+                file_browser->run_event<spacefm::signal::open_item>(file->path(),
+                                                                    ptk::open_action::file);
+            }
+            continue;
+        }
+
+        // Find app to open this file
+        std::optional<std::string> alloc_desktop = std::nullopt;
+
+        vfs::mime_type mime_type = file->mime_type();
+
+        // has archive handler?
+        if (!selected_files.empty() &&
+            open_archives_with_handler(parent, selected_files, file->path(), mime_type))
+        { // all files were handled by open_archives_with_handler
+            break;
+        }
+
+        // if has file handler, set alloc_desktop = ###XSETNAME
+        const std::vector<xset_t> handlers =
+            ptk_handler_file_has_handlers(ptk::handler::mode::file,
+                                          ptk::handler::mount::mount,
+                                          file->path(),
+                                          mime_type,
+                                          true,
+                                          false,
+                                          true);
+        if (!handlers.empty())
+        {
+            const xset_t handler_set = handlers.front();
+            alloc_desktop = std::format("###{}", handler_set->name);
+        }
+
+        // The file itself is a desktop entry file.
+        if (!alloc_desktop)
+        {
+            if (file->flags() & vfs::file_info_flags::desktop_entry &&
+                (app_settings.click_executes() || xforce))
+            {
+                alloc_desktop = file->path();
+            }
+            else
+            {
+                alloc_desktop = mime_type->default_action();
+            }
+        }
+
+        if (!alloc_desktop && mime_type_is_text_file(file->path(), mime_type->type()))
+        {
+            // FIXME: special handling for plain text file
+            mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            alloc_desktop = mime_type->default_action();
+        }
+
+        if (!alloc_desktop && file->is_symlink())
+        {
+            // broken link?
+            try
+            {
+                const auto target_path = std::filesystem::read_symlink(file->path());
+
+                if (!std::filesystem::exists(target_path))
+                {
+                    const std::string msg = std::format("This symlink's target is missing or "
+                                                        "you do not have permission "
+                                                        "to access it:\n{}\n\nTarget: {}",
+                                                        file->path().string(),
+                                                        target_path.string());
+                    GtkWidget* toplevel =
+                        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
+                    ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.data());
+                    continue;
+                }
+            }
+            catch (const std::filesystem::filesystem_error& e)
+            {
+                ztd::logger::warn("{}", e.what());
+                continue;
+            }
+        }
+        if (!alloc_desktop)
+        {
+            // Let the user choose an application
+            GtkWidget* toplevel =
+                file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
+            const auto ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
+                                                              mime_type,
+                                                              true,
+                                                              true,
+                                                              true,
+                                                              !file_browser);
+
+            if (ptk_app)
+            {
+                alloc_desktop = ptk_app;
+            }
+        }
+        if (!alloc_desktop)
         {
             continue;
         }
 
-        full_path = cwd / file->name();
-
-        if (!app_desktop.empty())
-        { // specified app to open all files
-            files_to_open = g_list_append(files_to_open, ztd::strdup(full_path));
+        const auto desktop = alloc_desktop.value();
+        if (files_to_open.contains(desktop))
+        {
+            files_to_open[desktop].emplace_back(file->path());
         }
         else
         {
-            // No app specified - Use default app for each file
-
-            // Is a dir?  Open in browser
-            if (file_browser && std::filesystem::is_directory(full_path))
-            {
-                if (!new_dir)
-                {
-                    new_dir = ztd::strdup(full_path);
-                }
-                else
-                {
-                    if (file_browser)
-                    {
-                        file_browser->run_event<spacefm::signal::open_item>(
-                            full_path,
-                            ptk::open_action::new_tab);
-                    }
-                }
-                continue;
-            }
-
-            /* If this file is an executable file, run it. */
-            if (!xnever && file->is_executable(full_path) &&
-                (app_settings.click_executes() || xforce))
-            {
-                Glib::spawn_command_line_async(full_path);
-                if (file_browser)
-                {
-                    file_browser->run_event<spacefm::signal::open_item>(full_path,
-                                                                        ptk::open_action::file);
-                }
-                continue;
-            }
-
-            /* Find app to open this file and place copy in alloc_desktop.
-             * This string is freed when hash table is destroyed. */
-            std::optional<std::string> alloc_desktop = std::nullopt;
-
-            vfs::mime_type mime_type = file->mime_type();
-
-            // has archive handler?
-            if (!sel_files.empty() &&
-                open_archives_with_handler(parent, sel_files, full_path, mime_type))
-            {
-                // all files were handled by open_archives_with_handler
-                break;
-            }
-
-            // if has file handler, set alloc_desktop = ###XSETNAME
-            const std::vector<xset_t> handlers =
-                ptk_handler_file_has_handlers(ptk::handler::mode::file,
-                                              ptk::handler::mount::mount,
-                                              full_path,
-                                              mime_type,
-                                              true,
-                                              false,
-                                              true);
-            if (!handlers.empty())
-            {
-                const xset_t handler_set = handlers.front();
-                alloc_desktop = std::format("###{}", handler_set->name);
-            }
-
-            /* The file itself is a desktop entry file. */
-            /* was: if(ztd::endswith(file->name(), ".desktop"))
-             */
-            if (!alloc_desktop)
-            {
-                if (file->flags() & vfs::file_info_flags::desktop_entry &&
-                    (app_settings.click_executes() || xforce))
-                {
-                    alloc_desktop = full_path;
-                }
-                else
-                {
-                    alloc_desktop = mime_type->default_action();
-                }
-            }
-
-            if (!alloc_desktop && mime_type_is_text_file(full_path, mime_type->type()))
-            {
-                /* FIXME: special handling for plain text file */
-                mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
-                alloc_desktop = mime_type->default_action();
-            }
-
-            if (!alloc_desktop && file->is_symlink())
-            {
-                // broken link?
-                try
-                {
-                    const auto target_path = std::filesystem::read_symlink(full_path);
-
-                    if (!std::filesystem::exists(target_path))
-                    {
-                        const std::string msg = std::format("This symlink's target is missing or "
-                                                            "you do not have permission "
-                                                            "to access it:\n{}\n\nTarget: {}",
-                                                            full_path.string(),
-                                                            target_path.string());
-                        toplevel = file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser))
-                                                : nullptr;
-                        ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.data());
-                        continue;
-                    }
-                }
-                catch (const std::filesystem::filesystem_error& e)
-                {
-                    ztd::logger::warn("{}", e.what());
-                }
-            }
-            if (!alloc_desktop)
-            {
-                /* Let the user choose an application */
-                toplevel =
-                    file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
-                const auto ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
-                                                                  mime_type,
-                                                                  true,
-                                                                  true,
-                                                                  true,
-                                                                  !file_browser);
-
-                if (ptk_app)
-                {
-                    alloc_desktop = ptk_app;
-                }
-            }
-            if (!alloc_desktop)
-            {
-                continue;
-            }
-
-            // add full_path to list, update hash table
-            files_to_open = nullptr;
-            if (!file_list_hash)
-            { /* this will free the keys (alloc_desktop) when hash table
-               * destroyed or new key inserted/replaced */
-                file_list_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, nullptr);
-            }
-            else
-            { // get existing file list for this app
-                files_to_open =
-                    (GList*)g_hash_table_lookup(file_list_hash, alloc_desktop.value().data());
-            }
-
-            if (!ztd::same(alloc_desktop.value(), full_path.string()))
-            { /* it is not a desktop file itself - add file to list.
-               * Otherwise use full_path as hash table key, which will
-               * be freed when hash table is destroyed. */
-                files_to_open = g_list_append(files_to_open, ztd::strdup(full_path));
-            }
-            // update file list in hash table
-            g_hash_table_replace(file_list_hash, ztd::strdup(alloc_desktop.value()), files_to_open);
+            files_to_open[desktop] = {file->path()};
         }
     }
 
-    if (!app_desktop.empty() && files_to_open)
+    for (const auto& [desktop, open_files] : files_to_open)
     {
-        // specified app to open all files
-        open_files_with_app(parent, files_to_open, app_desktop);
-        g_list_foreach(files_to_open, (GFunc)std::free, nullptr);
-        g_list_free(files_to_open);
-    }
-    else if (file_list_hash)
-    {
-        // No app specified - Use default app to open each associated list of files
-        // free_file_list_hash frees each file list and its strings
-        g_hash_table_foreach(file_list_hash, open_files_with_each_app, parent);
-        g_hash_table_foreach(file_list_hash, free_file_list_hash, nullptr);
-        g_hash_table_destroy(file_list_hash);
+        open_files_with_app(parent, open_files, desktop);
     }
 
-    if (new_dir)
+    if (file_browser && dirs_to_open.size() != 0)
     {
-        if (file_browser)
+        if (dirs_to_open.size() == 1)
         {
-            file_browser->run_event<spacefm::signal::open_item>(full_path, ptk::open_action::dir);
+            file_browser->run_event<spacefm::signal::open_item>(dirs_to_open.front(),
+                                                                ptk::open_action::dir);
         }
-        std::free(new_dir);
+        else
+        {
+            for (const auto& dir : dirs_to_open)
+            {
+                file_browser->run_event<spacefm::signal::open_item>(dir, ptk::open_action::new_tab);
+            }
+        }
     }
-
-    delete parent;
 }

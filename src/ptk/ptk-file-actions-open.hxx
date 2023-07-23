@@ -28,11 +28,10 @@
 
 #include "vfs/vfs-file-info.hxx"
 
-/* sel_files is a list of VFSFileInfo
- * app_desktop is the application used to open the files.
- * If app_desktop == nullptr, each file will be opened with its
- * default application. */
+// if app_desktop is empty each file will be opened with its default application
+// if xforce, force execute of executable ignoring app_settings.click_executes
+// if xnever, never execute an executable
 void ptk_open_files_with_app(const std::filesystem::path& cwd,
-                             const std::span<const vfs::file_info> sel_files,
+                             const std::span<const vfs::file_info> selected_files,
                              const std::string_view app_desktop, PtkFileBrowser* file_browser,
                              bool xforce, bool xnever);
