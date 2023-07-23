@@ -13,20 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
-#include <glibmm.h>
+#include <span>
 
-#include "ptk/ptk-builder.hxx"
-
-GtkBuilder*
-ptk_gtk_builder_new_from_file(const std::filesystem::path& file)
-{
-    GtkBuilder* builder = gtk_builder_new();
-    const auto filename = std::filesystem::path() / PACKAGE_UI_PATH / file;
-    gtk_builder_add_from_file(builder, filename.c_str(), nullptr);
-    return builder;
-}
+void find_files(const std::span<const std::filesystem::path> search_dirs);

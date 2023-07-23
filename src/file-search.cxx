@@ -1,6 +1,4 @@
 /**
- * Copyright 2008 PCMan <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,12 +13,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include <string>
+#include <string_view>
 
 #include <filesystem>
 
 #include <span>
 
-void find_files(const std::span<const std::filesystem::path> search_dirs);
+#include "ptk/ptk-error.hxx"
+
+void
+find_files(const std::span<const std::filesystem::path> search_dirs)
+{
+    (void)search_dirs;
+
+    ptk_show_error(nullptr, "Disabled", "File search requires a rewrite");
+}

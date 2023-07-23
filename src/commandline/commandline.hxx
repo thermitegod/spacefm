@@ -40,8 +40,6 @@ struct commandline_opt_data
 
     panel_t panel{0};
 
-    bool find_files{false};
-
     std::filesystem::path config_dir{};
     bool git_backed_settings{true};
 

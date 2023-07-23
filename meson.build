@@ -325,7 +325,6 @@ endforeach
 data_args = [
     '-DDATADIR="/usr/share"',
     '-DSYSCONFDIR="/etc"',
-    '-DPACKAGE_UI_PATH="/usr/share/spacefm/ui"',
     '-DPACKAGE_SCRIPTS_PATH="/usr/share/spacefm/scripts"',
     '-DFISH_FMLIB="/usr/share/spacefm/lib/fmlib.fish"',
 ]
@@ -340,7 +339,7 @@ sources = files(
     'src/about.cxx',
     'src/autosave.cxx',
     'src/bookmarks.cxx',
-    'src/find-files.cxx',
+    'src/file-search.cxx',
     'src/ipc.cxx',
     'src/item-prop.cxx',
     'src/main.cxx',
@@ -389,7 +388,6 @@ sources = files(
     'src/mime-type/mime-type.cxx',
 
     'src/ptk/ptk-app-chooser.cxx',
-    'src/ptk/ptk-builder.cxx',
     'src/ptk/ptk-bookmark-view.cxx',
     'src/ptk/ptk-clipboard.cxx',
     'src/ptk/ptk-dir-tree.cxx',
@@ -450,6 +448,5 @@ spacefm = build_target(
 ## Install
 
 install_subdir('data/applications', install_dir : datadir)
-install_subdir('data/ui', install_dir : datadir / target_name)
 install_subdir('data/icons', install_dir : datadir)
 install_subdir('data/scripts', install_dir : datadir / target_name)

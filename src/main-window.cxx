@@ -51,7 +51,6 @@
 #include "window-reference.hxx"
 #include "main-window.hxx"
 
-#include "ptk/ptk-builder.hxx"
 #include "ptk/ptk-error.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
@@ -72,7 +71,7 @@
 #include "bookmarks.hxx"
 #include "settings.hxx"
 #include "item-prop.hxx"
-#include "find-files.hxx"
+#include "file-search.hxx"
 
 #include "autosave.hxx"
 #include "terminal-handlers.hxx"

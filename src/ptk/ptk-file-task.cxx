@@ -2272,8 +2272,6 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
 static void
 query_overwrite(PtkFileTask* ptask)
 {
-    // TODO convert to gtk_builder (glade file)
-
     // ztd::logger::info("query_overwrite ptask={:p}", fmt::ptr(ptask));
     GtkWidget* dlg;
     GtkWidget* parent_win;

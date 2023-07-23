@@ -62,7 +62,6 @@
 #include "program-timer.hxx"
 #include "autosave.hxx"
 
-#include "find-files.hxx"
 #include "ipc.hxx"
 #include "settings.hxx"
 
@@ -223,27 +222,6 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
         //                    (void*)main_window,
         //                    opt->new_tab ? "new_tab" : "",
         //                    opt->reuse_tab ? "reuse_tab" : "");
-    }
-
-    // Find Files
-    if (opt->find_files)
-    {
-        // find files
-        init_folder();
-
-        std::vector<std::filesystem::path> search_dirs;
-        for (const auto& file : opt->files)
-        {
-            if (std::filesystem::is_directory(file))
-            {
-                search_dirs.emplace_back(file);
-            }
-        }
-
-        find_files(search_dirs);
-        opt->find_files = false;
-
-        return true;
     }
 
     if (opt->files.empty())

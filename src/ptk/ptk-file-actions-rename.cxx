@@ -2218,8 +2218,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
                 AutoOpenCreate* auto_open)
 {
-    // TODO convert to gtk_builder (glade file)
-
     GtkWidget* task_view = nullptr;
     i32 ret = 1;
     bool target_missing = false;

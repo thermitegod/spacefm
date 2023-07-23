@@ -65,7 +65,6 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt)
     app.add_option("-p,--panel", opt->panel, "Open directories in panel (1-4)")->expected(1);
     app.add_option("-c,--config", opt->config_dir, "Set configuration directory")->expected(1);
     app.add_flag("-g,--no-git-backed-settings", opt->git_backed_settings, "Do not use git to keep session history");
-    app.add_flag("-f,--find-files", opt->find_files, "Show File Search");
     app.add_flag("-v,--version", opt->version, "Show version information");
     // clang-format on
 
