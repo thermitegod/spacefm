@@ -3821,7 +3821,7 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
     {
         copy_dest = main_window_get_panel_cwd(this, panel_1);
     }
-    else if (setname == xset::name::copy_panel_3)
+    else if (setname == xset::name::copy_panel_2)
     {
         copy_dest = main_window_get_panel_cwd(this, panel_2);
     }

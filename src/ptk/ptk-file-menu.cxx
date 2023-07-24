@@ -2919,7 +2919,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
         {
             on_popup_extract_to_activate(nullptr, data);
         }
-        else if (set->xset_name == xset::name::arc_extract)
+        else if (set->xset_name == xset::name::arc_list)
         {
             on_popup_extract_list_activate(nullptr, data);
         }
