@@ -369,7 +369,7 @@ vfs_file_monitor_on_inotify_event(Glib::IOCondition condition)
                 }
                 else
                 { // IN_IGNORED not handled
-                    monitor_event = vfs::file_monitor_event::changed;
+                    monitor_event = vfs::file_monitor_event::other;
 #if defined(VFS_FILE_MONITOR_DEBUG)
                     const auto path = monitor->path() / file_name;
                     ztd::logger::debug("inotify-event MASK={} OTHER={}", event->mask, path);

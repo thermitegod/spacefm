@@ -40,6 +40,7 @@ namespace vfs
         created,
         deleted,
         changed,
+        other,
     };
 
     using file_monitor = std::shared_ptr<VFSFileMonitor>;

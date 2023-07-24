@@ -411,6 +411,8 @@ vfs_dir_monitor_callback(const vfs::file_monitor& monitor, vfs::file_monitor_eve
         case vfs::file_monitor_event::changed:
             dir->emit_file_changed(file_name, nullptr, false);
             break;
+        case vfs::file_monitor_event::other:
+            break;
     }
 }
 
