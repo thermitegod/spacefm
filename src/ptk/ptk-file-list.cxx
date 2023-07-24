@@ -393,7 +393,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 
     const u32 n = indices[0]; /* the n-th top level row */
 
-    if (n >= list->n_files || n < 0)
+    if (n >= list->n_files /* || n < 0 */)
     {
         return false;
     }
