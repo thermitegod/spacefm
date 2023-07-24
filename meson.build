@@ -144,28 +144,16 @@ if cpp.get_id() == 'gcc'
         '-Walloc-zero',
         '-Wstringop-overflow=4',
 
-        # Ignored by clang
         # '-Weffc++',
 
         # Disabled Warnings
-
-        # TODO
-        '-Wno-switch-enum',
+        '-Wno-array-bounds',
+        '-Wno-stringop-overflow',
         '-Wno-switch-default',
-        '-Wno-implicit-fallthrough',
-        '-Wno-duplicated-branches',
-        '-Wno-duplicated-cond',
         '-Wno-shadow',
         '-Wno-maybe-uninitialized',
         '-Wno-unused-result',
-
-        '-Wno-restrict',
-        '-Wno-catch-value',
         '-Wno-cast-function-type',
-        '-Wno-unused-macros',
-
-        '-Wno-type-limits',
-        '-Wno-strict-aliasing',
     ]
 
     flags += cpp.get_supported_arguments(default_warning_flags_gcc)
@@ -175,8 +163,6 @@ endif
 if cpp.get_id() == 'clang'
     default_warning_flags_clang = [
         # Disabled Warnings
-        '-Wno-unreachable-code-loop-increment',
-        '-Wno-unused-macros',
     ]
 
     flags += cpp.get_supported_arguments(default_warning_flags_clang)
