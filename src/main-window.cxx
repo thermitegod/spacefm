@@ -3269,8 +3269,8 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                     }
                     else
                     {
-                        const auto results = ztd::stat(target_path);
-                        if (results.is_valid())
+                        const auto results = ztd::statx(target_path);
+                        if (results)
                         {
                             const std::string lsize = vfs_file_size_format(results.size());
                             statusbar_txt.append(
@@ -3380,13 +3380,13 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         u64 disk_size_disk = 0;
         for (const auto& file : std::filesystem::directory_iterator(cwd))
         {
-            const auto file_stat = ztd::stat(file.path());
+            const auto file_stat = ztd::statx(file.path());
             if (!file_stat.is_regular_file())
             {
                 continue;
             }
             disk_size_bytes += file_stat.size();
-            disk_size_disk += file_stat.blocks() * ztd::BLOCK_SIZE;
+            disk_size_disk += file_stat.size_on_disk();
         }
         const std::string file_size = vfs_file_size_format(disk_size_bytes);
         const std::string disk_size = vfs_file_size_format(disk_size_disk);
@@ -7740,14 +7740,14 @@ main_window_socket_command(const std::string_view socket_commands_json)
                 return {SOCKET_INVALID, std::format("path does not exist '{}'", value)};
             }
 
-            const auto real_path_stat = ztd::stat(value);
+            const auto real_path_stat = ztd::statx(value);
             vfs::volume vol = nullptr;
             if (ztd::same(property, "umount") && std::filesystem::is_directory(value))
             {
                 // umount DIR
                 if (is_path_mountpoint(value))
                 {
-                    if (!real_path_stat.is_valid() || !real_path_stat.is_block_file())
+                    if (!real_path_stat || !real_path_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
                         vol = vfs_volume_get_by_device(value);
@@ -7758,7 +7758,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
                     }
                 }
             }
-            else if (real_path_stat.is_valid() && real_path_stat.is_block_file())
+            else if (real_path_stat && real_path_stat.is_block_file())
             {
                 // block device eg /dev/sda1
                 vol = vfs_volume_get_by_device(value);

@@ -266,8 +266,8 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
         }
         else if (std::filesystem::exists(real_path))
         {
-            const auto file_stat = ztd::stat(real_path);
-            if (file_stat.is_valid() && file_stat.is_block_file())
+            const auto file_stat = ztd::statx(real_path);
+            if (file_stat && file_stat.is_block_file())
             {
                 // open block device eg /dev/sda1
                 if (!main_window)

@@ -431,7 +431,7 @@ is_path_mountpoint(const std::filesystem::path& path)
         return false;
     }
 
-    const auto path_stat_dev = ztd::stat(path).dev();
+    const auto path_stat_dev = ztd::statx(path).dev();
     const auto path_statvfs_fsid = ztd::statvfs(path).fsid();
 
     return (path_stat_dev == path_statvfs_fsid);
@@ -666,8 +666,8 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     }
 
     const auto canon = std::filesystem::canonical(dir);
-    const auto stat = ztd::stat(canon);
-    if (!stat.is_valid() || stat.is_block_file())
+    const auto stat = ztd::statx(canon);
+    if (!stat || stat.is_block_file())
     {
         return false;
     }

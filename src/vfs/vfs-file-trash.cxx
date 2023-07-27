@@ -69,8 +69,8 @@ VFSTrash::VFSTrash() noexcept
 std::optional<dev_t>
 VFSTrash::device(const std::filesystem::path& path) noexcept
 {
-    const auto statbuf = ztd::lstat(path);
-    if (statbuf.is_valid())
+    const auto statbuf = ztd::statx(path, ztd::statx::symlink::no_follow);
+    if (statbuf)
     {
         return statbuf.dev();
     }

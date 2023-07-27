@@ -68,12 +68,12 @@ struct VFSFileInfo
     const std::string_view collate_key() const noexcept;
     const std::string_view collate_icase_key() const noexcept;
 
-    off_t size() const noexcept;
-    off_t disk_size() const noexcept;
+    u64 size() const noexcept;
+    u64 size_on_disk() const noexcept;
 
     const std::string_view display_size() const noexcept;
-    const std::string_view display_size_bytes() const noexcept;
-    const std::string_view display_disk_size() const noexcept;
+    const std::string_view display_size_in_bytes() const noexcept;
+    const std::string_view display_size_on_disk() const noexcept;
 
     blkcnt_t blocks() const noexcept;
 
@@ -89,9 +89,10 @@ struct VFSFileInfo
     const std::string_view display_ctime() const noexcept;
     const std::string_view display_permissions() noexcept;
 
-    std::time_t atime() noexcept;
-    std::time_t mtime() noexcept;
-    std::time_t ctime() noexcept;
+    std::time_t atime() const noexcept;
+    std::time_t btime() const noexcept;
+    std::time_t ctime() const noexcept;
+    std::time_t mtime() const noexcept;
 
     void load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
@@ -134,7 +135,7 @@ struct VFSFileInfo
     bool update(const std::filesystem::path& file_path) noexcept;
 
   private:
-    ztd::lstat file_stat_; // cached copy of struct stat()
+    ztd::statx file_stat_; // cached copy of struct statx()
     std::filesystem::file_status status_;
 
     std::filesystem::path path_{};     // real path on file system
@@ -148,8 +149,9 @@ struct VFSFileInfo
     std::string display_owner_{};      // displayed owner
     std::string display_group_{};      // displayed group
     std::string display_atime_{};      // displayed accessed time
+    std::string display_btime_{};      // displayed created time
+    std::string display_ctime_{};      // displayed last status change time
     std::string display_mtime_{};      // displayed modification time
-    std::string display_ctime_{};      // displayed created time
     std::string display_perm_{};       // displayed permission in string form
     vfs::mime_type mime_type_{};       // mime type related information
     GdkPixbuf* big_thumbnail_{};       // thumbnail of the file

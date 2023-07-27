@@ -109,7 +109,7 @@ struct ContextData
     xset_context_t context{nullptr};
     xset_t set{nullptr};
     std::string temp_cmd_line{};
-    ztd::stat script_stat;
+    ztd::statx script_stat;
     bool script_stat_valid{false};
     bool reset_command{false};
 
@@ -926,18 +926,18 @@ is_command_script_newer(ContextData* ctxt)
         return false;
     }
 
-    const auto script_stat = ztd::stat(script);
-    if (!script_stat.is_valid())
+    const auto script_stat = ztd::statx(script);
+    if (!script_stat)
     {
         return false;
     }
 
-    if (!ctxt->script_stat.is_valid())
+    if (!ctxt->script_stat)
     {
         return true;
     }
 
-    if (script_stat.mtime() != ctxt->script_stat.mtime() ||
+    if (script_stat.mtime().tv_sec != ctxt->script_stat.mtime().tv_sec ||
         script_stat.size() != ctxt->script_stat.size())
     {
         return true;
@@ -956,8 +956,8 @@ command_script_stat(ContextData* ctxt)
         return;
     }
 
-    const auto script_stat = ztd::stat(script);
-    if (script_stat.is_valid())
+    const auto script_stat = ztd::statx(script);
+    if (script_stat)
     {
         ctxt->script_stat_valid = true;
     }

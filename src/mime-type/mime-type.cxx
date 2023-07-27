@@ -446,8 +446,8 @@ mime_type_is_text_file(const std::filesystem::path& file_path, const std::string
     const i32 fd = open(file_path.c_str(), O_RDONLY);
     if (fd != -1)
     {
-        const auto file_stat = ztd::stat(fd);
-        if (file_stat.is_valid())
+        const auto file_stat = ztd::statx(file_path);
+        if (file_stat)
         {
             if (file_stat.is_regular_file())
             {

@@ -506,8 +506,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         if (mset->create_new != ptk::rename_mode::rename &&
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
         {
-            const auto file_stat = ztd::lstat(full_path);
-            if (file_stat.is_valid())
+            const auto file_stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+            if (file_stat)
             {
                 full_path_exists = true;
                 if (std::filesystem::is_directory(full_path))
@@ -519,10 +519,10 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     }
     else
     {
-        const auto path_stat = ztd::lstat(path);
+        const auto path_stat = ztd::statx(path, ztd::statx::symlink::no_follow);
 
-        const auto full_path_stat = ztd::lstat(full_path);
-        if (full_path_stat.is_valid())
+        const auto full_path_stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+        if (full_path_stat)
         {
             full_path_exists = true;
             if (std::filesystem::is_directory(full_path))
@@ -530,7 +530,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
                 full_path_exists_dir = true;
             }
         }
-        else if (path_stat.is_valid())
+        else if (path_stat)
         {
             if (!std::filesystem::is_directory(path))
             {
@@ -2020,7 +2020,7 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
     }
 
     u32 n = 1;
-    while (ztd::lstat(path).is_valid()) // need to see broken symlinks
+    while (ztd::statx(path, ztd::statx::symlink::no_follow)) // need to see broken symlinks
     {
         std::string name;
         if (ext.empty())
@@ -2175,7 +2175,9 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
     gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
     const char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
 
-    if (ztd::lstat(full_path).is_valid()) // need to see broken symlinks
+    // need to see broken symlinks
+    const auto stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+    if (stat)
     {
         const auto dir = std::filesystem::path(full_path).parent_path();
         const auto unique_path = get_unique_name(dir, ext);
@@ -3023,7 +3025,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
                 }
             }
-            else if (ztd::lstat(full_path).is_valid()) // need to see broken symlinks
+            else if (ztd::statx(full_path,
+                                ztd::statx::symlink::no_follow)) // need to see broken symlinks
             {
                 // overwrite
                 if (std::filesystem::is_directory(full_path))

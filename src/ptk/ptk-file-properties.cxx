@@ -100,14 +100,14 @@ calc_total_size_of_files(const std::filesystem::path& path, properties_dialog_da
         return;
     }
 
-    const auto file_stat = ztd::lstat(path);
-    if (!file_stat.is_valid())
+    const auto file_stat = ztd::statx(path, ztd::statx::symlink::no_follow);
+    if (!file_stat)
     {
         return;
     }
 
     data->total_size += file_stat.size();
-    data->size_on_disk += file_stat.blocks() * ztd::BLOCK_SIZE;
+    data->size_on_disk += file_stat.size_on_disk();
 
     if (!std::filesystem::is_directory(path))
     {
@@ -135,10 +135,11 @@ calc_total_size_of_files(const std::filesystem::path& path, properties_dialog_da
                 return;
             }
 
-            const auto directory_file_stat = ztd::lstat(directory_file);
+            const auto directory_file_stat =
+                ztd::statx(directory_file, ztd::statx::symlink::no_follow);
 
             data->total_size += directory_file_stat.size();
-            data->size_on_disk += directory_file_stat.blocks() * ztd::BLOCK_SIZE;
+            data->size_on_disk += directory_file_stat.size_on_disk();
             ++data->total_count_file;
         }
     }
@@ -479,7 +480,7 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
         gtk_label_set_text(GTK_LABEL(data->total_size_label), size.data());
 
         const std::string on_disk =
-            std::format("{}  ( {:L} bytes )", file->display_disk_size(), file->disk_size());
+            std::format("{}  ( {:L} bytes )", file->display_size_on_disk(), file->size_on_disk());
         gtk_label_set_text(GTK_LABEL(data->size_on_disk_label), on_disk.data());
 
         gtk_label_set_text(GTK_LABEL(data->count_label), "1 file");

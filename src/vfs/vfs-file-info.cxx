@@ -120,8 +120,8 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
 
     this->path_ = file_path;
 
-    this->file_stat_ = ztd::lstat(this->path_);
-    if (!this->file_stat_.is_valid())
+    this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow);
+    if (!this->file_stat_)
     {
         this->mime_type_ = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         return false;
@@ -139,7 +139,7 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     this->display_size_bytes_ = std::format("{:L}", this->size());
 
     // disk file size formated
-    const std::string disk_size = vfs_file_size_format(this->disk_size());
+    const std::string disk_size = vfs_file_size_format(this->size_on_disk());
     this->display_disk_size_ = disk_size;
 
     // hidden
@@ -184,24 +184,31 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     char buffer[100];
 
     // atime
-    const time_t atime = this->file_stat_.atime();
+    const time_t atime = this->atime();
     local_time = std::localtime(&atime);
     std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
     this->display_atime_ = buffer;
     std::memset(buffer, 0, sizeof(buffer));
 
-    // mtime
-    const time_t mtime = this->file_stat_.mtime();
-    local_time = std::localtime(&mtime);
+    // btime
+    const time_t btime = this->btime();
+    local_time = std::localtime(&btime);
     std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
-    this->display_mtime_ = buffer;
+    this->display_btime_ = buffer;
     std::memset(buffer, 0, sizeof(buffer));
 
     // ctime
-    const time_t ctime = this->file_stat_.ctime();
+    const time_t ctime = this->ctime();
     local_time = std::localtime(&ctime);
     std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
     this->display_ctime_ = buffer;
+    std::memset(buffer, 0, sizeof(buffer));
+
+    // mtime
+    const time_t mtime = this->mtime();
+    local_time = std::localtime(&mtime);
+    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
+    this->display_mtime_ = buffer;
     std::memset(buffer, 0, sizeof(buffer));
 
     return true;
@@ -252,16 +259,16 @@ VFSFileInfo::collate_icase_key() const noexcept
     return this->collate_icase_key_;
 }
 
-off_t
+u64
 VFSFileInfo::size() const noexcept
 {
     return this->file_stat_.size();
 }
 
-off_t
-VFSFileInfo::disk_size() const noexcept
+u64
+VFSFileInfo::size_on_disk() const noexcept
 {
-    return this->file_stat_.blocks() * ztd::BLOCK_SIZE;
+    return this->file_stat_.size_on_disk();
 }
 
 const std::string_view
@@ -271,13 +278,13 @@ VFSFileInfo::display_size() const noexcept
 }
 
 const std::string_view
-VFSFileInfo::display_size_bytes() const noexcept
+VFSFileInfo::display_size_in_bytes() const noexcept
 {
     return this->display_size_bytes_;
 }
 
 const std::string_view
-VFSFileInfo::display_disk_size() const noexcept
+VFSFileInfo::display_size_on_disk() const noexcept
 {
     return this->display_disk_size_;
 }
@@ -441,21 +448,27 @@ VFSFileInfo::display_ctime() const noexcept
 }
 
 std::time_t
-VFSFileInfo::atime() noexcept
+VFSFileInfo::atime() const noexcept
 {
-    return this->file_stat_.atime();
+    return this->file_stat_.atime().tv_sec;
 }
 
 std::time_t
-VFSFileInfo::mtime() noexcept
+VFSFileInfo::btime() const noexcept
 {
-    return this->file_stat_.mtime();
+    return this->file_stat_.btime().tv_sec;
 }
 
 std::time_t
-VFSFileInfo::ctime() noexcept
+VFSFileInfo::ctime() const noexcept
 {
-    return this->file_stat_.ctime();
+    return this->file_stat_.ctime().tv_sec;
+}
+
+std::time_t
+VFSFileInfo::mtime() const noexcept
+{
+    return this->file_stat_.mtime().tv_sec;
 }
 
 vfs::file_info_flags

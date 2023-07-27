@@ -91,8 +91,8 @@ MimeCache::load_mime_file()
         return;
     }
 
-    const auto mime_stat = ztd::stat(fd);
-    if (!mime_stat.is_valid())
+    const auto mime_stat = ztd::statx(this->file_path_);
+    if (!mime_stat)
     {
         close(fd);
         return;
