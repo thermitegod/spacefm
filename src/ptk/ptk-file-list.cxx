@@ -1184,14 +1184,14 @@ on_thumbnail_loaded(vfs::file_info file, PtkFileList* list)
 }
 
 void
-ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size)
+ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
 {
     if (!list)
     {
         return;
     }
 
-    const i32 old_max_thumbnail = list->max_thumbnail;
+    const u64 old_max_thumbnail = list->max_thumbnail;
     list->max_thumbnail = max_file_size;
     list->big_thumbnail = is_big;
     // FIXME: This is buggy!!! Further testing might be needed.

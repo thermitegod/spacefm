@@ -79,7 +79,7 @@ struct PtkFileList
 
     bool show_hidden{true};
     bool big_thumbnail{true};
-    i32 max_thumbnail{0};
+    u64 max_thumbnail{0};
 
     ptk::file_list::column sort_col{ptk::file_list::column::name};
     GtkSortType sort_order;
@@ -118,5 +118,5 @@ void ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir);
 
 bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info fi);
 
-void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, i32 max_file_size);
+void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size);
 void ptk_file_list_sort(PtkFileList* list); // sfm
