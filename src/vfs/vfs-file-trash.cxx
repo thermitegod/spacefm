@@ -231,20 +231,33 @@ VFSTrashDir::create_trash_dir() const noexcept
     this->check_dir_exists(this->info_path_);
 }
 
+const std::string
+VFSTrashDir::create_trash_date(const std::time_t time) const noexcept
+{
+    const auto point = std::chrono::system_clock::from_time_t(time);
+
+    const auto date = std::chrono::floor<std::chrono::days>(point);
+
+    const auto midnight = point - std::chrono::floor<std::chrono::days>(point);
+    const auto hours = std::chrono::duration_cast<std::chrono::hours>(midnight);
+    const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(midnight - hours);
+    const auto seconds =
+        std::chrono::duration_cast<std::chrono::seconds>(midnight - hours - minutes);
+
+    return std::format("{0:%Y-%m-%d}T{1:%H}:{2:%M}:{3:%S}", date, hours, minutes, seconds);
+}
+
 void
 VFSTrashDir::create_trash_info(const std::filesystem::path& path,
                                const std::string_view target_name) const noexcept
 {
     const auto trash_info = this->info_path_ / std::format("{}.trashinfo", target_name);
 
-    const std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    std::tm* local_time = std::localtime(&t);
-    std::ostringstream iso_time;
-    iso_time << std::put_time(local_time, "%FT%TZ");
+    const auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const auto iso_time = create_trash_date(time);
 
     const std::string trash_info_content =
-        std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time.str());
+        std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time);
 
     write_file(trash_info, trash_info_content);
 }

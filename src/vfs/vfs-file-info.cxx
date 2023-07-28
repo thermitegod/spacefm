@@ -48,6 +48,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -179,37 +180,10 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
         this->display_group_ = gr.name();
     }
 
-    // time
-    std::tm* local_time;
-    char buffer[100];
-
-    // atime
-    const time_t atime = this->atime();
-    local_time = std::localtime(&atime);
-    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
-    this->display_atime_ = buffer;
-    std::memset(buffer, 0, sizeof(buffer));
-
-    // btime
-    const time_t btime = this->btime();
-    local_time = std::localtime(&btime);
-    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
-    this->display_btime_ = buffer;
-    std::memset(buffer, 0, sizeof(buffer));
-
-    // ctime
-    const time_t ctime = this->ctime();
-    local_time = std::localtime(&ctime);
-    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
-    this->display_ctime_ = buffer;
-    std::memset(buffer, 0, sizeof(buffer));
-
-    // mtime
-    const time_t mtime = this->mtime();
-    local_time = std::localtime(&mtime);
-    std::strftime(buffer, sizeof(buffer), app_settings.date_format().data(), local_time);
-    this->display_mtime_ = buffer;
-    std::memset(buffer, 0, sizeof(buffer));
+    this->display_atime_ = vfs_create_display_date(this->atime());
+    this->display_btime_ = vfs_create_display_date(this->btime());
+    this->display_ctime_ = vfs_create_display_date(this->ctime());
+    this->display_mtime_ = vfs_create_display_date(this->mtime());
 
     return true;
 }

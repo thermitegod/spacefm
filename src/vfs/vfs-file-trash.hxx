@@ -51,6 +51,8 @@ class VFSTrashDir
     void move(const std::filesystem::path& path, const std::string_view target_name) const noexcept;
 
   private:
+    const std::string create_trash_date(const std::time_t time) const noexcept;
+
     // Create a directory if it does not exist
     static void check_dir_exists(const std::filesystem::path& dir) noexcept;
 

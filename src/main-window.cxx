@@ -5592,9 +5592,11 @@ main_task_view_update_task(PtkFileTask* ptask)
     if (ptaskt != ptask)
     {
         // new row
-        std::tm* local_time = std::localtime(&ptask->task->start_time);
-        std::ostringstream started;
-        started << std::put_time(local_time, "%H:%M");
+        const auto point = std::chrono::system_clock::from_time_t(ptask->task->start_time);
+        const auto midnight = point - std::chrono::floor<std::chrono::days>(point);
+        const auto hours = std::chrono::duration_cast<std::chrono::hours>(midnight);
+        const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(midnight - hours);
+        const auto started = std::format("{0:%H}:{1:%M}", hours, minutes);
 
         gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
                                           &it,
@@ -5602,7 +5604,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                                           main_window::column::to,
                                           dest_dir.empty() ? nullptr : dest_dir.c_str(),
                                           main_window::column::started,
-                                          started.str().data(),
+                                          started.data(),
                                           main_window::column::starttime,
                                           (i64)ptask->task->start_time,
                                           main_window::column::data,
