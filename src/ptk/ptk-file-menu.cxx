@@ -402,12 +402,15 @@ on_popup_detailed_column(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
         // atime
         set = xset_get_panel_mode(p, xset::panel::detcol_atime, mode);
         set->b = xset_get_panel(p, xset::panel::detcol_atime)->b;
-        // mtime
-        set = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_mtime)->b;
+        // btime
+        set = xset_get_panel_mode(p, xset::panel::detcol_btime, mode);
+        set->b = xset_get_panel(p, xset::panel::detcol_btime)->b;
         // ctime
         set = xset_get_panel_mode(p, xset::panel::detcol_ctime, mode);
         set->b = xset_get_panel(p, xset::panel::detcol_ctime)->b;
+        // mtime
+        set = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode);
+        set->b = xset_get_panel(p, xset::panel::detcol_mtime)->b;
 
         update_views_all_windows(nullptr, file_browser);
     }
@@ -561,14 +564,18 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         set = xset_get_panel(p, xset::panel::detcol_atime);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, xset::panel::detcol_atime, mode)->b;
-        // mtime
-        set = xset_get_panel(p, xset::panel::detcol_mtime);
+        // btime
+        set = xset_get_panel(p, xset::panel::detcol_btime);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode)->b;
+        set->b = xset_get_panel_mode(p, xset::panel::detcol_btime, mode)->b;
         // ctime
         set = xset_get_panel(p, xset::panel::detcol_ctime);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, xset::panel::detcol_ctime, mode)->b;
+        // mtime
+        set = xset_get_panel(p, xset::panel::detcol_mtime);
+        xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
+        set->b = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode)->b;
 
         xset_set_cb(xset::name::view_reorder_col, (GFunc)on_reorder, browser);
 
@@ -576,8 +583,9 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
         xset_set_var(set, xset::var::disable, "0");
         desc = std::format("panel{}_detcol_size panel{}_detcol_bytes panel{}_detcol_type "
                            "panel{}_detcol_mime panel{}_detcol_perm panel{}_detcol_owner "
-                           "panel{}_detcol_group panel{}_detcol_atime panel{}_detcol_mtime "
-                           "panel{}_detcol_ctime separator view_reorder_col",
+                           "panel{}_detcol_group panel{}_detcol_atime panel{}_detcol_btime "
+                           "panel{}_detcol_ctime panel{}_detcol_mtime separator view_reorder_col",
+                           p,
                            p,
                            p,
                            p,
@@ -710,14 +718,14 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->is_sort_order(ptk::file_browser::sort_order::atime) ? xset::b::xtrue
                                                                           : xset::b::xfalse;
-    // mtime
-    set = xset_get(xset::name::sortby_mtime);
+    // btime
+    set = xset_get(xset::name::sortby_btime);
     xset_set_cb(set, (GFunc)on_popup_sortby, browser);
     xset_set_ob1_int(set,
                      "sortorder",
-                     magic_enum::enum_integer(ptk::file_browser::sort_order::mtime));
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::btime));
     xset_set_ob2(set, nullptr, set_radio->name.data());
-    set->b = browser->is_sort_order(ptk::file_browser::sort_order::mtime) ? xset::b::xtrue
+    set->b = browser->is_sort_order(ptk::file_browser::sort_order::btime) ? xset::b::xtrue
                                                                           : xset::b::xfalse;
     // ctime
     set = xset_get(xset::name::sortby_ctime);
@@ -727,6 +735,15 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                      magic_enum::enum_integer(ptk::file_browser::sort_order::ctime));
     xset_set_ob2(set, nullptr, set_radio->name.data());
     set->b = browser->is_sort_order(ptk::file_browser::sort_order::ctime) ? xset::b::xtrue
+                                                                          : xset::b::xfalse;
+    // mtime
+    set = xset_get(xset::name::sortby_mtime);
+    xset_set_cb(set, (GFunc)on_popup_sortby, browser);
+    xset_set_ob1_int(set,
+                     "sortorder",
+                     magic_enum::enum_integer(ptk::file_browser::sort_order::mtime));
+    xset_set_ob2(set, nullptr, set_radio->name.data());
+    set->b = browser->is_sort_order(ptk::file_browser::sort_order::mtime) ? xset::b::xtrue
                                                                           : xset::b::xfalse;
 
     set = xset_get(xset::name::sortby_ascend);

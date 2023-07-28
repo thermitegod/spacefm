@@ -1134,13 +1134,17 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_atime));
                 xset_set_b_panel_mode(p,
-                                      xset::panel::detcol_mtime,
+                                      xset::panel::detcol_btime,
                                       mode,
-                                      xset_get_b_panel(p, xset::panel::detcol_mtime));
+                                      xset_get_b_panel(p, xset::panel::detcol_btime));
                 xset_set_b_panel_mode(p,
                                       xset::panel::detcol_ctime,
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_ctime));
+                xset_set_b_panel_mode(p,
+                                      xset::panel::detcol_mtime,
+                                      mode,
+                                      xset_get_b_panel(p, xset::panel::detcol_mtime));
                 const xset_t set_old = xset_get_panel(p, xset::panel::slider_positions);
                 set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
                 set->x = set_old->x ? set_old->x : "0";
@@ -6118,7 +6122,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
     const std::string property = json["property"];
 
     // must match file-browser.c
-    static constexpr std::array<const std::string_view, 11> column_titles{
+    static constexpr std::array<const std::string_view, 12> column_titles{
         "Name",
         "Size",
         "Size in Bytes",
@@ -6128,8 +6132,9 @@ main_window_socket_command(const std::string_view socket_commands_json)
         "Owner",
         "Group",
         "Date Accessed",
-        "Date Modified",
         "Date Created",
+        "Date Metadata Changed",
+        "Date Modified",
     };
 
     // window
@@ -6565,8 +6570,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
                          ztd::same(subproperty, "bytes") || ztd::same(subproperty, "type") ||
                          ztd::same(subproperty, "mime") || ztd::same(subproperty, "permission") ||
                          ztd::same(subproperty, "owner") || ztd::same(subproperty, "group") ||
-                         ztd::same(subproperty, "accessed") || ztd::same(subproperty, "modified") ||
-                         ztd::same(subproperty, "created")))
+                         ztd::same(subproperty, "accessed") || ztd::same(subproperty, "created") ||
+                         ztd::same(subproperty, "metadata") || ztd::same(subproperty, "modified")))
                     {
                         found = true;
                         break;
@@ -6623,13 +6628,17 @@ main_window_socket_command(const std::string_view socket_commands_json)
             {
                 j = ptk::file_browser::sort_order::atime;
             }
+            else if (ztd::same(subproperty, "created"))
+            {
+                j = ptk::file_browser::sort_order::btime;
+            }
+            else if (ztd::same(subproperty, "metadata"))
+            {
+                j = ptk::file_browser::sort_order::ctime;
+            }
             else if (ztd::same(subproperty, "modified"))
             {
                 j = ptk::file_browser::sort_order::mtime;
-            }
-            else if (ztd::same(subproperty, "created"))
-            {
-                j = ptk::file_browser::sort_order::ctime;
             }
 
             else
@@ -7113,8 +7122,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
                          ztd::same(subproperty, "bytes") || ztd::same(subproperty, "type") ||
                          ztd::same(subproperty, "mime") || ztd::same(subproperty, "permission") ||
                          ztd::same(subproperty, "owner") || ztd::same(subproperty, "group") ||
-                         ztd::same(subproperty, "accessed") || ztd::same(subproperty, "modified") ||
-                         ztd::same(subproperty, "created")))
+                         ztd::same(subproperty, "accessed") || ztd::same(subproperty, "created") ||
+                         ztd::same(subproperty, "metadata") || ztd::same(subproperty, "modified")))
                     {
                         found = true;
                         break;
@@ -7152,10 +7161,12 @@ main_window_socket_command(const std::string_view socket_commands_json)
                     return {SOCKET_SUCCESS, "group"};
                 case ptk::file_browser::sort_order::atime:
                     return {SOCKET_SUCCESS, "accessed"};
+                case ptk::file_browser::sort_order::btime:
+                    return {SOCKET_SUCCESS, "created"};
+                case ptk::file_browser::sort_order::ctime:
+                    return {SOCKET_SUCCESS, "metadata"};
                 case ptk::file_browser::sort_order::mtime:
                     return {SOCKET_SUCCESS, "modified"};
-                case ptk::file_browser::sort_order::ctime:
-                    return {SOCKET_SUCCESS, "created"};
             }
         }
         else if (ztd::same(property, "sort-ascend") || ztd::same(property, "sort-natural") ||

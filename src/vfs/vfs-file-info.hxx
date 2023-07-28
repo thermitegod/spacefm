@@ -85,8 +85,9 @@ struct VFSFileInfo
     const std::string_view display_owner() const noexcept;
     const std::string_view display_group() const noexcept;
     const std::string_view display_atime() const noexcept;
-    const std::string_view display_mtime() const noexcept;
+    const std::string_view display_btime() const noexcept;
     const std::string_view display_ctime() const noexcept;
+    const std::string_view display_mtime() const noexcept;
     const std::string_view display_permissions() noexcept;
 
     std::time_t atime() const noexcept;

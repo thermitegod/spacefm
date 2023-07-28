@@ -208,8 +208,9 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     column_types[ptk::file_list::column::owner] = G_TYPE_STRING;
     column_types[ptk::file_list::column::group] = G_TYPE_STRING;
     column_types[ptk::file_list::column::atime] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::mtime] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::btime] = G_TYPE_STRING;
     column_types[ptk::file_list::column::ctime] = G_TYPE_STRING;
+    column_types[ptk::file_list::column::mtime] = G_TYPE_STRING;
     column_types[ptk::file_list::column::info] = G_TYPE_POINTER;
 }
 
@@ -507,11 +508,14 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case ptk::file_list::column::atime:
             g_value_set_string(value, file->display_atime().data());
             break;
-        case ptk::file_list::column::mtime:
-            g_value_set_string(value, file->display_mtime().data());
+        case ptk::file_list::column::btime:
+            g_value_set_string(value, file->display_btime().data());
             break;
         case ptk::file_list::column::ctime:
             g_value_set_string(value, file->display_ctime().data());
+            break;
+        case ptk::file_list::column::mtime:
+            g_value_set_string(value, file->display_mtime().data());
             break;
         case ptk::file_list::column::info:
             g_value_set_pointer(value, vfs_file_info_ref(file));
@@ -895,7 +899,7 @@ compare_file_info_atime(vfs::file_info file_a, vfs::file_info file_b, PtkFileLis
 }
 
 static i32
-compare_file_info_mtime(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+compare_file_info_btime(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
 {
     i32 result;
 
@@ -909,11 +913,11 @@ compare_file_info_mtime(vfs::file_info file_a, vfs::file_info file_b, PtkFileLis
         }
     }
 
-    if (file_a->mtime() > file_b->mtime())
+    if (file_a->btime() > file_b->btime())
     {
         result = 1;
     }
-    else if (file_a->mtime() == file_b->mtime())
+    else if (file_a->btime() == file_b->btime())
     {
         result = 0;
     }
@@ -945,6 +949,37 @@ compare_file_info_ctime(vfs::file_info file_a, vfs::file_info file_b, PtkFileLis
         result = 1;
     }
     else if (file_a->ctime() == file_b->ctime())
+    {
+        result = 0;
+    }
+    else
+    {
+        result = -1;
+    }
+
+    return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
+}
+
+static i32
+compare_file_info_mtime(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list)
+{
+    i32 result;
+
+    // dirs before/after files
+    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    {
+        result = file_a->is_directory() - file_b->is_directory();
+        if (result != 0)
+        {
+            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+        }
+    }
+
+    if (file_a->mtime() > file_b->mtime())
+    {
+        result = 1;
+    }
+    else if (file_a->mtime() == file_b->mtime())
     {
         result = 0;
     }
@@ -1028,12 +1063,12 @@ ptk_file_info_list_sort(PtkFileList* list)
                               { return compare_file_info_atime(file_a, file_b, list) < 0; });
             break;
         }
-        case ptk::file_list::column::mtime:
+        case ptk::file_list::column::btime:
         {
             std::ranges::sort(file_list.begin(),
                               file_list.end(),
                               [&list](vfs::file_info file_a, vfs::file_info file_b)
-                              { return compare_file_info_mtime(file_a, file_b, list) < 0; });
+                              { return compare_file_info_btime(file_a, file_b, list) < 0; });
             break;
         }
         case ptk::file_list::column::ctime:
@@ -1042,6 +1077,14 @@ ptk_file_info_list_sort(PtkFileList* list)
                               file_list.end(),
                               [&list](vfs::file_info file_a, vfs::file_info file_b)
                               { return compare_file_info_ctime(file_a, file_b, list) < 0; });
+            break;
+        }
+        case ptk::file_list::column::mtime:
+        {
+            std::ranges::sort(file_list.begin(),
+                              file_list.end(),
+                              [&list](vfs::file_info file_a, vfs::file_info file_b)
+                              { return compare_file_info_mtime(file_a, file_b, list) < 0; });
             break;
         }
         case ptk::file_list::column::big_icon:

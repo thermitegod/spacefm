@@ -185,7 +185,7 @@ struct column_data
 };
 
 // must match main-window.c  main_window_socket_command
-static constexpr std::array<column_data, 11> columns{
+static constexpr std::array<column_data, 12> columns{
     {{
          "Name",
          xset::panel::detcol_name,
@@ -232,14 +232,19 @@ static constexpr std::array<column_data, 11> columns{
          ptk::file_list::column::atime,
      },
      {
+         "Date Created",
+         xset::panel::detcol_btime,
+         ptk::file_list::column::btime,
+     },
+     {
+         "Date Metadata Change",
+         xset::panel::detcol_ctime,
+         ptk::file_list::column::ctime,
+     },
+     {
          "Date Modified",
          xset::panel::detcol_mtime,
          ptk::file_list::column::mtime,
-     },
-     {
-         "Date Created",
-         xset::panel::detcol_ctime,
-         ptk::file_list::column::ctime,
      }},
 };
 
@@ -1230,11 +1235,14 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
         case ptk::file_list::column::atime:
             sort_order = ptk::file_browser::sort_order::atime;
             break;
-        case ptk::file_list::column::mtime:
-            sort_order = ptk::file_browser::sort_order::mtime;
+        case ptk::file_list::column::btime:
+            sort_order = ptk::file_browser::sort_order::btime;
             break;
         case ptk::file_list::column::ctime:
             sort_order = ptk::file_browser::sort_order::ctime;
+            break;
+        case ptk::file_list::column::mtime:
+            sort_order = ptk::file_browser::sort_order::mtime;
             break;
         case ptk::file_list::column::big_icon:
         case ptk::file_list::column::small_icon:
@@ -2969,11 +2977,14 @@ file_list_order_from_sort_order(ptk::file_browser::sort_order order)
         case ptk::file_browser::sort_order::atime:
             col = ptk::file_list::column::atime;
             break;
-        case ptk::file_browser::sort_order::mtime:
-            col = ptk::file_list::column::mtime;
+        case ptk::file_browser::sort_order::btime:
+            col = ptk::file_list::column::btime;
             break;
         case ptk::file_browser::sort_order::ctime:
             col = ptk::file_list::column::ctime;
+            break;
+        case ptk::file_browser::sort_order::mtime:
+            col = ptk::file_list::column::mtime;
             break;
     }
     return magic_enum::enum_integer(col);
@@ -6237,13 +6248,17 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::atime);
         }
-        else if (set->xset_name == xset::name::sortby_mtime)
+        else if (set->xset_name == xset::name::sortby_btime)
         {
-            i = magic_enum::enum_integer(ptk::file_browser::sort_order::mtime);
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::btime);
         }
         else if (set->xset_name == xset::name::sortby_ctime)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::ctime);
+        }
+        else if (set->xset_name == xset::name::sortby_mtime)
+        {
+            i = magic_enum::enum_integer(ptk::file_browser::sort_order::mtime);
         }
         else if (set->xset_name == xset::name::sortby_ascend)
         {

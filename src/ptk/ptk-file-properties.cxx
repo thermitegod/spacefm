@@ -493,18 +493,21 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
 
     if (multiple_files)
     {
-        page.add_row("Modified:    ",
-                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
         page.add_row("Accessed:    ",
                      GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
         page.add_row("Created:     ",
                      GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
+        page.add_row("Metadata:    ",
+                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
+        page.add_row("Modified:    ",
+                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
     }
     else
     {
-        page.add_row("Modified:    ", GTK_WIDGET(create_prop_text_box_date(file->mtime())));
         page.add_row("Accessed:    ", GTK_WIDGET(create_prop_text_box_date(file->atime())));
-        page.add_row("Created:     ", GTK_WIDGET(create_prop_text_box_date(file->ctime())));
+        page.add_row("Created:     ", GTK_WIDGET(create_prop_text_box_date(file->btime())));
+        page.add_row("Metadata:    ", GTK_WIDGET(create_prop_text_box_date(file->ctime())));
+        page.add_row("Modified:    ", GTK_WIDGET(create_prop_text_box_date(file->mtime())));
     }
 
     return page.box();

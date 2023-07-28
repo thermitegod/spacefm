@@ -54,8 +54,9 @@ namespace ptk::file_list
         owner,
         group,
         atime,
-        mtime,
+        btime,
         ctime,
+        mtime,
         info,
     };
 

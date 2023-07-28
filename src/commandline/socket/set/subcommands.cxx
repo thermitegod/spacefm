@@ -780,7 +780,7 @@ setup_subcommand_set_column_width_group(CLI::App* app, const socket_subcommand_d
 }
 
 void
-setup_subcommand_set_column_width_accessed(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_date_accessed(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("accessed", "Set property accessed");
 
@@ -791,24 +791,35 @@ setup_subcommand_set_column_width_accessed(CLI::App* app, const socket_subcomman
 }
 
 void
-setup_subcommand_set_column_width_modified(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_date_created(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("created", "Set property created");
+
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "created"; };
+    sub->callback(run_subcommand);
+}
+
+void
+setup_subcommand_set_column_width_date_metadata(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("metadata", "Set property metadata");
+
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+
+    const auto run_subcommand = [opt]() { opt->subproperty = "metadata"; };
+    sub->callback(run_subcommand);
+}
+
+void
+setup_subcommand_set_column_width_date_modified(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("modified", "Set property modified");
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "modified"; };
-    sub->callback(run_subcommand);
-}
-
-void
-setup_subcommand_set_column_width_created(CLI::App* app, const socket_subcommand_data_t& opt)
-{
-    auto* sub = app->add_subcommand("created", "Set property created");
-
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
-    const auto run_subcommand = [opt]() { opt->subproperty = "accessed"; };
     sub->callback(run_subcommand);
 }
 
@@ -830,9 +841,10 @@ commandline::socket::set::column_width(CLI::App* app, const socket_subcommand_da
     setup_subcommand_set_column_width_permission(sub, opt);
     setup_subcommand_set_column_width_owner(sub, opt);
     setup_subcommand_set_column_width_group(sub, opt);
-    setup_subcommand_set_column_width_accessed(sub, opt);
-    setup_subcommand_set_column_width_modified(sub, opt);
-    setup_subcommand_set_column_width_created(sub, opt);
+    setup_subcommand_set_column_width_date_accessed(sub, opt);
+    setup_subcommand_set_column_width_date_created(sub, opt);
+    setup_subcommand_set_column_width_date_metadata(sub, opt);
+    setup_subcommand_set_column_width_date_modified(sub, opt);
 }
 
 /*

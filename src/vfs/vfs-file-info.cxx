@@ -436,15 +436,21 @@ VFSFileInfo::display_atime() const noexcept
 }
 
 const std::string_view
-VFSFileInfo::display_mtime() const noexcept
+VFSFileInfo::display_btime() const noexcept
 {
-    return this->display_mtime_;
+    return this->display_btime_;
 }
 
 const std::string_view
 VFSFileInfo::display_ctime() const noexcept
 {
     return this->display_ctime_;
+}
+
+const std::string_view
+VFSFileInfo::display_mtime() const noexcept
+{
+    return this->display_mtime_;
 }
 
 std::time_t
