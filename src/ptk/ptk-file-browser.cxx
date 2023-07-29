@@ -2314,11 +2314,12 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
-            exo_icon_view_widget_to_icon_coords(EXO_ICON_VIEW(file_browser->folder_view_),
-                                                x,
-                                                y,
-                                                &x,
-                                                &y);
+            gtk_icon_view_convert_widget_to_bin_window_coords(
+                GTK_ICON_VIEW(file_browser->folder_view_),
+                x,
+                y,
+                &x,
+                &y);
             tree_path = folder_view_get_tree_path_at_pos(file_browser, x, y);
             model = exo_icon_view_get_model(EXO_ICON_VIEW(file_browser->folder_view_));
             break;
@@ -2677,7 +2678,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
             // store x and y because exo_icon_view has no get_drag_dest_row
             file_browser->drag_x_ = x;
             file_browser->drag_y_ = y;
-            exo_icon_view_widget_to_icon_coords(EXO_ICON_VIEW(widget), x, y, &x, &y);
+            gtk_icon_view_convert_widget_to_bin_window_coords(GTK_ICON_VIEW(widget), x, y, &x, &y);
             tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget), x, y);
             model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
             break;
