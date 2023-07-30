@@ -342,7 +342,7 @@ load_settings()
             if (default_app)
             {
                 const vfs::desktop desktop = vfs_get_desktop(default_app.value());
-                xset_set(xset::name::editor, xset::var::s, desktop->full_path().string());
+                xset_set(xset::name::editor, xset::var::s, desktop->path().string());
             }
         }
     }

@@ -151,7 +151,7 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
 
     // tooltip
     const std::string tooltip = std::format("{}\nName={}\nExec={}\nTerminal={}",
-                                            desktop->full_path().string(),
+                                            desktop->path().string(),
                                             desktop->display_name(),
                                             desktop->exec(),
                                             desktop->use_terminal());

@@ -44,283 +44,181 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-app-desktop.hxx"
 
-std::map<std::string, vfs::desktop> desktops_map;
+static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";
+
+static constexpr std::string DESKTOP_ENTRY_KEY_TYPE = "Type";
+static constexpr std::string DESKTOP_ENTRY_KEY_NAME = "Name";
+static constexpr std::string DESKTOP_ENTRY_KEY_GENERICNAME = "GenericName";
+static constexpr std::string DESKTOP_ENTRY_KEY_NODISPLAY = "NoDisplay";
+static constexpr std::string DESKTOP_ENTRY_KEY_COMMENT = "Comment";
+static constexpr std::string DESKTOP_ENTRY_KEY_ICON = "Icon";
+static constexpr std::string DESKTOP_ENTRY_KEY_TRYEXEC = "TryExec";
+static constexpr std::string DESKTOP_ENTRY_KEY_EXEC = "Exec";
+static constexpr std::string DESKTOP_ENTRY_KEY_PATH = "Path";
+static constexpr std::string DESKTOP_ENTRY_KEY_TERMINAL = "Terminal";
+static constexpr std::string DESKTOP_ENTRY_KEY_ACTIONS = "Actions";
+static constexpr std::string DESKTOP_ENTRY_KEY_MIMETYPE = "MimeType";
+static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
+static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
+static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
+
+std::map<std::filesystem::path, vfs::desktop> desktops_cache;
 
 vfs::desktop
-vfs_get_desktop(const std::string_view desktop_file)
+vfs_get_desktop(const std::filesystem::path& desktop_file)
 {
-    if (desktops_map.contains(desktop_file.data()))
+    if (desktops_cache.contains(desktop_file))
     {
-        // ztd::logger::info("cached vfs_get_desktop={}", desktop_file);
-        return desktops_map.at(desktop_file.data());
+        // ztd::logger::info("cached vfs_get_desktop={}", desktop_file.string());
+        return desktops_cache.at(desktop_file);
     }
-    // ztd::logger::info("new vfs_get_desktop={}", desktop_file);
+    // ztd::logger::info("new vfs_get_desktop={}", desktop_file.string());
 
     vfs::desktop desktop = std::make_shared<VFSAppDesktop>(desktop_file);
 
-    desktops_map.insert({desktop_file.data(), desktop});
+    desktops_cache.insert({desktop_file, desktop});
 
     return desktop;
 }
 
 VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
 {
-    bool load;
     const auto kf = Glib::KeyFile::create();
 
     if (desktop_file.is_absolute())
     {
-        this->file_name_ = desktop_file.filename();
-        this->full_path_ = desktop_file;
-        load = kf->load_from_file(desktop_file, Glib::KeyFile::Flags::NONE);
+        this->filename_ = desktop_file.filename();
+        this->path_ = desktop_file;
+        this->loaded_ = kf->load_from_file(desktop_file, Glib::KeyFile::Flags::NONE);
     }
     else
     {
-        this->file_name_ = desktop_file.filename();
-        const auto relative_path = std::filesystem::path() / "applications" / this->file_name_;
+        this->filename_ = desktop_file.filename();
+        const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
         std::string relative_full_path;
-        load =
+        this->loaded_ =
             kf->load_from_data_dirs(relative_path, relative_full_path, Glib::KeyFile::Flags::NONE);
-        this->full_path_ = relative_full_path;
+        this->path_ = relative_full_path;
     }
 
-    if (!load)
+    if (!this->loaded_)
     {
-        ztd::logger::warn("Failed to load desktop file {}", desktop_file.string());
-        this->exec_ = this->file_name_;
+        ztd::logger::error("Failed to load desktop file: {}", desktop_file.string());
         return;
     }
-
-    static const std::string desktop_entry = "Desktop Entry";
 
     // Keys not loaded from .desktop files
     // - Hidden
     // - OnlyShowIn
     // - NotShowIn
     // - DBusActivatable
+    // - StartupWMClass
     // - URL
     // - PrefersNonDefaultGPU
     // - SingleMainWindow
 
-    try
+    // clang-format off
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
     {
-        const Glib::ustring g_type = kf->get_string(desktop_entry, "Type");
-        if (!g_type.empty())
-        {
-            this->type_ = g_type;
-        }
+        this->desktop_entry_.type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
     {
-        const Glib::ustring g_name = kf->get_string(desktop_entry, "Name");
-        if (!g_name.empty())
-        {
-            this->name_ = g_name;
-        }
+        this->desktop_entry_.name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
     {
-        const Glib::ustring g_generic_name = kf->get_string(desktop_entry, "GenericName");
-        if (!g_generic_name.empty())
-        {
-            this->generic_name_ = g_generic_name;
-        }
+        this->desktop_entry_.generic_name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY))
     {
-        this->no_display_ = kf->get_boolean(desktop_entry, "NoDisplay");
+        this->desktop_entry_.no_display = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT))
     {
-        const Glib::ustring g_comment = kf->get_string(desktop_entry, "Comment");
-        if (!g_comment.empty())
-        {
-            this->comment_ = g_comment;
-        }
+        this->desktop_entry_.comment = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON))
     {
-        const Glib::ustring g_icon = kf->get_string(desktop_entry, "Icon");
-        if (!g_icon.empty())
-        {
-            this->icon_ = g_icon;
-        }
+        this->desktop_entry_.icon = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC))
     {
-        const Glib::ustring g_try_exec = kf->get_string(desktop_entry, "TryExec");
-        if (!g_try_exec.empty())
-        {
-            this->try_exec_ = g_try_exec;
-        }
+        this->desktop_entry_.try_exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC))
     {
-        const Glib::ustring g_exec = kf->get_string(desktop_entry, "Exec");
-        if (!g_exec.empty())
-        {
-            this->exec_ = g_exec;
-        }
+        this->desktop_entry_.exec = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH))
     {
-        const Glib::ustring g_path = kf->get_string(desktop_entry, "Path");
-        if (!g_path.empty())
-        {
-            this->path_ = g_path;
-        }
+        this->desktop_entry_.path = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL))
     {
-        this->terminal_ = kf->get_boolean(desktop_entry, "Terminal");
+         this->desktop_entry_.terminal = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS))
     {
-        const Glib::ustring g_actions = kf->get_string(desktop_entry, "Actions");
-        if (!g_actions.empty())
-        {
-            this->actions_ = g_actions;
-        }
+        this->desktop_entry_.actions = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE))
     {
-        const Glib::ustring g_mime_type = kf->get_string(desktop_entry, "MimeType");
-        if (!g_mime_type.empty())
-        {
-            this->mime_type_ = g_mime_type; // TODO vector
-        }
+        this->desktop_entry_.mime_type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES))
     {
-        const Glib::ustring g_categories = kf->get_string(desktop_entry, "Categories");
-        if (!g_categories.empty())
-        {
-            this->categories_ = g_categories;
-        }
+        this->desktop_entry_.categories = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS))
     {
-        const Glib::ustring g_keywords = kf->get_string(desktop_entry, "Keywords");
-        if (!g_keywords.empty())
-        {
-            this->keywords_ = g_keywords;
-        }
+        this->desktop_entry_.keywords = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
+    if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY))
     {
-        this->startup_notify_ = kf->get_boolean(desktop_entry, "StartupNotify");
+        this->desktop_entry_.startup_notify = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
     }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
-
-    try
-    {
-        const Glib::ustring g_startup_wm_class = kf->get_string(desktop_entry, "StartupWMClass");
-        if (!g_startup_wm_class.empty())
-        {
-            this->startup_wm_class_ = g_startup_wm_class;
-        }
-    }
-    catch (const Glib::KeyFileError& e)
-    { /* Desktop Missing Key, Use Default init */
-    }
+    // clang-format on
 }
 
 const std::string_view
 VFSAppDesktop::name() const noexcept
 {
-    return this->file_name_;
+    return this->filename_;
 }
 
 const std::string_view
 VFSAppDesktop::display_name() const noexcept
 {
-    if (!this->name_.empty())
+    if (!this->desktop_entry_.name.empty())
     {
-        return this->name_;
+        return this->desktop_entry_.name;
     }
-    return this->file_name_;
+    return this->filename_;
 }
 
 const std::string_view
 VFSAppDesktop::exec() const noexcept
 {
-    return this->exec_;
+    return this->desktop_entry_.exec;
 }
 
 bool
 VFSAppDesktop::use_terminal() const noexcept
 {
-    return this->terminal_;
+    return this->desktop_entry_.terminal;
 }
 
 const std::filesystem::path&
-VFSAppDesktop::full_path() const noexcept
+VFSAppDesktop::path() const noexcept
 {
-    return this->full_path_;
+    return this->path_;
 }
 
 const std::string_view
 VFSAppDesktop::icon_name() const noexcept
 {
-    return this->icon_;
+    return this->desktop_entry_.icon;
 }
 
 GdkPixbuf*
@@ -328,9 +226,9 @@ VFSAppDesktop::icon(i32 size) const noexcept
 {
     GdkPixbuf* desktop_icon = nullptr;
 
-    if (!this->icon_.empty())
+    if (!this->desktop_entry_.icon.empty())
     {
-        desktop_icon = vfs_load_icon(this->icon_, size);
+        desktop_icon = vfs_load_icon(this->desktop_entry_.icon, size);
     }
 
     // fallback to generic icon
@@ -349,14 +247,9 @@ VFSAppDesktop::icon(i32 size) const noexcept
 bool
 VFSAppDesktop::open_multiple_files() const noexcept
 {
-    if (this->exec_.empty())
-    {
-        return false;
-    }
-
     static constexpr std::array<const std::string_view, 2> keys{"%U", "%F"};
 
-    return ztd::contains(this->exec_, keys);
+    return ztd::contains(this->desktop_entry_.exec, keys);
 }
 
 const std::optional<std::vector<std::vector<std::string>>>
@@ -365,18 +258,18 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
-    std::vector<std::vector<std::string>> commands = {{ztd::split(this->exec_, " ")}};
+    std::vector<std::vector<std::string>> commands = {{ztd::split(this->desktop_entry_.exec, " ")}};
 
     bool add_files = false;
 
     static constexpr std::array<const std::string_view, 2> open_files_keys{"%F", "%U"};
-    if (ztd::contains(this->exec_, open_files_keys))
+    if (ztd::contains(this->desktop_entry_.exec, open_files_keys))
     {
         // %F and %U must always be at the end
-        if (!ztd::endswith(this->exec_, open_files_keys))
+        if (!ztd::endswith(this->desktop_entry_.exec, open_files_keys))
         {
             ztd::logger::error("Malformed desktop file, %F and %U must always be at the end: {}",
-                               this->full_path_.string());
+                               this->path_.string());
             return std::nullopt;
         }
 
@@ -400,13 +293,13 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
     }
 
     static constexpr std::array<const std::string_view, 2> open_file_keys{"%f", "%u"};
-    if (ztd::contains(this->exec_, open_file_keys))
+    if (ztd::contains(this->desktop_entry_.exec, open_file_keys))
     {
         // %f and %u must always be at the end
-        if (!ztd::endswith(this->exec_, open_file_keys))
+        if (!ztd::endswith(this->desktop_entry_.exec, open_file_keys))
         {
             ztd::logger::error("Malformed desktop file, %f and %u must always be at the end: {}",
-                               this->full_path_.string());
+                               this->path_.string());
             return std::nullopt;
         }
 
@@ -436,10 +329,10 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
     {
         ztd::logger::error("Malformed desktop file, trying to open a desktop file without file/url "
                            "keys with a file list: {}",
-                           this->full_path_.string());
+                           this->path_.string());
     }
 
-    if (ztd::contains(this->exec_, "%c"))
+    if (ztd::contains(this->desktop_entry_.exec, "%c"))
     {
         for (auto& argv : commands)
         {
@@ -454,7 +347,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
         }
     }
 
-    if (ztd::contains(this->exec_, "%k"))
+    if (ztd::contains(this->desktop_entry_.exec, "%k"))
     {
         for (auto& argv : commands)
         {
@@ -462,14 +355,14 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
             {
                 if (ztd::same(arg, "%k"))
                 {
-                    argv[index] = this->full_path();
+                    argv[index] = this->path_;
                     break;
                 }
             }
         }
     }
 
-    if (ztd::contains(this->exec_, "%i"))
+    if (ztd::contains(this->desktop_entry_.exec, "%i"))
     {
         for (auto& argv : commands)
         {
@@ -505,12 +398,28 @@ VFSAppDesktop::exec_in_terminal(const std::filesystem::path& cwd,
 }
 
 void
+VFSAppDesktop::open_file(const std::filesystem::path& working_dir,
+                         const std::filesystem::path& file_path) const
+{
+    if (this->desktop_entry_.exec.empty())
+    {
+        const std::string msg =
+            std::format("Desktop Exec is empty, command not found\n\n{}", this->filename_);
+        throw VFSAppDesktopException(msg);
+    }
+
+    const std::vector<std::filesystem::path> file_paths{file_path};
+    this->exec_desktop(working_dir, file_paths);
+}
+
+void
 VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
                           const std::span<const std::filesystem::path> file_paths) const
 {
-    if (this->exec_.empty())
+    if (this->desktop_entry_.exec.empty())
     {
-        const std::string msg = std::format("Command not found\n\n{}", this->file_name_);
+        const std::string msg =
+            std::format("Desktop Exec is empty, command not found\n\n{}", this->filename_);
         throw VFSAppDesktopException(msg);
     }
 
@@ -546,7 +455,8 @@ VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
         for (const auto& argv : desktop_commands)
         {
             const std::string command = ztd::join(argv, " ");
-            this->exec_in_terminal(!this->path_.empty() ? this->path_ : working_dir.string(),
+            this->exec_in_terminal(!this->desktop_entry_.path.empty() ? this->desktop_entry_.path
+                                                                      : working_dir.string(),
                                    command);
         }
     }
@@ -554,16 +464,17 @@ VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
     {
         for (const auto& argv : desktop_commands)
         {
-            Glib::spawn_async_with_pipes(!this->path_.empty() ? this->path_ : working_dir.string(),
-                                         argv,
-                                         Glib::SpawnFlags::SEARCH_PATH |
-                                             Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
-                                             Glib::SpawnFlags::STDERR_TO_DEV_NULL,
-                                         Glib::SlotSpawnChildSetup(),
-                                         nullptr,
-                                         nullptr,
-                                         nullptr,
-                                         nullptr);
+            Glib::spawn_async_with_pipes(
+                !this->desktop_entry_.path.empty() ? this->desktop_entry_.path
+                                                   : working_dir.string(),
+                argv,
+                Glib::SpawnFlags::SEARCH_PATH | Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
+                    Glib::SpawnFlags::STDERR_TO_DEV_NULL,
+                Glib::SlotSpawnChildSetup(),
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr);
         }
     }
 }

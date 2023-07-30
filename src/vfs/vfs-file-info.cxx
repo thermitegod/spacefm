@@ -821,7 +821,7 @@ VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
     const auto file_dir = file_path.parent_path();
 
     this->flags_ = (vfs::file_info_flags)(this->flags_ | vfs::file_info_flags::desktop_entry);
-    const vfs::desktop desktop = vfs_get_desktop(file_path.string());
+    const vfs::desktop desktop = vfs_get_desktop(file_path);
 
     // MOD  display real filenames of .desktop files not in desktop directory
     if (std::filesystem::equivalent(file_dir, vfs::user_dirs->desktop_dir()))

@@ -227,28 +227,6 @@ open_files_with_handler(const std::shared_ptr<ParentInfo>& parent,
     }
 }
 
-static const std::string
-check_desktop_name(const std::string_view app_desktop)
-{
-    // Check whether this is an app desktop file or just a command line
-    if (ztd::endswith(app_desktop, ".desktop"))
-    {
-        return app_desktop.data();
-    }
-
-    // Not a desktop entry name
-    // If we are lucky enough, there might be a desktop entry
-    // for this program
-    const std::string name = std::format("{}.desktop", app_desktop);
-    if (std::filesystem::exists(name))
-    {
-        return name;
-    }
-
-    // fallback
-    return app_desktop.data();
-}
-
 static bool
 open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
                     const std::span<const std::filesystem::path> open_files,
@@ -270,9 +248,9 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
         return false;
     }
 
-    const vfs::desktop desktop = vfs_get_desktop(check_desktop_name(app_desktop));
+    const vfs::desktop desktop = vfs_get_desktop(app_desktop);
 
-    ztd::logger::info("EXEC({})={}", desktop->full_path().string(), desktop->exec());
+    ztd::logger::info("EXEC({})={}", desktop->path().string(), desktop->exec());
 
     try
     {

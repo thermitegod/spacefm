@@ -111,11 +111,9 @@ open_file(const std::filesystem::path& path)
 
     const vfs::desktop desktop = vfs_get_desktop(check_app_name.value());
 
-    const std::vector<std::filesystem::path> open_files{path};
-
     try
     {
-        desktop->open_files(vfs::user_dirs->current_dir(), open_files);
+        desktop->open_file(vfs::user_dirs->current_dir(), path);
     }
     catch (const VFSAppDesktopException& e)
     {
