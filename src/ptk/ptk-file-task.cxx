@@ -2424,29 +2424,21 @@ query_overwrite(PtkFileTask* ptask)
     }
 
     // filenames
-    char* base_name = ztd::strdup(current_dest.filename());
-    char* base_name_disp = ztd::strdup(base_name); // auto free
-    char* src_dir = ztd::strdup(current_file.parent_path());
-    char* src_dir_disp = ztd::strdup(src_dir);
-    char* dest_dir = ztd::strdup(current_dest.parent_path());
-    char* dest_dir_disp = ztd::strdup(dest_dir);
+    const std::string filename = current_dest.filename();
+    const std::string src_dir = current_file.parent_path();
+    const std::string dest_dir = current_dest.parent_path();
 
-    const auto [filename_no_extension, filename_extension] = get_name_extension(base_name);
+    const auto filename_parts = split_basename_extension(filename);
 
-    char* ext_disp = !filename_extension.empty() ? ztd::strdup(filename_extension) : nullptr;
     const std::string unique_name =
-        vfs_get_unique_name(dest_dir, filename_no_extension, filename_extension);
-    char* new_name_plain =
-        !unique_name.empty() ? ztd::strdup(std::filesystem::path(unique_name).filename()) : nullptr;
-    char* new_name = new_name_plain ? ztd::strdup(new_name_plain) : nullptr;
+        vfs_get_unique_name(dest_dir, filename_parts.basename, filename_parts.extension);
+    const std::string new_name_plain =
+        !unique_name.empty() ? std::filesystem::path(unique_name).filename() : "";
+    const std::string new_name = !new_name_plain.empty() ? new_name_plain : "";
 
-    const i32 pos = ext_disp ? std::strlen(base_name_disp) - std::strlen(ext_disp) - 1 : -1;
-
-    std::free(base_name);
-    std::free(ext_disp);
-    std::free(src_dir);
-    std::free(dest_dir);
-    std::free(new_name_plain);
+    const auto pos = !filename_parts.extension.empty()
+                         ? filename.size() - filename_parts.extension.size() - 1
+                         : -1;
 
     // create dialog
     if (ptask->progress_dlg)
@@ -2546,7 +2538,7 @@ query_overwrite(PtkFileTask* ptask)
     gtk_widget_set_can_focus(from_label, false);
     gtk_box_pack_start(GTK_BOX(vbox), from_label, false, true, 0);
 
-    GtkWidget* from_dir = gtk_label_new(src_dir_disp);
+    GtkWidget* from_dir = gtk_label_new(src_dir.data());
     gtk_widget_set_halign(GTK_WIDGET(from_dir), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(from_dir), GtkAlign::GTK_ALIGN_START);
     gtk_label_set_ellipsize(GTK_LABEL(from_dir), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -2572,7 +2564,7 @@ query_overwrite(PtkFileTask* ptask)
         gtk_widget_set_valign(GTK_WIDGET(to_label), GtkAlign::GTK_ALIGN_START);
         gtk_box_pack_start(GTK_BOX(vbox), to_label, false, true, 0);
 
-        GtkWidget* to_dir = gtk_label_new(dest_dir_disp);
+        GtkWidget* to_dir = gtk_label_new(dest_dir.data());
         gtk_widget_set_halign(GTK_WIDGET(to_dir), GtkAlign::GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(to_dir), GtkAlign::GTK_ALIGN_START);
         gtk_label_set_ellipsize(GTK_LABEL(to_dir), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
@@ -2601,7 +2593,7 @@ query_overwrite(PtkFileTask* ptask)
     // name input
     GtkWidget* scroll = gtk_scrolled_window_new(nullptr, nullptr);
     GtkWidget* query_input =
-        GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(scroll), base_name_disp));
+        GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(scroll), filename.data()));
     g_signal_connect(G_OBJECT(query_input),
                      "key-press-event",
                      G_CALLBACK(on_query_input_keypress),
@@ -2613,10 +2605,6 @@ query_overwrite(PtkFileTask* ptask)
                      "changed",
                      G_CALLBACK(on_multi_input_changed),
                      query_input);
-    g_object_set_data_full(G_OBJECT(query_input),
-                           "old_name",
-                           base_name_disp,
-                           (GDestroyNotify)std::free);
     gtk_widget_set_size_request(GTK_WIDGET(query_input), -1, 60);
     gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 60);
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(query_input));
@@ -2630,7 +2618,7 @@ query_overwrite(PtkFileTask* ptask)
     g_signal_connect(G_OBJECT(rename_button), "clicked", G_CALLBACK(on_query_button_press), ptask);
     GtkWidget* auto_button = gtk_button_new_with_mnemonic(" A_uto Rename ");
     g_signal_connect(G_OBJECT(auto_button), "clicked", G_CALLBACK(on_query_button_press), ptask);
-    gtk_widget_set_tooltip_text(auto_button, new_name);
+    gtk_widget_set_tooltip_text(auto_button, new_name.data());
     GtkWidget* auto_all_button = gtk_button_new_with_mnemonic(" Auto Re_name All ");
     g_signal_connect(G_OBJECT(auto_all_button),
                      "clicked",
@@ -2645,10 +2633,6 @@ query_overwrite(PtkFileTask* ptask)
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(auto_button), false, true, 0);
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(auto_all_button), false, true, 0);
     gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(hbox), false, true, 0);
-
-    std::free(src_dir_disp);
-    std::free(dest_dir_disp);
-    std::free(new_name);
 
     // update displays (mutex is already locked)
     ptask->dsp_curspeed = "stalled";

@@ -235,10 +235,11 @@ VFSFileTask::check_overwrite(const std::filesystem::path& dest_file, bool* dest_
             const auto old_name = dest_file.filename();
             const auto dest_file_dir = dest_file.parent_path();
 
-            const auto [filename_no_extension, filename_extension] = get_name_extension(old_name);
+            const auto filename_parts = split_basename_extension(old_name);
 
-            *new_dest_file = ztd::strdup(
-                vfs_get_unique_name(dest_file_dir, filename_no_extension, filename_extension));
+            *new_dest_file = ztd::strdup(vfs_get_unique_name(dest_file_dir,
+                                                             filename_parts.basename,
+                                                             filename_parts.extension));
             *dest_exists = false;
             if (*new_dest_file)
             {

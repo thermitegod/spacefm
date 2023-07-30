@@ -349,9 +349,9 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         const std::string full_name =
             gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
-        const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
-        gtk_text_buffer_set_text(mset->buf_name, filename_no_extension.data(), -1);
-        gtk_entry_set_text(mset->entry_ext, filename_extension.data());
+        const auto filename_parts = split_basename_extension(full_name);
+        gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
+        gtk_entry_set_text(mset->entry_ext, filename_parts.extension.data());
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -446,27 +446,27 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             path = cwd / path;
         }
 
-        const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
-        gtk_text_buffer_set_text(mset->buf_name, filename_no_extension.data(), -1);
-        gtk_entry_set_text(mset->entry_ext, filename_extension.data());
+        const auto filename_parts = split_basename_extension(full_name);
+        gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
+        gtk_entry_set_text(mset->entry_ext, filename_parts.extension.data());
 
         // update full_name
-        if (!filename_no_extension.empty() && !filename_extension.empty())
+        if (filename_parts.basename.empty() || filename_parts.extension.empty())
         {
-            full_name = std::format("{}.{}", filename_no_extension, filename_extension);
+            if (!filename_parts.basename.empty() && filename_parts.extension.empty())
+            {
+                full_name = filename_parts.basename;
+            }
+            else if (filename_parts.basename.empty() && !filename_parts.extension.empty())
+            {
+                full_name = filename_parts.extension;
+            }
+            else
+            {
+                full_name = "";
+            }
         }
-        else if (!filename_no_extension.empty() && filename_extension.empty())
-        {
-            full_name = filename_no_extension;
-        }
-        else if (filename_no_extension.empty() && !filename_extension.empty())
-        {
-            full_name = filename_extension;
-        }
-        else
-        {
-            full_name = "";
-        }
+
         gtk_text_buffer_set_text(mset->buf_full_name, full_name.data(), -1);
 
         // update path
@@ -737,11 +737,9 @@ select_input(GtkWidget* widget, MoveSet* mset)
             gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
             char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-
-            const auto [filename_no_extension, filename_extension] = get_name_extension(full_name);
-
+            const auto filename_parts = split_basename_extension(full_name);
             std::free(full_name);
-            gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_no_extension.length());
+            gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_parts.basename.length());
         }
         else
         {

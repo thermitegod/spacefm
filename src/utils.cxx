@@ -112,12 +112,12 @@ dir_has_files(const std::filesystem::path& path) noexcept
     return false;
 }
 
-const std::pair<std::string, std::string>
-get_name_extension(const std::filesystem::path& filename) noexcept
+const split_basename_extension_data
+split_basename_extension(const std::filesystem::path& filename) noexcept
 {
     if (std::filesystem::is_directory(filename))
     {
-        return std::make_pair(filename.string(), "");
+        return {filename.string()};
     }
 
     // Find the last dot in the filename
@@ -134,17 +134,17 @@ get_name_extension(const std::filesystem::path& filename) noexcept
             // Find the second last dot in the filename
             const auto split_second = ztd::rpartition(split[0], ".");
 
-            return std::make_pair(split_second[0], std::format("{}.{}", split_second[2], split[2]));
+            return {split_second[0], std::format("{}.{}", split_second[2], split[2]), true};
         }
         else
         {
-            // Return the base name and the extension
-            return std::make_pair(split[0], split[2]);
+            // Return the basename and the extension
+            return {split[0], split[2]};
         }
     }
 
-    // No valid extension found, return the whole filename as the base name
-    return std::make_pair(filename.string(), "");
+    // No valid extension found, return the whole filename as the basename
+    return {filename.string()};
 }
 
 void

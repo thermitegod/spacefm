@@ -100,12 +100,12 @@ archive_handler_get_first_extension(xset_t handler_xset)
             for (const std::string_view path : pathnames)
             {
                 // getting just the extension of the pathname list element
-                const auto [filename_no_extension, filename_extension] = get_name_extension(path);
-                archive_extension = filename_extension;
-                if (!filename_extension.empty())
+                const auto filename_parts = split_basename_extension(path);
+                archive_extension = filename_parts.extension;
+                if (!filename_parts.extension.empty())
                 {
                     // add a dot to extension
-                    archive_extension = std::format(".{}", filename_extension);
+                    archive_extension = std::format(".{}", filename_parts.extension);
                     break;
                 }
             }
@@ -1247,16 +1247,14 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
             for (const std::string_view pathname : pathnames)
             {
                 // getting just the extension of the pathname list element
-                const auto [filename_no_extension, filename_extension] =
-                    get_name_extension(pathname);
-
-                if (filename_extension.empty())
+                const auto filename_parts = split_basename_extension(pathname);
+                if (filename_parts.extension.empty())
                 {
                     continue;
                 }
 
                 // add a dot to extension
-                const std::string new_extension = std::format(".{}", filename_extension);
+                const std::string new_extension = std::format(".{}", filename_parts.extension);
                 // Checking if the current extension is being used
                 if (ztd::endswith(filename, new_extension))
                 { // It is - determining filename without extension
@@ -1351,15 +1349,13 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 
                 // Now the extraction filename is obtained, determine the
                 // normal filename without the extension
-                const auto [filename_no_extension, filename_extension] =
-                    get_name_extension(filename_no_archive_ext);
-
+                const auto filename_parts = split_basename_extension(filename_no_archive_ext);
                 i32 n = 1;
                 // Looping to find a path that doesnt exist
                 while (std::filesystem::exists(extract_target))
                 {
                     const auto new_filename =
-                        std::format("{}-{}{}.{}", filename, "copy", ++n, filename_extension);
+                        std::format("{}-{}{}.{}", filename, "copy", ++n, filename_parts.extension);
                     if (create_parent)
                     {
                         const auto path = std::filesystem::path() / parent_path / new_filename;
