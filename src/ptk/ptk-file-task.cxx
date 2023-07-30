@@ -2391,13 +2391,11 @@ query_overwrite(PtkFileTask* ptask)
             const time_t dest_mtime = dest_stat.mtime().tv_sec;
             const auto dest_time = vfs_create_display_date(dest_mtime);
 
-            const std::string src_rel =
-                std::format("{}{}{}{}{}",
-                            !src_rel_time.empty() || !src_rel_size.empty() ? "<b>( " : "",
-                            !src_rel_time.empty() ? src_rel_time : "",
-                            !src_rel_time.empty() && !src_rel_size.empty() ? " &amp; " : "",
-                            !src_rel_size.empty() ? src_rel_size : "",
-                            !src_rel_time.empty() || !src_rel_size.empty() ? " )</b> " : "");
+            std::string src_rel;
+            if (!src_rel_time.empty() || !src_rel_size.empty())
+            {
+                src_rel = std::format("<b>( {} &amp; {} )</b>", src_rel_time, src_rel_size);
+            }
 
             from_size_str = std::format("\t{}\t{}{}{}{}",
                                         src_time,
