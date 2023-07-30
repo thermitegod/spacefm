@@ -4213,8 +4213,7 @@ PtkFileBrowser::select_last() noexcept
     i32 elementn = -1;
     GList* l;
     GList* element = nullptr;
-    // ztd::logger::info("    search for {}", (char*)file_browser->curHistory->data);
-
+    // ztd::logger::info("    search for {}", (char*)this->curHistory->data);
     if (this->history_ && this->histsel_ && this->curHistory_ && (l = g_list_last(this->history_)))
     {
         if (l->data && ztd::same((char*)l->data, (char*)this->curHistory_->data))
@@ -4251,92 +4250,76 @@ PtkFileBrowser::select_last() noexcept
     }
 
 #if 0
+    ztd::logger::debug("element {}", element ? "OK" : "nullptr");
     if (element)
     {
-        ztd::logger::debug("element OK");
-        if (element->data)
-        {
-            ztd::logger::debug("element->data OK");
-        }
-        else
-        {
-            ztd::logger::debug("element->data nullptr");
-        }
+        ztd::logger::debug("element->data {}", element->data ? "OK" : "nullptr");
     }
-    else
-    {
-        ztd::logger::debug("element nullptr");
-    }
-    ztd::logger::debug("histsellen={}", g_list_length(this->histsel));
+    ztd::logger::debug("histsellen={}", g_list_length(this->histsel_));
 #endif
 
-    if (!element || !element->data)
+    if (element && element->data)
     {
-        return;
-    }
-
-    // ztd::logger::info("    select files");
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
-    GtkTreeSelection* selection = nullptr;
-    bool firstsel = true;
-    if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
-    {
-        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
-    }
-
-    for (l = (GList*)element->data; l; l = g_list_next(l))
-    {
-        if (!l->data)
+        // ztd::logger::info("    select files");
+        PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+        GtkTreeSelection* tree_sel;
+        bool firstsel = true;
+        if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
         {
-            continue;
+            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
         }
-        // ztd::logger::debug("find a file");
-        GtkTreeIter it;
-        GtkTreePath* tp;
-        const vfs::file_info file = VFS_FILE_INFO(l->data);
-        if (ptk_file_list_find_iter(list, &it, file))
-        {
-            // ztd::logger::debug("found file");
-            tp = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
 
-            switch (this->view_mode_)
+        for (l = (GList*)element->data; l; l = g_list_next(l))
+        {
+            if (l->data)
             {
-                case ptk::file_browser::view_mode::icon_view:
-                case ptk::file_browser::view_mode::compact_view:
-                    exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), tp);
-                    if (firstsel)
+                // ztd::logger::debug("find a file");
+                GtkTreeIter it;
+                GtkTreePath* tp;
+                vfs::file_info file = VFS_FILE_INFO(l->data);
+                if (ptk_file_list_find_iter(list, &it, file))
+                {
+                    // ztd::logger::debug("found file");
+                    tp = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
+                    if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
+                        this->view_mode_ == ptk::file_browser::view_mode::compact_view)
                     {
-                        exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
-                                                 tp,
-                                                 nullptr,
-                                                 false);
-                        exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_),
-                                                     tp,
-                                                     true,
-                                                     .25,
-                                                     0);
-                        firstsel = false;
-                    }
-                    break;
-                case ptk::file_browser::view_mode::list_view:
-                    gtk_tree_selection_select_path(selection, tp);
-                    if (firstsel)
-                    {
-                        gtk_tree_view_set_cursor(GTK_TREE_VIEW(this->folder_view_),
-                                                 tp,
-                                                 nullptr,
-                                                 false);
-                        gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(this->folder_view_),
+                        exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), tp);
+                        if (firstsel)
+                        {
+                            exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
                                                      tp,
                                                      nullptr,
-                                                     true,
-                                                     .25,
-                                                     0);
-                        firstsel = false;
+                                                     false);
+                            exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_),
+                                                         tp,
+                                                         true,
+                                                         .25,
+                                                         0);
+                            firstsel = false;
+                        }
                     }
-                    break;
+                    else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
+                    {
+                        gtk_tree_selection_select_path(tree_sel, tp);
+                        if (firstsel)
+                        {
+                            gtk_tree_view_set_cursor(GTK_TREE_VIEW(this->folder_view_),
+                                                     tp,
+                                                     nullptr,
+                                                     false);
+                            gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(this->folder_view_),
+                                                         tp,
+                                                         nullptr,
+                                                         true,
+                                                         .25,
+                                                         0);
+                            firstsel = false;
+                        }
+                    }
+                    gtk_tree_path_free(tp);
+                }
             }
-            gtk_tree_path_free(tp);
         }
     }
 }
@@ -5281,89 +5264,78 @@ PtkFileBrowser::selected_items(GtkTreeModel** model) noexcept
 void
 PtkFileBrowser::select_file(const std::filesystem::path& path) noexcept
 {
-    GtkTreeSelection* selection = nullptr;
+    GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;
 
-    switch (this->view_mode_)
+    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+    if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
+        this->view_mode_ == ptk::file_browser::view_mode::compact_view)
     {
-        case ptk::file_browser::view_mode::icon_view:
-        case ptk::file_browser::view_mode::compact_view:
-            exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
-            model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
-            break;
-        case ptk::file_browser::view_mode::list_view:
-            model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
-            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
-            gtk_tree_selection_unselect_all(selection);
-            break;
+        exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
+        model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
     }
-
-    if (model == nullptr)
+    else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
+    {
+        model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
+        tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
+        gtk_tree_selection_unselect_all(tree_sel);
+    }
+    if (!model)
     {
         return;
     }
-
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
 
     GtkTreeIter it;
-    if (!gtk_tree_model_get_iter_first(model, &it))
+    if (gtk_tree_model_get_iter_first(model, &it))
     {
-        return;
+        const std::string name = path.filename();
+
+        do
+        {
+            vfs::file_info file;
+            gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
+            if (file)
+            {
+                const auto file_name = file->name();
+                if (ztd::same(file_name, name))
+                {
+                    GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
+                    if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
+                        this->view_mode_ == ptk::file_browser::view_mode::compact_view)
+                    {
+                        exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), tree_path);
+                        exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
+                                                 tree_path,
+                                                 nullptr,
+                                                 false);
+                        exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_),
+                                                     tree_path,
+                                                     true,
+                                                     .25,
+                                                     0);
+                    }
+                    else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
+                    {
+                        gtk_tree_selection_select_path(tree_sel, tree_path);
+                        gtk_tree_view_set_cursor(GTK_TREE_VIEW(this->folder_view_),
+                                                 tree_path,
+                                                 nullptr,
+                                                 false);
+                        gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(this->folder_view_),
+                                                     tree_path,
+                                                     nullptr,
+                                                     true,
+                                                     .25,
+                                                     0);
+                    }
+                    gtk_tree_path_free(tree_path);
+                    vfs_file_info_unref(file);
+                    break;
+                }
+                vfs_file_info_unref(file);
+            }
+        } while (gtk_tree_model_iter_next(model, &it));
     }
-
-    const std::string name = path.filename();
-
-    do
-    {
-        vfs::file_info file;
-        gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
-        if (!file)
-        {
-            continue;
-        }
-
-        if (ztd::same(file->name(), name))
-        {
-            vfs_file_info_unref(file);
-            continue;
-        }
-
-        GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
-        switch (this->view_mode_)
-        {
-            case ptk::file_browser::view_mode::icon_view:
-            case ptk::file_browser::view_mode::compact_view:
-                exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), tree_path);
-                exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
-                                         tree_path,
-                                         nullptr,
-                                         false);
-                exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_),
-                                             tree_path,
-                                             true,
-                                             .25,
-                                             0);
-
-                break;
-            case ptk::file_browser::view_mode::list_view:
-                gtk_tree_selection_select_path(selection, tree_path);
-                gtk_tree_view_set_cursor(GTK_TREE_VIEW(this->folder_view_),
-                                         tree_path,
-                                         nullptr,
-                                         false);
-                gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(this->folder_view_),
-                                             tree_path,
-                                             nullptr,
-                                             true,
-                                             .25,
-                                             0);
-
-                break;
-        }
-        gtk_tree_path_free(tree_path);
-        vfs_file_info_unref(file);
-        break;
-    } while (gtk_tree_model_iter_next(model, &it));
 }
 
 void
