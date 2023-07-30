@@ -1031,7 +1031,7 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 
     GtkWidget** mode = (GtkWidget**)g_object_get_data(G_OBJECT(dlg), "mode");
 
-    const std::array<file_misc_mode, 3> misc_modes{
+    static constexpr std::array<file_misc_mode, 3> misc_modes{
         file_misc_mode::filename,
         file_misc_mode::parent,
         file_misc_mode::path,
@@ -1115,7 +1115,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
 
     // Mode
-    const std::array<file_misc_mode, 3> misc_modes{
+    static constexpr std::array<file_misc_mode, 3> misc_modes{
         file_misc_mode::filename,
         file_misc_mode::parent,
         file_misc_mode::path,
