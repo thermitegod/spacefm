@@ -54,9 +54,6 @@
 
 #include "vfs/vfs-file-info.hxx"
 
-static std::map<uid_t, ztd::passwd> cached_uid;
-static std::map<gid_t, ztd::group> cached_gid;
-
 static u32 big_thumb_size = 48;
 static u32 small_thumb_size = 20;
 
@@ -155,31 +152,14 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     // this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
 
     // owner
-    if (cached_uid.contains(this->file_stat_.uid()))
-    {
-        const auto pw = cached_uid.at(this->file_stat_.uid());
-        this->display_owner_ = pw.name();
-    }
-    else
-    {
-        const auto pw = ztd::passwd(this->file_stat_.uid());
-        cached_uid.insert({this->file_stat_.uid(), pw});
-        this->display_owner_ = pw.name();
-    }
+    const auto pw = ztd::passwd(this->file_stat_.uid());
+    this->display_owner_ = pw.name();
 
     // group
-    if (cached_gid.contains(this->file_stat_.gid()))
-    {
-        const auto gr = cached_gid.at(this->file_stat_.gid());
-        this->display_group_ = gr.name();
-    }
-    else
-    {
-        const auto gr = ztd::group(this->file_stat_.gid());
-        cached_gid.insert({this->file_stat_.gid(), gr});
-        this->display_group_ = gr.name();
-    }
+    const auto gr = ztd::group(this->file_stat_.gid());
+    this->display_group_ = gr.name();
 
+    // time
     this->display_atime_ = vfs_create_display_date(this->atime());
     this->display_btime_ = vfs_create_display_date(this->btime());
     this->display_ctime_ = vfs_create_display_date(this->ctime());
