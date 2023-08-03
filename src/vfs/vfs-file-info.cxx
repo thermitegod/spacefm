@@ -528,7 +528,7 @@ get_file_perm_string(std::filesystem::file_status status)
         }
         else
         {
-            perm[owner_exec] = 's';
+            perm[owner_exec] = 'S';
         }
     }
     else
