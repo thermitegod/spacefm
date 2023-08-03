@@ -207,9 +207,6 @@ namespace preference::large_icons
         i32 value;
         gtk_tree_model_get(model, &iter, 1, &value, -1);
 
-        vfs_mime_type_set_icon_size_big(value);
-        vfs_file_info_set_thumbnail_size_big(value);
-
         if (value != app_settings.icon_size_big())
         {
             vfs_dir_foreach(&dir_unload_thumbnails, true);
@@ -321,9 +318,6 @@ namespace preference::small_icons
 
         i32 value;
         gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-        vfs_mime_type_set_icon_size_small(value);
-        vfs_file_info_set_thumbnail_size_small(value);
 
         if (value != app_settings.icon_size_small())
         {

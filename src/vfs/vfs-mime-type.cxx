@@ -15,7 +15,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <memory>
 #include <string>
 #include <string_view>
 
@@ -44,6 +43,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "settings/app.hxx"
+
 #include "mime-type/mime-action.hxx"
 #include "mime-type/mime-type.hxx"
 
@@ -56,9 +57,6 @@
 
 static std::map<std::string, vfs::mime_type> mime_map;
 std::mutex mime_map_lock;
-
-static i32 big_icon_size{32};
-static i32 small_icon_size{16};
 
 static std::vector<vfs::file_monitor> mime_caches_monitors;
 
@@ -193,20 +191,38 @@ VFSMimeType::icon(bool big) noexcept
     i32 icon_size;
 
     if (big)
-    {
+    { // big icon
+        if (this->icon_size_big_ != app_settings.icon_size_big())
+        { // big icon size has changed
+            if (this->big_icon_)
+            {
+                g_object_unref(this->big_icon_);
+                this->big_icon_ = nullptr;
+            }
+        }
         if (this->big_icon_)
-        { /* big icon */
+        {
             return g_object_ref(this->big_icon_);
         }
-        icon_size = big_icon_size;
+        this->icon_size_big_ = app_settings.icon_size_big();
+        icon_size = this->icon_size_big_;
     }
-    else /* small icon */
-    {
+    else
+    { // small icon
+        if (this->icon_size_small_ != app_settings.icon_size_small())
+        { // small icon size has changed
+            if (this->small_icon_)
+            {
+                g_object_unref(this->small_icon_);
+                this->small_icon_ = nullptr;
+            }
+        }
         if (this->small_icon_)
         {
             return g_object_ref(this->small_icon_);
         }
-        icon_size = small_icon_size;
+        this->icon_size_small_ = app_settings.icon_size_small();
+        icon_size = this->icon_size_small_;
     }
 
     GdkPixbuf* icon = nullptr;
@@ -393,70 +409,6 @@ VFSMimeType::add_action(const std::string_view desktop_id) noexcept
         return mime_type_add_action(this->type_, desktop_id);
     }
     return desktop_id.data();
-}
-
-void
-VFSMimeType::free_cached_big_icons() noexcept
-{
-    if (this->big_icon_)
-    {
-        g_object_unref(this->big_icon_);
-        this->big_icon_ = nullptr;
-    }
-}
-
-void
-VFSMimeType::free_cached_small_icons() noexcept
-{
-    if (this->small_icon_)
-    {
-        g_object_unref(this->small_icon_);
-        this->small_icon_ = nullptr;
-    }
-}
-
-void
-vfs_mime_type_set_icon_size_big(i32 size)
-{
-    std::unique_lock<std::mutex> lock(mime_map_lock);
-
-    if (size == big_icon_size)
-    {
-        return;
-    }
-
-    big_icon_size = size;
-    // Unload old cached icons
-    const auto action = [](const auto& mime) { mime.second->free_cached_big_icons(); };
-    std::ranges::for_each(mime_map, action);
-}
-
-void
-vfs_mime_type_set_icon_size_small(i32 size)
-{
-    std::unique_lock<std::mutex> lock(mime_map_lock);
-
-    if (size == small_icon_size)
-    {
-        return;
-    }
-
-    small_icon_size = size;
-    // Unload old cached icons
-    const auto action = [](const auto& mime) { mime.second->free_cached_small_icons(); };
-    std::ranges::for_each(mime_map, action);
-}
-
-i32
-vfs_mime_type_get_icon_size_big()
-{
-    return big_icon_size;
-}
-
-i32
-vfs_mime_type_get_icon_size_small()
-{
-    return small_icon_size;
 }
 
 const std::optional<std::filesystem::path>

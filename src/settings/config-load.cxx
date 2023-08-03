@@ -71,25 +71,25 @@ config_parse_general(const toml::value& tbl, u64 version)
 
     if (section.contains(TOML_KEY_MAX_THUMB_SIZE))
     {
-        const auto max_thumb_size = toml::find<u64>(section, TOML_KEY_MAX_THUMB_SIZE);
+        const auto max_thumb_size = toml::find<u32>(section, TOML_KEY_MAX_THUMB_SIZE);
         app_settings.max_thumb_size(max_thumb_size << 10);
     }
 
     if (section.contains(TOML_KEY_ICON_SIZE_BIG))
     {
-        const auto icon_size_big = toml::find<u64>(section, TOML_KEY_ICON_SIZE_BIG);
+        const auto icon_size_big = toml::find<i32>(section, TOML_KEY_ICON_SIZE_BIG);
         app_settings.icon_size_big(icon_size_big);
     }
 
     if (section.contains(TOML_KEY_ICON_SIZE_SMALL))
     {
-        const auto icon_size_small = toml::find<u64>(section, TOML_KEY_ICON_SIZE_SMALL);
+        const auto icon_size_small = toml::find<i32>(section, TOML_KEY_ICON_SIZE_SMALL);
         app_settings.icon_size_small(icon_size_small);
     }
 
     if (section.contains(TOML_KEY_ICON_SIZE_TOOL))
     {
-        const auto icon_size_tool = toml::find<u64>(section, TOML_KEY_ICON_SIZE_TOOL);
+        const auto icon_size_tool = toml::find<i32>(section, TOML_KEY_ICON_SIZE_TOOL);
         app_settings.icon_size_tool(icon_size_tool);
     }
 

@@ -82,12 +82,6 @@ init_folder()
     vfs_volume_init();
     vfs_thumbnail_init();
 
-    vfs_mime_type_set_icon_size_big(app_settings.icon_size_big());
-    vfs_mime_type_set_icon_size_small(app_settings.icon_size_small());
-
-    vfs_file_info_set_thumbnail_size_big(app_settings.icon_size_big());
-    vfs_file_info_set_thumbnail_size_small(app_settings.icon_size_small());
-
     folder_initialized = true;
 }
 

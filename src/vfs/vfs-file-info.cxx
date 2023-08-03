@@ -54,9 +54,6 @@
 
 #include "vfs/vfs-file-info.hxx"
 
-static u32 big_thumb_size = 48;
-static u32 small_thumb_size = 20;
-
 vfs::file_info
 vfs_file_info_new(const std::filesystem::path& file_path)
 {
@@ -281,7 +278,7 @@ VFSFileInfo::big_icon() noexcept
 
     i32 w = 0;
     i32 h = 0;
-    const i32 icon_size = vfs_mime_type_get_icon_size_big();
+    const i32 icon_size = app_settings.icon_size_big();
 
     if (this->big_thumbnail_)
     {
@@ -783,7 +780,7 @@ VFSFileInfo::load_thumbnail_small(const std::filesystem::path& full_path) noexce
         return;
     }
 
-    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, small_thumb_size);
+    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, app_settings.icon_size_small());
     if (thumbnail)
     {
         this->small_thumbnail_ = thumbnail;
@@ -809,7 +806,7 @@ VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
         return;
     }
 
-    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, big_thumb_size);
+    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, app_settings.icon_size_big());
     if (thumbnail)
     {
         this->big_thumbnail_ = thumbnail;
@@ -818,18 +815,6 @@ VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
     {
         this->big_thumbnail_ = this->big_icon();
     }
-}
-
-void
-vfs_file_info_set_thumbnail_size_big(i32 size)
-{
-    big_thumb_size = size;
-}
-
-void
-vfs_file_info_set_thumbnail_size_small(i32 size)
-{
-    small_thumb_size = size;
 }
 
 void
@@ -856,8 +841,8 @@ VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
         return;
     }
 
-    const i32 big_size = vfs_mime_type_get_icon_size_big();
-    const i32 small_size = vfs_mime_type_get_icon_size_small();
+    const i32 big_size = app_settings.icon_size_big();
+    const i32 small_size = app_settings.icon_size_small();
     if (this->big_thumbnail_ == nullptr)
     {
         GdkPixbuf* icon = desktop->icon(big_size);

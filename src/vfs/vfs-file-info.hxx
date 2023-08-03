@@ -195,6 +195,3 @@ vfs::file_info vfs_file_info_ref(vfs::file_info file);
 void vfs_file_info_unref(vfs::file_info file);
 
 void vfs_file_info_list_free(const std::span<const vfs::file_info> list);
-
-void vfs_file_info_set_thumbnail_size_big(i32 size);
-void vfs_file_info_set_thumbnail_size_small(i32 size);

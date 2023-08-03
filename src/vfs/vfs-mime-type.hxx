@@ -62,14 +62,13 @@ struct VFSMimeType
     // If user-custom desktop file is created, it is returned in custom_desktop.
     const std::string add_action(const std::string_view desktop_id) noexcept;
 
-    void free_cached_big_icons() noexcept;
-    void free_cached_small_icons() noexcept;
-
   private:
     std::string type_{};        // mime_type-type string
     std::string description_{}; // description of the mimele type
     GdkPixbuf* big_icon_{nullptr};
     GdkPixbuf* small_icon_{nullptr};
+    i32 icon_size_big_{0};
+    i32 icon_size_small_{0};
 };
 
 namespace vfs
@@ -88,12 +87,6 @@ vfs::mime_type vfs_mime_type_get_from_file(const std::filesystem::path& file_pat
 vfs::mime_type vfs_mime_type_get_from_type(const std::string_view type);
 
 //////////////////////
-
-void vfs_mime_type_set_icon_size_big(i32 size);
-void vfs_mime_type_set_icon_size_small(i32 size);
-
-i32 vfs_mime_type_get_icon_size_big();
-i32 vfs_mime_type_get_icon_size_small();
 
 void vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id);
 

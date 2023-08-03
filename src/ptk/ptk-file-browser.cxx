@@ -1983,8 +1983,8 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
     GtkCellRenderer* renderer;
 
     i32 icon_size = 0;
-    const i32 big_icon_size = vfs_mime_type_get_icon_size_big();
-    const i32 small_icon_size = vfs_mime_type_get_icon_size_small();
+    const i32 big_icon_size = app_settings.icon_size_big();
+    const i32 small_icon_size = app_settings.icon_size_small();
 
     PangoAttrList* attr_list = pango_attr_list_new();
     pango_attr_list_insert(attr_list, pango_attr_insert_hyphens_new(false));
