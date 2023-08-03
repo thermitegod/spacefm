@@ -23,6 +23,8 @@
 
 #include <vector>
 
+#include <span>
+
 #include <memory>
 
 #include <optional>
@@ -132,7 +134,7 @@ struct VFSVolume
 bool vfs_volume_init();
 void vfs_volume_finalize();
 
-const std::vector<vfs::volume>& vfs_volume_get_all_volumes();
+const std::span<const vfs::volume> vfs_volume_get_all_volumes();
 
 void vfs_volume_add_callback(vfs::volume_callback cb, void* user_data);
 void vfs_volume_remove_callback(vfs::volume_callback cb, void* user_data);

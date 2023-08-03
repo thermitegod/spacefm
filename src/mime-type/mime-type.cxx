@@ -65,7 +65,7 @@ inline constexpr i32 TEXT_MAX_EXTENT = 512;
 /* Check if the specified mime_type is the subclass of the specified parent type */
 static bool mime_type_is_subclass(const std::string_view type, const std::string_view parent);
 
-std::vector<mime_cache_t> caches;
+static std::vector<mime_cache_t> caches;
 
 /* max magic extent of all caches */
 static u32 mime_cache_max_extent = 0;
@@ -531,7 +531,7 @@ mime_type_is_subclass(const std::string_view type, const std::string_view parent
 /*
  * Get mime caches
  */
-const std::vector<mime_cache_t>&
+const std::span<const mime_cache_t>
 mime_type_get_caches()
 {
     return caches;

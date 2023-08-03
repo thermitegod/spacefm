@@ -23,7 +23,7 @@
 #include <filesystem>
 
 #include <array>
-#include <vector>
+#include <span>
 
 #include "mime-type/mime-cache.hxx"
 
@@ -66,6 +66,6 @@ const std::array<std::string, 2> mime_type_get_desc_icon(const std::string_view 
 /*
  * Get mime caches
  */
-const std::vector<mime_cache_t>& mime_type_get_caches();
+const std::span<const mime_cache_t> mime_type_get_caches();
 
 void mime_type_regen_all_caches();

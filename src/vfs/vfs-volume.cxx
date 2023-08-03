@@ -583,7 +583,7 @@ vfs_volume_finalize()
     }
 }
 
-const std::vector<vfs::volume>&
+const std::span<const vfs::volume>
 vfs_volume_get_all_volumes()
 {
     return volumes;
