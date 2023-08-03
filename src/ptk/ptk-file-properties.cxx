@@ -493,13 +493,13 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
     if (multiple_files)
     {
         page.add_row("Accessed:    ",
-                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
+                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple timestamps )")));
         page.add_row("Created:     ",
-                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
+                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple timestamps )")));
         page.add_row("Metadata:    ",
-                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
+                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple timestamps )")));
         page.add_row("Modified:    ",
-                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple files )")));
+                     GTK_WIDGET(create_prop_text_box_no_focus("( multiple timestamps )")));
     }
     else
     {
