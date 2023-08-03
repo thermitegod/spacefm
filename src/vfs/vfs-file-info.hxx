@@ -75,7 +75,7 @@ struct VFSFileInfo
     const std::string_view display_size_in_bytes() const noexcept;
     const std::string_view display_size_on_disk() const noexcept;
 
-    blkcnt_t blocks() const noexcept;
+    u64 blocks() const noexcept;
 
     std::filesystem::perms permissions() const noexcept;
 
@@ -133,6 +133,16 @@ struct VFSFileInfo
     // Full path of the file is required by this function
     bool is_text(const std::filesystem::path& file_path = "") const noexcept;
 
+    // File attributes
+    bool is_compressed() const noexcept; // file is compressed by the filesystem
+    bool is_immutable() const noexcept;  // file cannot be modified
+    bool is_append() const noexcept;     // file can only be opened in append mode for writing
+    bool is_nodump() const noexcept;     // file is not a candidate for backup
+    bool is_encrypted() const noexcept;  // file requires a key to be encrypted by the filesystem
+    bool is_verity() const noexcept;     // file has fs-verity enabled
+    bool is_dax() const noexcept;        // file is in the DAX (cpu direct access) state
+
+    // update file info
     bool update(const std::filesystem::path& file_path) noexcept;
 
   private:

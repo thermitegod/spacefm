@@ -513,6 +513,205 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
 }
 
 GtkWidget*
+init_attributes_tab(properties_dialog_data* data,
+                    const std::span<const vfs::file_info> selected_files)
+{
+    (void)data;
+
+    auto page = PropertiesPage();
+
+    const bool multiple_files = selected_files.size() > 1;
+    const auto selected_file = selected_files.front();
+
+    if (multiple_files)
+    {
+        bool is_same_value_compressed = true;
+        bool is_same_value_immutable = true;
+        bool is_same_value_append = true;
+        bool is_same_value_nodump = true;
+        bool is_same_value_encrypted = true;
+        bool is_same_value_verity = true;
+        bool is_same_value_dax = true;
+
+        // The first file will get checked against itself
+        for (const auto file : selected_files)
+        {
+            if (is_same_value_compressed)
+            {
+                is_same_value_compressed = selected_file->is_compressed() == file->is_compressed();
+            }
+            if (is_same_value_immutable)
+            {
+                is_same_value_immutable = selected_file->is_immutable() == file->is_immutable();
+            }
+            if (is_same_value_append)
+            {
+                is_same_value_append = selected_file->is_append() == file->is_append();
+            }
+            if (is_same_value_nodump)
+            {
+                is_same_value_nodump = selected_file->is_nodump() == file->is_nodump();
+            }
+            if (is_same_value_encrypted)
+            {
+                is_same_value_encrypted = selected_file->is_encrypted() == file->is_encrypted();
+            }
+            if (is_same_value_verity)
+            {
+                is_same_value_verity = selected_file->is_verity() == file->is_verity();
+            }
+            if (is_same_value_dax)
+            {
+                is_same_value_dax = selected_file->is_dax() == file->is_dax();
+            }
+        }
+
+        if (is_same_value_compressed)
+        {
+            GtkWidget* check_button_compressed =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_compressed), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_compressed),
+                                         selected_file->is_compressed());
+            page.add_row("Compressed: ", GTK_WIDGET(check_button_compressed));
+        }
+        else
+        {
+            page.add_row("Compressed: ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_immutable)
+        {
+            GtkWidget* check_button_immutable =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_immutable), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_immutable),
+                                         selected_file->is_immutable());
+            page.add_row("Immutable:  ", GTK_WIDGET(check_button_immutable));
+        }
+        else
+        {
+            page.add_row("Immutable:  ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_append)
+        {
+            GtkWidget* check_button_append =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_append), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_append),
+                                         selected_file->is_append());
+            page.add_row("Append:     ", GTK_WIDGET(check_button_append));
+        }
+        else
+        {
+            page.add_row("Append:     ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_nodump)
+        {
+            GtkWidget* check_button_nodump =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_nodump), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_nodump),
+                                         selected_file->is_nodump());
+            page.add_row("Nodump:     ", GTK_WIDGET(check_button_nodump));
+        }
+        else
+        {
+            page.add_row("Nodump:     ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_encrypted)
+        {
+            GtkWidget* check_button_encrypted =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_encrypted), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_encrypted),
+                                         selected_file->is_encrypted());
+            page.add_row("Encrypted:  ", GTK_WIDGET(check_button_encrypted));
+        }
+        else
+        {
+            page.add_row("Encrypted:  ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_verity)
+        {
+            GtkWidget* check_button_verity =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_verity), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_verity),
+                                         selected_file->is_verity());
+            page.add_row("Verity:     ", GTK_WIDGET(check_button_verity));
+        }
+        else
+        {
+            page.add_row("Verity:     ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_dax)
+        {
+            GtkWidget* check_button_dax =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_dax), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_dax),
+                                         selected_file->is_dax());
+            page.add_row("Dax:        ", GTK_WIDGET(check_button_dax));
+        }
+        else
+        {
+            page.add_row("Dax:        ", gtk_label_new(" ( Multiple Values ) "));
+        }
+    }
+    else
+    {
+        GtkWidget* check_button_compressed = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_compressed), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_compressed),
+                                     selected_file->is_compressed());
+        page.add_row("Compressed: ", GTK_WIDGET(check_button_compressed));
+
+        GtkWidget* check_button_immutable = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_immutable), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_immutable),
+                                     selected_file->is_immutable());
+        page.add_row("Immutable:  ", GTK_WIDGET(check_button_immutable));
+
+        GtkWidget* check_button_append = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_append), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_append),
+                                     selected_file->is_append());
+        page.add_row("Append:     ", GTK_WIDGET(check_button_append));
+
+        GtkWidget* check_button_nodump = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_nodump), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_nodump),
+                                     selected_file->is_nodump());
+        page.add_row("Nodump:     ", GTK_WIDGET(check_button_nodump));
+
+        GtkWidget* check_button_encrypted = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_encrypted), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_encrypted),
+                                     selected_file->is_encrypted());
+        page.add_row("Encrypted:  ", GTK_WIDGET(check_button_encrypted));
+
+        GtkWidget* check_button_verity = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_verity), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_verity),
+                                     selected_file->is_verity());
+        page.add_row("Verity:     ", GTK_WIDGET(check_button_verity));
+
+        GtkWidget* check_button_dax = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_dax), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_dax), selected_file->is_dax());
+        page.add_row("Dax:        ", GTK_WIDGET(check_button_dax));
+    }
+
+    return page.box();
+}
+
+GtkWidget*
 init_permissions_tab(properties_dialog_data* data,
                      const std::span<const vfs::file_info> selected_files)
 {
@@ -726,6 +925,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     // clang-format off
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_file_info_tab(data, cwd , selected_files), gtk_label_new("File Info"));
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_attributes_tab(data, selected_files), gtk_label_new("Attributes"));
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_permissions_tab(data, selected_files), gtk_label_new("Permissions"));
     // clang-format on
 

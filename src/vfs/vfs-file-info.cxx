@@ -243,7 +243,7 @@ VFSFileInfo::display_size_on_disk() const noexcept
     return this->display_disk_size_;
 }
 
-blkcnt_t
+u64
 VFSFileInfo::blocks() const noexcept
 {
     return this->file_stat_.blocks();
@@ -695,6 +695,48 @@ bool
 VFSFileInfo::is_text(const std::filesystem::path& file_path) const noexcept
 {
     return mime_type_is_text_file(file_path, this->mime_type_->type());
+}
+
+bool
+VFSFileInfo::is_compressed() const noexcept
+{
+    return this->file_stat_.is_compressed();
+}
+
+bool
+VFSFileInfo::is_immutable() const noexcept
+{
+    return this->file_stat_.is_immutable();
+}
+
+bool
+VFSFileInfo::is_append() const noexcept
+{
+    return this->file_stat_.is_append();
+}
+
+bool
+VFSFileInfo::is_nodump() const noexcept
+{
+    return this->file_stat_.is_nodump();
+}
+
+bool
+VFSFileInfo::is_encrypted() const noexcept
+{
+    return this->file_stat_.is_encrypted();
+}
+
+bool
+VFSFileInfo::is_verity() const noexcept
+{
+    return this->file_stat_.is_verity();
+}
+
+bool
+VFSFileInfo::is_dax() const noexcept
+{
+    return this->file_stat_.is_dax();
 }
 
 std::filesystem::perms
