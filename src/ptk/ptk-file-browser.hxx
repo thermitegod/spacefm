@@ -196,6 +196,8 @@ struct PtkFileBrowser
 
     void new_tab() noexcept;
     void new_tab_here() noexcept;
+    void close_tab() noexcept;
+    void restore_tab() noexcept;
     void open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept;
     void set_default_folder() const noexcept;
 
@@ -488,6 +490,8 @@ void ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser);
 
 void ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_close_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_restore_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
 void ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser);
 
 void ptk_file_browser_select_all(GtkWidget* item, PtkFileBrowser* file_browser);

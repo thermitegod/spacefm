@@ -117,8 +117,6 @@ void main_task_view_update_task(PtkFileTask* ptask);
 void main_task_view_remove_task(PtkFileTask* ptask);
 void main_task_pause_all_queued(PtkFileTask* ptask);
 void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
-void on_restore_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
-void on_close_notebook_page(GtkButton* btn, PtkFileBrowser* file_browser);
 // void show_panels(GtkMenuItem* item, MainWindow* main_window);
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
@@ -148,6 +146,9 @@ void main_window_open_network(MainWindow* main_window, const std::string_view ur
 bool main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64 tab,
                        const char* focus, u32 keyval, u32 button, u32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);
+
+void main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
+void main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser);
 
 const std::tuple<char, std::string>
 main_window_socket_command(const std::string_view socket_commands_json);

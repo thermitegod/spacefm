@@ -82,6 +82,7 @@
 
 #include "signals.hxx"
 
+#include "autosave.hxx"
 #include "settings.hxx"
 #include "utils.hxx"
 #include "type-conversion.hxx"
@@ -178,6 +179,9 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 // instance-wide command history
 std::vector<std::string> xset_cmd_history;
+
+// history of closed tabs
+static std::map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
 struct column_data
 {
@@ -1176,7 +1180,7 @@ on_folder_content_changed(vfs::file_info file, PtkFileBrowser* file_browser)
         if (!std::filesystem::is_directory(file_browser->cwd()))
         {
             // current directory does not exist - was renamed
-            on_close_notebook_page(nullptr, file_browser);
+            file_browser->close_tab();
         }
     }
     else
@@ -1191,7 +1195,7 @@ on_file_deleted(vfs::file_info file, PtkFileBrowser* file_browser)
     if (file == nullptr)
     {
         // The directory itself was deleted
-        on_close_notebook_page(nullptr, file_browser);
+        file_browser->close_tab();
         // file_browser->chdir(vfs::user_dirs->home_dir(), ptk::file_browser::chdir_mode::PTK_FB_CHDIR_ADD_HISTORY);
     }
     else
@@ -3362,11 +3366,11 @@ PtkFileBrowser::go_tab(tab_t tab) noexcept
             break;
         case tab_control_code_close:
             // close
-            on_close_notebook_page(nullptr, this);
+            this->close_tab();
             break;
         case tab_control_code_restore:
             // restore
-            on_restore_notebook_page(nullptr, this);
+            this->restore_tab();
             break;
         default:
             // set tab
@@ -3426,7 +3430,7 @@ PtkFileBrowser::refresh() noexcept
 
     if (!std::filesystem::is_directory(this->cwd()))
     {
-        on_close_notebook_page(nullptr, this);
+        this->close_tab();
         return;
     }
 
@@ -3609,6 +3613,129 @@ PtkFileBrowser::new_tab_here() noexcept
     else
     {
         this->run_event<spacefm::signal::open_item>(dir_path, ptk::open_action::new_tab);
+    }
+}
+
+void
+PtkFileBrowser::close_tab() noexcept
+{
+    closed_tabs_restore[this->panel_].emplace_back(this->cwd());
+    // ztd::logger::info("close_tab() fb={:p}, path={}", fmt::ptr(this), closed_tabs_restore[this->panel_].back());
+
+    GtkNotebook* notebook =
+        GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(this), GTK_TYPE_NOTEBOOK));
+
+    MainWindow* main_window = this->main_window_;
+    main_window->curpanel = this->panel_;
+    main_window->notebook = main_window->panel[main_window->curpanel - 1];
+
+    if (event_handler->tab_close->s || event_handler->tab_close->ob2_data)
+    {
+        main_window_event(
+            main_window,
+            event_handler->tab_close,
+            xset::name::evt_tab_close,
+            this->panel_,
+            gtk_notebook_page_num(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(this)) + 1,
+            nullptr,
+            0,
+            0,
+            0,
+            false);
+    }
+
+    // save solumns and slider positions of tab to be closed
+    this->slider_release(nullptr);
+    this->save_column_widths(GTK_TREE_VIEW(this->folder_view_));
+
+    // remove page can also be used to destroy - same result
+    // gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
+    gtk_widget_destroy(GTK_WIDGET(this));
+
+    if (!app_settings.always_show_tabs())
+    {
+        if (gtk_notebook_get_n_pages(notebook) == 1)
+        {
+            gtk_notebook_set_show_tabs(notebook, false);
+        }
+    }
+
+    if (gtk_notebook_get_n_pages(notebook) == 0)
+    {
+        std::filesystem::path path;
+        const auto default_path = xset_get_s(xset::name::go_set_default);
+        if (default_path)
+        {
+            path = default_path.value();
+        }
+        else
+        {
+            path = vfs::user_dirs->home_dir();
+        }
+        main_window_add_new_tab(main_window, path);
+        PtkFileBrowser* a_browser =
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
+        a_browser->update_views();
+        main_window_set_window_title(main_window, a_browser);
+        if (xset_get_b(xset::name::main_save_tabs))
+        {
+            autosave_request_add();
+        }
+        return;
+    }
+
+    // update view of new current tab
+    const tab_t cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
+    if (cur_tabx != -1)
+    {
+        PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
+            gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
+        a_browser->update_views();
+        main_window_update_status_bar(main_window, a_browser);
+        // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
+        if (event_handler->tab_focus->s || event_handler->tab_focus->ob2_data)
+        {
+            main_window_event(main_window,
+                              event_handler->tab_focus,
+                              xset::name::evt_tab_focus,
+                              main_window->curpanel,
+                              cur_tabx + 1,
+                              nullptr,
+                              0,
+                              0,
+                              0,
+                              false);
+        }
+    }
+
+    main_window_set_window_title(main_window, this);
+    if (xset_get_b(xset::name::main_save_tabs))
+    {
+        autosave_request_add();
+    }
+}
+
+void
+PtkFileBrowser::restore_tab() noexcept
+{
+    if (closed_tabs_restore[this->panel_].empty())
+    {
+        ztd::logger::info("No tabs to restore for panel {}", this->panel_);
+        return;
+    }
+
+    const auto file_path = closed_tabs_restore[this->panel_].back();
+    closed_tabs_restore[this->panel_].pop_back();
+    // ztd::logger::info("restore_tab() fb={:p}, panel={} path={}", fmt::ptr(this), this->panel_, file_path);
+
+    MainWindow* main_window = this->main_window_;
+
+    main_window_add_new_tab(main_window, file_path);
+
+    main_window_set_window_title(main_window, this);
+    if (xset_get_b(xset::name::main_save_tabs))
+    {
+        autosave_request_add();
     }
 }
 
@@ -6476,6 +6603,20 @@ ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser)
 {
     (void)item;
     file_browser->new_tab_here();
+}
+
+void
+ptk_file_browser_close_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
+{
+    (void)item;
+    file_browser->close_tab();
+}
+
+void
+ptk_file_browser_restore_tab(GtkMenuItem* item, PtkFileBrowser* file_browser)
+{
+    (void)item;
+    file_browser->restore_tab();
 }
 
 void
