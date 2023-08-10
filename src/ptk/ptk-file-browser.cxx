@@ -2360,13 +2360,12 @@ static void
 on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                   GtkSelectionData* sel_data, u32 info, u32 time, void* user_data)
 {
+    (void)widget;
     (void)x;
     (void)y;
     (void)info;
 
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(user_data);
-    /* Do not call the default handler */
-    g_signal_stop_emission_by_name(widget, "drag-data-received");
 
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
         (gtk_selection_data_get_format(sel_data) == 8))
@@ -2499,18 +2498,14 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
                              GtkSelectionData* sel_data, u32 info, u32 time,
                              PtkFileBrowser* file_browser)
 {
+    (void)widget;
     (void)drag_context;
     (void)info;
     (void)time;
     GdkAtom type = gdk_atom_intern("text/uri-list", false);
+
     std::string uri_list;
     const auto selected_files = file_browser->selected_files();
-
-    /*  Do not call the default handler  */
-    g_signal_stop_emission_by_name(widget, "drag-data-get");
-
-    // drag_context->suggested_action = GdkDragAction::GDK_ACTION_MOVE;
-
     for (const vfs::file_info file : selected_files)
     {
         const auto full_path = file_browser->cwd() / file->name();
@@ -2531,8 +2526,7 @@ static void
 on_folder_view_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
                           PtkFileBrowser* file_browser)
 {
-    /*  Do not call the default handler  */
-    g_signal_stop_emission_by_name(widget, "drag-begin");
+    (void)widget;
     gtk_drag_set_icon_default(drag_context);
     file_browser->is_drag_ = true;
 }
@@ -2602,14 +2596,10 @@ static bool
 on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
                            PtkFileBrowser* file_browser)
 {
-    GtkAllocation allocation;
-
-    /*  Do not call the default handler  */
-    g_signal_stop_emission_by_name(widget, "drag-motion");
-
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_widget_get_parent(widget));
 
     // GtkAdjustment* vadj = gtk_scrolled_window_get_vadjustment(scroll);
+    GtkAllocation allocation;
     gtk_widget_get_allocation(widget, &allocation);
 
     if (y < 32)
@@ -2780,10 +2770,10 @@ static bool
 on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
                           PtkFileBrowser* file_browser)
 {
+    (void)widget;
     (void)drag_context;
     (void)time;
-    /*  Do not call the default handler  */
-    g_signal_stop_emission_by_name(widget, "drag-leave");
+
     file_browser->drag_source_dev_ = 0;
     file_browser->drag_source_inode_ = 0;
 
@@ -2803,8 +2793,6 @@ on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
     (void)y;
     (void)file_browser;
     GdkAtom target = gdk_atom_intern("text/uri-list", false);
-    /*  Do not call the default handler  */
-    g_signal_stop_emission_by_name(widget, "drag-drop");
 
     gtk_drag_get_data(widget, drag_context, target, time);
     return true;
