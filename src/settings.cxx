@@ -3070,11 +3070,9 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 static void
 set_gtk3_widget_padding(GtkWidget* widget, i32 left_right, i32 top_bottom)
 {
-    const std::string str = std::format("GtkWidget {{ padding-left: {}px; padding-right: {}px; "
-                                        "padding-top: {}px; padding-bottom: {}px; }}",
+    const std::string str = std::format("GtkWidget {{ padding-left: {0}px; padding-right: {0}px; "
+                                        "padding-top: {1}px; padding-bottom: {1}px; }}",
                                         left_right,
-                                        left_right,
-                                        top_bottom,
                                         top_bottom);
 
     GtkCssProvider* provider = gtk_css_provider_new();

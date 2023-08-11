@@ -3335,7 +3335,7 @@ PtkFileBrowser::go_default() noexcept
 void
 PtkFileBrowser::go_tab(tab_t tab) noexcept
 {
-    // ztd::logger::info("ptk_file_browser_go_tab fb={:p}", fmt::ptr(this));
+    // ztd::logger::info("ptk_file_browser_go_tab fb={}", fmt::ptr(this));
     GtkWidget* notebook = this->notebook_;
 
     switch (tab)
@@ -3620,7 +3620,7 @@ void
 PtkFileBrowser::close_tab() noexcept
 {
     closed_tabs_restore[this->panel_].emplace_back(this->cwd());
-    // ztd::logger::info("close_tab() fb={:p}, path={}", fmt::ptr(this), closed_tabs_restore[this->panel_].back());
+    // ztd::logger::info("close_tab() fb={}, path={}", fmt::ptr(this), closed_tabs_restore[this->panel_].back());
 
     GtkNotebook* notebook =
         GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(this), GTK_TYPE_NOTEBOOK));
@@ -3726,7 +3726,7 @@ PtkFileBrowser::restore_tab() noexcept
 
     const auto file_path = closed_tabs_restore[this->panel_].back();
     closed_tabs_restore[this->panel_].pop_back();
-    // ztd::logger::info("restore_tab() fb={:p}, panel={} path={}", fmt::ptr(this), this->panel_, file_path);
+    // ztd::logger::info("restore_tab() fb={}, panel={} path={}", fmt::ptr(this), this->panel_, file_path);
 
     MainWindow* main_window = this->main_window_;
 
@@ -4874,7 +4874,7 @@ PtkFileBrowser::show_thumbnails(i32 max_file_size, bool large_icons) noexcept
 void
 PtkFileBrowser::update_views() noexcept
 {
-    // ztd::logger::debug("PtkFileBrowser::update_views fb={:p}  (panel {})", this, this->mypanel);
+    // ztd::logger::debug("PtkFileBrowser::update_views fb={}  (panel {})", fmt::ptr(this), this->mypanel);
 
     // hide/show browser widgets based on user settings
     const panel_t p = this->panel_;
@@ -5208,7 +5208,7 @@ PtkFileBrowser::update_views() noexcept
     // Show Hidden
     this->show_hidden_files(xset_get_b_panel(p, xset::panel::show_hidden));
 
-    // ztd::logger::info("PtkFileBrowser::update_views fb={:p} DONE", this);
+    // ztd::logger::info("PtkFileBrowser::update_views fb={} DONE", fmt::ptr(this));
 }
 
 void
@@ -5287,7 +5287,7 @@ PtkFileBrowser::save_column_widths(GtkTreeView* view) noexcept
     {
         const panel_t p = this->panel_;
         const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
-        // ztd::logger::debug("save_columns  fb={:p} (panel {})  mode = {}", fmt::ptr(this), p, mode);
+        // ztd::logger::debug("save_columns  fb={} (panel {})  mode = {}", fmt::ptr(this), p, mode);
         for (const auto i : ztd::range(columns.size()))
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
@@ -5337,7 +5337,7 @@ PtkFileBrowser::slider_release(GtkWidget* widget) noexcept
     else
     {
         i32 pos;
-        // ztd::logger::debug("PtkFileBrowser::slider_release fb={:p}  (panel {})  mode = {}", this, p, fmt::ptr(mode));
+        // ztd::logger::debug("PtkFileBrowser::slider_release fb={}  (panel {})  mode = {}", fmt::ptr(this), p, fmt::ptr(mode));
         pos = gtk_paned_get_position(GTK_PANED(this->side_vpane_top));
         if (!this->main_window_->fullscreen)
         {

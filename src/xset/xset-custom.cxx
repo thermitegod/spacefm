@@ -490,18 +490,16 @@ xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
     if (!set->plugin)
     {
         ptask->task->exec_command =
-            std::format("tar --numeric-owner -cJf {} * ; err=$status ; rm -rf {} ; "
-                        "if [ $err -ne 0 ];then rm -f {} ; fi ; exit $err",
+            std::format("tar --numeric-owner -cJf {0} * ; err=$status ; rm -rf {1} ; "
+                        "if [ $err -ne 0 ];then rm -f {0} ; fi ; exit $err",
                         path_q,
-                        plug_dir_q,
-                        path_q);
+                        plug_dir_q);
     }
     else
     {
         ptask->task->exec_command =
-            std::format("tar --numeric-owner -cJf {} * ; err=$status ; "
-                        "if [ $err -ne 0 ] ; then rm -f {} ; fi ; exit $err",
-                        path_q,
+            std::format("tar --numeric-owner -cJf {0} * ; err=$status ; "
+                        "if [ $err -ne 0 ] ; then rm -f {0} ; fi ; exit $err",
                         path_q);
     }
     ptask->task->exec_sync = true;

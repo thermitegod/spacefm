@@ -122,13 +122,13 @@ PtkFileTask::PtkFileTask(vfs::file_task_type type,
     }
 
     // GThread *self = g_thread_self ();
-    // ztd::logger::info("GUI_THREAD = {:p}", fmt::ptr(self));
-    // ztd::logger::info("ptk_file_task_new DONE ptask={:p}", fmt::ptr(this));
+    // ztd::logger::info("GUI_THREAD = {}", fmt::ptr(self));
+    // ztd::logger::info("ptk_file_task_new DONE ptask={}", fmt::ptr(this));
 }
 
 PtkFileTask::~PtkFileTask()
 {
-    // ztd::logger::info("ptk_file_task_destroy ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_destroy ptask={}", fmt::ptr(ptask));
     if (this->timeout)
     {
         g_source_remove(this->timeout);
@@ -193,7 +193,7 @@ PtkFileTask::~PtkFileTask()
         std::free(this->pop_handler);
     }
 
-    // ztd::logger::info("ptk_file_task_destroy DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_destroy DONE ptask={}", fmt::ptr(ptask));
 }
 
 void
@@ -316,13 +316,12 @@ static bool
 on_progress_timer(PtkFileTask* ptask)
 {
     // GThread *self = g_thread_self ();
-    // ztd::logger::info("PROGRESS_TIMER_THREAD = {:p}", fmt::ptr(self));
+    // ztd::logger::info("PROGRESS_TIMER_THREAD = {}", fmt::ptr(self));
 
     // query condition?
     if (ptask->query_cond && ptask->query_cond != ptask->query_cond_last)
     {
-        // ztd::logger::info("QUERY = {:p}  mutex = {:p}", fmt::ptr(ptask->query_cond),
-        // fmt::ptr(ptask->task->mutex));
+        // ztd::logger::info("QUERY = {}  mutex = {}", fmt::ptr(ptask->query_cond), fmt::ptr(ptask->task->mutex));
         ptask->restart_timeout = (ptask->timeout != 0);
         if (ptask->timeout)
         {
@@ -368,7 +367,7 @@ on_progress_timer(PtkFileTask* ptask)
         return true;
     }
     ptask->progress_count = 0;
-    // ztd::logger::info("on_progress_timer ptask={:p}", ptask);
+    // ztd::logger::info("on_progress_timer ptask={}", fmt::ptr(ptask));
 
     if (ptask->complete)
     {
@@ -398,7 +397,7 @@ on_progress_timer(PtkFileTask* ptask)
         if (!ptask->progress_dlg || (!ptask->err_count && !ptask->keep_dlg))
         {
             delete ptask;
-            // ztd::logger::info("on_progress_timer DONE false-COMPLETE ptask={:p}", ptask);
+            // ztd::logger::info("on_progress_timer DONE false-COMPLETE ptask={}", fmt::ptr(ptask));
             return false;
         }
         else if (ptask->progress_dlg && ptask->err_count)
@@ -406,14 +405,14 @@ on_progress_timer(PtkFileTask* ptask)
             gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
         }
     }
-    // ztd::logger::info("on_progress_timer DONE true ptask={:p}", ptask);
+    // ztd::logger::info("on_progress_timer DONE true ptask={}", fmt::ptr(ptask));
     return !ptask->complete;
 }
 
 static bool
 ptk_file_task_add_main(PtkFileTask* ptask)
 {
-    // ztd::logger::info("ptk_file_task_add_main ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_add_main ptask={}", fmt::ptr(ptask));
     if (ptask->timeout)
     {
         g_source_remove(ptask->timeout);
@@ -435,14 +434,14 @@ ptk_file_task_add_main(PtkFileTask* ptask)
 
     on_progress_timer(ptask);
 
-    // ztd::logger::info("ptk_file_task_add_main DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_add_main DONE ptask={}", fmt::ptr(ptask));
     return false;
 }
 
 void
 ptk_file_task_run(PtkFileTask* ptask)
 {
-    // ztd::logger::info("ptk_file_task_run ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_run ptask={}", fmt::ptr(ptask));
     // wait this long to first show task in manager, popup
     ptask->timeout = g_timeout_add(500, (GSourceFunc)ptk_file_task_add_main, ptask);
     ptask->progress_timer = 0;
@@ -456,14 +455,14 @@ ptk_file_task_run(PtkFileTask* ptask)
         }
     }
     ptask->progress_timer = g_timeout_add(50, (GSourceFunc)on_progress_timer, ptask);
-    // ztd::logger::info("ptk_file_task_run DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_run DONE ptask={}", fmt::ptr(ptask));
 }
 
 bool
 ptk_file_task_cancel(PtkFileTask* ptask)
 {
     // GThread *self = g_thread_self ();
-    // ztd::logger::info("CANCEL_THREAD = {:p}", fmt::ptr(self));
+    // ztd::logger::info("CANCEL_THREAD = {}", fmt::ptr(self));
     if (ptask->timeout)
     {
         g_source_remove(ptask->timeout);
@@ -1198,7 +1197,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
     std::string ufile_path;
 
-    // ztd::logger::info("ptk_file_task_progress_update ptask={:p}", ptask);
+    // ztd::logger::info("ptk_file_task_progress_update ptask={}", fmt::ptr(ptask));
 
     vfs::file_task task = ptask->task;
 
@@ -1555,7 +1554,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
         }
     }
     gtk_label_set_text(ptask->errors, errs.data());
-    // ztd::logger::info("ptk_file_task_progress_update DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_progress_update DONE ptask={}", fmt::ptr(ptask));
 }
 
 void
@@ -1579,7 +1578,7 @@ ptk_file_task_set_recursive(PtkFileTask* ptask, bool recursive)
 static void
 ptk_file_task_update(PtkFileTask* ptask)
 {
-    // ztd::logger::info("ptk_file_task_update ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_update ptask={}", fmt::ptr(ptask));
     // calculate updated display data
 
     if (!ptk_file_task_trylock(ptask))
@@ -1961,7 +1960,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     }
 
     task->unlock();
-    // ztd::logger::info("ptk_file_task_update DONE ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("ptk_file_task_update DONE ptask={}", fmt::ptr(ptask));
 }
 
 static bool
@@ -1985,12 +1984,11 @@ on_vfs_file_task_state_cb(vfs::file_task task, vfs::file_task_state state, void*
             }
             ptask->progress_count = 50; // trigger fast display
             task->unlock();
-            // gtk_signal_emit_by_name( G_OBJECT( ptask->signal_widget ), "task-notify",
-            //                                                                 ptask );
+            // gtk_signal_emit_by_name(G_OBJECT(ptask->signal_widget), "task-notify", ptask);
             break;
         case vfs::file_task_state::query_overwrite:
             // 0; GThread *self = g_thread_self ();
-            // ztd::logger::info("TASK_THREAD = {:p}", fmt::ptr(self));
+            // ztd::logger::info("TASK_THREAD = {}", fmt::ptr(self));
             task->lock();
             ptask->query_new_dest = (char**)state_data;
             *ptask->query_new_dest = nullptr;
@@ -2273,7 +2271,7 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
 static void
 query_overwrite(PtkFileTask* ptask)
 {
-    // ztd::logger::info("query_overwrite ptask={:p}", fmt::ptr(ptask));
+    // ztd::logger::info("query_overwrite ptask={}", fmt::ptr(ptask));
     GtkWidget* dlg;
     GtkWidget* parent_win;
     GtkTextIter iter;
@@ -2356,7 +2354,7 @@ query_overwrite(PtkFileTask* ptask)
             else
             {
                 const std::string size_str = vfs_file_size_format(src_stat.size());
-                src_size = std::format("{}\t( {} bytes )", size_str, src_stat.size());
+                src_size = std::format("{}\t( {:L} bytes )", size_str, src_stat.size());
                 if (src_stat.size() > dest_stat.size())
                 {
                     src_rel_size = "larger";
@@ -2386,7 +2384,7 @@ query_overwrite(PtkFileTask* ptask)
             }
             const std::string size_str = vfs_file_size_format(dest_stat.size());
             const std::string dest_size =
-                std::format("{}\t( {} bytes )", size_str, dest_stat.size());
+                std::format("{}\t( {:L} bytes )", size_str, dest_stat.size());
 
             const time_t dest_mtime = dest_stat.mtime().tv_sec;
             const auto dest_time = vfs_create_display_date(dest_mtime);

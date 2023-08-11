@@ -170,7 +170,7 @@ vfs_dir_finalize(GObject* obj)
         }
     }
 
-    // ztd::logger::debug("dir->thumbnail_loader: {:p}", dir->thumbnail_loader);
+    // ztd::logger::debug("dir->thumbnail_loader: {}", fmt::ptr(dir->thumbnail_loader));
     if (dir->thumbnail_loader)
     {
         // ztd::logger::debug("FREE THUMBNAIL LOADER IN VFSDIR");

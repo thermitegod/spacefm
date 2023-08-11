@@ -606,16 +606,12 @@ install_plugin_file(void* main_win, GtkWidget* handler_dlg, const std::filesyste
     }
 
     ptask->task->exec_command = std::format(
-        "rm -rf {} ; mkdir -p {} && cd {} && tar --exclude='/*' --keep-old-files -xf {} ; "
-        "err=$status ; if [ $err -ne 0 ] || [ ! -e plugin ] {} ; then rm -rf {} ; echo 'Error "
-        "installing "
-        "plugin (invalid plugin file?)'; exit 1 ; fi ; {}",
-        plug_dir_q,
-        plug_dir_q,
+        "rm -rf {0} ; mkdir -p {0} && cd {0} && tar --exclude='/*' --keep-old-files -xf {1} ; "
+        "err=$status ; if [ $err -ne 0 ] || [ ! -e plugin ] {2} ; then rm -rf {0} ; echo 'Error "
+        "installing plugin (invalid plugin file?)'; exit 1 ; fi ; {3}",
         plug_dir_q,
         file_path_q,
         book,
-        plug_dir_q,
         own);
 
     ptask->task->exec_sync = true;

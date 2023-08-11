@@ -1531,7 +1531,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         }
 
         // build - command
-        ztd::logger::info("TASK_COMMAND({:p})={}", fmt::ptr(this->exec_ptask), this->exec_command);
+        ztd::logger::info("TASK_COMMAND({})={}", fmt::ptr(this->exec_ptask), this->exec_command);
 
         buf.append(std::format("{}\n\n", this->exec_command));
         buf.append(std::format("set fm_err $status\n\n"));

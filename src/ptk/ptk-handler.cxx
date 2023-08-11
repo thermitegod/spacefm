@@ -1490,8 +1490,7 @@ ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
                 break;
         }
         const std::string msg =
-            std::format("The selected {} Handler file has been imported to the {} Handlers list.",
-                        mode_name,
+            std::format("The selected {0} Handler file has been imported to the {0} Handlers list.",
                         mode_name);
         xset_msg_dialog(nullptr,
                         GtkMessageType::GTK_MESSAGE_INFO,

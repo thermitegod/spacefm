@@ -581,20 +581,10 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
         set = xset_get(xset::name::view_columns);
         xset_set_var(set, xset::var::disable, "0");
-        desc = std::format("panel{}_detcol_size panel{}_detcol_bytes panel{}_detcol_type "
-                           "panel{}_detcol_mime panel{}_detcol_perm panel{}_detcol_owner "
-                           "panel{}_detcol_group panel{}_detcol_atime panel{}_detcol_btime "
-                           "panel{}_detcol_ctime panel{}_detcol_mtime separator view_reorder_col",
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
-                           p,
+        desc = std::format("panel{0}_detcol_size panel{0}_detcol_bytes panel{0}_detcol_type "
+                           "panel{0}_detcol_mime panel{0}_detcol_perm panel{0}_detcol_owner "
+                           "panel{0}_detcol_group panel{0}_detcol_atime panel{0}_detcol_btime "
+                           "panel{0}_detcol_ctime panel{0}_detcol_mtime separator view_reorder_col",
                            p);
         xset_set_var(set, xset::var::desc, desc);
         set = xset_get(xset::name::rubberband);
@@ -821,22 +811,15 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
 
     set = xset_get(xset::name::view_list_style);
-    desc = std::format("panel{}_list_detailed panel{}_list_compact panel{}_list_icons separator "
-                       "view_thumb panel{}_list_large rubberband",
-                       p,
-                       p,
-                       p,
+    desc = std::format("panel{0}_list_detailed panel{0}_list_compact panel{0}_list_icons separator "
+                       "view_thumb panel{0}_list_large rubberband",
                        p);
     xset_set_var(set, xset::var::desc, desc);
     set = xset_get(xset::name::con_view);
     set->disable = !browser->file_list_;
-    desc = std::format("panel{}_show_toolbox panel{}_show_sidebar panel{}_show_devmon "
-                       "panel{}_show_dirtree separator panel{}_show_hidden "
+    desc = std::format("panel{0}_show_toolbox panel{0}_show_sidebar panel{0}_show_devmon "
+                       "panel{0}_show_dirtree separator panel{0}_show_hidden "
                        "view_list_style view_sortby view_columns separator view_refresh",
-                       p,
-                       p,
-                       p,
-                       p,
                        p);
     xset_set_var(set, xset::var::desc, desc);
     xset_add_menuitem(browser, menu, accel_group, set);
@@ -1858,12 +1841,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 const auto& share_desktop = check_share_desktop.value();
 
                 const std::string msg =
-                    std::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' and "
+                    std::format("The file '{0}' does not exist.\n\nBy copying '{1}' to '{0}' and "
                                 "editing it, you can adjust the behavior and appearance of this "
                                 "application for the current user.\n\nCreate this copy now?",
                                 path.string(),
-                                share_desktop.string(),
-                                path.string());
+                                share_desktop.string());
                 const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
                                                      GtkMessageType::GTK_MESSAGE_QUESTION,
                                                      "Copy Desktop File",
@@ -1974,22 +1956,22 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
                 if (std::filesystem::exists(usr_path))
                 {
-                    msg = std::format("The file '{}' does not exist.\n\nBy copying '{}' to '{}' "
-                                      "and editing it, you can adjust how MIME type '{}' files are "
-                                      "recognized for the current user.\n\nCreate this copy now?",
-                                      mime_file.string(),
-                                      usr_path.string(),
-                                      mime_file.string(),
-                                      mime_type->type());
+                    msg =
+                        std::format("The file '{0}' does not exist.\n\nBy copying '{1}' to '{0}' "
+                                    "and editing it, you can adjust how MIME type '{2}' files are "
+                                    "recognized for the current user.\n\nCreate this copy now?",
+                                    mime_file.string(),
+                                    usr_path.string(),
+                                    mime_type->type());
                 }
                 else
                 {
-                    msg = std::format("The file '{}' does not exist.\n\nBy creating new file '{}' "
-                                      "and editing it, you can define how MIME type '{}' files are "
-                                      "recognized for the current user.\n\nCreate this file now?",
-                                      mime_file.string(),
-                                      mime_file.string(),
-                                      mime_type->type());
+                    msg =
+                        std::format("The file '{0}' does not exist.\n\nBy creating new file '{0}' "
+                                    "and editing it, you can define how MIME type '{1}' files are "
+                                    "recognized for the current user.\n\nCreate this file now?",
+                                    mime_file.string(),
+                                    mime_type->type());
                 }
 
                 const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),

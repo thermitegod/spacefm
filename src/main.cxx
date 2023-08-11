@@ -210,8 +210,8 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
     if (opt->new_tab || opt->reuse_tab)
     {
         main_window = main_window_get_on_current_desktop();
-        // ztd::logger::debug("main_window_get_on_current_desktop = {:p}  {} {}",
-        //                    (void*)main_window,
+        // ztd::logger::debug("main_window_get_on_current_desktop = {}  {} {}",
+        //                    fmt::ptr(main_window),
         //                    opt->new_tab ? "new_tab" : "",
         //                    opt->reuse_tab ? "reuse_tab" : "");
     }
@@ -301,7 +301,7 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
         }
     }
 
-    // ztd::logger::debug("handle_parsed_commandline_args mw = {:p}", (void*)main_window);
+    // ztd::logger::debug("handle_parsed_commandline_args mw = {}", fmt::ptr(main_window));
 
     return ret;
 }

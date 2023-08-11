@@ -1205,9 +1205,7 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                                                           cur_tabx));
                             // if (file_browser->folder_view)
                             //      gtk_widget_grab_focus(file_browser->folder_view);
-                            // ztd::logger::info("call delayed (showpanels) #{} {:p} window={:p}",
-                            // cur_tabx, fmt::ptr(file_browser->folder_view),
-                            // fmt::ptr(main_window));
+                            // ztd::logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, fmt::ptr(file_browser->folder_view_), fmt::ptr(main_window));
                             g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
                         }
                     }
@@ -2582,7 +2580,7 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     }
     // ztd::logger::info("New tab panel={} path={}", main_window->curpanel, folder_path);
 
-    // ztd::logger::info("main_window_add_new_tab fb={:p}", fmt::ptr(file_browser));
+    // ztd::logger::info("main_window_add_new_tab fb={}", fmt::ptr(file_browser));
     file_browser->set_single_click(app_settings.single_click());
 
     file_browser->show_thumbnails(app_settings.show_thumbnail() ? app_settings.max_thumb_size()
@@ -2649,10 +2647,9 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     set_panel_focus(main_window, file_browser);
     //    while(g_main_context_pending(nullptr))  // wait for chdir to grab focus
     //        g_main_context_iteration(nullptr, true);
-    // gtk_widget_grab_focus( GTK_WIDGET( file_browser->folder_view ) );
-    // ztd::logger::info("focus browser {} {}", idx, file_browser->folder_view);
-    // ztd::logger::info("call delayed (newtab) #{} {:p}", idx,
-    // fmt::ptr(file_browser->folder_view));
+    // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view_));
+    // ztd::logger::info("focus browser {} {}", idx, fmt::ptr(file_browser->folder_view_));
+    // ztd::logger::info("call delayed (newtab) #{} {}", idx, fmt::ptr(file_browser->folder_view_));
     // g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
 }
 
@@ -2736,7 +2733,7 @@ delayed_focus_file_browser(PtkFileBrowser* file_browser)
 {
     if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
     {
-        // ztd::logger::info("delayed_focus_file_browser fb={:p}", fmt::ptr(file_browser));
+        // ztd::logger::info("delayed_focus_file_browser fb={}", fmt::ptr(file_browser));
         if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
         {
             gtk_widget_grab_focus(file_browser->folder_view());
@@ -2912,8 +2909,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     }
 
     file_browser = PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_num));
-    // ztd::logger::info("on_folder_notebook_switch_pape fb={:p}   panel={}   page={}",
-    // file_browser, file_browser->mypanel, page_num);
+    // ztd::logger::info("on_folder_notebook_switch_pape fb={}   panel={}   page={}", fmt::ptr(file_browser), file_browser->mypanel, page_num);
     main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
@@ -3047,7 +3043,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         const std::string disk_size = vfs_file_size_format(total_on_disk_size);
 
         statusbar_txt.append(
-            std::format("{} / {} ({} / {})", num_sel, num_vis, file_size, disk_size));
+            std::format("{:L} / {:L} ({} / {})", num_sel, num_vis, file_size, disk_size));
 
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
@@ -3164,31 +3160,31 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
 
             if (count_dir)
             {
-                statusbar_txt.append(std::format("  Directories ({})", count_dir));
+                statusbar_txt.append(std::format("  Directories ({:L})", count_dir));
             }
             if (count_file)
             {
-                statusbar_txt.append(std::format("  Files ({})", count_file));
+                statusbar_txt.append(std::format("  Files ({:L})", count_file));
             }
             if (count_symlink)
             {
-                statusbar_txt.append(std::format("  Symlinks ({})", count_symlink));
+                statusbar_txt.append(std::format("  Symlinks ({:L})", count_symlink));
             }
             if (count_socket)
             {
-                statusbar_txt.append(std::format("  Sockets ({})", count_socket));
+                statusbar_txt.append(std::format("  Sockets ({:L})", count_socket));
             }
             if (count_pipe)
             {
-                statusbar_txt.append(std::format("  Named Pipes ({})", count_pipe));
+                statusbar_txt.append(std::format("  Named Pipes ({:L})", count_pipe));
             }
             if (count_block)
             {
-                statusbar_txt.append(std::format("  Block Devices ({})", count_block));
+                statusbar_txt.append(std::format("  Block Devices ({:L})", count_block));
             }
             if (count_char)
             {
-                statusbar_txt.append(std::format("  Character Devices ({})", count_char));
+                statusbar_txt.append(std::format("  Character Devices ({:L})", count_char));
             }
         }
 
@@ -3218,7 +3214,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         const u32 num_hidx = file_browser->dir_ ? file_browser->dir_->xhidden_count : 0;
         if (num_hid || num_hidx)
         {
-            statusbar_txt.append(std::format("{} visible ({} hidden)  ({} / {})",
+            statusbar_txt.append(std::format("{:L} visible ({:L} hidden)  ({} / {})",
                                              num_vis,
                                              num_hid,
                                              file_size,
@@ -3226,7 +3222,7 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
         }
         else
         {
-            statusbar_txt.append(std::format("{} {}  ({} / {})",
+            statusbar_txt.append(std::format("{:L} {}  ({} / {})",
                                              num_vis,
                                              num_vis == 1 ? "item" : "items",
                                              file_size,
@@ -3789,7 +3785,7 @@ main_window_get_on_current_desktop()
     for (MainWindow* window : all_windows)
     {
         const i64 desktop = get_desktop_index(GTK_WINDOW(window));
-        // ztd::logger::info( "    test win {:p} = {}", window, desktop);
+        // ztd::logger::info( "    test win {} = {}", fmt::ptr(window), desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
         {
             return window;
@@ -4346,11 +4342,11 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     buf.append(std::format("set fm_value {}\n", ztd::shell::quote(value)));
     if (vtask->exec_ptask)
     {
-        buf.append(std::format("set fm_my_task {:p}\n", fmt::ptr(vtask->exec_ptask)));
-        buf.append(std::format("set fm_my_task_id {:p}\n", fmt::ptr(vtask->exec_ptask)));
+        buf.append(std::format("set fm_my_task {}\n", fmt::ptr(vtask->exec_ptask)));
+        buf.append(std::format("set fm_my_task_id {}\n", fmt::ptr(vtask->exec_ptask)));
     }
-    buf.append(std::format("set fm_my_window {:p}\n", fmt::ptr(main_window)));
-    buf.append(std::format("set fm_my_window_id {:p}\n", fmt::ptr(main_window)));
+    buf.append(std::format("set fm_my_window {}\n", fmt::ptr(main_window)));
+    buf.append(std::format("set fm_my_window_id {}\n", fmt::ptr(main_window)));
 
     // utils
     buf.append(std::format("set fm_editor {}\n",
@@ -4441,11 +4437,11 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             buf.append(std::format("set fm_task_current_dest_file {}\n", ztd::shell::quote(current_dest.string())));
             // clang-format on
         }
-        buf.append(std::format("set fm_task_id {:p}\n", fmt::ptr(ptask)));
+        buf.append(std::format("set fm_task_id {}\n", fmt::ptr(ptask)));
         if (ptask->task_view && (main_window = get_task_view_window(ptask->task_view)))
         {
-            buf.append(std::format("set fm_task_window {:p}\n", fmt::ptr(main_window)));
-            buf.append(std::format("set fm_task_window_id {:p}\n", fmt::ptr(main_window)));
+            buf.append(std::format("set fm_task_window {}\n", fmt::ptr(main_window)));
+            buf.append(std::format("set fm_task_window_id {}\n", fmt::ptr(main_window)));
         }
     }
 
@@ -5971,7 +5967,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
     {
         for (MainWindow* window2 : all_windows)
         {
-            const std::string str = std::format("{:p}", (void*)window2);
+            const std::string str = std::format("{}", fmt::ptr(window2));
             if (ztd::same(str, window))
             {
                 main_window = window2;
@@ -7066,7 +7062,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "max-thumbnail-size"))
         {
-            return {SOCKET_SUCCESS, std::format("{} B", app_settings.max_thumb_size())};
+            return {SOCKET_SUCCESS,
+                    std::format("{}", vfs_file_size_format(app_settings.max_thumb_size()))};
         }
         else if (ztd::same(property, "large-icons"))
         {
@@ -7222,7 +7219,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             do
             {
                 gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
-                const std::string str = std::format("{:p}", (void*)ptask);
+                const std::string str = std::format("{}", fmt::ptr(ptask));
                 if (ztd::same(str, data[i]))
                 {
                     break;
@@ -7366,7 +7363,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             do
             {
                 gtk_tree_model_get(model, &it, main_window::column::data, &ptask, -1);
-                const std::string str = std::format("{:p}", (void*)ptask);
+                const std::string str = std::format("{}", fmt::ptr(ptask));
                 if (ztd::same(str, property))
                 {
                     break;
@@ -7545,8 +7542,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
                         std::format("Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
                                     "new_task_id={}",
-                                    (void*)main_window,
-                                    (void*)ptask)};
+                                    fmt::ptr(main_window),
+                                    fmt::ptr(ptask))};
             }
         }
         else if (ztd::same(property, "edit"))
@@ -7748,8 +7745,8 @@ main_window_socket_command(const std::string_view socket_commands_json)
                     std::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
                                 "new_task_id={}",
-                                (void*)main_window,
-                                (void*)ptask)};
+                                fmt::ptr(main_window),
+                                fmt::ptr(ptask))};
         }
         else
         {
@@ -7991,7 +7988,7 @@ run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, 
     }
     else if (ztd::contains(replace, "%w"))
     {
-        rep = std::format("{:p}", (void*)main_window);
+        rep = std::format("{}", fmt::ptr(main_window));
         cmd = ztd::replace(cmd, "%w", rep);
     }
     else if (ztd::contains(replace, "%p"))
