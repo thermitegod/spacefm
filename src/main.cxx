@@ -301,9 +301,12 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
 static void
 tmp_clean()
 {
-    const auto tmp = vfs::user_dirs->program_tmp_dir();
-    std::filesystem::remove_all(tmp);
-    ztd::logger::info("Removed {}", tmp.string());
+    const auto& tmp = vfs::user_dirs->program_tmp_dir();
+    if (std::filesystem::exists(tmp))
+    {
+        std::filesystem::remove_all(tmp);
+        ztd::logger::info("Removed {}", tmp.string());
+    }
 }
 
 int
