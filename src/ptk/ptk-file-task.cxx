@@ -1588,7 +1588,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     }
 
     vfs::file_task task = ptask->task;
-    off_t cur_speed;
+    u64 cur_speed;
     const f64 timer_elapsed = task->timer.elapsed();
 
     if (task->type == vfs::file_task_type::exec)
@@ -1766,7 +1766,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         speed2 = std::format("{}/s", size_str2);
 
         // remain cur
-        off_t remain;
+        u64 remain;
         if (cur_speed > 0 && task->total_size != 0)
         {
             remain = (task->total_size - task->progress) / cur_speed;

@@ -175,7 +175,7 @@ class VFSFileTask
 
     bool should_abort();
 
-    off_t get_total_size_of_dir(const std::filesystem::path& path);
+    u64 get_total_size_of_dir(const std::filesystem::path& path);
 
     void append_add_log(const std::string_view msg);
 
@@ -201,12 +201,12 @@ class VFSFileTask
     // For chmod. If chmod is not needed, this should be nullptr
     std::optional<std::array<u8, 12>> chmod_actions{std::nullopt};
 
-    off_t total_size{0}; // Total size of the files to be processed, in bytes
-    off_t progress{0};   // Total size of current processed files, in btytes
-    i32 percent{0};      // progress (percentage)
+    u64 total_size{0}; // Total size of the files to be processed, in bytes
+    u64 progress{0};   // Total size of current processed files, in btytes
+    i32 percent{0};    // progress (percentage)
     bool custom_percent{false};
-    off_t last_speed{0};
-    off_t last_progress{0};
+    u64 last_speed{0};
+    u64 last_progress{0};
     f64 last_elapsed{0.0};
     u32 current_item{0};
 

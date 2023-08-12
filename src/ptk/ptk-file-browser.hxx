@@ -106,8 +106,8 @@ struct PtkFileBrowser
     GtkTreeModel* file_list_{nullptr};
     i32 max_thumbnail_{0};
     i32 n_sel_files_{0};
-    off_t sel_size_{0};
-    off_t sel_disk_size_{0};
+    u64 sel_size_{0};
+    u64 sel_disk_size_{0};
     u32 sel_change_idle_{0};
 
     // path bar auto seek

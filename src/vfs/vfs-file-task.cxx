@@ -1848,7 +1848,7 @@ vfs_file_task_thread(vfs::file_task task)
             }
             else
             {
-                const off_t size = task->get_total_size_of_dir(src_path);
+                const u64 size = task->get_total_size_of_dir(src_path);
                 task->lock();
                 task->total_size += size;
                 task->unlock();
@@ -1917,7 +1917,7 @@ vfs_file_task_thread(vfs::file_task task)
                 if ((task->type == vfs::file_task_type::move) && file_stat.dev() != dest_dev)
                 {
                     // recursive size
-                    const off_t size = task->get_total_size_of_dir(src_path);
+                    const u64 size = task->get_total_size_of_dir(src_path);
                     task->lock();
                     task->total_size += size;
                     task->unlock();
@@ -1976,7 +1976,7 @@ vfs_file_task_thread(vfs::file_task task)
             xset_get_b(xset::name::task_q_smart))
         {
             // make queue exception for smaller tasks
-            off_t exlimit;
+            u64 exlimit;
             switch (task->type)
             {
                 case vfs::file_task_type::move:
@@ -2137,7 +2137,6 @@ VFSFileTask::abort_task()
 }
 
 /*
- * void get_total_size_of_dir(const char* path, off_t* size)
  * Recursively count total size of all files in the specified directory.
  * If the path specified is a file, the size of the file is directly returned.
  * cancel is used to cancel the operation. This function will check the value
@@ -2145,7 +2144,7 @@ VFSFileTask::abort_task()
  * calculation is cancelled.
  * NOTE: *size should be set to zero before calling this function.
  */
-off_t
+u64
 VFSFileTask::get_total_size_of_dir(const std::filesystem::path& path)
 {
     if (this->abort)
@@ -2159,7 +2158,7 @@ VFSFileTask::get_total_size_of_dir(const std::filesystem::path& path)
         return 0;
     }
 
-    off_t size = file_stat.size();
+    u64 size = file_stat.size();
 
     // Do not follow symlinks
     if (file_stat.is_symlink() || !file_stat.is_directory())
