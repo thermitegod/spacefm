@@ -192,13 +192,6 @@ namespace xset
         root_bar,
         view_thumb,
 
-        // Plugins //
-        plug_install,
-        plug_ifile,
-        plug_copy,
-        plug_cfile,
-        plug_cverb,
-
         // Help //
         main_about,
         main_dev,

@@ -119,7 +119,6 @@ namespace xset
         submenu_book,
         sep,
         add_tool,
-        import_file,
         cut,
         copy,
         paste,
@@ -135,10 +134,7 @@ namespace xset
         prop_cmd,
         ignore_context,
         scroll,
-        EXPORT, // TODO RENAME
         browse_files,
-        browse_data,
-        browse_plugin,
         help,
         help_new,
         help_add,
@@ -154,18 +150,6 @@ namespace xset
         unset,
         xtrue,
         xfalse
-    };
-
-    struct XSetPlugin
-    { // not saved at all
-        XSetPlugin() = delete;
-        XSetPlugin(const std::string_view name, const std::filesystem::path& path)
-            : name(name), path(path){};
-        ~XSetPlugin() = default;
-
-        bool is_top{false};           // not saved
-        std::string name{};           // not saved
-        std::filesystem::path path{}; // not saved
     };
 
     struct XSet
@@ -219,8 +203,6 @@ namespace xset
         bool keep_terminal{false}; // saved, or save icon if lock
         bool scroll_lock{false};   // saved
         char opener{0};            // saved
-
-        std::unique_ptr<xset::XSetPlugin> plugin{nullptr};
     };
 } // namespace xset
 

@@ -36,7 +36,6 @@
 
 #include "settings/config-save.hxx"
 #include "settings/disk-format.hxx"
-#include "settings/plugins-save.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
@@ -49,7 +48,6 @@
 #include "xset/xset-custom.hxx"
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-plugins.hxx"
 
 const std::string
 xset_custom_new_name()
@@ -62,10 +60,9 @@ xset_custom_new_name()
         if (!xset_is(setname))
         {
             const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / setname;
-            const auto path2 = vfs::user_dirs->program_config_dir() / "plugin-data" / setname;
 
             // only use free xset name if no aux data dirs exist for that name too.
-            if (!std::filesystem::exists(path1) && !std::filesystem::exists(path2))
+            if (!std::filesystem::exists(path1))
             {
                 break;
             }
@@ -113,17 +110,10 @@ xset_custom_delete(xset_t set, bool delete_next)
     }
 
     const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-    const auto path2 = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
     if (std::filesystem::exists(path1))
     {
         std::filesystem::remove_all(path1);
         ztd::logger::info("Removed {}", path1.string());
-    }
-
-    if (std::filesystem::exists(path2))
-    {
-        std::filesystem::remove_all(path2);
-        ztd::logger::info("Removed {}", path2.string());
     }
 
     xset_remove(set);
@@ -269,258 +259,13 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     return menu_label;
 }
 
-static bool
-xset_custom_export_files(xset_t set, const std::filesystem::path& plug_dir)
-{
-    assert(set != nullptr);
-
-    std::filesystem::path path_src;
-    std::filesystem::path path_dest;
-
-    if (set->plugin)
-    {
-        path_src = set->plugin->path / set->plugin->name;
-        path_dest = plug_dir / set->plugin->name;
-    }
-    else
-    {
-        path_src = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-        path_dest = plug_dir / set->name;
-    }
-
-    if (!(std::filesystem::exists(path_src) && dir_has_files(path_src)))
-    {
-        // skip empty or missing dirs
-        return true;
-    }
-
-    i32 exit_status;
-    const std::string command = std::format("cp -a {} {}", path_src.string(), path_dest.string());
-    ztd::logger::info("COMMAND={}", command);
-    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-
-    return !!exit_status;
-}
-
-static bool
-xset_custom_export_write(xsetpak_t& xsetpak, xset_t set, const std::filesystem::path& plug_dir)
-{ // recursively write set, submenu sets, and next sets
-    xsetpak_t xsetpak_local{{std::format("{}", set->name), xset_pack_set(set)}};
-
-    xsetpak.insert(xsetpak_local.begin(), xsetpak_local.end());
-
-    if (!xset_custom_export_files(set, plug_dir))
-    {
-        return false;
-    }
-    if (set->menu_style == xset::menu::submenu && set->child)
-    {
-        if (!xset_custom_export_write(xsetpak, xset_get(set->child.value()), plug_dir))
-        {
-            return false;
-        }
-    }
-    if (set->next)
-    {
-        if (!xset_custom_export_write(xsetpak, xset_get(set->next.value()), plug_dir))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-void
-xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
-{
-    std::optional<std::string> default_path = std::nullopt;
-    std::string deffile;
-
-    // get new plugin filename
-    xset_t save = xset_get(xset::name::plug_cfile);
-    if (save->s) //&& std::filesystem::is_directory(save->s)
-    {
-        default_path = save->s;
-    }
-    else
-    {
-        default_path = xset_get_s(xset::name::go_set_default);
-        if (!default_path)
-        {
-            default_path = "/";
-        }
-    }
-
-    if (!set->plugin)
-    {
-        const std::string s1 = clean_label(set->menu_label.value(), true, false);
-        std::string type;
-        if (ztd::startswith(set->name, "handler_archive_"))
-        {
-            type = "archive-handler";
-        }
-        else if (ztd::startswith(set->name, "handler_filesystem_"))
-        {
-            type = "device-handler";
-        }
-        else if (ztd::startswith(set->name, "handler_network_"))
-        {
-            type = "protocol-handler";
-        }
-        else if (ztd::startswith(set->name, "handler_file_"))
-        {
-            type = "file-handler";
-        }
-        else
-        {
-            type = "plugin";
-        }
-
-        deffile = std::format("{}-{}-{}.tar.xz", s1, PACKAGE_NAME, type);
-    }
-    else
-    {
-        const auto s1 = set->plugin->path.filename();
-        // Need to use .string() to avoid fmt adding double quotes when formating
-        deffile = std::format("{}-{}-plugin.tar.xz", s1.string(), PACKAGE_NAME);
-    }
-
-    const auto path = xset_file_dialog(parent,
-                                       GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
-                                       "Save As Plugin File",
-                                       default_path.value(),
-                                       deffile);
-    if (!path)
-    {
-        return;
-    }
-    save->s = path.value().parent_path();
-
-    // get or create tmp plugin dir
-    std::filesystem::path plug_dir;
-    if (!set->plugin)
-    {
-        const auto user_tmp = vfs::user_dirs->program_tmp_dir();
-        if (!std::filesystem::is_directory(user_tmp))
-        {
-            xset_msg_dialog(parent,
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Export Error",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            "Unable to create temporary files");
-            return;
-        }
-        while (true)
-        {
-            plug_dir = user_tmp / ztd::randhex();
-            if (!std::filesystem::exists(plug_dir))
-            {
-                break;
-            }
-        }
-        std::filesystem::create_directories(plug_dir);
-        std::filesystem::permissions(plug_dir, std::filesystem::perms::owner_all);
-
-        // Create plugin file
-        // const auto plugin_path = plug_dir / PLUGIN_FILE_FILENAME;
-
-        // Do not want to store plugins prev/next/parent
-        // TODO - Better way
-        const auto s_prev = set->prev;
-        const auto s_next = set->next;
-        const auto s_parent = set->parent;
-        set->prev = std::nullopt;
-        set->next = std::nullopt;
-        set->parent = std::nullopt;
-        xsetpak_t xsetpak{{std::format("{}", set->name), xset_pack_set(set)}};
-        set->prev = s_prev;
-        set->next = s_next;
-        set->parent = s_parent;
-        //
-
-        if (!xset_custom_export_files(set, plug_dir))
-        {
-            if (!set->plugin)
-            {
-                std::filesystem::remove_all(plug_dir);
-                ztd::logger::info("Removed {}", plug_dir.string());
-            }
-            xset_msg_dialog(parent,
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Export Error",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            "Unable to create temporary files");
-            return;
-        }
-        if (set->menu_style == xset::menu::submenu && set->child)
-        {
-            if (!xset_custom_export_write(xsetpak, xset_get(set->child.value()), plug_dir))
-            {
-                if (!set->plugin)
-                {
-                    std::filesystem::remove_all(plug_dir);
-                    ztd::logger::info("Removed {}", plug_dir.string());
-                }
-                xset_msg_dialog(parent,
-                                GtkMessageType::GTK_MESSAGE_ERROR,
-                                "Export Error",
-                                GtkButtonsType::GTK_BUTTONS_OK,
-                                "Unable to create temporary files");
-                return;
-            }
-        }
-
-        save_user_plugin(path.value(), xsetpak);
-    }
-    else
-    {
-        plug_dir = set->plugin->path;
-    }
-
-    // tar and delete tmp files
-    // task
-    PtkFileTask* ptask;
-    ptask = ptk_file_exec_new("Export Plugin",
-                              plug_dir,
-                              parent,
-                              file_browser ? file_browser->task_view() : nullptr);
-
-    const std::string plug_dir_q = ztd::shell::quote(plug_dir.string());
-    const std::string path_q = ztd::shell::quote(path.value().string());
-    if (!set->plugin)
-    {
-        ptask->task->exec_command =
-            std::format("tar --numeric-owner -cJf {0} * ; err=$status ; rm -rf {1} ; "
-                        "if [ $err -ne 0 ];then rm -f {0} ; fi ; exit $err",
-                        path_q,
-                        plug_dir_q);
-    }
-    else
-    {
-        ptask->task->exec_command =
-            std::format("tar --numeric-owner -cJf {0} * ; err=$status ; "
-                        "if [ $err -ne 0 ] ; then rm -f {0} ; fi ; exit $err",
-                        path_q);
-    }
-    ptask->task->exec_sync = true;
-    ptask->task->exec_popup = false;
-    ptask->task->exec_show_output = false;
-    ptask->task->exec_show_error = true;
-    ptask->task->exec_export = false;
-    ptask->task->exec_browser = file_browser;
-    ptk_file_task_run(ptask);
-
-    return;
-}
-
 char*
 xset_custom_get_script(xset_t set, bool create)
 {
     assert(set != nullptr);
 
     if ((!ztd::startswith(set->name, "cstm_") && !ztd::startswith(set->name, "cust") &&
-         !ztd::startswith(set->name, "hand")) ||
-        (create && set->plugin))
+         !ztd::startswith(set->name, "hand")))
     {
         return nullptr;
     }
@@ -537,14 +282,7 @@ xset_custom_get_script(xset_t set, bool create)
         }
     }
 
-    if (set->plugin)
-    {
-        path = set->plugin->path / set->plugin->name / "exec.fish";
-    }
-    else
-    {
-        path = vfs::user_dirs->program_config_dir() / "scripts" / set->name / "exec.fish";
-    }
+    path = vfs::user_dirs->program_config_dir() / "scripts" / set->name / "exec.fish";
 
     if (create && !std::filesystem::exists(path))
     {
@@ -585,17 +323,9 @@ xset_custom_copy_files(xset_t src, xset_t dest)
 
     // copy command dir
 
-    std::filesystem::path path_src;
     std::filesystem::path path_dest;
 
-    if (src->plugin)
-    {
-        path_src = src->plugin->path / src->plugin->name;
-    }
-    else
-    {
-        path_src = vfs::user_dirs->program_config_dir() / "scripts" / src->name;
-    }
+    const auto path_src = vfs::user_dirs->program_config_dir() / "scripts" / src->name;
     // ztd::logger::info("    path_src={}", path_src);
 
     // ztd::logger::info("    path_src EXISTS");
@@ -630,55 +360,14 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     command = std::format("chmod -R go-rwx {}", path_dest.string());
     ztd::logger::info("COMMAND={}", command);
     Glib::spawn_command_line_sync(command);
-
-    // copy data dir
-    xset_t mset = xset_get_plugin_mirror(src);
-    path_src = vfs::user_dirs->program_config_dir() / "plugin-data" / mset->name;
-    if (std::filesystem::is_directory(path_src))
-    {
-        path_dest = vfs::user_dirs->program_config_dir() / "plugin-data" / dest->name;
-        command = std::format("cp -a {} {}", path_src.string(), path_dest.string());
-        ztd::logger::info("COMMAND={}", command);
-        Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
-        std::string copy_out;
-        if (standard_output)
-        {
-            copy_out.append(*standard_output);
-        }
-        if (standard_error)
-        {
-            copy_out.append(*standard_error);
-        }
-        ztd::logger::info("{}", copy_out);
-        if (exit_status && WIFEXITED(exit_status))
-        {
-            const std::string msg =
-                std::format("An error occured copying command data files\n\n{}", *standard_error);
-            xset_msg_dialog(nullptr,
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Copy Command Error",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            msg);
-        }
-        command = std::format("chmod -R go-rwx {}", path_dest.string());
-        ztd::logger::info("COMMAND={}", command);
-        Glib::spawn_command_line_sync(command);
-    }
 }
 
 xset_t
-xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
+xset_custom_copy(xset_t set, bool copy_next)
 {
     assert(set != nullptr);
 
-    // ztd::logger::info("xset_custom_copy( {}, {}, {})", set->name, copy_next ? "true" : "false",
-    // delete_set ? "true" : "false");
-    xset_t mset = set;
-    // if a plugin with a mirror, get the mirror
-    if (set->plugin && set->shared_key)
-    {
-        mset = xset_get_plugin_mirror(set);
-    }
+    // ztd::logger::info("xset_custom_copy({}, {})", set->name, copy_next);
 
     xset_t newset = xset_custom_new();
     newset->menu_label = set->menu_label;
@@ -690,25 +379,17 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     newset->title = set->title;
     newset->b = set->b;
     newset->menu_style = set->menu_style;
-    newset->context = mset->context;
+    newset->context = set->context;
     newset->line = set->line;
 
-    newset->task = mset->task;
-    newset->task_pop = mset->task_pop;
-    newset->task_err = mset->task_err;
-    newset->task_out = mset->task_out;
-    newset->in_terminal = mset->in_terminal;
-    newset->keep_terminal = mset->keep_terminal;
-    newset->scroll_lock = mset->scroll_lock;
-
-    if (!mset->icon && set->plugin)
-    {
-        newset->icon = set->icon;
-    }
-    else
-    {
-        newset->icon = mset->icon;
-    }
+    newset->task = set->task;
+    newset->task_pop = set->task_pop;
+    newset->task_err = set->task_err;
+    newset->task_out = set->task_out;
+    newset->in_terminal = set->in_terminal;
+    newset->keep_terminal = set->keep_terminal;
+    newset->scroll_lock = set->scroll_lock;
+    newset->icon = set->icon;
 
     xset_custom_copy_files(set, newset);
     newset->tool = set->tool;
@@ -717,7 +398,7 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     {
         xset_t set_child = xset_get(set->child.value());
         // ztd::logger::info("    copy submenu {}", set_child->name);
-        xset_t newchild = xset_custom_copy(set_child, true, delete_set);
+        xset_t newchild = xset_custom_copy(set_child, true);
         newset->child = newchild->name;
         newchild->parent = newset->name;
     }
@@ -726,15 +407,9 @@ xset_custom_copy(xset_t set, bool copy_next, bool delete_set)
     {
         xset_t set_next = xset_get(set->next.value());
         // ztd::logger::info("    copy next {}", set_next->name);
-        xset_t newnext = xset_custom_copy(set_next, true, delete_set);
+        xset_t newnext = xset_custom_copy(set_next, true);
         newnext->prev = newset->name;
         newset->next = newnext->name;
-    }
-
-    // when copying imported plugin file, discard mirror xset
-    if (delete_set)
-    {
-        xset_custom_delete(set, false);
     }
 
     return newset;

@@ -63,7 +63,6 @@
 #include "xset/xset-custom.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
-#include "xset/xset-plugins.hxx"
 
 #include "settings/app.hxx"
 #include "settings/disk-format.hxx"
@@ -251,197 +250,6 @@ on_window_configure_event(GtkWindow* window, GdkEvent* event, MainWindow* main_w
             g_timeout_add(200, (GSourceFunc)on_configure_evt_timer, main_window);
     }
     return false;
-}
-
-static void
-on_plugin_install(GtkMenuItem* item, MainWindow* main_window, xset_t set2)
-{
-    xset_t set;
-    std::filesystem::path path;
-    std::string msg;
-    plugin::job job = plugin::job::install;
-
-    if (!item)
-    {
-        set = set2;
-    }
-    else
-    {
-        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
-    }
-    if (!set)
-    {
-        return;
-    }
-
-    if (ztd::endswith(set->name, "cfile") || ztd::endswith(set->name, "curl"))
-    {
-        job = plugin::job::copy;
-    }
-
-    if (ztd::endswith(set->name, "file"))
-    {
-        std::optional<std::string> default_path = std::nullopt;
-
-        // get file path
-        xset_t save = xset_get(xset::name::plug_ifile);
-        if (save->s)
-        { //&& std::filesystem::is_directory(save->s)
-            default_path = xset_get_s(save);
-        }
-        else
-        {
-            default_path = xset_get_s(xset::name::go_set_default);
-            if (!default_path)
-            {
-                default_path = "/";
-            }
-        }
-        const auto file = xset_file_dialog(GTK_WIDGET(main_window),
-                                           GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                           "Choose Plugin File",
-                                           default_path.value(),
-                                           std::nullopt);
-        if (!file)
-        {
-            return;
-        }
-        path = file.value();
-        save->s = std::filesystem::path(path).filename();
-    }
-
-    std::filesystem::path plug_dir;
-    switch (job)
-    {
-        case plugin::job::install:
-        {
-            // install job
-            char* filename = ztd::strdup(path.filename());
-            char* ext = strstr(filename, ".spacefm-plugin");
-            if (!ext)
-            {
-                ext = strstr(filename, ".tar.gz");
-            }
-            if (ext)
-            {
-                ext[0] = '\0';
-            }
-            char* plug_dir_name = filename;
-            if (ext)
-            {
-                ext[0] = '.';
-            }
-            if (!plug_dir_name)
-            {
-                msg = "This plugin's filename is invalid.  Please rename it using "
-                      "alpha-numeric ASCII characters and try again.";
-                xset_msg_dialog(GTK_WIDGET(main_window),
-                                GtkMessageType::GTK_MESSAGE_ERROR,
-                                "Invalid Plugin Filename",
-                                GtkButtonsType::GTK_BUTTONS_OK,
-                                msg);
-
-                std::free(plug_dir_name);
-                return;
-            }
-
-            plug_dir = std::filesystem::path() / DATADIR / PACKAGE_NAME / "plugins" / plug_dir_name;
-
-            if (std::filesystem::exists(plug_dir))
-            {
-                msg = std::format(
-                    "There is already a plugin installed as '{}'.  Overwrite ?\n\nTip: You can "
-                    "also rename this plugin file to install it under a different name.",
-                    plug_dir_name);
-                const i32 response = xset_msg_dialog(GTK_WIDGET(main_window),
-                                                     GtkMessageType::GTK_MESSAGE_WARNING,
-                                                     "Overwrite Plugin ?",
-                                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                     msg);
-
-                if (response != GtkResponseType::GTK_RESPONSE_YES)
-                {
-                    std::free(plug_dir_name);
-                    return;
-                }
-            }
-            std::free(plug_dir_name);
-            break;
-        }
-        case plugin::job::copy:
-        {
-            // copy job
-            const auto user_tmp = vfs::user_dirs->program_tmp_dir();
-            if (std::filesystem::is_directory(user_tmp))
-            {
-                xset_msg_dialog(GTK_WIDGET(main_window),
-                                GtkMessageType::GTK_MESSAGE_ERROR,
-                                "Error Creating Temp Directory",
-                                GtkButtonsType::GTK_BUTTONS_OK,
-                                "Unable to create temporary directory");
-                return;
-            }
-            while (true)
-            {
-                plug_dir = user_tmp / ztd::randhex();
-                if (!std::filesystem::exists(plug_dir))
-                {
-                    break;
-                }
-            }
-            break;
-        }
-        case plugin::job::remove:
-            break;
-    }
-
-    install_plugin_file(main_window, nullptr, path, plug_dir, job, nullptr);
-}
-
-static GtkWidget*
-create_plugins_menu(MainWindow* main_window)
-{
-    PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    GtkAccelGroup* accel_group = gtk_accel_group_new();
-    GtkWidget* plug_menu = gtk_menu_new();
-    if (!file_browser)
-    {
-        return plug_menu;
-    }
-
-    std::vector<xset_t> plugins;
-
-    xset_t set;
-
-    set = xset_get(xset::name::plug_ifile);
-    xset_set_cb(set, (GFunc)on_plugin_install, main_window);
-    xset_set_ob1(set, "set", set);
-    set = xset_get(xset::name::plug_cfile);
-    xset_set_cb(set, (GFunc)on_plugin_install, main_window);
-    xset_set_ob1(set, "set", set);
-
-    set = xset_get(xset::name::plug_install);
-    xset_add_menuitem(file_browser, plug_menu, accel_group, set);
-    set = xset_get(xset::name::plug_copy);
-    xset_add_menuitem(file_browser, plug_menu, accel_group, set);
-
-    GtkWidget* item = gtk_separator_menu_item_new();
-    gtk_menu_shell_append(GTK_MENU_SHELL(plug_menu), item);
-
-    plugins = xset_get_plugins();
-    for (xset_t plugin : plugins)
-    {
-        assert(plugin != nullptr);
-        xset_add_menuitem(file_browser, plug_menu, accel_group, plugin);
-    }
-    if (!plugins.empty())
-    {
-        xset_clear_plugins(plugins);
-    }
-
-    gtk_widget_show_all(plug_menu);
-    return plug_menu;
 }
 
 static void
@@ -1543,17 +1351,6 @@ rebuild_menu_bookmarks(MainWindow* main_window, PtkFileBrowser* file_browser)
 }
 
 static void
-rebuild_menu_plugins(MainWindow* main_window)
-{
-    main_window->plug_menu = create_plugins_menu(main_window);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->plug_menu_item), main_window->plug_menu);
-    g_signal_connect(main_window->plug_menu,
-                     "key-press-event",
-                     G_CALLBACK(xset_menu_keypress),
-                     nullptr);
-}
-
-static void
 rebuild_menu_tools(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     GtkAccelGroup* accel_group = gtk_accel_group_new();
@@ -1629,9 +1426,6 @@ rebuild_menus(MainWindow* main_window)
     // Bookmarks
     rebuild_menu_bookmarks(main_window, file_browser);
 
-    // Plugins
-    rebuild_menu_plugins(main_window);
-
     // Tools
     rebuild_menu_tools(main_window, file_browser);
 
@@ -1700,10 +1494,6 @@ main_window_init(MainWindow* main_window)
 
     main_window->book_menu_item = gtk_menu_item_new_with_mnemonic("_Bookmarks");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->book_menu_item);
-
-    main_window->plug_menu_item = gtk_menu_item_new_with_mnemonic("_Plugins");
-    gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->plug_menu_item);
-    main_window->plug_menu = nullptr;
 
     main_window->tool_menu_item = gtk_menu_item_new_with_mnemonic("_Tools");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->tool_menu_item);
@@ -1777,10 +1567,6 @@ main_window_init(MainWindow* main_window)
                      G_CALLBACK(on_menu_bar_event),
                      main_window);
     g_signal_connect(G_OBJECT(main_window->book_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
-    g_signal_connect(G_OBJECT(main_window->plug_menu_item),
                      "button-press-event",
                      G_CALLBACK(on_menu_bar_event),
                      main_window);
@@ -3621,10 +3407,6 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         }
         focus_panel(nullptr, main_window, i);
     }
-    else if (ztd::startswith(set->name, "plug_"))
-    {
-        on_plugin_install(nullptr, main_window, set);
-    }
     else if (ztd::startswith(set->name, "task_"))
     {
         if (set->xset_name == xset::name::task_manager)
@@ -4357,33 +4139,8 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     if (set)
     {
         // cmd_dir
-        std::filesystem::path path;
-        std::filesystem::path esc_path;
-
-        if (set->plugin)
-        {
-            path = set->plugin->path / "files";
-            if (!std::filesystem::exists(path))
-            {
-                path = set->plugin->path / set->plugin->name;
-            }
-        }
-        else
-        {
-            path = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-        }
+        const auto path = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
         buf.append(std::format("set fm_cmd_dir {}\n", ztd::shell::quote(path.string())));
-
-        // cmd_data
-        path = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
-        buf.append(std::format("set fm_cmd_data {}\n", ztd::shell::quote(path.string())));
-
-        // plugin_dir
-        if (set->plugin)
-        {
-            buf.append(std::format("set fm_plugin_dir {}\n",
-                                   ztd::shell::quote(set->plugin->path.string())));
-        }
 
         // cmd_name
         if (set->menu_label)

@@ -51,15 +51,12 @@
 #include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-plugins.hxx"
 
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-keyboard.hxx"
 
 #include "autosave.hxx"
 #include "write.hxx"
-
-#define HANDLER_DATA(obj) (static_cast<HandlerData*>(obj))
 
 #define INFO_EXAMPLE                                                                            \
     "# Enter command to show properties or leave blank for auto:\n\n\n# # Example:\n\n# echo "  \
@@ -70,8 +67,6 @@ namespace ptk::handler
 {
     enum class job
     {
-        export_job,
-        import_file,
         restore_all,
         remove,
     };
@@ -1395,143 +1390,6 @@ add_new_handler(i32 mode)
     };
 }
 
-void
-ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set)
-{
-    // Adding new handler as a copy of the imported plugin set
-    xset_t new_handler_xset = add_new_handler(mode);
-    new_handler_xset->b = set->b;
-    new_handler_xset->disable = false; // not default - save in session
-    new_handler_xset->menu_label = set->menu_label;
-    new_handler_xset->icon = set->icon;
-    new_handler_xset->s = set->s; // Mime Type(s) or whitelist
-    new_handler_xset->x = set->x; // Extension(s) or blacklist
-    new_handler_xset->in_terminal = set->in_terminal;
-    new_handler_xset->keep_terminal = set->keep_terminal;
-    new_handler_xset->scroll_lock = set->scroll_lock;
-
-    // build copy scripts command
-    const auto path_src = set->plugin->path / set->plugin->name;
-    const auto path_dest_dir = vfs::user_dirs->program_config_dir() / "scripts";
-    std::filesystem::create_directories(path_dest_dir);
-    std::filesystem::permissions(path_dest_dir, std::filesystem::perms::owner_all);
-    const auto path_dest =
-        vfs::user_dirs->program_config_dir() / "scripts" / new_handler_xset->name;
-    const std::string cp_command =
-        std::format("cp -a {} {}", path_src.string(), path_dest.string());
-
-    // run command
-    std::string* standard_output = nullptr;
-    std::string* standard_error = nullptr;
-    i32 exit_status;
-
-    ztd::logger::info("COMMAND={}", cp_command);
-    Glib::spawn_command_line_sync(cp_command, standard_output, standard_error, &exit_status);
-    std::string out;
-    if (standard_output)
-    {
-        out.append(*standard_output);
-    }
-    if (standard_error)
-    {
-        out.append(*standard_error);
-    }
-    ztd::logger::info("{}", out);
-    if (exit_status && WIFEXITED(exit_status))
-    {
-        const std::string msg =
-            std::format("An error occured copying command files\n\n{}", *standard_error);
-        xset_msg_dialog(nullptr,
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Copy Command Error",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        msg);
-    }
-    const std::string chmod_command = std::format("chmod -R go-rwx {}", path_dest.string());
-    ztd::logger::info("COMMAND={}", chmod_command);
-    Glib::spawn_command_line_sync(chmod_command);
-
-    // add to handler list
-    const auto archive_handlers_s = xset_get_s(handler_conf_xsets.at(mode));
-    if (ztd::compare(archive_handlers_s.value(), "") <= 0)
-    {
-        // No handlers present - adding new handler
-        xset_set(handler_conf_xsets.at(mode), xset::var::s, new_handler_xset->name);
-    }
-    else
-    {
-        // Adding new handler to handlers
-        const std::string new_handlers_list =
-            std::format("{} {}", new_handler_xset->name, archive_handlers_s.value());
-        xset_set(handler_conf_xsets.at(mode), xset::var::s, new_handlers_list);
-    }
-
-    // have handler dialog open?
-    HandlerData* hnd = handler_dlg && GTK_IS_WIDGET(handler_dlg)
-                           ? HANDLER_DATA(g_object_get_data(G_OBJECT(handler_dlg), "hnd"))
-                           : nullptr;
-    if (!(hnd && hnd->dlg == handler_dlg && hnd->mode == mode))
-    {
-        // dialog not shown or invalid
-        const char* mode_name;
-        switch (mode)
-        {
-            case ptk::handler::mode::arc:
-                mode_name = "Archive";
-                break;
-            case ptk::handler::mode::fs:
-                mode_name = "Device";
-                break;
-            case ptk::handler::mode::net:
-                mode_name = "Protocol";
-                break;
-            case ptk::handler::mode::file:
-                mode_name = "File";
-                break;
-        }
-        const std::string msg =
-            std::format("The selected {0} Handler file has been imported to the {0} Handlers list.",
-                        mode_name);
-        xset_msg_dialog(nullptr,
-                        GtkMessageType::GTK_MESSAGE_INFO,
-                        "Handler Imported",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        msg);
-        return;
-    }
-
-    // Have valid handler data and dialog
-
-    // Obtaining appending iterator for treeview model
-    GtkTreeIter iter;
-    gtk_list_store_prepend(GTK_LIST_STORE(hnd->list), &iter);
-
-    // Adding handler to model
-    const char* disabled = hnd->mode == ptk::handler::mode::file ? "(optional)" : "(disabled)";
-    const std::string dis_name = std::format("{} {}",
-                                             new_handler_xset->menu_label.value(),
-                                             new_handler_xset->b == xset::b::xtrue ? "" : disabled);
-    gtk_list_store_set(GTK_LIST_STORE(hnd->list),
-                       &iter,
-                       ptk::handler::column::xset_name,
-                       new_handler_xset->name.c_str(),
-                       ptk::handler::column::handler_name,
-                       dis_name.data(),
-                       -1);
-
-    // Activating the new handler - the normal loading code
-    // automatically kicks in
-    GtkTreePath* new_handler_path = gtk_tree_model_get_path(GTK_TREE_MODEL(hnd->list), &iter);
-    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hnd->view_handlers), new_handler_path, nullptr, false);
-    gtk_tree_path_free(new_handler_path);
-
-    // Making sure the remove and apply buttons are sensitive
-    gtk_widget_set_sensitive(hnd->btn_remove, true);
-    gtk_widget_set_sensitive(hnd->btn_apply, false);
-
-    hnd->changed = hnd->compress_changed = hnd->extract_changed = hnd->list_changed = false;
-}
-
 static void
 config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const Handler* handler,
                              HandlerData* hnd)
@@ -2787,7 +2645,6 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
         ptk::handler::job(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
     // Determine handler selected
-    xset_t set_sel = nullptr;
     char* xset_name;
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(hnd->view_handlers));
     GtkTreeIter it;
@@ -2795,96 +2652,20 @@ on_option_cb(GtkMenuItem* item, HandlerData* hnd)
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
         gtk_tree_model_get(model, &it, ptk::handler::column::xset_name, &xset_name, -1);
-        set_sel = xset_is(xset_name);
         std::free(xset_name);
     }
 
     // determine job
     std::optional<std::filesystem::path> file;
-    xset_t save;
     switch (job)
     {
-        case ptk::handler::job::import_file:
-        {
-            std::optional<std::string> default_path = std::nullopt;
-            // get file path
-            save = xset_get(xset::name::plug_ifile);
-            if (save->s)
-            { //&& std::filesystem::is_directory(save->s)
-                default_path = save->s;
-            }
-            else
-            {
-                default_path = xset_get_s(xset::name::go_set_default);
-                if (!default_path)
-                {
-                    default_path = "/";
-                }
-            }
-            file = xset_file_dialog(GTK_WIDGET(hnd->dlg),
-                                    GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                    "Choose Handler Plugin File",
-                                    default_path.value(),
-                                    std::nullopt);
-            if (!file)
-            {
-                return;
-            }
-            save->s = file.value().parent_path();
-            break;
-        }
         case ptk::handler::job::restore_all:
             restore_defaults(hnd, true);
-            return;
+            break;
         case ptk::handler::job::remove:
             on_configure_button_press(GTK_BUTTON(hnd->btn_remove), hnd);
-            return;
-        case ptk::handler::job::export_job:
-            // export
-            if (!set_sel)
-            {
-                return; // nothing selected - failsafe
-            }
-
-            if (ztd::startswith(set_sel->name, handler_def_prefixs.at(hnd->mode)) &&
-                set_sel->disable)
-            {
-                // is an unsaved default handler, click Defaults then Apply to save
-                restore_defaults(hnd, false);
-                on_configure_button_press(GTK_BUTTON(hnd->btn_apply), hnd);
-                if (set_sel->disable)
-                {
-                    return; // failsafe
-                }
-            }
-            xset_custom_export(hnd->dlg, nullptr, set_sel);
-            return;
-    }
-
-    // Make Plugin Dir
-    const auto user_tmp = vfs::user_dirs->program_tmp_dir();
-    if (!std::filesystem::is_directory(user_tmp))
-    {
-        xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Error Creating Temp Directory",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "Unable to create temporary directory");
-        return;
-    }
-
-    std::filesystem::path plug_dir;
-    while (true)
-    {
-        plug_dir = user_tmp / ztd::randhex();
-        if (!std::filesystem::exists(plug_dir))
-        {
             break;
-        }
     }
-
-    // Install plugin
-    install_plugin_file(nullptr, hnd->dlg, file.value(), plug_dir, plugin::job::copy, nullptr);
 }
 
 static void
@@ -2943,10 +2724,6 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
         gtk_widget_set_sensitive(item, handler_selected);
     }
 
-    item = add_popup_menuitem(popup, accel_group, "_Export", ptk::handler::job::export_job, hnd);
-    gtk_widget_set_sensitive(item, handler_selected);
-
-    add_popup_menuitem(popup, accel_group, "Import _File", ptk::handler::job::import_file, hnd);
     add_popup_menuitem(popup,
                        accel_group,
                        "Restore _Default Handlers",

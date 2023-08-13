@@ -39,7 +39,6 @@
 #include "xset/xset-design.hxx"
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-plugins.hxx"
 #include "xset/xset-static-strings.hxx"
 
 #include "item-prop.hxx"
@@ -84,16 +83,15 @@ xset_design_job_set_icon(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
-    xset_t mset = xset_get_plugin_mirror(set);
-    const std::string old_icon = mset->icon.value_or("");
+    const std::string old_icon = set->icon.value_or("");
     // Note: xset_text_dialog uses the title passed to know this is an
     // icon chooser, so it adds a Choose button.  If you change the title,
     // change xset_text_dialog.
     const auto [response, answer] =
-        xset_text_dialog(parent, "Set Icon", icon_desc, "", mset->icon.value_or(""), "", false);
+        xset_text_dialog(parent, "Set Icon", icon_desc, "", set->icon.value_or(""), "", false);
 
-    mset->icon = answer;
-    if (set->lock && !ztd::same(old_icon, mset->icon.value()))
+    set->icon = answer;
+    if (set->lock && !ztd::same(old_icon, set->icon.value()))
     {
         // built-in icon has been changed from default, save it
         set->keep_terminal = true;
@@ -109,7 +107,7 @@ xset_design_job_set_edit(xset_t set)
     if (cmd_type == xset::cmd::script)
     {
         // script
-        char* cscript = xset_custom_get_script(set, !set->plugin);
+        char* cscript = xset_custom_get_script(set, true);
         if (!cscript)
         {
             return;
@@ -128,7 +126,7 @@ xset_design_job_set_edit_root(xset_t set)
     if (cmd_type == xset::cmd::script)
     {
         // script
-        char* cscript = xset_custom_get_script(set, !set->plugin);
+        char* cscript = xset_custom_get_script(set, true);
         if (!cscript)
         {
             return;
@@ -243,11 +241,6 @@ xset_design_job_set_custom(xset_t set)
 static void
 xset_design_job_set_user(xset_t set)
 {
-    if (set->plugin)
-    {
-        return;
-    }
-
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     const auto [response, answer] =
@@ -436,67 +429,6 @@ xset_design_job_set_add_tool(xset_t set, xset::tool tool_type)
 }
 
 static void
-xset_design_job_set_import_file(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    std::optional<std::string> default_path = std::nullopt;
-
-    xset_t save = xset_get(xset::name::plug_ifile);
-    if (save->s) //&& std::filesystem::is_directory(save->s)
-    {
-        default_path = save->s;
-    }
-    else
-    {
-        default_path = xset_get_s(xset::name::go_set_default);
-        if (!default_path)
-        {
-            default_path = "/";
-        }
-    }
-    const auto file = xset_file_dialog(GTK_WIDGET(parent),
-                                       GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                       "Choose Plugin File",
-                                       default_path.value(),
-                                       std::nullopt);
-    if (!file)
-    {
-        return;
-    }
-
-    save->s = file.value().parent_path();
-
-    // Make Plugin Dir
-    const auto user_tmp = vfs::user_dirs->program_tmp_dir();
-    if (!std::filesystem::is_directory(user_tmp))
-    {
-        xset_msg_dialog(GTK_WIDGET(parent),
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Error Creating Temp Directory",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "Unable to create temporary directory");
-        return;
-    }
-
-    std::filesystem::path plug_dir;
-    while (std::filesystem::exists(plug_dir))
-    {
-        plug_dir = user_tmp / ztd::randhex();
-        if (!std::filesystem::exists(plug_dir))
-        {
-            break;
-        }
-    }
-    install_plugin_file(set->browser ? set->browser->main_window() : nullptr,
-                        nullptr,
-                        file.value(),
-                        plug_dir.string(),
-                        plugin::job::copy,
-                        set);
-}
-
-static void
 xset_design_job_set_cut(xset_t set)
 {
     xset_set_clipboard = set;
@@ -543,70 +475,17 @@ xset_design_job_set_paste(xset_t set)
     }
     else
     {
-        xset_t newset = xset_custom_copy(xset_set_clipboard, false, false);
+        xset_t newset = xset_custom_copy(xset_set_clipboard, false);
         xset_custom_insert_after(set, newset);
     }
 
     return update_toolbars;
 }
 
-static void
-xset_remove_plugin(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set)
-{
-    if (!file_browser || !set || !set->plugin->is_top || set->plugin->path.empty())
-    {
-        return;
-    }
-
-    if (app_settings.confirm())
-    {
-        const std::string label = clean_label(set->menu_label.value(), false, false);
-        const std::string msg =
-            std::format("Uninstall the '{}' plugin?\n\n( {} )", label, set->plugin->path.string());
-
-        const i32 response = xset_msg_dialog(parent,
-                                             GtkMessageType::GTK_MESSAGE_WARNING,
-                                             "Uninstall Plugin",
-                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                             msg);
-
-        if (response != GtkResponseType::GTK_RESPONSE_YES)
-        {
-            return;
-        }
-    }
-    PtkFileTask* ptask = ptk_file_exec_new("Uninstall Plugin", parent, file_browser->task_view());
-
-    const std::string plug_dir_q = ztd::shell::quote(set->plugin->path.string());
-
-    ptask->task->exec_command = std::format("rm -rf {}", plug_dir_q);
-    ptask->task->exec_sync = true;
-    ptask->task->exec_popup = false;
-    ptask->task->exec_show_output = false;
-    ptask->task->exec_show_error = true;
-    ptask->task->exec_export = false;
-    ptask->task->exec_as_user = "root";
-
-    const auto plugin_data = new PluginData;
-    plugin_data->plug_dir = set->plugin->path;
-    plugin_data->set = set;
-    plugin_data->job = plugin::job::remove;
-    ptask->complete_notify = (GFunc)on_install_plugin_cb;
-    ptask->user_data = plugin_data;
-
-    ptk_file_task_run(ptask);
-}
-
 static bool
 xset_design_job_set_remove(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    if (set->plugin)
-    {
-        xset_remove_plugin(parent, set->browser, set);
-        return false;
-    }
 
     GtkButtonsType buttons;
     GtkWidget* dlgparent = nullptr;
@@ -701,17 +580,6 @@ xset_design_job_set_remove(xset_t set)
     xset_custom_delete(set, false);
 
     return update_toolbars;
-}
-
-static void
-xset_design_job_set_export(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    if ((!set->lock || set->xset_name == xset::name::main_book) && set->tool <= xset::tool::custom)
-    {
-        xset_custom_export(parent, set->browser, set);
-    }
 }
 
 static void
@@ -814,49 +682,7 @@ xset_design_job_set_browse_files(xset_t set)
         return;
     }
 
-    std::filesystem::path folder;
-    if (set->plugin)
-    {
-        folder = std::filesystem::path() / set->plugin->path / "files";
-        if (!std::filesystem::exists(folder))
-        {
-            folder = std::filesystem::path() / set->plugin->path / set->plugin->name;
-        }
-    }
-    else
-    {
-        folder = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-    }
-    if (!std::filesystem::exists(folder) && !set->plugin)
-    {
-        std::filesystem::create_directories(folder);
-        std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
-    }
-
-    if (set->browser)
-    {
-        set->browser->run_event<spacefm::signal::open_item>(folder, ptk::open_action::dir);
-    }
-}
-
-static void
-xset_design_job_set_browse_data(xset_t set)
-{
-    if (set->tool > xset::tool::custom)
-    {
-        return;
-    }
-
-    std::filesystem::path folder;
-    if (set->plugin)
-    {
-        xset_t mset = xset_get_plugin_mirror(set);
-        folder = vfs::user_dirs->program_config_dir() / "plugin-data" / mset->name;
-    }
-    else
-    {
-        folder = vfs::user_dirs->program_config_dir() / "plugin-data" / set->name;
-    }
+    const auto folder = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
     if (!std::filesystem::exists(folder))
     {
         std::filesystem::create_directories(folder);
@@ -870,114 +696,94 @@ xset_design_job_set_browse_data(xset_t set)
 }
 
 static void
-xset_design_job_set_browse_plugins(xset_t set)
-{
-    if (set->plugin && !set->plugin->path.empty())
-    {
-        if (set->browser)
-        {
-            set->browser->run_event<spacefm::signal::open_item>(set->plugin->path,
-                                                                ptk::open_action::dir);
-        }
-    }
-}
-
-static void
 xset_design_job_set_term(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->in_terminal)
+    if (set->in_terminal)
     {
-        mset->in_terminal = false;
+        set->in_terminal = false;
     }
     else
     {
-        mset->in_terminal = true;
-        mset->task = false;
+        set->in_terminal = true;
+        set->task = false;
     }
 }
 
 static void
 xset_design_job_set_keep(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->keep_terminal)
+    if (set->keep_terminal)
     {
-        mset->keep_terminal = false;
+        set->keep_terminal = false;
     }
     else
     {
-        mset->keep_terminal = true;
+        set->keep_terminal = true;
     }
 }
 
 static void
 xset_design_job_set_task(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->task)
+    if (set->task)
     {
-        mset->task = false;
+        set->task = false;
     }
     else
     {
-        mset->task = true;
+        set->task = true;
     }
 }
 
 static void
 xset_design_job_set_pop(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->task_pop)
+    if (set->task_pop)
     {
-        mset->task_pop = false;
+        set->task_pop = false;
     }
     else
     {
-        mset->task_pop = true;
+        set->task_pop = true;
     }
 }
 
 static void
 xset_design_job_set_err(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->task_err)
+    if (set->task_err)
     {
-        mset->task_err = false;
+        set->task_err = false;
     }
     else
     {
-        mset->task_err = true;
+        set->task_err = true;
     }
 }
 
 static void
 xset_design_job_set_out(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->task_out)
+    if (set->task_out)
     {
-        mset->task_out = false;
+        set->task_out = false;
     }
     else
     {
-        mset->task_out = true;
+        set->task_out = true;
     }
 }
 
 static void
 xset_design_job_set_scroll(xset_t set)
 {
-    xset_t mset = xset_get_plugin_mirror(set);
-    if (mset->scroll_lock)
+    if (set->scroll_lock)
     {
-        mset->scroll_lock = false;
+        set->scroll_lock = false;
     }
     else
     {
-        mset->scroll_lock = true;
+        set->scroll_lock = true;
     }
 }
 
@@ -1040,9 +846,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             tool_type = xset::tool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
             xset_design_job_set_add_tool(set, tool_type);
             break;
-        case xset::job::import_file:
-            xset_design_job_set_import_file(set);
-            break;
         case xset::job::cut:
             xset_design_job_set_cut(set);
             break;
@@ -1055,9 +858,6 @@ xset_design_job(GtkWidget* item, xset_t set)
         case xset::job::remove:
         case xset::job::remove_book:
             update_toolbars = xset_design_job_set_remove(set);
-            break;
-        case xset::job::EXPORT:
-            xset_design_job_set_export(set);
             break;
         case xset::job::normal:
             xset_design_job_set_normal(set);
@@ -1085,12 +885,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             break;
         case xset::job::browse_files:
             xset_design_job_set_browse_files(set);
-            break;
-        case xset::job::browse_data:
-            xset_design_job_set_browse_data(set);
-            break;
-        case xset::job::browse_plugin:
-            xset_design_job_set_browse_plugins(set);
             break;
         case xset::job::term:
             xset_design_job_set_term(set);

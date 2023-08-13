@@ -373,13 +373,10 @@ sources = files(
     'src/xset/xset-dialog.cxx',
     'src/xset/xset-event-handler.cxx',
     'src/xset/xset-lookup.cxx',
-    'src/xset/xset-plugins.cxx',
 
     'src/settings/app.cxx',
     'src/settings/config-load.cxx',
     'src/settings/config-save.cxx',
-    'src/settings/plugins-load.cxx',
-    'src/settings/plugins-save.cxx',
 
     'src/settings/upgrade/config-upgrade.cxx',
 

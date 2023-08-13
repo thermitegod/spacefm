@@ -68,7 +68,6 @@
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
-#include "xset/xset-plugins.hxx"
 #include "xset/xset-static-strings.hxx"
 
 #include "settings/app.hxx"
@@ -470,7 +469,6 @@ bool
 xset_opener(PtkFileBrowser* file_browser, const char job)
 { // find an opener for job
     xset_t set;
-    xset_t mset;
     xset_t open_all_set;
     xset_t tset;
     xset_t open_all_tset;
@@ -485,25 +483,7 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
         if (!set2->lock && set2->opener == job && set2->tool == xset::tool::NOT &&
             set2->menu_style != xset::menu::submenu && set2->menu_style != xset::menu::sep)
         {
-            if (set2->desc && ztd::same(set2->desc.value(), "@plugin@mirror@"))
-            {
-                // is a plugin mirror
-                mset = set2;
-                if (!mset->shared_key)
-                {
-                    continue;
-                }
-                set2 = xset_is(mset->shared_key.value());
-            }
-            else if (set2->plugin && set2->shared_key)
-            {
-                // plugin with mirror - ignore to use mirror's context only
-                continue;
-            }
-            else
-            {
-                set = mset = set2;
-            }
+            set = set2;
 
             if (!context)
             {
@@ -534,10 +514,10 @@ xset_opener(PtkFileBrowser* file_browser, const char job)
             }
 
             // test context
-            if (mset->context)
+            if (set->context)
             {
                 const item_prop::context::state context_action =
-                    xset_context_test(context, mset->context.value(), false);
+                    xset_context_test(context, set->context.value(), false);
                 if (context_action == item_prop::context::state::hide ||
                     context_action == item_prop::context::state::disable)
                 {
@@ -682,43 +662,24 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     std::string icon_name;
     std::optional<std::string> context = std::nullopt;
     item_prop::context::state context_action = item_prop::context::state::show;
-    xset_t mset;
     // ztd::logger::info("xset_add_menuitem {}", set->name);
 
-    // plugin?
-    mset = xset_get_plugin_mirror(set);
-    if (set->plugin && set->shared_key)
-    {
-        icon_name = mset->icon.value();
-        context = mset->context;
-    }
     if (icon_name.empty() && set->icon)
     {
         icon_name = set->icon.value();
     }
 
-    std::filesystem::path icon_file;
     if (icon_name.empty())
     {
-        if (set->plugin)
-        {
-            icon_file = set->plugin->path / set->plugin->name / "icon";
-        }
-        else
-        {
-            icon_file = vfs::user_dirs->program_config_dir() / "scripts" / set->name / "icon";
-        }
-
+        const auto icon_file =
+            vfs::user_dirs->program_config_dir() / "scripts" / set->name / "icon";
         if (std::filesystem::exists(icon_file))
         {
             icon_name = icon_file;
         }
     }
-    if (!context)
-    {
-        context = set->context;
-    }
 
+    context = set->context;
     // context?
     if (context && set->tool == xset::tool::NOT && xset_context && xset_context->valid &&
         !xset_get_b(xset::name::context_dlg))
@@ -744,7 +705,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                         item =
                             gtk_check_menu_item_new_with_mnemonic(set->menu_label.value().data());
                         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
-                                                       mset->b == xset::b::xtrue);
+                                                       set->b == xset::b::xtrue);
                     }
                     break;
                 case xset::menu::radio:
@@ -761,7 +722,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                     set_radio->ob2_data =
                         (void*)gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
                     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
-                                                   mset->b == xset::b::xtrue);
+                                                   set->b == xset::b::xtrue);
                     break;
                 case xset::menu::submenu:
                     submenu = gtk_menu_new();
@@ -928,7 +889,6 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     GtkWidget* parent;
     GtkWidget* task_view = nullptr;
     std::string value;
-    xset_t mset;
 
     // builtin toolitem?
     if (set->tool > xset::tool::custom)
@@ -936,9 +896,6 @@ xset_custom_activate(GtkWidget* item, xset_t set)
         xset_builtin_tool_activate(set->tool, set, nullptr);
         return;
     }
-
-    // plugin?
-    mset = xset_get_plugin_mirror(set);
 
     std::filesystem::path cwd;
     if (set->browser)
@@ -954,8 +911,8 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     }
 
     // name
-    if (!set->plugin && !(!set->lock && xset::cmd(xset_get_int(set, xset::var::x)) >
-                                            xset::cmd::script /*app or bookmark*/))
+    if (!(!set->lock &&
+          xset::cmd(xset_get_int(set, xset::var::x)) > xset::cmd::script /*app or bookmark*/))
     {
         if (!set->menu_label ||
             (set->menu_label && ztd::same(set->menu_label.value(), "New _Command")))
@@ -980,10 +937,10 @@ xset_custom_activate(GtkWidget* item, xset_t set)
     switch (set->menu_style)
     {
         case xset::menu::check:
-            value = std::format("{:d}", mset->b == xset::b::xtrue ? 1 : 0);
+            value = std::format("{:d}", set->b == xset::b::xtrue ? 1 : 0);
             break;
         case xset::menu::string:
-            value = mset->s.value();
+            value = set->s.value();
             break;
         case xset::menu::normal:
         case xset::menu::radio:
@@ -1113,24 +1070,20 @@ xset_custom_activate(GtkWidget* item, xset_t set)
         ptask->task->exec_as_user = set->y.value();
     }
 
-    if (set->plugin && set->shared_key && mset->icon)
-    {
-        ptask->task->exec_icon = mset->icon.value();
-    }
-    else if (set->icon)
+    if (set->icon)
     {
         ptask->task->exec_icon = set->icon.value();
     }
 
     ptask->task->current_dest = value; // temp storage
-    ptask->task->exec_terminal = mset->in_terminal;
-    ptask->task->exec_keep_terminal = mset->keep_terminal;
-    ptask->task->exec_sync = !app_no_sync && mset->task;
-    ptask->task->exec_popup = mset->task_pop;
-    ptask->task->exec_show_output = mset->task_out;
-    ptask->task->exec_show_error = mset->task_err;
-    ptask->task->exec_scroll_lock = mset->scroll_lock;
-    ptask->task->exec_checksum = !!set->plugin;
+    ptask->task->exec_terminal = set->in_terminal;
+    ptask->task->exec_keep_terminal = set->keep_terminal;
+    ptask->task->exec_sync = !app_no_sync && set->task;
+    ptask->task->exec_popup = set->task_pop;
+    ptask->task->exec_show_output = set->task_out;
+    ptask->task->exec_show_error = set->task_err;
+    ptask->task->exec_scroll_lock = set->scroll_lock;
+    ptask->task->exec_checksum = true;
     ptask->task->exec_export = true;
     // ptask->task->exec_keep_tmp = true;
 
@@ -1412,20 +1365,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
             set2->keymod == keymod && set2 != keyset)
         {
             std::string name;
-            if (set2->desc && ztd::same(set2->desc.value(), "@plugin@mirror@") && set2->shared_key)
-            {
-                // set2 is plugin mirror
-                xset_t rset = xset_get(set2->shared_key.value());
-                if (rset->menu_label)
-                {
-                    name = clean_label(rset->menu_label.value(), false, false);
-                }
-                else
-                {
-                    name = "( no name )";
-                }
-            }
-            else if (set2->menu_label)
+            if (set2->menu_label)
             {
                 name = clean_label(set2->menu_label.value(), false, false);
             }
@@ -1582,11 +1522,6 @@ xset_set_key(GtkWidget* parent, xset_t set)
             newkey = 0; // unset
             newkeymod = 0;
         }
-        // plugin? set shared_key to mirror if not
-        if (set->plugin && !set->shared_key)
-        {
-            xset_get_plugin_mirror(set);
-        }
         // set new key
         if (set->shared_key)
         {
@@ -1615,18 +1550,6 @@ xset_job_is_valid(xset_t set, xset::job job)
         return false;
     }
 
-    if (set->plugin)
-    {
-        if (set->plugin->path.empty())
-        {
-            return false;
-        }
-        if (!set->plugin->is_top)
-        {
-            no_remove = true;
-        }
-    }
-
     // control open_all item
     if (ztd::startswith(set->name, "open_all_type_"))
     {
@@ -1646,17 +1569,13 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::edit:
             return !set->lock && set->menu_style < xset::menu::submenu;
         case xset::job::command:
-            return !set->plugin;
+            return true;
         case xset::job::cut:
-            return (!set->lock && !set->plugin);
+            return !set->lock;
         case xset::job::copy:
             return !set->lock;
         case xset::job::paste:
             if (!xset_set_clipboard)
-            {
-                no_paste = true;
-            }
-            else if (set->plugin)
             {
                 no_paste = true;
             }
@@ -1701,7 +1620,6 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::submenu_book:
         case xset::job::sep:
         case xset::job::add_tool:
-        case xset::job::import_file:
         case xset::job::remove_book:
         case xset::job::normal:
         case xset::job::check:
@@ -1711,10 +1629,7 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::copyname:
         case xset::job::ignore_context:
         case xset::job::scroll:
-        case xset::job::EXPORT:
         case xset::job::browse_files:
-        case xset::job::browse_data:
-        case xset::job::browse_plugin:
         case xset::job::help:
         case xset::job::help_new:
         case xset::job::help_add:
@@ -1870,7 +1785,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
 
     GtkWidget* newitem;
     GtkWidget* submenu;
-    GtkWidget* submenu2;
     bool no_remove = false;
     bool no_paste = false;
     // bool open_all = false;
@@ -1883,26 +1797,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // to signal this is a bookmark, pass book_insert = set
     const bool show_keys = set->tool == xset::tool::NOT;
 
-    if (set->plugin)
-    {
-        if (!set->plugin->path.empty())
-        {
-            if (!set->plugin->is_top)
-            {
-                no_remove = true;
-            }
-        }
-        else
-        {
-            no_remove = true;
-        }
-    }
-
     if (!xset_set_clipboard)
-    {
-        no_paste = true;
-    }
-    else if (insert_set->plugin)
     {
         no_paste = true;
     }
@@ -1931,7 +1826,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
 
     // Cut
     newitem = xset_design_additem(design_menu, "Cu_t", xset::job::cut, set);
-    gtk_widget_set_sensitive(newitem, !set->lock && !set->plugin);
+    gtk_widget_set_sensitive(newitem, !set->lock);
     if (show_keys)
     {
         gtk_widget_add_accelerator(newitem,
@@ -1981,19 +1876,12 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                                    GTK_ACCEL_VISIBLE);
     }
 
-    // Export
-    newitem = xset_design_additem(design_menu, "E_xport", xset::job::EXPORT, set);
-    gtk_widget_set_sensitive(
-        newitem,
-        (!set->lock && set->menu_style < xset::menu::sep && set->tool <= xset::tool::custom) ||
-            set->xset_name == xset::name::main_book);
-
     //// New submenu
     newitem = gtk_menu_item_new_with_mnemonic("_New");
     submenu = gtk_menu_new();
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
     gtk_container_add(GTK_CONTAINER(design_menu), newitem);
-    gtk_widget_set_sensitive(newitem, !set->plugin);
+    gtk_widget_set_sensitive(newitem, true);
     g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(xset::job::help_new));
     g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
@@ -2021,20 +1909,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // New > Separator
     newitem = xset_design_additem(submenu, "S_eparator", xset::job::sep, insert_set);
 
-    // New > Import >
-    newitem = gtk_menu_item_new_with_mnemonic("_Import");
-    submenu2 = gtk_menu_new();
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu2);
-    gtk_container_add(GTK_CONTAINER(submenu), newitem);
-    gtk_widget_set_sensitive(newitem, !insert_set->plugin);
-    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(xset::job::import_file));
-    g_signal_connect(submenu2,
-                     "key_press_event",
-                     G_CALLBACK(xset_design_menu_keypress),
-                     insert_set);
-
-    newitem = xset_design_additem(submenu2, "_File", xset::job::import_file, insert_set);
-
+#if 0
     if (insert_set->tool != xset::tool::NOT)
     {
         // "Add" submenu for builtin tool items
@@ -2058,6 +1933,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
             }
         }
     }
+#endif
 
     // Separator
     gtk_container_add(GTK_CONTAINER(design_menu), gtk_separator_menu_item_new());
@@ -2478,8 +2354,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
     GtkWidget* parent;
     GFunc cb_func = nullptr;
     void* cb_data = nullptr;
-    xset_t mset; // mirror set or set
-    xset_t rset; // real set
 
     if (item)
     {
@@ -2495,56 +2369,36 @@ xset_menu_cb(GtkWidget* item, xset_t set)
 
     parent = GTK_WIDGET(set->browser);
 
-    if (set->plugin)
-    {
-        // set is plugin
-        mset = xset_get_plugin_mirror(set);
-        rset = set;
-    }
-    else if (!set->lock && set->desc && ztd::same(set->desc.value(), "@plugin@mirror@") &&
-             set->shared_key)
-    {
-        // set is plugin mirror
-        mset = set;
-        rset = xset_get(set->shared_key.value());
-        rset->browser = set->browser;
-    }
-    else
-    {
-        mset = set;
-        rset = set;
-    }
-
-    switch (rset->menu_style)
+    switch (set->menu_style)
     {
         case xset::menu::normal:
             if (cb_func)
             {
                 cb_func(item, cb_data);
             }
-            else if (!rset->lock)
+            else if (!set->lock)
             {
-                xset_custom_activate(item, rset);
+                xset_custom_activate(item, set);
             }
             break;
         case xset::menu::sep:
             break;
         case xset::menu::check:
-            if (mset->b == xset::b::xtrue)
+            if (set->b == xset::b::xtrue)
             {
-                mset->b = xset::b::xfalse;
+                set->b = xset::b::xfalse;
             }
             else
             {
-                mset->b = xset::b::xtrue;
+                set->b = xset::b::xtrue;
             }
             if (cb_func)
             {
                 cb_func(item, cb_data);
             }
-            else if (!rset->lock)
+            else if (!set->lock)
             {
-                xset_custom_activate(item, rset);
+                xset_custom_activate(item, set);
             }
             if (set->tool == xset::tool::custom)
             {
@@ -2555,26 +2409,26 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         case xset::menu::confirm:
         {
             std::string title;
-            std::string msg = rset->desc.value();
+            std::string msg = set->desc.value();
             std::string default_str;
-            if (rset->title && rset->lock)
+            if (set->title && set->lock)
             {
-                title = rset->title.value();
+                title = set->title.value();
             }
             else
             {
-                title = clean_label(rset->menu_label.value(), false, false);
+                title = clean_label(set->menu_label.value(), false, false);
             }
-            if (rset->lock)
+            if (set->lock)
             {
-                default_str = rset->z.value();
+                default_str = set->z.value();
             }
             else
             {
                 msg = ztd::replace(msg, "\\n", "\n");
                 msg = ztd::replace(msg, "\\t", "\t");
             }
-            if (rset->menu_style == xset::menu::confirm)
+            if (set->menu_style == xset::menu::confirm)
             {
                 const i32 response = xset_msg_dialog(parent,
                                                      GtkMessageType::GTK_MESSAGE_QUESTION,
@@ -2590,15 +2444,15 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                     }
                     else if (!set->lock)
                     {
-                        xset_custom_activate(item, rset);
+                        xset_custom_activate(item, set);
                     }
                 }
             }
             else
             {
                 const auto [response, answer] =
-                    xset_text_dialog(parent, title, msg, "", mset->s.value(), default_str, false);
-                mset->s = answer;
+                    xset_text_dialog(parent, title, msg, "", set->s.value(), default_str, false);
+                set->s = answer;
                 if (response)
                 {
                     if (cb_func)
@@ -2607,24 +2461,24 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                     }
                     else if (!set->lock)
                     {
-                        xset_custom_activate(item, rset);
+                        xset_custom_activate(item, set);
                     }
                 }
             }
         }
         break;
         case xset::menu::radio:
-            if (mset->b != xset::b::xtrue)
+            if (set->b != xset::b::xtrue)
             {
-                mset->b = xset::b::xtrue;
+                set->b = xset::b::xtrue;
             }
             if (cb_func)
             {
                 cb_func(item, cb_data);
             }
-            else if (!rset->lock)
+            else if (!set->lock)
             {
-                xset_custom_activate(item, rset);
+                xset_custom_activate(item, set);
             }
             break;
         case xset::menu::fontdlg:
@@ -2635,8 +2489,8 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                 const auto file =
                     xset_file_dialog(parent,
                                      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
-                                     rset->title.value(),
-                                     rset->s.value(),
+                                     set->title.value(),
+                                     set->s.value(),
                                      "foobar.xyz");
                 // ztd::logger::info("file={}", file);
             }
@@ -2648,19 +2502,19 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             // change xset_text_dialog.
             const auto [response, answer] =
                 xset_text_dialog(parent,
-                                 rset->title ? rset->title.value() : "Set Icon",
-                                 rset->desc ? rset->desc.value() : icon_desc,
+                                 set->title ? set->title.value() : "Set Icon",
+                                 set->desc ? set->desc.value() : icon_desc,
                                  "",
-                                 rset->icon.value(),
+                                 set->icon.value(),
                                  "",
                                  false);
 
-            rset->icon = answer;
+            set->icon = answer;
             if (response)
             {
-                if (rset->lock)
+                if (set->lock)
                 {
-                    rset->keep_terminal = true; // trigger save of changed icon
+                    set->keep_terminal = true; // trigger save of changed icon
                 }
                 if (cb_func)
                 {
@@ -2685,12 +2539,12 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             }
             else if (!set->lock)
             {
-                xset_custom_activate(item, rset);
+                xset_custom_activate(item, set);
             }
             break;
     }
 
-    if (rset->menu_style != xset::menu::normal)
+    if (set->menu_style != xset::menu::normal)
     {
         autosave_request_add();
     }

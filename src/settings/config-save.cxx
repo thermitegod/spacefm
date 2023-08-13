@@ -61,11 +61,6 @@ xset_pack_set(xset_t set)
         return setvars;
     }
 
-    if (set->plugin)
-    {
-        return setvars;
-    }
-
     if (set->s)
     {
         const auto name = xset::get_name_from_xsetvar(xset::var::s);

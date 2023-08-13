@@ -111,8 +111,3 @@ const std::string XSET_KEY_KEEP_TERMINAL{"keep_terminal"};
 const std::string XSET_KEY_SCROLL_LOCK{"scroll_lock"};
 const std::string XSET_KEY_DISABLE{"disable"};
 const std::string XSET_KEY_OPENER{"opener"};
-
-// TOML Plugins
-const std::string PLUGIN_FILE_FILENAME{"plugin.toml"};
-
-const std::string PLUGIN_FILE_SECTION_PLUGIN{"Plugin"};

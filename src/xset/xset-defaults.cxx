@@ -885,32 +885,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Thumbnails (global)"); // in View|Panel View|Style
     set->menu_style = xset::menu::check;
 
-    // Plugins
-    set = xset_get(xset::name::plug_install);
-    xset_set_var(set, xset::var::menu_label, "_Install");
-    set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "plug_ifile");
-    xset_set_var(set, xset::var::icn, "gtk-add");
-
-    set = xset_get(xset::name::plug_ifile);
-    xset_set_var(set, xset::var::menu_label, "_File");
-    xset_set_var(set, xset::var::icn, "gtk-file");
-
-    set = xset_get(xset::name::plug_copy);
-    xset_set_var(set, xset::var::menu_label, "_Import");
-    set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "plug_cfile separator plug_cverb");
-    xset_set_var(set, xset::var::icn, "gtk-copy");
-
-    set = xset_get(xset::name::plug_cfile);
-    xset_set_var(set, xset::var::menu_label, "_File");
-    xset_set_var(set, xset::var::icn, "gtk-file");
-
-    set = xset_get(xset::name::plug_cverb);
-    xset_set_var(set, xset::var::menu_label, "_Verbose");
-    set->menu_style = xset::menu::check;
-    set->b = xset::b::xtrue;
-
     // Help
     set = xset_get(xset::name::main_about);
     xset_set_var(set, xset::var::menu_label, "_About");

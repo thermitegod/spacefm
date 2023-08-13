@@ -62,7 +62,6 @@ namespace ptk::handler
 } // namespace ptk::handler
 
 void ptk_handler_add_defaults(i32 mode, bool overwrite, bool add_missing);
-void ptk_handler_import(i32 mode, GtkWidget* handler_dlg, xset_t set);
 void ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handler_set);
 bool ptk_handler_values_in_list(const std::string_view list,
                                 const std::span<const std::string> values, std::string& msg);

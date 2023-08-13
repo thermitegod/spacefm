@@ -30,8 +30,7 @@ xset_t xset_custom_new();
 void xset_custom_delete(xset_t set, bool delete_next);
 xset_t xset_custom_remove(xset_t set);
 const std::string xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size);
-void xset_custom_export(GtkWidget* parent, PtkFileBrowser* file_browser, xset_t set);
 char* xset_custom_get_script(xset_t set, bool create);
-xset_t xset_custom_copy(xset_t set, bool copy_next, bool delete_set);
+xset_t xset_custom_copy(xset_t set, bool copy_next);
 
 xset_t xset_find_custom(const std::string_view search);
