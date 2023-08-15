@@ -2210,8 +2210,8 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             // prev
             do
             {
-                if (--panel_x < 1)
-                {
+                if (!is_valid_panel(--panel_x))
+                { // loop to end
                     panel_x = 4;
                 }
                 if (panel_x == file_browser->panel())
@@ -2225,7 +2225,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
             do
             {
                 if (!is_valid_panel(++panel_x))
-                {
+                { // loop to start
                     panel_x = 1;
                 }
                 if (panel_x == file_browser->panel())
@@ -5981,7 +5981,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
     }
 
     // panel
-    if (panel == 0)
+    if (panel == INVALID_PANEL)
     {
         panel = main_window->curpanel;
     }

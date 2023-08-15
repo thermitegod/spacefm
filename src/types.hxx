@@ -43,8 +43,7 @@
 // using usize = size_t;
 // using isize = ssize_t;
 
-// need too use signed type because neg values are treated
-// as control codes and not a tab/panel number
+// using a signed type because negative values are used as control codes
 using panel_t = i64;
 
 inline constexpr panel_t panel_control_code_prev = -1;
@@ -56,17 +55,17 @@ inline constexpr panel_t panel_2 = 2;
 inline constexpr panel_t panel_3 = 3;
 inline constexpr panel_t panel_4 = 4;
 
-inline constexpr panel_t MIN_PANELS    = -3;
-inline constexpr panel_t INVALID_PANEL =  0; // 0 is unused for sanity reasons
-inline constexpr panel_t MAX_PANELS    =  4;
+inline constexpr panel_t MIN_PANELS = panel_1;
+inline constexpr panel_t MAX_PANELS = panel_4;
+
+inline constexpr panel_t INVALID_PANEL = 0; // 0 is unused for sanity reasons
 
 inline constexpr std::array<panel_t, MAX_PANELS> PANELS{panel_1, panel_2, panel_3, panel_4};
 
 bool is_valid_panel(panel_t p);
 bool is_valid_panel_code(panel_t p);
 
-// need too use signed type because neg values are treated
-// as control codes and not a tab number
+// using a signed type because negative values are used as control codes
 using tab_t = i64;
 
 inline constexpr tab_t tab_control_code_prev    = -1;
@@ -87,9 +86,10 @@ inline constexpr tab_t tab_8  = 8;
 inline constexpr tab_t tab_9  = 9;
 inline constexpr tab_t tab_10 = 10;
 
-inline constexpr tab_t MIN_TABS    = -4;
-inline constexpr tab_t INVALID_TAB =  0; // 0 is unused for sanity reasons
-inline constexpr tab_t MAX_TABS    = 10; // only max tabs with keybinding support
+inline constexpr tab_t MIN_TABS = tab_1;
+inline constexpr tab_t MAX_TABS = tab_10; // this is only the max tabs with keybinding support
+
+inline constexpr tab_t INVALID_TAB = 0; // 0 is unused for sanity reasons
 
 inline constexpr std::array<panel_t, MAX_TABS> TABS{tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7, tab_8, tab_9, tab_10};
 
