@@ -76,6 +76,8 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-dir.hxx"
 
+#include "types.hxx"
+
 #include "settings/app.hxx"
 
 #include "signals.hxx"
@@ -6286,11 +6288,10 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
     }
     else if (ztd::startswith(set->name, "panel"))
     {
-        const i32 panel_num = set->name[5];
+        const panel_t panel_num = std::stoi(set->name.substr(5, 1));
+        // ztd::logger::debug("ACTION panel={}", panel_num);
 
-        // ztd::logger::info("ACTION panelN={}  {}", panel_num, set->name[5]);
-
-        if (i > 0 && i < 5)
+        if (is_valid_panel(panel_num))
         {
             xset_t set2;
             const std::string fullxname = std::format("panel{}_", panel_num);

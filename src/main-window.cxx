@@ -7054,7 +7054,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             else if (ztd::startswith(property, "panel"))
             {
-                const i32 j = property[5] - 48;
+                const panel_t j = std::stoi(property.substr(5, 1));
                 return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(j, xset::panel::show))};
             }
             if (!valid)
