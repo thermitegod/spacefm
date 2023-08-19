@@ -51,6 +51,8 @@
 #include "write.hxx"
 #include "utils.hxx"
 
+#include "ptk/ptk-dialog.hxx"
+
 #include "ptk/ptk-app-chooser.hxx"
 
 #include "settings.hxx"
@@ -1058,11 +1060,11 @@ save_command_script(ContextData* ctxt, bool query)
 
     if (query)
     {
-        const i32 response = xset_msg_dialog(ctxt->dlg,
-                                             GtkMessageType::GTK_MESSAGE_QUESTION,
-                                             "Save Modified Script?",
-                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                             "Save your changes to the command script?");
+        const auto response = ptk_show_message(GTK_WINDOW(ctxt->dlg),
+                                               GtkMessageType::GTK_MESSAGE_QUESTION,
+                                               "Save Modified Script?",
+                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                               "Save your changes to the command script?");
 
         if (response == GtkResponseType::GTK_RESPONSE_NO)
         {
@@ -1072,8 +1074,8 @@ save_command_script(ContextData* ctxt, bool query)
 
     if (is_command_script_newer(ctxt))
     {
-        const i32 response = xset_msg_dialog(
-            ctxt->dlg,
+        const auto response = ptk_show_message(
+            GTK_WINDOW(ctxt->dlg),
             GtkMessageType::GTK_MESSAGE_QUESTION,
             "Overwrite Script?",
             GtkButtonsType::GTK_BUTTONS_YES_NO,
@@ -1176,12 +1178,12 @@ on_edit_button_press(GtkWidget* btn, ContextData* ctxt)
         std::free(text);
         if (path.empty() || !mime_type_is_text_file(path, ""))
         {
-            xset_msg_dialog(GTK_WIDGET(ctxt->dlg),
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Error",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            "The command line does not begin with a text file (script) to be "
-                            "opened, or the script was not found in your $PATH.");
+            ptk_show_message(GTK_WINDOW(ctxt->dlg),
+                             GtkMessageType::GTK_MESSAGE_ERROR,
+                             "Error",
+                             GtkButtonsType::GTK_BUTTONS_OK,
+                             "The command line does not begin with a text file (script) to be "
+                             "opened, or the script was not found in your $PATH.");
             return;
         }
     }
@@ -1535,13 +1537,13 @@ replace_item_props(ContextData* ctxt)
             set->line = get_text_view(GTK_TEXT_VIEW(ctxt->cmd_script));
             if (set->line && set->line.value().size() > 2000)
             {
-                xset_msg_dialog(ctxt->dlg,
-                                GtkMessageType::GTK_MESSAGE_WARNING,
-                                "Command Line Too Long",
-                                GtkButtonsType::GTK_BUTTONS_OK,
-                                "Your command line is greater than 2000 characters and may be "
-                                "truncated when saved.  Consider using a command script instead "
-                                "by selecting Script on the Command tab.");
+                ptk_show_message(GTK_WINDOW(ctxt->dlg),
+                                 GtkMessageType::GTK_MESSAGE_WARNING,
+                                 "Command Line Too Long",
+                                 GtkButtonsType::GTK_BUTTONS_OK,
+                                 "Your command line is greater than 2000 characters and may be "
+                                 "truncated when saved.  Consider using a command script instead "
+                                 "by selecting Script on the Command tab.");
             }
         }
         else

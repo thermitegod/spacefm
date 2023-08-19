@@ -25,7 +25,7 @@
 
 #include "xset/xset.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -242,8 +242,9 @@ config_parse_xset(const toml::value& tbl, u64 version)
                 }
                 catch (const std::logic_error& e)
                 {
-                    const std::string msg = std::format("XSet parse error:\n\n{}", e.what());
-                    ptk_show_error(nullptr, "Error", e.what());
+                    ptk_show_error(nullptr,
+                                   "Error",
+                                   std::format("XSet parse error:\n\n{}", e.what()));
                     return;
                 }
 

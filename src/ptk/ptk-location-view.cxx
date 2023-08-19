@@ -50,7 +50,7 @@
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "main-window.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -682,15 +682,15 @@ popup_missing_mount(GtkWidget* view, i32 job)
     {
         cmd = "unmount";
     }
-    const std::string msg =
-        std::format("No handler is configured for this device type, or no {} command is set. "
-                    "Add a handler in Settings|Device Handlers or Protocol Handlers.",
-                    cmd);
-    xset_msg_dialog(view,
-                    GtkMessageType::GTK_MESSAGE_ERROR,
-                    "Handler Not Found",
-                    GtkButtonsType::GTK_BUTTONS_OK,
-                    msg);
+
+    ptk_show_message(
+        GTK_WINDOW(view),
+        GtkMessageType::GTK_MESSAGE_ERROR,
+        "Handler Not Found",
+        GtkButtonsType::GTK_BUTTONS_OK,
+        std::format("No handler is configured for this device type, or no {} command is set. Add a "
+                    "handler in Settings|Device Handlers or Protocol Handlers.",
+                    cmd));
 }
 
 static void

@@ -19,8 +19,14 @@
 
 #include <gtk/gtk.h>
 
-// The string 'message' can contain pango markups.
-// Special markup characters can also be used and will be
-// escaped in this function.
+#include <glibmm.h>
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
+i32 ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
+                     GtkButtonsType buttons, const std::string_view message,
+                     const std::string_view secondary_message = "") noexcept;
+
 void ptk_show_error(GtkWindow* parent, const std::string_view title,
-                    const std::string_view message);
+                    const std::string_view message) noexcept;

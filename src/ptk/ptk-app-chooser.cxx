@@ -38,8 +38,9 @@
 
 #include "vfs/vfs-async-task.hxx"
 
-#include "ptk/ptk-handler.hxx"
+#include "ptk/ptk-dialog.hxx"
 
+#include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-app-chooser.hxx"
 
 enum class app_chooser_column
@@ -537,19 +538,17 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                                                                  true);
     if (!handlers.empty())
     {
-        const std::string msg = std::format(
-            "Note:  MIME type '{}' is currently set to open with the '{}' file handler, rather "
-            "than with your associated MIME application.\n\nYou may also need to disable this "
-            "handler in Open|File Handlers for this type to be opened with your associated "
-            "application by default.",
-            mime_type->type(),
-            handlers.front()->menu_label.value());
-
-        xset_msg_dialog(parent,
-                        GtkMessageType::GTK_MESSAGE_INFO,
-                        "MIME Type Has Handler",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        msg);
+        ptk_show_message(
+            GTK_WINDOW(parent),
+            GtkMessageType::GTK_MESSAGE_INFO,
+            "MIME Type Has Handler",
+            GtkButtonsType::GTK_BUTTONS_OK,
+            std::format("Note:  MIME type '{}' is currently set to open with the '{}' file "
+                        "handler, rather than with your associated MIME application.\n\nYou may "
+                        "also need to disable this handler in Open|File Handlers for this type to "
+                        "be opened with your associated application by default.",
+                        mime_type->type(),
+                        handlers.front()->menu_label.value()));
     }
     else if (!xset_get_b(xset::name::arc_def_open))
     {
@@ -563,20 +562,19 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                                                  true);
         if (!handlers.empty())
         {
-            const std::string msg = std::format(
-                "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
-                "rather than with your associated MIME application.\n\nYou may also need to "
-                "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
-                "global option Open|Archive Defaults|Open With App, for this type to be opened "
-                "with your associated application by default.",
-                mime_type->type(),
-                handlers.front()->menu_label.value());
-
-            xset_msg_dialog(parent,
-                            GtkMessageType::GTK_MESSAGE_INFO,
-                            "MIME Type Has Handler",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            msg);
+            ptk_show_message(
+                GTK_WINDOW(parent),
+                GtkMessageType::GTK_MESSAGE_INFO,
+                "MIME Type Has Handler",
+                GtkButtonsType::GTK_BUTTONS_OK,
+                std::format(
+                    "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
+                    "rather than with your associated MIME application.\n\nYou may also need to "
+                    "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
+                    "global option Open|Archive Defaults|Open With App, for this type to be opened "
+                    "with your associated application by default.",
+                    mime_type->type(),
+                    handlers.front()->menu_label.value()));
         }
     }
 }

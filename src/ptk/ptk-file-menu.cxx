@@ -50,6 +50,8 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-mime-monitor.hxx"
 
+#include "ptk/ptk-dialog.hxx"
+
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-actions-open.hxx"
 #include "ptk/ptk-file-actions-misc.hxx"
@@ -1810,8 +1812,8 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             if (!ztd::same(mime_type->type(), "text/plain") &&
                 ztd::startswith(mime_type->type(), "text/"))
             {
-                xset_msg_dialog(
-                    GTK_WIDGET(data->browser),
+                ptk_show_message(
+                    GTK_WINDOW(data->browser),
                     GtkMessageType::GTK_MESSAGE_INFO,
                     "Remove Text Type Association",
                     GtkButtonsType::GTK_BUTTONS_OK,
@@ -1840,17 +1842,16 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 }
                 const auto& share_desktop = check_share_desktop.value();
 
-                const std::string msg =
+                const auto response = ptk_show_message(
+                    GTK_WINDOW(data->browser),
+                    GtkMessageType::GTK_MESSAGE_QUESTION,
+                    "Copy Desktop File",
+                    GtkButtonsType::GTK_BUTTONS_YES_NO,
                     std::format("The file '{0}' does not exist.\n\nBy copying '{1}' to '{0}' and "
                                 "editing it, you can adjust the behavior and appearance of this "
                                 "application for the current user.\n\nCreate this copy now?",
                                 path.string(),
-                                share_desktop.string());
-                const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
-                                                     GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                     "Copy Desktop File",
-                                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                     msg);
+                                share_desktop.string()));
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
@@ -1974,11 +1975,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     mime_type->type());
                 }
 
-                const i32 response = xset_msg_dialog(GTK_WIDGET(data->browser),
-                                                     GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                     "Create New XML",
-                                                     GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                     msg);
+                const auto response = ptk_show_message(GTK_WINDOW(data->browser),
+                                                       GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                       "Create New XML",
+                                                       GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                       msg);
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {

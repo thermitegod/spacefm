@@ -51,7 +51,7 @@
 #include "window-reference.hxx"
 #include "main-window.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
 
@@ -485,8 +485,8 @@ static void
 main_design_mode(GtkMenuItem* menuitem, MainWindow* main_window)
 {
     (void)menuitem;
-    xset_msg_dialog(
-        GTK_WIDGET(main_window),
+    ptk_show_message(
+        GTK_WINDOW(main_window),
         GtkMessageType::GTK_MESSAGE_INFO,
         "Design Mode Help",
         GtkButtonsType::GTK_BUTTONS_OK,
@@ -1704,14 +1704,6 @@ main_window_close(MainWindow* main_window)
     gtk_widget_destroy(GTK_WIDGET(main_window));
 }
 
-static void
-on_abort_tasks_response(GtkDialog* dlg, i32 response, GtkWidget* main_window)
-{
-    (void)dlg;
-    (void)response;
-    main_window_close(MAIN_WINDOW_REINTERPRET(main_window));
-}
-
 void
 main_window_store_positions(MainWindow* main_window)
 {
@@ -1817,26 +1809,20 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
     // tasks running?
     if (main_tasks_running(main_window))
     {
-        GtkWidget* dlg = gtk_message_dialog_new(GTK_WINDOW(widget),
-                                                GtkDialogFlags::GTK_DIALOG_MODAL,
-                                                GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                "Stop all tasks running in this window?");
-        gtk_dialog_set_default_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_NO);
-
-        const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+        const auto response = ptk_show_message(GTK_WINDOW(widget),
+                                               GtkMessageType::GTK_MESSAGE_QUESTION,
+                                               "MainWindow Delete Event",
+                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                               "Stop all tasks running in this window?");
 
         if (response == GtkResponseType::GTK_RESPONSE_YES)
         {
-            gtk_widget_destroy(dlg);
-            dlg = gtk_message_dialog_new(GTK_WINDOW(widget),
-                                         GtkDialogFlags::GTK_DIALOG_MODAL,
-                                         GtkMessageType::GTK_MESSAGE_INFO,
-                                         GtkButtonsType::GTK_BUTTONS_CLOSE,
-                                         "Aborting tasks...");
-            g_signal_connect(dlg, "response", G_CALLBACK(on_abort_tasks_response), widget);
-            g_signal_connect(dlg, "destroy", G_CALLBACK(gtk_widget_destroy), dlg);
-            gtk_widget_show_all(dlg);
+            ptk_show_message(GTK_WINDOW(widget),
+                             GtkMessageType::GTK_MESSAGE_INFO,
+                             "MainWindow Delete Event",
+                             GtkButtonsType::GTK_BUTTONS_CLOSE,
+                             "Aborting tasks...");
+            main_window_close(main_window);
 
             on_task_stop(nullptr,
                          main_window->task_view,
@@ -1852,7 +1838,6 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
         }
         else
         {
-            gtk_widget_destroy(dlg);
             return true;
         }
     }
@@ -3642,8 +3627,8 @@ void
 on_reorder(GtkWidget* item, GtkWidget* parent)
 {
     (void)item;
-    xset_msg_dialog(
-        parent,
+    ptk_show_message(
+        GTK_WINDOW(parent),
         GtkMessageType::GTK_MESSAGE_INFO,
         "Reorder Columns Help",
         GtkButtonsType::GTK_BUTTONS_OK,

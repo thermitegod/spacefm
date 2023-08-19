@@ -40,7 +40,7 @@
 
 #include "xset/xset.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 

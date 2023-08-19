@@ -38,6 +38,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "ptk/ptk-dialog.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
@@ -1379,16 +1381,14 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             su = get_valid_su();
             if (su.empty())
             {
-                const std::string msg =
-                    "Configure a valid Terminal SU command in View|Preferences|Advanced";
-                ztd::logger::warn(msg);
-                // do not use xset_msg_dialog if non-main thread
+                // do not use ptk_show_message() if non-main thread
                 // this->task_error(0, str);
-                xset_msg_dialog(parent,
-                                GtkMessageType::GTK_MESSAGE_ERROR,
-                                "Terminal SU Not Available",
-                                GtkButtonsType::GTK_BUTTONS_OK,
-                                msg);
+                ptk_show_message(
+                    GTK_WINDOW(parent),
+                    GtkMessageType::GTK_MESSAGE_ERROR,
+                    "Terminal SU Not Available",
+                    GtkButtonsType::GTK_BUTTONS_OK,
+                    "Configure a valid Terminal SU command in View|Preferences|Advanced");
                 call_state_callback(this, vfs::file_task_state::finish);
                 // ztd::logger::info("vfs_file_task_exec DONE ERROR");
                 return;
@@ -1400,15 +1400,13 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     const auto tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(tmp))
     {
-        const std::string msg = "Cannot create temporary directory";
-        ztd::logger::warn(msg);
-        // do not use xset_msg_dialog if non-main thread
+        // do not use ptk_show_message() if non-main thread
         // this->task_error(0, str);
-        xset_msg_dialog(parent,
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Error",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        msg);
+        ptk_show_message(GTK_WINDOW(parent),
+                         GtkMessageType::GTK_MESSAGE_ERROR,
+                         "Error",
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         "Cannot create temporary directory");
         call_state_callback(this, vfs::file_task_state::finish);
         // ztd::logger::info("vfs_file_task_exec DONE ERROR");
         return;
@@ -1432,16 +1430,13 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
 
         if (terminal.empty())
         {
-            const std::string msg =
-                "Please set a valid terminal program in View|Preferences|Advanced";
-            ztd::logger::warn(msg);
-            // do not use xset_msg_dialog if non-main thread
+            // do not use ptk_show_message() if non-main thread
             // this->task_error(0, str);
-            xset_msg_dialog(parent,
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Terminal Not Available",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            msg);
+            ptk_show_message(GTK_WINDOW(parent),
+                             GtkMessageType::GTK_MESSAGE_ERROR,
+                             "Terminal Not Available",
+                             GtkButtonsType::GTK_BUTTONS_OK,
+                             "Please set a valid terminal program in View|Preferences|Advanced");
 
             call_state_callback(this, vfs::file_task_state::finish);
             // ztd::logger::info("vfs_file_task_exec DONE ERROR");

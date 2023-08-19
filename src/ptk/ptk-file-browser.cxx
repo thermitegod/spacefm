@@ -54,7 +54,7 @@
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 
 #include "ptk/ptk-file-actions-open.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
@@ -3084,8 +3084,9 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     {
         if (!this->inhibit_focus_)
         {
-            const std::string msg = std::format("Directory does not exist\n\n{}", path.string());
-            ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))), "Error", msg);
+            ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
+                           "Error",
+                           std::format("Directory does not exist\n\n{}", path.string()));
         }
         return false;
     }
@@ -3094,10 +3095,10 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     {
         if (!this->inhibit_focus_)
         {
-            const std::string errno_msg = std::strerror(errno);
-            const std::string msg =
-                std::format("Unable to access {}\n\n{}", path.string(), errno_msg);
-            ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))), "Error", msg);
+            ptk_show_error(
+                GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
+                "Error",
+                std::format("Unable to access {}\n\n{}", path.string(), std::strerror(errno)));
         }
         return false;
     }
@@ -3855,8 +3856,8 @@ PtkFileBrowser::hide_selected(const std::span<const vfs::file_info> selected_fil
 {
     (void)cwd;
 
-    const i32 response = xset_msg_dialog(
-        GTK_WIDGET(this),
+    const auto response = ptk_show_message(
+        GTK_WINDOW(this),
         GtkMessageType::GTK_MESSAGE_INFO,
         "Hide File",
         GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
@@ -4111,11 +4112,11 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
 
         if (std::filesystem::equivalent(dest_dir.value(), cwd))
         {
-            xset_msg_dialog(GTK_WIDGET(this),
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Invalid Destination",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            "Destination same as source");
+            ptk_show_message(GTK_WINDOW(this),
+                             GtkMessageType::GTK_MESSAGE_ERROR,
+                             "Invalid Destination",
+                             GtkButtonsType::GTK_BUTTONS_OK,
+                             "Destination same as source");
             return;
         }
 
@@ -4139,11 +4140,11 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
     }
     else
     {
-        xset_msg_dialog(GTK_WIDGET(this),
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Invalid Destination",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "Invalid destination");
+        ptk_show_message(GTK_WINDOW(this),
+                         GtkMessageType::GTK_MESSAGE_ERROR,
+                         "Invalid Destination",
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         "Invalid destination");
     }
 }
 
@@ -4492,8 +4493,7 @@ on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg) noexcep
     "The pattern matches if the input string cannot be matched with any of the patterns in the "  \
     "pattern-list.\n"
 
-static
-const std::tuple<bool, std::string>
+static const std::tuple<bool, std::string>
 select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern) noexcept
 {
     GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(parent),

@@ -44,7 +44,7 @@
 #include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 
 #include "ptk/ptk-file-task.hxx"
@@ -2988,11 +2988,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 // create parent directory
                 if (xset_get_b(xset::name::move_dlg_confirm_create))
                 {
-                    response = xset_msg_dialog(mset->parent,
-                                               GtkMessageType::GTK_MESSAGE_QUESTION,
-                                               "Create Parent Directory",
-                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                               "The parent directory does not exist. Create it?");
+                    response = ptk_show_message(GTK_WINDOW(mset->parent),
+                                                GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                "Create Parent Directory",
+                                                GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                "The parent directory does not exist. Create it?");
                     if (response != GtkResponseType::GTK_RESPONSE_YES)
                     {
                         continue;
@@ -3010,11 +3010,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
                     if (std::filesystem::is_directory(path))
                     {
-                        const std::string errno_msg = std::strerror(errno);
-                        const std::string msg =
-                            std::format("Error creating parent directory\n\n{}", errno_msg);
-                        ptk_show_error(GTK_WINDOW(mset->dlg), "Mkdir Error", msg);
-
+                        ptk_show_error(GTK_WINDOW(mset->dlg),
+                                       "Mkdir Error",
+                                       std::format("Error creating parent directory\n\n{}",
+                                                   std::strerror(errno)));
                         continue;
                     }
                     else
@@ -3032,12 +3031,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     // just in case
                     continue;
                 }
-                response = xset_msg_dialog(mset->parent,
-                                           GtkMessageType::GTK_MESSAGE_WARNING,
-                                           "Overwrite Existing File",
-                                           GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                           "OVERWRITE WARNING",
-                                           "The file path exists.  Overwrite existing file?");
+                response = ptk_show_message(GTK_WINDOW(mset->parent),
+                                            GtkMessageType::GTK_MESSAGE_WARNING,
+                                            "Overwrite Existing File",
+                                            GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                            "OVERWRITE WARNING",
+                                            "The file path exists.  Overwrite existing file?");
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
@@ -3369,9 +3368,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     }
 
                     // Unknown error has occurred - alert user as usual
-                    const std::string errno_msg = std::strerror(errno);
-                    const std::string msg = std::format("Error renaming file\n\n{}", errno_msg);
-                    ptk_show_error(GTK_WINDOW(mset->dlg), "Rename Error", msg);
+                    ptk_show_error(GTK_WINDOW(mset->dlg),
+                                   "Rename Error",
+                                   std::format("Error renaming file\n\n{}", std::strerror(errno)));
                     continue;
                 }
                 else
@@ -3446,10 +3445,11 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
             parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
         }
 
-        const std::string msg = std::format("{} target{} missing",
-                                            missing_targets,
-                                            missing_targets > 1 ? "s are" : " is");
-        ptk_show_error(parent, "Error", msg);
+        ptk_show_error(parent,
+                       "Error",
+                       std::format("{} target{} missing",
+                                   missing_targets,
+                                   missing_targets > 1 ? "s are" : " is"));
     }
 }
 
@@ -3486,14 +3486,13 @@ ptk_file_misc_rootcmd(PtkFileBrowser* file_browser, const std::span<const vfs::f
     {
         if (app_settings.confirm_delete())
         {
-            const std::string msg = std::format("Delete {} selected item as root ?", item_count);
-
-            const i32 response = xset_msg_dialog(parent,
-                                                 GtkMessageType::GTK_MESSAGE_WARNING,
-                                                 "Confirm Delete As Root",
-                                                 GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                 "DELETE AS ROOT",
-                                                 msg);
+            const auto response =
+                ptk_show_message(GTK_WINDOW(parent),
+                                 GtkMessageType::GTK_MESSAGE_WARNING,
+                                 "Confirm Delete As Root",
+                                 GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                 "DELETE AS ROOT",
+                                 std::format("Delete {} selected item as root ?", item_count));
 
             if (response != GtkResponseType::GTK_RESPONSE_YES)
             {

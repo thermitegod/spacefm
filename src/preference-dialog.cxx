@@ -40,7 +40,7 @@
 #include "xset/xset-lookup.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-location-view.hxx"
 
 #include "preference-dialog.hxx"

@@ -29,7 +29,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
 
@@ -546,10 +546,11 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
 
         if (missing_targets > 0)
         {
-            const std::string msg = std::format("{} target{} missing",
-                                                missing_targets,
-                                                missing_targets > 1 ? "s are" : " is");
-            ptk_show_error(parent_win ? GTK_WINDOW(parent_win) : nullptr, "Error", msg);
+            ptk_show_error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                           "Error",
+                           std::format("{} target{} missing",
+                                       missing_targets,
+                                       missing_targets > 1 ? "s are" : " is"));
         }
     }
     gtk_selection_data_free(sel_data);

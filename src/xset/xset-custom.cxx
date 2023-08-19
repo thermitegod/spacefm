@@ -37,6 +37,8 @@
 #include "settings/config-save.hxx"
 #include "settings/disk-format.hxx"
 
+#include "ptk/ptk-dialog.hxx"
+
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task.hxx"
 
@@ -349,13 +351,10 @@ xset_custom_copy_files(xset_t src, xset_t dest)
     ztd::logger::info("{}", out);
     if (exit_status && WIFEXITED(exit_status))
     {
-        const std::string msg =
-            std::format("An error occured copying command files\n\n{}", *standard_error);
-        xset_msg_dialog(nullptr,
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Copy Command Error",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        msg);
+        ptk_show_error(
+            nullptr,
+            "Copy Command Error",
+            std::format("An error occured copying command files\n\n{}", *standard_error));
     }
     command = std::format("chmod -R go-rwx {}", path_dest.string());
     ztd::logger::info("COMMAND={}", command);

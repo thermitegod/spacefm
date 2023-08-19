@@ -35,7 +35,7 @@
 
 #include "settings.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -163,45 +163,6 @@ on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
         return true;
     }
     return false;
-}
-
-i32
-xset_msg_dialog(GtkWidget* parent, GtkMessageType action, const std::string_view title,
-                GtkButtonsType buttons, const std::string_view msg1, const std::string_view msg2)
-{
-    GtkWidget* dlgparent = nullptr;
-
-    if (parent)
-    {
-        dlgparent = gtk_widget_get_toplevel(parent);
-    }
-
-    GtkWidget* dlg =
-        gtk_message_dialog_new(GTK_WINDOW(dlgparent),
-                               GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
-                                              GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
-                               action,
-                               buttons,
-                               msg1.data(),
-                               nullptr);
-
-    if (action == GtkMessageType::GTK_MESSAGE_INFO)
-    {
-        xset_set_window_icon(GTK_WINDOW(dlg));
-    }
-    gtk_window_set_role(GTK_WINDOW(dlg), "msg_dialog");
-
-    if (!msg2.empty())
-    {
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), msg2.data(), nullptr);
-    }
-
-    gtk_window_set_title(GTK_WINDOW(dlg), title.data());
-
-    gtk_widget_show_all(dlg);
-    const i32 res = gtk_dialog_run(GTK_DIALOG(dlg));
-    gtk_widget_destroy(dlg);
-    return res;
 }
 
 const std::tuple<bool, std::string>

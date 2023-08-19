@@ -53,7 +53,7 @@
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-location-view.hxx"
 
 #include "settings/app.hxx"
@@ -111,9 +111,9 @@ open_file(const std::filesystem::path& path)
     }
     catch (const VFSAppDesktopException& e)
     {
-        const std::string msg =
-            std::format("Unable to open file:\n{}\n{}", path.string(), e.what());
-        ptk_show_error(nullptr, "Error", msg);
+        ptk_show_error(nullptr,
+                       "Error",
+                       std::format("Unable to open file:\n{}\n{}", path.string(), e.what()));
     }
 
     vfs_file_info_unref(file);
@@ -296,8 +296,9 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
         }
         else
         {
-            const auto err_msg = std::format("File does not exist:\n\n{}", real_path.string());
-            ptk_show_error(nullptr, "Error", err_msg);
+            ptk_show_error(nullptr,
+                           "Error",
+                           std::format("File does not exist:\n\n{}", real_path.string()));
         }
     }
 
@@ -390,8 +391,8 @@ main(int argc, char* argv[])
     {
         ptk_show_error(nullptr,
                        "Error",
-                       "Error: Unable to initialize inotify file change monitor.\n\nDo you have "
-                       "an inotify-capable kernel?");
+                       "Unable to initialize inotify file change monitor. Do you have an "
+                       "inotify-capable kernel?");
         vfs_file_monitor_clean();
         std::exit(EXIT_FAILURE);
     }

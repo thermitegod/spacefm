@@ -52,6 +52,8 @@
 #include "xset/xset-custom.hxx"
 #include "xset/xset-dialog.hxx"
 
+#include "ptk/ptk-dialog.hxx"
+
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-keyboard.hxx"
 
@@ -1476,11 +1478,11 @@ config_load_handler_settings(xset_t handler_xset, char* handler_xset_name, const
         }
         if (error)
         {
-            xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                            GtkMessageType::GTK_MESSAGE_ERROR,
-                            "Error Loading Handler",
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            error_message);
+            ptk_show_message(GTK_WINDOW(hnd->dlg),
+                             GtkMessageType::GTK_MESSAGE_ERROR,
+                             "Error Loading Handler",
+                             GtkButtonsType::GTK_BUTTONS_OK,
+                             error_message);
         }
     }
     // Run In Terminal checkboxes
@@ -1889,11 +1891,11 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
             return;
         }
 
-        const i32 response = xset_msg_dialog(hnd->dlg,
-                                             GtkMessageType::GTK_MESSAGE_WARNING,
-                                             "Confirm Remove",
-                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                             "Permanently remove the selected handler?");
+        const auto response = ptk_show_message(GTK_WINDOW(hnd->dlg),
+                                               GtkMessageType::GTK_MESSAGE_WARNING,
+                                               "Confirm Remove",
+                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                               "Permanently remove the selected handler?");
 
         if (response != GtkResponseType::GTK_RESPONSE_YES)
         {
@@ -2022,11 +2024,11 @@ on_configure_button_press(GtkButton* widget, HandlerData* hnd)
 
     if (error)
     {
-        xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Error Saving Handler",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        error_message);
+        ptk_show_message(GTK_WINDOW(hnd->dlg),
+                         GtkMessageType::GTK_MESSAGE_ERROR,
+                         "Error Saving Handler",
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         error_message);
     }
 
     std::free(xset_name);
@@ -2123,11 +2125,11 @@ on_handlers_key_press(GtkWidget* widget, GdkEventKey* evt, HandlerData* hnd)
         return false;
     }
 
-    const i32 response = xset_msg_dialog(hnd->dlg,
-                                         GtkMessageType::GTK_MESSAGE_QUESTION,
-                                         "Apply Changes ?",
-                                         GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                         "Apply changes to the current handler?");
+    const auto response = ptk_show_message(GTK_WINDOW(hnd->dlg),
+                                           GtkMessageType::GTK_MESSAGE_QUESTION,
+                                           "Apply Changes ?",
+                                           GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                           "Apply changes to the current handler?");
 
     if (response == GtkResponseType::GTK_RESPONSE_YES)
     {
@@ -2169,11 +2171,11 @@ on_handlers_button_press(GtkWidget* view, GdkEventButton* event, HandlerData* hn
     if (gtk_widget_get_sensitive(hnd->btn_apply))
     {
         // Query apply changes
-        const i32 response = xset_msg_dialog(hnd->dlg,
-                                             GtkMessageType::GTK_MESSAGE_QUESTION,
-                                             "Apply Changes ?",
-                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                             "Apply changes to the current handler?");
+        const auto response = ptk_show_message(GTK_WINDOW(hnd->dlg),
+                                               GtkMessageType::GTK_MESSAGE_QUESTION,
+                                               "Apply Changes ?",
+                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                               "Apply changes to the current handler?");
 
         if (response == GtkResponseType::GTK_RESPONSE_YES)
         {
@@ -2232,12 +2234,12 @@ restore_defaults(HandlerData* hnd, bool all)
 {
     if (all)
     {
-        const i32 response = xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                                             GtkMessageType::GTK_MESSAGE_WARNING,
-                                             "Restore Default Handlers",
-                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                             "Missing default handlers will be restored.\n\nAlso "
-                                             "OVERWRITE ALL EXISTING default handlers?");
+        const auto response = ptk_show_message(GTK_WINDOW(hnd->dlg),
+                                               GtkMessageType::GTK_MESSAGE_WARNING,
+                                               "Restore Default Handlers",
+                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                               "Missing default handlers will be restored.\n\nAlso "
+                                               "OVERWRITE ALL EXISTING default handlers?");
         if (response != GtkResponseType::GTK_RESPONSE_YES &&
             response != GtkResponseType::GTK_RESPONSE_NO)
         {
@@ -2368,11 +2370,11 @@ validate_archive_handler(HandlerData* hnd)
     {
         /* Handler name not set - warning user and exiting. Note
          * that the created dialog does not have an icon set */
-        xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                        GtkMessageType::GTK_MESSAGE_WARNING,
-                        dialog_titles.at(hnd->mode),
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "Please enter a valid handler name.");
+        ptk_show_message(GTK_WINDOW(hnd->dlg),
+                         GtkMessageType::GTK_MESSAGE_WARNING,
+                         dialog_titles.at(hnd->mode),
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         "Please enter a valid handler name.");
         gtk_widget_grab_focus(hnd->entry_handler_name);
         return false;
     }
@@ -2380,11 +2382,11 @@ validate_archive_handler(HandlerData* hnd)
     // MIME and Pathname cannot both be empty
     if (ztd::compare(handler_mime, "") <= 0 && ztd::compare(handler_extension, "") <= 0)
     {
-        xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                        GtkMessageType::GTK_MESSAGE_WARNING,
-                        dialog_titles.at(hnd->mode),
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "Please enter a valid MIME Type or Pathname pattern.");
+        ptk_show_message(GTK_WINDOW(hnd->dlg),
+                         GtkMessageType::GTK_MESSAGE_WARNING,
+                         dialog_titles.at(hnd->mode),
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         "Please enter a valid MIME Type or Pathname pattern.");
         gtk_widget_grab_focus(hnd->entry_handler_mime);
         return false;
     }
@@ -2410,22 +2412,15 @@ validate_archive_handler(HandlerData* hnd)
         if ((!ztd::contains(handler_compress, "%o") && !ztd::contains(handler_compress, "%O")) ||
             (!ztd::contains(handler_compress, "%n") && !ztd::contains(handler_compress, "%N")))
         {
-            xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                            GtkMessageType::GTK_MESSAGE_WARNING,
-                            dialog_titles.at(hnd->mode),
-                            GtkButtonsType::GTK_BUTTONS_OK,
-                            "The following "
-                            "substitution variables should probably be in the "
-                            "compression command:\n\n"
-                            "One of the following:\n\n"
-                            "%%n: First selected file/directory to"
-                            " archive\n"
-                            "%%N: All selected files/directories to"
-                            " archive\n\n"
-                            "and one of the following:\n\n"
-                            "%%o: Resulting single archive\n"
-                            "%%O: Resulting archive per source "
-                            "file/directory");
+            ptk_show_message(GTK_WINDOW(hnd->dlg),
+                             GtkMessageType::GTK_MESSAGE_WARNING,
+                             dialog_titles.at(hnd->mode),
+                             GtkButtonsType::GTK_BUTTONS_OK,
+                             "The following substitution variables should probably be in the "
+                             "compression command:\n\nOne of the following:\n\n%%n: First selected "
+                             "file/directory to archive\n%%N: All selected files/directories to "
+                             "archive\n\nand one of the following:\n\n%%o: Resulting single "
+                             "archive\n%%O: Resulting archive per source file/directory");
             gtk_widget_grab_focus(hnd->view_handler_compress);
 
             std::free(handler_compress);
@@ -2440,14 +2435,12 @@ validate_archive_handler(HandlerData* hnd)
         /* Not all substitution characters are in place - warning
          * user and exiting. Note that the created dialog does not
          * have an icon set */
-        xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                        GtkMessageType::GTK_MESSAGE_WARNING,
-                        dialog_titles.at(hnd->mode),
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "The following "
-                        "variables should probably be in the extraction "
-                        "command:\n\n%%x: "
-                        "Archive to extract");
+        ptk_show_message(GTK_WINDOW(hnd->dlg),
+                         GtkMessageType::GTK_MESSAGE_WARNING,
+                         dialog_titles.at(hnd->mode),
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         "The following variables should probably be in the extraction "
+                         "command:\n\n%%x: Archive to extract");
         gtk_widget_grab_focus(hnd->view_handler_extract);
 
         std::free(handler_compress);
@@ -2461,14 +2454,12 @@ validate_archive_handler(HandlerData* hnd)
         /* Not all substitution characters are in place  - warning
          * user and exiting. Note that the created dialog does not
          * have an icon set */
-        xset_msg_dialog(GTK_WIDGET(hnd->dlg),
-                        GtkMessageType::GTK_MESSAGE_WARNING,
-                        dialog_titles.at(hnd->mode),
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        "The following "
-                        "variables should probably be in the list "
-                        "command:\n\n%%x: "
-                        "Archive to list");
+        ptk_show_message(GTK_WINDOW(hnd->dlg),
+                         GtkMessageType::GTK_MESSAGE_WARNING,
+                         dialog_titles.at(hnd->mode),
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         "The following variables should probably be in the list command:\n\n%%x: "
+                         "Archive to list");
         gtk_widget_grab_focus(hnd->view_handler_list);
 
         std::free(handler_compress);

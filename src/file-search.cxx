@@ -20,7 +20,7 @@
 
 #include <span>
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 
 void
 find_files(const std::span<const std::filesystem::path> search_dirs)

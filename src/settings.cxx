@@ -86,7 +86,7 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-handler.hxx"
@@ -1231,8 +1231,9 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path, bool force_root,
     }
     catch (const VFSAppDesktopException& e)
     {
-        const auto msg = std::format("Unable to open file:\n{}\n{}", path.string(), e.what());
-        ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr, "Error", msg);
+        ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+                       "Error",
+                       std::format("Unable to open file:\n{}\n{}", path.string(), e.what()));
     }
 }
 
@@ -2430,11 +2431,11 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             }
             if (set->menu_style == xset::menu::confirm)
             {
-                const i32 response = xset_msg_dialog(parent,
-                                                     GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                     title,
-                                                     GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                                     msg);
+                const auto response = ptk_show_message(GTK_WINDOW(parent),
+                                                       GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                       title,
+                                                       GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                                       msg);
 
                 if (response == GtkResponseType::GTK_RESPONSE_OK)
                 {

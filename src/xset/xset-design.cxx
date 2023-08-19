@@ -48,7 +48,7 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
@@ -262,18 +262,17 @@ xset_design_job_set_app(xset_t set)
     if (ztd::startswith(set->name, "open_all_type_"))
     {
         const std::string name = ztd::removeprefix(set->name, "open_all_type_");
-        const std::string msg =
+
+        const auto response = ptk_show_message(
+            GTK_WINDOW(parent),
+            GtkMessageType::GTK_MESSAGE_INFO,
+            "New Context Command",
+            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
             std::format("You are adding a custom command to the Default menu item.  This item will "
                         "automatically have a pre-context - it will only appear when the MIME type "
                         "of the first selected file matches the current type '{}'.\n\nAdd commands "
                         "or menus here which you only want to appear for this one MIME type.",
-                        name.empty() ? "(none)" : name);
-
-        const i32 response = xset_msg_dialog(parent,
-                                             GtkMessageType::GTK_MESSAGE_INFO,
-                                             "New Context Command",
-                                             GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                             msg);
+                        name.empty() ? "(none)" : name));
 
         if (response != GtkResponseType::GTK_RESPONSE_OK)
         {
@@ -311,18 +310,17 @@ xset_design_job_set_command(xset_t set)
     if (ztd::startswith(set->name, "open_all_type_"))
     {
         const std::string name = ztd::removeprefix(set->name, "open_all_type_");
-        const std::string msg =
+
+        const auto response = ptk_show_message(
+            GTK_WINDOW(parent),
+            GtkMessageType::GTK_MESSAGE_INFO,
+            "New Context Command",
+            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
             std::format("You are adding a custom command to the Default menu item.  This item will "
                         "automatically have a pre-context - it will only appear when the MIME type "
                         "of the first selected file matches the current type '{}'.\n\nAdd commands "
                         "or menus here which you only want to appear for this one MIME type.",
-                        name.empty() ? "(none)" : name);
-
-        const i32 response = xset_msg_dialog(parent,
-                                             GtkMessageType::GTK_MESSAGE_INFO,
-                                             "New Context Command",
-                                             GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                             msg);
+                        name.empty() ? "(none)" : name));
 
         if (response != GtkResponseType::GTK_RESPONSE_OK)
         {
@@ -358,18 +356,17 @@ xset_design_job_set_submenu(xset_t set)
     if (ztd::startswith(set->name, "open_all_type_"))
     {
         const std::string name = ztd::removeprefix(set->name, "open_all_type_");
-        const std::string msg =
+
+        const auto response = ptk_show_message(
+            GTK_WINDOW(parent),
+            GtkMessageType::GTK_MESSAGE_INFO,
+            "New Context Submenu",
+            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
             std::format("You are adding a custom submenu to the Default menu item.  This item will "
                         "automatically have a pre-context - it will only appear when the MIME type "
                         "of the first selected file matches the current type '{}'.\n\nAdd commands "
                         "or menus here which you only want to appear for this one MIME type.",
-                        name.empty() ? "(none)" : name);
-
-        const i32 response = xset_msg_dialog(parent,
-                                             GtkMessageType::GTK_MESSAGE_INFO,
-                                             "New Context Submenu",
-                                             GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                             msg);
+                        name.empty() ? "(none)" : name));
 
         if (response != GtkResponseType::GTK_RESPONSE_OK)
         {
@@ -489,7 +486,6 @@ xset_design_job_set_remove(xset_t set)
 
     GtkButtonsType buttons;
     GtkWidget* dlgparent = nullptr;
-    GtkWidget* dlg;
 
     std::string name;
     std::string prog;
@@ -516,16 +512,15 @@ xset_design_job_set_remove(xset_t set)
     std::string msg;
     if (set->child && set->menu_style == xset::menu::submenu)
     {
-        msg = std::format(
-            "Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis action "
-            "will delete all settings and files associated with these items.",
-            name);
+        msg = std::format("Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis "
+                          "action will delete all settings and files associated with these items.",
+                          name);
         buttons = GtkButtonsType::GTK_BUTTONS_YES_NO;
     }
     else
     {
-        msg = std::format("Permanently remove the '{}' item?\n\nThis action will delete "
-                          "all settings and files associated with this item.",
+        msg = std::format("Permanently remove the '{}' item?\n\nThis action will delete all "
+                          "settings and files associated with this item.",
                           name);
         buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;
     }
@@ -538,17 +533,13 @@ xset_design_job_set_remove(xset_t set)
         {
             dlgparent = gtk_widget_get_toplevel(parent);
         }
-        dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
-                                     GtkDialogFlags::GTK_DIALOG_MODAL,
-                                     GtkMessageType::GTK_MESSAGE_WARNING,
-                                     buttons,
-                                     msg.data(),
-                                     nullptr);
-        xset_set_window_icon(GTK_WINDOW(dlg));
-        gtk_window_set_title(GTK_WINDOW(dlg), "Confirm Remove");
-        gtk_widget_show_all(dlg);
-        const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
-        gtk_widget_destroy(dlg);
+
+        const auto response = ptk_show_message(GTK_WINDOW(dlgparent),
+                                               GtkMessageType::GTK_MESSAGE_WARNING,
+                                               "Confirm Remove",
+                                               buttons,
+                                               msg);
+
         if (response != GtkResponseType::GTK_RESPONSE_OK &&
             response != GtkResponseType::GTK_RESPONSE_YES)
         {

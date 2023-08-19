@@ -39,7 +39,7 @@
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
-#include "ptk/ptk-error.hxx"
+#include "ptk/ptk-dialog.hxx"
 
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
@@ -142,11 +142,11 @@ open_files_with_handler(const std::shared_ptr<ParentInfo>& parent,
                                                error_message);
     if (error)
     {
-        xset_msg_dialog(parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
-                        GtkMessageType::GTK_MESSAGE_ERROR,
-                        "Error Loading Handler",
-                        GtkButtonsType::GTK_BUTTONS_OK,
-                        error_message);
+        ptk_show_message(GTK_WINDOW(parent->file_browser),
+                         GtkMessageType::GTK_MESSAGE_ERROR,
+                         "Error Loading Handler",
+                         GtkButtonsType::GTK_BUTTONS_OK,
+                         error_message);
         return;
     }
 
@@ -371,14 +371,14 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
                 if (!std::filesystem::exists(target_path))
                 {
-                    const std::string msg = std::format("This symlink's target is missing or "
-                                                        "you do not have permission "
-                                                        "to access it:\n{}\n\nTarget: {}",
-                                                        file->path().string(),
-                                                        target_path.string());
                     GtkWidget* toplevel =
                         file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
-                    ptk_show_error(GTK_WINDOW(toplevel), "Broken Link", msg.data());
+                    ptk_show_error(GTK_WINDOW(toplevel),
+                                   "Broken Link",
+                                   std::format("This symlink's target is missing or you do not "
+                                               "have permission to access it:\n{}\n\nTarget: {}",
+                                               file->path().string(),
+                                               target_path.string()));
                     continue;
                 }
             }
