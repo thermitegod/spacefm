@@ -270,7 +270,7 @@ on_popup_select_pattern(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
     if (data->browser)
     {
-        data->browser->select_pattern(nullptr);
+        data->browser->select_pattern();
     }
 }
 

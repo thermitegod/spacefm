@@ -6397,7 +6397,7 @@ main_window_socket_command(const std::string_view socket_commands_json)
             }
             else
             {
-                file_browser->select_pattern(value.data());
+                file_browser->select_pattern(value);
             }
         }
         else if (ztd::same(property, "current-dir"))

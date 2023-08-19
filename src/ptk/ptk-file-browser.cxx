@@ -4462,34 +4462,97 @@ PtkFileBrowser::select_last() noexcept
     }
 }
 
-void
-PtkFileBrowser::select_pattern(const char* search_key) noexcept
+static bool
+on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg) noexcept
 {
-    GtkTreeModel* model;
-    GtkTreePath* path;
-    GtkTreeIter it;
-    GtkTreeSelection* selection = nullptr;
-    vfs::file_info file;
-    const char* key;
-
-    if (search_key)
+    (void)widget;
+    if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
     {
-        key = search_key;
+        gtk_dialog_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_OK);
+        return true;
     }
-    else
+    return false;
+}
+
+// stolen from the fnmatch man page
+#define FNMATCH_HELP                                                                              \
+    "'?(pattern-list)'\n"                                                                         \
+    "The pattern matches if zero or one occurrences of any of the patterns in the pattern-list "  \
+    "match the input string.\n\n"                                                                 \
+    "'*(pattern-list)'\n"                                                                         \
+    "The pattern matches if zero or more occurrences of any of the patterns in the pattern-list " \
+    "match the input string.\n\n"                                                                 \
+    "'+(pattern-list)'\n"                                                                         \
+    "The pattern matches if one or more occurrences of any of the patterns in the pattern-list "  \
+    "match the input string.\n\n"                                                                 \
+    "'@(pattern-list)'\n"                                                                         \
+    "The pattern matches if exactly one occurrence of any of the patterns in the pattern-list "   \
+    "match the input string.\n\n"                                                                 \
+    "'!(pattern-list)'\n"                                                                         \
+    "The pattern matches if the input string cannot be matched with any of the patterns in the "  \
+    "pattern-list.\n"
+
+static
+const std::tuple<bool, std::string>
+select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern) noexcept
+{
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
+                                               GtkDialogFlags::GTK_DIALOG_MODAL,
+                                               GtkMessageType::GTK_MESSAGE_QUESTION,
+                                               GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
+                                               "Enter a pattern to select files and directories");
+
+    gtk_window_set_title(GTK_WINDOW(dialog), "Select By Pattern");
+    gtk_window_set_role(GTK_WINDOW(dialog), "pattern_dialog");
+
+    gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 400);
+    gtk_window_set_resizable(GTK_WINDOW(dialog), true);
+
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), FNMATCH_HELP);
+
+    GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    GtkWidget* vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 10);
+    gtk_container_set_border_width(GTK_CONTAINER(vbox), 20);
+    gtk_container_add(GTK_CONTAINER(content_area), vbox);
+
+    GtkEntry* input = GTK_ENTRY(gtk_entry_new());
+    gtk_entry_set_text(input, default_pattern.data());
+    gtk_editable_set_editable(GTK_EDITABLE(input), true);
+    gtk_container_set_border_width(GTK_CONTAINER(input), 10);
+
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(input), true, true, 4);
+
+    g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
+
+    // show
+    gtk_widget_show_all(dialog);
+
+    const i32 response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    std::string pattern;
+    bool ret = false;
+    if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        // get pattern from user  (store in ob1 so it is not saved)
+        pattern = gtk_entry_get_text(GTK_ENTRY(input));
+        ret = true;
+    }
+
+    gtk_widget_destroy(dialog);
+
+    return std::make_tuple(ret, pattern);
+}
+
+void
+PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
+{
+    std::string_view key;
+    if (search_key.empty())
+    {
+        // get pattern from user (store in ob1 so it is not saved)
         xset_t set = xset_get(xset::name::select_patt);
-        const auto [response, answer] = xset_text_dialog(
-            GTK_WIDGET(this),
-            "Select By Pattern",
-            "Enter pattern to select files and directories:\n\nIf your pattern contains any "
-            "uppercase characters, the matching will be case sensitive.\n\nExample:  "
-            "*sp*e?m*\n\nTIP: You can also enter '%% PATTERN' in the path bar.",
-            "",
-            set->ob1,
-            "",
-            false);
+        const auto [response, answer] =
+            select_pattern_dialog(GTK_WIDGET(this->main_window_), set->ob1 ? set->ob1 : "");
 
         set->ob1 = ztd::strdup(answer);
         if (!response || !set->ob1)
@@ -4498,16 +4561,14 @@ PtkFileBrowser::select_pattern(const char* search_key) noexcept
         }
         key = set->ob1;
     }
-
-    // case insensitive search ?
-    bool icase = false;
-    char* lower_key = g_utf8_strdown(key, -1);
-    if (ztd::same(lower_key, key))
+    else
     {
-        // key is all lowercase so do icase search
-        icase = true;
+        key = search_key;
     }
-    std::free(lower_key);
+
+    GtkTreeModel* model;
+    GtkTreeIter it;
+    GtkTreeSelection* selection = nullptr;
 
     // get model, treesel, and stop signals
     switch (this->view_mode_)
@@ -4543,6 +4604,7 @@ PtkFileBrowser::select_pattern(const char* search_key) noexcept
         do
         {
             // get file
+            vfs::file_info file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (!file)
             {
@@ -4551,18 +4613,10 @@ PtkFileBrowser::select_pattern(const char* search_key) noexcept
 
             // test name
             const auto name = file->display_name();
-            bool select = false;
-            if (icase)
-            {
-                select = ztd::fnmatch(key, ztd::lower(name));
-            }
-            else
-            {
-                select = ztd::fnmatch(key, name);
-            }
+            const bool select = ztd::fnmatch(key, name);
 
             // do selection and scroll to first selected
-            path =
+            GtkTreePath* path =
                 gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST_REINTERPRET(this->file_list_)),
                                         &it);
 
@@ -6508,7 +6562,7 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
         }
         else if (set->xset_name == xset::name::select_patt)
         {
-            this->select_pattern(nullptr);
+            this->select_pattern();
         }
     }
     else // all the rest require ptkfilemenu data
