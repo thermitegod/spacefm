@@ -235,11 +235,6 @@ VFSAppDesktop::icon(i32 size) const noexcept
     if (!desktop_icon)
     {
         desktop_icon = vfs_load_icon("application-x-executable", size);
-        // fallback to generic icon
-        if (!desktop_icon)
-        {
-            desktop_icon = vfs_load_icon("gnome-mime-application-x-executable", size);
-        }
     }
     return desktop_icon;
 }

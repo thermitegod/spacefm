@@ -277,36 +277,19 @@ VFSMimeType::icon(bool big) noexcept
     if (!icon)
     {
         // guess icon
-        const auto mime_parts = ztd::partition(this->type_, "/");
-        const std::string& split_mime = mime_parts[0];
-        const std::string& split_type = mime_parts[2];
-
         if (ztd::contains(this->type_, "/"))
         {
             // convert mime-type foo/bar to foo-bar
-            std::string icon_name = ztd::replace(this->type_, "/", "-");
+            const std::string icon_name = ztd::replace(this->type_, "/", "-");
 
             // is there an icon named foo-bar?
             icon = vfs_load_icon(icon_name, icon_size);
+            // fallback try foo-x-generic
             if (!icon)
             {
-                // maybe we can find a legacy icon named gnome-mime-foo-bar
-                icon_name = std::format("gnome-mime-{}-{}", split_mime, split_type);
-                icon = vfs_load_icon(icon_name, icon_size);
-            }
-
-            // try gnome-mime-foo
-            if (!icon)
-            {
-                icon_name = std::format("gnome-mime-{}", split_mime);
-                icon = vfs_load_icon(icon_name, icon_size);
-            }
-
-            // try foo-x-generic
-            if (!icon)
-            {
-                icon_name = std::format("{}-x-generic", split_mime);
-                icon = vfs_load_icon(icon_name, icon_size);
+                const auto mime = ztd::partition(this->type_, "/")[0];
+                const std::string generic_icon_name = std::format("{}-x-generic", mime);
+                icon = vfs_load_icon(generic_icon_name, icon_size);
             }
         }
     }
