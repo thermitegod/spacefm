@@ -121,11 +121,26 @@ VFSTrash::trash(const std::filesystem::path& path) noexcept
         return false;
     }
 
-    if (path.string().ends_with("/Trash") ||
-        path.string().ends_with(std::format("/.Trash-{}", getuid())))
+    if (ztd::contains(path.string(), "Trash"))
     {
-        ztd::logger::warn("Refusing to trash Trash Dir: {}", path.string());
-        return true;
+        if (path.string().ends_with("/Trash") ||
+            path.string().ends_with(std::format("/.Trash-{}", getuid())))
+        {
+            ztd::logger::warn("Refusing to trash the Trash Dir: {}", path.string());
+            return true;
+        }
+        else if (path.string().ends_with("/Trash/files") ||
+                 path.string().ends_with(std::format("/.Trash-{}/files", getuid())))
+        {
+            ztd::logger::warn("Refusing to trash the Trash Files Dir: {}", path.string());
+            return true;
+        }
+        else if (path.string().ends_with("/Trash/info") ||
+                 path.string().ends_with(std::format("/.Trash-{}/info", getuid())))
+        {
+            ztd::logger::warn("Refusing to trash the Trash Info Dir: {}", path.string());
+            return true;
+        }
     }
 
     trash_dir->create_trash_dir();

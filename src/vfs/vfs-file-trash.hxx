@@ -35,7 +35,7 @@
 // One in $XDG_DATA_HOME/VFSTrash or ~/.local/share/VFSTrash
 // if $XDG_DATA_HOME is not set
 //
-// Every mountpoint will get a trash directory at $TOPLEVEL/.VFSTrash-$UID.
+// Every mountpoint will get a trash directory at $TOPLEVEL/.Trash-$UID.
 class VFSTrashDir
 {
   public:
