@@ -22,10 +22,6 @@
 
 #include <memory>
 
-#include <optional>
-
-#include <sstream>
-
 #include <chrono>
 
 #include <ztd/ztd.hxx>
@@ -56,43 +52,34 @@ VFSTrash::instance() noexcept
 
 VFSTrash::VFSTrash() noexcept
 {
-    const dev_t home_device = device(vfs::user_dirs->home_dir()).value();
+    const auto home_id = ztd::statx(vfs::user_dirs->home_dir()).mount_id();
     const auto user_trash = vfs::user_dirs->data_dir() / "Trash";
     std::shared_ptr<VFSTrashDir> home_trash = std::make_shared<VFSTrashDir>(user_trash);
-    this->trash_dirs_[home_device] = home_trash;
+    this->trash_dirs_[home_id] = home_trash;
 }
 
-std::optional<dev_t>
-VFSTrash::device(const std::filesystem::path& path) noexcept
+u64
+VFSTrash::mount_id(const std::filesystem::path& path) noexcept
 {
-    const auto statbuf = ztd::statx(path, ztd::statx::symlink::no_follow);
-    if (statbuf)
-    {
-        return statbuf.dev();
-    }
-    else
-    {
-        return std::nullopt; // stat failed
-    }
+    return ztd::statx(path, ztd::statx::symlink::no_follow).mount_id();
 }
 
 const std::filesystem::path
 VFSTrash::toplevel(const std::filesystem::path& path) noexcept
 {
-    const dev_t dev = device(path).value();
+    const auto id = mount_id(path);
 
     std::filesystem::path mount_path = path;
     std::filesystem::path last_path;
 
-    // ztd::logger::info("dev mount {}", device(mount_path));
-    // ztd::logger::info("dev       {}", dev);
+    // ztd::logger::info("id mount {}", device(mount_path));
+    // ztd::logger::info("id       {}", id);
 
     // walk up the path until it gets to the root of the device
-    while (device(mount_path).value() == dev)
+    while (mount_id(mount_path) == id)
     {
         last_path = mount_path;
-        const std::filesystem::path mount_parent = std::filesystem::path(mount_path).parent_path();
-        mount_path = mount_parent;
+        mount_path = mount_path.parent_path();
     }
 
     // ztd::logger::info("last path   {}", last_path);
@@ -104,14 +91,14 @@ VFSTrash::toplevel(const std::filesystem::path& path) noexcept
 std::shared_ptr<VFSTrashDir>
 VFSTrash::trash_dir(const std::filesystem::path& path) noexcept
 {
-    const dev_t dev = device(path).value();
+    const auto id = mount_id(path);
 
-    if (this->trash_dirs_.contains(dev))
+    if (this->trash_dirs_.contains(id))
     {
-        return this->trash_dirs_[dev];
+        return this->trash_dirs_[id];
     }
 
-    // on another device, cannot use $HOME trashcan
+    // path on another device, cannot use $HOME trashcan
     const std::filesystem::path top_dir = toplevel(path);
     // BUGGED - only the std::format part of the path is used in creating 'trash_path',
     // do not think this is my bug.
@@ -120,7 +107,7 @@ VFSTrash::trash_dir(const std::filesystem::path& path) noexcept
         std::format("{}/.Trash-{}", top_dir.string(), getuid());
 
     std::shared_ptr<VFSTrashDir> trash_dir = std::make_shared<VFSTrashDir>(trash_path);
-    this->trash_dirs_[dev] = trash_dir;
+    this->trash_dirs_[id] = trash_dir;
 
     return trash_dir;
 }

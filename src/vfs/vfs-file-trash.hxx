@@ -99,8 +99,8 @@ class VFSTrash
     static VFSTrash* instance() noexcept;
     static VFSTrash* single_instance;
 
-    // return the device of the file or directory
-    static std::optional<dev_t> device(const std::filesystem::path& path) noexcept;
+    // return the mount point id for the file or directory
+    static u64 mount_id(const std::filesystem::path& path) noexcept;
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
     static const std::filesystem::path toplevel(const std::filesystem::path& path) noexcept;
