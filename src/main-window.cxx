@@ -3167,18 +3167,6 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         }
     }
 
-#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
-    u32 nonlatin_key = 0;
-    // need to transpose nonlatin keyboard layout ?
-    if (!((GDK_KEY_0 <= event->keyval && event->keyval <= GDK_KEY_9) ||
-          (GDK_KEY_A <= event->keyval && event->keyval <= GDK_KEY_Z) ||
-          (GDK_KEY_a <= event->keyval && event->keyval <= GDK_KEY_z)))
-    {
-        nonlatin_key = event->keyval;
-        transpose_nonlatin_keypress(event);
-    }
-#endif
-
     if ((event_handler->win_key->s || event_handler->win_key->ob2_data) &&
         main_window_event(main_window,
                           event_handler->win_key,
@@ -3201,15 +3189,8 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         if (set->shared_key)
         {
             // set has shared key
-#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
-            // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
-            set = xset_get(set->shared_key.value());
-            if ((set->key == event->keyval || (nonlatin_key && set->key == nonlatin_key)) &&
-                set->keymod == keymod)
-#else
             set = xset_get(set->shared_key.value());
             if (set->key == event->keyval && set->keymod == keymod)
-#endif
             {
                 // shared key match
                 if (ztd::startswith(set->name, "panel"))
@@ -3235,26 +3216,11 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                 continue;
             }
         }
-#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
-        // nonlatin key match is for nonlatin keycodes set prior to 1.0.3
-        if (((set->key == event->keyval ||
-            (nonlatin_key && set->key == nonlatin_key)) &&
-            set->keymod == keymod)
-#else
         if (set->key == event->keyval && set->keymod == keymod)
-#endif
         {
             return on_main_window_keypress_found_key(main_window, set);
         }
     }
-
-#if defined(HAVE_NONLATIN_KEYBOARD_SUPPORT)
-    if (nonlatin_key != 0)
-    {
-        // use literal keycode for pass-thru, eg for find-as-you-type search
-        event->keyval = nonlatin_key;
-    }
-#endif
 
     if ((event->state & GdkModifierType::GDK_MOD1_MASK))
     {

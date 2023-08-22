@@ -41,6 +41,7 @@
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
+#include "xset/xset-keyboard.hxx"
 
 #include "item-prop.hxx"
 #include "write.hxx"

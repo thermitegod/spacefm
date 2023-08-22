@@ -50,9 +50,6 @@ void free_settings();
 
 void xset_set_window_icon(GtkWindow* win);
 
-void xset_set_key(GtkWidget* parent, xset_t set);
-const std::string xset_get_keyname(xset_t set, i32 key_val, i32 key_mod);
-
 GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button,
                                  std::time_t time);
 

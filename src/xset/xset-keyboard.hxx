@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,18 +13,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#pragma once
 
-#include <glibmm.h>
+#include <string>
+
+#include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-u32
-ptk_get_keymod(u32 event)
-{
-    return (event & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
-                     GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
-                     GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
-}
+#include "xset/xset.hxx"
+
+const std::string xset_get_keyname(xset_t set, i32 key_val, i32 key_mod);
+
+void xset_set_key(GtkWidget* parent, xset_t set);

@@ -32,6 +32,7 @@
 #include "xset/xset-design.hxx"
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
+#include "xset/xset-keyboard.hxx"
 #include "xset/xset-static-strings.hxx"
 
 #include "item-prop.hxx"
