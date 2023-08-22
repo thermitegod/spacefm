@@ -940,6 +940,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     gtk_widget_show_all(dialog);
 
     gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
 }
 
 void
