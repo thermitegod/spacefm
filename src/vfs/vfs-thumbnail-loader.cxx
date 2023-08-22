@@ -23,14 +23,13 @@
 
 #include <filesystem>
 
-#include <array>
+#include <map>
 
 #include <chrono>
 
 #include <memory>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>

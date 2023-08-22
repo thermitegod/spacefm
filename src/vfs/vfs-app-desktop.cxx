@@ -31,8 +31,9 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <glibmm.h>
-#include <glibmm/keyfile.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

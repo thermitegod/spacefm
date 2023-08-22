@@ -20,8 +20,6 @@
 
 #include <map>
 
-#include <glibmm.h>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 

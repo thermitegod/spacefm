@@ -20,12 +20,13 @@
 
 #include <filesystem>
 
+#include <fcntl.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include <glibmm.h>
-
 #include "vfs/libudevpp/libudevpp.hxx"
+
 #include "vfs/linux/procfs.hxx"
 #include "vfs/linux/sysfs.hxx"
 

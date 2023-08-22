@@ -24,18 +24,10 @@
 
 #include <span>
 
-#include <vector>
-
-#include <map>
-
 #include <algorithm>
 #include <ranges>
 
-#include <sstream>
-
 #include <chrono>
-
-#include <system_error>
 
 #include <glibmm.h>
 

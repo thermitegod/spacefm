@@ -26,7 +26,9 @@
 
 #include <fcntl.h>
 
-#include <glib.h>
+#include <glibmm.h>
+
+#include <malloc.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -98,7 +100,7 @@ MimeCache::load_mime_file()
         return;
     }
 
-    char* buf = (char*)g_malloc(mime_stat.size());
+    char* buf = (char*)malloc(mime_stat.size());
     const auto length = read(fd, buf, mime_stat.size());
     if (length == -1)
     {

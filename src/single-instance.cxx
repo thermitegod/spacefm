@@ -14,19 +14,12 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
 #include <filesystem>
 
-#include <iostream>
 #include <fstream>
-
-#include <cstdlib>
-
-#include <fcntl.h>
-#include <unistd.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

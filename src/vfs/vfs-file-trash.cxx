@@ -28,10 +28,6 @@
 
 #include <chrono>
 
-#include <unistd.h>
-
-#include <glibmm.h>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 

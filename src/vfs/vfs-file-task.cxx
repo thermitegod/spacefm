@@ -28,12 +28,12 @@
 
 #include <fcntl.h>
 #include <utime.h>
-#include <sys/types.h>
+
+#include <malloc.h>
 
 #include <fmt/format.h>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -92,7 +92,7 @@ VFSFileTask::VFSFileTask(vfs::file_task_type type,
         (this->type == vfs::file_task_type::copy || this->type == vfs::file_task_type::DELETE);
 
     // Init GMutex
-    this->mutex = (GMutex*)g_malloc(sizeof(GMutex));
+    this->mutex = (GMutex*)malloc(sizeof(GMutex));
     g_mutex_init(this->mutex);
 
     GtkTextIter iter;

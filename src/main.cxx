@@ -14,22 +14,14 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
 #include <filesystem>
 
-#include <span>
-
-#include <array>
-#include <vector>
+#include <memory>
 
 #include <chrono>
-
-#include <cstdio>
-#include <csignal>
-#include <cstdlib>
 
 #include <CLI/CLI.hpp>
 
@@ -39,7 +31,6 @@
 #include <gtk/gtk.h>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

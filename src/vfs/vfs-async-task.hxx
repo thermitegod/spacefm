@@ -17,20 +17,15 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
-
 #include <thread>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <future>
-#include <chrono>
 
 #include <gtk/gtk.h>
 
-#include <glib.h>
-#include <glib-object.h>
+#include <glibmm.h>
 
 #include <sigc++/sigc++.h>
 

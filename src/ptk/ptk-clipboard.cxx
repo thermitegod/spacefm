@@ -24,7 +24,6 @@
 #include <vector>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

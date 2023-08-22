@@ -23,9 +23,6 @@
 #include <vector>
 #include <map>
 
-#include <iostream>
-#include <fstream>
-
 #include <algorithm>
 #include <ranges>
 
@@ -33,16 +30,13 @@
 
 #include <optional>
 
+#include <fstream>
+
 #include <cassert>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
-#include <fcntl.h>
-
-#if defined(__GLIBC__)
 #include <malloc.h>
-#endif
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -644,9 +638,7 @@ VFSDir::unload_thumbnails(bool is_big) noexcept
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-#if defined(__GLIBC__)
     malloc_trim(0);
-#endif
 }
 
 /* signal handlers */

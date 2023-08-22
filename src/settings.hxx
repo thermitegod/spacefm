@@ -23,12 +23,8 @@
 
 #include <filesystem>
 
-#include <array>
-#include <vector>
+#include <chrono>
 
-#include <memory>
-
-#include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 

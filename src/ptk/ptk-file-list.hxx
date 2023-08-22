@@ -17,18 +17,11 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
-
 #include <sigc++/sigc++.h>
 
 #include <gtk/gtk.h>
-#include <glib.h>
-#include <glib-object.h>
 
-#include <cstdlib>
-
-#include <sys/types.h>
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 

@@ -21,8 +21,8 @@
 
 #include <optional>
 
-#include <ranges>
 #include <algorithm>
+#include <ranges>
 
 #include <libudev.h>
 

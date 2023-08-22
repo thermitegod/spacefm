@@ -24,8 +24,6 @@
 
 #include <deque>
 
-#include <chrono>
-
 #include <memory>
 
 #include "vfs/vfs-dir.hxx"

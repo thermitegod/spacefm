@@ -27,20 +27,18 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <cassert>
 
 #include <malloc.h>
 
-#include <fcntl.h>
-
 #include <fmt/format.h>
 
-#include <glibmm.h>
-#include <glibmm/convert.h>
-
-#include <glib.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+
+#include <glibmm.h>
 
 #include <exo/exo.h>
 
@@ -991,9 +989,7 @@ ptk_file_browser_finalize(GObject* obj)
      * mainly to deal with the possibility that killing the browser results in
      * thousands of large thumbnails being freed, but the memory not actually
      * released by SpaceFM */
-#if defined(__GLIBC__)
     malloc_trim(0);
-#endif
 }
 
 static void
@@ -1334,9 +1330,7 @@ on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
      * mainly to deal with the possibility that changing the directory results in
      * thousands of large thumbnails being freed, but the memory not actually
      * released by SpaceFM */
-#if defined(__GLIBC__)
     malloc_trim(0);
-#endif
 
     file_browser->run_event<spacefm::signal::chdir_after>();
     file_browser->run_event<spacefm::signal::change_content>();
@@ -3486,9 +3480,7 @@ PtkFileBrowser::refresh() noexcept
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-#if defined(__GLIBC__)
     malloc_trim(0);
-#endif
 
     // begin load dir
     this->busy_ = true;

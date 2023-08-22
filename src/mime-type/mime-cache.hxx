@@ -26,8 +26,6 @@
 
 #include <span>
 
-#include <memory>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 

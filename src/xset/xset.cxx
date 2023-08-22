@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <memory>
 #include <string>
 #include <string_view>
 
@@ -23,11 +22,9 @@
 
 #include <optional>
 
-#include <type_traits>
-
 #include <cassert>
 
-#include <glib.h>
+#include <glibmm.h>
 
 #include <magic_enum.hpp>
 

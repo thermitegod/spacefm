@@ -14,13 +14,10 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
 #include <filesystem>
-
-#include <glib.h>
 
 #include <glibmm.h>
 

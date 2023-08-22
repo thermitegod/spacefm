@@ -39,14 +39,7 @@
 #include <array>
 #include <vector>
 
-#include <iostream>
-#include <fstream>
-
-#include <unistd.h>
-#include <fcntl.h>
-
 #include <glibmm.h>
-#include <glibmm/keyfile.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

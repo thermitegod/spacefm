@@ -14,13 +14,12 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
 #include <vector>
 
-#include <glib.h>
+#include <glibmm.h>
 
 #include "vfs/vfs-file-info.hxx"
 

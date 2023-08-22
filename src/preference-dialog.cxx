@@ -20,8 +20,6 @@
 
 #include <array>
 
-#include <memory>
-
 #include <gtk/gtk.h>
 
 #include <glibmm.h>

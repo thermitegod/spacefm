@@ -22,7 +22,6 @@
 // gnome-menus, which is licensed under GNU Lesser General Public License.
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
@@ -31,9 +30,6 @@
 #include <map>
 
 #include <memory>
-
-#include <algorithm>
-#include <ranges>
 
 #include <sys/inotify.h>
 

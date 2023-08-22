@@ -23,8 +23,6 @@
 #include <array>
 #include <vector>
 
-#include <sstream>
-
 #include <chrono>
 
 #include <optional>
@@ -36,7 +34,6 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -620,9 +617,7 @@ main_window_reload_thumbnails_all_windows()
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-#if defined(__GLIBC__)
     malloc_trim(0);
-#endif
 }
 
 void

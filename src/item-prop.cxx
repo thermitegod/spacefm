@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <optional>
 #include <string>
 #include <string_view>
 
@@ -22,12 +21,8 @@
 #include <filesystem>
 
 #include <array>
-#include <vector>
 
-#include <iostream>
 #include <fstream>
-
-#include <glibmm.h>
 
 #include <gtk/gtk.h>
 

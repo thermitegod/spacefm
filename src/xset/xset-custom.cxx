@@ -18,8 +18,6 @@
 
 #include <format>
 
-#include <optional>
-
 #include <cassert>
 
 #include <gtk/gtk.h>

@@ -34,18 +34,11 @@
 #include <ranges>
 
 #include <map>
-#include <unordered_map>
-
-#include <utility>
 
 #include <memory>
 
-#include <iostream>
 #include <fstream>
 
-#include <sstream>
-
-#include <ctime>
 #include <chrono>
 
 #include <thread>
@@ -54,15 +47,8 @@
 #include <mutex>
 #include <future>
 
-#include <system_error>
-
 #include <cassert>
 #include <exception>
-
-#include <cmath>
-#include <cstdint>
-#include <cstring>
-#include <cstdio>
 
 // FMT
 #include <fmt/format.h>
@@ -73,23 +59,11 @@
 // GTK
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
-
-// GLIB
-#include <glib.h>
-#include <glib-object.h>
 
 // GTKMM
 // #include <gtkmm-3.0/gtkmm.h>
 // #include <gdkmm-3.0/gdkmm.h>
-
-// GLIBMM
 #include <glibmm.h>
-#include <glibmm/convert.h>
-#include <glibmm/keyfile.h>
-#include <glibmm/iochannel.h>
-
-// GIOMM
 #include <giomm.h>
 
 // ZTD

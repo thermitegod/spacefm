@@ -14,7 +14,6 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
@@ -22,7 +21,6 @@
 #include <ranges>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

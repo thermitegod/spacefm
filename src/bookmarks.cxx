@@ -18,14 +18,9 @@
 
 #include <format>
 
-#include <array>
-#include <vector>
-
-#include <iostream>
-
 #include <filesystem>
 
-#include <glibmm.h>
+#include <fstream>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -125,7 +120,7 @@ add_bookmarks(const std::filesystem::path& book_path) noexcept
 {
     bookmarks_changed = true;
 
-    const std::string book_name = book_path.filename();
+    const auto book_name = book_path.filename();
 
     bookmarks.push_back({book_path, book_name});
 }

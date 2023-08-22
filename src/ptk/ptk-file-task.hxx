@@ -23,8 +23,9 @@
 
 #include <array>
 
-#include <glib.h>
 #include <gtk/gtk.h>
+
+#include <glibmm.h>
 
 #include "vfs/vfs-file-task.hxx"
 

@@ -22,12 +22,13 @@
 #include <filesystem>
 
 #include <map>
-#include <array>
 
 #include <algorithm>
 #include <ranges>
 
 #include <cassert>
+
+#include <malloc.h>
 
 #include <glibmm.h>
 
@@ -698,7 +699,7 @@ dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
     {
         len += std::strlen((char*)l->data) + 1;
     }
-    char* dir_path = CHAR(g_malloc(len));
+    char* dir_path = CHAR(malloc(len));
 
     char* p;
     for (p = dir_path, l = names; l; l = g_slist_next(l))

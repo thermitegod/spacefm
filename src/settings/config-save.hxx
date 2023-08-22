@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <string_view>
-
 #include "settings/disk-format.hxx"
 
 #include "xset/xset.hxx"

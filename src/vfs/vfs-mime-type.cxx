@@ -20,7 +20,6 @@
 
 #include <filesystem>
 
-#include <utility>
 #include <vector>
 
 #include <map>
@@ -36,9 +35,9 @@
 
 #include <memory>
 
-#include <glibmm.h>
-
 #include <gtk/gtk.h>
+
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

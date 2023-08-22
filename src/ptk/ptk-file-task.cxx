@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <optional>
 #include <string>
 #include <string_view>
 
@@ -26,6 +25,8 @@
 #include <array>
 #include <vector>
 
+#include <optional>
+
 #include <chrono>
 
 #include <sys/wait.h>
@@ -33,7 +34,6 @@
 #include <fmt/format.h>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

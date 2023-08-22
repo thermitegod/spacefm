@@ -14,13 +14,10 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
 #include <memory>
-
-#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

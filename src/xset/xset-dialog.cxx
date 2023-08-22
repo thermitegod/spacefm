@@ -22,11 +22,9 @@
 
 #include <optional>
 
-#include <glibmm.h>
+#include <memory>
 
 #include <gtk/gtk.h>
-
-#include <glib.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

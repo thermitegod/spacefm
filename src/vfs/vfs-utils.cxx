@@ -25,8 +25,6 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include <glibmm.h>
-
 #include "settings/app.hxx"
 
 #include "vfs/vfs-utils.hxx"

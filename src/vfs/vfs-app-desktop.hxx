@@ -28,8 +28,6 @@
 
 #include <optional>
 
-#include <memory>
-
 #include <exception>
 
 #include <gtk/gtk.h>

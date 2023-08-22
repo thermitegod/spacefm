@@ -31,21 +31,14 @@
 
 #include <optional>
 
-#include <iostream>
-#include <fstream>
-
 #include <algorithm>
 #include <ranges>
 
 #include <memory>
 
-#include <cassert>
-
 #include <fcntl.h>
 
 #include <pugixml.hpp>
-
-#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

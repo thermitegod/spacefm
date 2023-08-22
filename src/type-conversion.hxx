@@ -16,14 +16,13 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
 #include <span>
 #include <vector>
 
-#include <glib.h>
+#include <glibmm.h>
 
 #include "vfs/vfs-file-info.hxx"
 

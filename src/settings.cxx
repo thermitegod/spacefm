@@ -27,27 +27,18 @@
 #include <vector>
 
 #include <map>
-#include <unordered_map>
-
-#include <iostream>
-#include <fstream>
-
-#include <algorithm>
-#include <ranges>
 
 #include <optional>
 
+#include <memory>
+
+#include <chrono>
+
 #include <cassert>
-
-#include <unistd.h>
-
-#include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <gtk/gtk.h>
 
-#include <gdk/gdkkeysyms.h>
-#include <fcntl.h>
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -107,7 +98,7 @@ struct builtin_tool_data
 };
 
 // must match xset::tool:: enum
-const std::unordered_map<xset::tool, builtin_tool_data> builtin_tools{
+const std::map<xset::tool, builtin_tool_data> builtin_tools{
     {xset::tool::NOT,
      {
          std::nullopt,

@@ -18,13 +18,7 @@
 
 #include <format>
 
-#include <vector>
-
 #include <filesystem>
-
-#include <utility>
-
-#include <fcntl.h>
 
 #include <glibmm.h>
 

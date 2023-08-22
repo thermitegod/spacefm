@@ -22,9 +22,7 @@
 
 #include <optional>
 
-#include <memory>
-
-#include <glib.h>
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 

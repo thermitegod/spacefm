@@ -18,7 +18,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
@@ -30,7 +29,7 @@
 
 #include <sigc++/sigc++.h>
 
-#include <glib.h>
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 

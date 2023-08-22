@@ -35,10 +35,7 @@
 
 #include <optional>
 
-#include <iostream>
 #include <fstream>
-
-#include <cassert>
 
 #include <glibmm.h>
 

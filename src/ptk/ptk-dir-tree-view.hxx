@@ -17,10 +17,10 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
+#include <filesystem>
 
 #include <gtk/gtk.h>
+
 #include "ptk/ptk-file-browser.hxx"
 
 /* Create a new dir tree view */

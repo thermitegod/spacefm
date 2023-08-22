@@ -14,21 +14,14 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
-#include <vector>
-
-#include <functional>
-#include <optional>
-
 #include <cassert>
 
-#include <glibmm.h>
-#include <glibmm/convert.h>
-
 #include <gtk/gtk.h>
+
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

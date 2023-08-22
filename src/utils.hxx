@@ -20,10 +20,6 @@
 
 #include <filesystem>
 
-#include <vector>
-
-#include <utility>
-
 struct split_basename_extension_data
 {
     std::string basename{};

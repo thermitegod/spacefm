@@ -19,13 +19,11 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
+#include <filesystem>
 
 #include <span>
 
 #include <gtk/gtk.h>
-#include <glib.h>
 
 #include "ptk/ptk-file-browser.hxx"
 

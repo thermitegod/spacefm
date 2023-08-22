@@ -28,14 +28,9 @@
 #include <array>
 #include <vector>
 
-#include <sstream>
-
-#include <chrono>
-
 #include <cassert>
 
 #include <glibmm.h>
-#include <glibmm/convert.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

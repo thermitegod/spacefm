@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <gtk/gtk.h>
-#include <glib.h>
 
 #include "xset/xset.hxx"
 

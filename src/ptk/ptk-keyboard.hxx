@@ -19,7 +19,6 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <glib.h>
 
 #include <ztd/ztd.hxx>
 

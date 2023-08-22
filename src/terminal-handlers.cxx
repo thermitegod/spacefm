@@ -18,11 +18,9 @@
 
 #include <format>
 
-#include <filesystem>
-
 #include <vector>
 
-#include <map>
+#include <memory>
 
 #include <glibmm.h>
 

@@ -15,17 +15,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <string_view>
-
 #include <thread>
-#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <future>
-#include <chrono>
 
-#include <glib.h>
+#include <glibmm.h>
 
 #include "vfs/vfs-async-task.hxx"
 

@@ -25,14 +25,13 @@
 #include <array>
 #include <vector>
 
+#include <chrono>
+
 #include <optional>
 
-#include <glibmm.h>
-
-#include <ztd/ztd.hxx>
-
-#include <glib.h>
 #include <gtk/gtk.h>
+
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
