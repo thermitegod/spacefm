@@ -24,13 +24,14 @@
 
 #include <deque>
 
+#include <thread>
+#include <mutex>
+
 #include <memory>
 
-#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file-info.hxx"
-
-#include <magic_enum.hpp>
+#include "vfs/vfs-async-task.hxx"
 
 // forward declare types
 struct VFSThumbnailRequest;
@@ -40,12 +41,8 @@ namespace vfs
 {
     // using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
     using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
+    using thumbnail_request_t = std::shared_ptr<VFSThumbnailRequest>;
 } // namespace vfs
-
-namespace vfs::thumbnail
-{
-    using request = std::shared_ptr<VFSThumbnailRequest>;
-} // namespace vfs::thumbnail
 
 struct VFSThumbnailLoader
 {
@@ -59,7 +56,9 @@ struct VFSThumbnailLoader
 
     u32 idle_handler{0};
 
-    std::deque<vfs::thumbnail::request> queue{};
+    std::mutex mtx;
+
+    std::deque<vfs::thumbnail_request_t> queue{};
     std::deque<vfs::file_info> update_queue{};
 };
 

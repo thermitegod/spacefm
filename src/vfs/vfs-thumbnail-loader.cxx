@@ -27,7 +27,12 @@
 
 #include <chrono>
 
+#include <thread>
+#include <mutex>
+
 #include <memory>
+
+#include <cassert>
 
 #include <glibmm.h>
 
@@ -39,8 +44,9 @@
 
 #include "settings/app.hxx"
 
-#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 static void* thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader);
@@ -57,27 +63,13 @@ namespace vfs
 
 struct VFSThumbnailRequest
 {
-    VFSThumbnailRequest(vfs::file_info file);
-    ~VFSThumbnailRequest();
-
     vfs::file_info file{nullptr};
     std::map<vfs::thumbnail_size, i32> n_requests;
 };
 
-VFSThumbnailRequest::VFSThumbnailRequest(vfs::file_info file)
-{
-    this->file = vfs_file_info_ref(file);
-}
-
-VFSThumbnailRequest::~VFSThumbnailRequest()
-{
-    vfs_file_info_unref(this->file);
-}
-
 VFSThumbnailLoader::VFSThumbnailLoader(vfs::dir dir)
 {
     this->dir = g_object_ref(dir);
-    this->idle_handler = 0;
     this->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, this);
 }
 
@@ -91,13 +83,6 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 
     // stop the running thread, if any.
     this->task->cancel();
-
-    if (this->idle_handler)
-    {
-        g_source_remove(this->idle_handler);
-        this->idle_handler = 0;
-    }
-
     g_object_unref(this->task);
 
     if (!this->update_queue.empty())
@@ -155,26 +140,21 @@ on_thumbnail_idle(vfs::thumbnail_loader loader)
 static void*
 thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 {
+    // ztd::logger::debug("thumbnail_loader_thread");
     while (!task->is_canceled())
     {
+        std::lock_guard<std::mutex> lock(loader->mtx);
         if (loader->queue.empty())
         {
             break;
         }
+        // ztd::logger::debug("loader->queue={}", loader->queue.size());
 
-        const vfs::thumbnail::request req = loader->queue.front();
-        loader->queue.pop_front();
-        if (!req)
-        {
-            break;
-        }
+        const auto req = loader->queue.front();
+        assert(req != nullptr);
+        assert(req->file != nullptr);
         // ztd::logger::debug("pop: {}", req->file->name());
-
-        // Only we have the reference. That means, no body is using the file
-        if (req->file->ref_count() == 1)
-        {
-            continue;
-        }
+        loader->queue.pop_front();
 
         bool need_update = false;
         for (const auto [index, value] : ztd::enumerate(req->n_requests))
@@ -203,7 +183,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             }
             need_update = true;
         }
-
+        // ztd::logger::debug("task->is_canceled()={} need_update={}", task->is_canceled(), need_update);
         if (!task->is_canceled() && need_update)
         {
             loader->update_queue.emplace_back(vfs_file_info_ref(req->file));
@@ -231,11 +211,6 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
     {
         if (loader->idle_handler == 0)
         {
-            // FIXME: add2 This source always causes a "Source ID was not
-            // found" critical warning if removed in vfs_thumbnail_loader_free.
-            // Where is this being removed?  See comment in
-            // vfs_thumbnail_loader_cancel_all_requests
-
             // ztd::logger::debug("ADD IDLE HANDLER BEFORE THREAD ENDING");
             loader->idle_handler =
                 g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc)on_thumbnail_idle, loader, nullptr);
@@ -253,24 +228,20 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name(), is_big);
     if (!dir->thumbnail_loader)
     {
+        // ztd::logger::debug("new_task: !dir->thumbnail_loader");
         dir->thumbnail_loader = vfs_thumbnail_loader_new(dir);
+        assert(dir->thumbnail_loader != nullptr);
         new_task = true;
     }
 
-    vfs::thumbnail_loader loader = dir->thumbnail_loader;
-
-    if (!loader->task)
-    {
-        loader->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, loader);
-        new_task = true;
-    }
+    const auto loader = dir->thumbnail_loader;
 
     // Check if the request is already scheduled
-    vfs::thumbnail::request req;
-    for (const vfs::thumbnail::request& queued_req : loader->queue)
+    vfs::thumbnail_request_t req;
+    for (const vfs::thumbnail_request_t& queued_req : loader->queue)
     {
         req = queued_req;
-        // ztd::logger::info("req->file->name={} | file->name={}", req->file->name(), file->name());
+        // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
         // If file with the same name is already in our queue
         if (req->file == file || ztd::same(req->file->name(), file->name()))
         {
@@ -282,13 +253,15 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
     if (!req)
     {
         req = std::make_shared<VFSThumbnailRequest>(file);
-        dir->thumbnail_loader->queue.emplace_back(req);
+        // ztd::logger::debug("loader->queue add file={}", req->file->name());
+        loader->queue.emplace_back(req);
     }
 
     ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
 
     if (new_task)
     {
+        // ztd::logger::debug("new_task: loader->queue={}", loader->queue.size());
         loader->task->run();
     }
 }
@@ -316,8 +289,7 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
 
     const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / file_name;
 
-    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri,
-    // thumb_size);
+    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri, thumb_size);
 
     // get file mtime
     const auto ftime = std::filesystem::last_write_time(file_path);
