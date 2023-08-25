@@ -50,6 +50,8 @@
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-async-thread.hxx"
+
 #include "vfs/vfs-dir.hxx"
 
 #define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
@@ -145,7 +147,6 @@ vfs_dir_finalize(GObject* obj)
 
         // ztd::logger::info("vfs_dir_finalize -> vfs_async_task_cancel");
         dir->task->cancel();
-        g_object_unref(dir->task);
         dir->task = nullptr;
     }
     if (dir->monitor)
@@ -244,7 +245,6 @@ vfs_dir_get_by_path(const std::filesystem::path& path)
 void
 on_list_task_finished(vfs::dir dir, bool is_cancelled)
 {
-    g_object_unref(dir->task);
     dir->task = nullptr;
     dir->run_event<spacefm::signal::file_listed>(is_cancelled);
     dir->file_listed = true;
@@ -296,10 +296,8 @@ get_hidden_files(const std::filesystem::path& path) noexcept
 }
 
 static void*
-vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
+vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
 {
-    (void)task;
-
     std::lock_guard<std::mutex> lock(dir->mutex);
 
     dir->file_listed = false;
@@ -314,7 +312,7 @@ vfs_dir_load_thread(vfs::async_task task, vfs::dir dir)
 
     for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
     {
-        if (dir->task->is_canceled())
+        if (task->is_canceled())
         {
             break;
         }
@@ -489,12 +487,12 @@ VFSDir::load() noexcept
     }
     // ztd::logger::info("dir->path={}", dir->path);
 
-    this->task = vfs_async_task_new((VFSAsyncFunc)vfs_dir_load_thread, this);
+    this->task = vfs_async_thread_new((vfs::async_thread_function_t)vfs_dir_load_thread, this);
 
     this->signal_task_load_dir =
         this->task->add_event<spacefm::signal::task_finish>(on_list_task_finished, this);
 
-    this->task->run_thread();
+    this->task->run();
 }
 
 bool

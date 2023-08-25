@@ -37,24 +37,20 @@
 #define VFS_ASYNC_TASK(obj) (static_cast<VFSAsyncTask*>(obj))
 
 // forward declare
-struct VFSDir;
 struct VFSAsyncTask;
-struct FindFile;
 
 using VFSAsyncFunc = void* (*)(VFSAsyncTask*, void*);
 
 namespace vfs
 {
     using async_task = ztd::raw_ptr<VFSAsyncTask>;
-    using dir = ztd::raw_ptr<VFSDir>;
 } // namespace vfs
 
 struct VFSAsyncTask
 {
     GObject parent;
     VFSAsyncFunc func;
-    void* user_data{nullptr};
-    void* ret_val{nullptr};
+    void* user_data_{nullptr};
 
     GThread* thread{nullptr};
     u32 idle_id{0};
@@ -67,17 +63,17 @@ struct VFSAsyncTask
     std::atomic<bool> thread_finished{true};
 
   public:
-    void* get_data();
-
     // Execute the async task
-    void run_thread();
-
-    bool is_finished();
-    bool is_canceled();
+    void run();
 
     // Cancel the async task running in another thread.
     // NOTE: Only can be called from main thread.
     void cancel();
+
+    void* user_data();
+
+    bool is_finished();
+    bool is_canceled();
 
     // private
     void cleanup(bool finalize);
@@ -87,36 +83,16 @@ struct VFSAsyncTask
     // Signals
   public:
     // Signals function types
-    using evt_task_finished__find_file_t = void(FindFile*);
-    using evt_task_finished__load_app_t = void(VFSAsyncTask*, bool, GtkWidget*);
-    using evt_task_finished__load_dir_t = void(vfs::dir, bool);
+    using evt_task_finished_load_app_t = void(VFSAsyncTask*, bool, GtkWidget*);
 
     // Signals Add Event
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
-    add_event(evt_task_finished__find_file_t fun, FindFile* file)
-    {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
-        this->evt_data_find_file = file;
-        return this->evt_task_finished__find_file.connect(sigc::ptr_fun(fun));
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
-    add_event(evt_task_finished__load_app_t fun, GtkWidget* app)
+    add_event(evt_task_finished_load_app_t fun, GtkWidget* app)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
         this->evt_data_load_app = app;
-        return this->evt_task_finished__load_app.connect(sigc::ptr_fun(fun));
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
-    add_event(evt_task_finished__load_dir_t fun, vfs::dir dir)
-    {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
-        this->evt_data_load_dir = dir;
-        return this->evt_task_finished__load_dir.connect(sigc::ptr_fun(fun));
+        return this->evt_task_finished_load_app.connect(sigc::ptr_fun(fun));
     }
 
     // Signals Run Event
@@ -125,24 +101,18 @@ struct VFSAsyncTask
     run_event(bool is_cancelled)
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::task_finish");
-        this->evt_task_finished__find_file.emit(this->evt_data_find_file);
-        this->evt_task_finished__load_app.emit(this, is_cancelled, this->evt_data_load_app);
-        this->evt_task_finished__load_dir.emit(this->evt_data_load_dir, is_cancelled);
+        this->evt_task_finished_load_app.emit(this, is_cancelled, this->evt_data_load_app);
     }
 
     // Signals
   private:
     // Signal types
-    sigc::signal<evt_task_finished__find_file_t> evt_task_finished__find_file;
-    sigc::signal<evt_task_finished__load_app_t> evt_task_finished__load_app;
-    sigc::signal<evt_task_finished__load_dir_t> evt_task_finished__load_dir;
+    sigc::signal<evt_task_finished_load_app_t> evt_task_finished_load_app;
 
   private:
     // Signal data
     // TODO/FIXME has to be a better way to do this
-    FindFile* evt_data_find_file{nullptr};
     GtkWidget* evt_data_load_app{nullptr};
-    vfs::dir evt_data_load_dir{nullptr};
 };
 
 VFSAsyncTask* vfs_async_task_new(VFSAsyncFunc task_func, void* user_data);

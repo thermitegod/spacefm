@@ -39,6 +39,7 @@
 
 #include "settings/app.hxx"
 
+#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
@@ -288,7 +289,7 @@ vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
 
     if (new_task)
     {
-        loader->task->run_thread();
+        loader->task->run();
     }
 }
 

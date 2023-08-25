@@ -26,6 +26,7 @@
 
 #include <memory>
 
+#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file-info.hxx"
 

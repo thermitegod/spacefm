@@ -94,7 +94,7 @@ vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 {
     vfs::async_task task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;
-    task->user_data = user_data;
+    task->user_data_ = user_data;
     return VFS_ASYNC_TASK(task);
 }
 
@@ -128,13 +128,12 @@ void*
 vfs_async_task_thread(void* _task)
 {
     vfs::async_task task = VFS_ASYNC_TASK(_task);
-    void* ret = task->func(task, task->user_data);
+    void* ret = task->func(task, task->user_data_);
 
     const std::unique_lock<std::mutex> lock(task->mutex);
 
     task->idle_id = g_idle_add((GSourceFunc)on_idle, task); // runs in main loop thread
-    task->ret_val = ret;
-    task->thread_finished.store(true);
+    task->thread_finished = true;
 
     return ret;
 }
@@ -148,13 +147,13 @@ vfs_async_task_finish(vfs::async_task task, bool is_cancelled)
 }
 
 void*
-VFSAsyncTask::get_data()
+VFSAsyncTask::user_data()
 {
-    return this->user_data;
+    return this->user_data_;
 }
 
 void
-VFSAsyncTask::run_thread()
+VFSAsyncTask::run()
 {
     this->thread = g_thread_new("async_task", vfs_async_task_thread, this);
 }
@@ -193,9 +192,9 @@ VFSAsyncTask::real_cancel(bool finalize)
      * to get things right.
      */
 
-    this->thread_cancel.store(true);
+    this->thread_cancel = true;
     this->cleanup(finalize);
-    this->thread_cancelled.store(true);
+    this->thread_cancelled = true;
 }
 
 void
@@ -216,7 +215,7 @@ VFSAsyncTask::cleanup(bool finalize)
     {
         g_thread_join(this->thread);
         this->thread = nullptr;
-        this->thread_finished.store(true);
+        this->thread_finished = true;
 
         // Only emit the signal when we are not finalizing.
         // Emitting signal on an object during destruction is not allowed.

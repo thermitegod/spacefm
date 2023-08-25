@@ -35,7 +35,8 @@
 
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-file-info.hxx"
-#include "vfs/vfs-async-task.hxx"
+
+#include "vfs/vfs-async-thread.hxx"
 
 #include "signals.hxx"
 
@@ -68,7 +69,7 @@ struct VFSDir
 
     std::mutex mutex;
 
-    vfs::async_task task{nullptr};
+    vfs::async_thread_t task{nullptr};
 
     bool file_listed{true};
     bool load_complete{true};

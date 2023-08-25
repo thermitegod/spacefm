@@ -191,7 +191,7 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
 static void
 on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dialog)
 {
-    GtkTreeModel* model = GTK_TREE_MODEL(task->get_data());
+    GtkTreeModel* model = GTK_TREE_MODEL(task->user_data());
     if (is_cancelled)
     {
         g_object_unref(model);
@@ -308,7 +308,7 @@ init_all_apps_tab(GtkWidget* dialog)
 
     task->add_event<spacefm::signal::task_finish>(on_load_all_apps_finish, dialog);
 
-    task->run_thread();
+    task->run();
 
     g_signal_connect(G_OBJECT(tree_view),
                      "row_activated",
@@ -675,7 +675,7 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
 static void*
 load_all_known_apps_thread(vfs::async_task task)
 {
-    GtkListStore* list = GTK_LIST_STORE(task->get_data());
+    GtkListStore* list = GTK_LIST_STORE(task->user_data());
 
     const auto dir = vfs::user_dirs->data_dir() / "applications";
     load_all_apps_in_dir(dir, list, task);
