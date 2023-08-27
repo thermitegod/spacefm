@@ -350,12 +350,12 @@ sources = files(
     'src/settings.cxx',
     'src/single-instance.cxx',
     'src/terminal-handlers.cxx',
-    'src/type-conversion.cxx',
     'src/types.cxx',
     'src/utils.cxx',
     'src/window-reference.cxx',
 
     'src/compat/gtk4-porting.cxx',
+    'src/compat/type-conversion.cxx',
 
     'src/commandline/commandline.cxx',
     'src/commandline/socket.cxx',

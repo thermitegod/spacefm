@@ -76,16 +76,17 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-dir.hxx"
 
-#include "types.hxx"
+#include "compat/type-conversion.hxx"
 
 #include "settings/app.hxx"
 
 #include "signals.hxx"
 
+#include "types.hxx"
+
 #include "autosave.hxx"
 #include "settings.hxx"
 #include "utils.hxx"
-#include "type-conversion.hxx"
 
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
 static void ptk_file_browser_init(PtkFileBrowser* file_browser);

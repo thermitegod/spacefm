@@ -28,7 +28,7 @@
  */
 
 std::vector<std::filesystem::path>
-glist_t_char_to_vector_t_path(GList* list)
+glist_to_vector_path(GList* list)
 {
     std::vector<std::filesystem::path> vec;
     vec.reserve(g_list_length(list));
@@ -45,7 +45,7 @@ glist_t_char_to_vector_t_path(GList* list)
  */
 
 std::vector<std::string>
-glist_t_char_to_vector_t_string(GList* list)
+glist_to_vector_string(GList* list)
 {
     std::vector<std::string> vec;
     vec.reserve(g_list_length(list));

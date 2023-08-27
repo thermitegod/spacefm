@@ -27,10 +27,10 @@
 #include "vfs/vfs-file-info.hxx"
 
 // std::filesystem::path
-std::vector<std::filesystem::path> glist_t_char_to_vector_t_path(GList* list);
+std::vector<std::filesystem::path> glist_to_vector_path(GList* list);
 
 // std::string
-std::vector<std::string> glist_t_char_to_vector_t_string(GList* list);
+std::vector<std::string> glist_to_vector_string(GList* list);
 
 // VFSFileInfo
 std::vector<vfs::file_info> glist_to_vector_vfs_file_info(GList* list);

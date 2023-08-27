@@ -31,7 +31,7 @@
 
 #include <magic_enum.hpp>
 
-#include "type-conversion.hxx"
+#include "compat/type-conversion.hxx"
 
 #include "ptk/ptk-file-list.hxx"
 
