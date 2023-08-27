@@ -35,6 +35,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "ptk/ptk-dialog.hxx"
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
@@ -556,10 +558,10 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
     gtk_widget_show_all(dlg);
 
     bool exit_loop = false;
-    i32 res;
-    while ((res = gtk_dialog_run(GTK_DIALOG(dlg))))
+    i32 response;
+    while ((response = gtk4_dialog_run(GTK_DIALOG(dlg))))
     {
-        switch (res)
+        switch (response)
         {
             case GtkResponseType::GTK_RESPONSE_OK:
             {
@@ -960,7 +962,6 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
     std::string parent_quote;
     std::filesystem::path dest;
     std::string full_quote;
-    i32 res;
 
     // Making sure files to act on have been passed
     if (sel_files.empty() || job == ptk::handler::archive::compress)
@@ -1086,10 +1087,11 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
         }
 
         // Displaying dialog
+        i32 response;
         bool exit_loop = false;
-        while ((res = gtk_dialog_run(GTK_DIALOG(dlg))))
+        while ((response = gtk4_dialog_run(GTK_DIALOG(dlg))))
         {
-            switch (res)
+            switch (response)
             {
                 case GtkResponseType::GTK_RESPONSE_OK:
                     // Fetching user-specified settings and saving

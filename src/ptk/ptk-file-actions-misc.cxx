@@ -28,6 +28,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "settings/app.hxx"
 
 #include "vfs/vfs-file-info.hxx"
@@ -156,7 +158,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 
     gtk_widget_show_all(dialog);
 
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
     return response == GtkResponseType::GTK_RESPONSE_ACCEPT;
 }

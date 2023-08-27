@@ -355,6 +355,8 @@ sources = files(
     'src/utils.cxx',
     'src/window-reference.cxx',
 
+    'src/compat/gtk4-porting.cxx',
+
     'src/commandline/commandline.cxx',
     'src/commandline/socket.cxx',
     'src/commandline/socket/subcommands.cxx',

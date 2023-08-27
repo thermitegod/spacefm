@@ -33,6 +33,8 @@
 
 #include <magic_enum.hpp>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "mime-type/mime-type.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
@@ -2528,7 +2530,7 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     }
 
     i32 response;
-    while ((response = gtk_dialog_run(GTK_DIALOG(ctxt->dlg))))
+    while ((response = gtk4_dialog_run(GTK_DIALOG(ctxt->dlg))))
     {
         bool exit_loop = false;
         switch (response)

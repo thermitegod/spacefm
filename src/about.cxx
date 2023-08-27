@@ -26,8 +26,6 @@ show_about_dialog(GtkWindow* parent)
     GtkWidget* dialog = gtk_about_dialog_new();
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
 
-    gtk_dialog_add_button(GTK_DIALOG(dialog), "Close", GtkResponseType::GTK_RESPONSE_CLOSE);
-
     gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME_FANCY);
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
     gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "spacefm");
@@ -37,7 +35,7 @@ show_about_dialog(GtkWindow* parent)
     gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dialog), "Github");
     gtk_about_dialog_set_license_type(GTK_ABOUT_DIALOG(dialog), GtkLicense::GTK_LICENSE_GPL_3_0);
 
-    gtk_dialog_run(GTK_DIALOG(dialog));
+    g_signal_connect(dialog, "response", G_CALLBACK(g_object_unref), nullptr);
 
-    gtk_widget_destroy(dialog);
+    gtk_widget_show(dialog);
 }

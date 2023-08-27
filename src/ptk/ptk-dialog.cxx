@@ -20,6 +20,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "ptk/ptk-dialog.hxx"
 
 void
@@ -37,7 +39,10 @@ ptk_show_error(GtkWindow* parent, const std::string_view title,
 
     gtk_window_set_title(GTK_WINDOW(dialog), title.empty() ? "Error" : title.data());
 
-    gtk_dialog_run(GTK_DIALOG(dialog));
+    // g_signal_connect(dialog, "response", G_CALLBACK(g_object_unref), nullptr);
+    // gtk_widget_show(dialog);
+
+    gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
 
@@ -65,7 +70,7 @@ ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_vie
     }
 
     gtk_widget_show_all(dialog);
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 
     return response;

@@ -42,6 +42,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "xset/xset.hxx"
@@ -3284,7 +3286,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
      * buttons that should not cause the dialog to exit */
     /*igcr need to handle dialog delete event? */
     i32 response;
-    while ((response = gtk_dialog_run(GTK_DIALOG(hnd->dlg))))
+    while ((response = gtk4_dialog_run(GTK_DIALOG(hnd->dlg))))
     {
         bool exit_loop = false;
         switch (response)

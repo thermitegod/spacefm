@@ -29,6 +29,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "types.hxx"
 
 #include "settings.hxx"
@@ -277,7 +279,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     std::string ans;
     i32 response;
     bool ret = false;
-    while ((response = gtk_dialog_run(GTK_DIALOG(dlg))))
+    while ((response = gtk4_dialog_run(GTK_DIALOG(dlg))))
     {
         bool exit_loop = false;
         switch (response)
@@ -429,7 +431,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dlg));
 
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);

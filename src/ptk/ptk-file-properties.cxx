@@ -30,6 +30,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-time.hxx"
@@ -938,7 +940,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     gtk_widget_show_all(dialog);
 
-    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
 

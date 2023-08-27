@@ -37,6 +37,8 @@
 
 #include <magic_enum.hpp>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "ptk/ptk-file-menu.hxx"
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
@@ -967,7 +969,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dlg));
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         const char* new_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
@@ -1160,7 +1162,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
     }
 
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dlg));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dlg));
     // bogus GTK warning here: Unable to retrieve the file info for...
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
@@ -2914,7 +2916,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     std::string to_path;
     std::string from_path;
     i32 response;
-    while ((response = gtk_dialog_run(GTK_DIALOG(mset->dlg))))
+    while ((response = gtk4_dialog_run(GTK_DIALOG(mset->dlg))))
     {
         if (response == GtkResponseType::GTK_RESPONSE_OK ||
             response == GtkResponseType::GTK_RESPONSE_APPLY)

@@ -47,6 +47,8 @@
 
 #include <magic_enum.hpp>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
@@ -4519,7 +4521,7 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     // show
     gtk_widget_show_all(dialog);
 
-    const i32 response = gtk_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
 
     std::string pattern;
     bool ret = false;

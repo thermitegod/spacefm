@@ -29,6 +29,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
@@ -601,7 +603,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
 
     std::optional<std::string> app = std::nullopt;
 
-    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         app = app_chooser_dialog_get_selected_app(dialog);

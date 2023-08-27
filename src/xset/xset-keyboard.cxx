@@ -23,6 +23,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "settings.hxx"
 #include "utils.hxx"
 
@@ -257,7 +259,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     gtk_widget_show_all(dialog);
     gtk_window_set_title(GTK_WINDOW(dialog), "Set Key");
 
-    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 
     if (response == GtkResponseType::GTK_RESPONSE_OK ||
