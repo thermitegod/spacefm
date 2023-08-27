@@ -36,7 +36,6 @@ ptk_show_error(GtkWindow* parent, const std::string_view title,
                                nullptr);
 
     gtk_window_set_title(GTK_WINDOW(dialog), title.empty() ? "Error" : title.data());
-    gtk_window_set_role(GTK_WINDOW(dialog), "error_dialog");
 
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
@@ -57,7 +56,6 @@ ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_vie
                                nullptr);
 
     gtk_window_set_title(GTK_WINDOW(dialog), title.data());
-    gtk_window_set_role(GTK_WINDOW(dialog), "message_dialog");
 
     if (!secondary_message.empty())
     {

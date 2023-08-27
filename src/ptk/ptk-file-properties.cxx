@@ -906,7 +906,6 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
                                     nullptr);
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-    gtk_window_set_role(GTK_WINDOW(dialog), "properties_dialog");
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
 

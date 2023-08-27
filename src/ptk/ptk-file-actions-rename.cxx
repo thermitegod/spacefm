@@ -1091,7 +1091,6 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         "OK",
         GtkResponseType::GTK_RESPONSE_OK,
         nullptr);
-    gtk_window_set_role(GTK_WINDOW(dlg), "file_dialog");
 
     gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
     gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
@@ -2320,8 +2319,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                                                    GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
                                     nullptr,
                                     nullptr);
-    // std::free( title );
-    gtk_window_set_role(GTK_WINDOW(mset->dlg), "rename_dialog");
 
     // Buttons
     mset->options = gtk_button_new_with_mnemonic("Opt_ions");

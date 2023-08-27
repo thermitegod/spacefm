@@ -185,7 +185,6 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                                             msg1.data(),
                                             nullptr);
     xset_set_window_icon(GTK_WINDOW(dlg));
-    gtk_window_set_role(GTK_WINDOW(dlg), "text_dialog");
 
     i32 width = xset_get_int(xset::name::text_dlg, xset::var::s);
     i32 height = xset_get_int(xset::name::text_dlg, xset::var::z);
@@ -382,7 +381,6 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     // GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), true);
     xset_set_window_icon(GTK_WINDOW(dlg));
-    gtk_window_set_role(GTK_WINDOW(dlg), "file_dialog");
 
     if (deffolder)
     {

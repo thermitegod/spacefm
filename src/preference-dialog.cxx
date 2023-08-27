@@ -1178,7 +1178,6 @@ show_preference_dialog(GtkWindow* parent) noexcept
                                     nullptr);
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-    gtk_window_set_role(GTK_WINDOW(dialog), "preferences_dialog");
 
     g_signal_connect(dialog, "response", G_CALLBACK(on_response), nullptr);
 

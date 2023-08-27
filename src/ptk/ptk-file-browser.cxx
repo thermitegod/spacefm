@@ -4495,7 +4495,6 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
                                                "Enter a pattern to select files and directories");
 
     gtk_window_set_title(GTK_WINDOW(dialog), "Select By Pattern");
-    gtk_window_set_role(GTK_WINDOW(dialog), "pattern_dialog");
 
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 400);
     gtk_window_set_resizable(GTK_WINDOW(dialog), true);

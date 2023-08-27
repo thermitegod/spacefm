@@ -1724,7 +1724,6 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         nullptr,
         nullptr);
     xset_set_window_icon(GTK_WINDOW(ctxt->dlg));
-    gtk_window_set_role(GTK_WINDOW(ctxt->dlg), "context_dialog");
 
     i32 width = xset_get_int(xset::name::context_dlg, xset::var::x);
     i32 height = xset_get_int(xset::name::context_dlg, xset::var::y);

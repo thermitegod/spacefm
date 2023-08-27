@@ -1137,7 +1137,6 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     }
     gtk_window_set_gravity(GTK_WINDOW(ptask->progress_dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(ptask->progress_dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
-    gtk_window_set_role(GTK_WINDOW(ptask->progress_dlg), "task_dialog");
 
     //    gtk_dialog_set_default_response( ptask->progress_dlg, GtkResponseType::GTK_RESPONSE_OK );
     g_signal_connect(ptask->progress_dlg, "response", G_CALLBACK(on_progress_dlg_response), ptask);
@@ -2472,7 +2471,6 @@ query_overwrite(PtkFileTask* ptask)
     gtk_window_set_type_hint(GTK_WINDOW(dlg), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_gravity(GTK_WINDOW(dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
-    gtk_window_set_role(GTK_WINDOW(dlg), "overwrite_dialog");
 
     gtk_widget_set_halign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_START);
