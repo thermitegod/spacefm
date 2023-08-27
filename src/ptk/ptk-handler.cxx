@@ -55,6 +55,7 @@
 
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-keyboard.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "autosave.hxx"
 #include "write.hxx"
@@ -2805,8 +2806,7 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     // Debug code
     // ztd::logger::info("Parent window title: {}", gtk_window_get_title(GTK_WINDOW(hnd->parent)));
 
-    // Forcing dialog icon
-    xset_set_window_icon(GTK_WINDOW(hnd->dlg));
+    ptk_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
     i32 width = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::x);

@@ -50,6 +50,7 @@
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-user-dirs.hxx"
@@ -942,7 +943,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
                                                  GtkResponseType::GTK_RESPONSE_OK,
                                                  nullptr);
 
-    xset_set_window_icon(GTK_WINDOW(dlg));
+    ptk_set_window_icon(GTK_WINDOW(dlg));
 
     if (name.empty())
     {

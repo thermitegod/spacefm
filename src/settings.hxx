@@ -48,8 +48,6 @@ void free_settings();
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
 
-void xset_set_window_icon(GtkWindow* win);
-
 GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button,
                                  std::time_t time);
 

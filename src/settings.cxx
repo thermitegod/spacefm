@@ -3191,39 +3191,3 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     gtk_widget_show_all(toolbar);
 }
-
-void
-xset_set_window_icon(GtkWindow* win)
-{
-    std::string name;
-    xset_t set = xset_get(xset::name::main_icon);
-    if (set->icon)
-    {
-        name = set->icon.value();
-    }
-    else
-    {
-        name = "spacefm";
-    }
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-    if (!icon_theme)
-    {
-        return;
-    }
-    GError* error = nullptr;
-    GdkPixbuf* icon =
-        gtk_icon_theme_load_icon(icon_theme, name.c_str(), 48, (GtkIconLookupFlags)0, &error);
-    if (icon)
-    {
-        gtk_window_set_icon(GTK_WINDOW(win), icon);
-        g_object_unref(icon);
-    }
-    else if (error)
-    {
-        // An error occured on loading the icon
-        ztd::logger::error("Unable to load the window icon '{}' in - xset_set_window_icon - {}",
-                           name,
-                           error->message);
-        g_error_free(error);
-    }
-}
