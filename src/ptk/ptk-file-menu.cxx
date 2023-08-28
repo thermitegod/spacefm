@@ -2507,18 +2507,7 @@ static void
 on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-
-    // if a single dir or file is selected, bookmark it instead of cwd
-    if (!data->sel_files.empty() && data->sel_files.size() == 1)
-    {
-        vfs::file_info file = data->sel_files.back();
-        const auto full_path = data->cwd / file->name();
-        ptk_bookmark_view_add_bookmark(full_path);
-    }
-    else
-    {
-        ptk_bookmark_view_add_bookmark(data->browser);
-    }
+    ptk_bookmark_view_add_bookmark(data->browser->cwd());
 }
 
 static void
@@ -2939,7 +2928,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
         }
         else if (set->xset_name == xset::name::new_bookmark)
         {
-            ptk_bookmark_view_add_bookmark(browser);
+            ptk_bookmark_view_add_bookmark(browser->cwd());
         }
         else if (set->xset_name == xset::name::new_archive)
         {

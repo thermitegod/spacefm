@@ -6261,27 +6261,15 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
 {
     i32 i = 0;
     xset_t set = xset_get(setname);
-
-    const xset::main_window_panel mode = this->main_window_->panel_context.at(this->panel_);
-
     // ztd::logger::info("PtkFileBrowser::on_action {}", set->name);
+
+    const auto mode = this->main_window_->panel_context.at(this->panel_);
 
     if (ztd::startswith(set->name, "book_"))
     {
         if (set->xset_name == xset::name::book_add)
         {
-            const char* text = this->path_bar_ && gtk_widget_has_focus(this->path_bar_)
-                                   ? gtk_entry_get_text(GTK_ENTRY(this->path_bar_))
-                                   : nullptr;
-            if (text && (std::filesystem::exists(text) || ztd::contains(text, ":/") ||
-                         ztd::startswith(text, "//")))
-            {
-                ptk_bookmark_view_add_bookmark(text);
-            }
-            else
-            {
-                ptk_bookmark_view_add_bookmark(this);
-            }
+            ptk_bookmark_view_add_bookmark(this->cwd());
         }
     }
     else if (ztd::startswith(set->name, "go_"))
