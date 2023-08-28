@@ -6257,12 +6257,12 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
 }
 
 void
-PtkFileBrowser::on_action(xset::name setname) noexcept
+PtkFileBrowser::on_action(const xset::name setname) noexcept
 {
-    i32 i = 0;
-    xset_t set = xset_get(setname);
+    const xset_t set = xset_get(setname);
     // ztd::logger::info("PtkFileBrowser::on_action {}", set->name);
 
+    assert(is_valid_panel(this->panel_));
     const auto mode = this->main_window_->panel_context.at(this->panel_);
 
     if (ztd::startswith(set->name, "book_"))
@@ -6311,6 +6311,7 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
         }
         else
         {
+            i32 i = 0;
             if (set->xset_name == xset::name::tab_prev)
             {
                 i = tab_control_code_prev;
@@ -6336,6 +6337,7 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
     }
     else if (ztd::startswith(set->name, "focus_"))
     {
+        i32 i = 0;
         if (set->xset_name == xset::name::focus_path_bar)
         {
             i = 0;
@@ -6372,7 +6374,7 @@ PtkFileBrowser::on_action(xset::name setname) noexcept
     }
     else if (ztd::startswith(set->name, "sortby_"))
     {
-        i = -3;
+        i32 i = -3;
         if (set->xset_name == xset::name::sortby_name)
         {
             i = magic_enum::enum_integer(ptk::file_browser::sort_order::name);

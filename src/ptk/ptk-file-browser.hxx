@@ -257,7 +257,7 @@ struct PtkFileBrowser
 
     void on_permission(GtkMenuItem* item, const std::span<const vfs::file_info> selected_files,
                        const std::filesystem::path& cwd) noexcept;
-    void on_action(xset::name setname) noexcept;
+    void on_action(const xset::name setname) noexcept;
 
     void focus_folder_view() noexcept;
     void enable_toolbar() noexcept;

@@ -3233,9 +3233,8 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
 static bool
 on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
 {
-    PtkFileBrowser* browser;
-
-    browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+    PtkFileBrowser* browser =
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
     if (!browser)
     {
         return true;
