@@ -64,6 +64,7 @@
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-dir-tree-view.hxx"
 #include "ptk/ptk-dir-tree.hxx"
+#include "ptk/ptk-task-view.hxx"
 
 #include "ptk/ptk-file-list.hxx"
 

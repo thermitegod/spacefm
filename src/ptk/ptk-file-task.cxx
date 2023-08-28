@@ -51,6 +51,8 @@
 #include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
 
+#include "ptk/ptk-task-view.hxx"
+
 #include "ptk/ptk-file-task.hxx"
 
 static bool on_vfs_file_task_state_cb(vfs::file_task task, vfs::file_task_state state,

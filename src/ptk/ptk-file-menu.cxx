@@ -59,6 +59,7 @@
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-task-view.hxx"
 
 #include "settings/app.hxx"
 

@@ -112,10 +112,6 @@ MainWindow* main_window_get_on_current_desktop();
  */
 const std::vector<MainWindow*>& main_window_get_all();
 
-void main_task_view_update_task(PtkFileTask* ptask);
-void main_task_view_remove_task(PtkFileTask* ptask);
-void main_task_pause_all_queued(PtkFileTask* ptask);
-void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
 // void show_panels(GtkMenuItem* item, MainWindow* main_window);
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
@@ -125,7 +121,6 @@ void main_window_refresh_all_tabs_matching(const std::filesystem::path& path);
 void main_window_close_all_invalid_tabs();
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
 const std::string main_write_exports(vfs::file_task vtask, const std::string_view value);
-void on_reorder(GtkWidget* item, GtkWidget* parent);
 const std::optional<std::filesystem::path> main_window_get_tab_cwd(PtkFileBrowser* file_browser,
                                                                    tab_t tab_num);
 const std::optional<std::filesystem::path> main_window_get_panel_cwd(PtkFileBrowser* file_browser,
