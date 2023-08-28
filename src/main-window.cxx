@@ -5242,18 +5242,12 @@ main_task_view_update_task(PtkFileTask* ptask)
                 iname = "gtk-execute";
             }
 
-            i32 icon_size = app_settings.icon_size_small();
-            if (icon_size > PANE_MAX_ICON_SIZE)
-            {
-                icon_size = PANE_MAX_ICON_SIZE;
-            }
-
             GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
             pixbuf = gtk_icon_theme_load_icon(
                 icon_theme,
                 iname.data(),
-                icon_size,
+                22,
                 (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                 nullptr);
             if (!pixbuf)
@@ -5261,7 +5255,7 @@ main_task_view_update_task(PtkFileTask* ptask)
                 pixbuf = gtk_icon_theme_load_icon(
                     icon_theme,
                     "gtk-execute",
-                    icon_size,
+                    22,
                     (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
                     nullptr);
             }
