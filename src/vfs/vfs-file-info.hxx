@@ -174,6 +174,8 @@ struct VFSFileInfo
     void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;
     void load_thumbnail_big(const std::filesystem::path& full_path) noexcept;
 
+    const std::string special_directory_get_icon_name() const noexcept;
+
   public: // TODO need to remove manual ref counting
     void ref_inc();
     void ref_dec();

@@ -255,62 +255,96 @@ VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
     this->load_special_info(full_path);
 }
 
+/* Icons */
+#define ICON_FOLDER              "folder-symbolic"
+#define ICON_FOLDER_DOCUMENTS    "folder-documents-symbolic"
+#define ICON_FOLDER_DOWNLOAD     "folder-download-symbolic"
+#define ICON_FOLDER_MUSIC        "folder-music-symbolic"
+#define ICON_FOLDER_PICTURES     "folder-pictures-symbolic"
+#define ICON_FOLDER_PUBLIC_SHARE "folder-publicshare-symbolic"
+#define ICON_FOLDER_TEMPLATES    "folder-templates-symbolic"
+#define ICON_FOLDER_VIDEOS       "folder-videos-symbolic"
+#define ICON_FOLDER_HOME         "user-home-symbolic"
+#define ICON_FOLDER_DESKTOP      "user-desktop-symbolic"
+
+/* Fullcolor icons */
+#define ICON_FULLCOLOR_FOLDER              "folder"
+#define ICON_FULLCOLOR_FOLDER_DOCUMENTS    "folder-documents"
+#define ICON_FULLCOLOR_FOLDER_DOWNLOAD     "folder-download"
+#define ICON_FULLCOLOR_FOLDER_MUSIC        "folder-music"
+#define ICON_FULLCOLOR_FOLDER_PICTURES     "folder-pictures"
+#define ICON_FULLCOLOR_FOLDER_PUBLIC_SHARE "folder-publicshare"
+#define ICON_FULLCOLOR_FOLDER_TEMPLATES    "folder-templates"
+#define ICON_FULLCOLOR_FOLDER_VIDEOS       "folder-videos"
+#define ICON_FULLCOLOR_FOLDER_HOME         "user-home"
+#define ICON_FULLCOLOR_FOLDER_DESKTOP      "user-desktop"
+
+const std::string
+VFSFileInfo::special_directory_get_icon_name() const noexcept
+{
+    const bool symbolic = this->is_symlink();
+
+    if (vfs::user_dirs->home_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_HOME : ICON_FULLCOLOR_FOLDER_HOME;
+    }
+    else if (vfs::user_dirs->desktop_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_DESKTOP : ICON_FULLCOLOR_FOLDER_DESKTOP;
+    }
+    else if (vfs::user_dirs->documents_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_DOCUMENTS : ICON_FULLCOLOR_FOLDER_DOCUMENTS;
+    }
+    else if (vfs::user_dirs->download_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_DOWNLOAD : ICON_FULLCOLOR_FOLDER_DOWNLOAD;
+    }
+    else if (vfs::user_dirs->music_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_MUSIC : ICON_FULLCOLOR_FOLDER_MUSIC;
+    }
+    else if (vfs::user_dirs->pictures_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_PICTURES : ICON_FULLCOLOR_FOLDER_PICTURES;
+    }
+    else if (vfs::user_dirs->public_share_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_PUBLIC_SHARE : ICON_FULLCOLOR_FOLDER_PUBLIC_SHARE;
+    }
+    else if (vfs::user_dirs->template_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_TEMPLATES : ICON_FULLCOLOR_FOLDER_TEMPLATES;
+    }
+    else if (vfs::user_dirs->videos_dir() == this->path_)
+    {
+        return (symbolic) ? ICON_FOLDER_VIDEOS : ICON_FULLCOLOR_FOLDER_VIDEOS;
+    }
+    else
+    {
+        return (symbolic) ? ICON_FOLDER : ICON_FULLCOLOR_FOLDER;
+    }
+}
+
 GdkPixbuf*
 VFSFileInfo::big_icon() noexcept
 {
-    // get special icons for special files, especially for some desktop icons
-    if (this->flags() == vfs::file_info_flags::none)
+    if (this->flags() & vfs::file_info_flags::desktop_entry && this->big_thumbnail_)
     {
-        if (!this->mime_type_)
-        {
-            return nullptr;
-        }
-        return this->mime_type_->icon(true);
+        return g_object_ref(this->big_thumbnail_);
     }
 
-    i32 w = 0;
-    i32 h = 0;
-    const i32 icon_size = app_settings.icon_size_big();
-
-    if (this->big_thumbnail_)
+    if (this->is_directory())
     {
-        w = gdk_pixbuf_get_width(this->big_thumbnail_);
-        h = gdk_pixbuf_get_height(this->big_thumbnail_);
+        const auto icon_name = this->special_directory_get_icon_name();
+        return vfs_load_icon(icon_name, app_settings.icon_size_big());
     }
 
-    if (std::abs(std::max(w, h) - icon_size) > 2)
+    if (!this->mime_type_)
     {
-        char* icon_name = nullptr;
-        if (this->big_thumbnail_)
-        {
-            icon_name = (char*)g_object_steal_data(G_OBJECT(this->big_thumbnail_), "name");
-            g_object_unref(this->big_thumbnail_);
-            this->big_thumbnail_ = nullptr;
-        }
-        if (icon_name)
-        {
-            if (ztd::startswith(icon_name, "/"))
-            {
-                this->big_thumbnail_ = gdk_pixbuf_new_from_file(icon_name, nullptr);
-            }
-            else
-            {
-                this->big_thumbnail_ = vfs_load_icon(icon_name, icon_size);
-            }
-        }
-        if (this->big_thumbnail_)
-        {
-            g_object_set_data_full(G_OBJECT(this->big_thumbnail_),
-                                   "name",
-                                   icon_name,
-                                   (GDestroyNotify)std::free);
-        }
-        else
-        {
-            std::free(icon_name);
-        }
+        return nullptr;
     }
-    return this->big_thumbnail_ ? g_object_ref(this->big_thumbnail_) : nullptr;
+    return this->mime_type_->icon(true);
 }
 
 GdkPixbuf*
@@ -319,6 +353,12 @@ VFSFileInfo::small_icon() noexcept
     if (this->flags() & vfs::file_info_flags::desktop_entry && this->small_thumbnail_)
     {
         return g_object_ref(this->small_thumbnail_);
+    }
+
+    if (this->is_directory())
+    {
+        const auto icon_name = this->special_directory_get_icon_name();
+        return vfs_load_icon(icon_name, app_settings.icon_size_small());
     }
 
     if (!this->mime_type_)
