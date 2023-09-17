@@ -551,7 +551,7 @@ ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_t
                         mime_type->type(),
                         handlers.front()->menu_label.value()));
     }
-    else if (!xset_get_b(xset::name::arc_def_open))
+    else if (!xset_get_b(xset::name::archive_default_open_with_app))
     {
         // is archive handler set for this type?
         handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,

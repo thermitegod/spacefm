@@ -388,6 +388,7 @@ sources = files(
     'src/mime-type/mime-type.cxx',
 
     'src/ptk/ptk-app-chooser.cxx',
+    'src/ptk/ptk-archiver.cxx',
     'src/ptk/ptk-bookmark-view.cxx',
     'src/ptk/ptk-clipboard.cxx',
     'src/ptk/ptk-dialog.cxx',
@@ -396,7 +397,6 @@ sources = files(
     'src/ptk/ptk-file-actions-misc.cxx',
     'src/ptk/ptk-file-actions-open.cxx',
     'src/ptk/ptk-file-actions-rename.cxx',
-    'src/ptk/ptk-file-archiver.cxx',
     'src/ptk/ptk-file-browser.cxx',
     'src/ptk/ptk-file-list.cxx',
     'src/ptk/ptk-file-menu.cxx',

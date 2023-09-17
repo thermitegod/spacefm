@@ -243,7 +243,7 @@ inline constexpr std::array<Handler, 13> handlers_arc{
         "RAR",
         "application/x-rar",
         "*.rar *.RAR",
-        "command rar a -r %o %N",
+        "rar a -r %o %N",
         true,
         "unrar -o- x %x",
         true,
@@ -2664,10 +2664,10 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
     static constexpr std::array<xset::name, 4> arcnames{
-        xset::name::arc_def_open,
-        xset::name::arc_def_ex,
-        xset::name::arc_def_exto,
-        xset::name::arc_def_list,
+        xset::name::archive_default_open_with_app,
+        xset::name::archive_default_extract,
+        xset::name::archive_default_extract_to,
+        xset::name::archive_default_open_with_archiver,
     };
 
     for (const xset::name arcname : arcnames)
@@ -2730,32 +2730,31 @@ on_options_button_clicked(GtkWidget* btn, HandlerData* hnd)
             // Archive options
             xset_context_new();
             gtk_container_add(GTK_CONTAINER(popup), gtk_separator_menu_item_new());
-            set = xset_get(xset::name::arc_def_open);
+            set = xset_get(xset::name::archive_default_open_with_app);
             // do NOT use set = xset_set_cb here or wrong set is passed
-            xset_set_cb(xset::name::arc_def_open, (GFunc)on_archive_default, set);
+            xset_set_cb(xset::name::archive_default_open_with_app, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, nullptr);
             xset_t set_radio = set;
 
-            set = xset_get(xset::name::arc_def_ex);
-            xset_set_cb(xset::name::arc_def_ex, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::archive_default_extract);
+            xset_set_cb(xset::name::archive_default_extract, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
-            set = xset_get(xset::name::arc_def_exto);
-            xset_set_cb(xset::name::arc_def_exto, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::archive_default_extract_to);
+            xset_set_cb(xset::name::archive_default_extract_to, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
-            set = xset_get(xset::name::arc_def_list);
-            xset_set_cb(xset::name::arc_def_list, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::archive_default_open_with_archiver);
+            xset_set_cb(xset::name::archive_default_open_with_archiver,
+                        (GFunc)on_archive_default,
+                        set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
-
-            set = xset_get(xset::name::arc_def_write);
-            set->disable = geteuid() == 0 || !xset_get_b(xset::name::arc_def_parent);
 
             // temp remove unwanted items from Archive Defaults submenu
-            set = xset_get(xset::name::arc_default);
+            set = xset_get(xset::name::archive_default);
             const auto old_desc = set->desc;
-            set->desc = "arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
-                        "arc_def_parent arc_def_write";
+            set->desc = "archive_default_open_with_app archive_default_extract "
+                        "archive_default_extract_to archive_default_open_with_archiver";
             xset_add_menuitem(hnd->browser, popup, accel_group, set);
             set->desc = old_desc;
         }

@@ -41,10 +41,10 @@
 
 #include "ptk/ptk-dialog.hxx"
 
+#include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-archiver.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-file-archiver.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 
@@ -67,12 +67,12 @@ open_archives_with_handler(const std::shared_ptr<ParentInfo>& parent,
                            const std::span<const vfs::file_info> selected_files,
                            const std::filesystem::path& full_path, const vfs::mime_type& mime_type)
 {
-    if (xset_get_b(xset::name::arc_def_open))
+    if (xset_get_b(xset::name::archive_default_open_with_app))
     {                 // user has open archives with app option enabled
         return false; // do not handle these files
     }
 
-    const bool extract_here = xset_get_b(xset::name::arc_def_ex);
+    const bool extract_here = xset_get_b(xset::name::archive_default_extract);
     std::filesystem::path dest_dir;
     ptk::handler::archive cmd;
 
@@ -83,12 +83,12 @@ open_archives_with_handler(const std::shared_ptr<ParentInfo>& parent,
         cmd = ptk::handler::archive::extract;
         dest_dir = parent->cwd;
     }
-    else if (extract_here || xset_get_b(xset::name::arc_def_exto))
+    else if (extract_here || xset_get_b(xset::name::archive_default_extract_to))
     {
         // Extract Here but no write access or Extract To option
         cmd = ptk::handler::archive::extract;
     }
-    else if (xset_get_b(xset::name::arc_def_list))
+    else if (xset_get_b(xset::name::archive_default_open_with_archiver))
     {
         // List contents
         cmd = ptk::handler::archive::list;
@@ -113,12 +113,15 @@ open_archives_with_handler(const std::shared_ptr<ParentInfo>& parent,
         return false; // do not handle these files
     }
 
-    ptk_file_archiver_extract(parent->file_browser,
-                              selected_files,
-                              parent->cwd,
-                              dest_dir,
-                              magic_enum::enum_integer(cmd),
-                              true);
+    if (cmd == ptk::handler::archive::extract)
+    {
+        ptk_file_archiver_extract(parent->file_browser, selected_files, dest_dir);
+    }
+    else // ptk::handler::archive::list
+    {
+        ptk_file_archiver_open(parent->file_browser, selected_files);
+    }
+
     return true; // all files handled
 }
 

@@ -50,15 +50,15 @@
 
 #include "ptk/ptk-dialog.hxx"
 
+#include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-archiver.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-actions-open.hxx"
 #include "ptk/ptk-file-actions-misc.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
-#include "ptk/ptk-file-archiver.hxx"
 #include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-task-view.hxx"
 
 #include "settings/app.hxx"
@@ -104,7 +104,7 @@ static void on_popup_rename_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_compress_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_extract_here_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_extract_to_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
-static void on_popup_extract_list_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
+static void on_popup_extract_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_new_folder_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_new_text_file_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_new_link_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -444,10 +444,10 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
 {
     (void)menuitem;
     static constexpr std::array<xset::name, 4> arcnames{
-        xset::name::arc_def_open,
-        xset::name::arc_def_ex,
-        xset::name::arc_def_exto,
-        xset::name::arc_def_list,
+        xset::name::archive_default_open_with_app,
+        xset::name::archive_default_extract,
+        xset::name::archive_default_extract_to,
+        xset::name::archive_default_open_with_archiver,
     };
 
     for (const xset::name arcname : arcnames)
@@ -986,9 +986,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         // Prepare archive commands
         std::vector<xset_t> handlers;
 
-        xset_t set_arc_extract = nullptr;
-        xset_t set_arc_extractto;
-        xset_t set_arc_list;
+        xset_t set_archive_extract = nullptr;
+        xset_t set_archive_extract_to = nullptr;
+        xset_t set_archive_open = nullptr;
+
         handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,
                                                  ptk::handler::archive::extract,
                                                  file_path,
@@ -998,79 +999,78 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                                                  false);
         if (!handlers.empty())
         {
-            set_arc_extract = xset_get(xset::name::arc_extract);
-            xset_set_cb(set_arc_extract, (GFunc)on_popup_extract_here_activate, data);
-            xset_set_ob1(set_arc_extract, "set", set_arc_extract);
-            set_arc_extract->disable = no_write_access;
+            set_archive_extract = xset_get(xset::name::archive_extract);
+            xset_set_cb(set_archive_extract, (GFunc)on_popup_extract_here_activate, data);
+            set_archive_extract->disable = no_write_access;
 
-            set_arc_extractto = xset_get(xset::name::arc_extractto);
-            xset_set_cb(set_arc_extractto, (GFunc)on_popup_extract_to_activate, data);
-            xset_set_ob1(set_arc_extractto, "set", set_arc_extractto);
+            set_archive_extract_to = xset_get(xset::name::archive_extract_to);
+            xset_set_cb(set_archive_extract_to, (GFunc)on_popup_extract_to_activate, data);
 
-            set_arc_list = xset_get(xset::name::arc_list);
-            xset_set_cb(set_arc_list, (GFunc)on_popup_extract_list_activate, data);
-            xset_set_ob1(set_arc_list, "set", set_arc_list);
+            set_archive_open = xset_get(xset::name::archive_open);
+            xset_set_cb(set_archive_open, (GFunc)on_popup_extract_open_activate, data);
 
-            set = xset_get(xset::name::arc_def_open);
+            set = xset_get(xset::name::archive_default_open_with_app);
             // do NOT use set = xset_set_cb here or wrong set is passed
-            xset_set_cb(xset::name::arc_def_open, (GFunc)on_archive_default, set);
+            xset_set_cb(xset::name::archive_default_open_with_app, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, nullptr);
             set_radio = set;
 
-            set = xset_get(xset::name::arc_def_ex);
-            xset_set_cb(xset::name::arc_def_ex, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::archive_default_extract);
+            xset_set_cb(xset::name::archive_default_extract, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
-            set = xset_get(xset::name::arc_def_exto);
-            xset_set_cb(xset::name::arc_def_exto, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::archive_default_extract_to);
+            xset_set_cb(xset::name::archive_default_extract_to, (GFunc)on_archive_default, set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
-            set = xset_get(xset::name::arc_def_list);
-            xset_set_cb(xset::name::arc_def_list, (GFunc)on_archive_default, set);
+            set = xset_get(xset::name::archive_default_open_with_archiver);
+            xset_set_cb(xset::name::archive_default_open_with_archiver,
+                        (GFunc)on_archive_default,
+                        set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
-
-            set = xset_get(xset::name::arc_def_write);
-            set->disable = geteuid() == 0 || !xset_get_b(xset::name::arc_def_parent);
 
             xset_set_cb(xset::name::arc_conf2, (GFunc)on_archive_show_config, data);
 
-            if (!xset_get_b(xset::name::arc_def_open))
+            if (!xset_get_b(xset::name::archive_default_open_with_app))
             {
                 // archives are not set to open with app, so list archive
                 // functions before file handlers and associated apps
 
                 // list active function first
-                if (xset_get_b(xset::name::arc_def_ex))
+                if (xset_get_b(xset::name::archive_default_extract))
                 {
-                    xset_add_menuitem(browser, submenu, accel_group, set_arc_extract);
-                    set_arc_extract = nullptr;
+                    xset_add_menuitem(browser, submenu, accel_group, set_archive_extract);
+                    set_archive_extract = nullptr;
                 }
-                else if (xset_get_b(xset::name::arc_def_exto))
+                else if (xset_get_b(xset::name::archive_default_extract_to))
                 {
-                    xset_add_menuitem(browser, submenu, accel_group, set_arc_extractto);
-                    set_arc_extractto = nullptr;
+                    xset_add_menuitem(browser, submenu, accel_group, set_archive_extract_to);
+                    set_archive_extract_to = nullptr;
                 }
                 else
                 {
-                    xset_add_menuitem(browser, submenu, accel_group, set_arc_list);
-                    set_arc_list = nullptr;
+                    xset_add_menuitem(browser, submenu, accel_group, set_archive_open);
+                    set_archive_open = nullptr;
                 }
 
                 // add others
-                if (set_arc_extract)
+                if (set_archive_extract)
                 {
-                    xset_add_menuitem(browser, submenu, accel_group, set_arc_extract);
+                    xset_add_menuitem(browser, submenu, accel_group, set_archive_extract);
                 }
-                if (set_arc_extractto)
+                if (set_archive_extract_to)
                 {
-                    xset_add_menuitem(browser, submenu, accel_group, set_arc_extractto);
+                    xset_add_menuitem(browser, submenu, accel_group, set_archive_extract_to);
                 }
-                if (set_arc_list)
+                if (set_archive_open)
                 {
-                    xset_add_menuitem(browser, submenu, accel_group, set_arc_list);
+                    xset_add_menuitem(browser, submenu, accel_group, set_archive_open);
                 }
-                xset_add_menuitem(browser, submenu, accel_group, xset_get(xset::name::arc_default));
-                set_arc_extract = nullptr;
+                xset_add_menuitem(browser,
+                                  submenu,
+                                  accel_group,
+                                  xset_get(xset::name::archive_default));
+                set_archive_extract = nullptr;
 
                 // separator
                 item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
@@ -1273,7 +1273,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             }
         }
 
-        if (set_arc_extract)
+        if (set_archive_extract)
         {
             // archives are set to open with app, so list archive
             // functions after associated apps
@@ -1282,10 +1282,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
             gtk_menu_shell_append(GTK_MENU_SHELL(submenu), GTK_WIDGET(item));
 
-            xset_add_menuitem(browser, submenu, accel_group, set_arc_extract);
-            xset_add_menuitem(browser, submenu, accel_group, set_arc_extractto);
-            xset_add_menuitem(browser, submenu, accel_group, set_arc_list);
-            xset_add_menuitem(browser, submenu, accel_group, xset_get(xset::name::arc_default));
+            xset_add_menuitem(browser, submenu, accel_group, set_archive_extract);
+            xset_add_menuitem(browser, submenu, accel_group, set_archive_extract_to);
+            xset_add_menuitem(browser, submenu, accel_group, set_archive_open);
+            xset_add_menuitem(browser, submenu, accel_group, xset_get(xset::name::archive_default));
         }
 
         g_signal_connect(submenu, "key-press-event", G_CALLBACK(app_menu_keypress), data);
@@ -2632,43 +2632,29 @@ static void
 on_popup_compress_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    ptk_file_archiver_create(data->browser, data->sel_files, data->cwd);
+    ptk_file_archiver_create(data->browser, data->sel_files);
 }
 
 static void
 on_popup_extract_to_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk_file_archiver_extract(data->browser,
-                              data->sel_files,
-                              data->cwd,
-                              "",
-                              ptk::handler::archive::extract,
-                              menuitem ? true : false);
+    (void)menuitem;
+    ptk_file_archiver_extract(data->browser, data->sel_files, "");
 }
 
 static void
 on_popup_extract_here_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk_file_archiver_extract(data->browser,
-                              data->sel_files,
-                              data->cwd,
-                              data->cwd,
-                              ptk::handler::archive::extract,
-                              menuitem ? true : false);
+    (void)menuitem;
+    ptk_file_archiver_extract(data->browser, data->sel_files, data->cwd);
 }
 
 static void
-on_popup_extract_list_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
+on_popup_extract_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
+    (void)menuitem;
     // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk_file_archiver_extract(data->browser,
-                              data->sel_files,
-                              data->cwd,
-                              "",
-                              ptk::handler::archive::list,
-                              menuitem ? true : false);
+    ptk_file_archiver_open(data->browser, data->sel_files);
 }
 
 static void
@@ -2875,17 +2861,17 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
     }
     else if (ztd::startswith(set->name, "arc_"))
     {
-        if (set->xset_name == xset::name::arc_extract)
+        if (set->xset_name == xset::name::archive_extract)
         {
             on_popup_extract_here_activate(nullptr, data);
         }
-        else if (set->xset_name == xset::name::arc_extractto)
+        else if (set->xset_name == xset::name::archive_extract_to)
         {
             on_popup_extract_to_activate(nullptr, data);
         }
-        else if (set->xset_name == xset::name::arc_list)
+        else if (set->xset_name == xset::name::archive_open)
         {
-            on_popup_extract_list_activate(nullptr, data);
+            on_popup_extract_open_activate(nullptr, data);
         }
         else if (set->xset_name == xset::name::arc_conf2)
         {

@@ -1197,52 +1197,42 @@ xset_defaults()
     xset_set(xset::name::open_in_panel3, xset::var::menu_label, "Panel _3");
     xset_set(xset::name::open_in_panel4, xset::var::menu_label, "Panel _4");
 
-    set = xset_get(xset::name::arc_extract);
-    xset_set_var(set, xset::var::menu_label, "_Extract");
+    set = xset_get(xset::name::archive_extract);
+    xset_set_var(set, xset::var::menu_label, "Archive Extract");
     xset_set_var(set, xset::var::icn, "gtk-convert");
 
-    set = xset_get(xset::name::arc_extractto);
-    xset_set_var(set, xset::var::menu_label, "Extract _To");
+    set = xset_get(xset::name::archive_extract_to);
+    xset_set_var(set, xset::var::menu_label, "Archive Extract To");
     xset_set_var(set, xset::var::icn, "gtk-convert");
 
-    set = xset_get(xset::name::arc_list);
-    xset_set_var(set, xset::var::menu_label, "_List Contents");
+    set = xset_get(xset::name::archive_open);
+    xset_set_var(set, xset::var::menu_label, "Archive Open");
     xset_set_var(set, xset::var::icn, "gtk-file");
 
-    set = xset_get(xset::name::arc_default);
+    set = xset_get(xset::name::archive_default);
     xset_set_var(set, xset::var::menu_label, "_Archive Defaults");
     set->menu_style = xset::menu::submenu;
     xset_set_var(set,
                  xset::var::desc,
-                 "arc_conf2 separator arc_def_open arc_def_ex arc_def_exto arc_def_list separator "
-                 "arc_def_parent arc_def_write");
+                 "arc_conf2 separator archive_default_open_with_app archive_default_extract "
+                 "archive_default_extract_to archive_default_open_with_archiver");
 
-    set = xset_get(xset::name::arc_def_open);
-    xset_set_var(set, xset::var::menu_label, "_Open With App");
+    set = xset_get(xset::name::archive_default_open_with_app);
+    xset_set_var(set, xset::var::menu_label, "Open With App");
     set->menu_style = xset::menu::radio;
 
-    set = xset_get(xset::name::arc_def_ex);
-    xset_set_var(set, xset::var::menu_label, "_Extract");
+    set = xset_get(xset::name::archive_default_extract);
+    xset_set_var(set, xset::var::menu_label, "Extract");
     set->menu_style = xset::menu::radio;
     set->b = xset::b::xtrue;
 
-    set = xset_get(xset::name::arc_def_exto);
-    xset_set_var(set, xset::var::menu_label, "Extract _To");
+    set = xset_get(xset::name::archive_default_extract_to);
+    xset_set_var(set, xset::var::menu_label, "Extract To");
     set->menu_style = xset::menu::radio;
 
-    set = xset_get(xset::name::arc_def_list);
-    xset_set_var(set, xset::var::menu_label, "_List Contents");
+    set = xset_get(xset::name::archive_default_open_with_archiver);
+    xset_set_var(set, xset::var::menu_label, "Open With Archiver");
     set->menu_style = xset::menu::radio;
-
-    set = xset_get(xset::name::arc_def_parent);
-    xset_set_var(set, xset::var::menu_label, "_Create Subdirectory");
-    set->menu_style = xset::menu::check;
-    set->b = xset::b::xtrue;
-
-    set = xset_get(xset::name::arc_def_write);
-    xset_set_var(set, xset::var::menu_label, "_Write Access");
-    set->menu_style = xset::menu::check;
-    set->b = xset::b::xtrue;
 
     set = xset_get(xset::name::arc_conf2);
     xset_set_var(set, xset::var::menu_label, "Archive _Handlers");
@@ -2183,6 +2173,7 @@ xset_default_keys()
     def_key(xset::name::new_file, GDK_KEY_F, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(xset::name::new_directory, GDK_KEY_N, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(xset::name::new_link, GDK_KEY_L, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
+    // def_key(xset::name::new_archive, GDK_KEY_A, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(xset::name::main_new_window, GDK_KEY_n, GdkModifierType::GDK_CONTROL_MASK);
     def_key(xset::name::open_all, GDK_KEY_F6, 0);
     def_key(xset::name::main_full, GDK_KEY_F11, 0);

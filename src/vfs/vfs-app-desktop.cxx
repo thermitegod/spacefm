@@ -240,6 +240,12 @@ VFSAppDesktop::icon(i32 size) const noexcept
     return desktop_icon;
 }
 
+const std::vector<std::string>
+VFSAppDesktop::supported_mime_types() const noexcept
+{
+    return ztd::split(this->desktop_entry_.mime_type, ";");
+}
+
 bool
 VFSAppDesktop::open_multiple_files() const noexcept
 {
