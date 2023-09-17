@@ -955,8 +955,8 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.c_str());
     }
 
-    i32 width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
-    i32 height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
+    const auto width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
+    const auto height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1003,15 +1003,11 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         gtk_entry_set_text(GTK_ENTRY(w), path);
     }
 
+    // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-    if (width && height)
-    {
-        xset_set(xset::name::move_dlg_help, xset::var::x, std::to_string(width));
-        xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(height));
-    }
+    xset_set(xset::name::move_dlg_help, xset::var::x, std::to_string(allocation.width));
+    xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(allocation.height));
 
     gtk_widget_destroy(dlg);
 }
@@ -1046,15 +1042,15 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
                     : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
             GtkAllocation allocation;
             gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-            const i32 width = allocation.width;
-            const i32 height = allocation.height;
+            const auto width = allocation.width;
+            const auto height = allocation.height;
             gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), action);
             if (width && height)
             {
                 // under some circumstances, changing the action changes the size
                 gtk_window_set_position(GTK_WINDOW(dlg),
                                         GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
-                gtk_window_resize(GTK_WINDOW(dlg), width, height);
+                gtk_window_resize(GTK_WINDOW(dlg), allocation.width, allocation.height);
                 while (g_main_context_pending(nullptr))
                 {
                     g_main_context_iteration(nullptr, true);
@@ -1148,8 +1144,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(hbox);
 
-    i32 width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
-    i32 height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
+    const auto width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
+    const auto height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -1201,16 +1197,11 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         }
     }
 
-    // save size
+    // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-    if (width && height)
-    {
-        xset_set(xset::name::move_dlg_help, xset::var::x, std::to_string(width));
-        xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(height));
-    }
+    xset_set(xset::name::move_dlg_help, xset::var::x, std::to_string(allocation.width));
+    xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(allocation.height));
 
     // save mode
     for (const auto [index, value] : ztd::enumerate(misc_modes))

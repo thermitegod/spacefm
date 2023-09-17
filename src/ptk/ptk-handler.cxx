@@ -2809,8 +2809,8 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     ptk_set_window_icon(GTK_WINDOW(hnd->dlg));
 
     // Setting saved dialog size
-    i32 width = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::x);
-    i32 height = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::y);
+    const auto width = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::x);
+    const auto height = xset_get_int(handler_conf_xsets.at(ptk::handler::mode::arc), xset::var::y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(hnd->dlg), width, height);
@@ -3321,20 +3321,12 @@ ptk_handler_show_config(i32 mode, PtkFileBrowser* file_browser, xset_t def_handl
     // Fetching dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(hnd->dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-
-    // Checking if they are valid
-    if (width && height)
-    {
-        // They are - saving
-        xset_set(handler_conf_xsets.at(ptk::handler::mode::arc),
-                 xset::var::x,
-                 std::to_string(width));
-        xset_set(handler_conf_xsets.at(ptk::handler::mode::arc),
-                 xset::var::y,
-                 std::to_string(height));
-    }
+    xset_set(handler_conf_xsets.at(ptk::handler::mode::arc),
+             xset::var::x,
+             std::to_string(allocation.width));
+    xset_set(handler_conf_xsets.at(ptk::handler::mode::arc),
+             xset::var::y,
+             std::to_string(allocation.height));
 
     // Clearing up dialog
     delete hnd;

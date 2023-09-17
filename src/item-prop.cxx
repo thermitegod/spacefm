@@ -1727,8 +1727,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         nullptr);
     ptk_set_window_icon(GTK_WINDOW(ctxt->dlg));
 
-    i32 width = xset_get_int(xset::name::context_dlg, xset::var::x);
-    i32 height = xset_get_int(xset::name::context_dlg, xset::var::y);
+    const auto width = xset_get_int(xset::name::context_dlg, xset::var::x);
+    const auto height = xset_get_int(xset::name::context_dlg, xset::var::y);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(ctxt->dlg), width, height);
@@ -2550,15 +2550,11 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
         }
     }
 
+    // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(ctxt->dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-    if (width && height)
-    {
-        xset_set(xset::name::context_dlg, xset::var::x, std::to_string(width));
-        xset_set(xset::name::context_dlg, xset::var::y, std::to_string(height));
-    }
+    xset_set(xset::name::context_dlg, xset::var::x, std::to_string(allocation.width));
+    xset_set(xset::name::context_dlg, xset::var::y, std::to_string(allocation.height));
 
     delete ctxt;
 }

@@ -189,8 +189,8 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                                             nullptr);
     ptk_set_window_icon(GTK_WINDOW(dlg));
 
-    i32 width = xset_get_int(xset::name::text_dlg, xset::var::s);
-    i32 height = xset_get_int(xset::name::text_dlg, xset::var::z);
+    const auto width = xset_get_int(xset::name::text_dlg, xset::var::s);
+    const auto height = xset_get_int(xset::name::text_dlg, xset::var::z);
     if (width && height)
     {
         gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
@@ -347,14 +347,11 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
         }
     }
 
+    // Saving dialog dimensions
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-    if (width && height)
-    {
-        xset_set(xset::name::text_dlg, xset::var::s, std::to_string(width));
-        xset_set(xset::name::text_dlg, xset::var::z, std::to_string(height));
-    }
+    xset_set(xset::name::text_dlg, xset::var::s, std::to_string(allocation.width));
+    xset_set(xset::name::text_dlg, xset::var::z, std::to_string(allocation.height));
+
     gtk_widget_destroy(dlg);
 
     return std::make_tuple(ret, answer);
@@ -417,8 +414,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
         }
     }
 
-    i32 width = xset_get_int(xset::name::file_dlg, xset::var::x);
-    i32 height = xset_get_int(xset::name::file_dlg, xset::var::y);
+    const auto width = xset_get_int(xset::name::file_dlg, xset::var::x);
+    const auto height = xset_get_int(xset::name::file_dlg, xset::var::y);
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
@@ -434,15 +431,11 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
 
     const auto response = gtk4_dialog_run(GTK_DIALOG(dlg));
 
+    // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    width = allocation.width;
-    height = allocation.height;
-    if (width && height)
-    {
-        xset_set(xset::name::file_dlg, xset::var::x, std::to_string(width));
-        xset_set(xset::name::file_dlg, xset::var::y, std::to_string(height));
-    }
+    xset_set(xset::name::file_dlg, xset::var::x, std::to_string(allocation.width));
+    xset_set(xset::name::file_dlg, xset::var::y, std::to_string(allocation.height));
 
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
