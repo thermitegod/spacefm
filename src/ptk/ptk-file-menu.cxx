@@ -1621,15 +1621,7 @@ static void
 on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-
-    std::vector<vfs::file_info> sel_files = data->sel_files;
-
-    if (sel_files.empty())
-    {
-        sel_files.emplace_back(data->file);
-    }
-
-    ptk_open_files_with_app(data->cwd, sel_files, "", data->browser, true, false);
+    ptk_open_files_with_app(data->cwd, data->sel_files, "", data->browser, true, false);
 }
 
 static void
@@ -1656,15 +1648,13 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
     }
-    const auto app = ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
-    if (app)
+
+    const auto check_app =
+        ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
+    if (check_app)
     {
-        std::vector<vfs::file_info> sel_files = data->sel_files;
-        if (sel_files.empty())
-        {
-            sel_files.emplace_back(data->file);
-        }
-        ptk_open_files_with_app(data->cwd, sel_files, app.value(), data->browser, false, false);
+        const auto& app = check_app.value();
+        ptk_open_files_with_app(data->cwd, data->sel_files, app, data->browser, false, false);
     }
 }
 
@@ -1683,13 +1673,7 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         return;
     }
-
-    std::vector<vfs::file_info> sel_files = data->sel_files;
-    if (sel_files.empty())
-    {
-        sel_files.emplace_back(data->file);
-    }
-    ptk_open_files_with_app(data->cwd, sel_files, "", data->browser, false, true);
+    ptk_open_files_with_app(data->cwd, data->sel_files, "", data->browser, false, true);
 }
 
 static void
@@ -1719,12 +1703,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
         app = desktop->name();
     }
 
-    std::vector<vfs::file_info> sel_files = data->sel_files;
-    if (sel_files.empty())
-    {
-        sel_files.emplace_back(data->file);
-    }
-    ptk_open_files_with_app(data->cwd, sel_files, app, data->browser, false, false);
+    ptk_open_files_with_app(data->cwd, data->sel_files, app, data->browser, false, false);
 }
 
 namespace ptk::file_menu

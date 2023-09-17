@@ -273,6 +273,11 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                         const std::string_view app_desktop, PtkFileBrowser* file_browser,
                         bool xforce, bool xnever)
 {
+    if (selected_files.empty())
+    {
+        return;
+    }
+
     const auto parent = std::make_shared<ParentInfo>(file_browser, cwd);
 
     if (!app_desktop.empty())
