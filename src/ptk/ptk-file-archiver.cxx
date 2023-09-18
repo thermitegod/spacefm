@@ -408,7 +408,7 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
             gtk_list_store_set(GTK_LIST_STORE(list),
                                &iter,
                                file_archiver::column::xset_name,
-                               archive_handlers.data(),
+                               archive_handler.data(),
                                file_archiver::extensions_column::handler_extension,
                                extensions.data(),
                                -1);
