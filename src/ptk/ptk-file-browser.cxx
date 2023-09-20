@@ -3760,10 +3760,6 @@ PtkFileBrowser::selected_files() noexcept
 void
 PtkFileBrowser::open_selected_files() noexcept
 {
-    if (xset_opener(this, 1))
-    {
-        return;
-    }
     this->open_selected_files_with_app();
 }
 

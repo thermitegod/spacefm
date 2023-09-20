@@ -740,6 +740,8 @@ on_context_button_press(GtkWidget* widget, ContextData* ctxt)
 static void
 on_context_sub_changed(GtkComboBox* box, ContextData* ctxt)
 {
+    ztd::logger::debug("on_context_sub_changed");
+
     (void)box;
     GtkTreeIter it;
     char* value;
@@ -2078,7 +2080,8 @@ xset_item_prop_dlg(const xset_context_t& context, xset_t set, i32 page)
     ctxt->set = set;
 
     // set match / action
-    char* elements = ztd::strdup(set->context.value());
+
+    char* elements = ztd::strdup(set->context.value_or(nullptr));
     char* action = get_element_next(&elements);
     char* match = get_element_next(&elements);
     if (match && action)

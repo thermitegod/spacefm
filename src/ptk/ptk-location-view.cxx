@@ -350,11 +350,6 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         return;
     }
 
-    if (xset_opener(file_browser, 2))
-    {
-        return;
-    }
-
     if (!vol->is_mounted() && vol->is_device_type(vfs::volume_device_type::block))
     {
         try_mount(view, vol);
@@ -1558,10 +1553,6 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
             // left-click - mount & open
             // device opener?  note that context may be based on devices list sel
             // will not work for desktop because no DesktopWindow currently available
-            if (file_browser && xset_opener(file_browser, 2))
-            {
-                return;
-            }
 
             if (file_browser)
             {

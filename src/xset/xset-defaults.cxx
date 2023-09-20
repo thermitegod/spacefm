@@ -836,10 +836,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Preferences");
     xset_set_var(set, xset::var::icn, "gtk-preferences");
 
-    set = xset_get(xset::name::main_tool);
-    xset_set_var(set, xset::var::menu_label, "_Tool");
-    set->menu_style = xset::menu::submenu;
-
     set = xset_get(xset::name::root_bar); // in Preferences
     set->b = xset::b::xtrue;
 

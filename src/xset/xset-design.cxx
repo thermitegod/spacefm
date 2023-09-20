@@ -296,52 +296,6 @@ xset_design_job_set_app(xset_t set)
 }
 
 static void
-xset_design_job_set_command(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    if (ztd::startswith(set->name, "open_all_type_"))
-    {
-        const std::string name = ztd::removeprefix(set->name, "open_all_type_");
-
-        const auto response = ptk_show_message(
-            GTK_WINDOW(parent),
-            GtkMessageType::GTK_MESSAGE_INFO,
-            "New Context Command",
-            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-            std::format("You are adding a custom command to the Default menu item.  This item will "
-                        "automatically have a pre-context - it will only appear when the MIME type "
-                        "of the first selected file matches the current type '{}'.\n\nAdd commands "
-                        "or menus here which you only want to appear for this one MIME type.",
-                        name.empty() ? "(none)" : name));
-
-        if (response != GtkResponseType::GTK_RESPONSE_OK)
-        {
-            return;
-        }
-    }
-
-    const auto [response, answer] = xset_text_dialog(parent,
-                                                     "Set Item Name",
-                                                     enter_menu_name_new,
-                                                     "",
-                                                     "New _Command",
-                                                     "",
-                                                     false);
-
-    const std::string name = answer;
-
-    // add new menu item
-    xset_t newset = xset_custom_new();
-    xset_custom_insert_after(set, newset);
-
-    newset->menu_label = name;
-    newset->browser = set->browser;
-
-    xset_item_prop_dlg(xset_context, newset, 2);
-}
-
-static void
 xset_design_job_set_submenu(xset_t set)
 {
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
@@ -815,9 +769,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             break;
         case xset::job::app:
             xset_design_job_set_app(set);
-            break;
-        case xset::job::command:
-            xset_design_job_set_command(set);
             break;
         case xset::job::submenu:
         case xset::job::submenu_book:

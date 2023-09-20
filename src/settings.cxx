@@ -449,123 +449,6 @@ free_settings()
     }
 }
 
-bool
-xset_opener(PtkFileBrowser* file_browser, const char job)
-{ // find an opener for job
-    xset_t set;
-    xset_t open_all_set;
-    xset_t tset;
-    xset_t open_all_tset;
-    xset_context_t context;
-    bool found = false;
-    char pinned;
-
-    for (xset_t set2 : xsets)
-    {
-        assert(set2 != nullptr);
-
-        if (!set2->lock && set2->opener == job && set2->tool == xset::tool::NOT &&
-            set2->menu_style != xset::menu::submenu && set2->menu_style != xset::menu::sep)
-        {
-            set = set2;
-
-            if (!context)
-            {
-                context = xset_context_new();
-                if (!context)
-                {
-                    return false;
-                }
-                if (file_browser)
-                {
-                    main_context_fill(file_browser, context);
-                }
-                else
-                {
-                    return false;
-                }
-
-                if (!context->valid)
-                {
-                    return false;
-                }
-
-                // get mime type open_all_type set
-                std::string str = context->var[item_prop::context::item::mime];
-                str = ztd::replace(str, "-", "_");
-                str = ztd::replace(str, " ", "");
-                open_all_set = xset_is(std::format("open_all_type_{}", str));
-            }
-
-            // test context
-            if (set->context)
-            {
-                const item_prop::context::state context_action =
-                    xset_context_test(context, set->context.value(), false);
-                if (context_action == item_prop::context::state::hide ||
-                    context_action == item_prop::context::state::disable)
-                {
-                    continue;
-                }
-            }
-
-            // valid custom type?
-            const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-            if (cmd_type != xset::cmd::app && cmd_type != xset::cmd::line &&
-                cmd_type != xset::cmd::script)
-            {
-                continue;
-            }
-
-            // is set pinned to open_all_type for pre-context?
-            pinned = 0;
-            for (xset_t set3 : xsets)
-            {
-                assert(set3 != nullptr);
-
-                if (set3->next && ztd::startswith(set3->name, "open_all_type_"))
-                {
-                    tset = open_all_tset = set3;
-                    while (tset->next)
-                    {
-                        if (ztd::same(set->name, tset->next.value()))
-                        {
-                            // found pinned to open_all_type
-                            if (open_all_tset == open_all_set)
-                            {
-                                // correct mime type
-                                pinned = 2;
-                            }
-                            else
-                            {
-                                // wrong mime type
-                                pinned = 1;
-                            }
-                            break;
-                        }
-                        if (tset->next)
-                        {
-                            tset = xset_is(tset->next.value());
-                        }
-                    }
-                }
-            }
-            if (pinned == 1)
-            {
-                continue;
-            }
-
-            // valid
-            found = true;
-            set->browser = file_browser;
-            const std::string clean = clean_label(set->menu_label.value(), false, false);
-            ztd::logger::info("Selected Menu Item '{}' As Handler", clean);
-            xset_menu_cb(nullptr, set); // also does custom activate
-        }
-    }
-    return found;
-}
-
 GtkWidget*
 xset_get_image(const std::string_view icon, GtkIconSize icon_size)
 {
@@ -866,214 +749,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     return item;
 }
 
-static void
-xset_custom_activate(GtkWidget* item, xset_t set)
-{
-    (void)item;
-    GtkWidget* parent;
-    GtkWidget* task_view = nullptr;
-    std::string value;
-
-    // builtin toolitem?
-    if (set->tool > xset::tool::custom)
-    {
-        xset_builtin_tool_activate(set->tool, set, nullptr);
-        return;
-    }
-
-    std::filesystem::path cwd;
-    if (set->browser)
-    {
-        parent = GTK_WIDGET(set->browser);
-        task_view = set->browser->task_view();
-        cwd = set->browser->cwd();
-    }
-    else
-    {
-        ztd::logger::warn("xset_custom_activate !browser !desktop");
-        return;
-    }
-
-    // name
-    if (!(!set->lock &&
-          xset::cmd(xset_get_int(set, xset::var::x)) > xset::cmd::script /*app or bookmark*/))
-    {
-        if (!set->menu_label ||
-            (set->menu_label && ztd::same(set->menu_label.value(), "New _Command")))
-        {
-            const auto [response, answer] = xset_text_dialog(parent,
-                                                             "Change Item Name",
-                                                             enter_menu_name_new,
-                                                             "",
-                                                             set->menu_label.value(),
-                                                             "",
-                                                             false);
-
-            set->menu_label = answer;
-            if (!response)
-            {
-                return;
-            }
-        }
-    }
-
-    // variable value
-    switch (set->menu_style)
-    {
-        case xset::menu::check:
-            value = std::format("{:d}", set->b == xset::b::xtrue ? 1 : 0);
-            break;
-        case xset::menu::string:
-            value = set->s.value();
-            break;
-        case xset::menu::normal:
-        case xset::menu::radio:
-        case xset::menu::filedlg:
-        case xset::menu::fontdlg:
-        case xset::menu::icon:
-        case xset::menu::colordlg: // deprecated
-        case xset::menu::confirm:
-        case xset::menu::reserved_03:
-        case xset::menu::reserved_04:
-        case xset::menu::reserved_05:
-        case xset::menu::reserved_06:
-        case xset::menu::reserved_07:
-        case xset::menu::reserved_08:
-        case xset::menu::reserved_09:
-        case xset::menu::reserved_10:
-        case xset::menu::submenu:
-        case xset::menu::sep:
-            if (set->menu_label)
-            {
-                value = set->menu_label.value();
-            }
-            break;
-    }
-
-    // is not activatable command?
-    if (!(!set->lock && set->menu_style < xset::menu::submenu))
-    {
-        xset_item_prop_dlg(xset_context, set, 0);
-        return;
-    }
-
-    // command
-    std::string command;
-    bool app_no_sync = false;
-    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-    switch (cmd_type)
-    {
-        case xset::cmd::line:
-        { // line
-            if (!set->line)
-            {
-                xset_item_prop_dlg(xset_context, set, 2);
-                return;
-            }
-            command = replace_line_subs(set->line.value());
-            command = ztd::replace(command, "\\n", "\n");
-            command = ztd::replace(command, "\\t", "\t");
-            break;
-        }
-        case xset::cmd::script:
-        { // script
-            command = xset_custom_get_script(set, false);
-            if (command.empty())
-            {
-                return;
-            }
-            break;
-        }
-        case xset::cmd::app:
-        { // app or executable
-            if (!set->z)
-            {
-                xset_item_prop_dlg(xset_context, set, 0);
-                return;
-            }
-            else if (ztd::endswith(set->z.value(), ".desktop"))
-            {
-                const vfs::desktop desktop = vfs_get_desktop(set->z.value());
-                if (!desktop->exec().empty())
-                {
-                    // get file list
-                    std::vector<vfs::file_info> selected_files;
-                    if (set->browser)
-                    {
-                        selected_files = set->browser->selected_files();
-                    }
-                    else
-                    {
-                        cwd = "/";
-                    }
-
-                    std::vector<std::filesystem::path> open_files;
-                    open_files.reserve(selected_files.size());
-                    for (const vfs::file_info file : selected_files)
-                    {
-                        const auto open_file = cwd / file->name();
-                        open_files.emplace_back(open_file);
-                    }
-
-                    // open in app
-                    try
-                    {
-                        desktop->open_files(cwd, open_files);
-                    }
-                    catch (const VFSAppDesktopException& e)
-                    {
-                        ptk_show_error(parent ? GTK_WINDOW(parent) : nullptr, "Error", e.what());
-                    }
-
-                    vfs_file_info_list_free(selected_files);
-                }
-                return;
-            }
-            else
-            {
-                command = ztd::shell::quote(set->z.value());
-                app_no_sync = true;
-            }
-            break;
-        }
-        case xset::cmd::bookmark:
-        case xset::cmd::invalid:
-            return;
-    }
-
-    // task
-    const std::string task_name = clean_label(set->menu_label.value(), false, false);
-    PtkFileTask* ptask = ptk_file_exec_new(task_name, cwd, parent, task_view);
-    // do not free cwd!
-    ptask->task->exec_browser = set->browser;
-    ptask->task->exec_command = command;
-    ptask->task->exec_set = set;
-
-    if (set->y)
-    {
-        ptask->task->exec_as_user = set->y.value();
-    }
-
-    if (set->icon)
-    {
-        ptask->task->exec_icon = set->icon.value();
-    }
-
-    ptask->task->current_dest = value; // temp storage
-    ptask->task->exec_terminal = set->in_terminal;
-    ptask->task->exec_keep_terminal = set->keep_terminal;
-    ptask->task->exec_sync = !app_no_sync && set->task;
-    ptask->task->exec_popup = set->task_pop;
-    ptask->task->exec_show_output = set->task_out;
-    ptask->task->exec_show_error = set->task_err;
-    ptask->task->exec_scroll_lock = set->scroll_lock;
-    ptask->task->exec_checksum = true;
-    ptask->task->exec_export = true;
-    // ptask->task->exec_keep_tmp = true;
-
-    ptk_file_task_run(ptask);
-}
-
 void
 xset_custom_insert_after(xset_t target, xset_t set)
 { // inserts single set 'set', no next
@@ -1253,8 +928,6 @@ xset_job_is_valid(xset_t set, xset::job job)
                     !open_all);
         case xset::job::edit:
             return !set->lock && set->menu_style < xset::menu::submenu;
-        case xset::job::command:
-            return true;
         case xset::job::cut:
             return !set->lock;
         case xset::job::copy:
@@ -1363,9 +1036,6 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
                     break;
                 case GDK_KEY_Delete:
                     job = xset::job::remove;
-                    break;
-                case GDK_KEY_Insert:
-                    job = xset::job::command;
                     break;
                 default:
                     break;
@@ -1572,8 +1242,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // New > Application
     newitem = xset_design_additem(submenu, "_Application", xset::job::app, insert_set);
 
-    // New > Command
-    newitem = xset_design_additem(submenu, "_Command", xset::job::command, insert_set);
     if (show_keys)
     {
         gtk_widget_add_accelerator(newitem,
@@ -1832,10 +1500,6 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                     // shift
                     job = xset::job::paste;
                     break;
-                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
-                    // ctrl + shift
-                    job = xset::job::command;
-                    break;
                 default:
                     break;
             }
@@ -1958,9 +1622,6 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                 case GDK_KEY_Delete:
                     job = xset::job::remove;
                     break;
-                case GDK_KEY_Insert:
-                    job = xset::job::command;
-                    break;
                 default:
                     break;
             }
@@ -2029,7 +1690,6 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 void
 xset_menu_cb(GtkWidget* item, xset_t set)
 {
-    GtkWidget* parent;
     GFunc cb_func = nullptr;
     void* cb_data = nullptr;
 
@@ -2045,7 +1705,7 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         cb_data = set->cb_data;
     }
 
-    parent = GTK_WIDGET(set->browser);
+    GtkWidget* parent = GTK_WIDGET(set->browser);
 
     switch (set->menu_style)
     {
@@ -2053,10 +1713,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             if (cb_func)
             {
                 cb_func(item, cb_data);
-            }
-            else if (!set->lock)
-            {
-                xset_custom_activate(item, set);
             }
             break;
         case xset::menu::sep:
@@ -2070,14 +1726,12 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             {
                 set->b = xset::b::xtrue;
             }
+
             if (cb_func)
             {
                 cb_func(item, cb_data);
             }
-            else if (!set->lock)
-            {
-                xset_custom_activate(item, set);
-            }
+
             if (set->tool == xset::tool::custom)
             {
                 set->browser->update_toolbar_widgets(set, xset::tool::invalid);
@@ -2120,10 +1774,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                     {
                         cb_func(item, cb_data);
                     }
-                    else if (!set->lock)
-                    {
-                        xset_custom_activate(item, set);
-                    }
                 }
             }
             else
@@ -2137,10 +1787,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                     {
                         cb_func(item, cb_data);
                     }
-                    else if (!set->lock)
-                    {
-                        xset_custom_activate(item, set);
-                    }
                 }
             }
         }
@@ -2153,10 +1799,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             if (cb_func)
             {
                 cb_func(item, cb_data);
-            }
-            else if (!set->lock)
-            {
-                xset_custom_activate(item, set);
             }
             break;
         case xset::menu::fontdlg:
@@ -2214,10 +1856,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             if (cb_func)
             {
                 cb_func(item, cb_data);
-            }
-            else if (!set->lock)
-            {
-                xset_custom_activate(item, set);
             }
             break;
     }
@@ -2473,10 +2111,6 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                 case GdkModifierType::GDK_SHIFT_MASK:
                     // shift
                     job = xset::job::paste;
-                    break;
-                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
-                    // ctrl + shift
-                    job = xset::job::command;
                     break;
                 default:
                     break;

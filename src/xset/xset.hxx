@@ -112,7 +112,6 @@ namespace xset
         out,
         bookmark,
         app,
-        command,
         submenu,
         submenu_book,
         sep,

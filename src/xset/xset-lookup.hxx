@@ -187,7 +187,6 @@ namespace xset
         main_full,
         main_design_mode,
         main_prefs,
-        main_tool,
         root_bar,
         view_thumb,
 

@@ -1334,31 +1334,6 @@ rebuild_menu_bookmarks(MainWindow* main_window, PtkFileBrowser* file_browser)
 }
 
 static void
-rebuild_menu_tools(MainWindow* main_window, PtkFileBrowser* file_browser)
-{
-    GtkAccelGroup* accel_group = gtk_accel_group_new();
-
-    GtkWidget* newmenu = gtk_menu_new();
-    xset_t child_set = nullptr;
-    xset_t set = xset_get(xset::name::main_tool);
-    if (!set->child)
-    {
-        child_set = xset_custom_new();
-        child_set->menu_label = "New _Command";
-        child_set->parent = xset::get_name_from_xsetname(xset::name::main_tool);
-        set->child = child_set->name;
-    }
-    else
-    {
-        child_set = xset_get(set->child.value());
-    }
-    xset_add_menuitem(file_browser, newmenu, accel_group, child_set);
-    gtk_widget_show_all(GTK_WIDGET(newmenu));
-    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->tool_menu_item), newmenu);
-}
-
-static void
 rebuild_menu_help(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     GtkAccelGroup* accel_group = gtk_accel_group_new();
@@ -1408,9 +1383,6 @@ rebuild_menus(MainWindow* main_window)
 
     // Bookmarks
     rebuild_menu_bookmarks(main_window, file_browser);
-
-    // Tools
-    rebuild_menu_tools(main_window, file_browser);
 
     // Help
     rebuild_menu_help(main_window, file_browser);
@@ -1465,13 +1437,9 @@ main_window_init(MainWindow* main_window)
 
     main_window->dev_menu_item = gtk_menu_item_new_with_mnemonic("_Devices");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->dev_menu_item);
-    main_window->dev_menu = nullptr;
 
     main_window->book_menu_item = gtk_menu_item_new_with_mnemonic("_Bookmarks");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->book_menu_item);
-
-    main_window->tool_menu_item = gtk_menu_item_new_with_mnemonic("_Tools");
-    gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->tool_menu_item);
 
     main_window->help_menu_item = gtk_menu_item_new_with_mnemonic("_Help");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->help_menu_item);

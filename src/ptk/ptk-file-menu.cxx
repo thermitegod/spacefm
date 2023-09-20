@@ -1605,10 +1605,6 @@ static void
 on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    if (xset_opener(data->browser, 1))
-    {
-        return;
-    }
     ptk_open_files_with_app(data->cwd, data->sel_files, "", data->browser, false, true);
 }
 

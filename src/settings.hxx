@@ -65,7 +65,6 @@ void xset_edit(GtkWidget* parent, const std::filesystem::path& path, bool force_
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                        xset_t set_parent, bool show_tooltips);
 
-bool xset_opener(PtkFileBrowser* file_browser, char job);
 const std::string xset_get_builtin_toolitem_label(xset::tool tool_type);
 
 ////////////////////////////////////////
