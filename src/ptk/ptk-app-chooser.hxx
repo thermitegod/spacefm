@@ -31,6 +31,3 @@ const std::optional<std::string> ptk_choose_app_for_mime_type(GtkWindow* parent,
                                                               bool focus_all_apps,
                                                               bool show_command, bool show_default,
                                                               bool dir_default);
-
-// Check if the user set the selected app default handler.
-void ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_type);

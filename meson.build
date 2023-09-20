@@ -402,7 +402,6 @@ sources = files(
     'src/ptk/ptk-file-menu.cxx',
     'src/ptk/ptk-file-properties.cxx',
     'src/ptk/ptk-file-task.cxx',
-    'src/ptk/ptk-handler.cxx',
     'src/ptk/ptk-keyboard.cxx',
     'src/ptk/ptk-location-view.cxx',
     'src/ptk/ptk-path-entry.cxx',

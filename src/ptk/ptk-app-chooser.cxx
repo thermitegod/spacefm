@@ -42,7 +42,6 @@
 
 #include "ptk/ptk-dialog.hxx"
 
-#include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-app-chooser.hxx"
 
 enum class app_chooser_column
@@ -526,60 +525,6 @@ on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
     }
 }
 
-void
-ptk_app_chooser_has_handler_warn(GtkWidget* parent, const vfs::mime_type& mime_type)
-{
-    // is file handler set for this type?
-    std::vector<xset_t> handlers = ptk_handler_file_has_handlers(ptk::handler::mode::file,
-                                                                 ptk::handler::mount::mount,
-                                                                 "",
-                                                                 mime_type,
-                                                                 false,
-                                                                 false,
-                                                                 true);
-    if (!handlers.empty())
-    {
-        ptk_show_message(
-            GTK_WINDOW(parent),
-            GtkMessageType::GTK_MESSAGE_INFO,
-            "MIME Type Has Handler",
-            GtkButtonsType::GTK_BUTTONS_OK,
-            std::format("Note:  MIME type '{}' is currently set to open with the '{}' file "
-                        "handler, rather than with your associated MIME application.\n\nYou may "
-                        "also need to disable this handler in Open|File Handlers for this type to "
-                        "be opened with your associated application by default.",
-                        mime_type->type(),
-                        handlers.front()->menu_label.value()));
-    }
-    else if (!xset_get_b(xset::name::archive_default_open_with_app))
-    {
-        // is archive handler set for this type?
-        handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,
-                                                 ptk::handler::archive::extract,
-                                                 "",
-                                                 mime_type,
-                                                 false,
-                                                 false,
-                                                 true);
-        if (!handlers.empty())
-        {
-            ptk_show_message(
-                GTK_WINDOW(parent),
-                GtkMessageType::GTK_MESSAGE_INFO,
-                "MIME Type Has Handler",
-                GtkButtonsType::GTK_BUTTONS_OK,
-                std::format(
-                    "Note:  MIME type '{}' is currently set to open with the '{}' archive handler, "
-                    "rather than with your associated MIME application.\n\nYou may also need to "
-                    "disable this handler in Open|Archive Defaults|Archive Handlers, OR select "
-                    "global option Open|Archive Defaults|Open With App, for this type to be opened "
-                    "with your associated application by default.",
-                    mime_type->type(),
-                    handlers.front()->menu_label.value()));
-        }
-    }
-}
-
 const std::optional<std::string>
 ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
                              bool focus_all_apps, bool show_command, bool show_default,
@@ -614,7 +559,6 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
             if (app_chooser_dialog_get_set_default(dialog))
             {
                 mime_type->set_default_action(app.value());
-                ptk_app_chooser_has_handler_warn(dialog, mime_type);
             }
             else if (/* !ztd::same(mime_type->get_type(), XDG_MIME_TYPE_UNKNOWN) && */
                      (dir_default || !ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY)))

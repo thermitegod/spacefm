@@ -260,25 +260,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "Ignore _No Policy");
     set->menu_style = xset::menu::check;
 
-    set = xset_get(xset::name::dev_mount_options);
-    xset_set_var(set, xset::var::menu_label, "_Mount Options");
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "Enter your comma- or space-separated list of default mount options below (%%o in "
-        "handlers).\n\nIn addition to regular options, you can also specify options to be added "
-        "or removed for a specific filesystem type by using the form OPTION+FSTYPE or "
-        "OPTION-FSTYPE.\n\nExample:  nosuid, sync+vfat, sync+ntfs, noatime, noatime-ext4\nThis "
-        "will add nosuid and noatime for all filesystem types, add sync for vfat and ntfs only, "
-        "and remove noatime for ext4.\n\nNote: Some options, such as nosuid, may be added by the "
-        "mount program even if you do not include them.  Options in fstab take precedence.  "
-        "pmount and some handlers may ignore options set here.");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Default Mount Options");
-    xset_set_var(set, xset::var::s, "noexec, nosuid, noatime");
-    xset_set_var(set, xset::var::z, "noexec, nosuid, noatime");
-    xset_set_var(set, xset::var::icn, "gtk-edit");
-
     set = xset_get(xset::name::dev_change);
     xset_set_var(set, xset::var::menu_label, "_Change Detection");
     xset_set_var(
@@ -293,22 +274,6 @@ xset_defaults()
     xset_set_var(set, xset::var::icn, "gtk-edit");
     set->s = "cifs curlftpfs ftpfs fuse.sshfs nfs smbfs";
     set->z = set->s;
-
-    set = xset_get(xset::name::dev_fs_cnf);
-    xset_set_var(set, xset::var::menu_label, "_Device Handlers");
-    xset_set_var(set, xset::var::icon, "gtk-preferences");
-    xset_set_var(set,
-                 xset::var::s,
-                 "handler_filesystem_fuseiso handler_filesystem_udiso handler_filesystem_def");
-
-    set = xset_get(xset::name::dev_net_cnf);
-    xset_set_var(set, xset::var::menu_label, "_Protocol Handlers");
-    xset_set_var(set, xset::var::icon, "gtk-preferences");
-    xset_set_var(set,
-                 xset::var::s,
-                 "handler_network_http handler_network_ftp handler_network_ssh handler_network_mtp "
-                 "handler_network_gphoto handler_network_ifuse handler_network_udevil "
-                 "handler_network_udevilsmb handler_network_fusesmb handler_network_fuse");
 
     // dev icons
     set = xset_get(xset::name::dev_icon);
@@ -1152,11 +1117,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Choose...");
     xset_set_var(set, xset::var::icn, "gtk-open");
 
-    set = xset_get(xset::name::open_hand);
-    xset_set_var(set, xset::var::menu_label, "File _Handlers...");
-    xset_set_var(set, xset::var::icn, "gtk-preferences");
-    xset_set_var(set, xset::var::s, "handler_file_iso");
-
     set = xset_get(xset::name::open_all);
     xset_set_var(set, xset::var::menu_label, "Open With _Default"); // virtual
 
@@ -1214,7 +1174,7 @@ xset_defaults()
     set->menu_style = xset::menu::submenu;
     xset_set_var(set,
                  xset::var::desc,
-                 "arc_conf2 separator archive_default_open_with_app archive_default_extract "
+                 "archive_default_open_with_app archive_default_extract "
                  "archive_default_extract_to archive_default_open_with_archiver");
 
     set = xset_get(xset::name::archive_default_open_with_app);
@@ -1233,17 +1193,6 @@ xset_defaults()
     set = xset_get(xset::name::archive_default_open_with_archiver);
     xset_set_var(set, xset::var::menu_label, "Open With Archiver");
     set->menu_style = xset::menu::radio;
-
-    set = xset_get(xset::name::arc_conf2);
-    xset_set_var(set, xset::var::menu_label, "Archive _Handlers");
-    xset_set_var(set, xset::var::icon, "gtk-preferences");
-    xset_set_var(
-        set,
-        xset::var::s,
-        "handler_archive_7z handler_archive_rar handler_archive_tar handler_archive_tar_bz2 "
-        "handler_archive_tar_gz handler_archive_tar_xz handler_archive_zip handler_archive_gz "
-        "handler_archive_xz handler_archive_tar_lz4 handler_archive_lz4 handler_archive_tar_zst "
-        "handler_archive_zst");
 
     set = xset_get(xset::name::open_new);
     xset_set_var(set, xset::var::menu_label, "_New");
@@ -1507,12 +1456,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "Auto See_k");
     set->menu_style = xset::menu::check;
     set->b = xset::b::xtrue;
-
-    set = xset_get(xset::name::path_hand);
-    xset_set_var(set, xset::var::menu_label, "_Protocol Handlers");
-    xset_set_var(set, xset::var::icn, "gtk-preferences");
-    xset_set_var(set, xset::var::shared_key, "dev_net_cnf");
-    // set->s was custom protocol handler in sfm<=0.9.3 - retained
 
     // EDIT
     set = xset_get(xset::name::edit_cut);

@@ -20,6 +20,9 @@
 
 #include <span>
 
+#include <algorithm>
+#include <ranges>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -30,6 +33,80 @@
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-archiver.hxx"
+
+// Taken from file-roller .desktop file
+static std::array<std::string, 65> archive_mime_types{
+    "application/bzip2",
+    "application/gzip",
+    "application/vnd.android.package-archive",
+    "application/vnd.ms-cab-compressed",
+    "application/vnd.debian.binary-package",
+    "application/x-7z-compressed",
+    "application/x-7z-compressed-tar",
+    "application/x-ace",
+    "application/x-alz",
+    "application/x-apple-diskimage",
+    "application/x-ar",
+    "application/x-archive",
+    "application/x-arj",
+    "application/x-brotli",
+    "application/x-bzip-brotli-tar",
+    "application/x-bzip",
+    "application/x-bzip-compressed-tar",
+    "application/x-bzip1",
+    "application/x-bzip1-compressed-tar",
+    "application/x-cabinet",
+    "application/x-cd-image",
+    "application/x-compress",
+    "application/x-compressed-tar",
+    "application/x-cpio",
+    "application/x-chrome-extension",
+    "application/x-deb",
+    "application/x-ear",
+    "application/x-ms-dos-executable",
+    "application/x-gtar",
+    "application/x-gzip",
+    "application/x-gzpostscript",
+    "application/x-java-archive",
+    "application/x-lha",
+    "application/x-lhz",
+    "application/x-lrzip",
+    "application/x-lrzip-compressed-tar",
+    "application/x-lz4",
+    "application/x-lzip",
+    "application/x-lzip-compressed-tar",
+    "application/x-lzma",
+    "application/x-lzma-compressed-tar",
+    "application/x-lzop",
+    "application/x-lz4-compressed-tar",
+    "application/x-ms-wim",
+    "application/x-rar",
+    "application/x-rar-compressed",
+    "application/x-rpm",
+    "application/x-source-rpm",
+    "application/x-rzip",
+    "application/x-rzip-compressed-tar",
+    "application/x-tar",
+    "application/x-tarz",
+    "application/x-tzo",
+    "application/x-stuffit",
+    "application/x-war",
+    "application/x-xar",
+    "application/x-xz",
+    "application/x-xz-compressed-tar",
+    "application/x-zip",
+    "application/x-zip-compressed",
+    "application/x-zstd-compressed-tar",
+    "application/x-zoo",
+    "application/zip",
+    "application/zstd",
+};
+
+bool
+ptk_archiver_is_mime_type_archive(const vfs::mime_type& mime_type)
+{
+    return std::ranges::find(archive_mime_types, mime_type->type()) != archive_mime_types.cend();
+}
 
 static bool
 is_archiver_installed()
@@ -56,8 +133,7 @@ archiver_create_shell_file_list(const std::span<const vfs::file_info> sel_files)
 }
 
 void
-ptk_file_archiver_create(PtkFileBrowser* file_browser,
-                         const std::span<const vfs::file_info> sel_files)
+ptk_archiver_create(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files)
 {
     (void)file_browser;
 
@@ -74,9 +150,8 @@ ptk_file_archiver_create(PtkFileBrowser* file_browser,
 }
 
 void
-ptk_file_archiver_extract(PtkFileBrowser* file_browser,
-                          const std::span<const vfs::file_info> sel_files,
-                          const std::filesystem::path& dest_dir)
+ptk_archiver_extract(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files,
+                     const std::filesystem::path& dest_dir)
 {
     if (!is_archiver_installed() || sel_files.empty())
     {
@@ -103,8 +178,7 @@ ptk_file_archiver_extract(PtkFileBrowser* file_browser,
 }
 
 void
-ptk_file_archiver_open(PtkFileBrowser* file_browser,
-                       const std::span<const vfs::file_info> sel_files)
+ptk_archiver_open(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files)
 {
     (void)file_browser;
 

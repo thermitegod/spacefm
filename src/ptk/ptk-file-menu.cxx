@@ -57,7 +57,6 @@
 #include "ptk/ptk-file-actions-misc.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
 #include "ptk/ptk-file-properties.hxx"
-#include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
 
@@ -86,7 +85,6 @@ static void on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMe
 static void on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data);
-static void on_popup_handlers_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_cut_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_copy_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_paste_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -461,13 +459,6 @@ on_archive_default(GtkMenuItem* menuitem, xset_t set)
             xset_set_b(arcname, false);
         }
     }
-}
-
-static void
-on_archive_show_config(GtkMenuItem* menuitem, PtkFileMenu* data)
-{
-    (void)menuitem;
-    ptk_handler_show_config(ptk::handler::mode::arc, data->browser, nullptr);
 }
 
 static void
@@ -990,14 +981,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_t set_archive_extract_to = nullptr;
         xset_t set_archive_open = nullptr;
 
-        handlers = ptk_handler_file_has_handlers(ptk::handler::mode::arc,
-                                                 ptk::handler::archive::extract,
-                                                 file_path,
-                                                 mime_type,
-                                                 false,
-                                                 false,
-                                                 false);
-        if (!handlers.empty())
+        if (mime_type && ptk_archiver_is_mime_type_archive(mime_type))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);
             xset_set_cb(set_archive_extract, (GFunc)on_popup_extract_here_activate, data);
@@ -1028,8 +1012,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                         (GFunc)on_archive_default,
                         set);
             xset_set_ob2(set, nullptr, set_radio->name.data());
-
-            xset_set_cb(xset::name::arc_conf2, (GFunc)on_archive_show_config, data);
 
             if (!xset_get_b(xset::name::archive_default_open_with_app))
             {
@@ -1078,43 +1060,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             }
         }
 
-        // file handlers
-        handlers = ptk_handler_file_has_handlers(ptk::handler::mode::file,
-                                                 ptk::handler::mount::mount,
-                                                 file_path,
-                                                 mime_type,
-                                                 false,
-                                                 true,
-                                                 false);
-
         GtkWidget* app_menu_item;
-        if (!handlers.empty())
-        {
-            for (const xset_t handler_set : handlers)
-            {
-                app_menu_item =
-                    gtk_menu_item_new_with_label(handler_set->menu_label.value().data());
-                gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
-                g_signal_connect(G_OBJECT(app_menu_item),
-                                 "activate",
-                                 G_CALLBACK(on_popup_run_app),
-                                 (void*)data);
-                g_object_set_data(G_OBJECT(app_menu_item), "menu", submenu);
-                g_signal_connect(G_OBJECT(app_menu_item),
-                                 "button-press-event",
-                                 G_CALLBACK(on_app_button_press),
-                                 (void*)data);
-                g_signal_connect(G_OBJECT(app_menu_item),
-                                 "button-release-event",
-                                 G_CALLBACK(on_app_button_press),
-                                 (void*)data);
-                g_object_set_data(G_OBJECT(app_menu_item), "handler_set", handler_set->name.data());
-            }
-            // add a separator
-            item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
-            gtk_widget_show(GTK_WIDGET(item));
-            gtk_container_add(GTK_CONTAINER(submenu), GTK_WIDGET(item));
-        }
 
         i32 icon_w;
         i32 icon_h;
@@ -1183,10 +1129,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         set = xset_get(xset::name::open_other);
         xset_set_cb(set, (GFunc)on_popup_open_with_another_activate, data);
-        xset_add_menuitem(browser, submenu, accel_group, set);
-
-        set = xset_get(xset::name::open_hand);
-        xset_set_cb(set, (GFunc)on_popup_handlers_activate, data);
         xset_add_menuitem(browser, submenu, accel_group, set);
 
         // Default
@@ -1660,13 +1602,6 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 static void
-on_popup_handlers_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
-{
-    (void)menuitem;
-    ptk_handler_show_config(ptk::handler::mode::file, data->browser, nullptr);
-}
-
-static void
 on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
@@ -1680,31 +1615,16 @@ on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data)
 static void
 on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
-    xset_t handler_set = nullptr;
-    const char* xset_name =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "handler_set"));
-    if (xset_name != nullptr)
-    {
-        handler_set = xset_get(xset_name);
-    }
-
     const char* desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
     const vfs::desktop desktop = vfs_get_desktop(desktop_file);
 
-    std::string app;
-
-    // is a file handler
-    if (handler_set)
-    {
-        app = std::format("###{}", handler_set->name);
-    }
-    else
-    {
-        app = desktop->name();
-    }
-
-    ptk_open_files_with_app(data->cwd, data->sel_files, app, data->browser, false, false);
+    ptk_open_files_with_app(data->cwd,
+                            data->sel_files,
+                            desktop->name(),
+                            data->browser,
+                            false,
+                            false);
 }
 
 namespace ptk::file_menu
@@ -1777,8 +1697,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         case ptk::file_menu::app_job::DEFAULT:
         {
             mime_type->set_default_action(desktop->name());
-            ptk_app_chooser_has_handler_warn(data->browser ? GTK_WIDGET(data->browser) : nullptr,
-                                             mime_type);
             break;
         }
         case ptk::file_menu::app_job::remove:
@@ -2199,22 +2117,6 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
         return;
     }
 
-    xset_t handler_set = nullptr;
-    const char* xset_name =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "handler_set"));
-    if (xset_name != nullptr)
-    {
-        handler_set = xset_get(xset_name);
-    }
-
-    if (handler_set)
-    {
-        // is a file handler - open file handler config
-        gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
-        ptk_handler_show_config(ptk::handler::mode::file, data->browser, handler_set);
-        return;
-    }
-
     std::string type;
     vfs::mime_type mime_type = data->file->mime_type();
     if (mime_type)
@@ -2632,21 +2534,21 @@ static void
 on_popup_compress_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    ptk_file_archiver_create(data->browser, data->sel_files);
+    ptk_archiver_create(data->browser, data->sel_files);
 }
 
 static void
 on_popup_extract_to_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    ptk_file_archiver_extract(data->browser, data->sel_files, "");
+    ptk_archiver_extract(data->browser, data->sel_files, "");
 }
 
 static void
 on_popup_extract_here_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    ptk_file_archiver_extract(data->browser, data->sel_files, data->cwd);
+    ptk_archiver_extract(data->browser, data->sel_files, data->cwd);
 }
 
 static void
@@ -2654,7 +2556,7 @@ on_popup_extract_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk_file_archiver_open(data->browser, data->sel_files);
+    ptk_archiver_open(data->browser, data->sel_files);
 }
 
 static void
@@ -2872,10 +2774,6 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
         else if (set->xset_name == xset::name::archive_open)
         {
             on_popup_extract_open_activate(nullptr, data);
-        }
-        else if (set->xset_name == xset::name::arc_conf2)
-        {
-            on_archive_show_config(nullptr, data);
         }
     }
     else if (ztd::startswith(set->name, "new_"))

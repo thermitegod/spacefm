@@ -48,8 +48,6 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 
-#include "ptk/ptk-handler.hxx"
-
 #include "settings/app.hxx"
 
 #include "utils.hxx"
@@ -63,171 +61,43 @@ struct ParentInfo
 };
 
 static bool
-open_archives_with_handler(const std::shared_ptr<ParentInfo>& parent,
-                           const std::span<const vfs::file_info> selected_files,
-                           const std::filesystem::path& full_path, const vfs::mime_type& mime_type)
+open_archives(const std::shared_ptr<ParentInfo>& parent,
+              const std::span<const vfs::file_info> selected_files, const vfs::mime_type& mime_type)
 {
+    const bool is_archive = ptk_archiver_is_mime_type_archive(mime_type);
+    if (!is_archive)
+    {
+        return false;
+    }
+
     if (xset_get_b(xset::name::archive_default_open_with_app))
-    {                 // user has open archives with app option enabled
-        return false; // do not handle these files
+    { // user has open archives with app option enabled, do not handle these files
+        return false;
     }
 
     const bool extract_here = xset_get_b(xset::name::archive_default_extract);
-    std::filesystem::path dest_dir;
-    ptk::handler::archive cmd;
 
     // determine default archive action in this dir
     if (extract_here && have_rw_access(parent->cwd))
     {
         // Extract Here
-        cmd = ptk::handler::archive::extract;
-        dest_dir = parent->cwd;
+        ptk_archiver_extract(parent->file_browser, selected_files, parent->cwd);
+        return true;
     }
     else if (extract_here || xset_get_b(xset::name::archive_default_extract_to))
     {
         // Extract Here but no write access or Extract To option
-        cmd = ptk::handler::archive::extract;
+        ptk_archiver_extract(parent->file_browser, selected_files, "");
+        return true;
     }
     else if (xset_get_b(xset::name::archive_default_open_with_archiver))
     {
-        // List contents
-        cmd = ptk::handler::archive::list;
-    }
-    else
-    {
-        return false; // do not handle these files
+        ptk_archiver_open(parent->file_browser, selected_files);
+        return true;
     }
 
-    // type or pathname has archive handler? - do not test command non-empty
-    // here because only applies to first file
-    const std::vector<xset_t> handlers =
-        ptk_handler_file_has_handlers(ptk::handler::mode::arc,
-                                      magic_enum::enum_integer(cmd),
-                                      full_path,
-                                      mime_type,
-                                      false,
-                                      false,
-                                      true);
-    if (handlers.empty())
-    {
-        return false; // do not handle these files
-    }
-
-    if (cmd == ptk::handler::archive::extract)
-    {
-        ptk_file_archiver_extract(parent->file_browser, selected_files, dest_dir);
-    }
-    else // ptk::handler::archive::list
-    {
-        ptk_file_archiver_open(parent->file_browser, selected_files);
-    }
-
-    return true; // all files handled
-}
-
-static void
-open_files_with_handler(const std::shared_ptr<ParentInfo>& parent,
-                        const std::span<const std::filesystem::path> open_files, xset_t handler_set)
-{
-    std::string str;
-    std::string command_final;
-
-    ztd::logger::info("Selected File Handler '{}'", handler_set->menu_label.value());
-
-    // get command - was already checked as non-empty
-    std::string error_message;
-    std::string command;
-    const bool error = ptk_handler_load_script(ptk::handler::mode::file,
-                                               ptk::handler::mount::mount,
-                                               handler_set,
-                                               nullptr,
-                                               command,
-                                               error_message);
-    if (error)
-    {
-        ptk_show_message(GTK_WINDOW(parent->file_browser),
-                         GtkMessageType::GTK_MESSAGE_ERROR,
-                         "Error Loading Handler",
-                         GtkButtonsType::GTK_BUTTONS_OK,
-                         error_message);
-        return;
-    }
-
-    /* prepare fish vars for just the files being opened by this handler,
-     * not necessarily all selected */
-    std::string fm_filenames = "fm_filenames=(\n";
-    std::string fm_files = "fm_files=(\n";
-    // command looks like it handles multiple files ?
-    static constexpr std::array<const std::string_view, 4> keys{"%N",
-                                                                "%F",
-                                                                "fm_files[",
-                                                                "fm_filenames["};
-    const bool multiple = ztd::contains(command, keys);
-    if (multiple)
-    {
-        for (const auto& file : open_files)
-        {
-            // filename
-            const auto name = file.filename();
-            fm_filenames.append(std::format("{}\n", ztd::shell::quote(name.string())));
-            // file path
-            fm_filenames.append(std::format("{}\n", ztd::shell::quote(file.string())));
-        }
-    }
-    fm_filenames.append(")\nfm_filename=\"$fm_filenames[0]\"\n");
-    fm_files.append(")\nfm_file=\"$fm_files[0]\"\n");
-    // replace standard sub vars
-    command = replace_line_subs(command);
-
-    // start task(s)
-
-    for (const auto& file : open_files)
-    {
-        if (multiple)
-        {
-            command_final = std::format("{}{}{}", fm_filenames, fm_files, command);
-        }
-        else
-        {
-            // add sub vars for single file
-            // filename
-            std::string quoted;
-
-            const auto name = file.filename();
-            quoted = ztd::shell::quote(name.string());
-            str = std::format("fm_filename={}\n", quoted);
-            // file path
-            quoted = ztd::shell::quote(file.string());
-            command_final =
-                std::format("{}{}{}fm_file={}\n{}", fm_filenames, fm_files, str, quoted, command);
-        }
-
-        // Run task
-        PtkFileTask* ptask =
-            ptk_file_exec_new(handler_set->menu_label.value(),
-                              parent->cwd,
-                              parent->file_browser ? GTK_WIDGET(parent->file_browser) : nullptr,
-                              parent->file_browser ? parent->file_browser->task_view() : nullptr);
-        // do not free cwd!
-        ptask->task->exec_browser = parent->file_browser;
-        ptask->task->exec_command = command_final;
-        if (handler_set->icon)
-        {
-            ptask->task->exec_icon = handler_set->icon.value();
-        }
-        ptask->task->exec_terminal = handler_set->in_terminal;
-        ptask->task->exec_keep_terminal = false;
-        // file handlers store Run As Task in keep_terminal
-        ptask->task->exec_sync = handler_set->keep_terminal;
-        ptask->task->exec_show_error = ptask->task->exec_sync;
-        ptask->task->exec_export = true;
-        ptk_file_task_run(ptask);
-
-        if (multiple)
-        {
-            break;
-        }
-    }
+    // do not handle these files
+    return false;
 }
 
 static bool
@@ -235,17 +105,6 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
                     const std::span<const std::filesystem::path> open_files,
                     const std::string_view app_desktop)
 {
-    if (ztd::startswith(app_desktop, "###") && !open_files.empty())
-    {
-        const xset_t handler_set = xset_is(ztd::removeprefix(app_desktop, "###"));
-        if (handler_set == nullptr)
-        {
-            return false;
-        }
-        // is a handler
-        open_files_with_handler(parent, open_files, handler_set);
-        return true;
-    }
     if (app_desktop.empty())
     {
         return false;
@@ -327,26 +186,10 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
         vfs::mime_type mime_type = file->mime_type();
 
-        // has archive handler?
-        if (!selected_files.empty() &&
-            open_archives_with_handler(parent, selected_files, file->path(), mime_type))
-        { // all files were handled by open_archives_with_handler
+        // archive has special handling
+        if (!selected_files.empty() && open_archives(parent, selected_files, mime_type))
+        { // all files were handled by open_archives
             break;
-        }
-
-        // if has file handler, set alloc_desktop = ###XSETNAME
-        const std::vector<xset_t> handlers =
-            ptk_handler_file_has_handlers(ptk::handler::mode::file,
-                                          ptk::handler::mount::mount,
-                                          file->path(),
-                                          mime_type,
-                                          true,
-                                          false,
-                                          true);
-        if (!handlers.empty())
-        {
-            const xset_t handler_set = handlers.front();
-            alloc_desktop = std::format("###{}", handler_set->name);
         }
 
         // The file itself is a desktop entry file.

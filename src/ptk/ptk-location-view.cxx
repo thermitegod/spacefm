@@ -45,7 +45,6 @@
 #include "types.hxx"
 
 #include "ptk/ptk-location-view.hxx"
-#include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-dialog.hxx"
 #include "main-window.hxx"
@@ -1177,38 +1176,6 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
 }
 
-static void
-on_handler_show_config(GtkMenuItem* item, GtkWidget* view, xset_t set2)
-{
-    xset_t set;
-    i32 mode;
-
-    if (!item)
-    {
-        set = set2;
-    }
-    else
-    {
-        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
-    }
-
-    if (set->xset_name == xset::name::dev_fs_cnf)
-    {
-        mode = ptk::handler::mode::fs;
-    }
-    else if (set->xset_name == xset::name::dev_net_cnf)
-    {
-        mode = ptk::handler::mode::net;
-    }
-    else
-    {
-        return;
-    }
-    PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
-    ptk_handler_show_config(mode, file_browser, nullptr);
-}
-
 static bool
 volume_is_visible(vfs::volume vol)
 {
@@ -1299,14 +1266,6 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
     else if (set->xset_name == xset::name::dev_dispname)
     {
         update_names();
-    }
-    else if (set->xset_name == xset::name::dev_fs_cnf)
-    {
-        on_handler_show_config(nullptr, view, set);
-    }
-    else if (set->xset_name == xset::name::dev_net_cnf)
-    {
-        on_handler_show_config(nullptr, view, set);
     }
     else if (set->xset_name == xset::name::dev_change)
     {
@@ -1434,16 +1393,9 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     set = xset_get(xset::name::dev_exec_video);
     set->disable = !auto_optical;
 
-    set = xset_get(xset::name::dev_fs_cnf);
-    xset_set_cb(set, (GFunc)on_handler_show_config, view);
-    xset_set_ob1(set, "set", set);
-    set = xset_get(xset::name::dev_net_cnf);
-    xset_set_cb(set, (GFunc)on_handler_show_config, view);
-    xset_set_ob1(set, "set", set);
-
     set = xset_get(xset::name::dev_menu_settings);
-    menu_elements = "dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
-                    "dev_mount_options dev_change separator dev_single dev_newtab dev_icon";
+    menu_elements = "dev_show separator dev_menu_auto dev_exec dev_change separator dev_single "
+                    "dev_newtab dev_icon";
     xset_set_var(set, xset::var::desc, menu_elements);
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
@@ -1803,18 +1755,9 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    set = xset_get(xset::name::dev_fs_cnf);
-    xset_set_cb(set, (GFunc)on_handler_show_config, parent);
-    xset_set_ob1(set, "set", set);
-    set = xset_get(xset::name::dev_net_cnf);
-    xset_set_cb(set, (GFunc)on_handler_show_config, parent);
-    xset_set_ob1(set, "set", set);
-
     set = xset_get(xset::name::dev_menu_settings);
 
-    const std::string desc =
-        std::format("dev_show separator dev_menu_auto dev_exec dev_fs_cnf dev_net_cnf "
-                    "dev_mount_options dev_change{}",
-                    file_browser ? " dev_newtab" : "");
+    const std::string desc = std::format("dev_show separator dev_menu_auto dev_exec dev_change{}",
+                                         file_browser ? " dev_newtab" : "");
     xset_set_var(set, xset::var::desc, desc.data());
 }

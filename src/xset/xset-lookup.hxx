@@ -75,7 +75,6 @@ namespace xset
         dev_exec_unmount,
         dev_exec_remove,
 
-        dev_mount_options,
         dev_change,
         dev_fs_cnf,
         dev_net_cnf,
@@ -258,7 +257,6 @@ namespace xset
         open_edit,
         open_edit_root,
         open_other,
-        open_hand,
         open_all,
         open_in_tab,
 
@@ -293,7 +291,6 @@ namespace xset
         archive_default_extract,
         archive_default_extract_to,
         archive_default_open_with_archiver,
-        arc_conf2,
 
         open_new,
         new_file,
@@ -372,7 +369,6 @@ namespace xset
 
         view_refresh,
         path_seek,
-        path_hand,
         edit_cut,
         edit_copy,
         edit_paste,
@@ -1184,21 +1180,6 @@ namespace xset
         su_command,
 
         // HANDLERS //
-
-        // handlers arc
-        handler_archive_7z,
-        handler_archive_gz,
-        handler_archive_rar,
-        handler_archive_tar,
-        handler_archive_tar_bz2,
-        handler_archive_tar_gz,
-        handler_archive_tar_lz4,
-        handler_archive_tar_xz,
-        handler_archive_tar_zst,
-        handler_archive_lz4,
-        handler_archive_xz,
-        handler_archive_zip,
-        handler_archive_zst,
 
         // handlers file
         handler_file_iso,

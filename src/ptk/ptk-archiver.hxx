@@ -22,15 +22,18 @@
 #include <gtk/gtk.h>
 
 #include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-mime-type.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 
-void ptk_file_archiver_create(PtkFileBrowser* file_browser,
-                              const std::span<const vfs::file_info> sel_files);
+void ptk_archiver_create(PtkFileBrowser* file_browser,
+                         const std::span<const vfs::file_info> sel_files);
 
-void ptk_file_archiver_extract(PtkFileBrowser* file_browser,
-                               const std::span<const vfs::file_info> sel_files,
-                               const std::filesystem::path& dest_dir);
+void ptk_archiver_extract(PtkFileBrowser* file_browser,
+                          const std::span<const vfs::file_info> sel_files,
+                          const std::filesystem::path& dest_dir);
 
-void ptk_file_archiver_open(PtkFileBrowser* file_browser,
-                            const std::span<const vfs::file_info> sel_files);
+void ptk_archiver_open(PtkFileBrowser* file_browser,
+                       const std::span<const vfs::file_info> sel_files);
+
+bool ptk_archiver_is_mime_type_archive(const vfs::mime_type& mime_type);

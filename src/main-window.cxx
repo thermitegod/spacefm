@@ -79,7 +79,6 @@
 #include "ptk/ptk-task-view.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-handler.hxx"
 
 static void rebuild_menus(MainWindow* main_window);
 

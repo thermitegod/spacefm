@@ -80,7 +80,6 @@
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-location-view.hxx"
@@ -336,12 +335,6 @@ load_settings()
             }
         }
     }
-
-    // add default handlers
-    ptk_handler_add_defaults(ptk::handler::mode::arc, false, false);
-    ptk_handler_add_defaults(ptk::handler::mode::fs, false, false);
-    ptk_handler_add_defaults(ptk::handler::mode::net, false, false);
-    ptk_handler_add_defaults(ptk::handler::mode::file, false, false);
 
     // set default keys
     xset_default_keys();

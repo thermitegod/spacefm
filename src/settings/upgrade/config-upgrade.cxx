@@ -21,36 +21,5 @@
 void
 config_upgrade(u64 version)
 {
-    if (version == 1)
-    {
-        xset_t set;
-
-        // upgrade builtin
-
-        set = xset_get(xset::name::dev_net_cnf);
-        set->s = ztd::replace(set->s.value(), "hand_net_+", "handler_network_");
-
-        set = xset_get(xset::name::arc_conf2);
-        set->s = ztd::replace(set->s.value(), "hand_arc_+", "handler_archive_");
-
-        set = xset_get(xset::name::dev_fs_cnf);
-        set->s = ztd::replace(set->s.value(), "hand_fs_+", "handler_filesystem_");
-
-        set = xset_get(xset::name::open_hand);
-        set->s = ztd::replace(set->s.value(), "hand_f_+", "handler_file_");
-
-        // upgrade user custom
-
-        set = xset_get(xset::name::dev_net_cnf);
-        set->s = ztd::replace(set->s.value(), "hand_net_", "custom_handler_network_");
-
-        set = xset_get(xset::name::arc_conf2);
-        set->s = ztd::replace(set->s.value(), "hand_arc_", "custom_handler_archive_");
-
-        set = xset_get(xset::name::dev_fs_cnf);
-        set->s = ztd::replace(set->s.value(), "hand_fs_", "custom_handler_filesystem_");
-
-        set = xset_get(xset::name::open_hand);
-        set->s = ztd::replace(set->s.value(), "hand_f_", "custom_handler_file_");
-    }
+    (void)version;
 }

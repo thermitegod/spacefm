@@ -72,7 +72,6 @@
 
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-handler.hxx"
 
 #include "ptk/ptk-task-view.hxx"
 

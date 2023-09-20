@@ -35,7 +35,6 @@
 #include "main-window.hxx"
 
 #include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-handler.hxx"
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
 
@@ -501,13 +500,6 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 }
 
 static void
-on_protocol_handlers(GtkWidget* widget, PtkFileBrowser* file_browser)
-{
-    (void)widget;
-    ptk_handler_show_config(ptk::handler::mode::net, file_browser, nullptr);
-}
-
-static void
 on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 {
     if (!file_browser)
@@ -531,9 +523,6 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
     set = xset_get(xset::name::path_seek);
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
-    set = xset_get(xset::name::path_hand);
-    xset_set_cb(set, (GFunc)on_protocol_handlers, file_browser);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
 
