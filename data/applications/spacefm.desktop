@@ -2,6 +2,7 @@
 Version=1.0
 Name=SpaceFM
 Categories=System;FileTools;Utility;Core;GTK;FileManager;
+TryExec=spacefm
 Exec=spacefm %F
 Icon=spacefm
 StartupNotify=true
