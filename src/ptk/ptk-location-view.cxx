@@ -25,17 +25,12 @@
 
 #include <vector>
 
-#include <algorithm>
-#include <ranges>
-
-#include <chrono>
-
 #include <glibmm.h>
+
+#include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <magic_enum.hpp>
 
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
@@ -44,14 +39,16 @@
 
 #include "types.hxx"
 
+#include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-dialog.hxx"
 #include "main-window.hxx"
 
+#include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
+#include "settings.hxx"
 #include "settings/app.hxx"
 
 #include "utils.hxx"

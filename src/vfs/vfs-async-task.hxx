@@ -17,11 +17,8 @@
 
 #pragma once
 
-#include <thread>
 #include <atomic>
-#include <condition_variable>
 #include <mutex>
-#include <future>
 
 #include <gtk/gtk.h>
 

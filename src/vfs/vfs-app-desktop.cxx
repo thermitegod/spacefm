@@ -42,7 +42,6 @@
 #include "ptk/ptk-file-task.hxx"
 
 #include "vfs/vfs-utils.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-app-desktop.hxx"
 
 static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";

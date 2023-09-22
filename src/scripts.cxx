@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
 #include <string_view>
 
 #include <filesystem>
@@ -22,8 +21,6 @@
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "scripts.hxx"
 

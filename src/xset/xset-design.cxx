@@ -23,6 +23,8 @@
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -37,26 +39,16 @@
 
 #include "item-prop.hxx"
 
-#include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-keyboard.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-location-view.hxx"
-
-#include "types.hxx"
 
 #include "settings/app.hxx"
-#include "settings/disk-format.hxx"
 
 #include "autosave.hxx"
-#include "write.hxx"
 #include "utils.hxx"
 
 #include "settings.hxx"

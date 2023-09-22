@@ -23,8 +23,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include <magic_enum.hpp>
-
 #define PTK_DIR_TREE(obj)             (static_cast<PtkDirTree*>(obj))
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<PtkDirTree*>(obj))
 

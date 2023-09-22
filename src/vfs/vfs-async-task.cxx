@@ -15,10 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <thread>
-#include <condition_variable>
 #include <mutex>
-#include <future>
 
 #include <glibmm.h>
 

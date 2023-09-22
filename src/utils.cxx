@@ -25,9 +25,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "extern.hxx"
+#include "xset/xset.hxx"
 
-#include "settings.hxx"
+#include "extern.hxx"
 
 #include "utils.hxx"
 

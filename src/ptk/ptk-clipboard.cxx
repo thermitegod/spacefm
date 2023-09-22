@@ -30,7 +30,6 @@
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-file-actions-rename.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
 

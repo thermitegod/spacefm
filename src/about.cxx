@@ -16,7 +16,6 @@
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "about.hxx"
 

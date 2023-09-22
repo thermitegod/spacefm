@@ -24,10 +24,6 @@
 
 #include <memory>
 
-#include <optional>
-
-#include <chrono>
-
 #include <ztd/ztd.hxx>
 
 // trash directories. There might be several on a system:

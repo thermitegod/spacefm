@@ -27,20 +27,17 @@
 
 #include <optional>
 
-#include <chrono>
-
 #include <fcntl.h>
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include <magic_enum.hpp>
-
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
-#include "xset/xset-dialog.hxx"
 
 #include "write.hxx"
 
@@ -66,7 +63,6 @@
 #include "item-prop.hxx"
 #include "main-window.hxx"
 
-#include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-file-list.hxx"
 
 #include "ptk/ptk-file-menu.hxx"

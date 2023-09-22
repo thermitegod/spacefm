@@ -23,19 +23,12 @@
 
 #include <filesystem>
 
-#include <chrono>
-
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
 
-#include "types.hxx"
-
-#include "vfs/vfs-file-task.hxx"
-
 #include "xset/xset.hxx"
-#include "xset/xset-lookup.hxx"
 
 // This limits the small icon size for side panes and task list
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;

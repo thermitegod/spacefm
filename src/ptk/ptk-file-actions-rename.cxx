@@ -28,18 +28,16 @@
 #include <optional>
 
 #include <algorithm>
-#include <ranges>
 
 #include <glibmm.h>
+
+#include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include <magic_enum.hpp>
-
 #include "compat/gtk4-porting.hxx"
 
-#include "ptk/ptk-file-menu.hxx"
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
@@ -55,6 +53,7 @@
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "settings.hxx"
 #include "settings/app.hxx"
 
 #include "utils.hxx"

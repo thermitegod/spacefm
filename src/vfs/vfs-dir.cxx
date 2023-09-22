@@ -24,7 +24,6 @@
 #include <map>
 
 #include <algorithm>
-#include <ranges>
 
 #include <mutex>
 
@@ -41,15 +40,12 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include <magic_enum.hpp>
-
 #include "write.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-async-thread.hxx"
 
 #include "vfs/vfs-dir.hxx"

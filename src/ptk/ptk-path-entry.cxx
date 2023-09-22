@@ -18,14 +18,13 @@
 #include <filesystem>
 
 #include <algorithm>
-#include <ranges>
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <magic_enum.hpp>
 
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
@@ -33,10 +32,9 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "main-window.hxx"
+#include "settings.hxx"
 
 #include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-location-view.hxx"
-#include "ptk/ptk-bookmark-view.hxx"
 
 #include "ptk/ptk-path-entry.hxx"
 

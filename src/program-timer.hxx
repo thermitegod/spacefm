@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <ztd/ztd.hxx>
+
 namespace program_timer
 {
     void start() noexcept;

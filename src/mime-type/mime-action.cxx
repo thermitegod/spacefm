@@ -47,7 +47,6 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "write.hxx"
-#include "utils.hxx"
 
 #include "mime-type/mime-action.hxx"
 

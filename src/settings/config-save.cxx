@@ -26,18 +26,13 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "types.hxx"
-
 #include "write.hxx"
 
 #include "xset/xset.hxx"
 
-#include "ptk/ptk-dialog.hxx"
-
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
-#include "settings/config-load.hxx"
 #include "settings/disk-format.hxx"
 
 const setvars_t

@@ -27,18 +27,10 @@
 
 #include "utils.hxx"
 
-#include "types.hxx"
-
 #include "write.hxx"
 #include "settings.hxx"
 
-#include "settings/config-save.hxx"
-#include "settings/disk-format.hxx"
-
 #include "ptk/ptk-dialog.hxx"
-
-#include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-file-task.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
@@ -47,7 +39,6 @@
 #include "xset/xset.hxx"
 #include "xset/xset-custom.hxx"
 #include "xset/xset-design-clipboard.hxx"
-#include "xset/xset-dialog.hxx"
 
 const std::string
 xset_custom_new_name()

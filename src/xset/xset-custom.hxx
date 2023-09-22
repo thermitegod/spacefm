@@ -20,8 +20,6 @@
 
 #include <gtk/gtk.h>
 
-#include "types.hxx"
-
 #include "xset/xset.hxx"
 
 const std::string xset_custom_new_name();

@@ -16,7 +16,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
 #include <string_view>
 
 #include <filesystem>
@@ -24,7 +23,6 @@
 #include <map>
 
 #include <algorithm>
-#include <ranges>
 
 #include <cassert>
 
@@ -34,10 +32,10 @@
 
 #include <gdk/gdk.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <magic_enum.hpp>
 
 #include "types.hxx"
 
@@ -47,7 +45,6 @@
 
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-file-info.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"

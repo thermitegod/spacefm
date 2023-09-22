@@ -15,12 +15,10 @@
 
 #pragma once
 
-#include <string>
 #include <string_view>
 
+#include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
-
-#include "settings.hxx"
 
 namespace item_prop::context
 {

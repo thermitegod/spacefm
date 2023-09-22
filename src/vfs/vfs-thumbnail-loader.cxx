@@ -27,7 +27,6 @@
 
 #include <chrono>
 
-#include <thread>
 #include <mutex>
 
 #include <memory>

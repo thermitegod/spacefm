@@ -26,14 +26,16 @@
 
 #include <map>
 
+#include <gtk/gtk.h>
+
 #include "types.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 
-#include <gtk/gtk.h>
+#include "vfs/vfs-file-task.hxx"
+
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-file-task.hxx"
 
 #define MAIN_WINDOW(obj)             (static_cast<MainWindow*>(obj))
 #define MAIN_WINDOW_REINTERPRET(obj) (reinterpret_cast<MainWindow*>(obj))

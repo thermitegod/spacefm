@@ -21,57 +21,29 @@
 #include <filesystem>
 
 #include <array>
-#include <vector>
 
 #include <chrono>
 
 #include <optional>
-
-#include <cassert>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "types.hxx"
-
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-location-view.hxx"
 
-#include "window-reference.hxx"
 #include "main-window.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-file-menu.hxx"
-
-#include "about.hxx"
-#include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
-#include "xset/xset-custom.hxx"
-#include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
 
-#include "settings/app.hxx"
-#include "settings/disk-format.hxx"
-
-#include "bookmarks.hxx"
 #include "settings.hxx"
-#include "item-prop.hxx"
-#include "file-search.hxx"
 
-#include "autosave.hxx"
-#include "terminal-handlers.hxx"
-
-#include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
-
-#include "ptk/ptk-bookmark-view.hxx"
-#include "ptk/ptk-clipboard.hxx"
 
 #include "ptk/ptk-task-view.hxx"
 

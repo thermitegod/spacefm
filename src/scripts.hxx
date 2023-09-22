@@ -17,8 +17,6 @@
 
 #include <filesystem>
 
-#include <exception>
-
 namespace spacefm
 {
     enum class script

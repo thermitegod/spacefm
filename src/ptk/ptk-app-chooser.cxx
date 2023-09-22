@@ -31,16 +31,11 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "xset/xset.hxx"
-#include "xset/xset-dialog.hxx"
-
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-async-task.hxx"
-
-#include "ptk/ptk-dialog.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 

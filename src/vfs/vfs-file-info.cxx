@@ -25,9 +25,6 @@
 #include <span>
 
 #include <algorithm>
-#include <ranges>
-
-#include <chrono>
 
 #include <glibmm.h>
 
@@ -35,8 +32,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "settings/app.hxx"
-
-#include "settings.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"

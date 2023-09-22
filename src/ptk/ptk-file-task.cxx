@@ -27,25 +27,22 @@
 
 #include <optional>
 
-#include <chrono>
-
 #include <sys/wait.h>
 
 #include <fmt/format.h>
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <magic_enum.hpp>
 
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
-#include "settings/app.hxx"
+#include "settings.hxx"
 
-#include "main-window.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-time.hxx"

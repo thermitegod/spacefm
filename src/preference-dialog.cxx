@@ -16,8 +16,6 @@
 #include <string>
 #include <string_view>
 
-#include <format>
-
 #include <array>
 
 #include <gtk/gtk.h>
@@ -35,10 +33,11 @@
 
 #include "main-window.hxx"
 
+#include "settings.hxx"
+
 #include "xset/xset-lookup.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-location-view.hxx"
 
 #include "preference-dialog.hxx"

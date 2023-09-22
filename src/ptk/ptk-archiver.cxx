@@ -21,7 +21,6 @@
 #include <span>
 
 #include <algorithm>
-#include <ranges>
 
 #include <glibmm.h>
 

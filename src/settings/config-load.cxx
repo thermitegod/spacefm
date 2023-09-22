@@ -26,8 +26,6 @@
 
 #include "ptk/ptk-dialog.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
-
 #include "settings/upgrade/config-upgrade.hxx"
 
 #include "settings/app.hxx"

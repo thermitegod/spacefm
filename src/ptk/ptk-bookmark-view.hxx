@@ -15,13 +15,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <filesystem>
 
 #include <gtk/gtk.h>
-
-#include "vfs/vfs-volume.hxx"
 
 void ptk_bookmark_view_add_bookmark(const std::filesystem::path& book_path);
 

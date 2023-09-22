@@ -25,8 +25,6 @@
 
 #include <optional>
 
-#include "settings.hxx"
-
 #include "vfs/vfs-device.hxx"
 
 #define VFS_VOLUME(obj) (static_cast<vfs::volume>(obj))

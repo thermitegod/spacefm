@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include <string>
 #include <string_view>
 
 #include <filesystem>
@@ -28,8 +27,9 @@
 
 #include <gtk/gtk.h>
 
+#include <xset/xset.hxx>
+
 #include "vfs/vfs-dir.hxx"
-#include "settings.hxx"
 
 #include "types.hxx"
 

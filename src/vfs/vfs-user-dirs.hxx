@@ -24,6 +24,7 @@
 #include <memory>
 
 #include <glibmm.h>
+
 struct VFSUserDirs
 {
   public:

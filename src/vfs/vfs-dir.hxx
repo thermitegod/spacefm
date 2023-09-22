@@ -23,8 +23,6 @@
 
 #include <vector>
 
-#include <memory>
-
 #include <mutex>
 
 #include <sigc++/sigc++.h>

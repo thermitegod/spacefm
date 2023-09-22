@@ -25,8 +25,6 @@
 #include <array>
 #include <vector>
 
-#include <chrono>
-
 #include <optional>
 
 #include <gtk/gtk.h>
@@ -35,8 +33,6 @@
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <magic_enum.hpp>
 
 #include "xset/xset.hxx"
 

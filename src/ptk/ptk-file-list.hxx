@@ -25,8 +25,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include <magic_enum.hpp>
-
 #include "vfs/vfs-dir.hxx"
 
 #define PTK_FILE_LIST(obj)             (static_cast<PtkFileList*>(obj))

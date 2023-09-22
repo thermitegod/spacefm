@@ -22,14 +22,11 @@
 
 #include <span>
 
-#include <array>
 #include <vector>
 
 #include <memory>
 
 #include <optional>
-
-#include <magic_enum.hpp>
 
 #include <glibmm.h>
 
@@ -37,13 +34,11 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-#include "xset/xset-dialog.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-archiver.hxx"
-#include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"

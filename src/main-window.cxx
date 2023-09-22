@@ -23,8 +23,6 @@
 #include <array>
 #include <vector>
 
-#include <chrono>
-
 #include <optional>
 
 #include <malloc.h>
@@ -58,7 +56,6 @@
 #include "xset/xset.hxx"
 #include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
-#include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
 
 #include "settings/app.hxx"
@@ -78,7 +75,6 @@
 
 #include "ptk/ptk-task-view.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
-#include "ptk/ptk-clipboard.hxx"
 
 static void rebuild_menus(MainWindow* main_window);
 

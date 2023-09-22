@@ -22,18 +22,12 @@
 
 #include <optional>
 
-#include <memory>
-
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "compat/gtk4-porting.hxx"
-
-#include "types.hxx"
-
-#include "settings.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-utils.hxx"

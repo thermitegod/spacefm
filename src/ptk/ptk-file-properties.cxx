@@ -23,8 +23,6 @@
 #include <span>
 #include <vector>
 
-#include <chrono>
-
 #include <gtk/gtk.h>
 
 #include <ztd/ztd.hxx>

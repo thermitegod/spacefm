@@ -15,21 +15,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <map>
 
 #include <algorithm>
-#include <ranges>
 
 #include <chrono>
 
 #include <cassert>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include <magic_enum.hpp>
 
 #include "compat/type-conversion.hxx"
 
@@ -37,8 +34,6 @@
 
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
-
-#include "types.hxx"
 
 static void ptk_file_list_init(PtkFileList* list);
 

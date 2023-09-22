@@ -17,7 +17,6 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <future>
 
 #include <vector>
 
@@ -28,7 +27,6 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "types.hxx"
 #include "program-timer.hxx"
 
 #include "autosave.hxx"
