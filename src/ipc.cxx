@@ -27,7 +27,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "main-window.hxx"
+#include "ipc-command.hxx"
 
 #include "ipc.hxx"
 
@@ -50,7 +50,7 @@ socket_server_thread()
         request >> command;
 
         ztd::logger::info("SOCKET({})", command);
-        const auto [ret, response] = main_window_socket_command(command);
+        const auto [ret, response] = run_ipc_command(command);
 
         nlohmann::json json;
         json["exit"] = ret;

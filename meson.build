@@ -341,6 +341,7 @@ sources = files(
     'src/bookmarks.cxx',
     'src/file-search.cxx',
     'src/ipc.cxx',
+    'src/ipc-command.cxx',
     'src/item-prop.cxx',
     'src/main.cxx',
     'src/main-window.cxx',

@@ -21,7 +21,6 @@
 #include <filesystem>
 
 #include <array>
-#include <tuple>
 #include <vector>
 
 #include <map>
@@ -143,8 +142,8 @@ bool main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64
                        const char* focus, u32 keyval, u32 button, u32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);
 
+void main_window_fullscreen_activate(MainWindow* main_window);
+bool main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set);
+
 void main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
 void main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser);
-
-const std::tuple<char, std::string>
-main_window_socket_command(const std::string_view socket_commands_json);

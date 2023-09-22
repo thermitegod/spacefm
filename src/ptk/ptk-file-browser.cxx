@@ -192,7 +192,7 @@ struct column_data
     ptk::file_list::column column;
 };
 
-// must match main-window.c  main_window_socket_command
+// must match ipc-command.cxx run_ipc_command()
 static constexpr std::array<column_data, 12> columns{
     {{
          "Name",

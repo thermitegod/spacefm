@@ -52,7 +52,7 @@ namespace ptk::file_list
     };
 
     // sort_dir of directory view - do not change order, saved
-    // see also: main-window.c main_window_socket_command() get sort_first
+    // see also: ipc-command.cxx run_ipc_command() get sort_first
     enum class sort_dir
     {
         mixed,
