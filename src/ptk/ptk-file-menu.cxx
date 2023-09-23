@@ -790,21 +790,22 @@ ptk_file_menu_free(PtkFileMenu* data)
 
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path)
+ptk_file_menu_new(PtkFileBrowser* browser)
 {
-    return ptk_file_menu_new(browser, file_path, {});
+    return ptk_file_menu_new(browser, {});
 }
 
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path,
-                  const std::span<const vfs::file_info> sel_files)
+ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info> sel_files)
 {
     assert(browser != nullptr);
 
+    std::filesystem::path file_path;
     vfs::file_info file = nullptr;
     if (!sel_files.empty())
     {
         file = sel_files.front();
+        file_path = file->path();
     }
 
     const auto cwd = browser->cwd();
@@ -812,7 +813,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path,
     const auto data = new PtkFileMenu;
     data->cwd = cwd;
     data->browser = browser;
-    data->file_path = ztd::strdup(file_path);
+    data->file_path = file_path;
     data->file = file;
     data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
     data->accel_group = gtk_accel_group_new();
@@ -822,10 +823,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path,
     g_object_weak_ref(G_OBJECT(popup), (GWeakNotify)ptk_file_menu_free, data);
     g_signal_connect_after((void*)popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
 
-    // is_dir = file_path && std::filesystem::is_directory(file_path);
     const bool is_dir = (file && file->is_directory());
     // Note: network filesystems may become unresponsive here
-    const bool is_text = file && file_path && file->is_text(file_path);
+    const bool is_text = file && file->is_text();
 
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
@@ -878,10 +878,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path,
         GtkWidget* submenu = gtk_menu_item_get_submenu(item);
 
         // Execute
-        if (!is_dir && file && file_path &&
+        if (!is_dir && file &&
             (file->flags() & vfs::file_info_flags::desktop_entry ||
              // Note: network filesystems may become unresponsive here
-             file->is_executable(file_path)))
+             file->is_executable()))
         {
             set = xset_get(xset::name::open_execute);
             xset_set_cb(set, (GFunc)on_popup_open_activate, data);

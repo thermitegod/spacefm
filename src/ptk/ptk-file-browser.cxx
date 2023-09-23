@@ -1441,22 +1441,11 @@ static void
 show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
 {
     (void)event;
-    std::filesystem::path file_path;
-    vfs::file_info file;
 
     const auto cwd = file_browser->cwd();
     const auto selected_files = file_browser->selected_files();
-    if (selected_files.empty())
-    {
-        file = nullptr;
-    }
-    else
-    {
-        file = selected_files.front();
-        file_path = cwd / file->name();
-    }
 
-    GtkWidget* popup = ptk_file_menu_new(file_browser, file_path.c_str(), selected_files);
+    GtkWidget* popup = ptk_file_menu_new(file_browser, selected_files);
     if (popup)
     {
         gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);

@@ -164,8 +164,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         }
 
         // If this file is an executable file, run it.
-        if (!xnever && file->is_executable(file->path()) &&
-            (app_settings.click_executes() || xforce))
+        if (!xnever && file->is_executable() && (app_settings.click_executes() || xforce))
         {
             Glib::spawn_command_line_async(file->path());
             if (file_browser)

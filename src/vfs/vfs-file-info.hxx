@@ -124,11 +124,8 @@ struct VFSFileInfo
     bool is_desktop_entry() const noexcept;
     bool is_unknown_type() const noexcept;
 
-    // Full path of the file is required by this function
-    bool is_executable(const std::filesystem::path& file_path = "") const noexcept;
-
-    // Full path of the file is required by this function
-    bool is_text(const std::filesystem::path& file_path = "") const noexcept;
+    bool is_executable() const noexcept;
+    bool is_text() const noexcept;
 
     // File attributes
     bool is_compressed() const noexcept; // file is compressed by the filesystem
