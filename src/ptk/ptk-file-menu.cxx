@@ -58,6 +58,8 @@
 
 #include "settings/app.hxx"
 
+#include "types.hxx"
+
 #include "settings.hxx"
 #include "main-window.hxx"
 
@@ -1328,28 +1330,26 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         for (tab_t tab : TABS)
         {
-            const std::string copy_tab = std::format("copy_tab_{}", tab);
+            const auto copy_tab = std::format("copy_tab_{}", tab);
             set = xset_get(copy_tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
 
-            const std::string move_tab = std::format("move_tab_{}", tab);
+            const auto move_tab = std::format("move_tab_{}", tab);
             set = xset_get(move_tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
+        }
 
-            if (tab > 4)
-            {
-                continue;
-            }
+        for (panel_t panel : PANELS)
+        {
+            const bool b = main_window_panel_is_visible(browser, panel);
 
-            const bool b = main_window_panel_is_visible(browser, tab);
-
-            const std::string copy_panel = std::format("copy_panel_{}", tab);
+            const auto copy_panel = std::format("copy_panel_{}", panel);
             set = xset_get(copy_panel);
-            set->disable = (tab == p) || !b;
+            set->disable = (panel == p) || !b;
 
-            const std::string move_panel = std::format("move_panel_{}", tab);
+            const auto move_panel = std::format("move_panel_{}", panel);
             set = xset_get(move_panel);
-            set->disable = (tab == p) || !b;
+            set->disable = (panel == p) || !b;
         }
 
         set = xset_get(xset::name::copy_to);
