@@ -47,7 +47,7 @@ void ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::p
 
 void ptk_clipboard_copy_text(const std::string_view text);
 
-void ptk_clipboard_copy_file_list(char** path, bool copy);
+void ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files, bool copy);
 
 const std::vector<std::filesystem::path>
 ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32* missing_targets);

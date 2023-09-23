@@ -200,7 +200,7 @@ ptk_clipboard_cut_or_copy_files(const std::span<const vfs::file_info> sel_files,
 }
 
 void
-ptk_clipboard_copy_file_list(char** path, bool copy)
+ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files, bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTargetList* target_list = gtk_target_list_new(nullptr, 0);
@@ -219,15 +219,13 @@ ptk_clipboard_copy_file_list(char** path, bool copy)
 
     gtk_target_list_unref(target_list);
 
-    char** file_path = path;
     std::vector<std::filesystem::path> file_list;
-    while (*file_path)
+    for (const auto& file : sel_files)
     {
-        if (*file_path[0] == '/')
+        if (std::filesystem::path(file).is_absolute())
         {
-            file_list.emplace_back(ztd::strdup(*file_path));
+            file_list.emplace_back(file);
         }
-        file_path++;
     }
 
     gtk_clipboard_set_with_data(clip,

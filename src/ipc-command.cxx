@@ -51,6 +51,7 @@
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-volume.hxx"
 
+#include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
 
 #include "main-window.hxx"
@@ -774,9 +775,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "clipboard-cut-files") ||
                  ztd::same(property, "clipboard-copy-files"))
         {
-            return {SOCKET_INVALID, "Not Implemented"};
-
-            // ptk_clipboard_copy_file_list(argv + i + 1, ztd::same(property, "clipboard_copy_files"));
+            ptk_clipboard_cut_or_copy_file_list(data, ztd::same(property, "clipboard_copy_files"));
         }
         else if (ztd::same(property, "selected-filenames") || ztd::same(property, "selected-files"))
         {
