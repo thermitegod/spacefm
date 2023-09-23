@@ -1101,10 +1101,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "Edi_t");
     xset_set_var(set, xset::var::icn, "gtk-edit");
 
-    set = xset_get(xset::name::open_edit_root);
-    xset_set_var(set, xset::var::menu_label, "Edit As _Root");
-    xset_set_var(set, xset::var::icn, "gtk-dialog-warning");
-
     set = xset_get(xset::name::open_other);
     xset_set_var(set, xset::var::menu_label, "_Choose...");
     xset_set_var(set, xset::var::icn, "gtk-open");

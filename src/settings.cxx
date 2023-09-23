@@ -834,11 +834,8 @@ xset_clipboard_in_set(xset_t set)
 }
 
 void
-xset_edit(GtkWidget* parent, const std::filesystem::path& path, bool force_root, bool no_root)
+xset_edit(GtkWidget* parent, const std::filesystem::path& path)
 {
-    (void)force_root;
-    (void)no_root;
-
     GtkWidget* dlgparent = nullptr;
     if (parent)
     {

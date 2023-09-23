@@ -1718,7 +1718,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, std::format("no such file '{}'", value)};
             }
-            xset_edit(GTK_WIDGET(file_browser), value, false, true);
+            xset_edit(GTK_WIDGET(file_browser), value);
         }
         else if (ztd::same(property, "mount") || ztd::same(property, "umount"))
         { // mount or unmount TARGET

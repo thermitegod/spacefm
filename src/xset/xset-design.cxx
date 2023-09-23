@@ -94,7 +94,7 @@ xset_design_job_set_edit(xset_t set)
         {
             return;
         }
-        xset_edit(parent, cscript, false, true);
+        xset_edit(parent, cscript);
         std::free(cscript);
     }
 }
@@ -113,7 +113,7 @@ xset_design_job_set_edit_root(xset_t set)
         {
             return;
         }
-        xset_edit(parent, cscript, true, false);
+        xset_edit(parent, cscript);
         std::free(cscript);
     }
 }
@@ -184,7 +184,7 @@ xset_design_job_set_script(xset_t set)
     {
         return;
     }
-    xset_edit(parent, cscript, false, false);
+    xset_edit(parent, cscript);
     std::free(cscript);
 }
 

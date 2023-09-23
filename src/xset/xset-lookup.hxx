@@ -250,7 +250,6 @@ namespace xset
         con_open,
         open_execute,
         open_edit,
-        open_edit_root,
         open_other,
         open_all,
         open_in_tab,
