@@ -880,31 +880,11 @@ xset_job_is_valid(xset_t set, xset::job job)
 
     bool no_remove = false;
     bool no_paste = false;
-    bool open_all = false;
-
-    if (!set)
-    {
-        return false;
-    }
-
-    // control open_all item
-    if (ztd::startswith(set->name, "open_all_type_"))
-    {
-        open_all = true;
-    }
 
     switch (job)
     {
         case xset::job::key:
             return set->menu_style < xset::menu::submenu;
-        case xset::job::icon:
-            return ((set->menu_style == xset::menu::normal ||
-                     set->menu_style == xset::menu::string ||
-                     set->menu_style == xset::menu::fontdlg ||
-                     set->menu_style == xset::menu::submenu || set->tool != xset::tool::NOT) &&
-                    !open_all);
-        case xset::job::edit:
-            return !set->lock && set->menu_style < xset::menu::submenu;
         case xset::job::cut:
             return !set->lock;
         case xset::job::copy:
@@ -932,34 +912,8 @@ xset_job_is_valid(xset_t set, xset::job job)
             return !no_paste;
         case xset::job::remove:
             return (!set->lock && !no_remove);
-        case xset::job::label:
-        case xset::job::line:
-        case xset::job::script:
-        case xset::job::custom:
-        case xset::job::term:
-        case xset::job::keep:
-        case xset::job::user:
-        case xset::job::task:
-        case xset::job::pop:
-        case xset::job::err:
-        case xset::job::out:
         case xset::job::add_tool:
         case xset::job::remove_book:
-        case xset::job::normal:
-        case xset::job::check:
-        case xset::job::confirm:
-        case xset::job::dialog:
-        case xset::job::message:
-        case xset::job::copyname:
-        case xset::job::ignore_context:
-        case xset::job::scroll:
-        case xset::job::browse_files:
-        case xset::job::help:
-        case xset::job::help_add:
-        case xset::job::help_browse:
-        case xset::job::help_style:
-        case xset::job::help_book:
-        case xset::job::tooltips:
         case xset::job::invalid:
             break;
     }
@@ -982,21 +936,13 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
     switch (keymod)
     {
         case 0:
-            switch (event->keyval)
+            if (event->keyval == GDK_KEY_F1)
             {
-                case GDK_KEY_F1:
-                    return true;
-                case GDK_KEY_F4:
-                    if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
-                    {
-                        job = xset::job::edit;
-                    }
-                    break;
-                case GDK_KEY_Delete:
-                    job = xset::job::remove;
-                    break;
-                default:
-                    break;
+                return true;
+            }
+            else if (event->keyval == GDK_KEY_Delete)
+            {
+                job = xset::job::remove;
             }
             break;
         case GdkModifierType::GDK_CONTROL_MASK:
@@ -1011,21 +957,8 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
                 case GDK_KEY_v:
                     job = xset::job::paste;
                     break;
-                case GDK_KEY_e:
-                    if (set->lock)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        job = xset::job::edit;
-                    }
-                    break;
                 case GDK_KEY_k:
                     job = xset::job::key;
-                    break;
-                case GDK_KEY_i:
-                    job = xset::job::icon;
                     break;
                 default:
                     break;
@@ -1076,7 +1009,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     GtkWidget* submenu;
     bool no_remove = false;
     bool no_paste = false;
-    // bool open_all = false;
 
     // xset_t mset;
     xset_t insert_set;
@@ -1105,10 +1037,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
         // do not allow paste of submenu to self or below
         no_paste = xset_clipboard_in_set(insert_set);
     }
-
-    // control open_all item
-    // if (ztd::startswith(set->name, "open_all_type_"))
-    //    open_all = true;
 
     GtkWidget* design_menu = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
@@ -1173,7 +1101,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
         submenu = gtk_menu_new();
         gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
         gtk_container_add(GTK_CONTAINER(design_menu), newitem);
-        g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(xset::job::help_add));
         g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
         for (const auto& it : builtin_tools)
@@ -1326,25 +1253,10 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                         xset_design_show_menu(menu, set, nullptr, event->button, event->time);
                         return true;
                     }
-                    else
-                    {
-                        if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
-                        {
-                            job = xset::job::edit;
-                        }
-                    }
                     break;
                 case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
                     job = xset::job::key;
-                    break;
-                case GdkModifierType::GDK_MOD1_MASK:
-                    // alt
-                    job = xset::job::help;
-                    break;
-                case GdkModifierType::GDK_SHIFT_MASK:
-                    // shift
-                    job = xset::job::icon;
                     break;
                 case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
@@ -1409,12 +1321,6 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                 case GDK_KEY_Menu:
                     xset_design_show_menu(widget, set, nullptr, 0, event->time);
                     return true;
-                case GDK_KEY_F4:
-                    if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
-                    {
-                        job = xset::job::edit;
-                    }
-                    break;
                 case GDK_KEY_Delete:
                     job = xset::job::remove;
                     break;
@@ -1440,19 +1346,9 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                         xset_design_show_menu(widget, set, nullptr, 0, event->time);
                         return true;
                     }
-                    else
-                    {
-                        if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
-                        {
-                            job = xset::job::edit;
-                        }
-                    }
                     break;
                 case GDK_KEY_k:
                     job = xset::job::key;
-                    break;
-                case GDK_KEY_i:
-                    job = xset::job::icon;
                     break;
                 default:
                     break;
@@ -1904,24 +1800,12 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
             // middle click
             switch (keymod)
             {
-                case 0:
-                    // no modifier
-                    if (set->tool == xset::tool::custom &&
-                        xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
-                    {
-                        job = xset::job::edit;
-                    }
-                    break;
                 case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
                     job = xset::job::key;
                     break;
                 case GdkModifierType::GDK_MOD1_MASK:
                     // alt
-                    break;
-                case GdkModifierType::GDK_SHIFT_MASK:
-                    // shift
-                    job = xset::job::icon;
                     break;
                 case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift

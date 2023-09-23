@@ -96,40 +96,12 @@ namespace xset
     enum class job
     {
         key,
-        icon,
-        label,
-        edit,
-        line,
-        script,
-        custom,
-        term,
-        keep,
-        user,
-        task,
-        pop,
-        err,
-        out,
         add_tool,
         cut,
         copy,
         paste,
         remove,
         remove_book,
-        normal,
-        check,
-        confirm,
-        dialog,
-        message,
-        copyname,
-        ignore_context,
-        scroll,
-        browse_files,
-        help,
-        help_add,
-        help_browse,
-        help_style,
-        help_book,
-        tooltips,
         invalid // Must be last
     };
 
@@ -199,8 +171,6 @@ using xset_t = ztd::raw_ptr<xset::XSet>;
 
 // all xsets
 extern std::vector<xset_t> xsets;
-
-void xset_remove(xset_t set);
 
 // get/set //
 

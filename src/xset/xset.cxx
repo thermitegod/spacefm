@@ -37,16 +37,6 @@
 
 std::vector<xset_t> xsets;
 
-void
-xset_remove(xset_t set)
-{
-    assert(set != nullptr);
-
-    xsets.erase(std::remove(xsets.begin(), xsets.end(), set), xsets.end());
-
-    delete set;
-}
-
 xset::XSet::XSet(const std::string_view set_name, xset::name xset_name)
 {
     // ztd::logger::info("XSet Constructor");

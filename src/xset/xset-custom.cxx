@@ -78,38 +78,6 @@ xset_custom_new()
     return set;
 }
 
-void
-xset_custom_delete(xset_t set, bool delete_next)
-{
-    assert(set != nullptr);
-
-    if (set->menu_style == xset::menu::submenu && set->child)
-    {
-        xset_t set_child = xset_get(set->child.value());
-        xset_custom_delete(set_child, true);
-    }
-
-    if (delete_next && set->next)
-    {
-        xset_t set_next = xset_get(set->next.value());
-        xset_custom_delete(set_next, true);
-    }
-
-    if (set == xset_set_clipboard)
-    {
-        xset_set_clipboard = nullptr;
-    }
-
-    const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-    if (std::filesystem::exists(path1))
-    {
-        std::filesystem::remove_all(path1);
-        ztd::logger::info("Removed {}", path1.string());
-    }
-
-    xset_remove(set);
-}
-
 xset_t
 xset_custom_remove(xset_t set)
 {
@@ -250,106 +218,6 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     return menu_label;
 }
 
-char*
-xset_custom_get_script(xset_t set, bool create)
-{
-    assert(set != nullptr);
-
-    if ((!ztd::startswith(set->name, "cstm_") && !ztd::startswith(set->name, "cust") &&
-         !ztd::startswith(set->name, "hand")))
-    {
-        return nullptr;
-    }
-
-    std::filesystem::path path;
-
-    if (create)
-    {
-        path = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-        if (!std::filesystem::exists(path))
-        {
-            std::filesystem::create_directories(path);
-            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-        }
-    }
-
-    path = vfs::user_dirs->program_config_dir() / "scripts" / set->name / "exec.fish";
-
-    if (create && !std::filesystem::exists(path))
-    {
-        std::string data;
-        data.append(std::format("#!{}\n", FISH_PATH));
-        data.append(std::format("source {}\n\n", FISH_FMLIB));
-        data.append("#import file manager variables\n");
-        data.append("$fm_import\n\n");
-        data.append("#For all spacefm variables see man page: spacefm-scripts\n\n");
-        data.append("#Start script\n");
-        data.append("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        data.append("#End script\n");
-        data.append("exit $status\n");
-
-        write_file(path, data);
-
-        if (std::filesystem::exists(path))
-        {
-            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-        }
-    }
-    return ztd::strdup(path);
-}
-
-static void
-xset_custom_copy_files(xset_t src, xset_t dest)
-{
-    assert(src != nullptr);
-    assert(dest != nullptr);
-
-    std::string command;
-
-    std::string* standard_output = nullptr;
-    std::string* standard_error = nullptr;
-    i32 exit_status;
-
-    // ztd::logger::info("xset_custom_copy_files( {}, {} )", src->name, dest->name);
-
-    // copy command dir
-
-    std::filesystem::path path_dest;
-
-    const auto path_src = vfs::user_dirs->program_config_dir() / "scripts" / src->name;
-    // ztd::logger::info("    path_src={}", path_src);
-
-    // ztd::logger::info("    path_src EXISTS");
-    path_dest = vfs::user_dirs->program_config_dir() / "scripts";
-    std::filesystem::create_directories(path_dest);
-    std::filesystem::permissions(path_dest, std::filesystem::perms::owner_all);
-    path_dest = vfs::user_dirs->program_config_dir() / "scripts" / dest->name;
-    command = std::format("cp -a {} {}", path_src.string(), path_dest.string());
-    // ztd::logger::info("    path_dest={}", path_dest);
-    ztd::logger::info("COMMAND={}", command);
-    Glib::spawn_command_line_sync(command, standard_output, standard_error, &exit_status);
-    std::string out;
-    if (standard_output)
-    {
-        out.append(*standard_output);
-    }
-    if (standard_error)
-    {
-        out.append(*standard_error);
-    }
-    ztd::logger::info("{}", out);
-    if (exit_status && WIFEXITED(exit_status))
-    {
-        ptk_show_error(
-            nullptr,
-            "Copy Command Error",
-            std::format("An error occured copying command files\n\n{}", *standard_error));
-    }
-    command = std::format("chmod -R go-rwx {}", path_dest.string());
-    ztd::logger::info("COMMAND={}", command);
-    Glib::spawn_command_line_sync(command);
-}
-
 xset_t
 xset_custom_copy(xset_t set, bool copy_next)
 {
@@ -378,8 +246,6 @@ xset_custom_copy(xset_t set, bool copy_next)
     newset->keep_terminal = set->keep_terminal;
     newset->scroll_lock = set->scroll_lock;
     newset->icon = set->icon;
-
-    xset_custom_copy_files(set, newset);
     newset->tool = set->tool;
 
     if (set->menu_style == xset::menu::submenu && set->child)

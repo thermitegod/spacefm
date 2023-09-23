@@ -15,8 +15,6 @@
 
 #include <string>
 
-#include <format>
-
 #include <cassert>
 
 #include <gtk/gtk.h>
@@ -32,18 +30,7 @@
 #include "xset/xset-custom.hxx"
 #include "xset/xset-design.hxx"
 #include "xset/xset-design-clipboard.hxx"
-#include "xset/xset-dialog.hxx"
 #include "xset/xset-keyboard.hxx"
-#include "xset/xset-static-strings.hxx"
-
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-user-dirs.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-
-#include "ptk/ptk-app-chooser.hxx"
-
-#include "settings/app.hxx"
 
 #include "autosave.hxx"
 #include "utils.hxx"
@@ -58,163 +45,6 @@ xset_design_job_set_key(xset_t set)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
 
     xset_set_key(parent, set);
-}
-
-static void
-xset_design_job_set_icon(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const std::string old_icon = set->icon.value_or("");
-    // Note: xset_text_dialog uses the title passed to know this is an
-    // icon chooser, so it adds a Choose button.  If you change the title,
-    // change xset_text_dialog.
-    const auto [response, answer] =
-        xset_text_dialog(parent, "Set Icon", icon_desc, "", set->icon.value_or(""), "", false);
-
-    set->icon = answer;
-    if (set->lock && !ztd::same(old_icon, set->icon.value()))
-    {
-        // built-in icon has been changed from default, save it
-        set->keep_terminal = true;
-    }
-}
-
-static void
-xset_design_job_set_edit(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-    if (cmd_type == xset::cmd::script)
-    {
-        // script
-        char* cscript = xset_custom_get_script(set, true);
-        if (!cscript)
-        {
-            return;
-        }
-        xset_edit(parent, cscript);
-        std::free(cscript);
-    }
-}
-
-static void
-xset_design_job_set_copyname(xset_t set)
-{
-    GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-
-    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-    if (cmd_type == xset::cmd::line)
-    {
-        // line
-        gtk_clipboard_set_text(clip, set->line.value().data(), -1);
-    }
-    else if (cmd_type == xset::cmd::script)
-    {
-        // script
-        char* cscript = xset_custom_get_script(set, true);
-        if (!cscript)
-        {
-            return;
-        }
-        gtk_clipboard_set_text(clip, cscript, -1);
-        std::free(cscript);
-    }
-    else if (cmd_type == xset::cmd::app)
-    {
-        // custom
-        if (set->z)
-        {
-            gtk_clipboard_set_text(clip, set->z.value().c_str(), -1);
-        }
-        else
-        {
-            gtk_clipboard_set_text(clip, "", -1);
-        }
-    }
-}
-
-static void
-xset_design_job_set_line(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const auto [response, answer] = xset_text_dialog(parent,
-                                                     "Edit Command Line",
-                                                     enter_command_line,
-                                                     "",
-                                                     set->line.value(),
-                                                     "",
-                                                     false);
-    set->line = answer;
-    if (response)
-    {
-        xset_set_var(set, xset::var::x, "0");
-    }
-}
-
-static void
-xset_design_job_set_script(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    xset_set_var(set, xset::var::x, "1");
-    char* cscript = xset_custom_get_script(set, true);
-    if (!cscript)
-    {
-        return;
-    }
-    xset_edit(parent, cscript);
-    std::free(cscript);
-}
-
-static void
-xset_design_job_set_custom(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    std::string file;
-    std::string folder;
-
-    if (set->z)
-    {
-        const auto z = set->z.value();
-        folder = std::filesystem::path(z).parent_path();
-        file = std::filesystem::path(z).filename();
-    }
-    else
-    {
-        folder = "/usr/bin";
-    }
-
-    const auto custom_file = xset_file_dialog(parent,
-                                              GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN,
-                                              "Choose Custom Executable",
-                                              folder,
-                                              file);
-
-    if (custom_file)
-    {
-        xset_set_var(set, xset::var::x, "2");
-        xset_set_var(set, xset::var::z, custom_file.value().string());
-    }
-}
-
-static void
-xset_design_job_set_user(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const auto [response, answer] =
-        xset_text_dialog(parent,
-                         "Run As User",
-                         "Run this command as username:\n\n( Leave blank for current user )",
-                         "",
-                         set->y.value(),
-                         "",
-                         false);
-    set->y = answer;
 }
 
 static void
@@ -253,6 +83,7 @@ xset_design_job_set_paste(xset_t set)
     {
         return false;
     }
+
     if (xset_set_clipboard->tool > xset::tool::custom && set->tool == xset::tool::NOT)
     {
         // failsafe - disallow pasting a builtin tool to a menu
@@ -289,16 +120,9 @@ xset_design_job_set_paste(xset_t set)
 static bool
 xset_design_job_set_remove(xset_t set)
 {
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    GtkButtonsType buttons;
-    GtkWidget* dlgparent = nullptr;
-
-    std::string name;
-    std::string prog;
-
     const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
 
+    std::string name;
     if (set->menu_label)
     {
         name = clean_label(set->menu_label.value(), false, false);
@@ -316,45 +140,7 @@ xset_design_job_set_remove(xset_t set)
         }
     }
 
-    std::string msg;
-    if (set->child && set->menu_style == xset::menu::submenu)
-    {
-        msg = std::format("Permanently remove the '{}' SUBMENU AND ALL ITEMS WITHIN IT?\n\nThis "
-                          "action will delete all settings and files associated with these items.",
-                          name);
-        buttons = GtkButtonsType::GTK_BUTTONS_YES_NO;
-    }
-    else
-    {
-        msg = std::format("Permanently remove the '{}' item?\n\nThis action will delete all "
-                          "settings and files associated with this item.",
-                          name);
-        buttons = GtkButtonsType::GTK_BUTTONS_OK_CANCEL;
-    }
-    const bool is_app = !set->lock && set->menu_style < xset::menu::submenu &&
-                        cmd_type == xset::cmd::app && set->tool <= xset::tool::custom;
-    if (!(set->menu_style == xset::menu::sep) && app_settings.confirm() && !is_app &&
-        set->tool <= xset::tool::custom)
-    {
-        if (parent)
-        {
-            dlgparent = gtk_widget_get_toplevel(parent);
-        }
-
-        const auto response = ptk_show_message(GTK_WINDOW(dlgparent),
-                                               GtkMessageType::GTK_MESSAGE_WARNING,
-                                               "Confirm Remove",
-                                               buttons,
-                                               msg);
-
-        if (response != GtkResponseType::GTK_RESPONSE_OK &&
-            response != GtkResponseType::GTK_RESPONSE_YES)
-        {
-            return false;
-        }
-    }
-
-    bool update_toolbars;
+    bool update_toolbars = false;
 
     // remove
     if (set->parent)
@@ -375,202 +161,7 @@ xset_design_job_set_remove(xset_t set)
         update_toolbars = true;
     }
 
-    xset_custom_delete(set, false);
-
     return update_toolbars;
-}
-
-static void
-xset_design_job_set_normal(xset_t set)
-{
-    set->menu_style = xset::menu::normal;
-}
-
-static void
-xset_design_job_set_check(xset_t set)
-{
-    set->menu_style = xset::menu::check;
-}
-
-static void
-xset_design_job_set_confirm(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    if (!set->desc)
-    {
-        set->desc = "Are you sure?";
-    }
-
-    const auto [response, answer] = xset_text_dialog(parent,
-                                                     "Dialog Message",
-                                                     "Enter the message to be displayed in this "
-                                                     "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                                     "",
-                                                     set->desc.value(),
-                                                     "",
-                                                     false);
-    set->desc = answer;
-    if (response)
-    {
-        set->menu_style = xset::menu::confirm;
-    }
-}
-
-static void
-xset_design_job_set_dialog(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const auto [response, answer] = xset_text_dialog(parent,
-                                                     "Dialog Message",
-                                                     "Enter the message to be displayed in this "
-                                                     "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                                     "",
-                                                     set->desc.value(),
-                                                     "",
-                                                     false);
-    set->desc = answer;
-    if (response)
-    {
-        set->menu_style = xset::menu::string;
-    }
-}
-
-static void
-xset_design_job_set_message(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const auto [response, answer] = xset_text_dialog(parent,
-                                                     "Dialog Message",
-                                                     "Enter the message to be displayed in this "
-                                                     "dialog:\n\nUse:\n\t\\n\tnewline\n\t\\t\ttab",
-                                                     "",
-                                                     set->desc.value(),
-                                                     "",
-                                                     false);
-    set->desc = answer;
-}
-
-static void
-xset_design_job_set_ignore_context(xset_t set)
-{
-    (void)set;
-    xset_set_b(xset::name::context_dlg, !xset_get_b(xset::name::context_dlg));
-}
-
-static void
-xset_design_job_set_browse_files(xset_t set)
-{
-    if (set->tool > xset::tool::custom)
-    {
-        return;
-    }
-
-    const auto folder = vfs::user_dirs->program_config_dir() / "scripts" / set->name;
-    if (!std::filesystem::exists(folder))
-    {
-        std::filesystem::create_directories(folder);
-        std::filesystem::permissions(folder, std::filesystem::perms::owner_all);
-    }
-
-    if (set->browser)
-    {
-        set->browser->run_event<spacefm::signal::open_item>(folder, ptk::open_action::dir);
-    }
-}
-
-static void
-xset_design_job_set_term(xset_t set)
-{
-    if (set->in_terminal)
-    {
-        set->in_terminal = false;
-    }
-    else
-    {
-        set->in_terminal = true;
-        set->task = false;
-    }
-}
-
-static void
-xset_design_job_set_keep(xset_t set)
-{
-    if (set->keep_terminal)
-    {
-        set->keep_terminal = false;
-    }
-    else
-    {
-        set->keep_terminal = true;
-    }
-}
-
-static void
-xset_design_job_set_task(xset_t set)
-{
-    if (set->task)
-    {
-        set->task = false;
-    }
-    else
-    {
-        set->task = true;
-    }
-}
-
-static void
-xset_design_job_set_pop(xset_t set)
-{
-    if (set->task_pop)
-    {
-        set->task_pop = false;
-    }
-    else
-    {
-        set->task_pop = true;
-    }
-}
-
-static void
-xset_design_job_set_err(xset_t set)
-{
-    if (set->task_err)
-    {
-        set->task_err = false;
-    }
-    else
-    {
-        set->task_err = true;
-    }
-}
-
-static void
-xset_design_job_set_out(xset_t set)
-{
-    if (set->task_out)
-    {
-        set->task_out = false;
-    }
-    else
-    {
-        set->task_out = true;
-    }
-}
-
-static void
-xset_design_job_set_scroll(xset_t set)
-{
-    if (set->scroll_lock)
-    {
-        set->scroll_lock = false;
-    }
-    else
-    {
-        set->scroll_lock = true;
-    }
 }
 
 void
@@ -580,118 +171,46 @@ xset_design_job(GtkWidget* item, xset_t set)
 
     bool update_toolbars = false;
 
-    xset::tool tool_type;
     const auto job = xset::job(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
     // ztd::logger::info("activate job {} {}", (i32)job, set->name);
     switch (job)
     {
         case xset::job::key:
+        {
             xset_design_job_set_key(set);
             break;
-        case xset::job::icon:
-            xset_design_job_set_icon(set);
-            break;
-        case xset::job::edit:
-            xset_design_job_set_edit(set);
-            break;
-        case xset::job::copyname:
-            xset_design_job_set_copyname(set);
-            break;
-        case xset::job::line:
-            xset_design_job_set_line(set);
-            break;
-        case xset::job::script:
-            xset_design_job_set_script(set);
-            break;
-        case xset::job::custom:
-            xset_design_job_set_custom(set);
-            break;
-        case xset::job::user:
-            xset_design_job_set_user(set);
-            break;
+        }
         case xset::job::add_tool:
-            tool_type = xset::tool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
+        {
+            const auto tool_type =
+                xset::tool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
             xset_design_job_set_add_tool(set, tool_type);
             break;
+        }
         case xset::job::cut:
+        {
             xset_design_job_set_cut(set);
             break;
+        }
         case xset::job::copy:
+        {
             xset_design_job_set_copy(set);
             break;
+        }
         case xset::job::paste:
+        {
             update_toolbars = xset_design_job_set_paste(set);
             break;
+        }
         case xset::job::remove:
         case xset::job::remove_book:
+        {
             update_toolbars = xset_design_job_set_remove(set);
             break;
-        case xset::job::normal:
-            xset_design_job_set_normal(set);
-            break;
-        case xset::job::check:
-            xset_design_job_set_check(set);
-            break;
-        case xset::job::confirm:
-            xset_design_job_set_confirm(set);
-            break;
-        case xset::job::dialog:
-            xset_design_job_set_dialog(set);
-            break;
-        case xset::job::message:
-            xset_design_job_set_message(set);
-            break;
-        case xset::job::ignore_context:
-            xset_design_job_set_ignore_context(set);
-            break;
-        case xset::job::browse_files:
-            xset_design_job_set_browse_files(set);
-            break;
-        case xset::job::term:
-            xset_design_job_set_term(set);
-            break;
-        case xset::job::keep:
-            xset_design_job_set_keep(set);
-            break;
-        case xset::job::task:
-            xset_design_job_set_task(set);
-            break;
-        case xset::job::pop:
-            xset_design_job_set_pop(set);
-            break;
-        case xset::job::err:
-            xset_design_job_set_err(set);
-            break;
-        case xset::job::out:
-            xset_design_job_set_out(set);
-            break;
-        case xset::job::scroll:
-            xset_design_job_set_scroll(set);
-            break;
-        case xset::job::tooltips:
-        case xset::job::label:
-        case xset::job::help:
-        case xset::job::help_add:
-        case xset::job::help_browse:
-        case xset::job::help_style:
-        case xset::job::help_book:
+        }
         case xset::job::invalid:
             break;
-    }
-
-    if (set && (!set->lock || set->xset_name == xset::name::main_book))
-    {
-        if (set->parent)
-        {
-            const xset_t set_next = xset_is(set->parent.value());
-            if (set_next && set_next->tool == xset::tool::custom &&
-                set_next->menu_style == xset::menu::submenu)
-            {
-                // this set is first item in custom toolbar submenu
-                update_toolbars = true;
-            }
-        }
     }
 
     if ((set && !set->lock && !(set->tool == xset::tool::NOT)) || update_toolbars)
