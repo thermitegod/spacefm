@@ -2826,8 +2826,6 @@ main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_brow
                 statusbar_txt.append(std::format("  Character Devices ({:L})", count_char));
             }
         }
-
-        vfs_file_info_list_free(selected_files);
     }
     else
     {
@@ -3460,8 +3458,6 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
                 }
                 buf.append(std::format(")\n"));
             }
-
-            vfs_file_info_list_free(selected_files);
         }
 
         // device

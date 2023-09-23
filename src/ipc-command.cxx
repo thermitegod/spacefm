@@ -1325,7 +1325,6 @@ run_ipc_command(const std::string_view socket_commands_json)
                 }
                 str.append(std::format("{} ", ztd::shell::quote(file->name())));
             }
-            vfs_file_info_list_free(selected_files);
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }
         else if (ztd::same(property, "selected-pattern"))

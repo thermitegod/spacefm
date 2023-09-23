@@ -752,8 +752,6 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
                     {
                         ptk_clipboard_copy_as_text(file_browser->cwd(), selected_files);
                     }
-
-                    vfs_file_info_list_free(selected_files);
                 }
                 else if (i == 2)
                 {
@@ -1450,7 +1448,6 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     {
         gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
     }
-    vfs_file_info_list_free(selected_files);
 }
 
 /* invoke popup menu via shortcut key */
@@ -2476,7 +2473,6 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
         uri_list.append(std::format("{}\n", uri));
     }
 
-    vfs_file_info_list_free(selected_files);
     gtk_selection_data_set(sel_data,
                            type,
                            8,
@@ -3030,7 +3026,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     if (this->curhistsel_ && this->curhistsel_->data)
     {
         // ztd::logger::debug("free curhistsel");
-        g_list_foreach((GList*)this->curhistsel_->data, (GFunc)vfs_file_info_unref, nullptr);
+        // g_list_foreach((GList*)this->curhistsel_->data, (GFunc)vfs_file_info_unref, nullptr);
         g_list_free((GList*)this->curhistsel_->data);
     }
     if (this->curhistsel_)
@@ -3730,8 +3726,6 @@ PtkFileBrowser::open_selected_files_with_app(const std::string_view app_desktop)
     const auto selected_files = this->selected_files();
 
     ptk_open_files_with_app(this->cwd(), selected_files, app_desktop, this, false, false);
-
-    vfs_file_info_list_free(selected_files);
 }
 
 void
@@ -4666,8 +4660,6 @@ PtkFileBrowser::file_properties(i32 page) noexcept
                              !dir_name.empty() ? dir_name : cwd,
                              selected_files,
                              page);
-
-    vfs_file_info_list_free(selected_files);
 }
 
 /* FIXME: Do not recreate the view if previous view is compact view */
