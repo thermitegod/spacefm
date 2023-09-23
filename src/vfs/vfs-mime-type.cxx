@@ -370,15 +370,7 @@ VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
 {
     const auto custom_desktop = this->add_action(desktop_id);
 
-    mime_type_update_association(this->type_,
-                                 custom_desktop.empty() ? desktop_id : custom_desktop,
-                                 mime_type::action::DEFAULT);
-}
-
-void
-VFSMimeType::remove_action(const std::string_view desktop_id) noexcept
-{
-    mime_type_update_association(this->type_, desktop_id, mime_type::action::remove);
+    mime_type_set_default_action(this->type_, custom_desktop.empty() ? desktop_id : custom_desktop);
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
@@ -404,10 +396,4 @@ vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
                                   const std::string_view desktop_id)
 {
     return mime_type_locate_desktop_file(dir, desktop_id);
-}
-
-void
-vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id)
-{
-    mime_type_update_association(type, desktop_id, mime_type::action::append);
 }

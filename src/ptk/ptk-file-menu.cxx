@@ -1581,11 +1581,9 @@ namespace ptk::file_menu
 {
     enum class app_job
     {
-        DEFAULT,
-        remove,
+        default_action,
         edit,
         edit_list,
-        add,
         browse,
         browse_shared,
         edit_type,
@@ -1644,35 +1642,9 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
     switch (ptk::file_menu::app_job(job))
     {
-        case ptk::file_menu::app_job::DEFAULT:
+        case ptk::file_menu::app_job::default_action:
         {
             mime_type->set_default_action(desktop->name());
-            break;
-        }
-        case ptk::file_menu::app_job::remove:
-        {
-            // for text files, spacefm displays both the actions for the type
-            // and the actions for text/plain, so removing an app may appear to not
-            // work if that app is still associated with text/plain
-            mime_type->remove_action(desktop->name());
-            if (!ztd::same(mime_type->type(), "text/plain") &&
-                ztd::startswith(mime_type->type(), "text/"))
-            {
-                ptk_show_message(
-                    GTK_WINDOW(data->browser),
-                    GtkMessageType::GTK_MESSAGE_INFO,
-                    "Remove Text Type Association",
-                    GtkButtonsType::GTK_BUTTONS_OK,
-                    "NOTE:  When compiling the list of applications to appear in the Open "
-                    "submenu for a text file, SpaceFM will include applications associated "
-                    "with the MIME type (eg text/html) AND applications associated with "
-                    "text/plain.  If you select Remove on an application, it will be removed "
-                    "as an associated application for the MIME type (eg text/html), "
-                    "but will NOT be removed as an associated application for text/plain "
-                    "(unless the MIME type is text/plain).  Thus using Remove may not remove "
-                    "the application from the Open submenu for this type, unless you also remove "
-                    "it from text/plain.");
-            }
             break;
         }
         case ptk::file_menu::app_job::edit:
@@ -1729,30 +1701,6 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
             const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
             xset_edit(GTK_WIDGET(data->browser), path, false, true);
-            break;
-        }
-        case ptk::file_menu::app_job::add:
-        {
-            const auto app = ptk_choose_app_for_mime_type(
-                data->browser ? GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)))
-                              : GTK_WINDOW(data->browser),
-                mime_type,
-                false,
-                true,
-                true,
-                true);
-            // ptk_choose_app_for_mime_type returns either a bare command that
-            // was already set as default, or a (custom or shared) desktop file
-            if (!app)
-            {
-                break;
-            }
-
-            if (ztd::endswith(app.value(), ".desktop") && !ztd::contains(app.value(), "/") &&
-                mime_type)
-            {
-                vfs_mime_type_append_action(mime_type->type(), app.value());
-            }
             break;
         }
         case ptk::file_menu::app_job::browse:
@@ -1994,41 +1942,14 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
-    const u32 keymod = ptk_get_keymod(event->state);
-
-    ptk::file_menu::app_job job;
-    bool job_set = false;
+    const auto keymod = ptk_get_keymod(event->state);
     if (keymod == 0)
     {
-        switch (event->keyval)
+        if (event->keyval == GDK_KEY_F2 || event->keyval == GDK_KEY_Menu)
         {
-            case GDK_KEY_F2:
-            case GDK_KEY_Menu:
-                show_app_menu(menu, item, data, 0, event->time);
-                return true;
-            case GDK_KEY_F4:
-                job = ptk::file_menu::app_job::edit;
-                job_set = true;
-                break;
-            case GDK_KEY_Delete:
-                job = ptk::file_menu::app_job::remove;
-                job_set = true;
-                break;
-            case GDK_KEY_Insert:
-                job = ptk::file_menu::app_job::add;
-                job_set = true;
-                break;
-            default:
-                break;
+            show_app_menu(menu, item, data, 0, event->time);
+            return true;
         }
-    }
-    if (job_set)
-    {
-        gtk_menu_shell_deactivate(GTK_MENU_SHELL(menu));
-        g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
-        g_object_set_data(G_OBJECT(item), "data", data);
-        app_job(item, item);
-        return true;
     }
     return false;
 }
@@ -2087,16 +2008,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // Set Default
     newitem = app_menu_additem(app_menu,
                                "_Set As Default",
-                               ptk::file_menu::app_job::DEFAULT,
+                               ptk::file_menu::app_job::default_action,
                                app_item,
                                data);
-
-    // Remove
-    newitem =
-        app_menu_additem(app_menu, "_Remove", ptk::file_menu::app_job::remove, app_item, data);
-
-    // Add
-    newitem = app_menu_additem(app_menu, "_Add...", ptk::file_menu::app_job::add, app_item, data);
 
     // Separator
     gtk_container_add(GTK_CONTAINER(app_menu), gtk_separator_menu_item_new());

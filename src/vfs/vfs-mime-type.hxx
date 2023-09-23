@@ -57,8 +57,6 @@ struct VFSMimeType
 
     void set_default_action(const std::string_view desktop_id) noexcept;
 
-    void remove_action(const std::string_view desktop_id) noexcept;
-
     // If user-custom desktop file is created, it is returned in custom_desktop.
     const std::string add_action(const std::string_view desktop_id) noexcept;
 
@@ -87,8 +85,6 @@ vfs::mime_type vfs_mime_type_get_from_file(const std::filesystem::path& file_pat
 vfs::mime_type vfs_mime_type_get_from_type(const std::string_view type);
 
 //////////////////////
-
-void vfs_mime_type_append_action(const std::string_view type, const std::string_view desktop_id);
 
 const std::optional<std::filesystem::path>
 vfs_mime_type_locate_desktop_file(const std::string_view desktop_id);

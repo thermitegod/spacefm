@@ -132,10 +132,10 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
  *
  */
 static void
-get_actions(const std::filesystem::path& dir, const std::string_view type,
+get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
             std::vector<std::string>& actions)
 {
-    // ztd::logger::info("get_actions( {}, {} )\n", dir, type);
+    // ztd::logger::info("get_actions( {}, {} )\n", dir, mime_type);
     std::vector<Glib::ustring> removed;
 
     static constexpr std::array<const std::string_view, 2> names{
@@ -148,7 +148,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view type,
         "MIME Cache",
     };
 
-    // ztd::logger::info("get_actions( {}/, {} )", dir, type);
+    // ztd::logger::info("get_actions( {}/, {} )", dir, mime_type);
     for (const auto n : ztd::range(names.size()))
     {
         const auto path = dir / names.at(n);
@@ -168,7 +168,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view type,
             // get removed associations in this dir
             try
             {
-                removed = kf->get_string_list("Removed Associations", type.data());
+                removed = kf->get_string_list("Removed Associations", mime_type.data());
                 // if (removed.empty())
                 //     continue;
             }
@@ -186,7 +186,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view type,
             std::vector<Glib::ustring> apps;
             try
             {
-                apps = kf->get_string_list(groups.at(k).data(), type.data());
+                apps = kf->get_string_list(groups.at(k).data(), mime_type.data());
                 // if (apps.empty())
                 //     return nullptr;
             }
@@ -242,7 +242,7 @@ mime_type_get_actions(const std::string_view mime_type)
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
     get_actions(vfs::user_dirs->config_dir(), mime_type, actions);
 
-    // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
+    // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
     const auto dir = vfs::user_dirs->data_dir() / "applications";
     get_actions(dir, mime_type, actions);
 
@@ -513,14 +513,13 @@ mime_type_add_action(const std::string_view type, const std::string_view desktop
     {
         return desktop_id.data();
     }
-
     return make_custom_desktop_file(desktop_id, type);
 }
 
 static const std::optional<std::filesystem::path>
 locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id)
 {
-    const auto desktop_path = dir / "applications" / desktop_id;
+    auto desktop_path = dir / "applications" / desktop_id;
     if (std::filesystem::is_regular_file(desktop_path))
     {
         return desktop_path;
@@ -536,7 +535,7 @@ locate_desktop_file(const std::filesystem::path& dir, const std::string_view des
     while (ztd::contains(new_desktop_id, "-"))
     {
         new_desktop_id = ztd::replace(new_desktop_id, "-", "/", 1);
-        const auto new_desktop_path = dir / "applications" / new_desktop_id;
+        auto new_desktop_path = dir / "applications" / new_desktop_id;
         // ztd::logger::info("new_desktop_id={}", new_desktop_id);
         if (std::filesystem::is_regular_file(new_desktop_path))
         {
@@ -576,330 +575,30 @@ mime_type_locate_desktop_file(const std::string_view desktop_id)
     return std::nullopt;
 }
 
-static const std::optional<std::string>
-get_default_action(const std::filesystem::path& dir, const std::string_view type)
-{
-    // ztd::logger::info("get_default_action( {}, {} )", dir, type);
-    // search these files in dir for the first existing default app
-    static constexpr std::array<const std::string_view, 2> names{
-        "mimeapps.list",
-        "defaults.list",
-    };
-    static constexpr std::array<const std::string_view, 3> groups{
-        "Default Applications",
-        "Added Associations",
-    };
-
-    for (const std::string_view name : names)
-    {
-        const auto path = dir / name;
-        // ztd::logger::info("    path = {}", path);
-        const auto kf = Glib::KeyFile::create();
-        try
-        {
-            kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
-        }
-        catch (const Glib::FileError& e)
-        {
-            return std::nullopt;
-        }
-
-        for (const std::string_view group : groups)
-        {
-            std::vector<Glib::ustring> apps;
-            try
-            {
-                apps = kf->get_string_list(group.data(), type.data());
-                if (apps.empty())
-                {
-                    break;
-                }
-            }
-            catch (...) // Glib::KeyFileError, Glib::FileError
-            {
-                break;
-            }
-
-            for (const Glib::ustring& app : apps)
-            {
-                if (app.empty())
-                {
-                    continue;
-                }
-
-                // ztd::logger::info("        {}", apps[i]);
-                if (mime_type_locate_desktop_file(app.data()))
-                {
-                    // ztd::logger::info("            EXISTS");
-                    return app.data();
-                }
-            }
-
-            if (ztd::same(name, "defaults.list"))
-            {
-                break; // defaults.list does not have Added Associations
-            }
-        }
-
-        if (std::filesystem::equivalent(dir, vfs::user_dirs->config_dir()))
-        {
-            break; // no defaults.list in ~/.config
-        }
-    }
-    return std::nullopt;
-}
-
-/*
- * Get default applications used to open this mime-type
- *
- * The returned string was newly allocated, and should be freed when no longer
- * used.  If nullptr is returned, that means a default app is not set for this
- * mime-type.  This is very roughly based on specs:
- * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
- *
- * The old defaults.list is also checked.
- */
 const std::optional<std::string>
 mime_type_get_default_action(const std::string_view mime_type)
 {
-    /* FIXME: need to check parent types if default action of current type is not set. */
+    assert(mime_type.empty() != true);
 
-    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    auto home_default_action = get_default_action(vfs::user_dirs->config_dir(), mime_type.data());
-    if (home_default_action)
+    const auto command = std::format("xdg-mime query default {}", mime_type);
+    // ztd::logger::debug("COMMAND={}", command);
+    std::string standard_output;
+    Glib::spawn_command_line_sync(command, &standard_output, nullptr, nullptr);
+    if (standard_output.empty())
     {
-        return home_default_action;
+        return std::nullopt;
     }
-
-    // $XDG_DATA_HOME=[~/.local]/applications/mimeapps.list
-    const auto data_app_dir = vfs::user_dirs->data_dir() / "applications";
-    auto data_default_action = get_default_action(data_app_dir, mime_type.data());
-    if (data_default_action)
-    {
-        return data_default_action;
-    }
-
-    // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
-    {
-        const auto sys_app_dir = std::filesystem::path() / sys_dir / "applications";
-        auto sys_default_action = get_default_action(sys_app_dir, mime_type.data());
-        if (sys_default_action)
-        {
-            return sys_default_action;
-        }
-    }
-
-    return std::nullopt;
+    // Need to remove '\n'
+    return ztd::strip(standard_output);
 }
 
-/*
- * Set applications used to open or never used to open this mime-type
- * desktop_id is the name of *.desktop file.
- * action ==
- *     mime_type::action::DEFAULT - make desktop_id the default app
- *     mime_type::action::APPEND  - add desktop_id to Default and Added apps
- *     mime_type::action::REMOVE  - add desktop id to Removed apps
- *
- * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
- */
 void
-mime_type_update_association(const std::string_view type, const std::string_view desktop_id,
-                             mime_type::action action)
+mime_type_set_default_action(const std::string_view mime_type, const std::string_view desktop_id)
 {
-    if (type.empty() || desktop_id.empty())
-    {
-        ztd::logger::warn("mime_type_update_association invalid type or desktop_id");
-        return;
-    }
+    assert(mime_type.empty() != true);
+    assert(desktop_id.empty() != true);
 
-    bool data_changed = false;
-
-    // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    const auto mimeapps = vfs::user_dirs->config_dir() / "mimeapps.list";
-
-    if (!std::filesystem::exists(mimeapps))
-    {
-        ztd::logger::info("Creating empty mime list: {}", mimeapps);
-        save_to_file(mimeapps, "[Default Applications]\n");
-    }
-
-    // Load current mimeapps.list content, if available
-    const auto kf = Glib::KeyFile::create();
-    try
-    {
-        kf->load_from_file(mimeapps, Glib::KeyFile::Flags::NONE);
-    }
-    catch (const Glib::FileError& e)
-    {
-        return;
-    }
-
-    static constexpr std::array<const std::string_view, 3> groups{
-        "Default Applications",
-        "Added Associations",
-        "Removed Associations",
-    };
-
-    for (const std::string_view group : groups)
-    {
-        std::string new_action;
-        bool is_present = false;
-
-        std::vector<Glib::ustring> apps;
-        try
-        {
-            apps = kf->get_string_list(group.data(), type.data());
-            if (apps.empty())
-            {
-                continue;
-            }
-        }
-        catch (...) // Glib::KeyFileError, Glib::FileError
-        {
-            continue;
-        }
-
-        mime_type::action group_block;
-        if (ztd::same(group, groups[0]))
-        {
-            group_block = mime_type::action::DEFAULT;
-        }
-        else if (ztd::same(group, groups[1]))
-        {
-            group_block = mime_type::action::append;
-        }
-        else
-        { // if (ztd::same(group, groups[2]))
-            group_block = mime_type::action::remove;
-        }
-
-        for (const auto i : ztd::range(apps.size()))
-        {
-            if (apps[i].empty())
-            {
-                continue;
-            }
-
-            if (ztd::same(apps.at(i).data(), desktop_id))
-            {
-                switch (action)
-                {
-                    case mime_type::action::DEFAULT:
-                        // found desktop_id already in group list
-                        if (group_block == mime_type::action::remove)
-                        {
-                            // Removed Associations - remove it
-                            is_present = true;
-                            continue;
-                        }
-                        else
-                        {
-                            // Default Applications or Added Associations
-                            if (i == 0)
-                            {
-                                // is already first - skip change
-                                is_present = true;
-                                break;
-                            }
-                            // in later position - remove it
-                            continue;
-                        }
-                        break;
-                    case mime_type::action::append:
-                        if (group_block == mime_type::action::remove)
-                        {
-                            // Removed Associations - remove it
-                            is_present = true;
-                            continue;
-                        }
-                        else
-                        {
-                            // Default or Added - already present, skip change
-                            is_present = true;
-                            break;
-                        }
-                        break;
-                    case mime_type::action::remove:
-                        if (group_block == mime_type::action::remove)
-                        {
-                            // Removed Associations - already present
-                            is_present = true;
-                            break;
-                        }
-                        else
-                        {
-                            // Default or Added - remove it
-                            is_present = true;
-                            continue;
-                        }
-                        break;
-                }
-            }
-            // copy other apps to new list preserving order
-            new_action = std::format("{}{};", new_action, apps.at(i).data());
-        }
-
-        // update key string if needed
-        if (action < mime_type::action::remove)
-        {
-            if (((group_block == mime_type::action::DEFAULT ||
-                  group_block == mime_type::action::append) &&
-                 !is_present) ||
-                (group_block == mime_type::action::remove && is_present))
-            {
-                if (group_block < mime_type::action::remove)
-                {
-                    // add to front of Default or Added list
-                    if (action == mime_type::action::DEFAULT)
-                    {
-                        new_action = std::format("{};{}", desktop_id, new_action);
-                    }
-                    else
-                    { // if ( action == mime_type::action::APPEND )
-                        new_action = std::format("{}{};", new_action, desktop_id);
-                    }
-                }
-                if (!new_action.empty())
-                {
-                    kf->set_string(group.data(), type.data(), new_action);
-                }
-                else
-                {
-                    kf->remove_key(group.data(), type.data());
-                }
-                data_changed = true;
-            }
-        }
-        else // if ( action == mime_type::action::REMOVE )
-        {
-            if (((group_block == mime_type::action::DEFAULT ||
-                  group_block == mime_type::action::append) &&
-                 is_present) ||
-                (group_block == mime_type::action::remove && !is_present))
-            {
-                if (group_block == mime_type::action::remove)
-                {
-                    // add to end of Removed list
-                    new_action = std::format("{}{};", new_action, desktop_id);
-                }
-                if (!new_action.empty())
-                {
-                    kf->set_string(group.data(), type.data(), new_action);
-                }
-                else
-                {
-                    kf->remove_key(group.data(), type.data());
-                }
-                data_changed = true;
-            }
-        }
-    }
-
-    // save updated mimeapps.list
-    if (data_changed)
-    {
-        const Glib::ustring data = kf->to_data();
-        save_to_file(mimeapps, data);
-    }
+    const auto command = std::format("xdg-mime default {} {}", desktop_id, mime_type);
+    ztd::logger::debug("COMMAND={}", command);
+    Glib::spawn_command_line_sync(command);
 }

@@ -39,28 +39,21 @@ namespace mime_type
 /*
  *  Get a list of applications supporting this mime-type
  */
-const std::vector<std::string> mime_type_get_actions(const std::string_view type);
+const std::vector<std::string> mime_type_get_actions(const std::string_view mime_type);
 
 /*
  * Add an applications used to open this mime-type
  * desktop_id is the name of *.desktop file.
- *
- * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
-const std::string mime_type_add_action(const std::string_view type,
+const std::string mime_type_add_action(const std::string_view mime_type,
                                        const std::string_view desktop_id);
 
 /*
  * Get default applications used to open this mime-type
  *
- * The returned string was newly allocated, and should be freed when no longer
- * used.  If nullptr is returned, that means a default app is not set for this
- * mime-type.  This is very roughly based on specs:
- * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
- *
- * The old defaults.list is also checked.
+ * If std::nullopt is returned, that means a default app is not set for this mime-type.
  */
-const std::optional<std::string> mime_type_get_default_action(const std::string_view type);
+const std::optional<std::string> mime_type_get_default_action(const std::string_view mime_type);
 
 /*
  * Set applications used to open or never used to open this mime-type
@@ -72,8 +65,8 @@ const std::optional<std::string> mime_type_get_default_action(const std::string_
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_update_association(const std::string_view type, const std::string_view desktop_id,
-                                  mime_type::action action);
+void mime_type_set_default_action(const std::string_view mime_type,
+                                  const std::string_view desktop_id);
 
 /* Locate the file path of desktop file by desktop_id */
 const std::optional<std::filesystem::path>
