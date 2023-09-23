@@ -49,9 +49,8 @@ struct PtkFileMenu
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
-                             const char* cwd, const std::span<const vfs::file_info> sel_files);
-GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
-                             const char* cwd);
+                             const std::span<const vfs::file_info> sel_files);
+GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file);
 
 void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group);

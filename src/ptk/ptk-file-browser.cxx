@@ -1472,11 +1472,7 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
     */
 
     char* dir_name = nullptr;
-    GtkWidget* popup = ptk_file_menu_new(file_browser,
-                                         file_path.c_str(),
-                                         file,
-                                         dir_name ? dir_name : cwd.c_str(),
-                                         selected_files);
+    GtkWidget* popup = ptk_file_menu_new(file_browser, file_path.c_str(), file, selected_files);
     if (popup)
     {
         gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);

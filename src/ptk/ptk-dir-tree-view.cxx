@@ -447,15 +447,15 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBro
                 if (event->button == 3)
                 {
                     // right click
-                    char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+                    const std::filesystem::path dir_path =
+                        ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
                     if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
                     {
                         /* show right-click menu
                          * This simulates a right-click in the file list when
                          * no files are selected (even if some are) since
                          * actions are to be taken on the dir itself. */
-                        GtkWidget* popup =
-                            ptk_file_menu_new(file_browser, nullptr, nullptr, dir_path);
+                        GtkWidget* popup = ptk_file_menu_new(file_browser, nullptr, nullptr);
                         if (popup)
                         {
                             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
@@ -560,14 +560,15 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEventKey* event, PtkFileBrowser* 
                 return false;
             }
 
-            const char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+            const std::filesystem::path dir_path =
+                ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
             if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
                  * no files are selected (even if some are) since
                  * actions are to be taken on the dir itself. */
-                GtkWidget* popup = ptk_file_menu_new(file_browser, nullptr, nullptr, dir_path);
+                GtkWidget* popup = ptk_file_menu_new(file_browser, nullptr, nullptr);
                 if (popup)
                 {
                     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);

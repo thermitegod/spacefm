@@ -794,30 +794,28 @@ ptk_file_menu_free(PtkFileMenu* data)
 
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
-                  const char* cwd)
+ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file)
 {
-    return ptk_file_menu_new(browser, file_path, file, cwd, {});
+    return ptk_file_menu_new(browser, file_path, file, {});
 }
 
 GtkWidget*
 ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
-                  const char* cwd, const std::span<const vfs::file_info> sel_files)
+                  const std::span<const vfs::file_info> sel_files)
 { // either desktop or browser must be non-nullptr
+
+    assert(browser != nullptr);
 
     xset_t set_radio;
     xset_t set;
     xset_t set2;
     GtkMenuItem* item;
 
-    if (!browser)
-    {
-        return nullptr;
-    }
+    const auto cwd = browser->cwd();
 
     const auto data = new PtkFileMenu;
 
-    data->cwd = ztd::strdup(cwd);
+    data->cwd = cwd;
     data->browser = browser;
 
     data->file_path = ztd::strdup(file_path);
@@ -846,7 +844,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
     // const i32 no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
-    const i32 no_write_access = faccessat(0, cwd, W_OK, AT_EACCESS);
+    const i32 no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     bool is_clip;
@@ -1170,7 +1168,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set->disable = !(browser->curHistory_ && browser->curHistory_->next);
         set = xset_get(xset::name::go_up);
         xset_set_cb(set, (GFunc)ptk_file_browser_go_up, browser);
-        set->disable = ztd::same(cwd, "/");
+        set->disable = std::filesystem::equivalent(cwd, "/");
         xset_set_cb(xset::name::go_home, (GFunc)ptk_file_browser_go_home, browser);
         xset_set_cb(xset::name::go_default, (GFunc)ptk_file_browser_go_default, browser);
         xset_set_cb(xset::name::go_set_default,
