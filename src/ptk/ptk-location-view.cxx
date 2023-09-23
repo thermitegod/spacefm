@@ -33,7 +33,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
 
@@ -1305,8 +1304,6 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_t set;
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    const xset_context_t context = xset_context_new();
-    main_context_fill(file_browser, context);
 
     set = xset_get(xset::name::dev_menu_remove);
     xset_set_cb(set, (GFunc)on_eject, vol);

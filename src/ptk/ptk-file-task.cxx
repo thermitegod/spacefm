@@ -704,7 +704,6 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
     (void)entry;
     (void)user_data;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    xset_context_new();
 
     xset_t set = xset_get(xset::name::separator);
     set->browser = nullptr;

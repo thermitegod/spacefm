@@ -39,7 +39,6 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -1586,7 +1585,6 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     (void)btn;
     GtkWidget* popup = gtk_menu_new();
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    xset_context_new();
 
     xset_t set;
 

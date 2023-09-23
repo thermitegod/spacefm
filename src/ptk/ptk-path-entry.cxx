@@ -27,11 +27,9 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "main-window.hxx"
 #include "settings.hxx"
 
 #include "ptk/ptk-keyboard.hxx"
@@ -506,9 +504,6 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
     }
 
     xset_t set;
-
-    const xset_context_t context = xset_context_new();
-    main_context_fill(file_browser, context);
 
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 

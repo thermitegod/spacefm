@@ -37,7 +37,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 
 #include "write.hxx"
 
@@ -60,7 +59,6 @@
 #include "settings/app.hxx"
 
 #include "settings.hxx"
-#include "item-prop.hxx"
 #include "main-window.hxx"
 
 #include "ptk/ptk-file-list.hxx"
@@ -872,7 +870,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
-    const i32 no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
+    // const i32 no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
     const i32 no_write_access = faccessat(0, cwd, W_OK, AT_EACCESS);
 
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -896,8 +894,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     const tab_t tab_count = counts[1];
     const tab_t tab_num = counts[2];
 
-    xset_context_t context = xset_context_new();
-
     // Get mime type and apps
     vfs::mime_type mime_type;
     std::vector<std::string> apps;
@@ -905,48 +901,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     {
         mime_type = file->mime_type();
         apps = mime_type->actions();
-        context->var[item_prop::context::item::mime] = mime_type->type();
     }
     else
     {
         mime_type = nullptr;
-        context->var[item_prop::context::item::mime] = "";
-    }
-
-    // context
-    if (file_path)
-    {
-        context->var[item_prop::context::item::name] =
-            std::filesystem::path(file_path).parent_path();
-    }
-
-    context->var[item_prop::context::item::dir] = cwd;
-    context->var[item_prop::context::item::read_access] = no_read_access ? "false" : "true";
-    context->var[item_prop::context::item::write_access] = no_write_access ? "false" : "true";
-    context->var[item_prop::context::item::is_text] = is_text ? "true" : "false";
-    context->var[item_prop::context::item::is_dir] = is_dir ? "true" : "false";
-    context->var[item_prop::context::item::mul_sel] = sel_files.size() > 1 ? "true" : "false";
-    context->var[item_prop::context::item::clip_files] = is_clip ? "true" : "false";
-
-    if (file)
-    {
-        context->var[item_prop::context::item::is_link] = file->is_symlink() ? "true" : "false";
-    }
-    else
-    {
-        context->var[item_prop::context::item::is_link] = "false";
-    }
-
-    if (browser)
-    {
-        main_context_fill(browser, context);
-    }
-
-    if (!context->valid)
-    {
-        ztd::logger::warn("rare exception due to context_fill hacks - fb was probably destroyed");
-        context = xset_context_new();
-        return nullptr;
     }
 
     // Open >

@@ -29,15 +29,12 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
 #include "xset/xset-design.hxx"
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-keyboard.hxx"
 #include "xset/xset-static-strings.hxx"
-
-#include "item-prop.hxx"
 
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-user-dirs.hxx"
@@ -237,116 +234,6 @@ xset_design_job_set_user(xset_t set)
                          "",
                          false);
     set->y = answer;
-}
-
-static void
-xset_design_job_set_app(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    if (ztd::startswith(set->name, "open_all_type_"))
-    {
-        const std::string name = ztd::removeprefix(set->name, "open_all_type_");
-
-        const auto response = ptk_show_message(
-            GTK_WINDOW(parent),
-            GtkMessageType::GTK_MESSAGE_INFO,
-            "New Context Command",
-            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-            std::format("You are adding a custom command to the Default menu item.  This item will "
-                        "automatically have a pre-context - it will only appear when the MIME type "
-                        "of the first selected file matches the current type '{}'.\n\nAdd commands "
-                        "or menus here which you only want to appear for this one MIME type.",
-                        name.empty() ? "(none)" : name));
-
-        if (response != GtkResponseType::GTK_RESPONSE_OK)
-        {
-            return;
-        }
-    }
-
-    vfs::mime_type mime_type = vfs_mime_type_get_from_type(
-        xset_context && !xset_context->var[item_prop::context::item::mime].empty()
-            ? xset_context->var[item_prop::context::item::mime].data()
-            : XDG_MIME_TYPE_UNKNOWN);
-    const auto app =
-        ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, true, false, false, false);
-
-    // add new menu item
-    xset_t newset = xset_custom_new();
-    xset_custom_insert_after(set, newset);
-
-    newset->z = app;
-    newset->menu_label = set->name;
-    newset->browser = set->browser;
-    newset->x = std::to_string(magic_enum::enum_integer(xset::cmd::app));
-    // unset these to save session space
-    newset->task = false;
-    newset->task_err = false;
-    newset->task_out = false;
-    newset->keep_terminal = false;
-}
-
-static void
-xset_design_job_set_submenu(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    if (ztd::startswith(set->name, "open_all_type_"))
-    {
-        const std::string name = ztd::removeprefix(set->name, "open_all_type_");
-
-        const auto response = ptk_show_message(
-            GTK_WINDOW(parent),
-            GtkMessageType::GTK_MESSAGE_INFO,
-            "New Context Submenu",
-            GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-            std::format("You are adding a custom submenu to the Default menu item.  This item will "
-                        "automatically have a pre-context - it will only appear when the MIME type "
-                        "of the first selected file matches the current type '{}'.\n\nAdd commands "
-                        "or menus here which you only want to appear for this one MIME type.",
-                        name.empty() ? "(none)" : name));
-
-        if (response != GtkResponseType::GTK_RESPONSE_OK)
-        {
-            return;
-        }
-    }
-
-    const auto [response, answer] =
-        xset_text_dialog(parent,
-                         "Set Submenu Name",
-                         "Enter submenu name:\n\nPrecede a character with an underscore (_) "
-                         "to underline that character as a shortcut key if desired.",
-                         "",
-                         "New _Submenu",
-                         "",
-                         false);
-    const std::string name = answer;
-    if (!response || name.empty())
-    {
-        return;
-    }
-
-    // add new submenu
-    xset_t newset = xset_custom_new();
-    newset->menu_label = name;
-    newset->menu_style = xset::menu::submenu;
-    xset_custom_insert_after(set, newset);
-
-    // add submenu child
-    xset_t childset = xset_custom_new();
-    newset->child = childset->name;
-    childset->parent = newset->name;
-    childset->menu_label = "New _Command";
-}
-
-static void
-xset_design_job_set_sep(xset_t set)
-{
-    xset_t newset = xset_custom_new();
-    newset->menu_style = xset::menu::sep;
-    xset_custom_insert_after(set, newset);
 }
 
 static void
@@ -586,18 +473,6 @@ xset_design_job_set_message(xset_t set)
 }
 
 static void
-xset_design_job_set_prop(xset_t set)
-{
-    xset_item_prop_dlg(xset_context, set, 0);
-}
-
-static void
-xset_design_job_set_prop_cmd(xset_t set)
-{
-    xset_item_prop_dlg(xset_context, set, 2);
-}
-
-static void
 xset_design_job_set_ignore_context(xset_t set)
 {
     (void)set;
@@ -727,7 +602,7 @@ xset_design_job(GtkWidget* item, xset_t set)
     xset::tool tool_type;
     const auto job = xset::job(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job")));
 
-    // ztd::logger::info("activate job {} {}", job, set->name);
+    // ztd::logger::info("activate job {} {}", (i32)job, set->name);
     switch (job)
     {
         case xset::job::key:
@@ -756,18 +631,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             break;
         case xset::job::user:
             xset_design_job_set_user(set);
-            break;
-        case xset::job::bookmark:
-            break;
-        case xset::job::app:
-            xset_design_job_set_app(set);
-            break;
-        case xset::job::submenu:
-        case xset::job::submenu_book:
-            xset_design_job_set_submenu(set);
-            break;
-        case xset::job::sep:
-            xset_design_job_set_sep(set);
             break;
         case xset::job::add_tool:
             tool_type = xset::tool(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tool_type")));
@@ -801,12 +664,6 @@ xset_design_job(GtkWidget* item, xset_t set)
         case xset::job::message:
             xset_design_job_set_message(set);
             break;
-        case xset::job::prop:
-            xset_design_job_set_prop(set);
-            break;
-        case xset::job::prop_cmd:
-            xset_design_job_set_prop_cmd(set);
-            break;
         case xset::job::ignore_context:
             xset_design_job_set_ignore_context(set);
             break;
@@ -837,7 +694,6 @@ xset_design_job(GtkWidget* item, xset_t set)
         case xset::job::tooltips:
         case xset::job::label:
         case xset::job::help:
-        case xset::job::help_new:
         case xset::job::help_add:
         case xset::job::help_browse:
         case xset::job::help_style:

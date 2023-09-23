@@ -342,7 +342,6 @@ sources = files(
     'src/file-search.cxx',
     'src/ipc.cxx',
     'src/ipc-command.cxx',
-    'src/item-prop.cxx',
     'src/main.cxx',
     'src/main-window.cxx',
     'src/preference-dialog.cxx',
@@ -368,7 +367,6 @@ sources = files(
     'src/commandline/socket/set-task/subcommands.cxx',
 
     'src/xset/xset.cxx',
-    'src/xset/xset-context.cxx',
     'src/xset/xset-custom.cxx',
     'src/xset/xset-defaults.cxx',
     'src/xset/xset-design.cxx',

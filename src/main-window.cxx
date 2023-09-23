@@ -54,8 +54,6 @@
 #include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
-#include "xset/xset-custom.hxx"
 #include "xset/xset-event-handler.hxx"
 
 #include "settings/app.hxx"
@@ -63,11 +61,9 @@
 
 #include "bookmarks.hxx"
 #include "settings.hxx"
-#include "item-prop.hxx"
 #include "file-search.hxx"
 
 #include "autosave.hxx"
-#include "terminal-handlers.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
@@ -1365,9 +1361,6 @@ rebuild_menus(MainWindow* main_window)
         return;
     }
 
-    const xset_context_t context = xset_context_new();
-    main_context_fill(file_browser, context);
-
     // File
     rebuild_menu_file(main_window, file_browser);
 
@@ -2041,8 +2034,6 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
         {
             GtkWidget* popup = gtk_menu_new();
             GtkAccelGroup* accel_group = gtk_accel_group_new();
-            const xset_context_t context = xset_context_new();
-            main_context_fill(file_browser, context);
 
             xset_t set;
 
@@ -3469,319 +3460,6 @@ main_window_get_on_current_desktop()
     }
     // revert to dumb if one or more window desktops unreadable
     return invalid ? main_window_get_last_active() : nullptr;
-}
-
-void
-main_context_fill(PtkFileBrowser* file_browser, const xset_context_t& c)
-{
-    PtkFileBrowser* a_browser;
-    vfs::mime_type mime_type;
-    GtkClipboard* clip = nullptr;
-    vfs::volume vol;
-    GtkTreeModel* model;
-    GtkTreeModel* model_task;
-    GtkTreeIter it;
-
-    c->valid = false;
-    if (!GTK_IS_WIDGET(file_browser))
-    {
-        return;
-    }
-
-    const MainWindow* main_window = file_browser->main_window();
-    if (main_window == nullptr)
-    {
-        return;
-    }
-
-    if (!c->var[item_prop::context::item::name].empty())
-    {
-        // if name is set, assume we do not need all selected files info
-        c->var[item_prop::context::item::dir] = file_browser->cwd();
-        // if (c->var[item_prop::context::item::dir])
-        //{
-        c->var[item_prop::context::item::write_access] =
-            ptk_file_browser_write_access(c->var[item_prop::context::item::dir]) ? "false" : "true";
-        // }
-
-        const auto selected_files = file_browser->selected_files();
-        if (!selected_files.empty())
-        {
-            const vfs::file_info file = selected_files.front();
-
-            c->var[item_prop::context::item::name] = file->name();
-            const auto path = std::filesystem::path() / c->var[item_prop::context::item::dir] /
-                              c->var[item_prop::context::item::name];
-            c->var[item_prop::context::item::is_dir] =
-                std::filesystem::is_directory(path) ? "true" : "false";
-            c->var[item_prop::context::item::is_text] = file->is_text(path) ? "true" : "false";
-            c->var[item_prop::context::item::is_link] = file->is_symlink() ? "true" : "false";
-
-            mime_type = file->mime_type();
-            if (mime_type)
-            {
-                c->var[item_prop::context::item::mime] = mime_type->type();
-            }
-
-            c->var[item_prop::context::item::mul_sel] =
-                selected_files.size() > 1 ? "true" : "false";
-        }
-        else
-        {
-            c->var[item_prop::context::item::name] = "";
-            c->var[item_prop::context::item::is_dir] = "false";
-            c->var[item_prop::context::item::is_text] = "false";
-            c->var[item_prop::context::item::is_link] = "false";
-            c->var[item_prop::context::item::mime] = "";
-            c->var[item_prop::context::item::mul_sel] = "false";
-        }
-
-        vfs_file_info_list_free(selected_files);
-    }
-
-    c->var[item_prop::context::item::is_root] = geteuid() == 0 ? "true" : "false";
-
-    if (c->var[item_prop::context::item::clip_files].empty())
-    {
-        clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-        if (!gtk_clipboard_wait_is_target_available(
-                clip,
-                gdk_atom_intern("x-special/gnome-copied-files", false)) &&
-            !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
-        {
-            c->var[item_prop::context::item::clip_files] = "false";
-        }
-        else
-        {
-            c->var[item_prop::context::item::clip_files] = "true";
-        }
-    }
-
-    if (c->var[item_prop::context::item::clip_text].empty())
-    {
-        if (!clip)
-        {
-            clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-        }
-        c->var[item_prop::context::item::clip_text] =
-            gtk_clipboard_wait_is_text_available(clip) ? "true" : "false";
-    }
-
-    // hack - Due to file_browser->update_views() main iteration, fb tab may be destroyed
-    // asynchronously - common if gui thread is blocked on stat
-    // NOTE:  this is no longer needed
-    if (!GTK_IS_WIDGET(file_browser))
-    {
-        return;
-    }
-
-    // device
-    if (file_browser->side_dev &&
-        (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev))))
-    {
-        c->var[item_prop::context::item::device] = vol->device_file();
-        c->var[item_prop::context::item::device_label] = vol->label();
-        c->var[item_prop::context::item::device_mount_point] = vol->mount_point();
-        c->var[item_prop::context::item::device_udi] = vol->udi();
-        c->var[item_prop::context::item::device_fstype] = vol->fstype();
-
-        std::string flags;
-        if (vol->is_removable())
-        {
-            flags = std::format("{} removable", flags);
-        }
-        else
-        {
-            flags = std::format("{} internal", flags);
-        }
-
-        if (vol->requires_eject())
-        {
-            flags = std::format("{} ejectable", flags);
-        }
-
-        if (vol->is_optical())
-        {
-            flags = std::format("{} optical", flags);
-        }
-
-        if (!vol->is_user_visible())
-        {
-            flags = std::format("{} policy_hide", flags);
-        }
-
-        if (vol->is_mounted())
-        {
-            flags = std::format("{} mounted", flags);
-        }
-        else if (vol->is_mountable())
-        {
-            flags = std::format("{} mountable", flags);
-        }
-        else
-        {
-            flags = std::format("{} no_media", flags);
-        }
-
-        c->var[item_prop::context::item::device_prop] = flags;
-    }
-
-    // panels
-    i32 panel_count = 0;
-    for (const panel_t p : PANELS)
-    {
-        if (!xset_get_b_panel(p, xset::panel::show))
-        {
-            continue;
-        }
-        const i32 i = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[p - 1]));
-        if (i != -1)
-        {
-            a_browser = PTK_FILE_BROWSER_REINTERPRET(
-                gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[p - 1]), i));
-        }
-        else
-        {
-            continue;
-        }
-        if (!a_browser || !gtk_widget_get_visible(GTK_WIDGET(a_browser)))
-        {
-            continue;
-        }
-
-        panel_count++;
-        c->var[item_prop::context::item::panel1_dir + p - 1] = a_browser->cwd();
-
-        if (a_browser->side_dev &&
-            (vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev))))
-        {
-            c->var[item_prop::context::item::panel1_device + p - 1] = vol->device_file();
-        }
-
-        // panel has files selected?
-        if (a_browser->is_view_mode(ptk::file_browser::view_mode::icon_view) ||
-            a_browser->is_view_mode(ptk::file_browser::view_mode::compact_view))
-        {
-            GList* selected_files = a_browser->selected_items(&model);
-            if (selected_files)
-            {
-                c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
-            }
-            else
-            {
-                c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
-            }
-            g_list_foreach(selected_files, (GFunc)gtk_tree_path_free, nullptr);
-            g_list_free(selected_files);
-        }
-        else if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
-        {
-            GtkTreeSelection* selection =
-                gtk_tree_view_get_selection(GTK_TREE_VIEW(a_browser->folder_view()));
-            if (gtk_tree_selection_count_selected_rows(selection) > 0)
-            {
-                c->var[item_prop::context::item::panel1_sel + p - 1] = "true";
-            }
-            else
-            {
-                c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
-            }
-        }
-        else
-        {
-            c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
-        }
-
-        if (file_browser == a_browser)
-        {
-            c->var[item_prop::context::item::tab] = std::to_string(i + 1);
-            c->var[item_prop::context::item::tab_count] =
-                std::to_string(gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[p - 1])));
-        }
-    }
-    c->var[item_prop::context::item::panel_count] = panel_count;
-    c->var[item_prop::context::item::panel] = file_browser->panel();
-
-    for (const panel_t p : PANELS)
-    {
-        if (c->var[item_prop::context::item::panel1_dir + p - 1].empty())
-        {
-            c->var[item_prop::context::item::panel1_dir + p - 1] = "";
-        }
-        if (c->var[item_prop::context::item::panel1_sel + p - 1].empty())
-        {
-            c->var[item_prop::context::item::panel1_sel + p - 1] = "false";
-        }
-        if (c->var[item_prop::context::item::panel1_device + p - 1].empty())
-        {
-            c->var[item_prop::context::item::panel1_device + p - 1] = "";
-        }
-    }
-
-    // tasks
-    const std::map<vfs::file_task_type, const std::string_view> job_titles{
-        {vfs::file_task_type::move, "move"},
-        {vfs::file_task_type::copy, "copy"},
-        {vfs::file_task_type::trash, "trash"},
-        {vfs::file_task_type::DELETE, "delete"},
-        {vfs::file_task_type::link, "link"},
-        {vfs::file_task_type::chmod_chown, "change"},
-        {vfs::file_task_type::exec, "run"},
-    };
-
-    PtkFileTask* ptask = ptk_task_view_get_selected_task(file_browser->task_view());
-    if (ptask)
-    {
-        c->var[item_prop::context::item::task_type] = job_titles.at(ptask->task->type).data();
-        if (ptask->task->type == vfs::file_task_type::exec)
-        {
-            if (ptask->task->current_file)
-            {
-                c->var[item_prop::context::item::task_name] = ptask->task->current_file.value();
-            }
-            if (ptask->task->dest_dir)
-            {
-                c->var[item_prop::context::item::task_dir] = ptask->task->dest_dir.value();
-            }
-        }
-        else
-        {
-            c->var[item_prop::context::item::task_name] = "";
-            ptk_file_task_lock(ptask);
-            if (ptask->task->current_file)
-            {
-                const auto current_file = ptask->task->current_file.value();
-                c->var[item_prop::context::item::task_dir] = current_file.parent_path();
-            }
-            ptk_file_task_unlock(ptask);
-        }
-    }
-    else
-    {
-        c->var[item_prop::context::item::task_type] = "";
-        c->var[item_prop::context::item::task_name] = "";
-        c->var[item_prop::context::item::task_dir] = "";
-    }
-    if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
-    {
-        c->var[item_prop::context::item::task_count] = "0";
-    }
-    else
-    {
-        model_task = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
-        i32 task_count = 0;
-        if (gtk_tree_model_get_iter_first(model_task, &it))
-        {
-            task_count++;
-            while (gtk_tree_model_iter_next(model_task, &it))
-            {
-                task_count++;
-            }
-        }
-        c->var[item_prop::context::item::task_count] = std::to_string(task_count);
-    }
-
-    c->valid = true;
 }
 
 const std::string

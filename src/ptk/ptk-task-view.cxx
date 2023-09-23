@@ -38,7 +38,6 @@
 #include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-event-handler.hxx"
 
 #include "settings.hxx"
@@ -785,7 +784,6 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
         return false;
     }
 
-    xset_context_t context;
     std::string menu_elements;
 
     switch (event->button)
@@ -883,8 +881,6 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             GtkAccelGroup* accel_group;
             popup = gtk_menu_new();
             accel_group = gtk_accel_group_new();
-            context = xset_context_new();
-            main_context_fill(file_browser, context);
 
             set = xset_get(xset::name::task_stop);
             xset_set_cb(set, (GFunc)on_task_stop, view);

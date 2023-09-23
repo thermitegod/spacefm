@@ -50,7 +50,6 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-event-handler.hxx"
 
@@ -807,8 +806,6 @@ static void
 on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_browser)
 {
     (void)widget;
-    const xset_context_t context = xset_context_new();
-    main_context_fill(file_browser, context);
     GtkAccelGroup* accel_group = gtk_accel_group_new();
     const std::string desc =
         std::format("separator panel{}_icon_status status_middle", file_browser->panel_);

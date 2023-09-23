@@ -49,12 +49,10 @@
 
 #include "settings.hxx"
 #include "main-window.hxx"
-#include "item-prop.hxx"
 
 #include "scripts.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
 #include "xset/xset-defaults.hxx"
 #include "xset/xset-design.hxx"
@@ -529,8 +527,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     xset_t keyset;
     xset_t set_next;
     std::string icon_name;
-    std::optional<std::string> context = std::nullopt;
-    item_prop::context::state context_action = item_prop::context::state::show;
+
     // ztd::logger::info("xset_add_menuitem {}", set->name);
 
     if (icon_name.empty() && set->icon)
@@ -548,199 +545,183 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         }
     }
 
-    context = set->context;
-    // context?
-    if (context && set->tool == xset::tool::NOT && xset_context && xset_context->valid &&
-        !xset_get_b(xset::name::context_dlg))
+    if (set->tool != xset::tool::NOT && set->menu_style != xset::menu::submenu)
     {
-        context_action = xset_context_test(xset_context, context.value(), set->disable);
+        // item = xset_new_menuitem(set->menu_label, icon_name);
     }
-
-    if (context_action != item_prop::context::state::hide)
+    else if (set->menu_style != xset::menu::normal)
     {
-        if (set->tool != xset::tool::NOT && set->menu_style != xset::menu::submenu)
+        xset_t set_radio;
+        switch (set->menu_style)
         {
-            // item = xset_new_menuitem( set->menu_label, icon_name );
-        }
-        else if (set->menu_style != xset::menu::normal)
-        {
-            xset_t set_radio;
-            switch (set->menu_style)
-            {
-                case xset::menu::check:
-                    if (!(!set->lock &&
-                          (xset::cmd(xset_get_int(set, xset::var::x)) > xset::cmd::script)))
+            case xset::menu::check:
+                if (!(!set->lock &&
+                      (xset::cmd(xset_get_int(set, xset::var::x)) > xset::cmd::script)))
+                {
+                    item = gtk_check_menu_item_new_with_mnemonic(set->menu_label.value().data());
+                    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
+                                                   set->b == xset::b::xtrue);
+                }
+                break;
+            case xset::menu::radio:
+                if (set->ob2_data)
+                {
+                    set_radio = xset_get(static_cast<const char*>(set->ob2_data));
+                }
+                else
+                {
+                    set_radio = set;
+                }
+                item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->ob2_data,
+                                                             set->menu_label.value().data());
+                set_radio->ob2_data =
+                    (void*)gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
+                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), set->b == xset::b::xtrue);
+                break;
+            case xset::menu::submenu:
+                submenu = gtk_menu_new();
+                item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
+                gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+                g_signal_connect(submenu,
+                                 "key-press-event",
+                                 G_CALLBACK(xset_menu_keypress),
+                                 nullptr);
+                if (set->lock)
+                {
+                    if (set->desc)
                     {
-                        item =
-                            gtk_check_menu_item_new_with_mnemonic(set->menu_label.value().data());
-                        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
-                                                       set->b == xset::b::xtrue);
+                        xset_add_menu(file_browser, submenu, accel_group, set->desc.value());
                     }
-                    break;
-                case xset::menu::radio:
-                    if (set->ob2_data)
+                }
+                else if (set->child)
+                {
+                    set_next = xset_get(set->child.value());
+                    xset_add_menuitem(file_browser, submenu, accel_group, set_next);
+                    GList* l = gtk_container_get_children(GTK_CONTAINER(submenu));
+                    if (l)
                     {
-                        set_radio = xset_get(static_cast<const char*>(set->ob2_data));
+                        g_list_free(l);
                     }
                     else
                     {
-                        set_radio = set;
-                    }
-                    item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->ob2_data,
-                                                                 set->menu_label.value().data());
-                    set_radio->ob2_data =
-                        (void*)gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
-                    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
-                                                   set->b == xset::b::xtrue);
-                    break;
-                case xset::menu::submenu:
-                    submenu = gtk_menu_new();
-                    item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
-                    gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-                    g_signal_connect(submenu,
-                                     "key-press-event",
-                                     G_CALLBACK(xset_menu_keypress),
-                                     nullptr);
-                    if (set->lock)
-                    {
-                        if (set->desc)
+                        // Nothing was added to the menu (all items likely have
+                        // invisible context) so destroy (hide) - issue #215
+                        gtk_widget_destroy(item);
+
+                        // next item
+                        if (set->next)
                         {
-                            xset_add_menu(file_browser, submenu, accel_group, set->desc.value());
+                            set_next = xset_get(set->next.value());
+                            xset_add_menuitem(file_browser, menu, accel_group, set_next);
                         }
+                        return item;
                     }
-                    else if (set->child)
-                    {
-                        set_next = xset_get(set->child.value());
-                        xset_add_menuitem(file_browser, submenu, accel_group, set_next);
-                        GList* l = gtk_container_get_children(GTK_CONTAINER(submenu));
-                        if (l)
-                        {
-                            g_list_free(l);
-                        }
-                        else
-                        {
-                            // Nothing was added to the menu (all items likely have
-                            // invisible context) so destroy (hide) - issue #215
-                            gtk_widget_destroy(item);
-
-                            // next item
-                            if (set->next)
-                            {
-                                set_next = xset_get(set->next.value());
-                                xset_add_menuitem(file_browser, menu, accel_group, set_next);
-                            }
-                            return item;
-                        }
-                    }
-                    break;
-                case xset::menu::sep:
-                    item = gtk_separator_menu_item_new();
-                    break;
-                case xset::menu::normal:
-                case xset::menu::string:
-                case xset::menu::filedlg:
-                case xset::menu::fontdlg:
-                case xset::menu::icon:
-                case xset::menu::colordlg: // deprecated
-                case xset::menu::confirm:
-                case xset::menu::reserved_03:
-                case xset::menu::reserved_04:
-                case xset::menu::reserved_05:
-                case xset::menu::reserved_06:
-                case xset::menu::reserved_07:
-                case xset::menu::reserved_08:
-                case xset::menu::reserved_09:
-                case xset::menu::reserved_10:
-                    break;
-            }
+                }
+                break;
+            case xset::menu::sep:
+                item = gtk_separator_menu_item_new();
+                break;
+            case xset::menu::normal:
+            case xset::menu::string:
+            case xset::menu::filedlg:
+            case xset::menu::fontdlg:
+            case xset::menu::icon:
+            case xset::menu::colordlg: // deprecated
+            case xset::menu::confirm:
+            case xset::menu::reserved_03:
+            case xset::menu::reserved_04:
+            case xset::menu::reserved_05:
+            case xset::menu::reserved_06:
+            case xset::menu::reserved_07:
+            case xset::menu::reserved_08:
+            case xset::menu::reserved_09:
+            case xset::menu::reserved_10:
+                break;
         }
-        if (!item)
-        {
-            // get menu icon size
-            i32 icon_w;
-            i32 icon_h;
-            gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
-            const i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
-
-            GdkPixbuf* app_icon = nullptr;
-            const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-            if (!set->lock && cmd_type == xset::cmd::app)
-            {
-                // Application
-                const std::string menu_label =
-                    xset_custom_get_app_name_icon(set, &app_icon, icon_size);
-                item = xset_new_menuitem(menu_label, "");
-            }
-            else
-            {
-                item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
-            }
-
-            if (app_icon)
-            {
-                g_object_unref(app_icon);
-            }
-        }
-
-        set->browser = file_browser;
-        g_object_set_data(G_OBJECT(item), "menu", menu);
-        g_object_set_data(G_OBJECT(item), "set", set->name.data());
-
-        if (set->ob1)
-        {
-            g_object_set_data(G_OBJECT(item), set->ob1, set->ob1_data);
-        }
-        if (set->menu_style != xset::menu::radio && set->ob2)
-        {
-            g_object_set_data(G_OBJECT(item), set->ob2, set->ob2_data);
-        }
-
-        if (set->menu_style < xset::menu::submenu)
-        {
-            // activate callback
-            if (!set->cb_func || set->menu_style != xset::menu::normal)
-            {
-                // use xset menu callback
-                // if ( !design_mode )
-                //{
-                g_signal_connect(item, "activate", G_CALLBACK(xset_menu_cb), set);
-                //}
-            }
-            else if (set->cb_func)
-            {
-                // use custom callback directly
-                // if ( !design_mode )
-                g_signal_connect(item, "activate", G_CALLBACK(set->cb_func), set->cb_data);
-            }
-
-            // key accel
-            if (set->shared_key)
-            {
-                keyset = xset_get(set->shared_key.value());
-            }
-            else
-            {
-                keyset = set;
-            }
-            if (keyset->key > 0 && accel_group)
-            {
-                gtk_widget_add_accelerator(item,
-                                           "activate",
-                                           accel_group,
-                                           keyset->key,
-                                           (GdkModifierType)keyset->keymod,
-                                           GTK_ACCEL_VISIBLE);
-            }
-        }
-        // design mode callback
-        g_signal_connect(item, "button-press-event", G_CALLBACK(xset_design_cb), set);
-        g_signal_connect(item, "button-release-event", G_CALLBACK(xset_design_cb), set);
-
-        gtk_widget_set_sensitive(item,
-                                 context_action != item_prop::context::state::disable &&
-                                     !set->disable);
-        gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
+    if (!item)
+    {
+        // get menu icon size
+        i32 icon_w;
+        i32 icon_h;
+        gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
+        const i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
+
+        GdkPixbuf* app_icon = nullptr;
+        const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
+        if (!set->lock && cmd_type == xset::cmd::app)
+        {
+            // Application
+            const std::string menu_label = xset_custom_get_app_name_icon(set, &app_icon, icon_size);
+            item = xset_new_menuitem(menu_label, "");
+        }
+        else
+        {
+            item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
+        }
+
+        if (app_icon)
+        {
+            g_object_unref(app_icon);
+        }
+    }
+
+    set->browser = file_browser;
+    g_object_set_data(G_OBJECT(item), "menu", menu);
+    g_object_set_data(G_OBJECT(item), "set", set->name.data());
+
+    if (set->ob1)
+    {
+        g_object_set_data(G_OBJECT(item), set->ob1, set->ob1_data);
+    }
+    if (set->menu_style != xset::menu::radio && set->ob2)
+    {
+        g_object_set_data(G_OBJECT(item), set->ob2, set->ob2_data);
+    }
+
+    if (set->menu_style < xset::menu::submenu)
+    {
+        // activate callback
+        if (!set->cb_func || set->menu_style != xset::menu::normal)
+        {
+            // use xset menu callback
+            // if ( !design_mode )
+            //{
+            g_signal_connect(item, "activate", G_CALLBACK(xset_menu_cb), set);
+            //}
+        }
+        else if (set->cb_func)
+        {
+            // use custom callback directly
+            // if ( !design_mode )
+            g_signal_connect(item, "activate", G_CALLBACK(set->cb_func), set->cb_data);
+        }
+
+        // key accel
+        if (set->shared_key)
+        {
+            keyset = xset_get(set->shared_key.value());
+        }
+        else
+        {
+            keyset = set;
+        }
+        if (keyset->key > 0 && accel_group)
+        {
+            gtk_widget_add_accelerator(item,
+                                       "activate",
+                                       accel_group,
+                                       keyset->key,
+                                       (GdkModifierType)keyset->keymod,
+                                       GTK_ACCEL_VISIBLE);
+        }
+    }
+    // design mode callback
+    g_signal_connect(item, "button-press-event", G_CALLBACK(xset_design_cb), set);
+    g_signal_connect(item, "button-release-event", G_CALLBACK(xset_design_cb), set);
+
+    gtk_widget_set_sensitive(item, !set->disable);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
     // next item
     if (set->next)
@@ -957,11 +938,6 @@ xset_job_is_valid(xset_t set, xset::job job)
             return !no_paste;
         case xset::job::remove:
             return (!set->lock && !no_remove);
-        // case xset::job::CONTEXT:
-        //    return ( xset_context && xset_context->valid && !open_all );
-        case xset::job::prop:
-        case xset::job::prop_cmd:
-            return true;
         case xset::job::label:
         case xset::job::edit_root:
         case xset::job::line:
@@ -974,11 +950,6 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::pop:
         case xset::job::err:
         case xset::job::out:
-        case xset::job::bookmark:
-        case xset::job::app:
-        case xset::job::submenu:
-        case xset::job::submenu_book:
-        case xset::job::sep:
         case xset::job::add_tool:
         case xset::job::remove_book:
         case xset::job::normal:
@@ -991,7 +962,6 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::scroll:
         case xset::job::browse_files:
         case xset::job::help:
-        case xset::job::help_new:
         case xset::job::help_add:
         case xset::job::help_browse:
         case xset::job::help_style:
@@ -1023,17 +993,10 @@ xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
             {
                 case GDK_KEY_F1:
                     return true;
-                case GDK_KEY_F3:
-                    job = xset::job::prop;
-                    break;
                 case GDK_KEY_F4:
                     if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
                     {
                         job = xset::job::edit;
-                    }
-                    else
-                    {
-                        job = xset::job::prop_cmd;
                     }
                     break;
                 case GDK_KEY_Delete:
@@ -1096,26 +1059,6 @@ on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
 {
     gtk_widget_set_sensitive(widget, true);
     gtk_menu_shell_deactivate(GTK_MENU_SHELL(design_menu));
-}
-
-static void
-set_check_menu_item_block(GtkWidget* item)
-{
-    g_signal_handlers_block_matched(item,
-                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
-                                    0,
-                                    0,
-                                    nullptr,
-                                    (void*)xset_design_job,
-                                    nullptr);
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), true);
-    g_signal_handlers_unblock_matched(item,
-                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
-                                      0,
-                                      0,
-                                      nullptr,
-                                      (void*)xset_design_job,
-                                      nullptr);
 }
 
 static GtkWidget*
@@ -1229,37 +1172,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                                    GTK_ACCEL_VISIBLE);
     }
 
-    //// New submenu
-    newitem = gtk_menu_item_new_with_mnemonic("_New");
-    submenu = gtk_menu_new();
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
-    gtk_container_add(GTK_CONTAINER(design_menu), newitem);
-    gtk_widget_set_sensitive(newitem, true);
-    g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(xset::job::help_new));
-    g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
-
-    // New > Bookmark
-    newitem = xset_design_additem(submenu, "_Bookmark", xset::job::bookmark, insert_set);
-
-    // New > Application
-    newitem = xset_design_additem(submenu, "_Application", xset::job::app, insert_set);
-
-    if (show_keys)
-    {
-        gtk_widget_add_accelerator(newitem,
-                                   "activate",
-                                   accel_group,
-                                   GDK_KEY_Insert,
-                                   (GdkModifierType)0,
-                                   GTK_ACCEL_VISIBLE);
-    }
-
-    // New > Submenu
-    newitem = xset_design_additem(submenu, "Sub_menu", xset::job::submenu, insert_set);
-
-    // New > Separator
-    newitem = xset_design_additem(submenu, "S_eparator", xset::job::sep, insert_set);
-
+    // Add >
     if (insert_set->tool != xset::tool::NOT)
     {
         // "Add" submenu for builtin tool items
@@ -1287,33 +1200,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // Separator
     gtk_container_add(GTK_CONTAINER(design_menu), gtk_separator_menu_item_new());
 
-    // Help
-    newitem = xset_design_additem(design_menu, "_Help", xset::job::help, set);
-    if (set->line)
-    {
-        gtk_widget_set_sensitive(newitem, !set->lock || set->line.value().data());
-    }
-    if (show_keys)
-    {
-        gtk_widget_add_accelerator(newitem,
-                                   "activate",
-                                   accel_group,
-                                   GDK_KEY_F1,
-                                   (GdkModifierType)0,
-                                   GTK_ACCEL_VISIBLE);
-    }
-
-    // Tooltips (toolbar)
-    if (set->tool != xset::tool::NOT)
-    {
-        newitem = xset_design_additem(design_menu, "T_ooltips", xset::job::tooltips, set);
-        if (!xset_get_b_panel(1, xset::panel::tool_l))
-        {
-            set_check_menu_item_block(newitem);
-        }
-    }
-
-    // Key
+    // Key Shorcut
     newitem = xset_design_additem(design_menu, "_Key Shortcut", xset::job::key, set);
     gtk_widget_set_sensitive(newitem, (set->menu_style < xset::menu::submenu));
     if (show_keys)
@@ -1323,77 +1210,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
                                    accel_group,
                                    GDK_KEY_k,
                                    GdkModifierType::GDK_CONTROL_MASK,
-                                   GTK_ACCEL_VISIBLE);
-    }
-
-    // Edit (script)
-    if (!set->lock && set->menu_style < xset::menu::submenu && set->tool <= xset::tool::custom)
-    {
-        if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
-        {
-            char* script = xset_custom_get_script(set, false);
-            if (script)
-            {
-                if (geteuid() != 0 && have_rw_access(script))
-                {
-                    // edit as user
-                    newitem =
-                        xset_design_additem(design_menu, "_Edit Script", xset::job::edit, set);
-                    if (show_keys)
-                    {
-                        gtk_widget_add_accelerator(newitem,
-                                                   "activate",
-                                                   accel_group,
-                                                   GDK_KEY_F4,
-                                                   (GdkModifierType)0,
-                                                   GTK_ACCEL_VISIBLE);
-                    }
-                }
-                else
-                {
-                    // edit as root
-                    newitem = xset_design_additem(design_menu,
-                                                  "E_dit As Root",
-                                                  xset::job::edit_root,
-                                                  set);
-                    if (geteuid() == 0 && show_keys)
-                    {
-                        gtk_widget_add_accelerator(newitem,
-                                                   "activate",
-                                                   accel_group,
-                                                   GDK_KEY_F4,
-                                                   (GdkModifierType)0,
-                                                   GTK_ACCEL_VISIBLE);
-                    }
-                }
-                std::free(script);
-            }
-        }
-        else if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::line)
-        {
-            // edit command line
-            newitem = xset_design_additem(design_menu, "_Edit Command", xset::job::prop_cmd, set);
-            if (show_keys)
-            {
-                gtk_widget_add_accelerator(newitem,
-                                           "activate",
-                                           accel_group,
-                                           GDK_KEY_F4,
-                                           (GdkModifierType)0,
-                                           GTK_ACCEL_VISIBLE);
-            }
-        }
-    }
-
-    // Properties
-    newitem = xset_design_additem(design_menu, "_Properties", xset::job::prop, set);
-    if (show_keys)
-    {
-        gtk_widget_add_accelerator(newitem,
-                                   "activate",
-                                   accel_group,
-                                   GDK_KEY_F3,
-                                   (GdkModifierType)0,
                                    GTK_ACCEL_VISIBLE);
     }
 
@@ -1523,10 +1339,6 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                         {
                             job = xset::job::edit;
                         }
-                        else
-                        {
-                            job = xset::job::prop_cmd;
-                        }
                     }
                     break;
                 case GdkModifierType::GDK_CONTROL_MASK:
@@ -1544,10 +1356,6 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                 case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
                     job = xset::job::remove;
-                    break;
-                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_MOD1_MASK):
-                    // ctrl + alt
-                    job = xset::job::prop;
                     break;
                 default:
                     break;
@@ -1608,17 +1416,10 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                 case GDK_KEY_Menu:
                     xset_design_show_menu(widget, set, nullptr, 0, event->time);
                     return true;
-                case GDK_KEY_F3:
-                    job = xset::job::prop;
-                    break;
                 case GDK_KEY_F4:
                     if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
                     {
                         job = xset::job::edit;
-                    }
-                    else
-                    {
-                        job = xset::job::prop_cmd;
                     }
                     break;
                 case GDK_KEY_Delete:
@@ -1651,10 +1452,6 @@ xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                         if (xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::script)
                         {
                             job = xset::job::edit;
-                        }
-                        else
-                        {
-                            job = xset::job::prop_cmd;
                         }
                     }
                     break;
@@ -2046,14 +1843,6 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     file_browser->focus_me();
     set->browser = file_browser;
 
-    // get context
-    const xset_context_t context = xset_context_new();
-    main_context_fill(file_browser, context);
-    if (!context->valid)
-    {
-        return true;
-    }
-
     switch (event->button)
     {
         case 1:
@@ -2129,10 +1918,6 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                     {
                         job = xset::job::edit;
                     }
-                    else
-                    {
-                        job = xset::job::prop_cmd;
-                    }
                     break;
                 case GdkModifierType::GDK_CONTROL_MASK:
                     // ctrl
@@ -2148,10 +1933,6 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                 case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):
                     // ctrl + shift
                     job = xset::job::remove;
-                    break;
-                case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_MOD1_MASK):
-                    // ctrl + alt
-                    job = xset::job::prop;
                     break;
                 default:
                     break;
@@ -2200,14 +1981,6 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
         return true;
     }
     file_browser->focus_me();
-
-    // get context
-    const xset_context_t context = xset_context_new();
-    main_context_fill(file_browser, context);
-    if (!context->valid)
-    {
-        return true;
-    }
 
     if (event->button == 1)
     {

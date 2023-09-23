@@ -40,13 +40,11 @@
 #include "types.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context.hxx"
 #include "xset/xset-custom.hxx"
 
 #include "settings/app.hxx"
 
 #include "settings.hxx"
-#include "item-prop.hxx"
 #include "terminal-handlers.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -1947,18 +1945,6 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             return {SOCKET_INVALID,
                     std::format("custom command or submenu '{}' not found", data[i])};
-        }
-        const xset_context_t context = xset_context_new();
-        main_context_fill(file_browser, context);
-        if (context && context->valid)
-        {
-            if (!xset_get_b(xset::name::context_dlg) &&
-                xset_context_test(context, set->context.value(), false) !=
-                    item_prop::context::state::show)
-            {
-                return {SOCKET_INVALID,
-                        std::format("item '{}' context hidden or disabled", data[i])};
-            }
         }
         if (set->menu_style == xset::menu::submenu)
         {
