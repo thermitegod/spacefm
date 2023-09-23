@@ -52,6 +52,7 @@ vfs_file_info_new(const std::filesystem::path& file_path)
 vfs::file_info
 vfs_file_info_ref(vfs::file_info file)
 {
+    assert(file != nullptr);
     file->ref_inc();
     return file;
 }
@@ -59,6 +60,7 @@ vfs_file_info_ref(vfs::file_info file)
 void
 vfs_file_info_unref(vfs::file_info file)
 {
+    assert(file != nullptr);
     file->ref_dec();
     if (file->ref_count() == 0)
     {

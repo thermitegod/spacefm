@@ -113,12 +113,6 @@ static void on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data);
 
 PtkFileMenu::~PtkFileMenu()
 {
-    if (this->file)
-    {
-        vfs_file_info_unref(this->file);
-    }
-    vfs_file_info_list_free(this->sel_files);
-
     if (this->accel_group)
     {
         g_object_unref(this->accel_group);
@@ -796,41 +790,31 @@ ptk_file_menu_free(PtkFileMenu* data)
 
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file)
+ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path)
 {
-    return ptk_file_menu_new(browser, file_path, file, {});
+    return ptk_file_menu_new(browser, file_path, {});
 }
 
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
+ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path,
                   const std::span<const vfs::file_info> sel_files)
-{ // either desktop or browser must be non-nullptr
-
+{
     assert(browser != nullptr);
 
-    xset_t set_radio;
-    xset_t set;
-    xset_t set2;
-    GtkMenuItem* item;
+    vfs::file_info file = nullptr;
+    if (!sel_files.empty())
+    {
+        file = sel_files.front();
+    }
 
     const auto cwd = browser->cwd();
 
     const auto data = new PtkFileMenu;
-
     data->cwd = cwd;
     data->browser = browser;
-
     data->file_path = ztd::strdup(file_path);
-    if (file)
-    {
-        data->file = vfs_file_info_ref(file);
-    }
-    else
-    {
-        data->file = nullptr;
-    }
+    data->file = file;
     data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
-
     data->accel_group = gtk_accel_group_new();
 
     GtkWidget* popup = gtk_menu_new();
@@ -870,17 +854,18 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
     const tab_t tab_num = counts[2];
 
     // Get mime type and apps
-    vfs::mime_type mime_type;
-    std::vector<std::string> apps;
+    vfs::mime_type mime_type = nullptr;
+    std::vector<std::string> apps{};
     if (file)
     {
         mime_type = file->mime_type();
         apps = mime_type->actions();
     }
-    else
-    {
-        mime_type = nullptr;
-    }
+
+    xset_t set_radio;
+    xset_t set;
+    xset_t set2;
+    GtkMenuItem* item;
 
     // Open >
     const bool set_disable = sel_files.empty();
@@ -904,8 +889,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         }
 
         // Prepare archive commands
-        std::vector<xset_t> handlers;
-
         xset_t set_archive_extract = nullptr;
         xset_t set_archive_extract_to = nullptr;
         xset_t set_archive_open = nullptr;
@@ -1009,17 +992,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         {
             for (const std::string_view app : apps)
             {
-#if 0
-                // TODO - FIXME
-                if ((app - apps) == 1 && handlers.empty())
-                {
-                    // Add a separator after default app if no handlers listed
-                    item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
-                    gtk_widget_show(GTK_WIDGET(item));
-                    gtk_container_add(GTK_CONTAINER(submenu), GTK_WIDGET(item));
-                }
-#endif
-
                 const vfs::desktop desktop = vfs_get_desktop(app);
                 const auto app_name = desktop->display_name();
                 if (!app_name.empty())
@@ -2504,18 +2476,18 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
     }
     else
     {
-        file = vfs_file_info_ref(sel_files.front());
+        file = sel_files.front();
         file_path = cwd / file->name();
     }
 
     const auto data = new PtkFileMenu;
     data->cwd = cwd;
     data->browser = browser;
-    data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
+    data->sel_files = sel_files;
     data->file_path = file_path;
     if (file)
     {
-        data->file = vfs_file_info_ref(file);
+        data->file = file;
     }
 
     // action

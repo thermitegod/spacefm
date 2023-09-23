@@ -21,9 +21,9 @@
 
 #include <filesystem>
 
-#include <span>
-
 #include <vector>
+
+#include <span>
 
 #include <gtk/gtk.h>
 #include "ptk/ptk-file-browser.hxx"
@@ -44,13 +44,13 @@ struct PtkFileMenu
     std::filesystem::path cwd{};
     std::filesystem::path file_path{};
     vfs::file_info file{nullptr};
-    std::vector<vfs::file_info> sel_files{};
+    std::vector<vfs::file_info> sel_files;
     GtkAccelGroup* accel_group{nullptr};
 };
 
-GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file,
+GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path,
                              const std::span<const vfs::file_info> sel_files);
-GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info file);
+GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path);
 
 void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group);

@@ -1456,31 +1456,10 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEventButton* event)
         file_path = cwd / file->name();
     }
 
-    /*
-    i32 button;
-    std::time_t time;
-    if (event)
-    {
-        button = event->button;
-        time = event->time;
-    }
-    else
-    {
-        button = 0;
-        time = gtk_get_current_event_time();
-    }
-    */
-
-    char* dir_name = nullptr;
-    GtkWidget* popup = ptk_file_menu_new(file_browser, file_path.c_str(), file, selected_files);
+    GtkWidget* popup = ptk_file_menu_new(file_browser, file_path.c_str(), selected_files);
     if (popup)
     {
         gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
-    }
-
-    if (dir_name)
-    {
-        std::free(dir_name);
     }
     vfs_file_info_list_free(selected_files);
 }
