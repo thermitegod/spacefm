@@ -2155,7 +2155,7 @@ on_popup_cut_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         return;
     }
-    ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, false);
+    ptk_clipboard_cut_or_copy_files(data->sel_files, false);
 }
 
 static void
@@ -2166,7 +2166,7 @@ on_popup_copy_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         return;
     }
-    ptk_clipboard_cut_or_copy_files(data->cwd, data->sel_files, true);
+    ptk_clipboard_cut_or_copy_files(data->sel_files, true);
 }
 
 static void
@@ -2208,14 +2208,14 @@ static void
 on_popup_copy_text_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD added
 {
     (void)menuitem;
-    ptk_clipboard_copy_as_text(data->cwd, data->sel_files);
+    ptk_clipboard_copy_as_text(data->sel_files);
 }
 
 static void
 on_popup_copy_name_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD added
 {
     (void)menuitem;
-    ptk_clipboard_copy_name(data->cwd, data->sel_files);
+    ptk_clipboard_copy_name(data->sel_files);
 }
 
 static void

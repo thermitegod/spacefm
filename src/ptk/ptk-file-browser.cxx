@@ -746,11 +746,11 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
 
                     if (i == 0)
                     {
-                        ptk_clipboard_copy_name(file_browser->cwd(), selected_files);
+                        ptk_clipboard_copy_name(selected_files);
                     }
                     else
                     {
-                        ptk_clipboard_copy_as_text(file_browser->cwd(), selected_files);
+                        ptk_clipboard_copy_as_text(selected_files);
                     }
                 }
                 else if (i == 2)
