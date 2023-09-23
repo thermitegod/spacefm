@@ -1052,34 +1052,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             }
         }
 
-        // open with other
-        item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
-        gtk_menu_shell_append(GTK_MENU_SHELL(submenu), GTK_WIDGET(item));
-
-        set = xset_get(xset::name::open_other);
-        xset_set_cb(set, (GFunc)on_popup_open_with_another_activate, data);
-        xset_add_menuitem(browser, submenu, accel_group, set);
-
-        // Default
-        std::string plain_type;
-        if (mime_type)
-        {
-            plain_type = mime_type->type().data();
-        }
-        plain_type = ztd::replace(plain_type, "-", "_");
-        plain_type = ztd::replace(plain_type, " ", "");
-        plain_type = std::format("open_all_type_{}", plain_type);
-        set = xset_get(plain_type.data());
-        xset_set_cb(set, (GFunc)on_popup_open_all, data);
-        set->lock = true;
-        set->menu_style = xset::menu::normal;
-        set->shared_key = xset::get_name_from_xsetname(xset::name::open_all);
-        set2 = xset_get(xset::name::open_all);
-        set->menu_label = set2->menu_label;
-        set->context = std::nullopt;
-        item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
-        set->menu_label = std::nullopt; // do not bother to save this
-
         // Edit / Dir
         if ((is_dir && browser) || (is_text && sel_files.size() == 1))
         {
@@ -1155,6 +1127,35 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             xset_add_menuitem(browser, submenu, accel_group, xset_get(xset::name::archive_default));
         }
 
+        // Choose, open with other app
+        item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
+        gtk_menu_shell_append(GTK_MENU_SHELL(submenu), GTK_WIDGET(item));
+
+        set = xset_get(xset::name::open_other);
+        xset_set_cb(set, (GFunc)on_popup_open_with_another_activate, data);
+        xset_add_menuitem(browser, submenu, accel_group, set);
+
+        // Default
+        std::string plain_type;
+        if (mime_type)
+        {
+            plain_type = mime_type->type().data();
+        }
+        plain_type = ztd::replace(plain_type, "-", "_");
+        plain_type = ztd::replace(plain_type, " ", "");
+        plain_type = std::format("open_all_type_{}", plain_type);
+        set = xset_get(plain_type.data());
+        xset_set_cb(set, (GFunc)on_popup_open_all, data);
+        set->lock = true;
+        set->menu_style = xset::menu::normal;
+        set->shared_key = xset::get_name_from_xsetname(xset::name::open_all);
+        set2 = xset_get(xset::name::open_all);
+        set->menu_label = set2->menu_label;
+        set->context = std::nullopt;
+        item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
+        set->menu_label = std::nullopt; // do not bother to save this
+
+        //
         g_signal_connect(submenu, "key-press-event", G_CALLBACK(app_menu_keypress), data);
     }
 
