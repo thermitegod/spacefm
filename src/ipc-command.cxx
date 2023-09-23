@@ -779,17 +779,37 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "selected-filenames") || ztd::same(property, "selected-files"))
         {
-            const std::string_view value = data[0];
+            const auto& select_filenames = data;
 
-            if (value.empty())
+            if (select_filenames.empty())
             {
                 // unselect all
-                file_browser->select_file_list(nullptr, false);
+                file_browser->unselect_all();
             }
             else
             {
-                return {SOCKET_INVALID, "Not Implemented"};
-                // file_browser->select_file_list(argv + i + 1, true);
+                for (const std::filesystem::path select_filename : select_filenames)
+                {
+                    file_browser->select_file(select_filename.filename(), false);
+                }
+            }
+        }
+        else if (ztd::same(property, "unselected-filenames") ||
+                 ztd::same(property, "unselected-files"))
+        {
+            const auto& select_filenames = data;
+
+            if (select_filenames.empty())
+            {
+                // unselect all
+                file_browser->unselect_all();
+            }
+            else
+            {
+                for (const std::filesystem::path select_filename : select_filenames)
+                {
+                    file_browser->unselect_file(select_filename.filename(), false);
+                }
             }
         }
         else if (ztd::same(property, "selected-pattern"))
@@ -799,7 +819,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             if (value.empty())
             {
                 // unselect all
-                file_browser->select_file_list(nullptr, false);
+                file_browser->unselect_all();
             }
             else
             {

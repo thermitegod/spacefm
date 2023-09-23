@@ -62,6 +62,8 @@ namespace commandline::socket::set
     void thumbnailer(CLI::App* app, const socket_subcommand_data_t& opt);
     void selected_files(CLI::App* app, const socket_subcommand_data_t& opt);
     void selected_filenames(CLI::App* app, const socket_subcommand_data_t& opt);
+    void unselected_files(CLI::App* app, const socket_subcommand_data_t& opt);
+    void unselected_filenames(CLI::App* app, const socket_subcommand_data_t& opt);
     void selected_pattern(CLI::App* app, const socket_subcommand_data_t& opt);
     void clipboard_text(CLI::App* app, const socket_subcommand_data_t& opt);
     void clipboard_primary_text(CLI::App* app, const socket_subcommand_data_t& opt);

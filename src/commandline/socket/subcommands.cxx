@@ -80,6 +80,8 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::thumbnailer(sub, opt);
     commandline::socket::set::selected_files(sub, opt);
     commandline::socket::set::selected_filenames(sub, opt);
+    commandline::socket::set::unselected_files(sub, opt);
+    commandline::socket::set::unselected_filenames(sub, opt);
     commandline::socket::set::selected_pattern(sub, opt);
     commandline::socket::set::clipboard_text(sub, opt);
     commandline::socket::set::clipboard_primary_text(sub, opt);

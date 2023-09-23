@@ -1235,7 +1235,7 @@ commandline::socket::set::selected_files(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("selected-files", "Set property selected-files");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
 
     const auto run_subcommand = [opt]() { opt->property = "selected-files"; };
     sub->callback(run_subcommand);
@@ -1250,9 +1250,39 @@ commandline::socket::set::selected_filenames(CLI::App* app, const socket_subcomm
 {
     auto* sub = app->add_subcommand("selected-filenames", "Set property selected-filenames");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
 
     const auto run_subcommand = [opt]() { opt->property = "selected-filenames"; };
+    sub->callback(run_subcommand);
+}
+
+/*
+ * subcommand unselected-files
+ */
+
+void
+commandline::socket::set::unselected_files(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("unselected-files", "Set property unselected-files");
+
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
+
+    const auto run_subcommand = [opt]() { opt->property = "unselected-files"; };
+    sub->callback(run_subcommand);
+}
+
+/*
+ * subcommand unselected-filenames
+ */
+
+void
+commandline::socket::set::unselected_filenames(CLI::App* app, const socket_subcommand_data_t& opt)
+{
+    auto* sub = app->add_subcommand("unselected-filenames", "Set property unselected-filenames");
+
+    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
+
+    const auto run_subcommand = [opt]() { opt->property = "unselected-filenames"; };
     sub->callback(run_subcommand);
 }
 

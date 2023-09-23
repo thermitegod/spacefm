@@ -246,8 +246,9 @@ struct PtkFileBrowser
     void rebuild_toolbars() noexcept;
 
     GList* selected_items(GtkTreeModel** model) noexcept;
-    void select_file(const std::filesystem::path& path) noexcept;
-    void select_file_list(char** filename, bool do_select) noexcept;
+    void select_file(const std::filesystem::path& path, const bool unselect_others = true) noexcept;
+    void unselect_file(const std::filesystem::path& path,
+                       const bool unselect_others = true) noexcept;
     void seek_path(const std::filesystem::path& seek_dir,
                    const std::filesystem::path& seek_name) noexcept;
     void update_toolbar_widgets(xset::tool tool_type) noexcept;

@@ -5273,7 +5273,7 @@ PtkFileBrowser::selected_items(GtkTreeModel** model) noexcept
 }
 
 void
-PtkFileBrowser::select_file(const std::filesystem::path& path) noexcept
+PtkFileBrowser::select_file(const std::filesystem::path& path, const bool unselect_others) noexcept
 {
     GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;
@@ -5282,14 +5282,20 @@ PtkFileBrowser::select_file(const std::filesystem::path& path) noexcept
     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
         this->view_mode_ == ptk::file_browser::view_mode::compact_view)
     {
-        exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
+        if (unselect_others)
+        {
+            exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
+        }
         model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
     }
     else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
     {
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
         tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
-        gtk_tree_selection_unselect_all(tree_sel);
+        if (unselect_others)
+        {
+            gtk_tree_selection_unselect_all(tree_sel);
+        }
     }
     if (!model)
     {
@@ -5299,7 +5305,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& path) noexcept
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        const std::string name = path.filename();
+        const std::string select_filename = path.filename();
 
         do
         {
@@ -5307,8 +5313,8 @@ PtkFileBrowser::select_file(const std::filesystem::path& path) noexcept
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                const auto file_name = file->name();
-                if (ztd::same(file_name, name))
+                const auto filename = file->name();
+                if (ztd::same(filename, select_filename))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
@@ -5350,149 +5356,87 @@ PtkFileBrowser::select_file(const std::filesystem::path& path) noexcept
 }
 
 void
-PtkFileBrowser::select_file_list(char** filename, bool do_select) noexcept
+PtkFileBrowser::unselect_file(const std::filesystem::path& path,
+                              const bool unselect_others) noexcept
 {
-    // If do_select, select all filenames, unselect others
-    // if !do_select, unselect filenames, leave others unchanged
-    // If !*filename select or unselect all
-    GtkTreeModel* model;
-    GtkTreeSelection* selection = nullptr;
+    GtkTreeSelection* tree_sel = nullptr;
+    GtkTreeModel* model = nullptr;
 
-    if (!filename || !*filename)
+    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+    if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
+        this->view_mode_ == ptk::file_browser::view_mode::compact_view)
     {
-        if (do_select)
+        if (unselect_others)
         {
-            this->select_all();
+            exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
         }
-        else
+        model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
+    }
+    else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
+    {
+        model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
+        tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
+        if (unselect_others)
         {
-            this->unselect_all();
+            gtk_tree_selection_unselect_all(tree_sel);
         }
+    }
+    if (!model)
+    {
         return;
     }
 
-    // get model, treesel, and stop signals
-    switch (this->view_mode_)
-    {
-        case ptk::file_browser::view_mode::icon_view:
-        case ptk::file_browser::view_mode::compact_view:
-            model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
-            break;
-        case ptk::file_browser::view_mode::list_view:
-            selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
-            model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
-            break;
-    }
-
-    // test rows
-    bool first_select = true;
     GtkTreeIter it;
-    vfs::file_info file;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        bool select;
+        const std::string unselect_filename = path.filename();
+
         do
         {
-            // get file
+            vfs::file_info file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
-            if (!file)
+            if (file)
             {
-                continue;
-            }
-
-            // test name
-            const auto name = file->display_name();
-            char** test_name = filename;
-            while (*test_name)
-            {
-                if (ztd::same(*test_name, name))
+                const auto filename = file->name();
+                if (ztd::same(filename, unselect_filename))
                 {
-                    break;
-                }
-                test_name++;
-            }
-            if (*test_name)
-            {
-                select = do_select;
-            }
-            else
-            {
-                select = !do_select;
-            }
-
-            // do selection and scroll to first selected
-            GtkTreePath* path =
-                gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST_REINTERPRET(this->file_list_)),
-                                        &it);
-
-            switch (this->view_mode_)
-            {
-                case ptk::file_browser::view_mode::icon_view:
-                case ptk::file_browser::view_mode::compact_view:
-                    // select
-                    if (exo_icon_view_path_is_selected(EXO_ICON_VIEW(this->folder_view_), path))
+                    GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
+                    if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
+                        this->view_mode_ == ptk::file_browser::view_mode::compact_view)
                     {
-                        if (!select)
-                        {
-                            exo_icon_view_unselect_path(EXO_ICON_VIEW(this->folder_view_), path);
-                        }
-                    }
-                    else if (select && do_select)
-                    {
-                        exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), path);
-                    }
-
-                    // scroll to first and set cursor
-                    if (first_select && select && do_select)
-                    {
+                        exo_icon_view_unselect_path(EXO_ICON_VIEW(this->folder_view_), tree_path);
                         exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
-                                                 path,
+                                                 tree_path,
                                                  nullptr,
                                                  false);
                         exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_),
-                                                     path,
+                                                     tree_path,
                                                      true,
                                                      .25,
                                                      0);
-                        first_select = false;
                     }
-                    break;
-                case ptk::file_browser::view_mode::list_view:
-                    // select
-                    if (gtk_tree_selection_path_is_selected(selection, path))
+                    else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
                     {
-                        if (!select)
-                        {
-                            gtk_tree_selection_unselect_path(selection, path);
-                        }
-                    }
-                    else if (select && do_select)
-                    {
-                        gtk_tree_selection_select_path(selection, path);
-                    }
-
-                    // scroll to first and set cursor
-                    if (first_select && select && do_select)
-                    {
+                        gtk_tree_selection_unselect_path(tree_sel, tree_path);
                         gtk_tree_view_set_cursor(GTK_TREE_VIEW(this->folder_view_),
-                                                 path,
+                                                 tree_path,
                                                  nullptr,
                                                  false);
                         gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(this->folder_view_),
-                                                     path,
+                                                     tree_path,
                                                      nullptr,
                                                      true,
                                                      .25,
                                                      0);
-                        first_select = false;
                     }
+                    gtk_tree_path_free(tree_path);
+                    vfs_file_info_unref(file);
                     break;
+                }
+                vfs_file_info_unref(file);
             }
-            gtk_tree_path_free(path);
         } while (gtk_tree_model_iter_next(model, &it));
     }
-
-    this->focus_folder_view();
 }
 
 void
