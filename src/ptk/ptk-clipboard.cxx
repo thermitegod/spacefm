@@ -138,25 +138,14 @@ ptk_clipboard_copy_name(const std::span<const vfs::file_info> sel_files)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-    i32 fcount = 0;
 
     std::string file_text;
     for (const vfs::file_info file : sel_files)
     {
-        if (fcount == 0)
-        {
-            file_text = std::format("{}", file->name());
-        }
-        else if (fcount == 1)
-        {
-            file_text = std::format("{}\n{}\n", file_text, file->name());
-        }
-        else
-        {
-            file_text = std::format("{}{}\n", file_text, file->name());
-        }
-        fcount++;
+        file_text = std::format("{}{}\n", file_text, file->name());
     }
+    file_text = ztd::strip(file_text);
+
     gtk_clipboard_set_text(clip, file_text.data(), -1);
     gtk_clipboard_set_text(clip_primary, file_text.data(), -1);
 }
