@@ -755,8 +755,11 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
                     }
                 }
                 else if (i == 2)
-                {
-                    file_browser->file_properties(0);
+                { // Scroll Wheel click
+                    ptk_show_file_properties(nullptr,
+                                             file_browser->cwd(),
+                                             file_browser->selected_files(),
+                                             0);
                 }
                 else if (i == 3)
                 {
@@ -2769,15 +2772,6 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
     file_browser->is_drag_ = false;
 }
 
-void
-on_popup_file_properties_activate(GtkMenuItem* menuitem, void* user_data)
-{
-    (void)menuitem;
-    GObject* popup = G_OBJECT(user_data);
-    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(popup, "PtkFileBrowser"));
-    file_browser->file_properties(0);
-}
-
 static bool
 on_dir_tree_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBrowser* file_browser)
 {
@@ -4622,19 +4616,6 @@ PtkFileBrowser::invert_selection() noexcept
             on_folder_view_item_sel_change(EXO_ICON_VIEW(selection), this);
             break;
     }
-}
-
-void
-PtkFileBrowser::file_properties(i32 page) noexcept
-{
-    const auto selected_files = this->selected_files();
-
-    GtkWidget* parent_window = gtk_widget_get_toplevel(GTK_WIDGET(this));
-
-    gtk_orientable_set_orientation(GTK_ORIENTABLE(parent_window),
-                                   GtkOrientation::GTK_ORIENTATION_VERTICAL);
-
-    ptk_show_file_properties(GTK_WINDOW(parent_window), this->cwd(), selected_files, page);
 }
 
 /* FIXME: Do not recreate the view if previous view is compact view */

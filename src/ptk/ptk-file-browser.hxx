@@ -228,8 +228,6 @@ struct PtkFileBrowser
     void select_pattern(const std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
-    void file_properties(i32 page) noexcept; // TODO const
-
     void view_as_icons() noexcept;
     void view_as_compact_list() noexcept;
     void view_as_list() noexcept;
