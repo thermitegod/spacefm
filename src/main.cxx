@@ -348,7 +348,11 @@ main(int argc, char* argv[])
     (void)freopen("/dev/null", "w", stderr);
 
     // initialize GTK+
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_init();
+#elif (GTK_MAJOR_VERSION == 3)
     gtk_init(&argc, &argv);
+#endif
 
     // ensure that there is only one instance of spacefm.
     // if there is an existing instance, only the FILES
