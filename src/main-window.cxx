@@ -458,22 +458,6 @@ on_main_icon()
     }
 }
 
-static void
-main_design_mode(GtkMenuItem* menuitem, MainWindow* main_window)
-{
-    (void)menuitem;
-    ptk_show_message(
-        GTK_WINDOW(main_window),
-        GtkMessageType::GTK_MESSAGE_INFO,
-        "Design Mode Help",
-        GtkButtonsType::GTK_BUTTONS_OK,
-        "Design Mode allows you to change the name, shortcut key and icon of menu, toolbar and "
-        "bookmark items, show help for an item, and add your own custom commands and "
-        "applications.\n\nTo open the Design Menu, simply right-click on a menu item, bookmark, "
-        "or toolbar item.  To open the Design Menu for a submenu, first close the submenu (by "
-        "clicking on it).\n\nFor more information, click the Help button below.");
-}
-
 void
 main_window_close_all_invalid_tabs()
 {
@@ -1178,7 +1162,6 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_prefs, (GFunc)on_preference_activate, main_window);
     xset_set_cb(xset::name::main_full, (GFunc)on_fullscreen_activate, main_window);
-    xset_set_cb(xset::name::main_design_mode, (GFunc)main_design_mode, main_window);
     xset_set_cb(xset::name::main_icon, (GFunc)on_main_icon, nullptr);
     xset_set_cb(xset::name::main_title, (GFunc)on_update_window_title, main_window);
 
@@ -1250,7 +1233,7 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
 
     menu_elements = "separator main_tasks main_auto separator main_title main_icon main_full "
-                    "separator main_design_mode main_prefs";
+                    "separator main_prefs";
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
@@ -3249,10 +3232,6 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         else if (set->xset_name == xset::name::main_prefs)
         {
             on_preference_activate(nullptr, main_window);
-        }
-        else if (set->xset_name == xset::name::main_design_mode)
-        {
-            main_design_mode(nullptr, main_window);
         }
         else if (set->xset_name == xset::name::main_icon)
         {

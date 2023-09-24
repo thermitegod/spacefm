@@ -828,10 +828,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Fullscreen");
     set->menu_style = xset::menu::check;
 
-    set = xset_get(xset::name::main_design_mode);
-    xset_set_var(set, xset::var::menu_label, "_Design Mode");
-    xset_set_var(set, xset::var::icn, "gtk-help");
-
     set = xset_get(xset::name::main_prefs);
     xset_set_var(set, xset::var::menu_label, "_Preferences");
     xset_set_var(set, xset::var::icn, "gtk-preferences");
