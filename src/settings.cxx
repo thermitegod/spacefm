@@ -1597,7 +1597,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     // New > Separator
     newitem = xset_design_additem(submenu, "S_eparator", xset::job::sep, insert_set);
 
-#if 0
     if (insert_set->tool != xset::tool::NOT)
     {
         // "Add" submenu for builtin tool items
@@ -1621,7 +1620,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
             }
         }
     }
-#endif
 
     // Separator
     gtk_container_add(GTK_CONTAINER(design_menu), gtk_separator_menu_item_new());
