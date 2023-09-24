@@ -494,6 +494,90 @@ mime_type_is_executable_file(const std::filesystem::path& file_path,
     return false;
 }
 
+// Taken from file-roller .desktop file
+inline constexpr std::array<std::string_view, 65> archive_mime_types{
+    "application/bzip2",
+    "application/gzip",
+    "application/vnd.android.package-archive",
+    "application/vnd.ms-cab-compressed",
+    "application/vnd.debian.binary-package",
+    "application/x-7z-compressed",
+    "application/x-7z-compressed-tar",
+    "application/x-ace",
+    "application/x-alz",
+    "application/x-apple-diskimage",
+    "application/x-ar",
+    "application/x-archive",
+    "application/x-arj",
+    "application/x-brotli",
+    "application/x-bzip-brotli-tar",
+    "application/x-bzip",
+    "application/x-bzip-compressed-tar",
+    "application/x-bzip1",
+    "application/x-bzip1-compressed-tar",
+    "application/x-cabinet",
+    "application/x-cd-image",
+    "application/x-compress",
+    "application/x-compressed-tar",
+    "application/x-cpio",
+    "application/x-chrome-extension",
+    "application/x-deb",
+    "application/x-ear",
+    "application/x-ms-dos-executable",
+    "application/x-gtar",
+    "application/x-gzip",
+    "application/x-gzpostscript",
+    "application/x-java-archive",
+    "application/x-lha",
+    "application/x-lhz",
+    "application/x-lrzip",
+    "application/x-lrzip-compressed-tar",
+    "application/x-lz4",
+    "application/x-lzip",
+    "application/x-lzip-compressed-tar",
+    "application/x-lzma",
+    "application/x-lzma-compressed-tar",
+    "application/x-lzop",
+    "application/x-lz4-compressed-tar",
+    "application/x-ms-wim",
+    "application/x-rar",
+    "application/x-rar-compressed",
+    "application/x-rpm",
+    "application/x-source-rpm",
+    "application/x-rzip",
+    "application/x-rzip-compressed-tar",
+    "application/x-tar",
+    "application/x-tarz",
+    "application/x-tzo",
+    "application/x-stuffit",
+    "application/x-war",
+    "application/x-xar",
+    "application/x-xz",
+    "application/x-xz-compressed-tar",
+    "application/x-zip",
+    "application/x-zip-compressed",
+    "application/x-zstd-compressed-tar",
+    "application/x-zoo",
+    "application/zip",
+    "application/zstd",
+};
+
+bool
+mime_type_is_archive_file(const std::filesystem::path& file_path, const std::string_view mime_type)
+{
+    std::string file_mime_type;
+    if (mime_type.empty())
+    {
+        file_mime_type = mime_type_get_by_file(file_path);
+    }
+    else
+    {
+        file_mime_type = mime_type;
+    }
+
+    return std::ranges::find(archive_mime_types, file_mime_type) != archive_mime_types.cend();
+}
+
 /* Check if the specified mime_type is the subclass of the specified parent type */
 static bool
 mime_type_is_subclass(const std::string_view type, const std::string_view parent)

@@ -57,6 +57,8 @@ bool mime_type_is_text_file(const std::filesystem::path& filepath,
                             const std::string_view mime_type = "");
 bool mime_type_is_executable_file(const std::filesystem::path& filepath,
                                   const std::string_view mime_type = "");
+bool mime_type_is_archive_file(const std::filesystem::path& filepath,
+                               const std::string_view mime_type = "");
 
 /**
  * Get human-readable description and icon name of the mime-type

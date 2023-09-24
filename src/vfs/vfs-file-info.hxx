@@ -121,6 +121,7 @@ struct VFSFileInfo
 
     bool is_image() const noexcept;
     bool is_video() const noexcept;
+    bool is_archive() const noexcept;
     bool is_desktop_entry() const noexcept;
     bool is_unknown_type() const noexcept;
 

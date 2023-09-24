@@ -716,11 +716,16 @@ VFSFileInfo::is_executable() const noexcept
     return mime_type_is_executable_file(this->path(), this->mime_type_->type());
 }
 
-// full path of the file is required by this function
 bool
 VFSFileInfo::is_text() const noexcept
 {
     return mime_type_is_text_file(this->path(), this->mime_type_->type());
+}
+
+bool
+VFSFileInfo::is_archive() const noexcept
+{
+    return mime_type_is_archive_file(this->path(), this->mime_type_->type());
 }
 
 bool

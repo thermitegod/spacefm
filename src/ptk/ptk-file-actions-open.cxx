@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include <algorithm>
+
 #include <memory>
 
 #include <optional>
@@ -33,6 +35,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "vfs/vfs-file-info.hxx"
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -57,10 +60,10 @@ struct ParentInfo
 
 static bool
 open_archives(const std::shared_ptr<ParentInfo>& parent,
-              const std::span<const vfs::file_info> selected_files, const vfs::mime_type& mime_type)
+              const std::span<const vfs::file_info> selected_files)
 {
-    const bool is_archive = ptk_archiver_is_mime_type_archive(mime_type);
-    if (!is_archive)
+    const auto is_archive = [](const vfs::file_info file) { return file->is_archive(); };
+    if (!std::ranges::all_of(selected_files, is_archive))
     {
         return false;
     }
@@ -181,7 +184,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         vfs::mime_type mime_type = file->mime_type();
 
         // archive has special handling
-        if (!selected_files.empty() && open_archives(parent, selected_files, mime_type))
+        if (!selected_files.empty() && open_archives(parent, selected_files))
         { // all files were handled by open_archives
             break;
         }

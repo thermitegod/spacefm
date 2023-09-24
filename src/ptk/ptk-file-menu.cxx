@@ -893,7 +893,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         xset_t set_archive_extract_to = nullptr;
         xset_t set_archive_open = nullptr;
 
-        if (mime_type && ptk_archiver_is_mime_type_archive(mime_type))
+        const auto is_archive = [](const vfs::file_info file) { return file->is_archive(); };
+        if (mime_type && std::ranges::all_of(sel_files, is_archive))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);
             xset_set_cb(set_archive_extract, (GFunc)on_popup_extract_here_activate, data);
