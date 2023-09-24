@@ -21,7 +21,7 @@
 
 #include <optional>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "vfs/vfs-mime-type.hxx"
 

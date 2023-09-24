@@ -25,9 +25,8 @@
 
 #include <mutex>
 
-#include <sigc++/sigc++.h>
-
 #include <glibmm.h>
+#include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>
 

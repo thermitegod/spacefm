@@ -35,9 +35,8 @@
 
 #include <fmt/format.h>
 
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
-
+#include <gtkmm.h>
+#include <gdkmm.h>
 #include <glibmm.h>
 
 #include <exo/exo.h>

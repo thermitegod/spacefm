@@ -23,8 +23,8 @@
 
 #include <filesystem>
 
-#include <gdk/gdk.h>
-#include <gtk/gtk.h>
+#include <gtkmm.h>
+#include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
 

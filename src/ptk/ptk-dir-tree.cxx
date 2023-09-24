@@ -28,9 +28,8 @@
 
 #include <malloc.h>
 
+#include <gdkmm.h>
 #include <glibmm.h>
-
-#include <gdk/gdk.h>
 
 #include <magic_enum.hpp>
 

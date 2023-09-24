@@ -23,9 +23,8 @@
 
 #include <optional>
 
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
-
-#include <gtk/gtk.h>
 
 #include <xset/xset.hxx>
 

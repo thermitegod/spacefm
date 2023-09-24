@@ -15,6 +15,6 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 void show_about_dialog(GtkWindow* parent);

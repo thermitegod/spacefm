@@ -15,6 +15,6 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 void ptk_set_window_icon(GtkWindow* win);

@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "xset/xset.hxx"
 

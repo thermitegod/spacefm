@@ -17,7 +17,7 @@
 
 #include <string_view>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "ptk/ptk-file-task.hxx"
 

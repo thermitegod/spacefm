@@ -15,9 +15,8 @@
 
 #include <string>
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-
+#include <gtkmm.h>
+#include <gdkmm.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

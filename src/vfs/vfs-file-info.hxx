@@ -26,12 +26,12 @@
 
 #include <atomic>
 
+#include <gtkmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-mime-type.hxx"
-
-#include <gtk/gtk.h>
 
 #define VFS_FILE_INFO(obj) (static_cast<vfs::file_info>(obj))
 

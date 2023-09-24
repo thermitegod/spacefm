@@ -21,7 +21,7 @@
 #include <span>
 #include <vector>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include <magic_enum.hpp>
 

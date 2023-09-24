@@ -13,7 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

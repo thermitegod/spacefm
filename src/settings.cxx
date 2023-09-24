@@ -36,8 +36,7 @@
 
 #include <cassert>
 
-#include <gtk/gtk.h>
-
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include <magic_enum.hpp>

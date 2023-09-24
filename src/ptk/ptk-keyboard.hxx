@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#include <gtkmm.h>
+#include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
 

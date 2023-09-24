@@ -15,8 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#include <gtkmm.h>
+#include <gdkmm.h>
 
 #include <glibmm.h>
 

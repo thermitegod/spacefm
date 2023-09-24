@@ -23,7 +23,8 @@
 
 #include <span>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
+
 #include "ptk/ptk-file-browser.hxx"
 
 #include "vfs/vfs-file-info.hxx"

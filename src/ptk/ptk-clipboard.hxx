@@ -24,8 +24,7 @@
 #include <span>
 #include <vector>
 
-#include <gtk/gtk.h>
-
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include "vfs/vfs-file-info.hxx"

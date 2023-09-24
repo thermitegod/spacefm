@@ -21,7 +21,7 @@
 
 #include <span>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "vfs/vfs-file-info.hxx"
 

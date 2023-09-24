@@ -56,10 +56,6 @@
 // SIGNALS
 #include <sigc++/sigc++.h>
 
-// GTK
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-
 // GTKMM
 #include <gtkmm.h>
 #include <gdkmm.h>

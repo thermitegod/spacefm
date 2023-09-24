@@ -24,7 +24,7 @@
 
 #include <map>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "types.hxx"
 

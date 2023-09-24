@@ -17,11 +17,9 @@
 
 #pragma once
 
-#include <sigc++/sigc++.h>
-
-#include <gtk/gtk.h>
-
+#include <gtkmm.h>
 #include <glibmm.h>
+#include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>
 

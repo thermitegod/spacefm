@@ -22,7 +22,7 @@
 
 #include <filesystem>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include "vfs/vfs-volume.hxx"
 

@@ -23,7 +23,7 @@
 #include <span>
 #include <vector>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

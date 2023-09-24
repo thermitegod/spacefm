@@ -28,7 +28,7 @@
 
 #include <memory>
 
-#include <gdk/gdk.h>
+#include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
 

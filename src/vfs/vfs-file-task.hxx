@@ -27,8 +27,7 @@
 
 #include <optional>
 
-#include <gtk/gtk.h>
-
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>

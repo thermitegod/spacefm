@@ -17,7 +17,9 @@
 
 #include <filesystem>
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
+
+#include "ptk/ptk-file-browser.hxx"
 
 void ptk_bookmark_view_add_bookmark(const std::filesystem::path& book_path);
 
