@@ -61,10 +61,10 @@
 #include <gdk/gdk.h>
 
 // GTKMM
-// #include <gtkmm-3.0/gtkmm.h>
-// #include <gdkmm-3.0/gdkmm.h>
-#include <glibmm.h>
+#include <gtkmm.h>
+#include <gdkmm.h>
 #include <giomm.h>
+#include <glibmm.h>
 
 // ZTD
 #include <ztd/ztd.hxx>

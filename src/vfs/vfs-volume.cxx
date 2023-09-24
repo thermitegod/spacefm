@@ -77,8 +77,13 @@ static std::vector<volume_callback_data_t> callbacks;
 static libudev::udev udev;
 static libudev::monitor umonitor;
 
+#if (GTK_MAJOR_VERSION == 4)
 static Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
 static Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
+static Glib::RefPtr<Glib::IOChannel> uchannel;
+static Glib::RefPtr<Glib::IOChannel> mchannel;
+#endif
 
 /*
  * DeviceMount
@@ -531,7 +536,11 @@ vfs_volume_init()
     }
 
     uchannel = Glib::IOChannel::create_from_fd(ufd);
+#if (GTK_MAJOR_VERSION == 4)
     uchannel->set_flags(Glib::IOFlags::NONBLOCK);
+#elif (GTK_MAJOR_VERSION == 3)
+    uchannel->set_flags(Glib::IO_FLAG_NONBLOCK);
+#endif
     uchannel->set_close_on_unref(true);
 
     Glib::signal_io().connect(sigc::ptr_fun(cb_udev_monitor_watch),
@@ -552,11 +561,12 @@ vfs_volume_init()
 void
 vfs_volume_finalize()
 {
+#if (GTK_MAJOR_VERSION == 4)
     // stop global mount monitor
     mchannel = nullptr;
-
     // stop global udev monitor
     uchannel = nullptr;
+#endif
 
     // free all devmounts
     devmounts.clear();

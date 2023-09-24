@@ -39,6 +39,7 @@
 #include <array>
 #include <vector>
 
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -76,13 +77,21 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
 {
     // ztd::logger::info("remove_actions( {} )", type);
 
+#if (GTK_MAJOR_VERSION == 4)
     const auto kf = Glib::KeyFile::create();
+#elif (GTK_MAJOR_VERSION == 3)
+    Glib::KeyFile kf;
+#endif
     try
     {
         // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
         const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
 
+#if (GTK_MAJOR_VERSION == 4)
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
+#elif (GTK_MAJOR_VERSION == 3)
+        kf.load_from_file(path, Glib::KEY_FILE_NONE);
+#endif
     }
     catch (const Glib::FileError& e)
     {
@@ -91,7 +100,11 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
             // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
             const auto path = vfs::user_dirs->data_dir() / "applications/mimeapps.list";
 
+#if (GTK_MAJOR_VERSION == 4)
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
+#elif (GTK_MAJOR_VERSION == 3)
+            kf.load_from_file(path, Glib::KEY_FILE_NONE);
+#endif
         }
         catch (const Glib::FileError& e)
         {
@@ -102,7 +115,11 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
     std::vector<Glib::ustring> removed;
     try
     {
+#if (GTK_MAJOR_VERSION == 4)
         removed = kf->get_string_list("Removed Associations", mime_type.data());
+#elif (GTK_MAJOR_VERSION == 3)
+        removed = kf.get_string_list("Removed Associations", mime_type.data());
+#endif
         if (removed.empty())
         {
             return;
@@ -153,10 +170,18 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
     {
         const auto path = dir / names.at(n);
         // ztd::logger::info( "    {}", path);
+#if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
+#elif (GTK_MAJOR_VERSION == 3)
+        Glib::KeyFile kf;
+#endif
         try
         {
+#if (GTK_MAJOR_VERSION == 4)
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
+#elif (GTK_MAJOR_VERSION == 3)
+            kf.load_from_file(path, Glib::KEY_FILE_NONE);
+#endif
         }
         catch (const Glib::FileError& e)
         {
@@ -168,7 +193,11 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
             // get removed associations in this dir
             try
             {
+#if (GTK_MAJOR_VERSION == 4)
                 removed = kf->get_string_list("Removed Associations", mime_type.data());
+#elif (GTK_MAJOR_VERSION == 3)
+                removed = kf.get_string_list("Removed Associations", mime_type.data());
+#endif
                 // if (removed.empty())
                 //     continue;
             }
@@ -186,7 +215,11 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
             std::vector<Glib::ustring> apps;
             try
             {
+#if (GTK_MAJOR_VERSION == 4)
                 apps = kf->get_string_list(groups.at(k).data(), mime_type.data());
+#elif (GTK_MAJOR_VERSION == 3)
+                apps = kf.get_string_list(groups.at(k).data(), mime_type.data());
+#endif
                 // if (apps.empty())
                 //     return nullptr;
             }
@@ -303,10 +336,18 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
         }
         const auto& filename = check_filename.value();
 
+#if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
+#elif (GTK_MAJOR_VERSION == 3)
+        Glib::KeyFile kf;
+#endif
         try
         {
+#if (GTK_MAJOR_VERSION == 4)
             kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
+#elif (GTK_MAJOR_VERSION == 3)
+            kf.load_from_file(filename, Glib::KEY_FILE_NONE);
+#endif
         }
         catch (const Glib::FileError& e)
         {
@@ -316,7 +357,11 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
         std::vector<Glib::ustring> types;
         try
         {
+#if (GTK_MAJOR_VERSION == 4)
             types = kf->get_string_list("Desktop Entry", "MimeType");
+#elif (GTK_MAJOR_VERSION == 3)
+            types = kf.get_string_list("Desktop Entry", "MimeType");
+#endif
             if (types.empty())
             {
                 return false;
@@ -340,8 +385,13 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
 
         if (!found) /* get the content of desktop file for comparison */
         {
+#if (GTK_MAJOR_VERSION == 4)
             cmd = kf->get_string("Desktop Entry", "Exec");
             name = kf->get_string("Desktop Entry", "Name");
+#elif (GTK_MAJOR_VERSION == 3)
+            cmd = kf.get_string("Desktop Entry", "Exec");
+            name = kf.get_string("Desktop Entry", "Name");
+#endif
         }
     }
     else
@@ -372,22 +422,38 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
             }
             const auto& filename = check_filename.value();
 
+#if (GTK_MAJOR_VERSION == 4)
             const auto kf = Glib::KeyFile::create();
+#elif (GTK_MAJOR_VERSION == 3)
+            Glib::KeyFile kf;
+#endif
             try
             {
+#if (GTK_MAJOR_VERSION == 4)
                 kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
+#elif (GTK_MAJOR_VERSION == 3)
+                kf.load_from_file(filename, Glib::KEY_FILE_NONE);
+#endif
             }
             catch (const Glib::FileError& e)
             {
                 return false;
             }
 
+#if (GTK_MAJOR_VERSION == 4)
             const Glib::ustring cmd2 = kf->get_string("Desktop Entry", "Exec");
+#elif (GTK_MAJOR_VERSION == 3)
+            const Glib::ustring cmd2 = kf.get_string("Desktop Entry", "Exec");
+#endif
             if (ztd::same(cmd.data(), cmd2.data())) /* 2 desktop files have same "Exec" */
             {
                 if (is_desktop)
                 {
+#if (GTK_MAJOR_VERSION == 4)
                     const Glib::ustring name2 = kf->get_string("Desktop Entry", "Name");
+#elif (GTK_MAJOR_VERSION == 3)
+                    const Glib::ustring name2 = kf.get_string("Desktop Entry", "Name");
+#endif
                     /* Then, check if the "Name" keys of 2 desktop files are the same. */
                     if (ztd::same(name.data(), name2.data()))
                     {
@@ -427,10 +493,18 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
         }
         const auto& filename = check_filename.value();
 
+#if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
+#elif (GTK_MAJOR_VERSION == 3)
+        Glib::KeyFile kf;
+#endif
         try
         {
+#if (GTK_MAJOR_VERSION == 4)
             kf->load_from_file(filename, Glib::KeyFile::Flags::KEEP_TRANSLATIONS);
+#elif (GTK_MAJOR_VERSION == 3)
+            kf.load_from_file(filename, Glib::KEY_FILE_KEEP_TRANSLATIONS);
+#endif
         }
         catch (const Glib::FileError& e)
         {
@@ -445,16 +519,29 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
         //
 
         const std::vector<Glib::ustring> mime_types{mime_type.data()};
+
+#if (GTK_MAJOR_VERSION == 4)
         /* set our mime-type */
         kf->set_string_list("Desktop Entry", "MimeType", mime_types);
         /* store id of original desktop file, for future use. */
         kf->set_string("Desktop Entry", "X-MimeType-Derived", desktop_id.data());
         kf->set_string("Desktop Entry", "NoDisplay", "true");
+#elif (GTK_MAJOR_VERSION == 3)
+        /* set our mime-type */
+        kf.set_string_list("Desktop Entry", "MimeType", mime_types);
+        /* store id of original desktop file, for future use. */
+        kf.set_string("Desktop Entry", "X-MimeType-Derived", desktop_id.data());
+        kf.set_string("Desktop Entry", "NoDisplay", "true");
+#endif
 
         const std::string name = ztd::removesuffix(desktop_id, desktop_ext);
         cust_template = std::format("{}-usercustom-{}.desktop", name, replace_txt);
 
+#if (GTK_MAJOR_VERSION == 4)
         file_content = kf->to_data();
+#elif (GTK_MAJOR_VERSION == 3)
+        file_content = kf.to_data();
+#endif
     }
     else /* it is not a desktop_id, but a command */
     {

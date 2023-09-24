@@ -29,6 +29,7 @@
 
 #include <sys/inotify.h>
 
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -47,7 +48,12 @@ static std::map<std::filesystem::path, vfs::file_monitor> monitor_map;
 static std::mutex monitor_mutex;
 
 static i32 inotify_fd = -1;
+
+#if (GTK_MAJOR_VERSION == 4)
 static Glib::RefPtr<Glib::IOChannel> inotify_io_channel = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
+static Glib::RefPtr<Glib::IOChannel> inotify_io_channel;
+#endif
 
 // event handler of all inotify events
 static bool vfs_file_monitor_on_inotify_event(Glib::IOCondition condition);
@@ -169,7 +175,11 @@ vfs_file_monitor_connect_to_inotify()
 
     inotify_io_channel = Glib::IOChannel::create_from_fd(inotify_fd);
     inotify_io_channel->set_buffered(true);
+#if (GTK_MAJOR_VERSION == 4)
     inotify_io_channel->set_flags(Glib::IOFlags::NONBLOCK);
+#elif (GTK_MAJOR_VERSION == 3)
+    inotify_io_channel->set_flags(Glib::IO_FLAG_NONBLOCK);
+#endif
 
     Glib::signal_io().connect(sigc::ptr_fun(vfs_file_monitor_on_inotify_event),
                               inotify_io_channel,

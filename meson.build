@@ -222,19 +222,24 @@ cli11_dep = dependency('CLI11', required : true)
 libzmq_dep = dependency('libzmq', required : true)
 libzmqpp_dep = cc.find_library('zmqpp', has_headers: ['zmqpp/zmqpp.hpp'], required: true)
 
-#gtk_dep = dependency('gtk4', required : true)
+# gtk_dep = dependency('gtk4', required : true)
 gtk_dep = dependency('gtk+-3.0', required : true)
-glib_dep = dependency('glib-2.0', required : true)
 
-#gtkmm_dep = dependency('gtkmm-4.0', required : true)
-glibmm_dep = dependency('glibmm-2.68', required : true)
-giomm_dep = dependency('giomm-2.68', required : true)
+# Gtk3 cpp
+gtkmm_dep = dependency('gtkmm-3.0', required : true)
+glibmm_dep = dependency('glibmm-2.4', required : true)
+giomm_dep = dependency('giomm-2.4', required : true)
+
+# Gtk4 cpp
+# gtkmm_dep = dependency('gtkmm-4.0', required : true)
+# glibmm_dep = dependency('glibmm-2.68', required : true)
+# giomm_dep = dependency('giomm-2.68', required : true)
 
 dependencies = [
+    gtkmm_dep,
     glibmm_dep,
     giomm_dep,
 
-    glib_dep,
     gtk_dep,
 
     # x11_dep,

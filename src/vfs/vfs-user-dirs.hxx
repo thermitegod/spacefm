@@ -23,6 +23,7 @@
 
 #include <memory>
 
+#include <gtkmm.h>
 #include <glibmm.h>
 
 struct VFSUserDirs
@@ -56,6 +57,7 @@ struct VFSUserDirs
   private:
     // GUserDirectory
     // clang-format off
+#if (GTK_MAJOR_VERSION == 4)
     const std::filesystem::path user_desktop{Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP)};
     const std::filesystem::path user_documents{Glib::get_user_special_dir(Glib::UserDirectory::DOCUMENTS)};
     const std::filesystem::path user_download{Glib::get_user_special_dir(Glib::UserDirectory::DOWNLOAD)};
@@ -64,6 +66,16 @@ struct VFSUserDirs
     const std::filesystem::path user_share{Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE)};
     const std::filesystem::path user_template{Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES)};
     const std::filesystem::path user_videos{Glib::get_user_special_dir(Glib::UserDirectory::VIDEOS)};
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::filesystem::path user_desktop{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DESKTOP)};
+    const std::filesystem::path user_documents{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOCUMENTS)};
+    const std::filesystem::path user_download{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOWNLOAD)};
+    const std::filesystem::path user_music{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_MUSIC)};
+    const std::filesystem::path user_pictures{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PICTURES)};
+    const std::filesystem::path user_share{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PUBLIC_SHARE)};
+    const std::filesystem::path user_template{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_TEMPLATES)};
+    const std::filesystem::path user_videos{Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_VIDEOS)};
+#endif
     // clang-format on
 
     // User

@@ -33,6 +33,7 @@
 
 #include <memory>
 
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -83,6 +84,8 @@ vfs_get_desktop(const std::filesystem::path& desktop_file)
 
 VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
 {
+#if (GTK_MAJOR_VERSION == 4)
+
     const auto kf = Glib::KeyFile::create();
 
     if (desktop_file.is_absolute())
@@ -179,6 +182,107 @@ VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
         this->desktop_entry_.startup_notify = kf->get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
     }
     // clang-format on
+
+#elif (GTK_MAJOR_VERSION == 3)
+
+    Glib::KeyFile kf;
+
+    if (desktop_file.is_absolute())
+    {
+        this->filename_ = desktop_file.filename();
+        this->path_ = desktop_file;
+        this->loaded_ = kf.load_from_file(desktop_file, Glib::KEY_FILE_NONE);
+    }
+    else
+    {
+        this->filename_ = desktop_file.filename();
+        const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
+        std::string relative_full_path;
+        this->loaded_ =
+            kf.load_from_data_dirs(relative_path, relative_full_path, Glib::KEY_FILE_NONE);
+        this->path_ = relative_full_path;
+    }
+
+    if (!this->loaded_)
+    {
+        ztd::logger::error("Failed to load desktop file: {}", desktop_file.string());
+        return;
+    }
+
+    // Keys not loaded from .desktop files
+    // - Hidden
+    // - OnlyShowIn
+    // - NotShowIn
+    // - DBusActivatable
+    // - StartupWMClass
+    // - URL
+    // - PrefersNonDefaultGPU
+    // - SingleMainWindow
+
+    // clang-format off
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
+    {
+        this->desktop_entry_.type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
+    {
+        this->desktop_entry_.name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
+    {
+        this->desktop_entry_.generic_name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY))
+    {
+        this->desktop_entry_.no_display = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NODISPLAY);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT))
+    {
+        this->desktop_entry_.comment = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_COMMENT);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON))
+    {
+        this->desktop_entry_.icon = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ICON);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC))
+    {
+        this->desktop_entry_.try_exec = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TRYEXEC);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC))
+    {
+        this->desktop_entry_.exec = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_EXEC);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH))
+    {
+        this->desktop_entry_.path = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_PATH);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL))
+    {
+         this->desktop_entry_.terminal = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TERMINAL);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS))
+    {
+        this->desktop_entry_.actions = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_ACTIONS);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE))
+    {
+        this->desktop_entry_.mime_type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_MIMETYPE);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES))
+    {
+        this->desktop_entry_.categories = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_CATEGORIES);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS))
+    {
+        this->desktop_entry_.keywords = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_KEYWORDS);
+    }
+    if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY))
+    {
+        this->desktop_entry_.startup_notify = kf.get_boolean(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_STARTUPNOTIFY);
+    }
+    // clang-format on
+
+#endif
 }
 
 const std::string_view
@@ -469,8 +573,13 @@ VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
                 !this->desktop_entry_.path.empty() ? this->desktop_entry_.path
                                                    : working_dir.string(),
                 argv,
+#if (GTK_MAJOR_VERSION == 4)
                 Glib::SpawnFlags::SEARCH_PATH | Glib::SpawnFlags::STDOUT_TO_DEV_NULL |
                     Glib::SpawnFlags::STDERR_TO_DEV_NULL,
+#elif (GTK_MAJOR_VERSION == 3)
+                Glib::SpawnFlags::SPAWN_SEARCH_PATH | Glib::SpawnFlags::SPAWN_STDOUT_TO_DEV_NULL |
+                    Glib::SpawnFlags::SPAWN_STDERR_TO_DEV_NULL,
+#endif
                 Glib::SlotSpawnChildSetup(),
                 nullptr,
                 nullptr,

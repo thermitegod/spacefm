@@ -1562,7 +1562,11 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
 
         Glib::spawn_async_with_pipes(working_directory,
                                      argv,
+#if (GTK_MAJOR_VERSION == 4)
                                      Glib::SpawnFlags::DO_NOT_REAP_CHILD,
+#elif (GTK_MAJOR_VERSION == 3)
+                                     Glib::SpawnFlags::SPAWN_DO_NOT_REAP_CHILD,
+#endif
                                      Glib::SlotSpawnChildSetup(),
                                      &pid,
                                      nullptr,
