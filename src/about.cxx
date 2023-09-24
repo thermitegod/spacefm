@@ -15,26 +15,24 @@
 
 #include <gtkmm.h>
 
-#include <ztd/ztd.hxx>
-
 #include "about.hxx"
 
 void
 show_about_dialog(GtkWindow* parent)
 {
-    GtkWidget* dialog = gtk_about_dialog_new();
-    gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
+    (void)parent;
 
-    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME_FANCY);
-    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
-    gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "spacefm");
-    gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog), "(unofficial)");
-    gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),
-                                 "https://github.com/thermitegod/spacefm");
-    gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dialog), "Github");
-    gtk_about_dialog_set_license_type(GTK_ABOUT_DIALOG(dialog), GtkLicense::GTK_LICENSE_GPL_3_0);
+    Gtk::AboutDialog dialog;
 
-    g_signal_connect(dialog, "response", G_CALLBACK(g_object_unref), nullptr);
+    // dialog.set_transient_for(parent);
 
-    gtk_widget_show(dialog);
+    dialog.set_program_name(PACKAGE_NAME_FANCY);
+    dialog.set_version(PACKAGE_VERSION);
+    dialog.set_logo_icon_name("spacefm");
+    dialog.set_comments("(unofficial)");
+    dialog.set_website("https://github.com/thermitegod/spacefm");
+    dialog.set_website_label("Github");
+    dialog.set_license_type(Gtk::License::LICENSE_GPL_3_0);
+
+    dialog.run();
 }
