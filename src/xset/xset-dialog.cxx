@@ -397,7 +397,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     if (deffile)
     {
         if (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE ||
-            action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER)
+            action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER)
         {
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile.value().c_str());
         }
