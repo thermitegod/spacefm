@@ -36,6 +36,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "ptk/ptk-file-browser.hxx"
 #include "types.hxx"
 

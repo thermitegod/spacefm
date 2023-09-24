@@ -21,3 +21,9 @@
 #include <ztd/ztd_logger.hxx>
 
 i32 gtk4_dialog_run(GtkDialog* dialog);
+
+#if (GTK_MAJOR_VERSION == 4)
+
+#define gtk_widget_show_all(widget) ((void)(widget))
+
+#endif

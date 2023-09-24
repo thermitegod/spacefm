@@ -36,6 +36,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "compat/gtk4-porting.hxx"
+
 #include "xset/xset.hxx"
 
 #include "write.hxx"

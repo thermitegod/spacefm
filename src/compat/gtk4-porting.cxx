@@ -24,7 +24,7 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#if GTK_CHECK_VERSION(3, 0, 0)
+#if (GTK_MAJOR_VERSION == 3)
 
 i32
 gtk4_dialog_run(GtkDialog* dialog)
@@ -32,7 +32,7 @@ gtk4_dialog_run(GtkDialog* dialog)
     return gtk_dialog_run(dialog);
 }
 
-#else
+#elif (GTK_MAJOR_VERSION == 4)
 
 static void
 dialog_response_cb(GObject* object, i32 response_id, void* user_data)
