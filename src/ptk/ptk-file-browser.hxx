@@ -114,11 +114,6 @@ struct PtkFileBrowser
     bool inhibit_focus_{false};
     std::optional<std::filesystem::path> seek_name_{std::nullopt};
 
-    /* side pane */
-    GtkWidget* side_pane_buttons_{nullptr};
-    GtkToggleToolButton* location_btn_{nullptr};
-    GtkToggleToolButton* dir_tree_btn_{nullptr};
-
     // sorting
     GtkSortType sort_type_;
     ptk::file_browser::sort_order sort_order_{ptk::file_browser::sort_order::perm};
