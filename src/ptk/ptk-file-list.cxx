@@ -216,7 +216,7 @@ ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
     iface->set_sort_column_id = ptk_file_list_set_sort_column_id;
     iface->set_sort_func = ptk_file_list_set_sort_func;
     iface->set_default_sort_func = ptk_file_list_set_default_sort_func;
-    iface->has_default_sort_func = (gboolean(*)(GtkTreeSortable*))gtk_false;
+    iface->has_default_sort_func = (gboolean(*)(GtkTreeSortable*)) false;
 }
 
 static void
