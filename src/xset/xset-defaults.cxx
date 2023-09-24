@@ -498,10 +498,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Terminal");
     set->b = xset::b::unset; // discovery notification
 
-    set = xset_get(xset::name::main_root_terminal);
-    xset_set_var(set, xset::var::menu_label, "_Root Terminal");
-    xset_set_var(set, xset::var::icn, "gtk-dialog-warning");
-
     // was previously used for 'Save Session' < 0.9.4 as xset::menu::NORMAL
     set = xset_get(xset::name::main_save_session);
     xset_set_var(set, xset::var::menu_label, "Open _URL");

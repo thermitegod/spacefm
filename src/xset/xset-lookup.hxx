@@ -135,7 +135,6 @@ namespace xset
         main_root_window,
         main_search,
         main_terminal,
-        main_root_terminal,
         main_save_session,
         main_save_tabs,
         main_exit,
