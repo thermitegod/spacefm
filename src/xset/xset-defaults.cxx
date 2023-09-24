@@ -1469,8 +1469,7 @@ xset_defaults()
         set,
         xset::var::desc,
         "copy_name copy_parent copy_path separator paste_link paste_target paste_as separator "
-        "copy_to "
-        "move_to edit_root edit_hide separator select_all select_patt select_invert select_un");
+        "copy_to move_to edit_hide separator select_all select_patt select_invert select_un");
     xset_set_var(set, xset::var::icn, "gtk-edit");
 
     set = xset_get(xset::name::copy_name);
@@ -1608,22 +1607,6 @@ xset_defaults()
 
     set = xset_get(xset::name::select_patt);
     xset_set_var(set, xset::var::menu_label, "S_elect By Pattern");
-
-    set = xset_get(xset::name::edit_root);
-    xset_set_var(set, xset::var::menu_label, "R_oot");
-    set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "root_copy_loc root_move2 root_delete");
-    xset_set_var(set, xset::var::icn, "gtk-dialog-warning");
-
-    set = xset_get(xset::name::root_copy_loc);
-    xset_set_var(set, xset::var::menu_label, "_Copy To");
-
-    set = xset_get(xset::name::root_move2);
-    xset_set_var(set, xset::var::menu_label, "Move _To");
-
-    set = xset_get(xset::name::root_delete);
-    xset_set_var(set, xset::var::menu_label, "_Delete");
-    xset_set_var(set, xset::var::icn, "gtk-delete");
 
     // Properties
     set = xset_get(xset::name::con_prop);

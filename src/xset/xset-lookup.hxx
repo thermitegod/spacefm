@@ -432,11 +432,6 @@ namespace xset
         select_un,
         select_invert,
         select_patt,
-        edit_root,
-        root_copy_loc,
-        root_move2,
-        root_trash,
-        root_delete,
 
         // Properties //
         con_prop,

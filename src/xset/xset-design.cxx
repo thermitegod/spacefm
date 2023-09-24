@@ -100,25 +100,6 @@ xset_design_job_set_edit(xset_t set)
 }
 
 static void
-xset_design_job_set_edit_root(xset_t set)
-{
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
-
-    const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-    if (cmd_type == xset::cmd::script)
-    {
-        // script
-        char* cscript = xset_custom_get_script(set, true);
-        if (!cscript)
-        {
-            return;
-        }
-        xset_edit(parent, cscript);
-        std::free(cscript);
-    }
-}
-
-static void
 xset_design_job_set_copyname(xset_t set)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -613,9 +594,6 @@ xset_design_job(GtkWidget* item, xset_t set)
             break;
         case xset::job::edit:
             xset_design_job_set_edit(set);
-            break;
-        case xset::job::edit_root:
-            xset_design_job_set_edit_root(set);
             break;
         case xset::job::copyname:
             xset_design_job_set_copyname(set);

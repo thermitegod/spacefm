@@ -240,24 +240,6 @@ on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
 }
 
 static void
-on_popup_rootcmd_activate(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
-{
-    xset_t set;
-    if (menuitem)
-    {
-        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "set")));
-    }
-    else
-    {
-        set = set2;
-    }
-    if (set)
-    {
-        ptk_file_misc_rootcmd(data->browser, data->sel_files, data->cwd.c_str(), set->name);
-    }
-}
-
-static void
 on_popup_select_pattern(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
@@ -1289,19 +1271,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_set_cb(set, (GFunc)on_popup_paste_as_activate, data);
         set->disable = !is_clip;
 
-        set = xset_get(xset::name::root_copy_loc);
-        xset_set_cb(set, (GFunc)on_popup_rootcmd_activate, data);
-        xset_set_ob1(set, "set", set);
-        set->disable = set_disable;
-        set = xset_get(xset::name::root_move2);
-        xset_set_cb(set, (GFunc)on_popup_rootcmd_activate, data);
-        xset_set_ob1(set, "set", set);
-        set->disable = set_disable;
-        set = xset_get(xset::name::root_delete);
-        xset_set_cb(set, (GFunc)on_popup_rootcmd_activate, data);
-        xset_set_ob1(set, "set", set);
-        set->disable = set_disable;
-
         set = xset_get(xset::name::edit_hide);
         xset_set_cb(set, (GFunc)on_hide_file, data);
         set->disable = set_disable || no_write_access || !browser;
@@ -1390,9 +1359,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
 
         set = xset_get(xset::name::move_to);
         set->disable = set_disable;
-
-        set = xset_get(xset::name::edit_root);
-        set->disable = (geteuid() == 0) || set_disable;
 
         set = xset_get(xset::name::edit_submenu);
         xset_add_menuitem(browser, popup, accel_group, set);
@@ -2715,15 +2681,6 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
              ztd::startswith(set->name, "move_tab_") || ztd::startswith(set->name, "move_panel_"))
     {
         on_copycmd(nullptr, data, set);
-    }
-    else if (ztd::startswith(set->name, "root_"))
-    {
-        if (set->xset_name == xset::name::root_copy_loc ||
-            set->xset_name == xset::name::root_move2 || set->xset_name == xset::name::root_delete ||
-            set->xset_name == xset::name::root_trash)
-        {
-            on_popup_rootcmd_activate(nullptr, data, set);
-        }
     }
     else if (browser)
     {

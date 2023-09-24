@@ -99,7 +99,6 @@ namespace xset
         icon,
         label,
         edit,
-        edit_root,
         line,
         script,
         custom,

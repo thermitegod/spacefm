@@ -936,7 +936,6 @@ xset_job_is_valid(xset_t set, xset::job job)
         case xset::job::remove:
             return (!set->lock && !no_remove);
         case xset::job::label:
-        case xset::job::edit_root:
         case xset::job::line:
         case xset::job::script:
         case xset::job::custom:
