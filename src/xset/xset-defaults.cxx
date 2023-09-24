@@ -1519,6 +1519,10 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Info");
     xset_set_var(set, xset::var::icn, "gtk-dialog-info");
 
+    set = xset_get(xset::name::prop_attr);
+    xset_set_var(set, xset::var::menu_label, "_Attributes");
+    xset_set_var(set, xset::var::icn, "gtk-dialog-info");
+
     set = xset_get(xset::name::prop_perm);
     xset_set_var(set, xset::var::menu_label, "_Permissions");
     xset_set_var(set, xset::var::icn, "dialog-password");

@@ -418,6 +418,7 @@ namespace xset
         // Properties //
         con_prop,
         prop_info,
+        prop_attr,
         prop_perm,
         prop_quick,
 

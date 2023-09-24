@@ -104,7 +104,7 @@ static void on_popup_new_text_file_activate(GtkMenuItem* menuitem, PtkFileMenu* 
 static void on_popup_new_link_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 
 static void on_popup_file_properties_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
-
+static void on_popup_file_attributes_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_file_permissions_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 
 static void on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -1368,8 +1368,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         // View >
         ptk_file_menu_add_panel_view_menu(browser, popup, accel_group);
 
-        // Properties
+        // Properties >
         xset_set_cb(xset::name::prop_info, (GFunc)on_popup_file_properties_activate, data);
+        xset_set_cb(xset::name::prop_attr, (GFunc)on_popup_file_attributes_activate, data);
         xset_set_cb(xset::name::prop_perm, (GFunc)on_popup_file_permissions_activate, data);
 
         static constexpr std::array<xset::name, 22> permcmds{
@@ -1394,7 +1395,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         set->disable = no_write_access || set_disable;
 
         set = xset_get(xset::name::con_prop);
-        xset_set_var(set, xset::var::desc, "prop_info prop_perm prop_quick");
+        xset_set_var(set, xset::var::desc, "prop_info prop_attr prop_perm prop_quick");
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 
@@ -2418,8 +2419,19 @@ on_popup_file_properties_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
     }
-
     ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 0);
+}
+
+static void
+on_popup_file_attributes_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
+{
+    (void)menuitem;
+    GtkWindow* parent_win = nullptr;
+    if (data->browser)
+    {
+        parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+    }
+    ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 1);
 }
 
 static void
@@ -2431,8 +2443,7 @@ on_popup_file_permissions_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
     }
-
-    ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 1);
+    ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 2);
 }
 
 static void
@@ -2556,6 +2567,10 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
     else if (set->xset_name == xset::name::prop_info)
     {
         on_popup_file_properties_activate(nullptr, data);
+    }
+    else if (set->xset_name == xset::name::prop_attr)
+    {
+        on_popup_file_attributes_activate(nullptr, data);
     }
     else if (set->xset_name == xset::name::prop_perm)
     {
