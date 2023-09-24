@@ -75,6 +75,7 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-dir.hxx"
+#include "vfs/vfs-file-info.hxx"
 
 #include "compat/type-conversion.hxx"
 
@@ -4626,24 +4627,14 @@ PtkFileBrowser::invert_selection() noexcept
 void
 PtkFileBrowser::file_properties(i32 page) noexcept
 {
-    std::filesystem::path dir_name;
-    auto selected_files = this->selected_files();
-    const auto cwd = this->cwd();
-    if (selected_files.empty())
-    {
-        vfs::file_info file = vfs_file_info_new(this->cwd());
-        selected_files.emplace_back(file);
-        dir_name = cwd.parent_path();
-    }
+    const auto selected_files = this->selected_files();
+
     GtkWidget* parent_window = gtk_widget_get_toplevel(GTK_WIDGET(this));
 
     gtk_orientable_set_orientation(GTK_ORIENTABLE(parent_window),
                                    GtkOrientation::GTK_ORIENTATION_VERTICAL);
 
-    ptk_show_file_properties(GTK_WINDOW(parent_window),
-                             !dir_name.empty() ? dir_name : cwd,
-                             selected_files,
-                             page);
+    ptk_show_file_properties(GTK_WINDOW(parent_window), this->cwd(), selected_files, page);
 }
 
 /* FIXME: Do not recreate the view if previous view is compact view */

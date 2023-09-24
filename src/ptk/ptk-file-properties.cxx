@@ -946,5 +946,17 @@ void
 ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
                          const std::span<const vfs::file_info> selected_files, i32 page)
 {
-    show_file_properties_dialog(parent, cwd, selected_files, page);
+    if (selected_files.empty())
+    {
+        vfs::file_info file = vfs_file_info_new(cwd);
+        const std::vector<vfs::file_info> cwd_selected{file};
+
+        show_file_properties_dialog(parent, cwd.parent_path(), cwd_selected, page);
+
+        vfs_file_info_unref(file);
+    }
+    else
+    {
+        show_file_properties_dialog(parent, cwd, selected_files, page);
+    }
 }
