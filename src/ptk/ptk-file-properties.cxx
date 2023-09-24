@@ -894,8 +894,6 @@ void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
                             const std::span<const vfs::file_info> selected_files, i32 page)
 {
-    (void)page;
-
     GtkWidget* dialog =
         gtk_dialog_new_with_buttons("File Properties",
                                     parent,
@@ -937,6 +935,8 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(close_dialog), data);
 
     gtk_widget_show_all(dialog);
+
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), page);
 
     gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
