@@ -280,32 +280,6 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
 }
 
 static void
-on_open_current_folder_as_root(GtkMenuItem* menuitem, void* user_data)
-{
-    (void)menuitem;
-    MainWindow* main_window = MAIN_WINDOW(user_data);
-    PtkFileBrowser* file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-    if (!file_browser)
-    {
-        return;
-    }
-    // root task
-    PtkFileTask* ptask = ptk_file_exec_new("Open Root Window",
-                                           file_browser->cwd(),
-                                           GTK_WIDGET(file_browser),
-                                           file_browser->task_view());
-    const std::string exe = ztd::program::exe();
-    const std::string cwd = ztd::shell::quote(file_browser->cwd().string());
-    ptask->task->exec_command = std::format("HOME=/root {} {}", exe, cwd);
-    ptask->task->exec_as_user = "root";
-    ptask->task->exec_sync = false;
-    ptask->task->exec_export = false;
-    ptask->task->exec_browser = nullptr;
-    ptk_file_task_run(ptask);
-}
-
-static void
 main_window_open_terminal(MainWindow* main_window)
 {
     PtkFileBrowser* file_browser =
@@ -1127,14 +1101,13 @@ rebuild_menu_file(MainWindow* main_window, PtkFileBrowser* file_browser)
 
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_new_window, (GFunc)on_new_window_activate, main_window);
-    xset_set_cb(xset::name::main_root_window, (GFunc)on_open_current_folder_as_root, main_window);
     xset_set_cb(xset::name::main_search, (GFunc)on_find_file_activate, main_window);
     xset_set_cb(xset::name::main_terminal, (GFunc)on_open_terminal_activate, main_window);
     xset_set_cb(xset::name::main_save_session, (GFunc)on_open_url, main_window);
     xset_set_cb(xset::name::main_exit, (GFunc)on_quit_activate, main_window);
     const std::string menu_elements =
         "main_save_session main_search separator main_terminal "
-        "main_new_window main_root_window separator main_save_tabs separator main_exit";
+        "main_new_window separator main_save_tabs separator main_exit";
     xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
@@ -3186,10 +3159,6 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         if (set->xset_name == xset::name::main_new_window)
         {
             on_new_window_activate(nullptr, main_window);
-        }
-        else if (set->xset_name == xset::name::main_root_window)
-        {
-            on_open_current_folder_as_root(nullptr, main_window);
         }
         else if (set->xset_name == xset::name::main_search)
         {

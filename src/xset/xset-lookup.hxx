@@ -132,7 +132,6 @@ namespace xset
 
         // File //
         main_new_window,
-        main_root_window,
         main_search,
         main_terminal,
         main_save_session,

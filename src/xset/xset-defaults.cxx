@@ -486,10 +486,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "New _Window");
     xset_set_var(set, xset::var::icn, "spacefm");
 
-    set = xset_get(xset::name::main_root_window);
-    xset_set_var(set, xset::var::menu_label, "R_oot Window");
-    xset_set_var(set, xset::var::icn, "gtk-dialog-warning");
-
     set = xset_get(xset::name::main_search);
     xset_set_var(set, xset::var::menu_label, "_File Search");
     xset_set_var(set, xset::var::icn, "gtk-find");
