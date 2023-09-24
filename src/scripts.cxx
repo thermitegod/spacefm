@@ -29,7 +29,6 @@
 using namespace std::literals::string_view_literals;
 
 static const std::map<spacefm::script, const std::string_view> script_map{
-    {spacefm::script::spacefm_auth, "spacefm-auth"sv},
     {spacefm::script::config_update, "config-update"sv},
     {spacefm::script::config_update_git, "config-update-git"sv},
 };

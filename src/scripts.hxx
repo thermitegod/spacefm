@@ -21,7 +21,6 @@ namespace spacefm
 {
     enum class script
     {
-        spacefm_auth,
         config_update,
         config_update_git,
     };

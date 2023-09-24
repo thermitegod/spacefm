@@ -43,7 +43,6 @@
 #include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-dialog.hxx"
 
 #include "terminal-handlers.hxx"
 
@@ -51,7 +50,6 @@
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-utils.hxx"
 
-#include "scripts.hxx"
 #include "write.hxx"
 #include "utils.hxx"
 
@@ -1411,8 +1409,6 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         }
     }
 
-    std::string sum_script;
-
     // Build exec script
     if (!this->exec_direct)
     {
@@ -1518,21 +1514,12 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
 
         // set permissions
         chmod(checked_exec_script.c_str(), 0700);
-
-        // use checksum
-        if (this->exec_checksum)
-        {
-            sum_script =
-                ztd::compute_checksum(ztd::checksum::type::md5, checked_exec_script.string());
-        }
     }
 
     this->percent = 50;
 
     // Spawn
     std::vector<std::string> argv;
-
-    bool single_arg = false;
 
     if (!terminal.empty())
     {
@@ -1549,38 +1536,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         }
     }
 
-    std::string auth;
-    if (!sum_script.empty())
-    {
-        // spacefm-auth exists?
-        auth = get_script_path(spacefm::script::spacefm_auth);
-        if (!script_exists(auth))
-        {
-            sum_script.clear();
-        }
-    }
-
-    if (!sum_script.empty() && !auth.empty())
-    {
-        // spacefm-auth
-        if (single_arg)
-        {
-            const std::string script = std::format("{} {} {} {}",
-                                                   FISH_PATH,
-                                                   auth,
-                                                   this->exec_script.value().string(),
-                                                   sum_script);
-            argv.emplace_back(script);
-        }
-        else
-        {
-            argv.emplace_back(FISH_PATH);
-            argv.emplace_back(auth);
-            argv.emplace_back(this->exec_script.value());
-            argv.emplace_back(sum_script);
-        }
-    }
-    else if (this->exec_direct)
+    if (this->exec_direct)
     {
         // add direct args - not currently used
         argv = this->exec_argv;

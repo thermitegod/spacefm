@@ -261,7 +261,6 @@ class VFSFileTask
     GIOChannel* exec_channel_out{nullptr};
     GIOChannel* exec_channel_err{nullptr};
     bool exec_scroll_lock{false};
-    bool exec_checksum{false};
     xset_t exec_set{nullptr};
     GCond* exec_cond{nullptr};
     void* exec_ptask{nullptr};
