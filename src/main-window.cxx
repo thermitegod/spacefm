@@ -3598,7 +3598,6 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             buf.append(std::format("set fm_task_pwd {}\n", ztd::shell::quote(dest_dir.string())));
             buf.append(std::format("set fm_task_name {}\n", ztd::shell::quote(current_file.string())));
             buf.append(std::format("set fm_task_command {}\n", ztd::shell::quote(ptask->task->exec_command)));
-            buf.append(std::format("set fm_task_user {}\n", ztd::shell::quote(ptask->task->exec_as_user)));
             buf.append(std::format("set fm_task_icon {}\n", ztd::shell::quote(ptask->task->exec_icon)));
             buf.append(std::format("set fm_task_pid {}\n", ptask->task->exec_pid));
             // clang-format on

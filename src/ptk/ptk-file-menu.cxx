@@ -1091,7 +1091,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
                 // Edit
                 set = xset_get(xset::name::open_edit);
                 xset_set_cb(set, (GFunc)on_file_edit, data);
-                set->disable = (geteuid() == 0);
                 xset_add_menuitem(browser, submenu, accel_group, set);
             }
             else if (browser && is_dir)
@@ -1402,17 +1401,14 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_set_cb(xset::name::prop_perm, (GFunc)on_popup_file_permissions_activate, data);
 
         static constexpr std::array<xset::name, 22> permcmds{
-            xset::name::perm_r,           xset::name::perm_rw,
-            xset::name::perm_rwx,         xset::name::perm_r_r,
-            xset::name::perm_rw_r,        xset::name::perm_rw_rw,
-            xset::name::perm_rwxr_x,      xset::name::perm_rwxrwx,
-            xset::name::perm_r_r_r,       xset::name::perm_rw_r_r,
-            xset::name::perm_rw_rw_rw,    xset::name::perm_rwxr_r,
-            xset::name::perm_rwxr_xr_x,   xset::name::perm_rwxrwxrwx,
-            xset::name::perm_rwxrwxrwt,   xset::name::perm_unstick,
-            xset::name::perm_stick,       xset::name::perm_go_w,
-            xset::name::perm_go_rwx,      xset::name::perm_ugo_w,
-            xset::name::perm_ugo_rx,      xset::name::perm_ugo_rwx,
+            xset::name::perm_r,         xset::name::perm_rw,        xset::name::perm_rwx,
+            xset::name::perm_r_r,       xset::name::perm_rw_r,      xset::name::perm_rw_rw,
+            xset::name::perm_rwxr_x,    xset::name::perm_rwxrwx,    xset::name::perm_r_r_r,
+            xset::name::perm_rw_r_r,    xset::name::perm_rw_rw_rw,  xset::name::perm_rwxr_r,
+            xset::name::perm_rwxr_xr_x, xset::name::perm_rwxrwxrwx, xset::name::perm_rwxrwxrwt,
+            xset::name::perm_unstick,   xset::name::perm_stick,     xset::name::perm_go_w,
+            xset::name::perm_go_rwx,    xset::name::perm_ugo_w,     xset::name::perm_ugo_rx,
+            xset::name::perm_ugo_rwx,
         };
 
         for (const xset::name permcmd : permcmds)

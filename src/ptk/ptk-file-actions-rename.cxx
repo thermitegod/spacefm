@@ -2870,7 +2870,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     g_signal_connect(G_OBJECT(mset->cancel), "focus", G_CALLBACK(on_button_focus), mset);
 
     // run
-    std::string root_mkdir;
     std::string to_path;
     std::string from_path;
     i32 response;
@@ -3003,13 +3002,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
                 if (overwrite)
                 {
-                    ptask->task->exec_command =
-                        std::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("ln -sf {} {}", from_path, to_path);
                 }
                 else
                 {
-                    ptask->task->exec_command =
-                        std::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("ln -s {} {}", from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3066,13 +3063,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 PtkFileTask* ptask = ptk_file_exec_new("Create New File", mset->parent, task_view);
                 if (from_path.empty())
                 {
-                    ptask->task->exec_command =
-                        std::format("{}{}touch {}", root_mkdir, over_cmd, to_path);
+                    ptask->task->exec_command = std::format("{}touch {}", over_cmd, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        std::format("{}{}cp -f {} {}", root_mkdir, over_cmd, from_path, to_path);
+                        std::format("{}cp -f {} {}", over_cmd, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3128,12 +3124,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     ptk_file_exec_new("Create New Directory", mset->parent, task_view);
                 if (from_path.empty())
                 {
-                    ptask->task->exec_command = std::format("{}mkdir {}", root_mkdir, to_path);
+                    ptask->task->exec_command = std::format("mkdir {}", to_path);
                 }
                 else
                 {
-                    ptask->task->exec_command =
-                        std::format("{}cp -rL {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("cp -rL {} {}", from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3180,13 +3175,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
                 if (mset->is_dir)
                 {
-                    ptask->task->exec_command =
-                        std::format("{}cp -Pfr {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("cp -Pfr {} {}", from_path, to_path);
                 }
                 else
                 {
                     ptask->task->exec_command =
-                        std::format("{}cp -Pf{} {} {}", root_mkdir, over_opt, from_path, to_path);
+                        std::format("cp -Pf{} {} {}", over_opt, from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3219,13 +3213,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 to_path = ztd::shell::quote(full_path.string());
                 if (overwrite)
                 {
-                    ptask->task->exec_command =
-                        std::format("{}ln -sf {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("ln -sf {} {}", from_path, to_path);
                 }
                 else
                 {
-                    ptask->task->exec_command =
-                        std::format("{}ln -s {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("ln -s {} {}", from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;
@@ -3246,13 +3238,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 to_path = ztd::shell::quote(full_path.string());
                 if (overwrite)
                 {
-                    ptask->task->exec_command =
-                        std::format("{}mv -f {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("mv -f {} {}", from_path, to_path);
                 }
                 else
                 {
-                    ptask->task->exec_command =
-                        std::format("{}mv {} {}", root_mkdir, from_path, to_path);
+                    ptask->task->exec_command = std::format("mv {} {}", from_path, to_path);
                 }
                 ptask->task->exec_sync = true;
                 ptask->task->exec_popup = false;

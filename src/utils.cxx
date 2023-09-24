@@ -27,8 +27,6 @@
 
 #include "xset/xset.hxx"
 
-#include "extern.hxx"
-
 #include "utils.hxx"
 
 const std::string
@@ -182,28 +180,4 @@ clean_label(const std::string_view menu_label, bool kill_special, bool escape) n
     }
 
     return new_menu_label;
-}
-
-const std::string
-get_valid_su() noexcept
-{
-    std::string use_su;
-    if (!xset_get_s(xset::name::su_command))
-    {
-        for (auto su_command : su_commands)
-        {
-            use_su = Glib::find_program_in_path(su_command.data());
-            if (!use_su.empty())
-            {
-                break;
-            }
-        }
-        if (use_su.empty())
-        {
-            use_su = su_commands.at(0);
-        }
-        xset_set(xset::name::su_command, xset::var::s, use_su);
-    }
-    const std::string su_path = Glib::find_program_in_path(use_su);
-    return su_path;
 }

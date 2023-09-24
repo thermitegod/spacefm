@@ -47,5 +47,3 @@ void open_in_prog(const std::filesystem::path& path) noexcept;
 
 const std::string clean_label(const std::string_view menu_label, bool kill_special,
                               bool escape) noexcept;
-
-const std::string get_valid_su() noexcept;

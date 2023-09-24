@@ -37,10 +37,6 @@ function fm_handle_err
     exit $fm_err
 end
 
-function fm_enter_to_close
-    set input (read -P '[ Finished ]  Press Enter to close: ')
-end
-
 function fm_enter_for_shell
     set input (read -P "[ Finished ]  Press Enter to close or s + Enter for a shell: ")
     if test "$input" = "s"

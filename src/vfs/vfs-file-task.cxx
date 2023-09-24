@@ -1369,35 +1369,6 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         return;
     }
 
-    // need su?
-    std::string su;
-    if (!this->exec_as_user.empty())
-    {
-        if (geteuid() == 0 && ztd::same(this->exec_as_user, "root"))
-        { // already root so no su
-            this->exec_as_user.clear();
-        }
-        else
-        {
-            // get su programs
-            su = get_valid_su();
-            if (su.empty())
-            {
-                // do not use ptk_show_message() if non-main thread
-                // this->task_error(0, str);
-                ptk_show_message(
-                    GTK_WINDOW(parent),
-                    GtkMessageType::GTK_MESSAGE_ERROR,
-                    "Terminal SU Not Available",
-                    GtkButtonsType::GTK_BUTTONS_OK,
-                    "Configure a valid Terminal SU command in View|Preferences|Advanced");
-                call_state_callback(this, vfs::file_task_state::finish);
-                // ztd::logger::info("vfs_file_task_exec DONE ERROR");
-                return;
-            }
-        }
-    }
-
     // make tmpdir
     const auto tmp = vfs::user_dirs->program_tmp_dir();
     if (!std::filesystem::is_directory(tmp))
@@ -1412,12 +1383,6 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         call_state_callback(this, vfs::file_task_state::finish);
         // ztd::logger::info("vfs_file_task_exec DONE ERROR");
         return;
-    }
-
-    // get terminal
-    if (!this->exec_terminal && !this->exec_as_user.empty())
-    { // using cli tool so run in terminal
-        this->exec_terminal = true;
     }
 
     std::string terminal;
@@ -1519,14 +1484,6 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         buf.append(
             std::format("set fm_source {}\n\n", ztd::shell::quote(checked_exec_script.string())));
 
-        // build - trap rm
-        if (!this->exec_keep_tmp && geteuid() != 0 && ztd::same(this->exec_as_user, "root"))
-        {
-            // run as root command, clean up
-            buf.append(std::format("trap \"rm -f {}; exit\" EXIT SIGINT SIGTERM SIGQUIT SIGHUP\n\n",
-                                   checked_exec_script.string()));
-        }
-
         // build - command
         ztd::logger::info("TASK_COMMAND({})={}", fmt::ptr(this->exec_ptask), this->exec_command);
 
@@ -1536,14 +1493,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         // build - press enter to close
         if (!terminal.empty() && this->exec_keep_terminal)
         {
-            if (geteuid() == 0 || ztd::same(this->exec_as_user, "root"))
-            {
-                buf.append("fm_enter_to_close\n\n");
-            }
-            else
-            {
-                buf.append("fm_enter_for_shell\n\n");
-            }
+            buf.append("fm_enter_for_shell\n\n");
         }
 
         buf.append(std::format("exit $fm_err\n"));
@@ -1570,7 +1520,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         chmod(checked_exec_script.c_str(), 0700);
 
         // use checksum
-        if (geteuid() != 0 && (!this->exec_as_user.empty() || this->exec_checksum))
+        if (this->exec_checksum)
         {
             sum_script =
                 ztd::compute_checksum(ztd::checksum::type::md5, checked_exec_script.string());
@@ -1582,7 +1532,6 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     // Spawn
     std::vector<std::string> argv;
 
-    std::string use_su;
     bool single_arg = false;
 
     if (!terminal.empty())
@@ -1597,31 +1546,6 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             {
                 argv.emplace_back(terminal_arg);
             }
-        }
-
-        use_su = su;
-    }
-
-    if (!this->exec_as_user.empty())
-    {
-        // su
-        argv.emplace_back(use_su);
-        if (!ztd::same(this->exec_as_user, "root"))
-        {
-            if (!ztd::same(use_su, "/bin/su"))
-            {
-                argv.emplace_back("-u");
-            }
-            argv.emplace_back(this->exec_as_user);
-        }
-
-        if (ztd::same(use_su, "/bin/su"))
-        {
-            // /bin/su
-            argv.emplace_back("-s");
-            argv.emplace_back(FISH_PATH);
-            argv.emplace_back("-c");
-            single_arg = true;
         }
     }
 
@@ -1641,23 +1565,17 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         // spacefm-auth
         if (single_arg)
         {
-            const std::string script =
-                std::format("{} {} {} {} {}",
-                            FISH_PATH,
-                            auth,
-                            ztd::same(this->exec_as_user, "root") ? "root" : "",
-                            this->exec_script.value().string(),
-                            sum_script);
+            const std::string script = std::format("{} {} {} {}",
+                                                   FISH_PATH,
+                                                   auth,
+                                                   this->exec_script.value().string(),
+                                                   sum_script);
             argv.emplace_back(script);
         }
         else
         {
             argv.emplace_back(FISH_PATH);
             argv.emplace_back(auth);
-            if (ztd::same(this->exec_as_user, "root"))
-            {
-                argv.emplace_back("root");
-            }
             argv.emplace_back(this->exec_script.value());
             argv.emplace_back(sum_script);
         }

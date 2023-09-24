@@ -297,9 +297,6 @@ load_settings()
         xset_set(xset::name::date_format, xset::var::s, app_settings.date_format());
     }
 
-    // MOD su command discovery (sets default)
-    get_valid_su();
-
     // MOD terminal discovery
     const auto main_terminal = xset_get_s(xset::name::main_terminal);
     if (!main_terminal)

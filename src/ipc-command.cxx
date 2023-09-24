@@ -1684,7 +1684,6 @@ run_ipc_command(const std::string_view socket_commands_json)
                                   file_browser->task_view());
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
-            ptask->task->exec_as_user = opt_user;
             ptask->task->exec_icon = opt_icon;
             ptask->task->exec_terminal = opt_terminal;
             ptask->task->exec_keep_terminal = false;

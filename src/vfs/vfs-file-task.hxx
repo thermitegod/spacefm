@@ -253,7 +253,6 @@ class VFSFileTask
     bool exec_keep_tmp{false}; // diagnostic to keep temp files
     void* exec_browser{nullptr};
     void* exec_desktop{nullptr};
-    std::string exec_as_user{};
     std::string exec_icon{};
     pid_t exec_pid{0};
     i32 exec_exit_status{0};
