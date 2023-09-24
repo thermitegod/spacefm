@@ -328,17 +328,16 @@ main_window_refresh_all()
     }
 }
 
-static void
-update_window_icon(GtkWindow* window, GtkIconTheme* theme)
+void
+MainWindow::update_window_icon() noexcept
 {
-    (void)theme;
     GError* error = nullptr;
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     GdkPixbuf* icon =
         gtk_icon_theme_load_icon(icon_theme, "spacefm", 48, (GtkIconLookupFlags)0, &error);
     if (icon)
     {
-        gtk_window_set_icon(window, icon);
+        gtk_window_set_icon(GTK_WINDOW(this), icon);
         g_object_unref(icon);
     }
     else if (error != nullptr)
@@ -1274,7 +1273,7 @@ main_window_init(MainWindow* main_window)
     NOTE: gtk_window_set_icon_name does not work under some WMs, such as IceWM.
     gtk_window_set_icon_name( GTK_WINDOW( main_window ),
                               "gnome-fs-directory" ); */
-    update_window_icon(GTK_WINDOW(main_window), gtk_icon_theme_get_default());
+    main_window->update_window_icon();
 
     main_window->main_vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(main_window), main_window->main_vbox);

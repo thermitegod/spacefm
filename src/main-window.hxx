@@ -82,6 +82,9 @@ struct MainWindow
     bool maximized;
     bool opened_maximized;
     bool fullscreen;
+
+  public:
+    void update_window_icon() noexcept;
 };
 
 GType main_window_get_type();
