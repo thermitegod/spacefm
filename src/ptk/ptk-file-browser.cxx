@@ -5873,10 +5873,6 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     std::string name;
     std::string prog;
 
-    const std::string user1 = "1000";
-    const std::string user2 = "1001";
-    const std::string myuser = std::format("{}", geteuid());
-
     if (ztd::startswith(set->name, "perm_"))
     {
         name = ztd::removeprefix(set->name, "perm_");
@@ -5888,28 +5884,6 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
         {
             prog = "chmod";
         }
-    }
-    else if (ztd::startswith(set->name, "rperm_"))
-    {
-        name = ztd::removeprefix(set->name, "rperm_");
-        if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
-        {
-            prog = "chmod -R";
-        }
-        else
-        {
-            prog = "chmod";
-        }
-    }
-    else if (ztd::startswith(set->name, "own_"))
-    {
-        name = ztd::removeprefix(set->name, "own_");
-        prog = "chown";
-    }
-    else if (ztd::startswith(set->name, "rown_"))
-    {
-        name = ztd::removeprefix(set->name, "rown_");
-        prog = "chown -R";
     }
     else
     {
@@ -6004,50 +5978,6 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     else if (ztd::same(name, "ugo_rwx"))
     {
         cmd = "ugo+rwX";
-    }
-    else if (ztd::same(name, "myuser"))
-    {
-        cmd = std::format("{}:{}", myuser, myuser);
-    }
-    else if (ztd::same(name, "myuser_users"))
-    {
-        cmd = std::format("{}:users", myuser);
-    }
-    else if (ztd::same(name, "user1"))
-    {
-        cmd = std::format("{}:{}", user1, user1);
-    }
-    else if (ztd::same(name, "user1_users"))
-    {
-        cmd = std::format("{}:users", user1);
-    }
-    else if (ztd::same(name, "user2"))
-    {
-        cmd = std::format("{}:{}", user2, user2);
-    }
-    else if (ztd::same(name, "user2_users"))
-    {
-        cmd = std::format("{}:users", user2);
-    }
-    else if (ztd::same(name, "root"))
-    {
-        cmd = "root:root";
-    }
-    else if (ztd::same(name, "root_users"))
-    {
-        cmd = "root:users";
-    }
-    else if (ztd::same(name, "root_myuser"))
-    {
-        cmd = std::format("root:{}", myuser);
-    }
-    else if (ztd::same(name, "root_user1"))
-    {
-        cmd = std::format("root:{}", user1);
-    }
-    else if (ztd::same(name, "root_user2"))
-    {
-        cmd = std::format("root:{}", user2);
     }
     else
     {

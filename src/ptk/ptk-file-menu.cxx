@@ -1401,7 +1401,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         xset_set_cb(xset::name::prop_info, (GFunc)on_popup_file_properties_activate, data);
         xset_set_cb(xset::name::prop_perm, (GFunc)on_popup_file_permissions_activate, data);
 
-        static constexpr std::array<xset::name, 63> permcmds{
+        static constexpr std::array<xset::name, 22> permcmds{
             xset::name::perm_r,           xset::name::perm_rw,
             xset::name::perm_rwx,         xset::name::perm_r_r,
             xset::name::perm_rw_r,        xset::name::perm_rw_rw,
@@ -1413,27 +1413,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
             xset::name::perm_stick,       xset::name::perm_go_w,
             xset::name::perm_go_rwx,      xset::name::perm_ugo_w,
             xset::name::perm_ugo_rx,      xset::name::perm_ugo_rwx,
-            xset::name::rperm_rw,         xset::name::rperm_rwx,
-            xset::name::rperm_rw_r,       xset::name::rperm_rw_rw,
-            xset::name::rperm_rwxr_x,     xset::name::rperm_rwxrwx,
-            xset::name::rperm_rw_r_r,     xset::name::rperm_rw_rw_rw,
-            xset::name::rperm_rwxr_r,     xset::name::rperm_rwxr_xr_x,
-            xset::name::rperm_rwxrwxrwx,  xset::name::rperm_rwxrwxrwt,
-            xset::name::rperm_unstick,    xset::name::rperm_stick,
-            xset::name::rperm_go_w,       xset::name::rperm_go_rwx,
-            xset::name::rperm_ugo_w,      xset::name::rperm_ugo_rx,
-            xset::name::rperm_ugo_rwx,    xset::name::own_myuser,
-            xset::name::own_myuser_users, xset::name::own_user1,
-            xset::name::own_user1_users,  xset::name::own_user2,
-            xset::name::own_user2_users,  xset::name::own_root,
-            xset::name::own_root_users,   xset::name::own_root_myuser,
-            xset::name::own_root_user1,   xset::name::own_root_user2,
-            xset::name::rown_myuser,      xset::name::rown_myuser_users,
-            xset::name::rown_user1,       xset::name::rown_user1_users,
-            xset::name::rown_user2,       xset::name::rown_user2_users,
-            xset::name::rown_root,        xset::name::rown_root_users,
-            xset::name::rown_root_myuser, xset::name::rown_root_user1,
-            xset::name::rown_root_user2,
         };
 
         for (const xset::name permcmd : permcmds)
@@ -1446,20 +1425,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const char* file_path, vfs::file_info
         set = xset_get(xset::name::prop_quick);
         set->disable = no_write_access || set_disable;
 
-        set = xset_get(xset::name::prop_root);
-        set->disable = set_disable;
-
         set = xset_get(xset::name::con_prop);
-        std::string desc;
-        if (geteuid() == 0)
-        {
-            desc = "prop_info prop_perm prop_root";
-        }
-        else
-        {
-            desc = "prop_info prop_perm prop_quick prop_root";
-        }
-        xset_set_var(set, xset::var::desc, desc);
+        xset_set_var(set, xset::var::desc, "prop_info prop_perm prop_quick");
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 
