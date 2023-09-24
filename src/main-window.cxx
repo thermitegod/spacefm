@@ -1893,7 +1893,7 @@ main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
     return gtk_widget_get_visible(main_window->panel[panel - 1]);
 }
 
-const std::array<i64, 3>
+const main_window_counts_data
 main_window_get_counts(PtkFileBrowser* file_browser)
 {
     if (!file_browser)
@@ -2436,14 +2436,14 @@ main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_brows
     {
         // get panel/tab info
         const auto counts = main_window_get_counts(file_browser);
-        const panel_t ipanel_count = counts[0];
-        const tab_t itab_count = counts[1];
-        const tab_t itab_num = counts[2];
+        const panel_t panel_count = counts.panel_count;
+        const tab_t tab_count = counts.tab_count;
+        const tab_t tab_num = counts.tab_num;
 
-        fmt = ztd::replace(fmt, "%t", std::to_string(itab_num));
-        fmt = ztd::replace(fmt, "%T", std::to_string(itab_count));
+        fmt = ztd::replace(fmt, "%t", std::to_string(tab_num));
+        fmt = ztd::replace(fmt, "%T", std::to_string(tab_count));
         fmt = ztd::replace(fmt, "%p", std::to_string(main_window->curpanel));
-        fmt = ztd::replace(fmt, "%P", std::to_string(ipanel_count));
+        fmt = ztd::replace(fmt, "%P", std::to_string(panel_count));
     }
     if (ztd::contains(fmt, "*") && !main_tasks_running(main_window))
     {

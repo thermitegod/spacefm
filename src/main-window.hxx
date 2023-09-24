@@ -20,7 +20,6 @@
 
 #include <filesystem>
 
-#include <array>
 #include <vector>
 
 #include <map>
@@ -125,7 +124,6 @@ const std::optional<std::filesystem::path> main_window_get_tab_cwd(PtkFileBrowse
                                                                    tab_t tab_num);
 const std::optional<std::filesystem::path> main_window_get_panel_cwd(PtkFileBrowser* file_browser,
                                                                      panel_t panel_num);
-const std::array<i64, 3> main_window_get_counts(PtkFileBrowser* file_browser);
 bool main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel);
 void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
                                const std::filesystem::path& file_path);
@@ -145,3 +143,11 @@ bool main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t kn
 
 void main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
 void main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser);
+
+struct main_window_counts_data
+{
+    panel_t panel_count;
+    tab_t tab_count;
+    tab_t tab_num;
+};
+const main_window_counts_data main_window_get_counts(PtkFileBrowser* file_browser);

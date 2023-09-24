@@ -995,18 +995,18 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "panel-count"))
         {
             const auto counts = main_window_get_counts(file_browser);
-            const panel_t panel_count = counts[0];
-            // const tab_t tab_count = counts[1];
-            // const tab_t tab_num = counts[2];
+            const panel_t panel_count = counts.panel_count;
+            // const tab_t tab_count = counts.tab_count;
+            // const tab_t tab_num = counts.tab_num;
 
             return {SOCKET_SUCCESS, std::format("{}", panel_count)};
         }
         else if (ztd::same(property, "tab-count"))
         {
             const auto counts = main_window_get_counts(file_browser);
-            // const panel_t panel_count = counts[0];
-            const tab_t tab_count = counts[1];
-            // const tab_t tab_num = counts[2];
+            // const panel_t panel_count = counts.panel_count;
+            const tab_t tab_count = counts.tab_count;
+            // const tab_t tab_num = counts.tab_num;
 
             return {SOCKET_SUCCESS, std::format("{}", tab_count)};
         }

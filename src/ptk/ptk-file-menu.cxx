@@ -849,9 +849,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     const panel_t p = browser->panel();
 
     const auto counts = main_window_get_counts(browser);
-    const panel_t panel_count = counts[0];
-    const tab_t tab_count = counts[1];
-    const tab_t tab_num = counts[2];
+    const panel_t panel_count = counts.panel_count;
+    const tab_t tab_count = counts.tab_count;
+    const tab_t tab_num = counts.tab_num;
 
     // Get mime type and apps
     vfs::mime_type mime_type = nullptr;
