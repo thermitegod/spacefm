@@ -79,12 +79,12 @@ xset_defaults()
     set = xset_get(xset::name::dev_show_internal_drives);
     xset_set_var(set, xset::var::menu_label, "_Internal Drives");
     set->menu_style = xset::menu::check;
-    set->b = geteuid() == 0 ? xset::b::xtrue : xset::b::xfalse;
+    set->b = xset::b::xtrue;
 
     set = xset_get(xset::name::dev_show_empty);
     xset_set_var(set, xset::var::menu_label, "_Empty Drives");
     set->menu_style = xset::menu::check;
-    set->b = xset::b::xtrue; // geteuid() == 0 ? xset::b::XSET_B_TRUE : xset::b::XSET_B_UNSET;
+    set->b = xset::b::xtrue;
 
     set = xset_get(xset::name::dev_show_partition_tables);
     xset_set_var(set, xset::var::menu_label, "_Partition Tables");
@@ -141,12 +141,12 @@ xset_defaults()
 
     set = xset_get(xset::name::dev_automount_optical);
     xset_set_var(set, xset::var::menu_label, "Mount _Optical");
-    set->b = geteuid() == 0 ? xset::b::xfalse : xset::b::xtrue;
+    set->b = xset::b::xtrue;
     set->menu_style = xset::menu::check;
 
     set = xset_get(xset::name::dev_automount_removable);
     xset_set_var(set, xset::var::menu_label, "_Mount Removable");
-    set->b = geteuid() == 0 ? xset::b::xfalse : xset::b::xtrue;
+    set->b = xset::b::xtrue;
     set->menu_style = xset::menu::check;
 
     set = xset_get(xset::name::dev_automount_volumes);
