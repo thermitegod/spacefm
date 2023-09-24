@@ -422,7 +422,7 @@ xset_defaults()
     set = xset_get(xset::name::move_option);
     xset_set_var(set, xset::var::menu_label, "_Option");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "move_copy move_link move_copyt move_linkt move_as_root");
+    xset_set_var(set, xset::var::desc, "move_copy move_link move_copyt move_linkt");
 
     set = xset_get(xset::name::move_copy);
     xset_set_var(set, xset::var::menu_label, "_Copy");
@@ -441,11 +441,6 @@ xset_defaults()
     set = xset_get(xset::name::move_linkt);
     xset_set_var(set, xset::var::menu_label, "Lin_k Target");
     set->menu_style = xset::menu::check;
-
-    set = xset_get(xset::name::move_as_root);
-    xset_set_var(set, xset::var::menu_label, "_As Root");
-    set->menu_style = xset::menu::check;
-    set->b = xset::b::xtrue;
 
     set = xset_get(xset::name::move_dlg_help);
     xset_set_var(set, xset::var::menu_label, "_Help");

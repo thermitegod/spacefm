@@ -20,8 +20,6 @@
 
 #include <filesystem>
 
-#include <span>
-
 #include <array>
 #include <vector>
 
@@ -53,7 +51,6 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "settings.hxx"
-#include "settings/app.hxx"
 
 #include "utils.hxx"
 
@@ -125,7 +122,6 @@ struct MoveSet
     GtkWidget* opt_link{nullptr};
     GtkWidget* opt_copy_target{nullptr};
     GtkWidget* opt_link_target{nullptr};
-    GtkWidget* opt_as_root{nullptr};
 
     GtkWidget* opt_new_file{nullptr};
     GtkWidget* opt_new_folder{nullptr};
@@ -1226,7 +1222,6 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     const bool link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link));
     const bool copy_target = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target));
     const bool link_target = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target));
-    const bool as_root = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_as_root));
 
     const bool new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
     const bool new_folder = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
@@ -1294,19 +1289,9 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
         }
     }
 
-    std::string root_msg;
-    if (as_root)
-    {
-        root_msg = " As Root";
-    }
-
     // Window Icon
     std::string win_icon;
-    if (as_root)
-    {
-        win_icon = "gtk-dialog-warning";
-    }
-    else if (mset->create_new != ptk::rename_mode::rename)
+    if (mset->create_new != ptk::rename_mode::rename)
     {
         win_icon = "gtk-new";
     }
@@ -1329,7 +1314,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     {
         desc = mset->desc;
     }
-    const std::string title = std::format("{} {}{}", action, desc, root_msg);
+    const std::string title = std::format("{} {}", action, desc);
     gtk_window_set_title(GTK_WINDOW(mset->dlg), title.data());
 
     if (!btn_label.empty())
@@ -1406,22 +1391,12 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         gtk_widget_hide(mset->opt_link_target);
     }
 
-    if (xset_get_b(xset::name::move_as_root))
-    {
-        gtk_widget_show(mset->opt_as_root);
-    }
-    else
-    {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_as_root), false);
-        gtk_widget_hide(mset->opt_as_root);
-    }
-
     if (!gtk_widget_get_visible(mset->opt_copy) && !gtk_widget_get_visible(mset->opt_link) &&
         !gtk_widget_get_visible(mset->opt_copy_target) &&
         !gtk_widget_get_visible(mset->opt_link_target))
     {
         gtk_widget_hide(mset->opt_move);
-        opts_visible = gtk_widget_get_visible(mset->opt_as_root);
+        opts_visible = false;
     }
     else
     {
@@ -1625,7 +1600,6 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     set = xset_get(xset::name::move_linkt);
     xset_set_cb(set, (GFunc)on_toggled, mset);
     set->disable = !mset->is_link;
-    xset_set_cb(xset::name::move_as_root, (GFunc)on_toggled, mset);
     set = xset_get(xset::name::move_option);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
@@ -2281,7 +2255,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     mset->is_move = false;
 
     // Dialog
-    const char* root_msg;
     if (mset->is_link)
     {
         mset->desc = "Link";
@@ -2709,7 +2682,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     mset->opt_link_target =
         gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(mset->opt_move),
                                                        "Link Tar_get");
-    mset->opt_as_root = gtk_check_button_new_with_mnemonic("A_s Root");
 
     mset->opt_new_file = gtk_radio_button_new_with_mnemonic(nullptr, "Fil_e");
     mset->opt_new_folder =
@@ -2725,7 +2697,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy_target), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link_target), false);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_as_root), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_file), false);
     g_signal_connect(G_OBJECT(mset->opt_new_file), "focus", G_CALLBACK(on_button_focus), mset);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_folder), false);
@@ -2838,7 +2809,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link_target), false, true, 3);
     }
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("  ")), false, true, 3);
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_as_root), false, true, 6);
     gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(hbox), false, true, 10);
 
     // show
@@ -2866,7 +2836,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     g_signal_connect(G_OBJECT(mset->opt_link), "toggled", G_CALLBACK(on_opt_toggled), mset);
     g_signal_connect(G_OBJECT(mset->opt_copy_target), "toggled", G_CALLBACK(on_opt_toggled), mset);
     g_signal_connect(G_OBJECT(mset->opt_link_target), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_as_root), "toggled", G_CALLBACK(on_opt_toggled), mset);
     g_signal_connect(G_OBJECT(mset->opt_new_file), "toggled", G_CALLBACK(on_opt_toggled), mset);
     g_signal_connect(G_OBJECT(mset->opt_new_folder), "toggled", G_CALLBACK(on_opt_toggled), mset);
     g_signal_connect(G_OBJECT(mset->opt_new_link), "toggled", G_CALLBACK(on_opt_toggled), mset);
@@ -2952,22 +2921,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_copy_target));
             const bool link_target =
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_link_target));
-            const bool as_root = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_as_root));
             const bool new_file =
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
             const bool new_folder =
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
             const bool new_link =
                 gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
-
-            if (as_root)
-            {
-                root_msg = " As Root";
-            }
-            else
-            {
-                root_msg = "";
-            }
 
             if (!std::filesystem::exists(path))
             {
@@ -2984,28 +2943,20 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                         continue;
                     }
                 }
-                if (as_root)
+                std::filesystem::create_directories(path);
+                std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+
+                if (!std::filesystem::is_directory(path))
                 {
-                    to_path = ztd::shell::quote(path.string());
-                    root_mkdir = std::format("mkdir -p {} && ", to_path);
+                    ptk_show_error(
+                        GTK_WINDOW(mset->dlg),
+                        "Mkdir Error",
+                        std::format("Error creating parent directory\n\n{}", std::strerror(errno)));
+                    continue;
                 }
                 else
                 {
-                    std::filesystem::create_directories(path);
-                    std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-
-                    if (std::filesystem::is_directory(path))
-                    {
-                        ptk_show_error(GTK_WINDOW(mset->dlg),
-                                       "Mkdir Error",
-                                       std::format("Error creating parent directory\n\n{}",
-                                                   std::strerror(errno)));
-                        continue;
-                    }
-                    else
-                    {
-                        update_new_display(path);
-                    }
+                    update_new_display(path);
                 }
             }
             else if (ztd::statx(full_path,
@@ -3034,8 +2985,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             if (create_new != ptk::rename_mode::rename && new_link)
             {
                 // new link task
-                const std::string task_name = std::format("Create Link{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
 
                 std::string str = gtk_entry_get_text(mset->entry_target);
                 str = ztd::strip(str);
@@ -3066,10 +3016,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
-                if (as_root)
-                {
-                    ptask->task->exec_as_user = "root";
-                }
                 if (auto_open)
                 {
                     auto_open->path = full_path;
@@ -3117,8 +3063,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                     over_cmd = std::format("rm -f {} && ", to_path);
                 }
 
-                const std::string task_name = std::format("Create New File{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new("Create New File", mset->parent, task_view);
                 if (from_path.empty())
                 {
                     ptask->task->exec_command =
@@ -3134,10 +3079,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
-                if (as_root)
-                {
-                    ptask->task->exec_as_user = "root";
-                }
                 if (auto_open)
                 {
                     auto_open->path = full_path;
@@ -3183,8 +3124,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 }
                 to_path = ztd::shell::quote(full_path.string());
 
-                const std::string task_name = std::format("Create New Directory{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
+                PtkFileTask* ptask =
+                    ptk_file_exec_new("Create New Directory", mset->parent, task_view);
                 if (from_path.empty())
                 {
                     ptask->task->exec_command = std::format("{}mkdir {}", root_mkdir, to_path);
@@ -3199,10 +3140,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
-                if (as_root)
-                {
-                    ptask->task->exec_as_user = "root";
-                }
                 if (auto_open)
                 {
                     auto_open->path = full_path;
@@ -3216,8 +3153,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             else if (copy || copy_target)
             {
                 // copy task
-                const std::string task_name = std::format("Copy{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new("Copy", mset->parent, task_view);
                 to_path = ztd::shell::quote(full_path.string());
                 if (copy || !mset->is_link)
                 {
@@ -3257,18 +3193,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
-                if (as_root)
-                {
-                    ptask->task->exec_as_user = "root";
-                }
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             else if (link || link_target)
             {
                 // link task
-                const std::string task_name = std::format("Create Link{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
                 if (link || !mset->is_link)
                 {
                     from_path = ztd::shell::quote(mset->full_path.string());
@@ -3301,21 +3232,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
-                if (as_root)
-                {
-                    ptask->task->exec_as_user = "root";
-                }
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }
             // need move?  (do move as task in case it takes a long time)
-            else if (as_root || !std::filesystem::equivalent(old_path, path))
+            else if (!std::filesystem::equivalent(old_path, path))
             {
             _move_task:
                 // move task - this is jumped to from the below rename block on
                 // EXDEV error
-                const std::string task_name = std::format("Move{}", root_msg);
-                PtkFileTask* ptask = ptk_file_exec_new(task_name, mset->parent, task_view);
+                PtkFileTask* ptask = ptk_file_exec_new("Move", mset->parent, task_view);
                 from_path = ztd::shell::quote(mset->full_path.string());
                 to_path = ztd::shell::quote(full_path.string());
                 if (overwrite)
@@ -3333,10 +3259,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
-                if (as_root)
-                {
-                    ptask->task->exec_as_user = "root";
-                }
                 ptk_file_task_run(ptask);
                 update_new_display(full_path);
             }

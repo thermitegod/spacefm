@@ -117,7 +117,6 @@ namespace xset
         move_link,
         move_copyt,
         move_linkt,
-        move_as_root,
         move_dlg_help,
         move_dlg_confirm_create,
 

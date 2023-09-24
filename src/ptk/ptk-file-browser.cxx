@@ -5872,7 +5872,6 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
 
     std::string name;
     std::string prog;
-    bool as_root = false;
 
     const std::string user1 = "1000";
     const std::string user2 = "1001";
@@ -5901,19 +5900,16 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
         {
             prog = "chmod";
         }
-        as_root = true;
     }
     else if (ztd::startswith(set->name, "own_"))
     {
         name = ztd::removeprefix(set->name, "own_");
         prog = "chown";
-        as_root = true;
     }
     else if (ztd::startswith(set->name, "rown_"))
     {
         name = ztd::removeprefix(set->name, "rown_");
         prog = "chown -R";
-        as_root = true;
     }
     else
     {
@@ -6074,10 +6070,6 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     ptask->task->exec_show_error = true;
     ptask->task->exec_show_output = false;
     ptask->task->exec_export = false;
-    if (as_root)
-    {
-        ptask->task->exec_as_user = "root";
-    }
     ptk_file_task_run(ptask);
 }
 
