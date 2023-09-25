@@ -1814,22 +1814,6 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     return true;
 }
 
-static void
-set_gtk3_widget_padding(GtkWidget* widget, i32 left_right, i32 top_bottom)
-{
-    const std::string str = std::format("GtkWidget {{ padding-left: {0}px; padding-right: {0}px; "
-                                        "padding-top: {1}px; padding-bottom: {1}px; }}",
-                                        left_right,
-                                        top_bottom);
-
-    GtkCssProvider* provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), str.data(), -1, nullptr);
-    GtkStyleContext* context = gtk_widget_get_style_context(widget);
-    gtk_style_context_add_provider(context,
-                                   GTK_STYLE_PROVIDER(provider),
-                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-}
-
 static GtkWidget*
 xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
                   i32 icon_size, xset_t set, bool show_tooltips)
@@ -1992,7 +1976,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             gtk_widget_set_margin_bottom(btn, 0);
             gtk_widget_set_hexpand(btn, false);
             gtk_widget_set_vexpand(btn, false);
-            set_gtk3_widget_padding(btn, 0, 0);
             gtk_button_set_always_show_image(GTK_BUTTON(btn), true);
             gtk_widget_set_margin_start(btn, 0);
             gtk_widget_set_margin_end(btn, 0);
@@ -2046,7 +2029,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             gtk_widget_set_margin_bottom(btn, 0);
             gtk_widget_set_hexpand(btn, false);
             gtk_widget_set_vexpand(btn, false);
-            set_gtk3_widget_padding(btn, 0, 0);
             gtk_button_set_always_show_image(GTK_BUTTON(btn), true);
             gtk_widget_set_margin_start(btn, 0);
             gtk_widget_set_margin_end(btn, 0);
@@ -2179,7 +2161,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             gtk_widget_set_margin_bottom(btn, 0);
             gtk_widget_set_hexpand(btn, false);
             gtk_widget_set_vexpand(btn, false);
-            set_gtk3_widget_padding(btn, 0, 0);
             gtk_button_set_always_show_image(GTK_BUTTON(btn), true);
             gtk_widget_set_margin_start(btn, 0);
             gtk_widget_set_margin_end(btn, 0);
@@ -2247,7 +2228,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             gtk_widget_set_margin_bottom(btn, 0);
             gtk_widget_set_hexpand(btn, false);
             gtk_widget_set_vexpand(btn, false);
-            set_gtk3_widget_padding(btn, 0, 0);
             gtk_button_set_always_show_image(GTK_BUTTON(btn), true);
             gtk_widget_set_margin_start(btn, 0);
             gtk_widget_set_margin_end(btn, 0);
@@ -2391,9 +2371,6 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     gtk_widget_set_margin_end(toolbar, 0);
     gtk_widget_set_margin_top(toolbar, 0);
     gtk_widget_set_margin_bottom(toolbar, 0);
-
-    // remove padding from GTK3 toolbar - this works
-    set_gtk3_widget_padding(toolbar, 0, 2);
     gtk_widget_set_margin_start(toolbar, 0);
     gtk_widget_set_margin_end(toolbar, 0);
 
