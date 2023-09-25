@@ -2343,6 +2343,7 @@ query_overwrite(PtkFileTask* ptask)
             {
                 dest_link = "\t<b>( link )</b>";
             }
+
             if (is_src_sym && !is_dest_sym)
             {
                 link_warn = "\t<b>! overwrite file with link !</b>";
@@ -2364,6 +2365,7 @@ query_overwrite(PtkFileTask* ptask)
                     src_rel_size = "smaller";
                 }
             }
+
             if (src_stat.mtime().tv_sec == dest_stat.mtime().tv_sec)
             {
                 src_time = "<b>( same time )</b>\t";
@@ -2382,6 +2384,7 @@ query_overwrite(PtkFileTask* ptask)
                     src_rel_time = "older";
                 }
             }
+
             const std::string size_str = vfs_file_size_format(dest_stat.size());
             const std::string dest_size =
                 std::format("{}\t( {:L} bytes )", size_str, dest_stat.size());
@@ -2390,7 +2393,15 @@ query_overwrite(PtkFileTask* ptask)
             const auto dest_time = vfs_create_display_date(dest_mtime);
 
             std::string src_rel;
-            if (!src_rel_time.empty() || !src_rel_size.empty())
+            if (src_rel_time.empty())
+            {
+                src_rel = std::format("<b>( {} )</b>", src_rel_size);
+            }
+            else if (src_rel_size.empty())
+            {
+                src_rel = std::format("<b>( {} )</b>", src_rel_time);
+            }
+            else
             {
                 src_rel = std::format("<b>( {} &amp; {} )</b>", src_rel_time, src_rel_size);
             }
