@@ -66,15 +66,33 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "Setti_ngs");
     xset_set_var(set, xset::var::icn, "gtk-properties");
     set->menu_style = xset::menu::submenu;
+    xset_set_submenu(set,
+                     {
+                         xset::name::dev_show,
+                         xset::name::separator,
+                         xset::name::dev_menu_auto,
+                         xset::name::dev_exec,
+                         xset::name::dev_change,
+                         xset::name::separator,
+                         xset::name::dev_single,
+                         xset::name::dev_newtab,
+                     });
 
     // dev settings
     set = xset_get(xset::name::dev_show);
     xset_set_var(set, xset::var::menu_label, "S_how");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "dev_show_internal_drives dev_show_empty dev_show_partition_tables dev_show_net "
-                 "dev_show_file dev_ignore_udisks_hide dev_show_hide_volumes dev_dispname");
+    xset_set_submenu(set,
+                     {
+                         xset::name::dev_show_internal_drives,
+                         xset::name::dev_show_empty,
+                         xset::name::dev_show_partition_tables,
+                         xset::name::dev_show_net,
+                         xset::name::dev_show_file,
+                         xset::name::dev_ignore_udisks_hide,
+                         xset::name::dev_show_hide_volumes,
+                         xset::name::dev_dispname,
+                     });
 
     set = xset_get(xset::name::dev_show_internal_drives);
     xset_set_var(set, xset::var::menu_label, "_Internal Drives");
@@ -134,10 +152,16 @@ xset_defaults()
     set = xset_get(xset::name::dev_menu_auto);
     xset_set_var(set, xset::var::menu_label, "_Auto Mount");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "dev_automount_optical dev_automount_removable dev_ignore_udisks_nopolicy "
-                 "dev_automount_volumes dev_automount_dirs dev_auto_open dev_unmount_quit");
+    xset_set_submenu(set,
+                     {
+                         xset::name::dev_automount_optical,
+                         xset::name::dev_automount_removable,
+                         xset::name::dev_ignore_udisks_nopolicy,
+                         xset::name::dev_automount_volumes,
+                         xset::name::dev_automount_dirs,
+                         xset::name::dev_auto_open,
+                         xset::name::dev_unmount_quit,
+                     });
 
     set = xset_get(xset::name::dev_automount_optical);
     xset_set_var(set, xset::var::menu_label, "Mount _Optical");
@@ -189,10 +213,16 @@ xset_defaults()
     set = xset_get(xset::name::dev_exec);
     xset_set_var(set, xset::var::menu_label, "Auto _Run");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "dev_exec_fs dev_exec_audio dev_exec_video separator dev_exec_insert "
-                 "dev_exec_unmount dev_exec_remove");
+    xset_set_submenu(set,
+                     {
+                         xset::name::dev_exec_fs,
+                         xset::name::dev_exec_audio,
+                         xset::name::dev_exec_video,
+                         xset::name::separator,
+                         xset::name::dev_exec_insert,
+                         xset::name::dev_exec_unmount,
+                         xset::name::dev_exec_remove,
+                     });
     xset_set_var(set, xset::var::icn, "gtk-execute");
 
     set = xset_get(xset::name::dev_exec_fs);
@@ -341,7 +371,13 @@ xset_defaults()
     set = xset_get(xset::name::move_option);
     xset_set_var(set, xset::var::menu_label, "_Option");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "move_copy move_link move_copyt move_linkt");
+    xset_set_submenu(set,
+                     {
+                         xset::name::move_copy,
+                         xset::name::move_link,
+                         xset::name::move_copyt,
+                         xset::name::move_linkt,
+                     });
 
     set = xset_get(xset::name::move_copy);
     xset_set_var(set, xset::var::menu_label, "_Copy");
@@ -374,7 +410,13 @@ xset_defaults()
     set = xset_get(xset::name::status_middle);
     xset_set_var(set, xset::var::menu_label, "_Middle Click");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "status_name status_path status_info status_hide");
+    xset_set_submenu(set,
+                     {
+                         xset::name::status_name,
+                         xset::name::status_path,
+                         xset::name::status_info,
+                         xset::name::status_hide,
+                     });
 
     set = xset_get(xset::name::status_name);
     xset_set_var(set, xset::var::menu_label, "Copy _Name");
@@ -452,9 +494,16 @@ xset_defaults()
     set = xset_get(xset::name::main_focus_panel);
     xset_set_var(set, xset::var::menu_label, "F_ocus");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "panel_prev panel_next panel_hide panel_1 panel_2 panel_3 panel_4");
+    xset_set_submenu(set,
+                     {
+                         xset::name::panel_prev,
+                         xset::name::panel_next,
+                         xset::name::panel_hide,
+                         xset::name::panel_1,
+                         xset::name::panel_2,
+                         xset::name::panel_3,
+                         xset::name::panel_4,
+                     });
     xset_set_var(set, xset::var::icn, "gtk-go-forward");
 
     set = xset_get(xset::name::panel_prev);
@@ -481,13 +530,24 @@ xset_defaults()
     set = xset_get(xset::name::main_auto);
     xset_set_var(set, xset::var::menu_label, "_Event Manager");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "auto_inst auto_win auto_pnl auto_tab evt_device");
+    xset_set_submenu(set,
+                     {
+                         xset::name::auto_inst,
+                         xset::name::auto_win,
+                         xset::name::auto_pnl,
+                         xset::name::auto_tab,
+                         xset::name::evt_device,
+                     });
     xset_set_var(set, xset::var::icn, "gtk-execute");
 
     set = xset_get(xset::name::auto_inst);
     xset_set_var(set, xset::var::menu_label, "_Instance");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "evt_start evt_exit");
+    xset_set_submenu(set,
+                     {
+                         xset::name::evt_start,
+                         xset::name::evt_exit,
+                     });
 
     set = xset_get(xset::name::evt_start);
     xset_set_var(set, xset::var::menu_label, "_Startup");
@@ -510,9 +570,15 @@ xset_defaults()
     set = xset_get(xset::name::auto_win);
     xset_set_var(set, xset::var::menu_label, "_Window");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "evt_win_new evt_win_focus evt_win_move evt_win_click evt_win_key evt_win_close");
+    xset_set_submenu(set,
+                     {
+                         xset::name::evt_win_new,
+                         xset::name::evt_win_focus,
+                         xset::name::evt_win_move,
+                         xset::name::evt_win_click,
+                         xset::name::evt_win_key,
+                         xset::name::evt_win_close,
+                     });
 
     set = xset_get(xset::name::evt_win_new);
     xset_set_var(set, xset::var::menu_label, "_New");
@@ -601,7 +667,12 @@ xset_defaults()
     set = xset_get(xset::name::auto_pnl);
     xset_set_var(set, xset::var::menu_label, "_Panel");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "evt_pnl_focus evt_pnl_show evt_pnl_sel");
+    xset_set_submenu(set,
+                     {
+                         xset::name::evt_pnl_focus,
+                         xset::name::evt_pnl_show,
+                         xset::name::evt_pnl_sel,
+                     });
 
     set = xset_get(xset::name::evt_pnl_focus);
     xset_set_var(set, xset::var::menu_label, "_Focus");
@@ -644,7 +715,13 @@ xset_defaults()
     set = xset_get(xset::name::auto_tab);
     xset_set_var(set, xset::var::menu_label, "_Tab");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "evt_tab_new evt_tab_chdir evt_tab_focus evt_tab_close");
+    xset_set_submenu(set,
+                     {
+                         xset::name::evt_tab_new,
+                         xset::name::evt_tab_chdir,
+                         xset::name::evt_tab_focus,
+                         xset::name::evt_tab_close,
+                     });
 
     set = xset_get(xset::name::evt_tab_new);
     xset_set_var(set, xset::var::menu_label, "_New");
@@ -745,11 +822,16 @@ xset_defaults()
     set = xset_get(xset::name::main_tasks);
     xset_set_var(set, xset::var::menu_label, "_Task Manager");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "task_show_manager task_hide_manager separator task_columns task_popups task_errors "
-        "task_queue");
+    xset_set_submenu(set,
+                     {
+                         xset::name::task_show_manager,
+                         xset::name::task_hide_manager,
+                         xset::name::separator,
+                         xset::name::task_columns,
+                         xset::name::task_popups,
+                         xset::name::task_errors,
+                         xset::name::task_queue,
+                     });
 
     set = xset_get(xset::name::task_col_status);
     xset_set_var(set, xset::var::menu_label, "_Status");
@@ -856,7 +938,13 @@ xset_defaults()
     set = xset_get(xset::name::task_all);
     xset_set_var(set, xset::var::menu_label, "_All Tasks");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "task_stop_all task_pause_all task_que_all task_resume_all");
+    xset_set_submenu(set,
+                     {
+                         xset::name::task_stop_all,
+                         xset::name::task_pause_all,
+                         xset::name::task_que_all,
+                         xset::name::task_resume_all,
+                     });
 
     set = xset_get(xset::name::task_stop_all);
     xset_set_var(set, xset::var::menu_label, "_Stop");
@@ -887,21 +975,38 @@ xset_defaults()
     set = xset_get(xset::name::task_columns);
     xset_set_var(set, xset::var::menu_label, "_Columns");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "task_col_count task_col_path task_col_file task_col_to task_col_progress task_col_total "
-        "task_col_started task_col_elapsed task_col_curspeed task_col_curest task_col_avgspeed "
-        "task_col_avgest separator task_col_reorder");
+    xset_set_submenu(set,
+                     {
+                         xset::name::task_col_count,
+                         xset::name::task_col_path,
+                         xset::name::task_col_file,
+                         xset::name::task_col_to,
+                         xset::name::task_col_progress,
+                         xset::name::task_col_total,
+                         xset::name::task_col_started,
+                         xset::name::task_col_elapsed,
+                         xset::name::task_col_curspeed,
+                         xset::name::task_col_curest,
+                         xset::name::task_col_avgspeed,
+                         xset::name::task_col_avgest,
+                         xset::name::separator,
+                         xset::name::task_col_reorder,
+                     });
 
     set = xset_get(xset::name::task_popups);
     xset_set_var(set, xset::var::menu_label, "_Popups");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "task_pop_all task_pop_top task_pop_above task_pop_stick separator task_pop_detail "
-        "task_pop_over task_pop_err");
+    xset_set_submenu(set,
+                     {
+                         xset::name::task_pop_all,
+                         xset::name::task_pop_top,
+                         xset::name::task_pop_above,
+                         xset::name::task_pop_stick,
+                         xset::name::separator,
+                         xset::name::task_pop_detail,
+                         xset::name::task_pop_over,
+                         xset::name::task_pop_err,
+                     });
 
     set = xset_get(xset::name::task_pop_all);
     xset_set_var(set, xset::var::menu_label, "Popup _All Tasks");
@@ -941,7 +1046,12 @@ xset_defaults()
     set = xset_get(xset::name::task_errors);
     xset_set_var(set, xset::var::menu_label, "Err_ors");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "task_err_first task_err_any task_err_cont");
+    xset_set_submenu(set,
+                     {
+                         xset::name::task_err_first,
+                         xset::name::task_err_any,
+                         xset::name::task_err_cont,
+                     });
 
     set = xset_get(xset::name::task_err_first);
     xset_set_var(set, xset::var::menu_label, "Stop If _First");
@@ -961,7 +1071,12 @@ xset_defaults()
     set = xset_get(xset::name::task_queue);
     xset_set_var(set, xset::var::menu_label, "Qu_eue");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "task_q_new task_q_smart task_q_pause");
+    xset_set_submenu(set,
+                     {
+                         xset::name::task_q_new,
+                         xset::name::task_q_smart,
+                         xset::name::task_q_pause,
+                     });
 
     set = xset_get(xset::name::task_q_new);
     xset_set_var(set, xset::var::menu_label, "_Queue New Tasks");
@@ -1003,10 +1118,22 @@ xset_defaults()
     set = xset_get(xset::name::open_in_tab);
     xset_set_var(set, xset::var::menu_label, "In _Tab");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "opentab_new opentab_prev opentab_next opentab_1 opentab_2 opentab_3 opentab_4 "
-                 "opentab_5 opentab_6 opentab_7 opentab_8 opentab_9 opentab_10");
+    xset_set_submenu(set,
+                     {
+                         xset::name::opentab_new,
+                         xset::name::opentab_prev,
+                         xset::name::opentab_next,
+                         xset::name::opentab_1,
+                         xset::name::opentab_2,
+                         xset::name::opentab_3,
+                         xset::name::opentab_4,
+                         xset::name::opentab_5,
+                         xset::name::opentab_6,
+                         xset::name::opentab_7,
+                         xset::name::opentab_8,
+                         xset::name::opentab_9,
+                         xset::name::opentab_10,
+                     });
 
     xset_set(xset::name::opentab_new, xset::var::menu_label, "N_ew");
     xset_set(xset::name::opentab_prev, xset::var::menu_label, "_Prev");
@@ -1025,10 +1152,15 @@ xset_defaults()
     set = xset_get(xset::name::open_in_panel);
     xset_set_var(set, xset::var::menu_label, "In _Panel");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "open_in_panelprev open_in_panelnext open_in_panel1 open_in_panel2 open_in_panel3 "
-                 "open_in_panel4");
+    xset_set_submenu(set,
+                     {
+                         xset::name::open_in_panelprev,
+                         xset::name::open_in_panelnext,
+                         xset::name::open_in_panel1,
+                         xset::name::open_in_panel2,
+                         xset::name::open_in_panel3,
+                         xset::name::open_in_panel4,
+                     });
 
     xset_set(xset::name::open_in_panelprev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::open_in_panelnext, xset::var::menu_label, "_Next");
@@ -1052,10 +1184,13 @@ xset_defaults()
     set = xset_get(xset::name::archive_default);
     xset_set_var(set, xset::var::menu_label, "_Archive Defaults");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "archive_default_open_with_app archive_default_extract "
-                 "archive_default_extract_to archive_default_open_with_archiver");
+    xset_set_submenu(set,
+                     {
+                         xset::name::archive_default_open_with_app,
+                         xset::name::archive_default_extract,
+                         xset::name::archive_default_extract_to,
+                         xset::name::archive_default_open_with_archiver,
+                     });
 
     set = xset_get(xset::name::archive_default_open_with_app);
     xset_set_var(set, xset::var::menu_label, "Open With App");
@@ -1077,10 +1212,17 @@ xset_defaults()
     set = xset_get(xset::name::open_new);
     xset_set_var(set, xset::var::menu_label, "_New");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "new_file new_directory new_link new_archive separator tab_new tab_new_here new_bookmark");
+    xset_set_submenu(set,
+                     {
+                         xset::name::new_file,
+                         xset::name::new_directory,
+                         xset::name::new_link,
+                         xset::name::new_archive,
+                         xset::name::separator,
+                         xset::name::tab_new,
+                         xset::name::tab_new_here,
+                         xset::name::new_bookmark,
+                     });
     xset_set_var(set, xset::var::icn, "gtk-new");
 
     set = xset_get(xset::name::new_file);
@@ -1123,10 +1265,20 @@ xset_defaults()
     set = xset_get(xset::name::con_go);
     xset_set_var(set, xset::var::menu_label, "_Go");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "go_back go_forward go_up go_home go_default go_set_default edit_canon separator "
-                 "go_tab go_focus");
+    xset_set_submenu(set,
+                     {
+                         xset::name::go_back,
+                         xset::name::go_forward,
+                         xset::name::go_up,
+                         xset::name::go_home,
+                         xset::name::go_default,
+                         xset::name::go_set_default,
+                         xset::name::edit_canon,
+                         xset::name::separator,
+                         xset::name::go_tab,
+                         xset::name::go_focus,
+                     });
+
     xset_set_var(set, xset::var::icn, "gtk-go-forward");
 
     set = xset_get(xset::name::go_back);
@@ -1159,9 +1311,14 @@ xset_defaults()
     set = xset_get(xset::name::go_focus);
     xset_set_var(set, xset::var::menu_label, "Fo_cus");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "focus_path_bar focus_filelist focus_dirtree focus_book focus_device");
+    xset_set_submenu(set,
+                     {
+                         xset::name::focus_path_bar,
+                         xset::name::focus_filelist,
+                         xset::name::focus_dirtree,
+                         xset::name::focus_book,
+                         xset::name::focus_device,
+                     });
 
     set = xset_get(xset::name::focus_path_bar);
     xset_set_var(set, xset::var::menu_label, "_Path Bar");
@@ -1186,10 +1343,23 @@ xset_defaults()
     set = xset_get(xset::name::go_tab);
     xset_set_var(set, xset::var::menu_label, "_Tab");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "tab_prev tab_next tab_restore tab_close tab_1 tab_2 tab_3 tab_4 tab_5 tab_6 "
-                 "tab_7 tab_8 tab_9 tab_10");
+    xset_set_submenu(set,
+                     {
+                         xset::name::tab_prev,
+                         xset::name::tab_next,
+                         xset::name::tab_restore,
+                         xset::name::tab_close,
+                         xset::name::tab_1,
+                         xset::name::tab_2,
+                         xset::name::tab_3,
+                         xset::name::tab_4,
+                         xset::name::tab_5,
+                         xset::name::tab_6,
+                         xset::name::tab_7,
+                         xset::name::tab_8,
+                         xset::name::tab_9,
+                         xset::name::tab_10,
+                     });
 
     xset_set(xset::name::tab_prev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::tab_next, xset::var::menu_label, "_Next");
@@ -1230,13 +1400,19 @@ xset_defaults()
     set = xset_get(xset::name::view_sortby);
     xset_set_var(set, xset::var::menu_label, "_Sort");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
+    xset_set_submenu(
         set,
-        xset::var::desc,
-        "sortby_name sortby_size sortby_bytes sortby_type sortby_mime sortby_perm "
-        "sortby_owner sortby_group sortby_atime sortby_btime sortby_ctime sortby_mtime "
-        "separator sortby_ascend sortby_descend separator sortx_alphanum sortx_case separator "
-        "sortx_directories sortx_files sortx_mix separator sortx_hidfirst sortx_hidlast");
+        {
+            xset::name::sortby_name,   xset::name::sortby_size,       xset::name::sortby_bytes,
+            xset::name::sortby_type,   xset::name::sortby_mime,       xset::name::sortby_perm,
+            xset::name::sortby_owner,  xset::name::sortby_group,      xset::name::sortby_atime,
+            xset::name::sortby_btime,  xset::name::sortby_ctime,      xset::name::sortby_mtime,
+            xset::name::separator,     xset::name::sortby_ascend,     xset::name::sortby_descend,
+            xset::name::separator,     xset::name::sortx_alphanum,    xset::name::sortx_case,
+            xset::name::separator,     xset::name::sortx_directories, xset::name::sortx_files,
+            xset::name::sortx_mix,     xset::name::separator,         xset::name::sortx_hidfirst,
+            xset::name::sortx_hidlast,
+        });
 
     set = xset_get(xset::name::sortby_name);
     xset_set_var(set, xset::var::menu_label, "_Name");
@@ -1365,11 +1541,25 @@ xset_defaults()
     set = xset_get(xset::name::edit_submenu);
     xset_set_var(set, xset::var::menu_label, "_Actions");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "copy_name copy_parent copy_path separator paste_link paste_target paste_as separator "
-        "copy_to move_to edit_hide separator select_all select_patt select_invert select_un");
+    xset_set_submenu(set,
+                     {
+                         xset::name::copy_name,
+                         xset::name::copy_parent,
+                         xset::name::copy_path,
+                         xset::name::separator,
+                         xset::name::paste_link,
+                         xset::name::paste_target,
+                         xset::name::paste_as,
+                         xset::name::separator,
+                         xset::name::copy_to,
+                         xset::name::move_to,
+                         xset::name::edit_hide,
+                         xset::name::separator,
+                         xset::name::select_all,
+                         xset::name::select_patt,
+                         xset::name::select_invert,
+                         xset::name::select_un,
+                     });
     xset_set_var(set, xset::var::icn, "gtk-edit");
 
     set = xset_get(xset::name::copy_name);
@@ -1399,7 +1589,14 @@ xset_defaults()
     set = xset_get(xset::name::copy_to);
     xset_set_var(set, xset::var::menu_label, "_Copy To");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "copy_loc copy_loc_last separator copy_tab copy_panel");
+    xset_set_submenu(set,
+                     {
+                         xset::name::copy_loc,
+                         xset::name::copy_loc_last,
+                         xset::name::separator,
+                         xset::name::copy_tab,
+                         xset::name::copy_panel,
+                     });
 
     set = xset_get(xset::name::copy_loc);
     xset_set_var(set, xset::var::menu_label, "L_ocation");
@@ -1411,10 +1608,21 @@ xset_defaults()
     set = xset_get(xset::name::copy_tab);
     xset_set_var(set, xset::var::menu_label, "_Tab");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "copy_tab_prev copy_tab_next copy_tab_1 copy_tab_2 copy_tab_3 copy_tab_4 "
-                 "copy_tab_5 copy_tab_6 copy_tab_7 copy_tab_8 copy_tab_9 copy_tab_10");
+    xset_set_submenu(set,
+                     {
+                         xset::name::copy_tab_prev,
+                         xset::name::copy_tab_next,
+                         xset::name::copy_tab_1,
+                         xset::name::copy_tab_2,
+                         xset::name::copy_tab_3,
+                         xset::name::copy_tab_4,
+                         xset::name::copy_tab_5,
+                         xset::name::copy_tab_6,
+                         xset::name::copy_tab_7,
+                         xset::name::copy_tab_8,
+                         xset::name::copy_tab_9,
+                         xset::name::copy_tab_10,
+                     });
 
     xset_set(xset::name::copy_tab_prev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::copy_tab_next, xset::var::menu_label, "_Next");
@@ -1432,10 +1640,15 @@ xset_defaults()
     set = xset_get(xset::name::copy_panel);
     xset_set_var(set, xset::var::menu_label, "_Panel");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "copy_panel_prev copy_panel_next copy_panel_1 copy_panel_2 copy_panel_3 copy_panel_4");
+    xset_set_submenu(set,
+                     {
+                         xset::name::copy_panel_prev,
+                         xset::name::copy_panel_next,
+                         xset::name::copy_panel_1,
+                         xset::name::copy_panel_2,
+                         xset::name::copy_panel_3,
+                         xset::name::copy_panel_4,
+                     });
 
     xset_set(xset::name::copy_panel_prev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::copy_panel_next, xset::var::menu_label, "_Next");
@@ -1447,7 +1660,14 @@ xset_defaults()
     set = xset_get(xset::name::move_to);
     xset_set_var(set, xset::var::menu_label, "_Move To");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "move_loc move_loc_last separator move_tab move_panel");
+    xset_set_submenu(set,
+                     {
+                         xset::name::move_loc,
+                         xset::name::move_loc_last,
+                         xset::name::separator,
+                         xset::name::move_tab,
+                         xset::name::move_panel,
+                     });
 
     set = xset_get(xset::name::move_loc);
     xset_set_var(set, xset::var::menu_label, "_Location");
@@ -1459,10 +1679,21 @@ xset_defaults()
     set = xset_get(xset::name::move_tab);
     xset_set_var(set, xset::var::menu_label, "_Tab");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "move_tab_prev move_tab_next move_tab_1 move_tab_2 move_tab_3 move_tab_4 "
-                 "move_tab_5 move_tab_6 move_tab_7 move_tab_8 move_tab_9 move_tab_10");
+    xset_set_submenu(set,
+                     {
+                         xset::name::move_tab_prev,
+                         xset::name::move_tab_next,
+                         xset::name::move_tab_1,
+                         xset::name::move_tab_2,
+                         xset::name::move_tab_3,
+                         xset::name::move_tab_4,
+                         xset::name::move_tab_5,
+                         xset::name::move_tab_6,
+                         xset::name::move_tab_7,
+                         xset::name::move_tab_8,
+                         xset::name::move_tab_9,
+                         xset::name::move_tab_10,
+                     });
 
     xset_set(xset::name::move_tab_prev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::move_tab_next, xset::var::menu_label, "_Next");
@@ -1480,10 +1711,15 @@ xset_defaults()
     set = xset_get(xset::name::move_panel);
     xset_set_var(set, xset::var::menu_label, "_Panel");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "move_panel_prev move_panel_next move_panel_1 move_panel_2 move_panel_3 move_panel_4");
+    xset_set_submenu(set,
+                     {
+                         xset::name::move_panel_prev,
+                         xset::name::move_panel_next,
+                         xset::name::move_panel_1,
+                         xset::name::move_panel_2,
+                         xset::name::move_panel_3,
+                         xset::name::move_panel_4,
+                     });
 
     xset_set(xset::name::move_panel_prev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::move_panel_next, xset::var::menu_label, "_Next");
@@ -1512,7 +1748,13 @@ xset_defaults()
     set = xset_get(xset::name::con_prop);
     xset_set_var(set, xset::var::menu_label, "Propert_ies");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "");
+    xset_set_submenu(set,
+                     {
+                         xset::name::prop_info,
+                         xset::name::prop_attr,
+                         xset::name::prop_perm,
+                         xset::name::prop_quick,
+                     });
     xset_set_var(set, xset::var::icn, "gtk-properties");
 
     set = xset_get(xset::name::prop_info);
@@ -1530,11 +1772,27 @@ xset_defaults()
     set = xset_get(xset::name::prop_quick);
     xset_set_var(set, xset::var::menu_label, "_Quick");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set,
-                 xset::var::desc,
-                 "perm_r perm_rw perm_rwx perm_r_r perm_rw_r perm_rw_rw perm_rwxr_x perm_rwxrwx "
-                 "perm_r_r_r perm_rw_r_r perm_rw_rw_rw perm_rwxr_r perm_rwxr_xr_x perm_rwxrwxrwx "
-                 "perm_rwxrwxrwt perm_unstick perm_stick perm_recurs");
+    xset_set_submenu(set,
+                     {
+                         xset::name::perm_r,
+                         xset::name::perm_rw,
+                         xset::name::perm_rwx,
+                         xset::name::perm_r_r,
+                         xset::name::perm_rw_r,
+                         xset::name::perm_rw_rw,
+                         xset::name::perm_rwxr_x,
+                         xset::name::perm_rwxrwx,
+                         xset::name::perm_r_r_r,
+                         xset::name::perm_rw_r_r,
+                         xset::name::perm_rw_rw_rw,
+                         xset::name::perm_rwxr_r,
+                         xset::name::perm_rwxr_xr_x,
+                         xset::name::perm_rwxrwxrwx,
+                         xset::name::perm_rwxrwxrwt,
+                         xset::name::perm_unstick,
+                         xset::name::perm_stick,
+                         xset::name::perm_recurs,
+                     });
 
     xset_set(xset::name::perm_r, xset::var::menu_label, "r--------");
     xset_set(xset::name::perm_rw, xset::var::menu_label, "rw-------");
@@ -1557,7 +1815,14 @@ xset_defaults()
     set = xset_get(xset::name::perm_recurs);
     xset_set_var(set, xset::var::menu_label, "_Recursive");
     set->menu_style = xset::menu::submenu;
-    xset_set_var(set, xset::var::desc, "perm_go_w perm_go_rwx perm_ugo_w perm_ugo_rx perm_ugo_rwx");
+    xset_set_submenu(set,
+                     {
+                         xset::name::perm_go_w,
+                         xset::name::perm_go_rwx,
+                         xset::name::perm_ugo_w,
+                         xset::name::perm_ugo_rx,
+                         xset::name::perm_ugo_rwx,
+                     });
 
     xset_set(xset::name::perm_go_w, xset::var::menu_label, "go-w");
     xset_set(xset::name::perm_go_rwx, xset::var::menu_label, "go-rwx");

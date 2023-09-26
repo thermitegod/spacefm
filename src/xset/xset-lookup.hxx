@@ -160,7 +160,6 @@ namespace xset
 
         evt_device,
         main_title,
-        main_icon,
         main_full,
         main_prefs,
         root_bar,
@@ -1136,6 +1135,7 @@ namespace xset
         menu_label_custom,
         icn,
         icon,
+        context_menu_entries,
         shared_key,
         next,
         prev,

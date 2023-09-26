@@ -1331,22 +1331,22 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(set, (GFunc)on_automountlist, vol);
     xset_set_ob1(set, "view", view);
 
-    std::string str;
+    std::vector<xset::name> context_menu_entries = {
+        xset::name::dev_menu_remove,
+        xset::name::dev_menu_unmount,
+        xset::name::separator,
+        xset::name::dev_menu_open,
+        xset::name::dev_menu_tab,
+        xset::name::dev_menu_mount,
+    };
+
     if (vol && vol->is_device_type(vfs::volume_device_type::network) &&
         (ztd::startswith(vol->device_file(), "//") || ztd::contains(vol->device_file(), ":/")))
     {
-        str = " dev_menu_mark";
+        context_menu_entries.emplace_back(xset::name::dev_menu_mark);
     }
 
-    std::string menu_elements;
-
-    menu_elements = std::format("dev_menu_remove dev_menu_unmount separator "
-                                "dev_menu_open dev_menu_tab dev_menu_mount{}",
-                                str);
-    xset_add_menu(file_browser, popup, accel_group, menu_elements);
-
-    // set = xset_get("dev_menu_root");
-    // set->disable = !vol;
+    xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
 
     xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
@@ -1362,12 +1362,25 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     set->disable = !auto_optical;
 
     set = xset_get(xset::name::dev_menu_settings);
-    menu_elements = "dev_show separator dev_menu_auto dev_exec dev_change separator dev_single "
-                    "dev_newtab";
-    xset_set_var(set, xset::var::desc, menu_elements);
+    xset_set_submenu(set,
+                     {
+                         xset::name::dev_show,
+                         xset::name::separator,
+                         xset::name::dev_menu_auto,
+                         xset::name::dev_exec,
+                         xset::name::dev_change,
+                         xset::name::separator,
+                         xset::name::dev_single,
+                         xset::name::dev_newtab,
+                     });
 
-    menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";
-    xset_add_menu(file_browser, popup, accel_group, menu_elements);
+    xset_add_menu(file_browser,
+                  popup,
+                  accel_group,
+                  {
+                      xset::name::separator,
+                      xset::name::dev_menu_settings,
+                  });
 
     gtk_widget_show_all(GTK_WIDGET(popup));
 
@@ -1720,8 +1733,13 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
     set = xset_get(xset::name::dev_menu_settings);
-
-    const std::string desc = std::format("dev_show separator dev_menu_auto dev_exec dev_change{}",
-                                         file_browser ? " dev_newtab" : "");
-    xset_set_var(set, xset::var::desc, desc.data());
+    xset_set_submenu(set,
+                     {
+                         xset::name::dev_show,
+                         xset::name::separator,
+                         xset::name::dev_menu_auto,
+                         xset::name::dev_exec,
+                         xset::name::dev_change,
+                         xset::name::dev_newtab,
+                     });
 }

@@ -915,21 +915,52 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             set = xset_get(xset::name::task_all);
             set->disable = !is_tasks;
 
-            std::string showout;
+            std::vector<xset::name> context_menu_entries;
             if (ptask && ptask->pop_handler)
             {
                 xset_set_cb(xset::name::task_showout, (GFunc)on_show_task_dialog, view);
-                showout = " task_showout";
+
+                context_menu_entries = {
+                    xset::name::task_stop,
+                    xset::name::separator,
+                    xset::name::task_pause,
+                    xset::name::task_que,
+                    xset::name::task_resume,
+                    xset::name::task_showout,
+                    xset::name::task_all,
+                    xset::name::separator,
+                    xset::name::task_show_manager,
+                    xset::name::task_hide_manager,
+                    xset::name::separator,
+                    xset::name::task_columns,
+                    xset::name::task_popups,
+                    xset::name::task_errors,
+                    xset::name::task_queue,
+                };
+            }
+            else
+            {
+                context_menu_entries = {
+                    xset::name::task_stop,
+                    xset::name::separator,
+                    xset::name::task_pause,
+                    xset::name::task_que,
+                    xset::name::task_resume,
+                    xset::name::task_all,
+                    xset::name::separator,
+                    xset::name::task_show_manager,
+                    xset::name::task_hide_manager,
+                    xset::name::separator,
+                    xset::name::task_columns,
+                    xset::name::task_popups,
+                    xset::name::task_errors,
+                    xset::name::task_queue,
+                };
             }
 
             ptk_task_view_prepare_menu(main_window, popup, accel_group);
 
-            menu_elements = std::format(
-                "task_stop separator task_pause task_que task_resume{} task_all separator "
-                "task_show_manager "
-                "task_hide_manager separator task_columns task_popups task_errors task_queue",
-                showout);
-            xset_add_menu(file_browser, popup, accel_group, menu_elements);
+            xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
 
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);

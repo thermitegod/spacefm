@@ -1083,10 +1083,20 @@ rebuild_menu_file(MainWindow* main_window, PtkFileBrowser* file_browser)
     xset_set_cb(xset::name::main_terminal, (GFunc)on_open_terminal_activate, main_window);
     xset_set_cb(xset::name::main_save_session, (GFunc)on_open_url, main_window);
     xset_set_cb(xset::name::main_exit, (GFunc)on_quit_activate, main_window);
-    const std::string menu_elements =
-        "main_save_session main_search separator main_terminal "
-        "main_new_window separator main_save_tabs separator main_exit";
-    xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
+    xset_add_menu(file_browser,
+                  newmenu,
+                  accel_group,
+                  {
+                      xset::name::main_save_session,
+                      xset::name::main_search,
+                      xset::name::separator,
+                      xset::name::main_terminal,
+                      xset::name::main_new_window,
+                      xset::name::separator,
+                      xset::name::main_save_tabs,
+                      xset::name::separator,
+                      xset::name::main_exit,
+                  });
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->file_menu_item), newmenu);
@@ -1160,18 +1170,35 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
     xset_set_ob1_int(set, "panel_num", panel_4);
     set->disable = (main_window->curpanel == 4);
 
-    std::string menu_elements;
-
-    menu_elements = "panel1_show panel2_show panel3_show panel4_show main_focus_panel";
     ptk_task_view_prepare_menu(main_window, newmenu, accel_group);
-    xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
+
+    xset_add_menu(file_browser,
+                  newmenu,
+                  accel_group,
+                  {
+                      xset::name::panel1_show,
+                      xset::name::panel2_show,
+                      xset::name::panel3_show,
+                      xset::name::panel4_show,
+                      xset::name::main_focus_panel,
+                  });
 
     // Panel View submenu
     ptk_file_menu_add_panel_view_menu(file_browser, newmenu, accel_group);
 
-    menu_elements = "separator main_tasks main_auto separator main_title main_icon main_full "
-                    "separator main_prefs";
-    xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
+    xset_add_menu(file_browser,
+                  newmenu,
+                  accel_group,
+                  {
+                      xset::name::separator,
+                      xset::name::main_tasks,
+                      xset::name::main_auto,
+                      xset::name::separator,
+                      xset::name::main_title,
+                      xset::name::main_full,
+                      xset::name::separator,
+                      xset::name::main_prefs,
+                  });
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->view_menu_item), newmenu);
@@ -1252,8 +1279,7 @@ rebuild_menu_help(MainWindow* main_window, PtkFileBrowser* file_browser)
 
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_about, (GFunc)on_about_activate, main_window);
-    const std::string menu_elements = "main_about";
-    xset_add_menu(file_browser, newmenu, accel_group, menu_elements);
+    xset_add_menu(file_browser, newmenu, accel_group, {xset::name::main_about});
     gtk_widget_show_all(GTK_WIDGET(newmenu));
     g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->help_menu_item), newmenu);

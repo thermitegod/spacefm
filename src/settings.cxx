@@ -460,18 +460,16 @@ xset_get_image(const std::string_view icon, GtkIconSize icon_size)
 
 void
 xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-              const std::string_view elements)
+              const std::vector<xset::name>& submenu_entries)
 {
-    if (elements.empty())
+    if (submenu_entries.empty())
     {
         return;
     }
 
-    const std::vector<std::string> split_elements = ztd::split(elements, " ");
-
-    for (const std::string_view element : split_elements)
+    for (const auto submenu_entry : submenu_entries)
     {
-        xset_t set = xset_get(element);
+        xset_t set = xset_get(submenu_entry);
         xset_add_menuitem(file_browser, menu, accel_group, set);
     }
 }
@@ -572,9 +570,12 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                                  nullptr);
                 if (set->lock)
                 {
-                    if (set->desc)
+                    if (!set->context_menu_entries.empty())
                     {
-                        xset_add_menu(file_browser, submenu, accel_group, set->desc.value());
+                        xset_add_menu(file_browser,
+                                      submenu,
+                                      accel_group,
+                                      set->context_menu_entries);
                     }
                 }
                 else if (set->child)

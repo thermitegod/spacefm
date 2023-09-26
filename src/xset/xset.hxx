@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <span>
+
 #include <optional>
 
 #include <glibmm.h>
@@ -147,6 +149,8 @@ namespace xset
         xset::tool tool{xset::tool::NOT};                 // saved
         bool lock{true};                                  // not saved
 
+        std::vector<xset::name> context_menu_entries{}; // not saved, in order
+
         // Custom Command ( !lock )
         std::optional<std::string> prev{std::nullopt};   // saved
         std::optional<std::string> parent{std::nullopt}; // saved
@@ -187,6 +191,8 @@ void xset_set(xset::name name, xset::var var, const std::string_view value) noex
 void xset_set(const std::string_view name, xset::var var, const std::string_view value) noexcept;
 
 void xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept;
+
+void xset_set_submenu(xset_t set, const std::vector<xset::name>& submenu_entries) noexcept;
 
 // B
 bool xset_get_b(xset_t set) noexcept;

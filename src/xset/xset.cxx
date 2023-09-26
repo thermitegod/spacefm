@@ -122,6 +122,7 @@ void
 xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
 {
     assert(set != nullptr);
+    assert(var != xset::var::context_menu_entries);
 
     switch (var)
     {
@@ -431,7 +432,19 @@ xset_set_var(xset_t set, xset::var var, const std::string_view value) noexcept
             set->opener = result == 1 ? true : false;
             break;
         }
+        case xset::var::context_menu_entries:
+            break;
     }
+}
+
+void
+xset_set_submenu(xset_t set, const std::vector<xset::name>& submenu_entries) noexcept
+{
+    assert(set != nullptr);
+    assert(set->menu_style == xset::menu::submenu);
+    assert(submenu_entries.empty() == false);
+
+    set->context_menu_entries = submenu_entries;
 }
 
 /**
@@ -775,6 +788,7 @@ xset_get_int(xset_t set, xset::var var) noexcept
         case xset::var::icn:
         case xset::var::menu_label_custom:
         case xset::var::icon:
+        case xset::var::context_menu_entries:
         case xset::var::shared_key:
         case xset::var::next:
         case xset::var::prev:

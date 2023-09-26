@@ -453,6 +453,8 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     xset_t set_radio;
     std::string desc;
 
+    std::vector<xset::name> context_menu_entries;
+
     if (!browser || !menu || !browser->file_list_)
     {
         return;
@@ -538,12 +540,80 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 
         set = xset_get(xset::name::view_columns);
         xset_set_var(set, xset::var::disable, "0");
-        desc = std::format("panel{0}_detcol_size panel{0}_detcol_bytes panel{0}_detcol_type "
-                           "panel{0}_detcol_mime panel{0}_detcol_perm panel{0}_detcol_owner "
-                           "panel{0}_detcol_group panel{0}_detcol_atime panel{0}_detcol_btime "
-                           "panel{0}_detcol_ctime panel{0}_detcol_mtime separator view_reorder_col",
-                           p);
-        xset_set_var(set, xset::var::desc, desc);
+        if (p == panel_1)
+        {
+            context_menu_entries = {
+                xset::name::panel1_detcol_size,
+                xset::name::panel1_detcol_bytes,
+                xset::name::panel1_detcol_type,
+                xset::name::panel1_detcol_mime,
+                xset::name::panel1_detcol_perm,
+                xset::name::panel1_detcol_owner,
+                xset::name::panel1_detcol_group,
+                xset::name::panel1_detcol_atime,
+                xset::name::panel1_detcol_btime,
+                xset::name::panel1_detcol_ctime,
+                xset::name::panel1_detcol_mtime,
+                xset::name::separator,
+                xset::name::view_reorder_col,
+            };
+        }
+        else if (p == panel_2)
+        {
+            context_menu_entries = {
+                xset::name::panel2_detcol_size,
+                xset::name::panel2_detcol_bytes,
+                xset::name::panel2_detcol_type,
+                xset::name::panel2_detcol_mime,
+                xset::name::panel2_detcol_perm,
+                xset::name::panel2_detcol_owner,
+                xset::name::panel2_detcol_group,
+                xset::name::panel2_detcol_atime,
+                xset::name::panel2_detcol_btime,
+                xset::name::panel2_detcol_ctime,
+                xset::name::panel2_detcol_mtime,
+                xset::name::separator,
+                xset::name::view_reorder_col,
+            };
+        }
+        else if (p == panel_3)
+        {
+            context_menu_entries = {
+                xset::name::panel3_detcol_size,
+                xset::name::panel3_detcol_bytes,
+                xset::name::panel3_detcol_type,
+                xset::name::panel3_detcol_mime,
+                xset::name::panel3_detcol_perm,
+                xset::name::panel3_detcol_owner,
+                xset::name::panel3_detcol_group,
+                xset::name::panel3_detcol_atime,
+                xset::name::panel3_detcol_btime,
+                xset::name::panel3_detcol_ctime,
+                xset::name::panel3_detcol_mtime,
+                xset::name::separator,
+                xset::name::view_reorder_col,
+            };
+        }
+        else if (p == panel_4)
+        {
+            context_menu_entries = {
+                xset::name::panel4_detcol_size,
+                xset::name::panel4_detcol_bytes,
+                xset::name::panel4_detcol_type,
+                xset::name::panel4_detcol_mime,
+                xset::name::panel4_detcol_perm,
+                xset::name::panel4_detcol_owner,
+                xset::name::panel4_detcol_group,
+                xset::name::panel4_detcol_atime,
+                xset::name::panel4_detcol_btime,
+                xset::name::panel4_detcol_ctime,
+                xset::name::panel4_detcol_mtime,
+                xset::name::separator,
+                xset::name::view_reorder_col,
+            };
+        }
+        xset_set_submenu(set, context_menu_entries);
+
         set = xset_get(xset::name::rubberband);
         xset_set_cb(set, (GFunc)main_window_rubberband_all, nullptr);
         set->disable = false;
@@ -768,17 +838,124 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     }
 
     set = xset_get(xset::name::view_list_style);
-    desc = std::format("panel{0}_list_detailed panel{0}_list_compact panel{0}_list_icons separator "
-                       "view_thumb panel{0}_list_large rubberband",
-                       p);
-    xset_set_var(set, xset::var::desc, desc);
+    if (p == panel_1)
+    {
+        context_menu_entries = {
+            xset::name::panel1_list_detailed,
+            xset::name::panel1_list_compact,
+            xset::name::panel1_list_icons,
+            xset::name::separator,
+            xset::name::view_thumb,
+            xset::name::panel1_list_large,
+            xset::name::rubberband,
+        };
+    }
+    else if (p == panel_2)
+    {
+        context_menu_entries = {
+            xset::name::panel2_list_detailed,
+            xset::name::panel2_list_compact,
+            xset::name::panel2_list_icons,
+            xset::name::separator,
+            xset::name::view_thumb,
+            xset::name::panel2_list_large,
+            xset::name::rubberband,
+        };
+    }
+    else if (p == panel_3)
+    {
+        context_menu_entries = {
+            xset::name::panel3_list_detailed,
+            xset::name::panel3_list_compact,
+            xset::name::panel3_list_icons,
+            xset::name::separator,
+            xset::name::view_thumb,
+            xset::name::panel3_list_large,
+            xset::name::rubberband,
+        };
+    }
+    else if (p == panel_4)
+    {
+        context_menu_entries = {
+            xset::name::panel4_list_detailed,
+            xset::name::panel4_list_compact,
+            xset::name::panel4_list_icons,
+            xset::name::separator,
+            xset::name::view_thumb,
+            xset::name::panel4_list_large,
+            xset::name::rubberband,
+        };
+    }
+    xset_set_submenu(set, context_menu_entries);
+
     set = xset_get(xset::name::con_view);
     set->disable = !browser->file_list_;
-    desc = std::format("panel{0}_show_toolbox panel{0}_show_sidebar panel{0}_show_devmon "
-                       "panel{0}_show_dirtree separator panel{0}_show_hidden "
-                       "view_list_style view_sortby view_columns separator view_refresh",
-                       p);
-    xset_set_var(set, xset::var::desc, desc);
+    if (p == panel_1)
+    {
+        context_menu_entries = {
+            xset::name::panel1_show_toolbox,
+            xset::name::panel1_show_sidebar,
+            xset::name::panel1_show_devmon,
+            xset::name::panel1_show_dirtree,
+            xset::name::separator,
+            xset::name::panel1_show_hidden,
+            xset::name::view_list_style,
+            xset::name::view_sortby,
+            xset::name::view_columns,
+            xset::name::separator,
+            xset::name::view_refresh,
+        };
+    }
+    else if (p == panel_2)
+    {
+        context_menu_entries = {
+            xset::name::panel2_show_toolbox,
+            xset::name::panel2_show_sidebar,
+            xset::name::panel2_show_devmon,
+            xset::name::panel2_show_dirtree,
+            xset::name::separator,
+            xset::name::panel2_show_hidden,
+            xset::name::view_list_style,
+            xset::name::view_sortby,
+            xset::name::view_columns,
+            xset::name::separator,
+            xset::name::view_refresh,
+        };
+    }
+    else if (p == panel_3)
+    {
+        context_menu_entries = {
+            xset::name::panel3_show_toolbox,
+            xset::name::panel3_show_sidebar,
+            xset::name::panel3_show_devmon,
+            xset::name::panel3_show_dirtree,
+            xset::name::separator,
+            xset::name::panel3_show_hidden,
+            xset::name::view_list_style,
+            xset::name::view_sortby,
+            xset::name::view_columns,
+            xset::name::separator,
+            xset::name::view_refresh,
+        };
+    }
+    else if (p == panel_4)
+    {
+        context_menu_entries = {
+            xset::name::panel4_show_toolbox,
+            xset::name::panel4_show_sidebar,
+            xset::name::panel4_show_devmon,
+            xset::name::panel4_show_dirtree,
+            xset::name::separator,
+            xset::name::panel4_show_hidden,
+            xset::name::view_list_style,
+            xset::name::view_sortby,
+            xset::name::view_columns,
+            xset::name::separator,
+            xset::name::view_refresh,
+        };
+    }
+    xset_set_submenu(set, context_menu_entries);
+
     xset_add_menuitem(browser, menu, accel_group, set);
 }
 
@@ -1213,11 +1390,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         set->disable = !browser;
 
         set = xset_get(xset::name::open_new);
-        xset_set_var(set,
-                     xset::var::desc,
-                     "new_file new_directory new_link new_archive separator tab_new tab_new_here "
-                     "new_bookmark");
-
         xset_add_menuitem(browser, popup, accel_group, set);
 
         set = xset_get(xset::name::separator);
@@ -1395,7 +1567,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         set->disable = no_write_access || set_disable;
 
         set = xset_get(xset::name::con_prop);
-        xset_set_var(set, xset::var::desc, "prop_info prop_attr prop_perm prop_quick");
         xset_add_menuitem(browser, popup, accel_group, set);
     }
 

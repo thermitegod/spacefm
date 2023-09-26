@@ -824,7 +824,10 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio->name.data());
 
-    xset_add_menu(file_browser, menu, accel_group, "separator status_middle");
+    xset_add_menu(file_browser,
+                  menu,
+                  accel_group,
+                  {xset::name::separator, xset::name::status_middle});
     gtk_widget_show_all(menu);
 
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
