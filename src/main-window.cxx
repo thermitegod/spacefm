@@ -1646,7 +1646,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
     // save settings
     app_settings.maximized(main_window->maximized);
     autosave_request_cancel();
-    save_settings(main_window);
+    save_settings();
 
     // tasks running?
     if (main_tasks_running(main_window))
@@ -2309,8 +2309,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
 
     autosave_request_cancel();
     main_window_store_positions(main_window);
-    save_settings(main_window);
-
+    save_settings();
     main_window_add_new_window(main_window);
 }
 

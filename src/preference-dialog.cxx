@@ -1158,7 +1158,7 @@ on_response(GtkWidget* widget, void* user_data)
     (void)user_data;
     GtkWidget* dialog = GTK_WIDGET(gtk_widget_get_ancestor(widget, GTK_TYPE_DIALOG));
 
-    save_settings(nullptr);
+    save_settings();
 
     // Close the preference dialog
     gtk_widget_destroy(dialog);

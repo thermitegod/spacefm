@@ -34,8 +34,7 @@
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
 void load_settings();
-void autosave_settings();
-void save_settings(void* main_window_ptr);
+void save_settings();
 void free_settings();
 
 ///////////////////////////////////////////////////////////////////////////////

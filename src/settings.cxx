@@ -341,27 +341,14 @@ load_settings()
 }
 
 void
-autosave_settings()
+save_settings()
 {
-    save_settings(nullptr);
-}
-
-void
-save_settings(void* main_window_ptr)
-{
-    MainWindow* main_window;
     // ztd::logger::info("save_settings");
+
+    MainWindow* main_window = main_window_get_last_active();
 
     // save tabs
     const bool save_tabs = xset_get_b(xset::name::main_save_tabs);
-    if (main_window_ptr)
-    {
-        main_window = MAIN_WINDOW(main_window_ptr);
-    }
-    else
-    {
-        main_window = main_window_get_last_active();
-    }
 
     if (GTK_IS_WIDGET(main_window))
     {

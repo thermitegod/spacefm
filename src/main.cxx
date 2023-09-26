@@ -406,7 +406,7 @@ main(int argc, char* argv[])
     load_bookmarks();
 
     // start autosave thread
-    autosave_init(autosave_settings);
+    autosave_init(save_settings);
 
     std::atexit(ztd::Logger->shutdown);
     std::atexit(free_settings);
