@@ -169,12 +169,6 @@ update_volume_icons()
 }
 
 static void
-update_all_icons()
-{
-    update_volume_icons();
-}
-
-static void
 update_change_detection()
 {
     // update all windows/all panels/all browsers
@@ -1250,10 +1244,6 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
     {
         on_automountlist(nullptr, vol, view);
     }
-    else if (ztd::startswith(set->name, "dev_icon_"))
-    {
-        update_volume_icons();
-    }
     else if (set->xset_name == xset::name::dev_dispname)
     {
         update_names();
@@ -1358,17 +1348,6 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     // set = xset_get("dev_menu_root");
     // set->disable = !vol;
 
-    xset_set_cb(xset::name::dev_icon_audiocd, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_optical_mounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_optical_media, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_optical_nomedia, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_floppy_mounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_floppy_unmounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_remove_mounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_remove_unmounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_internal_mounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_internal_unmounted, (GFunc)update_volume_icons, nullptr);
-    xset_set_cb(xset::name::dev_icon_network, (GFunc)update_all_icons, nullptr);
     xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
@@ -1384,7 +1363,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
 
     set = xset_get(xset::name::dev_menu_settings);
     menu_elements = "dev_show separator dev_menu_auto dev_exec dev_change separator dev_single "
-                    "dev_newtab dev_icon";
+                    "dev_newtab";
     xset_set_var(set, xset::var::desc, menu_elements);
 
     menu_elements = "separator dev_menu_root separator dev_prop dev_menu_settings";

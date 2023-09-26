@@ -51,11 +51,9 @@ namespace xset
         check,
         string,
         radio,
-        filedlg,
-        fontdlg,
-        icon,
-        colordlg, // deprecated
-        confirm,
+        reserved_00,
+        reserved_01,
+        reserved_02,
         reserved_03,
         reserved_04,
         reserved_05,
@@ -64,6 +62,8 @@ namespace xset
         reserved_08,
         reserved_09,
         reserved_10,
+        reserved_11,
+        reserved_12,
         submenu, // add new before submenu
         sep,
     };

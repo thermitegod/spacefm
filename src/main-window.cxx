@@ -379,21 +379,11 @@ main_window_refresh_all()
 static void
 update_window_icon(GtkWindow* window, GtkIconTheme* theme)
 {
-    std::string name;
+    (void)theme;
     GError* error = nullptr;
-
-    xset_t set = xset_get(xset::name::main_icon);
-    if (set->icon)
-    {
-        name = set->icon.value();
-    }
-    else
-    {
-        name = "spacefm";
-    }
-
+    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     GdkPixbuf* icon =
-        gtk_icon_theme_load_icon(theme, name.c_str(), 48, (GtkIconLookupFlags)0, &error);
+        gtk_icon_theme_load_icon(icon_theme, "spacefm", 48, (GtkIconLookupFlags)0, &error);
     if (icon)
     {
         gtk_window_set_icon(window, icon);
@@ -402,21 +392,9 @@ update_window_icon(GtkWindow* window, GtkIconTheme* theme)
     else if (error != nullptr)
     {
         // An error occured on loading the icon
-        ztd::logger::error("Unable to load the window icon '{}' in - update_window_icon - {}",
-                           name,
+        ztd::logger::error("Unable to load the window icon 'spacefm' in - update_window_icon - {}",
                            error->message);
         g_error_free(error);
-    }
-}
-
-static void
-on_main_icon()
-{
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-
-    for (MainWindow* window : all_windows)
-    {
-        update_window_icon(GTK_WINDOW(window), icon_theme);
     }
 }
 
@@ -1122,7 +1100,6 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_prefs, (GFunc)on_preference_activate, main_window);
     xset_set_cb(xset::name::main_full, (GFunc)on_fullscreen_activate, main_window);
-    xset_set_cb(xset::name::main_icon, (GFunc)on_main_icon, nullptr);
     xset_set_cb(xset::name::main_title, (GFunc)on_update_window_title, main_window);
 
     i32 vis_count = 0;
@@ -2062,39 +2039,17 @@ GtkWidget*
 main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser)
 {
     (void)main_window;
-    GtkEventBox* evt_box;
-    GtkWidget* tab_label;
-    GtkWidget* tab_text = nullptr;
-    GtkWidget* tab_icon = nullptr;
-    GtkWidget* close_btn;
-    GtkWidget* close_icon;
-    GdkPixbuf* pixbuf = nullptr;
 
     /* Create tab label */
-    evt_box = GTK_EVENT_BOX(gtk_event_box_new());
+    GtkEventBox* evt_box = GTK_EVENT_BOX(gtk_event_box_new());
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
 
-    tab_label = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-    xset_t set = xset_get_panel(file_browser->panel(), xset::panel::icon_tab);
-    if (set->icon)
-    {
-        pixbuf = vfs_load_icon(set->icon.value(), 16);
-        if (pixbuf)
-        {
-            tab_icon = gtk_image_new_from_pixbuf(pixbuf);
-            g_object_unref(pixbuf);
-        }
-        else
-        {
-            tab_icon = xset_get_image(set->icon.value(), GtkIconSize::GTK_ICON_SIZE_MENU);
-        }
-    }
-    if (!tab_icon)
-    {
-        tab_icon = gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
-    }
+    GtkWidget* tab_label = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget* tab_icon =
+        gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
+    GtkWidget* tab_text = nullptr;
     const auto cwd = file_browser->cwd();
     if (!cwd.empty())
     {
@@ -2117,10 +2072,11 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 
     if (app_settings.show_close_tab_buttons())
     {
-        close_btn = gtk_button_new();
+        GtkWidget* close_btn = gtk_button_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
         gtk_button_set_relief(GTK_BUTTON(close_btn), GTK_RELIEF_NONE);
-        close_icon = gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
+        GtkWidget* close_icon =
+            gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
 
         gtk_container_add(GTK_CONTAINER(close_btn), close_icon);
         gtk_box_pack_end(GTK_BOX(tab_label), close_btn, false, false, 0);
@@ -2149,10 +2105,7 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
                      file_browser);
 
     gtk_widget_show_all(GTK_WIDGET(evt_box));
-    if (!set->icon)
-    {
-        gtk_widget_hide(tab_icon);
-    }
+
     return GTK_WIDGET(evt_box);
 }
 
@@ -3182,10 +3135,6 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         else if (set->xset_name == xset::name::main_prefs)
         {
             on_preference_activate(nullptr, main_window);
-        }
-        else if (set->xset_name == xset::name::main_icon)
-        {
-            on_main_icon();
         }
         else if (set->xset_name == xset::name::main_title)
         {

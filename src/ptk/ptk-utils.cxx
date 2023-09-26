@@ -22,23 +22,10 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "xset/xset.hxx"
-
 void
 ptk_set_window_icon(GtkWindow* window)
 {
     assert(GTK_IS_WINDOW(window));
-
-    std::string name;
-    xset_t set = xset_get(xset::name::main_icon);
-    if (set->icon)
-    {
-        name = set->icon.value();
-    }
-    else
-    {
-        name = "spacefm";
-    }
 
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
     if (!icon_theme)
@@ -48,7 +35,7 @@ ptk_set_window_icon(GtkWindow* window)
 
     GError* error = nullptr;
     GdkPixbuf* icon =
-        gtk_icon_theme_load_icon(icon_theme, name.data(), 48, (GtkIconLookupFlags)0, &error);
+        gtk_icon_theme_load_icon(icon_theme, "spacefm", 48, (GtkIconLookupFlags)0, &error);
     if (icon)
     {
         gtk_window_set_icon(GTK_WINDOW(window), icon);
@@ -57,8 +44,7 @@ ptk_set_window_icon(GtkWindow* window)
     else if (!icon || error)
     {
         // An error occured on loading the icon
-        ztd::logger::error("Unable to load the window icon '{}' in - ptk_set_window_icon - {}",
-                           name,
+        ztd::logger::error("Unable to load the window icon 'spacefm' in - ptk_set_window_icon - {}",
                            error->message);
         g_error_free(error);
     }

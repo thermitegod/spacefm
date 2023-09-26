@@ -620,11 +620,9 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 break;
             case xset::menu::normal:
             case xset::menu::string:
-            case xset::menu::filedlg:
-            case xset::menu::fontdlg:
-            case xset::menu::icon:
-            case xset::menu::colordlg: // deprecated
-            case xset::menu::confirm:
+            case xset::menu::reserved_00:
+            case xset::menu::reserved_01:
+            case xset::menu::reserved_02:
             case xset::menu::reserved_03:
             case xset::menu::reserved_04:
             case xset::menu::reserved_05:
@@ -633,6 +631,8 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
             case xset::menu::reserved_08:
             case xset::menu::reserved_09:
             case xset::menu::reserved_10:
+            case xset::menu::reserved_11:
+            case xset::menu::reserved_12:
                 break;
         }
     }
@@ -1426,7 +1426,6 @@ xset_menu_cb(GtkWidget* item, xset_t set)
             }
             break;
         case xset::menu::string:
-        case xset::menu::confirm:
         {
             std::string title;
             std::string msg = set->desc.value();
@@ -1448,33 +1447,14 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                 msg = ztd::replace(msg, "\\n", "\n");
                 msg = ztd::replace(msg, "\\t", "\t");
             }
-            if (set->menu_style == xset::menu::confirm)
+            const auto [response, answer] =
+                xset_text_dialog(parent, title, msg, "", set->s.value(), default_str, false);
+            set->s = answer;
+            if (response)
             {
-                const auto response = ptk_show_message(GTK_WINDOW(parent),
-                                                       GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                       title,
-                                                       GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                                       msg);
-
-                if (response == GtkResponseType::GTK_RESPONSE_OK)
+                if (cb_func)
                 {
-                    if (cb_func)
-                    {
-                        cb_func(item, cb_data);
-                    }
-                }
-            }
-            else
-            {
-                const auto [response, answer] =
-                    xset_text_dialog(parent, title, msg, "", set->s.value(), default_str, false);
-                set->s = answer;
-                if (response)
-                {
-                    if (cb_func)
-                    {
-                        cb_func(item, cb_data);
-                    }
+                    cb_func(item, cb_data);
                 }
             }
         }
@@ -1489,49 +1469,9 @@ xset_menu_cb(GtkWidget* item, xset_t set)
                 cb_func(item, cb_data);
             }
             break;
-        case xset::menu::fontdlg:
-            break;
-        case xset::menu::filedlg:
-            // test purpose only
-            {
-                const auto file =
-                    xset_file_dialog(parent,
-                                     GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
-                                     set->title.value(),
-                                     set->s.value(),
-                                     "foobar.xyz");
-                // ztd::logger::info("file={}", file);
-            }
-            break;
-        case xset::menu::icon:
-        {
-            // Note: xset_text_dialog uses the title passed to know this is an
-            // icon chooser, so it adds a Choose button.  If you change the title,
-            // change xset_text_dialog.
-            const auto [response, answer] =
-                xset_text_dialog(parent,
-                                 set->title ? set->title.value() : "Set Icon",
-                                 set->desc ? set->desc.value() : icon_desc,
-                                 "",
-                                 set->icon.value(),
-                                 "",
-                                 false);
-
-            set->icon = answer;
-            if (response)
-            {
-                if (set->lock)
-                {
-                    set->keep_terminal = true; // trigger save of changed icon
-                }
-                if (cb_func)
-                {
-                    cb_func(item, cb_data);
-                }
-            }
-            break;
-        }
-        case xset::menu::colordlg: // deprecated
+        case xset::menu::reserved_00:
+        case xset::menu::reserved_01:
+        case xset::menu::reserved_02:
         case xset::menu::reserved_03:
         case xset::menu::reserved_04:
         case xset::menu::reserved_05:
@@ -1540,6 +1480,8 @@ xset_menu_cb(GtkWidget* item, xset_t set)
         case xset::menu::reserved_08:
         case xset::menu::reserved_09:
         case xset::menu::reserved_10:
+        case xset::menu::reserved_11:
+        case xset::menu::reserved_12:
         case xset::menu::submenu:
             if (cb_func)
             {
@@ -2363,11 +2305,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             break;
         case xset::menu::normal:
         case xset::menu::radio:
-        case xset::menu::filedlg:
-        case xset::menu::fontdlg:
-        case xset::menu::icon:
-        case xset::menu::colordlg: // deprecated
-        case xset::menu::confirm:
+        case xset::menu::reserved_00:
+        case xset::menu::reserved_01:
+        case xset::menu::reserved_02:
         case xset::menu::reserved_03:
         case xset::menu::reserved_04:
         case xset::menu::reserved_05:
@@ -2376,6 +2316,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
         case xset::menu::reserved_08:
         case xset::menu::reserved_09:
         case xset::menu::reserved_10:
+        case xset::menu::reserved_11:
+        case xset::menu::reserved_12:
             return nullptr;
     }
 

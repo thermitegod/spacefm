@@ -275,78 +275,7 @@ xset_defaults()
     set->s = "cifs curlftpfs ftpfs fuse.sshfs nfs smbfs";
     set->z = set->s;
 
-    // dev icons
-    set = xset_get(xset::name::dev_icon);
-    xset_set_var(set, xset::var::menu_label, "_Icon");
-    set->menu_style = xset::menu::submenu;
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "dev_icon_internal_mounted dev_icon_internal_unmounted separator dev_icon_remove_mounted "
-        "dev_icon_remove_unmounted separator dev_icon_optical_mounted dev_icon_optical_media "
-        "dev_icon_optical_nomedia dev_icon_audiocd separator dev_icon_floppy_mounted "
-        "dev_icon_floppy_unmounted separator dev_icon_network dev_icon_file");
-
-    set = xset_get(xset::name::dev_icon_audiocd);
-    xset_set_var(set, xset::var::menu_label, "Audio CD");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-cdrom");
-
-    set = xset_get(xset::name::dev_icon_optical_mounted);
-    xset_set_var(set, xset::var::menu_label, "Optical Mounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-cdrom");
-
-    set = xset_get(xset::name::dev_icon_optical_media);
-    xset_set_var(set, xset::var::menu_label, "Optical Has Media");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-yes");
-
-    set = xset_get(xset::name::dev_icon_optical_nomedia);
-    xset_set_var(set, xset::var::menu_label, "Optical No Media");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-close");
-
-    set = xset_get(xset::name::dev_icon_floppy_mounted);
-    xset_set_var(set, xset::var::menu_label, "Floppy Mounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-floppy");
-
-    set = xset_get(xset::name::dev_icon_floppy_unmounted);
-    xset_set_var(set, xset::var::menu_label, "Floppy Unmounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-floppy");
-
-    set = xset_get(xset::name::dev_icon_remove_mounted);
-    xset_set_var(set, xset::var::menu_label, "Removable Mounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-add");
-
-    set = xset_get(xset::name::dev_icon_remove_unmounted);
-    xset_set_var(set, xset::var::menu_label, "Removable Unmounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-remove");
-
-    set = xset_get(xset::name::dev_icon_internal_mounted);
-    xset_set_var(set, xset::var::menu_label, "Internal Mounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-open");
-
-    set = xset_get(xset::name::dev_icon_internal_unmounted);
-    xset_set_var(set, xset::var::menu_label, "Internal Unmounted");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-harddisk");
-
-    set = xset_get(xset::name::dev_icon_network);
-    xset_set_var(set, xset::var::menu_label, "Mounted Network");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-network");
-
-    set = xset_get(xset::name::dev_icon_file);
-    xset_set_var(set, xset::var::menu_label, "Mounted Other");
-    set->menu_style = xset::menu::icon;
-    xset_set_var(set, xset::var::icn, "gtk-file");
-
+    // Bookmarks
     set = xset_get(xset::name::book_open);
     xset_set_var(set, xset::var::menu_label, "_Open");
     xset_set_var(set, xset::var::icn, "gtk-open");
@@ -355,16 +284,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Settings");
     set->menu_style = xset::menu::submenu;
     xset_set_var(set, xset::var::icn, "gtk-properties");
-
-    set = xset_get(xset::name::book_icon);
-    xset_set_var(set, xset::var::menu_label, "Bookmark _Icon");
-    set->menu_style = xset::menu::icon;
-    // do not set a default icon for book_icon
-
-    set = xset_get(xset::name::book_menu_icon);
-    xset_set_var(set, xset::var::menu_label, "Sub_menu Icon");
-    set->menu_style = xset::menu::icon;
-    // do not set a default icon for book_menu_icon
 
     set = xset_get(xset::name::book_add);
     xset_set_var(set, xset::var::menu_label, "New _Bookmark");
@@ -796,20 +715,6 @@ xset_defaults()
         "panel\n\t*\tasterisk shown if tasks running in window");
     xset_set_var(set, xset::var::s, "%d");
     xset_set_var(set, xset::var::z, "%d");
-
-    set = xset_get(xset::name::main_icon);
-    xset_set_var(set, xset::var::menu_label, "_Window Icon");
-    set->menu_style = xset::menu::icon;
-    // Note: xset_text_dialog uses the title passed to know this is an
-    // icon chooser, so it adds a Choose button.  If you change the title,
-    // change xset_text_dialog.
-    set->title = "Set Window Icon";
-    set->desc = "Enter an icon name, icon file path, or stock item name:\n\nOr click "
-                "Choose to select an icon.  Not all icons may work properly due to "
-                "various issues.\n\nProvided alternate SpaceFM "
-                "icons:\n\tspacefm-[48|128]-[cube|pyramid]-[blue|green|red]\n\tspacefm-"
-                "48-folder-[blue|red]\n\nFor example: spacefm-48-pyramid-green";
-    // x and y store global icon chooser dialog size
 
     set = xset_get(xset::name::main_full);
     xset_set_var(set, xset::var::menu_label, "_Fullscreen");
@@ -1734,20 +1639,6 @@ xset_defaults()
         if (p != 1)
         {
             xset_set_var(set, xset::var::shared_key, "panel1_show_hidden");
-        }
-
-        set = xset_get_panel(p, xset::panel::icon_tab);
-        xset_set_var(set, xset::var::menu_label, "_Icon");
-        set->menu_style = xset::menu::icon;
-        xset_set_var(set, xset::var::icn, "gtk-directory");
-
-        set = xset_get_panel(p, xset::panel::icon_status);
-        xset_set_var(set, xset::var::menu_label, "_Icon");
-        set->menu_style = xset::menu::icon;
-        xset_set_var(set, xset::var::icn, "gtk-yes");
-        if (p != 1)
-        {
-            xset_set_var(set, xset::var::shared_key, "panel1_icon_status");
         }
 
         set = xset_get_panel(p, xset::panel::detcol_name);

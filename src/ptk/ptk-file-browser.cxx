@@ -805,13 +805,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
 {
     (void)widget;
     GtkAccelGroup* accel_group = gtk_accel_group_new();
-    const std::string desc =
-        std::format("separator panel{}_icon_status status_middle", file_browser->panel_);
 
-    xset_set_cb_panel(file_browser->panel_,
-                      xset::panel::icon_status,
-                      (GFunc)on_status_effect_change,
-                      file_browser);
     xset_t set = xset_get(xset::name::status_name);
     xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, nullptr);
@@ -826,7 +820,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set);
     xset_set_ob2(set, nullptr, set_radio->name.data());
 
-    xset_add_menu(file_browser, menu, accel_group, desc);
+    xset_add_menu(file_browser, menu, accel_group, "separator status_middle");
     gtk_widget_show_all(menu);
 
     g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
@@ -1061,18 +1055,8 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
     // gtk_widget_show_all(file_browser->folder_view_scroll);
 
     // set status bar icon
-    std::string icon_name;
-    xset_t set = xset_get_panel(curpanel, xset::panel::icon_status);
-    if (set->icon)
-    {
-        icon_name = set->icon.value();
-    }
-    else
-    {
-        icon_name = "gtk-yes";
-    }
     gtk_image_set_from_icon_name(GTK_IMAGE(file_browser->status_image),
-                                 icon_name.c_str(),
+                                 "gtk-yes",
                                  GtkIconSize::GTK_ICON_SIZE_MENU);
 
     gtk_widget_show_all(GTK_WIDGET(file_browser));
