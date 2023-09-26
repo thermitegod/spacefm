@@ -2345,12 +2345,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->revert), false);
     g_signal_connect(G_OBJECT(mset->revert), "clicked", G_CALLBACK(on_revert_button_press), mset);
 
-    mset->cancel = gtk_button_new_with_label("Cancel");
+    mset->cancel = gtk_button_new_with_mnemonic("Cancel");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
                                  mset->cancel,
                                  GtkResponseType::GTK_RESPONSE_CANCEL);
 
-    mset->next = gtk_button_new_with_label("OK");
+    mset->next = gtk_button_new_with_mnemonic("OK");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
                                  mset->next,
                                  GtkResponseType::GTK_RESPONSE_OK);
