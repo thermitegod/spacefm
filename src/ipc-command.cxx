@@ -1969,7 +1969,12 @@ run_ipc_command(const std::string_view socket_commands_json)
             // show submenu as popup menu
             set = xset_get(set->child.value());
             GtkWidget* widget = gtk_menu_new();
+
+#if (GTK_MAJOR_VERSION == 4)
+            GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
             GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
 
             xset_add_menuitem(file_browser, GTK_WIDGET(widget), accel_group, set);
             g_idle_add((GSourceFunc)delayed_show_menu, widget);

@@ -649,10 +649,9 @@ ptk_task_view_popup_errset(MainWindow* main_window, const std::string_view name)
 }
 
 void
-ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu, GtkAccelGroup* accel_group)
+ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu)
 {
     (void)menu;
-    (void)accel_group;
     xset_t set;
     xset_t set_radio;
 
@@ -864,9 +863,8 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                 return false;
             }
             GtkWidget* popup;
-            GtkAccelGroup* accel_group;
+
             popup = gtk_menu_new();
-            accel_group = gtk_accel_group_new();
 
             set = xset_get(xset::name::task_stop);
             xset_set_cb(set, (GFunc)on_task_stop, view);
@@ -944,7 +942,13 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
                 };
             }
 
-            ptk_task_view_prepare_menu(main_window, popup, accel_group);
+#if (GTK_MAJOR_VERSION == 4)
+            GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
+            GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
+
+            ptk_task_view_prepare_menu(main_window, popup);
 
             xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
 

@@ -24,6 +24,9 @@ i32 gtk4_dialog_run(GtkDialog* dialog);
 
 #if (GTK_MAJOR_VERSION == 4)
 
+// TODO
+//  - rename accel_group to shortcut_controller or controller. reusing the old name to avoid even more #if blocks.
+
 #define gtk_widget_show_all(widget) ((void)(widget))
 
 #endif

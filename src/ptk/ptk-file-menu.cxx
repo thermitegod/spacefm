@@ -447,9 +447,15 @@ on_permission(GtkMenuItem* menuitem, PtkFileMenu* data)
     }
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+void
+ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
+                                  GtkEventController* accel_group)
+#elif (GTK_MAJOR_VERSION == 3)
 void
 ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                                   GtkAccelGroup* accel_group)
+#endif
 {
     xset_t set;
     xset_t set_radio;
@@ -995,10 +1001,21 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     data->file_path = file_path;
     data->file = file;
     data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
+
+#if (GTK_MAJOR_VERSION == 4)
+    data->accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
     data->accel_group = gtk_accel_group_new();
+#endif
 
     GtkWidget* popup = gtk_menu_new();
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
+
     g_object_weak_ref(G_OBJECT(popup), (GWeakNotify)ptk_file_menu_free, data);
     g_signal_connect_after((void*)popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
 

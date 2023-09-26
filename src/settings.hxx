@@ -45,10 +45,21 @@ GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert
 
 GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size);
 
+#if (GTK_MAJOR_VERSION == 4)
+void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+                   const std::vector<xset::name>& submenu_entries);
+#elif (GTK_MAJOR_VERSION == 3)
 void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                    const std::vector<xset::name>& submenu_entries);
+#endif
+
+#if (GTK_MAJOR_VERSION == 4)
+GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
+                             GtkEventController* accel_group, xset_t set);
+#elif (GTK_MAJOR_VERSION == 3)
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, xset_t set);
+#endif
 
 void xset_menu_cb(GtkWidget* item, xset_t set);
 

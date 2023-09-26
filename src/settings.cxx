@@ -455,9 +455,15 @@ xset_get_image(const std::string_view icon, GtkIconSize icon_size)
     return gtk_image_new_from_icon_name(icon.data(), icon_size);
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+void
+xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+              const std::vector<xset::name>& submenu_entries)
+#elif (GTK_MAJOR_VERSION == 3)
 void
 xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
               const std::vector<xset::name>& submenu_entries)
+#endif
 {
     if (submenu_entries.empty())
     {
@@ -497,9 +503,15 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
     return item;
 }
 
+#if (GTK_MAJOR_VERSION == 4)
+GtkWidget*
+xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+                  xset_t set)
+#elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
 xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                   xset_t set)
+#endif
 {
     GtkWidget* item = nullptr;
     GtkWidget* submenu;
@@ -686,12 +698,21 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         }
         if (keyset->key > 0 && accel_group)
         {
+#if (GTK_MAJOR_VERSION == 4)
+            ztd::logger::debug("TODO - PORT - accel_group");
+            // gtk_widget_add_controller(item, accel_group);
+            // gtk_shortcut_controller_add_shortcut(
+            //     GTK_SHORTCUT_CONTROLLER(accel_group),
+            //     gtk_shortcut_new(gtk_keyval_trigger_new(keyset->key, (GdkModifierType)keyset->keymod),
+            //                     gtk_callback_action_new(callback_func /* TODO */, nullptr, nullptr)))
+#elif (GTK_MAJOR_VERSION == 3)
             gtk_widget_add_accelerator(item,
                                        "activate",
                                        accel_group,
                                        keyset->key,
                                        (GdkModifierType)keyset->keymod,
                                        GTK_ACCEL_VISIBLE);
+#endif
         }
     }
     // design mode callback
@@ -960,19 +981,28 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     }
 
     GtkWidget* design_menu = gtk_menu_new();
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
 
     // Cut
     newitem = xset_design_additem(design_menu, "Cu_t", xset::job::cut, set);
     gtk_widget_set_sensitive(newitem, !set->lock);
     if (show_keys)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        ztd::logger::debug("TODO - PORT - accel_group");
+#elif (GTK_MAJOR_VERSION == 3)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_x,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+#endif
     }
 
     // Copy
@@ -980,12 +1010,16 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     gtk_widget_set_sensitive(newitem, !set->lock);
     if (show_keys)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        ztd::logger::debug("TODO - PORT - accel_group");
+#elif (GTK_MAJOR_VERSION == 3)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_c,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+#endif
     }
 
     // Paste
@@ -993,12 +1027,16 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     gtk_widget_set_sensitive(newitem, !no_paste);
     if (show_keys)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        ztd::logger::debug("TODO - PORT - accel_group");
+#elif (GTK_MAJOR_VERSION == 3)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_v,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+#endif
     }
 
     // Remove
@@ -1006,12 +1044,16 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     gtk_widget_set_sensitive(newitem, !set->lock && !no_remove);
     if (show_keys)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        ztd::logger::debug("TODO - PORT - accel_group");
+#elif (GTK_MAJOR_VERSION == 3)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_Delete,
                                    (GdkModifierType)0,
                                    GTK_ACCEL_VISIBLE);
+#endif
     }
 
     // Add >
@@ -1045,12 +1087,16 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     gtk_widget_set_sensitive(newitem, (set->menu_style < xset::menu::submenu));
     if (show_keys)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        ztd::logger::debug("TODO - PORT - accel_group");
+#elif (GTK_MAJOR_VERSION == 3)
         gtk_widget_add_accelerator(newitem,
                                    "activate",
                                    accel_group,
                                    GDK_KEY_k,
                                    GdkModifierType::GDK_CONTROL_MASK,
                                    GTK_ACCEL_VISIBLE);
+#endif
     }
 
     // show menu
@@ -1646,7 +1692,13 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                 return true;
             }
             GtkWidget* menu = gtk_menu_new();
+
+#if (GTK_MAJOR_VERSION == 4)
+            GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
             GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
+
             xset_add_menuitem(file_browser, menu, accel_group, set_child);
             gtk_widget_show_all(GTK_WIDGET(menu));
             gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);

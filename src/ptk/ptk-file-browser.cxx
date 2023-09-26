@@ -792,7 +792,12 @@ static void
 on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_browser)
 {
     (void)widget;
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
 
     xset_t set = xset_get(xset::name::status_name);
     xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set);

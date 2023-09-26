@@ -1559,7 +1559,12 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
 {
     (void)btn;
     GtkWidget* popup = gtk_menu_new();
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
 
     xset_t set;
 

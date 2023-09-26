@@ -54,8 +54,7 @@ void ptk_task_view_task_stop(GtkWidget* view, xset_t set2, PtkFileTask* ptask2);
 
 void on_reorder(GtkWidget* item, GtkWidget* parent);
 
-void ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu,
-                                GtkAccelGroup* accel_group);
+void ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu);
 
 void ptk_task_view_column_selected(GtkWidget* view);
 

@@ -48,15 +48,24 @@ struct PtkFileMenu
     std::filesystem::path file_path{};
     vfs::file_info file{nullptr};
     std::vector<vfs::file_info> sel_files;
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group{nullptr};
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group{nullptr};
+#endif
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser);
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser,
                              const std::span<const vfs::file_info> sel_files);
 
+#if (GTK_MAJOR_VERSION == 4)
+void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
+                                       GtkEventController* accel_group);
+#elif (GTK_MAJOR_VERSION == 3)
 void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group);
+#endif
 
 void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, PtkFileMenu* data);
 

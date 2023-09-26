@@ -507,7 +507,11 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
 
     xset_t set;
 
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group = gtk_shortcut_controller_new();
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
+#endif
 
     set = xset_get(xset::name::separator);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);

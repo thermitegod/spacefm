@@ -71,7 +71,11 @@ struct MainWindow
     GtkWidget* task_scroll;
     GtkWidget* task_view;
 
+#if (GTK_MAJOR_VERSION == 4)
+    GtkEventController* accel_group;
+#elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group;
+#endif
 
     GtkWindowGroup* wgroup;
     u32 configure_evt_timer;
