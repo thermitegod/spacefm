@@ -51,7 +51,6 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-event-handler.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -707,20 +706,6 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
 
     if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-            main_window_event(file_browser->main_window_,
-                              event_handler->win_click,
-                              xset::name::evt_win_click,
-                              0,
-                              0,
-                              "statusbar",
-                              0,
-                              event->button,
-                              event->state,
-                              true))
-        {
-            return true;
-        }
         if (event->button == 2)
         {
             static constexpr std::array<xset::name, 4> setnames{
@@ -1470,22 +1455,6 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
         file_browser->focus_folder_view();
         // file_browser->button_press = true;
 
-        if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-            main_window_event(file_browser->main_window_,
-                              event_handler->win_click,
-                              xset::name::evt_win_click,
-                              0,
-                              0,
-                              "filelist",
-                              0,
-                              event->button,
-                              event->state,
-                              true))
-        {
-            file_browser->skip_release_ = true;
-            return true;
-        }
-
         if (event->button == 4 || event->button == 5 || event->button == 8 ||
             event->button == 9) // sfm
         {
@@ -1620,21 +1589,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEventButton* event,
     }
     else if (event->type == GdkEventType::GDK_2BUTTON_PRESS && event->button == 1)
     {
-        // f64 click event -  button = 0
-        if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-            main_window_event(file_browser->main_window_,
-                              event_handler->win_click,
-                              xset::name::evt_win_click,
-                              0,
-                              0,
-                              "filelist",
-                              0,
-                              0,
-                              event->state,
-                              true))
-        {
-            return true;
-        }
+        // double click event -  button = 0
 
         if (file_browser->view_mode_ == ptk::file_browser::view_mode::list_view)
         {
@@ -2780,21 +2735,6 @@ on_dir_tree_button_press(GtkWidget* view, GdkEventButton* event, PtkFileBrowser*
 {
     file_browser->focus_me();
 
-    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-        main_window_event(file_browser->main_window_,
-                          event_handler->win_click,
-                          xset::name::evt_win_click,
-                          0,
-                          0,
-                          "dirtree",
-                          0,
-                          event->button,
-                          event->state,
-                          true))
-    {
-        return false;
-    }
-
     if (event->type == GdkEventType::GDK_BUTTON_PRESS && event->button == 2) /* middle click */
     {
         /* left and right click handled in ptk-dir-tree-view.c
@@ -3523,21 +3463,6 @@ PtkFileBrowser::close_tab() noexcept
     main_window->curpanel = this->panel_;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
 
-    if (event_handler->tab_close->s || event_handler->tab_close->ob2_data)
-    {
-        main_window_event(
-            main_window,
-            event_handler->tab_close,
-            xset::name::evt_tab_close,
-            this->panel_,
-            gtk_notebook_page_num(GTK_NOTEBOOK(main_window->notebook), GTK_WIDGET(this)) + 1,
-            nullptr,
-            0,
-            0,
-            0,
-            false);
-    }
-
     // save solumns and slider positions of tab to be closed
     this->slider_release(nullptr);
     this->save_column_widths(GTK_TREE_VIEW(this->folder_view_));
@@ -3587,19 +3512,6 @@ PtkFileBrowser::close_tab() noexcept
         a_browser->update_views();
         main_window_update_status_bar(main_window, a_browser);
         // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
-        if (event_handler->tab_focus->s || event_handler->tab_focus->ob2_data)
-        {
-            main_window_event(main_window,
-                              event_handler->tab_focus,
-                              xset::name::evt_tab_focus,
-                              main_window->curpanel,
-                              cur_tabx + 1,
-                              nullptr,
-                              0,
-                              0,
-                              0,
-                              false);
-        }
     }
 
     main_window_set_window_title(main_window, this);
@@ -4731,20 +4643,6 @@ PtkFileBrowser::update_views() noexcept
 
     if (xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            (!this->toolbar || !gtk_widget_get_visible(this->toolbox_)))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "toolbar",
-                              0,
-                              0,
-                              0,
-                              true);
-        }
         if (!this->toolbar)
         {
             rebuild_toolbox(nullptr, this);
@@ -4754,39 +4652,11 @@ PtkFileBrowser::update_views() noexcept
     }
     else
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) && this->toolbox_ &&
-            gtk_widget_get_visible(this->toolbox_))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "toolbar",
-                              0,
-                              0,
-                              0,
-                              false);
-        }
         gtk_widget_hide(this->toolbox_);
     }
 
     if (xset_get_b_panel_mode(p, xset::panel::show_sidebar, mode))
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            (!this->side_toolbox || !gtk_widget_get_visible(this->side_toolbox)))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "sidetoolbar",
-                              0,
-                              0,
-                              0,
-                              true);
-        }
         if (!this->side_toolbar)
         {
             rebuild_side_toolbox(nullptr, this);
@@ -4796,20 +4666,6 @@ PtkFileBrowser::update_views() noexcept
     }
     else
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            this->side_toolbar && this->side_toolbox && gtk_widget_get_visible(this->side_toolbox))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "sidetoolbar",
-                              0,
-                              0,
-                              0,
-                              false);
-        }
         //  toolboxes must be destroyed together for toolbar_widgets[]
 #if 0
         if ( this->side_toolbar )
@@ -4823,20 +4679,6 @@ PtkFileBrowser::update_views() noexcept
 
     if (xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            (!this->side_dir_scroll || !gtk_widget_get_visible(this->side_dir_scroll)))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "dirtree",
-                              0,
-                              0,
-                              0,
-                              true);
-        }
         if (!this->side_dir)
         {
             this->side_dir = ptk_file_browser_create_dir_tree(this);
@@ -4850,20 +4692,6 @@ PtkFileBrowser::update_views() noexcept
     }
     else
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            this->side_dir_scroll && gtk_widget_get_visible(this->side_dir_scroll))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "dirtree",
-                              0,
-                              0,
-                              0,
-                              false);
-        }
         gtk_widget_hide(this->side_dir_scroll);
         if (this->side_dir)
         {
@@ -4874,20 +4702,6 @@ PtkFileBrowser::update_views() noexcept
 
     if (xset_get_b_panel_mode(p, xset::panel::show_devmon, mode))
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            (!this->side_dev_scroll || !gtk_widget_get_visible(this->side_dev_scroll)))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "devices",
-                              0,
-                              0,
-                              0,
-                              true);
-        }
         if (!this->side_dev)
         {
             this->side_dev = ptk_location_view_new(this);
@@ -4897,20 +4711,6 @@ PtkFileBrowser::update_views() noexcept
     }
     else
     {
-        if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-            this->side_dev_scroll && gtk_widget_get_visible(this->side_dev_scroll))
-        {
-            main_window_event(this->main_window_,
-                              event_handler->pnl_show,
-                              xset::name::evt_pnl_show,
-                              0,
-                              0,
-                              "devices",
-                              0,
-                              0,
-                              0,
-                              false);
-        }
         gtk_widget_hide(this->side_dev_scroll);
         if (this->side_dev)
         {

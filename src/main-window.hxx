@@ -134,8 +134,6 @@ void focus_panel(GtkMenuItem* item, void* mw, panel_t p);
 void main_window_open_path_in_current_tab(MainWindow* main_window,
                                           const std::filesystem::path& path);
 void main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab);
-bool main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64 tab,
-                       const char* focus, u32 keyval, u32 button, u32 state, bool visible);
 void main_window_store_positions(MainWindow* main_window);
 
 void main_window_fullscreen_activate(MainWindow* main_window);

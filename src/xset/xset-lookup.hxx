@@ -134,31 +134,6 @@ namespace xset
         panel_3,
         panel_4,
 
-        main_auto,
-        auto_inst,
-        evt_start,
-        evt_exit,
-        auto_win,
-
-        evt_win_new,
-        evt_win_focus,
-        evt_win_move,
-        evt_win_click,
-        evt_win_key,
-        evt_win_close,
-
-        auto_pnl,
-        evt_pnl_focus,
-        evt_pnl_show,
-        evt_pnl_sel,
-
-        auto_tab,
-        evt_tab_new,
-        evt_tab_chdir,
-        evt_tab_focus,
-        evt_tab_close,
-
-        evt_device,
         main_title,
         main_full,
         main_prefs,

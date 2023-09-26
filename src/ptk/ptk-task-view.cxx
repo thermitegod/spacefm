@@ -38,7 +38,6 @@
 #include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-event-handler.hxx"
 
 #include "settings.hxx"
 
@@ -765,21 +764,6 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
     bool is_tasks;
 
     if (event->type != GdkEventType::GDK_BUTTON_PRESS)
-    {
-        return false;
-    }
-
-    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-        main_window_event(main_window,
-                          event_handler->win_click,
-                          xset::name::evt_win_click,
-                          0,
-                          0,
-                          "tasklist",
-                          0,
-                          event->button,
-                          event->state,
-                          true))
     {
         return false;
     }

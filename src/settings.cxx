@@ -58,7 +58,6 @@
 #include "xset/xset-design.hxx"
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-event-handler.hxx"
 #include "xset/xset-static-strings.hxx"
 
 #include "settings/app.hxx"
@@ -335,9 +334,6 @@ load_settings()
 
     // set default keys
     xset_default_keys();
-
-    // cache event handlers
-    event_handler = std::make_unique<XSetEventHandler>();
 }
 
 void

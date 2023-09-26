@@ -54,7 +54,6 @@
 #include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-event-handler.hxx"
 
 #include "settings/app.hxx"
 #include "settings/disk-format.hxx"
@@ -96,7 +95,6 @@ static void on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow*
 static void on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window);
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                u32 time, PtkFileBrowser* file_browser);
-static bool on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_data);
 
 static bool on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set);
 static bool on_main_window_keypress_found_key(MainWindow* main_window, xset_t set);
@@ -177,56 +175,6 @@ main_window_class_init(MainWindowClass* klass)
                        g_cclosure_marshal_VOID__POINTER,
                        G_TYPE_NONE, 1, G_TYPE_POINTER );
     */
-}
-
-static bool
-on_configure_evt_timer(MainWindow* main_window)
-{
-    if (all_windows.empty())
-    {
-        return false;
-    }
-
-    // verify main_window still valid
-    for (MainWindow* window : all_windows)
-    {
-        if (window == main_window)
-        {
-            break;
-        }
-    }
-
-    if (main_window->configure_evt_timer)
-    {
-        g_source_remove(main_window->configure_evt_timer);
-        main_window->configure_evt_timer = 0;
-    }
-    main_window_event(main_window,
-                      event_handler->win_move,
-                      xset::name::evt_win_move,
-                      0,
-                      0,
-                      nullptr,
-                      0,
-                      0,
-                      0,
-                      true);
-    return false;
-}
-
-static bool
-on_window_configure_event(GtkWindow* window, GdkEvent* event, MainWindow* main_window)
-{
-    (void)window;
-    (void)event;
-    // use timer to prevent rapid events during resize
-    if ((event_handler->win_move->s || event_handler->win_move->ob2_data) &&
-        !main_window->configure_evt_timer)
-    {
-        main_window->configure_evt_timer =
-            g_timeout_add(200, (GSourceFunc)on_configure_evt_timer, main_window);
-    }
-    return false;
 }
 
 static void
@@ -935,39 +883,11 @@ show_panels(GtkMenuItem* item, MainWindow* main_window)
                     main_window_add_new_tab(main_window, folder_path);
                 }
             }
-            if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-                !gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
-            {
-                main_window_event(main_window,
-                                  event_handler->pnl_show,
-                                  xset::name::evt_pnl_show,
-                                  p,
-                                  0,
-                                  nullptr,
-                                  0,
-                                  0,
-                                  0,
-                                  true);
-            }
             gtk_widget_show(GTK_WIDGET(main_window->panel[p - 1]));
         }
         else
         {
             // not shown
-            if ((event_handler->pnl_show->s || event_handler->pnl_show->ob2_data) &&
-                gtk_widget_get_visible(GTK_WIDGET(main_window->panel[p - 1])))
-            {
-                main_window_event(main_window,
-                                  event_handler->pnl_show,
-                                  xset::name::evt_pnl_show,
-                                  p,
-                                  0,
-                                  nullptr,
-                                  0,
-                                  0,
-                                  0,
-                                  false);
-            }
             gtk_widget_hide(GTK_WIDGET(main_window->panel[p - 1]));
         }
     }
@@ -1192,7 +1112,6 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
                   {
                       xset::name::separator,
                       xset::name::main_tasks,
-                      xset::name::main_auto,
                       xset::name::separator,
                       xset::name::main_title,
                       xset::name::main_full,
@@ -1461,13 +1380,6 @@ main_window_init(MainWindow* main_window)
                      G_CALLBACK(on_main_window_keypress),
                      nullptr);
 
-    g_signal_connect(main_window, "focus-in-event", G_CALLBACK(on_main_window_focus), nullptr);
-
-    g_signal_connect(G_OBJECT(main_window),
-                     "configure-event",
-                     G_CALLBACK(on_window_configure_event),
-                     main_window);
-
     g_signal_connect(G_OBJECT(main_window),
                      "button-press-event",
                      G_CALLBACK(on_window_button_press_event),
@@ -1515,8 +1427,6 @@ main_window_init(MainWindow* main_window)
     // NOT doing this because it slows down the initial opening of the window
     // and shows a stale menu anyway.
     // rebuild_menus(main_window);
-
-    main_window_event(main_window, nullptr, xset::name::evt_win_new, 0, 0, nullptr, 0, 0, 0, true);
 }
 
 static void
@@ -1559,19 +1469,6 @@ main_window_close(MainWindow* main_window)
                             G_OBJECT(main_window),
                             G_CALLBACK(ptk_file_task_notify_handler), nullptr));
     */
-    if (event_handler->win_close->s || event_handler->win_close->ob2_data)
-    {
-        main_window_event(main_window,
-                          event_handler->win_close,
-                          xset::name::evt_win_close,
-                          0,
-                          0,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          false);
-    }
     gtk_widget_destroy(GTK_WIDGET(main_window));
 }
 
@@ -1954,20 +1851,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
     (void)widget;
     MainWindow* main_window = file_browser->main_window();
     on_file_browser_panel_change(file_browser, main_window);
-    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-        main_window_event(main_window,
-                          event_handler->win_click,
-                          xset::name::evt_win_click,
-                          0,
-                          0,
-                          "tabbar",
-                          0,
-                          event->button,
-                          event->state,
-                          true))
-    {
-        return true;
-    }
+
     // middle-click on tab closes
     if (event->type == GdkEventType::GDK_BUTTON_PRESS)
     {
@@ -2044,20 +1928,6 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
     if (xset_get_b(xset::name::main_save_tabs))
     {
         autosave_request_add();
-    }
-
-    if (event_handler->tab_chdir->s || event_handler->tab_chdir->ob2_data)
-    {
-        main_window_event(main_window,
-                          event_handler->tab_chdir,
-                          xset::name::evt_tab_chdir,
-                          0,
-                          0,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          true);
     }
 }
 
@@ -2242,20 +2112,6 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
         file_browser->chdir("/", ptk::file_browser::chdir_mode::add_history);
     }
 
-    if (event_handler->tab_new->s || event_handler->tab_new->ob2_data)
-    {
-        main_window_event(main_window,
-                          event_handler->tab_new,
-                          xset::name::evt_tab_new,
-                          0,
-                          0,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          true);
-    }
-
     set_panel_focus(main_window, file_browser);
     //    while(g_main_context_pending(nullptr))  // wait for chdir to grab focus
     //        g_main_context_iteration(nullptr, true);
@@ -2369,19 +2225,6 @@ set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
     }
 
     update_window_title(mw);
-    if (event_handler->pnl_focus->s || event_handler->pnl_focus->ob2_data)
-    {
-        main_window_event(main_window,
-                          event_handler->pnl_focus,
-                          xset::name::evt_pnl_focus,
-                          mw->curpanel,
-                          0,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          true);
-    }
 }
 
 void
@@ -2533,20 +2376,6 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     main_window_update_status_bar(main_window, file_browser);
 
     main_window_set_window_title(main_window, file_browser);
-
-    if (event_handler->tab_focus->ob2_data || event_handler->tab_focus->s)
-    {
-        main_window_event(main_window,
-                          event_handler->tab_focus,
-                          xset::name::evt_tab_focus,
-                          main_window->curpanel,
-                          page_num + 1,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          true);
-    }
 
     file_browser->update_views();
 
@@ -2877,20 +2706,6 @@ static void
 on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // ztd::logger::info("sel_change  panel {}", file_browser->mypanel);
-    if ((event_handler->pnl_sel->ob2_data || event_handler->pnl_sel->s) &&
-        main_window_event(main_window,
-                          event_handler->pnl_sel,
-                          xset::name::evt_pnl_sel,
-                          0,
-                          0,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          true))
-    {
-        return;
-    }
     main_window_update_status_bar(main_window, file_browser);
 }
 
@@ -2950,31 +2765,6 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
 }
 
 static bool
-on_main_window_focus(GtkWidget* main_window, GdkEventFocus* event, void* user_data)
-{
-    (void)event;
-    (void)user_data;
-    // this causes a widget not realized loop by running rebuild_menus while
-    // rebuild_menus is already running
-    // but this unneeded anyway?  cross-window menu changes seem to work ok
-    // rebuild_menus(main_window);  // xset may change in another window
-    if (event_handler->win_focus->s || event_handler->win_focus->ob2_data)
-    {
-        main_window_event(MAIN_WINDOW_REINTERPRET(main_window),
-                          event_handler->win_focus,
-                          xset::name::evt_win_focus,
-                          0,
-                          0,
-                          nullptr,
-                          0,
-                          0,
-                          0,
-                          true);
-    }
-    return false;
-}
-
-static bool
 on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set)
 {
     // ztd::logger::info("main_keypress {} {}", event->keyval, event->state);
@@ -3014,21 +2804,6 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         {
             return false; // send to pathbar
         }
-    }
-
-    if ((event_handler->win_key->s || event_handler->win_key->ob2_data) &&
-        main_window_event(main_window,
-                          event_handler->win_key,
-                          xset::name::evt_win_key,
-                          0,
-                          0,
-                          nullptr,
-                          event->keyval,
-                          0,
-                          keymod,
-                          true))
-    {
-        return true;
     }
 
     for (xset_t set : xsets)
@@ -3591,309 +3366,4 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
     buf.append("\n\n");
 
     return buf;
-}
-
-/*
- * Events
- */
-
-static bool
-run_event(MainWindow* main_window, PtkFileBrowser* file_browser, xset_t preset, xset::name event,
-          panel_t panel, tab_t tab, const char* focus, u32 keyval, u32 button, u32 state,
-          bool visible, xset_t set, char* ucmd)
-{
-    bool inhibit;
-    i32 exit_status;
-
-    const auto event_name = xset::get_name_from_xsetname(event);
-
-    if (!ucmd)
-    {
-        return false;
-    }
-
-    if (ucmd[0] == '*')
-    {
-        ucmd++;
-        inhibit = true;
-    }
-    else
-    {
-        inhibit = false;
-    }
-
-    if (!preset && (event == xset::name::evt_start || event == xset::name::evt_exit ||
-                    event == xset::name::evt_device))
-    {
-        std::string cmd = ucmd;
-        cmd = ztd::replace(cmd, "%e", event_name);
-
-        if (event == xset::name::evt_device)
-        {
-            if (!focus)
-            {
-                return false;
-            }
-            cmd = ztd::replace(cmd, "%f", focus);
-            std::string change;
-            switch (state)
-            {
-                case vfs::volume_state::added:
-                    change = "added";
-                    break;
-                case vfs::volume_state::removed:
-                    change = "removed";
-                    break;
-                case vfs::volume_state::changed:
-                    change = "changed";
-                    break;
-            }
-            cmd = ztd::replace(cmd, "%v", change);
-        }
-        ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
-        const std::string command = std::format("{} -c {}", FISH_PATH, cmd);
-        Glib::spawn_command_line_async(command);
-        return false;
-    }
-
-    if (main_window == nullptr)
-    {
-        return false;
-    }
-
-    // replace vars
-    std::string replace;
-    if (set == event_handler->win_click)
-    {
-        replace = "%e %w %p %t %f %b %m";
-        state = (state & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
-                          GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |
-                          GdkModifierType::GDK_HYPER_MASK | GdkModifierType::GDK_META_MASK));
-    }
-    else if (set == event_handler->win_key)
-    {
-        replace = "%e %w %p %t %k %m";
-    }
-    else if (set == event_handler->pnl_show)
-    {
-        replace = "%e %w %p %t %f %v";
-    }
-    else if (set == event_handler->tab_chdir)
-    {
-        replace = "%e %w %p %t %d";
-    }
-    else
-    {
-        replace = "%e %w %p %t";
-    }
-
-    /**
-     * %w  windowid
-     * %p  panel
-     * %t  tab
-     * %f  focus
-     * %e  event
-     * %k  keycode
-     * %m  modifier
-     * %b  button
-     * %v  visible
-     * %d  cwd
-     */
-    std::string rep;
-    std::string cmd = ucmd;
-    if (ztd::contains(replace, "%f"))
-    {
-        if (!focus)
-        {
-            rep = std::format("panel{}", panel);
-            cmd = ztd::replace(cmd, "%f", rep);
-        }
-        else
-        {
-            cmd = ztd::replace(cmd, "%f", focus);
-        }
-    }
-    else if (ztd::contains(replace, "%w"))
-    {
-        rep = std::format("{}", fmt::ptr(main_window));
-        cmd = ztd::replace(cmd, "%w", rep);
-    }
-    else if (ztd::contains(replace, "%p"))
-    {
-        rep = std::format("{}", panel);
-        cmd = ztd::replace(cmd, "%p", rep);
-    }
-    else if (ztd::contains(replace, "%t"))
-    {
-        rep = std::format("{}", tab);
-        cmd = ztd::replace(cmd, "%t", rep);
-    }
-    else if (ztd::contains(replace, "%v"))
-    {
-        cmd = ztd::replace(cmd, "%v", visible ? "1" : "0");
-    }
-    else if (ztd::contains(replace, "%k"))
-    {
-        rep = std::format("{:#x}", keyval);
-        cmd = ztd::replace(cmd, "%k", rep);
-    }
-    else if (ztd::contains(replace, "%b"))
-    {
-        rep = std::format("{}", button);
-        cmd = ztd::replace(cmd, "%b", rep);
-    }
-    else if (ztd::contains(replace, "%m"))
-    {
-        rep = std::format("{:#x}", state);
-        cmd = ztd::replace(cmd, "%m", rep);
-    }
-    else if (ztd::contains(replace, "%d"))
-    {
-        if (file_browser)
-        {
-            rep = ztd::shell::quote(file_browser->cwd().string());
-            cmd = ztd::replace(cmd, "%d", rep);
-        }
-    }
-
-    if (!inhibit)
-    {
-        ztd::logger::info("EVENT {} >>> {}", event_name, cmd);
-        if (event == xset::name::evt_tab_close)
-        {
-            const std::string command = std::format("{} -c {}", FISH_PATH, cmd);
-            // file_browser becomes invalid so spawn
-            Glib::spawn_command_line_async(command);
-        }
-        else
-        {
-            // task
-            PtkFileTask* ptask = ptk_file_exec_new(event_name,
-                                                   file_browser->cwd(),
-                                                   GTK_WIDGET(file_browser),
-                                                   main_window->task_view);
-            ptask->task->exec_browser = file_browser;
-            ptask->task->exec_command = cmd;
-            if (set->icon)
-            {
-                ptask->task->exec_icon = set->icon.value();
-            }
-            ptask->task->exec_sync = false;
-            ptask->task->exec_export = true;
-            ptk_file_task_run(ptask);
-        }
-        return false;
-    }
-
-    ztd::logger::info("REPLACE_EVENT {} >>> {}", event_name, cmd);
-
-    inhibit = false;
-    const std::string command = std::format("{} -c {}", FISH_PATH, cmd);
-    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-
-    if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0)
-    {
-        inhibit = true;
-    }
-
-    ztd::logger::info("REPLACE_EVENT ? {}", inhibit ? "true" : "false");
-    return inhibit;
-}
-
-bool
-main_window_event(void* mw, xset_t preset, xset::name event, i64 panel, i64 tab, const char* focus,
-                  u32 keyval, u32 button, u32 state, bool visible)
-{
-    xset_t set;
-    bool inhibit = false;
-
-    // ztd::logger::info("main_window_event {}", xset::get_name_from_xsetname(event));
-
-    if (preset)
-    {
-        set = preset;
-    }
-    else
-    {
-        set = xset_get(event);
-        if (!set->s && !set->ob2_data)
-        {
-            return false;
-        }
-    }
-
-    // get main_window, panel, and tab
-    MainWindow* main_window;
-    PtkFileBrowser* file_browser;
-    if (!mw)
-    {
-        main_window = main_window_get_last_active();
-    }
-    else
-    {
-        main_window = MAIN_WINDOW(mw);
-    }
-    if (main_window)
-    {
-        file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
-        if (!file_browser)
-        {
-            return false;
-        }
-        if (!panel)
-        {
-            panel = main_window->curpanel;
-        }
-        if (!tab)
-        {
-            tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[file_browser->panel() - 1]),
-                                        GTK_WIDGET(file_browser)) +
-                  1;
-        }
-    }
-    else
-    {
-        file_browser = nullptr;
-    }
-
-    // dynamic handlers
-    if (set->ob2_data)
-    {
-        for (GList* l = (GList*)set->ob2_data; l; l = g_list_next(l))
-        {
-            if (run_event(main_window,
-                          file_browser,
-                          preset,
-                          event,
-                          panel,
-                          tab,
-                          focus,
-                          keyval,
-                          button,
-                          state,
-                          visible,
-                          set,
-                          (char*)l->data))
-            {
-                inhibit = true;
-            }
-        }
-    }
-
-    // Events menu handler
-    return (run_event(main_window,
-                      file_browser,
-                      preset,
-                      event,
-                      panel,
-                      tab,
-                      focus,
-                      keyval,
-                      button,
-                      state,
-                      visible,
-                      set,
-                      set->s.value().data()) ||
-            inhibit);
 }

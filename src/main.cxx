@@ -418,8 +418,6 @@ main(int argc, char* argv[])
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
 
-    main_window_event(nullptr, nullptr, xset::name::evt_start, 0, 0, nullptr, 0, 0, 0, false);
-
     // handle the parsed result of command line args
     if (handle_parsed_commandline_args(opt))
     {
@@ -428,8 +426,6 @@ main(int argc, char* argv[])
         // run the main loop
         gtk_main();
     }
-
-    main_window_event(nullptr, nullptr, xset::name::evt_exit, 0, 0, nullptr, 0, 0, 0, false);
 
     std::exit(EXIT_SUCCESS);
 }

@@ -37,7 +37,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-#include "xset/xset-event-handler.hxx"
 
 #include "main-window.hxx"
 
@@ -605,20 +604,6 @@ call_callbacks(vfs::volume vol, vfs::volume_state state)
     for (const auto& callback : callbacks)
     {
         callback->cb(vol, state, callback->user_data);
-    }
-
-    if (event_handler->device->s || event_handler->device->ob2_data)
-    {
-        main_window_event(nullptr,
-                          nullptr,
-                          xset::name::evt_device,
-                          0,
-                          0,
-                          vol->device_file().data(),
-                          0,
-                          0,
-                          state,
-                          false);
     }
 }
 

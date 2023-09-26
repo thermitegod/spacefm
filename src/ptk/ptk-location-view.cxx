@@ -34,7 +34,6 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-event-handler.hxx"
 
 #include "types.hxx"
 
@@ -1406,21 +1405,6 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
     PtkFileBrowser* file_browser =
         PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
     file_browser->focus_me();
-
-    if ((event_handler->win_click->s || event_handler->win_click->ob2_data) &&
-        main_window_event(file_browser->main_window(),
-                          event_handler->win_click,
-                          xset::name::evt_win_click,
-                          0,
-                          0,
-                          "devices",
-                          0,
-                          event->button,
-                          event->state,
-                          true))
-    {
-        return false;
-    }
 
     // get selected vol
     GtkTreePath* tree_path = nullptr;

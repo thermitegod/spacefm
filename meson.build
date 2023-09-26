@@ -372,7 +372,6 @@ sources = files(
     'src/xset/xset-design.cxx',
     'src/xset/xset-design-clipboard.cxx',
     'src/xset/xset-dialog.cxx',
-    'src/xset/xset-event-handler.cxx',
     'src/xset/xset-keyboard.cxx',
     'src/xset/xset-lookup.cxx',
 
