@@ -31,7 +31,9 @@ is_valid_panel_code(panel_t p)
 bool
 is_valid_tab(tab_t t)
 {
-    return (t != INVALID_TAB || t >= MIN_TABS);
+    return (t != INVALID_TAB &&
+            (t == tab_1 || t == tab_2 || t == tab_3 || t == tab_4 || t == tab_5 || t == tab_6 ||
+             t == tab_7 || t == tab_8 || t == tab_9 || t == tab_10));
 }
 
 bool
