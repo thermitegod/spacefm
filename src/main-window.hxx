@@ -92,6 +92,7 @@ struct MainWindow
 
     GtkWidget* create_tab_label(PtkFileBrowser* file_browser) const noexcept;
     void new_tab(const std::filesystem::path& folder_path) noexcept;
+    void open_path_in_current_tab(const std::filesystem::path& path) noexcept;
 };
 
 GType main_window_get_type();
@@ -134,8 +135,7 @@ void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
-void main_window_open_path_in_current_tab(MainWindow* main_window,
-                                          const std::filesystem::path& path);
+
 void main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab);
 void main_window_store_positions(MainWindow* main_window);
 

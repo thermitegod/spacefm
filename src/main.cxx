@@ -178,7 +178,7 @@ open_in_tab(MainWindow** main_window, const std::filesystem::path& real_path,
         {
             if (opt->reuse_tab)
             {
-                main_window_open_path_in_current_tab(*main_window, real_path);
+                (*main_window)->open_path_in_current_tab(real_path);
                 opt->reuse_tab = false;
             }
             else

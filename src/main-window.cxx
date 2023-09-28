@@ -2385,9 +2385,9 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 }
 
 void
-main_window_open_path_in_current_tab(MainWindow* main_window, const std::filesystem::path& path)
+MainWindow::open_path_in_current_tab(const std::filesystem::path& path) noexcept
 {
-    PtkFileBrowser* file_browser = main_window->current_file_browser();
+    PtkFileBrowser* file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
