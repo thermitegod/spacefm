@@ -3492,7 +3492,7 @@ PtkFileBrowser::close_tab() noexcept
         PtkFileBrowser* a_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
         a_browser->update_views();
-        main_window_set_window_title(main_window, a_browser);
+        main_window->set_window_title( a_browser);
         if (xset_get_b(xset::name::main_save_tabs))
         {
             autosave_request_add();
@@ -3511,7 +3511,7 @@ PtkFileBrowser::close_tab() noexcept
         // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
     }
 
-    main_window_set_window_title(main_window, this);
+    main_window->set_window_title( this);
     if (xset_get_b(xset::name::main_save_tabs))
     {
         autosave_request_add();
@@ -3535,7 +3535,7 @@ PtkFileBrowser::restore_tab() noexcept
 
     main_window->new_tab(file_path);
 
-    main_window_set_window_title(main_window, this);
+    main_window->set_window_title( this);
     if (xset_get_b(xset::name::main_save_tabs))
     {
         autosave_request_add();

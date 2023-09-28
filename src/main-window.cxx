@@ -1900,7 +1900,7 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
 
     if (main_window->current_file_browser() == file_browser)
     {
-        main_window_set_window_title(main_window, file_browser);
+        main_window->set_window_title(file_browser);
         // gtk_entry_set_text(main_window->address_bar, file_browser->dir->path);
         // gtk_statusbar_push(GTK_STATUSBAR(main_window->status_bar), 0, "");
         // main_window_update_command_ui(main_window, file_browser);
@@ -2264,15 +2264,12 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
 }
 
 void
-main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser)
+MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
 {
+    assert(file_browser != nullptr);
+
     std::filesystem::path disp_path;
     std::string disp_name;
-
-    if (!file_browser || !main_window)
-    {
-        return;
-    }
 
     if (file_browser->dir_)
     {
@@ -2311,10 +2308,10 @@ main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_brows
 
         fmt = ztd::replace(fmt, "%t", std::to_string(tab_num));
         fmt = ztd::replace(fmt, "%T", std::to_string(tab_count));
-        fmt = ztd::replace(fmt, "%p", std::to_string(main_window->curpanel));
+        fmt = ztd::replace(fmt, "%p", std::to_string(this->curpanel));
         fmt = ztd::replace(fmt, "%P", std::to_string(panel_count));
     }
-    if (ztd::contains(fmt, "*") && !main_tasks_running(main_window))
+    if (ztd::contains(fmt, "*") && !main_tasks_running(this))
     {
         fmt = ztd::replace(fmt, "*", "");
     }
@@ -2327,7 +2324,7 @@ main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_brows
         fmt = ztd::replace(fmt, "%d", disp_path.string());
     }
 
-    gtk_window_set_title(GTK_WINDOW(main_window), fmt.data());
+    gtk_window_set_title(GTK_WINDOW(this), fmt.data());
 }
 
 static void
@@ -2336,7 +2333,7 @@ update_window_title(MainWindow* main_window)
     PtkFileBrowser* file_browser = main_window->current_file_browser();
     if (file_browser)
     {
-        main_window_set_window_title(main_window, file_browser);
+        main_window->set_window_title(file_browser);
     }
 }
 
@@ -2374,7 +2371,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 
     main_window->update_status_bar(file_browser);
 
-    main_window_set_window_title(main_window, file_browser);
+    main_window->set_window_title(file_browser);
 
     file_browser->update_views();
 
@@ -2694,7 +2691,6 @@ on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_wind
     // ztd::logger::info("panel_change  panel {}", file_browser->mypanel);
     main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->panels[main_window->curpanel - 1];
-    // main_window_set_window_title(main_window, file_browser);
     set_panel_focus(main_window, file_browser);
 }
 

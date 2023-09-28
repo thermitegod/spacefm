@@ -94,6 +94,7 @@ struct MainWindow
     void new_tab(const std::filesystem::path& folder_path) noexcept;
     void open_path_in_current_tab(const std::filesystem::path& path) noexcept;
 
+    void set_window_title(PtkFileBrowser* file_browser) noexcept;
     void update_status_bar(PtkFileBrowser* file_browser) const noexcept;
 };
 
@@ -143,8 +144,6 @@ void main_window_store_positions(MainWindow* main_window);
 
 void main_window_fullscreen_activate(MainWindow* main_window);
 bool main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set);
-
-void main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
 
 struct main_window_counts_data
 {
