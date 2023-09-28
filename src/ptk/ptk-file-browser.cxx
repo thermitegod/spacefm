@@ -3507,7 +3507,7 @@ PtkFileBrowser::close_tab() noexcept
         PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
             gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
         a_browser->update_views();
-        main_window_update_status_bar(main_window, a_browser);
+        main_window->update_status_bar(a_browser);
         // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
     }
 

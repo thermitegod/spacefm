@@ -93,6 +93,8 @@ struct MainWindow
     GtkWidget* create_tab_label(PtkFileBrowser* file_browser) const noexcept;
     void new_tab(const std::filesystem::path& folder_path) noexcept;
     void open_path_in_current_tab(const std::filesystem::path& path) noexcept;
+
+    void update_status_bar(PtkFileBrowser* file_browser) const noexcept;
 };
 
 GType main_window_get_type();
@@ -143,7 +145,6 @@ void main_window_fullscreen_activate(MainWindow* main_window);
 bool main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set);
 
 void main_window_set_window_title(MainWindow* main_window, PtkFileBrowser* file_browser);
-void main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser);
 
 struct main_window_counts_data
 {

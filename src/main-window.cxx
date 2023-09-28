@@ -1890,7 +1890,7 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
 static void
 on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
-    main_window_update_status_bar(main_window, file_browser);
+    main_window->update_status_bar(file_browser);
 }
 
 static void
@@ -2372,7 +2372,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->panels[main_window->curpanel - 1];
 
-    main_window_update_status_bar(main_window, file_browser);
+    main_window->update_status_bar(file_browser);
 
     main_window_set_window_title(main_window, file_browser);
 
@@ -2431,9 +2431,8 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
 }
 
 void
-main_window_update_status_bar(MainWindow* main_window, PtkFileBrowser* file_browser)
+MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
 {
-    (void)main_window;
     if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
     {
         return;
@@ -2703,14 +2702,14 @@ static void
 on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // ztd::logger::info("sel_change  panel {}", file_browser->mypanel);
-    main_window_update_status_bar(main_window, file_browser);
+    main_window->update_status_bar(file_browser);
 }
 
 static void
 on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window)
 {
     // ztd::logger::info("content_change  panel {}", file_browser->mypanel);
-    main_window_update_status_bar(main_window, file_browser);
+    main_window->update_status_bar(file_browser);
 }
 
 static bool
