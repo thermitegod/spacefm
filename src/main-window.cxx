@@ -104,8 +104,6 @@ static bool delayed_focus_file_browser(PtkFileBrowser* file_browser);
 
 static GtkWindowClass* parent_class = nullptr;
 
-static i32 n_windows = 0;
-
 static std::vector<MainWindow*> all_windows;
 
 //  Drag & Drop/Clipboard targets
@@ -1254,7 +1252,6 @@ main_window_init(MainWindow* main_window)
     gtk_window_group_add_window(main_window->wgroup, GTK_WINDOW(main_window));
 
     /* Add to total window count */
-    ++n_windows;
     all_windows.emplace_back(main_window);
 
     WindowReference::increase();
@@ -1430,8 +1427,6 @@ static void
 main_window_finalize(GObject* obj)
 {
     ztd::remove(all_windows, MAIN_WINDOW_REINTERPRET(obj));
-
-    --n_windows;
 
     g_object_unref((MAIN_WINDOW_REINTERPRET(obj))->wgroup);
 
