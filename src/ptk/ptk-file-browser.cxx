@@ -3458,7 +3458,7 @@ PtkFileBrowser::close_tab() noexcept
 
     MainWindow* main_window = this->main_window_;
     main_window->curpanel = this->panel_;
-    main_window->notebook = main_window->panel[main_window->curpanel - 1];
+    main_window->notebook = main_window->panels[main_window->curpanel - 1];
 
     // save solumns and slider positions of tab to be closed
     this->slider_release(nullptr);

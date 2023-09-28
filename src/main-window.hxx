@@ -55,7 +55,7 @@ struct MainWindow
     GtkWidget* help_menu_item;
     GtkWidget* dev_menu;
     GtkWidget* notebook; // MOD changed use to current panel
-    GtkWidget* panel[4];
+    GtkWidget* panels[4];
     i32 panel_slide_x[4];
     i32 panel_slide_y[4];
     i32 panel_slide_s[4];

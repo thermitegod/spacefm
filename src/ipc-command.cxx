@@ -156,7 +156,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         return {SOCKET_INVALID, std::format("invalid panel {}", panel)};
     }
     if (!xset_get_b_panel(panel, xset::panel::show) ||
-        gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) == -1)
+        gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panels[panel - 1])) == -1)
     {
         return {SOCKET_INVALID, std::format("panel {} is not visible", panel)};
     }
@@ -164,14 +164,14 @@ run_ipc_command(const std::string_view socket_commands_json)
     // tab
     if (tab == 0)
     {
-        tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panel[panel - 1])) + 1;
+        tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panels[panel - 1])) + 1;
     }
-    if (tab < 1 || tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
+    if (tab < 1 || tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panels[panel - 1])))
     {
         return {SOCKET_INVALID, std::format("invalid tab {}", tab)};
     }
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
-        gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panel[panel - 1]), tab - 1));
+        gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panels[panel - 1]), tab - 1));
 
     // command
 
@@ -395,7 +395,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
 
             if (!(is_valid_tab(new_tab) || is_valid_tab_code(new_tab)) || new_tab == INVALID_TAB ||
-                new_tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panel[panel - 1])))
+                new_tab > gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panels[panel - 1])))
             {
                 return {SOCKET_INVALID, std::format("invalid tab number: {}", new_tab)};
             }
@@ -989,7 +989,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             return {SOCKET_SUCCESS,
                     std::format("{}",
-                                gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panel[panel - 1]),
+                                gtk_notebook_page_num(GTK_NOTEBOOK(main_window->panels[panel - 1]),
                                                       GTK_WIDGET(file_browser)) +
                                     1)};
         }

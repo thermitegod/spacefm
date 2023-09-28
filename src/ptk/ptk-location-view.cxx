@@ -177,7 +177,7 @@ update_change_detection()
     {
         for (const panel_t p : PANELS)
         {
-            GtkNotebook* notebook = GTK_NOTEBOOK(window->panel[p - 1]);
+            GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
             const i32 num_pages = gtk_notebook_get_n_pages(notebook);
             for (const auto i : ztd::range(num_pages))
             {
