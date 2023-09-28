@@ -183,7 +183,7 @@ open_in_tab(MainWindow** main_window, const std::filesystem::path& real_path,
             }
             else
             {
-                main_window_add_new_tab(*main_window, real_path);
+                (*main_window)->new_tab(real_path);
             }
         }
     }

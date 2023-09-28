@@ -3488,7 +3488,7 @@ PtkFileBrowser::close_tab() noexcept
         {
             path = vfs::user_dirs->home_dir();
         }
-        main_window_add_new_tab(main_window, path);
+        main_window->new_tab(path);
         PtkFileBrowser* a_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
         a_browser->update_views();
@@ -3533,7 +3533,7 @@ PtkFileBrowser::restore_tab() noexcept
 
     MainWindow* main_window = this->main_window_;
 
-    main_window_add_new_tab(main_window, file_path);
+    main_window->new_tab(file_path);
 
     main_window_set_window_title(main_window, this);
     if (xset_get_b(xset::name::main_save_tabs))

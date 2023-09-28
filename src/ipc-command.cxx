@@ -411,7 +411,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
 
             focus_panel(main_window, panel);
-            main_window_add_new_tab(main_window, value);
+            main_window->new_tab(value);
         }
         else if (ztd::same(property, "devices-visible"))
         {

@@ -831,7 +831,7 @@ MainWindow::show_panels() noexcept
                         {
                             folder_path = vfs::user_dirs->home_dir();
                         }
-                        main_window_add_new_tab(this, folder_path);
+                        this->new_tab(folder_path);
                         tab_added = true;
                     }
                     if (set->x && !set->ob1)
@@ -868,7 +868,7 @@ MainWindow::show_panels() noexcept
                     {
                         folder_path = vfs::user_dirs->home_dir();
                     }
-                    main_window_add_new_tab(this, folder_path);
+                    this->new_tab(folder_path);
                 }
             }
             gtk_widget_show(GTK_WIDGET(this->panel[p - 1]));
@@ -970,7 +970,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
         MainWindow* main_window = file_browser->main_window();
 
-        main_window_add_new_tab(main_window, file_path);
+        main_window->new_tab(file_path);
 
         return true;
     }
@@ -1792,7 +1792,7 @@ main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
     main_window->curpanel = panel_x;
     main_window->notebook = main_window->panel[panel_x - 1];
 
-    main_window_add_new_tab(main_window, file_path);
+    main_window->new_tab(file_path);
 
     main_window->curpanel = save_curpanel;
     main_window->notebook = main_window->panel[main_window->curpanel - 1];
@@ -2045,12 +2045,12 @@ main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
 }
 
 void
-main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& folder_path)
+MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 {
-    GtkWidget* notebook = main_window->notebook;
+    // ztd::logger::debug("New tab fb={} panel={} path={}", fmt::ptr(file_browser), this->curpanel, folder_path);
 
     PtkFileBrowser* current_file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+        PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(this));
     if (GTK_IS_WIDGET(current_file_browser))
     {
         // save sliders of current fb ( new tab while task manager is shown changes vals )
@@ -2059,14 +2059,12 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
         current_file_browser->save_column_widths(GTK_TREE_VIEW(current_file_browser->folder_view_));
     }
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
-        ptk_file_browser_new(main_window->curpanel, notebook, main_window->task_view, main_window));
+        ptk_file_browser_new(this->curpanel, this->notebook, this->task_view, this));
     if (!file_browser)
     {
         return;
     }
-    // ztd::logger::info("New tab panel={} path={}", main_window->curpanel, folder_path);
 
-    // ztd::logger::info("main_window_add_new_tab fb={}", fmt::ptr(file_browser));
     file_browser->set_single_click(app_settings.single_click());
 
     file_browser->show_thumbnails(app_settings.show_thumbnail() ? app_settings.max_thumb_size()
@@ -2083,32 +2081,30 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     gtk_widget_show(GTK_WIDGET(file_browser));
 
     // file_browser->add_event<spacefm::signal::chdir_before>(on_file_browser_before_chdir, main_window);
-    file_browser->add_event<spacefm::signal::chdir_begin>(on_file_browser_begin_chdir, main_window);
-    file_browser->add_event<spacefm::signal::chdir_after>(on_file_browser_after_chdir, main_window);
-    file_browser->add_event<spacefm::signal::open_item>(on_file_browser_open_item, main_window);
-    file_browser->add_event<spacefm::signal::change_content>(on_file_browser_content_change,
-                                                             main_window);
-    file_browser->add_event<spacefm::signal::change_sel>(on_file_browser_sel_change, main_window);
-    file_browser->add_event<spacefm::signal::change_pane>(on_file_browser_panel_change,
-                                                          main_window);
+    file_browser->add_event<spacefm::signal::chdir_begin>(on_file_browser_begin_chdir, this);
+    file_browser->add_event<spacefm::signal::chdir_after>(on_file_browser_after_chdir, this);
+    file_browser->add_event<spacefm::signal::open_item>(on_file_browser_open_item, this);
+    file_browser->add_event<spacefm::signal::change_content>(on_file_browser_content_change, this);
+    file_browser->add_event<spacefm::signal::change_sel>(on_file_browser_sel_change, this);
+    file_browser->add_event<spacefm::signal::change_pane>(on_file_browser_panel_change, this);
 
-    GtkWidget* tab_label = main_window_create_tab_label(main_window, file_browser);
+    GtkWidget* tab_label = main_window_create_tab_label(this, file_browser);
     const i32 idx =
-        gtk_notebook_append_page(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), tab_label);
-    gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(notebook), GTK_WIDGET(file_browser), true);
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), idx);
+        gtk_notebook_append_page(GTK_NOTEBOOK(this->notebook), GTK_WIDGET(file_browser), tab_label);
+    gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(this->notebook), GTK_WIDGET(file_browser), true);
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(this->notebook), idx);
 
     if (app_settings.always_show_tabs())
     {
-        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), true);
+        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(this->notebook), true);
     }
-    else if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) > 1)
+    else if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(this->notebook)) > 1)
     {
-        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), true);
+        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(this->notebook), true);
     }
     else
     {
-        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), false);
+        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(this->notebook), false);
     }
 
     if (!file_browser->chdir(folder_path, ptk::file_browser::chdir_mode::add_history))
@@ -2116,7 +2112,8 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
         file_browser->chdir("/", ptk::file_browser::chdir_mode::add_history);
     }
 
-    set_panel_focus(main_window, file_browser);
+    set_panel_focus(this, file_browser);
+
     //    while(g_main_context_pending(nullptr))  // wait for chdir to grab focus
     //        g_main_context_iteration(nullptr, true);
     // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view_));
@@ -2428,7 +2425,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
             file_browser->chdir(path, ptk::file_browser::chdir_mode::add_history);
             break;
         case ptk::open_action::new_tab:
-            main_window_add_new_tab(main_window, path);
+            main_window->new_tab(path);
             break;
         case ptk::open_action::new_window:
         case ptk::open_action::terminal:
