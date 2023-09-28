@@ -814,8 +814,6 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
                   accel_group,
                   {xset::name::separator, xset::name::status_middle});
     gtk_widget_show_all(menu);
-
-    g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
 
 static void

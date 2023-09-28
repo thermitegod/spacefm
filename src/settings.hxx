@@ -51,7 +51,6 @@ GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, xset_t set);
 
 void xset_menu_cb(GtkWidget* item, xset_t set);
-bool xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data);
 
 void xset_edit(GtkWidget* parent, const std::filesystem::path& path);
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,

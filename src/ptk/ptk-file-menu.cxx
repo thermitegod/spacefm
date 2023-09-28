@@ -1573,7 +1573,6 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     gtk_widget_show_all(GTK_WIDGET(popup));
 
     g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
-    g_signal_connect(popup, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     return popup;
 }
 

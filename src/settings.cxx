@@ -560,10 +560,6 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
                 submenu = gtk_menu_new();
                 item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
                 gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-                g_signal_connect(submenu,
-                                 "key-press-event",
-                                 G_CALLBACK(xset_menu_keypress),
-                                 nullptr);
                 if (set->lock)
                 {
                     if (!set->context_menu_entries.empty())
@@ -1209,92 +1205,6 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
         return true;
     }
     return false; // true will not stop activate on button-press (will on release)
-}
-
-bool
-xset_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
-{
-    (void)user_data;
-    xset::job job = xset::job::invalid;
-    xset_t set;
-
-    GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
-    if (item)
-    {
-        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
-        if (!set)
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return false;
-    }
-
-    const u32 keymod = ptk_get_keymod(event->state);
-
-    switch (keymod)
-    {
-        case 0:
-            switch (event->keyval)
-            {
-                case GDK_KEY_F2:
-                case GDK_KEY_Menu:
-                    xset_design_show_menu(widget, set, nullptr, 0, event->time);
-                    return true;
-                case GDK_KEY_Delete:
-                    job = xset::job::remove;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case GdkModifierType::GDK_CONTROL_MASK:
-            switch (event->keyval)
-            {
-                case GDK_KEY_c:
-                    job = xset::job::copy;
-                    break;
-                case GDK_KEY_x:
-                    job = xset::job::cut;
-                    break;
-                case GDK_KEY_v:
-                    job = xset::job::paste;
-                    break;
-                case GDK_KEY_e:
-                    if (set->lock)
-                    {
-                        xset_design_show_menu(widget, set, nullptr, 0, event->time);
-                        return true;
-                    }
-                    break;
-                case GDK_KEY_k:
-                    job = xset::job::key;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        default:
-            break;
-    }
-
-    if (job != xset::job::invalid)
-    {
-        if (xset_job_is_valid(set, job))
-        {
-            gtk_menu_shell_deactivate(GTK_MENU_SHELL(widget));
-            g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
-            xset_design_job(item, set);
-        }
-        else
-        {
-            xset_design_show_menu(widget, set, nullptr, 0, event->time);
-        }
-        return true;
-    }
-    return false;
 }
 
 void

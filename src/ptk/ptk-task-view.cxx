@@ -948,7 +948,6 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
 
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
-            g_signal_connect(popup, "key_press_event", G_CALLBACK(xset_menu_keypress), nullptr);
             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             // right click
             break;

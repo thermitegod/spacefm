@@ -1018,7 +1018,6 @@ rebuild_menu_file(MainWindow* main_window, PtkFileBrowser* file_browser)
                       xset::name::main_exit,
                   });
     gtk_widget_show_all(GTK_WIDGET(newmenu));
-    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->file_menu_item), newmenu);
 }
 
@@ -1119,7 +1118,6 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
                       xset::name::main_prefs,
                   });
     gtk_widget_show_all(GTK_WIDGET(newmenu));
-    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->view_menu_item), newmenu);
 }
 
@@ -1153,10 +1151,6 @@ rebuild_menu_device(MainWindow* main_window, PtkFileBrowser* file_browser)
 
     main_window->dev_menu = newmenu;
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->dev_menu_item), main_window->dev_menu);
-    g_signal_connect(main_window->dev_menu,
-                     "key-press-event",
-                     G_CALLBACK(xset_menu_keypress),
-                     nullptr);
 }
 
 static void
@@ -1200,7 +1194,6 @@ rebuild_menu_help(MainWindow* main_window, PtkFileBrowser* file_browser)
     xset_set_cb(xset::name::main_about, (GFunc)on_about_activate, main_window);
     xset_add_menu(file_browser, newmenu, accel_group, {xset::name::main_about});
     gtk_widget_show_all(GTK_WIDGET(newmenu));
-    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->help_menu_item), newmenu);
 }
 
@@ -1881,7 +1874,6 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
             xset_add_menuitem(file_browser, popup, accel_group, set);
             gtk_widget_show_all(GTK_WIDGET(popup));
             g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
-            g_signal_connect(popup, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             return true;
         }

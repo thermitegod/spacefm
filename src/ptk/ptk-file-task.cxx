@@ -709,7 +709,6 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
-    g_signal_connect(menu, "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
 }
 
 static void

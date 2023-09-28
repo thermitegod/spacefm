@@ -78,7 +78,6 @@ delayed_show_menu(GtkWidget* menu)
     }
     gtk_widget_show_all(GTK_WIDGET(menu));
     gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-    g_signal_connect(G_OBJECT(menu), "key-press-event", G_CALLBACK(xset_menu_keypress), nullptr);
     g_signal_connect(menu, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
     return false;
 }
