@@ -904,66 +904,6 @@ xset_job_is_valid(xset_t set, xset::job job)
     return false;
 }
 
-static bool
-xset_design_menu_keypress(GtkWidget* widget, GdkEventKey* event, xset_t set)
-{
-    xset::job job = xset::job::invalid;
-
-    GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(widget));
-    if (!item)
-    {
-        return false;
-    }
-
-    const u32 keymod = ptk_get_keymod(event->state);
-
-    switch (keymod)
-    {
-        case 0:
-            if (event->keyval == GDK_KEY_F1)
-            {
-                return true;
-            }
-            else if (event->keyval == GDK_KEY_Delete)
-            {
-                job = xset::job::remove;
-            }
-            break;
-        case GdkModifierType::GDK_CONTROL_MASK:
-            switch (event->keyval)
-            {
-                case GDK_KEY_c:
-                    job = xset::job::copy;
-                    break;
-                case GDK_KEY_x:
-                    job = xset::job::cut;
-                    break;
-                case GDK_KEY_v:
-                    job = xset::job::paste;
-                    break;
-                case GDK_KEY_k:
-                    job = xset::job::key;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        default:
-            break;
-    }
-    if (job != xset::job::invalid)
-    {
-        if (xset_job_is_valid(set, job))
-        {
-            gtk_menu_shell_deactivate(GTK_MENU_SHELL(widget));
-            g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(job));
-            xset_design_job(item, set);
-            return true;
-        }
-    }
-    return false;
-}
-
 static void
 on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
 {
@@ -1085,7 +1025,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
         submenu = gtk_menu_new();
         gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
         gtk_container_add(GTK_CONTAINER(design_menu), newitem);
-        g_signal_connect(submenu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
         for (const auto& it : builtin_tools)
         {
@@ -1138,7 +1077,6 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
         g_signal_connect(menu, "hide", G_CALLBACK(on_menu_hide), design_menu);
     }
     g_signal_connect(design_menu, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
-    g_signal_connect(design_menu, "key_press_event", G_CALLBACK(xset_design_menu_keypress), set);
 
     gtk_menu_shell_set_take_focus(GTK_MENU_SHELL(design_menu), true);
     // this is required when showing the menu via F2 or Menu key for focus
