@@ -957,7 +957,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
     else
     {
-        file_browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(nullptr));
+        file_browser = main_window_get_current_file_browser();
     }
 
     if (!file_browser || !vol)
@@ -1025,7 +1025,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
     }
     else
     {
-        file_browser = PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(nullptr));
+        file_browser = main_window_get_current_file_browser();
     }
 
     if (!vol)

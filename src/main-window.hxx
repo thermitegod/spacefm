@@ -88,6 +88,8 @@ struct MainWindow
     void show_panels() noexcept;
     void focus_panel(const panel_t panel) noexcept;
 
+    PtkFileBrowser* current_file_browser() const noexcept;
+
     GtkWidget* create_tab_label(PtkFileBrowser* file_browser) const noexcept;
     void new_tab(const std::filesystem::path& folder_path) noexcept;
 };
@@ -97,7 +99,7 @@ GType main_window_get_type();
 GtkWidget* main_window_new();
 
 /* Utility functions */
-GtkWidget* main_window_get_current_file_browser(MainWindow* mainWindow);
+PtkFileBrowser* main_window_get_current_file_browser();
 
 void main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
                                   const std::filesystem::path& path);

@@ -1421,8 +1421,7 @@ xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* eve
     // get current browser, panel, and mode
     if (main_window)
     {
-        file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+        file_browser = main_window->current_file_browser();
         p = file_browser->panel();
         mode = main_window->panel_context.at(p);
     }

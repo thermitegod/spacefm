@@ -500,8 +500,7 @@ show_task_manager(MainWindow* main_window, bool show)
         if (tasks_has_focus)
         {
             // focus the file list
-            PtkFileBrowser* file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+            PtkFileBrowser* file_browser = main_window->current_file_browser();
             if (file_browser)
             {
                 gtk_widget_grab_focus(file_browser->folder_view());
@@ -856,8 +855,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
 
             // build popup
             PtkFileBrowser* file_browser;
-            file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+            file_browser = main_window->current_file_browser();
             if (!file_browser)
             {
                 return false;
