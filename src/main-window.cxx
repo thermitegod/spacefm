@@ -73,16 +73,6 @@
 
 static void rebuild_menus(MainWindow* main_window);
 
-static void main_window_class_init(MainWindowClass* klass);
-static void main_window_init(MainWindow* main_window);
-static void main_window_finalize(GObject* obj);
-static void main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
-static void main_window_set_property(GObject* obj, u32 prop_id, const GValue* value,
-                                     GParamSpec* pspec);
-static gboolean main_window_delete_event(GtkWidget* widget, GdkEventAny* event);
-
-static gboolean main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event);
-
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data);
 static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
@@ -122,6 +112,20 @@ static std::vector<MainWindow*> all_windows;
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 #define FM_TYPE_MAIN_WINDOW (main_window_get_type())
+
+struct MainWindowClass
+{
+    GtkWindowClass parent;
+};
+
+static void main_window_class_init(MainWindowClass* klass);
+static void main_window_init(MainWindow* main_window);
+static void main_window_finalize(GObject* obj);
+static void main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
+static void main_window_set_property(GObject* obj, u32 prop_id, const GValue* value,
+                                     GParamSpec* pspec);
+static gboolean main_window_delete_event(GtkWidget* widget, GdkEventAny* event);
+static gboolean main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event);
 
 GType
 main_window_get_type()

@@ -80,11 +80,6 @@ struct MainWindow
     bool fullscreen;
 };
 
-struct MainWindowClass
-{
-    GtkWindowClass parent;
-};
-
 GType main_window_get_type();
 
 GtkWidget* main_window_new();
