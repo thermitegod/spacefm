@@ -301,7 +301,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, "invalid panel number"};
             }
-            focus_panel(main_window, width);
+            main_window->focus_panel(width);
         }
         else if (ztd::same(property, "focused-pane"))
         {
@@ -410,7 +410,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_FAILURE, std::format("not a directory: '{}'", value)};
             }
 
-            focus_panel(main_window, panel);
+            main_window->focus_panel(panel);
             main_window->new_tab(value);
         }
         else if (ztd::same(property, "devices-visible"))

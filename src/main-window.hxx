@@ -86,6 +86,7 @@ struct MainWindow
   public:
     void update_window_icon() noexcept;
     void show_panels() noexcept;
+    void focus_panel(const panel_t panel) noexcept;
 
     GtkWidget* create_tab_label(PtkFileBrowser* file_browser) const noexcept;
     void new_tab(const std::filesystem::path& folder_path) noexcept;
@@ -131,7 +132,6 @@ void main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
-void focus_panel(MainWindow* main_window, const panel_t panel);
 void main_window_open_path_in_current_tab(MainWindow* main_window,
                                           const std::filesystem::path& path);
 void main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab);

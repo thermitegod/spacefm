@@ -483,7 +483,7 @@ main_window_toggle_thumbnails_all_windows()
 }
 
 void
-focus_panel(MainWindow* main_window, const panel_t panel)
+MainWindow::focus_panel(const panel_t panel) noexcept
 {
     panel_t panel_focus;
     panel_t panel_hide;
@@ -492,7 +492,7 @@ focus_panel(MainWindow* main_window, const panel_t panel)
     {
         case panel_control_code_prev:
             // prev
-            panel_focus = main_window->curpanel - 1;
+            panel_focus = this->curpanel - 1;
             do
             {
                 if (panel_focus < panel_1)
@@ -504,11 +504,11 @@ focus_panel(MainWindow* main_window, const panel_t panel)
                     break;
                 }
                 panel_focus--;
-            } while (panel_focus != main_window->curpanel - 1);
+            } while (panel_focus != this->curpanel - 1);
             break;
         case panel_control_code_next:
             // next
-            panel_focus = main_window->curpanel + 1;
+            panel_focus = this->curpanel + 1;
             do
             {
                 if (!is_valid_panel(panel_focus))
@@ -520,12 +520,12 @@ focus_panel(MainWindow* main_window, const panel_t panel)
                     break;
                 }
                 panel_focus++;
-            } while (panel_focus != main_window->curpanel + 1);
+            } while (panel_focus != this->curpanel + 1);
             break;
         case panel_control_code_hide:
             // hide
-            panel_hide = main_window->curpanel;
-            panel_focus = main_window->curpanel + 1;
+            panel_hide = this->curpanel;
+            panel_focus = this->curpanel + 1;
             do
             {
                 if (!is_valid_panel(panel_focus))
@@ -550,38 +550,38 @@ focus_panel(MainWindow* main_window, const panel_t panel)
 
     if (is_valid_panel(panel_focus))
     {
-        if (gtk_widget_get_visible(main_window->panel[panel_focus - 1]))
+        if (gtk_widget_get_visible(this->panel[panel_focus - 1]))
         {
-            gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel_focus - 1]));
-            main_window->curpanel = panel_focus;
-            main_window->notebook = main_window->panel[panel_focus - 1];
+            gtk_widget_grab_focus(GTK_WIDGET(this->panel[panel_focus - 1]));
+            this->curpanel = panel_focus;
+            this->notebook = this->panel[panel_focus - 1];
             PtkFileBrowser* file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(this));
             if (file_browser)
             {
                 gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
-                set_panel_focus(main_window, file_browser);
+                set_panel_focus(this, file_browser);
             }
         }
         else if (panel != panel_control_code_hide)
         {
             xset_set_b_panel(panel_focus, xset::panel::show, true);
-            show_panels_all_windows(nullptr, main_window);
-            gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel_focus - 1]));
-            main_window->curpanel = panel_focus;
-            main_window->notebook = main_window->panel[panel_focus - 1];
+            show_panels_all_windows(nullptr, this);
+            gtk_widget_grab_focus(GTK_WIDGET(this->panel[panel_focus - 1]));
+            this->curpanel = panel_focus;
+            this->notebook = this->panel[panel_focus - 1];
             PtkFileBrowser* file_browser =
-                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
+                PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(this));
             if (file_browser)
             {
                 gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
-                set_panel_focus(main_window, file_browser);
+                set_panel_focus(this, file_browser);
             }
         }
         else if (panel == panel_control_code_hide)
         {
             xset_set_b_panel(panel_hide, xset::panel::show, false);
-            show_panels_all_windows(nullptr, main_window);
+            show_panels_all_windows(nullptr, this);
         }
     }
 }
@@ -590,7 +590,8 @@ static void
 on_focus_panel(GtkMenuItem* item, void* user_data)
 {
     const panel_t panel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "panel"));
-    focus_panel(MAIN_WINDOW(user_data), panel);
+    MainWindow* main_window = MAIN_WINDOW(user_data);
+    main_window->focus_panel(panel);
 }
 
 void
@@ -2958,7 +2959,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         {
             i = std::stoi(set->name);
         }
-        focus_panel(main_window, i);
+        main_window->focus_panel(i);
     }
     else if (ztd::startswith(set->name, "task_"))
     {
