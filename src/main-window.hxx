@@ -85,6 +85,7 @@ struct MainWindow
 
   public:
     void update_window_icon() noexcept;
+    void show_panels() noexcept;
 };
 
 GType main_window_get_type();
@@ -113,7 +114,6 @@ MainWindow* main_window_get_on_current_desktop();
  */
 const std::vector<MainWindow*>& main_window_get_all();
 
-// void show_panels(GtkMenuItem* item, MainWindow* main_window);
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
 void main_window_reload_thumbnails_all_windows();
