@@ -1936,10 +1936,8 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
 }
 
 GtkWidget*
-main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser)
+MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 {
-    (void)main_window;
-
     /* Create tab label */
     GtkEventBox* evt_box = GTK_EVENT_BOX(gtk_event_box_new());
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
@@ -1949,22 +1947,17 @@ main_window_create_tab_label(MainWindow* main_window, PtkFileBrowser* file_brows
         gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
 
-    GtkWidget* tab_text = nullptr;
     const auto cwd = file_browser->cwd();
-    if (!cwd.empty())
-    {
-        const auto name = file_browser->cwd().filename();
-        tab_text = gtk_label_new(name.c_str());
-    }
+    GtkWidget* tab_text = gtk_label_new(cwd.filename().c_str());
 
-    gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-    if (std::strlen(gtk_label_get_text(GTK_LABEL(tab_text))) < 30)
+    if (cwd.string().size() < 30)
     {
         gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
         gtk_label_set_width_chars(GTK_LABEL(tab_text), -1);
     }
     else
     {
+        gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
         gtk_label_set_width_chars(GTK_LABEL(tab_text), 30);
     }
     gtk_label_set_max_width_chars(GTK_LABEL(tab_text), 30);
@@ -2088,7 +2081,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     file_browser->add_event<spacefm::signal::change_sel>(on_file_browser_sel_change, this);
     file_browser->add_event<spacefm::signal::change_pane>(on_file_browser_panel_change, this);
 
-    GtkWidget* tab_label = main_window_create_tab_label(this, file_browser);
+    GtkWidget* tab_label = this->create_tab_label(file_browser);
     const i32 idx =
         gtk_notebook_append_page(GTK_NOTEBOOK(this->notebook), GTK_WIDGET(file_browser), tab_label);
     gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(this->notebook), GTK_WIDGET(file_browser), true);
