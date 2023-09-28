@@ -1566,7 +1566,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
     save_settings();
 
     // tasks running?
-    if (main_tasks_running(main_window))
+    if (main_window->is_main_tasks_running())
     {
         const auto response = ptk_show_message(GTK_WINDOW(widget),
                                                GtkMessageType::GTK_MESSAGE_QUESTION,
@@ -1586,7 +1586,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
             ptk_task_view_task_stop(main_window->task_view,
                                     xset_get(xset::name::task_stop_all),
                                     nullptr);
-            while (main_tasks_running(main_window))
+            while (main_window->is_main_tasks_running())
             {
                 while (g_main_context_pending(nullptr))
                 {
@@ -2229,6 +2229,12 @@ set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
     update_window_title(mw);
 }
 
+bool
+MainWindow::is_main_tasks_running() const noexcept
+{
+    return ptk_task_view_is_main_tasks_running(this->task_view);
+}
+
 void
 main_window_fullscreen_activate(MainWindow* main_window)
 {
@@ -2311,7 +2317,7 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
         fmt = ztd::replace(fmt, "%p", std::to_string(this->curpanel));
         fmt = ztd::replace(fmt, "%P", std::to_string(panel_count));
     }
-    if (ztd::contains(fmt, "*") && !main_tasks_running(this))
+    if (ztd::contains(fmt, "*") && !this->is_main_tasks_running())
     {
         fmt = ztd::replace(fmt, "*", "");
     }

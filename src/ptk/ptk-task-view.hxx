@@ -43,7 +43,6 @@ enum task_view_column
     data
 };
 
-bool main_tasks_running(MainWindow* main_window);
 void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
 
 void main_task_view_update_task(PtkFileTask* ptask);
@@ -53,6 +52,8 @@ void main_task_pause_all_queued(PtkFileTask* ptask);
 void ptk_task_view_task_stop(GtkWidget* view, xset_t set2, PtkFileTask* ptask2);
 
 void on_reorder(GtkWidget* item, GtkWidget* parent);
+
+bool ptk_task_view_is_main_tasks_running(GtkWidget* task_view);
 
 void ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu);
 

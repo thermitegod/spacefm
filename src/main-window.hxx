@@ -96,6 +96,8 @@ struct MainWindow
 
     void set_window_title(PtkFileBrowser* file_browser) noexcept;
     void update_status_bar(PtkFileBrowser* file_browser) const noexcept;
+
+    bool is_main_tasks_running() const noexcept;
 };
 
 GType main_window_get_type();

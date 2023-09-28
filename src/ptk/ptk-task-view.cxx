@@ -188,18 +188,15 @@ ptk_task_view_column_selected(GtkWidget* view)
 }
 
 bool
-main_tasks_running(MainWindow* main_window)
+ptk_task_view_is_main_tasks_running(GtkWidget* task_view)
 {
-    if (!main_window->task_view || !GTK_IS_TREE_VIEW(main_window->task_view))
+    if (!task_view || !GTK_IS_TREE_VIEW(task_view))
     {
         return false;
     }
-
-    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(task_view));
     GtkTreeIter it;
-    const bool ret = gtk_tree_model_get_iter_first(model, &it);
-
-    return ret;
+    return gtk_tree_model_get_iter_first(model, &it);
 }
 
 void
