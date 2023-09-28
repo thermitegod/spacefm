@@ -259,7 +259,7 @@ static void
 on_open_in_panel(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    const panel_t panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel_num"));
+    const panel_t panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel"));
     if (data->browser)
     {
         main_window_open_in_panel(data->browser, panel_num, data->file_path);
@@ -1239,11 +1239,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
 
                 set = xset_get(xset::name::open_in_panelprev);
                 xset_set_cb(set, (GFunc)on_open_in_panel, data);
-                xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
+                xset_set_ob1_int(set, "panel", panel_control_code_prev);
                 set->disable = (panel_count == 1);
                 set = xset_get(xset::name::open_in_panelnext);
                 xset_set_cb(set, (GFunc)on_open_in_panel, data);
-                xset_set_ob1_int(set, "panel_num", panel_control_code_next);
+                xset_set_ob1_int(set, "panel", panel_control_code_next);
                 set->disable = (panel_count == 1);
 
                 for (panel_t panel : PANELS)
@@ -1251,7 +1251,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
                     const std::string name = std::format("open_in_panel{}", panel);
                     set = xset_get(name);
                     xset_set_cb(set, (GFunc)on_open_in_panel, data);
-                    xset_set_ob1_int(set, "panel_num", panel);
+                    xset_set_ob1_int(set, "panel", panel);
                     // set->disable = ( p == i );
                 }
 

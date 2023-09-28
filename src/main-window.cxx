@@ -484,97 +484,78 @@ main_window_toggle_thumbnails_all_windows()
 }
 
 void
-focus_panel(GtkMenuItem* item, void* mw, panel_t p)
+focus_panel(MainWindow* main_window, const panel_t panel)
 {
-    panel_t panel;
-    panel_t hidepanel;
-    panel_t panel_num;
+    panel_t panel_focus;
+    panel_t panel_hide;
 
-    MainWindow* main_window = MAIN_WINDOW(mw);
-
-    if (item)
-    {
-        panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "panel_num"));
-    }
-    else
-    {
-        if (p == INVALID_PANEL)
-        {
-            panel_num = main_window->curpanel;
-        }
-        else
-        {
-            panel_num = p;
-        }
-    }
-
-    switch (panel_num)
+    switch (panel)
     {
         case panel_control_code_prev:
             // prev
-            panel = main_window->curpanel - 1;
+            panel_focus = main_window->curpanel - 1;
             do
             {
-                if (panel < 1)
+                if (panel_focus < panel_1)
                 {
-                    panel = 4;
+                    panel_focus = panel_4;
                 }
-                if (xset_get_b_panel(panel, xset::panel::show))
+                if (xset_get_b_panel(panel_focus, xset::panel::show))
                 {
                     break;
                 }
-                panel--;
-            } while (panel != main_window->curpanel - 1);
+                panel_focus--;
+            } while (panel_focus != main_window->curpanel - 1);
             break;
         case panel_control_code_next:
             // next
-            panel = main_window->curpanel + 1;
+            panel_focus = main_window->curpanel + 1;
             do
             {
-                if (!is_valid_panel(panel))
+                if (!is_valid_panel(panel_focus))
                 {
-                    panel = 1;
+                    panel_focus = panel_1;
                 }
-                if (xset_get_b_panel(panel, xset::panel::show))
+                if (xset_get_b_panel(panel_focus, xset::panel::show))
                 {
                     break;
                 }
-                panel++;
-            } while (panel != main_window->curpanel + 1);
+                panel_focus++;
+            } while (panel_focus != main_window->curpanel + 1);
             break;
         case panel_control_code_hide:
             // hide
-            hidepanel = main_window->curpanel;
-            panel = main_window->curpanel + 1;
+            panel_hide = main_window->curpanel;
+            panel_focus = main_window->curpanel + 1;
             do
             {
-                if (!is_valid_panel(panel))
+                if (!is_valid_panel(panel_focus))
                 {
-                    panel = 1;
+                    panel_focus = panel_1;
                 }
-                if (xset_get_b_panel(panel, xset::panel::show))
+                if (xset_get_b_panel(panel_focus, xset::panel::show))
                 {
                     break;
                 }
-                panel++;
-            } while (panel != hidepanel);
-            if (panel == hidepanel)
+                panel_focus++;
+            } while (panel_focus != panel_hide);
+            if (panel_focus == panel_hide)
             {
-                panel = 0;
+                panel_focus = 0;
             }
             break;
         default:
-            panel = panel_num;
+            panel_focus = panel;
             break;
     }
 
-    if (panel > 0 && panel < 5)
+    if (is_valid_panel(panel_focus))
     {
-        if (gtk_widget_get_visible(main_window->panel[panel - 1]))
+        if (gtk_widget_get_visible(main_window->panel[panel_focus - 1]))
         {
-            gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel - 1]));
-            main_window->curpanel = panel;
-            main_window->notebook = main_window->panel[panel - 1];
+            gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel_focus - 1]));
+            main_window->curpanel = panel_focus;
+            main_window->notebook = main_window->panel[panel_focus - 1];
             PtkFileBrowser* file_browser =
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
@@ -583,13 +564,13 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
                 set_panel_focus(main_window, file_browser);
             }
         }
-        else if (panel_num != panel_control_code_hide)
+        else if (panel != panel_control_code_hide)
         {
-            xset_set_b_panel(panel, xset::panel::show, true);
+            xset_set_b_panel(panel_focus, xset::panel::show, true);
             show_panels_all_windows(nullptr, main_window);
-            gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel - 1]));
-            main_window->curpanel = panel;
-            main_window->notebook = main_window->panel[panel - 1];
+            gtk_widget_grab_focus(GTK_WIDGET(main_window->panel[panel_focus - 1]));
+            main_window->curpanel = panel_focus;
+            main_window->notebook = main_window->panel[panel_focus - 1];
             PtkFileBrowser* file_browser =
                 PTK_FILE_BROWSER_REINTERPRET(main_window_get_current_file_browser(main_window));
             if (file_browser)
@@ -598,12 +579,19 @@ focus_panel(GtkMenuItem* item, void* mw, panel_t p)
                 set_panel_focus(main_window, file_browser);
             }
         }
-        if (panel_num == panel_control_code_hide)
+        else if (panel == panel_control_code_hide)
         {
-            xset_set_b_panel(hidepanel, xset::panel::show, false);
+            xset_set_b_panel(panel_hide, xset::panel::show, false);
             show_panels_all_windows(nullptr, main_window);
         }
     }
+}
+
+static void
+on_focus_panel(GtkMenuItem* item, void* user_data)
+{
+    const panel_t panel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "panel"));
+    focus_panel(MAIN_WINDOW(user_data), panel);
 }
 
 void
@@ -1063,32 +1051,32 @@ rebuild_menu_view(MainWindow* main_window, PtkFileBrowser* file_browser)
     set->disable = (main_window->curpanel == 4 && vis_count == 1);
 
     set = xset_get(xset::name::panel_prev);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_control_code_prev);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_control_code_prev);
     set->disable = (vis_count == 1);
     set = xset_get(xset::name::panel_next);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_control_code_next);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_control_code_next);
     set->disable = (vis_count == 1);
     set = xset_get(xset::name::panel_hide);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_control_code_hide);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_control_code_hide);
     set->disable = (vis_count == 1);
     set = xset_get(xset::name::panel_1);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_1);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_1);
     set->disable = (main_window->curpanel == 1);
     set = xset_get(xset::name::panel_2);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_2);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_2);
     set->disable = (main_window->curpanel == 2);
     set = xset_get(xset::name::panel_3);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_3);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_3);
     set->disable = (main_window->curpanel == 3);
     set = xset_get(xset::name::panel_4);
-    xset_set_cb(set, (GFunc)focus_panel, main_window);
-    xset_set_ob1_int(set, "panel_num", panel_4);
+    xset_set_cb(set, (GFunc)on_focus_panel, main_window);
+    xset_set_ob1_int(set, "panel", panel_4);
     set->disable = (main_window->curpanel == 4);
 
     ptk_task_view_prepare_menu(main_window, newmenu, accel_group);
@@ -2955,7 +2943,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         {
             i = std::stoi(set->name);
         }
-        focus_panel(nullptr, main_window, i);
+        focus_panel(main_window, i);
     }
     else if (ztd::startswith(set->name, "task_"))
     {

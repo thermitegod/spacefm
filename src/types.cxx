@@ -18,7 +18,7 @@
 bool
 is_valid_panel(panel_t p)
 {
-    return (p != INVALID_PANEL || p >= MIN_PANELS || p <= MAX_PANELS);
+    return (p != INVALID_PANEL && (p == panel_1 || p == panel_2 || p == panel_3 || p == panel_4));
 }
 
 bool

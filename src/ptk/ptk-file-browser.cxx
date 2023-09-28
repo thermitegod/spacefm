@@ -748,7 +748,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEventButton* event, PtkFileBrow
                 }
                 else if (i == 3)
                 {
-                    focus_panel(nullptr, file_browser->main_window_, panel_control_code_hide);
+                    focus_panel(file_browser->main_window_, panel_control_code_hide);
                 }
             }
             return true;

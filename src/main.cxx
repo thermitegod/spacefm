@@ -230,7 +230,7 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
                 set->b = xset::b::xtrue;
                 show_panels_all_windows(nullptr, main_window);
             }
-            focus_panel(nullptr, (void*)main_window, opt->panel);
+            focus_panel(main_window, opt->panel);
         }
 
         return true;
