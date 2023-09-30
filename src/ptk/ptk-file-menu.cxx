@@ -1448,7 +1448,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         {
             set = xset_get(copycmd);
             xset_set_cb(set, (GFunc)on_copycmd, data);
-            xset_set_ob1(set, "set", set);
+            xset_set_ob1(set, "set", set->name.data());
         }
 
         // enables
@@ -1560,7 +1560,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         {
             set = xset_get(permcmd);
             xset_set_cb(set, (GFunc)on_permission, data);
-            xset_set_ob1(set, "set", set);
+            xset_set_ob1(set, "set", set->name.data());
         }
 
         set = xset_get(xset::name::prop_quick);
