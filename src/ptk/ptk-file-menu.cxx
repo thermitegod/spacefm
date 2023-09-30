@@ -1237,11 +1237,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
                     set->disable = (tab > tab_count) || (tab == tab_num);
                 }
 
-                set = xset_get(xset::name::open_in_panelprev);
+                set = xset_get(xset::name::open_in_panel_prev);
                 xset_set_cb(set, (GFunc)on_open_in_panel, data);
                 xset_set_ob1_int(set, "panel", panel_control_code_prev);
                 set->disable = (panel_count == 1);
-                set = xset_get(xset::name::open_in_panelnext);
+                set = xset_get(xset::name::open_in_panel_next);
                 xset_set_cb(set, (GFunc)on_open_in_panel, data);
                 xset_set_ob1_int(set, "panel", panel_control_code_next);
                 set->disable = (panel_count == 1);
@@ -2809,11 +2809,11 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
         {
             panel_t i;
 
-            if (ztd::same(set->name, "open_in_panel_prev"))
+            if (set->xset_name == xset::name::open_in_panel_prev)
             {
                 i = panel_control_code_prev;
             }
-            else if (ztd::same(set->name, "open_in_panel_next"))
+            else if (set->xset_name == xset::name::open_in_panel_next)
             {
                 i = panel_control_code_next;
             }

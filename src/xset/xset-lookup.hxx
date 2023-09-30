@@ -223,8 +223,8 @@ namespace xset
         opentab_10,
 
         open_in_panel,
-        open_in_panelprev,
-        open_in_panelnext,
+        open_in_panel_prev,
+        open_in_panel_next,
         open_in_panel1,
         open_in_panel2,
         open_in_panel3,

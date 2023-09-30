@@ -903,16 +903,16 @@ xset_defaults()
     set->menu_style = xset::menu::submenu;
     xset_set_submenu(set,
                      {
-                         xset::name::open_in_panelprev,
-                         xset::name::open_in_panelnext,
+                         xset::name::open_in_panel_prev,
+                         xset::name::open_in_panel_next,
                          xset::name::open_in_panel1,
                          xset::name::open_in_panel2,
                          xset::name::open_in_panel3,
                          xset::name::open_in_panel4,
                      });
 
-    xset_set(xset::name::open_in_panelprev, xset::var::menu_label, "_Prev");
-    xset_set(xset::name::open_in_panelnext, xset::var::menu_label, "_Next");
+    xset_set(xset::name::open_in_panel_prev, xset::var::menu_label, "_Prev");
+    xset_set(xset::name::open_in_panel_next, xset::var::menu_label, "_Next");
     xset_set(xset::name::open_in_panel1, xset::var::menu_label, "Panel _1");
     xset_set(xset::name::open_in_panel2, xset::var::menu_label, "Panel _2");
     xset_set(xset::name::open_in_panel3, xset::var::menu_label, "Panel _3");
