@@ -340,9 +340,6 @@ vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
 
         vfs::file_info file = vfs_file_info_new(full_path);
 
-        /* Special processing for desktop directory */
-        file->load_special_info(full_path);
-
         dir->file_list.emplace_back(file);
     }
 
@@ -514,7 +511,6 @@ VFSDir::update_file_info(vfs::file_info file) noexcept
     if (is_file_valid)
     {
         ret = true;
-        file->load_special_info(full_path);
     }
     else /* The file does not exist */
     {
@@ -580,7 +576,6 @@ VFSDir::update_created_files(const std::filesystem::path& key) noexcept
             {
                 vfs::file_info file = vfs_file_info_new(full_path);
                 // add new file to dir file_list
-                file->load_special_info(full_path);
                 this->file_list.emplace_back(vfs_file_info_ref(file));
 
                 this->run_event<spacefm::signal::file_created>(file);
@@ -618,14 +613,6 @@ VFSDir::unload_thumbnails(bool is_big) noexcept
         else
         {
             file->unload_small_thumbnail();
-        }
-
-        /* This is a desktop entry file, so the icon needs reload
-             FIXME: This is not a good way to do things, but there is no better way now.  */
-        if (file->flags() & vfs::file_info_flags::desktop_entry)
-        {
-            const auto file_path = std::filesystem::path() / this->path / file->name();
-            file->load_special_info(file_path);
         }
     }
 

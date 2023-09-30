@@ -441,9 +441,8 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
     {
         case ptk::file_list::column::big_icon:
             /* special file can use special icons saved as thumbnails*/
-            if (file->flags() == vfs::file_info_flags::none &&
-                (list->max_thumbnail > file->size() ||
-                 (list->max_thumbnail != 0 && file->is_video())))
+            if (!file->is_desktop_entry() && (list->max_thumbnail > file->size() ||
+                                              (list->max_thumbnail != 0 && file->is_video())))
             {
                 icon = file->big_thumbnail();
             }

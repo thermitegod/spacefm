@@ -35,20 +35,6 @@
 
 #define VFS_FILE_INFO(obj) (static_cast<vfs::file_info>(obj))
 
-namespace vfs
-{
-    enum file_info_flags
-    { // For future use, not all supported now
-        none = 0,
-        home_dir = (1 << 0),    // Not implemented
-        desktop_dir = (1 << 1), // Not implemented
-        desktop_entry = (1 << 2),
-        mount_point = (1 << 3), // Not implemented
-        remote = (1 << 4),      // Not implemented
-        // VIRTUAL = (1 << 5),     // Not implemented
-    };
-}
-
 struct VFSFileInfo
 {
   public:
@@ -104,10 +90,6 @@ struct VFSFileInfo
     void unload_big_thumbnail() noexcept;
     void unload_small_thumbnail() noexcept;
 
-    vfs::file_info_flags flags() const noexcept;
-
-    void load_special_info(const std::filesystem::path& file_path) noexcept;
-
     bool is_directory() const noexcept;
     bool is_regular_file() const noexcept;
     bool is_symlink() const noexcept;
@@ -162,13 +144,16 @@ struct VFSFileInfo
     vfs::mime_type mime_type_{};       // mime type related information
     GdkPixbuf* big_thumbnail_{};       // thumbnail of the file
     GdkPixbuf* small_thumbnail_{};     // thumbnail of the file
-    vfs::file_info_flags flags_{vfs::file_info_flags::none}; // if it is a special file
+
+    bool is_special_desktop_entry_{false}; // is a .desktop file
 
     bool is_hidden_{false}; // if the filename starts with '.'
 
   private:
     void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;
     void load_thumbnail_big(const std::filesystem::path& full_path) noexcept;
+
+    void load_special_info() noexcept;
 
     const std::string special_directory_get_icon_name() const noexcept;
 

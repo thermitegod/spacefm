@@ -1056,10 +1056,11 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
 
         // Execute
         if (!is_dir && file &&
-            (file->flags() & vfs::file_info_flags::desktop_entry ||
-             // Note: network filesystems may become unresponsive here
+            (file->is_desktop_entry() ||
+
              file->is_executable()))
         {
+            // Note: network filesystems may become unresponsive here
             set = xset_get(xset::name::open_execute);
             xset_set_cb(set, (GFunc)on_popup_open_activate, data);
             xset_add_menuitem(browser, submenu, accel_group, set);

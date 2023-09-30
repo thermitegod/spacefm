@@ -192,8 +192,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         // The file itself is a desktop entry file.
         if (!alloc_desktop)
         {
-            if (file->flags() & vfs::file_info_flags::desktop_entry &&
-                (app_settings.click_executes() || xforce))
+            if (file->is_desktop_entry() && (app_settings.click_executes() || xforce))
             {
                 alloc_desktop = file->path();
             }

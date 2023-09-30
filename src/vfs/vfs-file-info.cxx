@@ -151,6 +151,8 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     this->display_ctime_ = vfs_create_display_date(this->ctime());
     this->display_mtime_ = vfs_create_display_date(this->mtime());
 
+    this->load_special_info();
+
     return true;
 }
 
@@ -249,7 +251,7 @@ VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
     // and do not copy unused fields.
 
     this->mime_type_ = vfs_mime_type_get_from_file(full_path);
-    this->load_special_info(full_path);
+    this->load_special_info();
 }
 
 /* Icons */
@@ -326,7 +328,7 @@ VFSFileInfo::special_directory_get_icon_name() const noexcept
 GdkPixbuf*
 VFSFileInfo::big_icon() noexcept
 {
-    if (this->flags() & vfs::file_info_flags::desktop_entry && this->big_thumbnail_)
+    if (this->is_desktop_entry() && this->big_thumbnail_)
     {
         return g_object_ref(this->big_thumbnail_);
     }
@@ -347,7 +349,7 @@ VFSFileInfo::big_icon() noexcept
 GdkPixbuf*
 VFSFileInfo::small_icon() noexcept
 {
-    if (this->flags() & vfs::file_info_flags::desktop_entry && this->small_thumbnail_)
+    if (this->is_desktop_entry() && this->small_thumbnail_)
     {
         return g_object_ref(this->small_thumbnail_);
     }
@@ -455,12 +457,6 @@ std::time_t
 VFSFileInfo::mtime() const noexcept
 {
     return this->file_stat_.mtime().tv_sec;
-}
-
-vfs::file_info_flags
-VFSFileInfo::flags() const noexcept
-{
-    return this->flags_;
 }
 
 static const std::string
@@ -700,7 +696,7 @@ VFSFileInfo::is_video() const noexcept
 bool
 VFSFileInfo::is_desktop_entry() const noexcept
 {
-    return 0 != (this->flags() & vfs::file_info_flags::desktop_entry);
+    return this->is_special_desktop_entry_;
 }
 
 bool
@@ -852,23 +848,21 @@ VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
 }
 
 void
-VFSFileInfo::load_special_info(const std::filesystem::path& file_path) noexcept
+VFSFileInfo::load_special_info() noexcept
 {
     if (!ztd::endswith(this->name_, ".desktop"))
     {
         return;
     }
 
-    const auto file_dir = file_path.parent_path();
-
-    this->flags_ = (vfs::file_info_flags)(this->flags_ | vfs::file_info_flags::desktop_entry);
-    const vfs::desktop desktop = vfs_get_desktop(file_path);
+    this->is_special_desktop_entry_ = true;
+    const vfs::desktop desktop = vfs_get_desktop(this->path_);
 
     // MOD  display real filenames of .desktop files not in desktop directory
-    if (std::filesystem::equivalent(file_dir, vfs::user_dirs->desktop_dir()))
-    {
-        this->update_display_name(desktop->display_name());
-    }
+    // if (std::filesystem::equivalent(this->path_.parent_path(), vfs::user_dirs->desktop_dir()))
+    // {
+    //     this->update_display_name(desktop->display_name());
+    // }
 
     if (desktop->icon_name().empty())
     {
