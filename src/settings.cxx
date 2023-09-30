@@ -1425,10 +1425,6 @@ xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* eve
         p = file_browser->panel();
         mode = main_window->panel_context.at(p);
     }
-    if (!PTK_IS_FILE_BROWSER(file_browser))
-    {
-        return;
-    }
 
     switch (tool_type)
     {
@@ -1545,10 +1541,6 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
-    if (!PTK_IS_FILE_BROWSER(file_browser))
-    {
-        return true;
-    }
     file_browser->focus_me();
     set->browser = file_browser;
 
@@ -1673,10 +1665,6 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
-    if (!PTK_IS_FILE_BROWSER(file_browser))
-    {
-        return true;
-    }
     file_browser->focus_me();
 
     if (event->button == 1)

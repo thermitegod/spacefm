@@ -35,8 +35,7 @@
 #define PTK_FILE_BROWSER(obj)             (static_cast<PtkFileBrowser*>(obj))
 #define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<PtkFileBrowser*>(obj))
 
-#define PTK_TYPE_FILE_BROWSER    (ptk_file_browser_get_type())
-#define PTK_IS_FILE_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_BROWSER))
+#define PTK_TYPE_FILE_BROWSER (ptk_file_browser_get_type())
 
 namespace ptk
 {
