@@ -2631,35 +2631,20 @@ on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data)
 void
 ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
 {
-    if (!browser)
-    {
-        return;
-    }
-
-    std::filesystem::path cwd;
-    std::filesystem::path file_path;
-    vfs::file_info file;
-    std::vector<vfs::file_info> sel_files;
+    assert(set != nullptr);
+    assert(browser != nullptr);
+    // ztd::logger::debug("ptk_file_menu_action()={}", set->name);
 
     // setup data
-    if (browser)
-    {
-        cwd = browser->cwd();
-        sel_files = browser->selected_files();
-    }
-    else
-    {
-        cwd = vfs::user_dirs->desktop_dir();
-    }
+    const auto cwd = browser->cwd();
+    const auto sel_files = browser->selected_files();
 
-    if (sel_files.empty())
-    {
-        file = nullptr;
-    }
-    else
+    vfs::file_info file = nullptr;
+    std::filesystem::path file_path;
+    if (!sel_files.empty())
     {
         file = sel_files.front();
-        file_path = cwd / file->name();
+        file_path = file->path();
     }
 
     const auto data = new PtkFileMenu;
@@ -2801,60 +2786,54 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
     {
         on_copycmd(nullptr, data, set);
     }
-    else if (browser)
+    if (ztd::startswith(set->name, "open_in_panel"))
     {
-        // browser only
-        if (ztd::startswith(set->name, "open_in_panel"))
+        panel_t i;
+        if (set->xset_name == xset::name::open_in_panel_prev)
         {
-            panel_t i;
-
-            if (set->xset_name == xset::name::open_in_panel_prev)
+            i = panel_control_code_prev;
+        }
+        else if (set->xset_name == xset::name::open_in_panel_next)
+        {
+            i = panel_control_code_next;
+        }
+        else
+        {
+            i = std::stol(set->name);
+        }
+        main_window_open_in_panel(data->browser, i, data->file_path);
+    }
+    else if (ztd::startswith(set->name, "opentab_"))
+    {
+        tab_t i;
+        if (set->xset_name == xset::name::opentab_new)
+        {
+            on_popup_open_in_new_tab_activate(nullptr, data);
+        }
+        else
+        {
+            if (set->xset_name == xset::name::opentab_prev)
             {
-                i = panel_control_code_prev;
+                i = tab_control_code_prev;
             }
-            else if (set->xset_name == xset::name::open_in_panel_next)
+            else if (set->xset_name == xset::name::opentab_next)
             {
-                i = panel_control_code_next;
+                i = tab_control_code_next;
             }
             else
             {
                 i = std::stol(set->name);
             }
-            main_window_open_in_panel(data->browser, i, data->file_path);
+            data->browser->open_in_tab(data->file_path, i);
         }
-        else if (ztd::startswith(set->name, "opentab_"))
-        {
-            tab_t i;
-
-            if (set->xset_name == xset::name::opentab_new)
-            {
-                on_popup_open_in_new_tab_activate(nullptr, data);
-            }
-            else
-            {
-                if (set->xset_name == xset::name::opentab_prev)
-                {
-                    i = tab_control_code_prev;
-                }
-                else if (set->xset_name == xset::name::opentab_next)
-                {
-                    i = tab_control_code_next;
-                }
-                else
-                {
-                    i = std::stol(set->name);
-                }
-                data->browser->open_in_tab(data->file_path, i);
-            }
-        }
-        else if (set->xset_name == xset::name::tab_new)
-        {
-            browser->new_tab();
-        }
-        else if (set->xset_name == xset::name::tab_new_here)
-        {
-            on_popup_open_in_new_tab_here(nullptr, data);
-        }
+    }
+    else if (set->xset_name == xset::name::tab_new)
+    {
+        browser->new_tab();
+    }
+    else if (set->xset_name == xset::name::tab_new_here)
+    {
+        on_popup_open_in_new_tab_here(nullptr, data);
     }
 
     ptk_file_menu_free(data);
