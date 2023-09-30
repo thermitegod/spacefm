@@ -2629,7 +2629,7 @@ on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 void
-ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
+ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
 {
     if (!browser)
     {
@@ -2673,7 +2673,6 @@ ptk_file_menu_action(PtkFileBrowser* browser, const std::string_view setname)
     }
 
     // action
-    xset_t set = xset_get(setname);
     if (ztd::startswith(set->name, "open_") && !ztd::startswith(set->name, "open_in_"))
     {
         if (set->xset_name == xset::name::open_edit)

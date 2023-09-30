@@ -5953,7 +5953,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
     }
     else // all the rest require ptkfilemenu data
     {
-        ptk_file_menu_action(this, set->name);
+        ptk_file_menu_action(this, set);
     }
 }
 
