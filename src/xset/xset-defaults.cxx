@@ -1402,7 +1402,7 @@ xset_defaults()
     xset_set(xset::name::copy_panel_prev, xset::var::menu_label, "_Prev");
     xset_set(xset::name::copy_panel_next, xset::var::menu_label, "_Next");
     xset_set(xset::name::copy_panel_1, xset::var::menu_label, "Panel _1");
-    xset_set(xset::name::copy_panel_3, xset::var::menu_label, "Panel _2");
+    xset_set(xset::name::copy_panel_2, xset::var::menu_label, "Panel _2");
     xset_set(xset::name::copy_panel_3, xset::var::menu_label, "Panel _3");
     xset_set(xset::name::copy_panel_4, xset::var::menu_label, "Panel _4");
 

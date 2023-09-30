@@ -1433,7 +1433,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
             xset::name::copy_tab_3,      xset::name::copy_tab_4,      xset::name::copy_tab_5,
             xset::name::copy_tab_6,      xset::name::copy_tab_7,      xset::name::copy_tab_8,
             xset::name::copy_tab_9,      xset::name::copy_tab_10,     xset::name::copy_panel_prev,
-            xset::name::copy_panel_next, xset::name::copy_panel_1,    xset::name::copy_panel_3,
+            xset::name::copy_panel_next, xset::name::copy_panel_1,    xset::name::copy_panel_2,
             xset::name::copy_panel_3,    xset::name::copy_panel_4,    xset::name::move_loc,
             xset::name::move_loc_last,   xset::name::move_tab_prev,   xset::name::move_tab_next,
             xset::name::move_tab_1,      xset::name::move_tab_2,      xset::name::move_tab_3,
