@@ -881,18 +881,18 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
                     false);
 
     // status bar
-    file_browser->status_bar = gtk_statusbar_new();
+    file_browser->statusbar = GTK_STATUSBAR(gtk_statusbar_new());
 
-    GList* children = gtk_container_get_children(GTK_CONTAINER(file_browser->status_bar));
+    GList* children = gtk_container_get_children(GTK_CONTAINER(file_browser->statusbar));
     file_browser->status_frame = GTK_FRAME(children->data);
     g_list_free(children);
     children = gtk_container_get_children(
-        GTK_CONTAINER(gtk_statusbar_get_message_area(GTK_STATUSBAR(file_browser->status_bar))));
+        GTK_CONTAINER(gtk_statusbar_get_message_area(file_browser->statusbar)));
     file_browser->status_label = GTK_LABEL(children->data);
     g_list_free(children);
     // do not know panel yet
     file_browser->status_image = xset_get_image("gtk-yes", GtkIconSize::GTK_ICON_SIZE_MENU);
-    gtk_box_pack_start(GTK_BOX(file_browser->status_bar),
+    gtk_box_pack_start(GTK_BOX(file_browser->statusbar),
                        file_browser->status_image,
                        false,
                        false,
@@ -913,7 +913,7 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     // pack fb vbox
     gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->hpane), true, true, 0);
     // TODO pack task frames
-    gtk_box_pack_start(GTK_BOX(file_browser), file_browser->status_bar, false, false, 0);
+    gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->statusbar), false, false, 0);
 
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,

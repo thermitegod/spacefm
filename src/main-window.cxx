@@ -2391,10 +2391,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
 void
 MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
 {
-    if (!(GTK_IS_WIDGET(file_browser) && GTK_IS_STATUSBAR(file_browser->status_bar)))
-    {
-        return;
-    }
+    assert(file_browser != nullptr);
 
     const auto cwd = file_browser->cwd();
     if (cwd.empty())
@@ -2420,7 +2417,8 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
     if (file_browser->is_busy())
     {
         statusbar_txt.append(std::format("Reading {} ...", file_browser->cwd().string()));
-        gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.data());
+        gtk_statusbar_pop(file_browser->statusbar, 0);
+        gtk_statusbar_push(file_browser->statusbar, 0, statusbar_txt.data());
         return;
     }
 
@@ -2640,10 +2638,11 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
     }
 
     // too much padding
-    gtk_widget_set_margin_top(GTK_WIDGET(file_browser->status_bar), 0);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->status_bar), 0);
+    gtk_widget_set_margin_top(GTK_WIDGET(file_browser->statusbar), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->statusbar), 0);
 
-    gtk_statusbar_push(GTK_STATUSBAR(file_browser->status_bar), 0, statusbar_txt.data());
+    gtk_statusbar_pop(file_browser->statusbar, 0);
+    gtk_statusbar_push(file_browser->statusbar, 0, statusbar_txt.data());
 }
 
 GtkNotebook*

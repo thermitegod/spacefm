@@ -154,7 +154,7 @@ struct PtkFileBrowser
     GtkWidget* side_dev_scroll{nullptr};
     GtkWidget* side_dir{nullptr};
     GtkWidget* side_dev{nullptr};
-    GtkWidget* status_bar{nullptr};
+    GtkStatusbar* statusbar{nullptr};
     GtkFrame* status_frame{nullptr};
     GtkLabel* status_label{nullptr};
     GtkWidget* status_image{nullptr};
