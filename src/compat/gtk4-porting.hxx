@@ -29,4 +29,8 @@ i32 gtk4_dialog_run(GtkDialog* dialog);
 
 #define gtk_widget_show_all(widget) ((void)(widget))
 
+// https://docs.gtk.org/gtk4/migrating-3to4.html#reduce-the-use-of-gtk_widget_destroy
+// TODO - Need to replace with either gtk_container_remove() or g_object_unref()
+#define gtk_widget_destroy(widget) ((void)(widget))
+
 #endif
