@@ -946,12 +946,10 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     (void)event;
     (void)user_data;
 
-    GtkWidget* item = widget;
-
-    if (item)
+    if (widget)
     {
         const std::string file_path =
-            static_cast<const char*>(g_object_get_data(G_OBJECT(item), "path"));
+            static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "path"));
 
         if (file_path.empty())
         {
@@ -959,7 +957,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
         }
 
         const auto file_browser =
-            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(item), "file_browser"));
+            static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(widget), "file_browser"));
         MainWindow* main_window = file_browser->main_window();
 
         main_window->new_tab(file_path);
