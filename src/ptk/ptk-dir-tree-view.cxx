@@ -860,7 +860,13 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
             u32 drop_done : 1; /* Whether gdk_drag_drop_done() was performed */
         };
         ((struct _GdkDragContext*)drag_context)->suggested_action = suggested_action;
+#if (GTK_MAJOR_VERSION == 4)
+        gdk_drag_status(drag_context,
+                        suggested_action,
+                        gtk_event_controller_get_current_event_time());
+#elif (GTK_MAJOR_VERSION == 3)
         gdk_drag_status(drag_context, suggested_action, gtk_get_current_event_time());
+#endif
     }
     return false;
 }
