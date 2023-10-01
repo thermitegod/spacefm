@@ -1314,7 +1314,7 @@ main_window_init(MainWindow* main_window)
         main_window->panels[p - 1] = notebook;
     }
 
-    main_window->task_scroll = gtk_scrolled_window_new(nullptr, nullptr);
+    main_window->task_scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
 
     // clang-format off
     gtk_paned_pack1(main_window->hpane_top, GTK_WIDGET(main_window->get_panel_notebook(panel_1)), false, true);
@@ -1335,7 +1335,7 @@ main_window_init(MainWindow* main_window)
     main_window->curpanel = 1;
 
     // Task View
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(main_window->task_scroll),
+    gtk_scrolled_window_set_policy(main_window->task_scroll,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     main_window->task_view = main_task_view_new(main_window);
@@ -1510,7 +1510,7 @@ main_window_store_positions(MainWindow* main_window)
                 xset_set(xset::name::panel_sliders, xset::var::s, std::to_string(pos));
             }
 
-            if (gtk_widget_get_visible(main_window->task_scroll))
+            if (gtk_widget_get_visible(GTK_WIDGET(main_window->task_scroll)))
             {
                 pos = gtk_paned_get_position(main_window->task_vpane);
                 if (pos)

@@ -134,7 +134,7 @@ struct PtkFileBrowser
 
     /* directory view */
     GtkWidget* folder_view_{nullptr};
-    GtkWidget* folder_view_scroll_{nullptr};
+    GtkScrolledWindow* folder_view_scroll_{nullptr};
     GtkCellRenderer* icon_render_{nullptr};
 
     // MOD
@@ -150,8 +150,8 @@ struct PtkFileBrowser
     GtkBox* side_toolbox{nullptr};
     GtkPaned* side_vpane_top{nullptr};
     GtkPaned* side_vpane_bottom{nullptr};
-    GtkWidget* side_dir_scroll{nullptr};
-    GtkWidget* side_dev_scroll{nullptr};
+    GtkScrolledWindow* side_dir_scroll{nullptr};
+    GtkScrolledWindow* side_dev_scroll{nullptr};
     GtkWidget* side_dir{nullptr};
     GtkWidget* side_dev{nullptr};
     GtkStatusbar* statusbar{nullptr};
@@ -280,7 +280,7 @@ struct PtkFileBrowser
     GtkWidget* folder_view() const noexcept;
     void folder_view(GtkWidget* new_folder_view) noexcept;
 
-    GtkWidget* folder_view_scroll() const noexcept;
+    GtkScrolledWindow* folder_view_scroll() const noexcept;
     GtkCellRenderer* icon_render() const noexcept;
 
     // other

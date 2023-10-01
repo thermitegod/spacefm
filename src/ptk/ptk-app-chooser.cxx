@@ -214,13 +214,14 @@ on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dial
 GtkWidget*
 init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
 {
-    GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+    GtkScrolledWindow* scrolled_window =
+        GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    gtk_scrolled_window_set_policy(scrolled_window,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     // gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window), GtkShadowType::GTK_SHADOW_ETCHED_IN);
-    gtk_widget_set_hexpand(scrolled_window, true);
-    gtk_widget_set_vexpand(scrolled_window, true);
+    gtk_widget_set_hexpand(GTK_WIDGET(scrolled_window), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(scrolled_window), true);
 
     GtkListStore* list_store = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
                                                   GDK_TYPE_PIXBUF,
@@ -265,13 +266,12 @@ init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
 GtkWidget*
 init_all_apps_tab(GtkWidget* dialog)
 {
-    GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
-    // gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window), GtkShadowType::GTK_SHADOW_ETCHED_IN);
-    gtk_widget_set_hexpand(scrolled_window, true);
-    gtk_widget_set_vexpand(scrolled_window, true);
+    GtkScrolledWindow* scrolled_window =
+        GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    gtk_scrolled_window_set_policy(scrolled_window, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    // gtk_scrolled_window_set_shadow_type(scrolled_window, GtkShadowType::GTK_SHADOW_ETCHED_IN);
+    gtk_widget_set_hexpand(GTK_WIDGET(scrolled_window), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(scrolled_window), true);
 
     GtkListStore* list_store = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
                                                   GDK_TYPE_PIXBUF,

@@ -69,7 +69,7 @@ struct MainWindow
     GtkPaned* vpane;
     GtkPaned* task_vpane;
 
-    GtkWidget* task_scroll;
+    GtkScrolledWindow* task_scroll;
     GtkWidget* task_view;
 
 #if (GTK_MAJOR_VERSION == 4)

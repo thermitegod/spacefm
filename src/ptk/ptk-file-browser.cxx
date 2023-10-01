@@ -372,7 +372,7 @@ PtkFileBrowser::folder_view(GtkWidget* new_folder_view) noexcept
     this->folder_view_ = new_folder_view;
 }
 
-GtkWidget*
+GtkScrolledWindow*
 PtkFileBrowser::folder_view_scroll() const noexcept
 {
     return this->folder_view_scroll_;
@@ -839,7 +839,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     file_browser->hpane = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
     file_browser->side_vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
     gtk_widget_set_size_request(GTK_WIDGET(file_browser->side_vbox), 140, -1);
-    file_browser->folder_view_scroll_ = gtk_scrolled_window_new(nullptr, nullptr);
+    file_browser->folder_view_scroll_ =
+        GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     gtk_paned_pack1(file_browser->hpane, GTK_WIDGET(file_browser->side_vbox), false, false);
     gtk_paned_pack2(file_browser->hpane, GTK_WIDGET(file_browser->folder_view_scroll_), true, true);
 
@@ -851,8 +852,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
         GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
     file_browser->side_vpane_bottom =
         GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
-    file_browser->side_dir_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-    file_browser->side_dev_scroll = gtk_scrolled_window_new(nullptr, nullptr);
+    file_browser->side_dir_scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    file_browser->side_dev_scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     gtk_box_pack_start(file_browser->side_vbox,
                        GTK_WIDGET(file_browser->side_toolbox),
                        false,
@@ -912,13 +913,13 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     // TODO pack task frames
     gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->statusbar), false, false, 0);
 
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
+    gtk_scrolled_window_set_policy(file_browser->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_ALWAYS);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->side_dir_scroll),
+    gtk_scrolled_window_set_policy(file_browser->side_dir_scroll,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->side_dev_scroll),
+    gtk_scrolled_window_set_policy(file_browser->side_dev_scroll,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
 
@@ -1019,14 +1020,14 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
     else if (xset_get_b_panel(curpanel, xset::panel::list_icons))
     {
         file_browser->view_mode_ = ptk::file_browser::view_mode::icon_view;
-        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
+        gtk_scrolled_window_set_policy(file_browser->folder_view_scroll_,
                                        GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                        GtkPolicyType::GTK_POLICY_AUTOMATIC);
     }
     else if (xset_get_b_panel(curpanel, xset::panel::list_compact))
     {
         file_browser->view_mode_ = ptk::file_browser::view_mode::compact_view;
-        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
+        gtk_scrolled_window_set_policy(file_browser->folder_view_scroll_,
                                        GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                        GtkPolicyType::GTK_POLICY_AUTOMATIC);
     }
@@ -4544,7 +4545,7 @@ PtkFileBrowser::view_as_icons() noexcept
     }
     this->folder_view_ = create_folder_view(this, ptk::file_browser::view_mode::icon_view);
     exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), this->file_list_);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(this->folder_view_scroll_),
+    gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     gtk_widget_show(this->folder_view_);
@@ -4569,7 +4570,7 @@ PtkFileBrowser::view_as_compact_list() noexcept
     }
     this->folder_view_ = create_folder_view(this, ptk::file_browser::view_mode::compact_view);
     exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), this->file_list_);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(this->folder_view_scroll_),
+    gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     gtk_widget_show(this->folder_view_);
@@ -4593,7 +4594,7 @@ PtkFileBrowser::view_as_list() noexcept
     }
     this->folder_view_ = create_folder_view(this, ptk::file_browser::view_mode::list_view);
     gtk_tree_view_set_model(GTK_TREE_VIEW(this->folder_view_), this->file_list_);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(this->folder_view_scroll_),
+    gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_ALWAYS);
     gtk_widget_show(this->folder_view_);
@@ -4677,7 +4678,7 @@ PtkFileBrowser::update_views() noexcept
             this->side_dir = ptk_file_browser_create_dir_tree(this);
             gtk_container_add(GTK_CONTAINER(this->side_dir_scroll), this->side_dir);
         }
-        gtk_widget_show_all(this->side_dir_scroll);
+        gtk_widget_show_all(GTK_WIDGET(this->side_dir_scroll));
         if (this->side_dir && this->file_list_)
         {
             ptk_dir_tree_view_chdir(GTK_TREE_VIEW(this->side_dir), this->cwd());
@@ -4685,7 +4686,7 @@ PtkFileBrowser::update_views() noexcept
     }
     else
     {
-        gtk_widget_hide(this->side_dir_scroll);
+        gtk_widget_hide(GTK_WIDGET(this->side_dir_scroll));
         if (this->side_dir)
         {
             gtk_widget_destroy(this->side_dir);
@@ -4700,11 +4701,11 @@ PtkFileBrowser::update_views() noexcept
             this->side_dev = ptk_location_view_new(this);
             gtk_container_add(GTK_CONTAINER(this->side_dev_scroll), this->side_dev);
         }
-        gtk_widget_show_all(this->side_dev_scroll);
+        gtk_widget_show_all(GTK_WIDGET(this->side_dev_scroll));
     }
     else
     {
-        gtk_widget_hide(this->side_dev_scroll);
+        gtk_widget_hide(GTK_WIDGET(this->side_dev_scroll));
         if (this->side_dev)
         {
             gtk_widget_destroy(this->side_dev);

@@ -86,13 +86,12 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     gtk_label_set_attributes(GTK_LABEL(header_label), attr_list);
     gtk_box_pack_start(box, header_label, false, false, 0);
 
-    GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
-    // gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled_window), GtkShadowType::GTK_SHADOW_ETCHED_IN);
-    gtk_widget_set_hexpand(scrolled_window, true);
-    gtk_widget_set_vexpand(scrolled_window, true);
+    GtkScrolledWindow* scrolled_window =
+        GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    gtk_scrolled_window_set_policy(scrolled_window, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    // gtk_scrolled_window_set_shadow_type(scrolled_window, GtkShadowType::GTK_SHADOW_ETCHED_IN);
+    gtk_widget_set_hexpand(GTK_WIDGET(scrolled_window), true);
+    gtk_widget_set_vexpand(GTK_WIDGET(scrolled_window), true);
 
     GtkListStore* list_store = gtk_list_store_new(magic_enum::enum_count<file_action_column>(),
                                                   G_TYPE_STRING,
@@ -149,7 +148,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
 
     // Add the scrolled window to the box
-    gtk_box_pack_start(box, scrolled_window, true, true, 0);
+    gtk_box_pack_start(box, GTK_WIDGET(scrolled_window), true, true, 0);
 
     // Create the label for total size
     const auto total_size = std::format("Total Size: {}", vfs_file_size_format(total_size_bytes));

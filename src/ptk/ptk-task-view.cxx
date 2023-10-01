@@ -468,7 +468,7 @@ show_task_manager(MainWindow* main_window, bool show)
     {
         if (!gtk_widget_get_visible(GTK_WIDGET(main_window->task_scroll)))
         {
-            gtk_widget_show(main_window->task_scroll);
+            gtk_widget_show(GTK_WIDGET(main_window->task_scroll));
             // allow vpane to auto-adjust before setting new slider pos
             g_idle_add((GSourceFunc)idle_set_task_height, main_window);
         }

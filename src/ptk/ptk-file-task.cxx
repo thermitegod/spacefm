@@ -996,7 +996,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_set_size_request(GTK_WIDGET(ptask->error_view), 600, 300);
     gtk_widget_set_size_request(GTK_WIDGET(ptask->scroll), 600, 300);
     gtk_container_add(GTK_CONTAINER(ptask->scroll), ptask->error_view);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ptask->scroll),
+    gtk_scrolled_window_set_policy(ptask->scroll,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(ptask->error_view), GtkWrapMode::GTK_WRAP_WORD_CHAR);
@@ -2602,9 +2602,8 @@ query_overwrite(PtkFileTask* ptask)
     gtk_box_pack_start(vbox, name_label, false, true, 0);
 
     // name input
-    GtkWidget* scroll = gtk_scrolled_window_new(nullptr, nullptr);
-    GtkWidget* query_input =
-        GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(scroll), filename.data()));
+    GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    GtkWidget* query_input = GTK_WIDGET(multi_input_new(scroll, filename.data()));
     g_signal_connect(G_OBJECT(query_input),
                      "key-press-event",
                      G_CALLBACK(on_query_input_keypress),

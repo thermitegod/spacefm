@@ -91,7 +91,7 @@ struct MoveSet
     GtkWidget* browse_template{nullptr};
 
     GtkLabel* label_name{nullptr};
-    GtkWidget* scroll_name{nullptr};
+    GtkScrolledWindow* scroll_name{nullptr};
     GtkWidget* input_name{nullptr};
     GtkTextBuffer* buf_name{nullptr};
     GtkLabel* blank_name{nullptr};
@@ -101,19 +101,19 @@ struct MoveSet
     GtkEntry* entry_ext{nullptr};
 
     GtkLabel* label_full_name{nullptr};
-    GtkWidget* scroll_full_name{nullptr};
+    GtkScrolledWindow* scroll_full_name{nullptr};
     GtkWidget* input_full_name{nullptr};
     GtkTextBuffer* buf_full_name{nullptr};
     GtkLabel* blank_full_name{nullptr};
 
     GtkLabel* label_path{nullptr};
-    GtkWidget* scroll_path{nullptr};
+    GtkScrolledWindow* scroll_path{nullptr};
     GtkWidget* input_path{nullptr};
     GtkTextBuffer* buf_path{nullptr};
     GtkLabel* blank_path{nullptr};
 
     GtkLabel* label_full_path{nullptr};
-    GtkWidget* scroll_full_path{nullptr};
+    GtkScrolledWindow* scroll_full_path{nullptr};
     GtkWidget* input_full_path{nullptr};
     GtkTextBuffer* buf_full_path{nullptr};
 
@@ -2547,8 +2547,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_label_set_markup_with_mnemonic(mset->label_name, "<b>_Name:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
-    mset->scroll_name = gtk_scrolled_window_new(nullptr, nullptr);
-    mset->input_name = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_name), nullptr));
+    mset->scroll_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    mset->input_name = GTK_WIDGET(multi_input_new(mset->scroll_name, nullptr));
     gtk_label_set_mnemonic_widget(mset->label_name, mset->input_name);
     g_signal_connect(G_OBJECT(mset->input_name),
                      "key-press-event",
@@ -2600,9 +2600,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_label_set_markup_with_mnemonic(mset->label_full_name, "<b>_Filename:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
-    mset->scroll_full_name = gtk_scrolled_window_new(nullptr, nullptr);
-    mset->input_full_name =
-        GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_full_name), nullptr));
+    mset->scroll_full_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    mset->input_full_name = GTK_WIDGET(multi_input_new(mset->scroll_full_name, nullptr));
     gtk_label_set_mnemonic_widget(mset->label_full_name, mset->input_full_name);
     g_signal_connect(G_OBJECT(mset->input_full_name),
                      "mnemonic-activate",
@@ -2628,8 +2627,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_label_set_markup_with_mnemonic(mset->label_path, "<b>_Parent:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
-    mset->scroll_path = gtk_scrolled_window_new(nullptr, nullptr);
-    mset->input_path = GTK_WIDGET(multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_path), nullptr));
+    mset->scroll_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    mset->input_path = GTK_WIDGET(multi_input_new(mset->scroll_path, nullptr));
     gtk_label_set_mnemonic_widget(mset->label_path, mset->input_path);
     g_signal_connect(G_OBJECT(mset->input_path),
                      "mnemonic-activate",
@@ -2655,10 +2654,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_label_set_markup_with_mnemonic(mset->label_full_path, "<b>P_ath:</b>");
     gtk_widget_set_halign(GTK_WIDGET(mset->label_full_path), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_path), GtkAlign::GTK_ALIGN_START);
-    mset->scroll_full_path = gtk_scrolled_window_new(nullptr, nullptr);
+    mset->scroll_full_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     // set initial path
-    mset->input_full_path = GTK_WIDGET(
-        multi_input_new(GTK_SCROLLED_WINDOW(mset->scroll_full_path), mset->new_path.c_str()));
+    mset->input_full_path =
+        GTK_WIDGET(multi_input_new(mset->scroll_full_path, mset->new_path.c_str()));
     gtk_label_set_mnemonic_widget(mset->label_full_path, mset->input_full_path);
     g_signal_connect(G_OBJECT(mset->input_full_path),
                      "mnemonic-activate",

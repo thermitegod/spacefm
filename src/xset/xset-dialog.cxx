@@ -117,7 +117,7 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
 {
     GtkTextIter iter;
 
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+    gtk_scrolled_window_set_policy(scrolled,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     GtkTextView* input = GTK_TEXT_VIEW(gtk_text_view_new());
