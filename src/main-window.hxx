@@ -98,6 +98,8 @@ struct MainWindow
     void update_status_bar(PtkFileBrowser* file_browser) const noexcept;
 
     bool is_main_tasks_running() const noexcept;
+
+    GtkWidget* get_panel_notebook(const panel_t panel) const noexcept;
 };
 
 GType main_window_get_type();

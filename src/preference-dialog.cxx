@@ -217,7 +217,7 @@ namespace preference::large_icons
         {
             for (const panel_t p : PANELS)
             {
-                GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
+                GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : ztd::range(total_pages))
                 {
@@ -329,7 +329,7 @@ namespace preference::small_icons
         {
             for (const panel_t p : PANELS)
             {
-                GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
+                GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : ztd::range(total_pages))
                 {
@@ -482,7 +482,7 @@ namespace preference::single_click
             {
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                     for (const auto i : ztd::range(total_pages))
                     {
@@ -522,7 +522,7 @@ namespace preference::hover_selects
             {
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                     for (const auto i : ztd::range(total_pages))
                     {
@@ -671,7 +671,7 @@ namespace preference::show_tab_bar
             { // update all windows/all panels
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
                     const i32 n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
                     {
@@ -712,7 +712,7 @@ namespace preference::hide_close_tab
             { // update all windows/all panels/all browsers
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->panels[p - 1]);
+                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                     for (const auto i : ztd::range(total_pages))
                     {

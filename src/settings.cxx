@@ -354,18 +354,19 @@ save_settings()
             for (const panel_t p : PANELS)
             {
                 xset_t set = xset_get_panel(p, xset::panel::show);
-                if (GTK_IS_NOTEBOOK(main_window->panels[p - 1]))
+                if (GTK_IS_NOTEBOOK(main_window->get_panel_notebook(p)))
                 {
                     const i32 pages =
-                        gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->panels[p - 1]));
+                        gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->get_panel_notebook(p)));
                     if (pages) // panel was shown
                     {
                         std::string tabs;
                         for (const auto i : ztd::range(pages))
                         {
-                            PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
-                                gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window->panels[p - 1]),
-                                                          i));
+                            PtkFileBrowser* file_browser =
+                                PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(
+                                    GTK_NOTEBOOK(main_window->get_panel_notebook(p)),
+                                    i));
                             tabs = std::format("{}{}{}",
                                                tabs,
                                                CONFIG_FILE_TABS_DELIM,
@@ -377,8 +378,8 @@ save_settings()
                         set->s = tabs;
 
                         // save current tab
-                        const i32 current_page =
-                            gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->panels[p - 1]));
+                        const i32 current_page = gtk_notebook_get_current_page(
+                            GTK_NOTEBOOK(main_window->get_panel_notebook(p)));
                         set->x = std::to_string(current_page);
                     }
                 }
