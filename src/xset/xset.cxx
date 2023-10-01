@@ -505,7 +505,6 @@ xset_get_s(const std::string_view name) noexcept
 const std::optional<std::string>
 xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
 {
-    // TODO
     const std::string fullname = std::format("panel{}_{}", panel, name);
     return xset_get_s(fullname);
 }
