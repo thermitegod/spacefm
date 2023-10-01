@@ -998,7 +998,7 @@ ptk_file_browser_set_property(GObject* obj, u32 prop_id, const GValue* value, GP
 }
 
 GtkWidget*
-ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
+ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                      MainWindow* main_window)
 {
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
@@ -1061,9 +1061,9 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
 void
 PtkFileBrowser::update_tab_label() noexcept
 {
-    // GtkWidget* label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(this->notebook_), GTK_WIDGET(this));
+    // GtkWidget* label = gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this));
 
-    GtkWidget* label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(this->notebook_), GTK_WIDGET(this));
+    GtkWidget* label = gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this));
 
     GtkContainer* hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
     GList* children = gtk_container_get_children(hbox);
@@ -2084,7 +2084,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         {
             if (column.column == ptk::file_list::column::name && !app_settings.always_show_tabs() &&
                 file_browser->view_mode_ == ptk::file_browser::view_mode::list_view &&
-                gtk_notebook_get_n_pages(GTK_NOTEBOOK(file_browser->notebook_)) == 1)
+                gtk_notebook_get_n_pages(file_browser->notebook_) == 1)
             {
                 // when tabs are added, the width of the notebook decreases
                 // by a few pixels, meaning there is not enough space for
@@ -2096,7 +2096,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                 // below causes increasing reduction of column every time new tab is
                 // added and closed - undesirable
                 PtkFileBrowser* first_fb = PTK_FILE_BROWSER_REINTERPRET(
-                    gtk_notebook_get_nth_page(GTK_NOTEBOOK(file_browser->notebook_), 0));
+                    gtk_notebook_get_nth_page(file_browser->notebook_, 0));
 
                 if (first_fb && first_fb->view_mode_ == ptk::file_browser::view_mode::list_view &&
                     GTK_IS_TREE_VIEW(first_fb->folder_view_))
@@ -3167,32 +3167,31 @@ void
 PtkFileBrowser::go_tab(tab_t tab) noexcept
 {
     // ztd::logger::info("ptk_file_browser_go_tab fb={}", fmt::ptr(this));
-    GtkWidget* notebook = this->notebook_;
 
     switch (tab)
     {
         case tab_control_code_prev:
             // prev
-            if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) == 0)
+            if (gtk_notebook_get_current_page(this->notebook_) == 0)
             {
-                gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook),
-                                              gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) - 1);
+                gtk_notebook_set_current_page(this->notebook_,
+                                              gtk_notebook_get_n_pages(this->notebook_) - 1);
             }
             else
             {
-                gtk_notebook_prev_page(GTK_NOTEBOOK(notebook));
+                gtk_notebook_prev_page(this->notebook_);
             }
             break;
         case tab_control_code_next:
             // next
-            if (gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook)) + 1 ==
-                gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)))
+            if (gtk_notebook_get_current_page(this->notebook_) + 1 ==
+                gtk_notebook_get_n_pages(this->notebook_))
             {
-                gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), 0);
+                gtk_notebook_set_current_page(this->notebook_, 0);
             }
             else
             {
-                gtk_notebook_next_page(GTK_NOTEBOOK(notebook));
+                gtk_notebook_next_page(this->notebook_);
             }
             break;
         case tab_control_code_close:
@@ -3205,9 +3204,9 @@ PtkFileBrowser::go_tab(tab_t tab) noexcept
             break;
         default:
             // set tab
-            if (tab <= gtk_notebook_get_n_pages(GTK_NOTEBOOK(notebook)) && tab > 0)
+            if (tab <= gtk_notebook_get_n_pages(this->notebook_) && tab > 0)
             {
-                gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), tab - 1);
+                gtk_notebook_set_current_page(this->notebook_, tab - 1);
             }
             break;
     }
@@ -3488,7 +3487,7 @@ PtkFileBrowser::close_tab() noexcept
         }
         main_window->new_tab(path);
         PtkFileBrowser* a_browser =
-            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), 0));
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, 0));
         a_browser->update_views();
         main_window->set_window_title(a_browser);
         if (xset_get_b(xset::name::main_save_tabs))
@@ -3499,11 +3498,11 @@ PtkFileBrowser::close_tab() noexcept
     }
 
     // update view of new current tab
-    const tab_t cur_tabx = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook));
+    const tab_t cur_tabx = gtk_notebook_get_current_page(main_window->notebook);
     if (cur_tabx != -1)
     {
-        PtkFileBrowser* a_browser = PTK_FILE_BROWSER_REINTERPRET(
-            gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), cur_tabx));
+        PtkFileBrowser* a_browser =
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
         a_browser->update_views();
         main_window->update_status_bar(a_browser);
         // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
@@ -3543,8 +3542,8 @@ PtkFileBrowser::restore_tab() noexcept
 void
 PtkFileBrowser::open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept
 {
-    const tab_t cur_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(this->notebook_));
-    const tab_t pages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(this->notebook_));
+    const tab_t cur_page = gtk_notebook_get_current_page(this->notebook_);
+    const tab_t pages = gtk_notebook_get_n_pages(this->notebook_);
 
     tab_t page_x;
     switch (tab)
@@ -3564,8 +3563,8 @@ PtkFileBrowser::open_in_tab(const std::filesystem::path& file_path, const tab_t 
 
     if (page_x > -1 && page_x < pages && page_x != cur_page)
     {
-        PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
-            gtk_notebook_get_nth_page(GTK_NOTEBOOK(this->notebook_), page_x));
+        PtkFileBrowser* file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(this->notebook_, page_x));
 
         file_browser->chdir(file_path, ptk::file_browser::chdir_mode::add_history);
     }

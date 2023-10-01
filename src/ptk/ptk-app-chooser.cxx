@@ -49,7 +49,7 @@ enum class app_chooser_column
 
 struct app_chooser_dialog_data
 {
-    GtkWidget* notebook{nullptr};
+    GtkNotebook* notebook{nullptr};
 
     GtkWidget* entry_command{nullptr};
 
@@ -409,14 +409,12 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     }
 
     // Create the notebook with two tabs
-    data->notebook = gtk_notebook_new();
-    gtk_notebook_append_page(GTK_NOTEBOOK(data->notebook),
+    data->notebook = GTK_NOTEBOOK(gtk_notebook_new());
+    gtk_notebook_append_page(data->notebook,
                              init_associated_apps_tab(dialog, mime_type),
                              gtk_label_new("Associated Apps"));
-    gtk_notebook_append_page(GTK_NOTEBOOK(data->notebook),
-                             init_all_apps_tab(dialog),
-                             gtk_label_new("All Apps"));
-    gtk_box_pack_start(GTK_BOX(vbox), data->notebook, true, true, 0);
+    gtk_notebook_append_page(data->notebook, init_all_apps_tab(dialog), gtk_label_new("All Apps"));
+    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(data->notebook), true, true, 0);
 
     // Create the first checked button
     data->btn_open_in_terminal = gtk_check_button_new_with_label("Open in a terminal");
@@ -439,7 +437,7 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     if (focus_all_apps)
     {
         // select All Apps tab
-        gtk_notebook_next_page(GTK_NOTEBOOK(data->notebook));
+        gtk_notebook_next_page(data->notebook);
     }
 
     gtk_widget_grab_focus(GTK_WIDGET(data->notebook));
@@ -465,8 +463,8 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
         return app;
     }
 
-    const i32 idx = gtk_notebook_get_current_page(GTK_NOTEBOOK(data->notebook));
-    GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(GTK_NOTEBOOK(data->notebook), idx));
+    const i32 idx = gtk_notebook_get_current_page(data->notebook);
+    GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(data->notebook, idx));
     GtkTreeView* tree_view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
     GtkTreeSelection* selection = gtk_tree_view_get_selection(tree_view);
 

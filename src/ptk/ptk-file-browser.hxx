@@ -141,7 +141,7 @@ struct PtkFileBrowser
     panel_t panel_{0};
 
     MainWindow* main_window_{nullptr};
-    GtkWidget* notebook_{nullptr};
+    GtkNotebook* notebook_{nullptr};
     GtkWidget* task_view_{nullptr};
     GtkWidget* toolbox_{nullptr};
     GtkWidget* path_bar_{nullptr};
@@ -462,7 +462,7 @@ struct PtkFileBrowserClass
 
 GType ptk_file_browser_get_type();
 
-GtkWidget* ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
+GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                                 MainWindow* main_window);
 
 bool ptk_file_browser_write_access(const std::filesystem::path& cwd);

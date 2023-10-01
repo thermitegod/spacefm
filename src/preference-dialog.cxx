@@ -217,7 +217,7 @@ namespace preference::large_icons
         {
             for (const panel_t p : PANELS)
             {
-                GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
+                GtkNotebook* notebook = window->get_panel_notebook(p);
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : ztd::range(total_pages))
                 {
@@ -329,7 +329,7 @@ namespace preference::small_icons
         {
             for (const panel_t p : PANELS)
             {
-                GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
+                GtkNotebook* notebook = window->get_panel_notebook(p);
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : ztd::range(total_pages))
                 {
@@ -482,7 +482,7 @@ namespace preference::single_click
             {
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
+                    GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                     for (const auto i : ztd::range(total_pages))
                     {
@@ -522,7 +522,7 @@ namespace preference::hover_selects
             {
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
+                    GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                     for (const auto i : ztd::range(total_pages))
                     {
@@ -671,7 +671,7 @@ namespace preference::show_tab_bar
             { // update all windows/all panels
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
+                    GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 n = gtk_notebook_get_n_pages(notebook);
                     if (always_show_tabs)
                     {
@@ -712,7 +712,7 @@ namespace preference::hide_close_tab
             { // update all windows/all panels/all browsers
                 for (const panel_t p : PANELS)
                 {
-                    GtkNotebook* notebook = GTK_NOTEBOOK(window->get_panel_notebook(p));
+                    GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                     for (const auto i : ztd::range(total_pages))
                     {
@@ -1181,17 +1181,17 @@ show_preference_dialog(GtkWindow* parent) noexcept
 
     GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    GtkWidget* notebook = gtk_notebook_new();
-    gtk_container_add(GTK_CONTAINER(content_area), notebook);
+    GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
+    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(notebook));
 
     gtk_container_set_border_width(GTK_CONTAINER(notebook), 2);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
 
     // clang-format off
     // Add Setting Pages
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_general_tab(), gtk_label_new("General"));
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_interface_tab(), gtk_label_new("Interface"));
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_advanced_tab(), gtk_label_new("Advanced"));
+    gtk_notebook_append_page(notebook, init_general_tab(), gtk_label_new("General"));
+    gtk_notebook_append_page(notebook, init_interface_tab(), gtk_label_new("Interface"));
+    gtk_notebook_append_page(notebook, init_advanced_tab(), gtk_label_new("Advanced"));
     // clang-format on
 
     // gtk_widget_set_size_request(GTK_WIDGET(dialog), 500, 800);

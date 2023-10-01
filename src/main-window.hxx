@@ -54,8 +54,8 @@ struct MainWindow
     GtkWidget* tool_menu_item;
     GtkWidget* help_menu_item;
     GtkWidget* dev_menu;
-    GtkWidget* notebook; // MOD changed use to current panel
-    GtkWidget* panels[4];
+    GtkNotebook* notebook; // MOD changed use to current panel
+    GtkNotebook* panels[4];
     i32 panel_slide_x[4];
     i32 panel_slide_y[4];
     i32 panel_slide_s[4];
@@ -99,7 +99,7 @@ struct MainWindow
 
     bool is_main_tasks_running() const noexcept;
 
-    GtkWidget* get_panel_notebook(const panel_t panel) const noexcept;
+    GtkNotebook* get_panel_notebook(const panel_t panel) const noexcept;
 };
 
 GType main_window_get_type();

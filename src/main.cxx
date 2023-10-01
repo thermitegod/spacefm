@@ -155,8 +155,7 @@ open_in_tab(MainWindow** main_window, const std::filesystem::path& real_path,
         if (opt->panel > 0 && opt->panel < 5)
         {
             // change to user-specified panel
-            if (!gtk_notebook_get_n_pages(
-                    GTK_NOTEBOOK((*main_window)->get_panel_notebook(opt->panel))))
+            if (!gtk_notebook_get_n_pages((*main_window)->get_panel_notebook(opt->panel)))
             {
                 // set panel to load real_path on panel load
                 set = xset_get_panel(opt->panel, xset::panel::show);
@@ -165,7 +164,8 @@ open_in_tab(MainWindow** main_window, const std::filesystem::path& real_path,
                 set->b = xset::b::xtrue;
                 show_panels_all_windows(nullptr, *main_window);
             }
-            else if (!gtk_widget_get_visible((*main_window)->get_panel_notebook(opt->panel)))
+            else if (!gtk_widget_get_visible(
+                         GTK_WIDGET((*main_window)->get_panel_notebook(opt->panel))))
             {
                 // show panel
                 set = xset_get_panel(opt->panel, xset::panel::show);
@@ -223,7 +223,7 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
         if (is_valid_panel(opt->panel))
         {
             // user specified a panel with no file, let's show the panel
-            if (!gtk_widget_get_visible(main_window->get_panel_notebook(opt->panel)))
+            if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opt->panel))))
             {
                 // show panel
                 xset_t set = xset_get_panel(opt->panel, xset::panel::show);

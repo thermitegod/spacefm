@@ -909,8 +909,8 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    GtkWidget* notebook = gtk_notebook_new();
-    gtk_container_add(GTK_CONTAINER(content_area), notebook);
+    GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
+    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(notebook));
 
     gtk_container_set_border_width(GTK_CONTAINER(notebook), 2);
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
@@ -921,9 +921,9 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     g_object_set_data(G_OBJECT(dialog), "data", data);
 
     // clang-format off
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_file_info_tab(data, cwd , selected_files), gtk_label_new("File Info"));
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_attributes_tab(data, selected_files), gtk_label_new("Attributes"));
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), init_permissions_tab(data, selected_files), gtk_label_new("Permissions"));
+    gtk_notebook_append_page(notebook, init_file_info_tab(data, cwd , selected_files), gtk_label_new("File Info"));
+    gtk_notebook_append_page(notebook, init_attributes_tab(data, selected_files), gtk_label_new("Attributes"));
+    gtk_notebook_append_page(notebook, init_permissions_tab(data, selected_files), gtk_label_new("Permissions"));
     // clang-format on
 
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 470, 400);
@@ -936,7 +936,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     gtk_widget_show_all(dialog);
 
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), page);
+    gtk_notebook_set_current_page(notebook, page);
 
     gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
