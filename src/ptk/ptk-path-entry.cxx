@@ -541,13 +541,14 @@ ptk_path_entry_new(PtkFileBrowser* file_browser)
 
     const auto edata = new EntryData(file_browser);
 
-    g_signal_connect(entry, "focus-in-event", G_CALLBACK(on_focus_in), nullptr);
-    g_signal_connect(entry, "focus-out-event", G_CALLBACK(on_focus_out), nullptr);
+    // clang-format off
+    g_signal_connect(G_OBJECT(entry), "focus-in-event", G_CALLBACK(on_focus_in), nullptr);
+    g_signal_connect(G_OBJECT(entry), "focus-out-event", G_CALLBACK(on_focus_out), nullptr);
 
     // used to eat the tab key
-    g_signal_connect(entry, "key-press-event", G_CALLBACK(on_key_press), edata);
-
-    g_signal_connect(entry, "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
+    g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_key_press), edata);
+    g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
+    // clang-format on
 
     g_object_weak_ref(G_OBJECT(entry), (GWeakNotify)entry_data_free, edata);
     g_object_set_data(G_OBJECT(entry), "edata", edata);

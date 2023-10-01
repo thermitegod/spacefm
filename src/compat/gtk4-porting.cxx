@@ -53,11 +53,9 @@ gtk4_dialog_run(GtkDialog* dialog)
 
     gtk_widget_show(GTK_WIDGET(dialog));
 
-    g_signal_connect_object(dialog,
-                            "response",
-                            G_CALLBACK(dialog_response_cb),
-                            task,
-                            GConnectFlags::G_CONNECT_AFTER);
+    // clang-format off
+    g_signal_connect_object(G_OBJECT(dialog), "response", G_CALLBACK(dialog_response_cb), task, GConnectFlags::G_CONNECT_AFTER);
+    // clang-format on
 
     // Wait until the task is completed
     while (!g_task_get_completed(task))

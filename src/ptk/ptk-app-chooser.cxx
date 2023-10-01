@@ -252,10 +252,9 @@ init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
         }
     }
 
-    g_signal_connect(G_OBJECT(tree_view),
-                     "row_activated",
-                     G_CALLBACK(on_view_row_activated),
-                     dialog);
+    // clang-format off
+    g_signal_connect(G_OBJECT(tree_view), "row_activated", G_CALLBACK(on_view_row_activated), dialog);
+    // clang-format on
 
     // Add the tree view to the scrolled window
     gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
@@ -306,10 +305,9 @@ init_all_apps_tab(GtkWidget* dialog)
 
     task->run();
 
-    g_signal_connect(G_OBJECT(tree_view),
-                     "row_activated",
-                     G_CALLBACK(on_view_row_activated),
-                     dialog);
+    // clang-format off
+    g_signal_connect(G_OBJECT(tree_view), "row_activated", G_CALLBACK(on_view_row_activated), dialog);
+    // clang-format on
 
     // Add the tree view to the scrolled window
     gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
@@ -538,7 +536,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
                                            show_default,
                                            dir_default);
 
-    g_signal_connect(dialog, "response", G_CALLBACK(on_dialog_response), nullptr);
+    g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(on_dialog_response), nullptr);
 
     std::optional<std::string> app = std::nullopt;
 

@@ -1166,14 +1166,16 @@ rebuild_menu_bookmarks(MainWindow* main_window, PtkFileBrowser* file_browser)
         g_object_set_data(G_OBJECT(item), "path", ztd::strdup(book_path));
         g_object_set_data(G_OBJECT(item), "name", ztd::strdup(book_name));
 
-        g_signal_connect(item, "activate", G_CALLBACK(bookmark_menu_keypress), nullptr);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(bookmark_menu_keypress), nullptr);
 
         gtk_widget_set_sensitive(item, true);
         gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), item);
     }
 
     gtk_widget_show_all(GTK_WIDGET(newmenu));
-    g_signal_connect(newmenu, "key-press-event", G_CALLBACK(bookmark_menu_keypress), nullptr);
+    // clang-format off
+    g_signal_connect(G_OBJECT(newmenu), "key-press-event", G_CALLBACK(bookmark_menu_keypress), nullptr);
+    // clang-format on
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->book_menu_item), newmenu);
 }
 
@@ -1249,8 +1251,7 @@ main_window_init(MainWindow* main_window)
 
     WindowReference::increase();
 
-    // g_signal_connect( G_OBJECT( main_window ), "task-notify",
-    //                            G_CALLBACK( ptk_file_task_notify_handler ), nullptr );
+    // g_signal_connect(G_OBJECT(main_window), "task-notify", G_CALLBACK(ptk_file_task_notify_handler), nullptr);
 
     /* Start building GUI */
     /*
@@ -1304,10 +1305,10 @@ main_window_init(MainWindow* main_window)
         GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
         gtk_notebook_set_show_border(notebook, false);
         gtk_notebook_set_scrollable(notebook, true);
-        g_signal_connect(notebook,
-                         "switch-page",
-                         G_CALLBACK(on_folder_notebook_switch_pape),
-                         main_window);
+
+        // clang-format off
+        g_signal_connect(G_OBJECT(notebook), "switch-page", G_CALLBACK(on_folder_notebook_switch_pape), main_window);
+        // clang-format on
 
         main_window->panels[p - 1] = notebook;
     }
@@ -1341,41 +1342,18 @@ main_window_init(MainWindow* main_window)
 
     gtk_widget_show_all(GTK_WIDGET(main_window->main_vbox));
 
-    g_signal_connect(G_OBJECT(main_window->file_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
-    g_signal_connect(G_OBJECT(main_window->view_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
-    g_signal_connect(G_OBJECT(main_window->dev_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
-    g_signal_connect(G_OBJECT(main_window->book_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
-    g_signal_connect(G_OBJECT(main_window->tool_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
-    g_signal_connect(G_OBJECT(main_window->help_menu_item),
-                     "button-press-event",
-                     G_CALLBACK(on_menu_bar_event),
-                     main_window);
+    // clang-format off
+    g_signal_connect(G_OBJECT(main_window->file_menu_item), "button-press-event", G_CALLBACK(on_menu_bar_event), main_window);
+    g_signal_connect(G_OBJECT(main_window->view_menu_item), "button-press-event", G_CALLBACK(on_menu_bar_event), main_window);
+    g_signal_connect(G_OBJECT(main_window->dev_menu_item), "button-press-event", G_CALLBACK(on_menu_bar_event), main_window);
+    g_signal_connect(G_OBJECT(main_window->book_menu_item), "button-press-event", G_CALLBACK(on_menu_bar_event), main_window);
+    g_signal_connect(G_OBJECT(main_window->tool_menu_item), "button-press-event", G_CALLBACK(on_menu_bar_event), main_window);
+    g_signal_connect(G_OBJECT(main_window->help_menu_item), "button-press-event", G_CALLBACK(on_menu_bar_event), main_window);
 
     // use this OR widget_class->key_press_event = on_main_window_keypress;
-    g_signal_connect(G_OBJECT(main_window),
-                     "key-press-event",
-                     G_CALLBACK(on_main_window_keypress),
-                     nullptr);
-
-    g_signal_connect(G_OBJECT(main_window),
-                     "button-press-event",
-                     G_CALLBACK(on_window_button_press_event),
-                     main_window);
+    g_signal_connect(G_OBJECT(main_window), "key-press-event", G_CALLBACK(on_main_window_keypress), nullptr);
+    g_signal_connect(G_OBJECT(main_window), "button-press-event", G_CALLBACK(on_window_button_press_event), main_window);
+    // clang-format on
 
     main_window->panel_change = false;
     main_window->show_panels();
@@ -1872,7 +1850,9 @@ notebook_clicked(GtkWidget* widget, GdkEventButton* event,
             xset_set_cb(set, (GFunc)ptk_file_browser_new_tab_here, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             gtk_widget_show_all(GTK_WIDGET(popup));
-            g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+            // clang-format off
+            g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+            // clang-format on
             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             return true;
         }
@@ -1956,10 +1936,10 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 
         gtk_container_add(GTK_CONTAINER(close_btn), close_icon);
         gtk_box_pack_end(tab_label, GTK_WIDGET(close_btn), false, false, 0);
-        g_signal_connect(G_OBJECT(close_btn),
-                         "clicked",
-                         G_CALLBACK(ptk_file_browser_close_tab),
-                         file_browser);
+
+        // clang-format off
+        g_signal_connect(G_OBJECT(close_btn), "clicked", G_CALLBACK(ptk_file_browser_close_tab), file_browser);
+        // clang-format on
     }
 
     gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(tab_label));
@@ -1972,13 +1952,12 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
         sizeof(drag_targets) / sizeof(GtkTargetEntry),
         GdkDragAction(GdkDragAction::GDK_ACTION_DEFAULT | GdkDragAction::GDK_ACTION_COPY |
                       GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_LINK));
-    g_signal_connect((void*)ebox, "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
 
+    // clang-format off
+    g_signal_connect(G_OBJECT(ebox), "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
     // MOD  middle-click to close tab
-    g_signal_connect(G_OBJECT(ebox),
-                     "button-press-event",
-                     G_CALLBACK(notebook_clicked),
-                     file_browser);
+    g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(notebook_clicked), file_browser);
+    // clang-format on
 
     gtk_widget_show_all(GTK_WIDGET(ebox));
 

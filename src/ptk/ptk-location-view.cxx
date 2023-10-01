@@ -454,7 +454,7 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
                                         nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    // g_signal_connect( renderer, "edited", G_CALLBACK(on_bookmark_edited), view );
+    // g_signal_connect(G_OBJECT(renderer), "edited", G_CALLBACK(on_bookmark_edited), view);
     gtk_tree_view_column_pack_start(col, renderer, true);
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
@@ -476,10 +476,11 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 
     g_object_set_data(G_OBJECT(view), "file_browser", file_browser);
 
-    g_signal_connect(view, "row-activated", G_CALLBACK(on_row_activated), file_browser);
-
-    g_signal_connect(view, "button-press-event", G_CALLBACK(on_button_press_event), nullptr);
-    g_signal_connect(view, "key-press-event", G_CALLBACK(on_key_press_event), file_browser);
+    // clang-format off
+    g_signal_connect(G_OBJECT(view), "row-activated", G_CALLBACK(on_row_activated), file_browser);
+    g_signal_connect(G_OBJECT(view), "button-press-event", G_CALLBACK(on_button_press_event), nullptr);
+    g_signal_connect(G_OBJECT(view), "key-press-event", G_CALLBACK(on_key_press_event), file_browser);
+    // clang-format on
 
     return view;
 }
@@ -1390,7 +1391,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
 
     gtk_widget_show_all(GTK_WIDGET(popup));
 
-    g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
 
     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
 }
@@ -1555,13 +1556,13 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     set = xset_get(xset::name::dev_menu_remove);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(item, "activate", G_CALLBACK(on_eject), vol);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
 
     set = xset_get(xset::name::dev_menu_unmount);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(item, "activate", G_CALLBACK(on_umount), vol);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     gtk_widget_set_sensitive(item, !!vol);
 
@@ -1573,17 +1574,17 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     if (file_browser)
     {
-        g_signal_connect(item, "activate", G_CALLBACK(on_open_tab), vol);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open_tab), vol);
     }
     else
     {
-        g_signal_connect(item, "activate", G_CALLBACK(on_open), vol);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open), vol);
     }
 
     set = xset_get(xset::name::dev_menu_mount);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(item, "activate", G_CALLBACK(on_mount), vol);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     gtk_widget_set_sensitive(item, !!vol);
 
@@ -1591,8 +1592,8 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     gtk_widget_show_all(GTK_WIDGET(popup));
     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
     gtk_widget_set_sensitive(GTK_WIDGET(menu), false);
-    g_signal_connect(menu, "hide", G_CALLBACK(on_dev_menu_hide), popup);
-    g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    g_signal_connect(G_OBJECT(menu), "hide", G_CALLBACK(on_dev_menu_hide), popup);
+    g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
 
     gtk_menu_shell_set_take_focus(GTK_MENU_SHELL(popup), true);
     // this is required when showing the menu via F2 or Menu key for focus
@@ -1697,14 +1698,13 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
         GtkWidget* item = gtk_menu_item_new_with_label(volume->display_name().data());
         g_object_set_data(G_OBJECT(item), "menu", menu);
         g_object_set_data(G_OBJECT(item), "vol", volume);
-        g_signal_connect(item, "button-press-event", G_CALLBACK(on_dev_menu_button_press), volume);
-        g_signal_connect(item,
-                         "button-release-event",
-                         G_CALLBACK(on_dev_menu_button_press),
-                         volume);
+        // clang-format off
+        g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(on_dev_menu_button_press), volume);
+        g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(on_dev_menu_button_press), volume);
+        // clang-format on
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
-    g_signal_connect(menu, "key_press_event", G_CALLBACK(on_dev_menu_keypress), nullptr);
+    g_signal_connect(G_OBJECT(menu), "key_press_event", G_CALLBACK(on_dev_menu_keypress), nullptr);
 
     xset_set_cb(xset::name::dev_show_internal_drives, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_show_empty, (GFunc)update_all, nullptr);

@@ -944,7 +944,7 @@ namespace preference::date_format
     {
         GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
         gtk_entry_set_text(entry, app_settings.date_format().data());
-        g_signal_connect(entry, "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+        g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
         return entry;
     }
 } // namespace preference::date_format
@@ -967,7 +967,7 @@ namespace preference::editor
     {
         GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
         gtk_entry_set_text(entry, xset_get_s(xset::name::editor).value_or("").data());
-        g_signal_connect(entry, "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+        g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
         return entry;
     }
 } // namespace preference::editor
@@ -1177,7 +1177,7 @@ show_preference_dialog(GtkWindow* parent) noexcept
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
 
-    g_signal_connect(dialog, "response", G_CALLBACK(on_response), nullptr);
+    g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(on_response), nullptr);
 
     GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 

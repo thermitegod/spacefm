@@ -1017,7 +1017,9 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
 #endif
 
     g_object_weak_ref(G_OBJECT(popup), (GWeakNotify)ptk_file_menu_free, data);
-    g_signal_connect_after((void*)popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    // clang-format off
+    g_signal_connect_after(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    // clang-format on
 
     const bool is_dir = (file && file->is_directory());
     // Note: network filesystems may become unresponsive here
@@ -1202,23 +1204,15 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
                 }
 
                 gtk_container_add(GTK_CONTAINER(submenu), app_menu_item);
-                g_signal_connect(G_OBJECT(app_menu_item),
-                                 "activate",
-                                 G_CALLBACK(on_popup_run_app),
-                                 (void*)data);
+
+                // clang-format off
                 g_object_set_data(G_OBJECT(app_menu_item), "menu", submenu);
-                g_signal_connect(G_OBJECT(app_menu_item),
-                                 "button-press-event",
-                                 G_CALLBACK(on_app_button_press),
-                                 (void*)data);
-                g_signal_connect(G_OBJECT(app_menu_item),
-                                 "button-release-event",
-                                 G_CALLBACK(on_app_button_press),
-                                 (void*)data);
-                g_object_set_data_full(G_OBJECT(app_menu_item),
-                                       "desktop_file",
-                                       ztd::strdup(app.data()),
-                                       free);
+                g_object_set_data_full(G_OBJECT(app_menu_item), "desktop_file", ztd::strdup(app.data()), free);
+
+                g_signal_connect(G_OBJECT(app_menu_item), "activate", G_CALLBACK(on_popup_run_app), (void*)data);
+                g_signal_connect(G_OBJECT(app_menu_item), "button-press-event", G_CALLBACK(on_app_button_press), (void*)data);
+                g_signal_connect(G_OBJECT(app_menu_item), "button-release-event", G_CALLBACK(on_app_button_press), (void*)data);
+                // clang-format off
             }
         }
 
@@ -1326,7 +1320,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         set->menu_label = std::nullopt; // do not bother to save this
 
         //
-        g_signal_connect(submenu, "key-press-event", G_CALLBACK(app_menu_keypress), data);
+        g_signal_connect(G_OBJECT(submenu), "key-press-event", G_CALLBACK(app_menu_keypress), data);
     }
 
     // Go >
@@ -1592,7 +1586,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
 
     gtk_widget_show_all(GTK_WIDGET(popup));
 
-    g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
     return popup;
 }
 
@@ -2052,7 +2046,7 @@ app_menu_additem(GtkWidget* menu, const std::string_view label, ptk::file_menu::
     g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
     g_object_set_data(G_OBJECT(item), "data", data);
     gtk_container_add(GTK_CONTAINER(menu), item);
-    g_signal_connect(item, "activate", G_CALLBACK(app_job), app_item);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(app_job), app_item);
     return item;
 }
 
@@ -2165,7 +2159,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     gtk_container_add(GTK_CONTAINER(app_menu), newitem);
     g_object_set_data(G_OBJECT(newitem), "job", GINT_TO_POINTER(ptk::file_menu::app_job::usr));
     g_object_set_data(G_OBJECT(newitem), "data", data);
-    g_signal_connect(submenu, "key_press_event", G_CALLBACK(app_menu_keypress), data);
+    g_signal_connect(G_OBJECT(submenu), "key_press_event", G_CALLBACK(app_menu_keypress), data);
 
     // View /usr .desktop
     if (!desktop->name().empty())
@@ -2225,9 +2219,9 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     gtk_menu_popup_at_pointer(GTK_MENU(app_menu), nullptr);
     gtk_widget_set_sensitive(GTK_WIDGET(menu), false);
 
-    g_signal_connect(menu, "hide", G_CALLBACK(on_app_menu_hide), app_menu);
-    g_signal_connect(app_menu, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
-    g_signal_connect(app_menu, "key_press_event", G_CALLBACK(app_menu_keypress), data);
+    g_signal_connect(G_OBJECT(menu), "hide", G_CALLBACK(on_app_menu_hide), app_menu);
+    g_signal_connect(G_OBJECT(app_menu), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    g_signal_connect(G_OBJECT(app_menu), "key_press_event", G_CALLBACK(app_menu_keypress), data);
 
     gtk_menu_shell_set_take_focus(GTK_MENU_SHELL(app_menu), true);
     // this is required when showing the menu via F2 or Menu key for focus

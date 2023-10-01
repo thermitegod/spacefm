@@ -140,10 +140,9 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
     gtk_text_view_scroll_to_mark(input, insert, 0.0, false, 0, 0);
     gtk_text_view_set_accepts_tab(input, false);
 
-    g_signal_connect_after(G_OBJECT(buf),
-                           "insert-text",
-                           G_CALLBACK(on_multi_input_insert),
-                           nullptr);
+    // clang-format off
+    g_signal_connect_after(G_OBJECT(buf), "insert-text", G_CALLBACK(on_multi_input_insert), nullptr);
+    // clang-format on
 
     return input;
 }

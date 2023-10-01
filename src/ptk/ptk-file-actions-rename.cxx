@@ -1619,7 +1619,7 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(popup));
-    g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
     gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
 }
 
@@ -2401,11 +2401,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_valign(GTK_WIDGET(mset->label_mime), GtkAlign::GTK_ALIGN_START);
 
     gtk_label_set_selectable(mset->label_type, true);
-    g_signal_connect(G_OBJECT(mset->label_type),
-                     "button-press-event",
-                     G_CALLBACK(on_label_button_press),
-                     mset);
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->label_type), "button-press-event", G_CALLBACK(on_label_button_press), mset);
     g_signal_connect(G_OBJECT(mset->label_type), "focus", G_CALLBACK(on_label_focus), mset);
+    // clang-format on
 
     // Target
     if (mset->is_link || create_new != ptk::rename_mode::rename)
@@ -2416,20 +2415,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         gtk_widget_set_valign(GTK_WIDGET(mset->label_target), GtkAlign::GTK_ALIGN_END);
         mset->entry_target = GTK_ENTRY(gtk_entry_new());
         gtk_label_set_mnemonic_widget(mset->label_target, GTK_WIDGET(mset->entry_target));
-        g_signal_connect(G_OBJECT(mset->entry_target),
-                         "mnemonic-activate",
-                         G_CALLBACK(on_mnemonic_activate),
-                         mset);
         gtk_label_set_selectable(mset->label_target, true);
-        g_signal_connect(G_OBJECT(mset->label_target),
-                         "button-press-event",
-                         G_CALLBACK(on_label_button_press),
-                         mset);
+        // clang-format off
+        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+        g_signal_connect(G_OBJECT(mset->entry_target), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
+        g_signal_connect(G_OBJECT(mset->label_target), "button-press-event", G_CALLBACK(on_label_button_press), mset);
         g_signal_connect(G_OBJECT(mset->label_target), "focus", G_CALLBACK(on_label_focus), mset);
-        g_signal_connect(G_OBJECT(mset->entry_target),
-                         "key-press-event",
-                         G_CALLBACK(on_move_entry_keypress),
-                         mset);
+        // clang-format on
 
         if (create_new != ptk::rename_mode::rename)
         {
@@ -2440,10 +2432,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             {
                 gtk_entry_set_text(mset->entry_target, mset->new_path.c_str());
             }
-            g_signal_connect(G_OBJECT(mset->browse_target),
-                             "clicked",
-                             G_CALLBACK(on_create_browse_button_press),
-                             mset);
+            // clang-format off
+            g_signal_connect(G_OBJECT(mset->browse_target), "clicked", G_CALLBACK(on_create_browse_button_press), mset);
+            // clang-format on
         }
         else
         {
@@ -2465,16 +2456,13 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         gtk_label_set_markup_with_mnemonic(mset->label_template, "<b>_Template:</b>");
         gtk_widget_set_halign(GTK_WIDGET(mset->label_template), GtkAlign::GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(mset->label_template), GtkAlign::GTK_ALIGN_END);
-        g_signal_connect(G_OBJECT(mset->entry_target),
-                         "mnemonic-activate",
-                         G_CALLBACK(on_mnemonic_activate),
-                         mset);
         gtk_label_set_selectable(mset->label_template, true);
-        g_signal_connect(G_OBJECT(mset->label_template),
-                         "button-press-event",
-                         G_CALLBACK(on_label_button_press),
-                         mset);
+
+        // clang-format off
+        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+        g_signal_connect(G_OBJECT(mset->label_template), "button-press-event", G_CALLBACK(on_label_button_press), mset);
         g_signal_connect(G_OBJECT(mset->label_template), "focus", G_CALLBACK(on_label_focus), mset);
+        // clang-format on
 
         // template combo
         mset->combo_template = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
@@ -2494,14 +2482,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             }
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template), 0);
-        g_signal_connect(G_OBJECT(mset->combo_template),
-                         "changed",
-                         G_CALLBACK(on_template_changed),
-                         mset);
-        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template))),
-                         "key-press-event",
-                         G_CALLBACK(on_move_entry_keypress),
-                         mset);
+        // clang-format off
+        g_signal_connect(G_OBJECT(mset->combo_template), "changed", G_CALLBACK(on_template_changed), mset);
+        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
+        // clang-format on
 
         // template_dir combo
         mset->combo_template_dir = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
@@ -2522,18 +2506,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             }
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template_dir), 0);
-        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template_dir))),
-                         "key-press-event",
-                         G_CALLBACK(on_move_entry_keypress),
-                         mset);
+        // clang-format off
+        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template_dir))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
+        // clang-format on
 
         // Template Browse button
         mset->browse_template = gtk_button_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_template), false);
-        g_signal_connect(G_OBJECT(mset->browse_template),
-                         "clicked",
-                         G_CALLBACK(on_create_browse_button_press),
-                         mset);
+        // clang-format off
+        g_signal_connect(G_OBJECT(mset->browse_template), "clicked", G_CALLBACK(on_create_browse_button_press), mset);
+        // clang-format on
     }
     else
     {
@@ -2550,24 +2532,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     mset->scroll_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     mset->input_name = GTK_WIDGET(multi_input_new(mset->scroll_name, nullptr));
     gtk_label_set_mnemonic_widget(mset->label_name, mset->input_name);
-    g_signal_connect(G_OBJECT(mset->input_name),
-                     "key-press-event",
-                     G_CALLBACK(on_move_keypress),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->input_name),
-                     "mnemonic-activate",
-                     G_CALLBACK(on_mnemonic_activate),
-                     mset);
     gtk_label_set_selectable(mset->label_name, true);
-    g_signal_connect(G_OBJECT(mset->label_name),
-                     "button-press-event",
-                     G_CALLBACK(on_label_button_press),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->label_name), "focus", G_CALLBACK(on_label_focus), mset);
     mset->buf_name = GTK_TEXT_BUFFER(gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_name)));
+    mset->blank_name = GTK_LABEL(gtk_label_new(nullptr));
+
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->input_name), "key-press-event", G_CALLBACK(on_move_keypress), mset);
+    g_signal_connect(G_OBJECT(mset->input_name), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+    g_signal_connect(G_OBJECT(mset->label_name), "button-press-event", G_CALLBACK(on_label_button_press), mset);
+    g_signal_connect(G_OBJECT(mset->label_name), "focus", G_CALLBACK(on_label_focus), mset);
     g_signal_connect(G_OBJECT(mset->buf_name), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_name), "focus", G_CALLBACK(on_focus), mset);
-    mset->blank_name = GTK_LABEL(gtk_label_new(nullptr));
+    // clang-format on
 
     // Ext
     mset->label_ext = GTK_LABEL(gtk_label_new(nullptr));
@@ -2576,24 +2552,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_valign(GTK_WIDGET(mset->label_ext), GtkAlign::GTK_ALIGN_END);
     mset->entry_ext = GTK_ENTRY(gtk_entry_new());
     gtk_label_set_mnemonic_widget(mset->label_ext, GTK_WIDGET(mset->entry_ext));
-    g_signal_connect(G_OBJECT(mset->entry_ext),
-                     "mnemonic-activate",
-                     G_CALLBACK(on_mnemonic_activate),
-                     mset);
     gtk_label_set_selectable(mset->label_ext, true);
-    g_signal_connect(G_OBJECT(mset->label_ext),
-                     "button-press-event",
-                     G_CALLBACK(on_label_button_press),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->label_ext), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->entry_ext),
-                     "key-press-event",
-                     G_CALLBACK(on_move_entry_keypress),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->entry_ext), "changed", G_CALLBACK(on_move_change), mset);
-    g_signal_connect_after(G_OBJECT(mset->entry_ext), "focus", G_CALLBACK(on_focus), mset);
     gtk_widget_set_sensitive(GTK_WIDGET(mset->entry_ext), !mset->is_dir);
     gtk_widget_set_sensitive(GTK_WIDGET(mset->label_ext), !mset->is_dir);
+
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->entry_ext), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+    g_signal_connect(G_OBJECT(mset->label_ext), "button-press-event", G_CALLBACK(on_label_button_press), mset);
+    g_signal_connect(G_OBJECT(mset->label_ext), "focus", G_CALLBACK(on_label_focus), mset);
+    g_signal_connect(G_OBJECT(mset->entry_ext), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
+    g_signal_connect(G_OBJECT(mset->entry_ext), "changed", G_CALLBACK(on_move_change), mset);
+    g_signal_connect_after(G_OBJECT(mset->entry_ext), "focus", G_CALLBACK(on_focus), mset);
+    // clang-format on
 
     // Filename
     mset->label_full_name = GTK_LABEL(gtk_label_new(nullptr));
@@ -2603,24 +2573,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     mset->scroll_full_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     mset->input_full_name = GTK_WIDGET(multi_input_new(mset->scroll_full_name, nullptr));
     gtk_label_set_mnemonic_widget(mset->label_full_name, mset->input_full_name);
-    g_signal_connect(G_OBJECT(mset->input_full_name),
-                     "mnemonic-activate",
-                     G_CALLBACK(on_mnemonic_activate),
-                     mset);
     gtk_label_set_selectable(mset->label_full_name, true);
-    g_signal_connect(G_OBJECT(mset->label_full_name),
-                     "button-press-event",
-                     G_CALLBACK(on_label_button_press),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->label_full_name), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->input_full_name),
-                     "key-press-event",
-                     G_CALLBACK(on_move_keypress),
-                     mset);
     mset->buf_full_name = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_name));
+    mset->blank_full_name = GTK_LABEL(gtk_label_new(nullptr));
+
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->input_full_name), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+    g_signal_connect(G_OBJECT(mset->label_full_name), "button-press-event", G_CALLBACK(on_label_button_press), mset);
+    g_signal_connect(G_OBJECT(mset->label_full_name), "focus", G_CALLBACK(on_label_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_full_name), "key-press-event", G_CALLBACK(on_move_keypress), mset);
     g_signal_connect(G_OBJECT(mset->buf_full_name), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_full_name), "focus", G_CALLBACK(on_focus), mset);
-    mset->blank_full_name = GTK_LABEL(gtk_label_new(nullptr));
+    // clang-format on
 
     // Parent
     mset->label_path = GTK_LABEL(gtk_label_new(nullptr));
@@ -2630,24 +2594,18 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     mset->scroll_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     mset->input_path = GTK_WIDGET(multi_input_new(mset->scroll_path, nullptr));
     gtk_label_set_mnemonic_widget(mset->label_path, mset->input_path);
-    g_signal_connect(G_OBJECT(mset->input_path),
-                     "mnemonic-activate",
-                     G_CALLBACK(on_mnemonic_activate),
-                     mset);
     gtk_label_set_selectable(mset->label_path, true);
-    g_signal_connect(G_OBJECT(mset->label_path),
-                     "button-press-event",
-                     G_CALLBACK(on_label_button_press),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->label_path), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->input_path),
-                     "key-press-event",
-                     G_CALLBACK(on_move_keypress),
-                     mset);
     mset->buf_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_path));
+    mset->blank_path = GTK_LABEL(gtk_label_new(nullptr));
+
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->input_path), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+    g_signal_connect(G_OBJECT(mset->label_path), "button-press-event", G_CALLBACK(on_label_button_press), mset);
+    g_signal_connect(G_OBJECT(mset->label_path), "focus", G_CALLBACK(on_label_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_path), "key-press-event", G_CALLBACK(on_move_keypress), mset);
     g_signal_connect(G_OBJECT(mset->buf_path), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_path), "focus", G_CALLBACK(on_focus), mset);
-    mset->blank_path = GTK_LABEL(gtk_label_new(nullptr));
+    // clang-format on
 
     // Path
     mset->label_full_path = GTK_LABEL(gtk_label_new(nullptr));
@@ -2659,23 +2617,17 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     mset->input_full_path =
         GTK_WIDGET(multi_input_new(mset->scroll_full_path, mset->new_path.c_str()));
     gtk_label_set_mnemonic_widget(mset->label_full_path, mset->input_full_path);
-    g_signal_connect(G_OBJECT(mset->input_full_path),
-                     "mnemonic-activate",
-                     G_CALLBACK(on_mnemonic_activate),
-                     mset);
     gtk_label_set_selectable(mset->label_full_path, true);
-    g_signal_connect(G_OBJECT(mset->label_full_path),
-                     "button-press-event",
-                     G_CALLBACK(on_label_button_press),
-                     mset);
-    g_signal_connect(G_OBJECT(mset->label_full_path), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->input_full_path),
-                     "key-press-event",
-                     G_CALLBACK(on_move_keypress),
-                     mset);
     mset->buf_full_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_path));
+
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->input_full_path), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
+    g_signal_connect(G_OBJECT(mset->label_full_path), "button-press-event", G_CALLBACK(on_label_button_press), mset);
+    g_signal_connect(G_OBJECT(mset->label_full_path), "focus", G_CALLBACK(on_label_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_full_path), "key-press-event", G_CALLBACK(on_move_keypress), mset);
     g_signal_connect(G_OBJECT(mset->buf_full_path), "changed", G_CALLBACK(on_move_change), mset);
     g_signal_connect(G_OBJECT(mset->input_full_path), "focus", G_CALLBACK(on_focus), mset);
+    // clang-format on
 
     // Options
     mset->opt_move = gtk_radio_button_new_with_mnemonic(nullptr, "Mov_e");

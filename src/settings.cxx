@@ -673,16 +673,12 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         if (!set->cb_func || set->menu_style != xset::menu::normal)
         {
             // use xset menu callback
-            // if ( !design_mode )
-            //{
-            g_signal_connect(item, "activate", G_CALLBACK(xset_menu_cb), set);
-            //}
+            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_menu_cb), set);
         }
         else if (set->cb_func)
         {
             // use custom callback directly
-            // if ( !design_mode )
-            g_signal_connect(item, "activate", G_CALLBACK(set->cb_func), set->cb_data);
+            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(set->cb_func), set->cb_data);
         }
 
         // key accel
@@ -714,8 +710,8 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         }
     }
     // design mode callback
-    g_signal_connect(item, "button-press-event", G_CALLBACK(xset_design_cb), set);
-    g_signal_connect(item, "button-release-event", G_CALLBACK(xset_design_cb), set);
+    g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(xset_design_cb), set);
+    g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(xset_design_cb), set);
 
     gtk_widget_set_sensitive(item, !set->disable);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -935,7 +931,7 @@ xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job
 
     g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
     gtk_container_add(GTK_CONTAINER(menu), item);
-    g_signal_connect(item, "activate", G_CALLBACK(xset_design_job), set);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_design_job), set);
     return item;
 }
 
@@ -1115,9 +1111,11 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
     if (menu)
     {
         gtk_widget_set_sensitive(GTK_WIDGET(menu), false);
-        g_signal_connect(menu, "hide", G_CALLBACK(on_menu_hide), design_menu);
+        g_signal_connect(G_OBJECT(menu), "hide", G_CALLBACK(on_menu_hide), design_menu);
     }
-    g_signal_connect(design_menu, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    // clang-format off
+    g_signal_connect(G_OBJECT(design_menu), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+    // clang-format on
 
     gtk_menu_shell_set_take_focus(GTK_MENU_SHELL(design_menu), true);
     // this is required when showing the menu via F2 or Menu key for focus
@@ -1869,10 +1867,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(btn));
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
-            g_signal_connect(ebox,
-                             "button-press-event",
-                             G_CALLBACK(on_tool_icon_button_press),
-                             set);
+            // clang-format off
+            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set);
+            // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(btn));
 
@@ -1924,10 +1921,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(check_btn));
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
-            g_signal_connect(ebox,
-                             "button-press-event",
-                             G_CALLBACK(on_tool_icon_button_press),
-                             set);
+            // clang-format off
+            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set);
+            // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(check_btn));
 
@@ -2058,10 +2054,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(btn));
-            g_signal_connect(G_OBJECT(ebox),
-                             "button_press_event",
-                             G_CALLBACK(on_tool_icon_button_press),
-                             set);
+            // clang-format off
+            g_signal_connect(G_OBJECT(ebox), "button_press_event", G_CALLBACK(on_tool_icon_button_press), set);
+            // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(btn));
 
@@ -2125,10 +2120,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_destroy(menu_btn);
 
             gtk_box_pack_start(hbox, GTK_WIDGET(ebox), false, false, 0);
-            g_signal_connect(G_OBJECT(ebox),
-                             "button_press_event",
-                             G_CALLBACK(on_tool_menu_button_press),
-                             set);
+            // clang-format off
+            g_signal_connect(G_OBJECT(ebox), "button_press_event", G_CALLBACK(on_tool_menu_button_press), set);
+            // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(btn));
 
@@ -2155,10 +2149,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(sep));
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
-            g_signal_connect(ebox,
-                             "button-press-event",
-                             G_CALLBACK(on_tool_icon_button_press),
-                             set);
+            // clang-format off
+            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set);
+            // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             break;
         }

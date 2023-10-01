@@ -605,8 +605,8 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
         file_browser->path_bar_ = ptk_path_entry_new(file_browser);
 
         // clang-format off
-        g_signal_connect(file_browser->path_bar_, "activate", G_CALLBACK(on_address_bar_activate), file_browser);
-        g_signal_connect(file_browser->path_bar_, "focus-in-event", G_CALLBACK(on_address_bar_focus_in), file_browser);
+        g_signal_connect(G_OBJECT(file_browser->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), file_browser);
+        g_signal_connect(G_OBJECT(file_browser->path_bar_), "focus-in-event", G_CALLBACK(on_address_bar_focus_in), file_browser);
         // clang-format on
     }
 
@@ -829,8 +829,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     file_browser->path_bar_ = ptk_path_entry_new(file_browser);
 
     // clang-format off
-    g_signal_connect(file_browser->path_bar_, "activate", G_CALLBACK(on_address_bar_activate), file_browser);
-    g_signal_connect(file_browser->path_bar_, "focus-in-event", G_CALLBACK(on_address_bar_focus_in), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->path_bar_), "focus-in-event", G_CALLBACK(on_address_bar_focus_in), file_browser);
     // clang-format on
 
     // toolbox
@@ -907,8 +907,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     gtk_widget_set_valign(GTK_WIDGET(file_browser->status_label), GtkAlign::GTK_ALIGN_CENTER);
 
     // clang-format off
-    g_signal_connect(file_browser->status_label, "button-press-event", G_CALLBACK(on_status_bar_button_press), file_browser);
-    g_signal_connect(file_browser->status_label, "populate-popup", G_CALLBACK(on_status_bar_popup), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->status_label), "button-press-event", G_CALLBACK(on_status_bar_button_press), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->status_label), "populate-popup", G_CALLBACK(on_status_bar_popup), file_browser);
     // clang-format on
 
     // pack fb vbox
@@ -927,9 +927,9 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
 
     // clang-format off
-    g_signal_connect(file_browser->hpane, "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
-    g_signal_connect(file_browser->side_vpane_top, "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
-    g_signal_connect(file_browser->side_vpane_bottom, "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->hpane), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->side_vpane_top), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
     // clang-format on
 }
 
@@ -1131,7 +1131,7 @@ add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu, GList* l)
     // folder_image = gtk_image_new_from_icon_name("gnome-fs-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
 
     // clang-format off
-    g_signal_connect(menu_item, "activate", G_CALLBACK(on_history_menu_item_activate), file_browser);
+    g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(on_history_menu_item_activate), file_browser);
     // clang-format on
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
@@ -1259,7 +1259,9 @@ ptk_file_browser_update_model(PtkFileBrowser* file_browser)
 
     file_browser->show_thumbnails(file_browser->max_thumbnail_);
 
-    g_signal_connect(list, "sort-column-changed", G_CALLBACK(on_sort_col_changed), file_browser);
+    // clang-format off
+    g_signal_connect(G_OBJECT(list), "sort-column-changed", G_CALLBACK(on_sort_col_changed), file_browser);
+    // clang-format on
 
     switch (file_browser->view_mode_)
     {
@@ -1978,8 +1980,8 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                                                  GDK_ACTION_ALL);
 
             // clang-format off
-            g_signal_connect(folder_view, "item-activated", G_CALLBACK(on_folder_view_item_activated), file_browser);
-            g_signal_connect_after(folder_view, "selection-changed", G_CALLBACK(on_folder_view_item_sel_change), file_browser);
+            g_signal_connect(G_OBJECT(folder_view), "item-activated", G_CALLBACK(on_folder_view_item_activated), file_browser);
+            g_signal_connect_after(G_OBJECT(folder_view), "selection-changed", G_CALLBACK(on_folder_view_item_sel_change), file_browser);
             // clang-format on
 
             break;
@@ -2026,10 +2028,10 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                                                  GDK_ACTION_ALL);
 
             // clang-format off
-            g_signal_connect(folder_view, "row_activated", G_CALLBACK(on_folder_view_row_activated), file_browser);
-            g_signal_connect_after(selection, "changed", G_CALLBACK(on_folder_view_item_sel_change), file_browser);
-            g_signal_connect(folder_view, "columns-changed", G_CALLBACK(on_folder_view_columns_changed), file_browser);
-            g_signal_connect(folder_view, "destroy", G_CALLBACK(on_folder_view_destroy), file_browser);
+            g_signal_connect(G_OBJECT(folder_view), "row_activated", G_CALLBACK(on_folder_view_row_activated), file_browser);
+            g_signal_connect_after(G_OBJECT(selection), "changed", G_CALLBACK(on_folder_view_item_sel_change), file_browser);
+            g_signal_connect(G_OBJECT(folder_view), "columns-changed", G_CALLBACK(on_folder_view_columns_changed), file_browser);
+            g_signal_connect(G_OBJECT(folder_view), "destroy", G_CALLBACK(on_folder_view_destroy), file_browser);
             // clang-format on
             break;
     }
@@ -2037,17 +2039,17 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
     gtk_cell_renderer_set_fixed_size(file_browser->icon_render_, icon_size, icon_size);
 
     // clang-format off
-    g_signal_connect(folder_view, "button-press-event", G_CALLBACK(on_folder_view_button_press_event), file_browser);
-    g_signal_connect(folder_view, "button-release-event", G_CALLBACK(on_folder_view_button_release_event), file_browser);
-    g_signal_connect(folder_view, "popup-menu", G_CALLBACK(on_folder_view_popup_menu), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "button-press-event", G_CALLBACK(on_folder_view_button_press_event), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "button-release-event", G_CALLBACK(on_folder_view_button_release_event), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "popup-menu", G_CALLBACK(on_folder_view_popup_menu), file_browser);
     // init drag & drop support
-    g_signal_connect(folder_view, "drag-data-received", G_CALLBACK(on_folder_view_drag_data_received), file_browser);
-    g_signal_connect(folder_view, "drag-data-get", G_CALLBACK(on_folder_view_drag_data_get), file_browser);
-    g_signal_connect(folder_view, "drag-begin", G_CALLBACK(on_folder_view_drag_begin), file_browser);
-    g_signal_connect(folder_view, "drag-motion", G_CALLBACK(on_folder_view_drag_motion), file_browser);
-    g_signal_connect(folder_view, "drag-leave", G_CALLBACK(on_folder_view_drag_leave), file_browser);
-    g_signal_connect(folder_view, "drag-drop", G_CALLBACK(on_folder_view_drag_drop), file_browser);
-    g_signal_connect(folder_view, "drag-end", G_CALLBACK(on_folder_view_drag_end), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-data-received", G_CALLBACK(on_folder_view_drag_data_received), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-data-get", G_CALLBACK(on_folder_view_drag_data_get), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-begin", G_CALLBACK(on_folder_view_drag_begin), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-motion", G_CALLBACK(on_folder_view_drag_motion), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-leave", G_CALLBACK(on_folder_view_drag_leave), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-drop", G_CALLBACK(on_folder_view_drag_drop), file_browser);
+    g_signal_connect(G_OBJECT(folder_view), "drag-end", G_CALLBACK(on_folder_view_drag_end), file_browser);
     // clang-format on
 
     return folder_view;
@@ -2131,7 +2133,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
                          PangoEllipsizeMode::PANGO_ELLIPSIZE_END,
                          nullptr);
 
-            // g_signal_connect(renderer, "editing-started", G_CALLBACK(on_filename_editing_started), nullptr);
+            // g_signal_connect(G_OBJECT(renderer), "editing-started", G_CALLBACK(on_filename_editing_started), nullptr);
 
             GtkCellRenderer* pix_renderer;
             file_browser->icon_render_ = pix_renderer = gtk_cell_renderer_pixbuf_new();
@@ -2774,8 +2776,8 @@ ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser)
     GtkWidget* dir_tree = ptk_dir_tree_view_new(file_browser, file_browser->show_hidden_files_);
 
     // clang-format off
-    g_signal_connect(dir_tree, "row-activated", G_CALLBACK(on_dir_tree_row_activated), file_browser);
-    g_signal_connect(dir_tree, "button-press-event", G_CALLBACK(on_dir_tree_button_press), file_browser);
+    g_signal_connect(G_OBJECT(dir_tree), "row-activated", G_CALLBACK(on_dir_tree_row_activated), file_browser);
+    g_signal_connect(G_OBJECT(dir_tree), "button-press-event", G_CALLBACK(on_dir_tree_button_press), file_browser);
     // clang-format on
 
     return dir_tree;

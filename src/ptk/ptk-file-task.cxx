@@ -1003,7 +1003,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(ptask->error_view), GtkWrapMode::GTK_WRAP_WORD_CHAR);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(ptask->error_view), false);
 
-    g_signal_connect(ptask->error_view, "populate-popup", G_CALLBACK(on_view_popup), nullptr);
+    // clang-format off
+    g_signal_connect(G_OBJECT(ptask->error_view), "populate-popup", G_CALLBACK(on_view_popup), nullptr);
+    // clang-format on
 
     // Overwrite & Error
     GtkBox* overwrite_box = nullptr;
@@ -1043,10 +1045,9 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
                     ? magic_enum::enum_integer(task->overwrite_mode)
                     : 0);
         }
-        g_signal_connect(G_OBJECT(ptask->overwrite_combo),
-                         "changed",
-                         G_CALLBACK(on_overwrite_combo_changed),
-                         ptask);
+        // clang-format off
+        g_signal_connect(G_OBJECT(ptask->overwrite_combo), "changed", G_CALLBACK(on_overwrite_combo_changed), ptask);
+        // clang-format on
 
         ptask->error_combo = gtk_combo_box_text_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->error_combo), false);
@@ -1057,10 +1058,11 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(ptask->error_combo),
                                  magic_enum::enum_integer(ptask->err_mode));
-        g_signal_connect(G_OBJECT(ptask->error_combo),
-                         "changed",
-                         G_CALLBACK(on_error_combo_changed),
-                         ptask);
+
+        // clang-format off
+        g_signal_connect(G_OBJECT(ptask->error_combo), "changed", G_CALLBACK(on_error_combo_changed), ptask);
+        // clang-format on
+
         overwrite_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 20));
         gtk_box_pack_start(overwrite_box, GTK_WIDGET(ptask->overwrite_combo), false, true, 0);
         gtk_box_pack_start(overwrite_box, GTK_WIDGET(ptask->error_combo), false, true, 0);
@@ -1139,15 +1141,13 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_window_set_gravity(GTK_WINDOW(ptask->progress_dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(ptask->progress_dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
 
-    //    gtk_dialog_set_default_response( ptask->progress_dlg, GtkResponseType::GTK_RESPONSE_OK );
-    g_signal_connect(ptask->progress_dlg, "response", G_CALLBACK(on_progress_dlg_response), ptask);
-    g_signal_connect(ptask->progress_dlg, "destroy", G_CALLBACK(on_progress_dlg_destroy), ptask);
-    g_signal_connect(ptask->progress_dlg,
-                     "delete-event",
-                     G_CALLBACK(on_progress_dlg_delete_event),
-                     ptask);
-    // g_signal_connect( ptask->progress_dlg, "configure-event",
-    //                  G_CALLBACK( on_progress_configure_event ), ptask );
+    // clang-format off
+    // gtk_dialog_set_default_response(ptask->progress_dlg, GtkResponseType::GTK_RESPONSE_OK);
+    g_signal_connect(G_OBJECT(ptask->progress_dlg), "response", G_CALLBACK(on_progress_dlg_response), ptask);
+    g_signal_connect(G_OBJECT(ptask->progress_dlg), "destroy", G_CALLBACK(on_progress_dlg_destroy), ptask);
+    g_signal_connect(G_OBJECT(ptask->progress_dlg), "delete-event", G_CALLBACK(on_progress_dlg_delete_event), ptask);
+    // g_signal_connect(G_OBJECT(ptask->progress_dlg), "configure-event", G_CALLBACK(on_progress_configure_event), ptask);
+    // clang-format on
 
     gtk_widget_show_all(ptask->progress_dlg);
     if (ptask->overwrite_combo && !xset_get_b(xset::name::task_pop_over))
@@ -2604,17 +2604,15 @@ query_overwrite(PtkFileTask* ptask)
     // name input
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     GtkWidget* query_input = GTK_WIDGET(multi_input_new(scroll, filename.data()));
-    g_signal_connect(G_OBJECT(query_input),
-                     "key-press-event",
-                     G_CALLBACK(on_query_input_keypress),
-                     ptask);
+    // clang-format off
+    g_signal_connect(G_OBJECT(query_input), "key-press-event", G_CALLBACK(on_query_input_keypress), ptask);
+    // clang-format on
     GtkWidget* input_buf = GTK_WIDGET(gtk_text_view_get_buffer(GTK_TEXT_VIEW(query_input)));
     gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(input_buf), &iter, pos);
     gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(input_buf), &iter);
-    g_signal_connect(G_OBJECT(input_buf),
-                     "changed",
-                     G_CALLBACK(on_multi_input_changed),
-                     query_input);
+    // clang-format off
+    g_signal_connect(G_OBJECT(input_buf), "changed", G_CALLBACK(on_multi_input_changed), query_input);
+    // clang-format on
     gtk_widget_set_size_request(GTK_WIDGET(query_input), -1, 60);
     gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 60);
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(query_input));
@@ -2630,10 +2628,9 @@ query_overwrite(PtkFileTask* ptask)
     g_signal_connect(G_OBJECT(auto_button), "clicked", G_CALLBACK(on_query_button_press), ptask);
     gtk_widget_set_tooltip_text(GTK_WIDGET(auto_button), new_name.data());
     GtkButton* auto_all_button = GTK_BUTTON(gtk_button_new_with_mnemonic(" Auto Re_name All "));
-    g_signal_connect(G_OBJECT(auto_all_button),
-                     "clicked",
-                     G_CALLBACK(on_query_button_press),
-                     ptask);
+    // clang-format off
+    g_signal_connect(G_OBJECT(auto_all_button), "clicked", G_CALLBACK(on_query_button_press), ptask);
+    // clang-format on
     GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 30));
     gtk_widget_set_halign(GTK_WIDGET(hbox), GtkAlign::GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(hbox), GtkAlign::GTK_ALIGN_START);

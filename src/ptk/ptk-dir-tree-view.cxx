@@ -175,53 +175,27 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     gtk_tree_view_set_model(dir_tree_view, filter);
     g_object_unref(G_OBJECT(filter));
 
-    g_signal_connect(dir_tree_view,
-                     "row-expanded",
-                     G_CALLBACK(on_dir_tree_view_row_expanded),
-                     model);
+    // clang-format off
+    g_signal_connect(G_OBJECT(dir_tree_view), "row-expanded", G_CALLBACK(on_dir_tree_view_row_expanded), model);
 
-    g_signal_connect_data(dir_tree_view,
-                          "row-collapsed",
-                          G_CALLBACK(on_dir_tree_view_row_collapsed),
-                          model,
-                          nullptr,
-                          G_CONNECT_AFTER);
+    g_signal_connect_data(G_OBJECT(dir_tree_view), "row-collapsed", G_CALLBACK(on_dir_tree_view_row_collapsed), model, nullptr, G_CONNECT_AFTER);
 
-    g_signal_connect(dir_tree_view,
-                     "button-press-event",
-                     G_CALLBACK(on_dir_tree_view_button_press),
-                     browser);
-
-    g_signal_connect(dir_tree_view,
-                     "key-press-event",
-                     G_CALLBACK(on_dir_tree_view_key_press),
-                     browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "button-press-event", G_CALLBACK(on_dir_tree_view_button_press), browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "button-press-event", G_CALLBACK(on_dir_tree_view_button_press), browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "key-press-event", G_CALLBACK(on_dir_tree_view_key_press), browser);
 
     // MOD drag n drop
-    g_signal_connect((void*)dir_tree_view,
-                     "drag-data-received",
-                     G_CALLBACK(on_dir_tree_view_drag_data_received),
-                     browser);
-    g_signal_connect((void*)dir_tree_view,
-                     "drag-motion",
-                     G_CALLBACK(on_dir_tree_view_drag_motion),
-                     browser);
-
-    g_signal_connect((void*)dir_tree_view,
-                     "drag-leave",
-                     G_CALLBACK(on_dir_tree_view_drag_leave),
-                     browser);
-
-    g_signal_connect((void*)dir_tree_view,
-                     "drag-drop",
-                     G_CALLBACK(on_dir_tree_view_drag_drop),
-                     browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "drag-data-received", G_CALLBACK(on_dir_tree_view_drag_data_received), browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "drag-motion", G_CALLBACK(on_dir_tree_view_drag_motion), browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "drag-leave", G_CALLBACK(on_dir_tree_view_drag_leave), browser);
+    g_signal_connect(G_OBJECT(dir_tree_view), "drag-drop", G_CALLBACK(on_dir_tree_view_drag_drop), browser);
+    // clang-format on
 
     tree_path = gtk_tree_path_new_first();
     gtk_tree_view_expand_row(dir_tree_view, tree_path, false);
     gtk_tree_path_free(tree_path);
 
-    g_signal_connect(dir_tree_view, "destroy", G_CALLBACK(on_destroy), nullptr);
+    g_signal_connect(G_OBJECT(dir_tree_view), "destroy", G_CALLBACK(on_destroy), nullptr);
     return GTK_WIDGET(dir_tree_view);
 }
 

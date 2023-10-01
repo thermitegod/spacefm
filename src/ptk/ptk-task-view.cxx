@@ -948,7 +948,11 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
 
             gtk_widget_show_all(GTK_WIDGET(popup));
-            g_signal_connect(popup, "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+
+            // clang-format off
+            g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
+            // clang-format on
+
             gtk_menu_popup_at_pointer(GTK_MENU(popup), nullptr);
             // right click
             break;
@@ -1563,10 +1567,10 @@ main_task_view_new(MainWindow* main_window)
     }
 
     // clang-format off
-    g_signal_connect(view, "row-activated", G_CALLBACK(on_task_row_activated), nullptr);
-    g_signal_connect(view, "columns-changed", G_CALLBACK(on_task_columns_changed), nullptr);
-    g_signal_connect(view, "destroy", G_CALLBACK(on_task_destroy), nullptr);
-    g_signal_connect(view, "button-press-event", G_CALLBACK(on_task_button_press_event), main_window);
+    g_signal_connect(G_OBJECT(view), "row-activated", G_CALLBACK(on_task_row_activated), nullptr);
+    g_signal_connect(G_OBJECT(view), "columns-changed", G_CALLBACK(on_task_columns_changed), nullptr);
+    g_signal_connect(G_OBJECT(view), "destroy", G_CALLBACK(on_task_destroy), nullptr);
+    g_signal_connect(G_OBJECT(view), "button-press-event", G_CALLBACK(on_task_button_press_event), main_window);
     // clang-format on
 
     return view;
