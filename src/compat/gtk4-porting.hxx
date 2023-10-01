@@ -38,6 +38,8 @@ i32 gtk4_dialog_run(GtkDialog* dialog);
 #define gtk_box_pack_end(box, child, expand, fill, padding) (gtk_box_append(GTK_BOX(box), GTK_WIDGET(child)))
 // clang-format on
 
+#define gtk_scrolled_window_new(hadjustment, vadjustment) gtk_scrolled_window_new()
+
 #endif
 
 #if (GTK_MAJOR_VERSION == 3)
