@@ -256,7 +256,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     g_object_set_data(G_OBJECT(dialog), "btn_set", btn_set);
     g_object_set_data(G_OBJECT(dialog), "btn_unset", btn_unset);
     g_signal_connect(G_OBJECT(dialog), "key_press_event", G_CALLBACK(on_set_key_keypress), nullptr);
-    gtk_widget_show_all(dialog);
+    gtk_widget_show_all(GTK_WIDGET(dialog));
     gtk_window_set_title(GTK_WINDOW(dialog), "Set Key");
 
     const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));

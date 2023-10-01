@@ -69,7 +69,7 @@ ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_vie
                                                  nullptr);
     }
 
-    gtk_widget_show_all(dialog);
+    gtk_widget_show_all(GTK_WIDGET(dialog));
     const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 

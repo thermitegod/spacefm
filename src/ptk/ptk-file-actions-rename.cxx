@@ -953,7 +953,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
-        gtk_widget_show_all(dlg);
+        gtk_widget_show_all(GTK_WIDGET(dlg));
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (g_main_context_pending(nullptr))
@@ -1146,7 +1146,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
-        gtk_widget_show_all(dlg);
+        gtk_widget_show_all(GTK_WIDGET(dlg));
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (g_main_context_pending(nullptr))
@@ -2343,7 +2343,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_size_request(GTK_WIDGET(mset->dlg), 800, 500);
     gtk_window_set_resizable(GTK_WINDOW(mset->dlg), true);
     gtk_window_set_type_hint(GTK_WINDOW(mset->dlg), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
-    gtk_widget_show_all(mset->dlg);
+    gtk_widget_show_all(GTK_WIDGET(mset->dlg));
 
     // Entries
 
@@ -2747,7 +2747,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_box_pack_start(dlg_vbox, GTK_WIDGET(hbox), false, true, 10);
 
     // show
-    gtk_widget_show_all(mset->dlg);
+    gtk_widget_show_all(GTK_WIDGET(mset->dlg));
     on_toggled(nullptr, mset);
     if (mset->clip_copy)
     {

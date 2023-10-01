@@ -1135,7 +1135,7 @@ rebuild_menu_device(MainWindow* main_window, PtkFileBrowser* file_browser)
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
     // show all
-    gtk_widget_show_all(newmenu);
+    gtk_widget_show_all(GTK_WIDGET(newmenu));
 
     main_window->dev_menu = newmenu;
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window->dev_menu_item), main_window->dev_menu);

@@ -2128,7 +2128,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             item = GTK_WIDGET(gtk_tool_item_new());
             gtk_container_add(GTK_CONTAINER(item), GTK_WIDGET(hbox));
-            gtk_widget_show_all(item);
+            gtk_widget_show_all(GTK_WIDGET(item));
 
             // tooltip
             if (show_tooltips)

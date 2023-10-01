@@ -1149,7 +1149,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     // g_signal_connect(G_OBJECT(ptask->progress_dlg), "configure-event", G_CALLBACK(on_progress_configure_event), ptask);
     // clang-format on
 
-    gtk_widget_show_all(ptask->progress_dlg);
+    gtk_widget_show_all(GTK_WIDGET(ptask->progress_dlg));
     if (ptask->overwrite_combo && !xset_get_b(xset::name::task_pop_over))
     {
         gtk_widget_hide(GTK_WIDGET(ptask->overwrite_combo));

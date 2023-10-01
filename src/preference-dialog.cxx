@@ -1199,5 +1199,5 @@ show_preference_dialog(GtkWindow* parent) noexcept
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
 
-    gtk_widget_show_all(dialog);
+    gtk_widget_show_all(GTK_WIDGET(dialog));
 }

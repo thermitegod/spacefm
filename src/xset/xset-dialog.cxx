@@ -262,7 +262,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                                  GtkResponseType::GTK_RESPONSE_OK);
 
     // show
-    gtk_widget_show_all(dlg);
+    gtk_widget_show_all(GTK_WIDGET(dlg));
 
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
 
@@ -418,7 +418,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     if (width && height)
     {
         // filechooser will not honor default size or size request ?
-        gtk_widget_show_all(dlg);
+        gtk_widget_show_all(GTK_WIDGET(dlg));
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (g_main_context_pending(nullptr))

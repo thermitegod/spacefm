@@ -816,7 +816,7 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
                   menu,
                   accel_group,
                   {xset::name::separator, xset::name::status_middle});
-    gtk_widget_show_all(menu);
+    gtk_widget_show_all(GTK_WIDGET(menu));
 }
 
 static void
@@ -1049,7 +1049,7 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
     file_browser->folder_view(create_folder_view(file_browser, file_browser->view_mode_));
 
     gtk_container_add(GTK_CONTAINER(file_browser->folder_view_scroll_), file_browser->folder_view_);
-    // gtk_widget_show_all(file_browser->folder_view_scroll);
+    // gtk_widget_show_all(GTK_WIDGET(file_browser->folder_view_scroll_));
 
     // set status bar icon
     gtk_image_set_from_icon_name(GTK_IMAGE(file_browser->status_image),
@@ -4323,7 +4323,7 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
 
     // show
-    gtk_widget_show_all(dialog);
+    gtk_widget_show_all(GTK_WIDGET(dialog));
 
     const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
 
