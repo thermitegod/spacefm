@@ -51,7 +51,7 @@ struct app_chooser_dialog_data
 {
     GtkNotebook* notebook{nullptr};
 
-    GtkWidget* entry_command{nullptr};
+    GtkEntry* entry_command{nullptr};
 
     GtkWidget* btn_open_in_terminal{nullptr};
     GtkWidget* btn_set_as_default{nullptr};
@@ -396,10 +396,10 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     gtk_label_set_xalign(GTK_LABEL(label_entry_label), 0.0);
     gtk_label_set_yalign(GTK_LABEL(label_entry_label), 0.5);
 
-    data->entry_command = gtk_entry_new();
+    data->entry_command = GTK_ENTRY(gtk_entry_new());
     // gtk_widget_set_hexpand(GTK_WIDGET(entry), true);
     gtk_box_pack_start(label_entry_box, label_entry_label, false, false, 0);
-    gtk_box_pack_start(label_entry_box, data->entry_command, true, true, 0);
+    gtk_box_pack_start(label_entry_box, GTK_WIDGET(data->entry_command), true, true, 0);
     gtk_box_pack_start(vbox, GTK_WIDGET(label_entry_box), false, false, 0);
 
     if (!show_command)
@@ -458,7 +458,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
     auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
     assert(data != nullptr);
 
-    const std::string app = gtk_entry_get_text(GTK_ENTRY(data->entry_command));
+    const std::string app = gtk_entry_get_text(data->entry_command);
     if (!app.empty())
     {
         return app;

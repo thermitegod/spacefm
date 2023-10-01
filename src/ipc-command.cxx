@@ -323,7 +323,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
             else if (ztd::same(subproperty, "pathbar"))
             {
-                widget = file_browser->path_bar();
+                widget = GTK_WIDGET(file_browser->path_bar());
             }
 
             if (GTK_IS_WIDGET(widget))
@@ -722,17 +722,13 @@ run_ipc_command(const std::string_view socket_commands_json)
         { // TEXT [[SELSTART] SELEND]
             const std::string_view value = data[0];
 
-            GtkWidget* path_bar = file_browser->path_bar();
-            if (!GTK_IS_WIDGET(path_bar))
-            {
-                return {SOCKET_SUCCESS, ""};
-            }
+            GtkEntry* path_bar = file_browser->path_bar();
 
-            gtk_entry_set_text(GTK_ENTRY(path_bar), value.data());
+            gtk_entry_set_text(path_bar, value.data());
 
             gtk_editable_set_position(GTK_EDITABLE(path_bar), -1);
             // gtk_editable_select_region(GTK_EDITABLE(path_bar), width, height);
-            gtk_widget_grab_focus(path_bar);
+            gtk_widget_grab_focus(GTK_WIDGET(path_bar));
         }
         else if (ztd::same(property, "clipboard-text") ||
                  ztd::same(property, "clipboard-primary-text"))
@@ -979,7 +975,8 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_SUCCESS, "dirtree"};
             }
-            else if (file_browser->path_bar() && gtk_widget_is_focus(file_browser->path_bar()))
+            else if (file_browser->path_bar() &&
+                     gtk_widget_is_focus(GTK_WIDGET(file_browser->path_bar())))
             {
                 return {SOCKET_SUCCESS, "pathbar"};
             }
@@ -1259,11 +1256,8 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "pathbar-text"))
         {
-            const GtkWidget* path_bar = file_browser->path_bar();
-            if (GTK_IS_WIDGET(path_bar))
-            {
-                return {SOCKET_SUCCESS, std::format("{}", gtk_entry_get_text(GTK_ENTRY(path_bar)))};
-            }
+            GtkEntry* path_bar = file_browser->path_bar();
+            return {SOCKET_SUCCESS, std::format("{}", gtk_entry_get_text(path_bar))};
         }
         else if (ztd::same(property, "clipboard-text") ||
                  ztd::same(property, "clipboard-primary-text"))

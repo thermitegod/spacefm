@@ -33,4 +33,4 @@ struct EntryData
     u32 seek_timer{0};
 };
 
-GtkWidget* ptk_path_entry_new(PtkFileBrowser* file_browser);
+GtkEntry* ptk_path_entry_new(PtkFileBrowser* file_browser);

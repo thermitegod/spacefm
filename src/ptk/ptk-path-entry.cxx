@@ -282,7 +282,7 @@ static void
 insert_complete(GtkEntry* entry)
 {
     // find a real completion
-    const char* prefix = gtk_entry_get_text(GTK_ENTRY(entry));
+    const char* prefix = gtk_entry_get_text(entry);
     if (!prefix)
     {
         return;
@@ -364,7 +364,7 @@ insert_complete(GtkEntry* entry)
                                     nullptr,
                                     (void*)on_changed,
                                     nullptr);
-    gtk_entry_set_text(GTK_ENTRY(entry), new_prefix.c_str());
+    gtk_entry_set_text(entry, new_prefix.c_str());
     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
     g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                       GSignalMatchType::G_SIGNAL_MATCH_FUNC,
@@ -532,12 +532,12 @@ entry_data_free(EntryData* edata)
     delete edata;
 }
 
-GtkWidget*
+GtkEntry*
 ptk_path_entry_new(PtkFileBrowser* file_browser)
 {
-    GtkWidget* entry = gtk_entry_new();
-    gtk_entry_set_has_frame(GTK_ENTRY(entry), true);
-    gtk_widget_set_size_request(entry, 50, -1);
+    GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
+    gtk_entry_set_has_frame(entry, true);
+    gtk_widget_set_size_request(GTK_WIDGET(entry), 50, -1);
 
     const auto edata = new EntryData(file_browser);
 

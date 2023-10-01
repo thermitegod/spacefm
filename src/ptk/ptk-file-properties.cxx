@@ -722,15 +722,15 @@ init_permissions_tab(properties_dialog_data* data,
     const auto selected_file = selected_files.front();
 
     // Owner
-    GtkWidget* entry_owner = gtk_entry_new();
-    gtk_entry_set_text(GTK_ENTRY(entry_owner), selected_file->display_owner().data());
+    GtkEntry* entry_owner = GTK_ENTRY(gtk_entry_new());
+    gtk_entry_set_text(entry_owner, selected_file->display_owner().data());
     gtk_editable_set_editable(GTK_EDITABLE(entry_owner), false);
 
     page.add_row("Owner:", GTK_WIDGET(entry_owner));
 
     // Group
-    GtkWidget* entry_group = gtk_entry_new();
-    gtk_entry_set_text(GTK_ENTRY(entry_group), selected_file->display_group().data());
+    GtkEntry* entry_group = GTK_ENTRY(gtk_entry_new());
+    gtk_entry_set_text(entry_group, selected_file->display_group().data());
     gtk_editable_set_editable(GTK_EDITABLE(entry_group), false);
 
     page.add_row("Group:", GTK_WIDGET(entry_group));

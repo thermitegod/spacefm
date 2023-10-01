@@ -402,7 +402,7 @@ PtkFileBrowser::main_window() const noexcept
     return this->main_window_;
 }
 
-GtkWidget*
+GtkEntry*
 PtkFileBrowser::path_bar() const noexcept
 {
     return this->path_bar_;
@@ -411,7 +411,7 @@ PtkFileBrowser::path_bar() const noexcept
 static void
 save_command_history(GtkEntry* entry)
 {
-    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+    const std::string text = gtk_entry_get_text(entry);
 
     if (text.empty())
     {
@@ -1697,7 +1697,7 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
         {
             if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
             {
-                gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar_), dir_path);
+                gtk_entry_set_text(file_browser->path_bar_, dir_path);
             }
         }
         std::free(dir_path);
@@ -3063,7 +3063,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     const auto disp_path = this->cwd();
     if (!this->inhibit_focus_)
     {
-        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), disp_path.c_str());
+        gtk_entry_set_text(this->path_bar_, disp_path.c_str());
     }
 
     this->enable_toolbar();
@@ -4307,14 +4307,14 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 20);
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
 
-    GtkEntry* input = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(input, default_pattern.data());
-    gtk_editable_set_editable(GTK_EDITABLE(input), true);
-    gtk_container_set_border_width(GTK_CONTAINER(input), 10);
+    GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
+    gtk_entry_set_text(entry, default_pattern.data());
+    gtk_editable_set_editable(GTK_EDITABLE(entry), true);
+    gtk_container_set_border_width(GTK_CONTAINER(entry), 10);
 
-    gtk_box_pack_start(vbox, GTK_WIDGET(input), true, true, 4);
+    gtk_box_pack_start(vbox, GTK_WIDGET(entry), true, true, 4);
 
-    g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
+    g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
 
     // show
     gtk_widget_show_all(dialog);
@@ -4325,7 +4325,7 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     bool ret = false;
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        pattern = gtk_entry_get_text(GTK_ENTRY(input));
+        pattern = gtk_entry_get_text(entry);
         ret = true;
     }
 
@@ -4868,7 +4868,7 @@ PtkFileBrowser::focus(i32 job) noexcept
                 xset_set_b_panel_mode(p, xset::panel::show_toolbox, mode, true);
                 update_views_all_windows(nullptr, this);
             }
-            widget = this->path_bar_;
+            widget = GTK_WIDGET(this->path_bar_);
             break;
         case 1:
             if (!xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
@@ -5010,7 +5010,7 @@ PtkFileBrowser::rebuild_toolbars() noexcept
     {
         rebuild_toolbox(nullptr, this);
         const auto cwd = this->cwd();
-        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
+        gtk_entry_set_text(this->path_bar_, cwd.c_str());
     }
     if (this->side_toolbar)
     {

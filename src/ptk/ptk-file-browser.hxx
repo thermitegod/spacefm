@@ -144,7 +144,7 @@ struct PtkFileBrowser
     GtkNotebook* notebook_{nullptr};
     GtkWidget* task_view_{nullptr};
     GtkBox* toolbox_{nullptr};
-    GtkWidget* path_bar_{nullptr};
+    GtkEntry* path_bar_{nullptr};
     GtkPaned* hpane{nullptr};
     GtkBox* side_vbox{nullptr};
     GtkBox* side_toolbox{nullptr};
@@ -287,7 +287,7 @@ struct PtkFileBrowser
     panel_t panel() const noexcept;
     GtkWidget* task_view() const noexcept;
     MainWindow* main_window() const noexcept;
-    GtkWidget* path_bar() const noexcept;
+    GtkEntry* path_bar() const noexcept;
 
     // Signals
   public:

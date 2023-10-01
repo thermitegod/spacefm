@@ -942,10 +942,10 @@ namespace preference::date_format
     GtkEntry*
     create_pref_text_box()
     {
-        GtkEntry* box = GTK_ENTRY(gtk_entry_new());
-        gtk_entry_set_text(box, app_settings.date_format().data());
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
-        return box;
+        GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
+        gtk_entry_set_text(entry, app_settings.date_format().data());
+        g_signal_connect(entry, "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+        return entry;
     }
 } // namespace preference::date_format
 
@@ -965,10 +965,10 @@ namespace preference::editor
     GtkEntry*
     create_pref_text_box()
     {
-        GtkEntry* box = GTK_ENTRY(gtk_entry_new());
-        gtk_entry_set_text(box, xset_get_s(xset::name::editor).value_or("").data());
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
-        return box;
+        GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
+        gtk_entry_set_text(entry, xset_get_s(xset::name::editor).value_or("").data());
+        g_signal_connect(entry, "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+        return entry;
     }
 } // namespace preference::editor
 

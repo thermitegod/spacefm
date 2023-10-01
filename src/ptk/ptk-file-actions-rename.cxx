@@ -242,9 +242,8 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
         const bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
         if (new_folder ||
-            (new_link &&
-             std::filesystem::is_directory(gtk_entry_get_text(GTK_ENTRY(mset->entry_target))) &&
-             gtk_entry_get_text(GTK_ENTRY(mset->entry_target))[0] == '/'))
+            (new_link && std::filesystem::is_directory(gtk_entry_get_text(mset->entry_target)) &&
+             gtk_entry_get_text(mset->entry_target)[0] == '/'))
         {
             if (!mset->is_dir)
             {
@@ -660,7 +659,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     if (mset->create_new != ptk::rename_mode::rename &&
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
     {
-        path = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
+        path = gtk_entry_get_text(mset->entry_target);
         path = ztd::strip(path.string());
         gtk_widget_set_sensitive(mset->next,
                                  (!(full_path_same && full_path_exists) && !full_path_exists_dir));
@@ -2439,7 +2438,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_target), false);
             if (!mset->new_path.empty() && file)
             {
-                gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->new_path.c_str());
+                gtk_entry_set_text(mset->entry_target, mset->new_path.c_str());
             }
             g_signal_connect(G_OBJECT(mset->browse_target),
                              "clicked",
@@ -2448,7 +2447,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         }
         else
         {
-            gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->mime_type.data());
+            gtk_entry_set_text(mset->entry_target, mset->mime_type.data());
             gtk_editable_set_editable(GTK_EDITABLE(mset->entry_target), false);
             mset->browse_target = nullptr;
         }
