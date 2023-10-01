@@ -43,7 +43,7 @@ struct MainWindow
     GtkWindow parent;
 
     /* protected */
-    GtkWidget* main_vbox;
+    GtkBox* main_vbox;
     GtkWidget* menu_bar;
 
     // MOD

@@ -75,8 +75,8 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 
     GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    GtkWidget* box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 5);
-    gtk_container_add(GTK_CONTAINER(content_area), box);
+    GtkBox* box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 5));
+    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(box));
 
     // header label
     GtkWidget* header_label = gtk_label_new(header_text.data());
@@ -84,7 +84,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     PangoAttribute* attr = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
     pango_attr_list_insert(attr_list, attr);
     gtk_label_set_attributes(GTK_LABEL(header_label), attr_list);
-    gtk_box_pack_start(GTK_BOX(box), header_label, false, false, 0);
+    gtk_box_pack_start(box, header_label, false, false, 0);
 
     GtkWidget* scrolled_window = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
@@ -149,12 +149,12 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
 
     // Add the scrolled window to the box
-    gtk_box_pack_start(GTK_BOX(box), scrolled_window, true, true, 0);
+    gtk_box_pack_start(box, scrolled_window, true, true, 0);
 
     // Create the label for total size
     const auto total_size = std::format("Total Size: {}", vfs_file_size_format(total_size_bytes));
     GtkWidget* total_size_label = gtk_label_new(total_size.c_str());
-    gtk_box_pack_start(GTK_BOX(box), total_size_label, false, false, 0);
+    gtk_box_pack_start(box, total_size_label, false, false, 0);
 
     gtk_widget_show_all(dialog);
 

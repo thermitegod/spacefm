@@ -76,18 +76,18 @@ struct MoveSet
 
     GtkLabel* label_type{nullptr};
     GtkLabel* label_mime{nullptr};
-    GtkWidget* hbox_type{nullptr};
+    GtkBox* hbox_type{nullptr};
     std::string mime_type{};
 
     GtkLabel* label_target{nullptr};
     GtkEntry* entry_target{nullptr};
-    GtkWidget* hbox_target{nullptr};
+    GtkBox* hbox_target{nullptr};
     GtkWidget* browse_target{nullptr};
 
     GtkLabel* label_template{nullptr};
     GtkComboBox* combo_template{nullptr};
     GtkComboBox* combo_template_dir{nullptr};
-    GtkWidget* hbox_template{nullptr};
+    GtkBox* hbox_template{nullptr};
     GtkWidget* browse_template{nullptr};
 
     GtkLabel* label_name{nullptr};
@@ -96,7 +96,7 @@ struct MoveSet
     GtkTextBuffer* buf_name{nullptr};
     GtkLabel* blank_name{nullptr};
 
-    GtkWidget* hbox_ext{nullptr};
+    GtkBox* hbox_ext{nullptr};
     GtkLabel* label_ext{nullptr};
     GtkEntry* entry_ext{nullptr};
 
@@ -1112,7 +1112,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     // std::map<FileMiscMode, GtkWidget*> mode;
     GtkWidget* mode[3];
 
-    GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4));
     mode[magic_enum::enum_integer(file_misc_mode::filename)] =
         gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
     mode[magic_enum::enum_integer(file_misc_mode::parent)] =
@@ -1126,17 +1126,21 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[magic_enum::enum_integer(mode_default)]),
                                  true);
-    gtk_box_pack_start(GTK_BOX(hbox), gtk_label_new("Insert as"), false, true, 2);
+    gtk_box_pack_start(hbox, gtk_label_new("Insert as"), false, true, 2);
 
     for (const auto [index, value] : ztd::enumerate(misc_modes))
     {
         gtk_widget_set_focus_on_click(GTK_WIDGET(mode[index]), false);
         g_signal_connect(G_OBJECT(mode[index]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
-        gtk_box_pack_start(GTK_BOX(hbox), mode[index], false, true, 2);
+        gtk_box_pack_start(hbox, mode[index], false, true, 2);
     }
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))), hbox, false, true, 6);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))),
+                       GTK_WIDGET(hbox),
+                       false,
+                       true,
+                       6);
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
-    gtk_widget_show_all(hbox);
+    gtk_widget_show_all(GTK_WIDGET(hbox));
 
     const auto width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
     const auto height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
@@ -1468,11 +1472,11 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     if (!mset->is_link && (mset->create_new == ptk::rename_mode::rename) &&
         xset_get_b(xset::name::move_type))
     {
-        gtk_widget_show(mset->hbox_type);
+        gtk_widget_show(GTK_WIDGET(mset->hbox_type));
     }
     else
     {
-        gtk_widget_hide(mset->hbox_type);
+        gtk_widget_hide(GTK_WIDGET(mset->hbox_type));
     }
 
     bool new_file = false;
@@ -1525,7 +1529,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (opts_visible)
     {
-        if (gtk_widget_get_visible(mset->hbox_type))
+        if (gtk_widget_get_visible(GTK_WIDGET(mset->hbox_type)))
         {
         }
         else if (gtk_widget_get_visible(GTK_WIDGET(mset->label_full_path)))
@@ -2710,111 +2714,87 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
     gtk_widget_set_sensitive(mset->opt_link_target, mset->is_link);
 
     // Pack
-    GtkWidget* dlg_vbox = gtk_dialog_get_content_area(GTK_DIALOG(mset->dlg));
+    GtkBox* dlg_vbox = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(mset->dlg)));
     gtk_container_set_border_width(GTK_CONTAINER(mset->dlg), 10);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_name), false, true, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_name), true, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->label_name), false, true, 4);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->scroll_name), true, true, 0);
 
-    mset->hbox_ext = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->label_ext), false, true, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(gtk_label_new(" ")), false, true, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_ext), GTK_WIDGET(mset->entry_ext), true, true, 0);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_ext), false, true, 5);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_name), false, true, 0);
+    mset->hbox_ext = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_box_pack_start(mset->hbox_ext, GTK_WIDGET(mset->label_ext), false, true, 0);
+    gtk_box_pack_start(mset->hbox_ext, GTK_WIDGET(gtk_label_new(" ")), false, true, 0);
+    gtk_box_pack_start(mset->hbox_ext, GTK_WIDGET(mset->entry_ext), true, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->hbox_ext), false, true, 5);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->blank_name), false, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_name), false, true, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_name), true, true, 0);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_full_name), false, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->label_full_name), false, true, 4);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->scroll_full_name), true, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->blank_full_name), false, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_path), false, true, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_path), true, true, 0);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->blank_path), false, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->label_path), false, true, 4);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->scroll_path), true, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->blank_path), false, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->label_full_path), false, true, 4);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->scroll_full_path), true, true, 0);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->label_full_path), false, true, 4);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->scroll_full_path), true, true, 0);
 
-    mset->hbox_type = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_type), false, true, 0);
-    gtk_box_pack_start(GTK_BOX(mset->hbox_type), GTK_WIDGET(mset->label_mime), true, true, 5);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_type), false, true, 5);
+    mset->hbox_type = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_box_pack_start(mset->hbox_type, GTK_WIDGET(mset->label_type), false, true, 0);
+    gtk_box_pack_start(mset->hbox_type, GTK_WIDGET(mset->label_mime), true, true, 5);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->hbox_type), false, true, 5);
 
-    mset->hbox_target = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
+    mset->hbox_target = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     if (mset->label_target)
     {
-        gtk_box_pack_start(GTK_BOX(mset->hbox_target),
-                           GTK_WIDGET(mset->label_target),
-                           false,
-                           true,
-                           0);
+        gtk_box_pack_start(mset->hbox_target, GTK_WIDGET(mset->label_target), false, true, 0);
         if (create_new == ptk::rename_mode::rename)
         {
-            gtk_box_pack_start(GTK_BOX(mset->hbox_target),
-                               GTK_WIDGET(gtk_label_new(" ")),
-                               false,
-                               true,
-                               0);
+            gtk_box_pack_start(mset->hbox_target, GTK_WIDGET(gtk_label_new(" ")), false, true, 0);
         }
-        gtk_box_pack_start(GTK_BOX(mset->hbox_target),
+        gtk_box_pack_start(mset->hbox_target,
                            GTK_WIDGET(mset->entry_target),
                            true,
                            true,
                            create_new != ptk::rename_mode::rename ? 3 : 0);
         if (mset->browse_target)
         {
-            gtk_box_pack_start(GTK_BOX(mset->hbox_target),
-                               GTK_WIDGET(mset->browse_target),
-                               false,
-                               true,
-                               0);
+            gtk_box_pack_start(mset->hbox_target, GTK_WIDGET(mset->browse_target), false, true, 0);
         }
-        gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_target), false, true, 5);
+        gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->hbox_target), false, true, 5);
     }
 
-    mset->hbox_template = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
+    mset->hbox_template = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     if (mset->label_template)
     {
-        gtk_box_pack_start(GTK_BOX(mset->hbox_template),
-                           GTK_WIDGET(mset->label_template),
-                           false,
-                           true,
-                           0);
-        gtk_box_pack_start(GTK_BOX(mset->hbox_template),
-                           GTK_WIDGET(mset->combo_template),
-                           true,
-                           true,
-                           3);
-        gtk_box_pack_start(GTK_BOX(mset->hbox_template),
+        gtk_box_pack_start(mset->hbox_template, GTK_WIDGET(mset->label_template), false, true, 0);
+        gtk_box_pack_start(mset->hbox_template, GTK_WIDGET(mset->combo_template), true, true, 3);
+        gtk_box_pack_start(mset->hbox_template,
                            GTK_WIDGET(mset->combo_template_dir),
                            true,
                            true,
                            3);
-        gtk_box_pack_start(GTK_BOX(mset->hbox_template),
-                           GTK_WIDGET(mset->browse_template),
-                           false,
-                           true,
-                           0);
-        gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(mset->hbox_template), false, true, 5);
+        gtk_box_pack_start(mset->hbox_template, GTK_WIDGET(mset->browse_template), false, true, 0);
+        gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->hbox_template), false, true, 5);
     }
 
-    GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4);
+    GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4));
     if (create_new != ptk::rename_mode::rename)
     {
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("New")), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_file), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_folder), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_new_link), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(gtk_label_new("New")), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_new_file), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_new_folder), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_new_link), false, true, 3);
     }
     else
     {
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_move), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_copy), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_copy_target), false, true, 3);
-        gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(mset->opt_link_target), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_move), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_copy), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_link), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_copy_target), false, true, 3);
+        gtk_box_pack_start(hbox, GTK_WIDGET(mset->opt_link_target), false, true, 3);
     }
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(gtk_label_new("  ")), false, true, 3);
-    gtk_box_pack_start(GTK_BOX(dlg_vbox), GTK_WIDGET(hbox), false, true, 10);
+    gtk_box_pack_start(hbox, GTK_WIDGET(gtk_label_new("  ")), false, true, 3);
+    gtk_box_pack_start(dlg_vbox, GTK_WIDGET(hbox), false, true, 10);
 
     // show
     gtk_widget_show_all(mset->dlg);

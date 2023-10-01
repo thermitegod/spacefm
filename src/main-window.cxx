@@ -1261,8 +1261,8 @@ main_window_init(MainWindow* main_window)
                               "gnome-fs-directory" ); */
     main_window->update_window_icon();
 
-    main_window->main_vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(main_window), main_window->main_vbox);
+    main_window->main_vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
+    gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(main_window->main_vbox));
 
     // Create menu bar
 #if (GTK_MAJOR_VERSION == 4)
@@ -1271,10 +1271,10 @@ main_window_init(MainWindow* main_window)
     main_window->accel_group = gtk_accel_group_new();
 #endif
     main_window->menu_bar = gtk_menu_bar_new();
-    GtkWidget* menu_hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(menu_hbox), main_window->menu_bar, true, true, 0);
+    GtkBox* menu_hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_box_pack_start(menu_hbox, main_window->menu_bar, true, true, 0);
 
-    gtk_box_pack_start(GTK_BOX(main_window->main_vbox), menu_hbox, false, false, 0);
+    gtk_box_pack_start(main_window->main_vbox, GTK_WIDGET(menu_hbox), false, false, 0);
 
     main_window->file_menu_item = gtk_menu_item_new_with_mnemonic("_File");
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window->menu_bar), main_window->file_menu_item);
@@ -1328,7 +1328,7 @@ main_window_init(MainWindow* main_window)
     gtk_paned_pack1(main_window->task_vpane, GTK_WIDGET(main_window->vpane), true, true);
     gtk_paned_pack2(main_window->task_vpane, GTK_WIDGET(main_window->task_scroll), false, true);
 
-    gtk_box_pack_start(GTK_BOX(main_window->main_vbox), GTK_WIDGET(main_window->task_vpane), true, true, 0);
+    gtk_box_pack_start(main_window->main_vbox, GTK_WIDGET(main_window->task_vpane), true, true, 0);
     // clang-format off
 
     main_window->notebook = main_window->get_panel_notebook(panel_1);
@@ -1341,7 +1341,7 @@ main_window_init(MainWindow* main_window)
     main_window->task_view = main_task_view_new(main_window);
     gtk_container_add(GTK_CONTAINER(main_window->task_scroll), GTK_WIDGET(main_window->task_view));
 
-    gtk_widget_show_all(main_window->main_vbox);
+    gtk_widget_show_all(GTK_WIDGET(main_window->main_vbox));
 
     g_signal_connect(G_OBJECT(main_window->file_menu_item),
                      "button-press-event",
@@ -1927,10 +1927,10 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
     GtkEventBox* evt_box = GTK_EVENT_BOX(gtk_event_box_new());
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
 
-    GtkWidget* tab_label = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkBox* tab_label = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     GtkWidget* tab_icon =
         gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
-    gtk_box_pack_start(GTK_BOX(tab_label), tab_icon, false, false, 4);
+    gtk_box_pack_start(tab_label, tab_icon, false, false, 4);
 
     const auto cwd = file_browser->cwd();
     GtkWidget* tab_text = gtk_label_new(cwd.filename().c_str());
@@ -1946,7 +1946,7 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
         gtk_label_set_width_chars(GTK_LABEL(tab_text), 30);
     }
     gtk_label_set_max_width_chars(GTK_LABEL(tab_text), 30);
-    gtk_box_pack_start(GTK_BOX(tab_label), tab_text, false, false, 4);
+    gtk_box_pack_start(tab_label, tab_text, false, false, 4);
 
     if (app_settings.show_close_tab_buttons())
     {
@@ -1957,14 +1957,14 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
             gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
 
         gtk_container_add(GTK_CONTAINER(close_btn), close_icon);
-        gtk_box_pack_end(GTK_BOX(tab_label), close_btn, false, false, 0);
+        gtk_box_pack_end(tab_label, close_btn, false, false, 0);
         g_signal_connect(G_OBJECT(close_btn),
                          "clicked",
                          G_CALLBACK(ptk_file_browser_close_tab),
                          file_browser);
     }
 
-    gtk_container_add(GTK_CONTAINER(evt_box), tab_label);
+    gtk_container_add(GTK_CONTAINER(evt_box), GTK_WIDGET(tab_label));
 
     gtk_widget_set_events(GTK_WIDGET(evt_box), GdkEventMask::GDK_ALL_EVENTS_MASK);
     gtk_drag_dest_set(

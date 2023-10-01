@@ -612,7 +612,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
 
     // create toolbar
     file_browser->toolbar = gtk_toolbar_new();
-    gtk_box_pack_start(GTK_BOX(file_browser->toolbox_), file_browser->toolbar, true, true, 0);
+    gtk_box_pack_start(file_browser->toolbox_, file_browser->toolbar, true, true, 0);
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->toolbar), GtkToolbarStyle::GTK_TOOLBAR_ICONS);
     if (app_settings.icon_size_tool() > 0 &&
         app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
@@ -629,12 +629,12 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
                       show_tooltips);
 
     // add pathbar
-    GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     GtkToolItem* toolitem = gtk_tool_item_new();
     gtk_tool_item_set_expand(toolitem, true);
     gtk_toolbar_insert(GTK_TOOLBAR(file_browser->toolbar), toolitem, -1);
-    gtk_container_add(GTK_CONTAINER(toolitem), hbox);
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(file_browser->path_bar_), true, true, 5);
+    gtk_container_add(GTK_CONTAINER(toolitem), GTK_WIDGET(hbox));
+    gtk_box_pack_start(hbox, GTK_WIDGET(file_browser->path_bar_), true, true, 5);
 
     // fill right toolbar
     xset_fill_toolbar(GTK_WIDGET(file_browser),
@@ -646,7 +646,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     // show
     if (xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
     {
-        gtk_widget_show_all(file_browser->toolbox_);
+        gtk_widget_show_all(GTK_WIDGET(file_browser->toolbox_));
     }
 }
 
@@ -670,11 +670,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     // create side toolbar
     file_browser->side_toolbar = gtk_toolbar_new();
 
-    gtk_box_pack_start(GTK_BOX(file_browser->side_toolbox),
-                       file_browser->side_toolbar,
-                       true,
-                       true,
-                       0);
+    gtk_box_pack_start(file_browser->side_toolbox, file_browser->side_toolbar, true, true, 0);
     gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->side_toolbar),
                           GtkToolbarStyle::GTK_TOOLBAR_ICONS);
     if (app_settings.icon_size_tool() > 0 &&
@@ -693,7 +689,7 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     // show
     if (xset_get_b_panel_mode(p, xset::panel::show_sidebar, mode))
     {
-        gtk_widget_show_all(file_browser->side_toolbox);
+        gtk_widget_show_all(GTK_WIDGET(file_browser->side_toolbox));
     }
 }
 
@@ -836,19 +832,20 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
 
     // toolbox
     file_browser->toolbar = nullptr;
-    file_browser->toolbox_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(file_browser), file_browser->toolbox_, false, false, 0);
+    file_browser->toolbox_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->toolbox_), false, false, 0);
 
     // lists area
     file_browser->hpane = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
-    file_browser->side_vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_size_request(file_browser->side_vbox, 140, -1);
+    file_browser->side_vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
+    gtk_widget_set_size_request(GTK_WIDGET(file_browser->side_vbox), 140, -1);
     file_browser->folder_view_scroll_ = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_paned_pack1(file_browser->hpane, GTK_WIDGET(file_browser->side_vbox), false, false);
     gtk_paned_pack2(file_browser->hpane, GTK_WIDGET(file_browser->folder_view_scroll_), true, true);
 
     // fill side
-    file_browser->side_toolbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
+    file_browser->side_toolbox =
+        GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     file_browser->side_toolbar = nullptr;
     file_browser->side_vpane_top =
         GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
@@ -856,12 +853,12 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
         GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
     file_browser->side_dir_scroll = gtk_scrolled_window_new(nullptr, nullptr);
     file_browser->side_dev_scroll = gtk_scrolled_window_new(nullptr, nullptr);
-    gtk_box_pack_start(GTK_BOX(file_browser->side_vbox),
+    gtk_box_pack_start(file_browser->side_vbox,
                        GTK_WIDGET(file_browser->side_toolbox),
                        false,
                        false,
                        0);
-    gtk_box_pack_start(GTK_BOX(file_browser->side_vbox),
+    gtk_box_pack_start(file_browser->side_vbox,
                        GTK_WIDGET(file_browser->side_vpane_top),
                        true,
                        true,
@@ -4306,16 +4303,16 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
 
     GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    GtkWidget* vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 10);
+    GtkBox* vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 10));
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 20);
-    gtk_container_add(GTK_CONTAINER(content_area), vbox);
+    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
 
     GtkEntry* input = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_text(input, default_pattern.data());
     gtk_editable_set_editable(GTK_EDITABLE(input), true);
     gtk_container_set_border_width(GTK_CONTAINER(input), 10);
 
-    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(input), true, true, 4);
+    gtk_box_pack_start(vbox, GTK_WIDGET(input), true, true, 4);
 
     g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
 
@@ -4644,11 +4641,11 @@ PtkFileBrowser::update_views() noexcept
             rebuild_toolbox(nullptr, this);
             need_enable_toolbar = true;
         }
-        gtk_widget_show_all(this->toolbox_);
+        gtk_widget_show_all(GTK_WIDGET(this->toolbox_));
     }
     else
     {
-        gtk_widget_hide(this->toolbox_);
+        gtk_widget_hide(GTK_WIDGET(this->toolbox_));
     }
 
     if (xset_get_b_panel_mode(p, xset::panel::show_sidebar, mode))
@@ -4658,7 +4655,7 @@ PtkFileBrowser::update_views() noexcept
             rebuild_side_toolbox(nullptr, this);
             need_enable_toolbar = true;
         }
-        gtk_widget_show_all(this->side_toolbox);
+        gtk_widget_show_all(GTK_WIDGET(this->side_toolbox));
     }
     else
     {
@@ -4670,7 +4667,7 @@ PtkFileBrowser::update_views() noexcept
             this->side_toolbar = nullptr;
         }
 #endif
-        gtk_widget_hide(this->side_toolbox);
+        gtk_widget_hide(GTK_WIDGET(this->side_toolbox));
     }
 
     if (xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
@@ -4727,11 +4724,11 @@ PtkFileBrowser::update_views() noexcept
     if (xset_get_b_panel_mode(p, xset::panel::show_devmon, mode) ||
         xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
     {
-        gtk_widget_show(this->side_vbox);
+        gtk_widget_show(GTK_WIDGET(this->side_vbox));
     }
     else
     {
-        gtk_widget_hide(this->side_vbox);
+        gtk_widget_hide(GTK_WIDGET(this->side_vbox));
     }
 
     if (need_enable_toolbar)

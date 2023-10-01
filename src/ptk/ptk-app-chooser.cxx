@@ -358,8 +358,8 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
 
     // Create a vertical box to hold the dialog contents
     GtkWidget* content_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-    GtkWidget* vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_container_add(GTK_CONTAINER(content_box), vbox);
+    GtkBox* vbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 5));
+    gtk_container_add(GTK_CONTAINER(content_box), GTK_WIDGET(vbox));
 
     // Bold Text
     PangoAttrList* attr_list = pango_attr_list_new();
@@ -370,10 +370,11 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     GtkWidget* label_title = gtk_label_new("Choose an application or enter a command:");
     gtk_label_set_xalign(GTK_LABEL(label_title), 0.0);
     gtk_label_set_yalign(GTK_LABEL(label_title), 0.5);
-    gtk_box_pack_start(GTK_BOX(vbox), label_title, false, false, 0);
+    gtk_box_pack_start(vbox, label_title, false, false, 0);
 
     // Create the file type label
-    GtkWidget* label_file_type_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkBox* label_file_type_box =
+        GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5));
     GtkWidget* label_file_type = gtk_label_new("File Type:");
     gtk_label_set_attributes(GTK_LABEL(label_file_type), attr_list);
     gtk_label_set_xalign(GTK_LABEL(label_file_type), 0.0);
@@ -384,12 +385,12 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     gtk_label_set_xalign(GTK_LABEL(label_file_type), 0.0);
     gtk_label_set_yalign(GTK_LABEL(label_file_type), 0.5);
 
-    gtk_box_pack_start(GTK_BOX(label_file_type_box), label_file_type, false, false, 0);
-    gtk_box_pack_start(GTK_BOX(label_file_type_box), label_file_type_content, false, false, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), label_file_type_box, false, false, 0);
+    gtk_box_pack_start(label_file_type_box, label_file_type, false, false, 0);
+    gtk_box_pack_start(label_file_type_box, label_file_type_content, false, false, 0);
+    gtk_box_pack_start(vbox, GTK_WIDGET(label_file_type_box), false, false, 0);
 
     // Create the label with an entry box
-    GtkWidget* label_entry_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkBox* label_entry_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5));
     GtkWidget* label_entry_label = gtk_label_new("Command:");
     gtk_label_set_attributes(GTK_LABEL(label_entry_label), attr_list);
     gtk_label_set_xalign(GTK_LABEL(label_entry_label), 0.0);
@@ -397,9 +398,9 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
 
     data->entry_command = gtk_entry_new();
     // gtk_widget_set_hexpand(GTK_WIDGET(entry), true);
-    gtk_box_pack_start(GTK_BOX(label_entry_box), label_entry_label, false, false, 0);
-    gtk_box_pack_start(GTK_BOX(label_entry_box), data->entry_command, true, true, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), label_entry_box, false, false, 0);
+    gtk_box_pack_start(label_entry_box, label_entry_label, false, false, 0);
+    gtk_box_pack_start(label_entry_box, data->entry_command, true, true, 0);
+    gtk_box_pack_start(vbox, GTK_WIDGET(label_entry_box), false, false, 0);
 
     if (!show_command)
     {
@@ -414,16 +415,16 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
                              init_associated_apps_tab(dialog, mime_type),
                              gtk_label_new("Associated Apps"));
     gtk_notebook_append_page(data->notebook, init_all_apps_tab(dialog), gtk_label_new("All Apps"));
-    gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(data->notebook), true, true, 0);
+    gtk_box_pack_start(vbox, GTK_WIDGET(data->notebook), true, true, 0);
 
     // Create the first checked button
     data->btn_open_in_terminal = gtk_check_button_new_with_label("Open in a terminal");
-    gtk_box_pack_start(GTK_BOX(vbox), data->btn_open_in_terminal, false, false, 0);
+    gtk_box_pack_start(vbox, data->btn_open_in_terminal, false, false, 0);
 
     // Create the second checked button
     data->btn_set_as_default =
         gtk_check_button_new_with_label("Set as the default application for this file type");
-    gtk_box_pack_start(GTK_BOX(vbox), data->btn_set_as_default, false, false, 0);
+    gtk_box_pack_start(vbox, data->btn_set_as_default, false, false, 0);
     // Do not set default handler for directories and files with unknown type
     if (!show_default ||
         /*  ztd::same(mime_type->type(), XDG_MIME_TYPE_UNKNOWN) || */

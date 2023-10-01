@@ -221,48 +221,48 @@ on_update_labels(properties_dialog_data* data)
 class PropertiesSection
 {
   private:
-    GtkWidget* box_{nullptr};
-    GtkWidget* content_box_{nullptr};
+    GtkBox* box_{nullptr};
+    GtkBox* content_box_{nullptr};
 
   public:
     PropertiesSection()
     {
-        this->content_box_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6);
+        this->content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
 
         // clang-format off
-        GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-        gtk_box_pack_start(GTK_BOX(hbox), gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0), false, false, 0);
-        gtk_box_pack_start(GTK_BOX(hbox), this->content_box_, true, true, 0);
+        GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+        gtk_box_pack_start(hbox, gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0), false, false, 0);
+        gtk_box_pack_start(hbox, GTK_WIDGET(this->content_box_), true, true, 0);
         // clang-format on
 
-        this->box_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
-        gtk_box_pack_start(GTK_BOX(this->box_), hbox, false, false, 0);
+        this->box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
+        gtk_box_pack_start(this->box_, GTK_WIDGET(hbox), false, false, 0);
     }
 
     void
-    new_split_vboxes(GtkWidget** left_box, GtkWidget** right_box)
+    new_split_vboxes(GtkBox** left_box, GtkBox** right_box)
     {
-        *left_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6);
-        gtk_box_set_homogeneous(GTK_BOX(*left_box), false);
+        *left_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
+        gtk_box_set_homogeneous(*left_box, false);
 
-        *right_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6);
-        gtk_box_set_homogeneous(GTK_BOX(*right_box), false);
+        *right_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
+        gtk_box_set_homogeneous(*right_box, false);
 
-        GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 12);
-        gtk_box_pack_start(GTK_BOX(hbox), *left_box, false, false, 0);
-        gtk_box_pack_start(GTK_BOX(hbox), *right_box, false, true, 0);
-        gtk_box_pack_start(GTK_BOX(this->content_box_), hbox, true, true, 0);
+        GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 12));
+        gtk_box_pack_start(hbox, GTK_WIDGET(*left_box), false, false, 0);
+        gtk_box_pack_start(hbox, GTK_WIDGET(*right_box), false, true, 0);
+        gtk_box_pack_start(this->content_box_, GTK_WIDGET(hbox), true, true, 0);
 
         gtk_widget_set_hexpand(GTK_WIDGET(*right_box), true);
     }
 
-    GtkWidget*
+    GtkBox*
     box()
     {
         return box_;
     }
 
-    GtkWidget*
+    GtkBox*
     contentbox()
     {
         return content_box_;
@@ -272,18 +272,18 @@ class PropertiesSection
 class PropertiesPage
 {
   private:
-    GtkWidget* box_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 12);
+    GtkBox* box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 12));
     PropertiesSection section_;
 
   public:
     PropertiesPage()
     {
-        gtk_box_set_homogeneous(GTK_BOX(this->box_), false);
-        gtk_box_set_spacing(GTK_BOX(this->box_), 12);
+        gtk_box_set_homogeneous(this->box_, false);
+        gtk_box_set_spacing(this->box_, 12);
         gtk_container_set_border_width(GTK_CONTAINER(this->box_), 12);
 
         this->section_ = PropertiesSection();
-        gtk_box_pack_start(GTK_BOX(box_), this->section_.box(), false, false, 0);
+        gtk_box_pack_start(box_, GTK_WIDGET(this->section_.box()), false, false, 0);
     }
 
     void
@@ -300,26 +300,26 @@ class PropertiesPage
         if (right_item == nullptr)
         {
             // clang-format off
-            gtk_box_pack_start(GTK_BOX(this->section_.contentbox()), GTK_WIDGET(left_item), true, true, 0);
+            gtk_box_pack_start(this->section_.contentbox(), GTK_WIDGET(left_item), true, true, 0);
             // clang-format on
         }
         else
         {
-            GtkWidget* left_box;
-            GtkWidget* right_box;
+            GtkBox* left_box;
+            GtkBox* right_box;
             this->section_.new_split_vboxes(&left_box, &right_box);
-            gtk_box_pack_start(GTK_BOX(left_box), GTK_WIDGET(left_item), true, true, 0);
-            gtk_box_pack_start(GTK_BOX(right_box), GTK_WIDGET(right_item), true, true, 0);
+            gtk_box_pack_start(left_box, GTK_WIDGET(left_item), true, true, 0);
+            gtk_box_pack_start(right_box, GTK_WIDGET(right_item), true, true, 0);
         }
     }
 
     void
     add_row_widget(GtkWidget* item)
     {
-        gtk_box_pack_start(GTK_BOX(this->section_.contentbox()), GTK_WIDGET(item), true, true, 0);
+        gtk_box_pack_start(this->section_.contentbox(), GTK_WIDGET(item), true, true, 0);
     }
 
-    GtkWidget*
+    GtkBox*
     box()
     {
         return this->box_;
@@ -509,7 +509,7 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
         page.add_row("Modified:    ", GTK_WIDGET(create_prop_text_box_date(file->mtime())));
     }
 
-    return page.box();
+    return GTK_WIDGET(page.box());
 }
 
 GtkWidget*
@@ -708,7 +708,7 @@ init_attributes_tab(properties_dialog_data* data,
         page.add_row("Dax:        ", GTK_WIDGET(check_button_dax));
     }
 
-    return page.box();
+    return GTK_WIDGET(page.box());
 }
 
 GtkWidget*
@@ -858,7 +858,7 @@ init_permissions_tab(properties_dialog_data* data,
 
     page.add_row_widget(GTK_WIDGET(grid));
 
-    return page.box();
+    return GTK_WIDGET(page.box());
 }
 
 void

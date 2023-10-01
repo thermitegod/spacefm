@@ -46,14 +46,14 @@
 class PreferenceSection
 {
   private:
-    GtkWidget* box_{nullptr};
-    GtkWidget* content_box_{nullptr};
+    GtkBox* box_{nullptr};
+    GtkBox* content_box_{nullptr};
 
   public:
     PreferenceSection() = default;
     PreferenceSection(const std::string_view header)
     {
-        this->content_box_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6);
+        this->content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
 
         GtkWidget* label = gtk_label_new(header.data());
         PangoAttrList* attr_list = pango_attr_list_new();
@@ -64,38 +64,38 @@ class PreferenceSection
         gtk_label_set_yalign(GTK_LABEL(label), 0.5);
 
         // clang-format off
-        GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-        gtk_box_pack_start(GTK_BOX(hbox), gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0), false, false, 6);
-        gtk_box_pack_start(GTK_BOX(hbox), this->content_box_, true, true, 0);
+        GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+        gtk_box_pack_start(hbox, gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0), false, false, 6);
+        gtk_box_pack_start(hbox, GTK_WIDGET(this->content_box_), true, true, 0);
         // clang-format on
 
-        this->box_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
-        gtk_box_pack_start(GTK_BOX(this->box_), label, false, false, 0);
-        gtk_box_pack_start(GTK_BOX(this->box_), hbox, false, false, 6);
+        this->box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
+        gtk_box_pack_start(this->box_, GTK_WIDGET(label), false, false, 0);
+        gtk_box_pack_start(this->box_, GTK_WIDGET(hbox), false, false, 6);
     }
 
     void
-    new_split_vboxes(GtkWidget** left_box, GtkWidget** right_box)
+    new_split_vboxes(GtkBox** left_box, GtkBox** right_box)
     {
-        *left_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6);
-        gtk_box_set_homogeneous(GTK_BOX(*left_box), false);
+        *left_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
+        gtk_box_set_homogeneous(*left_box, false);
 
-        *right_box = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6);
-        gtk_box_set_homogeneous(GTK_BOX(*right_box), false);
+        *right_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
+        gtk_box_set_homogeneous(*right_box, false);
 
-        GtkWidget* hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 12);
-        gtk_box_pack_start(GTK_BOX(hbox), *left_box, true, true, 0);
-        gtk_box_pack_start(GTK_BOX(hbox), *right_box, false, false, 0);
-        gtk_box_pack_start(GTK_BOX(this->content_box_), hbox, true, true, 0);
+        GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 12));
+        gtk_box_pack_start(hbox, GTK_WIDGET(*left_box), true, true, 0);
+        gtk_box_pack_start(hbox, GTK_WIDGET(*right_box), false, false, 0);
+        gtk_box_pack_start(this->content_box_, GTK_WIDGET(hbox), true, true, 0);
     }
 
-    GtkWidget*
+    GtkBox*
     box()
     {
         return box_;
     }
 
-    GtkWidget*
+    GtkBox*
     contentbox()
     {
         return content_box_;
@@ -105,14 +105,14 @@ class PreferenceSection
 class PreferencePage
 {
   private:
-    GtkWidget* box_ = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 12);
+    GtkBox* box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 12));
     PreferenceSection section_;
 
   public:
     PreferencePage()
     {
-        gtk_box_set_homogeneous(GTK_BOX(this->box_), false);
-        gtk_box_set_spacing(GTK_BOX(this->box_), 12);
+        gtk_box_set_homogeneous(this->box_, false);
+        gtk_box_set_spacing(this->box_, 12);
         gtk_container_set_border_width(GTK_CONTAINER(this->box_), 12);
     }
 
@@ -121,7 +121,7 @@ class PreferencePage
     {
         this->section_ = PreferenceSection(header);
 
-        gtk_box_pack_start(GTK_BOX(box_), this->section_.box(), false, false, 0);
+        gtk_box_pack_start(this->box_, GTK_WIDGET(this->section_.box()), false, false, 0);
     }
 
     void
@@ -136,20 +136,20 @@ class PreferencePage
         if (right_item == nullptr)
         {
             // clang-format off
-            gtk_box_pack_start(GTK_BOX(this->section_.contentbox()), GTK_WIDGET(left_item), true, true, 0);
+            gtk_box_pack_start(this->section_.contentbox(), GTK_WIDGET(left_item), true, true, 0);
             // clang-format on
         }
         else
         {
-            GtkWidget* left_box;
-            GtkWidget* right_box;
+            GtkBox* left_box;
+            GtkBox* right_box;
             this->section_.new_split_vboxes(&left_box, &right_box);
-            gtk_box_pack_start(GTK_BOX(left_box), GTK_WIDGET(left_item), true, true, 0);
-            gtk_box_pack_start(GTK_BOX(right_box), GTK_WIDGET(right_item), true, true, 0);
+            gtk_box_pack_start(left_box, GTK_WIDGET(left_item), true, true, 0);
+            gtk_box_pack_start(right_box, GTK_WIDGET(right_item), true, true, 0);
         }
     }
 
-    GtkWidget*
+    GtkBox*
     box()
     {
         return this->box_;
@@ -1083,7 +1083,7 @@ init_general_tab()
     page.add_row(
         GTK_WIDGET(preference::thumbnailer_api::create_pref_check_button("Thumbnailer use API")));
 
-    return page.box();
+    return GTK_WIDGET(page.box());
 }
 
 GtkWidget*
@@ -1125,7 +1125,7 @@ init_interface_tab()
     page.add_row(GTK_WIDGET(gtk_label_new("Default Drag Action:")),
                  GTK_WIDGET(preference::drag_actions::create_combobox()));
 
-    return page.box();
+    return GTK_WIDGET(page.box());
 }
 
 GtkWidget*
@@ -1148,7 +1148,7 @@ init_advanced_tab()
     page.add_row(GTK_WIDGET(gtk_label_new("Date Format")),
                  GTK_WIDGET(preference::date_format::create_pref_text_box()));
 
-    return page.box();
+    return GTK_WIDGET(page.box());
 }
 
 void

@@ -1803,7 +1803,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     }
 
     GtkWidget* ebox;
-    GtkWidget* hbox;
+    GtkBox* hbox;
     xset_t set_child;
     xset::cmd cmd_type;
 
@@ -2061,8 +2061,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             ptk_file_browser_add_toolbar_widget(set, btn);
 
             // pack into hbox
-            hbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
-            gtk_box_pack_start(GTK_BOX(hbox), ebox, false, false, 0);
+            hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+            gtk_box_pack_start(hbox, ebox, false, false, 0);
             // tooltip
             if (show_tooltips)
             {
@@ -2118,7 +2118,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             g_list_free(children);
             gtk_widget_destroy(menu_btn);
 
-            gtk_box_pack_start(GTK_BOX(hbox), ebox, false, false, 0);
+            gtk_box_pack_start(hbox, ebox, false, false, 0);
             g_signal_connect(G_OBJECT(ebox),
                              "button_press_event",
                              G_CALLBACK(on_tool_menu_button_press),
@@ -2127,7 +2127,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             ptk_file_browser_add_toolbar_widget(set, btn);
 
             item = GTK_WIDGET(gtk_tool_item_new());
-            gtk_container_add(GTK_CONTAINER(item), hbox);
+            gtk_container_add(GTK_CONTAINER(item), GTK_WIDGET(hbox));
             gtk_widget_show_all(item);
 
             // tooltip

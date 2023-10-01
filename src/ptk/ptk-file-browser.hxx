@@ -143,11 +143,11 @@ struct PtkFileBrowser
     MainWindow* main_window_{nullptr};
     GtkNotebook* notebook_{nullptr};
     GtkWidget* task_view_{nullptr};
-    GtkWidget* toolbox_{nullptr};
+    GtkBox* toolbox_{nullptr};
     GtkWidget* path_bar_{nullptr};
     GtkPaned* hpane{nullptr};
-    GtkWidget* side_vbox{nullptr};
-    GtkWidget* side_toolbox{nullptr};
+    GtkBox* side_vbox{nullptr};
+    GtkBox* side_toolbox{nullptr};
     GtkPaned* side_vpane_top{nullptr};
     GtkPaned* side_vpane_bottom{nullptr};
     GtkWidget* side_dir_scroll{nullptr};
