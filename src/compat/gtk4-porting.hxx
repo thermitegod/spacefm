@@ -33,6 +33,11 @@ i32 gtk4_dialog_run(GtkDialog* dialog);
 // TODO - Need to replace with either gtk_container_remove() or g_object_unref()
 #define gtk_widget_destroy(widget) ((void)(widget))
 
+// clang-format off
+#define gtk_box_pack_start(box, child, expand, fill, padding) (gtk_box_prepend(GTK_BOX(box), GTK_WIDGET(child)))
+#define gtk_box_pack_end(box, child, expand, fill, padding) (gtk_box_append(GTK_BOX(box), GTK_WIDGET(child)))
+// clang-format on
+
 #endif
 
 #if (GTK_MAJOR_VERSION == 3)
@@ -42,5 +47,10 @@ guint gdk_key_event_get_keyval(GdkEvent* event);
 GdkModifierType gdk_event_get_modifier_state(GdkEvent* event);
 guint gdk_button_event_get_button(GdkEvent* event);
 gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y);
+
+// clang-format off
+// #define gtk_box_prepend(box, child) (gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(child), false, false, 0))
+// #define gtk_box_append(box, child) (gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(child), false, false, 0))
+// clang-format on
 
 #endif
