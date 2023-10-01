@@ -55,13 +55,13 @@ class PreferenceSection
     {
         this->content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
 
-        GtkWidget* label = gtk_label_new(header.data());
+        GtkLabel* label = GTK_LABEL(gtk_label_new(header.data()));
         PangoAttrList* attr_list = pango_attr_list_new();
         PangoAttribute* attr = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
         pango_attr_list_insert(attr_list, attr);
-        gtk_label_set_attributes(GTK_LABEL(label), attr_list);
-        gtk_label_set_xalign(GTK_LABEL(label), 0.0);
-        gtk_label_set_yalign(GTK_LABEL(label), 0.5);
+        gtk_label_set_attributes(label, attr_list);
+        gtk_label_set_xalign(label, 0.0);
+        gtk_label_set_yalign(label, 0.5);
 
         // clang-format off
         GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));

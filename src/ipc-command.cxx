@@ -1252,7 +1252,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "statusbar-text"))
         {
             return {SOCKET_SUCCESS,
-                    std::format("{}", gtk_label_get_text(GTK_LABEL(file_browser->status_label)))};
+                    std::format("{}", gtk_label_get_text(file_browser->status_label))};
         }
         else if (ztd::same(property, "pathbar-text"))
         {

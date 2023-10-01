@@ -1933,20 +1933,20 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
     gtk_box_pack_start(tab_label, tab_icon, false, false, 4);
 
     const auto cwd = file_browser->cwd();
-    GtkWidget* tab_text = gtk_label_new(cwd.filename().c_str());
+    GtkLabel* tab_text_label = GTK_LABEL(gtk_label_new(cwd.filename().c_str()));
 
     if (cwd.string().size() < 30)
     {
-        gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
-        gtk_label_set_width_chars(GTK_LABEL(tab_text), -1);
+        gtk_label_set_ellipsize(tab_text_label, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
+        gtk_label_set_width_chars(tab_text_label, -1);
     }
     else
     {
-        gtk_label_set_ellipsize(GTK_LABEL(tab_text), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-        gtk_label_set_width_chars(GTK_LABEL(tab_text), 30);
+        gtk_label_set_ellipsize(tab_text_label, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+        gtk_label_set_width_chars(tab_text_label, 30);
     }
-    gtk_label_set_max_width_chars(GTK_LABEL(tab_text), 30);
-    gtk_box_pack_start(tab_label, tab_text, false, false, 4);
+    gtk_label_set_max_width_chars(tab_text_label, 30);
+    gtk_box_pack_start(tab_label, GTK_WIDGET(tab_text_label), false, false, 4);
 
     if (app_settings.show_close_tab_buttons())
     {

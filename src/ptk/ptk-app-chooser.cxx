@@ -367,38 +367,38 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     pango_attr_list_insert(attr_list, attr);
 
     // Create the header label
-    GtkWidget* label_title = gtk_label_new("Choose an application or enter a command:");
-    gtk_label_set_xalign(GTK_LABEL(label_title), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(label_title), 0.5);
-    gtk_box_pack_start(vbox, label_title, false, false, 0);
+    GtkLabel* label_title = GTK_LABEL(gtk_label_new("Choose an application or enter a command:"));
+    gtk_label_set_xalign(label_title, 0.0);
+    gtk_label_set_yalign(label_title, 0.5);
+    gtk_box_pack_start(vbox, GTK_WIDGET(label_title), false, false, 0);
 
     // Create the file type label
     GtkBox* label_file_type_box =
         GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5));
-    GtkWidget* label_file_type = gtk_label_new("File Type:");
-    gtk_label_set_attributes(GTK_LABEL(label_file_type), attr_list);
-    gtk_label_set_xalign(GTK_LABEL(label_file_type), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(label_file_type), 0.5);
+    GtkLabel* label_file_type = GTK_LABEL(gtk_label_new("File Type:"));
+    gtk_label_set_attributes(label_file_type, attr_list);
+    gtk_label_set_xalign(label_file_type, 0.0);
+    gtk_label_set_yalign(label_file_type, 0.5);
 
     const auto mime_desc = std::format(" {}\n ( {} )", mime_type->description(), mime_type->type());
-    GtkWidget* label_file_type_content = gtk_label_new(mime_desc.data());
-    gtk_label_set_xalign(GTK_LABEL(label_file_type), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(label_file_type), 0.5);
+    GtkLabel* label_file_type_content = GTK_LABEL(gtk_label_new(mime_desc.data()));
+    gtk_label_set_xalign(label_file_type, 0.0);
+    gtk_label_set_yalign(label_file_type, 0.5);
 
-    gtk_box_pack_start(label_file_type_box, label_file_type, false, false, 0);
-    gtk_box_pack_start(label_file_type_box, label_file_type_content, false, false, 0);
+    gtk_box_pack_start(label_file_type_box, GTK_WIDGET(label_file_type), false, false, 0);
+    gtk_box_pack_start(label_file_type_box, GTK_WIDGET(label_file_type_content), false, false, 0);
     gtk_box_pack_start(vbox, GTK_WIDGET(label_file_type_box), false, false, 0);
 
     // Create the label with an entry box
     GtkBox* label_entry_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 5));
-    GtkWidget* label_entry_label = gtk_label_new("Command:");
-    gtk_label_set_attributes(GTK_LABEL(label_entry_label), attr_list);
-    gtk_label_set_xalign(GTK_LABEL(label_entry_label), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(label_entry_label), 0.5);
+    GtkLabel* label_entry_label = GTK_LABEL(gtk_label_new("Command:"));
+    gtk_label_set_attributes(label_entry_label, attr_list);
+    gtk_label_set_xalign(label_entry_label, 0.0);
+    gtk_label_set_yalign(label_entry_label, 0.5);
 
     data->entry_command = GTK_ENTRY(gtk_entry_new());
     // gtk_widget_set_hexpand(GTK_WIDGET(entry), true);
-    gtk_box_pack_start(label_entry_box, label_entry_label, false, false, 0);
+    gtk_box_pack_start(label_entry_box, GTK_WIDGET(label_entry_label), false, false, 0);
     gtk_box_pack_start(label_entry_box, GTK_WIDGET(data->entry_command), true, true, 0);
     gtk_box_pack_start(vbox, GTK_WIDGET(label_entry_box), false, false, 0);
 
@@ -406,7 +406,7 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     {
         // TODO - hide
         gtk_widget_hide(GTK_WIDGET(label_entry_box));
-        gtk_label_set_text(GTK_LABEL(label_title), "Please choose an application:");
+        gtk_label_set_text(label_title, "Please choose an application:");
     }
 
     // Create the notebook with two tabs

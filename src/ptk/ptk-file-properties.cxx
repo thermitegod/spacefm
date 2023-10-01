@@ -42,9 +42,9 @@ struct properties_dialog_data
     std::span<const vfs::file_info> file_list{};
     std::filesystem::path cwd{};
 
-    GtkWidget* total_size_label{nullptr};
-    GtkWidget* size_on_disk_label{nullptr};
-    GtkWidget* count_label{nullptr};
+    GtkLabel* total_size_label{nullptr};
+    GtkLabel* size_on_disk_label{nullptr};
+    GtkLabel* count_label{nullptr};
 
     u64 total_size{0};
     u64 size_on_disk{0};
@@ -192,7 +192,7 @@ on_update_labels(properties_dialog_data* data)
     {
         return true;
     }
-    gtk_label_set_text(GTK_LABEL(data->total_size_label), size_str.data());
+    gtk_label_set_text(data->total_size_label, size_str.data());
 
     const auto disk_str = std::format("{} ( {:L} bytes )",
                                       vfs_file_size_format(data->size_on_disk),
@@ -201,7 +201,7 @@ on_update_labels(properties_dialog_data* data)
     {
         return true;
     }
-    gtk_label_set_text(GTK_LABEL(data->size_on_disk_label), disk_str.data());
+    gtk_label_set_text(data->size_on_disk_label, disk_str.data());
 
     const auto count_str =
         std::format("{:L} files, {:L} directories", data->total_count_file, data->total_count_dir);
@@ -209,7 +209,7 @@ on_update_labels(properties_dialog_data* data)
     {
         return true;
     }
-    gtk_label_set_text(GTK_LABEL(data->count_label), count_str.data());
+    gtk_label_set_text(data->count_label, count_str.data());
 
     if (data->done)
     {
@@ -289,13 +289,13 @@ class PropertiesPage
     void
     add_row(const std::string_view left_item_name, GtkWidget* right_item = nullptr)
     {
-        GtkWidget* left_item = gtk_label_new(left_item_name.data());
+        GtkLabel* left_item = GTK_LABEL(gtk_label_new(left_item_name.data()));
         PangoAttrList* attr_list = pango_attr_list_new();
         PangoAttribute* attr = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
         pango_attr_list_insert(attr_list, attr);
-        gtk_label_set_attributes(GTK_LABEL(left_item), attr_list);
-        gtk_label_set_xalign(GTK_LABEL(left_item), 0.0);
-        gtk_label_set_yalign(GTK_LABEL(left_item), 0.5);
+        gtk_label_set_attributes(left_item, attr_list);
+        gtk_label_set_xalign(left_item, 0.0);
+        gtk_label_set_yalign(left_item, 0.5);
 
         if (right_item == nullptr)
         {
@@ -439,34 +439,34 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
     {
         const auto mime = file->mime_type();
         const auto file_type = std::format("{}\n{}", mime->description(), mime->type());
-        GtkWidget* type_label = gtk_label_new(file_type.data());
-        gtk_label_set_xalign(GTK_LABEL(type_label), 0.0);
-        gtk_label_set_yalign(GTK_LABEL(type_label), 0.5);
+        GtkLabel* type_label = GTK_LABEL(gtk_label_new(file_type.data()));
+        gtk_label_set_xalign(type_label, 0.0);
+        gtk_label_set_yalign(type_label, 0.5);
 
         page.add_row("Type:        ", GTK_WIDGET(type_label));
     }
     else
     {
-        GtkWidget* type_label = gtk_label_new("( multiple types )");
-        gtk_label_set_xalign(GTK_LABEL(type_label), 0.0);
-        gtk_label_set_yalign(GTK_LABEL(type_label), 0.5);
+        GtkLabel* type_label = GTK_LABEL(gtk_label_new("( multiple types )"));
+        gtk_label_set_xalign(type_label, 0.0);
+        gtk_label_set_yalign(type_label, 0.5);
 
         page.add_row("Type:        ", GTK_WIDGET(type_label));
     }
 
-    data->total_size_label = gtk_label_new("Calculating...");
-    gtk_label_set_xalign(GTK_LABEL(data->total_size_label), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(data->total_size_label), 0.5);
+    data->total_size_label = GTK_LABEL(gtk_label_new("Calculating..."));
+    gtk_label_set_xalign(data->total_size_label, 0.0);
+    gtk_label_set_yalign(data->total_size_label, 0.5);
     page.add_row("Total Size:  ", GTK_WIDGET(data->total_size_label));
 
-    data->size_on_disk_label = gtk_label_new("Calculating...");
-    gtk_label_set_xalign(GTK_LABEL(data->size_on_disk_label), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(data->size_on_disk_label), 0.5);
+    data->size_on_disk_label = GTK_LABEL(gtk_label_new("Calculating..."));
+    gtk_label_set_xalign(data->size_on_disk_label, 0.0);
+    gtk_label_set_yalign(data->size_on_disk_label, 0.5);
     page.add_row("Size On Disk:", GTK_WIDGET(data->size_on_disk_label));
 
-    data->count_label = gtk_label_new("Calculating...");
-    gtk_label_set_xalign(GTK_LABEL(data->count_label), 0.0);
-    gtk_label_set_yalign(GTK_LABEL(data->count_label), 0.5);
+    data->count_label = GTK_LABEL(gtk_label_new("Calculating..."));
+    gtk_label_set_xalign(data->count_label, 0.0);
+    gtk_label_set_yalign(data->count_label, 0.5);
     page.add_row("Count:       ", GTK_WIDGET(data->count_label));
 
     bool need_calc_size = true;
@@ -476,13 +476,13 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
 
         const std::string size =
             std::format("{}  ( {:L} bytes )", file->display_size(), file->size());
-        gtk_label_set_text(GTK_LABEL(data->total_size_label), size.data());
+        gtk_label_set_text(data->total_size_label, size.data());
 
         const std::string on_disk =
             std::format("{}  ( {:L} bytes )", file->display_size_on_disk(), file->size_on_disk());
-        gtk_label_set_text(GTK_LABEL(data->size_on_disk_label), on_disk.data());
+        gtk_label_set_text(data->size_on_disk_label, on_disk.data());
 
-        gtk_label_set_text(GTK_LABEL(data->count_label), "1 file");
+        gtk_label_set_text(data->count_label, "1 file");
     }
     if (need_calc_size)
     {
@@ -742,13 +742,13 @@ init_permissions_tab(properties_dialog_data* data,
     gtk_grid_set_column_spacing(GTK_GRID(grid), 5);
 
     // Create the labels for the first column
-    GtkWidget* label_perm_owner = gtk_label_new("Owner:");
-    GtkWidget* label_perm_group = gtk_label_new("Group:");
-    GtkWidget* label_perm_other = gtk_label_new("Other:");
+    GtkLabel* label_perm_owner = GTK_LABEL(gtk_label_new("Owner:"));
+    GtkLabel* label_perm_group = GTK_LABEL(gtk_label_new("Group:"));
+    GtkLabel* label_perm_other = GTK_LABEL(gtk_label_new("Other:"));
 
-    gtk_grid_attach(GTK_GRID(grid), label_perm_owner, 0, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), label_perm_group, 0, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), label_perm_other, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(label_perm_owner), 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(label_perm_group), 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(label_perm_other), 0, 2, 1, 1);
 
     // Create the permissions checked buttons
 

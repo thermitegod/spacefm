@@ -2535,71 +2535,70 @@ query_overwrite(PtkFileTask* ptask)
 
     // labels
     gtk_box_pack_start(vbox, gtk_label_new(nullptr), false, true, 0);
-    GtkWidget* msg = gtk_label_new(nullptr);
-    gtk_label_set_markup(GTK_LABEL(msg), message.data());
+    GtkLabel* msg = GTK_LABEL(gtk_label_new(nullptr));
+    gtk_label_set_markup(msg, message.data());
     gtk_widget_set_halign(GTK_WIDGET(msg), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(msg), GtkAlign::GTK_ALIGN_START);
-    gtk_widget_set_can_focus(msg, false);
-    gtk_box_pack_start(vbox, msg, false, true, 0);
+    gtk_widget_set_can_focus(GTK_WIDGET(msg), false);
+    gtk_box_pack_start(vbox, GTK_WIDGET(msg), false, true, 0);
     gtk_box_pack_start(vbox, gtk_label_new(nullptr), false, true, 0);
-    GtkWidget* from_label = gtk_label_new(nullptr);
-    gtk_label_set_markup(GTK_LABEL(from_label), from_disp.data());
+    GtkLabel* from_label = GTK_LABEL(gtk_label_new(nullptr));
+    gtk_label_set_markup(from_label, from_disp.data());
     gtk_widget_set_halign(GTK_WIDGET(from_label), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(from_label), GtkAlign::GTK_ALIGN_START);
-    gtk_widget_set_can_focus(from_label, false);
-    gtk_box_pack_start(vbox, from_label, false, true, 0);
+    gtk_widget_set_can_focus(GTK_WIDGET(from_label), false);
+    gtk_box_pack_start(vbox, GTK_WIDGET(from_label), false, true, 0);
 
-    GtkWidget* from_dir = gtk_label_new(src_dir.data());
+    GtkLabel* from_dir = GTK_LABEL(gtk_label_new(src_dir.data()));
     gtk_widget_set_halign(GTK_WIDGET(from_dir), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(from_dir), GtkAlign::GTK_ALIGN_START);
-    gtk_label_set_ellipsize(GTK_LABEL(from_dir), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-    gtk_label_set_selectable(GTK_LABEL(from_dir), true);
-    gtk_box_pack_start(vbox, from_dir, false, true, 0);
+    gtk_label_set_ellipsize(from_dir, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+    gtk_label_set_selectable(from_dir, true);
+    gtk_box_pack_start(vbox, GTK_WIDGET(from_dir), false, true, 0);
 
     if (!from_size_str.empty())
     {
-        GtkWidget* from_size = gtk_label_new(nullptr);
-        gtk_label_set_markup(GTK_LABEL(from_size), from_size_str.data());
+        GtkLabel* from_size = GTK_LABEL(gtk_label_new(nullptr));
+        gtk_label_set_markup(from_size, from_size_str.data());
         gtk_widget_set_halign(GTK_WIDGET(from_size), GtkAlign::GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(from_size), GtkAlign::GTK_ALIGN_END);
-        gtk_label_set_selectable(GTK_LABEL(from_size), true);
-        gtk_box_pack_start(vbox, from_size, false, true, 0);
+        gtk_label_set_selectable(from_size, true);
+        gtk_box_pack_start(vbox, GTK_WIDGET(from_size), false, true, 0);
     }
 
     if (has_overwrite_btn || different_files)
     {
         gtk_box_pack_start(vbox, gtk_label_new(nullptr), false, true, 0);
-        GtkWidget* to_label = gtk_label_new(nullptr);
-        gtk_label_set_markup(GTK_LABEL(to_label), "To directory:");
+        GtkLabel* to_label = GTK_LABEL(gtk_label_new(nullptr));
+        gtk_label_set_markup(to_label, "To directory:");
         gtk_widget_set_halign(GTK_WIDGET(to_label), GtkAlign::GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(to_label), GtkAlign::GTK_ALIGN_START);
-        gtk_box_pack_start(vbox, to_label, false, true, 0);
+        gtk_box_pack_start(vbox, GTK_WIDGET(to_label), false, true, 0);
 
-        GtkWidget* to_dir = gtk_label_new(dest_dir.data());
+        GtkLabel* to_dir = GTK_LABEL(gtk_label_new(dest_dir.data()));
         gtk_widget_set_halign(GTK_WIDGET(to_dir), GtkAlign::GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(to_dir), GtkAlign::GTK_ALIGN_START);
-        gtk_label_set_ellipsize(GTK_LABEL(to_dir), PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-        gtk_label_set_selectable(GTK_LABEL(to_dir), true);
-        gtk_box_pack_start(vbox, to_dir, false, true, 0);
+        gtk_label_set_ellipsize(to_dir, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+        gtk_label_set_selectable(to_dir, true);
+        gtk_box_pack_start(vbox, GTK_WIDGET(to_dir), false, true, 0);
 
         if (!to_size_str.empty())
         {
-            GtkWidget* to_size = gtk_label_new(nullptr);
-            gtk_label_set_markup(GTK_LABEL(to_size), to_size_str.data());
+            GtkLabel* to_size = GTK_LABEL(gtk_label_new(nullptr));
+            gtk_label_set_markup(to_size, to_size_str.data());
             gtk_widget_set_halign(GTK_WIDGET(to_size), GtkAlign::GTK_ALIGN_START);
             gtk_widget_set_valign(GTK_WIDGET(to_size), GtkAlign::GTK_ALIGN_END);
-            gtk_label_set_selectable(GTK_LABEL(to_size), true);
-            gtk_box_pack_start(vbox, to_size, false, true, 0);
+            gtk_label_set_selectable(to_size, true);
+            gtk_box_pack_start(vbox, GTK_WIDGET(to_size), false, true, 0);
         }
     }
 
     gtk_box_pack_start(vbox, gtk_label_new(nullptr), false, true, 0);
-    GtkWidget* name_label = gtk_label_new(nullptr);
-    gtk_label_set_markup(GTK_LABEL(name_label),
-                         is_dest_dir ? "<b>Directory Name:</b>" : "<b>Filename:</b>");
+    GtkLabel* name_label = GTK_LABEL(gtk_label_new(nullptr));
+    gtk_label_set_markup(name_label, is_dest_dir ? "<b>Directory Name:</b>" : "<b>Filename:</b>");
     gtk_widget_set_halign(GTK_WIDGET(name_label), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(name_label), GtkAlign::GTK_ALIGN_START);
-    gtk_box_pack_start(vbox, name_label, false, true, 0);
+    gtk_box_pack_start(vbox, GTK_WIDGET(name_label), false, true, 0);
 
     // name input
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
