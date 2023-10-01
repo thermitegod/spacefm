@@ -1152,11 +1152,11 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_widget_show_all(ptask->progress_dlg);
     if (ptask->overwrite_combo && !xset_get_b(xset::name::task_pop_over))
     {
-        gtk_widget_hide(ptask->overwrite_combo);
+        gtk_widget_hide(GTK_WIDGET(ptask->overwrite_combo));
     }
     if (ptask->error_combo && !xset_get_b(xset::name::task_pop_err))
     {
-        gtk_widget_hide(ptask->error_combo);
+        gtk_widget_hide(GTK_WIDGET(ptask->error_combo));
     }
     if (overwrite_box && !gtk_widget_get_visible(ptask->overwrite_combo) &&
         !gtk_widget_get_visible(ptask->error_combo))

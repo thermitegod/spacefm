@@ -1352,7 +1352,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         }
-        gtk_widget_hide(mset->opt_copy);
+        gtk_widget_hide(GTK_WIDGET(mset->opt_copy));
     }
 
     if (xset_get_b(xset::name::move_link))
@@ -1365,7 +1365,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         }
-        gtk_widget_hide(mset->opt_link);
+        gtk_widget_hide(GTK_WIDGET(mset->opt_link));
     }
 
     if (xset_get_b(xset::name::move_copyt) && mset->is_link)
@@ -1378,7 +1378,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         }
-        gtk_widget_hide(mset->opt_copy_target);
+        gtk_widget_hide(GTK_WIDGET(mset->opt_copy_target));
     }
 
     if (xset_get_b(xset::name::move_linkt) && mset->is_link)
@@ -1391,14 +1391,14 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
         {
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mset->opt_move), true);
         }
-        gtk_widget_hide(mset->opt_link_target);
+        gtk_widget_hide(GTK_WIDGET(mset->opt_link_target));
     }
 
     if (!gtk_widget_get_visible(mset->opt_copy) && !gtk_widget_get_visible(mset->opt_link) &&
         !gtk_widget_get_visible(mset->opt_copy_target) &&
         !gtk_widget_get_visible(mset->opt_link_target))
     {
-        gtk_widget_hide(mset->opt_move);
+        gtk_widget_hide(GTK_WIDGET(mset->opt_move));
         opts_visible = false;
     }
     else

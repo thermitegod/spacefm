@@ -2177,7 +2177,7 @@ main_window_fullscreen_activate(MainWindow* main_window)
         {
             file_browser->save_column_widths(GTK_TREE_VIEW(file_browser->folder_view()));
         }
-        gtk_widget_hide(main_window->menu_bar);
+        gtk_widget_hide(GTK_WIDGET(main_window->menu_bar));
         gtk_window_fullscreen(GTK_WINDOW(main_window));
         main_window->fullscreen = true;
     }
