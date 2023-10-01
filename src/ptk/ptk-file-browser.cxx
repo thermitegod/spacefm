@@ -1058,25 +1058,21 @@ ptk_file_browser_new(i32 curpanel, GtkWidget* notebook, GtkWidget* task_view,
     return GTK_IS_WIDGET(file_browser) ? GTK_WIDGET(file_browser) : nullptr;
 }
 
-static void
-ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
+void
+PtkFileBrowser::update_tab_label() noexcept
 {
-    GtkWidget* label;
-    GtkContainer* hbox;
-    // GtkImage* icon;
-    GtkLabel* text;
-    GList* children;
+    // GtkWidget* label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(this->notebook_), GTK_WIDGET(this));
 
-    label =
-        gtk_notebook_get_tab_label(GTK_NOTEBOOK(file_browser->notebook_), GTK_WIDGET(file_browser));
-    hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
-    children = gtk_container_get_children(hbox);
-    // icon = GTK_IMAGE(children->data);
-    text = GTK_LABEL(children->next->data);
-    g_list_free(children);
+    GtkWidget* label = gtk_notebook_get_tab_label(GTK_NOTEBOOK(this->notebook_), GTK_WIDGET(this));
 
-    /* TODO: Change the icon */
-    const auto cwd = file_browser->cwd();
+    GtkContainer* hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
+    GList* children = gtk_container_get_children(hbox);
+    // GtkImage* icon = GTK_IMAGE(children->data);
+    GtkLabel* text = GTK_LABEL(children->next->data);
+
+    // TODO: Change the icon
+
+    const auto cwd = this->cwd();
 
     const std::string name = std::filesystem::equivalent(cwd, "/") ? "/" : cwd.filename();
     gtk_label_set_text(text, name.data());
@@ -1090,6 +1086,8 @@ ptk_file_browser_update_tab_label(PtkFileBrowser* file_browser)
         gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
         gtk_label_set_width_chars(text, 30);
     }
+
+    g_list_free(children);
 }
 
 static void
@@ -3061,7 +3059,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     this->signal_file_listed =
         this->dir_->add_event<spacefm::signal::file_listed>(on_dir_file_listed, this);
 
-    ptk_file_browser_update_tab_label(this);
+    this->update_tab_label();
 
     const auto disp_path = this->cwd();
     if (!this->inhibit_focus_)

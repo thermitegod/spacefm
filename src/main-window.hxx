@@ -109,9 +109,6 @@ GtkWidget* main_window_new();
 /* Utility functions */
 PtkFileBrowser* main_window_get_current_file_browser();
 
-void main_window_update_tab_label(MainWindow* main_window, PtkFileBrowser* file_browser,
-                                  const std::filesystem::path& path);
-
 // void main_window_preference(MainWindow* main_window);
 
 /* get last active window */

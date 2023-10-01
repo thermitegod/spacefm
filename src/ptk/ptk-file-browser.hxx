@@ -254,6 +254,8 @@ struct PtkFileBrowser
     void focus_folder_view() noexcept;
     void enable_toolbar() noexcept;
 
+    void update_tab_label() noexcept;
+
     ////////////////
 
     bool using_large_icons() const noexcept;
