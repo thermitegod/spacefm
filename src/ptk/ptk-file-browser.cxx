@@ -1051,7 +1051,8 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                               main_window->panel_context.at(file_browser->panel_));
     file_browser->folder_view(create_folder_view(file_browser, file_browser->view_mode_));
 
-    gtk_container_add(GTK_CONTAINER(file_browser->folder_view_scroll_), file_browser->folder_view_);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
+                                  GTK_WIDGET(file_browser->folder_view_));
     // gtk_widget_show_all(GTK_WIDGET(file_browser->folder_view_scroll_));
 
     // set status bar icon
@@ -4569,7 +4570,8 @@ PtkFileBrowser::view_as_icons() noexcept
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     gtk_widget_show(GTK_WIDGET(this->folder_view_));
-    gtk_container_add(GTK_CONTAINER(this->folder_view_scroll_), this->folder_view_);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(this->folder_view_scroll_),
+                                  GTK_WIDGET(this->folder_view_));
 }
 
 /* FIXME: Do not recreate the view if previous view is icon view */
@@ -4594,7 +4596,8 @@ PtkFileBrowser::view_as_compact_list() noexcept
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     gtk_widget_show(GTK_WIDGET(this->folder_view_));
-    gtk_container_add(GTK_CONTAINER(this->folder_view_scroll_), this->folder_view_);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(this->folder_view_scroll_),
+                                  GTK_WIDGET(this->folder_view_));
 }
 
 void
@@ -4618,7 +4621,8 @@ PtkFileBrowser::view_as_list() noexcept
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_ALWAYS);
     gtk_widget_show(GTK_WIDGET(this->folder_view_));
-    gtk_container_add(GTK_CONTAINER(this->folder_view_scroll_), this->folder_view_);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(this->folder_view_scroll_),
+                                  GTK_WIDGET(this->folder_view_));
 }
 
 void
@@ -4696,7 +4700,8 @@ PtkFileBrowser::update_views() noexcept
         if (!this->side_dir)
         {
             this->side_dir = ptk_file_browser_create_dir_tree(this);
-            gtk_container_add(GTK_CONTAINER(this->side_dir_scroll), this->side_dir);
+            gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(this->side_dir_scroll),
+                                          GTK_WIDGET(this->side_dir));
         }
         gtk_widget_show_all(GTK_WIDGET(this->side_dir_scroll));
         if (this->side_dir && this->file_list_)
@@ -4719,7 +4724,8 @@ PtkFileBrowser::update_views() noexcept
         if (!this->side_dev)
         {
             this->side_dev = ptk_location_view_new(this);
-            gtk_container_add(GTK_CONTAINER(this->side_dev_scroll), this->side_dev);
+            gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(this->side_dir_scroll),
+                                          GTK_WIDGET(this->side_dir));
         }
         gtk_widget_show_all(GTK_WIDGET(this->side_dev_scroll));
     }

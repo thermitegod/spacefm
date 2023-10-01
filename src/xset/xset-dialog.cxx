@@ -125,7 +125,7 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
     gtk_widget_set_size_request(GTK_WIDGET(input), -1, 50);
     gtk_widget_set_size_request(GTK_WIDGET(scrolled), -1, 50);
 
-    gtk_container_add(GTK_CONTAINER(scrolled), GTK_WIDGET(input));
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), GTK_WIDGET(input));
     GtkTextBuffer* buf = gtk_text_view_get_buffer(input);
     gtk_text_view_set_wrap_mode(input,
                                 GtkWrapMode::GTK_WRAP_CHAR); // GtkWrapMode::GTK_WRAP_WORD_CHAR

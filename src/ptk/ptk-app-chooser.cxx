@@ -257,7 +257,7 @@ init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
     // clang-format on
 
     // Add the tree view to the scrolled window
-    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), GTK_WIDGET(tree_view));
 
     return GTK_WIDGET(scrolled_window);
 }
@@ -310,7 +310,7 @@ init_all_apps_tab(GtkWidget* dialog)
     // clang-format on
 
     // Add the tree view to the scrolled window
-    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), GTK_WIDGET(tree_view));
 
     return GTK_WIDGET(scrolled_window);
 }

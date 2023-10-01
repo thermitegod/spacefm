@@ -1261,7 +1261,12 @@ main_window_init(MainWindow* main_window)
     main_window->update_window_icon();
 
     main_window->main_vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
+
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_box_prepend(GTK_BOX(main_window), GTK_WIDGET(main_window->main_vbox));
+#elif (GTK_MAJOR_VERSION == 3)
     gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(main_window->main_vbox));
+#endif
 
     // Create menu bar
 #if (GTK_MAJOR_VERSION == 4)
@@ -1338,7 +1343,7 @@ main_window_init(MainWindow* main_window)
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
     main_window->task_view = main_task_view_new(main_window);
-    gtk_container_add(GTK_CONTAINER(main_window->task_scroll), GTK_WIDGET(main_window->task_view));
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(main_window->task_scroll), GTK_WIDGET(main_window->task_view));
 
     gtk_widget_show_all(GTK_WIDGET(main_window->main_vbox));
 
@@ -1936,7 +1941,7 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
         GtkWidget* close_icon =
             gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
 
-        gtk_container_add(GTK_CONTAINER(close_btn), close_icon);
+        gtk_button_set_child(GTK_BUTTON(close_btn), close_icon);
         gtk_box_pack_end(tab_label, GTK_WIDGET(close_btn), false, false, 0);
 
         // clang-format off

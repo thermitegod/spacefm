@@ -55,4 +55,17 @@ gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y);
 // #define gtk_box_append(box, child) (gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(child), false, false, 0))
 // clang-format on
 
+// clang-format off
+#define gtk_button_set_child(container, widget)             (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_box_set_child(container, widget)                (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_expander_set_child(container, widget)           (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_frame_set_child(container, widget)              (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_popover_set_child(container, widget)            (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_scrolled_window_set_child(container, widget)    (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_toggle_button_set_child(container, widget)      (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_toolbar_set_child(container, widget)            (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_viewport_set_child(container, widget)           (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+#define gtk_window_set_child(container, widget)             (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
+// clang-format on
+
 #endif

@@ -145,7 +145,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
 
     // Add the tree view to the scrolled window
-    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), GTK_WIDGET(tree_view));
 
     // Add the scrolled window to the box
     gtk_box_pack_start(box, GTK_WIDGET(scrolled_window), true, true, 0);

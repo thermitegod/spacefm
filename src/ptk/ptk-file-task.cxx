@@ -996,7 +996,8 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     // ubuntu shows input too small so use mininum height
     gtk_widget_set_size_request(GTK_WIDGET(ptask->error_view), 600, 300);
     gtk_widget_set_size_request(GTK_WIDGET(ptask->scroll), 600, 300);
-    gtk_container_add(GTK_CONTAINER(ptask->scroll), ptask->error_view);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(ptask->scroll),
+                                  GTK_WIDGET(ptask->error_view));
     gtk_scrolled_window_set_policy(ptask->scroll,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);

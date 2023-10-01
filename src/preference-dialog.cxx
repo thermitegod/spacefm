@@ -1182,6 +1182,7 @@ show_preference_dialog(GtkWindow* parent) noexcept
     GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
+
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(notebook));
 
     gtk_container_set_border_width(GTK_CONTAINER(notebook), 2);
