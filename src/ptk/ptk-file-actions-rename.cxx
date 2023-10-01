@@ -1135,11 +1135,8 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
         g_signal_connect(G_OBJECT(mode[index]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
         gtk_box_pack_start(hbox, mode[index], false, true, 2);
     }
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))),
-                       GTK_WIDGET(hbox),
-                       false,
-                       true,
-                       6);
+    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg)));
+    gtk_box_pack_start(GTK_BOX(content_area), GTK_WIDGET(hbox), false, true, 6);
     g_object_set_data(G_OBJECT(dlg), "mode", mode);
     gtk_widget_show_all(GTK_WIDGET(hbox));
 

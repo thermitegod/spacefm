@@ -4323,11 +4323,15 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
 
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), FNMATCH_HELP);
 
-    GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
 
     GtkBox* vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 10));
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 20);
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_box_prepend(GTK_BOX(content_area), GTK_WIDGET(vbox));
+#elif (GTK_MAJOR_VERSION == 3)
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
+#endif
 
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_text(entry, default_pattern.data());

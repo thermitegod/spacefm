@@ -208,11 +208,8 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     GtkTextView* input = multi_input_new(scroll_input, defstring.data());
     GtkTextBuffer* buf = gtk_text_view_get_buffer(input);
 
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))),
-                       GTK_WIDGET(scroll_input),
-                       true,
-                       true,
-                       4);
+    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg)));
+    gtk_box_pack_start(GTK_BOX(content_area), GTK_WIDGET(scroll_input), true, true, 4);
 
     g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dlg);
 

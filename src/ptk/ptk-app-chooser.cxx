@@ -355,9 +355,13 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
 
     // Create a vertical box to hold the dialog contents
-    GtkWidget* content_box = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
     GtkBox* vbox = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 5));
-    gtk_container_add(GTK_CONTAINER(content_box), GTK_WIDGET(vbox));
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_box_prepend(GTK_BOX(content_area), GTK_WIDGET(vbox));
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
+#endif
 
     // Bold Text
     PangoAttrList* attr_list = pango_attr_list_new();

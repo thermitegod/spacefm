@@ -73,10 +73,13 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     // whe the dialog is opened, should be the "Confirm" button
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GtkResponseType::GTK_RESPONSE_ACCEPT);
 
-    GtkWidget* content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
+    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
     GtkBox* box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 5));
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_box_prepend(GTK_BOX(content_area), GTK_WIDGET(box));
+#elif (GTK_MAJOR_VERSION == 3)
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(box));
+#endif
 
     // header label
     GtkLabel* header_label = GTK_LABEL(gtk_label_new(header_text.data()));

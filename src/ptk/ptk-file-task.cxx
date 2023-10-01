@@ -1084,7 +1084,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     }
 
     // Pack
-    GtkWidget* progress_dlg = gtk_dialog_get_content_area(GTK_DIALOG(ptask->progress_dlg));
+    GtkBox* progress_dlg = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(ptask->progress_dlg)));
     gtk_widget_set_hexpand(GTK_WIDGET(progress_dlg), true);
     gtk_widget_set_vexpand(GTK_WIDGET(progress_dlg), true);
 
@@ -2505,11 +2505,8 @@ query_overwrite(PtkFileTask* ptask)
         gtk_widget_set_size_request(GTK_WIDGET(dlg), 600, -1);
     }
 
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg))),
-                       GTK_WIDGET(vbox),
-                       true,
-                       true,
-                       0);
+    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg)));
+    gtk_box_pack_start(GTK_BOX(content_area), GTK_WIDGET(vbox), true, true, 0);
 
     // buttons
     if (has_overwrite_btn)
