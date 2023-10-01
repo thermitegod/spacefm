@@ -1846,7 +1846,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, new_menu_label ) );
             GtkButton* btn = GTK_BUTTON(gtk_button_new());
-            gtk_widget_show(image);
+            gtk_widget_show(GTK_WIDGET(image));
             gtk_button_set_image(btn, image);
             gtk_button_set_relief(btn, GTK_RELIEF_NONE);
             // These do not seem to do anything
@@ -1900,7 +1900,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             // gtk_tool_button_set_icon_widget( GTK_TOOL_BUTTON( btn ), image );
             // gtk_tool_button_set_label( GTK_TOOL_BUTTON( btn ), set->menu_label );
             GtkToggleButton* check_btn = GTK_TOGGLE_BUTTON(gtk_toggle_button_new());
-            gtk_widget_show(image);
+            gtk_widget_show(GTK_WIDGET(image));
             gtk_button_set_image(GTK_BUTTON(check_btn), image);
             gtk_button_set_relief(GTK_BUTTON(check_btn), GTK_RELIEF_NONE);
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_btn), xset_get_b(set));
@@ -2034,7 +2034,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             // cannot use gtk_tool_button_new because icon does not obey size
             // btn = GTK_WIDGET( gtk_tool_button_new( image, menu_label ) );
             GtkButton* btn = GTK_BUTTON(gtk_button_new());
-            gtk_widget_show(image);
+            gtk_widget_show(GTK_WIDGET(image));
             gtk_button_set_image(btn, image);
             gtk_button_set_relief(btn, GTK_RELIEF_NONE);
             gtk_widget_set_margin_start(GTK_WIDGET(btn), 0);

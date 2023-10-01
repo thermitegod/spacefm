@@ -4553,7 +4553,7 @@ PtkFileBrowser::view_as_icons() noexcept
     gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
-    gtk_widget_show(this->folder_view_);
+    gtk_widget_show(GTK_WIDGET(this->folder_view_));
     gtk_container_add(GTK_CONTAINER(this->folder_view_scroll_), this->folder_view_);
 }
 
@@ -4578,7 +4578,7 @@ PtkFileBrowser::view_as_compact_list() noexcept
     gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
-    gtk_widget_show(this->folder_view_);
+    gtk_widget_show(GTK_WIDGET(this->folder_view_));
     gtk_container_add(GTK_CONTAINER(this->folder_view_scroll_), this->folder_view_);
 }
 
@@ -4602,7 +4602,7 @@ PtkFileBrowser::view_as_list() noexcept
     gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_ALWAYS);
-    gtk_widget_show(this->folder_view_);
+    gtk_widget_show(GTK_WIDGET(this->folder_view_));
     gtk_container_add(GTK_CONTAINER(this->folder_view_scroll_), this->folder_view_);
 }
 

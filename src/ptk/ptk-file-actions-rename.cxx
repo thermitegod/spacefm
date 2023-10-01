@@ -1344,7 +1344,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     // opts
     if (xset_get_b(xset::name::move_copy) || mset->clip_copy)
     {
-        gtk_widget_show(mset->opt_copy);
+        gtk_widget_show(GTK_WIDGET(mset->opt_copy));
     }
     else
     {
@@ -1357,7 +1357,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (xset_get_b(xset::name::move_link))
     {
-        gtk_widget_show(mset->opt_link);
+        gtk_widget_show(GTK_WIDGET(mset->opt_link));
     }
     else
     {
@@ -1370,7 +1370,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (xset_get_b(xset::name::move_copyt) && mset->is_link)
     {
-        gtk_widget_show(mset->opt_copy_target);
+        gtk_widget_show(GTK_WIDGET(mset->opt_copy_target));
     }
     else
     {
@@ -1383,7 +1383,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 
     if (xset_get_b(xset::name::move_linkt) && mset->is_link)
     {
-        gtk_widget_show(mset->opt_link_target);
+        gtk_widget_show(GTK_WIDGET(mset->opt_link_target));
     }
     else
     {
@@ -1403,7 +1403,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
     }
     else
     {
-        gtk_widget_show(mset->opt_move);
+        gtk_widget_show(GTK_WIDGET(mset->opt_move));
         opts_visible = true;
     }
 

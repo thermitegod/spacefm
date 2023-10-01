@@ -40,7 +40,7 @@ ptk_show_error(GtkWindow* parent, const std::string_view title,
     gtk_window_set_title(GTK_WINDOW(dialog), title.empty() ? "Error" : title.data());
 
     // g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(g_object_unref), nullptr);
-    // gtk_widget_show(dialog);
+    // gtk_widget_show(GTK_WIDGET(dialog));
 
     gtk4_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
