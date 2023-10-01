@@ -1922,8 +1922,8 @@ GtkWidget*
 MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 {
     /* Create tab label */
-    GtkEventBox* evt_box = GTK_EVENT_BOX(gtk_event_box_new());
-    gtk_event_box_set_visible_window(GTK_EVENT_BOX(evt_box), false);
+    GtkEventBox* ebox = GTK_EVENT_BOX(gtk_event_box_new());
+    gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
 
     GtkBox* tab_label = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     GtkWidget* tab_icon =
@@ -1962,27 +1962,27 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
                          file_browser);
     }
 
-    gtk_container_add(GTK_CONTAINER(evt_box), GTK_WIDGET(tab_label));
+    gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(tab_label));
 
-    gtk_widget_set_events(GTK_WIDGET(evt_box), GdkEventMask::GDK_ALL_EVENTS_MASK);
+    gtk_widget_set_events(GTK_WIDGET(ebox), GdkEventMask::GDK_ALL_EVENTS_MASK);
     gtk_drag_dest_set(
-        GTK_WIDGET(evt_box),
+        GTK_WIDGET(ebox),
         GTK_DEST_DEFAULT_ALL,
         drag_targets,
         sizeof(drag_targets) / sizeof(GtkTargetEntry),
         GdkDragAction(GdkDragAction::GDK_ACTION_DEFAULT | GdkDragAction::GDK_ACTION_COPY |
                       GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_LINK));
-    g_signal_connect((void*)evt_box, "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
+    g_signal_connect((void*)ebox, "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
 
     // MOD  middle-click to close tab
-    g_signal_connect(G_OBJECT(evt_box),
+    g_signal_connect(G_OBJECT(ebox),
                      "button-press-event",
                      G_CALLBACK(notebook_clicked),
                      file_browser);
 
-    gtk_widget_show_all(GTK_WIDGET(evt_box));
+    gtk_widget_show_all(GTK_WIDGET(ebox));
 
-    return GTK_WIDGET(evt_box);
+    return GTK_WIDGET(ebox);
 }
 
 void

@@ -1801,7 +1801,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
         menu_style = xset::menu::string;
     }
 
-    GtkWidget* ebox;
     GtkBox* hbox;
     xset_t set_child;
     xset::cmd cmd_type;
@@ -1865,11 +1864,11 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             // create tool item containing an ebox to capture click on button
             item = GTK_WIDGET(gtk_tool_item_new());
-            ebox = gtk_event_box_new();
-            gtk_container_add(GTK_CONTAINER(item), ebox);
+            GtkEventBox* ebox = GTK_EVENT_BOX(gtk_event_box_new());
+            gtk_container_add(GTK_CONTAINER(item), GTK_WIDGET(ebox));
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(btn));
-            gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
-            gtk_event_box_set_above_child(GTK_EVENT_BOX(ebox), true);
+            gtk_event_box_set_visible_window(ebox, false);
+            gtk_event_box_set_above_child(ebox, true);
             g_signal_connect(ebox,
                              "button-press-event",
                              G_CALLBACK(on_tool_icon_button_press),
@@ -1881,7 +1880,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             if (show_tooltips)
             {
                 str = clean_label(new_menu_label.value(), false, false);
-                gtk_widget_set_tooltip_text(ebox, str.data());
+                gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
             break;
         }
@@ -1920,11 +1919,11 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             // create tool item containing an ebox to capture click on button
             item = GTK_WIDGET(gtk_tool_item_new());
-            ebox = gtk_event_box_new();
-            gtk_container_add(GTK_CONTAINER(item), ebox);
+            GtkEventBox* ebox = GTK_EVENT_BOX(gtk_event_box_new());
+            gtk_container_add(GTK_CONTAINER(item), GTK_WIDGET(ebox));
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(check_btn));
-            gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
-            gtk_event_box_set_above_child(GTK_EVENT_BOX(ebox), true);
+            gtk_event_box_set_visible_window(ebox, false);
+            gtk_event_box_set_above_child(ebox, true);
             g_signal_connect(ebox,
                              "button-press-event",
                              G_CALLBACK(on_tool_icon_button_press),
@@ -1936,7 +1935,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             if (show_tooltips)
             {
                 str = clean_label(menu_label.value(), false, false);
-                gtk_widget_set_tooltip_text(ebox, str.data());
+                gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
             break;
         }
@@ -2052,10 +2051,12 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_set_margin_start(GTK_WIDGET(btn), 0);
             gtk_widget_set_margin_end(GTK_WIDGET(btn), 0);
 
+            GtkEventBox* ebox;
+
             // create eventbox for btn
-            ebox = gtk_event_box_new();
-            gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
-            gtk_event_box_set_above_child(GTK_EVENT_BOX(ebox), true);
+            ebox = GTK_EVENT_BOX(gtk_event_box_new());
+            gtk_event_box_set_visible_window(ebox, false);
+            gtk_event_box_set_above_child(ebox, true);
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(btn));
             g_signal_connect(G_OBJECT(ebox),
                              "button_press_event",
@@ -2066,12 +2067,12 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             // pack into hbox
             hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-            gtk_box_pack_start(hbox, ebox, false, false, 0);
+            gtk_box_pack_start(hbox, GTK_WIDGET(ebox), false, false, 0);
             // tooltip
             if (show_tooltips)
             {
                 str = clean_label(menu_label.value(), false, false);
-                gtk_widget_set_tooltip_text(ebox, str.data());
+                gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
 
             // reset menu_label for below
@@ -2082,9 +2083,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             }
 
             ///////// create a menu_tool_button to steal the button from
-            ebox = gtk_event_box_new();
-            gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
-            gtk_event_box_set_above_child(GTK_EVENT_BOX(ebox), true);
+            ebox = GTK_EVENT_BOX(gtk_event_box_new());
+            gtk_event_box_set_visible_window(ebox, false);
+            gtk_event_box_set_above_child(ebox, true);
             GtkWidget* menu_btn;
             GtkWidget* hbox_menu;
             GList* children;
@@ -2123,7 +2124,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             g_list_free(children);
             gtk_widget_destroy(menu_btn);
 
-            gtk_box_pack_start(hbox, ebox, false, false, 0);
+            gtk_box_pack_start(hbox, GTK_WIDGET(ebox), false, false, 0);
             g_signal_connect(G_OBJECT(ebox),
                              "button_press_event",
                              G_CALLBACK(on_tool_menu_button_press),
@@ -2139,7 +2140,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             if (show_tooltips)
             {
                 str = clean_label(menu_label.value(), false, false);
-                gtk_widget_set_tooltip_text(ebox, str.data());
+                gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
             break;
         }
@@ -2149,11 +2150,11 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             GtkWidget* sep = GTK_WIDGET(gtk_separator_tool_item_new());
             gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(sep), true);
             item = GTK_WIDGET(gtk_tool_item_new());
-            ebox = gtk_event_box_new();
-            gtk_container_add(GTK_CONTAINER(item), ebox);
-            gtk_container_add(GTK_CONTAINER(ebox), sep);
-            gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
-            gtk_event_box_set_above_child(GTK_EVENT_BOX(ebox), true);
+            GtkEventBox* ebox = GTK_EVENT_BOX(gtk_event_box_new());
+            gtk_container_add(GTK_CONTAINER(item), GTK_WIDGET(ebox));
+            gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(sep));
+            gtk_event_box_set_visible_window(ebox, false);
+            gtk_event_box_set_above_child(ebox, true);
             g_signal_connect(ebox,
                              "button-press-event",
                              G_CALLBACK(on_tool_icon_button_press),
