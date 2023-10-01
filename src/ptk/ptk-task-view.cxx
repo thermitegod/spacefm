@@ -453,7 +453,7 @@ idle_set_task_height(MainWindow* main_window)
     }
     // ztd::logger::info("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
     // allocation.height, taskh, allocation.height - taskh);
-    gtk_paned_set_position(GTK_PANED(main_window->task_vpane), allocation.height - taskh);
+    gtk_paned_set_position(main_window->task_vpane, allocation.height - taskh);
     return false;
 }
 
@@ -478,7 +478,7 @@ show_task_manager(MainWindow* main_window, bool show)
         // save height
         if (gtk_widget_get_visible(GTK_WIDGET(main_window->task_scroll)))
         {
-            const i32 pos = gtk_paned_get_position(GTK_PANED(main_window->task_vpane));
+            const i32 pos = gtk_paned_get_position(main_window->task_vpane);
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)

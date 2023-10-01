@@ -840,41 +840,43 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     gtk_box_pack_start(GTK_BOX(file_browser), file_browser->toolbox_, false, false, 0);
 
     // lists area
-    file_browser->hpane = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
+    file_browser->hpane = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
     file_browser->side_vbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(file_browser->side_vbox, 140, -1);
     file_browser->folder_view_scroll_ = gtk_scrolled_window_new(nullptr, nullptr);
-    gtk_paned_pack1(GTK_PANED(file_browser->hpane), file_browser->side_vbox, false, false);
-    gtk_paned_pack2(GTK_PANED(file_browser->hpane), file_browser->folder_view_scroll_, true, true);
+    gtk_paned_pack1(file_browser->hpane, GTK_WIDGET(file_browser->side_vbox), false, false);
+    gtk_paned_pack2(file_browser->hpane, GTK_WIDGET(file_browser->folder_view_scroll_), true, true);
 
     // fill side
     file_browser->side_toolbox = gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0);
     file_browser->side_toolbar = nullptr;
-    file_browser->side_vpane_top = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL);
-    file_browser->side_vpane_bottom = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL);
+    file_browser->side_vpane_top =
+        GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
+    file_browser->side_vpane_bottom =
+        GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
     file_browser->side_dir_scroll = gtk_scrolled_window_new(nullptr, nullptr);
     file_browser->side_dev_scroll = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_box_pack_start(GTK_BOX(file_browser->side_vbox),
-                       file_browser->side_toolbox,
+                       GTK_WIDGET(file_browser->side_toolbox),
                        false,
                        false,
                        0);
     gtk_box_pack_start(GTK_BOX(file_browser->side_vbox),
-                       file_browser->side_vpane_top,
+                       GTK_WIDGET(file_browser->side_vpane_top),
                        true,
                        true,
                        0);
     // see https://github.com/BwackNinja/spacefm/issues/21
-    gtk_paned_pack1(GTK_PANED(file_browser->side_vpane_top),
-                    file_browser->side_dev_scroll,
+    gtk_paned_pack1(file_browser->side_vpane_top,
+                    GTK_WIDGET(file_browser->side_dev_scroll),
                     false,
                     false);
-    gtk_paned_pack2(GTK_PANED(file_browser->side_vpane_top),
-                    file_browser->side_vpane_bottom,
+    gtk_paned_pack2(file_browser->side_vpane_top,
+                    GTK_WIDGET(file_browser->side_vpane_bottom),
                     true,
                     false);
-    gtk_paned_pack2(GTK_PANED(file_browser->side_vpane_bottom),
-                    file_browser->side_dir_scroll,
+    gtk_paned_pack2(file_browser->side_vpane_bottom,
+                    GTK_WIDGET(file_browser->side_dir_scroll),
                     true,
                     false);
 
@@ -909,7 +911,7 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     // clang-format on
 
     // pack fb vbox
-    gtk_box_pack_start(GTK_BOX(file_browser), file_browser->hpane, true, true, 0);
+    gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->hpane), true, true, 0);
     // TODO pack task frames
     gtk_box_pack_start(GTK_BOX(file_browser), file_browser->status_bar, false, false, 0);
 
@@ -4715,11 +4717,11 @@ PtkFileBrowser::update_views() noexcept
 
     if (xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
     {
-        gtk_widget_show(this->side_vpane_bottom);
+        gtk_widget_show(GTK_WIDGET(this->side_vpane_bottom));
     }
     else
     {
-        gtk_widget_hide(this->side_vpane_bottom);
+        gtk_widget_hide(GTK_WIDGET(this->side_vpane_bottom));
     }
 
     if (xset_get_b_panel_mode(p, xset::panel::show_devmon, mode) ||
@@ -4754,7 +4756,7 @@ PtkFileBrowser::update_views() noexcept
     // ztd::logger::info("    set slide_x = {}", pos);
     if (pos > 0)
     {
-        gtk_paned_set_position(GTK_PANED(this->hpane), pos);
+        gtk_paned_set_position(this->hpane, pos);
     }
 
     // side_vpane_top
@@ -4764,7 +4766,7 @@ PtkFileBrowser::update_views() noexcept
         pos = -1;
     }
     // ztd::logger::info("    slide_y = {}", pos);
-    gtk_paned_set_position(GTK_PANED(this->side_vpane_top), pos);
+    gtk_paned_set_position(this->side_vpane_top, pos);
 
     // side_vpane_bottom
     pos = this->main_window_->panel_slide_s[p - 1];
@@ -4773,7 +4775,7 @@ PtkFileBrowser::update_views() noexcept
         pos = -1;
     }
     // ztd::logger::info( "slide_s = {}", pos);
-    gtk_paned_set_position(GTK_PANED(this->side_vpane_bottom), pos);
+    gtk_paned_set_position(this->side_vpane_bottom, pos);
 
     // Large Icons - option for Detailed and Compact list views
     const bool large_icons = xset_get_b_panel(p, xset::panel::list_icons) ||
@@ -4959,16 +4961,16 @@ PtkFileBrowser::save_column_widths(GtkTreeView* view) noexcept
 }
 
 bool
-PtkFileBrowser::slider_release(GtkWidget* widget) noexcept
+PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
 {
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
 
     xset_t set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
 
-    if (widget == this->hpane)
+    if (pane == this->hpane)
     {
-        const i32 pos = gtk_paned_get_position(GTK_PANED(this->hpane));
+        const i32 pos = gtk_paned_get_position(this->hpane);
         if (!this->main_window_->fullscreen)
         {
             set->x = std::to_string(pos);
@@ -4980,7 +4982,7 @@ PtkFileBrowser::slider_release(GtkWidget* widget) noexcept
     {
         i32 pos;
         // ztd::logger::debug("PtkFileBrowser::slider_release fb={}  (panel {})  mode = {}", fmt::ptr(this), p, fmt::ptr(mode));
-        pos = gtk_paned_get_position(GTK_PANED(this->side_vpane_top));
+        pos = gtk_paned_get_position(this->side_vpane_top);
         if (!this->main_window_->fullscreen)
         {
             set->y = std::to_string(pos);
@@ -4988,7 +4990,7 @@ PtkFileBrowser::slider_release(GtkWidget* widget) noexcept
         this->main_window_->panel_slide_y[p - 1] = pos;
         // ztd::logger::debug("    slide_y = {}  ", pos);
 
-        pos = gtk_paned_get_position(GTK_PANED(this->side_vpane_bottom));
+        pos = gtk_paned_get_position(this->side_vpane_bottom);
         if (!this->main_window_->fullscreen)
         {
             set->s = std::to_string(pos);
@@ -6095,5 +6097,5 @@ ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
                                 PtkFileBrowser* file_browser)
 {
     (void)event;
-    return file_browser->slider_release(widget);
+    return file_browser->slider_release(GTK_PANED(widget));
 }

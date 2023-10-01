@@ -242,25 +242,25 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_INVALID, "invalid slider value"};
             }
 
-            GtkWidget* widget;
+            GtkPaned* pane;
             if (ztd::same(property, "window-vslider-top"))
             {
-                widget = main_window->hpane_top;
+                pane = main_window->hpane_top;
             }
             else if (ztd::same(property, "window-vslider-bottom"))
             {
-                widget = main_window->hpane_bottom;
+                pane = main_window->hpane_bottom;
             }
             else if (ztd::same(property, "window-hslider"))
             {
-                widget = main_window->vpane;
+                pane = main_window->vpane;
             }
             else
             {
-                widget = main_window->task_vpane;
+                pane = main_window->task_vpane;
             }
 
-            gtk_paned_set_position(GTK_PANED(widget), width);
+            gtk_paned_set_position(pane, width);
         }
         else if (ztd::same(property, "focused-panel"))
         {
@@ -500,20 +500,20 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
             }
-            GtkWidget* widget;
+            GtkPaned* pane;
             if (ztd::same(property, "panel-hslider-top"))
             {
-                widget = file_browser->side_vpane_top;
+                pane = file_browser->side_vpane_top;
             }
             else if (ztd::same(property, "panel-hslider-bottom"))
             {
-                widget = file_browser->side_vpane_bottom;
+                pane = file_browser->side_vpane_bottom;
             }
             else
             {
-                widget = file_browser->hpane;
+                pane = file_browser->hpane;
             }
-            gtk_paned_set_position(GTK_PANED(widget), width);
+            gtk_paned_set_position(pane, width);
             file_browser->slider_release(nullptr);
             update_views_all_windows(nullptr, file_browser);
         }
@@ -938,29 +938,28 @@ run_ipc_command(const std::string_view socket_commands_json)
                  ztd::same(property, "window-vslider-bottom") ||
                  ztd::same(property, "window-hslider") || ztd::same(property, "window-tslider"))
         {
-            GtkWidget* widget = nullptr;
-
+            GtkPaned* pane;
             if (ztd::same(property, "window-vslider-top"))
             {
-                widget = main_window->hpane_top;
+                pane = main_window->hpane_top;
             }
             else if (ztd::same(property, "window-vslider-bottom"))
             {
-                widget = main_window->hpane_bottom;
+                pane = main_window->hpane_bottom;
             }
             else if (ztd::same(property, "window-hslider"))
             {
-                widget = main_window->vpane;
+                pane = main_window->vpane;
             }
             else if (ztd::same(property, "window-tslider"))
             {
-                widget = main_window->task_vpane;
+                pane = main_window->task_vpane;
             }
             else
             {
                 return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
             }
-            return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
+            return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(pane))};
         }
         else if (ztd::same(property, "focused-panel"))
         {
@@ -1076,24 +1075,24 @@ run_ipc_command(const std::string_view socket_commands_json)
                  ztd::same(property, "panel-hslider-bottom") ||
                  ztd::same(property, "panel-vslider"))
         {
-            GtkWidget* widget;
+            GtkPaned* pane;
             if (ztd::same(property, "panel-hslider-top"))
             {
-                widget = file_browser->side_vpane_top;
+                pane = file_browser->side_vpane_top;
             }
             else if (ztd::same(property, "panel-hslider-bottom"))
             {
-                widget = file_browser->side_vpane_bottom;
+                pane = file_browser->side_vpane_bottom;
             }
             else if (ztd::same(property, "panel-vslider"))
             {
-                widget = file_browser->hpane;
+                pane = file_browser->hpane;
             }
             else
             {
                 return {SOCKET_FAILURE, std::format("unknown property '{}'", property)};
             }
-            return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(GTK_PANED(widget)))};
+            return {SOCKET_SUCCESS, std::format("{}", gtk_paned_get_position(pane))};
         }
         else if (ztd::same(property, "column-width"))
         { // COLUMN

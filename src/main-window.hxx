@@ -64,10 +64,11 @@ struct MainWindow
 
     panel_t curpanel;
 
-    GtkWidget* hpane_top;
-    GtkWidget* hpane_bottom;
-    GtkWidget* vpane;
-    GtkWidget* task_vpane;
+    GtkPaned* hpane_top;
+    GtkPaned* hpane_bottom;
+    GtkPaned* vpane;
+    GtkPaned* task_vpane;
+
     GtkWidget* task_scroll;
     GtkWidget* task_view;
 

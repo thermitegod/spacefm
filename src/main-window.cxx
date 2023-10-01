@@ -1294,10 +1294,12 @@ main_window_init(MainWindow* main_window)
     rebuild_menus(main_window);
 
     /* Create client area */
-    main_window->task_vpane = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL);
-    main_window->vpane = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL);
-    main_window->hpane_top = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
-    main_window->hpane_bottom = gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
+    // clang-format off
+    main_window->task_vpane = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
+    main_window->vpane = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
+    main_window->hpane_top = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
+    main_window->hpane_bottom = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
+    // clang-format on
 
     for (const panel_t p : PANELS)
     {
@@ -1315,16 +1317,16 @@ main_window_init(MainWindow* main_window)
     main_window->task_scroll = gtk_scrolled_window_new(nullptr, nullptr);
 
     // clang-format off
-    gtk_paned_pack1(GTK_PANED(main_window->hpane_top), GTK_WIDGET(main_window->get_panel_notebook(panel_1)), false, true);
-    gtk_paned_pack2(GTK_PANED(main_window->hpane_top), GTK_WIDGET(main_window->get_panel_notebook(panel_2)), true, true);
-    gtk_paned_pack1(GTK_PANED(main_window->hpane_bottom), GTK_WIDGET(main_window->get_panel_notebook(panel_3)), false, true);
-    gtk_paned_pack2(GTK_PANED(main_window->hpane_bottom), GTK_WIDGET(main_window->get_panel_notebook(panel_4)), true, true);
+    gtk_paned_pack1(main_window->hpane_top, GTK_WIDGET(main_window->get_panel_notebook(panel_1)), false, true);
+    gtk_paned_pack2(main_window->hpane_top, GTK_WIDGET(main_window->get_panel_notebook(panel_2)), true, true);
+    gtk_paned_pack1(main_window->hpane_bottom, GTK_WIDGET(main_window->get_panel_notebook(panel_3)), false, true);
+    gtk_paned_pack2(main_window->hpane_bottom, GTK_WIDGET(main_window->get_panel_notebook(panel_4)), true, true);
 
-    gtk_paned_pack1(GTK_PANED(main_window->vpane), main_window->hpane_top, false, true);
-    gtk_paned_pack2(GTK_PANED(main_window->vpane), main_window->hpane_bottom, true, true);
+    gtk_paned_pack1(main_window->vpane, GTK_WIDGET(main_window->hpane_top), false, true);
+    gtk_paned_pack2(main_window->vpane, GTK_WIDGET(main_window->hpane_bottom), true, true);
 
-    gtk_paned_pack1(GTK_PANED(main_window->task_vpane), main_window->vpane, true, true);
-    gtk_paned_pack2(GTK_PANED(main_window->task_vpane), main_window->task_scroll, false, true);
+    gtk_paned_pack1(main_window->task_vpane, GTK_WIDGET(main_window->vpane), true, true);
+    gtk_paned_pack2(main_window->task_vpane, GTK_WIDGET(main_window->task_scroll), false, true);
 
     gtk_box_pack_start(GTK_BOX(main_window->main_vbox), GTK_WIDGET(main_window->task_vpane), true, true, 0);
     // clang-format off
@@ -1401,19 +1403,19 @@ main_window_init(MainWindow* main_window)
     {
         pos = 200;
     }
-    gtk_paned_set_position(GTK_PANED(main_window->hpane_top), pos);
+    gtk_paned_set_position(main_window->hpane_top, pos);
     pos = xset_get_int(xset::name::panel_sliders, xset::var::y);
     if (pos < 200)
     {
         pos = 200;
     }
-    gtk_paned_set_position(GTK_PANED(main_window->hpane_bottom), pos);
+    gtk_paned_set_position(main_window->hpane_bottom, pos);
     pos = xset_get_int(xset::name::panel_sliders, xset::var::s);
     if (pos < 200)
     {
         pos = -1;
     }
-    gtk_paned_set_position(GTK_PANED(main_window->vpane), pos);
+    gtk_paned_set_position(main_window->vpane, pos);
 
     // build the main menu initially, eg for F10 - Note: file_list is nullptr
     // NOT doing this because it slows down the initial opening of the window
@@ -1490,19 +1492,19 @@ main_window_store_positions(MainWindow* main_window)
         }
         if (GTK_IS_PANED(main_window->hpane_top))
         {
-            pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_top));
+            pos = gtk_paned_get_position(main_window->hpane_top);
             if (pos)
             {
                 xset_set(xset::name::panel_sliders, xset::var::x, std::to_string(pos));
             }
 
-            pos = gtk_paned_get_position(GTK_PANED(main_window->hpane_bottom));
+            pos = gtk_paned_get_position(main_window->hpane_bottom);
             if (pos)
             {
                 xset_set(xset::name::panel_sliders, xset::var::y, std::to_string(pos));
             }
 
-            pos = gtk_paned_get_position(GTK_PANED(main_window->vpane));
+            pos = gtk_paned_get_position(main_window->vpane);
             if (pos)
             {
                 xset_set(xset::name::panel_sliders, xset::var::s, std::to_string(pos));
@@ -1510,7 +1512,7 @@ main_window_store_positions(MainWindow* main_window)
 
             if (gtk_widget_get_visible(main_window->task_scroll))
             {
-                pos = gtk_paned_get_position(GTK_PANED(main_window->task_vpane));
+                pos = gtk_paned_get_position(main_window->task_vpane);
                 if (pos)
                 {
                     // save absolute height

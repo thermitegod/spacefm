@@ -145,11 +145,11 @@ struct PtkFileBrowser
     GtkWidget* task_view_{nullptr};
     GtkWidget* toolbox_{nullptr};
     GtkWidget* path_bar_{nullptr};
-    GtkWidget* hpane{nullptr};
+    GtkPaned* hpane{nullptr};
     GtkWidget* side_vbox{nullptr};
     GtkWidget* side_toolbox{nullptr};
-    GtkWidget* side_vpane_top{nullptr};
-    GtkWidget* side_vpane_bottom{nullptr};
+    GtkPaned* side_vpane_top{nullptr};
+    GtkPaned* side_vpane_bottom{nullptr};
     GtkWidget* side_dir_scroll{nullptr};
     GtkWidget* side_dev_scroll{nullptr};
     GtkWidget* side_dir{nullptr};
@@ -232,7 +232,7 @@ struct PtkFileBrowser
     void focus(i32 job) noexcept;
     void focus_me() noexcept;
     void save_column_widths(GtkTreeView* view) noexcept;
-    bool slider_release(GtkWidget* widget) noexcept;
+    bool slider_release(GtkPaned* pane) noexcept;
 
     void rebuild_toolbars() noexcept;
 
