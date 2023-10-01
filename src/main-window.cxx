@@ -1950,14 +1950,14 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 
     if (app_settings.show_close_tab_buttons())
     {
-        GtkWidget* close_btn = gtk_button_new();
+        GtkButton* close_btn = GTK_BUTTON(gtk_button_new());
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
-        gtk_button_set_relief(GTK_BUTTON(close_btn), GTK_RELIEF_NONE);
+        gtk_button_set_relief(close_btn, GTK_RELIEF_NONE);
         GtkWidget* close_icon =
             gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
 
         gtk_container_add(GTK_CONTAINER(close_btn), close_icon);
-        gtk_box_pack_end(tab_label, close_btn, false, false, 0);
+        gtk_box_pack_end(tab_label, GTK_WIDGET(close_btn), false, false, 0);
         g_signal_connect(G_OBJECT(close_btn),
                          "clicked",
                          G_CALLBACK(ptk_file_browser_close_tab),

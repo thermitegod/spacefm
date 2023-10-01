@@ -217,14 +217,16 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dlg);
 
     // buttons
-    GtkWidget* btn_edit;
-    GtkWidget* btn_default = nullptr;
-    GtkWidget* btn_icon_choose = nullptr;
+    GtkButton* btn_edit;
+    GtkButton* btn_default = nullptr;
+    GtkButton* btn_icon_choose = nullptr;
 
     if (edit_care)
     {
-        btn_edit = gtk_toggle_button_new_with_mnemonic("_Edit");
-        gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_edit, GtkResponseType::GTK_RESPONSE_YES);
+        btn_edit = GTK_BUTTON(gtk_toggle_button_new_with_mnemonic("_Edit"));
+        gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
+                                     GTK_WIDGET(btn_edit),
+                                     GtkResponseType::GTK_RESPONSE_YES);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_edit), false);
         gtk_text_view_set_editable(input, false);
     }
@@ -234,27 +236,31 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
      * and xset_design_job */
     if (ztd::same(title, "Set Icon") || ztd::same(title, "Set Window Icon"))
     {
-        btn_icon_choose = gtk_button_new_with_mnemonic("C_hoose");
+        btn_icon_choose = GTK_BUTTON(gtk_button_new_with_mnemonic("C_hoose"));
         gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
-                                     btn_icon_choose,
+                                     GTK_WIDGET(btn_icon_choose),
                                      GtkResponseType::GTK_RESPONSE_ACCEPT);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_icon_choose), false);
     }
 
     if (!defreset.empty())
     {
-        btn_default = gtk_button_new_with_mnemonic("_Default");
+        btn_default = GTK_BUTTON(gtk_button_new_with_mnemonic("_Default"));
         gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
-                                     btn_default,
+                                     GTK_WIDGET(btn_default),
                                      GtkResponseType::GTK_RESPONSE_NO);
         gtk_widget_set_focus_on_click(GTK_WIDGET(btn_default), false);
     }
 
-    GtkWidget* btn_cancel = gtk_button_new_with_label("Cancel");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_cancel, GtkResponseType::GTK_RESPONSE_CANCEL);
+    GtkButton* btn_cancel = GTK_BUTTON(gtk_button_new_with_label("Cancel"));
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
+                                 GTK_WIDGET(btn_cancel),
+                                 GtkResponseType::GTK_RESPONSE_CANCEL);
 
-    GtkWidget* btn_ok = gtk_button_new_with_label("OK");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dlg), btn_ok, GtkResponseType::GTK_RESPONSE_OK);
+    GtkButton* btn_ok = GTK_BUTTON(gtk_button_new_with_label("OK"));
+    gtk_dialog_add_action_widget(GTK_DIALOG(dlg),
+                                 GTK_WIDGET(btn_ok),
+                                 GtkResponseType::GTK_RESPONSE_OK);
 
     // show
     gtk_widget_show_all(dlg);
@@ -263,10 +269,10 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
 
     if (edit_care)
     {
-        gtk_widget_grab_focus(btn_ok);
+        gtk_widget_grab_focus(GTK_WIDGET(btn_ok));
         if (btn_default)
         {
-            gtk_widget_set_sensitive(btn_default, false);
+            gtk_widget_set_sensitive(GTK_WIDGET(btn_default), false);
         }
     }
 
@@ -313,7 +319,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                 if (btn_default)
                 {
                     gtk_widget_set_sensitive(
-                        btn_default,
+                        GTK_WIDGET(btn_default),
                         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(btn_edit)));
                 }
                 exit_loop = true;

@@ -91,7 +91,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 
     i32* newkey = (i32*)g_object_get_data(G_OBJECT(widget), "newkey");
     i32* newkeymod = (i32*)g_object_get_data(G_OBJECT(widget), "newkeymod");
-    GtkWidget* btn_set = GTK_WIDGET(g_object_get_data(G_OBJECT(widget), "btn_set"));
+    GtkButton* btn_set = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_set"));
+    GtkButton* btn_unset = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_unset"));
 
     xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "set")));
     assert(set != nullptr);
@@ -100,11 +101,11 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     {
         *newkey = 0;
         *newkeymod = 0;
-        gtk_widget_set_sensitive(btn_set, false);
+        gtk_widget_set_sensitive(GTK_WIDGET(btn_set), false);
         return true;
     }
 
-    gtk_widget_set_sensitive(btn_set, true);
+    gtk_widget_set_sensitive(GTK_WIDGET(btn_set), true);
 
     const u32 keymod = ptk_get_keymod(event->state);
     if (*newkey != 0 && keymod == 0)
@@ -112,14 +113,13 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
         if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
         {
             // user pressed Enter after selecting a key, so click Set
-            gtk_button_clicked(GTK_BUTTON(btn_set));
+            gtk_button_clicked(btn_set);
             return true;
         }
         else if (event->keyval == GDK_KEY_Escape && *newkey == GDK_KEY_Escape)
         {
             // user pressed Escape twice so click Unset
-            GtkWidget* btn_unset = GTK_WIDGET(g_object_get_data(G_OBJECT(widget), "btn_unset"));
-            gtk_button_clicked(GTK_BUTTON(btn_unset));
+            gtk_button_clicked(btn_unset);
             return true;
         }
     }
@@ -218,20 +218,21 @@ xset_set_key(GtkWidget* parent, xset_t set)
             .data(),
         nullptr);
 
-    GtkWidget* btn_cancel = gtk_button_new();
-    gtk_button_set_label(GTK_BUTTON(btn_cancel), "Cancel");
+    GtkButton* btn_cancel = GTK_BUTTON(gtk_button_new_with_label("Cancel"));
     gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
-                                 btn_cancel,
+                                 GTK_WIDGET(btn_cancel),
                                  GtkResponseType::GTK_RESPONSE_CANCEL);
 
-    GtkWidget* btn_unset = gtk_button_new();
-    gtk_button_set_label(GTK_BUTTON(btn_unset), "Unset");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dialog), btn_unset, GtkResponseType::GTK_RESPONSE_NO);
+    GtkButton* btn_unset = GTK_BUTTON(gtk_button_new_with_label("Unset"));
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
+                                 GTK_WIDGET(btn_unset),
+                                 GtkResponseType::GTK_RESPONSE_NO);
 
-    GtkWidget* btn_set = gtk_button_new();
-    gtk_button_set_label(GTK_BUTTON(btn_set), "Set");
-    gtk_dialog_add_action_widget(GTK_DIALOG(dialog), btn_set, GtkResponseType::GTK_RESPONSE_OK);
-    gtk_widget_set_sensitive(btn_set, false);
+    GtkButton* btn_set = GTK_BUTTON(gtk_button_new_with_label("Set"));
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
+                                 GTK_WIDGET(btn_set),
+                                 GtkResponseType::GTK_RESPONSE_OK);
+    gtk_widget_set_sensitive(GTK_WIDGET(btn_set), false);
 
     if (set->shared_key)
     {
@@ -243,7 +244,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
     }
     if (keyset->key <= 0)
     {
-        gtk_widget_set_sensitive(btn_unset, false);
+        gtk_widget_set_sensitive(GTK_WIDGET(btn_unset), false);
     }
 
     u32 newkey = 0;

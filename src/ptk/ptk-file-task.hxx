@@ -52,9 +52,9 @@ struct PtkFileTask
     vfs::file_task task{nullptr};
 
     GtkWidget* progress_dlg{nullptr};
-    GtkWidget* progress_btn_close{nullptr};
-    GtkWidget* progress_btn_stop{nullptr};
-    GtkWidget* progress_btn_pause{nullptr};
+    GtkButton* progress_btn_close{nullptr};
+    GtkButton* progress_btn_stop{nullptr};
+    GtkButton* progress_btn_pause{nullptr};
     GtkWindow* parent_window{nullptr};
     GtkWidget* task_view{nullptr};
     GtkLabel* from{nullptr};

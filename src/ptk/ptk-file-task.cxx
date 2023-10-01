@@ -558,9 +558,10 @@ set_button_states(PtkFileTask* ptask)
     const bool sens = !ptask->complete &&
                       !(ptask->task->type == vfs::file_task_type::exec && !ptask->task->exec_pid);
 
-    gtk_widget_set_sensitive(ptask->progress_btn_pause, sens);
-    gtk_button_set_label(GTK_BUTTON(ptask->progress_btn_pause), label.data());
-    gtk_widget_set_sensitive(ptask->progress_btn_close, ptask->complete || !!ptask->task_view);
+    gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_pause), sens);
+    gtk_button_set_label(ptask->progress_btn_pause, label.data());
+    gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_close),
+                             ptask->complete || !!ptask->task_view);
 }
 
 void
@@ -848,24 +849,24 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     // Pause
     // xset_t set = xset_get(xset::name::TASK_PAUSE);
 
-    ptask->progress_btn_pause = gtk_button_new_with_mnemonic("Pa_use");
+    ptask->progress_btn_pause = GTK_BUTTON(gtk_button_new_with_mnemonic("Pa_use"));
 
     gtk_dialog_add_action_widget(GTK_DIALOG(ptask->progress_dlg),
-                                 ptask->progress_btn_pause,
+                                 GTK_WIDGET(ptask->progress_btn_pause),
                                  GtkResponseType::GTK_RESPONSE_NO);
     gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->progress_btn_pause), false);
     // Stop
-    ptask->progress_btn_stop = gtk_button_new_with_label("Stop");
+    ptask->progress_btn_stop = GTK_BUTTON(gtk_button_new_with_label("Stop"));
     gtk_dialog_add_action_widget(GTK_DIALOG(ptask->progress_dlg),
-                                 ptask->progress_btn_stop,
+                                 GTK_WIDGET(ptask->progress_btn_stop),
                                  GtkResponseType::GTK_RESPONSE_CANCEL);
     gtk_widget_set_focus_on_click(GTK_WIDGET(ptask->progress_btn_stop), false);
     // Close
-    ptask->progress_btn_close = gtk_button_new_with_label("Close");
+    ptask->progress_btn_close = GTK_BUTTON(gtk_button_new_with_label("Close"));
     gtk_dialog_add_action_widget(GTK_DIALOG(ptask->progress_dlg),
-                                 ptask->progress_btn_close,
+                                 GTK_WIDGET(ptask->progress_btn_close),
                                  GtkResponseType::GTK_RESPONSE_OK);
-    gtk_widget_set_sensitive(ptask->progress_btn_close, !!ptask->task_view);
+    gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_close), !!ptask->task_view);
 
     set_button_states(ptask);
 
@@ -1162,7 +1163,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     {
         gtk_widget_hide(GTK_WIDGET(overwrite_box));
     }
-    gtk_widget_grab_focus(ptask->progress_btn_close);
+    gtk_widget_grab_focus(GTK_WIDGET(ptask->progress_btn_close));
 
     // icon
     set_progress_icon(ptask);
@@ -1206,9 +1207,9 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
     if (ptask->complete)
     {
-        gtk_widget_set_sensitive(ptask->progress_btn_stop, false);
-        gtk_widget_set_sensitive(ptask->progress_btn_pause, false);
-        gtk_widget_set_sensitive(ptask->progress_btn_close, true);
+        gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_stop), false);
+        gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_pause), false);
+        gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_close), true);
         if (ptask->overwrite_combo)
         {
             gtk_widget_set_sensitive(ptask->overwrite_combo, false);
@@ -2622,13 +2623,13 @@ query_overwrite(PtkFileTask* ptask)
     gtk_box_pack_start(vbox, GTK_WIDGET(scroll), true, true, 4);
 
     // extra buttons
-    GtkWidget* rename_button = gtk_button_new_with_mnemonic(" _Rename ");
-    gtk_widget_set_sensitive(rename_button, false);
+    GtkButton* rename_button = GTK_BUTTON(gtk_button_new_with_mnemonic(" _Rename "));
+    gtk_widget_set_sensitive(GTK_WIDGET(rename_button), false);
     g_signal_connect(G_OBJECT(rename_button), "clicked", G_CALLBACK(on_query_button_press), ptask);
-    GtkWidget* auto_button = gtk_button_new_with_mnemonic(" A_uto Rename ");
+    GtkButton* auto_button = GTK_BUTTON(gtk_button_new_with_mnemonic(" A_uto Rename "));
     g_signal_connect(G_OBJECT(auto_button), "clicked", G_CALLBACK(on_query_button_press), ptask);
-    gtk_widget_set_tooltip_text(auto_button, new_name.data());
-    GtkWidget* auto_all_button = gtk_button_new_with_mnemonic(" Auto Re_name All ");
+    gtk_widget_set_tooltip_text(GTK_WIDGET(auto_button), new_name.data());
+    GtkButton* auto_all_button = GTK_BUTTON(gtk_button_new_with_mnemonic(" Auto Re_name All "));
     g_signal_connect(G_OBJECT(auto_all_button),
                      "clicked",
                      G_CALLBACK(on_query_button_press),

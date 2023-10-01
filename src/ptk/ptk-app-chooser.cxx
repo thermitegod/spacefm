@@ -56,8 +56,8 @@ struct app_chooser_dialog_data
     GtkWidget* btn_open_in_terminal{nullptr};
     GtkWidget* btn_set_as_default{nullptr};
 
-    GtkWidget* btn_ok{nullptr};
-    GtkWidget* btn_cancel{nullptr};
+    GtkButton* btn_ok{nullptr};
+    GtkButton* btn_cancel{nullptr};
 };
 
 static void* load_all_known_apps_thread(vfs::async_task task);
@@ -181,7 +181,7 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
     (void)column;
     auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
     assert(data != nullptr);
-    gtk_button_clicked(GTK_BUTTON(data->btn_ok));
+    gtk_button_clicked(data->btn_ok);
 }
 
 static void
@@ -343,10 +343,10 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     assert(data != nullptr);
     g_object_set_data(G_OBJECT(dialog), "data", data);
 
-    data->btn_cancel =
-        gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL);
-    data->btn_ok =
-        gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", GtkResponseType::GTK_RESPONSE_OK);
+    data->btn_cancel = GTK_BUTTON(
+        gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL));
+    data->btn_ok = GTK_BUTTON(
+        gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", GtkResponseType::GTK_RESPONSE_OK));
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
     gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
