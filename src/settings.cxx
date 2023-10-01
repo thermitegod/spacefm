@@ -1698,7 +1698,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 }
 
 static GtkWidget*
-xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
+xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
                   i32 icon_size, xset_t set, bool show_tooltips)
 {
     if (!set)
@@ -2171,7 +2171,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
             return nullptr;
     }
 
-    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), -1);
+    gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(item), -1);
 
     // ztd::logger::info("    set={}   set->next={}", set->name, set->next);
     // next toolitem
@@ -2186,7 +2186,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 }
 
 void
-xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* toolbar,
+xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
                   xset_t set_parent, bool show_tooltips)
 {
     static constexpr std::array<xset::tool, 7> default_tools{
@@ -2211,7 +2211,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
     set_parent->lock = true;
     set_parent->menu_style = xset::menu::submenu;
 
-    const GtkIconSize icon_size = gtk_toolbar_get_icon_size(GTK_TOOLBAR(toolbar));
+    const GtkIconSize icon_size = gtk_toolbar_get_icon_size(toolbar);
 
     xset_t set_child = nullptr;
     if (set_parent->child)
@@ -2250,12 +2250,12 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* to
 
     // These do not seem to do anything
     gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
-    gtk_widget_set_margin_start(toolbar, 0);
-    gtk_widget_set_margin_end(toolbar, 0);
-    gtk_widget_set_margin_top(toolbar, 0);
-    gtk_widget_set_margin_bottom(toolbar, 0);
-    gtk_widget_set_margin_start(toolbar, 0);
-    gtk_widget_set_margin_end(toolbar, 0);
+    gtk_widget_set_margin_start(GTK_WIDGET(toolbar), 0);
+    gtk_widget_set_margin_end(GTK_WIDGET(toolbar), 0);
+    gtk_widget_set_margin_top(GTK_WIDGET(toolbar), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(toolbar), 0);
+    gtk_widget_set_margin_start(GTK_WIDGET(toolbar), 0);
+    gtk_widget_set_margin_end(GTK_WIDGET(toolbar), 0);
 
-    gtk_widget_show_all(toolbar);
+    gtk_widget_show_all(GTK_WIDGET(toolbar));
 }

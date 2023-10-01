@@ -594,7 +594,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     {
         if (GTK_IS_WIDGET(file_browser->toolbar))
         {
-            gtk_widget_destroy(file_browser->toolbar);
+            gtk_widget_destroy(GTK_WIDGET(file_browser->toolbar));
         }
         file_browser->toolbar = nullptr;
         file_browser->path_bar_ = nullptr;
@@ -611,13 +611,13 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     }
 
     // create toolbar
-    file_browser->toolbar = gtk_toolbar_new();
-    gtk_box_pack_start(file_browser->toolbox_, file_browser->toolbar, true, true, 0);
-    gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->toolbar), GtkToolbarStyle::GTK_TOOLBAR_ICONS);
+    file_browser->toolbar = GTK_TOOLBAR(gtk_toolbar_new());
+    gtk_box_pack_start(file_browser->toolbox_, GTK_WIDGET(file_browser->toolbar), true, true, 0);
+    gtk_toolbar_set_style(file_browser->toolbar, GtkToolbarStyle::GTK_TOOLBAR_ICONS);
     if (app_settings.icon_size_tool() > 0 &&
         app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
     {
-        gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->toolbar),
+        gtk_toolbar_set_icon_size(file_browser->toolbar,
                                   (GtkIconSize)app_settings.icon_size_tool());
     }
 
@@ -632,7 +632,7 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     GtkToolItem* toolitem = gtk_tool_item_new();
     gtk_tool_item_set_expand(toolitem, true);
-    gtk_toolbar_insert(GTK_TOOLBAR(file_browser->toolbar), toolitem, -1);
+    gtk_toolbar_insert(file_browser->toolbar, toolitem, -1);
     gtk_container_add(GTK_CONTAINER(toolitem), GTK_WIDGET(hbox));
     gtk_box_pack_start(hbox, GTK_WIDGET(file_browser->path_bar_), true, true, 5);
 
@@ -664,19 +664,22 @@ rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     // destroy
     if (file_browser->side_toolbar)
     {
-        gtk_widget_destroy(file_browser->side_toolbar);
+        gtk_widget_destroy(GTK_WIDGET(file_browser->side_toolbar));
     }
 
     // create side toolbar
-    file_browser->side_toolbar = gtk_toolbar_new();
+    file_browser->side_toolbar = GTK_TOOLBAR(gtk_toolbar_new());
 
-    gtk_box_pack_start(file_browser->side_toolbox, file_browser->side_toolbar, true, true, 0);
-    gtk_toolbar_set_style(GTK_TOOLBAR(file_browser->side_toolbar),
-                          GtkToolbarStyle::GTK_TOOLBAR_ICONS);
+    gtk_box_pack_start(file_browser->side_toolbox,
+                       GTK_WIDGET(file_browser->side_toolbar),
+                       true,
+                       true,
+                       0);
+    gtk_toolbar_set_style(file_browser->side_toolbar, GtkToolbarStyle::GTK_TOOLBAR_ICONS);
     if (app_settings.icon_size_tool() > 0 &&
         app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
     {
-        gtk_toolbar_set_icon_size(GTK_TOOLBAR(file_browser->side_toolbar),
+        gtk_toolbar_set_icon_size(file_browser->side_toolbar,
                                   (GtkIconSize)app_settings.icon_size_tool());
     }
     // fill side toolbar
@@ -4664,7 +4667,7 @@ PtkFileBrowser::update_views() noexcept
 #if 0
         if ( this->side_toolbar )
         {
-            gtk_widget_destroy(this->side_toolbar);
+            gtk_widget_destroy(GTK_WIDGET(this->side_toolbar));
             this->side_toolbar = nullptr;
         }
 #endif
