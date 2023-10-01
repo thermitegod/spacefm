@@ -148,10 +148,11 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
 }
 
 static bool
-on_input_keypress(GtkWidget* widget, GdkEventKey* event, GtkWidget* dlg)
+on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg)
 {
     (void)widget;
-    if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
+    const auto keyval = gdk_key_event_get_keyval(event);
+    if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
         gtk_dialog_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_OK);
         return true;

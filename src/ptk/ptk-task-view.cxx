@@ -750,7 +750,7 @@ ptk_task_view_show_task_dialog(GtkWidget* view)
 }
 
 static bool
-on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* main_window)
+on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_window)
 {
     GtkTreeModel* model = nullptr;
     GtkTreePath* tree_path;
@@ -760,14 +760,20 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
     xset_t set;
     bool is_tasks;
 
-    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    const auto button = gdk_button_event_get_button(event);
+    const auto type = gdk_event_get_event_type(event);
+
+    if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
 
     std::string menu_elements;
 
-    switch (event->button)
+    f64 x, y;
+    gdk_event_get_position(event, &x, &y);
+
+    switch (button)
     {
         case 1:
         case 2:
@@ -778,13 +784,13 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             // due to bug in gtk_tree_view_get_path_at_pos (gtk 2.24), a click
             // on the column header resize divider registers as a click on the
             // first row first column.  So if event->x < 7 ignore
-            if (event->x < 7)
+            if (x < 7)
             {
                 return false;
             }
             if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                               static_cast<i32>(event->x),
-                                               static_cast<i32>(event->y),
+                                               x,
+                                               y,
                                                &tree_path,
                                                &col,
                                                nullptr,
@@ -802,7 +808,7 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             {
                 return false;
             }
-            if (event->button == 1 && !ztd::same(gtk_tree_view_column_get_title(col), "Status"))
+            if (button == 1 && !ztd::same(gtk_tree_view_column_get_title(col), "Status"))
             {
                 return false;
             }
@@ -835,8 +841,8 @@ on_task_button_press_event(GtkWidget* view, GdkEventButton* event, MainWindow* m
             if (is_tasks)
             {
                 if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                                  static_cast<i32>(event->x),
-                                                  static_cast<i32>(event->y),
+                                                  x,
+                                                  y,
                                                   &tree_path,
                                                   &col,
                                                   nullptr,

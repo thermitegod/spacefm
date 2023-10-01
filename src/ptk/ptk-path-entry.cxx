@@ -376,13 +376,14 @@ insert_complete(GtkEntry* entry)
 }
 
 static bool
-on_key_press(GtkWidget* entry, GdkEventKey* event, EntryData* edata)
+on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata)
 {
     (void)edata;
+    const auto keyval = gdk_key_event_get_keyval(event);
 
-    if (event->keyval == GDK_KEY_Tab)
+    if (keyval == GDK_KEY_Tab)
     {
-        const u32 keymod = ptk_get_keymod(event->state);
+        const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
         if (keymod)
         {
             return false;

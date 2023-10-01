@@ -22,4 +22,4 @@
 
 #include <ztd/ztd.hxx>
 
-u32 ptk_get_keymod(u32 event);
+u32 ptk_get_keymod(GdkModifierType event);

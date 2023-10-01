@@ -24,7 +24,7 @@
 #include <ztd/ztd_logger.hxx>
 
 u32
-ptk_get_keymod(u32 event)
+ptk_get_keymod(GdkModifierType event)
 {
     return (event & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
                      GdkModifierType::GDK_MOD1_MASK | GdkModifierType::GDK_SUPER_MASK |

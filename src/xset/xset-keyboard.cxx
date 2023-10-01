@@ -85,7 +85,7 @@ xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
 }
 
 static bool
-on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
+on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
 {
     (void)user_data;
 
@@ -97,7 +97,9 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
     xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "set")));
     assert(set != nullptr);
 
-    if (!event->keyval)
+    const auto keyval = gdk_key_event_get_keyval(event);
+
+    if (!keyval)
     {
         *newkey = 0;
         *newkeymod = 0;
@@ -107,16 +109,16 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 
     gtk_widget_set_sensitive(GTK_WIDGET(btn_set), true);
 
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     if (*newkey != 0 && keymod == 0)
     {
-        if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)
+        if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
         {
             // user pressed Enter after selecting a key, so click Set
             gtk_button_clicked(btn_set);
             return true;
         }
-        else if (event->keyval == GDK_KEY_Escape && *newkey == GDK_KEY_Escape)
+        else if (keyval == GDK_KEY_Escape && *newkey == GDK_KEY_Escape)
         {
             // user pressed Escape twice so click Unset
             gtk_button_clicked(btn_unset);
@@ -133,12 +135,12 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
         keyset = xset_get(set->shared_key.value());
     }
 
-    const std::string keyname = xset_get_keyname(nullptr, event->keyval, keymod);
+    const std::string keyname = xset_get_keyname(nullptr, keyval, keymod);
 
     for (xset_t set2 : xsets)
     {
         assert(set2 != nullptr);
-        if (set != set2 && set2->key > 0 && set2->key == event->keyval && set2->keymod == keymod &&
+        if (set != set2 && set2->key > 0 && set2->key == keyval && set2->keymod == keymod &&
             set2 != keyset)
         {
             std::string name;
@@ -157,14 +159,14 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
                             "'{}'.\n\nPress a different key or click Set to replace the current "
                             "key assignment.",
                             keyname,
-                            event->keyval,
+                            keyval,
                             keymod,
                             keyname,
                             name)
                     .data(),
                 nullptr);
 
-            *newkey = event->keyval;
+            *newkey = keyval;
             *newkeymod = keymod;
 
             return true;
@@ -173,10 +175,9 @@ on_set_key_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
 
     gtk_message_dialog_format_secondary_text(
         GTK_MESSAGE_DIALOG(widget),
-        std::format("\t{}\n\tKeycode: {:#x}  Modifier: {:#x}", keyname, event->keyval, keymod)
-            .data(),
+        std::format("\t{}\n\tKeycode: {:#x}  Modifier: {:#x}", keyname, keyval, keymod).data(),
         nullptr);
-    *newkey = event->keyval;
+    *newkey = keyval;
     *newkeymod = keymod;
 
     return true;

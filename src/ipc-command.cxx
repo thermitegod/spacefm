@@ -1929,6 +1929,7 @@ run_ipc_command(const std::string_view socket_commands_json)
     }
     else if (ztd::same(command, "emit-key"))
     { // KEYCODE [KEYMOD]
+#if 0
         const std::vector<std::string> data = json["data"];
 
         // this only handles keys assigned to menu items
@@ -1946,6 +1947,9 @@ run_ipc_command(const std::string_view socket_commands_json)
             return {SOCKET_INVALID, std::format("invalid keycode '{}'", data[i])};
         }
         gdk_event_free((GdkEvent*)event);
+#else
+        return {SOCKET_INVALID, "Not Implemented"};
+#endif
     }
     else if (ztd::same(command, "activate"))
     {

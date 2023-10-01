@@ -245,7 +245,7 @@ struct PtkFileBrowser
     void update_toolbar_widgets(xset::tool tool_type) noexcept;
     void update_toolbar_widgets(xset_t set_ptr, xset::tool tool_type) noexcept;
 
-    void show_history_menu(bool is_back_history, GdkEventButton* event) noexcept;
+    void show_history_menu(bool is_back_history, GdkEvent* event) noexcept;
 
     void on_permission(GtkMenuItem* item, const std::span<const vfs::file_info> selected_files,
                        const std::filesystem::path& cwd) noexcept;
@@ -493,5 +493,5 @@ void ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser
 void ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser);
 
 void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser);
-bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEventButton* event,
+bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEvent* event,
                                      PtkFileBrowser* file_browser);

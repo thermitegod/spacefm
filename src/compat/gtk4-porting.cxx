@@ -67,3 +67,42 @@ gtk4_dialog_run(GtkDialog* dialog)
 }
 
 #endif
+
+#if (GTK_MAJOR_VERSION == 3)
+
+guint
+gdk_key_event_get_keyval(GdkEvent* event)
+{
+    guint keyval;
+    gdk_event_get_keyval(event, &keyval);
+    return keyval;
+}
+
+GdkModifierType
+gdk_event_get_modifier_state(GdkEvent* event)
+{
+    GdkModifierType state;
+    gdk_event_get_state(event, &state);
+    return state;
+}
+
+guint
+gdk_button_event_get_button(GdkEvent* event)
+{
+    guint button;
+    gdk_event_get_button(event, &button);
+    return button;
+}
+
+gboolean
+gdk_event_get_position(GdkEvent* event, double* x, double* y)
+{
+    double xx;
+    double yy;
+    const auto ret = gdk_event_get_coords(event, &xx, &yy);
+    *x = xx;
+    *y = yy;
+    return ret;
+}
+
+#endif

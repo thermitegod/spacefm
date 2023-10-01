@@ -64,8 +64,8 @@ static void add_volume(vfs::volume vol, bool set_icon);
 static void remove_volume(vfs::volume vol);
 static void update_volume(vfs::volume vol);
 
-static bool on_button_press_event(GtkTreeView* view, GdkEventButton* evt, void* user_data);
-static bool on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser);
+static bool on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data);
+static bool on_key_press_event(GtkWidget* w, GdkEvent* event, PtkFileBrowser* file_browser);
 
 static bool try_mount(GtkTreeView* view, vfs::volume vol);
 
@@ -1397,13 +1397,17 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
 }
 
 static bool
-on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
+on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
 {
     (void)user_data;
     vfs::volume vol = nullptr;
     bool ret = false;
 
-    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    const auto button = gdk_button_event_get_button(event);
+    const auto time = gdk_event_get_time(event);
+    const auto type = gdk_event_get_event_type(event);
+
+    if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
@@ -1414,14 +1418,12 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
     file_browser->focus_me();
 
     // get selected vol
+
+    f64 x, y;
+    gdk_event_get_position(event, &x, &y);
+
     GtkTreePath* tree_path = nullptr;
-    if (gtk_tree_view_get_path_at_pos(view,
-                                      static_cast<i32>(event->x),
-                                      static_cast<i32>(event->y),
-                                      &tree_path,
-                                      nullptr,
-                                      nullptr,
-                                      nullptr))
+    if (gtk_tree_view_get_path_at_pos(view, x, y, &tree_path, nullptr, nullptr, nullptr))
     {
         GtkTreeSelection* selection = gtk_tree_view_get_selection(view);
         GtkTreeIter it;
@@ -1432,7 +1434,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
         }
     }
 
-    switch (event->button)
+    switch (button)
     {
         case 1:
             // left button
@@ -1457,7 +1459,7 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
             break;
         case 3:
             // right button
-            show_devices_menu(view, vol, file_browser, event->button, event->time);
+            show_devices_menu(view, vol, file_browser, button, time);
             ret = true;
             break;
     }
@@ -1470,20 +1472,22 @@ on_button_press_event(GtkTreeView* view, GdkEventButton* event, void* user_data)
 }
 
 static bool
-on_key_press_event(GtkWidget* w, GdkEventKey* event, PtkFileBrowser* file_browser)
+on_key_press_event(GtkWidget* w, GdkEvent* event, PtkFileBrowser* file_browser)
 {
     (void)w;
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keyval = gdk_key_event_get_keyval(event);
+    const auto time = gdk_event_get_time(event);
 
-    if (event->keyval == GDK_KEY_Menu ||
-        (event->keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
+    if (keyval == GDK_KEY_Menu ||
+        (keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
     {
         // simulate right-click (menu)
         show_devices_menu(GTK_TREE_VIEW(file_browser->side_dev),
                           ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev)),
                           file_browser,
                           3,
-                          event->time);
+                          time);
         return true;
     }
     return false;
@@ -1601,38 +1605,43 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
 }
 
 static bool
-on_dev_menu_keypress(GtkWidget* menu, GdkEventKey* event, void* user_data)
+on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
 {
     (void)user_data;
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (item)
     {
+        const auto keyval = gdk_key_event_get_keyval(event);
+        const auto time = gdk_event_get_time(event);
+
         vfs::volume vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
-        if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter ||
-            event->keyval == GDK_KEY_space)
+        if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_space)
         {
             // simulate left-click (mount)
-            show_dev_design_menu(menu, item, vol, 1, event->time);
+            show_dev_design_menu(menu, item, vol, 1, time);
             return true;
         }
-        else if (event->keyval == GDK_KEY_Menu || event->keyval == GDK_KEY_F2)
+        else if (keyval == GDK_KEY_Menu || keyval == GDK_KEY_F2)
         {
             // simulate right-click (menu)
-            show_dev_design_menu(menu, item, vol, 3, event->time);
+            show_dev_design_menu(menu, item, vol, 3, time);
         }
     }
     return false;
 }
 
 static bool
-on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, vfs::volume vol)
+on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, vfs::volume vol)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto button = gdk_button_event_get_button(event);
+    const auto time = gdk_event_get_time(event);
+    const auto type = gdk_event_get_event_type(event);
 
-    if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
+    if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
-        if (event->button == 1 && keymod == 0)
+        if (button == 1 && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
             // does not always fire on this event so handle it ourselves
@@ -1651,12 +1660,12 @@ on_dev_menu_button_press(GtkWidget* item, GdkEventButton* event, vfs::volume vol
         return false;
         return false;
     }
-    else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    else if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
 
-    show_dev_design_menu(menu, item, vol, event->button, event->time);
+    show_dev_design_menu(menu, item, vol, button, time);
     return true;
 }
 

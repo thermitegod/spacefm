@@ -34,3 +34,13 @@ i32 gtk4_dialog_run(GtkDialog* dialog);
 #define gtk_widget_destroy(widget) ((void)(widget))
 
 #endif
+
+#if (GTK_MAJOR_VERSION == 3)
+
+// Fake gtk4 compat apis go here
+guint gdk_key_event_get_keyval(GdkEvent* event);
+GdkModifierType gdk_event_get_modifier_state(GdkEvent* event);
+guint gdk_button_event_get_button(GdkEvent* event);
+gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y);
+
+#endif

@@ -86,8 +86,8 @@
 
 // MOD settings
 
-static bool xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set);
-static void xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* event);
+static bool xset_design_cb(GtkWidget* item, GdkEvent* event, xset_t set);
+static void xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEvent* event);
 
 struct builtin_tool_data
 {
@@ -1125,16 +1125,19 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
 }
 
 static bool
-xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
+xset_design_cb(GtkWidget* item, GdkEvent* event, xset_t set)
 {
     xset::job job = xset::job::invalid;
 
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto button = gdk_button_event_get_button(event);
+    const auto time = gdk_event_get_time(event);
+    const auto type = gdk_event_get_event_type(event);
 
-    if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
+    if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
-        if (event->button == 1 && keymod == 0)
+        if (button == 1 && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
             // does not always fire on this event so handle it ourselves
@@ -1153,12 +1156,12 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
         // menu item in some GTK2/3 themes.
         return true;
     }
-    else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    else if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
 
-    switch (event->button)
+    switch (button)
     {
         case 1:
         case 3:
@@ -1167,13 +1170,13 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                 // left or right click
                 case 0:
                     // no modifier
-                    if (event->button == 3)
+                    if (button == 3)
                     {
                         // right
-                        xset_design_show_menu(menu, set, nullptr, event->button, event->time);
+                        xset_design_show_menu(menu, set, nullptr, button, time);
                         return true;
                     }
-                    else if (event->button == 1 && set->tool != xset::tool::NOT && !set->lock)
+                    else if (button == 1 && set->tool != xset::tool::NOT && !set->lock)
                     {
                         // activate
                         if (set->tool == xset::tool::custom)
@@ -1211,7 +1214,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
                     // no modifier
                     if (set->lock)
                     {
-                        xset_design_show_menu(menu, set, nullptr, event->button, event->time);
+                        xset_design_show_menu(menu, set, nullptr, button, time);
                         return true;
                     }
                     break;
@@ -1243,7 +1246,7 @@ xset_design_cb(GtkWidget* item, GdkEventButton* event, xset_t set)
         }
         else
         {
-            xset_design_show_menu(menu, set, nullptr, event->button, event->time);
+            xset_design_show_menu(menu, set, nullptr, button, time);
         }
         return true;
     }
@@ -1398,7 +1401,7 @@ multi_input_select_region(GtkWidget* input, i32 start, i32 end)
 }
 
 static void
-xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEventButton* event)
+xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEvent* event)
 {
     xset_t set2;
     panel_t p;
@@ -1523,24 +1526,26 @@ xset_new_builtin_toolitem(xset::tool tool_type)
 }
 
 static bool
-on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
+on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
 {
     xset::job job = xset::job::invalid;
 
-    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu_label,
-    // event->button);
-    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    const auto button = gdk_button_event_get_button(event);
+    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu_label, button);
+
+    const auto type = gdk_event_get_event_type(event);
+    if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
 
     // get and focus browser
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     file_browser->focus_me();
     set->browser = file_browser;
 
-    switch (event->button)
+    switch (button)
     {
         case 1:
         case 3:
@@ -1549,7 +1554,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
             {
                 case 0:
                     // no modifier
-                    if (event->button == 1)
+                    if (button == 1)
                     {
                         // left click
                         if (set->tool == xset::tool::custom &&
@@ -1581,7 +1586,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
                         }
                         return true;
                     }
-                    else // if ( event->button == 3 )
+                    else // if ( button == 3 )
                     {
                         // right-click show design menu for submenu set
                         xset_design_cb(nullptr, event, set);
@@ -1645,16 +1650,19 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
 }
 
 static bool
-on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
+on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
 {
-    // ztd::logger::info("on_tool_menu_button_press  {}   button = {}", set->menu_label,
-    // event->button);
-    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    const auto button = gdk_button_event_get_button(event);
+    // ztd::logger::info("on_tool_menu_button_press  {}   button = {}", set->menu_label,  button);
+
+    const auto type = gdk_event_get_event_type(event);
+    if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
-    const u32 keymod = ptk_get_keymod(event->state);
-    if (keymod != 0 || event->button != 1)
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+
+    if (keymod != 0 || button != 1)
     {
         return on_tool_icon_button_press(widget, event, set);
     }
@@ -1663,7 +1671,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEventButton* event, xset_t set)
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     file_browser->focus_me();
 
-    if (event->button == 1)
+    if (button == 1)
     {
         if (set->tool == xset::tool::custom)
         {

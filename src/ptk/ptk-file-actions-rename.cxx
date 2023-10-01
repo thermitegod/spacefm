@@ -149,14 +149,15 @@ static void on_toggled(GtkMenuItem* item, MoveSet* mset);
 static const std::optional<std::filesystem::path> get_template_dir();
 
 static bool
-on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
+on_move_keypress(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
 {
     (void)widget;
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keyval = gdk_key_event_get_keyval(event);
 
     if (keymod == 0)
     {
-        switch (event->keyval)
+        switch (keyval)
         {
             case GDK_KEY_Return:
             case GDK_KEY_KP_Enter:
@@ -173,14 +174,15 @@ on_move_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
 }
 
 static bool
-on_move_entry_keypress(GtkWidget* widget, GdkEventKey* event, MoveSet* mset)
+on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
 {
     (void)widget;
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keyval = gdk_key_event_get_keyval(event);
 
     if (keymod == 0)
     {
-        switch (event->keyval)
+        switch (keyval)
         {
             case GDK_KEY_Return:
             case GDK_KEY_KP_Enter:
@@ -1898,11 +1900,14 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
 }
 
 static bool
-on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
+on_label_button_press(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
 {
-    if (event->type == GdkEventType::GDK_BUTTON_PRESS)
+    const auto button = gdk_button_event_get_button(event);
+    const auto type = gdk_event_get_event_type(event);
+
+    if (type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if (event->button == 1 || event->button == 2)
+        if (button == 1 || button == 2)
         {
             GtkWidget* input = nullptr;
             if (widget == GTK_WIDGET(mset->label_name))
@@ -1929,7 +1934,7 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
             {
                 gtk_label_select_region(mset->label_mime, 0, -1);
                 gtk_widget_grab_focus(GTK_WIDGET(mset->label_mime));
-                if (event->button == 2)
+                if (button == 2)
                 {
                     copy_entry_to_clipboard(widget, mset);
                 }
@@ -1955,14 +1960,14 @@ on_label_button_press(GtkWidget* widget, GdkEventButton* event, MoveSet* mset)
             {
                 select_input(input, mset);
                 gtk_widget_grab_focus(input);
-                if (event->button == 2)
+                if (button == 2)
                 {
                     copy_entry_to_clipboard(widget, mset);
                 }
             }
         }
     }
-    else if (event->type == GdkEventType::GDK_2BUTTON_PRESS)
+    else if (type == GdkEventType::GDK_2BUTTON_PRESS)
     {
         copy_entry_to_clipboard(widget, mset);
     }

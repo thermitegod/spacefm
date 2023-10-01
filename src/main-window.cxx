@@ -88,10 +88,10 @@ static void on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindo
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                u32 time, PtkFileBrowser* file_browser);
 
-static bool on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set);
+static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set);
 static bool on_main_window_keypress_found_key(MainWindow* main_window, xset_t set);
-static bool on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
-                                         MainWindow* main_window); // sfm
+static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
+                                         MainWindow* main_window);
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
 static void main_window_close(MainWindow* main_window);
 
@@ -941,7 +941,7 @@ on_menu_bar_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
 }
 
 static bool
-bookmark_menu_keypress(GtkWidget* widget, GdkEventKey* event, void* user_data)
+bookmark_menu_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
 {
     (void)event;
     (void)user_data;
@@ -1810,22 +1810,24 @@ main_window_get_counts(PtkFileBrowser* file_browser)
 }
 
 static bool
-notebook_clicked(GtkWidget* widget, GdkEventButton* event,
-                 PtkFileBrowser* file_browser) // MOD added
+notebook_clicked(GtkWidget* widget, GdkEvent* event, PtkFileBrowser* file_browser)
 {
     (void)widget;
     MainWindow* main_window = file_browser->main_window();
     on_file_browser_panel_change(file_browser, main_window);
 
+    const auto button = gdk_button_event_get_button(event);
+    const auto type = gdk_event_get_event_type(event);
+
     // middle-click on tab closes
-    if (event->type == GdkEventType::GDK_BUTTON_PRESS)
+    if (type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if (event->button == 2)
+        if (button == 2)
         {
             file_browser->close_tab();
             return true;
         }
-        else if (event->button == 3)
+        else if (button == 3)
         {
             GtkWidget* popup = gtk_menu_new();
 
@@ -2670,24 +2672,26 @@ on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y
 }
 
 static bool
-on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
-                             MainWindow* main_window) // sfm
+on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
 {
     (void)widget;
-    if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    const auto type = gdk_event_get_event_type(event);
+    if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
 
+    const auto button = gdk_button_event_get_button(event);
+
     // handle mouse back/forward buttons anywhere in the main window
-    if (event->button == 4 || event->button == 5 || event->button == 8 || event->button == 9) // sfm
+    if (button == 4 || button == 5 || button == 8 || button == 9)
     {
         PtkFileBrowser* file_browser = main_window->current_file_browser();
         if (!file_browser)
         {
             return false;
         }
-        if (event->button == 4 || event->button == 8)
+        if (button == 4 || button == 8)
         {
             file_browser->go_back();
         }
@@ -2701,9 +2705,11 @@ on_window_button_press_event(GtkWidget* widget, GdkEventButton* event,
 }
 
 static bool
-on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set)
+on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set)
 {
-    // ztd::logger::info("main_keypress {} {}", event->keyval, event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keyval = gdk_key_event_get_keyval(event);
+    // ztd::logger::debug("main_keypress {} {}", keyval, keymod);
 
     if (known_set)
     {
@@ -2711,29 +2717,21 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         return on_main_window_keypress_found_key(main_window, set);
     }
 
-    if (event->keyval == 0)
+    if (keyval == 0)
     {
         return false;
     }
 
     PtkFileBrowser* browser;
 
-    const u32 keymod = ptk_get_keymod(event->state);
-
-    if ((event->keyval == GDK_KEY_Home &&
-         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
-        (event->keyval == GDK_KEY_End &&
-         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
-        (event->keyval == GDK_KEY_Delete && keymod == 0) ||
-        (event->keyval == GDK_KEY_Tab && keymod == 0) ||
-        (keymod == 0 && (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter)) ||
-        (event->keyval == GDK_KEY_Left &&
-         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
-        (event->keyval == GDK_KEY_Right &&
-         (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
-        (event->keyval == GDK_KEY_BackSpace && keymod == 0) ||
-        (keymod == 0 && event->keyval != GDK_KEY_Escape &&
-         gdk_keyval_to_unicode(event->keyval))) // visible char
+    if ((keyval == GDK_KEY_Home && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_End && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_Delete && keymod == 0) || (keyval == GDK_KEY_Tab && keymod == 0) ||
+        (keymod == 0 && (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)) ||
+        (keyval == GDK_KEY_Left && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_Right && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
+        (keyval == GDK_KEY_BackSpace && keymod == 0) ||
+        (keymod == 0 && keyval != GDK_KEY_Escape && gdk_keyval_to_unicode(keyval))) // visible char
     {
         browser = main_window->current_file_browser();
         if (browser && browser->path_bar() && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar())))
@@ -2750,7 +2748,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
         {
             // set has shared key
             set = xset_get(set->shared_key.value());
-            if (set->key == event->keyval && set->keymod == keymod)
+            if (set->key == keyval && set->keymod == keymod)
             {
                 // shared key match
                 if (ztd::startswith(set->name, "panel"))
@@ -2775,13 +2773,13 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
                 continue;
             }
         }
-        if (set->key == event->keyval && set->keymod == keymod)
+        if (set->key == keyval && set->keymod == keymod)
         {
             return on_main_window_keypress_found_key(main_window, set);
         }
     }
 
-    if ((event->state & GdkModifierType::GDK_MOD1_MASK))
+    if ((keymod & GdkModifierType::GDK_MOD1_MASK))
     {
         rebuild_menus(main_window);
     }
@@ -2790,7 +2788,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t know
 }
 
 bool
-main_window_keypress(MainWindow* main_window, GdkEventKey* event, xset_t known_set)
+main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set)
 {
     return on_main_window_keypress(main_window, event, known_set);
 }

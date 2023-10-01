@@ -72,8 +72,8 @@
 
 #define PTK_FILE_MENU(obj) (static_cast<PtkFileMenu*>(obj))
 
-static bool on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data);
-static bool app_menu_keypress(GtkWidget* widget, GdkEventKey* event, PtkFileMenu* data);
+static bool on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data);
+static bool app_menu_keypress(GtkWidget* widget, GdkEvent* event, PtkFileMenu* data);
 static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button,
                           std::time_t time);
 
@@ -2004,7 +2004,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 }
 
 static bool
-app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
+app_menu_keypress(GtkWidget* menu, GdkEvent* event, PtkFileMenu* data)
 {
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
     if (!item)
@@ -2018,12 +2018,15 @@ app_menu_keypress(GtkWidget* menu, GdkEventKey* event, PtkFileMenu* data)
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
-    const auto keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keyval = gdk_key_event_get_keyval(event);
+    const auto time = gdk_event_get_time(event);
+
     if (keymod == 0)
     {
-        if (event->keyval == GDK_KEY_F2 || event->keyval == GDK_KEY_Menu)
+        if (keyval == GDK_KEY_F2 || keyval == GDK_KEY_Menu)
         {
-            show_app_menu(menu, item, data, 0, event->time);
+            show_app_menu(menu, item, data, 0, time);
             return true;
         }
     }
@@ -2229,14 +2232,17 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 }
 
 static bool
-on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
+on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    const u32 keymod = ptk_get_keymod(event->state);
+    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto button = gdk_button_event_get_button(event);
+    const auto time = gdk_event_get_time(event);
+    const auto type = gdk_event_get_event_type(event);
 
-    if (event->type == GdkEventType::GDK_BUTTON_RELEASE)
+    if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
-        if (event->button == 1 && keymod == 0)
+        if (button == 1 && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
             // does not always fire on this event so handle it ourselves
@@ -2255,12 +2261,12 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
         // menu item in some GTK2/3 themes.
         return true;
     }
-    else if (event->type != GdkEventType::GDK_BUTTON_PRESS)
+    else if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
         return false;
     }
 
-    switch (event->button)
+    switch (button)
     {
         case 1:
         case 3:
@@ -2268,10 +2274,10 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
             if (keymod == 0)
             {
                 // no modifier
-                if (event->button == 3)
+                if (button == 3)
                 {
                     // right
-                    show_app_menu(menu, item, data, event->button, event->time);
+                    show_app_menu(menu, item, data, button, time);
                     return true;
                 }
             }
@@ -2281,7 +2287,7 @@ on_app_button_press(GtkWidget* item, GdkEventButton* event, PtkFileMenu* data)
             if (keymod == 0)
             {
                 // no modifier
-                show_app_menu(menu, item, data, event->button, event->time);
+                show_app_menu(menu, item, data, button, time);
                 return true;
             }
             break;
