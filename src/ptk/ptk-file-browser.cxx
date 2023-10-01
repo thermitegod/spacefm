@@ -1068,33 +1068,32 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
 void
 PtkFileBrowser::update_tab_label() noexcept
 {
-    // GtkWidget* label = gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this));
+#if (GTK_MAJOR_VERSION == 4)
+    GtkBox* box = GTK_BOX(gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkEventBox* ebox =
+        GTK_EVENT_BOX(gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this)));
+    GtkBox* box = GTK_BOX(g_object_get_data(G_OBJECT(ebox), "box"));
+#endif
 
-    GtkWidget* label = gtk_notebook_get_tab_label(this->notebook_, GTK_WIDGET(this));
-
-    GtkContainer* hbox = GTK_CONTAINER(gtk_bin_get_child(GTK_BIN(label)));
-    GList* children = gtk_container_get_children(hbox);
-    // GtkImage* icon = GTK_IMAGE(children->data);
-    GtkLabel* text = GTK_LABEL(children->next->data);
+    GtkLabel* label = GTK_LABEL(g_object_get_data(G_OBJECT(box), "label"));
 
     // TODO: Change the icon
+    // GtkWidget* icon = GTK_WIDGET(g_object_get_data(G_OBJECT(box), "icon"));
 
     const auto cwd = this->cwd();
-
     const std::string name = std::filesystem::equivalent(cwd, "/") ? "/" : cwd.filename();
-    gtk_label_set_text(text, name.data());
+    gtk_label_set_text(label, name.data());
     if (name.size() < 30)
     {
-        gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
-        gtk_label_set_width_chars(text, -1);
+        gtk_label_set_ellipsize(label, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
+        gtk_label_set_width_chars(label, -1);
     }
     else
     {
-        gtk_label_set_ellipsize(text, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-        gtk_label_set_width_chars(text, 30);
+        gtk_label_set_ellipsize(label, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+        gtk_label_set_width_chars(label, 30);
     }
-
-    g_list_free(children);
 }
 
 static void

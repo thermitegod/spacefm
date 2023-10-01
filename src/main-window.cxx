@@ -1909,29 +1909,31 @@ GtkWidget*
 MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 {
     /* Create tab label */
+#if (GTK_MAJOR_VERSION == 3)
     GtkEventBox* ebox = GTK_EVENT_BOX(gtk_event_box_new());
     gtk_event_box_set_visible_window(GTK_EVENT_BOX(ebox), false);
+#endif
 
-    GtkBox* tab_label = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-    GtkWidget* tab_icon =
+    GtkBox* box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+    GtkWidget* icon =
         gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
-    gtk_box_pack_start(tab_label, tab_icon, false, false, 4);
+    gtk_box_pack_start(box, icon, false, false, 4);
 
     const auto cwd = file_browser->cwd();
-    GtkLabel* tab_text_label = GTK_LABEL(gtk_label_new(cwd.filename().c_str()));
+    GtkLabel* label = GTK_LABEL(gtk_label_new(cwd.filename().c_str()));
 
     if (cwd.string().size() < 30)
     {
-        gtk_label_set_ellipsize(tab_text_label, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
-        gtk_label_set_width_chars(tab_text_label, -1);
+        gtk_label_set_ellipsize(label, PangoEllipsizeMode::PANGO_ELLIPSIZE_NONE);
+        gtk_label_set_width_chars(label, -1);
     }
     else
     {
-        gtk_label_set_ellipsize(tab_text_label, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
-        gtk_label_set_width_chars(tab_text_label, 30);
+        gtk_label_set_ellipsize(label, PangoEllipsizeMode::PANGO_ELLIPSIZE_MIDDLE);
+        gtk_label_set_width_chars(label, 30);
     }
-    gtk_label_set_max_width_chars(tab_text_label, 30);
-    gtk_box_pack_start(tab_label, GTK_WIDGET(tab_text_label), false, false, 4);
+    gtk_label_set_max_width_chars(label, 30);
+    gtk_box_pack_start(box, GTK_WIDGET(label), false, false, 4);
 
     if (app_settings.show_close_tab_buttons())
     {
@@ -1942,33 +1944,49 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
             gtk_image_new_from_icon_name("window-close", GtkIconSize::GTK_ICON_SIZE_MENU);
 
         gtk_button_set_child(GTK_BUTTON(close_btn), close_icon);
-        gtk_box_pack_end(tab_label, GTK_WIDGET(close_btn), false, false, 0);
+        gtk_box_pack_end(box, GTK_WIDGET(close_btn), false, false, 0);
 
         // clang-format off
         g_signal_connect(G_OBJECT(close_btn), "clicked", G_CALLBACK(ptk_file_browser_close_tab), file_browser);
         // clang-format on
     }
 
-    gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(tab_label));
+#if (GTK_MAJOR_VERSION == 3)
+    gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(box));
+    g_object_set_data(G_OBJECT(ebox), "box", box);
+#endif
 
-    gtk_widget_set_events(GTK_WIDGET(ebox), GdkEventMask::GDK_ALL_EVENTS_MASK);
+    gtk_widget_set_events(GTK_WIDGET(box), GdkEventMask::GDK_ALL_EVENTS_MASK);
     gtk_drag_dest_set(
-        GTK_WIDGET(ebox),
+        GTK_WIDGET(box),
         GTK_DEST_DEFAULT_ALL,
         drag_targets,
         sizeof(drag_targets) / sizeof(GtkTargetEntry),
         GdkDragAction(GdkDragAction::GDK_ACTION_DEFAULT | GdkDragAction::GDK_ACTION_COPY |
                       GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_LINK));
 
+    g_object_set_data(G_OBJECT(box), "label", label);
+    g_object_set_data(G_OBJECT(box), "icon", icon);
+
     // clang-format off
+#if (GTK_MAJOR_VERSION == 4)
+    g_signal_connect(G_OBJECT(box), "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
+    g_signal_connect(G_OBJECT(box), "button-press-event", G_CALLBACK(notebook_clicked), file_browser);
+
+    gtk_widget_show_all(GTK_WIDGET(box));
+#elif (GTK_MAJOR_VERSION == 3)
     g_signal_connect(G_OBJECT(ebox), "drag-motion", G_CALLBACK(on_tab_drag_motion), file_browser);
-    // MOD  middle-click to close tab
     g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(notebook_clicked), file_browser);
-    // clang-format on
 
     gtk_widget_show_all(GTK_WIDGET(ebox));
+#endif
+    // clang-format on
 
+#if (GTK_MAJOR_VERSION == 4)
+    return GTK_WIDGET(box);
+#elif (GTK_MAJOR_VERSION == 3)
     return GTK_WIDGET(ebox);
+#endif
 }
 
 void
@@ -2015,7 +2033,8 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     file_browser->add_event<spacefm::signal::change_pane>(on_file_browser_panel_change, this);
 
     GtkWidget* tab_label = this->create_tab_label(file_browser);
-    const i32 idx = gtk_notebook_append_page(this->notebook, GTK_WIDGET(file_browser), tab_label);
+    const i32 idx =
+        gtk_notebook_append_page(this->notebook, GTK_WIDGET(file_browser), GTK_WIDGET(tab_label));
     gtk_notebook_set_tab_reorderable(this->notebook, GTK_WIDGET(file_browser), true);
     gtk_notebook_set_current_page(this->notebook, idx);
 

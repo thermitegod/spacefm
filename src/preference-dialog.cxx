@@ -719,7 +719,9 @@ namespace preference::hide_close_tab
                         PtkFileBrowser* file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                         GtkWidget* tab_label = window->create_tab_label(file_browser);
-                        gtk_notebook_set_tab_label(notebook, GTK_WIDGET(file_browser), tab_label);
+                        gtk_notebook_set_tab_label(notebook,
+                                                   GTK_WIDGET(file_browser),
+                                                   GTK_WIDGET(tab_label));
                         file_browser->update_tab_label();
                     }
                 }
