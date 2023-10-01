@@ -1476,7 +1476,12 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
         }
 
         // Alt - Left/Right Click
+
+#if (GTK_MAJOR_VERSION == 4)
+        if ((keymod == GdkModifierType::GDK_ALT_MASK) && (button == 1 || button == 3))
+#elif (GTK_MAJOR_VERSION == 3)
         if ((keymod == GdkModifierType::GDK_MOD1_MASK) && (button == 1 || button == 3))
+#endif
         {
             if (button == 1)
             {
@@ -1631,7 +1636,12 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event,
 
     if (file_browser->is_drag_ || button != 1 || file_browser->skip_release_ ||
         (keymod & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
-                   GdkModifierType::GDK_MOD1_MASK)))
+#if (GTK_MAJOR_VERSION == 4)
+                   GdkModifierType::GDK_ALT_MASK
+#elif (GTK_MAJOR_VERSION == 3)
+                   GdkModifierType::GDK_MOD1_MASK
+#endif
+                   )))
     {
         if (file_browser->skip_release_)
         {

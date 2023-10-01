@@ -1194,7 +1194,11 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, xset_t set)
                     // ctrl
                     job = xset::job::copy;
                     break;
+#if (GTK_MAJOR_VERSION == 4)
+                case GdkModifierType::GDK_ALT_MASK:
+#elif (GTK_MAJOR_VERSION == 3)
                 case GdkModifierType::GDK_MOD1_MASK:
+#endif
                     // alt
                     job = xset::job::cut;
                     break;
@@ -1597,7 +1601,11 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
                     // ctrl
                     job = xset::job::copy;
                     break;
+#if (GTK_MAJOR_VERSION == 4)
+                case GdkModifierType::GDK_ALT_MASK:
+#elif (GTK_MAJOR_VERSION == 3)
                 case GdkModifierType::GDK_MOD1_MASK:
+#endif
                     // alt
                     job = xset::job::cut;
                     break;
@@ -1617,7 +1625,11 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
                     // ctrl
                     job = xset::job::key;
                     break;
+#if (GTK_MAJOR_VERSION == 4)
+                case GdkModifierType::GDK_ALT_MASK:
+#elif (GTK_MAJOR_VERSION == 3)
                 case GdkModifierType::GDK_MOD1_MASK:
+#endif
                     // alt
                     break;
                 case (GdkModifierType::GDK_CONTROL_MASK | GdkModifierType::GDK_SHIFT_MASK):

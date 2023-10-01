@@ -68,7 +68,11 @@ xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
         {
             mod = std::format("Meta+{}", mod);
         }
+#if (GTK_MAJOR_VERSION == 4)
+        if (keymod & GdkModifierType::GDK_ALT_MASK)
+#elif (GTK_MAJOR_VERSION == 3)
         if (keymod & GdkModifierType::GDK_MOD1_MASK)
+#endif
         {
             mod = std::format("Alt+{}", mod);
         }

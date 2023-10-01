@@ -2784,7 +2784,11 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_s
         }
     }
 
+#if (GTK_MAJOR_VERSION == 4)
+    if ((keymod & GdkModifierType::GDK_ALT_MASK))
+#elif (GTK_MAJOR_VERSION == 3)
     if ((keymod & GdkModifierType::GDK_MOD1_MASK))
+#endif
     {
         rebuild_menus(main_window);
     }
