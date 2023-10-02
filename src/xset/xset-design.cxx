@@ -41,7 +41,11 @@
 static void
 xset_design_job_set_key(xset_t set)
 {
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(set->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(set->browser));
+#endif
 
     xset_set_key(parent, set);
 }

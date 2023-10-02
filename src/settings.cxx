@@ -832,7 +832,11 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     GtkWidget* dlgparent = nullptr;
     if (parent)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        dlgparent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
+#elif (GTK_MAJOR_VERSION == 3)
         dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+#endif
     }
 
     const auto check_editor = xset_get_s(xset::name::editor);

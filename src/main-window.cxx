@@ -234,10 +234,16 @@ main_window_open_terminal(MainWindow* main_window)
     {
         return;
     }
-    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-    auto main_term = xset_get_s(xset::name::main_terminal);
+
+    const auto main_term = xset_get_s(xset::name::main_terminal);
     if (!main_term)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
+
         ptk_show_error(GTK_WINDOW(parent),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");

@@ -172,7 +172,11 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
 
     if (parent)
     {
-        dlgparent = gtk_widget_get_toplevel(parent);
+#if (GTK_MAJOR_VERSION == 4)
+        dlgparent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
+#elif (GTK_MAJOR_VERSION == 3)
+        dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+#endif
     }
 
     GtkWidget* dlg = gtk_message_dialog_new(GTK_WINDOW(dlgparent),
@@ -365,7 +369,13 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER
      */
-    GtkWidget* dlgparent = parent ? gtk_widget_get_toplevel(parent) : nullptr;
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* dlgparent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+#endif
+
     GtkWidget* dlg = gtk_file_chooser_dialog_new(title.data(),
                                                  dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
                                                  action,

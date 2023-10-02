@@ -287,9 +287,13 @@ init_all_apps_tab(GtkWidget* dialog)
     gtk_widget_grab_focus(GTK_WIDGET(tree_view));
     GdkCursor* busy = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(tree_view)),
                                                  GdkCursorType::GDK_WATCH);
-    gdk_window_set_cursor(
-        gtk_widget_get_window(GTK_WIDGET(gtk_widget_get_toplevel(GTK_WIDGET(tree_view)))),
-        busy);
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(tree_view)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(tree_view));
+#endif
+    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), busy);
     g_object_unref(busy);
 
     GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),

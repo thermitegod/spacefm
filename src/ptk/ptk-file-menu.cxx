@@ -1616,14 +1616,18 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
         mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_DIRECTORY);
     }
 
-    GtkWindow* parent_win = nullptr;
+    GtkWidget* parent = nullptr;
     if (data->browser)
     {
-        parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+#if (GTK_MAJOR_VERSION == 4)
+             parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+             parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
     }
 
     const auto check_app =
-        ptk_choose_app_for_mime_type(parent_win, mime_type, false, true, true, false);
+        ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, false, true, true, false);
     if (check_app)
     {
         const auto& app = check_app.value();
@@ -2366,8 +2370,13 @@ on_popup_paste_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     (void)menuitem;
     if (data->browser)
     {
-        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-        ptk_clipboard_paste_files(GTK_WINDOW(parent_win),
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
+
+        ptk_clipboard_paste_files(GTK_WINDOW(parent),
                                   data->cwd,
                                   GTK_TREE_VIEW(data->browser->task_view()),
                                   nullptr,
@@ -2438,8 +2447,13 @@ on_popup_delete_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (data->browser)
     {
-        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-        ptk_delete_files(GTK_WINDOW(parent_win),
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
+
+        ptk_delete_files(GTK_WINDOW(parent),
                          data->cwd,
                          data->sel_files,
                          GTK_TREE_VIEW(data->browser->task_view()));
@@ -2458,8 +2472,13 @@ on_popup_trash_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (data->browser)
     {
-        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
-        ptk_trash_files(GTK_WINDOW(parent_win),
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
+
+        ptk_trash_files(GTK_WINDOW(parent),
                         data->cwd,
                         data->sel_files,
                         GTK_TREE_VIEW(data->browser->task_view()));
@@ -2604,36 +2623,48 @@ static void
 on_popup_file_properties_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    GtkWindow* parent_win = nullptr;
+    GtkWidget* parent = nullptr;
     if (data->browser)
     {
-        parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+#if (GTK_MAJOR_VERSION == 4)
+        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
     }
-    ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 0);
+    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->sel_files, 0);
 }
 
 static void
 on_popup_file_attributes_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    GtkWindow* parent_win = nullptr;
+    GtkWidget* parent = nullptr;
     if (data->browser)
     {
-        parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+#if (GTK_MAJOR_VERSION == 4)
+        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
     }
-    ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 1);
+    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->sel_files, 1);
 }
 
 static void
 on_popup_file_permissions_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    GtkWindow* parent_win = nullptr;
+    GtkWidget* parent = nullptr;
     if (data->browser)
     {
-        parent_win = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(data->browser)));
+#if (GTK_MAJOR_VERSION == 4)
+        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data->browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
+#endif
     }
-    ptk_show_file_properties(parent_win, data->cwd, data->sel_files, 2);
+    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->sel_files, 2);
 }
 
 static void

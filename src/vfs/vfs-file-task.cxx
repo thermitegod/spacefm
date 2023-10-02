@@ -1349,11 +1349,19 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
     GtkWidget* parent = nullptr;
     if (this->exec_browser)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this->exec_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
         parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_browser));
+#endif
     }
     else if (this->exec_desktop)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this->exec_desktop)));
+#elif (GTK_MAJOR_VERSION == 3)
         parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_desktop));
+#endif
     }
 
     this->state = vfs::file_task_state::running;

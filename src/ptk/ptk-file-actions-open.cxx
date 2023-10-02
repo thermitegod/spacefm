@@ -118,9 +118,12 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
     }
     catch (const VFSAppDesktopException& e)
     {
-        GtkWidget* toplevel = parent->file_browser
-                                  ? gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser))
-                                  : nullptr;
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent->file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser));
+#endif
+
         ptk_show_error(GTK_WINDOW(toplevel), "Error", e.what());
     }
 
@@ -218,8 +221,12 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
                 if (!std::filesystem::exists(target_path))
                 {
-                    GtkWidget* toplevel =
-                        file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
+#if (GTK_MAJOR_VERSION == 4)
+                    GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+                    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
+
                     ptk_show_error(GTK_WINDOW(toplevel),
                                    "Broken Link",
                                    std::format("This symlink's target is missing or you do not "
@@ -238,8 +245,12 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         if (!alloc_desktop)
         {
             // Let the user choose an application
-            GtkWidget* toplevel =
-                file_browser ? gtk_widget_get_toplevel(GTK_WIDGET(file_browser)) : nullptr;
+#if (GTK_MAJOR_VERSION == 4)
+            GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+            GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
+
             const auto ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
                                                               mime_type,
                                                               true,

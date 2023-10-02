@@ -1908,12 +1908,18 @@ run_ipc_command(const std::string_view socket_commands_json)
             { // failsafe
                 return {SOCKET_FAILURE, std::format("invalid task type '{}'", property)};
             }
-            PtkFileTask* ptask =
-                ptk_file_task_new(task_type,
-                                  file_list,
-                                  target_dir,
-                                  GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser))),
-                                  file_browser->task_view());
+
+#if (GTK_MAJOR_VERSION == 4)
+            GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+            GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
+
+            PtkFileTask* ptask = ptk_file_task_new(task_type,
+                                                   file_list,
+                                                   target_dir,
+                                                   GTK_WINDOW(parent),
+                                                   file_browser->task_view());
             ptk_file_task_run(ptask);
             return {SOCKET_SUCCESS,
                     std::format("# Note: $new_task_id not valid until approx one "

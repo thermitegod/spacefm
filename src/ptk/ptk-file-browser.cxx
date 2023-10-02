@@ -2393,11 +2393,16 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 {
                     // ztd::logger::info("DnD dest_dir = {}", dest_dir);
 
-                    GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#if (GTK_MAJOR_VERSION == 4)
+                    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+                    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
+
                     PtkFileTask* ptask = ptk_file_task_new(file_action,
                                                            file_list,
                                                            dest_dir,
-                                                           GTK_WINDOW(parent_win),
+                                                           GTK_WINDOW(parent),
                                                            file_browser->task_view_);
                     ptk_file_task_run(ptask);
                 }
@@ -2943,7 +2948,13 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     {
         if (!this->inhibit_focus_)
         {
-            ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
+#if (GTK_MAJOR_VERSION == 4)
+            GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
+#endif
+
+            ptk_show_error(GTK_WINDOW(parent_win),
                            "Error",
                            std::format("Directory does not exist\n\n{}", path.string()));
         }
@@ -2954,8 +2965,14 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     {
         if (!this->inhibit_focus_)
         {
+#if (GTK_MAJOR_VERSION == 4)
+            GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+            GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
+#endif
+
             ptk_show_error(
-                GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
+                GTK_WINDOW(parent_win),
                 "Error",
                 std::format("Unable to access {}\n\n{}", path.string(), std::strerror(errno)));
         }
@@ -3655,7 +3672,6 @@ PtkFileBrowser::rename_selected_files(const std::span<const vfs::file_info> sele
     }
 
     gtk_widget_grab_focus(this->folder_view_);
-    gtk_widget_get_toplevel(GTK_WIDGET(this));
 
     for (const vfs::file_info file : selected_files)
     {
@@ -3693,11 +3709,15 @@ PtkFileBrowser::hide_selected(const std::span<const vfs::file_info> selected_fil
         return;
     }
 
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
+#endif
+
     if (selected_files.empty())
     {
-        ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
-                       "Error",
-                       "No files are selected");
+        ptk_show_error(GTK_WINDOW(parent_win), "Error", "No files are selected");
         return;
     }
 
@@ -3705,9 +3725,7 @@ PtkFileBrowser::hide_selected(const std::span<const vfs::file_info> selected_fil
     {
         if (!this->dir_->add_hidden(file))
         {
-            ptk_show_error(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
-                           "Error",
-                           "Error hiding files");
+            ptk_show_error(GTK_WINDOW(parent_win), "Error", "Error hiding files");
         }
     }
 
@@ -3951,13 +3969,18 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
             file_list.emplace_back(file_path);
         }
 
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
+#endif
+
         // task
-        PtkFileTask* ptask =
-            ptk_file_task_new(file_action,
-                              file_list,
-                              dest_dir.value(),
-                              GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
-                              this->task_view_);
+        PtkFileTask* ptask = ptk_file_task_new(file_action,
+                                               file_list,
+                                               dest_dir.value(),
+                                               GTK_WINDOW(parent_win),
+                                               this->task_view_);
         ptk_file_task_run(ptask);
     }
     else
@@ -4104,7 +4127,13 @@ PtkFileBrowser::read_sort_extra() const noexcept
 void
 PtkFileBrowser::paste_link() const noexcept
 {
-    ptk_clipboard_paste_links(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
+#endif
+
+    ptk_clipboard_paste_links(GTK_WINDOW(parent_win),
                               this->cwd(),
                               GTK_TREE_VIEW(this->task_view_),
                               nullptr,
@@ -4114,7 +4143,13 @@ PtkFileBrowser::paste_link() const noexcept
 void
 PtkFileBrowser::paste_target() const noexcept
 {
-    ptk_clipboard_paste_targets(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(this))),
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
+#endif
+
+    ptk_clipboard_paste_targets(GTK_WINDOW(parent_win),
                                 this->cwd(),
                                 GTK_TREE_VIEW(this->task_view_),
                                 nullptr,

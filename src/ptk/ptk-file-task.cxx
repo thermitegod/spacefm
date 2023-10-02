@@ -240,7 +240,11 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget
     GtkWidget* parent_win = nullptr;
     if (parent)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
+#elif (GTK_MAJOR_VERSION == 3)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+#endif
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
@@ -260,7 +264,11 @@ ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path&
     GtkWidget* parent_win = nullptr;
     if (parent)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
+#elif (GTK_MAJOR_VERSION == 3)
         parent_win = gtk_widget_get_toplevel(GTK_WIDGET(parent));
+#endif
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
@@ -2068,18 +2076,20 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, PtkFileTask* ptask)
         const auto new_name = multi_input_get_text(widget);
         const char* old_name =
             static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
-        GtkWidget* dlg = gtk_widget_get_toplevel(widget);
-        if (!GTK_IS_DIALOG(dlg))
-        {
-            return true;
-        }
+
+#if (GTK_MAJOR_VERSION == 4)
+        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
+#elif (GTK_MAJOR_VERSION == 3)
+        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+#endif
+
         if (new_name && old_name && !ztd::same(new_name.value(), old_name))
         {
-            gtk_dialog_response(GTK_DIALOG(dlg), ptk::file_task::response::rename);
+            gtk_dialog_response(GTK_DIALOG(parent), ptk::file_task::response::rename);
         }
         else
         {
-            gtk_dialog_response(GTK_DIALOG(dlg), ptk::file_task::response::auto_rename);
+            gtk_dialog_response(GTK_DIALOG(parent), ptk::file_task::response::auto_rename);
         }
         return true;
     }
@@ -2094,20 +2104,22 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     const char* old_name =
         static_cast<const char*>(g_object_get_data(G_OBJECT(query_input), "old_name"));
     const bool can_rename = new_name && old_name && (!ztd::same(new_name.value(), old_name));
-    GtkWidget* dlg = gtk_widget_get_toplevel(query_input);
-    if (!GTK_IS_DIALOG(dlg))
-    {
-        return;
-    }
-    GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "rename_button"));
+
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(query_input)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(query_input));
+#endif
+
+    GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(parent), "rename_button"));
     if (GTK_IS_WIDGET(rename_button))
     {
         gtk_widget_set_sensitive(rename_button, can_rename);
     }
-    gtk_dialog_set_response_sensitive(GTK_DIALOG(dlg),
+    gtk_dialog_set_response_sensitive(GTK_DIALOG(parent),
                                       ptk::file_task::response::overwrite,
                                       !can_rename);
-    gtk_dialog_set_response_sensitive(GTK_DIALOG(dlg),
+    gtk_dialog_set_response_sensitive(GTK_DIALOG(parent),
                                       ptk::file_task::response::overwrite_all,
                                       !can_rename);
 }
@@ -2243,13 +2255,14 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 static void
 on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
 {
-    GtkWidget* dlg = gtk_widget_get_toplevel(widget);
-    if (!GTK_IS_DIALOG(dlg))
-    {
-        return;
-    }
-    GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "rename_button"));
-    GtkWidget* auto_button = GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "auto_button"));
+#if (GTK_MAJOR_VERSION == 4)
+    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
+#elif (GTK_MAJOR_VERSION == 3)
+    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+#endif
+
+    GtkWidget* rename_button = GTK_WIDGET(g_object_get_data(G_OBJECT(parent), "rename_button"));
+    GtkWidget* auto_button = GTK_WIDGET(g_object_get_data(G_OBJECT(parent), "auto_button"));
     if (!rename_button || !auto_button)
     {
         return;
@@ -2267,7 +2280,7 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
     {
         response = ptk::file_task::response::auto_rename_all;
     }
-    query_overwrite_response(GTK_DIALOG(dlg), response, ptask);
+    query_overwrite_response(GTK_DIALOG(parent), response, ptask);
 }
 
 static void

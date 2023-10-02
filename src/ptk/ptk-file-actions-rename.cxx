@@ -2282,7 +2282,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
     if (file_browser)
     {
+#if (GTK_MAJOR_VERSION == 4)
+        mset->parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
         mset->parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
         task_view = file_browser->task_view();
     }
 
@@ -3274,13 +3278,17 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
 
     if (missing_targets > 0)
     {
-        GtkWindow* parent = nullptr;
+        GtkWidget* parent = nullptr;
         if (file_browser)
         {
-            parent = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(file_browser)));
+#if (GTK_MAJOR_VERSION == 4)
+            parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+#elif (GTK_MAJOR_VERSION == 3)
+            parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+#endif
         }
 
-        ptk_show_error(parent,
+        ptk_show_error(GTK_WINDOW(parent),
                        "Error",
                        std::format("{} target{} missing",
                                    missing_targets,
