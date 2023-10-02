@@ -1257,7 +1257,14 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "pathbar-text"))
         {
             GtkEntry* path_bar = file_browser->path_bar();
-            return {SOCKET_SUCCESS, std::format("{}", gtk_entry_get_text(path_bar))};
+
+#if (GTK_MAJOR_VERSION == 4)
+            const std::string text = gtk_editable_get_text(GTK_EDITABLE(path_bar));
+#elif (GTK_MAJOR_VERSION == 3)
+            const std::string text = gtk_entry_get_text(GTK_ENTRY(path_bar));
+#endif
+
+            return {SOCKET_SUCCESS, text};
         }
         else if (ztd::same(property, "clipboard-text") ||
                  ztd::same(property, "clipboard-primary-text"))

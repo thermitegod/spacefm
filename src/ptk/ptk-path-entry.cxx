@@ -56,13 +56,18 @@ EntryData::EntryData(PtkFileBrowser* file_browser)
 static const std::filesystem::path
 get_cwd(GtkEntry* entry)
 {
-    const char* entry_txt = gtk_entry_get_text(entry);
-    if (!entry_txt)
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    if (text.empty())
     {
         return vfs::user_dirs->home_dir();
     }
 
-    const std::filesystem::path path = entry_txt;
+    const std::filesystem::path path = text;
     if (path.empty())
     {
         return vfs::user_dirs->home_dir();
@@ -105,12 +110,18 @@ seek_path(GtkEntry* entry)
         return false;
     }
 
-    const char* entry_txt = gtk_entry_get_text(entry);
-    if (!entry_txt)
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    if (text.empty())
     {
         return false;
     }
-    const std::filesystem::path path = entry_txt;
+
+    const std::filesystem::path path = text;
 
     // get dir and name prefix
     const auto cwd = get_cwd(entry);
@@ -200,8 +211,13 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
 static void
 update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 {
-    const char* text = gtk_entry_get_text(entry);
-    if (!text)
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    if (text.empty())
     {
         return;
     }
@@ -282,8 +298,13 @@ static void
 insert_complete(GtkEntry* entry)
 {
     // find a real completion
-    const char* prefix = gtk_entry_get_text(entry);
-    if (!prefix)
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string prefix = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string prefix = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    if (prefix.empty())
     {
         return;
     }
@@ -506,20 +527,25 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
         return;
     }
 
-    xset_t set;
-
 #if (GTK_MAJOR_VERSION == 4)
     GtkEventController* accel_group = gtk_shortcut_controller_new();
 #elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
+    xset_t set;
+
     set = xset_get(xset::name::separator);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
-    const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
-    set->disable = !(text && (std::filesystem::exists(text) || ztd::startswith(text, ":/") ||
-                              ztd::startswith(text, "//")));
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    set->disable =
+        !(std::filesystem::exists(text) || text.starts_with(":/")) || text.starts_with("//");
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
     set = xset_get(xset::name::path_seek);

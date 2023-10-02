@@ -462,7 +462,12 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
 {
     GtkEntry* entry = GTK_ENTRY(g_object_get_data(G_OBJECT(dialog), "entry_command"));
 
-    const std::string app = gtk_entry_get_text(entry);
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string app = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string app = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
     if (!app.empty())
     {
         return app;

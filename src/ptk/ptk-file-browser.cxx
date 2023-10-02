@@ -411,7 +411,11 @@ PtkFileBrowser::path_bar() const noexcept
 static void
 save_command_history(GtkEntry* entry)
 {
-    const std::string text = gtk_entry_get_text(entry);
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
 
     if (text.empty())
     {
@@ -439,8 +443,13 @@ on_address_bar_focus_in(GtkWidget* entry, GdkEventFocus* evt, PtkFileBrowser* fi
 static void
 on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 {
-    const char* text = gtk_entry_get_text(GTK_ENTRY(entry));
-    if (!text || std::strlen(text) == 0)
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    if (text.empty())
     {
         return;
     }
@@ -4403,7 +4412,12 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     bool ret = false;
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        pattern = gtk_entry_get_text(entry);
+#if (GTK_MAJOR_VERSION == 4)
+        pattern = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+        pattern = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
         ret = true;
     }
 

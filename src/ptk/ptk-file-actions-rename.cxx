@@ -31,6 +31,7 @@
 
 #include <magic_enum.hpp>
 
+#include <ztd/internal/string_python.hxx>
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -243,9 +244,15 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         const bool new_folder =
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_folder));
         const bool new_link = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link));
+
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
+#endif
+
         if (new_folder ||
-            (new_link && std::filesystem::is_directory(gtk_entry_get_text(mset->entry_target)) &&
-             gtk_entry_get_text(mset->entry_target)[0] == '/'))
+            (new_link && std::filesystem::is_directory(text) && text.starts_with('/')))
         {
             if (!mset->is_dir)
             {
@@ -284,22 +291,28 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
         gtk_text_buffer_get_start_iter(mset->buf_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_name, &iter);
         const char* name = gtk_text_buffer_get_text(mset->buf_name, &siter, &iter, false);
-        const char* ext = (char*)gtk_entry_get_text(mset->entry_ext);
-        if (ext && ext[0] == '.')
+
+#if (GTK_MAJOR_VERSION == 4)
+        std::string ext = gtk_editable_get_text(GTK_EDITABLE(mset->entry_ext));
+#elif (GTK_MAJOR_VERSION == 3)
+        std::string ext = gtk_entry_get_text(GTK_ENTRY(mset->entry_ext));
+#endif
+
+        if (ext.starts_with('.'))
         { // ignore leading dot in extension field
-            ext++;
+            ext = ztd::removeprefix(ext, ".");
         }
 
         // update full_name
-        if (name && ext)
+        if (name && !ext.empty())
         {
             full_name = std::format("{}.{}", name, ext);
         }
-        else if (name && !ext)
+        else if (name && ext.empty())
         {
             full_name = name;
         }
-        else if (!name && ext)
+        else if (!name && !ext.empty())
         {
             full_name = ext;
         }
@@ -661,8 +674,12 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
     if (mset->create_new != ptk::rename_mode::rename &&
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
     {
-        path = gtk_entry_get_text(mset->entry_target);
-        path = ztd::strip(path.string());
+#if (GTK_MAJOR_VERSION == 4)
+        path = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
+#elif (GTK_MAJOR_VERSION == 3)
+        path = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
+#endif
+
         gtk_widget_set_sensitive(mset->next,
                                  (!(full_path_same && full_path_exists) && !full_path_exists_dir));
     }
@@ -854,8 +871,14 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         title = "Select Link Target";
         action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN;
-        const char* text = gtk_entry_get_text(mset->entry_target);
-        if (text && text[0] == '/')
+
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
+#endif
+
+        if (text.starts_with('/'))
         {
             const auto path = std::filesystem::path(text);
             dir = path.parent_path();
@@ -864,7 +887,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
         else
         {
             dir = mset->full_path.parent_path();
-            if (text)
+            if (!text.empty())
             {
                 name = text;
             }
@@ -874,9 +897,14 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         title = "Select Template File";
         action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN;
-        const char* text =
-            gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template))));
-        if (text && text[0] == '/')
+
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->combo_template));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->combo_template));
+#endif
+
+        if (text.starts_with('/'))
         {
             const auto path = std::filesystem::path(text);
             dir = path.parent_path();
@@ -893,7 +921,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             {
                 dir = mset->full_path.parent_path();
             }
-            if (text)
+            if (!text.empty())
             {
                 name = text;
             }
@@ -903,9 +931,14 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     {
         title = "Select Template Directory";
         action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-        const char* text =
-            gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template))));
-        if (text && text[0] == '/')
+
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->combo_template));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->combo_template));
+#endif
+
+        if (text.starts_with('/'))
         {
             const auto path = std::filesystem::path(text);
             dir = path.parent_path();
@@ -922,7 +955,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
             {
                 dir = mset->full_path.parent_path();
             }
-            if (text)
+            if (!text.empty())
             {
                 name = text;
             }
@@ -1843,7 +1876,13 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     }
     else if (widget == GTK_WIDGET(mset->label_ext))
     {
-        gtk_clipboard_set_text(clip, gtk_entry_get_text(mset->entry_ext), -1);
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_ext));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->entry_ext));
+#endif
+
+        gtk_clipboard_set_text(clip, text.data(), -1);
         return;
     }
     else if (widget == GTK_WIDGET(mset->label_full_name))
@@ -1865,7 +1904,13 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     }
     else if (widget == GTK_WIDGET(mset->label_target))
     {
-        gtk_clipboard_set_text(clip, gtk_entry_get_text(mset->entry_target), -1);
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
+#endif
+
+        gtk_clipboard_set_text(clip, text.data(), -1);
         return;
     }
     else if (widget == GTK_WIDGET(mset->label_template))
@@ -1879,7 +1924,13 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
         {
             w = gtk_bin_get_child(GTK_BIN(mset->combo_template_dir));
         }
-        gtk_clipboard_set_text(clip, gtk_entry_get_text(GTK_ENTRY(w)), -1);
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(w));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(w));
+#endif
+
+        gtk_clipboard_set_text(clip, text.data(), -1);
     }
 
     if (!buf)
@@ -2120,11 +2171,16 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
         return;
     }
 
-    std::string ext;
+    GtkEntry* entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template)));
 
-    const char* text =
-        gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template))));
-    if (text)
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    std::string ext;
+    if (!text.empty())
     {
         // ext = ztd::strip(text);
         ext = ztd::rpartition(ext, "/")[2];
@@ -2931,18 +2987,22 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
                 // new link task
                 PtkFileTask* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
 
-                std::string str = gtk_entry_get_text(mset->entry_target);
-                str = ztd::strip(str);
-                while (ztd::endswith(str, "/"))
+#if (GTK_MAJOR_VERSION == 4)
+                std::string entry_text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
+#elif (GTK_MAJOR_VERSION == 3)
+                std::string entry_text = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
+#endif
+
+                while (entry_text.ends_with('/'))
                 {
-                    if (str.size() == 1)
+                    if (entry_text.size() == 1)
                     {
                         break;
                     }
-                    str = ztd::removesuffix(str, "/");
+                    entry_text = ztd::removesuffix(entry_text, "/");
                 }
 
-                from_path = ztd::shell::quote(str);
+                from_path = ztd::shell::quote(entry_text);
                 to_path = ztd::shell::quote(full_path.string());
 
                 if (overwrite)

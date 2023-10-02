@@ -938,7 +938,12 @@ namespace preference::date_format
     pref_text_box_cb(GtkEntry* entry, const void* user_data)
     {
         (void)user_data;
-        const char* text = gtk_entry_get_text(entry);
+
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
 
         app_settings.date_format(text);
 
@@ -961,11 +966,14 @@ namespace preference::editor
     pref_text_box_cb(GtkEntry* entry, const void* user_data)
     {
         (void)user_data;
-        const char* text = gtk_entry_get_text(entry);
-        if (text)
-        {
-            xset_set(xset::name::editor, xset::var::s, text);
-        }
+
+#if (GTK_MAJOR_VERSION == 4)
+        const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+        const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+        xset_set(xset::name::editor, xset::var::s, text);
     }
 
     GtkEntry*
