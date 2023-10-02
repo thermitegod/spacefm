@@ -47,19 +47,6 @@ enum class app_chooser_column
     full_path,
 };
 
-struct app_chooser_dialog_data
-{
-    GtkNotebook* notebook{nullptr};
-
-    GtkEntry* entry_command{nullptr};
-
-    GtkWidget* btn_open_in_terminal{nullptr};
-    GtkWidget* btn_set_as_default{nullptr};
-
-    GtkButton* btn_ok{nullptr};
-    GtkButton* btn_cancel{nullptr};
-};
-
 static void* load_all_known_apps_thread(vfs::async_task task);
 
 static void
@@ -179,9 +166,8 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
     (void)tree_view;
     (void)path;
     (void)column;
-    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
-    assert(data != nullptr);
-    gtk_button_clicked(data->btn_ok);
+    GtkButton* btn = GTK_BUTTON(g_object_get_data(G_OBJECT(dialog), "btn_ok"));
+    gtk_button_clicked(btn);
 }
 
 static void
@@ -233,6 +219,8 @@ init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
     gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
 
+    g_object_set_data(G_OBJECT(scrolled_window), "view", tree_view);
+
     init_list_view(GTK_TREE_VIEW(tree_view));
 
     if (mime_type)
@@ -281,6 +269,8 @@ init_all_apps_tab(GtkWidget* dialog)
     GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
     gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
+
+    g_object_set_data(G_OBJECT(scrolled_window), "view", tree_view);
 
     init_list_view(GTK_TREE_VIEW(tree_view));
 
@@ -341,13 +331,9 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
                                     nullptr);
 
     // dialog widgets
-    const auto data = new app_chooser_dialog_data;
-    assert(data != nullptr);
-    g_object_set_data(G_OBJECT(dialog), "data", data);
-
-    data->btn_cancel = GTK_BUTTON(
+    GtkButton* btn_cancel = GTK_BUTTON(
         gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GtkResponseType::GTK_RESPONSE_CANCEL));
-    data->btn_ok = GTK_BUTTON(
+    GtkButton* btn_ok = GTK_BUTTON(
         gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", GtkResponseType::GTK_RESPONSE_OK));
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
@@ -406,10 +392,10 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     gtk_label_set_xalign(label_entry_label, 0.0);
     gtk_label_set_yalign(label_entry_label, 0.5);
 
-    data->entry_command = GTK_ENTRY(gtk_entry_new());
+    GtkEntry* entry_command = GTK_ENTRY(gtk_entry_new());
     // gtk_widget_set_hexpand(GTK_WIDGET(entry), true);
     gtk_box_pack_start(label_entry_box, GTK_WIDGET(label_entry_label), false, false, 0);
-    gtk_box_pack_start(label_entry_box, GTK_WIDGET(data->entry_command), true, true, 0);
+    gtk_box_pack_start(label_entry_box, GTK_WIDGET(entry_command), true, true, 0);
     gtk_box_pack_start(vbox, GTK_WIDGET(label_entry_box), false, false, 0);
 
     if (!show_command)
@@ -420,38 +406,47 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     }
 
     // Create the notebook with two tabs
-    data->notebook = GTK_NOTEBOOK(gtk_notebook_new());
-    gtk_notebook_append_page(data->notebook,
+    GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
+    gtk_notebook_append_page(notebook,
                              init_associated_apps_tab(dialog, mime_type),
                              gtk_label_new("Associated Apps"));
-    gtk_notebook_append_page(data->notebook, init_all_apps_tab(dialog), gtk_label_new("All Apps"));
-    gtk_box_pack_start(vbox, GTK_WIDGET(data->notebook), true, true, 0);
+    gtk_notebook_append_page(notebook, init_all_apps_tab(dialog), gtk_label_new("All Apps"));
+    gtk_box_pack_start(vbox, GTK_WIDGET(notebook), true, true, 0);
 
     // Create the first checked button
-    data->btn_open_in_terminal = gtk_check_button_new_with_label("Open in a terminal");
-    gtk_box_pack_start(vbox, data->btn_open_in_terminal, false, false, 0);
+    GtkCheckButton* btn_open_in_terminal = GTK_CHECK_BUTTON(gtk_check_button_new());
+    gtk_button_set_label(GTK_BUTTON(btn_open_in_terminal), "Open in a terminal");
+    gtk_box_pack_start(vbox, GTK_WIDGET(btn_open_in_terminal), false, false, 0);
 
     // Create the second checked button
-    data->btn_set_as_default =
-        gtk_check_button_new_with_label("Set as the default application for this file type");
-    gtk_box_pack_start(vbox, data->btn_set_as_default, false, false, 0);
+    GtkCheckButton* btn_set_as_default = GTK_CHECK_BUTTON(gtk_check_button_new());
+    gtk_button_set_label(GTK_BUTTON(btn_set_as_default),
+                         "Set as the default application for this file type");
+    gtk_box_pack_start(vbox, GTK_WIDGET(btn_set_as_default), false, false, 0);
     // Do not set default handler for directories and files with unknown type
     if (!show_default ||
         /*  ztd::same(mime_type->type(), XDG_MIME_TYPE_UNKNOWN) || */
         (ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
     {
-        gtk_widget_hide(GTK_WIDGET(data->btn_set_as_default));
+        gtk_widget_hide(GTK_WIDGET(btn_set_as_default));
     }
+
+    g_object_set_data(G_OBJECT(dialog), "notebook", notebook);
+    g_object_set_data(G_OBJECT(dialog), "entry_command", entry_command);
+    g_object_set_data(G_OBJECT(dialog), "btn_open_in_terminal", btn_open_in_terminal);
+    g_object_set_data(G_OBJECT(dialog), "btn_set_as_default", btn_set_as_default);
+    g_object_set_data(G_OBJECT(dialog), "btn_ok", btn_ok);
+    g_object_set_data(G_OBJECT(dialog), "btn_cancel", btn_cancel);
 
     gtk_widget_show_all(GTK_WIDGET(dialog));
 
     if (focus_all_apps)
     {
         // select All Apps tab
-        gtk_notebook_next_page(data->notebook);
+        gtk_notebook_next_page(notebook);
     }
 
-    gtk_widget_grab_focus(GTK_WIDGET(data->notebook));
+    gtk_widget_grab_focus(GTK_WIDGET(notebook));
 
     return dialog;
 }
@@ -465,18 +460,19 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
 const std::optional<std::string>
 app_chooser_dialog_get_selected_app(GtkWidget* dialog)
 {
-    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
-    assert(data != nullptr);
+    GtkEntry* entry = GTK_ENTRY(g_object_get_data(G_OBJECT(dialog), "entry_command"));
 
-    const std::string app = gtk_entry_get_text(data->entry_command);
+    const std::string app = gtk_entry_get_text(entry);
     if (!app.empty())
     {
         return app;
     }
 
-    const i32 idx = gtk_notebook_get_current_page(data->notebook);
-    GtkBin* scroll = GTK_BIN(gtk_notebook_get_nth_page(data->notebook, idx));
-    GtkTreeView* tree_view = GTK_TREE_VIEW(gtk_bin_get_child(scroll));
+    GtkNotebook* notebook = GTK_NOTEBOOK(g_object_get_data(G_OBJECT(dialog), "notebook"));
+
+    const auto page = gtk_notebook_get_current_page(notebook);
+    GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_notebook_get_nth_page(notebook, page));
+    GtkTreeView* tree_view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(scroll), "view"));
     GtkTreeSelection* selection = gtk_tree_view_get_selection(tree_view);
 
     GtkTreeModel* model;
@@ -502,9 +498,10 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
 static bool
 app_chooser_dialog_get_set_default(GtkWidget* dialog)
 {
-    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
-    assert(data != nullptr);
-    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->btn_set_as_default));
+    GtkToggleButton* btn =
+        GTK_TOGGLE_BUTTON(g_object_get_data(G_OBJECT(dialog), "btn_set_as_default"));
+
+    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(btn));
 }
 
 static void
@@ -572,10 +569,6 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
             }
         }
     }
-
-    auto data = static_cast<app_chooser_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
-    assert(data != nullptr);
-    delete data;
 
     gtk_widget_destroy(dialog);
 
