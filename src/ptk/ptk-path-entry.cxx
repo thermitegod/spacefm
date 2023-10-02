@@ -385,8 +385,14 @@ insert_complete(GtkEntry* entry)
                                     nullptr,
                                     (void*)on_changed,
                                     nullptr);
-    gtk_entry_set_text(entry, new_prefix.c_str());
+
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry), new_prefix.c_str());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry), new_prefix.c_str());
+#endif
     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
+
     g_signal_handlers_unblock_matched(G_OBJECT(entry),
                                       GSignalMatchType::G_SIGNAL_MATCH_FUNC,
                                       0,
@@ -436,33 +442,40 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
 {
     (void)completion;
 
-    char* path = nullptr;
-    gtk_tree_model_get(model, iter, ptk::path_entry::column::path, &path, -1);
-    if (path && path[0])
+    char* c_path = nullptr;
+    gtk_tree_model_get(model, iter, ptk::path_entry::column::path, &c_path, -1);
+    if (!(c_path && c_path[0]))
     {
-        g_signal_handlers_block_matched(G_OBJECT(entry),
-                                        GSignalMatchType::G_SIGNAL_MATCH_FUNC,
-                                        0,
-                                        0,
-                                        nullptr,
-                                        (void*)on_changed,
-                                        nullptr);
-
-        gtk_entry_set_text(GTK_ENTRY(entry), path);
-        std::free(path);
-        gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-
-        g_signal_handlers_unblock_matched(G_OBJECT(entry),
-                                          GSignalMatchType::G_SIGNAL_MATCH_FUNC,
-                                          0,
-                                          0,
-                                          nullptr,
-                                          (void*)on_changed,
-                                          nullptr);
-
-        on_changed(GTK_ENTRY(entry), nullptr);
-        seek_path_delayed(GTK_ENTRY(entry), 10);
+        return true;
     }
+    const std::filesystem::path path = c_path;
+    std::free(c_path);
+
+    g_signal_handlers_block_matched(G_OBJECT(entry),
+                                    GSignalMatchType::G_SIGNAL_MATCH_FUNC,
+                                    0,
+                                    0,
+                                    nullptr,
+                                    (void*)on_changed,
+                                    nullptr);
+
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry), path.c_str());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry), path.c_str());
+#endif
+    gtk_editable_set_position(GTK_EDITABLE(entry), -1);
+
+    g_signal_handlers_unblock_matched(G_OBJECT(entry),
+                                      GSignalMatchType::G_SIGNAL_MATCH_FUNC,
+                                      0,
+                                      0,
+                                      nullptr,
+                                      (void*)on_changed,
+                                      nullptr);
+
+    on_changed(GTK_ENTRY(entry), nullptr);
+    seek_path_delayed(GTK_ENTRY(entry), 10);
 
     return true;
 }

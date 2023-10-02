@@ -1887,7 +1887,6 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
     if (main_window->current_file_browser() == file_browser)
     {
         main_window->set_window_title(file_browser);
-        // gtk_entry_set_text(main_window->address_bar, file_browser->dir->path);
     }
 
     if (file_browser->inhibit_focus_)

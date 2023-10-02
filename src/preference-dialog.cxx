@@ -954,8 +954,14 @@ namespace preference::date_format
     create_pref_text_box()
     {
         GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-        gtk_entry_set_text(entry, app_settings.date_format().data());
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(entry), app_settings.date_format().data());
+#elif (GTK_MAJOR_VERSION == 3)
+        gtk_entry_set_text(GTK_ENTRY(entry), app_settings.date_format().data());
+#endif
+
         g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+
         return entry;
     }
 } // namespace preference::date_format
@@ -979,9 +985,17 @@ namespace preference::editor
     GtkEntry*
     create_pref_text_box()
     {
+        const auto editor = xset_get_s(xset::name::editor).value_or("");
+
         GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-        gtk_entry_set_text(entry, xset_get_s(xset::name::editor).value_or("").data());
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(entry), editor.data());
+#elif (GTK_MAJOR_VERSION == 3)
+        gtk_entry_set_text(GTK_ENTRY(entry), editor.data());
+#endif
+
         g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+
         return entry;
     }
 } // namespace preference::editor

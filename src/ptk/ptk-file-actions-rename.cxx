@@ -360,7 +360,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         const auto filename_parts = split_basename_extension(full_name);
         gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
-        gtk_entry_set_text(mset->entry_ext, filename_parts.extension.data());
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
+#elif (GTK_MAJOR_VERSION == 3)
+        gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), filename_parts.extension.data());
+#endif
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -457,7 +461,11 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 
         const auto filename_parts = split_basename_extension(full_name);
         gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
-        gtk_entry_set_text(mset->entry_ext, filename_parts.extension.data());
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
+#elif (GTK_MAJOR_VERSION == 3)
+        gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), filename_parts.extension.data());
+#endif
 
         // update full_name
         if (filename_parts.basename.empty() || filename_parts.extension.empty())
@@ -1028,7 +1036,11 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
                 }
             }
         }
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(w), path);
+#elif (GTK_MAJOR_VERSION == 3)
         gtk_entry_set_text(GTK_ENTRY(w), path);
+#endif
     }
 
     // Saving dialog dimensions
@@ -2193,7 +2205,11 @@ on_template_changed(GtkWidget* widget, MoveSet* mset)
             ext = "";
         }
     }
-    gtk_entry_set_text(mset->entry_ext, ext.data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), ext.data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), ext.data());
+#endif
 
     // need new name due to extension added?
     GtkTextIter iter, siter;
@@ -2492,7 +2508,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
             gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_target), false);
             if (!mset->new_path.empty() && file)
             {
-                gtk_entry_set_text(mset->entry_target, mset->new_path.c_str());
+#if (GTK_MAJOR_VERSION == 4)
+                gtk_editable_set_text(GTK_EDITABLE(mset->entry_target),
+                                      valumset->new_pathe.c_str());
+#elif (GTK_MAJOR_VERSION == 3)
+                gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->new_path.c_str());
+#endif
             }
             // clang-format off
             g_signal_connect(G_OBJECT(mset->browse_target), "clicked", G_CALLBACK(on_create_browse_button_press), mset);
@@ -2500,7 +2521,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
         }
         else
         {
-            gtk_entry_set_text(mset->entry_target, mset->mime_type.data());
+#if (GTK_MAJOR_VERSION == 4)
+            gtk_editable_set_text(GTK_EDITABLE(mset->entry_target), mset->mime_type.data());
+#elif (GTK_MAJOR_VERSION == 3)
+            gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->mime_type.data());
+#endif
             gtk_editable_set_editable(GTK_EDITABLE(mset->entry_target), false);
             mset->browse_target = nullptr;
         }

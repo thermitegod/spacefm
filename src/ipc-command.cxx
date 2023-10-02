@@ -724,7 +724,11 @@ run_ipc_command(const std::string_view socket_commands_json)
 
             GtkEntry* path_bar = file_browser->path_bar();
 
-            gtk_entry_set_text(path_bar, value.data());
+#if (GTK_MAJOR_VERSION == 4)
+            gtk_editable_set_text(GTK_EDITABLE(path_bar), value.data());
+#elif (GTK_MAJOR_VERSION == 3)
+            gtk_entry_set_text(GTK_ENTRY(path_bar), value.data());
+#endif
 
             gtk_editable_set_position(GTK_EDITABLE(path_bar), -1);
             // gtk_editable_select_region(GTK_EDITABLE(path_bar), width, height);

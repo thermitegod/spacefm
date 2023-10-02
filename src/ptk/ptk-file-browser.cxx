@@ -1729,7 +1729,11 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
         {
             if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
             {
-                gtk_entry_set_text(file_browser->path_bar_, dir_path);
+#if (GTK_MAJOR_VERSION == 4)
+                gtk_editable_set_text(GTK_EDITABLE(file_browser->path_bar_), dir_path);
+#elif (GTK_MAJOR_VERSION == 3)
+                gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar_), dir_path);
+#endif
             }
         }
         std::free(dir_path);
@@ -3118,7 +3122,11 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     const auto disp_path = this->cwd();
     if (!this->inhibit_focus_)
     {
-        gtk_entry_set_text(this->path_bar_, disp_path.c_str());
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), disp_path.c_str());
+#elif (GTK_MAJOR_VERSION == 3)
+        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), disp_path.c_str());
+#endif
     }
 
     this->enable_toolbar();
@@ -4391,7 +4399,11 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
 #endif
 
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(entry, default_pattern.data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry), default_pattern.data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry), default_pattern.data());
+#endif
     gtk_editable_set_editable(GTK_EDITABLE(entry), true);
 
     gtk_widget_set_margin_start(GTK_WIDGET(entry), 5);
@@ -5107,7 +5119,11 @@ PtkFileBrowser::rebuild_toolbars() noexcept
     {
         rebuild_toolbox(nullptr, this);
         const auto cwd = this->cwd();
-        gtk_entry_set_text(this->path_bar_, cwd.c_str());
+#if (GTK_MAJOR_VERSION == 4)
+        gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
+#elif (GTK_MAJOR_VERSION == 3)
+        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
+#endif
     }
     if (this->side_toolbar)
     {

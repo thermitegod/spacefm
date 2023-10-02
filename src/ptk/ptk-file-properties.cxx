@@ -334,7 +334,11 @@ GtkEntry*
 create_prop_text_box(const std::string_view data)
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(entry, data.data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry), data.data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry), data.data());
+#endif
     gtk_editable_set_editable(GTK_EDITABLE(entry), false);
     return entry;
 }
@@ -343,7 +347,11 @@ GtkEntry*
 create_prop_text_box_no_focus(const std::string_view data)
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(entry, data.data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry), data.data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry), data.data());
+#endif
     gtk_editable_set_editable(GTK_EDITABLE(entry), false);
     gtk_widget_set_can_focus(GTK_WIDGET(entry), false);
     gtk_widget_set_sensitive(GTK_WIDGET(entry), false);
@@ -356,7 +364,11 @@ create_prop_text_box_date(const std::time_t time)
     const auto time_formated = vfs_create_display_date(time);
 
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(entry, time_formated.data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry), time_formated.data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry), time_formated.data());
+#endif
     gtk_editable_set_editable(GTK_EDITABLE(entry), false);
     return entry;
 }
@@ -727,14 +739,22 @@ init_permissions_tab(properties_dialog_data* data,
 
     // Owner
     GtkEntry* entry_owner = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(entry_owner, selected_file->display_owner().data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry_owner), selected_file->display_owner().data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry_owner), selected_file->display_owner().data());
+#endif
     gtk_editable_set_editable(GTK_EDITABLE(entry_owner), false);
 
     page.add_row("Owner:", GTK_WIDGET(entry_owner));
 
     // Group
     GtkEntry* entry_group = GTK_ENTRY(gtk_entry_new());
-    gtk_entry_set_text(entry_group, selected_file->display_group().data());
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_editable_set_text(GTK_EDITABLE(entry_group), selected_file->display_group().data());
+#elif (GTK_MAJOR_VERSION == 3)
+    gtk_entry_set_text(GTK_ENTRY(entry_group), selected_file->display_group().data());
+#endif
     gtk_editable_set_editable(GTK_EDITABLE(entry_group), false);
 
     page.add_row("Group:", GTK_WIDGET(entry_group));
