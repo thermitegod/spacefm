@@ -61,7 +61,11 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
                                     nullptr);
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
-    gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
+
+    gtk_widget_set_margin_start(GTK_WIDGET(dialog), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(dialog), 5);
+    gtk_widget_set_margin_top(GTK_WIDGET(dialog), 5);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(dialog), 5);
 
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 800, 500);
     // gtk_window_set_resizable(GTK_WINDOW(dialog), true);

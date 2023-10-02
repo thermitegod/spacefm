@@ -113,7 +113,11 @@ class PreferencePage
     {
         gtk_box_set_homogeneous(this->box_, false);
         gtk_box_set_spacing(this->box_, 12);
-        gtk_container_set_border_width(GTK_CONTAINER(this->box_), 12);
+
+        gtk_widget_set_margin_start(GTK_WIDGET(this->box_), 12);
+        gtk_widget_set_margin_end(GTK_WIDGET(this->box_), 12);
+        gtk_widget_set_margin_top(GTK_WIDGET(this->box_), 12);
+        gtk_widget_set_margin_bottom(GTK_WIDGET(this->box_), 12);
     }
 
     void
@@ -1189,8 +1193,10 @@ show_preference_dialog(GtkWindow* parent) noexcept
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(notebook));
 #endif
 
-    gtk_container_set_border_width(GTK_CONTAINER(notebook), 2);
-    gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
+    gtk_widget_set_margin_start(GTK_WIDGET(notebook), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(notebook), 5);
+    gtk_widget_set_margin_top(GTK_WIDGET(notebook), 5);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(notebook), 5);
 
     // clang-format off
     // Add Setting Pages

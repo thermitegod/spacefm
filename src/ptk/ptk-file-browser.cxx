@@ -905,7 +905,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     gtk_label_set_selectable(file_browser->status_label, true);
     gtk_widget_set_can_focus(GTK_WIDGET(file_browser->status_label), false);
     gtk_widget_set_hexpand(GTK_WIDGET(file_browser->status_label), true);
-    gtk_widget_set_halign(GTK_WIDGET(file_browser->status_label), GtkAlign::GTK_ALIGN_FILL);
     gtk_widget_set_halign(GTK_WIDGET(file_browser->status_label), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(file_browser->status_label), GtkAlign::GTK_ALIGN_CENTER);
 
@@ -4370,7 +4369,12 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
 
     GtkBox* vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 10));
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 20);
+
+    gtk_widget_set_margin_start(GTK_WIDGET(vbox), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(vbox), 5);
+    gtk_widget_set_margin_top(GTK_WIDGET(vbox), 5);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(vbox), 5);
+
 #if (GTK_MAJOR_VERSION == 4)
     gtk_box_prepend(GTK_BOX(content_area), GTK_WIDGET(vbox));
 #elif (GTK_MAJOR_VERSION == 3)
@@ -4380,7 +4384,11 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_text(entry, default_pattern.data());
     gtk_editable_set_editable(GTK_EDITABLE(entry), true);
-    gtk_container_set_border_width(GTK_CONTAINER(entry), 10);
+
+    gtk_widget_set_margin_start(GTK_WIDGET(entry), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(entry), 5);
+    gtk_widget_set_margin_top(GTK_WIDGET(entry), 5);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(entry), 5);
 
     gtk_box_pack_start(vbox, GTK_WIDGET(entry), true, true, 4);
 

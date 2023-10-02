@@ -280,7 +280,11 @@ class PropertiesPage
     {
         gtk_box_set_homogeneous(this->box_, false);
         gtk_box_set_spacing(this->box_, 12);
-        gtk_container_set_border_width(GTK_CONTAINER(this->box_), 12);
+
+        gtk_widget_set_margin_start(GTK_WIDGET(this->box_), 12);
+        gtk_widget_set_margin_end(GTK_WIDGET(this->box_), 12);
+        gtk_widget_set_margin_top(GTK_WIDGET(this->box_), 12);
+        gtk_widget_set_margin_bottom(GTK_WIDGET(this->box_), 12);
 
         this->section_ = PropertiesSection();
         gtk_box_pack_start(box_, GTK_WIDGET(this->section_.box()), false, false, 0);
@@ -915,8 +919,15 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(notebook));
 #endif
 
-    gtk_container_set_border_width(GTK_CONTAINER(notebook), 2);
-    gtk_container_set_border_width(GTK_CONTAINER(dialog), 2);
+    gtk_widget_set_margin_start(GTK_WIDGET(notebook), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(notebook), 5);
+    gtk_widget_set_margin_top(GTK_WIDGET(notebook), 5);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(notebook), 5);
+
+    gtk_widget_set_margin_start(GTK_WIDGET(dialog), 5);
+    gtk_widget_set_margin_end(GTK_WIDGET(dialog), 5);
+    gtk_widget_set_margin_top(GTK_WIDGET(dialog), 5);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(dialog), 5);
 
     const auto data = new properties_dialog_data;
     data->file_list = selected_files;

@@ -2671,7 +2671,11 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_in
 
     // Pack
     GtkBox* dlg_vbox = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(mset->dlg)));
-    gtk_container_set_border_width(GTK_CONTAINER(mset->dlg), 10);
+
+    gtk_widget_set_margin_start(GTK_WIDGET(dlg_vbox), 10);
+    gtk_widget_set_margin_end(GTK_WIDGET(dlg_vbox), 10);
+    gtk_widget_set_margin_top(GTK_WIDGET(dlg_vbox), 10);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(dlg_vbox), 10);
 
     gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->label_name), false, true, 4);
     gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->scroll_name), true, true, 0);

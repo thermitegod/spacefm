@@ -1881,8 +1881,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_set_hexpand(GTK_WIDGET(btn), false);
             gtk_widget_set_vexpand(GTK_WIDGET(btn), false);
             gtk_button_set_always_show_image(btn, true);
-            gtk_widget_set_margin_start(GTK_WIDGET(btn), 0);
-            gtk_widget_set_margin_end(GTK_WIDGET(btn), 0);
 
             // create tool item containing an ebox to capture click on button
             item = GTK_WIDGET(gtk_tool_item_new());
@@ -1935,8 +1933,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_set_hexpand(GTK_WIDGET(check_btn), false);
             gtk_widget_set_vexpand(GTK_WIDGET(check_btn), false);
             gtk_button_set_always_show_image(GTK_BUTTON(check_btn), true);
-            gtk_widget_set_margin_start(GTK_WIDGET(check_btn), 0);
-            gtk_widget_set_margin_end(GTK_WIDGET(check_btn), 0);
 
             // create tool item containing an ebox to capture click on button
             item = GTK_WIDGET(gtk_tool_item_new());
@@ -2068,8 +2064,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_set_hexpand(GTK_WIDGET(btn), false);
             gtk_widget_set_vexpand(GTK_WIDGET(btn), false);
             gtk_button_set_always_show_image(btn, true);
-            gtk_widget_set_margin_start(GTK_WIDGET(btn), 0);
-            gtk_widget_set_margin_end(GTK_WIDGET(btn), 0);
 
             GtkEventBox* ebox;
 
@@ -2137,8 +2131,6 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_set_hexpand(GTK_WIDGET(btn), false);
             gtk_widget_set_vexpand(GTK_WIDGET(btn), false);
             gtk_button_set_always_show_image(btn, true);
-            gtk_widget_set_margin_start(GTK_WIDGET(btn), 0);
-            gtk_widget_set_margin_end(GTK_WIDGET(btn), 0);
 
             g_list_free(children);
             gtk_widget_destroy(menu_btn);
@@ -2275,13 +2267,10 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
     xset_add_toolitem(parent, file_browser, toolbar, icon_size, set_child, show_tooltips);
 
     // These do not seem to do anything
-    gtk_container_set_border_width(GTK_CONTAINER(toolbar), 0);
     gtk_widget_set_margin_start(GTK_WIDGET(toolbar), 0);
     gtk_widget_set_margin_end(GTK_WIDGET(toolbar), 0);
     gtk_widget_set_margin_top(GTK_WIDGET(toolbar), 0);
     gtk_widget_set_margin_bottom(GTK_WIDGET(toolbar), 0);
-    gtk_widget_set_margin_start(GTK_WIDGET(toolbar), 0);
-    gtk_widget_set_margin_end(GTK_WIDGET(toolbar), 0);
 
     gtk_widget_show_all(GTK_WIDGET(toolbar));
 }
