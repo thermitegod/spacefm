@@ -1391,9 +1391,10 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
                 file_browser->sel_disk_size_ += file->size_on_disk();
                 vfs_file_info_unref(file);
             }
-            ++file_browser->n_sel_files_;
         }
     }
+
+    file_browser->n_sel_files_ = g_list_length(selected_files);
 
     g_list_foreach(selected_files, (GFunc)gtk_tree_path_free, nullptr);
     g_list_free(selected_files);
