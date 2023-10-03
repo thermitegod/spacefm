@@ -40,7 +40,7 @@
 struct MainWindow
 {
     /* Private */
-    GtkWindow parent;
+    GtkApplicationWindow parent;
 
     /* protected */
     GtkBox* main_vbox;

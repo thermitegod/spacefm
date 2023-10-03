@@ -102,7 +102,7 @@ static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window);
 static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window);
 static bool delayed_focus_file_browser(PtkFileBrowser* file_browser);
 
-static GtkWindowClass* parent_class = nullptr;
+static GtkApplicationWindowClass* parent_class = nullptr;
 
 static std::vector<MainWindow*> all_windows;
 
@@ -113,7 +113,7 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
 struct MainWindowClass
 {
-    GtkWindowClass parent;
+    GtkApplicationWindowClass parent;
 };
 
 static void main_window_class_init(MainWindowClass* klass);
@@ -158,7 +158,7 @@ main_window_class_init(MainWindowClass* klass)
     GtkWidgetClass* widget_class;
 
     object_class = (GObjectClass*)klass;
-    parent_class = (GtkWindowClass*)g_type_class_peek_parent(klass);
+    parent_class = (GtkApplicationWindowClass*)g_type_class_peek_parent(klass);
 
     object_class->set_property = main_window_set_property;
     object_class->get_property = main_window_get_property;
