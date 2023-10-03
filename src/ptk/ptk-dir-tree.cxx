@@ -435,20 +435,13 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     switch (ptk::dir_tree::column(column))
     {
         case ptk::dir_tree::column::icon:
+        {
             if (!file)
             {
                 return;
             }
-            i32 icon_size;
-            GdkPixbuf* icon;
-            // icon = file->small_icon();
-            icon_size = app_settings.icon_size_small();
-            if (icon_size > PANE_MAX_ICON_SIZE)
-            {
-                icon_size = PANE_MAX_ICON_SIZE;
-            }
-
-            icon = vfs_load_icon("gtk-directory", icon_size);
+            const auto icon_size = 22; // app_settings.icon_size_small();
+            GdkPixbuf* icon = vfs_load_icon("gtk-directory", icon_size);
             if (!icon)
             {
                 icon = vfs_load_icon("gnome-fs-directory", icon_size);
@@ -463,7 +456,9 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
                 g_object_unref(icon);
             }
             break;
+        }
         case ptk::dir_tree::column::disp_name:
+        {
             if (file)
             {
                 g_value_set_string(value, file->display_name().data());
@@ -473,13 +468,16 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
                 g_value_set_string(value, "( no subdirectory )"); // no sub directory
             }
             break;
+        }
         case ptk::dir_tree::column::info:
+        {
             if (!file)
             {
                 return;
             }
             g_value_set_pointer(value, vfs_file_info_ref(file));
             break;
+        }
     }
 }
 
