@@ -227,15 +227,7 @@ VFSMimeType::icon(bool big) noexcept
 
     if (ztd::same(this->type_, XDG_MIME_TYPE_DIRECTORY))
     {
-        icon = vfs_load_icon("gtk-directory", icon_size);
-        if (!icon)
-        {
-            icon = vfs_load_icon("gnome-fs-directory", icon_size);
-        }
-        if (!icon)
-        {
-            icon = vfs_load_icon("folder", icon_size);
-        }
+        icon = vfs_load_icon(ICON_FULLCOLOR_FOLDER, icon_size);
         if (big)
         {
             this->big_icon_ = icon;

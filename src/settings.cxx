@@ -125,7 +125,7 @@ const std::map<xset::tool, builtin_tool_data> builtin_tools{
     {xset::tool::tree,
      {
          "Show Tree",
-         "gtk-directory",
+         "folder",
          "panel1_show_dirtree",
      }},
     {xset::tool::home,
@@ -2047,7 +2047,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             if (!image)
             {
-                image = xset_get_image(icon_name ? icon_name.value() : "gtk-directory",
+                image = xset_get_image(icon_name ? icon_name.value() : ICON_FULLCOLOR_FOLDER,
                                        (GtkIconSize)icon_size);
             }
 

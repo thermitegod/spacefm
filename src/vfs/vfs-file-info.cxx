@@ -254,31 +254,7 @@ VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
     this->load_special_info();
 }
 
-/* Icons */
-#define ICON_FOLDER              "folder-symbolic"
-#define ICON_FOLDER_DOCUMENTS    "folder-documents-symbolic"
-#define ICON_FOLDER_DOWNLOAD     "folder-download-symbolic"
-#define ICON_FOLDER_MUSIC        "folder-music-symbolic"
-#define ICON_FOLDER_PICTURES     "folder-pictures-symbolic"
-#define ICON_FOLDER_PUBLIC_SHARE "folder-publicshare-symbolic"
-#define ICON_FOLDER_TEMPLATES    "folder-templates-symbolic"
-#define ICON_FOLDER_VIDEOS       "folder-videos-symbolic"
-#define ICON_FOLDER_HOME         "user-home-symbolic"
-#define ICON_FOLDER_DESKTOP      "user-desktop-symbolic"
-
-/* Fullcolor icons */
-#define ICON_FULLCOLOR_FOLDER              "folder"
-#define ICON_FULLCOLOR_FOLDER_DOCUMENTS    "folder-documents"
-#define ICON_FULLCOLOR_FOLDER_DOWNLOAD     "folder-download"
-#define ICON_FULLCOLOR_FOLDER_MUSIC        "folder-music"
-#define ICON_FULLCOLOR_FOLDER_PICTURES     "folder-pictures"
-#define ICON_FULLCOLOR_FOLDER_PUBLIC_SHARE "folder-publicshare"
-#define ICON_FULLCOLOR_FOLDER_TEMPLATES    "folder-templates"
-#define ICON_FULLCOLOR_FOLDER_VIDEOS       "folder-videos"
-#define ICON_FULLCOLOR_FOLDER_HOME         "user-home"
-#define ICON_FULLCOLOR_FOLDER_DESKTOP      "user-desktop"
-
-const std::string
+const std::string_view
 VFSFileInfo::special_directory_get_icon_name() const noexcept
 {
     const bool symbolic = this->is_symlink();

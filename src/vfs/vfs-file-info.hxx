@@ -155,7 +155,7 @@ struct VFSFileInfo
 
     void load_special_info() noexcept;
 
-    const std::string special_directory_get_icon_name() const noexcept;
+    const std::string_view special_directory_get_icon_name() const noexcept;
 
   public: // TODO need to remove manual ref counting
     void ref_inc();

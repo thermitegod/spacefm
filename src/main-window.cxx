@@ -1260,10 +1260,6 @@ main_window_init(MainWindow* main_window)
     // g_signal_connect(G_OBJECT(main_window), "task-notify", G_CALLBACK(ptk_file_task_notify_handler), nullptr);
 
     /* Start building GUI */
-    /*
-    NOTE: gtk_window_set_icon_name does not work under some WMs, such as IceWM.
-    gtk_window_set_icon_name( GTK_WINDOW( main_window ),
-                              "gnome-fs-directory" ); */
     main_window->update_window_icon();
 
     main_window->main_vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
@@ -1921,7 +1917,7 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 
     GtkBox* box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
     GtkWidget* icon =
-        gtk_image_new_from_icon_name("gtk-directory", GtkIconSize::GTK_ICON_SIZE_MENU);
+        gtk_image_new_from_icon_name(ICON_FULLCOLOR_FOLDER.data(), GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(box, icon, false, false, 4);
 
     const auto cwd = file_browser->cwd();

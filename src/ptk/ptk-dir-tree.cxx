@@ -440,16 +440,8 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
             {
                 return;
             }
-            const auto icon_size = 22; // app_settings.icon_size_small();
-            GdkPixbuf* icon = vfs_load_icon("gtk-directory", icon_size);
-            if (!icon)
-            {
-                icon = vfs_load_icon("gnome-fs-directory", icon_size);
-            }
-            if (!icon)
-            {
-                icon = vfs_load_icon("folder", icon_size);
-            }
+            const auto icon_size = 22;
+            GdkPixbuf* icon = vfs_load_icon(ICON_FULLCOLOR_FOLDER, icon_size);
             if (icon)
             {
                 g_value_set_object(value, icon);

@@ -321,7 +321,7 @@ xset_defaults()
 
     set = xset_get(xset::name::main_book);
     xset_set_var(set, xset::var::menu_label, "_Bookmarks");
-    xset_set_var(set, xset::var::icn, "gtk-directory");
+    xset_set_var(set, xset::var::icn, "folder");
     set->menu_style = xset::menu::submenu;
 
     // Fonts
@@ -980,7 +980,7 @@ xset_defaults()
 
     set = xset_get(xset::name::new_directory);
     xset_set_var(set, xset::var::menu_label, "Dir_ectory");
-    xset_set_var(set, xset::var::icn, "gtk-directory");
+    xset_set_var(set, xset::var::icn, "folder");
 
     set = xset_get(xset::name::new_link);
     xset_set_var(set, xset::var::menu_label, "_Link");
@@ -1079,7 +1079,7 @@ xset_defaults()
 
     set = xset_get(xset::name::focus_dirtree);
     xset_set_var(set, xset::var::menu_label, "_Tree");
-    xset_set_var(set, xset::var::icn, "gtk-directory");
+    xset_set_var(set, xset::var::icn, "folder");
 
     set = xset_get(xset::name::focus_book);
     xset_set_var(set, xset::var::menu_label, "_Bookmarks");
