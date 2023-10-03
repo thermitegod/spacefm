@@ -119,6 +119,11 @@ VFSUserDirs::current_dir() const noexcept
 void
 VFSUserDirs::program_config_dir(const std::filesystem::path& config_dir) noexcept
 {
+    if (!std::filesystem::exists(config_dir))
+    {
+        std::filesystem::create_directories(config_dir);
+        std::filesystem::permissions(config_dir, std::filesystem::perms::owner_all);
+    }
     this->program_config = std::filesystem::canonical(config_dir);
 }
 
