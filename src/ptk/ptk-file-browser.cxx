@@ -183,6 +183,11 @@ std::vector<std::string> xset_cmd_history;
 // history of closed tabs
 static std::map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
+struct selection_history_data
+{
+    std::map<std::filesystem::path, std::vector<std::filesystem::path>> selection_history{};
+};
+
 struct column_data
 {
     std::string_view title;
@@ -482,7 +487,6 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         const auto dirname_path = dir_path.parent_path();
         if (!std::filesystem::equivalent(dirname_path, file_browser->cwd()))
         {
-            file_browser->select_path_ = dir_path;
             file_browser->chdir(dirname_path, ptk::file_browser::chdir_mode::add_history);
         }
         else
@@ -942,6 +946,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     g_signal_connect(G_OBJECT(file_browser->side_vpane_top), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
     g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
     // clang-format on
+
+    file_browser->history = std::make_shared<selection_history_data>();
 }
 
 static void
@@ -1122,7 +1128,8 @@ on_history_menu_item_activate(GtkWidget* menu_item, PtkFileBrowser* file_browser
         elementn = g_list_position(file_browser->history_, file_browser->curHistory_);
         if (elementn != -1)
         {
-            file_browser->curhistsel_ = g_list_nth(file_browser->histsel_, elementn);
+            // TODO
+            // file_browser->curhistsel_ = g_list_nth(file_browser->histsel_, elementn);
         }
         else
         {
@@ -2980,29 +2987,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     // if (cancel)
     //     return false;
 
-    // MOD remember selected files
-    // ztd::logger::debug("@@@@@@@@@@@ remember: {}", this->cwd());
-    if (this->curhistsel_ && this->curhistsel_->data)
-    {
-        // ztd::logger::debug("free curhistsel");
-        g_list_free((GList*)this->curhistsel_->data);
-    }
-    if (this->curhistsel_)
-    {
-        this->curhistsel_->data = vector_to_glist_vfs_file_info(this->selected_files());
-
-#if 0
-        ztd::logger::debug("set curhistsel {}", g_list_position(this->histsel, this->curhistsel));
-        if (this->curhistsel->data)
-        {
-            ztd::logger::debug("curhistsel->data OK");
-        }
-        else
-        {
-            ztd::logger::debug("curhistsel->data nullptr");
-        }
-#endif
-    }
+    this->update_selection_history();
 
     switch (mode)
     {
@@ -3019,37 +3004,16 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
                     g_list_free(this->curHistory_->next);
                     this->curHistory_->next = nullptr;
                 }
-                // MOD added - make histsel shadow this->history
-                if (this->curhistsel_ && this->curhistsel_->next)
-                {
-                    // ztd::logger::debug("@@@@@@@@@@@ free forward");
-                    for (GList* l = this->curhistsel_->next; l; l = g_list_next(l))
-                    {
-                        if (l->data)
-                        {
-                            // ztd::logger::debug("free forward item");
-                            g_list_free((GList*)l->data);
-                        }
-                    }
-                    g_list_free(this->curhistsel_->next);
-                    this->curhistsel_->next = nullptr;
-                }
                 /* Add path to history if there is no forward history */
                 this->history_ = g_list_append(this->history_, ztd::strdup(path));
                 this->curHistory_ = g_list_last(this->history_);
-                // MOD added - make histsel shadow this->history
-                GList* sellist = nullptr;
-                this->histsel_ = g_list_append(this->histsel_, sellist);
-                this->curhistsel_ = g_list_last(this->histsel_);
             }
             break;
         case ptk::file_browser::chdir_mode::back:
             this->curHistory_ = this->curHistory_->prev;
-            this->curhistsel_ = this->curhistsel_->prev;
             break;
         case ptk::file_browser::chdir_mode::forward:
             this->curHistory_ = this->curHistory_->next;
-            this->curhistsel_ = this->curhistsel_->next;
             break;
         case ptk::file_browser::chdir_mode::normal:
         case ptk::file_browser::chdir_mode::no_history:
@@ -3148,7 +3112,6 @@ PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
         const auto dir_path = canon.parent_path();
         if (!std::filesystem::equivalent(dir_path, cwd))
         {
-            this->select_path_ = canon;
             this->chdir(dir_path, ptk::file_browser::chdir_mode::add_history);
         }
         else
@@ -3308,50 +3271,7 @@ PtkFileBrowser::refresh() noexcept
         return;
     }
 
-    // save cursor's file path for later re-selection
-    GtkTreePath* tree_path = nullptr;
-    GtkTreeModel* model = nullptr;
-
-    switch (this->view_mode_)
-    {
-        case ptk::file_browser::view_mode::icon_view:
-        case ptk::file_browser::view_mode::compact_view:
-            exo_icon_view_get_cursor(EXO_ICON_VIEW(this->folder_view_), &tree_path, nullptr);
-            model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
-            break;
-        case ptk::file_browser::view_mode::list_view:
-            gtk_tree_view_get_cursor(GTK_TREE_VIEW(this->folder_view_), &tree_path, nullptr);
-            model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
-            break;
-    }
-
-    std::filesystem::path cursor_path;
-    GtkTreeIter it;
-    if (tree_path && model && gtk_tree_model_get_iter(model, &it, tree_path))
-    {
-        vfs::file_info file;
-        gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
-        if (file)
-        {
-            cursor_path = this->cwd() / file->name();
-        }
-    }
-    gtk_tree_path_free(tree_path);
-
-    // these steps are similar to chdir
-    // remove old dir object
-    if (this->dir_)
-    {
-        g_signal_handlers_disconnect_matched(this->dir_,
-                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
-                                             0,
-                                             0,
-                                             nullptr,
-                                             nullptr,
-                                             this);
-        g_object_unref(this->dir_);
-        this->dir_ = nullptr;
-    }
+    this->update_selection_history();
 
     // destroy file list and create new one
     ptk_file_browser_update_model(this);
@@ -3370,17 +3290,13 @@ PtkFileBrowser::refresh() noexcept
     if (this->dir_->is_file_listed())
     {
         on_dir_file_listed(this, false);
-        if (std::filesystem::exists(cursor_path))
-        {
-            this->select_file(cursor_path);
-        }
         this->busy_ = false;
     }
     else
     {
         this->busy_ = true;
-        this->select_path_ = cursor_path;
     }
+
     this->signal_file_listed =
         this->dir_->add_event<spacefm::signal::file_listed>(on_dir_file_listed, this);
 }
@@ -4192,132 +4108,13 @@ PtkFileBrowser::unselect_all() const noexcept
 void
 PtkFileBrowser::select_last() noexcept
 {
-    // ztd::logger::debug("PtkFileBrowser::select_last");
-
-    // select one file?
-    if (this->select_path_)
+    // ztd::logger::debug("select_last");
+    const auto cwd = this->cwd();
+    if (this->history->selection_history.contains(cwd))
     {
-        this->select_file(this->select_path_.value());
-        this->select_path_ = std::nullopt;
-        return;
+        this->select_files(this->history->selection_history.at(cwd));
     }
-
-#if 0
-
-    // select previously selected files
-    i32 elementn = -1;
-    GList* l;
-    GList* element = nullptr;
-    // ztd::logger::info("    search for {}", (char*)this->curHistory->data);
-    if (this->history_ && this->histsel_ && this->curHistory_ && (l = g_list_last(this->history_)))
-    {
-        if (l->data && ztd::same((char*)l->data, (char*)this->curHistory_->data))
-        {
-            elementn = g_list_position(this->history_, l);
-            if (elementn != -1)
-            {
-                element = g_list_nth(this->histsel_, elementn);
-                // skip the current history item if sellist empty since it was just created
-                if (!element->data)
-                {
-                    // ztd::logger::info("        found current empty");
-                    element = nullptr;
-                }
-                // else ztd::logger::info("        found current NON-empty");
-            }
-        }
-        if (!element)
-        {
-            while ((l = g_list_previous(l)))
-            {
-                if (l->data && ztd::same((char*)l->data, (char*)this->curHistory_->data))
-                {
-                    elementn = g_list_position(this->history_, l);
-                    // ztd::logger::info("        found elementn={}", elementn);
-                    if (elementn != -1)
-                    {
-                        element = g_list_nth(this->histsel_, elementn);
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-#if 0
-    ztd::logger::debug("element {}", element ? "OK" : "nullptr");
-    if (element)
-    {
-        ztd::logger::debug("element->data {}", element->data ? "OK" : "nullptr");
-    }
-    ztd::logger::debug("histsellen={}", g_list_length(this->histsel_));
-#endif
-
-    if (element && element->data)
-    {
-        // ztd::logger::info("    select files");
-        PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
-        GtkTreeSelection* tree_sel;
-        bool firstsel = true;
-        if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
-        {
-            tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
-        }
-
-        for (l = (GList*)element->data; l; l = g_list_next(l))
-        {
-            if (l->data)
-            {
-                // ztd::logger::debug("find a file");
-                GtkTreeIter it;
-                GtkTreePath* tp;
-                const vfs::file_info file(((VFSFileInfo*)l->data)->shared_ptr());
-                if (ptk_file_list_find_iter(list, &it, file))
-                {
-                    // ztd::logger::debug("found file");
-                    tp = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
-                    if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
-                        this->view_mode_ == ptk::file_browser::view_mode::compact_view)
-                    {
-                        exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), tp);
-                        if (firstsel)
-                        {
-                            exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
-                                                     tp,
-                                                     nullptr,
-                                                     false);
-                            exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_),
-                                                         tp,
-                                                         true,
-                                                         .25,
-                                                         0);
-                            firstsel = false;
-                        }
-                    }
-                    else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
-                    {
-                        gtk_tree_selection_select_path(tree_sel, tp);
-                        if (firstsel)
-                        {
-                            gtk_tree_view_set_cursor(GTK_TREE_VIEW(this->folder_view_),
-                                                     tp,
-                                                     nullptr,
-                                                     false);
-                            gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(this->folder_view_),
-                                                         tp,
-                                                         nullptr,
-                                                         true,
-                                                         .25,
-                                                         0);
-                            firstsel = false;
-                        }
-                    }
-                    gtk_tree_path_free(tp);
-                }
-            }
-        }
-    }
-#endif
+    this->history->selection_history.erase(cwd);
 }
 
 static bool
@@ -5117,6 +4914,32 @@ PtkFileBrowser::rebuild_toolbars() noexcept
     this->enable_toolbar();
 }
 
+void
+PtkFileBrowser::update_selection_history() noexcept
+{
+    const auto cwd = this->cwd();
+    // ztd::logger::debug("selection history: {}", cwd.string());
+    this->history->selection_history.contains(cwd);
+    {
+        this->history->selection_history.erase(cwd);
+    }
+
+    const auto selected_files = this->selected_files();
+    if (selected_files.empty())
+    {
+        return;
+    }
+
+    std::vector<std::filesystem::path> selected_filenames;
+    selected_filenames.reserve(selected_files.size());
+
+    for (const vfs::file_info& file : selected_files)
+    {
+        selected_filenames.emplace_back(file->name());
+    }
+    this->history->selection_history.insert({cwd, selected_filenames});
+}
+
 GList*
 PtkFileBrowser::selected_items(GtkTreeModel** model) noexcept
 {
@@ -5138,7 +4961,8 @@ PtkFileBrowser::selected_items(GtkTreeModel** model) noexcept
 }
 
 void
-PtkFileBrowser::select_file(const std::filesystem::path& path, const bool unselect_others) noexcept
+PtkFileBrowser::select_file(const std::filesystem::path& filename,
+                            const bool unselect_others) noexcept
 {
     GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;
@@ -5170,7 +4994,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& path, const bool unsele
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        const std::string select_filename = path.filename();
+        const std::string select_filename = filename.filename();
 
         do
         {
@@ -5178,8 +5002,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& path, const bool unsele
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                const auto filename = file->name();
-                if (ztd::same(filename, select_filename))
+                if (ztd::same(file->name(), select_filename))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
@@ -5219,7 +5042,18 @@ PtkFileBrowser::select_file(const std::filesystem::path& path, const bool unsele
 }
 
 void
-PtkFileBrowser::unselect_file(const std::filesystem::path& path,
+PtkFileBrowser::select_files(const std::span<std::filesystem::path> select_filenames) noexcept
+{
+    this->unselect_all();
+
+    for (const std::filesystem::path& select_filename : select_filenames)
+    {
+        this->select_file(select_filename.filename(), false);
+    }
+}
+
+void
+PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
                               const bool unselect_others) noexcept
 {
     GtkTreeSelection* tree_sel = nullptr;
@@ -5252,7 +5086,7 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& path,
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
-        const std::string unselect_filename = path.filename();
+        const std::string unselect_filename = filename.filename();
 
         do
         {
@@ -5260,8 +5094,7 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& path,
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                const auto filename = file->name();
-                if (ztd::same(filename, unselect_filename))
+                if (ztd::same(file->name(), unselect_filename))
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||

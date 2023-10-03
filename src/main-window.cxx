@@ -1887,8 +1887,8 @@ on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_windo
     }
     else
     {
-        file_browser->select_last();                                    // restore last selections
-        gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view())); // MOD
+        file_browser->select_last(); // restore last selections
+        gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
     }
     if (xset_get_b(xset::name::main_save_tabs))
     {

@@ -23,6 +23,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
@@ -89,6 +91,8 @@ namespace ptk::file_browser
 struct PtkFileBrowser;
 struct MainWindow;
 
+struct selection_history_data;
+
 struct PtkFileBrowser
 {
     /* parent class */
@@ -97,8 +101,6 @@ struct PtkFileBrowser
     /* <private> */
     GList* history_{nullptr};
     GList* curHistory_{nullptr};
-    GList* histsel_{nullptr};
-    GList* curhistsel_{nullptr};
 
     vfs::dir dir_{nullptr};
     GtkTreeModel* file_list_{nullptr};
@@ -162,7 +164,8 @@ struct PtkFileBrowser
     GtkToolbar* side_toolbar{nullptr};
     GSList* toolbar_widgets[10];
 
-    std::optional<std::filesystem::path> select_path_{std::nullopt};
+    // private:
+    std::shared_ptr<selection_history_data> history;
 
   public:
     // folder_path should be encodede in on-disk encoding
@@ -215,9 +218,17 @@ struct PtkFileBrowser
     void paste_link() const noexcept;
     void paste_target() const noexcept;
 
+    void update_selection_history() noexcept;
+
+    GList* selected_items(GtkTreeModel** model) noexcept;
     void select_all() const noexcept;
     void unselect_all() const noexcept;
     void select_last() noexcept;
+    void select_file(const std::filesystem::path& filename,
+                     const bool unselect_others = true) noexcept;
+    void select_files(const std::span<std::filesystem::path> select_filenames) noexcept;
+    void unselect_file(const std::filesystem::path& filename,
+                       const bool unselect_others = true) noexcept;
     void select_pattern(const std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
@@ -236,10 +247,6 @@ struct PtkFileBrowser
 
     void rebuild_toolbars() noexcept;
 
-    GList* selected_items(GtkTreeModel** model) noexcept;
-    void select_file(const std::filesystem::path& path, const bool unselect_others = true) noexcept;
-    void unselect_file(const std::filesystem::path& path,
-                       const bool unselect_others = true) noexcept;
     void seek_path(const std::filesystem::path& seek_dir,
                    const std::filesystem::path& seek_name) noexcept;
     void update_toolbar_widgets(xset::tool tool_type) noexcept;
