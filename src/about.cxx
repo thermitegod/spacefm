@@ -32,7 +32,11 @@ show_about_dialog(GtkWindow* parent)
     dialog.set_comments("(unofficial)");
     dialog.set_website("https://github.com/thermitegod/spacefm");
     dialog.set_website_label("Github");
+#if (GTK_MAJOR_VERSION == 4)
+    dialog.set_license_type(Gtk::License::GPL_3_0);
+#elif (GTK_MAJOR_VERSION == 3)
     dialog.set_license_type(Gtk::License::LICENSE_GPL_3_0);
+#endif
 
     dialog.run();
 }
