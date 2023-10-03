@@ -68,8 +68,7 @@ glist_to_vector_vfs_file_info(GList* list)
     vec.reserve(g_list_length(list));
     for (GList* l = list; l; l = g_list_next(l))
     {
-        vfs::file_info file = VFS_FILE_INFO(l->data);
-        vec.emplace_back(file);
+        vec.emplace_back(((VFSFileInfo*)l->data)->shared_from_this());
     }
     return vec;
 }
@@ -78,9 +77,9 @@ GList*
 vector_to_glist_vfs_file_info(const std::span<const vfs::file_info> list)
 {
     GList* l = nullptr;
-    for (const vfs::file_info file : list)
+    for (const vfs::file_info& file : list)
     {
-        l = g_list_append(l, file);
+        l = g_list_append(l, file.get());
     }
     return l;
 }

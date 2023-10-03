@@ -1361,7 +1361,7 @@ run_ipc_command(const std::string_view socket_commands_json)
 
             // build fish array
             std::string str;
-            for (const vfs::file_info file : selected_files)
+            for (const vfs::file_info& file : selected_files)
             {
                 if (!file)
                 {

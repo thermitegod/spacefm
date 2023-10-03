@@ -106,7 +106,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
                                                   G_TYPE_STRING,
                                                   G_TYPE_STRING);
     usize total_size_bytes = 0;
-    for (const vfs::file_info file : selected_files)
+    for (const vfs::file_info& file : selected_files)
     {
         total_size_bytes += file->size();
 
@@ -195,7 +195,7 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(selected_files.size());
-    for (const vfs::file_info file : selected_files)
+    for (const vfs::file_info& file : selected_files)
     {
         file_list.emplace_back(file->path());
     }
@@ -231,7 +231,7 @@ ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(selected_files.size());
-    for (const vfs::file_info file : selected_files)
+    for (const vfs::file_info& file : selected_files)
     {
         file_list.emplace_back(file->path());
     }

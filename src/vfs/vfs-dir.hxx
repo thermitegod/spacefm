@@ -92,35 +92,36 @@ struct VFSDir
 
     void unload_thumbnails(bool is_big) noexcept;
 
-    bool add_hidden(vfs::file_info file) const noexcept;
+    bool add_hidden(const vfs::file_info& file) const noexcept;
 
     /* emit signals */
     void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
-    void emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info file) noexcept;
-    void emit_file_changed(const std::filesystem::path& file_name, vfs::file_info file,
+    void emit_file_deleted(const std::filesystem::path& file_name,
+                           const vfs::file_info& file) noexcept;
+    void emit_file_changed(const std::filesystem::path& file_name, const vfs::file_info& file,
                            bool force) noexcept;
-    void emit_thumbnail_loaded(vfs::file_info file) noexcept;
+    void emit_thumbnail_loaded(const vfs::file_info& file) noexcept;
 
   private:
     vfs::file_info find_file(const std::filesystem::path& file_name,
-                             vfs::file_info file) const noexcept;
-    bool update_file_info(vfs::file_info file) noexcept;
+                             const vfs::file_info& file) const noexcept;
+    bool update_file_info(const vfs::file_info& file) noexcept;
 
     // Signals
   public:
     // Signals function types
-    using evt_file_created__run_first__t = void(vfs::file_info, PtkFileBrowser*);
-    using evt_file_created__run_last__t = void(vfs::file_info, PtkFileList*);
+    using evt_file_created__run_first__t = void(const vfs::file_info&, PtkFileBrowser*);
+    using evt_file_created__run_last__t = void(const vfs::file_info&, PtkFileList*);
 
-    using evt_file_changed__run_first__t = void(vfs::file_info, PtkFileBrowser*);
-    using evt_file_changed__run_last__t = void(vfs::file_info, PtkFileList*);
+    using evt_file_changed__run_first__t = void(const vfs::file_info&, PtkFileBrowser*);
+    using evt_file_changed__run_last__t = void(const vfs::file_info&, PtkFileList*);
 
-    using evt_file_deleted__run_first__t = void(vfs::file_info, PtkFileBrowser*);
-    using evt_file_deleted__run_last__t = void(vfs::file_info, PtkFileList*);
+    using evt_file_deleted__run_first__t = void(const vfs::file_info&, PtkFileBrowser*);
+    using evt_file_deleted__run_last__t = void(const vfs::file_info&, PtkFileList*);
 
     using evt_file_listed_t = void(PtkFileBrowser*, bool);
 
-    using evt_file_thumbnail_loaded_t = void(vfs::file_info, PtkFileList*);
+    using evt_file_thumbnail_loaded_t = void(const vfs::file_info&, PtkFileList*);
 
     using evt_mime_change_t = void();
 
@@ -234,7 +235,7 @@ struct VFSDir
     // Signals Run Event
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_created, void>::type
-    run_event(vfs::file_info file) const noexcept
+    run_event(const vfs::file_info& file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
         this->evt_mime_change.emit();
@@ -244,7 +245,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_changed, void>::type
-    run_event(vfs::file_info file) const noexcept
+    run_event(const vfs::file_info& file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
         this->evt_mime_change.emit();
@@ -254,7 +255,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_deleted, void>::type
-    run_event(vfs::file_info file) const noexcept
+    run_event(const vfs::file_info& file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
         this->evt_mime_change.emit();
@@ -273,7 +274,7 @@ struct VFSDir
 
     template<spacefm::signal evt>
     typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, void>::type
-    run_event(vfs::file_info file) const noexcept
+    run_event(const vfs::file_info& file) const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
         this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);

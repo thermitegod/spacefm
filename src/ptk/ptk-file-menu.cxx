@@ -1097,7 +1097,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         xset_t set_archive_extract_to = nullptr;
         xset_t set_archive_open = nullptr;
 
-        const auto is_archive = [](const vfs::file_info file) { return file->is_archive(); };
+        const auto is_archive = [](const vfs::file_info& file) { return file->is_archive(); };
         if (mime_type && std::ranges::all_of(sel_files, is_archive))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);
@@ -2313,7 +2313,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (!data->sel_files.empty())
     {
-        for (const vfs::file_info file : data->sel_files)
+        for (const vfs::file_info& file : data->sel_files)
         {
             const auto full_path = data->cwd / file->name();
             if (data->browser && std::filesystem::is_directory(full_path))
@@ -2541,14 +2541,12 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
     if (GTK_IS_WIDGET(ao->file_browser) && std::filesystem::exists(ao->path))
     {
         const auto cwd = ao->path.parent_path();
-        vfs::file_info file;
 
         // select file
         if (std::filesystem::equivalent(cwd, ao->file_browser->cwd()))
         {
-            file = vfs_file_info_new(ao->path);
+            vfs::file_info file = vfs_file_info_new(ao->path);
             ao->file_browser->dir_->emit_file_created(file->name(), true);
-            vfs_file_info_unref(file);
             vfs_dir_flush_notify_cache();
             ao->file_browser->select_file(ao->path);
         }
@@ -2562,10 +2560,9 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             }
             else
             {
-                file = vfs_file_info_new(ao->path);
+                vfs::file_info file = vfs_file_info_new(ao->path);
                 const std::vector<vfs::file_info> sel_files{file};
                 ptk_open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
-                vfs_file_info_unref(file);
             }
         }
     }

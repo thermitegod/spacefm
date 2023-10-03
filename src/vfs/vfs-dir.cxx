@@ -59,10 +59,10 @@ struct VFSDirClass
     GObjectClass parent;
 
     /* Default signal handlers */
-    void (*file_created)(vfs::dir dir, vfs::file_info file);
-    void (*file_deleted)(vfs::dir dir, vfs::file_info file);
-    void (*file_changed)(vfs::dir dir, vfs::file_info file);
-    void (*thumbnail_loaded)(vfs::dir dir, vfs::file_info file);
+    void (*file_created)(vfs::dir dir, const vfs::file_info& file);
+    void (*file_deleted)(vfs::dir dir, const vfs::file_info& file);
+    void (*file_changed)(vfs::dir dir, const vfs::file_info& file);
+    void (*thumbnail_loaded)(vfs::dir dir, const vfs::file_info& file);
     void (*file_listed)(vfs::dir dir);
     void (*load_complete)(vfs::dir dir);
     // void (*need_reload)(vfs::dir dir);
@@ -169,8 +169,8 @@ vfs_dir_finalize(GObject* obj)
         dir->thumbnail_loader = nullptr;
     }
 
-    vfs_file_info_list_free(dir->file_list);
-    vfs_file_info_list_free(dir->changed_files);
+    dir->file_list.clear();
+    dir->changed_files.clear();
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 }
@@ -413,14 +413,14 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
         return;
     }
 
-    for (const vfs::file_info file : dir->file_list)
+    for (const vfs::file_info& file : dir->file_list)
     {
         const auto full_path = std::filesystem::path() / dir->path / file->name();
         file->reload_mime_type(full_path);
         // ztd::logger::debug("reload {}", full_path);
     }
 
-    const auto action = [dir](vfs::file_info file)
+    const auto action = [dir](const vfs::file_info& file)
     { dir->run_event<spacefm::signal::file_changed>(file); };
     std::ranges::for_each(dir->file_list, action);
 }
@@ -446,9 +446,9 @@ vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
 */
 
 vfs::file_info
-VFSDir::find_file(const std::filesystem::path& file_name, vfs::file_info file) const noexcept
+VFSDir::find_file(const std::filesystem::path& file_name, const vfs::file_info& file) const noexcept
 {
-    for (const vfs::file_info file2 : this->file_list)
+    for (const vfs::file_info& file2 : this->file_list)
     {
         if (file == file2)
         {
@@ -463,7 +463,7 @@ VFSDir::find_file(const std::filesystem::path& file_name, vfs::file_info file) c
 }
 
 bool
-VFSDir::add_hidden(vfs::file_info file) const noexcept
+VFSDir::add_hidden(const vfs::file_info& file) const noexcept
 {
     const auto file_path = std::filesystem::path() / this->path / ".hidden";
     const std::string data = std::format("{}\n", file->name());
@@ -501,7 +501,7 @@ VFSDir::is_directory_empty() const noexcept
 }
 
 bool
-VFSDir::update_file_info(vfs::file_info file) noexcept
+VFSDir::update_file_info(const vfs::file_info& file) noexcept
 {
     bool ret = false;
 
@@ -520,7 +520,6 @@ VFSDir::update_file_info(vfs::file_info file) noexcept
             if (file)
             {
                 this->run_event<spacefm::signal::file_deleted>(file);
-                vfs_file_info_unref(file);
             }
         }
         ret = false;
@@ -541,12 +540,11 @@ VFSDir::update_changed_files(const std::filesystem::path& key) noexcept
         return;
     }
 
-    for (const vfs::file_info file : this->changed_files)
+    for (const vfs::file_info& file : this->changed_files)
     {
         if (this->update_file_info(file))
         {
             this->run_event<spacefm::signal::file_changed>(file);
-            vfs_file_info_unref(file);
         }
         // else was deleted, signaled, and unrefed in update_file_info
     }
@@ -576,22 +574,19 @@ VFSDir::update_created_files(const std::filesystem::path& key) noexcept
             {
                 vfs::file_info file = vfs_file_info_new(full_path);
                 // add new file to dir file_list
-                this->file_list.emplace_back(vfs_file_info_ref(file));
+                this->file_list.emplace_back(file);
 
                 this->run_event<spacefm::signal::file_created>(file);
-
-                vfs_file_info_unref(file);
             }
             // else file does not exist in filesystem
         }
         else
         {
             // file already exists in dir file_list
-            vfs::file_info file = vfs_file_info_ref(file_found);
+            vfs::file_info file = file_found;
             if (this->update_file_info(file))
             {
                 this->run_event<spacefm::signal::file_changed>(file);
-                vfs_file_info_unref(file);
             }
             // else was deleted, signaled, and unrefed in update_file_info
         }
@@ -604,7 +599,7 @@ VFSDir::unload_thumbnails(bool is_big) noexcept
 {
     std::lock_guard<std::mutex> lock(this->mutex);
 
-    for (const vfs::file_info file : this->file_list)
+    for (const vfs::file_info& file : this->file_list)
     {
         if (is_big)
         {
@@ -648,20 +643,19 @@ VFSDir::emit_file_created(const std::filesystem::path& file_name, bool force) no
 }
 
 void
-VFSDir::emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info file) noexcept
+VFSDir::emit_file_deleted(const std::filesystem::path& file_name,
+                          const vfs::file_info& file) noexcept
 {
     std::lock_guard<std::mutex> lock(this->mutex);
 
     if (std::filesystem::equivalent(file_name, this->path))
     {
         /* Special Case: The directory itself was deleted... */
-        file = nullptr;
 
         /* clear the whole list */
-        vfs_file_info_list_free(this->file_list);
         this->file_list.clear();
 
-        this->run_event<spacefm::signal::file_deleted>(file);
+        this->run_event<spacefm::signal::file_deleted>(nullptr);
 
         return;
     }
@@ -669,7 +663,6 @@ VFSDir::emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info
     vfs::file_info file_found = this->find_file(file_name, file);
     if (file_found)
     {
-        file_found = vfs_file_info_ref(file_found);
         if (!ztd::contains(this->changed_files, file_found))
         {
             this->changed_files.emplace_back(file_found);
@@ -682,15 +675,11 @@ VFSDir::emit_file_deleted(const std::filesystem::path& file_name, vfs::file_info
                                                            nullptr);
             }
         }
-        else
-        {
-            vfs_file_info_unref(file_found);
-        }
     }
 }
 
 void
-VFSDir::emit_file_changed(const std::filesystem::path& file_name, vfs::file_info file,
+VFSDir::emit_file_changed(const std::filesystem::path& file_name, const vfs::file_info& file,
                           bool force) noexcept
 {
     std::lock_guard<std::mutex> lock(this->mutex);
@@ -713,8 +702,6 @@ VFSDir::emit_file_changed(const std::filesystem::path& file_name, vfs::file_info
     vfs::file_info file_found = this->find_file(file_name, file);
     if (file_found)
     {
-        file_found = vfs_file_info_ref(file_found);
-
         if (!ztd::contains(this->changed_files, file_found))
         {
             if (force)
@@ -743,15 +730,11 @@ VFSDir::emit_file_changed(const std::filesystem::path& file_name, vfs::file_info
                 this->run_event<spacefm::signal::file_changed>(file_found);
             }
         }
-        else
-        {
-            vfs_file_info_unref(file_found);
-        }
     }
 }
 
 void
-VFSDir::emit_thumbnail_loaded(vfs::file_info file) noexcept
+VFSDir::emit_thumbnail_loaded(const vfs::file_info& file) noexcept
 {
     std::lock_guard<std::mutex> lock(this->mutex);
 
@@ -759,8 +742,6 @@ VFSDir::emit_thumbnail_loaded(vfs::file_info file) noexcept
     if (file_found)
     {
         assert(file == file_found);
-        file = vfs_file_info_ref(file_found);
-        this->run_event<spacefm::signal::file_thumbnail_loaded>(file);
-        vfs_file_info_unref(file);
+        this->run_event<spacefm::signal::file_thumbnail_loaded>(file_found);
     }
 }

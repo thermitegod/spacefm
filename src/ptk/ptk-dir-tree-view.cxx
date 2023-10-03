@@ -73,7 +73,6 @@ inline constexpr GdkDragAction GDK_ACTION_ALL =
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
 {
-    vfs::file_info file;
     GtkTreeView* view = GTK_TREE_VIEW(data);
     const bool show_hidden =
         GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(view), dir_tree_view_data));
@@ -83,15 +82,11 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
         return true;
     }
 
+    vfs::file_info file;
     gtk_tree_model_get(model, iter, ptk::dir_tree::column::info, &file, -1);
-    if (file)
+    if (file && file->is_hidden())
     {
-        if (file->is_hidden())
-        {
-            vfs_file_info_unref(file);
-            return false;
-        }
-        vfs_file_info_unref(file);
+        return false;
     }
     return true;
 }
@@ -250,9 +245,9 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
         }
 
         bool found = false;
-        vfs::file_info file;
         do
         {
+            vfs::file_info file;
             gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (!file)
             {
@@ -269,10 +264,8 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
                     gtk_tree_model_get_iter(model, &parent_it, tree_path);
                 }
                 found = true;
-                vfs_file_info_unref(file);
                 break;
             }
-            vfs_file_info_unref(file);
         } while (gtk_tree_model_iter_next(model, &it));
 
         if (!found)
@@ -346,19 +339,18 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
     (void)selection;
     (void)path_currently_selected;
     (void)data;
-    GtkTreeIter it;
-    vfs::file_info file;
 
+    GtkTreeIter it;
     if (!gtk_tree_model_get_iter(model, &it, path))
     {
         return false;
     }
+    vfs::file_info file;
     gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
     if (!file)
     {
         return false;
     }
-    vfs_file_info_unref(file);
     return true;
 }
 
@@ -569,12 +561,10 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* fil
 static char*
 dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 {
-    GtkTreePath* tree_path = nullptr;
-    GtkTreeIter it;
-    vfs::file_info file;
     char* dest_path = nullptr;
 
     // if drag is in progress, get the dest row path
+    GtkTreePath* tree_path = nullptr;
     gtk_tree_view_get_drag_dest_row(GTK_TREE_VIEW(view), &tree_path, nullptr);
     if (!tree_path)
     {
@@ -592,14 +582,15 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
     }
     if (tree_path)
     {
+        GtkTreeIter it;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
+            vfs::file_info file;
             gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (file)
             {
                 dest_path = ptk_dir_view_get_dir_path(model, &it);
-                vfs_file_info_unref(file);
             }
         }
         gtk_tree_path_free(tree_path);

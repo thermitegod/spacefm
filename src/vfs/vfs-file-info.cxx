@@ -22,9 +22,7 @@
 
 #include <filesystem>
 
-#include <span>
-
-#include <algorithm>
+#include <memory>
 
 #include <glibmm.h>
 
@@ -44,37 +42,18 @@
 vfs::file_info
 vfs_file_info_new(const std::filesystem::path& file_path)
 {
-    const auto fi = new VFSFileInfo(file_path);
-    fi->ref_inc();
-    return fi;
-}
-
-vfs::file_info
-vfs_file_info_ref(vfs::file_info file)
-{
-    assert(file != nullptr);
-    file->ref_inc();
-    return file;
-}
-
-void
-vfs_file_info_unref(vfs::file_info file)
-{
-    assert(file != nullptr);
-    file->ref_dec();
-    if (file->ref_count() == 0)
-    {
-        delete file;
-    }
+    return std::make_shared<VFSFileInfo>(file_path);
 }
 
 VFSFileInfo::VFSFileInfo(const std::filesystem::path& file_path)
 {
+    // ztd::logger::debug("VFSFileInfo={}", file_path);
     this->update(file_path);
 }
 
 VFSFileInfo::~VFSFileInfo()
 {
+    // ztd::logger::debug("~VFSFileInfo={}", this->path_.string());
     if (this->big_thumbnail_)
     {
         g_object_unref(this->big_thumbnail_);
@@ -863,28 +842,4 @@ VFSFileInfo::load_special_info() noexcept
             this->small_thumbnail_ = icon;
         }
     }
-}
-
-void
-vfs_file_info_list_free(const std::span<const vfs::file_info> list)
-{
-    std::ranges::for_each(list, vfs_file_info_unref);
-}
-
-void
-VFSFileInfo::ref_inc()
-{
-    ++n_ref;
-}
-
-void
-VFSFileInfo::ref_dec()
-{
-    --n_ref;
-}
-
-u32
-VFSFileInfo::ref_count()
-{
-    return n_ref;
 }

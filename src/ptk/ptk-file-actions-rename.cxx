@@ -2249,7 +2249,6 @@ update_new_display_delayed(const char* path)
     {
         vfs::file_info file = vfs_file_info_new(path);
         vdir->emit_file_created(file->name(), true);
-        vfs_file_info_unref(file);
         vfs_dir_flush_notify_cache();
     }
     if (vdir)
@@ -2270,7 +2269,7 @@ update_new_display(const std::filesystem::path& path)
 }
 
 i32
-ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_info file,
+ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::file_info& file,
                 const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
                 AutoOpenCreate* auto_open)
 {
@@ -3361,7 +3360,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
 
     for (const auto& file_path : files)
     {
-        vfs::file_info file = vfs_file_info_new(file_path);
+        const vfs::file_info file = vfs_file_info_new(file_path);
         const std::string file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,
@@ -3372,11 +3371,9 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
                              ptk::rename_mode::rename,
                              nullptr))
         {
-            vfs_file_info_unref(file);
             missing_targets = 0;
             break;
         }
-        vfs_file_info_unref(file);
     }
 
     if (missing_targets > 0)

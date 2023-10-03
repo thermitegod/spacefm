@@ -212,7 +212,7 @@ ptk_clipboard_copy_as_text(const std::span<const vfs::file_info> sel_files)
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (const vfs::file_info file : sel_files)
+    for (const vfs::file_info& file : sel_files)
     {
         const auto quoted = ztd::shell::quote(file->path().string());
         file_text = std::format("{} {}", file_text, quoted);
@@ -228,7 +228,7 @@ ptk_clipboard_copy_name(const std::span<const vfs::file_info> sel_files)
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (const vfs::file_info file : sel_files)
+    for (const vfs::file_info& file : sel_files)
     {
         file_text = std::format("{}{}\n", file_text, file->name());
     }
@@ -269,7 +269,7 @@ ptk_clipboard_cut_or_copy_files(const std::span<const vfs::file_info> sel_files,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(sel_files.size());
-    for (const vfs::file_info file : sel_files)
+    for (const vfs::file_info& file : sel_files)
     {
         file_list.emplace_back(file->path());
     }

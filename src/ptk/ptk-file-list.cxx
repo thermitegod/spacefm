@@ -94,10 +94,10 @@ static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
 
 /* signal handlers */
 
-static void ptk_file_list_file_created(vfs::file_info file, PtkFileList* list);
-static void on_file_list_file_deleted(vfs::file_info file, PtkFileList* list);
-static void ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list);
-static void on_thumbnail_loaded(vfs::file_info file, PtkFileList* list);
+static void ptk_file_list_file_created(const vfs::file_info& file, PtkFileList* list);
+static void on_file_list_file_deleted(const vfs::file_info& file, PtkFileList* list);
+static void ptk_file_list_file_changed(const vfs::file_info& file, PtkFileList* list);
+static void on_thumbnail_loaded(const vfs::file_info& file, PtkFileList* list);
 
 #define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
@@ -253,7 +253,7 @@ ptk_file_list_new(vfs::dir dir, bool show_hidden)
 }
 
 static void
-on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
+on_file_list_file_changed(const vfs::file_info& file, PtkFileList* list)
 {
     if (!file || !list->dir || list->dir->cancel)
     {
@@ -277,7 +277,7 @@ on_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 }
 
 static void
-on_file_list_file_created(vfs::file_info file, PtkFileList* list)
+on_file_list_file_created(const vfs::file_info& file, PtkFileList* list)
 {
     ptk_file_list_file_created(file, list);
 
@@ -306,7 +306,6 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
         { // cancel all possible pending requests
             vfs_thumbnail_loader_cancel_all_requests(list->dir, list->big_thumbnail);
         }
-        g_list_foreach(list->files, (GFunc)vfs_file_info_unref, nullptr);
         g_list_free(list->files);
 
         list->signal_file_created.disconnect();
@@ -336,11 +335,11 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
 
     if (dir && !dir->file_list.empty())
     {
-        for (const vfs::file_info file : dir->file_list)
+        for (const vfs::file_info& file : dir->file_list)
         {
             if (list->show_hidden || !file->is_hidden())
             {
-                list->files = g_list_prepend(list->files, vfs_file_info_ref(file));
+                list->files = g_list_prepend(list->files, file.get());
                 ++list->n_files;
             }
         }
@@ -433,7 +432,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 
     g_value_init(value, column_types[ptk::file_list::column(column)]);
 
-    vfs::file_info file = VFS_FILE_INFO(iter->user_data2);
+    const vfs::file_info file(((VFSFileInfo*)iter->user_data2)->shared_from_this());
 
     GdkPixbuf* icon = nullptr;
 
@@ -511,7 +510,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             g_value_set_string(value, file->display_mtime().data());
             break;
         case ptk::file_list::column::info:
-            g_value_set_pointer(value, vfs_file_info_ref(file));
+            g_value_set_pointer(value, file.get());
             break;
     }
 }
@@ -690,7 +689,7 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
 }
 
 static i32
-compare_file_info_name(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_name(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     i32 result;
     // by display name
@@ -715,92 +714,92 @@ compare_file_info_name(const vfs::file_info a, const vfs::file_info b, PtkFileLi
 }
 
 static i32
-compare_file_info_size(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_size(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return (a->size() > b->size()) ? 1 : ((a->size() == b->size()) ? 0 : -1);
 }
 
 static i32
-compare_file_info_type(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_type(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return ztd::sort::compare(a->mime_type()->description(), b->mime_type()->description());
 }
 
 static i32
-compare_file_info_mime(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_mime(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return ztd::sort::compare(a->mime_type()->description(), b->mime_type()->description());
 }
 
 static i32
-compare_file_info_perm(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_perm(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return ztd::sort::compare(a->display_permissions(), b->display_permissions());
 }
 
 static i32
-compare_file_info_owner(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_owner(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return ztd::sort::compare(a->display_owner(), b->display_owner());
 }
 
 static i32
-compare_file_info_group(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_group(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return ztd::sort::compare(a->display_group(), b->display_group());
 }
 
 static i32
-compare_file_info_atime(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_atime(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return (a->atime() > b->atime()) ? 1 : ((a->atime() == b->atime()) ? 0 : -1);
 }
 
 static i32
-compare_file_info_btime(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_btime(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return (a->btime() > b->btime()) ? 1 : ((a->btime() == b->btime()) ? 0 : -1);
 }
 
 static i32
-compare_file_info_ctime(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_ctime(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return (a->ctime() > b->ctime()) ? 1 : ((a->ctime() == b->ctime()) ? 0 : -1);
 }
 
 static i32
-compare_file_info_mtime(const vfs::file_info a, const vfs::file_info b, PtkFileList* list)
+compare_file_info_mtime(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list)
 {
     (void)list;
     return (a->mtime() > b->mtime()) ? 1 : ((a->mtime() == b->mtime()) ? 0 : -1);
 }
 
-using compare_function_ptr = i32 (*)(const vfs::file_info, const vfs::file_info, PtkFileList*);
+using compare_function_ptr = i32 (*)(const vfs::file_info&, const vfs::file_info&, PtkFileList*);
 
 static i32
-compare_file_info(vfs::file_info file_a, vfs::file_info file_b, PtkFileList* list,
+compare_file_info(const vfs::file_info& a, const vfs::file_info& b, PtkFileList* list,
                   compare_function_ptr func)
 {
     // dirs before/after files
     if (list->sort_dir != ptk::file_list::sort_dir::mixed)
     {
-        const auto result = file_a->is_directory() - file_b->is_directory();
+        const auto result = a->is_directory() - b->is_directory();
         if (result != 0)
         {
             return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
         }
     }
 
-    const auto result = func(file_a, file_b, list);
+    const auto result = func(a, b, list);
 
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
@@ -832,7 +831,7 @@ ptk_file_info_list_sort(PtkFileList* list)
     std::ranges::sort(
         file_list.begin(),
         file_list.end(),
-        [&list](vfs::file_info a, vfs::file_info b) {
+        [&list](vfs::file_info& a, vfs::file_info& b) {
             return compare_file_info(a, b, list, compare_function_ptr_table.at(list->sort_col)) < 0;
         });
 
@@ -857,16 +856,16 @@ ptk_file_list_sort(PtkFileList* list)
 }
 
 bool
-ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info file1)
+ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, const vfs::file_info& file1)
 {
     for (GList* l = list->files; l; l = g_list_next(l))
     {
-        vfs::file_info file2 = VFS_FILE_INFO(l->data);
+        const vfs::file_info file2(((VFSFileInfo*)l->data)->shared_from_this());
         if (file1 == file2 || ztd::same(file1->name(), file2->name()))
         {
             it->stamp = list->stamp;
             it->user_data = l;
-            it->user_data2 = file2;
+            it->user_data2 = file2.get();
             return true;
         }
     }
@@ -874,24 +873,24 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, vfs::file_info file1
 }
 
 static void
-ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
+ptk_file_list_file_created(const vfs::file_info& file, PtkFileList* list)
 {
     if (!list->show_hidden && file->is_hidden())
     {
         return;
     }
 
-    list->files = g_list_append(list->files, vfs_file_info_ref(file));
+    list->files = g_list_append(list->files, file.get());
     ++list->n_files;
 
     ptk_file_list_sort(list);
 
-    GList* l = g_list_find(list->files, file);
+    GList* l = g_list_find(list->files, file.get());
 
     GtkTreeIter it;
     it.stamp = list->stamp;
     it.user_data = l;
-    it.user_data2 = file;
+    it.user_data2 = file.get();
 
     GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
     gtk_tree_model_row_inserted(GTK_TREE_MODEL(list), path, &it);
@@ -899,7 +898,7 @@ ptk_file_list_file_created(vfs::file_info file, PtkFileList* list)
 }
 
 static void
-on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
+on_file_list_file_deleted(const vfs::file_info& file, PtkFileList* list)
 {
     /* If there is no file info, that means the dir itself was deleted. */
     if (!file)
@@ -909,11 +908,12 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
         for (GList* l = list->files; l; l = list->files)
         {
             gtk_tree_model_row_deleted(GTK_TREE_MODEL(list), path);
-            file = VFS_FILE_INFO(l->data);
-            list->files = g_list_delete_link(list->files, l);
-            vfs_file_info_unref(file);
-            --list->n_files;
+            // file = VFS_FILE_INFO(l->data);
+            // list->files = g_list_delete_link(list->files, l);
+            // --list->n_files;
         }
+        // g_list_free(list->files);
+        list->n_files = 0;
         gtk_tree_path_free(path);
         return;
     }
@@ -923,7 +923,7 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
         return;
     }
 
-    GList* l = g_list_find(list->files, file);
+    GList* l = g_list_find(list->files, file.get());
     if (!l)
     {
         return;
@@ -934,19 +934,18 @@ on_file_list_file_deleted(vfs::file_info file, PtkFileList* list)
     gtk_tree_path_free(path);
 
     list->files = g_list_delete_link(list->files, l);
-    vfs_file_info_unref(file);
     --list->n_files;
 }
 
 void
-ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
+ptk_file_list_file_changed(const vfs::file_info& file, PtkFileList* list)
 {
     if (!list->show_hidden && file->is_hidden())
     {
         return;
     }
 
-    GList* l = g_list_find(list->files, file);
+    GList* l = g_list_find(list->files, file.get());
     if (!l)
     {
         return;
@@ -963,7 +962,7 @@ ptk_file_list_file_changed(vfs::file_info file, PtkFileList* list)
 }
 
 static void
-on_thumbnail_loaded(vfs::file_info file, PtkFileList* list)
+on_thumbnail_loaded(const vfs::file_info& file, PtkFileList* list)
 {
     // ztd::logger::debug("LOADED: {}", file->name());
     ptk_file_list_file_changed(file, list);
@@ -991,7 +990,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
 
             for (GList* l = list->files; l; l = g_list_next(l))
             {
-                vfs::file_info file = VFS_FILE_INFO(l->data);
+                const vfs::file_info file(((VFSFileInfo*)l->data)->shared_from_this());
                 if ((file->is_image() || file->is_video()) && file->is_thumbnail_loaded(is_big))
                 {
                     /* update the model */
@@ -1011,7 +1010,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
 
     for (GList* l = list->files; l; l = g_list_next(l))
     {
-        vfs::file_info file = VFS_FILE_INFO(l->data);
+        const vfs::file_info file(((VFSFileInfo*)l->data)->shared_from_this());
         if (list->max_thumbnail != 0 &&
             (file->is_video() || (file->size() < list->max_thumbnail && file->is_image())))
         {

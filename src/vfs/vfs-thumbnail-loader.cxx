@@ -84,11 +84,6 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
     this->task->cancel();
     g_object_unref(this->task);
 
-    if (!this->update_queue.empty())
-    {
-        std::ranges::for_each(this->update_queue, vfs_file_info_unref);
-    }
-
     // ztd::logger::debug("FREE THUMBNAIL LOADER");
 
     // prevent recursive unref called from vfs_dir_finalize
@@ -120,7 +115,6 @@ on_thumbnail_idle(vfs::thumbnail_loader loader)
         loader->update_queue.pop_front();
 
         loader->dir->emit_thumbnail_loaded(file);
-        vfs_file_info_unref(file);
     }
 
     loader->idle_handler = 0;
@@ -185,7 +179,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         // ztd::logger::debug("task->is_canceled()={} need_update={}", task->is_canceled(), need_update);
         if (!task->is_canceled() && need_update)
         {
-            loader->update_queue.emplace_back(vfs_file_info_ref(req->file));
+            loader->update_queue.emplace_back(req->file);
             if (loader->idle_handler == 0)
             {
                 loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
@@ -220,7 +214,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 }
 
 void
-vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big)
+vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, bool is_big)
 {
     bool new_task = false;
 

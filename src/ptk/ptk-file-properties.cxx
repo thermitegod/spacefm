@@ -151,7 +151,7 @@ static void*
 calc_size(void* user_data)
 {
     const auto data = static_cast<properties_dialog_data*>(user_data);
-    for (const vfs::file_info file : data->file_list)
+    for (const vfs::file_info& file : data->file_list)
     {
         if (data->cancel)
         {
@@ -431,7 +431,7 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
     vfs::mime_type type2 = nullptr;
     bool same_type = true;
     bool is_dirs = false;
-    for (const vfs::file_info selected_file : selected_files)
+    for (const vfs::file_info& selected_file : selected_files)
     {
         type = selected_file->mime_type();
         if (!type2)
@@ -550,7 +550,7 @@ init_attributes_tab(properties_dialog_data* data,
         bool is_same_value_dax = true;
 
         // The first file will get checked against itself
-        for (const auto file : selected_files)
+        for (const vfs::file_info& file : selected_files)
         {
             if (is_same_value_compressed)
             {
@@ -990,8 +990,6 @@ ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
         const std::vector<vfs::file_info> cwd_selected{file};
 
         show_file_properties_dialog(parent, cwd.parent_path(), cwd_selected, page);
-
-        vfs_file_info_unref(file);
     }
     else
     {

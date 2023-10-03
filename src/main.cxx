@@ -78,7 +78,7 @@ init_folder()
 static void
 open_file(const std::filesystem::path& path)
 {
-    vfs::file_info file = vfs_file_info_new(path);
+    const vfs::file_info file = vfs_file_info_new(path);
     vfs::mime_type mime_type = file->mime_type();
 
     const auto check_app_name = mime_type->default_action();
@@ -105,8 +105,6 @@ open_file(const std::filesystem::path& path)
                        "Error",
                        std::format("Unable to open file:\n{}\n{}", path.string(), e.what()));
     }
-
-    vfs_file_info_unref(file);
 }
 
 static void

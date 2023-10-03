@@ -65,7 +65,7 @@ void vfs_thumbnail_init();
 
 void vfs_thumbnail_loader_free(vfs::thumbnail_loader loader);
 
-void vfs_thumbnail_loader_request(vfs::dir dir, vfs::file_info file, bool is_big);
+void vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, bool is_big);
 void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
 
 // Load thumbnail for the specified file

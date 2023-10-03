@@ -22,9 +22,7 @@
 
 #include <filesystem>
 
-#include <span>
-
-#include <atomic>
+#include <memory>
 
 #include <gtkmm.h>
 
@@ -33,13 +31,17 @@
 
 #include "vfs/vfs-mime-type.hxx"
 
-#define VFS_FILE_INFO(obj) (static_cast<vfs::file_info>(obj))
+// https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
 
-struct VFSFileInfo
+struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
 {
   public:
     VFSFileInfo(const std::filesystem::path& file_path);
     ~VFSFileInfo();
+
+    // noncopyable
+    // VFSFileInfo(const VFSFileInfo&) = delete;
+    // VFSFileInfo& operator=(const VFSFileInfo&) = delete;
 
     const std::string_view name() const noexcept;
     const std::string_view display_name() const noexcept;
@@ -156,24 +158,11 @@ struct VFSFileInfo
     void load_special_info() noexcept;
 
     const std::string_view special_directory_get_icon_name() const noexcept;
-
-  public: // TODO need to remove manual ref counting
-    void ref_inc();
-    void ref_dec();
-    u32 ref_count();
-
-  private:
-    std::atomic<u32> n_ref{0};
 };
 
 namespace vfs
 {
-    using file_info = ztd::raw_ptr<VFSFileInfo>;
+    using file_info = std::shared_ptr<VFSFileInfo>;
 } // namespace vfs
 
 vfs::file_info vfs_file_info_new(const std::filesystem::path& file_path);
-
-vfs::file_info vfs_file_info_ref(vfs::file_info file);
-void vfs_file_info_unref(vfs::file_info file);
-
-void vfs_file_info_list_free(const std::span<const vfs::file_info> list);

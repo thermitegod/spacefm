@@ -47,7 +47,7 @@ static const std::string
 archiver_create_shell_file_list(const std::span<const vfs::file_info> sel_files)
 {
     std::string file_list;
-    for (const auto file : sel_files)
+    for (const vfs::file_info& file : sel_files)
     {
         file_list.append(ztd::shell::quote(file->path().string()));
         file_list.append(" ");

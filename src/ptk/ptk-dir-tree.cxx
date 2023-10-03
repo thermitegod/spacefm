@@ -149,11 +149,6 @@ PtkDirTreeNode::PtkDirTreeNode()
 
 PtkDirTreeNode::~PtkDirTreeNode()
 {
-    if (this->file)
-    {
-        vfs_file_info_unref(this->file);
-    }
-
     std::vector<PtkDirTreeNode*> childs;
     for (PtkDirTreeNode* child = this->children; child; child = child->next)
     {
@@ -467,7 +462,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
             {
                 return;
             }
-            g_value_set_pointer(value, vfs_file_info_ref(file));
+            g_value_set_pointer(value, file.get());
             break;
         }
     }

@@ -48,7 +48,7 @@ namespace ptk
     };
 }
 
-i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, vfs::file_info file,
+i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::file_info& file,
                     const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
                     AutoOpenCreate* auto_open);
 

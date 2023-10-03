@@ -62,7 +62,7 @@ static bool
 open_archives(const std::shared_ptr<ParentInfo>& parent,
               const std::span<const vfs::file_info> selected_files)
 {
-    const auto is_archive = [](const vfs::file_info file) { return file->is_archive(); };
+    const auto is_archive = [](const vfs::file_info& file) { return file->is_archive(); };
     if (!std::ranges::all_of(selected_files, is_archive))
     {
         return false;
@@ -147,7 +147,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
     {
         std::vector<std::filesystem::path> files_to_open;
         files_to_open.reserve(selected_files.size());
-        for (const vfs::file_info file : selected_files)
+        for (const vfs::file_info& file : selected_files)
         {
             files_to_open.emplace_back(file->path());
         }
@@ -160,7 +160,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> dirs_to_open;
     std::map<std::string, std::vector<std::filesystem::path>> files_to_open;
-    for (const vfs::file_info file : selected_files)
+    for (const vfs::file_info& file : selected_files)
     {
         // Is a dir?  Open in browser
         if (file->is_directory())
