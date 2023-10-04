@@ -102,18 +102,6 @@ config_parse_general(const toml::value& tbl, u64 version)
         app_settings.single_hover(single_hover);
     }
 
-    if (section.contains(TOML_KEY_SORT_ORDER))
-    {
-        const auto sort_order = toml::find<u64>(section, TOML_KEY_SORT_ORDER);
-        app_settings.sort_order(sort_order);
-    }
-
-    if (section.contains(TOML_KEY_SORT_TYPE))
-    {
-        const auto sort_type = toml::find<u64>(section, TOML_KEY_SORT_TYPE);
-        app_settings.sort_type(sort_type);
-    }
-
     if (section.contains(TOML_KEY_USE_SI_PREFIX))
     {
         const auto use_si_prefix = toml::find<bool>(section, TOML_KEY_USE_SI_PREFIX);

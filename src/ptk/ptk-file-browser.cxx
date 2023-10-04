@@ -1224,16 +1224,11 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
             break;
     }
     file_browser->sort_order_ = sort_order;
-    // MOD enable following to make column click permanent sort
-    //    app_settings.sort_order(col);
-    //    if (file_browser)
-    //        file_browser->set_sort_order(),
-    //        app_settings.get_sort_order());
 
     xset_set_panel(file_browser->panel_,
                    xset::panel::list_detailed,
                    xset::var::x,
-                   std::to_string(col));
+                   std::to_string(magic_enum::enum_integer(file_browser->sort_order_)));
     xset_set_panel(file_browser->panel_,
                    xset::panel::list_detailed,
                    xset::var::y,

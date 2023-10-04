@@ -200,30 +200,6 @@ AppSettings::date_format(const std::string_view val) noexcept
 }
 
 u64
-AppSettings::sort_order() const noexcept
-{
-    return this->sort_order_;
-}
-
-void
-AppSettings::sort_order(u64 val) noexcept
-{
-    this->sort_order_ = val;
-}
-
-u64
-AppSettings::sort_type() const noexcept
-{
-    return this->sort_type_;
-}
-
-void
-AppSettings::sort_type(u64 val) noexcept
-{
-    this->sort_type_ = val;
-}
-
-u64
 AppSettings::width() const noexcept
 {
     return this->width_;

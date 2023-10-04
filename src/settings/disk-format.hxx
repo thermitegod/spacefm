@@ -62,8 +62,6 @@ const std::string TOML_KEY_ICON_SIZE_SMALL{"icon_size_small"};
 const std::string TOML_KEY_ICON_SIZE_TOOL{"icon_size_tool"};
 const std::string TOML_KEY_SINGLE_CLICK{"single_click"};
 const std::string TOML_KEY_SINGLE_HOVER{"single_hover"};
-const std::string TOML_KEY_SORT_ORDER{"sort_order"};
-const std::string TOML_KEY_SORT_TYPE{"sort_type"};
 const std::string TOML_KEY_USE_SI_PREFIX{"use_si_prefix"};
 const std::string TOML_KEY_CLICK_EXECUTE{"click_executes"};
 const std::string TOML_KEY_CONFIRM{"confirm"};

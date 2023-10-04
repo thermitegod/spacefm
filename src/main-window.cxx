@@ -2049,13 +2049,13 @@ main_window_add_new_tab(MainWindow* main_window, const std::filesystem::path& fo
     file_browser->show_thumbnails(app_settings.show_thumbnail() ? app_settings.max_thumb_size()
                                                                 : 0);
 
-    file_browser->set_sort_order(
-        (ptk::file_browser::sort_order)xset_get_int_panel(file_browser->panel(),
-                                                          xset::panel::list_detailed,
-                                                          xset::var::x));
-    file_browser->set_sort_type((GtkSortType)xset_get_int_panel(file_browser->panel(),
-                                                                xset::panel::list_detailed,
-                                                                xset::var::y));
+    const auto sort_order =
+        xset_get_int_panel(file_browser->panel(), xset::panel::list_detailed, xset::var::x);
+    file_browser->set_sort_order((ptk::file_browser::sort_order)sort_order);
+
+    const auto sort_type =
+        xset_get_int_panel(file_browser->panel(), xset::panel::list_detailed, xset::var::y);
+    file_browser->set_sort_type((GtkSortType)sort_type);
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 

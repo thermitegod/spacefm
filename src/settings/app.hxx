@@ -65,12 +65,6 @@ struct AppSettings
     [[nodiscard]] const std::string_view date_format() const noexcept;
     void date_format(const std::string_view val) noexcept;
 
-    [[nodiscard]] u64 sort_order() const noexcept;
-    void sort_order(u64 val) noexcept;
-
-    [[nodiscard]] u64 sort_type() const noexcept;
-    void sort_type(u64 val) noexcept;
-
     [[nodiscard]] u64 width() const noexcept;
     void width(u64 val) noexcept;
 
@@ -118,11 +112,6 @@ struct AppSettings
 
     const std::string date_format_default_{"%Y-%m-%d %H:%M:%S"};
     std::string date_format_custom_{};
-
-    // Sort by name, size, time
-    u64 sort_order_{0};
-    // ascending, descending
-    u64 sort_type_{0};
 
     // Window State
     u64 width_{640};

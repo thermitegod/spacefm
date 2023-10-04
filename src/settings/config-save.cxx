@@ -289,8 +289,6 @@ save_user_confing()
              {TOML_KEY_ICON_SIZE_TOOL, app_settings.icon_size_tool()},
              {TOML_KEY_SINGLE_CLICK, app_settings.single_click()},
              {TOML_KEY_SINGLE_HOVER, app_settings.single_hover()},
-             {TOML_KEY_SORT_ORDER, app_settings.sort_order()},
-             {TOML_KEY_SORT_TYPE, app_settings.sort_type()},
              {TOML_KEY_USE_SI_PREFIX, app_settings.use_si_prefix()},
              {TOML_KEY_CLICK_EXECUTE, app_settings.click_executes()},
              {TOML_KEY_CONFIRM, app_settings.confirm()},
