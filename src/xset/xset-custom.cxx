@@ -154,7 +154,7 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
 
     if (!set->lock && xset::cmd(xset_get_int(set, xset::var::x)) == xset::cmd::app)
     {
-        if (set->z && ztd::endswith(set->z.value(), ".desktop"))
+        if (set->z && set->z.value().ends_with(".desktop"))
         {
             const vfs::desktop desktop = vfs_get_desktop(set->z.value());
 

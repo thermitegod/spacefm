@@ -325,7 +325,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
     Glib::ustring name;
 
     bool found = false;
-    const bool is_desktop = ztd::endswith(desktop_id.data(), ".desktop");
+    const bool is_desktop = desktop_id.ends_with(".desktop");
 
     if (is_desktop)
     {
@@ -484,7 +484,7 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
     static constexpr const std::string_view desktop_ext{".desktop"};
     static constexpr const std::string_view replace_txt{"<REPLACE_TXT>"};
 
-    if (ztd::endswith(desktop_id, desktop_ext))
+    if (desktop_id.ends_with(desktop_ext))
     {
         const auto check_filename = mime_type_locate_desktop_file(desktop_id);
         if (!check_filename)

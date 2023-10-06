@@ -611,7 +611,7 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
             load_all_apps_in_dir(file_path, list, task);
             continue;
         }
-        if (!ztd::endswith(file_name.string(), ".desktop"))
+        if (!file_name.string().ends_with(".desktop"))
         {
             continue;
         }

@@ -321,7 +321,7 @@ insert_complete(GtkEntry* entry)
     std::string prefix_name;
     std::string long_prefix;
 
-    if (!ztd::endswith(prefix, "/"))
+    if (!prefix.ends_with('/'))
     {
         prefix_name = std::filesystem::path(prefix).filename();
     }

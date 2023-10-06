@@ -350,7 +350,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
         return;
     }
 
-    const bool all = ztd::endswith(set->name, "_all");
+    const bool all = set->name.ends_with("_all");
 
     if (all)
     {

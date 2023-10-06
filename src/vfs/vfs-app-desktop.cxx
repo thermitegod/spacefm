@@ -367,11 +367,14 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
 
     bool add_files = false;
 
+    const auto has_key = [this](const std::string_view key)
+    { return this->desktop_entry_.exec.ends_with(key); };
+
     static constexpr std::array<const std::string_view, 2> open_files_keys{"%F", "%U"};
     if (ztd::contains(this->desktop_entry_.exec, open_files_keys))
     {
         // %F and %U must always be at the end
-        if (!ztd::endswith(this->desktop_entry_.exec, open_files_keys))
+        if (!std::ranges::any_of(open_files_keys, has_key))
         {
             ztd::logger::error("Malformed desktop file, %F and %U must always be at the end: {}",
                                this->path_.string());
@@ -401,7 +404,7 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
     if (ztd::contains(this->desktop_entry_.exec, open_file_keys))
     {
         // %f and %u must always be at the end
-        if (!ztd::endswith(this->desktop_entry_.exec, open_file_keys))
+        if (!std::ranges::any_of(open_file_keys, has_key))
         {
             ztd::logger::error("Malformed desktop file, %f and %u must always be at the end: {}",
                                this->path_.string());

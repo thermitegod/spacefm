@@ -850,7 +850,7 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     const auto& editor = check_editor.value();
 
     vfs::desktop desktop;
-    if (ztd::endswith(editor, ".desktop"))
+    if (editor.ends_with(".desktop"))
     {
         desktop = vfs_get_desktop(editor);
     }

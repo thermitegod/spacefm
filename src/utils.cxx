@@ -121,7 +121,7 @@ split_basename_extension(const std::filesystem::path& filename) noexcept
         const auto split = ztd::rpartition(filename.string(), ".");
 
         // Check if the extension is a compressed tar archive
-        if (ztd::endswith(split[0], ".tar"))
+        if (split[0].ends_with(".tar"))
         {
             // Find the second last dot in the filename
             const auto split_second = ztd::rpartition(split[0], ".");

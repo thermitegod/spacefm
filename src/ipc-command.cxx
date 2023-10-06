@@ -869,7 +869,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             const std::string_view value = data[0];
 
-            if (!ztd::endswith(value, ".desktop"))
+            if (!value.ends_with(".desktop"))
             {
                 return {SOCKET_FAILURE, std::format("Must be a .desktop file '{}'", value)};
             }

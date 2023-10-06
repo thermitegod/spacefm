@@ -369,7 +369,7 @@ const std::string
 VFSMimeType::add_action(const std::string_view desktop_id) noexcept
 {
     // MOD  do not create custom desktop file if desktop_id is not a command
-    if (!ztd::endswith(desktop_id, ".desktop"))
+    if (!desktop_id.ends_with(".desktop"))
     {
         return mime_type_add_action(this->type_, desktop_id);
     }

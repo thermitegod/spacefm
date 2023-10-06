@@ -811,7 +811,7 @@ VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
 void
 VFSFileInfo::load_special_info() noexcept
 {
-    if (!ztd::endswith(this->name_, ".desktop"))
+    if (!this->name_.ends_with(".desktop"))
     {
         return;
     }
