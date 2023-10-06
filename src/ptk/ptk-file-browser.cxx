@@ -1538,26 +1538,21 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
         }
 
         /* an item is clicked, get its file path */
-        vfs::file_info file;
+        vfs::file_info file = nullptr;
         GtkTreeIter it;
-        std::filesystem::path file_path;
         if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
         {
+            // item is clicked
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
-            file_path = file_browser->cwd() / file->name();
-        }
-        else /* no item is clicked */
-        {
-            file = nullptr;
         }
 
         /* middle button */
-        if (button == 2 && !file_path.empty()) /* middle click on a item */
+        if (file && button == 2) /* middle click on a item */
         {
             /* open in new tab if its a directory */
-            if (std::filesystem::is_directory(file_path))
+            if (file->is_directory())
             {
-                file_browser->run_event<spacefm::signal::open_item>(file_path,
+                file_browser->run_event<spacefm::signal::open_item>(file->path(),
                                                                     ptk::open_action::new_tab);
             }
             ret = true;
@@ -2267,7 +2262,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
         {
             if (file->is_directory())
             {
-                dest_path = file_browser->cwd() / file->name();
+                dest_path = file->path();
             }
             else /* Drop on a file, not directory */
             {
@@ -2441,9 +2436,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
     const auto selected_files = file_browser->selected_files();
     for (const vfs::file_info& file : selected_files)
     {
-        const auto full_path = file_browser->cwd() / file->name();
-        const std::string uri = Glib::filename_to_uri(full_path);
-
+        const std::string uri = Glib::filename_to_uri(file->path());
         uri_list.append(std::format("{}\n", uri));
     }
 
@@ -3970,8 +3963,7 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
         file_list.reserve(sel_files.size());
         for (const vfs::file_info& file : sel_files)
         {
-            const auto file_path = cwd / file->name();
-            file_list.emplace_back(file_path);
+            file_list.emplace_back(file->path());
         }
 
 #if (GTK_MAJOR_VERSION == 4)

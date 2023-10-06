@@ -167,8 +167,7 @@ calc_size(void* user_data)
             ++data->total_count_file;
         }
 
-        const auto path = data->cwd / file->name();
-        calc_total_size_of_files(path, data);
+        calc_total_size_of_files(file->path(), data);
     }
     data->done = true;
     return nullptr;

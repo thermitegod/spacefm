@@ -2315,10 +2315,9 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
     {
         for (const vfs::file_info& file : data->sel_files)
         {
-            const auto full_path = data->cwd / file->name();
-            if (data->browser && std::filesystem::is_directory(full_path))
+            if (data->browser && std::filesystem::is_directory(file->path()))
             {
-                data->browser->run_event<spacefm::signal::open_item>(full_path,
+                data->browser->run_event<spacefm::signal::open_item>(file->path(),
                                                                      ptk::open_action::new_tab);
             }
         }

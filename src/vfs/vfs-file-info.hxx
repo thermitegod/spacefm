@@ -122,6 +122,7 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
     bool is_dax() const noexcept;        // file is in the DAX (cpu direct access) state
 
     // update file info
+    bool update() noexcept;
     bool update(const std::filesystem::path& file_path) noexcept;
 
   private:

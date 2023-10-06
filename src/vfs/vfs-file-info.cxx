@@ -135,6 +135,12 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     return true;
 }
 
+bool
+VFSFileInfo::update() noexcept
+{
+    return this->update(this->path_);
+}
+
 const std::string_view
 VFSFileInfo::name() const noexcept
 {

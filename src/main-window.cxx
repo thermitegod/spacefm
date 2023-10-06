@@ -2448,13 +2448,12 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
 
             if (file->is_symlink())
             {
-                const auto file_path = cwd / file->name();
-                const auto target = std::filesystem::absolute(file_path);
+                const auto target = std::filesystem::absolute(file->path());
                 if (!target.empty())
                 {
                     std::filesystem::path target_path;
 
-                    // ztd::logger::info("LINK: {}", file_path);
+                    // ztd::logger::info("LINK: {}", file->path());
                     if (!target.is_absolute())
                     {
                         // relative link
@@ -3142,8 +3141,7 @@ main_write_exports(vfs::file_task vtask, const std::string_view value)
             buf.append(std::format("set fm_panel{}_files (echo ", p));
             for (const vfs::file_info& file : selected_files)
             {
-                const auto path = cwd / file->name();
-                buf.append(std::format("{} ", ztd::shell::quote(path.string())));
+                buf.append(std::format("{} ", ztd::shell::quote(file->path().string())));
             }
             buf.append(std::format(")\n"));
 

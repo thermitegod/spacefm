@@ -415,9 +415,8 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
 
     for (const vfs::file_info& file : dir->file_list)
     {
-        const auto full_path = std::filesystem::path() / dir->path / file->name();
-        file->reload_mime_type(full_path);
-        // ztd::logger::debug("reload {}", full_path);
+        // ztd::logger::debug("reload {}", file->path());
+        file->reload_mime_type(file->path());
     }
 
     const auto action = [dir](const vfs::file_info& file)
@@ -505,9 +504,7 @@ VFSDir::update_file_info(const vfs::file_info& file) noexcept
 {
     bool ret = false;
 
-    const auto full_path = std::filesystem::path() / this->path / file->name();
-
-    const bool is_file_valid = file->update(full_path);
+    const bool is_file_valid = file->update();
     if (is_file_valid)
     {
         ret = true;
