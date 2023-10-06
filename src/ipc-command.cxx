@@ -1062,7 +1062,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                 xset_panel_var = xset::panel::show_hidden;
                 valid = true;
             }
-            else if (ztd::startswith(property, "panel"))
+            else if (property.starts_with("panel"))
             {
                 const panel_t j = std::stoi(property.substr(5, 1));
                 return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(j, xset::panel::show))};
@@ -1877,7 +1877,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             const std::filesystem::path& target_dir = opt_file_list.back();
             if (!ztd::same(property, "delete") || !ztd::same(property, "trash"))
             {
-                if (!ztd::startswith(target_dir.string(), "/"))
+                if (!target_dir.string().starts_with('/'))
                 {
                     return {SOCKET_INVALID,
                             std::format("TARGET must be absolute '{}'", target_dir.string())};
@@ -1887,7 +1887,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             std::vector<std::filesystem::path> file_list;
             for (const std::string_view file : opt_file_list)
             {
-                if (ztd::startswith(file, "/"))
+                if (file.starts_with('/'))
                 { // absolute path
                     file_list.emplace_back(file);
                 }

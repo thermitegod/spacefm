@@ -41,7 +41,7 @@ vfs_load_icon(const std::string_view icon_name, i32 icon_size)
         GtkIconLookupFlags(GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN |
                            GtkIconLookupFlags::GTK_ICON_LOOKUP_FORCE_SIZE));
 
-    if (!icon_info && !ztd::startswith(icon_name, "/"))
+    if (!icon_info && !icon_name.starts_with('/'))
     {
         return gdk_pixbuf_new_from_file_at_size(icon_name.data(), icon_size, icon_size, nullptr);
     }

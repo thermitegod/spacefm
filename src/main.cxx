@@ -268,8 +268,8 @@ handle_parsed_commandline_args(const commandline_opt_data_t& opt)
                 open_file(real_path);
             }
         }
-        else if ((!ztd::startswith(file.string(), "/") && ztd::contains(file.string(), ":/")) ||
-                 ztd::startswith(file.string(), "//"))
+        else if ((!file.string().starts_with('/') && ztd::contains(file.string(), ":/")) ||
+                 file.string().starts_with("//"))
         {
             if (main_window)
             {

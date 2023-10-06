@@ -2765,7 +2765,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_s
             if (set->key == keyval && set->keymod == keymod)
             {
                 // shared key match
-                if (ztd::startswith(set->name, "panel"))
+                if (set->name.starts_with("panel"))
                 {
                     // use current panel's set
                     browser = main_window->current_file_browser();
@@ -2851,11 +2851,11 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
     }
 
     // handlers
-    if (ztd::startswith(set->name, "dev_"))
+    if (set->name.starts_with("dev_"))
     {
         ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
     }
-    else if (ztd::startswith(set->name, "main_"))
+    else if (set->name.starts_with("main_"))
     {
         if (set->xset_name == xset::name::main_new_window)
         {
@@ -2895,7 +2895,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
             on_about_activate(nullptr, main_window);
         }
     }
-    else if (ztd::startswith(set->name, "panel_"))
+    else if (set->name.starts_with("panel_"))
     {
         i32 i;
         if (set->xset_name == xset::name::panel_prev)
@@ -2916,7 +2916,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         }
         main_window->focus_panel(i);
     }
-    else if (ztd::startswith(set->name, "task_"))
+    else if (set->name.starts_with("task_"))
     {
         if (set->xset_name == xset::name::task_manager)
         {
@@ -2959,7 +2959,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
         {
             ptk_task_view_show_task_dialog(browser->task_view());
         }
-        else if (ztd::startswith(set->name, "task_err_"))
+        else if (set->name.starts_with("task_err_"))
         {
             ptk_task_view_popup_errset(main_window, set->name);
         }

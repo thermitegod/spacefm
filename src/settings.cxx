@@ -418,7 +418,7 @@ free_settings()
         xset_t set = xsets.back();
         xsets.pop_back();
 
-        if (set->ob2_data && ztd::startswith(set->name, "evt_"))
+        if (set->ob2_data && set->name.starts_with("evt_"))
         {
             g_list_foreach((GList*)set->ob2_data, (GFunc)std::free, nullptr);
             g_list_free((GList*)set->ob2_data);

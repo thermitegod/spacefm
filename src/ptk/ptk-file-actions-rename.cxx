@@ -3071,11 +3071,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                 // new file task
                 if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))))
                 {
-                    std::string str = gtk_combo_box_text_get_active_text(
+                    const std::string str = gtk_combo_box_text_get_active_text(
                         GTK_COMBO_BOX_TEXT(mset->combo_template));
 
-                    str = ztd::strip(str);
-                    if (ztd::startswith(str, "/"))
+                    if (str.starts_with('/'))
                     {
                         from_path = ztd::shell::quote(str);
                     }
@@ -3140,7 +3139,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                 {
                     const std::string str = gtk_combo_box_text_get_active_text(
                         GTK_COMBO_BOX_TEXT(mset->combo_template_dir));
-                    if (ztd::startswith(str, "/"))
+                    if (str.starts_with('/'))
                     {
                         from_path = ztd::shell::quote(str);
                     }

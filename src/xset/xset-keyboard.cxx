@@ -201,12 +201,6 @@ xset_set_key(GtkWidget* parent, xset_t set)
     {
         name = xset_get_builtin_toolitem_label(set->tool);
     }
-    else if (ztd::startswith(set->name, "open_all_type_"))
-    {
-        keyset = xset_get(xset::name::open_all);
-        name = clean_label(keyset->menu_label.value(), false, true);
-        set->shared_key = xset::get_name_from_xsetname(xset::name::open_all);
-    }
     else
     {
         name = "( no name )";

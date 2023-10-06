@@ -149,7 +149,7 @@ seek_path(GtkEntry* entry)
             }
 
             const auto file_name = file.path().filename();
-            if (ztd::startswith(file_name.string(), seek_name.string()))
+            if (file_name.string().starts_with(seek_name.string()))
             {
                 const auto full_path = seek_dir / file_name;
                 if (std::filesystem::is_directory(full_path))
@@ -344,7 +344,7 @@ insert_complete(GtkEntry* entry)
                 break;
             }
         }
-        else if (ztd::startswith(file_name.string(), prefix_name))
+        else if (file_name.string().starts_with(prefix_name))
         { // prefix matches
             count++;
             if (long_prefix.empty())

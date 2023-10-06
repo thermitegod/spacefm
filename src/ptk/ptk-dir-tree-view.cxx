@@ -204,7 +204,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
     GtkTreeIter parent_it;
     GtkTreePath* tree_path = nullptr;
 
-    if (!ztd::startswith(path.string(), "/"))
+    if (!path.is_absolute())
     {
         return false;
     }

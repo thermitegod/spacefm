@@ -223,7 +223,7 @@ VFSDevice::device_get_info() noexcept
     {
         media_available = true;
     }
-    else if (ztd::startswith(this->devnode_, "/dev/loop"))
+    else if (this->devnode_.starts_with("/dev/loop"))
     {
         media_available = false;
     }
@@ -311,8 +311,7 @@ VFSDevice::device_get_info() noexcept
     const auto entrys = this->udevice.get_devlinks();
     for (const std::string_view entry : entrys)
     {
-        if (ztd::startswith(entry, "/dev/disk/by-id/") ||
-            ztd::startswith(entry, "/dev/disk/by-uuid/"))
+        if (entry.starts_with("/dev/disk/by-id/") || entry.starts_with("/dev/disk/by-uuid/"))
         {
             this->id_ = entry;
             break;

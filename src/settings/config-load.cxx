@@ -233,8 +233,7 @@ config_parse_xset(const toml::value& tbl, u64 version)
                     return;
                 }
 
-                if (ztd::startswith(set->name, "cstm_") || ztd::startswith(set->name, "handler_") ||
-                    ztd::startswith(set->name, "custom_handler_"))
+                if (set->name.starts_with("cstm_"))
                 { // custom
                     if (set->lock)
                     {

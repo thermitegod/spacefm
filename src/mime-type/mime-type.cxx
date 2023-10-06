@@ -422,7 +422,7 @@ mime_type_is_text_file(const std::filesystem::path& file_path, const std::string
         {
             return true;
         }
-        if (!ztd::startswith(mime_type, "text/") && !ztd::startswith(mime_type, "application/"))
+        if (!mime_type.starts_with("text/") && !mime_type.starts_with("application/"))
         {
             return false;
         }

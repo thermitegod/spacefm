@@ -462,7 +462,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
 
     // network path
-    if ((!ztd::startswith(text, "/") && ztd::contains(text, ":/")) || ztd::startswith(text, "//"))
+    if ((!text.starts_with('/') && ztd::contains(text, ":/")) || text.starts_with("//"))
     {
         save_command_history(GTK_ENTRY(entry));
         ptk_location_view_mount_network(file_browser, text, false, false);
@@ -3948,7 +3948,7 @@ PtkFileBrowser::set_sort_extra(xset::name setname) const noexcept
 {
     const xset_t set = xset_get(setname);
 
-    if (!ztd::startswith(set->name, "sortx_"))
+    if (!set->name.starts_with("sortx_"))
     {
         return;
     }
@@ -5207,7 +5207,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
                 it_dir = it;
                 break;
             }
-            if (ztd::startswith(name, seek_name.string()))
+            if (name.starts_with(seek_name.string()))
             {
                 // prefix found
                 if (file->is_directory())
@@ -5451,10 +5451,10 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     std::string name;
     std::string prog;
 
-    if (ztd::startswith(set->name, "perm_"))
+    if (set->name.starts_with("perm_"))
     {
         name = ztd::removeprefix(set->name, "perm_");
-        if (ztd::startswith(name, "go") || ztd::startswith(name, "ugo"))
+        if (name.starts_with("go") || name.starts_with("ugo"))
         {
             prog = "chmod -R";
         }
@@ -5590,14 +5590,14 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
     assert(is_valid_panel(this->panel_));
     const auto mode = this->main_window_->panel_context.at(this->panel_);
 
-    if (ztd::startswith(set->name, "book_"))
+    if (set->name.starts_with("book_"))
     {
         if (set->xset_name == xset::name::book_add)
         {
             ptk_bookmark_view_add_bookmark(this->cwd());
         }
     }
-    else if (ztd::startswith(set->name, "go_"))
+    else if (set->name.starts_with("go_"))
     {
         if (set->xset_name == xset::name::go_back)
         {
@@ -5624,7 +5624,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             this->set_default_folder();
         }
     }
-    else if (ztd::startswith(set->name, "tab_"))
+    else if (set->name.starts_with("tab_"))
     {
         if (set->xset_name == xset::name::tab_new)
         {
@@ -5660,7 +5660,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             this->go_tab(i);
         }
     }
-    else if (ztd::startswith(set->name, "focus_"))
+    else if (set->name.starts_with("focus_"))
     {
         i32 i = 0;
         if (set->xset_name == xset::name::focus_path_bar)
@@ -5697,7 +5697,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
     {
         main_window_toggle_thumbnails_all_windows();
     }
-    else if (ztd::startswith(set->name, "sortby_"))
+    else if (set->name.starts_with("sortby_"))
     {
         i32 i = -3;
         if (set->xset_name == xset::name::sortby_name)
@@ -5767,11 +5767,11 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
         }
         on_popup_sortby(nullptr, this, i);
     }
-    else if (ztd::startswith(set->name, "sortx_"))
+    else if (set->name.starts_with("sortx_"))
     {
         this->set_sort_extra(set->xset_name);
     }
-    else if (ztd::startswith(set->name, "panel"))
+    else if (set->name.starts_with("panel"))
     {
         const panel_t panel_num = std::stoi(set->name.substr(5, 1));
         // ztd::logger::debug("ACTION panel={}", panel_num);
@@ -5789,7 +5789,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             { // main View|Panel N
                 show_panels_all_windows(nullptr, this->main_window_);
             }
-            else if (ztd::startswith(xname, "show_")) // shared key
+            else if (xname.starts_with("show_")) // shared key
             {
                 set2 = xset_get_panel_mode(this->panel_, xname, mode);
                 set2->b = set2->b == xset::b::xtrue ? xset::b::unset : xset::b::xtrue;
@@ -5815,7 +5815,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
                     on_popup_list_large(nullptr, this);
                 }
             }
-            else if (ztd::startswith(xname, "detcol_") // shared key
+            else if (xname.starts_with("detcol_") // shared key
                      && this->view_mode_ == ptk::file_browser::view_mode::list_view)
             {
                 set2 = xset_get_panel_mode(this->panel_, xname, mode);
@@ -5824,7 +5824,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             }
         }
     }
-    else if (ztd::startswith(set->name, "status_"))
+    else if (set->name.starts_with("status_"))
     {
         if (ztd::same(set->name, "status_border") || ztd::same(set->name, "status_text"))
         {
@@ -5838,7 +5838,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             on_status_middle_click_config(nullptr, set);
         }
     }
-    else if (ztd::startswith(set->name, "paste_"))
+    else if (set->name.starts_with("paste_"))
     {
         if (set->xset_name == xset::name::paste_link)
         {
@@ -5853,7 +5853,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             ptk_file_misc_paste_as(this, this->cwd(), nullptr);
         }
     }
-    else if (ztd::startswith(set->name, "select_"))
+    else if (set->name.starts_with("select_"))
     {
         if (set->xset_name == xset::name::select_all)
         {

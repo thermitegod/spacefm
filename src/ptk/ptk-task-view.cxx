@@ -324,24 +324,24 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
         set = set2;
     }
 
-    if (!set || !ztd::startswith(set->name, "task_"))
+    if (!set || !set->name.starts_with("task_"))
     {
         return;
     }
 
-    if (ztd::startswith(set->name, "task_stop"))
+    if (set->name.starts_with("task_stop"))
     {
         job = main_window_job::stop;
     }
-    else if (ztd::startswith(set->name, "task_pause"))
+    else if (set->name.starts_with("task_pause"))
     {
         job = main_window_job::pause;
     }
-    else if (ztd::startswith(set->name, "task_que"))
+    else if (set->name.starts_with("task_que"))
     {
         job = main_window_job::queue;
     }
-    else if (ztd::startswith(set->name, "task_resume"))
+    else if (set->name.starts_with("task_resume"))
     {
         job = main_window_job::resume;
     }

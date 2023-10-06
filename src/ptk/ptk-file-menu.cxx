@@ -2710,7 +2710,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
     }
 
     // action
-    if (ztd::startswith(set->name, "open_") && !ztd::startswith(set->name, "open_in_"))
+    if (set->name.starts_with("open_") && !set->name.starts_with("open_in_"))
     {
         if (set->xset_name == xset::name::open_edit)
         {
@@ -2729,7 +2729,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
             on_popup_open_all(nullptr, data);
         }
     }
-    else if (ztd::startswith(set->name, "arc_"))
+    else if (set->name.starts_with("arc_"))
     {
         if (set->xset_name == xset::name::archive_extract)
         {
@@ -2744,7 +2744,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
             on_popup_extract_open_activate(nullptr, data);
         }
     }
-    else if (ztd::startswith(set->name, "new_"))
+    else if (set->name.starts_with("new_"))
     {
         if (set->xset_name == xset::name::new_file)
         {
@@ -2782,7 +2782,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
     {
         on_popup_file_permissions_activate(nullptr, data);
     }
-    else if (ztd::startswith(set->name, "edit_"))
+    else if (set->name.starts_with("edit_"))
     {
         if (set->xset_name == xset::name::edit_cut)
         {
@@ -2832,13 +2832,13 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
     {
         on_popup_copy_parent_activate(nullptr, data);
     }
-    else if (ztd::startswith(set->name, "copy_loc") || ztd::startswith(set->name, "copy_tab_") ||
-             ztd::startswith(set->name, "copy_panel_") || ztd::startswith(set->name, "move_loc") ||
-             ztd::startswith(set->name, "move_tab_") || ztd::startswith(set->name, "move_panel_"))
+    else if (set->name.starts_with("copy_loc") || set->name.starts_with("copy_tab_") ||
+             set->name.starts_with("copy_panel_") || set->name.starts_with("move_loc") ||
+             set->name.starts_with("move_tab_") || set->name.starts_with("move_panel_"))
     {
         on_copycmd(nullptr, data, set);
     }
-    if (ztd::startswith(set->name, "open_in_panel"))
+    if (set->name.starts_with("open_in_panel"))
     {
         panel_t i;
         if (set->xset_name == xset::name::open_in_panel_prev)
@@ -2855,7 +2855,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
         }
         main_window_open_in_panel(data->browser, i, data->file_path);
     }
-    else if (ztd::startswith(set->name, "opentab_"))
+    else if (set->name.starts_with("opentab_"))
     {
         tab_t i;
         if (set->xset_name == xset::name::opentab_new)

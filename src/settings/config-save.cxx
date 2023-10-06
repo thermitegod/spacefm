@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <format>
 
 #include <cassert>
@@ -41,12 +39,6 @@ xset_pack_set(xset_t set)
     assert(set != nullptr);
 
     setvars_t setvars;
-    // hack to not save default handlers - this allows default handlers
-    // to be updated more easily
-    if (set->disable && set->name[0] == 'h' && ztd::startswith(set->name, "hand"))
-    {
-        return setvars;
-    }
 
     if (set->s)
     {

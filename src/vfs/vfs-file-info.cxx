@@ -106,7 +106,7 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     this->display_disk_size_ = disk_size;
 
     // hidden
-    this->is_hidden_ = ztd::startswith(this->name_, ".");
+    this->is_hidden_ = this->name_.starts_with('.');
 
     // collate keys
     this->collate_key_ = g_utf8_collate_key_for_filename(this->display_name_.data(), -1);
@@ -644,14 +644,14 @@ bool
 VFSFileInfo::is_image() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
-    return ztd::startswith(this->mime_type_->type(), "image/");
+    return this->mime_type_->type().starts_with("image/");
 }
 
 bool
 VFSFileInfo::is_video() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
-    return ztd::startswith(this->mime_type_->type(), "video/");
+    return this->mime_type_->type().starts_with("video/");
 }
 
 bool

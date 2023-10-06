@@ -414,7 +414,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
 
     const vfs::device_t device = std::make_shared<VFSDevice>(udevice);
     if (!device->is_valid() || device->devnode().empty() || device->devnum() == 0 ||
-        !ztd::startswith(device->devnode(), "/dev/"))
+        !device->devnode().starts_with("/dev/"))
     {
         return nullptr;
     }

@@ -1182,7 +1182,7 @@ volume_is_visible(vfs::volume vol)
     }
 
     // loop
-    if (ztd::startswith(vol->device_file(), "/dev/loop"))
+    if (vol->device_file().starts_with("/dev/loop"))
     {
         if (vol->is_mounted() && xset_get_b(xset::name::dev_show_file))
         {
@@ -1196,8 +1196,8 @@ volume_is_visible(vfs::volume vol)
     }
 
     // ramfs CONFIG_BLK_DEV_RAM causes multiple entries of /dev/ram*
-    if (!vol->is_mounted() && ztd::startswith(vol->device_file(), "/dev/ram") &&
-        vol->device_file()[8] && g_ascii_isdigit(vol->device_file()[8]))
+    if (!vol->is_mounted() && vol->device_file().starts_with("/dev/ram") && vol->device_file()[8] &&
+        g_ascii_isdigit(vol->device_file()[8]))
     {
         return false;
     }
@@ -1264,7 +1264,7 @@ ptk_location_view_on_action(GtkWidget* view, xset_t set)
     else
     {
         // require vol != nullptr
-        if (ztd::startswith(set->name, "dev_menu_"))
+        if (set->name.starts_with("dev_menu_"))
         {
             if (set->xset_name == xset::name::dev_menu_remove)
             {
@@ -1351,7 +1351,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     };
 
     if (vol && vol->is_device_type(vfs::volume_device_type::network) &&
-        (ztd::startswith(vol->device_file(), "//") || ztd::contains(vol->device_file(), ":/")))
+        (vol->device_file().starts_with("//") || ztd::contains(vol->device_file(), ":/")))
     {
         context_menu_entries.emplace_back(xset::name::dev_menu_mark);
     }
