@@ -13,25 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-
 #include <gtkmm.h>
 #include <glibmm.h>
-
-#include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
-
-#include "vfs/vfs-utils.hxx"
 
 void
 ptk_set_window_icon(GtkWindow* window)
 {
-    assert(GTK_IS_WINDOW(window));
-
-    GdkPixbuf* icon = vfs_load_icon("spacefm", 48);
-    if (icon)
-    {
-        gtk_window_set_icon(GTK_WINDOW(window), icon);
-        g_object_unref(icon);
-    }
+    gtk_window_set_icon_name(GTK_WINDOW(window), "spacefm");
 }

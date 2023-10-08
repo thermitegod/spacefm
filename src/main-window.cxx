@@ -50,6 +50,7 @@
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "about.hxx"
 #include "preference-dialog.hxx"
@@ -328,12 +329,7 @@ main_window_refresh_all()
 void
 MainWindow::update_window_icon() noexcept
 {
-    GdkPixbuf* icon = vfs_load_icon("spacefm", 48);
-    if (icon)
-    {
-        gtk_window_set_icon(GTK_WINDOW(this), icon);
-        g_object_unref(icon);
-    }
+    ptk_set_window_icon(GTK_WINDOW(this));
 }
 
 void

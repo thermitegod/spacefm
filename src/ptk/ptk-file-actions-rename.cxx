@@ -1401,19 +1401,16 @@ on_opt_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
     }
 
     // Window Icon
-    GdkPixbuf* icon;
+    std::string icon;
     if (mset->create_new != ptk::rename_mode::rename)
     {
-        icon = vfs_load_icon("gtk-new", 16);
+        icon = "gtk-new";
     }
     else
     {
-        icon = vfs_load_icon("gtk-edit", 16);
+        icon = "gtk-edit";
     }
-    if (icon)
-    {
-        gtk_window_set_icon(GTK_WINDOW(mset->dlg), icon);
-    }
+    gtk_window_set_icon_name(GTK_WINDOW(mset->dlg), icon.data());
 
     // title
     if (desc.empty())

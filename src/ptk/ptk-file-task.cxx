@@ -725,35 +725,35 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
 static void
 set_progress_icon(PtkFileTask* ptask)
 {
-    GdkPixbuf* icon;
+    std::string icon;
     vfs::file_task task = ptask->task;
 
     if (task->state_pause != vfs::file_task_state::running)
     {
-        icon = vfs_load_icon("media-playback-pause", 16);
+        icon = "media-playback-pause";
     }
     else if (task->err_count)
     {
-        icon = vfs_load_icon("error", 16);
+        icon = "error";
     }
     else if (task->type == vfs::file_task_type::move || task->type == vfs::file_task_type::copy ||
              task->type == vfs::file_task_type::link || task->type == vfs::file_task_type::trash)
     {
-        icon = vfs_load_icon("stock_copy", 16);
+        icon = "stock_copy";
     }
     else if (task->type == vfs::file_task_type::DELETE)
     {
-        icon = vfs_load_icon("stock_delete", 16);
+        icon = "stock_delete";
     }
     else if (task->type == vfs::file_task_type::exec && !task->exec_icon.empty())
     {
-        icon = vfs_load_icon(task->exec_icon, 16);
+        icon = task->exec_icon;
     }
     else
     {
-        icon = vfs_load_icon("gtk-execute", 16);
+        icon = "gtk-execute";
     }
-    gtk_window_set_icon(GTK_WINDOW(ptask->progress_dlg), icon);
+    gtk_window_set_icon_name(GTK_WINDOW(ptask->progress_dlg), icon.data());
 }
 
 static void
