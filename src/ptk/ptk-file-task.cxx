@@ -1106,9 +1106,6 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     gtk_window_set_default_size(GTK_WINDOW(ptask->progress_dlg), win_width, win_height);
 #endif
 
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(ptask->progress_dlg),
-                              GtkButtonBoxStyle::GTK_BUTTONBOX_END);
-
 #if (GTK_MAJOR_VERSION == 3)
     if (xset_get_b(xset::name::task_pop_top))
     {
