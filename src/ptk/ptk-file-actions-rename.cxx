@@ -1879,6 +1879,9 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 static void
 copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
 {
+#if (GTK_MAJOR_VERSION == 4)
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+#elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTextBuffer* buf = nullptr;
 
@@ -1957,6 +1960,7 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
     char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     gtk_clipboard_set_text(clip, text, -1);
     std::free(text);
+#endif
 }
 
 static bool

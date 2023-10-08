@@ -1030,6 +1030,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     // const i32 no_read_access = faccessat(0, cwd, R_OK, AT_EACCESS);
     const i32 no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
+#if (GTK_MAJOR_VERSION == 4)
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    bool is_clip = false;
+#elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     bool is_clip;
     if (!gtk_clipboard_wait_is_target_available(
@@ -1043,6 +1047,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     {
         is_clip = true;
     }
+#endif
 
     const panel_t p = browser->panel();
 

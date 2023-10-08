@@ -33,6 +33,93 @@
 
 #include "ptk/ptk-clipboard.hxx"
 
+#if (GTK_MAJOR_VERSION == 4)
+
+// https://docs.gtk.org/gtk4/migrating-3to4.html#replace-gtkclipboard-with-gdkclipboard
+
+void
+ptk_clipboard_cut_or_copy_files(const std::span<const vfs::file_info> sel_files, bool copy)
+{
+    (void)sel_files;
+    (void)copy;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+void
+ptk_clipboard_copy_as_text(const std::span<const vfs::file_info> sel_files)
+{
+    (void)sel_files;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+void
+ptk_clipboard_copy_name(const std::span<const vfs::file_info> sel_files)
+{
+    (void)sel_files;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+void
+ptk_clipboard_paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+                          GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win)
+{
+    (void)parent_win;
+    (void)dest_dir;
+    (void)task_view;
+    (void)callback;
+    (void)callback_win;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+void
+ptk_clipboard_paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+                          GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win)
+{
+    (void)parent_win;
+    (void)dest_dir;
+    (void)task_view;
+    (void)callback;
+    (void)callback_win;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+void
+ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+                            GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win)
+{
+    (void)parent_win;
+    (void)dest_dir;
+    (void)task_view;
+    (void)callback;
+    (void)callback_win;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+void ptk_clipboard_copy_text(const std::string_view text)
+{
+    (void)text;
+}
+
+void
+ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files, bool copy)
+{
+    (void)sel_files;
+    (void)copy;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+}
+
+const std::vector<std::filesystem::path>
+ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32* missing_targets)
+{
+    (void)cwd;
+    (void)is_cut;
+    (void)missing_targets;
+    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    return {};
+}
+
+#elif (GTK_MAJOR_VERSION == 3)
+
 static GdkDragAction clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 static std::vector<std::filesystem::path> clipboard_file_list;
 
@@ -622,3 +709,5 @@ ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32
 
     return file_list;
 }
+
+#endif

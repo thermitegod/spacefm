@@ -737,6 +737,9 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "clipboard-text") ||
                  ztd::same(property, "clipboard-primary-text"))
         {
+#if (GTK_MAJOR_VERSION == 4)
+            return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
             const std::string_view value = data[0];
 
             if (!g_utf8_validate(value.data(), -1, nullptr))
@@ -748,10 +751,14 @@ run_ipc_command(const std::string_view socket_commands_json)
                                                                         : GDK_SELECTION_PRIMARY);
             const std::string str = unescape(value);
             gtk_clipboard_set_text(clip, str.data(), -1);
+#endif
         }
         else if (ztd::same(property, "clipboard-from-file") ||
                  ztd::same(property, "clipboard-primary-from-file"))
         {
+#if (GTK_MAJOR_VERSION == 4)
+            return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
             const std::string_view value = data[0];
 
             std::string contents;
@@ -772,6 +779,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                                                        ? GDK_SELECTION_CLIPBOARD
                                                        : GDK_SELECTION_PRIMARY);
             gtk_clipboard_set_text(clip, contents.data(), -1);
+#endif
         }
         else if (ztd::same(property, "clipboard-cut-files") ||
                  ztd::same(property, "clipboard-copy-files"))
@@ -1273,14 +1281,21 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (ztd::same(property, "clipboard-text") ||
                  ztd::same(property, "clipboard-primary-text"))
         {
+#if (GTK_MAJOR_VERSION == 4)
+            return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
             GtkClipboard* clip =
                 gtk_clipboard_get(ztd::same(property, "clipboard-text") ? GDK_SELECTION_CLIPBOARD
                                                                         : GDK_SELECTION_PRIMARY);
             return {SOCKET_SUCCESS, gtk_clipboard_wait_for_text(clip)};
+#endif
         }
         else if (ztd::same(property, "clipboard-cut-files") ||
                  ztd::same(property, "clipboard-copy-files"))
         {
+#if (GTK_MAJOR_VERSION == 4)
+            return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
             GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
             GdkAtom gnome_target;
             GdkAtom uri_list_target;
@@ -1330,6 +1345,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                 str.append(std::format("{} ", ztd::shell::quote(path)));
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
+#endif
         }
         else if (ztd::same(property, "selected-filenames") || ztd::same(property, "selected-files"))
         {
