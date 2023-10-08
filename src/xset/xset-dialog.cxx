@@ -427,13 +427,17 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     {
         // filechooser will not honor default size or size request ?
         gtk_widget_show_all(GTK_WIDGET(dlg));
+#if (GTK_MAJOR_VERSION == 3)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
+#endif
         gtk_window_resize(GTK_WINDOW(dlg), width, height);
         while (g_main_context_pending(nullptr))
         {
             g_main_context_iteration(nullptr, true);
         }
+#if (GTK_MAJOR_VERSION == 3)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
+#endif
     }
 
     const auto response = gtk4_dialog_run(GTK_DIALOG(dlg));

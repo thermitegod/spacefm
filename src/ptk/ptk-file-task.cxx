@@ -1108,6 +1108,8 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 
     gtk_button_box_set_layout(GTK_BUTTON_BOX(ptask->progress_dlg),
                               GtkButtonBoxStyle::GTK_BUTTONBOX_END);
+
+#if (GTK_MAJOR_VERSION == 3)
     if (xset_get_b(xset::name::task_pop_top))
     {
         gtk_window_set_type_hint(GTK_WINDOW(ptask->progress_dlg),
@@ -1128,6 +1130,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     }
     gtk_window_set_gravity(GTK_WINDOW(ptask->progress_dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(ptask->progress_dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
+#endif
 
     // clang-format off
     // gtk_dialog_set_default_response(ptask->progress_dlg, GtkResponseType::GTK_RESPONSE_OK);
@@ -2463,9 +2466,11 @@ query_overwrite(PtkFileTask* ptask)
     g_signal_connect(G_OBJECT(dlg), "response", G_CALLBACK(query_overwrite_response), ptask);
     gtk_window_set_resizable(GTK_WINDOW(dlg), true);
     gtk_window_set_title(GTK_WINDOW(dlg), title.data());
+#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dlg), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_gravity(GTK_WINDOW(dlg), GdkGravity::GDK_GRAVITY_NORTH_EAST);
     gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
+#endif
 
     gtk_widget_set_halign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(dlg), GtkAlign::GTK_ALIGN_START);

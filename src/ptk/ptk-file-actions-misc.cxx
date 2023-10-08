@@ -70,7 +70,9 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 800, 500);
     // gtk_window_set_resizable(GTK_WINDOW(dialog), true);
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+#endif
 
     // Set "Confirm" as the default button
     // TODO - The first column in the GtkTreeView is the active widget

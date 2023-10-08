@@ -929,7 +929,9 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+#endif
 
     GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
     GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
@@ -964,7 +966,9 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     // gtk_widget_set_size_request(GTK_WIDGET(dialog), 500, 800);
     // gtk_window_set_resizable(GTK_WINDOW(dialog), true);
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+#endif
 
     g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(close_dialog), data);
 

@@ -207,7 +207,11 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
             else
             {
+#if (GTK_MAJOR_VERSION == 4)
+                return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
                 gtk_window_move(GTK_WINDOW(main_window), width, height);
+#endif
             }
         }
         else if (ztd::same(property, "window-maximized"))

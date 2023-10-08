@@ -1230,7 +1230,10 @@ show_preference_dialog(GtkWindow* parent) noexcept
     // gtk_widget_set_size_request(GTK_WIDGET(dialog), 500, 800);
     // gtk_window_set_resizable(GTK_WINDOW(dialog), true);
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+
+#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+#endif
 
     gtk_widget_show_all(GTK_WIDGET(dialog));
 }

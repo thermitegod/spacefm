@@ -351,7 +351,9 @@ app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focu
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 600);
     // gtk_window_set_resizable(GTK_WINDOW(dialog), true);
     gtk_window_set_resizable(GTK_WINDOW(dialog), false);
+#if (GTK_MAJOR_VERSION == 3)
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
+#endif
 
     // Create a vertical box to hold the dialog contents
     GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
