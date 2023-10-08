@@ -1210,11 +1210,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             gtk_widget_set_sensitive(ptask->error_combo, false);
         }
 
-        if (task->type != vfs::file_task_type::exec)
-        {
-            ufile_path = nullptr;
-        }
-        else
+        if (task->type == vfs::file_task_type::exec)
         {
             if (task->current_file)
             {
@@ -1273,7 +1269,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
                 const auto current_file_filename = current_file.filename();
                 const auto current_dest_filename = current_dest.filename();
-                if (!std::filesystem::equivalent(current_file_filename, current_dest_filename))
+                if (!ztd::same(current_file_filename.string(), current_dest_filename.string()))
                 {
                     // source and dest filenames differ, user renamed - show all
                     udest = current_dest;
