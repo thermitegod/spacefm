@@ -203,7 +203,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
             if (ztd::same(property, "window-size"))
             {
-                gtk_window_resize(GTK_WINDOW(main_window), width, height);
+                gtk_window_set_default_size(GTK_WINDOW(main_window), width, height);
             }
             else
             {

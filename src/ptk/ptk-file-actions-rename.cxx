@@ -1001,7 +1001,7 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
 #if (GTK_MAJOR_VERSION == 3)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
 #endif
-        gtk_window_resize(GTK_WINDOW(dlg), width, height);
+        gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
         while (g_main_context_pending(nullptr))
         {
             g_main_context_iteration(nullptr, true);
@@ -1097,7 +1097,7 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
                 gtk_window_set_position(GTK_WINDOW(dlg),
                                         GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
 #endif
-                gtk_window_resize(GTK_WINDOW(dlg), allocation.width, allocation.height);
+                gtk_window_set_default_size(GTK_WINDOW(dlg), allocation.width, allocation.height);
                 while (g_main_context_pending(nullptr))
                 {
                     g_main_context_iteration(nullptr, true);
@@ -1203,7 +1203,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 #if (GTK_MAJOR_VERSION == 3)
         gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
 #endif
-        gtk_window_resize(GTK_WINDOW(dlg), width, height);
+        gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
         while (g_main_context_pending(nullptr))
         {
             g_main_context_iteration(nullptr, true);
