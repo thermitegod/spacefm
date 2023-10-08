@@ -21,30 +21,17 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "vfs/vfs-utils.hxx"
+
 void
 ptk_set_window_icon(GtkWindow* window)
 {
     assert(GTK_IS_WINDOW(window));
 
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-    if (!icon_theme)
-    {
-        return;
-    }
-
-    GError* error = nullptr;
-    GdkPixbuf* icon =
-        gtk_icon_theme_load_icon(icon_theme, "spacefm", 48, (GtkIconLookupFlags)0, &error);
+    GdkPixbuf* icon = vfs_load_icon("spacefm", 48);
     if (icon)
     {
         gtk_window_set_icon(GTK_WINDOW(window), icon);
         g_object_unref(icon);
-    }
-    else if (!icon || error)
-    {
-        // An error occured on loading the icon
-        ztd::logger::error("Unable to load the window icon 'spacefm' in - ptk_set_window_icon - {}",
-                           error->message);
-        g_error_free(error);
     }
 }

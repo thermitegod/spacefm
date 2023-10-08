@@ -44,6 +44,7 @@
 #include "settings.hxx"
 
 #include "vfs/vfs-file-task.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-task-view.hxx"
 
@@ -1061,7 +1062,6 @@ main_task_view_update_task(PtkFileTask* ptask)
     GtkWidget* view;
     GtkTreeModel* model;
     GtkTreeIter it;
-    GdkPixbuf* pixbuf;
     xset_t set;
 
     // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
@@ -1206,62 +1206,48 @@ main_task_view_update_task(PtkFileTask* ptask)
         }
 
         // update icon if queue state changed
-        pixbuf = nullptr;
+        GdkPixbuf* pixbuf = nullptr;
         if (ptask->pause_change_view)
         {
             // icon
-            std::string iname;
             if (ptask->task->state_pause == vfs::file_task_state::pause)
             {
                 set = xset_get(xset::name::task_pause);
-                iname = set->icon ? set->icon.value() : "media-playback-pause";
+                pixbuf = vfs_load_icon(set->icon.value_or("media-playback-pause"), 22);
             }
             else if (ptask->task->state_pause == vfs::file_task_state::queue)
             {
                 set = xset_get(xset::name::task_que);
-                iname = set->icon ? set->icon.value() : "list-add";
+                pixbuf = vfs_load_icon(set->icon.value_or("list-add"), 22);
             }
             else if (ptask->err_count && ptask->task->type != vfs::file_task_type::exec)
             {
-                iname = "error";
+                pixbuf = vfs_load_icon("error", 22);
             }
             else if (ptask->task->type == vfs::file_task_type::move ||
                      ptask->task->type == vfs::file_task_type::copy ||
                      ptask->task->type == vfs::file_task_type::link)
             {
-                iname = "stock_copy";
+                pixbuf = vfs_load_icon("stock_copy", 22);
             }
             else if (ptask->task->type == vfs::file_task_type::trash ||
                      ptask->task->type == vfs::file_task_type::DELETE)
             {
-                iname = "stock_delete";
+                pixbuf = vfs_load_icon("stock_delete", 22);
             }
             else if (ptask->task->type == vfs::file_task_type::exec &&
                      !ptask->task->exec_icon.empty())
             {
-                iname = ptask->task->exec_icon;
+                pixbuf = vfs_load_icon(ptask->task->exec_icon, 22);
             }
             else
             {
-                iname = "gtk-execute";
+                pixbuf = vfs_load_icon("gtk-execute", 22);
             }
 
-            GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-
-            pixbuf = gtk_icon_theme_load_icon(
-                icon_theme,
-                iname.data(),
-                22,
-                (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                nullptr);
             if (!pixbuf)
             {
-                pixbuf = gtk_icon_theme_load_icon(
-                    icon_theme,
-                    "gtk-execute",
-                    22,
-                    (GtkIconLookupFlags)GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                    nullptr);
+                pixbuf = vfs_load_icon("gtk-execute", 22);
             }
             ptask->pause_change_view = false;
         }

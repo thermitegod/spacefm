@@ -331,21 +331,11 @@ main_window_refresh_all()
 void
 MainWindow::update_window_icon() noexcept
 {
-    GError* error = nullptr;
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
-    GdkPixbuf* icon =
-        gtk_icon_theme_load_icon(icon_theme, "spacefm", 48, (GtkIconLookupFlags)0, &error);
+    GdkPixbuf* icon = vfs_load_icon("spacefm", 48);
     if (icon)
     {
         gtk_window_set_icon(GTK_WINDOW(this), icon);
         g_object_unref(icon);
-    }
-    else if (error != nullptr)
-    {
-        // An error occured on loading the icon
-        ztd::logger::error("Unable to load the window icon 'spacefm' in - update_window_icon - {}",
-                           error->message);
-        g_error_free(error);
     }
 }
 

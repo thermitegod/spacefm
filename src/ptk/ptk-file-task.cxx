@@ -730,60 +730,35 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
 static void
 set_progress_icon(PtkFileTask* ptask)
 {
-    GdkPixbuf* pixbuf;
+    GdkPixbuf* icon;
     vfs::file_task task = ptask->task;
-    GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
     if (task->state_pause != vfs::file_task_state::running)
     {
-        pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                          "media-playback-pause",
-                                          16,
-                                          GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        icon = vfs_load_icon("media-playback-pause", 16);
     }
     else if (task->err_count)
     {
-        pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                          "error",
-                                          16,
-                                          GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        icon = vfs_load_icon("error", 16);
     }
     else if (task->type == vfs::file_task_type::move || task->type == vfs::file_task_type::copy ||
              task->type == vfs::file_task_type::link || task->type == vfs::file_task_type::trash)
     {
-        pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                          "stock_copy",
-                                          16,
-                                          GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        icon = vfs_load_icon("stock_copy", 16);
     }
     else if (task->type == vfs::file_task_type::DELETE)
     {
-        pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                          "stock_delete",
-                                          16,
-                                          GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        icon = vfs_load_icon("stock_delete", 16);
     }
     else if (task->type == vfs::file_task_type::exec && !task->exec_icon.empty())
     {
-        pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                          task->exec_icon.data(),
-                                          16,
-                                          GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        icon = vfs_load_icon(task->exec_icon, 16);
     }
     else
     {
-        pixbuf = gtk_icon_theme_load_icon(icon_theme,
-                                          "gtk-execute",
-                                          16,
-                                          GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                          nullptr);
+        icon = vfs_load_icon("gtk-execute", 16);
     }
-    gtk_window_set_icon(GTK_WINDOW(ptask->progress_dlg), pixbuf);
+    gtk_window_set_icon(GTK_WINDOW(ptask->progress_dlg), icon);
 }
 
 static void

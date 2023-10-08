@@ -50,6 +50,7 @@
 
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "settings.hxx"
 
@@ -1337,23 +1338,18 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
     }
 
     // Window Icon
-    std::string win_icon;
+    GdkPixbuf* icon;
     if (mset->create_new != ptk::rename_mode::rename)
     {
-        win_icon = "gtk-new";
+        icon = vfs_load_icon("gtk-new", 16);
     }
     else
     {
-        win_icon = "gtk-edit";
+        icon = vfs_load_icon("gtk-edit", 16);
     }
-    GdkPixbuf* pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(),
-                                                 win_icon.c_str(),
-                                                 16,
-                                                 GtkIconLookupFlags::GTK_ICON_LOOKUP_USE_BUILTIN,
-                                                 nullptr);
-    if (pixbuf)
+    if (icon)
     {
-        gtk_window_set_icon(GTK_WINDOW(mset->dlg), pixbuf);
+        gtk_window_set_icon(GTK_WINDOW(mset->dlg), icon);
     }
 
     // title

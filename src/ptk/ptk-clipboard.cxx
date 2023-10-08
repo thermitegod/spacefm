@@ -95,7 +95,8 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
     ztd::logger::debug("TODO - PORT - GdkClipboard");
 }
 
-void ptk_clipboard_copy_text(const std::string_view text)
+void
+ptk_clipboard_copy_text(const std::string_view text)
 {
     (void)text;
 }
