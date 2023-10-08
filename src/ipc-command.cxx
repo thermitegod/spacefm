@@ -2020,7 +2020,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         else
         {
             // activate item
-            main_window_keypress(nullptr, nullptr, set);
+            main_window_keypress(nullptr, nullptr, set.get());
         }
     }
     else if (ztd::same(command, "add-event") || ztd::same(command, "replace-event") ||

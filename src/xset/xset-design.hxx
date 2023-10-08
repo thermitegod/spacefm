@@ -19,4 +19,4 @@
 
 #include "xset/xset.hxx"
 
-void xset_design_job(GtkWidget* item, xset_t set);
+void xset_design_job(GtkWidget* item, const xset_t& set);

@@ -1803,7 +1803,7 @@ xset_defaults()
     set->b = xset::b::xtrue;
 
     // mark all labels and icons as default
-    for (xset_t set2 : xsets)
+    for (const xset_t& set2 : xsets)
     {
         assert(set2 != nullptr);
 
@@ -1824,7 +1824,7 @@ xset_defaults()
 static void
 def_key(xset::name name, u32 key, u32 keymod)
 {
-    xset_t set = xset_get(name);
+    const xset_t set = xset_get(name);
 
     // key already set or unset?
     if (set->key != 0 || key == 0)
@@ -1833,11 +1833,11 @@ def_key(xset::name name, u32 key, u32 keymod)
     }
 
     // key combo already in use?
-    for (xset_t set2 : keysets)
+    for (const xset_t& keyset : keysets)
     {
-        assert(set2 != nullptr);
+        assert(keyset != nullptr);
 
-        if (set2->key == key && set2->keymod == keymod)
+        if (keyset->key == key && keyset->keymod == keymod)
         {
             return;
         }
@@ -1851,7 +1851,7 @@ xset_default_keys()
 {
     // read all currently set or unset keys
     keysets.reserve(xsets.size());
-    for (xset_t set : xsets)
+    for (const xset_t& set : xsets)
     {
         assert(set != nullptr);
 

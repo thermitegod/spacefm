@@ -518,7 +518,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
 }
 
 void
-ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget)
+ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget)
 { // store the toolbar widget created by set for later change of status
     assert(set != nullptr);
 
@@ -779,7 +779,7 @@ on_status_effect_change(GtkMenuItem* item, PtkFileBrowser* file_browser)
 }
 
 static void
-on_status_middle_click_config(GtkMenuItem* menuitem, xset_t set)
+on_status_middle_click_config(GtkMenuItem* menuitem, const xset_t& set)
 {
     (void)menuitem;
 
@@ -814,18 +814,20 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, PtkFileBrowser* file_bro
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    xset_t set = xset_get(xset::name::status_name);
-    xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set);
+    xset_t set;
+
+    set = xset_get(xset::name::status_name);
+    xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set.get());
     xset_set_ob2(set, nullptr, nullptr);
-    xset_t set_radio = set;
+    const xset_t set_radio = set;
     set = xset_get(xset::name::status_path);
-    xset_set_cb(xset::name::status_path, (GFunc)on_status_middle_click_config, set);
+    xset_set_cb(xset::name::status_path, (GFunc)on_status_middle_click_config, set.get());
     xset_set_ob2(set, nullptr, set_radio->name.data());
     set = xset_get(xset::name::status_info);
-    xset_set_cb(xset::name::status_info, (GFunc)on_status_middle_click_config, set);
+    xset_set_cb(xset::name::status_info, (GFunc)on_status_middle_click_config, set.get());
     xset_set_ob2(set, nullptr, set_radio->name.data());
     set = xset_get(xset::name::status_hide);
-    xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set);
+    xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set.get());
     xset_set_ob2(set, nullptr, set_radio->name.data());
 
     xset_add_menu(file_browser,
@@ -2109,7 +2111,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         // column width
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
-        xset_t set = xset_get_panel_mode(p, columns.at(idx).xset_name, mode);
+        const xset_t set = xset_get_panel_mode(p, columns.at(idx).xset_name, mode);
         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
@@ -3728,8 +3730,8 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
     }
     else if (setname == xset::name::copy_loc_last)
     {
-        xset_t set2 = xset_get(xset::name::copy_loc_last);
-        copy_dest = set2->desc.value();
+        const xset_t set = xset_get(xset::name::copy_loc_last);
+        copy_dest = set->desc.value();
     }
     else if (setname == xset::name::move_tab_prev)
     {
@@ -3805,8 +3807,8 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
     }
     else if (setname == xset::name::move_loc_last)
     {
-        xset_t set2 = xset_get(xset::name::copy_loc_last);
-        move_dest = set2->desc.value();
+        const xset_t set = xset_get(xset::name::copy_loc_last);
+        move_dest = set->desc.value();
     }
 
     if ((setname == xset::name::copy_loc || setname == xset::name::copy_loc_last ||
@@ -3814,10 +3816,12 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
         !copy_dest && !move_dest)
     {
         std::filesystem::path folder;
-        xset_t set2 = xset_get(xset::name::copy_loc_last);
-        if (set2->desc)
+        xset_t set;
+
+        set = xset_get(xset::name::copy_loc_last);
+        if (set->desc)
         {
-            folder = set2->desc.value();
+            folder = set->desc.value();
         }
         else
         {
@@ -3839,8 +3843,8 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
             {
                 move_dest = path;
             }
-            set2 = xset_get(xset::name::copy_loc_last);
-            xset_set_var(set2, xset::var::desc, path.value().string());
+            set = xset_get(xset::name::copy_loc_last);
+            xset_set_var(set, xset::var::desc, path.value().string());
         }
         else
         {
@@ -4226,7 +4230,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
     if (search_key.empty())
     {
         // get pattern from user (store in ob1 so it is not saved)
-        xset_t set = xset_get(xset::name::select_patt);
+        const xset_t set = xset_get(xset::name::select_patt);
         const auto [response, answer] =
             select_pattern_dialog(GTK_WIDGET(this->main_window_), set->ob1 ? set->ob1 : "");
 
@@ -4832,7 +4836,7 @@ PtkFileBrowser::save_column_widths(GtkTreeView* view) noexcept
                 if (ztd::same(title, column.title))
                 {
                     // save column width for this panel context
-                    xset_t set = xset_get_panel_mode(p, column.xset_name, mode);
+                    const xset_t set = xset_get_panel_mode(p, column.xset_name, mode);
                     const i32 width = gtk_tree_view_column_get_width(col);
                     if (width > 0)
                     {
@@ -4853,7 +4857,7 @@ PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
 
-    xset_t set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
+    const xset_t set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
 
     if (pane == this->hpane)
     {
@@ -5277,7 +5281,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
 }
 
 void
-PtkFileBrowser::update_toolbar_widgets(xset_t set, xset::tool tool_type) noexcept
+PtkFileBrowser::update_toolbar_widgets(const xset_t& set, xset::tool tool_type) noexcept
 {
     (void)tool_type;
 
@@ -5289,7 +5293,7 @@ PtkFileBrowser::update_toolbar_widgets(xset_t set, xset::tool tool_type) noexcep
         // a custom checkbox is being updated
         for (GSList* l = this->toolbar_widgets[7]; l; l = g_slist_next(l))
         {
-            xset_t test_set =
+            const xset_t test_set =
                 xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(l->data), "set")));
             if (set == test_set)
             {
@@ -5442,7 +5446,7 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
         return;
     }
 
-    xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
+    const xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     if (!set)
     {
         return;

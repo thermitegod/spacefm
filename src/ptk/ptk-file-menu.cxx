@@ -216,7 +216,7 @@ on_popup_show_hidden(GtkMenuItem* menuitem, PtkFileBrowser* browser)
 }
 
 static void
-on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, xset_t set2)
+on_copycmd(GtkMenuItem* menuitem, PtkFileMenu* data, const xset_t& set2)
 {
     xset_t set;
     if (menuitem)
@@ -276,7 +276,7 @@ on_file_edit(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 static void
-on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, xset_t set2)
+on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, const xset_t& set2)
 {
     xset_t set;
     if (menuitem)
@@ -405,7 +405,7 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
 }
 
 static void
-on_archive_default(GtkMenuItem* menuitem, xset_t set)
+on_archive_default(GtkMenuItem* menuitem, const xset_t& set)
 {
     (void)menuitem;
     static constexpr std::array<xset::name, 4> arcnames{
@@ -1112,22 +1112,26 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
 
             set = xset_get(xset::name::archive_default_open_with_app);
             // do NOT use set = xset_set_cb here or wrong set is passed
-            xset_set_cb(xset::name::archive_default_open_with_app, (GFunc)on_archive_default, set);
+            xset_set_cb(xset::name::archive_default_open_with_app,
+                        (GFunc)on_archive_default,
+                        set.get());
             xset_set_ob2(set, nullptr, nullptr);
             set_radio = set;
 
             set = xset_get(xset::name::archive_default_extract);
-            xset_set_cb(xset::name::archive_default_extract, (GFunc)on_archive_default, set);
+            xset_set_cb(xset::name::archive_default_extract, (GFunc)on_archive_default, set.get());
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::archive_default_extract_to);
-            xset_set_cb(xset::name::archive_default_extract_to, (GFunc)on_archive_default, set);
+            xset_set_cb(xset::name::archive_default_extract_to,
+                        (GFunc)on_archive_default,
+                        set.get());
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
             set = xset_get(xset::name::archive_default_open_with_archiver);
             xset_set_cb(xset::name::archive_default_open_with_archiver,
                         (GFunc)on_archive_default,
-                        set);
+                        set.get());
             xset_set_ob2(set, nullptr, set_radio->name.data());
 
             if (!xset_get_b(xset::name::archive_default_open_with_app))
@@ -2681,7 +2685,7 @@ on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 void
-ptk_file_menu_action(PtkFileBrowser* browser, xset_t set)
+ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
 {
     assert(set != nullptr);
     assert(browser != nullptr);

@@ -63,13 +63,12 @@ xset_custom_new_name()
     return setname;
 }
 
-xset_t
+const xset_t
 xset_custom_new()
 {
     const std::string setname = xset_custom_new_name();
 
-    xset_t set;
-    set = xset_get(setname);
+    const xset_t set = xset_get(setname);
     set->lock = false;
     set->keep_terminal = true;
     set->task = true;
@@ -78,8 +77,8 @@ xset_custom_new()
     return set;
 }
 
-xset_t
-xset_custom_remove(xset_t set)
+const xset_t
+xset_custom_remove(const xset_t& set)
 {
     assert(set != nullptr);
 
@@ -145,7 +144,7 @@ xset_custom_remove(xset_t set)
 }
 
 const std::string
-xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
+xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size)
 {
     assert(set != nullptr);
 
@@ -218,14 +217,14 @@ xset_custom_get_app_name_icon(xset_t set, GdkPixbuf** icon, i32 icon_size)
     return menu_label;
 }
 
-xset_t
-xset_custom_copy(xset_t set, bool copy_next)
+const xset_t
+xset_custom_copy(const xset_t& set, bool copy_next)
 {
     assert(set != nullptr);
 
     // ztd::logger::info("xset_custom_copy({}, {})", set->name, copy_next);
 
-    xset_t newset = xset_custom_new();
+    const xset_t newset = xset_custom_new();
     newset->menu_label = set->menu_label;
     newset->s = set->s;
     newset->x = set->x;
@@ -250,18 +249,18 @@ xset_custom_copy(xset_t set, bool copy_next)
 
     if (set->menu_style == xset::menu::submenu && set->child)
     {
-        xset_t set_child = xset_get(set->child.value());
+        const xset_t set_child = xset_get(set->child.value());
         // ztd::logger::info("    copy submenu {}", set_child->name);
-        xset_t newchild = xset_custom_copy(set_child, true);
+        const xset_t newchild = xset_custom_copy(set_child, true);
         newset->child = newchild->name;
         newchild->parent = newset->name;
     }
 
     if (copy_next && set->next)
     {
-        xset_t set_next = xset_get(set->next.value());
+        const xset_t set_next = xset_get(set->next.value());
         // ztd::logger::info("    copy next {}", set_next->name);
-        xset_t newnext = xset_custom_copy(set_next, true);
+        const xset_t newnext = xset_custom_copy(set_next, true);
         newnext->prev = newset->name;
         newset->next = newnext->name;
     }
@@ -269,13 +268,13 @@ xset_custom_copy(xset_t set, bool copy_next)
     return newset;
 }
 
-xset_t
+const xset_t
 xset_find_custom(const std::string_view search)
 {
     // find a custom command or submenu by label or xset name
     const std::string label = clean_label(search, true, false);
 
-    for (xset_t set : xsets)
+    for (const xset_t& set : xsets)
     {
         assert(set != nullptr);
 

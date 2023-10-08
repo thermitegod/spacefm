@@ -129,7 +129,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         {
             if (ztd::same(title, task_titles.at(task_view_column(index))))
             {
-                xset_t set = xset_get(value);
+                const xset_t set = xset_get(value);
                 // save column position
                 xset_set_var(set, xset::var::x, std::to_string(i));
                 // if the window was opened maximized and stayed maximized, or the
@@ -299,7 +299,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 }
 
 static void
-on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask2)
+on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, PtkFileTask* ptask2)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
@@ -406,7 +406,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, xset_t set2, PtkFileTask* ptask
 }
 
 void
-ptk_task_view_task_stop(GtkWidget* view, xset_t set2, PtkFileTask* ptask2)
+ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, PtkFileTask* ptask2)
 {
     on_task_stop(nullptr, view, set2, ptask2);
 }
@@ -423,7 +423,7 @@ idle_set_task_height(MainWindow* main_window)
     {
         // this is not perfect because panel half-width is set before user
         // adjusts window size
-        xset_t set = xset_get(xset::name::panel_sliders);
+        const xset_t set = xset_get(xset::name::panel_sliders);
         set->x = std::to_string(allocation.width / 2);
         set->y = std::to_string(allocation.width / 2);
         set->s = std::to_string(allocation.height / 2);

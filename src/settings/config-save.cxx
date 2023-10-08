@@ -34,7 +34,7 @@
 #include "settings/disk-format.hxx"
 
 const setvars_t
-xset_pack_set(xset_t set)
+xset_pack_set(const xset_t& set)
 {
     assert(set != nullptr);
 
@@ -247,7 +247,7 @@ xset_pack_sets()
     // map layout <XSet->name, <XSet->var, XSet->value>>
     xsetpak_t xsetpak;
 
-    for (xset_t set : xsets)
+    for (const xset_t& set : xsets)
     {
         assert(set != nullptr);
 

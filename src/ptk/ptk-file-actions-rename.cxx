@@ -1133,7 +1133,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     GtkTextIter siter;
     file_misc_mode mode_default = file_misc_mode::parent;
 
-    xset_t set = xset_get(xset::name::move_dlg_help);
+    const xset_t set = xset_get(xset::name::move_dlg_help);
     if (set->z)
     {
         mode_default = file_misc_mode(xset_get_int(xset::name::move_dlg_help, xset::var::z));

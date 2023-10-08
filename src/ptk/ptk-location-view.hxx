@@ -29,7 +29,7 @@
 // Location View
 GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);
 bool ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& path);
-void ptk_location_view_on_action(GtkWidget* view, xset_t set);
+void ptk_location_view_on_action(GtkWidget* view, const xset_t& set);
 vfs::volume ptk_location_view_get_selected_vol(GtkTreeView* location_view);
 void update_volume_icons();
 void ptk_location_view_mount_network(PtkFileBrowser* file_browser, const std::string_view url,

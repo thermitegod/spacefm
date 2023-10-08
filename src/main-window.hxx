@@ -143,7 +143,7 @@ void main_window_open_network(MainWindow* main_window, const std::string_view ur
 void main_window_store_positions(MainWindow* main_window);
 
 void main_window_fullscreen_activate(MainWindow* main_window);
-bool main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set);
+bool main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);
 
 struct main_window_counts_data
 {

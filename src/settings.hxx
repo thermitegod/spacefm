@@ -37,8 +37,8 @@ void free_settings();
 ///////////////////////////////////////////////////////////////////////////////
 // MOD extra settings below
 
-GtkWidget* xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button,
-                                 std::time_t time);
+GtkWidget* xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_insert,
+                                 u32 button, std::time_t time);
 
 GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size);
 
@@ -52,21 +52,21 @@ void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup*
 
 #if (GTK_MAJOR_VERSION == 4)
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
-                             GtkEventController* accel_group, xset_t set);
+                             GtkEventController* accel_group, const xset_t& set);
 #elif (GTK_MAJOR_VERSION == 3)
 GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
-                             GtkAccelGroup* accel_group, xset_t set);
+                             GtkAccelGroup* accel_group, const xset_t& set);
 #endif
 
-void xset_menu_cb(GtkWidget* item, xset_t set);
+void xset_menu_cb(GtkWidget* item, const xset_t& set);
 
 void xset_edit(GtkWidget* parent, const std::filesystem::path& path);
 void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
-                       xset_t set_parent, bool show_tooltips);
+                       const xset_t& set_parent, bool show_tooltips);
 
 const std::string xset_get_builtin_toolitem_label(xset::tool tool_type);
 
 ////////////////////////////////////////
 
-void xset_custom_insert_after(xset_t target, xset_t set);
-xset_t xset_new_builtin_toolitem(xset::tool tool_type);
+void xset_custom_insert_after(const xset_t& target, const xset_t& set);
+const xset_t xset_new_builtin_toolitem(xset::tool tool_type);

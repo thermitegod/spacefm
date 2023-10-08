@@ -1103,7 +1103,7 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
-    xset_t set = xset_get(xset::name::dev_show_hide_volumes);
+    const xset_t set = xset_get(xset::name::dev_show_hide_volumes);
     if (vol)
     {
         const std::string devid = ztd::removeprefix(vol->udi(), "/");
@@ -1141,7 +1141,7 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
-    xset_t set = xset_get(xset::name::dev_automount_volumes);
+    const xset_t set = xset_get(xset::name::dev_automount_volumes);
     if (vol)
     {
         const std::string devid = ztd::removeprefix(vol->udi(), "/");
@@ -1224,7 +1224,7 @@ volume_is_visible(vfs::volume vol)
 }
 
 void
-ptk_location_view_on_action(GtkWidget* view, xset_t set)
+ptk_location_view_on_action(GtkWidget* view, const xset_t& set)
 {
     // ztd::logger::info("ptk_location_view_on_action");
     if (!view)

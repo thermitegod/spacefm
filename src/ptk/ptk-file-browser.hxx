@@ -250,7 +250,7 @@ struct PtkFileBrowser
     void seek_path(const std::filesystem::path& seek_dir,
                    const std::filesystem::path& seek_name) noexcept;
     void update_toolbar_widgets(xset::tool tool_type) noexcept;
-    void update_toolbar_widgets(xset_t set_ptr, xset::tool tool_type) noexcept;
+    void update_toolbar_widgets(const xset_t& set_ptr, xset::tool tool_type) noexcept;
 
     void show_history_menu(bool is_back_history, GdkEvent* event) noexcept;
 
@@ -475,7 +475,7 @@ GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* 
 bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
 bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
 
-void ptk_file_browser_add_toolbar_widget(xset_t set, GtkWidget* widget);
+void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget);
 
 // MOD
 

@@ -22,4 +22,4 @@
 void save_user_confing();
 
 const xsetpak_t xset_pack_sets();
-const setvars_t xset_pack_set(xset_t set);
+const setvars_t xset_pack_set(const xset_t& set);

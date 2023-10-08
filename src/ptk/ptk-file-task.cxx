@@ -721,7 +721,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    xset_t set = xset_get(xset::name::separator);
+    const xset_t set = xset_get(xset::name::separator);
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));

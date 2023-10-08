@@ -34,7 +34,7 @@
 #include "xset/xset-keyboard.hxx"
 
 const std::string
-xset_get_keyname(xset_t set, i32 key_val, i32 key_mod)
+xset_get_keyname(const xset_t& set, i32 key_val, i32 key_mod)
 {
     u32 keyval;
     u32 keymod;
@@ -98,7 +98,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
     GtkButton* btn_set = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_set"));
     GtkButton* btn_unset = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_unset"));
 
-    xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "set")));
+    const xset_t set =
+        xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "set")));
     assert(set != nullptr);
 
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -141,7 +142,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
 
     const std::string keyname = xset_get_keyname(nullptr, keyval, keymod);
 
-    for (xset_t set2 : xsets)
+    for (const xset_t& set2 : xsets)
     {
         assert(set2 != nullptr);
         if (set != set2 && set2->key > 0 && set2->key == keyval && set2->keymod == keymod &&
@@ -188,7 +189,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
 }
 
 void
-xset_set_key(GtkWidget* parent, xset_t set)
+xset_set_key(GtkWidget* parent, const xset_t& set)
 {
     xset_t keyset;
 
@@ -267,7 +268,7 @@ xset_set_key(GtkWidget* parent, xset_t set)
         if (response == GtkResponseType::GTK_RESPONSE_OK && (newkey || newkeymod))
         {
             // clear duplicate key assignments
-            for (xset_t set2 : xsets)
+            for (const xset_t& set2 : xsets)
             {
                 assert(set2 != nullptr);
 

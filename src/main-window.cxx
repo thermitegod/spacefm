@@ -87,8 +87,8 @@ static void on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindo
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                u32 time, PtkFileBrowser* file_browser);
 
-static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set);
-static bool on_main_window_keypress_found_key(MainWindow* main_window, xset_t set);
+static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);
+static bool on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set);
 static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
                                          MainWindow* main_window);
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
@@ -2715,16 +2715,16 @@ on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* mai
 }
 
 static bool
-on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set)
+on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data)
 {
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
     // ztd::logger::debug("main_keypress {} {}", keyval, keymod);
 
-    if (known_set)
+    if (user_data)
     {
-        xset_t set = known_set;
-        return on_main_window_keypress_found_key(main_window, set);
+        const xset_t known_set = ((xset::XSet*)user_data)->shared_from_this();
+        return on_main_window_keypress_found_key(main_window, known_set);
     }
 
     if (keyval == 0)
@@ -2750,33 +2750,35 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_s
         }
     }
 
-    for (xset_t set : xsets)
+    for (const xset_t& set : xsets)
     {
         assert(set != nullptr);
 
         if (set->shared_key)
         {
             // set has shared key
-            set = xset_get(set->shared_key.value());
-            if (set->key == keyval && set->keymod == keymod)
+            xset_t shared_key_set = xset_get(set->shared_key.value());
+            if (shared_key_set->key == keyval && shared_key_set->keymod == keymod)
             {
                 // shared key match
-                if (set->name.starts_with("panel"))
+                if (shared_key_set->name.starts_with("panel"))
                 {
                     // use current panel's set
                     browser = main_window->current_file_browser();
                     if (browser)
                     {
                         const std::string new_set_name =
-                            std::format("panel{}{}", browser->panel(), set->name.data() + 6);
-                        set = xset_get(new_set_name);
+                            std::format("panel{}_{}",
+                                        browser->panel(),
+                                        shared_key_set->name.data() + 6);
+                        shared_key_set = xset_get(new_set_name);
                     }
                     else
                     { // failsafe
                         return false;
                     }
                 }
-                return on_main_window_keypress_found_key(main_window, set);
+                return on_main_window_keypress_found_key(main_window, shared_key_set);
             }
             else
             {
@@ -2802,13 +2804,13 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_s
 }
 
 bool
-main_window_keypress(MainWindow* main_window, GdkEvent* event, xset_t known_set)
+main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data)
 {
-    return on_main_window_keypress(main_window, event, known_set);
+    return on_main_window_keypress(main_window, event, user_data);
 }
 
 static bool
-on_main_window_keypress_found_key(MainWindow* main_window, xset_t set)
+on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set)
 {
     PtkFileBrowser* browser = main_window->current_file_browser();
     if (!browser)

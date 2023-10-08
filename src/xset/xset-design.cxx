@@ -39,7 +39,7 @@
 #include "main-window.hxx"
 
 static void
-xset_design_job_set_key(xset_t set)
+xset_design_job_set_key(const xset_t& set)
 {
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(set->browser)));
@@ -51,14 +51,14 @@ xset_design_job_set_key(xset_t set)
 }
 
 static void
-xset_design_job_set_add_tool(xset_t set, xset::tool tool_type)
+xset_design_job_set_add_tool(const xset_t& set, xset::tool tool_type)
 {
     if (tool_type < xset::tool::devices || tool_type >= xset::tool::invalid ||
         set->tool == xset::tool::NOT)
     {
         return;
     }
-    xset_t newset = xset_new_builtin_toolitem(tool_type);
+    const xset_t newset = xset_new_builtin_toolitem(tool_type);
     if (newset)
     {
         xset_custom_insert_after(set, newset);
@@ -66,21 +66,21 @@ xset_design_job_set_add_tool(xset_t set, xset::tool tool_type)
 }
 
 static void
-xset_design_job_set_cut(xset_t set)
+xset_design_job_set_cut(const xset_t& set)
 {
     xset_set_clipboard = set;
     xset_clipboard_is_cut = true;
 }
 
 static void
-xset_design_job_set_copy(xset_t set)
+xset_design_job_set_copy(const xset_t& set)
 {
     xset_set_clipboard = set;
     xset_clipboard_is_cut = false;
 }
 
 static bool
-xset_design_job_set_paste(xset_t set)
+xset_design_job_set_paste(const xset_t& set)
 {
     if (!xset_set_clipboard)
     {
@@ -99,7 +99,7 @@ xset_design_job_set_paste(xset_t set)
         update_toolbars = !(xset_set_clipboard->tool == xset::tool::NOT);
         if (!update_toolbars && xset_set_clipboard->parent)
         {
-            xset_t newset = xset_get(xset_set_clipboard->parent.value());
+            const xset_t newset = xset_get(xset_set_clipboard->parent.value());
             if (!(newset->tool == xset::tool::NOT))
             {
                 // we are cutting the first item in a tool submenu
@@ -113,7 +113,7 @@ xset_design_job_set_paste(xset_t set)
     }
     else
     {
-        xset_t newset = xset_custom_copy(xset_set_clipboard, false);
+        const xset_t newset = xset_custom_copy(xset_set_clipboard, false);
         xset_custom_insert_after(set, newset);
     }
 
@@ -121,7 +121,7 @@ xset_design_job_set_paste(xset_t set)
 }
 
 static bool
-xset_design_job_set_remove(xset_t set)
+xset_design_job_set_remove(const xset_t& set)
 {
     const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
 
@@ -168,7 +168,7 @@ xset_design_job_set_remove(xset_t set)
 }
 
 void
-xset_design_job(GtkWidget* item, xset_t set)
+xset_design_job(GtkWidget* item, const xset_t& set)
 {
     assert(set != nullptr);
 

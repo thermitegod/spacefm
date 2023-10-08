@@ -49,7 +49,7 @@ void main_task_view_update_task(PtkFileTask* ptask);
 void main_task_view_remove_task(PtkFileTask* ptask);
 void main_task_pause_all_queued(PtkFileTask* ptask);
 
-void ptk_task_view_task_stop(GtkWidget* view, xset_t set2, PtkFileTask* ptask2);
+void ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, PtkFileTask* ptask2);
 
 void on_reorder(GtkWidget* item, GtkWidget* parent);
 

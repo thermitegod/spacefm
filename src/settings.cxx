@@ -86,8 +86,8 @@
 
 // MOD settings
 
-static bool xset_design_cb(GtkWidget* item, GdkEvent* event, xset_t set);
-static void xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEvent* event);
+static bool xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set);
+static void xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event);
 
 struct builtin_tool_data
 {
@@ -353,7 +353,7 @@ save_settings()
         {
             for (const panel_t p : PANELS)
             {
-                xset_t set = xset_get_panel(p, xset::panel::show);
+                const xset_t set = xset_get_panel(p, xset::panel::show);
                 if (GTK_IS_NOTEBOOK(main_window->get_panel_notebook(p)))
                 {
                     const i32 pages = gtk_notebook_get_n_pages(main_window->get_panel_notebook(p));
@@ -387,7 +387,7 @@ save_settings()
             // clear saved tabs
             for (const panel_t p : PANELS)
             {
-                xset_t set = xset_get_panel(p, xset::panel::show);
+                const xset_t set = xset_get_panel(p, xset::panel::show);
                 set->s = std::nullopt;
                 set->x = std::nullopt;
             }
@@ -408,24 +408,7 @@ save_settings()
 void
 free_settings()
 {
-    while (true)
-    {
-        if (xsets.empty())
-        {
-            break;
-        }
-
-        xset_t set = xsets.back();
-        xsets.pop_back();
-
-        if (set->ob2_data && set->name.starts_with("evt_"))
-        {
-            g_list_foreach((GList*)set->ob2_data, (GFunc)std::free, nullptr);
-            g_list_free((GList*)set->ob2_data);
-        }
-
-        delete set;
-    }
+    xsets.clear();
 }
 
 GtkWidget*
@@ -470,7 +453,7 @@ xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* acce
 
     for (const auto submenu_entry : submenu_entries)
     {
-        xset_t set = xset_get(submenu_entry);
+        const xset_t set = xset_get(submenu_entry);
         xset_add_menuitem(file_browser, menu, accel_group, set);
     }
 }
@@ -504,11 +487,11 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
 #if (GTK_MAJOR_VERSION == 4)
 GtkWidget*
 xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
-                  xset_t set)
+                  const xset_t& set)
 #elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
 xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-                  xset_t set)
+                  const xset_t& set)
 #endif
 {
     GtkWidget* item = nullptr;
@@ -673,7 +656,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         if (!set->cb_func || set->menu_style != xset::menu::normal)
         {
             // use xset menu callback
-            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_menu_cb), set);
+            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_menu_cb), set.get());
         }
         else if (set->cb_func)
         {
@@ -710,8 +693,8 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         }
     }
     // design mode callback
-    g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(xset_design_cb), set);
-    g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(xset_design_cb), set);
+    g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(xset_design_cb), set.get());
+    g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(xset_design_cb), set.get());
 
     gtk_widget_set_sensitive(item, !set->disable);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -726,7 +709,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 }
 
 void
-xset_custom_insert_after(xset_t target, xset_t set)
+xset_custom_insert_after(const xset_t& target, const xset_t& set)
 { // inserts single set 'set', no next
 
     assert(target != nullptr);
@@ -755,7 +738,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
     set->next = target->next;
     if (target->next)
     {
-        xset_t target_next = xset_get(target->next.value());
+        const xset_t target_next = xset_get(target->next.value());
         target_next->prev = set->name;
     }
     target->next = set->name;
@@ -777,7 +760,7 @@ xset_custom_insert_after(xset_t target, xset_t set)
 }
 
 static bool
-xset_clipboard_in_set(xset_t set)
+xset_clipboard_in_set(const xset_t& set)
 { // look upward to see if clipboard is in set's tree
     assert(set != nullptr);
 
@@ -792,7 +775,7 @@ xset_clipboard_in_set(xset_t set)
 
     if (set->parent)
     {
-        xset_t set_parent = xset_get(set->parent.value());
+        const xset_t set_parent = xset_get(set->parent.value());
         if (xset_clipboard_in_set(set_parent))
         {
             return true;
@@ -806,7 +789,7 @@ xset_clipboard_in_set(xset_t set)
         {
             if (set_prev->parent)
             {
-                xset_t set_prev_parent = xset_get(set_prev->parent.value());
+                const xset_t set_prev_parent = xset_get(set_prev->parent.value());
                 if (xset_clipboard_in_set(set_prev_parent))
                 {
                     return true;
@@ -874,7 +857,7 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
 }
 
 static bool
-xset_job_is_valid(xset_t set, xset::job job)
+xset_job_is_valid(const xset_t& set, xset::job job)
 {
     assert(set != nullptr);
 
@@ -928,19 +911,20 @@ on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
 }
 
 static GtkWidget*
-xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job, xset_t set)
+xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job, const xset_t& set)
 {
     GtkWidget* item;
     item = gtk_menu_item_new_with_mnemonic(label.data());
 
     g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
     gtk_container_add(GTK_CONTAINER(menu), item);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_design_job), set);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_design_job), set.get());
     return item;
 }
 
 GtkWidget*
-xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 button, std::time_t time)
+xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_insert, u32 button,
+                      std::time_t time)
 {
     (void)button;
     (void)time;
@@ -1129,7 +1113,7 @@ xset_design_show_menu(GtkWidget* menu, xset_t set, xset_t book_insert, u32 butto
 }
 
 static bool
-xset_design_cb(GtkWidget* item, GdkEvent* event, xset_t set)
+xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
 {
     xset::job job = xset::job::invalid;
 
@@ -1262,7 +1246,7 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, xset_t set)
 }
 
 void
-xset_menu_cb(GtkWidget* item, xset_t set)
+xset_menu_cb(GtkWidget* item, const xset_t& set)
 {
     GFunc cb_func = nullptr;
     void* cb_data = nullptr;
@@ -1409,7 +1393,7 @@ multi_input_select_region(GtkWidget* input, i32 start, i32 end)
 }
 
 static void
-xset_builtin_tool_activate(xset::tool tool_type, xset_t set, GdkEvent* event)
+xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event)
 {
     xset_t set2;
     panel_t p;
@@ -1515,7 +1499,7 @@ xset_get_builtin_toolitem_label(xset::tool tool_type)
     return "";
 }
 
-xset_t
+const xset_t
 xset_new_builtin_toolitem(xset::tool tool_type)
 {
     if (tool_type < xset::tool::devices || tool_type >= xset::tool::invalid)
@@ -1534,7 +1518,7 @@ xset_new_builtin_toolitem(xset::tool tool_type)
 }
 
 static bool
-on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
+on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 {
     xset::job job = xset::job::invalid;
 
@@ -1570,7 +1554,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
                         {
                             if (set->child)
                             {
-                                xset_t set_child = xset_is(set->child.value());
+                                const xset_t set_child = xset_is(set->child.value());
                                 // activate first item in custom submenu
                                 xset_menu_cb(nullptr, set_child);
                             }
@@ -1666,7 +1650,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
 }
 
 static bool
-on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
+on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 {
     const auto button = gdk_button_event_get_button(event);
     // ztd::logger::info("on_tool_menu_button_press  {}   button = {}", set->menu_label,  button);
@@ -1721,7 +1705,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, xset_t set)
 
 static GtkWidget*
 xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
-                  i32 icon_size, xset_t set, bool show_tooltips)
+                  i32 icon_size, const xset_t& set, bool show_tooltips)
 {
     if (!set)
     {
@@ -1890,7 +1874,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
             // clang-format off
-            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set);
+            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set.get());
             // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(btn));
@@ -1942,7 +1926,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
             // clang-format off
-            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set);
+            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set.get());
             // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(check_btn));
@@ -2073,7 +2057,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_event_box_set_above_child(ebox, true);
             gtk_container_add(GTK_CONTAINER(ebox), GTK_WIDGET(btn));
             // clang-format off
-            g_signal_connect(G_OBJECT(ebox), "button_press_event", G_CALLBACK(on_tool_icon_button_press), set);
+            g_signal_connect(G_OBJECT(ebox), "button_press_event", G_CALLBACK(on_tool_icon_button_press), set.get());
             // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(btn));
@@ -2137,7 +2121,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             gtk_box_pack_start(hbox, GTK_WIDGET(ebox), false, false, 0);
             // clang-format off
-            g_signal_connect(G_OBJECT(ebox), "button_press_event", G_CALLBACK(on_tool_menu_button_press), set);
+            g_signal_connect(G_OBJECT(ebox), "button_press_event", G_CALLBACK(on_tool_menu_button_press), set.get());
             // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             ptk_file_browser_add_toolbar_widget(set, GTK_WIDGET(btn));
@@ -2166,7 +2150,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
             // clang-format off
-            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set);
+            g_signal_connect(G_OBJECT(ebox), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set.get());
             // clang-format on
             g_object_set_data(G_OBJECT(ebox), "browser", file_browser);
             break;
@@ -2205,7 +2189,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
 void
 xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
-                  xset_t set_parent, bool show_tooltips)
+                  const xset_t& set_parent, bool show_tooltips)
 {
     static constexpr std::array<xset::tool, 7> default_tools{
         xset::tool::bookmarks,
@@ -2231,7 +2215,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
     const GtkIconSize icon_size = gtk_toolbar_get_icon_size(toolbar);
 
-    xset_t set_child = nullptr;
+    xset_t set_child;
     if (set_parent->child)
     {
         set_child = xset_is(set_parent->child.value());
