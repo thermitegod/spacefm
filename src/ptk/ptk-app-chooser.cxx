@@ -194,7 +194,11 @@ on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dial
     gtk_tree_view_set_model(tree_view, model);
     g_object_unref(model);
 
+#if (GTK_MAJOR_VERSION == 4)
+    gtk_widget_set_cursor(GTK_WIDGET(dialog), nullptr);
+#elif (GTK_MAJOR_VERSION == 3)
     gdk_window_set_cursor(gtk_widget_get_window(dialog), nullptr);
+#endif
 }
 
 GtkWidget*
@@ -280,10 +284,11 @@ init_all_apps_tab(GtkWidget* dialog)
 
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(tree_view)));
+    gtk_widget_set_cursor(GTK_WIDGET(parent), nullptr);
 #elif (GTK_MAJOR_VERSION == 3)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(tree_view));
-#endif
     gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), busy);
+#endif
     g_object_unref(busy);
 
     GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
