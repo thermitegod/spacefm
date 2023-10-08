@@ -921,7 +921,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             i32 width;
             i32 height;
-            gtk_window_get_size(GTK_WINDOW(main_window), &width, &height);
+            gtk_window_get_default_size(GTK_WINDOW(main_window), &width, &height);
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
         }
         else if (ztd::same(property, "window-position"))
