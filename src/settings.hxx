@@ -30,9 +30,6 @@
 
 #include "xset/xset.hxx"
 
-// This limits the small icon size for side panes and task list
-inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
-
 void load_settings();
 void save_settings();
 void free_settings();
