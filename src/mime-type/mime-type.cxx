@@ -501,6 +501,7 @@ inline constexpr std::array<std::string_view, 65> archive_mime_types{
     "application/vnd.android.package-archive",
     "application/vnd.ms-cab-compressed",
     "application/vnd.debian.binary-package",
+    "application/vnd.rar",
     "application/x-7z-compressed",
     "application/x-7z-compressed-tar",
     "application/x-ace",
