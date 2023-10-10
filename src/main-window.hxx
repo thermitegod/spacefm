@@ -105,8 +105,6 @@ struct MainWindow
 
 GType main_window_get_type();
 
-GtkWidget* main_window_new();
-
 /* Utility functions */
 PtkFileBrowser* main_window_get_current_file_browser();
 

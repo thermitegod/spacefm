@@ -265,6 +265,7 @@ preprocessor = [
     '-DPACKAGE_NAME="spacefm"',
     '-DPACKAGE_NAME_FANCY="SpaceFM"',
     '-DPACKAGE_VERSION="@0@"'.format(meson.project_version()),
+    '-DPACKAGE_APPLICATION_NAME="com.thermitegod.spacefm"',
     '-DPACKAGE_BUGREPORT="TODO"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
 
@@ -351,7 +352,6 @@ sources = files(
     'src/terminal-handlers.cxx',
     'src/types.cxx',
     'src/utils.cxx',
-    'src/window-reference.cxx',
 
     'src/compat/gtk4-porting.cxx',
     'src/compat/type-conversion.cxx',

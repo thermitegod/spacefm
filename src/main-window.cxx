@@ -45,7 +45,6 @@
 
 #include "ptk/ptk-location-view.hxx"
 
-#include "window-reference.hxx"
 #include "main-window.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -108,8 +107,6 @@ static std::vector<MainWindow*> all_windows;
 
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
-
-#define FM_TYPE_MAIN_WINDOW (main_window_get_type())
 
 struct MainWindowClass
 {
@@ -1245,8 +1242,6 @@ main_window_init(MainWindow* main_window)
     /* Add to total window count */
     all_windows.emplace_back(main_window);
 
-    WindowReference::increase();
-
     // g_signal_connect(G_OBJECT(main_window), "task-notify", G_CALLBACK(ptk_file_task_notify_handler), nullptr);
 
     /* Start building GUI */
@@ -1403,7 +1398,7 @@ main_window_finalize(GObject* obj)
 
     g_object_unref((MAIN_WINDOW_REINTERPRET(obj))->wgroup);
 
-    WindowReference::decrease();
+    gtk_window_close(GTK_WINDOW(MAIN_WINDOW_REINTERPRET(obj)));
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 }
@@ -2057,12 +2052,6 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     // g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
 }
 
-GtkWidget*
-main_window_new()
-{
-    return GTK_WIDGET(g_object_new(FM_TYPE_MAIN_WINDOW, nullptr));
-}
-
 PtkFileBrowser*
 MainWindow::current_file_browser() const noexcept
 {
@@ -2130,8 +2119,15 @@ main_window_add_new_window(MainWindow* main_window)
             app_settings.height(allocation.height);
         }
     }
-    // GtkWidget* new_win = main_window_new();
-    main_window_new();
+
+    ztd::logger::info("Opening another window");
+
+    GtkApplication* app = gtk_window_get_application(GTK_WINDOW(main_window));
+
+    MainWindow* another_main_window =
+        MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
+
+    gtk_window_present(GTK_WINDOW(another_main_window));
 }
 
 static void

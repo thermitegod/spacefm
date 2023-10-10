@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <string>
-
 #include <vector>
 
 #include <memory>
@@ -28,7 +26,7 @@
 
 #include <src/types.hxx>
 
-struct commandline_opt_data
+struct commandline_opt_data : public std::enable_shared_from_this<commandline_opt_data>
 {
     std::vector<std::filesystem::path> files{};
 
