@@ -99,8 +99,15 @@ VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
         this->filename_ = desktop_file.filename();
         const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
         std::string relative_full_path;
-        this->loaded_ =
-            kf->load_from_data_dirs(relative_path, relative_full_path, Glib::KeyFile::Flags::NONE);
+        try
+        {
+            this->loaded_ = kf->load_from_data_dirs(relative_path, relative_full_path);
+        }
+        catch (...) // Glib::KeyFileError, Glib::FileError
+        {
+            ztd::logger::error("Error opening desktop file: {}", desktop_file.string());
+            return;
+        }
         this->path_ = relative_full_path;
     }
 
@@ -198,8 +205,15 @@ VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
         this->filename_ = desktop_file.filename();
         const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
         std::string relative_full_path;
-        this->loaded_ =
-            kf.load_from_data_dirs(relative_path, relative_full_path, Glib::KEY_FILE_NONE);
+        try
+        {
+            this->loaded_ = kf.load_from_data_dirs(relative_path, relative_full_path);
+        }
+        catch (...) // Glib::KeyFileError, Glib::FileError
+        {
+            ztd::logger::error("Error opening desktop file: {}", desktop_file.string());
+            return;
+        }
         this->path_ = relative_full_path;
     }
 
