@@ -279,8 +279,11 @@ init_all_apps_tab(GtkWidget* dialog)
     init_list_view(GTK_TREE_VIEW(tree_view));
 
     gtk_widget_grab_focus(GTK_WIDGET(tree_view));
+
+#if (GTK_MAJOR_VERSION == 3)
     GdkCursor* busy = gdk_cursor_new_for_display(gtk_widget_get_display(GTK_WIDGET(tree_view)),
                                                  GdkCursorType::GDK_WATCH);
+#endif
 
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(tree_view)));
@@ -289,7 +292,10 @@ init_all_apps_tab(GtkWidget* dialog)
     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(tree_view));
     gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(parent)), busy);
 #endif
+
+#if (GTK_MAJOR_VERSION == 3)
     g_object_unref(busy);
+#endif
 
     GtkListStore* list = gtk_list_store_new(magic_enum::enum_count<app_chooser_column>(),
                                             GDK_TYPE_PIXBUF,
