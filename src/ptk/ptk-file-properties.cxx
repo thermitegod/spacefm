@@ -23,6 +23,8 @@
 #include <span>
 #include <vector>
 
+#include <memory>
+
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
@@ -37,8 +39,12 @@
 
 #include "ptk/ptk-file-properties.hxx"
 
-struct properties_dialog_data
+struct properties_dialog_data : public std::enable_shared_from_this<properties_dialog_data>
 {
+    properties_dialog_data(std::span<const vfs::file_info> file_list,
+                           const std::filesystem::path& cwd)
+        : file_list(file_list), cwd(cwd){};
+
     std::span<const vfs::file_info> file_list{};
     std::filesystem::path cwd{};
 
@@ -57,7 +63,8 @@ struct properties_dialog_data
 };
 
 const std::vector<std::filesystem::path>
-find_subdirectories(const std::filesystem::path& directory, properties_dialog_data* data)
+find_subdirectories(const std::filesystem::path& directory,
+                    const std::shared_ptr<properties_dialog_data>& data)
 {
     std::vector<std::filesystem::path> subdirectories;
 
@@ -94,7 +101,8 @@ find_subdirectories(const std::filesystem::path& directory, properties_dialog_da
 // pointed by cancel in every iteration. If cancel is set to true, the
 // calculation is cancelled.
 static void
-calc_total_size_of_files(const std::filesystem::path& path, properties_dialog_data* data)
+calc_total_size_of_files(const std::filesystem::path& path,
+                         const std::shared_ptr<properties_dialog_data>& data)
 {
     if (data->cancel)
     {
@@ -150,7 +158,8 @@ calc_total_size_of_files(const std::filesystem::path& path, properties_dialog_da
 static void*
 calc_size(void* user_data)
 {
-    const auto data = static_cast<properties_dialog_data*>(user_data);
+    const auto data = ((properties_dialog_data*)user_data)->shared_from_this();
+
     for (const vfs::file_info& file : data->file_list)
     {
         if (data->cancel)
@@ -174,7 +183,7 @@ calc_size(void* user_data)
 }
 
 static bool
-on_update_labels(properties_dialog_data* data)
+on_update_labels(const std::shared_ptr<properties_dialog_data>& data)
 {
     // need a better thread model for this. all of the
     // data->cancel checks are needed to avoid segfaults when
@@ -373,7 +382,8 @@ create_prop_text_box_date(const std::time_t time)
 }
 
 GtkWidget*
-init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cwd,
+init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
+                   const std::filesystem::path& cwd,
                    const std::span<const vfs::file_info> selected_files)
 {
     // FIXME using spaces to align the right GtkWiget with the label
@@ -381,7 +391,7 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
 
     auto page = PropertiesPage();
 
-    const auto file = selected_files.front();
+    const auto& file = selected_files.front();
     const bool multiple_files = selected_files.size() > 1;
 
     if (multiple_files)
@@ -501,8 +511,8 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
     }
     if (need_calc_size)
     {
-        data->calc_size_thread = g_thread_new("calc_size", calc_size, data);
-        data->update_label_timer = g_timeout_add(250, (GSourceFunc)on_update_labels, data);
+        data->calc_size_thread = g_thread_new("calc_size", calc_size, data.get());
+        data->update_label_timer = g_timeout_add(250, (GSourceFunc)on_update_labels, data.get());
     }
 
     if (multiple_files)
@@ -528,7 +538,7 @@ init_file_info_tab(properties_dialog_data* data, const std::filesystem::path& cw
 }
 
 GtkWidget*
-init_attributes_tab(properties_dialog_data* data,
+init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
                     const std::span<const vfs::file_info> selected_files)
 {
     (void)data;
@@ -727,7 +737,7 @@ init_attributes_tab(properties_dialog_data* data,
 }
 
 GtkWidget*
-init_permissions_tab(properties_dialog_data* data,
+init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
                      const std::span<const vfs::file_info> selected_files)
 {
     (void)data;
@@ -888,29 +898,12 @@ void
 close_dialog(GtkWidget* widget, void* user_data)
 {
     (void)user_data;
-    GtkWidget* dialog = GTK_WIDGET(gtk_widget_get_ancestor(widget, GTK_TYPE_DIALOG));
 
-    auto data = static_cast<properties_dialog_data*>(g_object_get_data(G_OBJECT(dialog), "data"));
+    // Needs two calls to actually close the window
+    // g_object_unref(widget);
+    // g_object_unref(widget);
 
-    if (data != nullptr)
-    {
-        if (data->update_label_timer)
-        {
-            g_source_remove(data->update_label_timer);
-            data->update_label_timer = 0;
-        }
-        data->cancel = true;
-
-        if (data->calc_size_thread)
-        {
-            g_thread_join(data->calc_size_thread);
-            data->calc_size_thread = nullptr;
-        }
-
-        delete data;
-    }
-
-    gtk_widget_destroy(dialog);
+    gtk_widget_destroy(widget);
 }
 
 void
@@ -950,13 +943,10 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     gtk_widget_set_margin_top(GTK_WIDGET(dialog), 5);
     gtk_widget_set_margin_bottom(GTK_WIDGET(dialog), 5);
 
-    const auto data = new properties_dialog_data;
-    data->file_list = selected_files;
-    data->cwd = cwd;
-    g_object_set_data(G_OBJECT(dialog), "data", data);
+    const auto data = std::make_shared<properties_dialog_data>(selected_files, cwd);
 
     // clang-format off
-    gtk_notebook_append_page(notebook, init_file_info_tab(data, cwd , selected_files), gtk_label_new("File Info"));
+    gtk_notebook_append_page(notebook, init_file_info_tab(data, cwd, selected_files), gtk_label_new("File Info"));
     gtk_notebook_append_page(notebook, init_attributes_tab(data, selected_files), gtk_label_new("Attributes"));
     gtk_notebook_append_page(notebook, init_permissions_tab(data, selected_files), gtk_label_new("Permissions"));
     // clang-format on
@@ -969,14 +959,26 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
 #endif
 
-    g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(close_dialog), data);
+    g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(close_dialog), nullptr);
 
     gtk_widget_show_all(GTK_WIDGET(dialog));
 
     gtk_notebook_set_current_page(notebook, page);
 
     gtk4_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+
+    //
+    if (data->update_label_timer)
+    {
+        g_source_remove(data->update_label_timer);
+        data->update_label_timer = 0;
+    }
+    data->cancel = true;
+    if (data->calc_size_thread)
+    {
+        g_thread_join(data->calc_size_thread);
+        data->calc_size_thread = nullptr;
+    }
 }
 
 void
