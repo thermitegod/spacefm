@@ -362,13 +362,25 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         const std::string full_name =
             gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
 
-        const auto filename_parts = split_basename_extension(full_name);
-        gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
+        if (mset->file && mset->file->is_directory())
+        {
+            gtk_text_buffer_set_text(mset->buf_name, mset->file->name().data(), -1);
 #if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
+            gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), "");
 #elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), filename_parts.extension.data());
+            gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), "");
 #endif
+        }
+        else
+        {
+            const auto filename_parts = split_basename_extension(full_name);
+            gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
+#if (GTK_MAJOR_VERSION == 4)
+            gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
+#elif (GTK_MAJOR_VERSION == 3)
+            gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), filename_parts.extension.data());
+#endif
+        }
 
         // update full_path
         gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
@@ -463,28 +475,40 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
             path = cwd / path;
         }
 
-        const auto filename_parts = split_basename_extension(full_name);
-        gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
+        if (mset->file && mset->file->is_directory())
+        {
+            gtk_text_buffer_set_text(mset->buf_name, mset->file->name().data(), -1);
 #if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
+            gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), "");
 #elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), filename_parts.extension.data());
+            gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), "");
+#endif
+        }
+        else
+        {
+            const auto filename_parts = split_basename_extension(full_name);
+            gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
+#if (GTK_MAJOR_VERSION == 4)
+            gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
+#elif (GTK_MAJOR_VERSION == 3)
+            gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), filename_parts.extension.data());
 #endif
 
-        // update full_name
-        if (filename_parts.basename.empty() || filename_parts.extension.empty())
-        {
-            if (!filename_parts.basename.empty() && filename_parts.extension.empty())
+            // update full_name
+            if (filename_parts.basename.empty() || filename_parts.extension.empty())
             {
-                full_name = filename_parts.basename;
-            }
-            else if (filename_parts.basename.empty() && !filename_parts.extension.empty())
-            {
-                full_name = filename_parts.extension;
-            }
-            else
-            {
-                full_name = "";
+                if (!filename_parts.basename.empty() && filename_parts.extension.empty())
+                {
+                    full_name = filename_parts.basename;
+                }
+                else if (filename_parts.basename.empty() && !filename_parts.extension.empty())
+                {
+                    full_name = filename_parts.extension;
+                }
+                else
+                {
+                    full_name = "";
+                }
             }
         }
 
@@ -761,10 +785,18 @@ select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
             // name is not visible so select name in filename
             gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-            char* full_name = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-            const auto filename_parts = split_basename_extension(full_name);
-            std::free(full_name);
-            gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_parts.basename.length());
+            const std::string full_name =
+                gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
+
+            if (mset->file && mset->file->is_directory())
+            {
+                gtk_text_buffer_get_iter_at_offset(buf, &iter, full_name.size());
+            }
+            else
+            {
+                const auto filename_parts = split_basename_extension(full_name);
+                gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_parts.basename.size());
+            }
         }
         else
         {
