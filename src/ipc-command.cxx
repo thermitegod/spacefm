@@ -941,10 +941,14 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "screen-size"))
         {
+#if (GTK_MAJOR_VERSION == 4)
+            return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
             GdkRectangle workarea = GdkRectangle();
             gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
                                      &workarea);
             return {SOCKET_SUCCESS, std::format("{}x{}", workarea.width, workarea.height)};
+#endif
         }
         else if (ztd::same(property, "window-vslider-top") ||
                  ztd::same(property, "window-vslider-bottom") ||
