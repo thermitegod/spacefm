@@ -123,7 +123,6 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 
     GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
-    gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
 
     // tree view is non-selectable
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));

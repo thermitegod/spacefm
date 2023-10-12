@@ -221,7 +221,6 @@ init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
 
     GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
-    gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
 
     g_object_set_data(G_OBJECT(scrolled_window), "view", tree_view);
 
@@ -272,7 +271,6 @@ init_all_apps_tab(GtkWidget* dialog)
 
     GtkWidget* tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), true);
-    gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree_view), true);
 
     g_object_set_data(G_OBJECT(scrolled_window), "view", tree_view);
 
