@@ -17,11 +17,7 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
-
-#include <span>
 
 #include <gtkmm.h>
 

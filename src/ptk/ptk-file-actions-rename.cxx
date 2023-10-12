@@ -27,6 +27,8 @@
 
 #include <algorithm>
 
+#include <memory>
+
 #include <glibmm.h>
 
 #include <magic_enum.hpp>
@@ -57,10 +59,12 @@
 
 #include "ptk/ptk-file-actions-rename.hxx"
 
-struct MoveSet
+struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {
-    MoveSet() = default;
+    MoveSet(const vfs::file_info& file_info) : file(file_info){};
     ~MoveSet() = default;
+
+    vfs::file_info file;
 
     std::filesystem::path full_path{};
     std::filesystem::path old_path{};
@@ -146,11 +150,11 @@ struct MoveSet
     bool is_move{false};
 };
 
-static void on_toggled(GtkMenuItem* item, MoveSet* mset);
+static void on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset);
 static const std::optional<std::filesystem::path> get_template_dir();
 
 static bool
-on_move_keypress(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
+on_move_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
 {
     (void)widget;
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
@@ -175,7 +179,7 @@ on_move_keypress(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
 }
 
 static bool
-on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
+on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
 {
     (void)widget;
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
@@ -200,7 +204,7 @@ on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
 }
 
 static void
-on_move_change(GtkWidget* widget, MoveSet* mset)
+on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
     g_signal_handlers_block_matched(mset->entry_ext,
                                     GSignalMatchType::G_SIGNAL_MATCH_FUNC,
@@ -735,7 +739,7 @@ on_move_change(GtkWidget* widget, MoveSet* mset)
 }
 
 static void
-select_input(GtkWidget* widget, MoveSet* mset)
+select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
     if (GTK_IS_EDITABLE(widget))
     {
@@ -773,7 +777,7 @@ select_input(GtkWidget* widget, MoveSet* mset)
 }
 
 static bool
-on_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
+on_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<MoveSet>& mset)
 {
     (void)direction;
     select_input(widget, mset);
@@ -781,7 +785,7 @@ on_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 }
 
 static bool
-on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
+on_button_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<MoveSet>& mset)
 {
     if (direction == GtkDirectionType::GTK_DIR_TAB_FORWARD ||
         direction == GtkDirectionType::GTK_DIR_TAB_BACKWARD)
@@ -856,7 +860,7 @@ on_button_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 }
 
 static void
-on_revert_button_press(GtkWidget* widget, MoveSet* mset)
+on_revert_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
     (void)widget;
     GtkWidget* temp = mset->last_widget;
@@ -867,7 +871,7 @@ on_revert_button_press(GtkWidget* widget, MoveSet* mset)
 }
 
 static void
-on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
+on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
 #if (GTK_MAJOR_VERSION == 4)
     ptk_show_message(GTK_WINDOW(parent),
@@ -1120,7 +1124,7 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 #endif
 
 static void
-on_browse_button_press(GtkWidget* widget, MoveSet* mset)
+on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
 #if (GTK_MAJOR_VERSION == 4)
     ptk_show_message(GTK_WINDOW(parent),
@@ -1288,7 +1292,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 }
 
 static void
-on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
+on_opt_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
 {
     (void)item;
 
@@ -1402,7 +1406,7 @@ on_opt_toggled(GtkMenuItem* item, MoveSet* mset)
 }
 
 static void
-on_toggled(GtkMenuItem* item, MoveSet* mset)
+on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
 {
     (void)item;
     bool someone_is_visible = false;
@@ -1617,7 +1621,7 @@ on_toggled(GtkMenuItem* item, MoveSet* mset)
 }
 
 static bool
-on_mnemonic_activate(GtkWidget* widget, bool arg1, MoveSet* mset)
+on_mnemonic_activate(GtkWidget* widget, bool arg1, const std::shared_ptr<MoveSet>& mset)
 {
     (void)arg1;
     select_input(widget, mset);
@@ -1625,7 +1629,7 @@ on_mnemonic_activate(GtkWidget* widget, bool arg1, MoveSet* mset)
 }
 
 static void
-on_options_button_press(GtkWidget* btn, MoveSet* mset)
+on_options_button_press(GtkWidget* btn, const std::shared_ptr<MoveSet>& mset)
 {
     (void)btn;
     GtkWidget* popup = gtk_menu_new();
@@ -1639,41 +1643,41 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
     xset_t set;
 
     set = xset_get(xset::name::move_name);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_filename);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_parent);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_path);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_type);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = (mset->create_new != ptk::rename_mode::rename || mset->is_link);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_target);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->create_new != ptk::rename_mode::rename || !mset->is_link;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
     set = xset_get(xset::name::move_template);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->create_new == ptk::rename_mode::rename;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     set = xset_get(xset::name::move_copy);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->clip_copy || mset->create_new != ptk::rename_mode::rename;
     set = xset_get(xset::name::move_link);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->create_new != ptk::rename_mode::rename;
     set = xset_get(xset::name::move_copyt);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = !mset->is_link;
     set = xset_get(xset::name::move_linkt);
-    xset_set_cb(set, (GFunc)on_toggled, mset);
+    xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = !mset->is_link;
     set = xset_get(xset::name::move_option);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
@@ -1691,7 +1695,7 @@ on_options_button_press(GtkWidget* btn, MoveSet* mset)
 }
 
 static bool
-on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
+on_label_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<MoveSet>& mset)
 {
     GtkWidget* input = nullptr;
     GtkWidget* input2 = nullptr;
@@ -1900,7 +1904,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, MoveSet* mset)
 }
 
 static void
-copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
+copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
 #if (GTK_MAJOR_VERSION == 4)
     ztd::logger::debug("TODO - PORT - GdkClipboard");
@@ -1987,7 +1991,7 @@ copy_entry_to_clipboard(GtkWidget* widget, MoveSet* mset)
 }
 
 static bool
-on_label_button_press(GtkWidget* widget, GdkEvent* event, MoveSet* mset)
+on_label_button_press(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
 {
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
@@ -2201,7 +2205,7 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
 }
 
 static void
-on_template_changed(GtkWidget* widget, MoveSet* mset)
+on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
     (void)widget;
 
@@ -2297,37 +2301,19 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
         return 0;
     }
 
-    const auto mset = new MoveSet;
+    const auto mset = std::make_shared<MoveSet>(file);
 
     if (create_new == ptk::rename_mode::rename)
     {
-        if (!file)
-        {
-            return 0;
-        }
-
-        std::string full_name;
-        // special processing for files with inconsistent real name and display name
-        if (file->is_desktop_entry())
-        {
-            full_name = file->name();
-        }
-        if (full_name.empty())
-        {
-            full_name = file->display_name();
-        }
-        if (full_name.empty())
-        {
-            full_name = file->name();
-        }
+        const std::string_view original_filename = file->name();
 
         mset->is_dir = file->is_directory();
         mset->is_link = file->is_symlink();
         mset->clip_copy = clip_copy;
-        mset->full_path = std::filesystem::path() / file_dir / full_name;
+        mset->full_path = std::filesystem::path() / file_dir / original_filename;
         if (dest_dir)
         {
-            mset->new_path = std::filesystem::path() / dest_dir / full_name;
+            mset->new_path = std::filesystem::path() / dest_dir / original_filename;
         }
         else
         {
@@ -2402,21 +2388,27 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                                  mset->options,
                                  GtkResponseType::GTK_RESPONSE_YES);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->options), false);
-    g_signal_connect(G_OBJECT(mset->options), "clicked", G_CALLBACK(on_options_button_press), mset);
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->options), "clicked", G_CALLBACK(on_options_button_press), mset.get());
+    // clang-format on
 
     mset->browse = gtk_button_new_with_mnemonic("_Browse");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
                                  mset->browse,
                                  GtkResponseType::GTK_RESPONSE_YES);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse), false);
-    g_signal_connect(G_OBJECT(mset->browse), "clicked", G_CALLBACK(on_browse_button_press), mset);
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->browse), "clicked", G_CALLBACK(on_browse_button_press), mset.get());
+    // clang-format on
 
     mset->revert = gtk_button_new_with_mnemonic("Re_vert");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
                                  mset->revert,
                                  GtkResponseType::GTK_RESPONSE_NO);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->revert), false);
-    g_signal_connect(G_OBJECT(mset->revert), "clicked", G_CALLBACK(on_revert_button_press), mset);
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->revert), "clicked", G_CALLBACK(on_revert_button_press), mset.get());
+    // clang-format on
 
     mset->cancel = gtk_button_new_with_mnemonic("Cancel");
     gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
@@ -2508,8 +2500,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
 
     gtk_label_set_selectable(mset->label_type, true);
     // clang-format off
-    g_signal_connect(G_OBJECT(mset->label_type), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-    g_signal_connect(G_OBJECT(mset->label_type), "focus", G_CALLBACK(on_label_focus), mset);
+    g_signal_connect(G_OBJECT(mset->label_type), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_type), "focus", G_CALLBACK(on_label_focus), mset.get());
     // clang-format on
 
     // Target
@@ -2523,10 +2515,10 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
         gtk_label_set_mnemonic_widget(mset->label_target, GTK_WIDGET(mset->entry_target));
         gtk_label_set_selectable(mset->label_target, true);
         // clang-format off
-        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-        g_signal_connect(G_OBJECT(mset->entry_target), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
-        g_signal_connect(G_OBJECT(mset->label_target), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-        g_signal_connect(G_OBJECT(mset->label_target), "focus", G_CALLBACK(on_label_focus), mset);
+        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+        g_signal_connect(G_OBJECT(mset->entry_target), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset.get());
+        g_signal_connect(G_OBJECT(mset->label_target), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+        g_signal_connect(G_OBJECT(mset->label_target), "focus", G_CALLBACK(on_label_focus), mset.get());
         // clang-format on
 
         if (create_new != ptk::rename_mode::rename)
@@ -2544,7 +2536,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
 #endif
             }
             // clang-format off
-            g_signal_connect(G_OBJECT(mset->browse_target), "clicked", G_CALLBACK(on_create_browse_button_press), mset);
+            g_signal_connect(G_OBJECT(mset->browse_target), "clicked", G_CALLBACK(on_create_browse_button_press), mset.get());
             // clang-format on
         }
         else
@@ -2557,7 +2549,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
             gtk_editable_set_editable(GTK_EDITABLE(mset->entry_target), false);
             mset->browse_target = nullptr;
         }
-        g_signal_connect(G_OBJECT(mset->entry_target), "changed", G_CALLBACK(on_move_change), mset);
+        // clang-format off
+        g_signal_connect(G_OBJECT(mset->entry_target), "changed", G_CALLBACK(on_move_change), mset.get());
+        // clang-format on
     }
     else
     {
@@ -2574,9 +2568,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
         gtk_label_set_selectable(mset->label_template, true);
 
         // clang-format off
-        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-        g_signal_connect(G_OBJECT(mset->label_template), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-        g_signal_connect(G_OBJECT(mset->label_template), "focus", G_CALLBACK(on_label_focus), mset);
+        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+        g_signal_connect(G_OBJECT(mset->label_template), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+        g_signal_connect(G_OBJECT(mset->label_template), "focus", G_CALLBACK(on_label_focus), mset.get());
         // clang-format on
 
         // template combo
@@ -2598,8 +2592,8 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template), 0);
         // clang-format off
-        g_signal_connect(G_OBJECT(mset->combo_template), "changed", G_CALLBACK(on_template_changed), mset);
-        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
+        g_signal_connect(G_OBJECT(mset->combo_template), "changed", G_CALLBACK(on_template_changed), mset.get());
+        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset.get());
         // clang-format on
 
         // template_dir combo
@@ -2622,14 +2616,14 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
         }
         gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template_dir), 0);
         // clang-format off
-        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template_dir))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
+        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template_dir))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset.get());
         // clang-format on
 
         // Template Browse button
         mset->browse_template = gtk_button_new();
         gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_template), false);
         // clang-format off
-        g_signal_connect(G_OBJECT(mset->browse_template), "clicked", G_CALLBACK(on_create_browse_button_press), mset);
+        g_signal_connect(G_OBJECT(mset->browse_template), "clicked", G_CALLBACK(on_create_browse_button_press), mset.get());
         // clang-format on
     }
     else
@@ -2652,12 +2646,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     mset->blank_name = GTK_LABEL(gtk_label_new(nullptr));
 
     // clang-format off
-    g_signal_connect(G_OBJECT(mset->input_name), "key-press-event", G_CALLBACK(on_move_keypress), mset);
-    g_signal_connect(G_OBJECT(mset->input_name), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-    g_signal_connect(G_OBJECT(mset->label_name), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-    g_signal_connect(G_OBJECT(mset->label_name), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->buf_name), "changed", G_CALLBACK(on_move_change), mset);
-    g_signal_connect(G_OBJECT(mset->input_name), "focus", G_CALLBACK(on_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_name), "key-press-event", G_CALLBACK(on_move_keypress), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_name), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_name), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_name), "focus", G_CALLBACK(on_label_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->buf_name), "changed", G_CALLBACK(on_move_change), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_name), "focus", G_CALLBACK(on_focus), mset.get());
     // clang-format on
 
     // Ext
@@ -2672,12 +2666,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     gtk_widget_set_sensitive(GTK_WIDGET(mset->label_ext), !mset->is_dir);
 
     // clang-format off
-    g_signal_connect(G_OBJECT(mset->entry_ext), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-    g_signal_connect(G_OBJECT(mset->label_ext), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-    g_signal_connect(G_OBJECT(mset->label_ext), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->entry_ext), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset);
-    g_signal_connect(G_OBJECT(mset->entry_ext), "changed", G_CALLBACK(on_move_change), mset);
-    g_signal_connect_after(G_OBJECT(mset->entry_ext), "focus", G_CALLBACK(on_focus), mset);
+    g_signal_connect(G_OBJECT(mset->entry_ext), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_ext), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_ext), "focus", G_CALLBACK(on_label_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->entry_ext), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset.get());
+    g_signal_connect(G_OBJECT(mset->entry_ext), "changed", G_CALLBACK(on_move_change), mset.get());
+    g_signal_connect_after(G_OBJECT(mset->entry_ext), "focus", G_CALLBACK(on_focus), mset.get());
     // clang-format on
 
     // Filename
@@ -2693,12 +2687,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     mset->blank_full_name = GTK_LABEL(gtk_label_new(nullptr));
 
     // clang-format off
-    g_signal_connect(G_OBJECT(mset->input_full_name), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-    g_signal_connect(G_OBJECT(mset->label_full_name), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-    g_signal_connect(G_OBJECT(mset->label_full_name), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->input_full_name), "key-press-event", G_CALLBACK(on_move_keypress), mset);
-    g_signal_connect(G_OBJECT(mset->buf_full_name), "changed", G_CALLBACK(on_move_change), mset);
-    g_signal_connect(G_OBJECT(mset->input_full_name), "focus", G_CALLBACK(on_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_full_name), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_full_name), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_full_name), "focus", G_CALLBACK(on_label_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_full_name), "key-press-event", G_CALLBACK(on_move_keypress), mset.get());
+    g_signal_connect(G_OBJECT(mset->buf_full_name), "changed", G_CALLBACK(on_move_change), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_full_name), "focus", G_CALLBACK(on_focus), mset.get());
     // clang-format on
 
     // Parent
@@ -2714,12 +2708,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     mset->blank_path = GTK_LABEL(gtk_label_new(nullptr));
 
     // clang-format off
-    g_signal_connect(G_OBJECT(mset->input_path), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-    g_signal_connect(G_OBJECT(mset->label_path), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-    g_signal_connect(G_OBJECT(mset->label_path), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->input_path), "key-press-event", G_CALLBACK(on_move_keypress), mset);
-    g_signal_connect(G_OBJECT(mset->buf_path), "changed", G_CALLBACK(on_move_change), mset);
-    g_signal_connect(G_OBJECT(mset->input_path), "focus", G_CALLBACK(on_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_path), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_path), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_path), "focus", G_CALLBACK(on_label_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_path), "key-press-event", G_CALLBACK(on_move_keypress), mset.get());
+    g_signal_connect(G_OBJECT(mset->buf_path), "changed", G_CALLBACK(on_move_change), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_path), "focus", G_CALLBACK(on_focus), mset.get());
     // clang-format on
 
     // Path
@@ -2736,12 +2730,12 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     mset->buf_full_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_path));
 
     // clang-format off
-    g_signal_connect(G_OBJECT(mset->input_full_path), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset);
-    g_signal_connect(G_OBJECT(mset->label_full_path), "button-press-event", G_CALLBACK(on_label_button_press), mset);
-    g_signal_connect(G_OBJECT(mset->label_full_path), "focus", G_CALLBACK(on_label_focus), mset);
-    g_signal_connect(G_OBJECT(mset->input_full_path), "key-press-event", G_CALLBACK(on_move_keypress), mset);
-    g_signal_connect(G_OBJECT(mset->buf_full_path), "changed", G_CALLBACK(on_move_change), mset);
-    g_signal_connect(G_OBJECT(mset->input_full_path), "focus", G_CALLBACK(on_focus), mset);
+    g_signal_connect(G_OBJECT(mset->input_full_path), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_full_path), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
+    g_signal_connect(G_OBJECT(mset->label_full_path), "focus", G_CALLBACK(on_label_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_full_path), "key-press-event", G_CALLBACK(on_move_keypress), mset.get());
+    g_signal_connect(G_OBJECT(mset->buf_full_path), "changed", G_CALLBACK(on_move_change), mset.get());
+    g_signal_connect(G_OBJECT(mset->input_full_path), "focus", G_CALLBACK(on_focus), mset.get());
     // clang-format on
 
     // Options
@@ -2766,13 +2760,15 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                                                        "_Link");
 
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_move), false);
-    g_signal_connect(G_OBJECT(mset->opt_move), "focus", G_CALLBACK(on_button_focus), mset);
+    g_signal_connect(G_OBJECT(mset->opt_move), "focus", G_CALLBACK(on_button_focus), mset.get());
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_copy_target), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_link_target), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_file), false);
-    g_signal_connect(G_OBJECT(mset->opt_new_file), "focus", G_CALLBACK(on_button_focus), mset);
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->opt_new_file), "focus", G_CALLBACK(on_button_focus), mset.get());
+    // clang-format on
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_folder), false);
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->opt_new_link), false);
     gtk_widget_set_sensitive(mset->opt_copy_target, mset->is_link && !target_missing);
@@ -2885,14 +2881,16 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     }
 
     // signals
-    g_signal_connect(G_OBJECT(mset->opt_move), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_copy), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_link), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_copy_target), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_link_target), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_new_file), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_new_folder), "toggled", G_CALLBACK(on_opt_toggled), mset);
-    g_signal_connect(G_OBJECT(mset->opt_new_link), "toggled", G_CALLBACK(on_opt_toggled), mset);
+    // clang-format off
+    g_signal_connect(G_OBJECT(mset->opt_move), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_copy), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_link), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_copy_target), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_link_target), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_new_file), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_new_folder), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    g_signal_connect(G_OBJECT(mset->opt_new_link), "toggled", G_CALLBACK(on_opt_toggled), mset.get());
+    // clang-format on
 
     // init
     on_move_change(GTK_WIDGET(mset->buf_full_path), mset);
@@ -2919,9 +2917,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
     select_input(mset->last_widget, mset);
     gtk_widget_grab_focus(mset->last_widget);
 
-    g_signal_connect(G_OBJECT(mset->options), "focus", G_CALLBACK(on_button_focus), mset);
-    g_signal_connect(G_OBJECT(mset->next), "focus", G_CALLBACK(on_button_focus), mset);
-    g_signal_connect(G_OBJECT(mset->cancel), "focus", G_CALLBACK(on_button_focus), mset);
+    g_signal_connect(G_OBJECT(mset->options), "focus", G_CALLBACK(on_button_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->next), "focus", G_CALLBACK(on_button_focus), mset.get());
+    g_signal_connect(G_OBJECT(mset->cancel), "focus", G_CALLBACK(on_button_focus), mset.get());
 
     // run
     std::string to_path;
@@ -3353,8 +3351,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
 
     // destroy
     gtk_widget_destroy(mset->dlg);
-
-    delete mset;
 
     return ret;
 }
