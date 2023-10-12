@@ -17,13 +17,13 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
 
 #include <vector>
 
 #include <span>
+
+#include <memory>
 
 #include <gtkmm.h>
 
@@ -53,6 +53,16 @@ struct PtkFileMenu
 #elif (GTK_MAJOR_VERSION == 3)
     GtkAccelGroup* accel_group{nullptr};
 #endif
+};
+
+struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
+{
+    AutoOpenCreate(PtkFileBrowser* file_browser, bool open_file);
+
+    PtkFileBrowser* file_browser{nullptr};
+    bool open_file{false};
+    std::filesystem::path path{};
+    GFunc callback{nullptr};
 };
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser);

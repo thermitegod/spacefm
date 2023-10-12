@@ -27,6 +27,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <fcntl.h>
 
 #include <glibmm.h>
@@ -113,11 +115,22 @@ static void on_popup_open_all(GtkMenuItem* menuitem, PtkFileMenu* data);
 
 static void on_popup_canon(GtkMenuItem* menuitem, PtkFileMenu* data);
 
+static void on_autoopen_create_cb(void* task, AutoOpenCreate* ao);
+
 PtkFileMenu::~PtkFileMenu()
 {
     if (this->accel_group)
     {
         g_object_unref(this->accel_group);
+    }
+}
+
+AutoOpenCreate::AutoOpenCreate(PtkFileBrowser* file_browser, bool open_file)
+    : file_browser(file_browser), open_file(open_file)
+{
+    if (this->file_browser)
+    {
+        this->callback = (GFunc)on_autoopen_create_cb;
     }
 }
 
@@ -2581,13 +2594,7 @@ create_new_file(PtkFileMenu* data, ptk::rename_mode create_new)
         return;
     }
 
-    const auto ao = new AutoOpenCreate;
-    ao->file_browser = data->browser;
-    ao->open_file = false;
-    if (data->browser)
-    {
-        ao->callback = (GFunc)on_autoopen_create_cb;
-    }
+    const auto ao = new AutoOpenCreate(data->browser, false);
 
     vfs::file_info file = nullptr;
     if (!data->sel_files.empty())
@@ -2595,12 +2602,7 @@ create_new_file(PtkFileMenu* data, ptk::rename_mode create_new)
         file = data->sel_files.front();
     }
 
-    const i32 result =
-        ptk_rename_file(data->browser, data->cwd.c_str(), file, nullptr, false, create_new, ao);
-    if (result == 0)
-    {
-        delete ao;
-    }
+    ptk_rename_file(data->browser, data->cwd.c_str(), file, nullptr, false, create_new, ao);
 }
 
 static void

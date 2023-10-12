@@ -22,16 +22,9 @@
 #include <gtkmm.h>
 
 #include "ptk/ptk-file-browser.hxx"
+#include "ptk/ptk-file-menu.hxx"
 
 #include "vfs/vfs-file-info.hxx"
-
-struct AutoOpenCreate
-{
-    std::filesystem::path path{};
-    PtkFileBrowser* file_browser{nullptr};
-    GFunc callback{nullptr};
-    bool open_file{false};
-};
 
 namespace ptk
 {
