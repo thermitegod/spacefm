@@ -38,10 +38,6 @@
 
 #include "types.hxx"
 
-#include "settings/app.hxx"
-
-#include "settings.hxx"
-
 #include "vfs/vfs-file-monitor.hxx"
 #include "vfs/vfs-file-info.hxx"
 #include "vfs/vfs-utils.hxx"
