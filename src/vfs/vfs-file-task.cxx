@@ -26,6 +26,8 @@
 
 #include <chrono>
 
+#include <memory>
+
 #include <fcntl.h>
 #include <utime.h>
 
@@ -63,18 +65,12 @@
  * freed after file operation has been completed
  */
 vfs::file_task
-vfs_task_new(vfs::file_task_type type, const std::span<const std::filesystem::path> src_files,
+vfs_task_new(const vfs::file_task_type type, const std::span<const std::filesystem::path> src_files,
              const std::filesystem::path& dest_dir)
 {
-    const auto task = new VFSFileTask(type, src_files, dest_dir);
+    const auto task = std::make_shared<VFSFileTask>(type, src_files, dest_dir);
 
     return task;
-}
-
-void
-vfs_file_task_free(vfs::file_task task)
-{
-    delete task;
 }
 
 VFSFileTask::VFSFileTask(vfs::file_task_type type,
@@ -272,7 +268,7 @@ VFSFileTask::check_overwrite(const std::filesystem::path& dest_file, bool* dest_
             new_dest = nullptr;
 
             // query user
-            if (!this->state_cb(this,
+            if (!this->state_cb(this->shared_from_this(),
                                 vfs::file_task_state::query_overwrite,
                                 &new_dest,
                                 this->state_cb_data))
@@ -361,7 +357,10 @@ VFSFileTask::check_dest_in_src(const std::filesystem::path& src_dir)
     this->append_add_log(err);
     if (this->state_cb)
     {
-        this->state_cb(this, vfs::file_task_state::error, nullptr, this->state_cb_data);
+        this->state_cb(this->shared_from_this(),
+                       vfs::file_task_state::error,
+                       nullptr,
+                       this->state_cb_data);
     }
     this->state = vfs::file_task_state::running;
 
@@ -1172,7 +1171,7 @@ VFSFileTask::file_chown_chmod(const std::filesystem::path& src_file)
 }
 
 static void
-call_state_callback(vfs::file_task task, vfs::file_task_state state)
+call_state_callback(const vfs::file_task& task, vfs::file_task_state state)
 {
     task->state = state;
 
@@ -1212,7 +1211,7 @@ cb_exec_child_cleanup(pid_t pid, i32 status, char* tmp_file)
 }
 
 static void
-cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
+cb_exec_child_watch(pid_t pid, i32 status, const vfs::file_task& task)
 {
     bool bad_status = false;
     g_spawn_close_pid(pid);
@@ -1268,7 +1267,7 @@ cb_exec_child_watch(pid_t pid, i32 status, vfs::file_task task)
 }
 
 static bool
-cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, vfs::file_task task)
+cb_exec_out_watch(GIOChannel* channel, GIOCondition cond, const vfs::file_task& task)
 {
     if ((cond & G_IO_NVAL))
     {
@@ -1385,7 +1384,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                          "Error",
                          GtkButtonsType::GTK_BUTTONS_OK,
                          "Cannot create temporary directory");
-        call_state_callback(this, vfs::file_task_state::finish);
+        call_state_callback(this->shared_from_this(), vfs::file_task_state::finish);
         // ztd::logger::info("vfs_file_task_exec DONE ERROR");
         return;
     }
@@ -1410,7 +1409,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                              GtkButtonsType::GTK_BUTTONS_OK,
                              "Please set a valid terminal program in View|Preferences|Advanced");
 
-            call_state_callback(this, vfs::file_task_state::finish);
+            call_state_callback(this->shared_from_this(), vfs::file_task_state::finish);
             // ztd::logger::info("vfs_file_task_exec DONE ERROR");
             return;
         }
@@ -1453,7 +1452,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                         std::filesystem::remove(checked_exec_script);
                     }
                 }
-                call_state_callback(this, vfs::file_task_state::finish);
+                call_state_callback(this->shared_from_this(), vfs::file_task_state::finish);
                 // ztd::logger::info("vfs_file_task_exec DONE ERROR");
                 return;
             }
@@ -1461,7 +1460,8 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
             if (this->current_dest)
             {
                 const auto checked_current_dest = this->current_dest.value();
-                buf.append(main_write_exports(this, checked_current_dest.string()));
+                buf.append(
+                    main_write_exports(this->shared_from_this(), checked_current_dest.string()));
             }
         }
         else
@@ -1514,7 +1514,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                     std::filesystem::remove(checked_exec_script);
                 }
             }
-            call_state_callback(this, vfs::file_task_state::finish);
+            call_state_callback(this->shared_from_this(), vfs::file_task_state::finish);
             // ztd::logger::info("vfs_file_task_exec DONE ERROR");
             return;
         }
@@ -1606,7 +1606,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
                         magic_enum::enum_integer(e.code()),
                         Glib::strerror(e.code()).c_str());
         this->task_error(errno, msg);
-        call_state_callback(this, vfs::file_task_state::finish);
+        call_state_callback(this->shared_from_this(), vfs::file_task_state::finish);
         // ztd::logger::info("vfs_file_task_exec DONE ERROR");
         return;
     }
@@ -1628,7 +1628,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
         {
             g_child_watch_add(pid, (GChildWatchFunc)cb_exec_child_cleanup, nullptr);
         }
-        call_state_callback(this, vfs::file_task_state::finish);
+        call_state_callback(this->shared_from_this(), vfs::file_task_state::finish);
         return;
     }
 
@@ -1671,7 +1671,7 @@ VFSFileTask::file_exec(const std::filesystem::path& src_file)
 }
 
 static bool
-on_size_timeout(vfs::file_task task)
+on_size_timeout(const vfs::file_task& task)
 {
     if (!task->abort)
     {
@@ -1681,7 +1681,7 @@ on_size_timeout(vfs::file_task task)
 }
 
 static void*
-vfs_file_task_thread(vfs::file_task task)
+vfs_file_task_thread(const vfs::file_task& task)
 {
     u32 size_timeout = 0;
     if (task->type < vfs::file_task_type::move || task->type >= vfs::file_task_type::last)
@@ -1689,7 +1689,7 @@ vfs_file_task_thread(vfs::file_task task)
         task->state = vfs::file_task_state::running;
         if (size_timeout)
         {
-            g_source_remove_by_user_data(task);
+            g_source_remove_by_user_data(task.get());
         }
         if (task->state_cb)
         {
@@ -1709,7 +1709,7 @@ vfs_file_task_thread(vfs::file_task task)
         task->state = vfs::file_task_state::running;
         if (size_timeout)
         {
-            g_source_remove_by_user_data(task);
+            g_source_remove_by_user_data(task.get());
         }
 
         if (task->state_cb)
@@ -1724,7 +1724,7 @@ vfs_file_task_thread(vfs::file_task task)
     {
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
-        size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
+        size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         for (const auto& src_path : task->src_paths)
         {
             const auto file_stat = ztd::statx(src_path, ztd::statx::symlink::no_follow);
@@ -1745,7 +1745,7 @@ vfs_file_task_thread(vfs::file_task task)
                 task->state = vfs::file_task_state::running;
                 if (size_timeout)
                 {
-                    g_source_remove_by_user_data(task);
+                    g_source_remove_by_user_data(task.get());
                 }
                 if (task->state_cb)
                 {
@@ -1768,7 +1768,7 @@ vfs_file_task_thread(vfs::file_task task)
 
         // start timer to limit the amount of time to spend on this - can be
         // VERY slow for network filesystems
-        size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task);
+        size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         if (task->type != vfs::file_task_type::chmod_chown)
         {
             const auto file_stat =
@@ -1780,7 +1780,7 @@ vfs_file_task_thread(vfs::file_task task)
                 task->state = vfs::file_task_state::running;
                 if (size_timeout)
                 {
-                    g_source_remove_by_user_data(task);
+                    g_source_remove_by_user_data(task.get());
                 }
                 if (task->state_cb)
                 {
@@ -1821,7 +1821,7 @@ vfs_file_task_thread(vfs::file_task task)
                 task->state = vfs::file_task_state::running;
                 if (size_timeout)
                 {
-                    g_source_remove_by_user_data(task);
+                    g_source_remove_by_user_data(task.get());
                 }
 
                 if (task->state_cb)
@@ -1842,7 +1842,7 @@ vfs_file_task_thread(vfs::file_task task)
         task->state = vfs::file_task_state::running;
         if (size_timeout)
         {
-            g_source_remove_by_user_data(task);
+            g_source_remove_by_user_data(task.get());
         }
         if (task->state_cb)
         {
@@ -1854,7 +1854,7 @@ vfs_file_task_thread(vfs::file_task task)
     // cancel the timer
     if (size_timeout)
     {
-        g_source_remove_by_user_data(task);
+        g_source_remove_by_user_data(task.get());
     }
 
     if (task->state_pause == vfs::file_task_state::queue)
@@ -1902,7 +1902,7 @@ vfs_file_task_thread(vfs::file_task task)
         task->state = vfs::file_task_state::running;
         if (size_timeout)
         {
-            g_source_remove_by_user_data(task);
+            g_source_remove_by_user_data(task.get());
         }
         if (task->state_cb)
         {
@@ -1944,7 +1944,7 @@ vfs_file_task_thread(vfs::file_task task)
     task->state = vfs::file_task_state::running;
     if (size_timeout)
     {
-        g_source_remove_by_user_data(task);
+        g_source_remove_by_user_data(task.get());
     }
     if (task->state_cb)
     {
@@ -2095,7 +2095,7 @@ VFSFileTask::task_error(i32 errnox, const std::string_view action)
         this->append_add_log(msg);
     }
 
-    call_state_callback(this, vfs::file_task_state::error);
+    call_state_callback(this->shared_from_this(), vfs::file_task_state::error);
 }
 
 void
@@ -2106,5 +2106,5 @@ VFSFileTask::task_error(i32 errnox, const std::string_view action,
     const std::string errno_msg = std::strerror(errnox);
     const std::string msg = std::format("\n{} {}\nError: {}\n", action, target.string(), errno_msg);
     this->append_add_log(msg);
-    call_state_callback(this, vfs::file_task_state::error);
+    call_state_callback(this->shared_from_this(), vfs::file_task_state::error);
 }

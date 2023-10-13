@@ -54,7 +54,7 @@
 
 #include "ptk/ptk-file-task.hxx"
 
-static bool on_vfs_file_task_state_cb(vfs::file_task task, vfs::file_task_state state,
+static bool on_vfs_file_task_state_cb(const vfs::file_task& task, vfs::file_task_state state,
                                       void* state_data, void* user_data);
 
 static void query_overwrite(PtkFileTask* ptask);
@@ -179,11 +179,6 @@ PtkFileTask::~PtkFileTask()
             this->task->child_watch = 0;
         }
         // ztd::logger::info("    g_io_channel_shutdown DONE");
-    }
-
-    if (this->task)
-    {
-        vfs_file_task_free(this->task);
     }
 
     gtk_text_buffer_set_text(this->log_buf, "", -1);
@@ -387,7 +382,7 @@ on_progress_timer(PtkFileTask* ptask)
         }
         if (ptask->complete_notify)
         {
-            ptask->complete_notify(ptask->task, ptask->user_data);
+            ptask->complete_notify(ptask->task.get(), ptask->user_data);
             ptask->complete_notify = nullptr;
         }
         main_task_view_remove_task(ptask);
@@ -1948,7 +1943,7 @@ ptk_file_task_update(PtkFileTask* ptask)
 }
 
 static bool
-on_vfs_file_task_state_cb(vfs::file_task task, vfs::file_task_state state, void* state_data,
+on_vfs_file_task_state_cb(const vfs::file_task& task, vfs::file_task_state state, void* state_data,
                           void* user_data)
 {
     PtkFileTask* ptask = PTK_FILE_TASK(user_data);

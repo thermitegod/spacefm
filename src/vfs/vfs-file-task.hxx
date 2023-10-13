@@ -27,6 +27,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -117,17 +119,18 @@ inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
     std::filesystem::perms::sticky_bit,
 };
 
-class VFSFileTask;
+struct VFSFileTask;
 
 namespace vfs
 {
-    using file_task = ztd::raw_ptr<VFSFileTask>;
+    using file_task = std::shared_ptr<VFSFileTask>;
 }
 
-using VFSFileTaskStateCallback = bool (*)(vfs::file_task task, vfs::file_task_state state,
-                                          void* state_data, void* user_data);
+using VFSFileTaskStateCallback = bool (*)(const vfs::file_task& task,
+                                          const vfs::file_task_state state, void* state_data,
+                                          void* user_data);
 
-class VFSFileTask
+struct VFSFileTask : public std::enable_shared_from_this<VFSFileTask>
 {
   public:
     VFSFileTask() = delete;
@@ -265,8 +268,6 @@ class VFSFileTask
     void* exec_ptask{nullptr};
 };
 
-vfs::file_task vfs_task_new(vfs::file_task_type task_type,
+vfs::file_task vfs_task_new(const vfs::file_task_type task_type,
                             const std::span<const std::filesystem::path> src_files,
                             const std::filesystem::path& dest_dir);
-
-void vfs_file_task_free(vfs::file_task task);

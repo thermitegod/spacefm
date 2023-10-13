@@ -852,7 +852,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static bool
-on_autoopen_cb(vfs::file_task task, AutoOpen* ao)
+on_autoopen_cb(const vfs::file_task& task, AutoOpen* ao)
 {
     (void)task;
     // ztd::logger::info("on_autoopen_cb");

@@ -3089,7 +3089,7 @@ main_window_get_on_current_desktop()
 }
 
 const std::string
-main_write_exports(vfs::file_task vtask, const std::string_view value)
+main_write_exports(const vfs::file_task& vtask, const std::string_view value)
 {
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     const MainWindow* main_window = file_browser->main_window();

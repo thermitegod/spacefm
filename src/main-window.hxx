@@ -127,7 +127,7 @@ void main_window_toggle_thumbnails_all_windows();
 void main_window_refresh_all_tabs_matching(const std::filesystem::path& path);
 void main_window_close_all_invalid_tabs();
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
-const std::string main_write_exports(vfs::file_task vtask, const std::string_view value);
+const std::string main_write_exports(const vfs::file_task& vtask, const std::string_view value);
 const std::optional<std::filesystem::path> main_window_get_tab_cwd(PtkFileBrowser* file_browser,
                                                                    tab_t tab_num);
 const std::optional<std::filesystem::path> main_window_get_panel_cwd(PtkFileBrowser* file_browser,
