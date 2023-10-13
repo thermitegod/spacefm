@@ -519,30 +519,32 @@ VFSAppDesktop::exec_in_terminal(const std::filesystem::path& cwd,
     ptk_file_task_run(ptask);
 }
 
-void
+bool
 VFSAppDesktop::open_file(const std::filesystem::path& working_dir,
                          const std::filesystem::path& file_path) const
 {
     if (this->desktop_entry_.exec.empty())
     {
-        const std::string msg =
-            std::format("Desktop Exec is empty, command not found\n\n{}", this->filename_);
-        throw VFSAppDesktopException(msg);
+        ztd::logger::error(
+            std::format("Desktop Exec is empty, command not found: {}", this->filename_));
+        return false;
     }
 
     const std::vector<std::filesystem::path> file_paths{file_path};
     this->exec_desktop(working_dir, file_paths);
+
+    return true;
 }
 
-void
+bool
 VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
                           const std::span<const std::filesystem::path> file_paths) const
 {
     if (this->desktop_entry_.exec.empty())
     {
-        const std::string msg =
-            std::format("Desktop Exec is empty, command not found\n\n{}", this->filename_);
-        throw VFSAppDesktopException(msg);
+        ztd::logger::error(
+            std::format("Desktop Exec is empty, command not found: {}", this->filename_));
+        return false;
     }
 
     if (this->open_multiple_files())
@@ -558,6 +560,8 @@ VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
             this->exec_desktop(working_dir, open_files);
         }
     }
+
+    return true;
 }
 
 void

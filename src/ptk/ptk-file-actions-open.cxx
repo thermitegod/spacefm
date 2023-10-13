@@ -112,19 +112,19 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 
     ztd::logger::info("EXEC({})={}", desktop->path().string(), desktop->exec());
 
-    try
+    const bool opened = desktop->open_files(parent->cwd, open_files);
+    if (!opened)
     {
-        desktop->open_files(parent->cwd, open_files);
-    }
-    catch (const VFSAppDesktopException& e)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent->file_browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(parent->file_browser));
-#endif
-
-        ptk_show_error(GTK_WINDOW(toplevel), "Error", e.what());
+        std::string file_list;
+        for (const auto& file : open_files)
+        {
+            file_list.append(file.string());
+            file_list.append("\n");
+        }
+        ptk_show_error(
+            nullptr,
+            "Error",
+            std::format("Unable to use '{}' to open files:\n{}", app_desktop, file_list));
     }
 
     return true;

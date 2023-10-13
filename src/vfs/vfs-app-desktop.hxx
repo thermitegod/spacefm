@@ -28,8 +28,6 @@
 
 #include <optional>
 
-#include <exception>
-
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
@@ -50,10 +48,10 @@ class VFSAppDesktop
     [[nodiscard]] const std::string_view icon_name() const noexcept;
     [[nodiscard]] GdkPixbuf* icon(i32 size) const noexcept;
     [[nodiscard]] bool use_terminal() const noexcept;
-    void open_file(const std::filesystem::path& working_dir,
-                   const std::filesystem::path& file_path) const;
-    void open_files(const std::filesystem::path& working_dir,
-                    const std::span<const std::filesystem::path> file_paths) const;
+    [[nodiscard]] bool open_file(const std::filesystem::path& working_dir,
+                                 const std::filesystem::path& file_path) const;
+    [[nodiscard]] bool open_files(const std::filesystem::path& working_dir,
+                                  const std::span<const std::filesystem::path> file_paths) const;
 
     const std::vector<std::string> supported_mime_types() const noexcept;
 
@@ -99,27 +97,6 @@ namespace vfs
 {
     using desktop = std::shared_ptr<VFSAppDesktop>;
 } // namespace vfs
-
-class VFSAppDesktopException : virtual public std::exception
-{
-  protected:
-    std::string error_message;
-
-  public:
-    explicit VFSAppDesktopException(const std::string_view msg) : error_message(msg)
-    {
-    }
-
-    virtual ~VFSAppDesktopException() throw()
-    {
-    }
-
-    virtual const char*
-    what() const throw()
-    {
-        return error_message.data();
-    }
-};
 
 // get cached VFSAppDesktop
 vfs::desktop vfs_get_desktop(const std::filesystem::path& desktop_file);

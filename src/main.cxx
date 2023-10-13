@@ -76,18 +76,17 @@ open_file(const std::filesystem::path& path)
             return;
         }
     }
+    const auto& app_name = check_app_name.value();
 
-    const vfs::desktop desktop = vfs_get_desktop(check_app_name.value());
+    const vfs::desktop desktop = vfs_get_desktop(app_name);
 
-    try
+    const bool opened = desktop->open_file(vfs::user_dirs->current_dir(), path);
+    if (!opened)
     {
-        desktop->open_file(vfs::user_dirs->current_dir(), path);
-    }
-    catch (const VFSAppDesktopException& e)
-    {
-        ptk_show_error(nullptr,
-                       "Error",
-                       std::format("Unable to open file:\n{}\n{}", path.string(), e.what()));
+        ptk_show_error(
+            nullptr,
+            "Error",
+            std::format("Unable to use '{}' to open file:\n{}", app_name, path.string()));
     }
 }
 

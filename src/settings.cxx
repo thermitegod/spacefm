@@ -844,15 +844,13 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     }
 
     const std::vector<std::filesystem::path> open_files{path};
-    try
+
+    const bool opened = desktop->open_files(path.parent_path(), open_files);
+    if (!opened)
     {
-        desktop->open_files(path.parent_path(), open_files);
-    }
-    catch (const VFSAppDesktopException& e)
-    {
-        ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+        ptk_show_error(nullptr,
                        "Error",
-                       std::format("Unable to open file:\n{}\n{}", path.string(), e.what()));
+                       std::format("Unable to use '{}' to open file:\n{}", editor, path.string()));
     }
 }
 
