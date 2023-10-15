@@ -766,16 +766,20 @@ VFSFileInfo::load_thumbnail_small() noexcept
         return;
     }
 
-    GdkPixbuf* thumbnail =
-        vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
-    if (thumbnail)
+    if (this->is_image() || this->is_video())
     {
-        this->small_thumbnail_ = thumbnail;
+        GdkPixbuf* thumbnail =
+            vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
+        if (thumbnail)
+        {
+            this->big_thumbnail_ = thumbnail;
+            return;
+        }
     }
-    else // fallback to mime_type icon
-    {
-        this->small_thumbnail_ = this->small_icon();
-    }
+
+    // fallback to mime_type icon
+    // ztd::logger::debug("mime={}", this->mime_type_->type());
+    this->big_thumbnail_ = this->small_icon();
 }
 
 void
@@ -793,16 +797,20 @@ VFSFileInfo::load_thumbnail_big() noexcept
         return;
     }
 
-    GdkPixbuf* thumbnail =
-        vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_big());
-    if (thumbnail)
+    if (this->is_image() || this->is_video())
     {
-        this->big_thumbnail_ = thumbnail;
+        GdkPixbuf* thumbnail =
+            vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_big());
+        if (thumbnail)
+        {
+            this->big_thumbnail_ = thumbnail;
+            return;
+        }
     }
-    else // fallback to mime_type icon
-    {
-        this->big_thumbnail_ = this->big_icon();
-    }
+
+    // fallback to mime_type icon
+    // ztd::logger::debug("mime={}", this->mime_type_->type());
+    this->big_thumbnail_ = this->big_icon();
 }
 
 void
