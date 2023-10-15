@@ -100,8 +100,7 @@ VFSFileInfo::update() noexcept
     this->display_size_bytes_ = std::format("{:L}", this->size());
 
     // disk file size formated
-    const std::string disk_size = vfs_file_size_format(this->size_on_disk());
-    this->display_disk_size_ = disk_size;
+    this->display_disk_size_ = vfs_file_size_format(this->size_on_disk());
 
     // hidden
     this->is_hidden_ = this->name_.starts_with('.');
