@@ -869,6 +869,12 @@ on_revert_button_press(GtkWidget* widget, MoveSet* mset)
 static void
 on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
 {
+#if (GTK_MAJOR_VERSION == 4)
+    ptk_show_message(GTK_WINDOW(parent),
+                     "Needs Update",
+                     "Gtk4 changed and then deprecated the GtkFileChooser API");
+    return;
+#elif (GTK_MAJOR_VERSION == 3)
     i32 action;
     const char* title;
 
@@ -1054,8 +1060,10 @@ on_create_browse_button_press(GtkWidget* widget, MoveSet* mset)
     xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(allocation.height));
 
     gtk_widget_destroy(dlg);
+#endif
 }
 
+#if (GTK_MAJOR_VERSION == 3)
 enum class file_misc_mode
 {
     filename,
@@ -1109,10 +1117,17 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
         }
     }
 }
+#endif
 
 static void
 on_browse_button_press(GtkWidget* widget, MoveSet* mset)
 {
+#if (GTK_MAJOR_VERSION == 4)
+    ptk_show_message(GTK_WINDOW(parent),
+                     "Needs Update",
+                     "Gtk4 changed and then deprecated the GtkFileChooser API");
+    return;
+#elif (GTK_MAJOR_VERSION == 3)
     (void)widget;
     GtkTextIter iter;
     GtkTextIter siter;
@@ -1269,6 +1284,7 @@ on_browse_button_press(GtkWidget* widget, MoveSet* mset)
     }
 
     gtk_widget_destroy(dlg);
+#endif
 }
 
 static void

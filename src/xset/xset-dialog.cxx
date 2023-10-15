@@ -363,6 +363,12 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
                  const std::optional<std::filesystem::path>& deffolder,
                  const std::optional<std::filesystem::path>& deffile)
 {
+#if (GTK_MAJOR_VERSION == 4)
+    ptk_show_message(GTK_WINDOW(parent),
+                     "Needs Update",
+                     "Gtk4 changed and then deprecated the GtkFileChooser API");
+    return std::nullopt;
+#elif (GTK_MAJOR_VERSION == 3)
     /*  Actions:
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN
      *      GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE
@@ -460,4 +466,5 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     }
     gtk_widget_destroy(dlg);
     return std::nullopt;
+#endif
 }
