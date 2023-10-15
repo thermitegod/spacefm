@@ -161,13 +161,8 @@ vfs_dir_finalize(GObject* obj)
         }
     }
 
-    // ztd::logger::debug("dir->thumbnail_loader: {}", fmt::ptr(dir->thumbnail_loader));
-    if (dir->thumbnail_loader)
-    {
-        // ztd::logger::debug("FREE THUMBNAIL LOADER IN VFSDIR");
-        vfs_thumbnail_loader_free(dir->thumbnail_loader);
-        dir->thumbnail_loader = nullptr;
-    }
+    // ztd::logger::trace("dir->thumbnail_loader: {}", fmt::ptr(dir->thumbnail_loader));
+    dir->thumbnail_loader = nullptr;
 
     dir->file_list.clear();
     dir->changed_files.clear();
@@ -468,6 +463,18 @@ VFSDir::add_hidden(const vfs::file_info& file) const noexcept
     const std::string data = std::format("{}\n", file->name());
 
     return write_file(file_path, data);
+}
+
+void
+VFSDir::cancel_all_thumbnail_requests() noexcept
+{
+    this->thumbnail_loader = nullptr;
+}
+
+void
+VFSDir::load_thumbnail(const vfs::file_info& file, const bool is_big) noexcept
+{
+    vfs_thumbnail_loader_request(this, file, is_big);
 }
 
 void

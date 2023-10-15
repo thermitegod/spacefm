@@ -48,8 +48,8 @@
 #include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-static void* thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader);
-static bool on_thumbnail_idle(vfs::thumbnail_loader loader);
+static void* thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loader);
+static bool on_thumbnail_idle(void* user_data);
 
 namespace vfs
 {
@@ -91,23 +91,44 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
     g_object_unref(this->dir);
 }
 
+void
+VFSThumbnailLoader::loader_request(const vfs::file_info& file, bool is_big) noexcept
+{
+    // Check if the request is already scheduled
+    vfs::thumbnail_request_t req;
+    for (const vfs::thumbnail_request_t& queued_req : this->queue)
+    {
+        req = queued_req;
+        // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
+        // If file with the same name is already in our queue
+        if (req->file == file || ztd::same(req->file->name(), file->name()))
+        {
+            break;
+        }
+        req = nullptr;
+    }
+
+    if (!req)
+    {
+        req = std::make_shared<VFSThumbnailRequest>(file);
+        // ztd::logger::debug("this->queue add file={}", req->file->name());
+        this->queue.emplace_back(req);
+    }
+
+    ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
+}
+
 vfs::thumbnail_loader
 vfs_thumbnail_loader_new(vfs::dir dir)
 {
-    const auto loader = new VFSThumbnailLoader(dir);
-    return loader;
-}
-
-void
-vfs_thumbnail_loader_free(vfs::thumbnail_loader loader)
-{
-    delete loader;
+    return std::make_shared<VFSThumbnailLoader>(dir);
 }
 
 static bool
-on_thumbnail_idle(vfs::thumbnail_loader loader)
+on_thumbnail_idle(void* user_data)
 {
     // ztd::logger::debug("ENTER ON_THUMBNAIL_IDLE");
+    const auto loader = ((VFSThumbnailLoader*)user_data)->shared_from_this();
 
     while (!loader->update_queue.empty())
     {
@@ -122,16 +143,17 @@ on_thumbnail_idle(vfs::thumbnail_loader loader)
     if (loader->task->is_finished())
     {
         // ztd::logger::debug("FREE LOADER IN IDLE HANDLER");
+        // ztd::logger::trace("dir->thumbnail_loader: {}", fmt::ptr(loader->dir->thumbnail_loader));
         loader->dir->thumbnail_loader = nullptr;
-        vfs_thumbnail_loader_free(loader);
     }
+
     // ztd::logger::debug("LEAVE ON_THUMBNAIL_IDLE");
 
     return false;
 }
 
 static void*
-thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
+thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loader)
 {
     // ztd::logger::debug("thumbnail_loader_thread");
     while (!task->is_canceled())
@@ -184,7 +206,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
             {
                 loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
                                                        (GSourceFunc)on_thumbnail_idle,
-                                                       loader,
+                                                       loader.get(),
                                                        nullptr);
             }
         }
@@ -205,8 +227,10 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
         if (loader->idle_handler == 0)
         {
             // ztd::logger::debug("ADD IDLE HANDLER BEFORE THREAD ENDING");
-            loader->idle_handler =
-                g_idle_add_full(G_PRIORITY_LOW, (GSourceFunc)on_thumbnail_idle, loader, nullptr);
+            loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
+                                                   (GSourceFunc)on_thumbnail_idle,
+                                                   loader.get(),
+                                                   nullptr);
         }
     }
     // ztd::logger::debug("THREAD ENDED!");
@@ -214,7 +238,7 @@ thumbnail_loader_thread(vfs::async_task task, vfs::thumbnail_loader loader)
 }
 
 void
-vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, bool is_big)
+vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, const bool is_big)
 {
     bool new_task = false;
 
@@ -228,49 +252,13 @@ vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, bool is_b
     }
 
     const auto loader = dir->thumbnail_loader;
-
-    // Check if the request is already scheduled
-    vfs::thumbnail_request_t req;
-    for (const vfs::thumbnail_request_t& queued_req : loader->queue)
-    {
-        req = queued_req;
-        // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
-        // If file with the same name is already in our queue
-        if (req->file == file || ztd::same(req->file->name(), file->name()))
-        {
-            break;
-        }
-        req = nullptr;
-    }
-
-    if (!req)
-    {
-        req = std::make_shared<VFSThumbnailRequest>(file);
-        // ztd::logger::debug("loader->queue add file={}", req->file->name());
-        loader->queue.emplace_back(req);
-    }
-
-    ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
+    loader->loader_request(file, is_big);
 
     if (new_task)
     {
         // ztd::logger::debug("new_task: loader->queue={}", loader->queue.size());
         loader->task->run();
     }
-}
-
-void
-vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big)
-{
-    (void)is_big;
-
-    vfs::thumbnail_loader loader = dir->thumbnail_loader;
-    if (!loader)
-    {
-        return;
-    }
-
-    vfs_thumbnail_loader_free(loader);
 }
 
 static GdkPixbuf*

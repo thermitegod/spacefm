@@ -37,17 +37,18 @@ struct VFSThumbnailLoader;
 
 namespace vfs
 {
-    // using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
-    using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
+    using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
     using thumbnail_request_t = std::shared_ptr<VFSThumbnailRequest>;
 } // namespace vfs
 
-struct VFSThumbnailLoader
+struct VFSThumbnailLoader : public std::enable_shared_from_this<VFSThumbnailLoader>
 {
   public:
     VFSThumbnailLoader() = delete;
     VFSThumbnailLoader(vfs::dir dir);
     ~VFSThumbnailLoader();
+
+    void loader_request(const vfs::file_info& file, bool is_big) noexcept;
 
     vfs::dir dir{nullptr};
     vfs::async_task task{nullptr};
@@ -63,10 +64,7 @@ struct VFSThumbnailLoader
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
 
-void vfs_thumbnail_loader_free(vfs::thumbnail_loader loader);
-
-void vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, bool is_big);
-void vfs_thumbnail_loader_cancel_all_requests(vfs::dir dir, bool is_big);
+void vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, const bool is_big);
 
 // Load thumbnail for the specified file
 // If the caller knows mtime of the file, it should pass mtime to this function to

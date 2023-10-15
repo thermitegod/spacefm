@@ -25,6 +25,8 @@
 
 #include <mutex>
 
+#include <memory>
+
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
 
@@ -49,7 +51,7 @@ struct VFSThumbnailLoader;
 namespace vfs
 {
     using dir = ztd::raw_ptr<VFSDir>;
-    using thumbnail_loader = ztd::raw_ptr<VFSThumbnailLoader>;
+    using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
 } // namespace vfs
 
 struct VFSDir
@@ -93,6 +95,9 @@ struct VFSDir
     void unload_thumbnails(bool is_big) noexcept;
 
     bool add_hidden(const vfs::file_info& file) const noexcept;
+
+    void cancel_all_thumbnail_requests() noexcept;
+    void load_thumbnail(const vfs::file_info& file, const bool is_big) noexcept;
 
     /* emit signals */
     void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;

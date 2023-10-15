@@ -271,7 +271,7 @@ on_file_list_file_changed(const vfs::file_info& file, PtkFileList* list)
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
         {
-            vfs_thumbnail_loader_request(list->dir, file, list->big_thumbnail);
+            list->dir->load_thumbnail(file, list->big_thumbnail);
         }
     }
 }
@@ -287,7 +287,7 @@ on_file_list_file_created(const vfs::file_info& file, PtkFileList* list)
     {
         if (!file->is_thumbnail_loaded(list->big_thumbnail))
         {
-            vfs_thumbnail_loader_request(list->dir, file, list->big_thumbnail);
+            list->dir->load_thumbnail(file, list->big_thumbnail);
         }
     }
 }
@@ -304,7 +304,7 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
     {
         if (list->max_thumbnail > 0)
         { // cancel all possible pending requests
-            vfs_thumbnail_loader_cancel_all_requests(list->dir, list->big_thumbnail);
+            list->dir->cancel_all_thumbnail_requests();
         }
         g_list_free(list->files);
 
@@ -984,14 +984,15 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
     {
         if (old_max_thumbnail > 0) /* cancel thumbnails */
         {
-            vfs_thumbnail_loader_cancel_all_requests(list->dir, list->big_thumbnail);
+            list->dir->cancel_all_thumbnail_requests();
 
             list->signal_file_thumbnail_loaded.disconnect();
 
             for (GList* l = list->files; l; l = g_list_next(l))
             {
                 const vfs::file_info file(((VFSFileInfo*)l->data)->shared_from_this());
-                if ((file->is_image() || file->is_video()) && file->is_thumbnail_loaded(is_big))
+                if ((file->is_image() || file->is_video()) &&
+                    file->is_thumbnail_loaded(list->big_thumbnail))
                 {
                     /* update the model */
                     ptk_file_list_file_changed(file, list);
@@ -1000,7 +1001,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
 
             /* Thumbnails are being disabled so ensure the large thumbnails are
              * freed - with up to 256x256 images this is a lot of memory */
-            list->dir->unload_thumbnails(is_big);
+            list->dir->unload_thumbnails(list->big_thumbnail);
         }
         return;
     }
@@ -1014,13 +1015,13 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
         if (list->max_thumbnail != 0 &&
             (file->is_video() || (file->size() < list->max_thumbnail && file->is_image())))
         {
-            if (file->is_thumbnail_loaded(is_big))
+            if (file->is_thumbnail_loaded(list->big_thumbnail))
             {
                 ptk_file_list_file_changed(file, list);
             }
             else
             {
-                vfs_thumbnail_loader_request(list->dir, file, is_big);
+                list->dir->load_thumbnail(file, list->big_thumbnail);
                 // ztd::logger::debug("REQUEST: {}", file->name());
             }
         }
