@@ -546,7 +546,7 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
     auto page = PropertiesPage();
 
     const bool multiple_files = selected_files.size() > 1;
-    const auto selected_file = selected_files.front();
+    const auto& selected_file = selected_files.front();
 
     if (multiple_files)
     {
@@ -744,7 +744,7 @@ init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
 
     auto page = PropertiesPage();
 
-    const auto selected_file = selected_files.front();
+    const auto& selected_file = selected_files.front();
 
     // Owner
     GtkEntry* entry_owner = GTK_ENTRY(gtk_entry_new());

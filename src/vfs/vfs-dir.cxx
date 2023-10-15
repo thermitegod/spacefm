@@ -569,7 +569,7 @@ VFSDir::update_created_files(const std::filesystem::path& key) noexcept
 
     for (const auto& created_file : this->created_files)
     {
-        vfs::file_info file_found = this->find_file(created_file, nullptr);
+        const vfs::file_info file_found = this->find_file(created_file, nullptr);
         if (!file_found)
         {
             // file is not in dir file_list
@@ -587,10 +587,9 @@ VFSDir::update_created_files(const std::filesystem::path& key) noexcept
         else
         {
             // file already exists in dir file_list
-            vfs::file_info file = file_found;
-            if (this->update_file_info(file))
+            if (this->update_file_info(file_found))
             {
-                this->run_event<spacefm::signal::file_changed>(file);
+                this->run_event<spacefm::signal::file_changed>(file_found);
             }
             // else was deleted, signaled, and unrefed in update_file_info
         }
