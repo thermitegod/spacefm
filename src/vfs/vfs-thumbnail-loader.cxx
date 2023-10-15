@@ -182,14 +182,11 @@ thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loade
             const bool load_big = (value.first == vfs::thumbnail_size::big);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
-                const auto full_path =
-                    std::filesystem::path() / loader->dir->path / req->file->name();
+                // ztd::logger::debug("loader->dir->path    = {}", loader->dir->path);
+                // ztd::logger::debug("req->file->name()    = {}", req->file->name());
+                // ztd::logger::debug("req->file->path()    = {}", req->file->path().string());
 
-                // ztd::logger::info("loader->dir->path    = {}", loader->dir->path);
-                // ztd::logger::info("req->file->name()    = {}", req->file->name());
-                // ztd::logger::info("full_path            = {}", full_path);
-
-                req->file->load_thumbnail(full_path, load_big);
+                req->file->load_thumbnail(load_big);
 
                 // Slow down for debugging.
                 // ztd::logger::debug("DELAY!!");

@@ -744,20 +744,20 @@ VFSFileInfo::is_thumbnail_loaded(bool big) const noexcept
 }
 
 void
-VFSFileInfo::load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept
+VFSFileInfo::load_thumbnail(bool big) noexcept
 {
     if (big)
     {
-        load_thumbnail_big(full_path);
+        load_thumbnail_big();
     }
     else
     {
-        load_thumbnail_small(full_path);
+        load_thumbnail_small();
     }
 }
 
 void
-VFSFileInfo::load_thumbnail_small(const std::filesystem::path& full_path) noexcept
+VFSFileInfo::load_thumbnail_small() noexcept
 {
     if (this->small_thumbnail_)
     {
@@ -765,13 +765,13 @@ VFSFileInfo::load_thumbnail_small(const std::filesystem::path& full_path) noexce
     }
 
     std::error_code ec;
-    const bool exists = std::filesystem::exists(full_path, ec);
+    const bool exists = std::filesystem::exists(this->path_, ec);
     if (ec || !exists)
     {
         return;
     }
 
-    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, app_settings.icon_size_small());
+    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(this->path_, app_settings.icon_size_small());
     if (thumbnail)
     {
         this->small_thumbnail_ = thumbnail;
@@ -783,7 +783,7 @@ VFSFileInfo::load_thumbnail_small(const std::filesystem::path& full_path) noexce
 }
 
 void
-VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
+VFSFileInfo::load_thumbnail_big() noexcept
 {
     if (this->big_thumbnail_)
     {
@@ -791,13 +791,13 @@ VFSFileInfo::load_thumbnail_big(const std::filesystem::path& full_path) noexcept
     }
 
     std::error_code ec;
-    const bool exists = std::filesystem::exists(full_path, ec);
+    const bool exists = std::filesystem::exists(this->path_, ec);
     if (ec || !exists)
     {
         return;
     }
 
-    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(full_path, app_settings.icon_size_big());
+    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(this->path_, app_settings.icon_size_big());
     if (thumbnail)
     {
         this->big_thumbnail_ = thumbnail;

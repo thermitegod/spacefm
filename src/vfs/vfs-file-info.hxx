@@ -80,7 +80,7 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
     std::time_t ctime() const noexcept;
     std::time_t mtime() const noexcept;
 
-    void load_thumbnail(const std::filesystem::path& full_path, bool big) noexcept;
+    void load_thumbnail(bool big) noexcept;
     bool is_thumbnail_loaded(bool big) const noexcept;
 
     GdkPixbuf* big_icon() noexcept;
@@ -153,8 +153,8 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
     bool is_hidden_{false}; // if the filename starts with '.'
 
   private:
-    void load_thumbnail_small(const std::filesystem::path& full_path) noexcept;
-    void load_thumbnail_big(const std::filesystem::path& full_path) noexcept;
+    void load_thumbnail_small() noexcept;
+    void load_thumbnail_big() noexcept;
 
     void load_special_info() noexcept;
 
