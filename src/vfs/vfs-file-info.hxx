@@ -65,7 +65,7 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
     std::filesystem::perms permissions() const noexcept;
 
     vfs::mime_type mime_type() const noexcept;
-    void reload_mime_type(const std::filesystem::path& full_path) noexcept;
+    void reload_mime_type() noexcept;
 
     const std::string_view display_owner() const noexcept;
     const std::string_view display_group() const noexcept;

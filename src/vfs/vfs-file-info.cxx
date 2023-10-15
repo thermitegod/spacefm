@@ -229,13 +229,9 @@ VFSFileInfo::mime_type() const noexcept
 }
 
 void
-VFSFileInfo::reload_mime_type(const std::filesystem::path& full_path) noexcept
+VFSFileInfo::reload_mime_type() noexcept
 {
-    // In current implementation, only st_mode is used in
-    // mime-type detection, so let's save some CPU cycles
-    // and do not copy unused fields.
-
-    this->mime_type_ = vfs_mime_type_get_from_file(full_path);
+    this->mime_type_ = vfs_mime_type_get_from_file(this->path_);
     this->load_special_info();
 }
 

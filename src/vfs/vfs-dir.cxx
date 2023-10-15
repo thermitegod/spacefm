@@ -411,7 +411,7 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
     for (const vfs::file_info& file : dir->file_list)
     {
         // ztd::logger::debug("reload {}", file->path());
-        file->reload_mime_type(file->path());
+        file->reload_mime_type();
     }
 
     const auto action = [dir](const vfs::file_info& file)
