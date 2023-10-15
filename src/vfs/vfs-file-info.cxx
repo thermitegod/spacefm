@@ -45,10 +45,10 @@ vfs_file_info_new(const std::filesystem::path& file_path)
     return std::make_shared<VFSFileInfo>(file_path);
 }
 
-VFSFileInfo::VFSFileInfo(const std::filesystem::path& file_path)
+VFSFileInfo::VFSFileInfo(const std::filesystem::path& file_path) : path_(file_path)
 {
     // ztd::logger::debug("VFSFileInfo={}", file_path);
-    this->update(file_path);
+    this->update();
 }
 
 VFSFileInfo::~VFSFileInfo()
@@ -65,9 +65,9 @@ VFSFileInfo::~VFSFileInfo()
 }
 
 bool
-VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
+VFSFileInfo::update() noexcept
 {
-    if (std::filesystem::equivalent(file_path, "/"))
+    if (std::filesystem::equivalent(this->path_, "/"))
     {
         // special case, using std::filesystem::path::filename() on the root
         // directory returns an empty string. that causes subtle bugs
@@ -77,11 +77,9 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     }
     else
     {
-        this->name_ = file_path.filename();
-        this->display_name_ = file_path.filename();
+        this->name_ = this->path_.filename();
+        this->display_name_ = this->path_.filename();
     }
-
-    this->path_ = file_path;
 
     this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow);
     if (!this->file_stat_)
@@ -133,12 +131,6 @@ VFSFileInfo::update(const std::filesystem::path& file_path) noexcept
     this->load_special_info();
 
     return true;
-}
-
-bool
-VFSFileInfo::update() noexcept
-{
-    return this->update(this->path_);
 }
 
 const std::string_view

@@ -123,7 +123,6 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
 
     // update file info
     bool update() noexcept;
-    bool update(const std::filesystem::path& file_path) noexcept;
 
   private:
     ztd::statx file_stat_; // cached copy of struct statx()
