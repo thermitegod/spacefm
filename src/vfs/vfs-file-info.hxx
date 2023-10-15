@@ -49,6 +49,7 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
     void update_display_name(const std::string_view new_display_name) noexcept;
 
     const std::filesystem::path& path() const noexcept;
+    const std::string_view uri() const noexcept;
 
     const std::string_view collate_key() const noexcept;
     const std::string_view collate_icase_key() const noexcept;
@@ -128,7 +129,9 @@ struct VFSFileInfo : public std::enable_shared_from_this<VFSFileInfo>
     ztd::statx file_stat_; // cached copy of struct statx()
     std::filesystem::file_status status_;
 
-    std::filesystem::path path_{};     // real path on file system
+    std::filesystem::path path_{}; // real path on file system
+    std::string uri_{};            // uri of the real path on file system
+
     std::string name_{};               // real name on file system
     std::string display_name_{};       // displayed name (in UTF-8)
     std::string collate_key_{};        // sfm sort key

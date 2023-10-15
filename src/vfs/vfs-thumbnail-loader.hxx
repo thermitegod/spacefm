@@ -17,10 +17,6 @@
 
 #pragma once
 
-#include <string_view>
-
-#include <filesystem>
-
 #include <deque>
 
 #include <mutex>
@@ -66,10 +62,4 @@ void vfs_thumbnail_init();
 
 void vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, const bool is_big);
 
-// Load thumbnail for the specified file
-// If the caller knows mtime of the file, it should pass mtime to this function to
-// prevent unnecessary disk I/O and this can speed up the loading.
-// Otherwise, it should pass 0 for mtime, and the function will do stat() on the file
-// to get mtime.
-GdkPixbuf* vfs_thumbnail_load_for_uri(const std::string_view uri, i32 thumb_size);
-GdkPixbuf* vfs_thumbnail_load_for_file(const std::filesystem::path& file, i32 thumb_size);
+GdkPixbuf* vfs_thumbnail_load(const vfs::file_info& file, i32 thumb_size);

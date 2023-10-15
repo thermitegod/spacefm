@@ -48,6 +48,8 @@ vfs_file_info_new(const std::filesystem::path& file_path)
 VFSFileInfo::VFSFileInfo(const std::filesystem::path& file_path) : path_(file_path)
 {
     // ztd::logger::debug("VFSFileInfo={}", file_path);
+    this->uri_ = Glib::filename_to_uri(this->path_.string());
+
     this->update();
 }
 
@@ -163,6 +165,12 @@ const std::filesystem::path&
 VFSFileInfo::path() const noexcept
 {
     return this->path_;
+}
+
+const std::string_view
+VFSFileInfo::uri() const noexcept
+{
+    return this->uri_;
 }
 
 const std::string_view
@@ -758,7 +766,8 @@ VFSFileInfo::load_thumbnail_small() noexcept
         return;
     }
 
-    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(this->path_, app_settings.icon_size_small());
+    GdkPixbuf* thumbnail =
+        vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
     if (thumbnail)
     {
         this->small_thumbnail_ = thumbnail;
@@ -784,7 +793,8 @@ VFSFileInfo::load_thumbnail_big() noexcept
         return;
     }
 
-    GdkPixbuf* thumbnail = vfs_thumbnail_load_for_file(this->path_, app_settings.icon_size_big());
+    GdkPixbuf* thumbnail =
+        vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_big());
     if (thumbnail)
     {
         this->big_thumbnail_ = thumbnail;

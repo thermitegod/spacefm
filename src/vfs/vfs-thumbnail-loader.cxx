@@ -17,7 +17,6 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
@@ -258,25 +257,20 @@ vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, const boo
     }
 }
 
-static GdkPixbuf*
-vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_view file_uri,
-                   i32 thumb_size)
+GdkPixbuf*
+vfs_thumbnail_load(const vfs::file_info& file, i32 thumb_size)
 {
-    const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file_uri);
+    const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
     const std::string file_name = std::format("{}.png", file_hash);
 
     const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / file_name;
 
-    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file_path, file_uri, thumb_size);
-
-    // get file mtime
-    const auto ftime = std::filesystem::last_write_time(file_path);
-    const auto stime = std::chrono::file_clock::to_sys(ftime);
-    const auto mtime = std::chrono::system_clock::to_time_t(stime);
+    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
     // if the mtime of the file being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created files
     // will not have a thumbnail until a refresh
+    const auto mtime = file->mtime();
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     if (now - mtime < 5)
     {
@@ -324,7 +318,7 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
                 video_thumb.setSeekPercentage(25);
                 video_thumb.setThumbnailSize(thumb_size);
                 video_thumb.setMaintainAspectRatio(true);
-                video_thumb.generateThumbnail(file_path,
+                video_thumb.generateThumbnail(file->path(),
                                               ThumbnailerImageType::Png,
                                               thumbnail_file,
                                               nullptr);
@@ -339,7 +333,7 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
         {
             const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
                                              thumb_size,
-                                             ztd::shell::quote(file_path.string()),
+                                             ztd::shell::quote(file->path().string()),
                                              ztd::shell::quote(thumbnail_file.string()));
             // ztd::logger::info("COMMAND={}", command);
             Glib::spawn_command_line_sync(command);
@@ -383,22 +377,6 @@ vfs_thumbnail_load(const std::filesystem::path& file_path, const std::string_vie
     }
 
     return result;
-}
-
-GdkPixbuf*
-vfs_thumbnail_load_for_uri(const std::string_view uri, i32 thumb_size)
-{
-    const std::filesystem::path file = Glib::filename_from_uri(uri.data());
-    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
-    return ret;
-}
-
-GdkPixbuf*
-vfs_thumbnail_load_for_file(const std::filesystem::path& file, i32 thumb_size)
-{
-    const std::string uri = Glib::filename_to_uri(file.string());
-    GdkPixbuf* ret = vfs_thumbnail_load(file, uri, thumb_size);
-    return ret;
 }
 
 void
