@@ -23,6 +23,8 @@
 
 #include <chrono>
 
+#include <cassert>
+
 #include <CLI/CLI.hpp>
 
 #include <fmt/format.h>
@@ -146,12 +148,16 @@ tmp_clean()
 static void
 activate(GtkApplication* app, void* user_data)
 {
+    assert(GTK_IS_APPLICATION(app));
+
     const auto opt = ((commandline_opt_data*)user_data)->shared_from_this();
 
     app_settings.load_saved_tabs(!opt->no_tabs);
 
     MainWindow* main_window =
         MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
+    gtk_window_set_application(GTK_WINDOW(main_window), app);
+    assert(GTK_IS_APPLICATION_WINDOW(main_window));
 
     // ztd::logger::debug("main_window = {}  {} {}",
     //                    fmt::ptr(main_window),
@@ -246,13 +252,6 @@ main(int argc, char* argv[])
     //
     // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
     (void)freopen("/dev/null", "w", stderr);
-
-    // initialize GTK+
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_init();
-#elif (GTK_MAJOR_VERSION == 3)
-    gtk_init(nullptr, nullptr);
-#endif
 
     // ensure that there is only one instance of spacefm.
     // if there is an existing instance, only the FILES

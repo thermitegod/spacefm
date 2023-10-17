@@ -140,7 +140,7 @@ main_window_get_type()
             (GInstanceInitFunc)main_window_init,
             nullptr,
         };
-        type = g_type_register_static(GTK_TYPE_WINDOW,
+        type = g_type_register_static(GTK_TYPE_APPLICATION_WINDOW,
                                       "MainWindow",
                                       &info,
                                       GTypeFlags::G_TYPE_FLAG_NONE);
@@ -2120,14 +2120,21 @@ main_window_add_new_window(MainWindow* main_window)
         }
     }
 
+    app_settings.load_saved_tabs(false);
+
     ztd::logger::info("Opening another window");
 
     GtkApplication* app = gtk_window_get_application(GTK_WINDOW(main_window));
+    assert(GTK_IS_APPLICATION(app));
 
     MainWindow* another_main_window =
         MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
+    gtk_window_set_application(GTK_WINDOW(main_window), app);
+    assert(GTK_IS_APPLICATION_WINDOW(another_main_window));
 
     gtk_window_present(GTK_WINDOW(another_main_window));
+
+    app_settings.load_saved_tabs(true);
 }
 
 static void
