@@ -32,8 +32,6 @@
 
 #include <memory>
 
-#include <chrono>
-
 #include <cassert>
 
 #include <gtkmm.h>
@@ -59,7 +57,6 @@
 #include "xset/xset-design.hxx"
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-static-strings.hxx"
 
 #include "settings/app.hxx"
 #include "settings/config-load.hxx"
@@ -68,21 +65,16 @@
 #include "terminal-handlers.hxx"
 
 #include "autosave.hxx"
-#include "write.hxx"
 #include "utils.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-location-view.hxx"
 
 // MOD settings
 
@@ -93,7 +85,7 @@ struct builtin_tool_data
 {
     std::optional<std::string> name;
     std::optional<std::string> icon;
-    std::optional<std::string> shared_key;
+    std::optional<xset::name> shared_key;
 };
 
 // must match xset::tool:: enum
@@ -114,97 +106,97 @@ const std::map<xset::tool, builtin_tool_data> builtin_tools{
      {
          "Show Devices",
          "gtk-harddisk",
-         "panel1_show_devmon",
+         xset::name::panel1_show_devmon,
      }},
     {xset::tool::bookmarks,
      {
          "Show Bookmarks",
          "gtk-jump-to",
-         "panel1_show_book",
+         std::nullopt,
      }},
     {xset::tool::tree,
      {
          "Show Tree",
          "folder",
-         "panel1_show_dirtree",
+         xset::name::panel1_show_dirtree,
      }},
     {xset::tool::home,
      {
          "Home",
          "gtk-home",
-         "go_home",
+         xset::name::go_home,
      }},
     {xset::tool::DEFAULT,
      {
          "Default",
          "gtk-home",
-         "go_default",
+         xset::name::go_default,
      }},
     {xset::tool::up,
      {
          "Up",
          "gtk-go-up",
-         "go_up",
+         xset::name::go_up,
      }},
     {xset::tool::back,
      {
          "Back",
          "gtk-go-back",
-         "go_back",
+         xset::name::go_back,
      }},
     {xset::tool::back_menu,
      {
          "Back History",
          "gtk-go-back",
-         "go_back",
+         xset::name::go_back,
      }},
     {xset::tool::fwd,
      {
          "Forward",
          "gtk-go-forward",
-         "go_forward",
+         xset::name::go_forward,
      }},
     {xset::tool::fwd_menu,
      {
          "Forward History",
          "gtk-go-forward",
-         "go_forward",
+         xset::name::go_forward,
      }},
     {xset::tool::refresh,
      {
          "Refresh",
          "gtk-refresh",
-         "view_refresh",
+         xset::name::view_refresh,
      }},
     {xset::tool::new_tab,
      {
          "New Tab",
          "gtk-add",
-         "tab_new",
+         xset::name::tab_new,
      }},
     {xset::tool::new_tab_here,
      {
          "New Tab Here",
          "gtk-add",
-         "tab_new_here",
+         xset::name::tab_new_here,
      }},
     {xset::tool::show_hidden,
      {
          "Show Hidden",
          "gtk-apply",
-         "panel1_show_hidden",
+         xset::name::panel1_show_hidden,
      }},
     {xset::tool::show_thumb,
      {
          "Show Thumbnails",
          std::nullopt,
-         "view_thumb",
+         xset::name::view_thumb,
      }},
     {xset::tool::large_icons,
      {
          "Large Icons",
          "zoom-in",
-         "panel1_list_large",
+         xset::name::panel1_list_large,
      }},
     {xset::tool::invalid,
      {
@@ -667,7 +659,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         // key accel
         if (set->shared_key)
         {
-            keyset = xset_get(set->shared_key.value());
+            keyset = set->shared_key;
         }
         else
         {
@@ -1748,7 +1740,11 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
     }
     if (set->tool > xset::tool::custom && set->tool < xset::tool::invalid && !set->shared_key)
     {
-        set->shared_key = builtin_tools.at(set->tool).shared_key;
+        const auto shared_key = builtin_tools.at(set->tool).shared_key;
+        if (shared_key)
+        {
+            set->shared_key = xset_get(shared_key.value());
+        }
     }
 
     // builtin toolitems do not have menu_style set

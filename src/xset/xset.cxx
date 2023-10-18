@@ -134,6 +134,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
 {
     assert(set != nullptr);
     assert(var != xset::var::context_menu_entries);
+    assert(var != xset::var::shared_key);
 
     switch (var)
     {
@@ -266,11 +267,6 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
             // pre-0.9.0 icon or >= 0.9.0 custom item icon
             // only save if custom or not default icon
             // also check that stock name does not match
-            break;
-        }
-        case xset::var::shared_key:
-        {
-            set->shared_key = value;
             break;
         }
         case xset::var::next:
@@ -443,6 +439,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
             set->opener = result == 1 ? true : false;
             break;
         }
+        case xset::var::shared_key:
         case xset::var::context_menu_entries:
             break;
     }

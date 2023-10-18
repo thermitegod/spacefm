@@ -37,6 +37,12 @@ struct PtkFileBrowser;
 
 namespace xset
 {
+    struct XSet;
+}
+using xset_t = std::shared_ptr<xset::XSet>;
+
+namespace xset
+{
     enum class cmd
     {
         line,
@@ -140,8 +146,9 @@ namespace xset
         PtkFileBrowser* browser{nullptr};          // not saved - set automatically
         u32 key{0};                                // saved
         u32 keymod{0};                             // saved
-        std::optional<std::string> shared_key{std::nullopt}; // not saved
-        std::optional<std::string> icon{std::nullopt};       // saved
+        xset_t shared_key{nullptr};                // not saved
+
+        std::optional<std::string> icon{std::nullopt};    // saved
         std::optional<std::string> desc{std::nullopt};    // saved if ( !lock ), or read if locked
         std::optional<std::string> title{std::nullopt};   // saved if ( !lock ), or read if locked
         std::optional<std::string> next{std::nullopt};    // saved
@@ -169,9 +176,6 @@ namespace xset
         char opener{0};            // saved
     };
 } // namespace xset
-
-// using xset_t = std::unique_ptr<XSet>;
-using xset_t = std::shared_ptr<xset::XSet>;
 
 // all xsets
 extern std::vector<xset_t> xsets;

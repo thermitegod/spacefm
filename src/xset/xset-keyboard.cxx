@@ -137,7 +137,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
     xset_t keyset = nullptr;
     if (set->shared_key)
     {
-        keyset = xset_get(set->shared_key.value());
+        keyset = set->shared_key;
     }
 
     const std::string keyname = xset_get_keyname(nullptr, keyval, keymod);
@@ -236,7 +236,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set)
 
     if (set->shared_key)
     {
-        keyset = xset_get(set->shared_key.value());
+        keyset = set->shared_key;
     }
     else
     {
@@ -288,7 +288,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set)
         // set new key
         if (set->shared_key)
         {
-            keyset = xset_get(set->shared_key.value());
+            keyset = set->shared_key;
         }
         else
         {

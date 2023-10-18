@@ -487,7 +487,7 @@ xset_defaults()
 
     set = xset_get(xset::name::main_dev);
     xset_set_var(set, xset::var::menu_label, "_Show Devices");
-    xset_set_var(set, xset::var::shared_key, "panel1_show_devmon");
+    set->shared_key = xset_get(xset::name::panel1_show_devmon);
     set->menu_style = xset::menu::check;
 
     // Tasks
@@ -911,7 +911,7 @@ xset_defaults()
 
     set = xset_get(xset::name::new_bookmark);
     xset_set_var(set, xset::var::menu_label, "_Bookmark");
-    xset_set_var(set, xset::var::shared_key, "book_add");
+    set->shared_key = xset_get(xset::name::book_add);
     xset_set_var(set, xset::var::icn, "gtk-jump-to");
 
     set = xset_get(xset::name::new_archive);
@@ -1511,7 +1511,7 @@ xset_defaults()
         set->b = xset::b::xtrue;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_show_toolbox");
+            set->shared_key = xset_get(xset::name::panel1_show_toolbox);
         }
 
         set = xset_get_panel(p, xset::panel::show_devmon);
@@ -1520,7 +1520,7 @@ xset_defaults()
         set->b = xset::b::unset;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_show_devmon");
+            set->shared_key = xset_get(xset::name::panel1_show_devmon);
         }
 
         set = xset_get_panel(p, xset::panel::show_dirtree);
@@ -1529,7 +1529,7 @@ xset_defaults()
         set->b = xset::b::xtrue;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_show_dirtree");
+            set->shared_key = xset_get(xset::name::panel1_show_dirtree);
         }
 
         set = xset_get_panel(p, xset::panel::show_sidebar);
@@ -1538,7 +1538,7 @@ xset_defaults()
         set->b = xset::b::unset;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_show_sidebar");
+            set->shared_key = xset_get(xset::name::panel1_show_sidebar);
         }
 
         set = xset_get_panel(p, xset::panel::list_detailed);
@@ -1547,7 +1547,7 @@ xset_defaults()
         set->b = xset::b::xtrue;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_list_detailed");
+            set->shared_key = xset_get(xset::name::panel1_list_detailed);
         }
 
         set = xset_get_panel(p, xset::panel::list_icons);
@@ -1555,7 +1555,7 @@ xset_defaults()
         set->menu_style = xset::menu::radio;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_list_icons");
+            set->shared_key = xset_get(xset::name::panel1_list_icons);
         }
 
         set = xset_get_panel(p, xset::panel::list_compact);
@@ -1563,7 +1563,7 @@ xset_defaults()
         set->menu_style = xset::menu::radio;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_list_compact");
+            set->shared_key = xset_get(xset::name::panel1_list_compact);
         }
 
         set = xset_get_panel(p, xset::panel::list_large);
@@ -1571,7 +1571,7 @@ xset_defaults()
         set->menu_style = xset::menu::check;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_list_large");
+            set->shared_key = xset_get(xset::name::panel1_list_large);
         }
 
         set = xset_get_panel(p, xset::panel::show_hidden);
@@ -1579,7 +1579,7 @@ xset_defaults()
         set->menu_style = xset::menu::check;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_show_hidden");
+            set->shared_key = xset_get(xset::name::panel1_show_hidden);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_name);
@@ -1595,7 +1595,7 @@ xset_defaults()
         set->x = "1";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_size");
+            set->shared_key = xset_get(xset::name::panel1_detcol_size);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_bytes);
@@ -1605,7 +1605,7 @@ xset_defaults()
         set->x = "2";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_bytes");
+            set->shared_key = xset_get(xset::name::panel1_detcol_bytes);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_type);
@@ -1614,7 +1614,7 @@ xset_defaults()
         set->x = "3";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_type");
+            set->shared_key = xset_get(xset::name::panel1_detcol_type);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_mime);
@@ -1623,7 +1623,7 @@ xset_defaults()
         set->x = "4";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_mime");
+            set->shared_key = xset_get(xset::name::panel1_detcol_mime);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_perm);
@@ -1632,7 +1632,7 @@ xset_defaults()
         set->x = "5";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_perm");
+            set->shared_key = xset_get(xset::name::panel1_detcol_perm);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_owner);
@@ -1641,7 +1641,7 @@ xset_defaults()
         set->x = "6";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_owner");
+            set->shared_key = xset_get(xset::name::panel1_detcol_owner);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_group);
@@ -1650,7 +1650,7 @@ xset_defaults()
         set->x = "7";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_group");
+            set->shared_key = xset_get(xset::name::panel1_detcol_group);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_atime);
@@ -1659,7 +1659,7 @@ xset_defaults()
         set->x = "8";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_atime");
+            set->shared_key = xset_get(xset::name::panel1_detcol_atime);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_btime);
@@ -1668,7 +1668,7 @@ xset_defaults()
         set->x = "9";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_btime");
+            set->shared_key = xset_get(xset::name::panel1_detcol_btime);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_ctime);
@@ -1677,7 +1677,7 @@ xset_defaults()
         set->x = "10";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_ctime");
+            set->shared_key = xset_get(xset::name::panel1_detcol_ctime);
         }
 
         set = xset_get_panel(p, xset::panel::detcol_mtime);
@@ -1686,7 +1686,7 @@ xset_defaults()
         set->x = "11";
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_detcol_mtime");
+            set->shared_key = xset_get(xset::name::panel1_detcol_mtime);
         }
 
         set = xset_get_panel(p, xset::panel::sort_extra);
@@ -1701,7 +1701,7 @@ xset_defaults()
         set->b = xset::b::xtrue;
         if (p != 1)
         {
-            xset_set_var(set, xset::var::shared_key, "panel1_book_fol");
+            set->shared_key = xset_get(xset::name::panel1_book_fol);
         }
     }
 

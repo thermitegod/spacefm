@@ -91,7 +91,6 @@ const std::string XSET_KEY_MENU_LABEL{"menu_label"};
 const std::string XSET_KEY_MENU_LABEL_CUSTOM{"menu_label_custom"};
 const std::string XSET_KEY_ICN{"icn"};
 const std::string XSET_KEY_ICON{"icon"};
-const std::string XSET_KEY_SHARED_KEY{"shared_key"};
 const std::string XSET_KEY_NEXT{"next"};
 const std::string XSET_KEY_PREV{"prev"};
 const std::string XSET_KEY_PARENT{"parent"};

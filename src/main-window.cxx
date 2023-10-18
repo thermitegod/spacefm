@@ -2764,7 +2764,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
         if (set->shared_key)
         {
             // set has shared key
-            xset_t shared_key_set = xset_get(set->shared_key.value());
+            xset_t shared_key_set = set->shared_key;
             if (shared_key_set->key == keyval && shared_key_set->keymod == keymod)
             {
                 // shared key match
