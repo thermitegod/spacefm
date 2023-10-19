@@ -64,14 +64,6 @@ namespace xset
         dev_auto_open,
         dev_unmount_quit,
 
-        dev_exec,
-        dev_exec_fs,
-        dev_exec_audio,
-        dev_exec_video,
-        dev_exec_insert,
-        dev_exec_unmount,
-        dev_exec_remove,
-
         dev_change,
         dev_fs_cnf,
         dev_net_cnf,

@@ -1361,23 +1361,12 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    const bool auto_optical = xset_get_b(xset::name::dev_automount_optical);
-    const bool auto_removable = xset_get_b(xset::name::dev_automount_removable);
-
-    set = xset_get(xset::name::dev_exec_fs);
-    set->disable = !auto_optical && !auto_removable;
-    set = xset_get(xset::name::dev_exec_audio);
-    set->disable = !auto_optical;
-    set = xset_get(xset::name::dev_exec_video);
-    set->disable = !auto_optical;
-
     set = xset_get(xset::name::dev_menu_settings);
     xset_set_submenu(set,
                      {
                          xset::name::dev_show,
                          xset::name::separator,
                          xset::name::dev_menu_auto,
-                         xset::name::dev_exec,
                          xset::name::dev_change,
                          xset::name::separator,
                          xset::name::dev_single,
@@ -1740,7 +1729,6 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
                          xset::name::dev_show,
                          xset::name::separator,
                          xset::name::dev_menu_auto,
-                         xset::name::dev_exec,
                          xset::name::dev_change,
                          xset::name::dev_newtab,
                      });

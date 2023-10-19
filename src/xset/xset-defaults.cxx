@@ -71,7 +71,6 @@ xset_defaults()
                          xset::name::dev_show,
                          xset::name::separator,
                          xset::name::dev_menu_auto,
-                         xset::name::dev_exec,
                          xset::name::dev_change,
                          xset::name::separator,
                          xset::name::dev_single,
@@ -209,82 +208,6 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Unmount On Exit");
     set->b = xset::b::unset;
     set->menu_style = xset::menu::check;
-
-    set = xset_get(xset::name::dev_exec);
-    xset_set_var(set, xset::var::menu_label, "Auto _Run");
-    set->menu_style = xset::menu::submenu;
-    xset_set_submenu(set,
-                     {
-                         xset::name::dev_exec_fs,
-                         xset::name::dev_exec_audio,
-                         xset::name::dev_exec_video,
-                         xset::name::separator,
-                         xset::name::dev_exec_insert,
-                         xset::name::dev_exec_unmount,
-                         xset::name::dev_exec_remove,
-                     });
-    xset_set_var(set, xset::var::icn, "gtk-execute");
-
-    set = xset_get(xset::name::dev_exec_fs);
-    xset_set_var(set, xset::var::menu_label, "On _Mount");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Auto Run On Mount");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically after a removable "
-                 "drive or data disc is auto-mounted:\n\nUse:\n\t%%v\tdevice (eg "
-                 "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
-
-    set = xset_get(xset::name::dev_exec_audio);
-    xset_set_var(set, xset::var::menu_label, "On _Audio CD");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Auto Run On Audio CD");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically when an audio CD is "
-                 "inserted in a qualified device:\n\nUse:\n\t%%v\tdevice (eg "
-                 "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
-
-    set = xset_get(xset::name::dev_exec_video);
-    xset_set_var(set, xset::var::menu_label, "On _Video DVD");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Auto Run On Video DVD");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically when a video DVD is "
-                 "auto-mounted:\n\nUse:\n\t%%v\tdevice (eg /dev/sda1)\n\t%%l\tdevice "
-                 "label\n\t%%m\tdevice mount point (eg /media/disk)");
-
-    set = xset_get(xset::name::dev_exec_insert);
-    xset_set_var(set, xset::var::menu_label, "On _Insert");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Auto Run On Insert");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically when any device is "
-                 "inserted:\n\nUse:\n\t%%v\tdevice added (eg /dev/sda1)\n\t%%l\tdevice "
-                 "label\n\t%%m\tdevice mount point (eg /media/disk)");
-
-    set = xset_get(xset::name::dev_exec_unmount);
-    xset_set_var(set, xset::var::menu_label, "On _Unmount");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Auto Run On Unmount");
-    xset_set_var(set,
-                 xset::var::desc,
-                 "Enter program or fish command line to be run automatically when any device is "
-                 "unmounted by any means:\n\nUse:\n\t%%v\tdevice unmounted (eg "
-                 "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
-
-    set = xset_get(xset::name::dev_exec_remove);
-    xset_set_var(set, xset::var::menu_label, "On _Remove");
-    set->menu_style = xset::menu::string;
-    xset_set_var(set, xset::var::title, "Auto Run On Remove");
-    xset_set_var(
-        set,
-        xset::var::desc,
-        "Enter program or fish command line to be run automatically when any device is removed "
-        "(ejection of media does not qualify):\n\nUse:\n\t%%v\tdevice removed (eg "
-        "/dev/sda1)\n\t%%l\tdevice label\n\t%%m\tdevice mount point (eg /media/disk)");
 
     set = xset_get(xset::name::dev_ignore_udisks_nopolicy);
     xset_set_var(set, xset::var::menu_label, "Ignore _No Policy");
