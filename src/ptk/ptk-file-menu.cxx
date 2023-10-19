@@ -1350,10 +1350,10 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     {
         set = xset_get(xset::name::go_back);
         xset_set_cb(set, (GFunc)ptk_file_browser_go_back, browser);
-        set->disable = !(browser->curHistory_ && browser->curHistory_->prev);
+        set->disable = !browser->navigation_history->has_back();
         set = xset_get(xset::name::go_forward);
         xset_set_cb(set, (GFunc)ptk_file_browser_go_forward, browser);
-        set->disable = !(browser->curHistory_ && browser->curHistory_->next);
+        set->disable = !browser->navigation_history->has_forward();
         set = xset_get(xset::name::go_up);
         xset_set_cb(set, (GFunc)ptk_file_browser_go_up, browser);
         set->disable = std::filesystem::equivalent(cwd, "/");

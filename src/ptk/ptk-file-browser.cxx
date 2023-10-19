@@ -75,8 +75,6 @@
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file-info.hxx"
 
-#include "compat/type-conversion.hxx"
-
 #include "settings/app.hxx"
 
 #include "signals.hxx"
@@ -86,6 +84,8 @@
 #include "autosave.hxx"
 #include "settings.hxx"
 #include "utils.hxx"
+
+#include "ptk/ptk-file-browser.hxx"
 
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
 static void ptk_file_browser_init(PtkFileBrowser* file_browser);
@@ -187,6 +187,81 @@ struct selection_history_data
 {
     std::map<std::filesystem::path, std::vector<std::filesystem::path>> selection_history{};
 };
+
+void
+navigation_history_data::go_back() noexcept
+{
+    if (this->back_.empty())
+    {
+        // ztd::logger::debug("Back navigation history is empty");
+        return;
+    }
+    this->forward_.emplace_back(this->current_);
+    this->current_ = this->back_.back();
+    this->back_.pop_back();
+}
+
+bool
+navigation_history_data::has_back() const noexcept
+{
+    return !this->back_.empty();
+}
+
+const std::vector<std::filesystem::path>&
+navigation_history_data::get_back() const noexcept
+{
+    return this->back_;
+}
+
+void
+navigation_history_data::go_forward() noexcept
+{
+    if (this->forward_.empty())
+    {
+        // ztd::logger::debug("Forward navigation history is empty");
+        return;
+    }
+    this->back_.emplace_back(this->current_);
+    this->current_ = this->forward_.back();
+    this->forward_.pop_back();
+}
+
+bool
+navigation_history_data::has_forward() const noexcept
+{
+    return !this->forward_.empty();
+}
+
+const std::vector<std::filesystem::path>&
+navigation_history_data::get_forward() const noexcept
+{
+    return this->forward_;
+}
+
+void
+navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
+{
+    // ztd::logger::debug("New Forward navigation history");
+    if (!this->current_.empty())
+    {
+        this->back_.emplace_back(this->current_);
+    }
+    this->current_ = path;
+    this->forward_.clear();
+}
+
+void
+navigation_history_data::reset() noexcept
+{
+    this->back_.clear();
+    this->forward_.clear();
+}
+
+const std::filesystem::path&
+navigation_history_data::current() const noexcept
+{
+    return this->current_;
+}
 
 struct column_data
 {
@@ -949,7 +1024,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
     // clang-format on
 
-    file_browser->history = std::make_shared<selection_history_data>();
+    file_browser->selection_history = std::make_shared<selection_history_data>();
+    file_browser->navigation_history = std::make_shared<navigation_history_data>();
 }
 
 static void
@@ -1115,38 +1191,19 @@ PtkFileBrowser::update_tab_label() noexcept
 static void
 on_history_menu_item_activate(GtkWidget* menu_item, PtkFileBrowser* file_browser)
 {
-    GList* l = (GList*)g_object_get_data(G_OBJECT(menu_item), "path");
-    GList* tmp = file_browser->curHistory_;
-    file_browser->curHistory_ = l;
-
-    if (!file_browser->chdir((char*)l->data, ptk::file_browser::chdir_mode::no_history))
-    {
-        file_browser->curHistory_ = tmp;
-    }
-    else
-    {
-        // MOD sync curhistsel
-        i32 elementn = -1;
-        elementn = g_list_position(file_browser->history_, file_browser->curHistory_);
-        if (elementn != -1)
-        {
-            // TODO
-            // file_browser->curhistsel_ = g_list_nth(file_browser->histsel_, elementn);
-        }
-        else
-        {
-            ztd::logger::debug("missing history item - ptk-file-browser.cxx");
-        }
-    }
+    const std::filesystem::path path = CONST_CHAR(g_object_get_data(G_OBJECT(menu_item), "path"));
+    file_browser->chdir(path, ptk::file_browser::chdir_mode::no_history);
 }
 
 static GtkWidget*
-add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu, GList* l)
+add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu,
+                      const std::filesystem::path& path)
 {
-    GtkWidget* menu_item;
-    const auto disp_name = std::filesystem::path((char*)l->data).filename();
-    menu_item = gtk_menu_item_new_with_label(disp_name.c_str());
-    g_object_set_data(G_OBJECT(menu_item), "path", l);
+    GtkWidget* menu_item = gtk_menu_item_new_with_label(path.filename().c_str());
+    g_object_set_data_full(G_OBJECT(menu_item),
+                           "path",
+                           ztd::strdup(path.c_str()),
+                           (GDestroyNotify)std::free);
 
     // clang-format off
     g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(on_history_menu_item_activate), file_browser);
@@ -2994,28 +3051,16 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     switch (mode)
     {
         case ptk::file_browser::chdir_mode::add_history:
-            if (!this->curHistory_ ||
-                !std::filesystem::equivalent(static_cast<const char*>(this->curHistory_->data),
-                                             path))
+            if (!std::filesystem::equivalent(this->navigation_history->current(), path))
             {
-                /* Has forward history */
-                if (this->curHistory_ && this->curHistory_->next)
-                {
-                    /* clear old forward history */
-                    g_list_foreach(this->curHistory_->next, (GFunc)std::free, nullptr);
-                    g_list_free(this->curHistory_->next);
-                    this->curHistory_->next = nullptr;
-                }
-                /* Add path to history if there is no forward history */
-                this->history_ = g_list_append(this->history_, ztd::strdup(path));
-                this->curHistory_ = g_list_last(this->history_);
+                this->navigation_history->new_forward(path);
             }
             break;
         case ptk::file_browser::chdir_mode::back:
-            this->curHistory_ = this->curHistory_->prev;
+            this->navigation_history->go_back();
             break;
         case ptk::file_browser::chdir_mode::forward:
-            this->curHistory_ = this->curHistory_->next;
+            this->navigation_history->go_forward();
             break;
         case ptk::file_browser::chdir_mode::normal:
         case ptk::file_browser::chdir_mode::no_history:
@@ -3079,17 +3124,15 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 
     this->enable_toolbar();
 
+    this->refresh(false);
+
     return true;
 }
 
-const std::filesystem::path
+const std::filesystem::path&
 PtkFileBrowser::cwd() const noexcept
 {
-    if (!this->curHistory_)
-    {
-        return vfs::user_dirs->home_dir();
-    }
-    return (const char*)this->curHistory_->data;
+    return this->navigation_history->current();
 }
 
 void
@@ -3225,26 +3268,20 @@ void
 PtkFileBrowser::go_back() noexcept
 {
     this->focus_folder_view();
-    /* there is no back history */
-    if (!this->curHistory_ || !this->curHistory_->prev)
+    if (this->navigation_history->has_back())
     {
-        return;
+        this->chdir(this->navigation_history->current(), ptk::file_browser::chdir_mode::back);
     }
-    const char* path = (const char*)this->curHistory_->prev->data;
-    this->chdir(path, ptk::file_browser::chdir_mode::back);
 }
 
 void
 PtkFileBrowser::go_forward() noexcept
 {
     this->focus_folder_view();
-    /* If there is no forward history */
-    if (!this->curHistory_ || !this->curHistory_->next)
+    if (this->navigation_history->has_forward())
     {
-        return;
+        this->chdir(this->navigation_history->current(), ptk::file_browser::chdir_mode::forward);
     }
-    const char* path = (const char*)this->curHistory_->next->data;
-    this->chdir(path, ptk::file_browser::chdir_mode::forward);
 }
 
 void
@@ -3259,7 +3296,7 @@ PtkFileBrowser::go_up() noexcept
 }
 
 void
-PtkFileBrowser::refresh() noexcept
+PtkFileBrowser::refresh(const bool update_selected_files) noexcept
 {
     if (this->busy_)
     {
@@ -3273,7 +3310,10 @@ PtkFileBrowser::refresh() noexcept
         return;
     }
 
-    this->update_selection_history();
+    if (update_selected_files)
+    {
+        this->update_selection_history();
+    }
 
     // destroy file list and create new one
     ptk_file_browser_update_model(this);
@@ -4114,11 +4154,11 @@ PtkFileBrowser::select_last() noexcept
 {
     // ztd::logger::debug("select_last");
     const auto cwd = this->cwd();
-    if (this->history->selection_history.contains(cwd))
+    if (this->selection_history->selection_history.contains(cwd))
     {
-        this->select_files(this->history->selection_history.at(cwd));
+        this->select_files(this->selection_history->selection_history.at(cwd));
     }
-    this->history->selection_history.erase(cwd);
+    this->selection_history->selection_history.erase(cwd);
 }
 
 static bool
@@ -4923,9 +4963,9 @@ PtkFileBrowser::update_selection_history() noexcept
 {
     const auto cwd = this->cwd();
     // ztd::logger::debug("selection history: {}", cwd.string());
-    this->history->selection_history.contains(cwd);
+    this->selection_history->selection_history.contains(cwd);
     {
-        this->history->selection_history.erase(cwd);
+        this->selection_history->selection_history.erase(cwd);
     }
 
     const auto selected_files = this->selected_files();
@@ -4941,7 +4981,7 @@ PtkFileBrowser::update_selection_history() noexcept
     {
         selected_filenames.emplace_back(file->name());
     }
-    this->history->selection_history.insert({cwd, selected_filenames});
+    this->selection_history->selection_history.insert({cwd, selected_filenames});
 }
 
 GList*
@@ -5332,12 +5372,12 @@ PtkFileBrowser::update_toolbar_widgets(xset::tool tool_type) noexcept
         case xset::tool::back:
         case xset::tool::back_menu:
             x = 1;
-            b = this->curHistory_ && this->curHistory_->prev;
+            b = this->navigation_history->has_back();
             break;
         case xset::tool::fwd:
         case xset::tool::fwd_menu:
             x = 2;
-            b = this->curHistory_ && this->curHistory_->next;
+            b = this->navigation_history->has_forward();
             break;
         case xset::tool::devices:
             x = 3;
@@ -5404,9 +5444,9 @@ PtkFileBrowser::show_history_menu(bool is_back_history, GdkEvent* event) noexcep
     if (is_back_history)
     {
         // back history
-        for (GList* l = g_list_previous(this->curHistory_); l != nullptr; l = g_list_previous(l))
+        for (const auto& back_history : this->navigation_history->get_back())
         {
-            add_history_menu_item(this, GTK_WIDGET(menu), l);
+            add_history_menu_item(this, GTK_WIDGET(menu), back_history);
             if (!has_items)
             {
                 has_items = true;
@@ -5416,9 +5456,9 @@ PtkFileBrowser::show_history_menu(bool is_back_history, GdkEvent* event) noexcep
     else
     {
         // forward history
-        for (GList* l = g_list_next(this->curHistory_); l != nullptr; l = g_list_next(l))
+        for (const auto& forward_history : this->navigation_history->get_back())
         {
-            add_history_menu_item(this, GTK_WIDGET(menu), l);
+            add_history_menu_item(this, GTK_WIDGET(menu), forward_history);
             if (!has_items)
             {
                 has_items = true;
