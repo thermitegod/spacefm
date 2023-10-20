@@ -3076,6 +3076,8 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     }
 
     // load new dir
+
+    this->signal_file_listed.disconnect();
     this->busy_ = true;
     this->dir_ = vfs_dir_get_by_path(path);
 
@@ -3107,8 +3109,6 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     }
 
     this->enable_toolbar();
-
-    this->refresh(false);
 
     return true;
 }
@@ -3309,13 +3309,8 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
      * have been freed but the memory not actually released by SpaceFM */
     malloc_trim(0);
 
-    // begin load dir
-
-    this->signal_file_listed.disconnect();
-
+    // begin reload dir
     this->busy_ = true;
-
-    this->dir_ = vfs_dir_get_by_path(this->cwd());
 
     this->run_event<spacefm::signal::chdir_begin>();
 
@@ -3328,9 +3323,6 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
     {
         this->busy_ = true;
     }
-
-    this->signal_file_listed =
-        this->dir_->add_event<spacefm::signal::file_listed>(on_dir_file_listed, this);
 }
 
 void
