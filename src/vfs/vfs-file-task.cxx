@@ -367,25 +367,6 @@ VFSFileTask::check_dest_in_src(const std::filesystem::path& src_dir)
     return true;
 }
 
-static void
-update_file_display(const std::filesystem::path& path)
-{
-    // for devices like nfs, emit created and flush to avoid a
-    // blocking stat call in GUI thread during writes
-    const auto dir_path = path.parent_path();
-    vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
-    if (vdir && vdir->avoid_changes)
-    {
-        vfs::file_info file = vfs_file_info_new(path);
-        vdir->emit_file_created(file->name(), true);
-        vfs_dir_flush_notify_cache();
-    }
-    if (vdir)
-    {
-        g_object_unref(vdir);
-    }
-}
-
 void
 VFSFileTask::file_copy(const std::filesystem::path& src_file)
 {
@@ -482,11 +463,6 @@ VFSFileTask::do_file_copy(const std::filesystem::path& src_file,
             times.actime = file_stat.atime().tv_sec;
             times.modtime = file_stat.mtime().tv_sec;
             utime(actual_dest_file.c_str(), &times);
-
-            if (this->avoid_changes)
-            {
-                update_file_display(actual_dest_file);
-            }
 
             /* Move files to different device: Need to delete source dir */
             if ((this->type == vfs::file_task_type::move) && !this->should_abort() && !copy_fail)
@@ -680,10 +656,6 @@ VFSFileTask::do_file_copy(const std::filesystem::path& src_file,
                         times.actime = file_stat.atime().tv_sec;
                         times.modtime = file_stat.mtime().tv_sec;
                         utime(actual_dest_file.c_str(), &times);
-                    }
-                    if (this->avoid_changes)
-                    {
-                        update_file_display(actual_dest_file);
                     }
 
                     /* Move files to different device: Need to delete source files */
@@ -1144,11 +1116,6 @@ VFSFileTask::file_chown_chmod(const std::filesystem::path& src_file)
         this->lock();
         this->progress += src_stat.size();
         this->unlock();
-
-        if (this->avoid_changes)
-        {
-            update_file_display(src_file);
-        }
 
         if (src_stat.is_directory() && this->is_recursive)
         {

@@ -2288,34 +2288,6 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     }
 }
 
-static bool
-update_new_display_delayed(const char* path)
-{
-    const auto dir_path = std::filesystem::path(path).parent_path();
-    vfs::dir vdir = vfs_dir_get_by_path_soft(dir_path);
-    if (vdir && vdir->avoid_changes)
-    {
-        vfs::file_info file = vfs_file_info_new(path);
-        vdir->emit_file_created(file->name(), true);
-        vfs_dir_flush_notify_cache();
-    }
-    if (vdir)
-    {
-        g_object_unref(vdir);
-    }
-    return false;
-}
-
-static void
-update_new_display(const std::filesystem::path& path)
-{
-    // for devices like nfs, emit created so the new file is shown
-    // update now
-    update_new_display_delayed(path.c_str());
-    // update a little later for exec tasks
-    g_timeout_add(1500, (GSourceFunc)update_new_display_delayed, ztd::strdup(path.string()));
-}
-
 i32
 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::file_info& file,
                 const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
@@ -3034,10 +3006,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                         std::format("Error creating parent directory\n\n{}", std::strerror(errno)));
                     continue;
                 }
-                else
-                {
-                    update_new_display(path);
-                }
             }
             else if (ztd::statx(full_path,
                                 ztd::statx::symlink::no_follow)) // need to see broken symlinks
@@ -3106,7 +3074,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
             }
             else if (create_new != ptk::rename_mode::rename && new_file)
             {
@@ -3167,7 +3134,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
             }
             else if (create_new != ptk::rename_mode::rename)
             {
@@ -3227,7 +3193,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                     ptask->user_data = auto_open;
                 }
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
             }
             else if (copy || copy_target)
             {
@@ -3272,7 +3237,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
             }
             else if (link || link_target)
             {
@@ -3309,7 +3273,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
             }
             // need move?  (do move as task in case it takes a long time)
             else if (!std::filesystem::equivalent(old_path, path))
@@ -3334,7 +3297,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                 ptask->task->exec_show_error = true;
                 ptask->task->exec_export = false;
                 ptk_file_task_run(ptask);
-                update_new_display(full_path);
             }
             else
             {
@@ -3354,10 +3316,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::f
                                    "Rename Error",
                                    std::format("Error renaming file\n\n{}", std::strerror(errno)));
                     continue;
-                }
-                else
-                {
-                    update_new_display(full_path);
                 }
             }
             break;
