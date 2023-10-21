@@ -2572,7 +2572,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         {
             if (std::filesystem::is_directory(ao->path))
             {
-                ao->file_browser->chdir(ao->path, ptk::file_browser::chdir_mode::add_history);
+                ao->file_browser->chdir(ao->path);
             }
             else
             {

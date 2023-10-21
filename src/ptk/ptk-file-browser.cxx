@@ -554,7 +554,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     { // open dir
         if (!std::filesystem::equivalent(dir_path, file_browser->cwd()))
         {
-            file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history);
+            file_browser->chdir(dir_path);
         }
     }
     else if (std::filesystem::is_regular_file(dir_path))
@@ -562,7 +562,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
         const auto dirname_path = dir_path.parent_path();
         if (!std::filesystem::equivalent(dirname_path, file_browser->cwd()))
         {
-            file_browser->chdir(dirname_path, ptk::file_browser::chdir_mode::add_history);
+            file_browser->chdir(dirname_path);
         }
         else
         {
@@ -1192,7 +1192,7 @@ static void
 on_history_menu_item_activate(GtkWidget* menu_item, PtkFileBrowser* file_browser)
 {
     const std::filesystem::path path = CONST_CHAR(g_object_get_data(G_OBJECT(menu_item), "path"));
-    file_browser->chdir(path, ptk::file_browser::chdir_mode::no_history);
+    file_browser->chdir(path);
 }
 
 static GtkWidget*
@@ -1245,7 +1245,7 @@ on_file_deleted(const vfs::file_info& file, PtkFileBrowser* file_browser)
     {
         // The directory itself was deleted
         file_browser->close_tab();
-        // file_browser->chdir(vfs::user_dirs->home_dir(), ptk::file_browser::chdir_mode::PTK_FB_CHDIR_ADD_HISTORY);
+        // file_browser->chdir(vfs::user_dirs->home_dir());
     }
     else
     {
@@ -1782,7 +1782,7 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
     {
         if (!std::filesystem::equivalent(dir_path, file_browser->cwd()))
         {
-            if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
+            if (file_browser->chdir(dir_path))
             {
 #if (GTK_MAJOR_VERSION == 4)
                 gtk_editable_set_text(GTK_EDITABLE(file_browser->path_bar_), dir_path);
@@ -3050,7 +3050,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 
     switch (mode)
     {
-        case ptk::file_browser::chdir_mode::add_history:
+        case ptk::file_browser::chdir_mode::normal:
             if (!std::filesystem::equivalent(this->navigation_history->current(), path))
             {
                 this->navigation_history->new_forward(path);
@@ -3061,9 +3061,6 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
             break;
         case ptk::file_browser::chdir_mode::forward:
             this->navigation_history->go_forward();
-            break;
-        case ptk::file_browser::chdir_mode::normal:
-        case ptk::file_browser::chdir_mode::no_history:
             break;
     }
 
@@ -3148,7 +3145,7 @@ PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
     if (std::filesystem::is_directory(canon))
     {
         // open dir
-        this->chdir(canon, ptk::file_browser::chdir_mode::add_history);
+        this->chdir(canon);
         gtk_widget_grab_focus(GTK_WIDGET(this->folder_view_));
     }
     else if (std::filesystem::exists(canon))
@@ -3157,7 +3154,7 @@ PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
         const auto dir_path = canon.parent_path();
         if (!std::filesystem::equivalent(dir_path, cwd))
         {
-            this->chdir(dir_path, ptk::file_browser::chdir_mode::add_history);
+            this->chdir(dir_path);
         }
         else
         {
@@ -3197,7 +3194,7 @@ void
 PtkFileBrowser::go_home() noexcept
 {
     this->focus_folder_view();
-    this->chdir(vfs::user_dirs->home_dir(), ptk::file_browser::chdir_mode::add_history);
+    this->chdir(vfs::user_dirs->home_dir());
 }
 
 void
@@ -3207,11 +3204,11 @@ PtkFileBrowser::go_default() noexcept
     const auto default_path = xset_get_s(xset::name::go_set_default);
     if (default_path)
     {
-        this->chdir(default_path.value(), ptk::file_browser::chdir_mode::add_history);
+        this->chdir(default_path.value());
     }
     else
     {
-        this->chdir(vfs::user_dirs->home_dir(), ptk::file_browser::chdir_mode::add_history);
+        this->chdir(vfs::user_dirs->home_dir());
     }
 }
 
@@ -3291,7 +3288,7 @@ PtkFileBrowser::go_up() noexcept
     const auto parent_dir = this->cwd().parent_path();
     if (!std::filesystem::equivalent(parent_dir, this->cwd()))
     {
-        this->chdir(parent_dir, ptk::file_browser::chdir_mode::add_history);
+        this->chdir(parent_dir);
     }
 }
 
@@ -3568,7 +3565,7 @@ PtkFileBrowser::open_in_tab(const std::filesystem::path& file_path, const tab_t 
         PtkFileBrowser* file_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(this->notebook_, page_x));
 
-        file_browser->chdir(file_path, ptk::file_browser::chdir_mode::add_history);
+        file_browser->chdir(file_path);
     }
 }
 
@@ -5190,7 +5187,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
         // change dir
         this->seek_name_ = seek_name;
         this->inhibit_focus_ = true;
-        if (!this->chdir(seek_dir, ptk::file_browser::chdir_mode::add_history))
+        if (!this->chdir(seek_dir))
         {
             this->inhibit_focus_ = false;
             this->seek_name_ = std::nullopt;

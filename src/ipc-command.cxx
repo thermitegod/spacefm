@@ -851,7 +851,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_FAILURE, std::format("directory '{}' does not exist", value)};
             }
-            file_browser->chdir(value, ptk::file_browser::chdir_mode::add_history);
+            file_browser->chdir(value);
         }
         else if (ztd::same(property, "thumbnailer"))
         {

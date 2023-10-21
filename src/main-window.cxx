@@ -2037,9 +2037,9 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
         gtk_notebook_set_show_tabs(this->notebook, false);
     }
 
-    if (!file_browser->chdir(folder_path, ptk::file_browser::chdir_mode::add_history))
+    if (!file_browser->chdir(folder_path))
     {
-        file_browser->chdir("/", ptk::file_browser::chdir_mode::add_history);
+        file_browser->chdir("/");
     }
 
     set_panel_focus(this, file_browser);
@@ -2347,7 +2347,7 @@ MainWindow::open_path_in_current_tab(const std::filesystem::path& path) noexcept
     {
         return;
     }
-    file_browser->chdir(path, ptk::file_browser::chdir_mode::add_history);
+    file_browser->chdir(path);
 }
 
 void
@@ -2373,7 +2373,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
     switch (action)
     {
         case ptk::open_action::dir:
-            file_browser->chdir(path, ptk::file_browser::chdir_mode::add_history);
+            file_browser->chdir(path);
             break;
         case ptk::open_action::new_tab:
             main_window->new_tab(path);

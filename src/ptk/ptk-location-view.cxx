@@ -372,7 +372,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         {
             if (!std::filesystem::equivalent(vol->mount_point(), file_browser->cwd()))
             {
-                file_browser->chdir(vol->mount_point(), ptk::file_browser::chdir_mode::add_history);
+                file_browser->chdir(vol->mount_point());
             }
         }
     }

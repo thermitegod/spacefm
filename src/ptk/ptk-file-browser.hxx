@@ -80,8 +80,6 @@ namespace ptk::file_browser
     enum class chdir_mode
     {
         normal,
-        add_history,
-        no_history,
         back,
         forward,
     };
@@ -189,9 +187,9 @@ struct PtkFileBrowser
     std::shared_ptr<navigation_history_data> navigation_history;
 
   public:
-    // folder_path should be encodede in on-disk encoding
-    bool chdir(const std::filesystem::path& folder_path,
-               const ptk::file_browser::chdir_mode mode) noexcept;
+    bool chdir(
+        const std::filesystem::path& folder_path,
+        const ptk::file_browser::chdir_mode mode = ptk::file_browser::chdir_mode::normal) noexcept;
 
     const std::filesystem::path& cwd() const noexcept;
     void canon(const std::filesystem::path& path) noexcept;

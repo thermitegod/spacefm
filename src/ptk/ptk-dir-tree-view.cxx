@@ -424,7 +424,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* 
                     // right click
                     const std::filesystem::path dir_path =
                         ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-                    if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
+                    if (file_browser->chdir(dir_path))
                     {
                         /* show right-click menu
                          * This simulates a right-click in the file list when
@@ -535,7 +535,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* fil
 
             const std::filesystem::path dir_path =
                 ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-            if (file_browser->chdir(dir_path, ptk::file_browser::chdir_mode::add_history))
+            if (file_browser->chdir(dir_path))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
