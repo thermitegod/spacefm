@@ -285,6 +285,8 @@ struct PtkFileBrowser
 
     ////////////////
 
+    void update_model() noexcept;
+
     bool using_large_icons() const noexcept;
     bool is_busy() const noexcept;
 

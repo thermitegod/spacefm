@@ -105,8 +105,6 @@ static GtkWidget* ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser)
 
 static void on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled);
 
-static void ptk_file_browser_update_model(PtkFileBrowser* file_browser);
-
 /* Get GtkTreePath of the item at coordinate x, y */
 static GtkTreePath* folder_view_get_tree_path_at_pos(PtkFileBrowser* file_browser, i32 x, i32 y);
 
@@ -1326,38 +1324,36 @@ on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
                    std::to_string(file_browser->sort_type_));
 }
 
-static void
-ptk_file_browser_update_model(PtkFileBrowser* file_browser)
+void
+PtkFileBrowser::update_model() noexcept
 {
-    PtkFileList* list = ptk_file_list_new(file_browser->dir_, file_browser->show_hidden_files_);
-    GtkTreeModel* old_list = file_browser->file_list_;
-    file_browser->file_list_ = GTK_TREE_MODEL(list);
+    PtkFileList* list = ptk_file_list_new(this->dir_, this->show_hidden_files_);
+    GtkTreeModel* old_list = this->file_list_;
+    this->file_list_ = GTK_TREE_MODEL(list);
     if (old_list)
     {
         g_object_unref(G_OBJECT(old_list));
     }
 
-    file_browser->read_sort_extra();
+    this->read_sort_extra();
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
-                                         file_list_order_from_sort_order(file_browser->sort_order_),
-                                         file_browser->sort_type_);
+                                         file_list_order_from_sort_order(this->sort_order_),
+                                         this->sort_type_);
 
-    file_browser->show_thumbnails(file_browser->max_thumbnail_);
+    this->show_thumbnails(this->max_thumbnail_);
 
     // clang-format off
-    g_signal_connect(G_OBJECT(list), "sort-column-changed", G_CALLBACK(on_sort_col_changed), file_browser);
+    g_signal_connect(G_OBJECT(list), "sort-column-changed", G_CALLBACK(on_sort_col_changed), this);
     // clang-format on
 
-    switch (file_browser->view_mode_)
+    switch (this->view_mode_)
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
-            exo_icon_view_set_model(EXO_ICON_VIEW(file_browser->folder_view_),
-                                    GTK_TREE_MODEL(list));
+            exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), GTK_TREE_MODEL(list));
             break;
         case ptk::file_browser::view_mode::list_view:
-            gtk_tree_view_set_model(GTK_TREE_VIEW(file_browser->folder_view_),
-                                    GTK_TREE_MODEL(list));
+            gtk_tree_view_set_model(GTK_TREE_VIEW(this->folder_view_), GTK_TREE_MODEL(list));
             break;
     }
 
@@ -1383,7 +1379,7 @@ on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
             dir->add_event<spacefm::signal::file_changed>(on_folder_content_changed, file_browser);
     }
 
-    ptk_file_browser_update_model(file_browser);
+    file_browser->update_model();
     file_browser->busy_ = false;
 
     /* Ensuring free space at the end of the heap is freed to the OS,
@@ -3325,7 +3321,7 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
     }
 
     // destroy file list and create new one
-    ptk_file_browser_update_model(this);
+    this->update_model();
 
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
@@ -3363,7 +3359,7 @@ PtkFileBrowser::show_hidden_files(bool show) noexcept
 
     if (this->file_list_)
     {
-        ptk_file_browser_update_model(this);
+        this->update_model();
 
         this->run_event<spacefm::signal::change_sel>();
     }
