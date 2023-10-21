@@ -157,7 +157,7 @@ thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loade
     // ztd::logger::debug("thumbnail_loader_thread");
     while (!task->is_canceled())
     {
-        std::lock_guard<std::mutex> lock(loader->mtx);
+        std::scoped_lock<std::mutex> lock(loader->mtx);
         if (loader->queue.empty())
         {
             break;

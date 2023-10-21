@@ -289,7 +289,7 @@ get_hidden_files(const std::filesystem::path& path) noexcept
 static void*
 vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
 {
-    std::lock_guard<std::mutex> lock(dir->mutex);
+    std::scoped_lock<std::mutex> lock(dir->mutex);
 
     dir->file_listed = false;
     dir->load_complete = false;
@@ -401,7 +401,7 @@ reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
 {
     (void)key;
 
-    std::lock_guard<std::mutex> lock(dir->mutex);
+    std::scoped_lock<std::mutex> lock(dir->mutex);
 
     if (!dir || dir->is_directory_empty())
     {
@@ -537,7 +537,7 @@ VFSDir::update_changed_files(const std::filesystem::path& key) noexcept
 {
     (void)key;
 
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (this->changed_files.empty())
     {
@@ -560,7 +560,7 @@ VFSDir::update_created_files(const std::filesystem::path& key) noexcept
 {
     (void)key;
 
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (this->created_files.empty())
     {
@@ -600,7 +600,7 @@ VFSDir::update_created_files(const std::filesystem::path& key) noexcept
 void
 VFSDir::unload_thumbnails(bool is_big) noexcept
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->mutex);
 
     for (const vfs::file_info& file : this->file_list)
     {
@@ -649,7 +649,7 @@ void
 VFSDir::emit_file_deleted(const std::filesystem::path& file_name,
                           const vfs::file_info& file) noexcept
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (std::filesystem::equivalent(file_name, this->path))
     {
@@ -685,7 +685,7 @@ void
 VFSDir::emit_file_changed(const std::filesystem::path& file_name, const vfs::file_info& file,
                           bool force) noexcept
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->mutex);
 
     // ztd::logger::info("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path,
     // file_name, this->avoid_changes ? "true" : "false");
@@ -739,7 +739,7 @@ VFSDir::emit_file_changed(const std::filesystem::path& file_name, const vfs::fil
 void
 VFSDir::emit_thumbnail_loaded(const vfs::file_info& file) noexcept
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->mutex);
 
     vfs::file_info file_found = this->find_file(file->name(), file);
     if (file_found)
