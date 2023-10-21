@@ -29,6 +29,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <fstream>
 
 #include <cassert>
@@ -74,9 +76,8 @@ static void vfs_dir_finalize(GObject* obj);
 static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
 static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
 
-static void vfs_dir_monitor_callback(const vfs::file_monitor& monitor,
-                                     vfs::file_monitor_event event,
-                                     const std::filesystem::path& file_name, void* user_data);
+static void vfs_dir_monitor_callback(vfs::file_monitor_event event,
+                                     const std::filesystem::path& path, void* user_data);
 
 static GObjectClass* parent_class = nullptr;
 
@@ -145,10 +146,6 @@ vfs_dir_finalize(GObject* obj)
         dir->task->cancel();
         dir->task = nullptr;
     }
-    if (dir->monitor)
-    {
-        vfs_file_monitor_remove(dir->monitor, vfs_dir_monitor_callback, dir);
-    }
 
     dir_map.erase(dir->path.c_str());
     /* There is no VFSDir instance */
@@ -161,11 +158,14 @@ vfs_dir_finalize(GObject* obj)
         }
     }
 
+    // ztd::logger::trace("dir->monitor: {}", fmt::ptr(dir->monitor));
     // ztd::logger::trace("dir->thumbnail_loader: {}", fmt::ptr(dir->thumbnail_loader));
+    dir->monitor = nullptr;
     dir->thumbnail_loader = nullptr;
 
     dir->file_list.clear();
     dir->changed_files.clear();
+    dir->created_files.clear();
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 }
@@ -296,7 +296,11 @@ vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
     dir->xhidden_count = 0;
 
     /* Install file alteration monitor */
-    dir->monitor = vfs_file_monitor_add(dir->path, vfs_dir_monitor_callback, dir);
+    if (!dir->monitor)
+    {
+        dir->monitor =
+            std::make_shared<vfs::file_monitor>(dir->path, vfs_dir_monitor_callback, dir);
+    }
 
     // MOD  dir contains .hidden file?
     const auto hidden_files = get_hidden_files(dir->path);
@@ -374,22 +378,21 @@ vfs_dir_flush_notify_cache()
 
 /* Callback function which will be called when monitored events happen */
 static void
-vfs_dir_monitor_callback(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
-                         const std::filesystem::path& file_name, void* user_data)
+vfs_dir_monitor_callback(vfs::file_monitor_event event, const std::filesystem::path& path,
+                         void* user_data)
 {
-    (void)monitor;
     vfs::dir dir = VFS_DIR(user_data);
 
     switch (event)
     {
         case vfs::file_monitor_event::created:
-            dir->emit_file_created(file_name, false);
+            dir->emit_file_created(path.filename(), false);
             break;
         case vfs::file_monitor_event::deleted:
-            dir->emit_file_deleted(file_name, nullptr);
+            dir->emit_file_deleted(path.filename(), nullptr);
             break;
         case vfs::file_monitor_event::changed:
-            dir->emit_file_changed(file_name, nullptr, false);
+            dir->emit_file_changed(path.filename(), nullptr, false);
             break;
         case vfs::file_monitor_event::other:
             break;

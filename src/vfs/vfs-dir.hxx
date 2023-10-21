@@ -64,7 +64,7 @@ struct VFSDir
     std::vector<vfs::file_info> file_list{};
 
     /*<private>*/
-    vfs::file_monitor monitor{nullptr};
+    std::shared_ptr<vfs::file_monitor> monitor{nullptr};
 
     std::mutex mutex;
 

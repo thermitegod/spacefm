@@ -56,7 +56,7 @@
 static std::map<std::string, vfs::mime_type> mime_map;
 std::mutex mime_map_lock;
 
-static std::vector<vfs::file_monitor> mime_caches_monitors;
+static std::vector<std::shared_ptr<vfs::file_monitor>> mime_caches_monitors;
 
 vfs::mime_type
 vfs_mime_type_new(const std::string_view type_name)
@@ -100,12 +100,11 @@ vfs_mime_type_reload()
 }
 
 static void
-on_mime_cache_changed(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
-                      const std::filesystem::path& file_name, void* user_data)
+on_mime_cache_changed(vfs::file_monitor_event event, const std::filesystem::path& path,
+                      void* user_data)
 {
-    (void)monitor;
     (void)event;
-    (void)file_name;
+    (void)path;
     (void)user_data;
 
     // ztd::logger::debug("reloading all mime caches");
@@ -134,8 +133,8 @@ vfs_mime_type_init()
             continue;
         }
 
-        const vfs::file_monitor monitor =
-            vfs_file_monitor_add(cache->file_path(), on_mime_cache_changed, nullptr);
+        const auto monitor =
+            std::make_shared<vfs::file_monitor>(cache->file_path(), on_mime_cache_changed, nullptr);
 
         mime_caches_monitors.emplace_back(monitor);
     }
@@ -145,9 +144,7 @@ void
 vfs_mime_type_finalize()
 {
     // remove file alteration monitor for mime-cache
-    const auto action_remove = [](const vfs::file_monitor& monitor)
-    { vfs_file_monitor_remove(monitor, on_mime_cache_changed, nullptr); };
-    std::ranges::for_each(mime_caches_monitors, action_remove);
+    mime_caches_monitors.clear();
 
     mime_type_finalize();
 

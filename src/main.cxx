@@ -283,17 +283,6 @@ main(int argc, char* argv[])
     // Start a thread to receive socket messages
     const std::jthread socket_server(socket_server_thread);
 
-    // initialize the file alteration monitor
-    if (!vfs_file_monitor_init())
-    {
-        ptk_show_error(nullptr,
-                       "Error",
-                       "Unable to initialize inotify file change monitor. Do you have an "
-                       "inotify-capable kernel?");
-        vfs_file_monitor_clean();
-        std::exit(EXIT_FAILURE);
-    }
-
     // Seed RNG
     // using the current time is a good enough seed
     const auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -315,7 +304,6 @@ main(int argc, char* argv[])
     std::atexit(free_settings);
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
-    std::atexit(vfs_file_monitor_clean);
     std::atexit(vfs_mime_type_finalize);
     std::atexit(vfs_volume_finalize);
     std::atexit(single_instance_finalize);

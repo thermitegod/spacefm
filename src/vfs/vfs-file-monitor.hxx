@@ -19,14 +19,13 @@
 
 #include <filesystem>
 
-#include <vector>
-
 #include <memory>
 
-#include <ztd/ztd.hxx>
+#include <gtkmm.h>
+#include <glibmm.h>
+#include <sigc++/sigc++.h>
 
-struct VFSFileMonitor;
-struct VFSFileMonitorCallbackEntry;
+#include <ztd/ztd.hxx>
 
 namespace vfs
 {
@@ -38,68 +37,40 @@ namespace vfs
         other,
     };
 
-    using file_monitor = std::shared_ptr<VFSFileMonitor>;
-
     // Callback function which will be called when monitored events happen
-    using file_monitor_callback = void (*)(const vfs::file_monitor& monitor,
-                                           vfs::file_monitor_event event,
-                                           const std::filesystem::path& file_name, void* user_data);
+    using file_monitor_callback_t = void (*)(const vfs::file_monitor_event event,
+                                             const std::filesystem::path& path, void* user_data);
 
-    using file_monitor_callback_entry = std::shared_ptr<VFSFileMonitorCallbackEntry>;
+    struct file_monitor
+    {
+        file_monitor() = delete;
+        file_monitor(const std::filesystem::path& path, vfs::file_monitor_callback_t callback,
+                     void* user_data);
+        ~file_monitor();
 
+      private:
+        bool on_inotify_event(const Glib::IOCondition condition);
+        void dispatch_event(vfs::file_monitor_event event,
+                            const std::filesystem::path& file_name) noexcept;
+
+        i32 inotify_fd_{-1};
+        i32 inotify_wd_{-1};
+
+        std::filesystem::path path_{};
+
+#if (GTK_MAJOR_VERSION == 4)
+        Glib::RefPtr<Glib::IOChannel> inotify_io_channel = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
+        Glib::RefPtr<Glib::IOChannel> inotify_io_channel;
+#endif
+        sigc::connection signal_io_handler;
+
+        struct callback_entry
+        {
+            vfs::file_monitor_callback_t callback{nullptr};
+            void* user_data{nullptr};
+        };
+        // std::vector<callback_entry> callbacks_{};
+        callback_entry callback_{};
+    };
 } // namespace vfs
-
-struct VFSFileMonitor
-{
-    VFSFileMonitor() = delete;
-    VFSFileMonitor(const std::filesystem::path& real_path, i32 wd);
-    ~VFSFileMonitor();
-
-    void add_user() noexcept;
-    void remove_user() noexcept;
-    bool has_users() const noexcept;
-
-    const std::filesystem::path& path() const noexcept;
-    i32 wd() const noexcept;
-
-    void add_callback(vfs::file_monitor_callback callback, void* user_data) noexcept;
-    void remove_callback(vfs::file_monitor_callback callback, void* user_data) noexcept;
-
-    const std::vector<vfs::file_monitor_callback_entry> callbacks() const noexcept;
-
-  private:
-    std::filesystem::path path_{};
-    i32 wd_{0};
-    std::vector<vfs::file_monitor_callback_entry> callbacks_{};
-
-    // user ref count
-    i32 user_count{1};
-};
-
-/*
- * Init monitor:
- * Establish connection with inotify.
- */
-bool vfs_file_monitor_init();
-
-/*
- * Monitor changes of a file or directory.
- *
- * Parameters:
- * path: the file/dir to be monitored
- * cb: callback function to be called when file event happens.
- * user_data: user data to be passed to callback function.
- */
-vfs::file_monitor vfs_file_monitor_add(const std::filesystem::path& path,
-                                       vfs::file_monitor_callback cb, void* user_data);
-
-/*
- * Remove previously installed monitor.
- */
-void vfs_file_monitor_remove(const vfs::file_monitor& monitor, vfs::file_monitor_callback cb,
-                             void* user_data);
-
-/*
- * Clean up and shutdown file alteration monitor.
- */
-void vfs_file_monitor_clean();

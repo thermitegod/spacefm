@@ -24,6 +24,8 @@
 
 #include <algorithm>
 
+#include <memory>
+
 #include <cassert>
 
 #include <malloc.h>
@@ -63,7 +65,7 @@ struct PtkDirTreeNode
     vfs::file_info file{nullptr};
     PtkDirTreeNode* children{nullptr};
     i32 n_children{0};
-    vfs::file_monitor monitor{nullptr};
+    std::shared_ptr<vfs::file_monitor> monitor{nullptr};
     i32 n_expand{0};
     PtkDirTreeNode* parent{nullptr};
     PtkDirTreeNode* next{nullptr};
@@ -136,8 +138,8 @@ static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
 
 /* signal handlers */
 
-static void on_file_monitor_event(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
-                                  const std::filesystem::path& file_name, void* user_data);
+static void on_file_monitor_event(vfs::file_monitor_event event, const std::filesystem::path& path,
+                                  void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
                                              const std::filesystem::path& path);
@@ -801,7 +803,10 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
 
     if (std::filesystem::is_directory(path))
     {
-        node->monitor = vfs_file_monitor_add(path, &on_file_monitor_event, node);
+        if (!node->monitor)
+        {
+            node->monitor = std::make_shared<vfs::file_monitor>(path, on_file_monitor_event, node);
+        }
 
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
@@ -846,7 +851,6 @@ ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path
         }
         if (node->monitor)
         {
-            vfs_file_monitor_remove(node->monitor, &on_file_monitor_event, node);
             node->monitor = nullptr;
         }
         PtkDirTreeNode* child;
@@ -881,13 +885,13 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
 }
 
 static void
-on_file_monitor_event(const vfs::file_monitor& monitor, vfs::file_monitor_event event,
-                      const std::filesystem::path& file_name, void* user_data)
+on_file_monitor_event(vfs::file_monitor_event event, const std::filesystem::path& path,
+                      void* user_data)
 {
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);
     assert(node != nullptr);
 
-    PtkDirTreeNode* child = find_node(node, file_name.string());
+    PtkDirTreeNode* child = find_node(node, path.filename().string());
 
     if (event == vfs::file_monitor_event::created)
     {
@@ -902,10 +906,9 @@ on_file_monitor_event(const vfs::file_monitor& monitor, vfs::file_monitor_event 
             {
                 child = nullptr;
             }
-            const auto file_path = monitor->path() / file_name;
-            if (std::filesystem::is_directory(file_path))
+            if (std::filesystem::is_directory(path))
             {
-                ptk_dir_tree_insert_child(node->tree, node, monitor->path(), file_name);
+                ptk_dir_tree_insert_child(node->tree, node, path.parent_path(), path.filename());
                 if (child)
                 {
                     ptk_dir_tree_delete_child(node->tree, child);
