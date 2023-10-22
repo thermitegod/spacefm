@@ -150,7 +150,7 @@ activate(GtkApplication* app, void* user_data)
 {
     assert(GTK_IS_APPLICATION(app));
 
-    const auto opt = ((commandline_opt_data*)user_data)->shared_from_this();
+    const auto opt = static_cast<commandline_opt_data*>(user_data)->shared_from_this();
 
     app_settings.load_saved_tabs(!opt->no_tabs);
 

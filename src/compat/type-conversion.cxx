@@ -68,7 +68,7 @@ glist_to_vector_vfs_file_info(GList* list)
     vec.reserve(g_list_length(list));
     for (GList* l = list; l; l = g_list_next(l))
     {
-        vec.emplace_back(((VFSFileInfo*)l->data)->shared_from_this());
+        vec.emplace_back(static_cast<VFSFileInfo*>(l->data)->shared_from_this());
     }
     return vec;
 }

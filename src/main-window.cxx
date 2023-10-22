@@ -2726,7 +2726,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
 
     if (user_data)
     {
-        const xset_t known_set = ((xset::XSet*)user_data)->shared_from_this();
+        const xset_t known_set = static_cast<xset::XSet*>(user_data)->shared_from_this();
         return on_main_window_keypress_found_key(main_window, known_set);
     }
 

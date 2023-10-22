@@ -432,7 +432,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 
     g_value_init(value, column_types[ptk::file_list::column(column)]);
 
-    const vfs::file_info file(((VFSFileInfo*)iter->user_data2)->shared_from_this());
+    const vfs::file_info file = static_cast<VFSFileInfo*>(iter->user_data2)->shared_from_this();
 
     GdkPixbuf* icon = nullptr;
 
@@ -860,7 +860,7 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, const vfs::file_info
 {
     for (GList* l = list->files; l; l = g_list_next(l))
     {
-        const vfs::file_info file2(((VFSFileInfo*)l->data)->shared_from_this());
+        const vfs::file_info file2 = static_cast<VFSFileInfo*>(l->data)->shared_from_this();
         if (file1 == file2 || ztd::same(file1->name(), file2->name()))
         {
             it->stamp = list->stamp;
@@ -990,7 +990,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
 
             for (GList* l = list->files; l; l = g_list_next(l))
             {
-                const vfs::file_info file(((VFSFileInfo*)l->data)->shared_from_this());
+                const vfs::file_info file = static_cast<VFSFileInfo*>(l->data)->shared_from_this();
                 if ((file->is_image() || file->is_video()) &&
                     file->is_thumbnail_loaded(list->big_thumbnail))
                 {
@@ -1011,7 +1011,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
 
     for (GList* l = list->files; l; l = g_list_next(l))
     {
-        const vfs::file_info file(((VFSFileInfo*)l->data)->shared_from_this());
+        const vfs::file_info file = static_cast<VFSFileInfo*>(l->data)->shared_from_this();
         if (list->max_thumbnail != 0 &&
             (file->is_video() || (file->size() < list->max_thumbnail && file->is_image())))
         {

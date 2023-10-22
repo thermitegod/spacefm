@@ -127,7 +127,7 @@ static bool
 on_thumbnail_idle(void* user_data)
 {
     // ztd::logger::debug("ENTER ON_THUMBNAIL_IDLE");
-    const auto loader = ((VFSThumbnailLoader*)user_data)->shared_from_this();
+    const auto loader = static_cast<VFSThumbnailLoader*>(user_data)->shared_from_this();
 
     while (!loader->update_queue.empty())
     {

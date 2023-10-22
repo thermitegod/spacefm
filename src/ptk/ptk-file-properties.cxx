@@ -158,7 +158,7 @@ calc_total_size_of_files(const std::filesystem::path& path,
 static void*
 calc_size(void* user_data)
 {
-    const auto data = ((properties_dialog_data*)user_data)->shared_from_this();
+    const auto data = static_cast<properties_dialog_data*>(user_data)->shared_from_this();
 
     for (const vfs::file_info& file : data->file_list)
     {
