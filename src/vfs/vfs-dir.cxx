@@ -348,8 +348,8 @@ notify_file_change(void* user_data)
 
     for (const auto& [path, dir] : dir_map)
     {
-        dir->update_changed_files(path);
-        dir->update_created_files(path);
+        dir->update_changed_files();
+        dir->update_created_files();
     }
     /* remove the timeout */
     change_notify_timeout = 0;
@@ -367,8 +367,8 @@ vfs_dir_flush_notify_cache()
 
     for (const auto& [path, dir] : dir_map)
     {
-        dir->update_changed_files(path);
-        dir->update_created_files(path);
+        dir->update_changed_files();
+        dir->update_created_files();
     }
 }
 
@@ -397,10 +397,8 @@ vfs_dir_monitor_callback(const vfs::file_monitor& monitor, vfs::file_monitor_eve
 }
 
 static void
-reload_mime_type(const std::filesystem::path& key, vfs::dir dir)
+reload_mime_type(vfs::dir dir)
 {
-    (void)key;
-
     std::scoped_lock<std::mutex> lock(dir->mutex);
 
     if (!dir || dir->is_directory_empty())
@@ -423,7 +421,7 @@ void
 vfs_dir_mime_type_reload()
 {
     // ztd::logger::debug("reload mime-type");
-    const auto action = [](const auto& dir) { reload_mime_type(dir.first, dir.second); };
+    const auto action = [](const auto& dir) { reload_mime_type(dir.second); };
     std::ranges::for_each(dir_map, action);
 }
 
@@ -533,10 +531,8 @@ VFSDir::update_file_info(const vfs::file_info& file) noexcept
 }
 
 void
-VFSDir::update_changed_files(const std::filesystem::path& key) noexcept
+VFSDir::update_changed_files() noexcept
 {
-    (void)key;
-
     std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (this->changed_files.empty())
@@ -556,10 +552,8 @@ VFSDir::update_changed_files(const std::filesystem::path& key) noexcept
 }
 
 void
-VFSDir::update_created_files(const std::filesystem::path& key) noexcept
+VFSDir::update_created_files() noexcept
 {
-    (void)key;
-
     std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (this->created_files.empty())

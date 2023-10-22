@@ -89,8 +89,8 @@ struct VFSDir
     bool is_file_listed() const noexcept;
     bool is_directory_empty() const noexcept;
 
-    void update_created_files(const std::filesystem::path& key) noexcept;
-    void update_changed_files(const std::filesystem::path& key) noexcept;
+    void update_created_files() noexcept;
+    void update_changed_files() noexcept;
 
     void unload_thumbnails(bool is_big) noexcept;
 
