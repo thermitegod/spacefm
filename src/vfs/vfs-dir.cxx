@@ -14,14 +14,12 @@
  */
 
 #include <string>
-#include <string_view>
 
 #include <format>
 
 #include <filesystem>
 
 #include <vector>
-#include <map>
 
 #include <algorithm>
 
@@ -52,189 +50,116 @@
 
 #include "vfs/vfs-dir.hxx"
 
-#define VFS_DIR_REINTERPRET(obj) (reinterpret_cast<VFSDir*>(obj))
-
-#define VFS_TYPE_DIR (vfs_dir_get_type())
-
-struct VFSDirClass
-{
-    GObjectClass parent;
-
-    /* Default signal handlers */
-    void (*file_created)(vfs::dir dir, const vfs::file_info& file);
-    void (*file_deleted)(vfs::dir dir, const vfs::file_info& file);
-    void (*file_changed)(vfs::dir dir, const vfs::file_info& file);
-    void (*thumbnail_loaded)(vfs::dir dir, const vfs::file_info& file);
-    void (*file_listed)(vfs::dir dir);
-    void (*load_complete)(vfs::dir dir);
-    // void (*need_reload)(vfs::dir dir);
-    // void (*update_mime)(vfs::dir dir);
-};
-
-static void vfs_dir_class_init(VFSDirClass* klass);
-static void vfs_dir_finalize(GObject* obj);
-static void vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec);
-static void vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
-
 static void vfs_dir_monitor_callback(vfs::file_monitor_event event,
                                      const std::filesystem::path& path, void* user_data);
 
-static GObjectClass* parent_class = nullptr;
-
-static std::map<const char*, vfs::dir> dir_map;
-// static std::map<std::string, vfs::dir> dir_map; // breaks multiple tabs with save VFSDir, reason unknown
-// static std::map<std::filesystem::path, vfs::dir> dir_map; // breaks multiple tabs with save VFSDir, reason unknown
-
-static u32 change_notify_timeout = 0;
-
-/*
- * gobject
- */
-
-GType
-vfs_dir_get_type()
+const std::shared_ptr<vfs::dir>
+vfs_dir_new()
 {
-    static GType type = G_TYPE_INVALID;
-    if (type == G_TYPE_INVALID)
-    {
-        static const GTypeInfo info = {
-            sizeof(VFSDirClass),
-            nullptr,
-            nullptr,
-            (GClassInitFunc)vfs_dir_class_init,
-            nullptr,
-            nullptr,
-            sizeof(VFSDir),
-            0,
-            nullptr,
-            nullptr,
-        };
-        type = g_type_register_static(G_TYPE_OBJECT, "VFSDir", &info, GTypeFlags::G_TYPE_FLAG_NONE);
-    }
-    return type;
+    return std::make_shared<vfs::dir>();
 }
 
-static void
-vfs_dir_class_init(VFSDirClass* klass)
+vfs::dir::dir()
 {
-    GObjectClass* object_class;
-
-    object_class = (GObjectClass*)klass;
-    parent_class = (GObjectClass*)g_type_class_peek_parent(klass);
-
-    object_class->set_property = vfs_dir_set_property;
-    object_class->get_property = vfs_dir_get_property;
-    object_class->finalize = vfs_dir_finalize;
+    // ztd::logger::debug("vfs::dir::dir({})", fmt::ptr(this));
 }
 
-/* destructor */
-static void
-vfs_dir_finalize(GObject* obj)
+vfs::dir::~dir()
 {
-    vfs::dir dir = VFS_DIR_REINTERPRET(obj);
-    // ztd::logger::info("vfs_dir_finalize  {}", dir->path);
-    do
-    {
-    } while (g_source_remove_by_user_data(dir));
+    // ztd::logger::debug("vfs::dir::~dir({})  {}", fmt::ptr(this), path);
 
-    if (dir->task)
+    this->signal_task_load_dir.disconnect();
+
+    if (this->task)
     {
-        dir->signal_task_load_dir.disconnect();
         // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
 
         // ztd::logger::info("vfs_dir_finalize -> vfs_async_task_cancel");
-        dir->task->cancel();
-        dir->task = nullptr;
+        this->task->cancel();
+        this->task = nullptr;
     }
 
-    dir_map.erase(dir->path.c_str());
-    /* There is no VFSDir instance */
-    if (dir_map.size() == 0)
-    {
-        if (change_notify_timeout)
-        {
-            g_source_remove(change_notify_timeout);
-            change_notify_timeout = 0;
-        }
-    }
+    // ztd::logger::trace("this->monitor: {}", fmt::ptr(this->monitor));
+    // ztd::logger::trace("this->thumbnail_loader: {}", fmt::ptr(this->thumbnail_loader));
+    this->monitor = nullptr;
+    this->thumbnail_loader = nullptr;
 
-    // ztd::logger::trace("dir->monitor: {}", fmt::ptr(dir->monitor));
-    // ztd::logger::trace("dir->thumbnail_loader: {}", fmt::ptr(dir->thumbnail_loader));
-    dir->monitor = nullptr;
-    dir->thumbnail_loader = nullptr;
-
-    dir->file_list.clear();
-    dir->changed_files.clear();
-    dir->created_files.clear();
-
-    G_OBJECT_CLASS(parent_class)->finalize(obj);
-}
-
-static void
-vfs_dir_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec)
-{
-    (void)obj;
-    (void)prop_id;
-    (void)value;
-    (void)pspec;
-}
-
-static void
-vfs_dir_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec)
-{
-    (void)obj;
-    (void)prop_id;
-    (void)value;
-    (void)pspec;
+    this->file_list.clear();
+    this->changed_files.clear();
+    this->created_files.clear();
 }
 
 /* methods */
 
-/* constructor is private */
-static vfs::dir
-vfs_dir_new(const std::string_view path)
-{
-    vfs::dir dir = VFS_DIR(g_object_new(VFS_TYPE_DIR, nullptr));
-    assert(dir != nullptr);
+// broken signals when multiple tabs have the same vfs::dir
+// Not a problem with the vfs::dir cache, but with the signals
+// REPRO
+//      - open multiple tabs in the same path
+//      - touch and rm new files
+//      - swtich between tabs, new files missing / duplicate of the same new file,
+//                                                 number of duplicates is the same as
+//                                                 the number of tabs opened in that path
 
-    assert(path.empty() != true);
-    dir->path = path.data();
-    dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
+// #define ENABLE_BROKEN_VFS_DIR_CACHE_SIGNALS
 
-    // ztd::logger::info("vfs_dir_new {}  avoid_changes={}", dir->path, dir->avoid_changes);
+#if defined(ENABLE_BROKEN_VFS_DIR_CACHE_SIGNALS)
 
-    return dir;
-}
+static ztd::weak_smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache(vfs_dir_new);
 
-vfs::dir
+const std::shared_ptr<vfs::dir>
 vfs_dir_get_by_path_soft(const std::filesystem::path& path)
 {
-    vfs::dir dir = nullptr;
-    if (dir_map.contains(path.c_str()))
+    std::shared_ptr<vfs::dir> dir = nullptr;
+    if (dir_smart_cache.contains(path))
     {
-        dir = dir_map.at(path.c_str());
+        dir = dir_smart_cache.get(path);
         assert(dir != nullptr);
-        g_object_ref(dir);
+        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", fmt::ptr(dir), path);
     }
     return dir;
 }
 
-vfs::dir
+const std::shared_ptr<vfs::dir>
 vfs_dir_get_by_path(const std::filesystem::path& path)
 {
-    vfs::dir dir = vfs_dir_get_by_path_soft(path);
+    auto dir = vfs_dir_get_by_path_soft(path);
     if (dir == nullptr)
     {
-        dir = vfs_dir_new(path.c_str());
+        // Create a new blank vfs::dir
+        dir = dir_smart_cache.get(path);
         assert(dir != nullptr);
+        // ztd::logger::debug("vfs::dir::dir({}) new     {}", fmt::ptr(dir), path);
+
+        dir->path = path;
+        dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
+
         dir->load(); /* asynchronous operation */
-        dir_map.insert({dir->path.c_str(), dir});
     }
+
+    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), dir->path);
+
     return dir;
 }
+#else
+const std::shared_ptr<vfs::dir>
+vfs_dir_get_by_path(const std::filesystem::path& path)
+{
+    auto dir = vfs_dir_new();
+    assert(dir != nullptr);
+
+    dir->path = path;
+    dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
+
+    dir->load(); /* asynchronous operation */
+
+    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), dir->path);
+
+    return dir;
+}
+#endif
 
 void
-on_list_task_finished(vfs::dir dir, bool is_cancelled)
+on_list_task_finished(const std::shared_ptr<vfs::dir>& dir, bool is_cancelled)
 {
     dir->task = nullptr;
     dir->run_event<spacefm::signal::file_listed>(is_cancelled);
@@ -287,10 +212,8 @@ get_hidden_files(const std::filesystem::path& path) noexcept
 }
 
 static void*
-vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
+vfs_dir_load_thread(const vfs::async_thread_t& task, const std::shared_ptr<vfs::dir>& dir)
 {
-    std::scoped_lock<std::mutex> lock(dir->mutex);
-
     dir->file_listed = false;
     dir->load_complete = false;
     dir->xhidden_count = 0;
@@ -299,7 +222,7 @@ vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
     if (!dir->monitor)
     {
         dir->monitor =
-            std::make_shared<vfs::file_monitor>(dir->path, vfs_dir_monitor_callback, dir);
+            std::make_shared<vfs::file_monitor>(dir->path, vfs_dir_monitor_callback, dir.get());
     }
 
     // MOD  dir contains .hidden file?
@@ -345,43 +268,13 @@ vfs_dir_load_thread(const vfs::async_thread_t& task, vfs::dir dir)
     return nullptr;
 }
 
-static bool
-notify_file_change(void* user_data)
-{
-    (void)user_data;
-
-    for (const auto& [path, dir] : dir_map)
-    {
-        dir->update_changed_files();
-        dir->update_created_files();
-    }
-    /* remove the timeout */
-    change_notify_timeout = 0;
-    return false;
-}
-
-void
-vfs_dir_flush_notify_cache()
-{
-    if (change_notify_timeout)
-    {
-        g_source_remove(change_notify_timeout);
-    }
-    change_notify_timeout = 0;
-
-    for (const auto& [path, dir] : dir_map)
-    {
-        dir->update_changed_files();
-        dir->update_created_files();
-    }
-}
-
 /* Callback function which will be called when monitored events happen */
 static void
 vfs_dir_monitor_callback(vfs::file_monitor_event event, const std::filesystem::path& path,
                          void* user_data)
 {
-    vfs::dir dir = VFS_DIR(user_data);
+    assert(user_data != nullptr);
+    const auto dir = static_cast<vfs::dir*>(user_data)->shared_from_this();
 
     switch (event)
     {
@@ -399,49 +292,21 @@ vfs_dir_monitor_callback(vfs::file_monitor_event event, const std::filesystem::p
     }
 }
 
-static void
-reload_mime_type(vfs::dir dir)
-{
-    std::scoped_lock<std::mutex> lock(dir->mutex);
-
-    if (!dir || dir->is_directory_empty())
-    {
-        return;
-    }
-
-    for (const vfs::file_info& file : dir->file_list)
-    {
-        // ztd::logger::debug("reload {}", file->path());
-        file->reload_mime_type();
-    }
-
-    const auto action = [dir](const vfs::file_info& file)
-    { dir->run_event<spacefm::signal::file_changed>(file); };
-    std::ranges::for_each(dir->file_list, action);
-}
-
 void
 vfs_dir_mime_type_reload()
 {
     // ztd::logger::debug("reload mime-type");
-    const auto action = [](const auto& dir) { reload_mime_type(dir.second); };
-    std::ranges::for_each(dir_map, action);
-}
-
-void
-vfs_dir_foreach(VFSDirForeachFunc func, bool user_data)
-{
-    // ztd::logger::debug("reload mime-type");
-    const auto action = [func, user_data](const auto& dir) { func(dir.second, user_data); };
-    std::ranges::for_each(dir_map, action);
+    // const auto action = [](const auto& dir) { dir.second.lock()->reload_mime_type(); };
+    // std::ranges::for_each(dir_smart_cache, action);
 }
 
 /**
-* VFSDir class
+* vfs::dir class
 */
 
 vfs::file_info
-VFSDir::find_file(const std::filesystem::path& file_name, const vfs::file_info& file) const noexcept
+vfs::dir::find_file(const std::filesystem::path& file_name,
+                    const vfs::file_info& file) const noexcept
 {
     for (const vfs::file_info& file2 : this->file_list)
     {
@@ -458,7 +323,7 @@ VFSDir::find_file(const std::filesystem::path& file_name, const vfs::file_info& 
 }
 
 bool
-VFSDir::add_hidden(const vfs::file_info& file) const noexcept
+vfs::dir::add_hidden(const vfs::file_info& file) const noexcept
 {
     const auto file_path = std::filesystem::path() / this->path / ".hidden";
     const std::string data = std::format("{}\n", file->name());
@@ -467,48 +332,51 @@ VFSDir::add_hidden(const vfs::file_info& file) const noexcept
 }
 
 void
-VFSDir::cancel_all_thumbnail_requests() noexcept
+vfs::dir::cancel_all_thumbnail_requests() noexcept
 {
     this->thumbnail_loader = nullptr;
 }
 
 void
-VFSDir::load_thumbnail(const vfs::file_info& file, const bool is_big) noexcept
+vfs::dir::load_thumbnail(const vfs::file_info& file, const bool is_big) noexcept
 {
-    vfs_thumbnail_loader_request(this, file, is_big);
+    vfs_thumbnail_loader_request(this->shared_from_this(), file, is_big);
 }
 
 void
-VFSDir::load() noexcept
+vfs::dir::load() noexcept
 {
     if (this->path.empty())
     {
         return;
     }
     // ztd::logger::info("dir->path={}", dir->path);
+    if (!this->task)
+    {
+        this->task = vfs_async_thread_new((vfs::async_thread_function_t)vfs_dir_load_thread, this);
 
-    this->task = vfs_async_thread_new((vfs::async_thread_function_t)vfs_dir_load_thread, this);
+        this->signal_task_load_dir =
+            this->task->add_event<spacefm::signal::task_finish>(on_list_task_finished,
+                                                                this->shared_from_this());
 
-    this->signal_task_load_dir =
-        this->task->add_event<spacefm::signal::task_finish>(on_list_task_finished, this);
-
-    this->task->run();
+        this->task->run();
+    }
 }
 
 bool
-VFSDir::is_file_listed() const noexcept
+vfs::dir::is_file_listed() const noexcept
 {
     return this->file_listed;
 }
 
 bool
-VFSDir::is_directory_empty() const noexcept
+vfs::dir::is_directory_empty() const noexcept
 {
     return this->file_list.empty();
 }
 
 bool
-VFSDir::update_file_info(const vfs::file_info& file) noexcept
+vfs::dir::update_file_info(const vfs::file_info& file) noexcept
 {
     bool ret = false;
 
@@ -534,9 +402,9 @@ VFSDir::update_file_info(const vfs::file_info& file) noexcept
 }
 
 void
-VFSDir::update_changed_files() noexcept
+vfs::dir::update_changed_files() noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    //std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (this->changed_files.empty())
     {
@@ -555,9 +423,9 @@ VFSDir::update_changed_files() noexcept
 }
 
 void
-VFSDir::update_created_files() noexcept
+vfs::dir::update_created_files() noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    // std::scoped_lock<std::mutex> lock(this->mutex);
 
     if (this->created_files.empty())
     {
@@ -595,7 +463,7 @@ VFSDir::update_created_files() noexcept
 }
 
 void
-VFSDir::unload_thumbnails(bool is_big) noexcept
+vfs::dir::unload_thumbnails(bool is_big) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 
@@ -617,9 +485,28 @@ VFSDir::unload_thumbnails(bool is_big) noexcept
     malloc_trim(0);
 }
 
+void
+vfs::dir::reload_mime_type() noexcept
+{
+    std::scoped_lock<std::mutex> lock(this->mutex);
+
+    if (this->is_directory_empty())
+    {
+        return;
+    }
+
+    const auto reload_file_mime_action = [](const vfs::file_info& file)
+    { file->reload_mime_type(); };
+    std::ranges::for_each(this->file_list, reload_file_mime_action);
+
+    const auto signal_file_changed_action = [this](const vfs::file_info& file)
+    { this->run_event<spacefm::signal::file_changed>(file); };
+    std::ranges::for_each(this->file_list, signal_file_changed_action);
+}
+
 /* signal handlers */
 void
-VFSDir::emit_file_created(const std::filesystem::path& file_name, bool force) noexcept
+vfs::dir::emit_file_created(const std::filesystem::path& file_name, bool force) noexcept
 {
     (void)force;
     // Ignore avoid_changes for creation of files
@@ -632,19 +519,14 @@ VFSDir::emit_file_created(const std::filesystem::path& file_name, bool force) no
     }
 
     this->created_files.emplace_back(file_name);
-    if (change_notify_timeout == 0)
-    {
-        change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
-                                                   200,
-                                                   (GSourceFunc)notify_file_change,
-                                                   nullptr,
-                                                   nullptr);
-    }
+
+    this->update_changed_files();
+    this->update_created_files();
 }
 
 void
-VFSDir::emit_file_deleted(const std::filesystem::path& file_name,
-                          const vfs::file_info& file) noexcept
+vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
+                            const vfs::file_info& file) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 
@@ -666,21 +548,16 @@ VFSDir::emit_file_deleted(const std::filesystem::path& file_name,
         if (!ztd::contains(this->changed_files, file_found))
         {
             this->changed_files.emplace_back(file_found);
-            if (change_notify_timeout == 0)
-            {
-                change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
-                                                           200,
-                                                           (GSourceFunc)notify_file_change,
-                                                           nullptr,
-                                                           nullptr);
-            }
+
+            this->update_changed_files();
+            this->update_created_files();
         }
     }
 }
 
 void
-VFSDir::emit_file_changed(const std::filesystem::path& file_name, const vfs::file_info& file,
-                          bool force) noexcept
+vfs::dir::emit_file_changed(const std::filesystem::path& file_name, const vfs::file_info& file,
+                            bool force) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 
@@ -707,26 +584,17 @@ VFSDir::emit_file_changed(const std::filesystem::path& file_name, const vfs::fil
             if (force)
             {
                 this->changed_files.emplace_back(file_found);
-                if (change_notify_timeout == 0)
-                {
-                    change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
-                                                               100,
-                                                               (GSourceFunc)notify_file_change,
-                                                               nullptr,
-                                                               nullptr);
-                }
+
+                this->update_changed_files();
+                this->update_created_files();
             }
             else if (this->update_file_info(file_found)) // update file info the first time
             {
                 this->changed_files.emplace_back(file_found);
-                if (change_notify_timeout == 0)
-                {
-                    change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
-                                                               500,
-                                                               (GSourceFunc)notify_file_change,
-                                                               nullptr,
-                                                               nullptr);
-                }
+
+                this->update_changed_files();
+                this->update_created_files();
+
                 this->run_event<spacefm::signal::file_changed>(file_found);
             }
         }
@@ -734,7 +602,7 @@ VFSDir::emit_file_changed(const std::filesystem::path& file_name, const vfs::fil
 }
 
 void
-VFSDir::emit_thumbnail_loaded(const vfs::file_info& file) noexcept
+vfs::dir::emit_thumbnail_loaded(const vfs::file_info& file) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 

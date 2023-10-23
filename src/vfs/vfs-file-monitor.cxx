@@ -28,6 +28,8 @@
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -82,7 +84,7 @@ vfs::file_monitor::file_monitor(const std::filesystem::path& path,
         this->callback_ = callback_entry{callback, user_data};
     }
 
-    // ztd::logger::debug("vfs::file_monitor::file_monitor({})  {} ({})  {}", fmt::ptr(this), real_path, this->path_, this->inotify_wd_);
+    // ztd::logger::debug("vfs::file_monitor::file_monitor({})  {} ({})  fd={} wd={}", fmt::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
 }
 
 vfs::file_monitor::~file_monitor()
@@ -99,6 +101,8 @@ void
 vfs::file_monitor::dispatch_event(vfs::file_monitor_event event,
                                   const std::filesystem::path& path) noexcept
 {
+    // ztd::logger::debug("vfs::file_monitor::dispatch_event({})  {}   {}", fmt::ptr(this), magic_enum::enum_name(event), this->path_);
+
     this->callback_.callback(event, path, this->callback_.user_data);
 }
 

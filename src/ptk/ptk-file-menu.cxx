@@ -2563,7 +2563,6 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         {
             vfs::file_info file = vfs_file_info_new(ao->path);
             ao->file_browser->dir_->emit_file_created(file->name(), true);
-            vfs_dir_flush_notify_cache();
             ao->file_browser->select_file(ao->path);
         }
 

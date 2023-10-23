@@ -62,8 +62,9 @@ namespace ptk::file_list
 struct PtkFileList
 {
     GObject parent;
+
     /* <private> */
-    vfs::dir dir{nullptr};
+    std::shared_ptr<vfs::dir> dir{nullptr};
     GList* files{nullptr};
     u32 n_files{0};
 
@@ -94,17 +95,17 @@ struct PtkFileListClass
 {
     GObjectClass parent;
     /* Default signal handlers */
-    void (*file_created)(vfs::dir dir, const char* file_name);
-    void (*file_deleted)(vfs::dir dir, const char* file_name);
-    void (*file_changed)(vfs::dir dir, const char* file_name);
-    void (*load_complete)(vfs::dir dir);
+    // void (*file_created)(const std::shared_ptr<vfs::dir>& dir, const char* file_name);
+    // void (*file_deleted)(const std::shared_ptr<vfs::dir>& dir, const char* file_name);
+    // void (*file_changed)(const std::shared_ptr<vfs::dir>& dir, const char* file_name);
+    // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
 };
 
 GType ptk_file_list_get_type();
 
-PtkFileList* ptk_file_list_new(vfs::dir dir, bool show_hidden);
+PtkFileList* ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden);
 
-void ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir);
+void ptk_file_list_set_dir(PtkFileList* list, const std::shared_ptr<vfs::dir>& dir);
 
 bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, const vfs::file_info& file);
 

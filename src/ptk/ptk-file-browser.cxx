@@ -1041,17 +1041,8 @@ ptk_file_browser_finalize(GObject* obj)
 {
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(obj);
     // ztd::logger::info("ptk_file_browser_finalize");
-    if (file_browser->dir_)
-    {
-        g_signal_handlers_disconnect_matched(file_browser->dir_,
-                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
-                                             0,
-                                             0,
-                                             nullptr,
-                                             nullptr,
-                                             file_browser);
-        g_object_unref(file_browser->dir_);
-    }
+
+    file_browser->dir_ = nullptr;
 
     /* Remove all idle handlers which are not called yet. */
     do
@@ -1365,12 +1356,16 @@ PtkFileBrowser::update_model() noexcept
 static void
 on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
 {
-    vfs::dir dir = file_browser->dir_;
+    const auto& dir = file_browser->dir_;
 
     file_browser->n_sel_files_ = 0;
 
     if (!is_cancelled)
     {
+        file_browser->signal_file_created.disconnect();
+        file_browser->signal_file_deleted.disconnect();
+        file_browser->signal_file_changed.disconnect();
+
         file_browser->signal_file_created =
             dir->add_event<spacefm::signal::file_created>(on_folder_content_changed, file_browser);
         file_browser->signal_file_deleted =
@@ -3069,19 +3064,6 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
             break;
     }
 
-    // remove old dir object
-    if (this->dir_)
-    {
-        g_signal_handlers_disconnect_matched(this->dir_,
-                                             GSignalMatchType::G_SIGNAL_MATCH_DATA,
-                                             0,
-                                             0,
-                                             nullptr,
-                                             nullptr,
-                                             this);
-        g_object_unref(this->dir_);
-    }
-
     switch (this->view_mode_)
     {
         case ptk::file_browser::view_mode::icon_view:
@@ -3328,7 +3310,11 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
     malloc_trim(0);
 
     // begin load dir
+
+    this->signal_file_listed.disconnect();
+
     this->busy_ = true;
+
     this->dir_ = vfs_dir_get_by_path(this->cwd());
 
     this->run_event<spacefm::signal::chdir_begin>();

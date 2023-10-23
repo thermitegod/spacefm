@@ -65,9 +65,8 @@ struct VFSThumbnailRequest
     std::map<vfs::thumbnail_size, i32> n_requests;
 };
 
-VFSThumbnailLoader::VFSThumbnailLoader(vfs::dir dir)
+VFSThumbnailLoader::VFSThumbnailLoader(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
 {
-    this->dir = g_object_ref(dir);
     this->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, this);
 }
 
@@ -87,7 +86,7 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 
     // prevent recursive unref called from vfs_dir_finalize
     this->dir->thumbnail_loader = nullptr;
-    g_object_unref(this->dir);
+    this->dir = nullptr;
 }
 
 void
@@ -118,7 +117,7 @@ VFSThumbnailLoader::loader_request(const vfs::file_info& file, bool is_big) noex
 }
 
 vfs::thumbnail_loader
-vfs_thumbnail_loader_new(vfs::dir dir)
+vfs_thumbnail_loader_new(const std::shared_ptr<vfs::dir>& dir)
 {
     return std::make_shared<VFSThumbnailLoader>(dir);
 }
@@ -234,7 +233,8 @@ thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loade
 }
 
 void
-vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, const bool is_big)
+vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir, const vfs::file_info& file,
+                             const bool is_big)
 {
     bool new_task = false;
 

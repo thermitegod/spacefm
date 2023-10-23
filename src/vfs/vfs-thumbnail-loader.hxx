@@ -41,12 +41,12 @@ struct VFSThumbnailLoader : public std::enable_shared_from_this<VFSThumbnailLoad
 {
   public:
     VFSThumbnailLoader() = delete;
-    VFSThumbnailLoader(vfs::dir dir);
+    VFSThumbnailLoader(const std::shared_ptr<vfs::dir>& dir);
     ~VFSThumbnailLoader();
 
     void loader_request(const vfs::file_info& file, bool is_big) noexcept;
 
-    vfs::dir dir{nullptr};
+    std::shared_ptr<vfs::dir> dir{nullptr};
     vfs::async_task task{nullptr};
 
     u32 idle_handler{0};
@@ -60,6 +60,7 @@ struct VFSThumbnailLoader : public std::enable_shared_from_this<VFSThumbnailLoad
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
 
-void vfs_thumbnail_loader_request(vfs::dir dir, const vfs::file_info& file, const bool is_big);
+void vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir, const vfs::file_info& file,
+                                  const bool is_big);
 
 GdkPixbuf* vfs_thumbnail_load(const vfs::file_info& file, i32 thumb_size);

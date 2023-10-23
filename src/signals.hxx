@@ -19,7 +19,7 @@ namespace spacefm
 {
     enum class signal
     {
-        // VFSDir
+        // vfs::dir
         file_created,
         file_changed,
         file_deleted,

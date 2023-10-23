@@ -27,15 +27,12 @@
 
 #include "signals.hxx"
 
-struct VFSDir;
-
 namespace vfs
 {
+    struct dir;
     struct async_thread;
     using async_thread_t = std::shared_ptr<async_thread>;
     using async_thread_function_t = void* (*)(async_thread*, void*);
-
-    using dir = ztd::raw_ptr<VFSDir>;
 
     struct async_thread
     {
@@ -68,12 +65,12 @@ namespace vfs
         // Signals
       public:
         // Signals function types
-        using evt_task_finished_load_dir_t = void(vfs::dir, bool);
+        using evt_task_finished_load_dir_t = void(const std::shared_ptr<vfs::dir>&, bool);
 
         // Signals Add Event
         template<spacefm::signal evt>
         typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
-        add_event(evt_task_finished_load_dir_t fun, vfs::dir dir)
+        add_event(evt_task_finished_load_dir_t fun, const std::shared_ptr<vfs::dir>& dir)
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
             this->evt_data_load_dir = dir;
@@ -96,7 +93,7 @@ namespace vfs
 
       private:
         // Signal data
-        vfs::dir evt_data_load_dir{nullptr};
+        std::shared_ptr<vfs::dir> evt_data_load_dir{nullptr};
     };
 } // namespace vfs
 

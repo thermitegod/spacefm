@@ -33,7 +33,6 @@
 #include "ptk/ptk-file-list.hxx"
 
 #include "vfs/vfs-file-info.hxx"
-#include "vfs/vfs-thumbnail-loader.hxx"
 
 static void ptk_file_list_init(PtkFileList* list);
 
@@ -244,7 +243,7 @@ ptk_file_list_finalize(GObject* object)
 }
 
 PtkFileList*
-ptk_file_list_new(vfs::dir dir, bool show_hidden)
+ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden)
 {
     PtkFileList* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;
@@ -293,7 +292,7 @@ on_file_list_file_created(const vfs::file_info& file, PtkFileList* list)
 }
 
 void
-ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
+ptk_file_list_set_dir(PtkFileList* list, const std::shared_ptr<vfs::dir>& dir)
 {
     if (list->dir == dir)
     {
@@ -312,8 +311,6 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
         list->signal_file_deleted.disconnect();
         list->signal_file_changed.disconnect();
         list->signal_file_thumbnail_loaded.disconnect();
-
-        g_object_unref(list->dir);
     }
 
     list->dir = dir;
@@ -323,8 +320,6 @@ ptk_file_list_set_dir(PtkFileList* list, vfs::dir dir)
     {
         return;
     }
-
-    g_object_ref(list->dir);
 
     list->signal_file_created =
         list->dir->add_event<spacefm::signal::file_created>(on_file_list_file_created, list);
@@ -440,8 +435,9 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
     {
         case ptk::file_list::column::big_icon:
             /* special file can use special icons saved as thumbnails*/
-            if (!file->is_desktop_entry() && (list->max_thumbnail > file->size() ||
-                                              (list->max_thumbnail != 0 && file->is_video())))
+            if (file && !file->is_desktop_entry() &&
+                (list->max_thumbnail > file->size() ||
+                 (list->max_thumbnail != 0 && file->is_video())))
             {
                 icon = file->big_thumbnail();
             }
@@ -458,8 +454,8 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             break;
         case ptk::file_list::column::small_icon:
             /* special file can use special icons saved as thumbnails*/
-            if (list->max_thumbnail > file->size() ||
-                (list->max_thumbnail != 0 && file->is_video()))
+            if (file && (list->max_thumbnail > file->size() ||
+                         (list->max_thumbnail != 0 && file->is_video())))
             {
                 icon = file->small_thumbnail();
             }

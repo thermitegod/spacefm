@@ -19,6 +19,8 @@
 
 #include <filesystem>
 
+#include <memory>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -30,7 +32,7 @@
 #include "vfs/vfs-mime-monitor.hxx"
 
 static u32 mime_change_timer = 0;
-static vfs::dir mime_dir = nullptr;
+static std::shared_ptr<vfs::dir> mime_dir = nullptr;
 
 static bool
 on_mime_change_timer(void* user_data)

@@ -121,7 +121,7 @@ struct PtkFileBrowser
     GtkBox parent;
 
     /* <private> */
-    vfs::dir dir_{nullptr};
+    std::shared_ptr<vfs::dir> dir_{nullptr};
     GtkTreeModel* file_list_{nullptr};
     i32 max_thumbnail_{0};
     u64 n_sel_files_{0};
