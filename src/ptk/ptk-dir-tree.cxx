@@ -57,7 +57,7 @@ struct PtkDirTreeClass
 
 struct PtkDirTreeNode
 {
-    PtkDirTreeNode();
+    PtkDirTreeNode() = default;
     ~PtkDirTreeNode();
 
     vfs::file_info file{nullptr};
@@ -71,6 +71,23 @@ struct PtkDirTreeNode
     PtkDirTreeNode* last{nullptr};
     PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 };
+
+PtkDirTreeNode::~PtkDirTreeNode()
+{
+    this->file = nullptr;
+    this->monitor = nullptr;
+
+    std::vector<PtkDirTreeNode*> childs;
+    for (PtkDirTreeNode* child = this->children; child; child = child->next)
+    {
+        childs.emplace_back(child);
+    }
+    std::ranges::reverse(childs);
+    for (PtkDirTreeNode* child : childs)
+    {
+        delete child;
+    }
+}
 
 static void ptk_dir_tree_init(PtkDirTree* tree);
 
@@ -128,39 +145,6 @@ static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* p
 static GObjectClass* parent_class = nullptr;
 
 static std::map<ptk::dir_tree::column, GType> column_types;
-
-PtkDirTreeNode::PtkDirTreeNode()
-{
-    this->file = nullptr;
-    this->children = nullptr;
-    this->n_children = 0;
-    this->monitor = nullptr;
-    this->n_expand = 0;
-    this->parent = nullptr;
-    this->next = nullptr;
-    this->prev = nullptr;
-    this->last = nullptr;
-    this->tree = nullptr;
-}
-
-PtkDirTreeNode::~PtkDirTreeNode()
-{
-    std::vector<PtkDirTreeNode*> childs;
-    for (PtkDirTreeNode* child = this->children; child; child = child->next)
-    {
-        childs.emplace_back(child);
-    }
-    std::ranges::reverse(childs);
-    for (PtkDirTreeNode* child : childs)
-    {
-        delete child;
-    }
-
-    if (this->monitor)
-    {
-        vfs_file_monitor_remove(this->monitor, &on_file_monitor_event, this);
-    }
-}
 
 GType
 ptk_dir_tree_get_type()
