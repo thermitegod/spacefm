@@ -93,6 +93,8 @@ namespace vfs
 
         void reload_mime_type() noexcept;
 
+        const std::optional<std::vector<std::filesystem::path>> get_hidden_files() const noexcept;
+
         /* emit signals */
         void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
         void emit_file_deleted(const std::filesystem::path& file_name,

@@ -167,13 +167,13 @@ on_list_task_finished(const std::shared_ptr<vfs::dir>& dir, bool is_cancelled)
     dir->load_complete = true;
 }
 
-static const std::optional<std::vector<std::filesystem::path>>
-get_hidden_files(const std::filesystem::path& path) noexcept
+const std::optional<std::vector<std::filesystem::path>>
+vfs::dir::get_hidden_files() const noexcept
 {
     std::vector<std::filesystem::path> hidden;
 
     // Read .hidden into string
-    const auto hidden_path = path / ".hidden";
+    const auto hidden_path = this->path / ".hidden";
 
     if (!std::filesystem::is_regular_file(hidden_path))
     {
@@ -226,7 +226,7 @@ vfs_dir_load_thread(const vfs::async_thread_t& task, const std::shared_ptr<vfs::
     }
 
     // MOD  dir contains .hidden file?
-    const auto hidden_files = get_hidden_files(dir->path);
+    const auto hidden_files = dir->get_hidden_files();
 
     for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
     {
