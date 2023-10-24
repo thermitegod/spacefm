@@ -205,6 +205,13 @@ if not toml11_dep.found() # using subproject
   toml11_dep = toml11_proj.dependency('toml11')
 endif
 
+# CLI11 use system or subproject
+cli11_dep = dependency('CLI11', required : false)
+if not cli11_dep.found() # using subproject
+  cli11_dep_proj = subproject('cli11', required : true)
+  cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
+endif
+
 libudev_dep = dependency('libudev', required : true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
 openssl_dep = dependency('openssl', required : true)
@@ -216,7 +223,6 @@ fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 pugixml_dep = dependency('pugixml', required : true)
 nlohmann_json_dep = dependency('nlohmann_json', required : true)
-cli11_dep = dependency('CLI11', required : true)
 
 # zmqpp does not provide a pkgconfig file
 libzmq_dep = dependency('libzmq', required : true)
