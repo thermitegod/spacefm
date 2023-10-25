@@ -43,7 +43,7 @@ struct PtkFileList;
 
 namespace vfs
 {
-    struct thumbnail_loader;
+    struct thumbnailer;
 
     struct dir : public std::enable_shared_from_this<dir>
     {
@@ -64,7 +64,7 @@ namespace vfs
         bool show_hidden{true};
         bool avoid_changes{true};
 
-        std::shared_ptr<vfs::thumbnail_loader> thumbnail_loader{nullptr};
+        std::shared_ptr<vfs::thumbnailer> thumbnailer{nullptr};
 
         std::vector<std::shared_ptr<vfs::file>> changed_files{};
         std::vector<std::filesystem::path> created_files{};

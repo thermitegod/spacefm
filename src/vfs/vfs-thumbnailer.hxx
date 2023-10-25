@@ -37,14 +37,14 @@ namespace vfs
     struct dir;
     struct file;
 
-    struct thumbnail_loader : public std::enable_shared_from_this<thumbnail_loader>
+    struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
     {
       public:
-        thumbnail_loader() = delete;
-        thumbnail_loader(const std::shared_ptr<vfs::dir>& dir);
-        ~thumbnail_loader();
+        thumbnailer() = delete;
+        thumbnailer(const std::shared_ptr<vfs::dir>& dir);
+        ~thumbnailer();
 
-        static const std::shared_ptr<vfs::thumbnail_loader>
+        static const std::shared_ptr<vfs::thumbnailer>
         create(const std::shared_ptr<vfs::dir>& dir) noexcept;
 
         void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
@@ -67,7 +67,7 @@ namespace vfs
             std::map<size, i32> n_requests;
         };
 
-        std::deque<std::shared_ptr<vfs::thumbnail_loader::request>> queue{};
+        std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};
         std::deque<std::shared_ptr<vfs::file>> update_queue{};
     };
 } // namespace vfs
@@ -75,7 +75,7 @@ namespace vfs
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
 
-void vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir,
-                                  const std::shared_ptr<vfs::file>& file, const bool is_big);
+void vfs_thumbnail_request(const std::shared_ptr<vfs::dir>& dir,
+                           const std::shared_ptr<vfs::file>& file, const bool is_big);
 
 GdkPixbuf* vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size);

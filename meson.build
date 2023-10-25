@@ -422,7 +422,7 @@ sources = files(
     'src/vfs/vfs-mime-type.cxx',
     'src/vfs/vfs-mime-monitor.cxx',
     'src/vfs/vfs-monitor.cxx',
-    'src/vfs/vfs-thumbnail-loader.cxx',
+    'src/vfs/vfs-thumbnailer.cxx',
     'src/vfs/vfs-time.cxx',
     'src/vfs/vfs-user-dirs.cxx',
     'src/vfs/vfs-utils.cxx',

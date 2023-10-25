@@ -33,7 +33,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"

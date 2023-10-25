@@ -42,7 +42,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-thumbnailer.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-dialog.hxx"

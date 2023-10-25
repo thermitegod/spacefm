@@ -44,7 +44,7 @@
 #include "utils.hxx"
 
 #include "vfs/vfs-volume.hxx"
-#include "vfs/vfs-thumbnail-loader.hxx"
+#include "vfs/vfs-thumbnailer.hxx"
 
 #include "vfs/vfs-async-thread.hxx"
 
@@ -79,10 +79,10 @@ vfs::dir::~dir()
         this->task = nullptr;
     }
 
-    // ztd::logger::trace("this->monitor: {}", fmt::ptr(this->monitor));
-    // ztd::logger::trace("this->thumbnail_loader: {}", fmt::ptr(this->thumbnail_loader));
+    // ztd::logger::trace("this->monitor({})", fmt::ptr(this->monitor));
+    // ztd::logger::trace("this->thumbnailer({})", fmt::ptr(this->thumbnailer));
     this->monitor = nullptr;
-    this->thumbnail_loader = nullptr;
+    this->thumbnailer = nullptr;
 
     this->file_list.clear();
     this->changed_files.clear();
@@ -334,13 +334,13 @@ vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
 void
 vfs::dir::cancel_all_thumbnail_requests() noexcept
 {
-    this->thumbnail_loader = nullptr;
+    this->thumbnailer = nullptr;
 }
 
 void
 vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_big) noexcept
 {
-    vfs_thumbnail_loader_request(this->shared_from_this(), file, is_big);
+    vfs_thumbnail_request(this->shared_from_this(), file, is_big);
 }
 
 void
