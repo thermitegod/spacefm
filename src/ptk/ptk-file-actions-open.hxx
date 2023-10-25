@@ -25,12 +25,12 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
 // if app_desktop is empty each file will be opened with its default application
 // if xforce, force execute of executable ignoring app_settings.click_executes
 // if xnever, never execute an executable
 void ptk_open_files_with_app(const std::filesystem::path& cwd,
-                             const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                             const std::span<const std::shared_ptr<vfs::file>> selected_files,
                              const std::string_view app_desktop, PtkFileBrowser* file_browser,
                              bool xforce, bool xnever);

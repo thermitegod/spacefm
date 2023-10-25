@@ -23,16 +23,16 @@
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 
 void ptk_archiver_create(PtkFileBrowser* file_browser,
-                         const std::span<const std::shared_ptr<vfs::file_info>> sel_files);
+                         const std::span<const std::shared_ptr<vfs::file>> sel_files);
 
 void ptk_archiver_extract(PtkFileBrowser* file_browser,
-                          const std::span<const std::shared_ptr<vfs::file_info>> sel_files,
+                          const std::span<const std::shared_ptr<vfs::file>> sel_files,
                           const std::filesystem::path& dest_dir);
 
 void ptk_archiver_open(PtkFileBrowser* file_browser,
-                       const std::span<const std::shared_ptr<vfs::file_info>> sel_files);
+                       const std::span<const std::shared_ptr<vfs::file>> sel_files);

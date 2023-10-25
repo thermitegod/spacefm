@@ -995,12 +995,12 @@ ptk_file_menu_new(PtkFileBrowser* browser)
 
 GtkWidget*
 ptk_file_menu_new(PtkFileBrowser* browser,
-                  const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+                  const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     assert(browser != nullptr);
 
     std::filesystem::path file_path;
-    std::shared_ptr<vfs::file_info> file = nullptr;
+    std::shared_ptr<vfs::file> file = nullptr;
     if (!sel_files.empty())
     {
         file = sel_files.front();
@@ -1014,8 +1014,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
     data->browser = browser;
     data->file_path = file_path;
     data->file = file;
-    data->sel_files =
-        std::vector<std::shared_ptr<vfs::file_info>>(sel_files.begin(), sel_files.end());
+    data->sel_files = std::vector<std::shared_ptr<vfs::file>>(sel_files.begin(), sel_files.end());
 
 #if (GTK_MAJOR_VERSION == 4)
     data->accel_group = gtk_shortcut_controller_new();
@@ -2578,7 +2577,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             else
             {
                 const auto file = vfs_file_info_new(ao->path);
-                const std::vector<std::shared_ptr<vfs::file_info>> sel_files{file};
+                const std::vector<std::shared_ptr<vfs::file>> sel_files{file};
                 ptk_open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
             }
         }
@@ -2597,7 +2596,7 @@ create_new_file(PtkFileMenu* data, ptk::rename_mode create_new)
 
     const auto ao = new AutoOpenCreate(data->browser, false);
 
-    std::shared_ptr<vfs::file_info> file = nullptr;
+    std::shared_ptr<vfs::file> file = nullptr;
     if (!data->sel_files.empty())
     {
         file = data->sel_files.front();
@@ -2698,7 +2697,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
     const auto& cwd = browser->cwd();
     const auto sel_files = browser->selected_files();
 
-    std::shared_ptr<vfs::file_info> file = nullptr;
+    std::shared_ptr<vfs::file> file = nullptr;
     std::filesystem::path file_path;
     if (!sel_files.empty())
     {

@@ -46,7 +46,7 @@ is_archiver_installed()
 }
 
 static const std::string
-archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     std::string file_list;
     for (const auto& file : sel_files)
@@ -59,7 +59,7 @@ archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file_
 
 void
 ptk_archiver_create(PtkFileBrowser* file_browser,
-                    const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+                    const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     (void)file_browser;
 
@@ -77,7 +77,7 @@ ptk_archiver_create(PtkFileBrowser* file_browser,
 
 void
 ptk_archiver_extract(PtkFileBrowser* file_browser,
-                     const std::span<const std::shared_ptr<vfs::file_info>> sel_files,
+                     const std::span<const std::shared_ptr<vfs::file>> sel_files,
                      const std::filesystem::path& dest_dir)
 {
     if (!is_archiver_installed() || sel_files.empty())
@@ -106,7 +106,7 @@ ptk_archiver_extract(PtkFileBrowser* file_browser,
 
 void
 ptk_archiver_open(PtkFileBrowser* file_browser,
-                  const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+                  const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     (void)file_browser;
 

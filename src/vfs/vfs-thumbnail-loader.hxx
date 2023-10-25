@@ -24,7 +24,7 @@
 #include <memory>
 
 #include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 #include "vfs/vfs-async-task.hxx"
 
 // forward declare types
@@ -44,7 +44,7 @@ struct VFSThumbnailLoader : public std::enable_shared_from_this<VFSThumbnailLoad
     VFSThumbnailLoader(const std::shared_ptr<vfs::dir>& dir);
     ~VFSThumbnailLoader();
 
-    void loader_request(const std::shared_ptr<vfs::file_info>& file, bool is_big) noexcept;
+    void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
 
     std::shared_ptr<vfs::dir> dir{nullptr};
     vfs::async_task task{nullptr};
@@ -54,13 +54,13 @@ struct VFSThumbnailLoader : public std::enable_shared_from_this<VFSThumbnailLoad
     std::mutex mtx;
 
     std::deque<vfs::thumbnail_request_t> queue{};
-    std::deque<std::shared_ptr<vfs::file_info>> update_queue{};
+    std::deque<std::shared_ptr<vfs::file>> update_queue{};
 };
 
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
 
 void vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir,
-                                  const std::shared_ptr<vfs::file_info>& file, const bool is_big);
+                                  const std::shared_ptr<vfs::file>& file, const bool is_big);
 
-GdkPixbuf* vfs_thumbnail_load(const std::shared_ptr<vfs::file_info>& file, i32 thumb_size);
+GdkPixbuf* vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size);

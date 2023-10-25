@@ -31,9 +31,9 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
-/* sel_files is a list containing vfs::file_info structures
+/* sel_files is a list containing vfs::file structures
  * The list will be freed in this function, so the caller must not
  * free the list after calling this function.
  */
@@ -46,8 +46,8 @@ struct PtkFileMenu
     PtkFileBrowser* browser{nullptr};
     std::filesystem::path cwd{};
     std::filesystem::path file_path{};
-    std::shared_ptr<vfs::file_info> file{nullptr};
-    std::vector<std::shared_ptr<vfs::file_info>> sel_files;
+    std::shared_ptr<vfs::file> file{nullptr};
+    std::vector<std::shared_ptr<vfs::file>> sel_files;
 #if (GTK_MAJOR_VERSION == 4)
     GtkEventController* accel_group{nullptr};
 #elif (GTK_MAJOR_VERSION == 3)
@@ -67,7 +67,7 @@ struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser);
 GtkWidget* ptk_file_menu_new(PtkFileBrowser* browser,
-                             const std::span<const std::shared_ptr<vfs::file_info>> sel_files);
+                             const std::span<const std::shared_ptr<vfs::file>> sel_files);
 
 #if (GTK_MAJOR_VERSION == 4)
 void ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,

@@ -305,9 +305,9 @@ vfs_dir_mime_type_reload()
 * vfs::dir class
 */
 
-const std::shared_ptr<vfs::file_info>
+const std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& file_name,
-                    const std::shared_ptr<vfs::file_info>& file) const noexcept
+                    const std::shared_ptr<vfs::file>& file) const noexcept
 {
     for (const auto& file2 : this->file_list)
     {
@@ -324,7 +324,7 @@ vfs::dir::find_file(const std::filesystem::path& file_name,
 }
 
 bool
-vfs::dir::add_hidden(const std::shared_ptr<vfs::file_info>& file) const noexcept
+vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
 {
     const auto file_path = std::filesystem::path() / this->path / ".hidden";
     const std::string data = std::format("{}\n", file->name());
@@ -339,7 +339,7 @@ vfs::dir::cancel_all_thumbnail_requests() noexcept
 }
 
 void
-vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file_info>& file, const bool is_big) noexcept
+vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_big) noexcept
 {
     vfs_thumbnail_loader_request(this->shared_from_this(), file, is_big);
 }
@@ -378,7 +378,7 @@ vfs::dir::is_directory_empty() const noexcept
 }
 
 bool
-vfs::dir::update_file_info(const std::shared_ptr<vfs::file_info>& file) noexcept
+vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
 {
     bool ret = false;
 
@@ -527,7 +527,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& file_name, bool force) 
 
 void
 vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
-                            const std::shared_ptr<vfs::file_info>& file) noexcept
+                            const std::shared_ptr<vfs::file>& file) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 
@@ -558,7 +558,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
 
 void
 vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
-                            const std::shared_ptr<vfs::file_info>& file, bool force) noexcept
+                            const std::shared_ptr<vfs::file>& file, bool force) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 
@@ -603,7 +603,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
 }
 
 void
-vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file_info>& file) noexcept
+vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 

@@ -23,12 +23,12 @@
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
 void ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                     const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                     const std::span<const std::shared_ptr<vfs::file>> selected_files,
                      GtkTreeView* task_view);
 
 void ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                      const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                      const std::span<const std::shared_ptr<vfs::file>> selected_files,
                       GtkTreeView* task_view);

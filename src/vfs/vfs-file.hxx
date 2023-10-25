@@ -35,15 +35,15 @@
 
 namespace vfs
 {
-    struct file_info : public std::enable_shared_from_this<file_info>
+    struct file : public std::enable_shared_from_this<file>
     {
       public:
-        file_info(const std::filesystem::path& file_path);
-        ~file_info();
+        file(const std::filesystem::path& file_path);
+        ~file();
 
         // noncopyable
-        // file_info(const file_info&) = delete;
-        // file_info& operator=(const file_info&) = delete;
+        // file(const file&) = delete;
+        // file& operator=(const file&) = delete;
 
         const std::string_view name() const noexcept;
         const std::string_view display_name() const noexcept;
@@ -166,4 +166,4 @@ namespace vfs
     };
 } // namespace vfs
 
-const std::shared_ptr<vfs::file_info> vfs_file_info_new(const std::filesystem::path& file_path);
+const std::shared_ptr<vfs::file> vfs_file_info_new(const std::filesystem::path& file_path);

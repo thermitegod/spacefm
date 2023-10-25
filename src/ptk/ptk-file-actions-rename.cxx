@@ -49,7 +49,7 @@
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-utils.hxx"
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 
@@ -61,10 +61,10 @@
 
 struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {
-    MoveSet(const std::shared_ptr<vfs::file_info>& file_info) : file(file_info){};
+    MoveSet(const std::shared_ptr<vfs::file>& file) : file(file){};
     ~MoveSet() = default;
 
-    std::shared_ptr<vfs::file_info> file;
+    std::shared_ptr<vfs::file> file;
 
     std::filesystem::path full_path{};
     std::filesystem::path old_path{};
@@ -2290,7 +2290,7 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 
 i32
 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
-                const std::shared_ptr<vfs::file_info>& file, const char* dest_dir, bool clip_copy,
+                const std::shared_ptr<vfs::file>& file, const char* dest_dir, bool clip_copy,
                 ptk::rename_mode create_new, AutoOpenCreate* auto_open)
 {
     GtkWidget* task_view = nullptr;

@@ -108,7 +108,7 @@ PtkFileList* ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_h
 void ptk_file_list_set_dir(PtkFileList* list, const std::shared_ptr<vfs::dir>& dir);
 
 bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it,
-                             const std::shared_ptr<vfs::file_info>& file);
+                             const std::shared_ptr<vfs::file>& file);
 
 void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size);
 void ptk_file_list_sort(PtkFileList* list); // sfm

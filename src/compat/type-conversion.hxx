@@ -24,7 +24,7 @@
 
 #include <glibmm.h>
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
 // std::filesystem::path
 const std::vector<std::filesystem::path> glist_to_vector_path(GList* list);
@@ -32,6 +32,6 @@ const std::vector<std::filesystem::path> glist_to_vector_path(GList* list);
 // std::string
 const std::vector<std::string> glist_to_vector_string(GList* list);
 
-// vfs::file_info
-const std::vector<std::shared_ptr<vfs::file_info>> glist_to_vector_vfs_file_info(GList* list);
-GList* vector_to_glist_vfs_file_info(const std::span<const std::shared_ptr<vfs::file_info>> list);
+// vfs::file
+const std::vector<std::shared_ptr<vfs::file>> glist_to_vector_vfs_file(GList* list);
+GList* vector_to_glist_vfs_file(const std::span<const std::shared_ptr<vfs::file>> list);

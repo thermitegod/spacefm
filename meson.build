@@ -416,7 +416,7 @@ sources = files(
     'src/vfs/vfs-async-thread.cxx',
     'src/vfs/vfs-device.cxx',
     'src/vfs/vfs-dir.cxx',
-    'src/vfs/vfs-file-info.cxx',
+    'src/vfs/vfs-file.cxx',
     'src/vfs/vfs-file-monitor.cxx',
     'src/vfs/vfs-file-task.cxx',
     'src/vfs/vfs-file-trash.cxx',

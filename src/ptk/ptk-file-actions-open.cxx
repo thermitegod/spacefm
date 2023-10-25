@@ -35,7 +35,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -60,7 +60,7 @@ struct ParentInfo
 
 static bool
 open_archives(const std::shared_ptr<ParentInfo>& parent,
-              const std::span<const std::shared_ptr<vfs::file_info>> selected_files)
+              const std::span<const std::shared_ptr<vfs::file>> selected_files)
 {
     const auto is_archive = [](const auto& file) { return file->is_archive(); };
     if (!std::ranges::all_of(selected_files, is_archive))
@@ -132,7 +132,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 
 void
 ptk_open_files_with_app(const std::filesystem::path& cwd,
-                        const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                        const std::span<const std::shared_ptr<vfs::file>> selected_files,
                         const std::string_view app_desktop, PtkFileBrowser* file_browser,
                         bool xforce, bool xnever)
 {

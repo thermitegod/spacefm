@@ -24,7 +24,7 @@
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-menu.hxx"
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
 namespace ptk
 {
@@ -38,8 +38,8 @@ namespace ptk
 }
 
 i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
-                    const std::shared_ptr<vfs::file_info>& file, const char* dest_dir,
-                    bool clip_copy, ptk::rename_mode create_new, AutoOpenCreate* auto_open);
+                    const std::shared_ptr<vfs::file>& file, const char* dest_dir, bool clip_copy,
+                    ptk::rename_mode create_new, AutoOpenCreate* auto_open);
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path& cwd,
                             GFunc callback);

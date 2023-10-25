@@ -40,7 +40,7 @@
 // https://docs.gtk.org/gtk4/migrating-3to4.html#replace-gtkclipboard-with-gdkclipboard
 
 void
-ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file_info>> sel_files,
+ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> sel_files,
                                 bool copy)
 {
     (void)sel_files;
@@ -49,14 +49,14 @@ ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file_
 }
 
 void
-ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     (void)sel_files;
     ztd::logger::debug("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk_clipboard_copy_name(const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+ptk_clipboard_copy_name(const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     (void)sel_files;
     ztd::logger::debug("TODO - PORT - GdkClipboard");
@@ -209,7 +209,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data)
 }
 
 void
-ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel_files)
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -225,7 +225,7 @@ ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file_info>
 }
 
 void
-ptk_clipboard_copy_name(const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
+ptk_clipboard_copy_name(const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
@@ -251,7 +251,7 @@ ptk_clipboard_copy_text(const std::string_view text)
 }
 
 void
-ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file_info>> sel_files,
+ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> sel_files,
                                 bool copy)
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);

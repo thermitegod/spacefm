@@ -37,24 +37,24 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 
-const std::shared_ptr<vfs::file_info>
+const std::shared_ptr<vfs::file>
 vfs_file_info_new(const std::filesystem::path& path)
 {
-    return std::make_shared<vfs::file_info>(path);
+    return std::make_shared<vfs::file>(path);
 }
 
-vfs::file_info::file_info(const std::filesystem::path& path) : path_(path)
+vfs::file::file(const std::filesystem::path& path) : path_(path)
 {
-    // ztd::logger::debug("vfs::file_info::file_info({})    {}", fmt::ptr(this), this->path);
+    // ztd::logger::debug("vfs::file::file({})    {}", fmt::ptr(this), this->path);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
     this->update();
 }
 
-vfs::file_info::~file_info()
+vfs::file::~file()
 {
-    // ztd::logger::debug("vfs::file_info::~file_info({})   {}", fmt::ptr(this), this->path);
+    // ztd::logger::debug("vfs::file::~file({})   {}", fmt::ptr(this), this->path);
     if (this->big_thumbnail_)
     {
         g_object_unref(this->big_thumbnail_);
@@ -66,7 +66,7 @@ vfs::file_info::~file_info()
 }
 
 bool
-vfs::file_info::update() noexcept
+vfs::file::update() noexcept
 {
     if (std::filesystem::equivalent(this->path_, "/"))
     {
@@ -134,20 +134,20 @@ vfs::file_info::update() noexcept
 }
 
 const std::string_view
-vfs::file_info::name() const noexcept
+vfs::file::name() const noexcept
 {
     return this->name_;
 }
 
 // Get displayed name encoded in UTF-8
 const std::string_view
-vfs::file_info::display_name() const noexcept
+vfs::file::display_name() const noexcept
 {
     return this->display_name_;
 }
 
 void
-vfs::file_info::update_display_name(const std::string_view new_display_name) noexcept
+vfs::file::update_display_name(const std::string_view new_display_name) noexcept
 {
     this->display_name_ = new_display_name.data();
     // sfm get new collate keys
@@ -161,80 +161,80 @@ vfs::file_info::update_display_name(const std::string_view new_display_name) noe
 }
 
 const std::filesystem::path&
-vfs::file_info::path() const noexcept
+vfs::file::path() const noexcept
 {
     return this->path_;
 }
 
 const std::string_view
-vfs::file_info::uri() const noexcept
+vfs::file::uri() const noexcept
 {
     return this->uri_;
 }
 
 const std::string_view
-vfs::file_info::collate_key() const noexcept
+vfs::file::collate_key() const noexcept
 {
     return this->collate_key_;
 }
 
 const std::string_view
-vfs::file_info::collate_icase_key() const noexcept
+vfs::file::collate_icase_key() const noexcept
 {
     return this->collate_icase_key_;
 }
 
 u64
-vfs::file_info::size() const noexcept
+vfs::file::size() const noexcept
 {
     return this->file_stat_.size();
 }
 
 u64
-vfs::file_info::size_on_disk() const noexcept
+vfs::file::size_on_disk() const noexcept
 {
     return this->file_stat_.size_on_disk();
 }
 
 const std::string_view
-vfs::file_info::display_size() const noexcept
+vfs::file::display_size() const noexcept
 {
     return this->display_size_;
 }
 
 const std::string_view
-vfs::file_info::display_size_in_bytes() const noexcept
+vfs::file::display_size_in_bytes() const noexcept
 {
     return this->display_size_bytes_;
 }
 
 const std::string_view
-vfs::file_info::display_size_on_disk() const noexcept
+vfs::file::display_size_on_disk() const noexcept
 {
     return this->display_disk_size_;
 }
 
 u64
-vfs::file_info::blocks() const noexcept
+vfs::file::blocks() const noexcept
 {
     return this->file_stat_.blocks();
 }
 
 vfs::mime_type
-vfs::file_info::mime_type() const noexcept
+vfs::file::mime_type() const noexcept
 {
     return this->mime_type_;
 }
 
 void
-vfs::file_info::reload_mime_type() noexcept
+vfs::file::reload_mime_type() noexcept
 {
     this->mime_type_ = vfs_mime_type_get_from_file(this->path_);
     this->load_special_info();
 }
 
 const std::string_view
-vfs::file_info::special_directory_get_icon_name() const noexcept
+vfs::file::special_directory_get_icon_name() const noexcept
 {
     const bool symbolic = this->is_symlink();
 
@@ -281,7 +281,7 @@ vfs::file_info::special_directory_get_icon_name() const noexcept
 }
 
 GdkPixbuf*
-vfs::file_info::big_icon() noexcept
+vfs::file::big_icon() noexcept
 {
     if (this->is_desktop_entry() && this->big_thumbnail_)
     {
@@ -302,7 +302,7 @@ vfs::file_info::big_icon() noexcept
 }
 
 GdkPixbuf*
-vfs::file_info::small_icon() noexcept
+vfs::file::small_icon() noexcept
 {
     if (this->is_desktop_entry() && this->small_thumbnail_)
     {
@@ -323,19 +323,19 @@ vfs::file_info::small_icon() noexcept
 }
 
 GdkPixbuf*
-vfs::file_info::big_thumbnail() const noexcept
+vfs::file::big_thumbnail() const noexcept
 {
     return this->big_thumbnail_ ? g_object_ref(this->big_thumbnail_) : nullptr;
 }
 
 GdkPixbuf*
-vfs::file_info::small_thumbnail() const noexcept
+vfs::file::small_thumbnail() const noexcept
 {
     return this->small_thumbnail_ ? g_object_ref(this->small_thumbnail_) : nullptr;
 }
 
 void
-vfs::file_info::unload_big_thumbnail() noexcept
+vfs::file::unload_big_thumbnail() noexcept
 {
     if (this->big_thumbnail_)
     {
@@ -345,7 +345,7 @@ vfs::file_info::unload_big_thumbnail() noexcept
 }
 
 void
-vfs::file_info::unload_small_thumbnail() noexcept
+vfs::file::unload_small_thumbnail() noexcept
 {
     if (this->small_thumbnail_)
     {
@@ -355,61 +355,61 @@ vfs::file_info::unload_small_thumbnail() noexcept
 }
 
 const std::string_view
-vfs::file_info::display_owner() const noexcept
+vfs::file::display_owner() const noexcept
 {
     return this->display_owner_;
 }
 
 const std::string_view
-vfs::file_info::display_group() const noexcept
+vfs::file::display_group() const noexcept
 {
     return this->display_group_;
 }
 
 const std::string_view
-vfs::file_info::display_atime() const noexcept
+vfs::file::display_atime() const noexcept
 {
     return this->display_atime_;
 }
 
 const std::string_view
-vfs::file_info::display_btime() const noexcept
+vfs::file::display_btime() const noexcept
 {
     return this->display_btime_;
 }
 
 const std::string_view
-vfs::file_info::display_ctime() const noexcept
+vfs::file::display_ctime() const noexcept
 {
     return this->display_ctime_;
 }
 
 const std::string_view
-vfs::file_info::display_mtime() const noexcept
+vfs::file::display_mtime() const noexcept
 {
     return this->display_mtime_;
 }
 
 std::time_t
-vfs::file_info::atime() const noexcept
+vfs::file::atime() const noexcept
 {
     return this->file_stat_.atime().tv_sec;
 }
 
 std::time_t
-vfs::file_info::btime() const noexcept
+vfs::file::btime() const noexcept
 {
     return this->file_stat_.btime().tv_sec;
 }
 
 std::time_t
-vfs::file_info::ctime() const noexcept
+vfs::file::ctime() const noexcept
 {
     return this->file_stat_.ctime().tv_sec;
 }
 
 std::time_t
-vfs::file_info::mtime() const noexcept
+vfs::file::mtime() const noexcept
 {
     return this->file_stat_.mtime().tv_sec;
 }
@@ -560,7 +560,7 @@ get_file_perm_string(std::filesystem::file_status status)
 }
 
 const std::string_view
-vfs::file_info::display_permissions() noexcept
+vfs::file::display_permissions() noexcept
 {
     if (this->display_perm_.empty())
     {
@@ -570,7 +570,7 @@ vfs::file_info::display_permissions() noexcept
 }
 
 bool
-vfs::file_info::is_directory() const noexcept
+vfs::file::is_directory() const noexcept
 {
     // return std::filesystem::is_directory(this->status);
 
@@ -587,148 +587,148 @@ vfs::file_info::is_directory() const noexcept
 }
 
 bool
-vfs::file_info::is_regular_file() const noexcept
+vfs::file::is_regular_file() const noexcept
 {
     return std::filesystem::is_regular_file(this->status_);
 }
 
 bool
-vfs::file_info::is_symlink() const noexcept
+vfs::file::is_symlink() const noexcept
 {
     return std::filesystem::is_symlink(this->status_);
 }
 
 bool
-vfs::file_info::is_socket() const noexcept
+vfs::file::is_socket() const noexcept
 {
     return std::filesystem::is_socket(this->status_);
 }
 
 bool
-vfs::file_info::is_fifo() const noexcept
+vfs::file::is_fifo() const noexcept
 {
     return std::filesystem::is_fifo(this->status_);
 }
 
 bool
-vfs::file_info::is_block_file() const noexcept
+vfs::file::is_block_file() const noexcept
 {
     return std::filesystem::is_block_file(this->status_);
 }
 
 bool
-vfs::file_info::is_character_file() const noexcept
+vfs::file::is_character_file() const noexcept
 {
     return std::filesystem::is_character_file(this->status_);
 }
 
 bool
-vfs::file_info::is_other() const noexcept
+vfs::file::is_other() const noexcept
 {
     return (!this->is_directory() && !this->is_regular_file() && !this->is_symlink());
 }
 
 bool
-vfs::file_info::is_hidden() const noexcept
+vfs::file::is_hidden() const noexcept
 {
     return this->is_hidden_;
 }
 
 bool
-vfs::file_info::is_image() const noexcept
+vfs::file::is_image() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
     return this->mime_type_->type().starts_with("image/");
 }
 
 bool
-vfs::file_info::is_video() const noexcept
+vfs::file::is_video() const noexcept
 {
     // FIXME: We had better use functions of xdg_mime to check this
     return this->mime_type_->type().starts_with("video/");
 }
 
 bool
-vfs::file_info::is_desktop_entry() const noexcept
+vfs::file::is_desktop_entry() const noexcept
 {
     return this->is_special_desktop_entry_;
 }
 
 bool
-vfs::file_info::is_unknown_type() const noexcept
+vfs::file::is_unknown_type() const noexcept
 {
     return ztd::same(this->mime_type_->type(), XDG_MIME_TYPE_UNKNOWN);
 }
 
 // full path of the file is required by this function
 bool
-vfs::file_info::is_executable() const noexcept
+vfs::file::is_executable() const noexcept
 {
     return mime_type_is_executable_file(this->path(), this->mime_type_->type());
 }
 
 bool
-vfs::file_info::is_text() const noexcept
+vfs::file::is_text() const noexcept
 {
     return mime_type_is_text_file(this->path(), this->mime_type_->type());
 }
 
 bool
-vfs::file_info::is_archive() const noexcept
+vfs::file::is_archive() const noexcept
 {
     return mime_type_is_archive_file(this->path(), this->mime_type_->type());
 }
 
 bool
-vfs::file_info::is_compressed() const noexcept
+vfs::file::is_compressed() const noexcept
 {
     return this->file_stat_.is_compressed();
 }
 
 bool
-vfs::file_info::is_immutable() const noexcept
+vfs::file::is_immutable() const noexcept
 {
     return this->file_stat_.is_immutable();
 }
 
 bool
-vfs::file_info::is_append() const noexcept
+vfs::file::is_append() const noexcept
 {
     return this->file_stat_.is_append();
 }
 
 bool
-vfs::file_info::is_nodump() const noexcept
+vfs::file::is_nodump() const noexcept
 {
     return this->file_stat_.is_nodump();
 }
 
 bool
-vfs::file_info::is_encrypted() const noexcept
+vfs::file::is_encrypted() const noexcept
 {
     return this->file_stat_.is_encrypted();
 }
 
 bool
-vfs::file_info::is_verity() const noexcept
+vfs::file::is_verity() const noexcept
 {
     return this->file_stat_.is_verity();
 }
 
 bool
-vfs::file_info::is_dax() const noexcept
+vfs::file::is_dax() const noexcept
 {
     return this->file_stat_.is_dax();
 }
 
 std::filesystem::perms
-vfs::file_info::permissions() const noexcept
+vfs::file::permissions() const noexcept
 {
     return this->status_.permissions();
 }
 
 bool
-vfs::file_info::is_thumbnail_loaded(bool big) const noexcept
+vfs::file::is_thumbnail_loaded(bool big) const noexcept
 {
     if (big)
     {
@@ -738,7 +738,7 @@ vfs::file_info::is_thumbnail_loaded(bool big) const noexcept
 }
 
 void
-vfs::file_info::load_thumbnail(bool big) noexcept
+vfs::file::load_thumbnail(bool big) noexcept
 {
     if (big)
     {
@@ -751,7 +751,7 @@ vfs::file_info::load_thumbnail(bool big) noexcept
 }
 
 void
-vfs::file_info::load_thumbnail_small() noexcept
+vfs::file::load_thumbnail_small() noexcept
 {
     if (this->small_thumbnail_)
     {
@@ -782,7 +782,7 @@ vfs::file_info::load_thumbnail_small() noexcept
 }
 
 void
-vfs::file_info::load_thumbnail_big() noexcept
+vfs::file::load_thumbnail_big() noexcept
 {
     if (this->big_thumbnail_)
     {
@@ -813,7 +813,7 @@ vfs::file_info::load_thumbnail_big() noexcept
 }
 
 void
-vfs::file_info::load_special_info() noexcept
+vfs::file::load_special_info() noexcept
 {
     if (!this->name_.ends_with(".desktop"))
     {

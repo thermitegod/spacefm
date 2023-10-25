@@ -41,7 +41,7 @@
 #include "types.hxx"
 
 #include "vfs/vfs-file-monitor.hxx"
-#include "vfs/vfs-file-info.hxx"
+#include "vfs/vfs-file.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"
@@ -62,7 +62,7 @@ struct PtkDirTreeNode
     PtkDirTreeNode() = default;
     ~PtkDirTreeNode();
 
-    std::shared_ptr<vfs::file_info> file{nullptr};
+    std::shared_ptr<vfs::file> file{nullptr};
     PtkDirTreeNode* children{nullptr};
     i32 n_children{0};
     std::shared_ptr<vfs::file_monitor> monitor{nullptr};

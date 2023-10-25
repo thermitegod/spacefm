@@ -84,7 +84,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
         return true;
     }
 
-    std::shared_ptr<vfs::file_info> file;
+    std::shared_ptr<vfs::file> file;
     gtk_tree_model_get(model, iter, ptk::dir_tree::column::info, &file, -1);
     if (file && file->is_hidden())
     {
@@ -249,7 +249,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
         bool found = false;
         do
         {
-            std::shared_ptr<vfs::file_info> file;
+            std::shared_ptr<vfs::file> file;
             gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (!file)
             {
@@ -347,7 +347,7 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
     {
         return false;
     }
-    std::shared_ptr<vfs::file_info> file;
+    std::shared_ptr<vfs::file> file;
     gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
     if (!file)
     {
@@ -588,7 +588,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
-            std::shared_ptr<vfs::file_info> file;
+            std::shared_ptr<vfs::file> file;
             gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (file)
             {
