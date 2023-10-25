@@ -38,6 +38,9 @@ namespace vfs
         async_thread(vfs::async_thread::function_t task_function, void* user_data);
         ~async_thread();
 
+        static const std::shared_ptr<vfs::async_thread>
+        create(vfs::async_thread::function_t task_function, void* user_data) noexcept;
+
         void run();
         void cancel();
 
@@ -95,6 +98,3 @@ namespace vfs
         std::shared_ptr<vfs::dir> evt_data_load_dir{nullptr};
     };
 } // namespace vfs
-
-const std::shared_ptr<vfs::async_thread>
-vfs_async_thread_new(vfs::async_thread::function_t task_func, void* user_data);

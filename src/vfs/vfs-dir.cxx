@@ -354,7 +354,8 @@ vfs::dir::load() noexcept
     // ztd::logger::info("dir->path={}", dir->path);
     if (!this->task)
     {
-        this->task = vfs_async_thread_new((vfs::async_thread::function_t)vfs_dir_load_thread, this);
+        this->task =
+            vfs::async_thread::create((vfs::async_thread::function_t)vfs_dir_load_thread, this);
 
         this->signal_task_load_dir =
             this->task->add_event<spacefm::signal::task_finish>(on_list_task_finished,
