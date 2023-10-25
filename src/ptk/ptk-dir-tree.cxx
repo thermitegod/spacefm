@@ -805,7 +805,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     {
         if (!node->monitor)
         {
-            node->monitor = std::make_shared<vfs::monitor>(path, on_monitor_event, node);
+            node->monitor = vfs::monitor::create(path, on_monitor_event, node);
         }
 
         for (const auto& file : std::filesystem::directory_iterator(path))

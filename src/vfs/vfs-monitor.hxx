@@ -47,6 +47,9 @@ namespace vfs
         monitor(const std::filesystem::path& path, callback_t callback, void* user_data);
         ~monitor();
 
+        static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
+                                                     callback_t callback, void* user_data) noexcept;
+
       private:
         bool on_inotify_event(const Glib::IOCondition condition);
         void dispatch_event(const event event, const std::filesystem::path& file_name) noexcept;

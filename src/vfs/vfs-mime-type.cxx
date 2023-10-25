@@ -134,7 +134,7 @@ vfs_mime_type_init()
         }
 
         const auto monitor =
-            std::make_shared<vfs::monitor>(cache->file_path(), on_mime_cache_changed, nullptr);
+            vfs::monitor::create(cache->file_path(), on_mime_cache_changed, nullptr);
 
         mime_caches_monitors.emplace_back(monitor);
     }

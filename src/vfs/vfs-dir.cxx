@@ -222,8 +222,7 @@ vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
     /* Install file alteration monitor */
     if (!dir->monitor)
     {
-        dir->monitor =
-            std::make_shared<vfs::monitor>(dir->path, vfs_dir_monitor_callback, dir.get());
+        dir->monitor = vfs::monitor::create(dir->path, vfs_dir_monitor_callback, dir.get());
     }
 
     // MOD  dir contains .hidden file?

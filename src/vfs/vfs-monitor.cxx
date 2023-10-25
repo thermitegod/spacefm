@@ -40,6 +40,13 @@
 inline constexpr u32 EVENT_SIZE = (sizeof(inotify_event));
 inline constexpr u32 EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
 
+const std::shared_ptr<vfs::monitor>
+vfs::monitor::create(const std::filesystem::path& path, callback_t callback,
+                     void* user_data) noexcept
+{
+    return std::make_shared<vfs::monitor>(path, callback, user_data);
+}
+
 vfs::monitor::monitor(const std::filesystem::path& path, callback_t callback, void* user_data)
     : path_(path)
 {
