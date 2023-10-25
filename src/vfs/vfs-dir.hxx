@@ -30,7 +30,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-file-monitor.hxx"
+#include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-file.hxx"
 
 #include "vfs/vfs-async-thread.hxx"
@@ -56,7 +56,7 @@ namespace vfs
         std::vector<std::shared_ptr<vfs::file>> file_list{};
 
         /*<private>*/
-        std::shared_ptr<vfs::file_monitor> monitor{nullptr};
+        std::shared_ptr<vfs::monitor> monitor{nullptr};
         std::shared_ptr<vfs::async_thread> task{nullptr};
 
         bool file_listed{true};

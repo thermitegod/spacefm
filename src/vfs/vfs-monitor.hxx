@@ -29,29 +29,27 @@
 
 namespace vfs
 {
-    enum class file_monitor_event
+    struct monitor
     {
-        created,
-        deleted,
-        changed,
-        other,
-    };
+        enum class event
+        {
+            created,
+            deleted,
+            changed,
+            other,
+        };
 
-    // Callback function which will be called when monitored events happen
-    using file_monitor_callback_t = void (*)(const vfs::file_monitor_event event,
-                                             const std::filesystem::path& path, void* user_data);
+        // Callback function which will be called when monitored events happen
+        using callback_t = void (*)(const event event, const std::filesystem::path& path,
+                                    void* user_data);
 
-    struct file_monitor
-    {
-        file_monitor() = delete;
-        file_monitor(const std::filesystem::path& path, vfs::file_monitor_callback_t callback,
-                     void* user_data);
-        ~file_monitor();
+        monitor() = delete;
+        monitor(const std::filesystem::path& path, callback_t callback, void* user_data);
+        ~monitor();
 
       private:
         bool on_inotify_event(const Glib::IOCondition condition);
-        void dispatch_event(vfs::file_monitor_event event,
-                            const std::filesystem::path& file_name) noexcept;
+        void dispatch_event(const event event, const std::filesystem::path& file_name) noexcept;
 
         i32 inotify_fd_{-1};
         i32 inotify_wd_{-1};
@@ -67,7 +65,7 @@ namespace vfs
 
         struct callback_entry
         {
-            vfs::file_monitor_callback_t callback{nullptr};
+            callback_t callback{nullptr};
             void* user_data{nullptr};
         };
         // std::vector<callback_entry> callbacks_{};

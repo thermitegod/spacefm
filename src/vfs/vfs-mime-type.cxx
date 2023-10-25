@@ -46,17 +46,17 @@
 #include "mime-type/mime-action.hxx"
 #include "mime-type/mime-type.hxx"
 
+#include "vfs/vfs-monitor.hxx"
+#include "vfs/vfs-dir.hxx"
+#include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-file-monitor.hxx"
 
 #include "vfs/vfs-dir.hxx"
-
-#include "vfs/vfs-utils.hxx"
 
 static std::map<std::string, vfs::mime_type> mime_map;
 std::mutex mime_map_lock;
 
-static std::vector<std::shared_ptr<vfs::file_monitor>> mime_caches_monitors;
+static std::vector<std::shared_ptr<vfs::monitor>> mime_caches_monitors;
 
 vfs::mime_type
 vfs_mime_type_new(const std::string_view type_name)
@@ -100,7 +100,7 @@ vfs_mime_type_reload()
 }
 
 static void
-on_mime_cache_changed(vfs::file_monitor_event event, const std::filesystem::path& path,
+on_mime_cache_changed(const vfs::monitor::event event, const std::filesystem::path& path,
                       void* user_data)
 {
     (void)event;
@@ -134,7 +134,7 @@ vfs_mime_type_init()
         }
 
         const auto monitor =
-            std::make_shared<vfs::file_monitor>(cache->file_path(), on_mime_cache_changed, nullptr);
+            std::make_shared<vfs::monitor>(cache->file_path(), on_mime_cache_changed, nullptr);
 
         mime_caches_monitors.emplace_back(monitor);
     }

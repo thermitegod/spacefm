@@ -40,7 +40,7 @@
 
 #include "types.hxx"
 
-#include "vfs/vfs-file-monitor.hxx"
+#include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-utils.hxx"
 
@@ -65,7 +65,7 @@ struct PtkDirTreeNode
     std::shared_ptr<vfs::file> file{nullptr};
     PtkDirTreeNode* children{nullptr};
     i32 n_children{0};
-    std::shared_ptr<vfs::file_monitor> monitor{nullptr};
+    std::shared_ptr<vfs::monitor> monitor{nullptr};
     i32 n_expand{0};
     PtkDirTreeNode* parent{nullptr};
     PtkDirTreeNode* next{nullptr};
@@ -138,8 +138,8 @@ static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
 
 /* signal handlers */
 
-static void on_file_monitor_event(vfs::file_monitor_event event, const std::filesystem::path& path,
-                                  void* user_data);
+static void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path,
+                             void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
                                              const std::filesystem::path& path);
@@ -805,7 +805,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     {
         if (!node->monitor)
         {
-            node->monitor = std::make_shared<vfs::file_monitor>(path, on_file_monitor_event, node);
+            node->monitor = std::make_shared<vfs::monitor>(path, on_monitor_event, node);
         }
 
         for (const auto& file : std::filesystem::directory_iterator(path))
@@ -885,15 +885,15 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
 }
 
 static void
-on_file_monitor_event(vfs::file_monitor_event event, const std::filesystem::path& path,
-                      void* user_data)
+on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path,
+                 void* user_data)
 {
     PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);
     assert(node != nullptr);
 
     PtkDirTreeNode* child = find_node(node, path.filename().string());
 
-    if (event == vfs::file_monitor_event::created)
+    if (event == vfs::monitor::event::created)
     {
         if (!child)
         {
@@ -916,7 +916,7 @@ on_file_monitor_event(vfs::file_monitor_event event, const std::filesystem::path
             }
         }
     }
-    else if (event == vfs::file_monitor_event::deleted)
+    else if (event == vfs::monitor::event::deleted)
     {
         if (child)
         {

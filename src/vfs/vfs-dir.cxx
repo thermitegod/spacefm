@@ -50,7 +50,7 @@
 
 #include "vfs/vfs-dir.hxx"
 
-static void vfs_dir_monitor_callback(vfs::file_monitor_event event,
+static void vfs_dir_monitor_callback(const vfs::monitor::event event,
                                      const std::filesystem::path& path, void* user_data);
 
 const std::shared_ptr<vfs::dir>
@@ -223,7 +223,7 @@ vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
     if (!dir->monitor)
     {
         dir->monitor =
-            std::make_shared<vfs::file_monitor>(dir->path, vfs_dir_monitor_callback, dir.get());
+            std::make_shared<vfs::monitor>(dir->path, vfs_dir_monitor_callback, dir.get());
     }
 
     // MOD  dir contains .hidden file?
@@ -271,7 +271,7 @@ vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
 
 /* Callback function which will be called when monitored events happen */
 static void
-vfs_dir_monitor_callback(vfs::file_monitor_event event, const std::filesystem::path& path,
+vfs_dir_monitor_callback(const vfs::monitor::event event, const std::filesystem::path& path,
                          void* user_data)
 {
     assert(user_data != nullptr);
@@ -279,16 +279,16 @@ vfs_dir_monitor_callback(vfs::file_monitor_event event, const std::filesystem::p
 
     switch (event)
     {
-        case vfs::file_monitor_event::created:
+        case vfs::monitor::event::created:
             dir->emit_file_created(path.filename(), false);
             break;
-        case vfs::file_monitor_event::deleted:
+        case vfs::monitor::event::deleted:
             dir->emit_file_deleted(path.filename(), nullptr);
             break;
-        case vfs::file_monitor_event::changed:
+        case vfs::monitor::event::changed:
             dir->emit_file_changed(path.filename(), nullptr, false);
             break;
-        case vfs::file_monitor_event::other:
+        case vfs::monitor::event::other:
             break;
     }
 }
