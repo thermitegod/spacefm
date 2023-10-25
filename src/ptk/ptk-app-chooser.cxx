@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -202,7 +203,7 @@ on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dial
 }
 
 GtkWidget*
-init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
+init_associated_apps_tab(GtkWidget* dialog, const std::shared_ptr<vfs::mime_type>& mime_type)
 {
     GtkScrolledWindow* scrolled_window =
         GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
@@ -232,7 +233,7 @@ init_associated_apps_tab(GtkWidget* dialog, vfs::mime_type mime_type)
         const auto type = mime_type->type();
         if (apps.empty() && mime_type_is_text_file("", type))
         {
-            mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            // mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
         }
         if (!apps.empty())
         {
@@ -319,8 +320,8 @@ init_all_apps_tab(GtkWidget* dialog)
 }
 
 static GtkWidget*
-app_chooser_dialog(GtkWindow* parent, const vfs::mime_type& mime_type, bool focus_all_apps,
-                   bool show_command, bool show_default, bool dir_default)
+app_chooser_dialog(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
+                   bool focus_all_apps, bool show_command, bool show_default, bool dir_default)
 {
     // focus_all_apps      Focus All Apps tab by default
     // show_command        Show custom Command entry
@@ -543,7 +544,7 @@ on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
 }
 
 const std::optional<std::string>
-ptk_choose_app_for_mime_type(GtkWindow* parent, const vfs::mime_type& mime_type,
+ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
                              bool focus_all_apps, bool show_command, bool show_default,
                              bool dir_default)
 {

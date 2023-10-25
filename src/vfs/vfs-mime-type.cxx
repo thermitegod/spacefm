@@ -24,9 +24,6 @@
 
 #include <map>
 
-#include <algorithm>
-#include <ranges>
-
 #include <thread>
 #include <mutex>
 #include <chrono>
@@ -51,28 +48,26 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-mime-type.hxx"
 
-#include "vfs/vfs-dir.hxx"
-
-static std::map<std::string, vfs::mime_type> mime_map;
+static std::map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
 std::mutex mime_map_lock;
 
 static std::vector<std::shared_ptr<vfs::monitor>> mime_caches_monitors;
 
-vfs::mime_type
+const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_new(const std::string_view type_name)
 {
-    auto mime_type = std::make_shared<VFSMimeType>(type_name);
+    auto mime_type = std::make_shared<vfs::mime_type>(type_name);
     return mime_type;
 }
 
-vfs::mime_type
+const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_get_from_file(const std::filesystem::path& file_path)
 {
     const std::string type = mime_type_get_by_file(file_path);
     return vfs_mime_type_get_from_type(type);
 }
 
-vfs::mime_type
+const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_get_from_type(const std::string_view type)
 {
     std::unique_lock<std::mutex> lock(mime_map_lock);
@@ -82,7 +77,7 @@ vfs_mime_type_get_from_type(const std::string_view type)
         return mime_map.at(type.data());
     }
 
-    vfs::mime_type mime_type = vfs_mime_type_new(type);
+    const auto mime_type = vfs_mime_type_new(type);
     mime_map.insert({mime_type->type().data(), mime_type});
 
     return mime_type;
@@ -153,7 +148,7 @@ vfs_mime_type_finalize()
 
 /////////////////////////////////////
 
-VFSMimeType::VFSMimeType(const std::string_view type_name) : type_(type_name)
+vfs::mime_type::mime_type(const std::string_view type_name) : type_(type_name)
 {
     const auto icon_data = mime_type_get_desc_icon(this->type_);
     this->description_ = icon_data[1];
@@ -168,7 +163,7 @@ VFSMimeType::VFSMimeType(const std::string_view type_name) : type_(type_name)
     }
 }
 
-VFSMimeType::~VFSMimeType()
+vfs::mime_type::~mime_type()
 {
     if (this->big_icon_)
     {
@@ -181,7 +176,7 @@ VFSMimeType::~VFSMimeType()
 }
 
 GdkPixbuf*
-VFSMimeType::icon(bool big) noexcept
+vfs::mime_type::icon(bool big) noexcept
 {
     i32 icon_size;
 
@@ -254,7 +249,7 @@ VFSMimeType::icon(bool big) noexcept
     if (this->description_.empty())
     {
         ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
-        vfs::mime_type vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        const auto vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
             this->description_ = vfs_mime->description();
@@ -287,7 +282,7 @@ VFSMimeType::icon(bool big) noexcept
         if (!ztd::same(this->type_, XDG_MIME_TYPE_UNKNOWN))
         {
             /* FIXME: fallback to icon of parent mime-type */
-            vfs::mime_type unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+            const auto unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
             icon = unknown->icon(big);
         }
         else /* unknown */
@@ -308,26 +303,26 @@ VFSMimeType::icon(bool big) noexcept
 }
 
 const std::string_view
-VFSMimeType::type() const noexcept
+vfs::mime_type::type() const noexcept
 {
     return this->type_;
 }
 
 /* Get human-readable description of mime type */
 const std::string_view
-VFSMimeType::description() noexcept
+vfs::mime_type::description() noexcept
 {
     return this->description_;
 }
 
 const std::vector<std::string>
-VFSMimeType::actions() const noexcept
+vfs::mime_type::actions() const noexcept
 {
     return mime_type_get_actions(this->type_);
 }
 
 const std::optional<std::string>
-VFSMimeType::default_action() const noexcept
+vfs::mime_type::default_action() const noexcept
 {
     auto def = mime_type_get_default_action(this->type_);
 
@@ -354,7 +349,7 @@ VFSMimeType::default_action() const noexcept
  * app can be the name of the desktop file or a command line.
  */
 void
-VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
+vfs::mime_type::set_default_action(const std::string_view desktop_id) noexcept
 {
     const auto custom_desktop = this->add_action(desktop_id);
 
@@ -363,7 +358,7 @@ VFSMimeType::set_default_action(const std::string_view desktop_id) noexcept
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
 const std::string
-VFSMimeType::add_action(const std::string_view desktop_id) noexcept
+vfs::mime_type::add_action(const std::string_view desktop_id) noexcept
 {
     // MOD  do not create custom desktop file if desktop_id is not a command
     if (!desktop_id.ends_with(".desktop"))

@@ -1071,7 +1071,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
     const tab_t tab_num = counts.tab_num;
 
     // Get mime type and apps
-    vfs::mime_type mime_type = nullptr;
+    std::shared_ptr<vfs::mime_type> mime_type = nullptr;
     std::vector<std::string> apps{};
     if (file)
     {
@@ -1204,7 +1204,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
         {
-            vfs::mime_type txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            const auto txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
             const std::vector<std::string> txt_apps = txt_type->actions();
             if (!txt_apps.empty())
             {
@@ -1624,7 +1624,7 @@ static void
 on_popup_open_with_another_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
-    vfs::mime_type mime_type;
+    std::shared_ptr<vfs::mime_type> mime_type;
 
     if (data->file)
     {
@@ -1737,7 +1737,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         return;
     }
 
-    vfs::mime_type mime_type = data->file->mime_type();
+    auto mime_type = data->file->mime_type();
     if (!mime_type)
     {
         mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
@@ -2095,7 +2095,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     }
 
     std::string type;
-    vfs::mime_type mime_type = data->file->mime_type();
+    const auto mime_type = data->file->mime_type();
     if (mime_type)
     {
         type = mime_type->type();

@@ -184,7 +184,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         // Find app to open this file
         std::optional<std::string> alloc_desktop = std::nullopt;
 
-        vfs::mime_type mime_type = file->mime_type();
+        auto mime_type = file->mime_type();
 
         // archive has special handling
         if (!selected_files.empty() && open_archives(parent, selected_files))

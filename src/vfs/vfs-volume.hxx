@@ -51,7 +51,6 @@ namespace vfs
 
 // forward declare types
 struct VFSVolume;
-struct VFSMimeType;
 
 namespace vfs
 {

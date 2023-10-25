@@ -436,8 +436,8 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
         page.add_row("Link Target: ", GTK_WIDGET(create_prop_text_box(target)));
     }
 
-    vfs::mime_type type;
-    vfs::mime_type type2 = nullptr;
+    std::shared_ptr<vfs::mime_type> type;
+    std::shared_ptr<vfs::mime_type> type2 = nullptr;
     bool same_type = true;
     bool is_dirs = false;
     for (const auto& selected_file : selected_files)

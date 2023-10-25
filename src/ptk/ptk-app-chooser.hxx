@@ -26,8 +26,7 @@
 #include "vfs/vfs-mime-type.hxx"
 
 // Let the user choose a application
-const std::optional<std::string> ptk_choose_app_for_mime_type(GtkWindow* parent,
-                                                              const vfs::mime_type& mime_type,
-                                                              bool focus_all_apps,
-                                                              bool show_command, bool show_default,
-                                                              bool dir_default);
+const std::optional<std::string>
+ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
+                             bool focus_all_apps, bool show_command, bool show_default,
+                             bool dir_default);

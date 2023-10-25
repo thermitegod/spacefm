@@ -34,55 +34,52 @@
 
 #include "mime-type/mime-type.hxx"
 
-struct VFSMimeType
-{
-  public:
-    VFSMimeType(const std::string_view type_name);
-    ~VFSMimeType();
-
-    GdkPixbuf* icon(bool big) noexcept;
-
-    // Get mime-type string
-    const std::string_view type() const noexcept;
-
-    // Get human-readable description of mime-type
-    const std::string_view description() noexcept;
-
-    // Get available actions (applications) for this mime-type
-    // returned vector should be freed with g_strfreev when not needed.
-    const std::vector<std::string> actions() const noexcept;
-
-    // returned string should be freed with g_strfreev when not needed.
-    const std::optional<std::string> default_action() const noexcept;
-
-    void set_default_action(const std::string_view desktop_id) noexcept;
-
-    // If user-custom desktop file is created, it is returned in custom_desktop.
-    const std::string add_action(const std::string_view desktop_id) noexcept;
-
-  private:
-    std::string type_{};        // mime_type-type string
-    std::string description_{}; // description of the mimele type
-    GdkPixbuf* big_icon_{nullptr};
-    GdkPixbuf* small_icon_{nullptr};
-    i32 icon_size_big_{0};
-    i32 icon_size_small_{0};
-};
-
 namespace vfs
 {
-    using mime_type_callback_entry = void (*)();
+    struct mime_type
+    {
+      public:
+        mime_type(const std::string_view type_name);
+        ~mime_type();
 
-    using mime_type = std::shared_ptr<VFSMimeType>;
+        GdkPixbuf* icon(bool big) noexcept;
+
+        // Get mime-type string
+        const std::string_view type() const noexcept;
+
+        // Get human-readable description of mime-type
+        const std::string_view description() noexcept;
+
+        // Get available actions (applications) for this mime-type
+        // returned vector should be freed with g_strfreev when not needed.
+        const std::vector<std::string> actions() const noexcept;
+
+        // returned string should be freed with g_strfreev when not needed.
+        const std::optional<std::string> default_action() const noexcept;
+
+        void set_default_action(const std::string_view desktop_id) noexcept;
+
+        // If user-custom desktop file is created, it is returned in custom_desktop.
+        const std::string add_action(const std::string_view desktop_id) noexcept;
+
+      private:
+        std::string type_{};        // mime_type-type string
+        std::string description_{}; // description of the mime type
+        GdkPixbuf* big_icon_{nullptr};
+        GdkPixbuf* small_icon_{nullptr};
+        i32 icon_size_big_{0};
+        i32 icon_size_small_{0};
+    };
 } // namespace vfs
 
 void vfs_mime_type_init();
 void vfs_mime_type_finalize();
 
-vfs::mime_type vfs_mime_type_new(const std::string_view type_name);
+const std::shared_ptr<vfs::mime_type> vfs_mime_type_new(const std::string_view type_name);
 
-vfs::mime_type vfs_mime_type_get_from_file(const std::filesystem::path& file_path);
-vfs::mime_type vfs_mime_type_get_from_type(const std::string_view type);
+const std::shared_ptr<vfs::mime_type>
+vfs_mime_type_get_from_file(const std::filesystem::path& file_path);
+const std::shared_ptr<vfs::mime_type> vfs_mime_type_get_from_type(const std::string_view type);
 
 //////////////////////
 

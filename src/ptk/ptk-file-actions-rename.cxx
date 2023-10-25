@@ -2475,7 +2475,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
     }
     else if (file)
     {
-        vfs::mime_type mime_type = file->mime_type();
+        const auto mime_type = file->mime_type();
         if (mime_type)
         {
             mset->mime_type = mime_type->type();

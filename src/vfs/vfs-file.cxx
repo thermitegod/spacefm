@@ -221,7 +221,7 @@ vfs::file::blocks() const noexcept
     return this->file_stat_.blocks();
 }
 
-vfs::mime_type
+const std::shared_ptr<vfs::mime_type>&
 vfs::file::mime_type() const noexcept
 {
     return this->mime_type_;
