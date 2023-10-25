@@ -80,7 +80,7 @@ open_file(const std::filesystem::path& path)
     }
     const auto& app_name = check_app_name.value();
 
-    const auto desktop = vfs_get_desktop(app_name);
+    const auto desktop = vfs::desktop::create(app_name);
 
     const bool opened = desktop->open_file(vfs::user_dirs->current_dir(), path);
     if (!opened)

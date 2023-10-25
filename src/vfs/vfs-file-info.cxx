@@ -822,7 +822,7 @@ VFSFileInfo::load_special_info() noexcept
     }
 
     this->is_special_desktop_entry_ = true;
-    const auto desktop = vfs_get_desktop(this->path_);
+    const auto desktop = vfs::desktop::create(this->path_);
 
     // MOD  display real filenames of .desktop files not in desktop directory
     // if (std::filesystem::equivalent(this->path_.parent_path(), vfs::user_dirs->desktop_dir()))

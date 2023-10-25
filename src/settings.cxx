@@ -319,7 +319,7 @@ load_settings()
             const auto default_app = mime_type->default_action();
             if (default_app)
             {
-                const auto desktop = vfs_get_desktop(default_app.value());
+                const auto desktop = vfs::desktop::create(default_app.value());
                 xset_set(xset::name::editor, xset::var::s, desktop->path().string());
             }
         }
@@ -827,12 +827,12 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     std::shared_ptr<vfs::desktop> desktop;
     if (editor.ends_with(".desktop"))
     {
-        desktop = vfs_get_desktop(editor);
+        desktop = vfs::desktop::create(editor);
     }
     else
     { // this might work
         ztd::logger::warn("Editor is not set to a .desktop file");
-        desktop = vfs_get_desktop(fmt::format("{}.desktop", editor));
+        desktop = vfs::desktop::create(std::format("{}.desktop", editor));
     }
 
     const std::vector<std::filesystem::path> open_files{path};

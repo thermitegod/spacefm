@@ -66,7 +66,7 @@ static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
 std::map<std::filesystem::path, std::shared_ptr<vfs::desktop>> desktops_cache;
 
 const std::shared_ptr<vfs::desktop>
-vfs_get_desktop(const std::filesystem::path& desktop_file)
+vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 {
     if (desktops_cache.contains(desktop_file))
     {
@@ -74,7 +74,6 @@ vfs_get_desktop(const std::filesystem::path& desktop_file)
         // ztd::logger::info("vfs::desktop::desktop({})  cache   {}", fmt::ptr(desktop), desktop_file.string());
         return desktop;
     }
-    // ztd::logger::info("new vfs_get_desktop={}", desktop_file.string());
 
     auto desktop = std::make_shared<vfs::desktop>(desktop_file);
     desktops_cache.insert({desktop_file, desktop});

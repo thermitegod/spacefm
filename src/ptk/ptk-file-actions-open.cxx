@@ -108,7 +108,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
         return false;
     }
 
-    const auto desktop = vfs_get_desktop(app_desktop);
+    const auto desktop = vfs::desktop::create(app_desktop);
 
     ztd::logger::info("EXEC({})={}", desktop->path().string(), desktop->exec());
 

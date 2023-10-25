@@ -119,7 +119,7 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
                                -1);
             if (file)
             {
-                const auto desktop = vfs_get_desktop(path);
+                const auto desktop = vfs::desktop::create(path);
                 if (ztd::same(file, desktop->name()))
                 {
                     // already exists
@@ -131,7 +131,7 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list_store), &iter));
     }
 
-    const auto desktop = vfs_get_desktop(path);
+    const auto desktop = vfs::desktop::create(path);
 
     // tooltip
     const std::string tooltip = std::format("{}\nName={}\nExec={}\nTerminal={}",

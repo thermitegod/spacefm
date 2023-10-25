@@ -28,6 +28,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
@@ -42,6 +44,8 @@ namespace vfs
         // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", fmt::ptr(this)) };
 
         desktop(const std::filesystem::path& desktop_file) noexcept;
+
+        static const std::shared_ptr<desktop> create(const std::filesystem::path& path) noexcept;
 
         [[nodiscard]] const std::string_view name() const noexcept;
         [[nodiscard]] const std::string_view display_name() const noexcept;
@@ -96,5 +100,3 @@ namespace vfs
         desktop_entry_data desktop_entry_;
     };
 } // namespace vfs
-
-const std::shared_ptr<vfs::desktop> vfs_get_desktop(const std::filesystem::path& desktop_file);

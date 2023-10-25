@@ -155,7 +155,7 @@ xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size
     {
         if (set->z && set->z.value().ends_with(".desktop"))
         {
-            const auto desktop = vfs_get_desktop(set->z.value());
+            const auto desktop = vfs::desktop::create(set->z.value());
 
             if (!set->menu_label)
             {
