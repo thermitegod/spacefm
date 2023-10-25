@@ -25,6 +25,8 @@
 
 #include <vector>
 
+#include <memory>
+
 #include <glibmm.h>
 
 #include <magic_enum.hpp>
@@ -61,19 +63,21 @@ static i32 n_vols = 0;
 
 static void ptk_location_view_init_model(GtkListStore* list);
 
-static void on_volume_event(vfs::volume vol, vfs::volume_state state, void* user_data);
+static void on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state,
+                            void* user_data);
 
-static void add_volume(vfs::volume vol, bool set_icon);
-static void remove_volume(vfs::volume vol);
-static void update_volume(vfs::volume vol);
+static void add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon);
+static void remove_volume(const std::shared_ptr<vfs::volume>& vol);
+static void update_volume(const std::shared_ptr<vfs::volume>& vol);
 
 static bool on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data);
 static bool on_key_press_event(GtkWidget* w, GdkEvent* event, PtkFileBrowser* file_browser);
 
-static bool try_mount(GtkTreeView* view, vfs::volume vol);
+static bool try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol);
 
-static void on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2);
-static void on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2);
+static void on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
+                        GtkWidget* view2);
+static void on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2);
 
 namespace ptk::location_view
 {
@@ -116,7 +120,7 @@ AutoOpen::~AutoOpen()
     }
 }
 
-static bool volume_is_visible(vfs::volume vol);
+static bool volume_is_visible(const std::shared_ptr<vfs::volume>& vol);
 static void update_all();
 
 /*  Drag & Drop/Clipboard targets  */
@@ -153,7 +157,7 @@ update_volume_icons()
     {
         do
         {
-            vfs::volume vol = nullptr;
+            std::shared_ptr<vfs::volume> vol = nullptr;
             gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
             if (vol)
             {
@@ -208,9 +212,9 @@ update_all()
         return;
     }
 
-    vfs::volume v = nullptr;
+    std::shared_ptr<vfs::volume> v = nullptr;
 
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
         if (volume)
         {
@@ -249,9 +253,14 @@ update_all()
 static void
 update_names()
 {
-    vfs::volume v = nullptr;
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    std::shared_ptr<vfs::volume> v = nullptr;
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
+        if (!volume)
+        {
+            continue;
+        }
+
         volume->set_info();
 
         // search model for volume vol
@@ -284,7 +293,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
     {
         do
         {
-            vfs::volume vol;
+            std::shared_ptr<vfs::volume> vol;
             gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
             const auto mount_point = vol->mount_point();
             if (std::filesystem::equivalent(cur_dir, mount_point))
@@ -304,7 +313,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
     return false;
 }
 
-vfs::volume
+const std::shared_ptr<vfs::volume>
 ptk_location_view_get_selected_vol(GtkTreeView* location_view)
 {
     // ztd::logger::info("ptk_location_view_get_selected_vol    view = {}", location_view);
@@ -313,7 +322,7 @@ ptk_location_view_get_selected_vol(GtkTreeView* location_view)
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
     if (gtk_tree_selection_get_selected(selection, nullptr, &it))
     {
-        vfs::volume vol;
+        std::shared_ptr<vfs::volume> vol;
         gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
         return vol;
     }
@@ -337,14 +346,14 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         return;
     }
 
-    vfs::volume vol;
+    std::shared_ptr<vfs::volume> vol;
     gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
     if (!vol)
     {
         return;
     }
 
-    if (!vol->is_mounted() && vol->is_device_type(vfs::volume_device_type::block))
+    if (!vol->is_mounted() && vol->is_device_type(vfs::volume::device_type::block))
     {
         try_mount(view, vol);
         if (vol->is_mounted())
@@ -386,8 +395,13 @@ ptk_location_view_open_block(const std::filesystem::path& block, bool new_tab)
     // may be link so get real path
     const auto canon = std::filesystem::canonical(block);
 
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
+        if (!volume)
+        {
+            continue;
+        }
+
         if (ztd::same(volume->device_file(), canon.string()))
         {
             if (new_tab)
@@ -412,8 +426,13 @@ ptk_location_view_init_model(GtkListStore* list)
 
     vfs_volume_add_callback(on_volume_event, model);
 
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
+        if (!volume)
+        {
+            continue;
+        }
+
         add_volume(volume, false);
     }
     update_volume_icons();
@@ -489,18 +508,19 @@ ptk_location_view_new(PtkFileBrowser* file_browser)
 }
 
 static void
-on_volume_event(vfs::volume vol, vfs::volume_state state, void* user_data)
+on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state,
+                void* user_data)
 {
     (void)user_data;
     switch (state)
     {
-        case vfs::volume_state::added:
+        case vfs::volume::state::added:
             add_volume(vol, true);
             break;
-        case vfs::volume_state::removed:
+        case vfs::volume::state::removed:
             remove_volume(vol);
             break;
-        case vfs::volume_state::changed: // CHANGED may occur before ADDED !
+        case vfs::volume::state::changed: // CHANGED may occur before ADDED !
             if (!volume_is_visible(vol))
             {
                 remove_volume(vol);
@@ -510,15 +530,15 @@ on_volume_event(vfs::volume vol, vfs::volume_state state, void* user_data)
                 update_volume(vol);
             }
             break;
-        case vfs::volume_state::mounted:
-        case vfs::volume_state::unmounted:
-        case vfs::volume_state::eject:
+        case vfs::volume::state::mounted:
+        case vfs::volume::state::unmounted:
+        case vfs::volume::state::eject:
             break;
     }
 }
 
 static void
-add_volume(vfs::volume vol, bool set_icon)
+add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
 {
     if (!volume_is_visible(vol))
     {
@@ -526,7 +546,7 @@ add_volume(vfs::volume vol, bool set_icon)
     }
 
     // sfm - vol already exists?
-    vfs::volume v = nullptr;
+    std::shared_ptr<vfs::volume> v = nullptr;
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -552,7 +572,7 @@ add_volume(vfs::volume vol, bool set_icon)
                                       ptk::location_view::column::path,
                                       mount_point.data(),
                                       ptk::location_view::column::data,
-                                      vol,
+                                      vol.get(),
                                       -1);
     if (set_icon)
     {
@@ -573,7 +593,7 @@ add_volume(vfs::volume vol, bool set_icon)
 }
 
 static void
-remove_volume(vfs::volume vol)
+remove_volume(const std::shared_ptr<vfs::volume>& vol)
 {
     if (!vol)
     {
@@ -581,7 +601,7 @@ remove_volume(vfs::volume vol)
     }
 
     GtkTreeIter it;
-    vfs::volume v = nullptr;
+    std::shared_ptr<vfs::volume> v = nullptr;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
@@ -598,7 +618,7 @@ remove_volume(vfs::volume vol)
 }
 
 static void
-update_volume(vfs::volume vol)
+update_volume(const std::shared_ptr<vfs::volume>& vol)
 {
     if (!vol)
     {
@@ -606,7 +626,7 @@ update_volume(vfs::volume vol)
     }
 
     GtkTreeIter it;
-    vfs::volume v = nullptr;
+    std::shared_ptr<vfs::volume> v = nullptr;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
@@ -680,7 +700,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
 }
 
 static void
-on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     GtkWidget* view;
     if (!item)
@@ -733,7 +753,7 @@ on_mount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static void
-on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     GtkWidget* view;
     if (!item)
@@ -777,7 +797,7 @@ on_umount(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static void
-on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     GtkWidget* view;
     if (!item)
@@ -820,7 +840,7 @@ on_eject(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 
         ptk_file_task_run(ptask);
     }
-    else if (vol->is_device_type(vfs::volume_device_type::block) &&
+    else if (vol->is_device_type(vfs::volume::device_type::block) &&
              (vol->is_optical() || vol->requires_eject()))
     {
         // task
@@ -856,8 +876,13 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
 {
     (void)task;
     // ztd::logger::info("on_autoopen_cb");
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
+        if (!volume)
+        {
+            continue;
+        }
+
         if (volume->devnum() == ao->devnum)
         {
             if (volume->is_mounted())
@@ -887,7 +912,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
 }
 
 static bool
-try_mount(GtkTreeView* view, vfs::volume vol)
+try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
 {
     if (!view || !vol)
     {
@@ -942,7 +967,7 @@ try_mount(GtkTreeView* view, vfs::volume vol)
 }
 
 static void
-on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     PtkFileBrowser* file_browser;
     GtkWidget* view;
@@ -1011,7 +1036,7 @@ on_open_tab(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static void
-on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     PtkFileBrowser* file_browser;
     GtkWidget* view;
@@ -1090,7 +1115,7 @@ on_open(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static void
-on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     std::string msg;
     GtkWidget* view;
@@ -1128,7 +1153,7 @@ on_showhide(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static void
-on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
+on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     std::string msg;
     GtkWidget* view;
@@ -1167,16 +1192,16 @@ on_automountlist(GtkMenuItem* item, vfs::volume vol, GtkWidget* view2)
 }
 
 static bool
-volume_is_visible(vfs::volume vol)
+volume_is_visible(const std::shared_ptr<vfs::volume>& vol)
 {
     // network
-    if (vol->is_device_type(vfs::volume_device_type::network))
+    if (vol->is_device_type(vfs::volume::device_type::network))
     {
         return xset_get_b(xset::name::dev_show_net);
     }
 
     // other - eg fuseiso mounted file
-    if (vol->is_device_type(vfs::volume_device_type::other))
+    if (vol->is_device_type(vfs::volume::device_type::other))
     {
         return xset_get_b(xset::name::dev_show_file);
     }
@@ -1231,7 +1256,7 @@ ptk_location_view_on_action(GtkWidget* view, const xset_t& set)
     {
         return;
     }
-    vfs::volume vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
+    const auto vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
 
     if (set->xset_name == xset::name::dev_show_internal_drives ||
         set->xset_name == xset::name::dev_show_empty ||
@@ -1291,8 +1316,8 @@ ptk_location_view_on_action(GtkWidget* view, const xset_t& set)
 }
 
 static void
-show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_browser, u32 button,
-                  std::time_t time)
+show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
+                  PtkFileBrowser* file_browser, u32 button, std::time_t time)
 {
     (void)button;
     (void)time;
@@ -1306,23 +1331,23 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
 #endif
 
     set = xset_get(xset::name::dev_menu_remove);
-    xset_set_cb(set, (GFunc)on_eject, vol);
+    xset_set_cb(set, (GFunc)on_eject, vol.get());
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
     set = xset_get(xset::name::dev_menu_unmount);
-    xset_set_cb(set, (GFunc)on_umount, vol);
+    xset_set_cb(set, (GFunc)on_umount, vol.get());
     xset_set_ob1(set, "view", view);
     set->disable = !vol; //!( vol && vol->is_mounted );
     set = xset_get(xset::name::dev_menu_open);
-    xset_set_cb(set, (GFunc)on_open, vol);
+    xset_set_cb(set, (GFunc)on_open, vol.get());
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
     set = xset_get(xset::name::dev_menu_tab);
-    xset_set_cb(set, (GFunc)on_open_tab, vol);
+    xset_set_cb(set, (GFunc)on_open_tab, vol.get());
     xset_set_ob1(set, "view", view);
     set->disable = !vol;
     set = xset_get(xset::name::dev_menu_mount);
-    xset_set_cb(set, (GFunc)on_mount, vol);
+    xset_set_cb(set, (GFunc)on_mount, vol.get());
     xset_set_ob1(set, "view", view);
     set->disable = !vol; // || ( vol && vol->is_mounted );
 
@@ -1333,12 +1358,12 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
     xset_set_cb(xset::name::dev_show_file, (GFunc)update_all, nullptr);
     // set->disable = xset_get_b(xset::name::DEV_SHOW_INTERNAL_DRIVES);
     xset_set_cb(xset::name::dev_ignore_udisks_hide, (GFunc)update_all, nullptr);
-    xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol);
+    xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol.get());
     xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
     set = xset_get(xset::name::dev_automount_volumes);
-    xset_set_cb(set, (GFunc)on_automountlist, vol);
+    xset_set_cb(set, (GFunc)on_automountlist, vol.get());
     xset_set_ob1(set, "view", view);
 
     std::vector<xset::name> context_menu_entries = {
@@ -1350,7 +1375,7 @@ show_devices_menu(GtkTreeView* view, vfs::volume vol, PtkFileBrowser* file_brows
         xset::name::dev_menu_mount,
     };
 
-    if (vol && vol->is_device_type(vfs::volume_device_type::network) &&
+    if (vol && vol->is_device_type(vfs::volume::device_type::network) &&
         (vol->device_file().starts_with("//") || ztd::contains(vol->device_file(), ":/")))
     {
         context_menu_entries.emplace_back(xset::name::dev_menu_mark);
@@ -1392,7 +1417,7 @@ static bool
 on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
 {
     (void)user_data;
-    vfs::volume vol = nullptr;
+    const std::shared_ptr<vfs::volume>& vol = nullptr;
     bool ret = false;
 
     const auto button = gdk_button_event_get_button(event);
@@ -1493,16 +1518,21 @@ on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
 }
 
 static void
-show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 button,
-                     std::time_t time)
+show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr<vfs::volume>& vol,
+                     u32 button, std::time_t time)
 {
     (void)dev_item;
     (void)time;
     PtkFileBrowser* file_browser;
 
     // validate vol
-    for (const vfs::volume volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
+        if (!volume)
+        {
+            continue;
+        }
+
         if (volume == vol)
         {
             break;
@@ -1552,13 +1582,13 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     set = xset_get(xset::name::dev_menu_remove);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
 
     set = xset_get(xset::name::dev_menu_unmount);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     gtk_widget_set_sensitive(item, !!vol);
 
@@ -1570,17 +1600,17 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, vfs::volume vol, u32 
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     if (file_browser)
     {
-        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open_tab), vol);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open_tab), vol.get());
     }
     else
     {
-        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open), vol);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open), vol.get());
     }
 
     set = xset_get(xset::name::dev_menu_mount);
     item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol);
+    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     gtk_widget_set_sensitive(item, !!vol);
 
@@ -1606,7 +1636,10 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
         const auto keyval = gdk_key_event_get_keyval(event);
         const auto time = gdk_event_get_time(event);
 
-        vfs::volume vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
+        // vfs::volume vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
+        void* object_vol = g_object_get_data(G_OBJECT(item), "vol");
+        const auto vol = static_cast<vfs::volume*>(object_vol)->shared_from_this();
+
         if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_space)
         {
             // simulate left-click (mount)
@@ -1623,7 +1656,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
 }
 
 static bool
-on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, vfs::volume vol)
+on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr<vfs::volume>& vol)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
@@ -1663,7 +1696,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, vfs::volume vol)
 
 #if 0
 static i32
-cmp_dev_name(vfs::volume a, vfs::volume b)
+cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::volume>& b)
 {
     return ztd::compare(a->display_name(), b->display_name());
 }
@@ -1678,30 +1711,19 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     // file_browser may be nullptr
     g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
 
-    std::vector<vfs::volume> names;
-    const auto& volumes = vfs_volume_get_all_volumes();
-    names.reserve(volumes.size());
-    for (const auto volume : volumes)
+    for (const auto& volume : vfs_volume_get_all_volumes())
     {
-        if (volume && volume_is_visible(volume))
+        if (!volume || !volume_is_visible(volume))
         {
-            names.emplace_back(volume);
+            continue;
         }
-    }
 
-    vfs::volume vol;
-#if 0 // BUG
-    std::ranges::sort(names, cmp_dev_name);
-#endif
-    for (const auto volume : names)
-    {
-        vol = volume;
         GtkWidget* item = gtk_menu_item_new_with_label(volume->display_name().data());
         g_object_set_data(G_OBJECT(item), "menu", menu);
-        g_object_set_data(G_OBJECT(item), "vol", volume);
+        g_object_set_data(G_OBJECT(item), "vol", volume.get());
         // clang-format off
-        g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(on_dev_menu_button_press), volume);
-        g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(on_dev_menu_button_press), volume);
+        g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(on_dev_menu_button_press), volume.get());
+        g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(on_dev_menu_button_press), volume.get());
         // clang-format on
         gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     }
@@ -1714,13 +1736,13 @@ ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkW
     xset_set_cb(xset::name::dev_show_file, (GFunc)update_all, nullptr);
     // set->disable = xset_get_b(xset::name::DEV_SHOW_INTERNAL_DRIVES);
     xset_set_cb(xset::name::dev_ignore_udisks_hide, (GFunc)update_all, nullptr);
-    xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol);
+    // xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol.get());
     xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
     // bool auto_optical = set->b == xset::b::XSET_B_TRUE;
     xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
     // bool auto_removable = set->b == xset::b::XSET_B_TRUE;
     xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
-    xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol);
+    // xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol.get());
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
     set = xset_get(xset::name::dev_menu_settings);

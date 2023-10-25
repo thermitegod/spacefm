@@ -1778,7 +1778,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
 
             const auto real_path_stat = ztd::statx(value);
-            vfs::volume vol = nullptr;
+            std::shared_ptr<vfs::volume> vol = nullptr;
             if (ztd::same(property, "umount") && std::filesystem::is_directory(value))
             {
                 // umount DIR

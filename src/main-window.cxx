@@ -3162,8 +3162,7 @@ main_write_exports(const std::shared_ptr<vfs::file_task>& vtask, const std::stri
         // device
         if (a_browser->side_dev)
         {
-            vfs::volume vol =
-                ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev));
+            const auto vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(a_browser->side_dev));
             if (vol)
             {
                 if (file_browser == a_browser)
