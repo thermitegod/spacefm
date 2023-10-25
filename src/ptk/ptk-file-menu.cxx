@@ -1214,7 +1214,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         {
             for (const std::string_view app : apps)
             {
-                const vfs::desktop desktop = vfs_get_desktop(app);
+                const auto desktop = vfs_get_desktop(app);
                 const auto app_name = desktop->display_name();
                 if (!app_name.empty())
                 {
@@ -1669,7 +1669,7 @@ on_popup_run_app(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     const char* desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
-    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const auto desktop = vfs_get_desktop(desktop_file);
 
     ptk_open_files_with_app(data->cwd,
                             data->sel_files,
@@ -1723,7 +1723,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const auto desktop = vfs_get_desktop(desktop_file);
     if (desktop->name().empty())
     {
         return;
@@ -2040,7 +2040,7 @@ app_menu_keypress(GtkWidget* menu, GdkEvent* event, PtkFileMenu* data)
 
     // if original menu, desktop will be set
     const std::string desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
-    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const auto desktop = vfs_get_desktop(desktop_file);
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
@@ -2106,7 +2106,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 
     const std::string desktop_file =
         CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
-    const vfs::desktop desktop = vfs_get_desktop(desktop_file);
+    const auto desktop = vfs_get_desktop(desktop_file);
 
     GtkWidget* app_menu = gtk_menu_new();
 

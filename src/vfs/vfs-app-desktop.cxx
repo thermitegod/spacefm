@@ -63,27 +63,28 @@ static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
 static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
 static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
 
-std::map<std::filesystem::path, vfs::desktop> desktops_cache;
+std::map<std::filesystem::path, std::shared_ptr<vfs::desktop>> desktops_cache;
 
-vfs::desktop
+const std::shared_ptr<vfs::desktop>
 vfs_get_desktop(const std::filesystem::path& desktop_file)
 {
     if (desktops_cache.contains(desktop_file))
     {
-        // ztd::logger::info("cached vfs_get_desktop={}", desktop_file.string());
-        return desktops_cache.at(desktop_file);
+        auto desktop = desktops_cache.at(desktop_file);
+        // ztd::logger::info("vfs::desktop::desktop({})  cache   {}", fmt::ptr(desktop), desktop_file.string());
+        return desktop;
     }
     // ztd::logger::info("new vfs_get_desktop={}", desktop_file.string());
 
-    vfs::desktop desktop = std::make_shared<VFSAppDesktop>(desktop_file);
-
+    auto desktop = std::make_shared<vfs::desktop>(desktop_file);
     desktops_cache.insert({desktop_file, desktop});
-
+    // ztd::logger::info("vfs::desktop::desktop({})  new     {}", fmt::ptr(desktop), desktop_file.string());
     return desktop;
 }
 
-VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
+vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
 {
+    // ztd::logger::info("vfs::desktop::desktop({})", fmt::ptr(this));
 #if (GTK_MAJOR_VERSION == 4)
 
     const auto kf = Glib::KeyFile::create();
@@ -300,13 +301,13 @@ VFSAppDesktop::VFSAppDesktop(const std::filesystem::path& desktop_file) noexcept
 }
 
 const std::string_view
-VFSAppDesktop::name() const noexcept
+vfs::desktop::name() const noexcept
 {
     return this->filename_;
 }
 
 const std::string_view
-VFSAppDesktop::display_name() const noexcept
+vfs::desktop::display_name() const noexcept
 {
     if (!this->desktop_entry_.name.empty())
     {
@@ -316,31 +317,31 @@ VFSAppDesktop::display_name() const noexcept
 }
 
 const std::string_view
-VFSAppDesktop::exec() const noexcept
+vfs::desktop::exec() const noexcept
 {
     return this->desktop_entry_.exec;
 }
 
 bool
-VFSAppDesktop::use_terminal() const noexcept
+vfs::desktop::use_terminal() const noexcept
 {
     return this->desktop_entry_.terminal;
 }
 
 const std::filesystem::path&
-VFSAppDesktop::path() const noexcept
+vfs::desktop::path() const noexcept
 {
     return this->path_;
 }
 
 const std::string_view
-VFSAppDesktop::icon_name() const noexcept
+vfs::desktop::icon_name() const noexcept
 {
     return this->desktop_entry_.icon;
 }
 
 GdkPixbuf*
-VFSAppDesktop::icon(i32 size) const noexcept
+vfs::desktop::icon(i32 size) const noexcept
 {
     GdkPixbuf* desktop_icon = nullptr;
 
@@ -358,13 +359,13 @@ VFSAppDesktop::icon(i32 size) const noexcept
 }
 
 const std::vector<std::string>
-VFSAppDesktop::supported_mime_types() const noexcept
+vfs::desktop::supported_mime_types() const noexcept
 {
     return ztd::split(this->desktop_entry_.mime_type, ";");
 }
 
 bool
-VFSAppDesktop::open_multiple_files() const noexcept
+vfs::desktop::open_multiple_files() const noexcept
 {
     static constexpr std::array<const std::string_view, 2> keys{"%U", "%F"};
 
@@ -372,8 +373,8 @@ VFSAppDesktop::open_multiple_files() const noexcept
 }
 
 const std::optional<std::vector<std::vector<std::string>>>
-VFSAppDesktop::app_exec_generate_desktop_argv(
-    const std::span<const std::filesystem::path> file_list, bool quote_file_list) const noexcept
+vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
+                                             bool quote_file_list) const noexcept
 {
     // https://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
@@ -503,8 +504,8 @@ VFSAppDesktop::app_exec_generate_desktop_argv(
 }
 
 void
-VFSAppDesktop::exec_in_terminal(const std::filesystem::path& cwd,
-                                const std::string_view command) const noexcept
+vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
+                               const std::string_view command) const noexcept
 {
     // task
     PtkFileTask* ptask = ptk_file_exec_new(this->display_name(), cwd, nullptr, nullptr);
@@ -520,8 +521,8 @@ VFSAppDesktop::exec_in_terminal(const std::filesystem::path& cwd,
 }
 
 bool
-VFSAppDesktop::open_file(const std::filesystem::path& working_dir,
-                         const std::filesystem::path& file_path) const
+vfs::desktop::open_file(const std::filesystem::path& working_dir,
+                        const std::filesystem::path& file_path) const
 {
     if (this->desktop_entry_.exec.empty())
     {
@@ -537,8 +538,8 @@ VFSAppDesktop::open_file(const std::filesystem::path& working_dir,
 }
 
 bool
-VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
-                          const std::span<const std::filesystem::path> file_paths) const
+vfs::desktop::open_files(const std::filesystem::path& working_dir,
+                         const std::span<const std::filesystem::path> file_paths) const
 {
     if (this->desktop_entry_.exec.empty())
     {
@@ -565,8 +566,8 @@ VFSAppDesktop::open_files(const std::filesystem::path& working_dir,
 }
 
 void
-VFSAppDesktop::exec_desktop(const std::filesystem::path& working_dir,
-                            const std::span<const std::filesystem::path> file_paths) const noexcept
+vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
+                           const std::span<const std::filesystem::path> file_paths) const noexcept
 {
     const auto check_desktop_commands =
         this->app_exec_generate_desktop_argv(file_paths, this->use_terminal());

@@ -319,7 +319,7 @@ load_settings()
             const auto default_app = mime_type->default_action();
             if (default_app)
             {
-                const vfs::desktop desktop = vfs_get_desktop(default_app.value());
+                const auto desktop = vfs_get_desktop(default_app.value());
                 xset_set(xset::name::editor, xset::var::s, desktop->path().string());
             }
         }
@@ -824,7 +824,7 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     }
     const auto& editor = check_editor.value();
 
-    vfs::desktop desktop;
+    std::shared_ptr<vfs::desktop> desktop;
     if (editor.ends_with(".desktop"))
     {
         desktop = vfs_get_desktop(editor);
