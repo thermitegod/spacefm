@@ -52,21 +52,6 @@ static void* thumbnail_loader_thread(vfs::async_task task,
                                      const std::shared_ptr<vfs::thumbnail_loader>& loader);
 static bool on_thumbnail_idle(void* user_data);
 
-namespace vfs
-{
-    enum class thumbnail_size
-    {
-        big,
-        small,
-    };
-}
-
-struct VFSThumbnailRequest
-{
-    std::shared_ptr<vfs::file> file{nullptr};
-    std::map<vfs::thumbnail_size, i32> n_requests;
-};
-
 vfs::thumbnail_loader::thumbnail_loader(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
 {
     this->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, this);
@@ -101,8 +86,8 @@ void
 vfs::thumbnail_loader::loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept
 {
     // Check if the request is already scheduled
-    vfs::thumbnail_request_t req;
-    for (const vfs::thumbnail_request_t& queued_req : this->queue)
+    std::shared_ptr<vfs::thumbnail_loader::request> req;
+    for (const auto& queued_req : this->queue)
     {
         req = queued_req;
         // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
@@ -116,12 +101,13 @@ vfs::thumbnail_loader::loader_request(const std::shared_ptr<vfs::file>& file, bo
 
     if (!req)
     {
-        req = std::make_shared<VFSThumbnailRequest>(file);
+        req = std::make_shared<vfs::thumbnail_loader::request>(file);
         // ztd::logger::debug("this->queue add file={}", req->file->name());
         this->queue.emplace_back(req);
     }
 
-    ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
+    ++req->n_requests[is_big ? vfs::thumbnail_loader::request::size::big
+                             : vfs::thumbnail_loader::request::size::small];
 }
 
 static bool
@@ -179,7 +165,7 @@ thumbnail_loader_thread(vfs::async_task task, const std::shared_ptr<vfs::thumbna
                 continue;
             }
 
-            const bool load_big = (value.first == vfs::thumbnail_size::big);
+            const bool load_big = (value.first == vfs::thumbnail_loader::request::size::big);
             if (!req->file->is_thumbnail_loaded(load_big))
             {
                 // ztd::logger::debug("loader->dir->path    = {}", loader->dir->path);

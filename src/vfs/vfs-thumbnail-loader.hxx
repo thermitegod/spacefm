@@ -17,26 +17,25 @@
 
 #pragma once
 
+#include <map>
+
 #include <deque>
 
 #include <mutex>
 
 #include <memory>
 
-#include "vfs/vfs-file.hxx"
+#include <gdkmm.h>
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
 #include "vfs/vfs-async-task.hxx"
-
-// forward declare types
-struct VFSThumbnailRequest;
-
-namespace vfs
-{
-    using thumbnail_request_t = std::shared_ptr<VFSThumbnailRequest>;
-} // namespace vfs
 
 namespace vfs
 {
     struct dir;
+    struct file;
 
     struct thumbnail_loader : public std::enable_shared_from_this<thumbnail_loader>
     {
@@ -57,7 +56,18 @@ namespace vfs
 
         std::mutex mtx;
 
-        std::deque<vfs::thumbnail_request_t> queue{};
+        struct request
+        {
+            enum class size
+            {
+                big,
+                small,
+            };
+            std::shared_ptr<vfs::file> file{nullptr};
+            std::map<size, i32> n_requests;
+        };
+
+        std::deque<std::shared_ptr<vfs::thumbnail_loader::request>> queue{};
         std::deque<std::shared_ptr<vfs::file>> update_queue{};
     };
 } // namespace vfs
