@@ -87,7 +87,7 @@ vfs_async_task_init(vfs::async_task* task)
 }
 
 vfs::async_task*
-vfs_async_task_new(vfs::async_task::function_t task_func, void* user_data)
+vfs::async_task::create(vfs::async_task::function_t task_func, void* user_data) noexcept
 {
     const auto task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;

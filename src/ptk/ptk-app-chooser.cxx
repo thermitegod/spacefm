@@ -302,7 +302,7 @@ init_all_apps_tab(GtkWidget* dialog)
                                             G_TYPE_STRING,
                                             G_TYPE_STRING);
     const auto task =
-        vfs_async_task_new((vfs::async_task::function_t)load_all_known_apps_thread, list);
+        vfs::async_task::create((vfs::async_task::function_t)load_all_known_apps_thread, list);
     g_object_set_data(G_OBJECT(task), "view", tree_view);
     g_object_set_data(G_OBJECT(dialog), "task", task);
 

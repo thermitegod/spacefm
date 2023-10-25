@@ -39,6 +39,9 @@ namespace vfs
 
         GObject parent;
 
+        static vfs::async_task* create(vfs::async_task::function_t task_func,
+                                       void* user_data) noexcept;
+
         /*private*/
 
         function_t func;
@@ -107,5 +110,3 @@ namespace vfs
         GtkWidget* evt_data_load_app{nullptr};
     };
 } // namespace vfs
-
-vfs::async_task* vfs_async_task_new(vfs::async_task::function_t task_func, void* user_data);
