@@ -61,10 +61,10 @@
 
 struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {
-    MoveSet(const vfs::file_info& file_info) : file(file_info){};
+    MoveSet(const std::shared_ptr<vfs::file_info>& file_info) : file(file_info){};
     ~MoveSet() = default;
 
-    vfs::file_info file;
+    std::shared_ptr<vfs::file_info> file;
 
     std::filesystem::path full_path{};
     std::filesystem::path old_path{};
@@ -2289,9 +2289,9 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 i32
-ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::file_info& file,
-                const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
-                AutoOpenCreate* auto_open)
+ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
+                const std::shared_ptr<vfs::file_info>& file, const char* dest_dir, bool clip_copy,
+                ptk::rename_mode create_new, AutoOpenCreate* auto_open)
 {
     GtkWidget* task_view = nullptr;
     i32 ret = 1;
@@ -3357,7 +3357,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
 
     for (const auto& file_path : files)
     {
-        const vfs::file_info file = vfs_file_info_new(file_path);
+        const auto file = vfs_file_info_new(file_path);
         const std::string file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,

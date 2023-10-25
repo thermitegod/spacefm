@@ -62,7 +62,7 @@ struct PtkDirTreeNode
     PtkDirTreeNode() = default;
     ~PtkDirTreeNode();
 
-    vfs::file_info file{nullptr};
+    std::shared_ptr<vfs::file_info> file{nullptr};
     PtkDirTreeNode* children{nullptr};
     i32 n_children{0};
     std::shared_ptr<vfs::file_monitor> monitor{nullptr};
@@ -408,7 +408,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     assert(node != nullptr);
 
     g_value_init(value, column_types[ptk::dir_tree::column(column)]);
-    vfs::file_info file = node->file;
+    const auto& file = node->file;
     switch (ptk::dir_tree::column(column))
     {
         case ptk::dir_tree::column::icon:
@@ -606,8 +606,8 @@ static i32
 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b)
 {
     (void)tree;
-    vfs::file_info file1 = a->file;
-    vfs::file_info file2 = b->file;
+    const auto& file1 = a->file;
+    const auto& file2 = b->file;
 
     if (!file1 || !file2)
     {

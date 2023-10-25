@@ -38,14 +38,13 @@
 #include "signals.hxx"
 
 // forward declare types
-struct VFSFileInfo;
 struct PtkFileBrowser;
 struct PtkFileList;
-struct VFSDir;
 struct VFSThumbnailLoader;
 
 namespace vfs
 {
+    struct file_info;
     using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
 
     struct dir : public std::enable_shared_from_this<dir>
@@ -55,7 +54,7 @@ namespace vfs
         ~dir();
 
         std::filesystem::path path{};
-        std::vector<vfs::file_info> file_list{};
+        std::vector<std::shared_ptr<vfs::file_info>> file_list{};
 
         /*<private>*/
         std::shared_ptr<vfs::file_monitor> monitor{nullptr};
@@ -69,7 +68,7 @@ namespace vfs
 
         vfs::thumbnail_loader thumbnail_loader{nullptr};
 
-        std::vector<vfs::file_info> changed_files{};
+        std::vector<std::shared_ptr<vfs::file_info>> changed_files{};
         std::vector<std::filesystem::path> created_files{};
 
         i64 xhidden_count{0};
@@ -85,10 +84,11 @@ namespace vfs
 
         void unload_thumbnails(bool is_big) noexcept;
 
-        bool add_hidden(const vfs::file_info& file) const noexcept;
+        bool add_hidden(const std::shared_ptr<vfs::file_info>& file) const noexcept;
 
         void cancel_all_thumbnail_requests() noexcept;
-        void load_thumbnail(const vfs::file_info& file, const bool is_big) noexcept;
+        void load_thumbnail(const std::shared_ptr<vfs::file_info>& file,
+                            const bool is_big) noexcept;
 
         void reload_mime_type() noexcept;
 
@@ -97,15 +97,16 @@ namespace vfs
         /* emit signals */
         void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
         void emit_file_deleted(const std::filesystem::path& file_name,
-                               const vfs::file_info& file) noexcept;
-        void emit_file_changed(const std::filesystem::path& file_name, const vfs::file_info& file,
-                               bool force) noexcept;
-        void emit_thumbnail_loaded(const vfs::file_info& file) noexcept;
+                               const std::shared_ptr<vfs::file_info>& file) noexcept;
+        void emit_file_changed(const std::filesystem::path& file_name,
+                               const std::shared_ptr<vfs::file_info>& file, bool force) noexcept;
+        void emit_thumbnail_loaded(const std::shared_ptr<vfs::file_info>& file) noexcept;
 
       private:
-        vfs::file_info find_file(const std::filesystem::path& file_name,
-                                 const vfs::file_info& file) const noexcept;
-        bool update_file_info(const vfs::file_info& file) noexcept;
+        const std::shared_ptr<vfs::file_info>
+        find_file(const std::filesystem::path& file_name,
+                  const std::shared_ptr<vfs::file_info>& file) const noexcept;
+        bool update_file_info(const std::shared_ptr<vfs::file_info>& file) noexcept;
 
       private:
         std::mutex mutex;
@@ -113,18 +114,25 @@ namespace vfs
         // Signals
       public:
         // Signals function types
-        using evt_file_created__run_first__t = void(const vfs::file_info&, PtkFileBrowser*);
-        using evt_file_created__run_last__t = void(const vfs::file_info&, PtkFileList*);
+        using evt_file_created__run_first__t = void(const std::shared_ptr<vfs::file_info>&,
+                                                    PtkFileBrowser*);
+        using evt_file_created__run_last__t = void(const std::shared_ptr<vfs::file_info>&,
+                                                   PtkFileList*);
 
-        using evt_file_changed__run_first__t = void(const vfs::file_info&, PtkFileBrowser*);
-        using evt_file_changed__run_last__t = void(const vfs::file_info&, PtkFileList*);
+        using evt_file_changed__run_first__t = void(const std::shared_ptr<vfs::file_info>&,
+                                                    PtkFileBrowser*);
+        using evt_file_changed__run_last__t = void(const std::shared_ptr<vfs::file_info>&,
+                                                   PtkFileList*);
 
-        using evt_file_deleted__run_first__t = void(const vfs::file_info&, PtkFileBrowser*);
-        using evt_file_deleted__run_last__t = void(const vfs::file_info&, PtkFileList*);
+        using evt_file_deleted__run_first__t = void(const std::shared_ptr<vfs::file_info>&,
+                                                    PtkFileBrowser*);
+        using evt_file_deleted__run_last__t = void(const std::shared_ptr<vfs::file_info>&,
+                                                   PtkFileList*);
 
         using evt_file_listed_t = void(PtkFileBrowser*, bool);
 
-        using evt_file_thumbnail_loaded_t = void(const vfs::file_info&, PtkFileList*);
+        using evt_file_thumbnail_loaded_t = void(const std::shared_ptr<vfs::file_info>&,
+                                                 PtkFileList*);
 
         using evt_mime_change_t = void();
 
@@ -239,7 +247,7 @@ namespace vfs
         // Signals Run Event
         template<spacefm::signal evt>
         typename std::enable_if<evt == spacefm::signal::file_created, void>::type
-        run_event(const vfs::file_info& file) const noexcept
+        run_event(const std::shared_ptr<vfs::file_info>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
             this->evt_mime_change.emit();
@@ -249,7 +257,7 @@ namespace vfs
 
         template<spacefm::signal evt>
         typename std::enable_if<evt == spacefm::signal::file_changed, void>::type
-        run_event(const vfs::file_info& file) const noexcept
+        run_event(const std::shared_ptr<vfs::file_info>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
             this->evt_mime_change.emit();
@@ -259,7 +267,7 @@ namespace vfs
 
         template<spacefm::signal evt>
         typename std::enable_if<evt == spacefm::signal::file_deleted, void>::type
-        run_event(const vfs::file_info& file) const noexcept
+        run_event(const std::shared_ptr<vfs::file_info>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
             this->evt_mime_change.emit();
@@ -278,7 +286,7 @@ namespace vfs
 
         template<spacefm::signal evt>
         typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, void>::type
-        run_event(const vfs::file_info& file) const noexcept
+        run_event(const std::shared_ptr<vfs::file_info>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
             this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);

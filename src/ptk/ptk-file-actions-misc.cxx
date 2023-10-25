@@ -21,6 +21,8 @@
 #include <span>
 #include <vector>
 
+#include <memory>
+
 #include <gtkmm.h>
 
 #include <magic_enum.hpp>
@@ -40,8 +42,9 @@
 #include "ptk/ptk-file-actions-misc.hxx"
 
 static bool
-create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
-                          const std::span<const vfs::file_info> selected_files) noexcept
+create_file_action_dialog(
+    GtkWindow* parent, const std::string_view header_text,
+    const std::span<const std::shared_ptr<vfs::file_info>> selected_files) noexcept
 {
     enum class file_action_column
     {
@@ -106,7 +109,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
                                                   G_TYPE_STRING,
                                                   G_TYPE_STRING);
     usize total_size_bytes = 0;
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         total_size_bytes += file->size();
 
@@ -172,7 +175,8 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 
 void
 ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                 const std::span<const vfs::file_info> selected_files, GtkTreeView* task_view)
+                 const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                 GtkTreeView* task_view)
 {
     (void)cwd;
 
@@ -194,7 +198,7 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(selected_files.size());
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         file_list.emplace_back(file->path());
     }
@@ -208,7 +212,8 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
 void
 ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                const std::span<const vfs::file_info> selected_files, GtkTreeView* task_view)
+                const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                GtkTreeView* task_view)
 {
     (void)cwd;
 
@@ -230,7 +235,7 @@ ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 
     std::vector<std::filesystem::path> file_list;
     file_list.reserve(selected_files.size());
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         file_list.emplace_back(file->path());
     }

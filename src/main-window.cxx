@@ -2439,7 +2439,7 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
         if (num_sel == 1)
         // display file name or symlink info in status bar if one file selected
         {
-            const vfs::file_info& file = selected_files.front();
+            const auto& file = selected_files.front();
             if (!file)
             {
                 return;
@@ -2511,7 +2511,7 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
             u32 count_block = 0;
             u32 count_char = 0;
 
-            for (const vfs::file_info& file : selected_files)
+            for (const auto& file : selected_files)
             {
                 if (!file)
                 {
@@ -3140,7 +3140,7 @@ main_write_exports(const vfs::file_task& vtask, const std::string_view value)
         {
             // create fish array
             buf.append(std::format("set fm_panel{}_files (echo ", p));
-            for (const vfs::file_info& file : selected_files)
+            for (const auto& file : selected_files)
             {
                 buf.append(std::format("{} ", ztd::shell::quote(file->path().string())));
             }
@@ -3150,7 +3150,7 @@ main_write_exports(const vfs::file_task& vtask, const std::string_view value)
             {
                 // create fish array
                 buf.append(std::format("set fm_filenames (echo "));
-                for (const vfs::file_info& file : selected_files)
+                for (const auto& file : selected_files)
                 {
                     buf.append(std::format("{} ", ztd::shell::quote(file->name())));
                 }

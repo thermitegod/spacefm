@@ -994,12 +994,13 @@ ptk_file_menu_new(PtkFileBrowser* browser)
 }
 
 GtkWidget*
-ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info> sel_files)
+ptk_file_menu_new(PtkFileBrowser* browser,
+                  const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
 {
     assert(browser != nullptr);
 
     std::filesystem::path file_path;
-    vfs::file_info file = nullptr;
+    std::shared_ptr<vfs::file_info> file = nullptr;
     if (!sel_files.empty())
     {
         file = sel_files.front();
@@ -1013,7 +1014,8 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
     data->browser = browser;
     data->file_path = file_path;
     data->file = file;
-    data->sel_files = std::vector<vfs::file_info>(sel_files.begin(), sel_files.end());
+    data->sel_files =
+        std::vector<std::shared_ptr<vfs::file_info>>(sel_files.begin(), sel_files.end());
 
 #if (GTK_MAJOR_VERSION == 4)
     data->accel_group = gtk_shortcut_controller_new();
@@ -1110,7 +1112,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         xset_t set_archive_extract_to = nullptr;
         xset_t set_archive_open = nullptr;
 
-        const auto is_archive = [](const vfs::file_info& file) { return file->is_archive(); };
+        const auto is_archive = [](const auto& file) { return file->is_archive(); };
         if (mime_type && std::ranges::all_of(sel_files, is_archive))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);
@@ -2330,7 +2332,7 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 
     if (!data->sel_files.empty())
     {
-        for (const vfs::file_info& file : data->sel_files)
+        for (const auto& file : data->sel_files)
         {
             if (data->browser && std::filesystem::is_directory(file->path()))
             {
@@ -2561,7 +2563,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         // select file
         if (std::filesystem::equivalent(cwd, ao->file_browser->cwd()))
         {
-            vfs::file_info file = vfs_file_info_new(ao->path);
+            const auto file = vfs_file_info_new(ao->path);
             ao->file_browser->dir_->emit_file_created(file->name(), true);
             ao->file_browser->select_file(ao->path);
         }
@@ -2575,8 +2577,8 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             }
             else
             {
-                vfs::file_info file = vfs_file_info_new(ao->path);
-                const std::vector<vfs::file_info> sel_files{file};
+                const auto file = vfs_file_info_new(ao->path);
+                const std::vector<std::shared_ptr<vfs::file_info>> sel_files{file};
                 ptk_open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
             }
         }
@@ -2595,7 +2597,7 @@ create_new_file(PtkFileMenu* data, ptk::rename_mode create_new)
 
     const auto ao = new AutoOpenCreate(data->browser, false);
 
-    vfs::file_info file = nullptr;
+    std::shared_ptr<vfs::file_info> file = nullptr;
     if (!data->sel_files.empty())
     {
         file = data->sel_files.front();
@@ -2696,7 +2698,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
     const auto& cwd = browser->cwd();
     const auto sel_files = browser->selected_files();
 
-    vfs::file_info file = nullptr;
+    std::shared_ptr<vfs::file_info> file = nullptr;
     std::filesystem::path file_path;
     if (!sel_files.empty())
     {

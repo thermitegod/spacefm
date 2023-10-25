@@ -61,7 +61,7 @@ namespace vfs
 
 struct VFSThumbnailRequest
 {
-    vfs::file_info file{nullptr};
+    std::shared_ptr<vfs::file_info> file{nullptr};
     std::map<vfs::thumbnail_size, i32> n_requests;
 };
 
@@ -90,7 +90,8 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 }
 
 void
-VFSThumbnailLoader::loader_request(const vfs::file_info& file, bool is_big) noexcept
+VFSThumbnailLoader::loader_request(const std::shared_ptr<vfs::file_info>& file,
+                                   bool is_big) noexcept
 {
     // Check if the request is already scheduled
     vfs::thumbnail_request_t req;
@@ -130,7 +131,7 @@ on_thumbnail_idle(void* user_data)
 
     while (!loader->update_queue.empty())
     {
-        vfs::file_info file = loader->update_queue.front();
+        const auto& file = loader->update_queue.front();
         loader->update_queue.pop_front();
 
         loader->dir->emit_thumbnail_loaded(file);
@@ -233,8 +234,8 @@ thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loade
 }
 
 void
-vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir, const vfs::file_info& file,
-                             const bool is_big)
+vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir,
+                             const std::shared_ptr<vfs::file_info>& file, const bool is_big)
 {
     bool new_task = false;
 
@@ -258,7 +259,7 @@ vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir, const vfs::fi
 }
 
 GdkPixbuf*
-vfs_thumbnail_load(const vfs::file_info& file, i32 thumb_size)
+vfs_thumbnail_load(const std::shared_ptr<vfs::file_info>& file, i32 thumb_size)
 {
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
     const std::string file_name = std::format("{}.png", file_hash);

@@ -37,9 +37,9 @@ namespace ptk
     };
 }
 
-i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir, const vfs::file_info& file,
-                    const char* dest_dir, bool clip_copy, ptk::rename_mode create_new,
-                    AutoOpenCreate* auto_open);
+i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
+                    const std::shared_ptr<vfs::file_info>& file, const char* dest_dir,
+                    bool clip_copy, ptk::rename_mode create_new, AutoOpenCreate* auto_open);
 
 void ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path& cwd,
                             GFunc callback);

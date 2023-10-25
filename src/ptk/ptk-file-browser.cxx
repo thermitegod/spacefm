@@ -1220,7 +1220,7 @@ ptk_file_browser_content_changed(PtkFileBrowser* file_browser)
 }
 
 static void
-on_folder_content_changed(const vfs::file_info& file, PtkFileBrowser* file_browser)
+on_folder_content_changed(const std::shared_ptr<vfs::file_info>& file, PtkFileBrowser* file_browser)
 {
     if (file == nullptr)
     {
@@ -1238,7 +1238,7 @@ on_folder_content_changed(const vfs::file_info& file, PtkFileBrowser* file_brows
 }
 
 static void
-on_file_deleted(const vfs::file_info& file, PtkFileBrowser* file_browser)
+on_file_deleted(const std::shared_ptr<vfs::file_info>& file, PtkFileBrowser* file_browser)
 {
     if (file == nullptr)
     {
@@ -1450,7 +1450,7 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
         GtkTreeIter it;
         if (gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data))
         {
-            vfs::file_info file;
+            std::shared_ptr<vfs::file_info> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
@@ -1604,7 +1604,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
         }
 
         /* an item is clicked, get its file path */
-        vfs::file_info file = nullptr;
+        std::shared_ptr<vfs::file_info> file = nullptr;
         GtkTreeIter it;
         if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
         {
@@ -2322,7 +2322,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
             return nullptr;
         }
 
-        vfs::file_info file;
+        std::shared_ptr<vfs::file_info> file;
         gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
         if (file)
         {
@@ -2500,7 +2500,7 @@ on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
 
     std::string uri_list;
     const auto selected_files = file_browser->selected_files();
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         const std::string uri = Glib::filename_to_uri(file->path());
         uri_list.append(std::format("{}\n", uri));
@@ -2663,7 +2663,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
         GtkTreeIter it;
         if (gtk_tree_model_get_iter(model, &it, tree_path))
         {
-            vfs::file_info file;
+            std::shared_ptr<vfs::file_info> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (!file || !file->is_directory())
             {
@@ -2845,7 +2845,7 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_
             GtkTreeIter it;
             if (gtk_tree_model_get_iter(model, &it, tree_path))
             {
-                vfs::file_info file;
+                std::shared_ptr<vfs::file_info> file;
                 gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
                 if (file)
                 {
@@ -3560,11 +3560,11 @@ PtkFileBrowser::set_default_folder() const noexcept
     xset_set(xset::name::go_set_default, xset::var::s, this->cwd().string());
 }
 
-const std::vector<vfs::file_info>
+const std::vector<std::shared_ptr<vfs::file_info>>
 PtkFileBrowser::selected_files() noexcept
 {
     GtkTreeModel* model = nullptr;
-    std::vector<vfs::file_info> file_list;
+    std::vector<std::shared_ptr<vfs::file_info>> file_list;
     GList* selected_files = this->selected_items(&model);
     if (!selected_files)
     {
@@ -3575,7 +3575,7 @@ PtkFileBrowser::selected_files() noexcept
     for (GList* sel = selected_files; sel; sel = g_list_next(sel))
     {
         GtkTreeIter it;
-        vfs::file_info file;
+        std::shared_ptr<vfs::file_info> file;
         gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data);
         gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
         file_list.emplace_back(file);
@@ -3601,8 +3601,9 @@ PtkFileBrowser::open_selected_files_with_app(const std::string_view app_desktop)
 }
 
 void
-PtkFileBrowser::rename_selected_files(const std::span<const vfs::file_info> selected_files,
-                                      const std::filesystem::path& cwd) noexcept
+PtkFileBrowser::rename_selected_files(
+    const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+    const std::filesystem::path& cwd) noexcept
 {
     if (selected_files.empty())
     {
@@ -3611,7 +3612,7 @@ PtkFileBrowser::rename_selected_files(const std::span<const vfs::file_info> sele
 
     gtk_widget_grab_focus(this->folder_view_);
 
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         if (!ptk_rename_file(this,
                              cwd.c_str(),
@@ -3627,7 +3628,7 @@ PtkFileBrowser::rename_selected_files(const std::span<const vfs::file_info> sele
 }
 
 void
-PtkFileBrowser::hide_selected(const std::span<const vfs::file_info> selected_files,
+PtkFileBrowser::hide_selected(const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
                               const std::filesystem::path& cwd) noexcept
 {
     (void)cwd;
@@ -3659,7 +3660,7 @@ PtkFileBrowser::hide_selected(const std::span<const vfs::file_info> selected_fil
         return;
     }
 
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         if (!this->dir_->add_hidden(file))
         {
@@ -3672,7 +3673,7 @@ PtkFileBrowser::hide_selected(const std::span<const vfs::file_info> selected_fil
 }
 
 void
-PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
+PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file_info>> sel_files,
                         const std::filesystem::path& cwd, xset::name setname) noexcept
 {
     std::optional<std::filesystem::path> copy_dest;
@@ -3903,7 +3904,7 @@ PtkFileBrowser::copycmd(const std::span<const vfs::file_info> sel_files,
         // rebuild sel_files with full paths
         std::vector<std::filesystem::path> file_list;
         file_list.reserve(sel_files.size());
-        for (const vfs::file_info& file : sel_files)
+        for (const auto& file : sel_files)
         {
             file_list.emplace_back(file->path());
         }
@@ -4292,7 +4293,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
         do
         {
             // get file
-            vfs::file_info file;
+            std::shared_ptr<vfs::file_info> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (!file)
             {
@@ -4959,7 +4960,7 @@ PtkFileBrowser::update_selection_history() noexcept
     std::vector<std::filesystem::path> selected_filenames;
     selected_filenames.reserve(selected_files.size());
 
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         selected_filenames.emplace_back(file->name());
     }
@@ -5024,7 +5025,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& filename,
 
         do
         {
-            vfs::file_info file;
+            std::shared_ptr<vfs::file_info> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
@@ -5116,7 +5117,7 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
 
         do
         {
-            vfs::file_info file;
+            std::shared_ptr<vfs::file_info> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
@@ -5218,7 +5219,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
         do
         {
             // get file
-            vfs::file_info file;
+            std::shared_ptr<vfs::file_info> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (!file)
             {
@@ -5460,7 +5461,7 @@ PtkFileBrowser::show_history_menu(bool is_back_history, GdkEvent* event) noexcep
 
 void
 PtkFileBrowser::on_permission(GtkMenuItem* item,
-                              const std::span<const vfs::file_info> selected_files,
+                              const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
                               const std::filesystem::path& cwd) noexcept
 {
     if (selected_files.empty())
@@ -5589,7 +5590,7 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     }
 
     std::string file_paths;
-    for (const vfs::file_info& file : selected_files)
+    for (const auto& file : selected_files)
     {
         const std::string file_path = ztd::shell::quote(file->name());
         file_paths = std::format("{} {}", file_paths, file_path);

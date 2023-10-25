@@ -64,7 +64,7 @@
 static void
 open_file(const std::filesystem::path& path)
 {
-    const vfs::file_info file = vfs_file_info_new(path);
+    const auto file = vfs_file_info_new(path);
     vfs::mime_type mime_type = file->mime_type();
 
     const auto check_app_name = mime_type->default_action();

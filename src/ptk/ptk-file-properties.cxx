@@ -41,11 +41,11 @@
 
 struct properties_dialog_data : public std::enable_shared_from_this<properties_dialog_data>
 {
-    properties_dialog_data(std::span<const vfs::file_info> file_list,
+    properties_dialog_data(std::span<const std::shared_ptr<vfs::file_info>> file_list,
                            const std::filesystem::path& cwd)
         : file_list(file_list), cwd(cwd){};
 
-    std::span<const vfs::file_info> file_list{};
+    std::span<const std::shared_ptr<vfs::file_info>> file_list{};
     std::filesystem::path cwd{};
 
     GtkLabel* total_size_label{nullptr};
@@ -160,7 +160,7 @@ calc_size(void* user_data)
 {
     const auto data = static_cast<properties_dialog_data*>(user_data)->shared_from_this();
 
-    for (const vfs::file_info& file : data->file_list)
+    for (const auto& file : data->file_list)
     {
         if (data->cancel)
         {
@@ -384,7 +384,7 @@ create_prop_text_box_date(const std::time_t time)
 GtkWidget*
 init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
                    const std::filesystem::path& cwd,
-                   const std::span<const vfs::file_info> selected_files)
+                   const std::span<const std::shared_ptr<vfs::file_info>> selected_files)
 {
     // FIXME using spaces to align the right GtkWiget with the label
     // This works but should be fixed with an alignment solution
@@ -440,7 +440,7 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
     vfs::mime_type type2 = nullptr;
     bool same_type = true;
     bool is_dirs = false;
-    for (const vfs::file_info& selected_file : selected_files)
+    for (const auto& selected_file : selected_files)
     {
         type = selected_file->mime_type();
         if (!type2)
@@ -539,7 +539,7 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
 
 GtkWidget*
 init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
-                    const std::span<const vfs::file_info> selected_files)
+                    const std::span<const std::shared_ptr<vfs::file_info>> selected_files)
 {
     (void)data;
 
@@ -559,7 +559,7 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
         bool is_same_value_dax = true;
 
         // The first file will get checked against itself
-        for (const vfs::file_info& file : selected_files)
+        for (const auto& file : selected_files)
         {
             if (is_same_value_compressed)
             {
@@ -738,7 +738,7 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
 
 GtkWidget*
 init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
-                     const std::span<const vfs::file_info> selected_files)
+                     const std::span<const std::shared_ptr<vfs::file_info>> selected_files)
 {
     (void)data;
 
@@ -908,7 +908,8 @@ close_dialog(GtkWidget* widget, void* user_data)
 
 void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
-                            const std::span<const vfs::file_info> selected_files, i32 page)
+                            const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                            i32 page)
 {
     GtkWidget* dialog =
         gtk_dialog_new_with_buttons("File Properties",
@@ -983,12 +984,13 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
 void
 ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
-                         const std::span<const vfs::file_info> selected_files, i32 page)
+                         const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                         i32 page)
 {
     if (selected_files.empty())
     {
-        vfs::file_info file = vfs_file_info_new(cwd);
-        const std::vector<vfs::file_info> cwd_selected{file};
+        const auto file = vfs_file_info_new(cwd);
+        const std::vector<std::shared_ptr<vfs::file_info>> cwd_selected{file};
 
         show_file_properties_dialog(parent, cwd.parent_path(), cwd_selected, page);
     }

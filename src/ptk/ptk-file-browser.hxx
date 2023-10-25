@@ -217,17 +217,18 @@ struct PtkFileBrowser
     void open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept;
     void set_default_folder() const noexcept;
 
-    const std::vector<vfs::file_info> selected_files() noexcept;
+    const std::vector<std::shared_ptr<vfs::file_info>> selected_files() noexcept;
 
     void open_selected_files() noexcept;
     void open_selected_files_with_app(const std::string_view app_desktop = "") noexcept;
 
-    void rename_selected_files(const std::span<const vfs::file_info> selected_files,
-                               const std::filesystem::path& cwd) noexcept;
-    void hide_selected(const std::span<const vfs::file_info> selected_files,
+    void
+    rename_selected_files(const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
+                          const std::filesystem::path& cwd) noexcept;
+    void hide_selected(const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
                        const std::filesystem::path& cwd) noexcept;
 
-    void copycmd(const std::span<const vfs::file_info> selected_files,
+    void copycmd(const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
                  const std::filesystem::path& cwd, xset::name setname) noexcept;
 
     void set_sort_order(ptk::file_browser::sort_order order) noexcept;
@@ -274,7 +275,8 @@ struct PtkFileBrowser
 
     void show_history_menu(bool is_back_history, GdkEvent* event) noexcept;
 
-    void on_permission(GtkMenuItem* item, const std::span<const vfs::file_info> selected_files,
+    void on_permission(GtkMenuItem* item,
+                       const std::span<const std::shared_ptr<vfs::file_info>> selected_files,
                        const std::filesystem::path& cwd) noexcept;
     void on_action(const xset::name setname) noexcept;
 

@@ -20,6 +20,8 @@
 
 #include <span>
 
+#include <memory>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -44,10 +46,10 @@ is_archiver_installed()
 }
 
 static const std::string
-archiver_create_shell_file_list(const std::span<const vfs::file_info> sel_files)
+archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
 {
     std::string file_list;
-    for (const vfs::file_info& file : sel_files)
+    for (const auto& file : sel_files)
     {
         file_list.append(ztd::shell::quote(file->path().string()));
         file_list.append(" ");
@@ -56,7 +58,8 @@ archiver_create_shell_file_list(const std::span<const vfs::file_info> sel_files)
 }
 
 void
-ptk_archiver_create(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files)
+ptk_archiver_create(PtkFileBrowser* file_browser,
+                    const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
 {
     (void)file_browser;
 
@@ -73,7 +76,8 @@ ptk_archiver_create(PtkFileBrowser* file_browser, const std::span<const vfs::fil
 }
 
 void
-ptk_archiver_extract(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files,
+ptk_archiver_extract(PtkFileBrowser* file_browser,
+                     const std::span<const std::shared_ptr<vfs::file_info>> sel_files,
                      const std::filesystem::path& dest_dir)
 {
     if (!is_archiver_installed() || sel_files.empty())
@@ -101,7 +105,8 @@ ptk_archiver_extract(PtkFileBrowser* file_browser, const std::span<const vfs::fi
 }
 
 void
-ptk_archiver_open(PtkFileBrowser* file_browser, const std::span<const vfs::file_info> sel_files)
+ptk_archiver_open(PtkFileBrowser* file_browser,
+                  const std::span<const std::shared_ptr<vfs::file_info>> sel_files)
 {
     (void)file_browser;
 

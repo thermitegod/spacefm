@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <string>
 
 #include <filesystem>
@@ -27,7 +28,7 @@
  * std::filesystem::path
  */
 
-std::vector<std::filesystem::path>
+const std::vector<std::filesystem::path>
 glist_to_vector_path(GList* list)
 {
     std::vector<std::filesystem::path> vec;
@@ -44,7 +45,7 @@ glist_to_vector_path(GList* list)
  * std::string
  */
 
-std::vector<std::string>
+const std::vector<std::string>
 glist_to_vector_string(GList* list)
 {
     std::vector<std::string> vec;
@@ -58,26 +59,26 @@ glist_to_vector_string(GList* list)
 }
 
 /**
- * VFSFileInfo
+ * vfs::file_info
  */
 
-std::vector<vfs::file_info>
+const std::vector<std::shared_ptr<vfs::file_info>>
 glist_to_vector_vfs_file_info(GList* list)
 {
-    std::vector<vfs::file_info> vec;
+    std::vector<std::shared_ptr<vfs::file_info>> vec;
     vec.reserve(g_list_length(list));
     for (GList* l = list; l; l = g_list_next(l))
     {
-        vec.emplace_back(static_cast<VFSFileInfo*>(l->data)->shared_from_this());
+        vec.emplace_back(static_cast<vfs::file_info*>(l->data)->shared_from_this());
     }
     return vec;
 }
 
 GList*
-vector_to_glist_vfs_file_info(const std::span<const vfs::file_info> list)
+vector_to_glist_vfs_file_info(const std::span<const std::shared_ptr<vfs::file_info>> list)
 {
     GList* l = nullptr;
-    for (const vfs::file_info& file : list)
+    for (const auto& file : list)
     {
         l = g_list_append(l, file.get());
     }
