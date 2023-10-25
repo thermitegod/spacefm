@@ -30,13 +30,12 @@
 namespace vfs
 {
     struct dir;
-    struct async_thread;
-    using async_thread_t = std::shared_ptr<async_thread>;
-    using async_thread_function_t = void* (*)(async_thread*, void*);
 
-    struct async_thread
+    struct async_thread : public std::enable_shared_from_this<async_thread>
     {
-        async_thread(async_thread_function_t task_function, void* user_data);
+        using function_t = void* (*)(const std::shared_ptr<async_thread>&, void*);
+
+        async_thread(vfs::async_thread::function_t task_function, void* user_data);
         ~async_thread();
 
         void run();
@@ -51,7 +50,7 @@ namespace vfs
         void cleanup(bool finalize);
 
       private:
-        async_thread_function_t task_function_;
+        function_t task_function_;
         void* user_data_;
 
         std::jthread thread_;
@@ -97,4 +96,5 @@ namespace vfs
     };
 } // namespace vfs
 
-vfs::async_thread_t vfs_async_thread_new(vfs::async_thread_function_t task_func, void* user_data);
+const std::shared_ptr<vfs::async_thread>
+vfs_async_thread_new(vfs::async_thread::function_t task_func, void* user_data);

@@ -19,7 +19,7 @@
 
 #include "vfs/vfs-async-thread.hxx"
 
-vfs::async_thread::async_thread(vfs::async_thread_function_t task_function, void* user_data)
+vfs::async_thread::async_thread(vfs::async_thread::function_t task_function, void* user_data)
     : task_function_(task_function), user_data_(user_data)
 {
 }
@@ -41,7 +41,8 @@ vfs::async_thread::run()
     this->finished_ = false;
     this->canceled_ = false;
 
-    this->thread_ = std::jthread([this]() { this->task_function_(this, this->user_data_); });
+    this->thread_ = std::jthread(
+        [this]() { this->task_function_(this->shared_from_this(), this->user_data_); });
 
     this->thread_.join();
     this->running_ = false;
@@ -107,8 +108,8 @@ vfs::async_thread::cleanup(bool finalize)
     }
 }
 
-vfs::async_thread_t
-vfs_async_thread_new(vfs::async_thread_function_t task_function, void* user_data)
+const std::shared_ptr<vfs::async_thread>
+vfs_async_thread_new(vfs::async_thread::function_t task_function, void* user_data)
 {
     return std::make_shared<vfs::async_thread>(task_function, user_data);
 }

@@ -59,8 +59,7 @@ namespace vfs
 
         /*<private>*/
         std::shared_ptr<vfs::file_monitor> monitor{nullptr};
-
-        vfs::async_thread_t task{nullptr};
+        std::shared_ptr<vfs::async_thread> task{nullptr};
 
         bool file_listed{true};
         bool load_complete{true};
