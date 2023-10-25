@@ -39,235 +39,200 @@
 
 namespace vfs
 {
-    enum class file_task_type
+    struct file_task : public std::enable_shared_from_this<file_task>
     {
-        move,
-        copy,
-        trash,
-        DELETE,
-        link,
-        chmod_chown, // These two kinds of operation have lots in common,
-                     // so put them together to reduce duplicated disk I/O
-        exec,
-        last,
-    };
+        enum class type
+        {
+            move,
+            copy,
+            trash,
+            del, // cannot be named delete
+            link,
+            chmod_chown, // These two kinds of operation have lots in common,
+                         // so put them together to reduce duplicated disk I/O
+            exec,
+            last,
+        };
 
-    enum class file_task_state
-    {
-        running,
-        size_timeout,
-        query_overwrite,
-        error,
-        pause,
-        queue,
-        finish,
-    };
+        enum class state
+        {
+            running,
+            size_timeout,
+            query_overwrite,
+            error,
+            pause,
+            queue,
+            finish,
+        };
 
-    enum class file_task_overwrite_mode
-    {                  // do not reposition first four values
-        overwrite,     // Overwrite current dest file / Ask
-        overwrite_all, // Overwrite all existing files without prompt
-        skip_all,      // Do not try to overwrite any files
-        auto_rename,   // Assign a new unique name
-        skip,          // Do not overwrite current file
-        rename,        // Rename file
-    };
+        enum class overwrite_mode
+        {                  // do not reposition first four values
+            overwrite,     // Overwrite current dest file / Ask
+            overwrite_all, // Overwrite all existing files without prompt
+            skip_all,      // Do not try to overwrite any files
+            auto_rename,   // Assign a new unique name
+            skip,          // Do not overwrite current file
+            rename,        // Rename file
+        };
 
-    enum class exec_type
-    {
-        normal,
-        custom,
-    };
+        enum chmod_action
+        {
+            owner_r,
+            owner_w,
+            owner_x,
+            group_r,
+            group_w,
+            group_x,
+            other_r,
+            other_w,
+            other_x,
+            set_uid,
+            set_gid,
+            sticky,
+        };
 
-    enum chmod_action
-    {
-        owner_r,
-        owner_w,
-        owner_x,
-        group_r,
-        group_w,
-        group_x,
-        other_r,
-        other_w,
-        other_x,
-        set_uid,
-        set_gid,
-        sticky,
+        file_task() = delete;
+        file_task(type type, const std::span<const std::filesystem::path> src_files,
+                  const std::filesystem::path& dest_dir);
+        ~file_task();
+
+        void lock();
+        void unlock();
+
+        using state_callback_t = bool (*)(const std::shared_ptr<vfs::file_task>& task,
+                                          const vfs::file_task::state state, void* state_data,
+                                          void* user_data);
+
+        void set_state_callback(state_callback_t cb, void* user_data);
+
+        void set_chmod(std::array<u8, 12> new_chmod_actions);
+        void set_chown(uid_t new_uid, gid_t new_gid);
+
+        void set_recursive(bool recursive);
+        void set_overwrite_mode(const vfs::file_task::overwrite_mode mode);
+
+        void run_task();
+        void try_abort_task();
+        void abort_task();
+
+      public: // private: // TODO
+        bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
+                             char** new_dest_file);
+        bool check_dest_in_src(const std::filesystem::path& src_dir);
+
+        void file_copy(const std::filesystem::path& src_file);
+        bool do_file_copy(const std::filesystem::path& src_file,
+                          const std::filesystem::path& dest_file);
+
+        void file_move(const std::filesystem::path& src_file);
+        i32 do_file_move(const std::filesystem::path& src_file,
+                         const std::filesystem::path& dest_path);
+
+        void file_trash(const std::filesystem::path& src_file);
+        void file_delete(const std::filesystem::path& src_file);
+        void file_link(const std::filesystem::path& src_file);
+        void file_chown_chmod(const std::filesystem::path& src_file);
+        void file_exec(const std::filesystem::path& src_file);
+
+        bool should_abort();
+
+        u64 get_total_size_of_dir(const std::filesystem::path& path);
+
+        void append_add_log(const std::string_view msg);
+
+        void task_error(i32 errnox, const std::string_view action);
+        void task_error(i32 errnox, const std::string_view action,
+                        const std::filesystem::path& target);
+
+      public:
+        vfs::file_task::type type_;
+        std::vector<std::filesystem::path> src_paths{}; // All source files. This list will be freed
+                                                        // after file operation is completed.
+        std::optional<std::filesystem::path> dest_dir{}; // Destinaton directory
+        bool avoid_changes{false};
+
+        vfs::file_task::overwrite_mode overwrite_mode_;
+        bool is_recursive{false}; // Apply operation to all files under directories
+                                  // recursively. This is default to copy/delete,
+                                  // and should be set manually for chown/chmod.
+
+        // For chown
+        uid_t uid{0};
+        gid_t gid{0};
+
+        // For chmod. If chmod is not needed, this should be nullptr
+        std::optional<std::array<u8, 12>> chmod_actions{std::nullopt};
+
+        u64 total_size{0}; // Total size of the files to be processed, in bytes
+        u64 progress{0};   // Total size of current processed files, in btytes
+        i32 percent{0};    // progress (percentage)
+        bool custom_percent{false};
+        u64 last_speed{0};
+        u64 last_progress{0};
+        f64 last_elapsed{0.0};
+        u32 current_item{0};
+
+        ztd::timer timer;
+        std::time_t start_time;
+
+        // copy of Current processed file
+        std::optional<std::filesystem::path> current_file{std::nullopt};
+        // copy of Current destination file
+        std::optional<std::filesystem::path> current_dest{std::nullopt};
+
+        i32 err_count{0};
+        i32 error{0};
+        bool error_first{true};
+
+        GThread* thread{nullptr};
+        vfs::file_task::state state_;
+        vfs::file_task::state state_pause_{vfs::file_task::state::running};
+        bool abort{false};
+        GCond* pause_cond{nullptr};
+        bool queue_start{false};
+
+        state_callback_t state_cb{nullptr};
+        void* state_cb_data{nullptr};
+
+        GMutex* mutex{nullptr};
+
+        // sfm write directly to gtk buffer for speed
+        GtkTextBuffer* add_log_buf{nullptr};
+        GtkTextMark* add_log_end{nullptr};
+
+        // MOD run task
+        std::string exec_action{};
+        std::string exec_command{};
+        bool exec_sync{true};
+        bool exec_popup{false};
+        bool exec_show_output{false};
+        bool exec_show_error{false};
+        bool exec_terminal{false};
+        bool exec_keep_terminal{false};
+        bool exec_export{false};
+        bool exec_direct{false};
+        std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
+                                              // for su commands, must use fish -c
+                                              // as su does not execute binaries
+        std::optional<std::filesystem::path> exec_script{};
+        bool exec_keep_tmp{false}; // diagnostic to keep temp files
+        void* exec_browser{nullptr};
+        void* exec_desktop{nullptr};
+        std::string exec_icon{};
+        pid_t exec_pid{0};
+        i32 exec_exit_status{0};
+        u32 child_watch{0};
+        bool exec_is_error{false};
+        GIOChannel* exec_channel_out{nullptr};
+        GIOChannel* exec_channel_err{nullptr};
+        bool exec_scroll_lock{false};
+        xset_t exec_set{nullptr};
+        GCond* exec_cond{nullptr};
+        void* exec_ptask{nullptr};
     };
 } // namespace vfs
 
-inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
-    // User
-    std::filesystem::perms::owner_read,
-    std::filesystem::perms::owner_write,
-    std::filesystem::perms::owner_exec,
-    // Group
-    std::filesystem::perms::group_read,
-    std::filesystem::perms::group_write,
-    std::filesystem::perms::group_exec,
-
-    // Other
-    std::filesystem::perms::others_read,
-    std::filesystem::perms::others_write,
-    std::filesystem::perms::others_exec,
-
-    // uid/gid
-    std::filesystem::perms::set_uid,
-    std::filesystem::perms::set_gid,
-
-    // sticky bit
-    std::filesystem::perms::sticky_bit,
-};
-
-struct VFSFileTask;
-
-namespace vfs
-{
-    using file_task = std::shared_ptr<VFSFileTask>;
-}
-
-using VFSFileTaskStateCallback = bool (*)(const vfs::file_task& task,
-                                          const vfs::file_task_state state, void* state_data,
-                                          void* user_data);
-
-struct VFSFileTask : public std::enable_shared_from_this<VFSFileTask>
-{
-  public:
-    VFSFileTask() = delete;
-    VFSFileTask(vfs::file_task_type type, const std::span<const std::filesystem::path> src_files,
-                const std::filesystem::path& dest_dir);
-    ~VFSFileTask();
-
-    void lock();
-    void unlock();
-
-    void set_state_callback(VFSFileTaskStateCallback cb, void* user_data);
-
-    void set_chmod(std::array<u8, 12> new_chmod_actions);
-    void set_chown(uid_t new_uid, gid_t new_gid);
-
-    void set_recursive(bool recursive);
-    void set_overwrite_mode(vfs::file_task_overwrite_mode mode);
-
-    void run_task();
-    void try_abort_task();
-    void abort_task();
-
-  public: // private: // TODO
-    bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                         char** new_dest_file);
-    bool check_dest_in_src(const std::filesystem::path& src_dir);
-
-    void file_copy(const std::filesystem::path& src_file);
-    bool do_file_copy(const std::filesystem::path& src_file,
-                      const std::filesystem::path& dest_file);
-
-    void file_move(const std::filesystem::path& src_file);
-    i32 do_file_move(const std::filesystem::path& src_file, const std::filesystem::path& dest_path);
-
-    void file_trash(const std::filesystem::path& src_file);
-    void file_delete(const std::filesystem::path& src_file);
-    void file_link(const std::filesystem::path& src_file);
-    void file_chown_chmod(const std::filesystem::path& src_file);
-    void file_exec(const std::filesystem::path& src_file);
-
-    bool should_abort();
-
-    u64 get_total_size_of_dir(const std::filesystem::path& path);
-
-    void append_add_log(const std::string_view msg);
-
-    void task_error(i32 errnox, const std::string_view action);
-    void task_error(i32 errnox, const std::string_view action, const std::filesystem::path& target);
-
-  public:
-    vfs::file_task_type type;
-    std::vector<std::filesystem::path> src_paths{};  // All source files. This list will be freed
-                                                     // after file operation is completed.
-    std::optional<std::filesystem::path> dest_dir{}; // Destinaton directory
-    bool avoid_changes{false};
-
-    vfs::file_task_overwrite_mode overwrite_mode;
-    bool is_recursive{false}; // Apply operation to all files under directories
-                              // recursively. This is default to copy/delete,
-                              // and should be set manually for chown/chmod.
-
-    // For chown
-    uid_t uid{0};
-    gid_t gid{0};
-
-    // For chmod. If chmod is not needed, this should be nullptr
-    std::optional<std::array<u8, 12>> chmod_actions{std::nullopt};
-
-    u64 total_size{0}; // Total size of the files to be processed, in bytes
-    u64 progress{0};   // Total size of current processed files, in btytes
-    i32 percent{0};    // progress (percentage)
-    bool custom_percent{false};
-    u64 last_speed{0};
-    u64 last_progress{0};
-    f64 last_elapsed{0.0};
-    u32 current_item{0};
-
-    ztd::timer timer;
-    std::time_t start_time;
-
-    // copy of Current processed file
-    std::optional<std::filesystem::path> current_file{std::nullopt};
-    // copy of Current destination file
-    std::optional<std::filesystem::path> current_dest{std::nullopt};
-
-    i32 err_count{0};
-    i32 error{0};
-    bool error_first{true};
-
-    GThread* thread{nullptr};
-    vfs::file_task_state state;
-    vfs::file_task_state state_pause{vfs::file_task_state::running};
-    bool abort{false};
-    GCond* pause_cond{nullptr};
-    bool queue_start{false};
-
-    VFSFileTaskStateCallback state_cb{nullptr};
-    void* state_cb_data{nullptr};
-
-    GMutex* mutex{nullptr};
-
-    // sfm write directly to gtk buffer for speed
-    GtkTextBuffer* add_log_buf{nullptr};
-    GtkTextMark* add_log_end{nullptr};
-
-    // MOD run task
-    vfs::exec_type exec_type{vfs::exec_type::normal};
-    std::string exec_action{};
-    std::string exec_command{};
-    bool exec_sync{true};
-    bool exec_popup{false};
-    bool exec_show_output{false};
-    bool exec_show_error{false};
-    bool exec_terminal{false};
-    bool exec_keep_terminal{false};
-    bool exec_export{false};
-    bool exec_direct{false};
-    std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
-                                          // for su commands, must use fish -c
-                                          // as su does not execute binaries
-    std::optional<std::filesystem::path> exec_script{};
-    bool exec_keep_tmp{false}; // diagnostic to keep temp files
-    void* exec_browser{nullptr};
-    void* exec_desktop{nullptr};
-    std::string exec_icon{};
-    pid_t exec_pid{0};
-    i32 exec_exit_status{0};
-    u32 child_watch{0};
-    bool exec_is_error{false};
-    GIOChannel* exec_channel_out{nullptr};
-    GIOChannel* exec_channel_err{nullptr};
-    bool exec_scroll_lock{false};
-    xset_t exec_set{nullptr};
-    GCond* exec_cond{nullptr};
-    void* exec_ptask{nullptr};
-};
-
-vfs::file_task vfs_task_new(const vfs::file_task_type task_type,
-                            const std::span<const std::filesystem::path> src_files,
-                            const std::filesystem::path& dest_dir);
+const std::shared_ptr<vfs::file_task>
+vfs_task_new(const vfs::file_task::type task_type,
+             const std::span<const std::filesystem::path> src_files,
+             const std::filesystem::path& dest_dir);

@@ -688,17 +688,17 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                 }
                 g_strfreev(list);
 
-                vfs::file_task_type file_action;
+                vfs::file_task::type file_action;
                 switch (gdk_drag_context_get_selected_action(drag_context))
                 {
                     case GdkDragAction::GDK_ACTION_COPY:
-                        file_action = vfs::file_task_type::copy;
+                        file_action = vfs::file_task::type::copy;
                         break;
                     case GdkDragAction::GDK_ACTION_MOVE:
-                        file_action = vfs::file_task_type::move;
+                        file_action = vfs::file_task::type::move;
                         break;
                     case GdkDragAction::GDK_ACTION_LINK:
-                        file_action = vfs::file_task_type::link;
+                        file_action = vfs::file_task::type::link;
                         break;
                     case GdkDragAction::GDK_ACTION_DEFAULT:
                     case GdkDragAction::GDK_ACTION_PRIVATE:

@@ -1442,7 +1442,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             return {SOCKET_INVALID, std::format("invalid task '{}'", data[i])};
         }
-        if (ptask->task->type != vfs::file_task_type::exec)
+        if (ptask->task->type_ != vfs::file_task::type::exec)
         {
             return {SOCKET_INVALID, std::format("internal task {} is read-only", data[i])};
         }
@@ -1520,15 +1520,15 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             if (ztd::same(subproperty, "run"))
             {
-                ptk_file_task_pause(ptask, vfs::file_task_state::running);
+                ptk_file_task_pause(ptask, vfs::file_task::state::running);
             }
             else if (ztd::same(subproperty, "pause"))
             {
-                ptk_file_task_pause(ptask, vfs::file_task_state::pause);
+                ptk_file_task_pause(ptask, vfs::file_task::state::pause);
             }
             else if (ztd::same(subproperty, "queue") || ztd::same(subproperty, "queued"))
             {
-                ptk_file_task_pause(ptask, vfs::file_task_state::queue);
+                ptk_file_task_pause(ptask, vfs::file_task::state::queue);
             }
             else if (ztd::same(subproperty, "stop"))
             {
@@ -1652,15 +1652,15 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (ztd::same(property, "queue_state"))
         {
-            if (ptask->task->state_pause == vfs::file_task_state::running)
+            if (ptask->task->state_pause_ == vfs::file_task::state::running)
             {
                 return {SOCKET_SUCCESS, "run"};
             }
-            else if (ptask->task->state_pause == vfs::file_task_state::pause)
+            else if (ptask->task->state_pause_ == vfs::file_task::state::pause)
             {
                 return {SOCKET_SUCCESS, "pause"};
             }
-            else if (ptask->task->state_pause == vfs::file_task_state::queue)
+            else if (ptask->task->state_pause_ == vfs::file_task::state::queue)
             {
                 return {SOCKET_SUCCESS, "queue"};
             }
@@ -1918,26 +1918,26 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_INVALID,
                         std::format("task type {} requires FILE argument(s)", data[i])};
             }
-            vfs::file_task_type task_type;
+            vfs::file_task::type task_type;
             if (ztd::same(property, "copy"))
             {
-                task_type = vfs::file_task_type::copy;
+                task_type = vfs::file_task::type::copy;
             }
             else if (ztd::same(property, "move"))
             {
-                task_type = vfs::file_task_type::move;
+                task_type = vfs::file_task::type::move;
             }
             else if (ztd::same(property, "link"))
             {
-                task_type = vfs::file_task_type::link;
+                task_type = vfs::file_task::type::link;
             }
             else if (ztd::same(property, "delete"))
             {
-                task_type = vfs::file_task_type::DELETE;
+                task_type = vfs::file_task::type::del;
             }
             else if (ztd::same(property, "trash"))
             {
-                task_type = vfs::file_task_type::trash;
+                task_type = vfs::file_task::type::trash;
             }
             else
             { // failsafe

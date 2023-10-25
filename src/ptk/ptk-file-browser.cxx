@@ -2421,20 +2421,20 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 }
                 g_strfreev(list);
 
-                vfs::file_task_type file_action;
+                vfs::file_task::type file_action;
 
                 if (file_browser->drag_source_dev_ != dest_dev ||
                     file_browser->drag_source_inode_ == dest_inode)
                 { // src and dest are on different devices or same dir
                     // ztd::logger::debug("DnD COPY");
                     gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
-                    file_action = vfs::file_task_type::copy;
+                    file_action = vfs::file_task::type::copy;
                 }
                 else
                 {
                     // ztd::logger::debug("DnD MOVE");
                     gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
-                    file_action = vfs::file_task_type::move;
+                    file_action = vfs::file_task::type::move;
                 }
 
                 std::vector<std::filesystem::path> file_list;
@@ -3877,17 +3877,17 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
 
     if (copy_dest || move_dest)
     {
-        vfs::file_task_type file_action;
+        vfs::file_task::type file_action;
         std::optional<std::filesystem::path> dest_dir;
 
         if (copy_dest)
         {
-            file_action = vfs::file_task_type::copy;
+            file_action = vfs::file_task::type::copy;
             dest_dir = copy_dest;
         }
         else
         {
-            file_action = vfs::file_task_type::move;
+            file_action = vfs::file_task::type::move;
             dest_dir = move_dest;
         }
 

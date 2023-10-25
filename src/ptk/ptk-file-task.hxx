@@ -23,6 +23,8 @@
 
 #include <array>
 
+#include <memory>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -45,11 +47,12 @@ struct PtkFileTask
     PtkFileTask() = delete;
     ~PtkFileTask();
 
-    PtkFileTask(vfs::file_task_type type, const std::span<const std::filesystem::path> src_files,
+    PtkFileTask(const vfs::file_task::type type,
+                const std::span<const std::filesystem::path> src_files,
                 const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                 GtkWidget* task_view);
 
-    vfs::file_task task{nullptr};
+    std::shared_ptr<vfs::file_task> task{nullptr};
 
     GtkWidget* progress_dlg{nullptr};
     GtkButton* progress_btn_close{nullptr};
@@ -108,11 +111,11 @@ struct PtkFileTask
 void ptk_file_task_lock(PtkFileTask* ptask);
 void ptk_file_task_unlock(PtkFileTask* ptask);
 
-PtkFileTask* ptk_file_task_new(vfs::file_task_type type,
+PtkFileTask* ptk_file_task_new(const vfs::file_task::type type,
                                const std::span<const std::filesystem::path> src_files,
                                GtkWindow* parent_window, GtkWidget* task_view);
 
-PtkFileTask* ptk_file_task_new(vfs::file_task_type type,
+PtkFileTask* ptk_file_task_new(const vfs::file_task::type type,
                                const std::span<const std::filesystem::path> src_files,
                                const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                                GtkWidget* task_view);
@@ -135,6 +138,6 @@ void ptk_file_task_run(PtkFileTask* ptask);
 
 bool ptk_file_task_cancel(PtkFileTask* ptask);
 
-void ptk_file_task_pause(PtkFileTask* ptask, vfs::file_task_state state);
+void ptk_file_task_pause(PtkFileTask* ptask, const vfs::file_task::state state);
 
 void ptk_file_task_progress_open(PtkFileTask* ptask);

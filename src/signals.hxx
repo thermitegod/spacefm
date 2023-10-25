@@ -27,7 +27,7 @@ namespace spacefm
         file_thumbnail_loaded,
         // file_load_complete,
 
-        // VFSFileTask
+        // vfs::file_task
         task_finish,
 
         // PTKFileBrowser

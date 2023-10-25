@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -3092,7 +3093,7 @@ main_window_get_on_current_desktop()
 }
 
 const std::string
-main_write_exports(const vfs::file_task& vtask, const std::string_view value)
+main_write_exports(const std::shared_ptr<vfs::file_task>& vtask, const std::string_view value)
 {
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(vtask->exec_browser);
     const MainWindow* main_window = file_browser->main_window();
@@ -3269,24 +3270,24 @@ main_write_exports(const vfs::file_task& vtask, const std::string_view value)
     PtkFileTask* ptask = ptk_task_view_get_selected_task(file_browser->task_view());
     if (ptask)
     {
-        const std::map<vfs::file_task_type, const std::string_view> job_titles{
-            {vfs::file_task_type::move, "move"},
-            {vfs::file_task_type::copy, "copy"},
-            {vfs::file_task_type::trash, "trash"},
-            {vfs::file_task_type::DELETE, "delete"},
-            {vfs::file_task_type::link, "link"},
-            {vfs::file_task_type::chmod_chown, "change"},
-            {vfs::file_task_type::exec, "run"},
+        const std::map<vfs::file_task::type, const std::string_view> job_titles{
+            {vfs::file_task::type::move, "move"},
+            {vfs::file_task::type::copy, "copy"},
+            {vfs::file_task::type::trash, "trash"},
+            {vfs::file_task::type::del, "delete"},
+            {vfs::file_task::type::link, "link"},
+            {vfs::file_task::type::chmod_chown, "change"},
+            {vfs::file_task::type::exec, "run"},
         };
 
         buf.append("\n");
-        buf.append(std::format("set fm_task_type {}\n", job_titles.at(ptask->task->type)));
+        buf.append(std::format("set fm_task_type {}\n", job_titles.at(ptask->task->type_)));
 
         const auto dest_dir = ptask->task->dest_dir.value_or("");
         const auto current_file = ptask->task->current_file.value_or("");
         const auto current_dest = ptask->task->current_dest.value_or("");
 
-        if (ptask->task->type == vfs::file_task_type::exec)
+        if (ptask->task->type_ == vfs::file_task::type::exec)
         {
             // clang-format off
             buf.append(std::format("set fm_task_pwd {}\n", ztd::shell::quote(dest_dir.string())));
