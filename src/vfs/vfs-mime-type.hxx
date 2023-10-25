@@ -42,6 +42,9 @@ namespace vfs
         mime_type(const std::string_view type_name);
         ~mime_type();
 
+        static const std::shared_ptr<vfs::mime_type>
+        create(const std::string_view type_name) noexcept;
+
         GdkPixbuf* icon(bool big) noexcept;
 
         // Get mime-type string
@@ -74,8 +77,6 @@ namespace vfs
 
 void vfs_mime_type_init();
 void vfs_mime_type_finalize();
-
-const std::shared_ptr<vfs::mime_type> vfs_mime_type_new(const std::string_view type_name);
 
 const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_get_from_file(const std::filesystem::path& file_path);

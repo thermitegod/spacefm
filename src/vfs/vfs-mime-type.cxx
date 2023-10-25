@@ -54,10 +54,9 @@ std::mutex mime_map_lock;
 static std::vector<std::shared_ptr<vfs::monitor>> mime_caches_monitors;
 
 const std::shared_ptr<vfs::mime_type>
-vfs_mime_type_new(const std::string_view type_name)
+vfs::mime_type::create(const std::string_view type_name) noexcept
 {
-    auto mime_type = std::make_shared<vfs::mime_type>(type_name);
-    return mime_type;
+    return std::make_shared<vfs::mime_type>(type_name);
 }
 
 const std::shared_ptr<vfs::mime_type>
@@ -77,9 +76,8 @@ vfs_mime_type_get_from_type(const std::string_view type)
         return mime_map.at(type.data());
     }
 
-    const auto mime_type = vfs_mime_type_new(type);
+    const auto mime_type = vfs::mime_type::create(type);
     mime_map.insert({mime_type->type().data(), mime_type});
-
     return mime_type;
 }
 
