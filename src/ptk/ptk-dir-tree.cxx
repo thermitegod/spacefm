@@ -626,7 +626,7 @@ ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const std::files
     node->parent = parent;
     if (!path.empty())
     {
-        node->file = vfs_file_info_new(path);
+        node->file = vfs::file::create(path);
         node->n_children = 1;
         node->children = ptk_dir_tree_node_new(tree, node, std::filesystem::path());
         node->last = node->children;

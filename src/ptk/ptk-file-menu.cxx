@@ -2562,7 +2562,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
         // select file
         if (std::filesystem::equivalent(cwd, ao->file_browser->cwd()))
         {
-            const auto file = vfs_file_info_new(ao->path);
+            const auto file = vfs::file::create(ao->path);
             ao->file_browser->dir_->emit_file_created(file->name(), true);
             ao->file_browser->select_file(ao->path);
         }
@@ -2576,7 +2576,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             }
             else
             {
-                const auto file = vfs_file_info_new(ao->path);
+                const auto file = vfs::file::create(ao->path);
                 const std::vector<std::shared_ptr<vfs::file>> sel_files{file};
                 ptk_open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
             }

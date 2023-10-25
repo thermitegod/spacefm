@@ -261,7 +261,7 @@ vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
             }
         }
 
-        const auto file = vfs_file_info_new(full_path);
+        const auto file = vfs::file::create(full_path);
 
         dir->file_list.emplace_back(file);
     }
@@ -443,7 +443,7 @@ vfs::dir::update_created_files() noexcept
             const auto full_path = std::filesystem::path() / this->path / created_file;
             if (std::filesystem::exists(full_path))
             {
-                const auto file = vfs_file_info_new(full_path);
+                const auto file = vfs::file::create(full_path);
                 // add new file to dir file_list
                 this->file_list.emplace_back(file);
 

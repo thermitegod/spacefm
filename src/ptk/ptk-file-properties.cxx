@@ -988,7 +988,7 @@ ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
 {
     if (selected_files.empty())
     {
-        const auto file = vfs_file_info_new(cwd);
+        const auto file = vfs::file::create(cwd);
         const std::vector<std::shared_ptr<vfs::file>> cwd_selected{file};
 
         show_file_properties_dialog(parent, cwd.parent_path(), cwd_selected, page);

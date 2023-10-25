@@ -3357,7 +3357,7 @@ ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path
 
     for (const auto& file_path : files)
     {
-        const auto file = vfs_file_info_new(file_path);
+        const auto file = vfs::file::create(file_path);
         const std::string file_dir = std::filesystem::path(file_path).parent_path();
 
         if (!ptk_rename_file(file_browser,

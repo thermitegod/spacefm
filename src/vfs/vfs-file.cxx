@@ -40,7 +40,7 @@
 #include "vfs/vfs-file.hxx"
 
 const std::shared_ptr<vfs::file>
-vfs_file_info_new(const std::filesystem::path& path)
+vfs::file::create(const std::filesystem::path& path) noexcept
 {
     return std::make_shared<vfs::file>(path);
 }

@@ -41,9 +41,7 @@ namespace vfs
         file(const std::filesystem::path& file_path);
         ~file();
 
-        // noncopyable
-        // file(const file&) = delete;
-        // file& operator=(const file&) = delete;
+        static const std::shared_ptr<vfs::file> create(const std::filesystem::path& path) noexcept;
 
         const std::string_view name() const noexcept;
         const std::string_view display_name() const noexcept;
@@ -165,5 +163,3 @@ namespace vfs
         const std::string_view special_directory_get_icon_name() const noexcept;
     };
 } // namespace vfs
-
-const std::shared_ptr<vfs::file> vfs_file_info_new(const std::filesystem::path& file_path);
