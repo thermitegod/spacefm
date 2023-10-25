@@ -64,7 +64,7 @@ struct VFSVolume
 {
   public:
     VFSVolume() = default;
-    VFSVolume(const vfs::device_t& device);
+    VFSVolume(const std::shared_ptr<vfs::device>& device);
     ~VFSVolume() = default;
 
   public:

@@ -412,7 +412,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
         return nullptr;
     }
 
-    const vfs::device_t device = std::make_shared<VFSDevice>(udevice);
+    const auto device = std::make_shared<vfs::device>(udevice);
     if (!device->is_valid() || device->devnode().empty() || device->devnum() == 0 ||
         !device->devnode().starts_with("/dev/"))
     {
@@ -691,7 +691,7 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
  * VFSVolume
  */
 
-VFSVolume::VFSVolume(const vfs::device_t& device)
+VFSVolume::VFSVolume(const std::shared_ptr<vfs::device>& device)
 {
     this->devnum_ = device->devnum();
     this->device_type_ = vfs::volume_device_type::block;

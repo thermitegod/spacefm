@@ -30,7 +30,7 @@
 
 #include "vfs/vfs-device.hxx"
 
-VFSDevice::VFSDevice(const libudev::device& udevice)
+vfs::device::device(const libudev::device& udevice)
 {
     this->udevice = udevice;
 
@@ -38,103 +38,103 @@ VFSDevice::VFSDevice(const libudev::device& udevice)
 }
 
 dev_t
-VFSDevice::devnum() const noexcept
+vfs::device::devnum() const noexcept
 {
     return this->devnum_;
 }
 
 const std::string_view
-VFSDevice::devnode() const noexcept
+vfs::device::devnode() const noexcept
 {
     return this->devnode_;
 }
 
 const std::string_view
-VFSDevice::native_path() const noexcept
+vfs::device::native_path() const noexcept
 {
     return this->native_path_;
 }
 
 const std::string_view
-VFSDevice::mount_points() const noexcept
+vfs::device::mount_points() const noexcept
 {
     return this->mount_points_;
 }
 
 bool
-VFSDevice::is_valid() const noexcept
+vfs::device::is_valid() const noexcept
 {
     return this->is_valid_;
 }
 
 bool
-VFSDevice::is_system_internal() const noexcept
+vfs::device::is_system_internal() const noexcept
 {
     return this->is_system_internal_;
 }
 
 bool
-VFSDevice::is_removable() const noexcept
+vfs::device::is_removable() const noexcept
 {
     return this->is_removable_;
 }
 
 bool
-VFSDevice::is_media_available() const noexcept
+vfs::device::is_media_available() const noexcept
 {
     return this->is_media_available_;
 }
 
 bool
-VFSDevice::is_optical_disc() const noexcept
+vfs::device::is_optical_disc() const noexcept
 {
     return this->is_optical_disc_;
 }
 
 bool
-VFSDevice::is_mounted() const noexcept
+vfs::device::is_mounted() const noexcept
 {
     return this->is_mounted_;
 }
 
 bool
-VFSDevice::is_media_ejectable() const noexcept
+vfs::device::is_media_ejectable() const noexcept
 {
     return this->is_media_ejectable_;
 }
 
 const std::string_view
-VFSDevice::id() const noexcept
+vfs::device::id() const noexcept
 {
     return this->id_;
 }
 
 const std::string_view
-VFSDevice::id_label() const noexcept
+vfs::device::id_label() const noexcept
 {
     return this->id_label_;
 }
 
 u64
-VFSDevice::size() const noexcept
+vfs::device::size() const noexcept
 {
     return this->size_;
 }
 
 u64
-VFSDevice::block_size() const noexcept
+vfs::device::block_size() const noexcept
 {
     return this->block_size_;
 }
 
 const std::string_view
-VFSDevice::fstype() const noexcept
+vfs::device::fstype() const noexcept
 {
     return this->fstype_;
 }
 
 const std::optional<std::string>
-VFSDevice::info_mount_points() noexcept
+vfs::device::info_mount_points() noexcept
 {
     const dev_t dmajor = gnu_dev_major(this->devnum_);
     const dev_t dminor = gnu_dev_minor(this->devnum_);
@@ -188,7 +188,7 @@ VFSDevice::info_mount_points() noexcept
 }
 
 bool
-VFSDevice::device_get_info() noexcept
+vfs::device::device_get_info() noexcept
 {
     const auto device_syspath = this->udevice.get_syspath();
     const auto device_devnode = this->udevice.get_devnode();
