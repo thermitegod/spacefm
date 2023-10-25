@@ -42,9 +42,10 @@
 
 #include "settings/app.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-async-task.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
 static void* thumbnail_loader_thread(vfs::async_task task,
@@ -90,6 +91,12 @@ vfs::thumbnail_loader::~thumbnail_loader()
     this->dir = nullptr;
 }
 
+const std::shared_ptr<vfs::thumbnail_loader>
+vfs::thumbnail_loader::create(const std::shared_ptr<vfs::dir>& dir) noexcept
+{
+    return std::make_shared<vfs::thumbnail_loader>(dir);
+}
+
 void
 vfs::thumbnail_loader::loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept
 {
@@ -115,12 +122,6 @@ vfs::thumbnail_loader::loader_request(const std::shared_ptr<vfs::file>& file, bo
     }
 
     ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
-}
-
-const std::shared_ptr<vfs::thumbnail_loader>
-vfs_thumbnail_loader_new(const std::shared_ptr<vfs::dir>& dir)
-{
-    return std::make_shared<vfs::thumbnail_loader>(dir);
 }
 
 static bool
@@ -243,7 +244,7 @@ vfs_thumbnail_loader_request(const std::shared_ptr<vfs::dir>& dir,
     if (!dir->thumbnail_loader)
     {
         // ztd::logger::debug("new_task: !dir->thumbnail_loader");
-        dir->thumbnail_loader = vfs_thumbnail_loader_new(dir);
+        dir->thumbnail_loader = vfs::thumbnail_loader::create(dir);
         assert(dir->thumbnail_loader != nullptr);
         new_task = true;
     }

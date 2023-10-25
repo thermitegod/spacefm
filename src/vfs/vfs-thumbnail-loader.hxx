@@ -23,7 +23,6 @@
 
 #include <memory>
 
-#include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-async-task.hxx"
 
@@ -37,12 +36,17 @@ namespace vfs
 
 namespace vfs
 {
+    struct dir;
+
     struct thumbnail_loader : public std::enable_shared_from_this<thumbnail_loader>
     {
       public:
         thumbnail_loader() = delete;
         thumbnail_loader(const std::shared_ptr<vfs::dir>& dir);
         ~thumbnail_loader();
+
+        static const std::shared_ptr<vfs::thumbnail_loader>
+        create(const std::shared_ptr<vfs::dir>& dir) noexcept;
 
         void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
 
