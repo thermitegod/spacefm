@@ -92,9 +92,13 @@ namespace vfs
         };
 
         file_task() = delete;
-        file_task(type type, const std::span<const std::filesystem::path> src_files,
+        file_task(const type type, const std::span<const std::filesystem::path> src_files,
                   const std::filesystem::path& dest_dir);
         ~file_task();
+
+        static const std::shared_ptr<vfs::file_task>
+        create(const type type, const std::span<const std::filesystem::path> src_files,
+               const std::filesystem::path& dest_dir) noexcept;
 
         void lock();
         void unlock();
@@ -231,8 +235,3 @@ namespace vfs
         void* exec_ptask{nullptr};
     };
 } // namespace vfs
-
-const std::shared_ptr<vfs::file_task>
-vfs_task_new(const vfs::file_task::type task_type,
-             const std::span<const std::filesystem::path> src_files,
-             const std::filesystem::path& dest_dir);

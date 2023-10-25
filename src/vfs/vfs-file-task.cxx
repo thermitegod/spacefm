@@ -83,14 +83,10 @@ inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
     std::filesystem::perms::sticky_bit,
 };
 
-/*
- * source_files sould be a newly allocated list, and it will be
- * freed after file operation has been completed
- */
 const std::shared_ptr<vfs::file_task>
-vfs_task_new(const vfs::file_task::type task_type,
-             const std::span<const std::filesystem::path> src_files,
-             const std::filesystem::path& dest_dir)
+vfs::file_task::create(const vfs::file_task::type task_type,
+                       const std::span<const std::filesystem::path> src_files,
+                       const std::filesystem::path& dest_dir) noexcept
 {
     return std::make_shared<vfs::file_task>(task_type, src_files, dest_dir);
 }

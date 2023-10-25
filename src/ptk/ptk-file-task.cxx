@@ -70,7 +70,7 @@ PtkFileTask::PtkFileTask(const vfs::file_task::type type,
                          const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                          GtkWidget* task_view)
 {
-    this->task = vfs_task_new(type, src_files, dest_dir);
+    this->task = vfs::file_task::create(type, src_files, dest_dir);
 
     this->task->set_state_callback(on_vfs_file_task_state_cb, this);
     this->parent_window = parent_window;
