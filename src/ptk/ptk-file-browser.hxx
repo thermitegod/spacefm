@@ -106,7 +106,8 @@ struct navigation_history_data
 
     void reset() noexcept;
 
-    const std::filesystem::path& current() const noexcept;
+    const std::filesystem::path& path(const ptk::file_browser::chdir_mode mode =
+                                          ptk::file_browser::chdir_mode::normal) const noexcept;
 
   private:
     std::vector<std::filesystem::path> forward_{};

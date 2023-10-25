@@ -258,9 +258,19 @@ navigation_history_data::reset() noexcept
 }
 
 const std::filesystem::path&
-navigation_history_data::current() const noexcept
+navigation_history_data::path(const ptk::file_browser::chdir_mode mode) const noexcept
 {
-    return this->current_;
+    switch (mode)
+    {
+        case ptk::file_browser::chdir_mode::normal:
+            return this->current_;
+        case ptk::file_browser::chdir_mode::back:
+            assert(!this->back_.empty());
+            return this->back_.back();
+        case ptk::file_browser::chdir_mode::forward:
+            assert(!this->forward_.empty());
+            return this->forward_.back();
+    }
 }
 
 struct column_data
@@ -3051,7 +3061,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
     switch (mode)
     {
         case ptk::file_browser::chdir_mode::normal:
-            if (!std::filesystem::equivalent(this->navigation_history->current(), path))
+            if (!std::filesystem::equivalent(this->navigation_history->path(), path))
             {
                 this->navigation_history->new_forward(path);
             }
@@ -3109,13 +3119,13 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 
     this->update_tab_label();
 
-    const auto disp_path = this->cwd();
+    const auto cwd = this->cwd();
     if (!this->inhibit_focus_)
     {
 #if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), disp_path.c_str());
+        gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
 #elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), disp_path.c_str());
+        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
 #endif
     }
 
@@ -3129,7 +3139,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 const std::filesystem::path&
 PtkFileBrowser::cwd() const noexcept
 {
-    return this->navigation_history->current();
+    return this->navigation_history->path();
 }
 
 void
@@ -3267,7 +3277,8 @@ PtkFileBrowser::go_back() noexcept
     this->focus_folder_view();
     if (this->navigation_history->has_back())
     {
-        this->chdir(this->navigation_history->current(), ptk::file_browser::chdir_mode::back);
+        const auto mode = ptk::file_browser::chdir_mode::back;
+        this->chdir(this->navigation_history->path(mode), mode);
     }
 }
 
@@ -3277,7 +3288,8 @@ PtkFileBrowser::go_forward() noexcept
     this->focus_folder_view();
     if (this->navigation_history->has_forward())
     {
-        this->chdir(this->navigation_history->current(), ptk::file_browser::chdir_mode::forward);
+        const auto mode = ptk::file_browser::chdir_mode::forward;
+        this->chdir(this->navigation_history->path(mode), mode);
     }
 }
 
