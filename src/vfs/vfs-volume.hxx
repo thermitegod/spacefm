@@ -58,6 +58,9 @@ namespace vfs
         ~volume() = default;
         // ~volume() { ztd::logger::debug("vfs::volume::~volume({})", fmt::ptr(this)); };
 
+        static const std::shared_ptr<vfs::volume>
+        create(const std::shared_ptr<vfs::device>& device) noexcept;
+
         using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,
                                     const vfs::volume::state state, void* user_data);
 

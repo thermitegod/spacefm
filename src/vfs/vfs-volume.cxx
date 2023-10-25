@@ -420,7 +420,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
     }
 
     // translate device info to VFSVolume
-    return std::make_shared<vfs::volume>(device);
+    return vfs::volume::create(device);
 }
 
 bool
@@ -739,6 +739,12 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device)
     // ztd::logger::debug("    mount_point={}", this->mount_point_);
     // ztd::logger::debug("    size={}", this->size_);
     // ztd::logger::debug("    disp_name={}", this->disp_name_);
+}
+
+const std::shared_ptr<vfs::volume>
+vfs::volume::create(const std::shared_ptr<vfs::device>& device) noexcept
+{
+    return std::make_shared<vfs::volume>(device);
 }
 
 const std::optional<std::string>
