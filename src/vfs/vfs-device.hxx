@@ -20,6 +20,8 @@
 
 #include <optional>
 
+#include <memory>
+
 #include <ztd/ztd.hxx>
 
 #include "vfs/libudevpp/libudevpp.hxx"
@@ -31,6 +33,8 @@ namespace vfs
         device() = delete;
         device(const libudev::device& udevice);
         ~device() = default;
+
+        static const std::shared_ptr<vfs::device> create(const libudev::device& udevice) noexcept;
 
         libudev::device udevice;
 
