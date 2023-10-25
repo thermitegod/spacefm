@@ -47,7 +47,7 @@
 
 #include "vfs/vfs-thumbnailer.hxx"
 
-static void* thumbnailer_thread(vfs::async_task task,
+static void* thumbnailer_thread(vfs::async_task* task,
                                 const std::shared_ptr<vfs::thumbnailer>& loader);
 static bool on_thumbnail_idle(void* user_data);
 
@@ -55,7 +55,7 @@ vfs::thumbnailer::thumbnailer(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
 {
     // ztd::logger::debug("vfs::dir::thumbnailer({})", fmt::ptr(this));
 
-    this->task = vfs_async_task_new((VFSAsyncFunc)thumbnailer_thread, this);
+    this->task = vfs_async_task_new((vfs::async_task::function_t)thumbnailer_thread, this);
 }
 
 vfs::thumbnailer::~thumbnailer()
@@ -136,7 +136,7 @@ on_thumbnail_idle(void* user_data)
 }
 
 static void*
-thumbnailer_thread(vfs::async_task task, const std::shared_ptr<vfs::thumbnailer>& loader)
+thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer>& loader)
 {
     // ztd::logger::debug("thumbnailer_thread");
     while (!task->is_canceled())

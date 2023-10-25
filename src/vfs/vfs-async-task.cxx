@@ -24,19 +24,19 @@
 struct VFSAsyncTaskClass
 {
     GObjectClass parent_class;
-    void (*finish)(vfs::async_task task, bool is_cancelled);
+    void (*finish)(vfs::async_task* task, bool is_cancelled);
 };
 
 GType vfs_async_task_get_type();
 
-#define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<VFSAsyncTask*>(obj))
+#define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<vfs::async_task*>(obj))
 
 #define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
 
 static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);
-static void vfs_async_task_init(vfs::async_task task);
+static void vfs_async_task_init(vfs::async_task* task);
 static void vfs_async_task_finalize(GObject* object);
-static void vfs_async_task_finish(vfs::async_task task, bool is_cancelled);
+static void vfs_async_task_finish(vfs::async_task* task, bool is_cancelled);
 
 /* Local data */
 static GObjectClass* parent_class = nullptr;
@@ -54,7 +54,7 @@ vfs_async_task_get_type()
             (GClassInitFunc)vfs_async_task_class_init,
             nullptr, /* class_finalize */
             nullptr, /* class_data */
-            sizeof(VFSAsyncTask),
+            sizeof(vfs::async_task),
             0,
             (GInstanceInitFunc)vfs_async_task_init,
             nullptr /* value_table */
@@ -81,15 +81,15 @@ vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 }
 
 static void
-vfs_async_task_init(vfs::async_task task)
+vfs_async_task_init(vfs::async_task* task)
 {
     (void)task;
 }
 
-vfs::async_task
-vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
+vfs::async_task*
+vfs_async_task_new(vfs::async_task::function_t task_func, void* user_data)
 {
-    vfs::async_task task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
+    const auto task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;
     task->user_data_ = user_data;
     return VFS_ASYNC_TASK(task);
@@ -98,7 +98,7 @@ vfs_async_task_new(VFSAsyncFunc task_func, void* user_data)
 static void
 vfs_async_task_finalize(GObject* object)
 {
-    vfs::async_task task;
+    vfs::async_task* task;
     // FIXME: destroying the object without calling vfs_async_task_cancel
     // currently induces unknown errors.
     task = VFS_ASYNC_TASK_REINTERPRET(object);
@@ -116,7 +116,7 @@ vfs_async_task_finalize(GObject* object)
 static bool
 on_idle(void* _task)
 {
-    vfs::async_task task = VFS_ASYNC_TASK(_task);
+    const auto task = VFS_ASYNC_TASK(_task);
     task->cleanup(false);
     return true; // the idle handler is removed in task->cleanup.
 }
@@ -124,7 +124,7 @@ on_idle(void* _task)
 void*
 vfs_async_task_thread(void* _task)
 {
-    vfs::async_task task = VFS_ASYNC_TASK(_task);
+    const auto task = VFS_ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data_);
 
     const std::unique_lock<std::mutex> lock(task->mutex);
@@ -136,7 +136,7 @@ vfs_async_task_thread(void* _task)
 }
 
 static void
-vfs_async_task_finish(vfs::async_task task, bool is_cancelled)
+vfs_async_task_finish(vfs::async_task* task, bool is_cancelled)
 {
     (void)task;
     (void)is_cancelled;
@@ -144,31 +144,31 @@ vfs_async_task_finish(vfs::async_task task, bool is_cancelled)
 }
 
 void*
-VFSAsyncTask::user_data()
+vfs::async_task::user_data()
 {
     return this->user_data_;
 }
 
 void
-VFSAsyncTask::run()
+vfs::async_task::run()
 {
     this->thread = g_thread_new("async_task", vfs_async_task_thread, this);
 }
 
 bool
-VFSAsyncTask::is_finished()
+vfs::async_task::is_finished()
 {
     return this->thread_finished;
 }
 
 bool
-VFSAsyncTask::is_canceled()
+vfs::async_task::is_canceled()
 {
     return this->thread_cancel;
 }
 
 void
-VFSAsyncTask::real_cancel(bool finalize)
+vfs::async_task::real_cancel(bool finalize)
 {
     if (!this->thread)
     {
@@ -195,13 +195,13 @@ VFSAsyncTask::real_cancel(bool finalize)
 }
 
 void
-VFSAsyncTask::cancel()
+vfs::async_task::cancel()
 {
     this->real_cancel(false);
 }
 
 void
-VFSAsyncTask::cleanup(bool finalize)
+vfs::async_task::cleanup(bool finalize)
 {
     if (this->idle_id)
     {

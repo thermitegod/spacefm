@@ -30,10 +30,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-async-task.hxx"
-
 namespace vfs
 {
+    struct async_task;
     struct dir;
     struct file;
 
@@ -50,7 +49,7 @@ namespace vfs
         void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
 
         std::shared_ptr<vfs::dir> dir{nullptr};
-        vfs::async_task task{nullptr};
+        vfs::async_task* task{nullptr};
 
         u32 idle_handler{0};
 

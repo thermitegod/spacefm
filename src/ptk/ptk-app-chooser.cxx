@@ -48,7 +48,7 @@ enum class app_chooser_column
     full_path,
 };
 
-static void* load_all_known_apps_thread(vfs::async_task task);
+static void* load_all_known_apps_thread(vfs::async_task* task);
 
 static void
 init_list_view(GtkTreeView* tree_view)
@@ -172,7 +172,7 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
 }
 
 static void
-on_load_all_apps_finish(vfs::async_task task, bool is_cancelled, GtkWidget* dialog)
+on_load_all_apps_finish(vfs::async_task* task, bool is_cancelled, GtkWidget* dialog)
 {
     GtkTreeModel* model = GTK_TREE_MODEL(task->user_data());
     if (is_cancelled)
@@ -301,7 +301,8 @@ init_all_apps_tab(GtkWidget* dialog)
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING);
-    vfs::async_task task = vfs_async_task_new((VFSAsyncFunc)load_all_known_apps_thread, list);
+    const auto task =
+        vfs_async_task_new((vfs::async_task::function_t)load_all_known_apps_thread, list);
     g_object_set_data(G_OBJECT(task), "view", tree_view);
     g_object_set_data(G_OBJECT(dialog), "task", task);
 
@@ -530,7 +531,7 @@ on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
         id == GtkResponseType::GTK_RESPONSE_NONE ||
         id == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
     {
-        vfs::async_task task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dialog), "task"));
+        const auto task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dialog), "task"));
         if (task)
         {
             // ztd::logger::info("app-chooser.cxx -> vfs_async_task_cancel");
@@ -594,7 +595,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
 
 static void
 load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
-                     vfs::async_task task)
+                     vfs::async_task* task)
 {
     if (!std::filesystem::is_directory(dir_path))
     {
@@ -632,7 +633,7 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
 }
 
 static void*
-load_all_known_apps_thread(vfs::async_task task)
+load_all_known_apps_thread(vfs::async_task* task)
 {
     GtkListStore* list = GTK_LIST_STORE(task->user_data());
 
