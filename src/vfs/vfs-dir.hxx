@@ -40,11 +40,10 @@
 // forward declare types
 struct PtkFileBrowser;
 struct PtkFileList;
-struct VFSThumbnailLoader;
 
 namespace vfs
 {
-    using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
+    struct thumbnail_loader;
 
     struct dir : public std::enable_shared_from_this<dir>
     {
@@ -65,7 +64,7 @@ namespace vfs
         bool show_hidden{true};
         bool avoid_changes{true};
 
-        vfs::thumbnail_loader thumbnail_loader{nullptr};
+        std::shared_ptr<vfs::thumbnail_loader> thumbnail_loader{nullptr};
 
         std::vector<std::shared_ptr<vfs::file>> changed_files{};
         std::vector<std::filesystem::path> created_files{};

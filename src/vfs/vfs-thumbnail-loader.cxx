@@ -47,7 +47,8 @@
 #include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-thumbnail-loader.hxx"
 
-static void* thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loader);
+static void* thumbnail_loader_thread(vfs::async_task task,
+                                     const std::shared_ptr<vfs::thumbnail_loader>& loader);
 static bool on_thumbnail_idle(void* user_data);
 
 namespace vfs
@@ -65,12 +66,12 @@ struct VFSThumbnailRequest
     std::map<vfs::thumbnail_size, i32> n_requests;
 };
 
-VFSThumbnailLoader::VFSThumbnailLoader(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
+vfs::thumbnail_loader::thumbnail_loader(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
 {
     this->task = vfs_async_task_new((VFSAsyncFunc)thumbnail_loader_thread, this);
 }
 
-VFSThumbnailLoader::~VFSThumbnailLoader()
+vfs::thumbnail_loader::~thumbnail_loader()
 {
     if (this->idle_handler)
     {
@@ -90,7 +91,7 @@ VFSThumbnailLoader::~VFSThumbnailLoader()
 }
 
 void
-VFSThumbnailLoader::loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept
+vfs::thumbnail_loader::loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept
 {
     // Check if the request is already scheduled
     vfs::thumbnail_request_t req;
@@ -116,17 +117,17 @@ VFSThumbnailLoader::loader_request(const std::shared_ptr<vfs::file>& file, bool 
     ++req->n_requests[is_big ? vfs::thumbnail_size::big : vfs::thumbnail_size::small];
 }
 
-vfs::thumbnail_loader
+const std::shared_ptr<vfs::thumbnail_loader>
 vfs_thumbnail_loader_new(const std::shared_ptr<vfs::dir>& dir)
 {
-    return std::make_shared<VFSThumbnailLoader>(dir);
+    return std::make_shared<vfs::thumbnail_loader>(dir);
 }
 
 static bool
 on_thumbnail_idle(void* user_data)
 {
     // ztd::logger::debug("ENTER ON_THUMBNAIL_IDLE");
-    const auto loader = static_cast<VFSThumbnailLoader*>(user_data)->shared_from_this();
+    const auto loader = static_cast<vfs::thumbnail_loader*>(user_data)->shared_from_this();
 
     while (!loader->update_queue.empty())
     {
@@ -151,7 +152,7 @@ on_thumbnail_idle(void* user_data)
 }
 
 static void*
-thumbnail_loader_thread(vfs::async_task task, const vfs::thumbnail_loader& loader)
+thumbnail_loader_thread(vfs::async_task task, const std::shared_ptr<vfs::thumbnail_loader>& loader)
 {
     // ztd::logger::debug("thumbnail_loader_thread");
     while (!task->is_canceled())

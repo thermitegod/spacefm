@@ -29,33 +29,34 @@
 
 // forward declare types
 struct VFSThumbnailRequest;
-struct VFSThumbnailLoader;
 
 namespace vfs
 {
-    using thumbnail_loader = std::shared_ptr<VFSThumbnailLoader>;
     using thumbnail_request_t = std::shared_ptr<VFSThumbnailRequest>;
 } // namespace vfs
 
-struct VFSThumbnailLoader : public std::enable_shared_from_this<VFSThumbnailLoader>
+namespace vfs
 {
-  public:
-    VFSThumbnailLoader() = delete;
-    VFSThumbnailLoader(const std::shared_ptr<vfs::dir>& dir);
-    ~VFSThumbnailLoader();
+    struct thumbnail_loader : public std::enable_shared_from_this<thumbnail_loader>
+    {
+      public:
+        thumbnail_loader() = delete;
+        thumbnail_loader(const std::shared_ptr<vfs::dir>& dir);
+        ~thumbnail_loader();
 
-    void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
+        void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
 
-    std::shared_ptr<vfs::dir> dir{nullptr};
-    vfs::async_task task{nullptr};
+        std::shared_ptr<vfs::dir> dir{nullptr};
+        vfs::async_task task{nullptr};
 
-    u32 idle_handler{0};
+        u32 idle_handler{0};
 
-    std::mutex mtx;
+        std::mutex mtx;
 
-    std::deque<vfs::thumbnail_request_t> queue{};
-    std::deque<std::shared_ptr<vfs::file>> update_queue{};
-};
+        std::deque<vfs::thumbnail_request_t> queue{};
+        std::deque<std::shared_ptr<vfs::file>> update_queue{};
+    };
+} // namespace vfs
 
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
