@@ -63,19 +63,15 @@ namespace vfs
         std::atomic<bool> cancel_{false};
         std::atomic<bool> canceled_{false};
 
-        // Signals
+        // Signals //
       public:
-        // Signals function types
-        using evt_task_finished_load_dir_t = void(const std::shared_ptr<vfs::dir>&, bool);
-
         // Signals Add Event
-        template<spacefm::signal evt>
+        template<spacefm::signal evt, typename bind_fun>
         typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
-        add_event(evt_task_finished_load_dir_t fun, const std::shared_ptr<vfs::dir>& dir)
+        add_event(bind_fun fun)
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
-            this->evt_data_load_dir = dir;
-            return this->evt_task_finished_load_dir.connect(sigc::ptr_fun(fun));
+            return this->evt_task_finished_load_dir.connect(fun);
         }
 
         // Signals Run Event
@@ -84,16 +80,11 @@ namespace vfs
         run_event(bool is_cancelled)
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::task_finish");
-            this->evt_task_finished_load_dir.emit(this->evt_data_load_dir, is_cancelled);
+            this->evt_task_finished_load_dir.emit(is_cancelled);
         }
 
-        // Signals
       private:
         // Signal types
-        sigc::signal<evt_task_finished_load_dir_t> evt_task_finished_load_dir;
-
-      private:
-        // Signal data
-        std::shared_ptr<vfs::dir> evt_data_load_dir{nullptr};
+        sigc::signal<void(bool)> evt_task_finished_load_dir;
     };
 } // namespace vfs

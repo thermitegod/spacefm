@@ -155,12 +155,12 @@ vfs_dir_get_by_path(const std::filesystem::path& path)
 #endif
 
 void
-on_list_task_finished(const std::shared_ptr<vfs::dir>& dir, bool is_cancelled)
+vfs::dir::on_list_task_finished(bool is_cancelled)
 {
-    dir->task = nullptr;
-    dir->run_event<spacefm::signal::file_listed>(is_cancelled);
-    dir->file_listed = true;
-    dir->load_complete = true;
+    this->task = nullptr;
+    this->run_event<spacefm::signal::file_listed>(is_cancelled);
+    this->file_listed = true;
+    this->load_complete = true;
 }
 
 const std::filesystem::path&
@@ -356,9 +356,8 @@ vfs::dir::load(const std::filesystem::path& path) noexcept
     {
         this->task = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
 
-        this->signal_task_load_dir =
-            this->task->add_event<spacefm::signal::task_finish>(on_list_task_finished,
-                                                                this->shared_from_this());
+        this->signal_task_load_dir = this->task->add_event<spacefm::signal::task_finish>(
+            std::bind(&vfs::dir::on_list_task_finished, this, std::placeholders::_1));
 
         this->task->run();
     }

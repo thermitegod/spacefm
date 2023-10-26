@@ -106,6 +106,9 @@ namespace vfs
       private:
         void load_thread();
 
+        // signal callback
+        void on_list_task_finished(bool is_cancelled);
+
         const std::shared_ptr<vfs::file>
         find_file(const std::filesystem::path& file_name,
                   const std::shared_ptr<vfs::file>& file) const noexcept;
