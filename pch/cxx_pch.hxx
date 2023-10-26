@@ -30,6 +30,8 @@
 
 #include <optional>
 
+#include <functional>
+
 #include <algorithm>
 #include <ranges>
 
