@@ -2228,7 +2228,7 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
 
     if (file_browser->dir_)
     {
-        disp_path = file_browser->dir_->path;
+        disp_path = file_browser->dir_->path();
         disp_name = std::filesystem::equivalent(disp_path, "/") ? "/" : disp_path.filename();
     }
     else

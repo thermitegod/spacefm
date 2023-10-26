@@ -163,13 +163,19 @@ on_list_task_finished(const std::shared_ptr<vfs::dir>& dir, bool is_cancelled)
     dir->load_complete = true;
 }
 
+const std::filesystem::path&
+vfs::dir::path() const noexcept
+{
+    return this->path_;
+}
+
 const std::optional<std::vector<std::filesystem::path>>
 vfs::dir::get_hidden_files() const noexcept
 {
     std::vector<std::filesystem::path> hidden;
 
     // Read .hidden into string
-    const auto hidden_path = this->path / ".hidden";
+    const auto hidden_path = this->path_ / ".hidden";
 
     if (!std::filesystem::is_regular_file(hidden_path))
     {
@@ -217,13 +223,13 @@ vfs::dir::load_thread()
     /* Install file alteration monitor */
     if (!this->monitor)
     {
-        this->monitor = vfs::monitor::create(this->path, vfs_dir_monitor_callback, this);
+        this->monitor = vfs::monitor::create(this->path_, vfs_dir_monitor_callback, this);
     }
 
     // MOD  dir contains .hidden file?
     const auto hidden_files = this->get_hidden_files();
 
-    for (const auto& dfile : std::filesystem::directory_iterator(this->path))
+    for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
         if (this->task->is_canceled())
         {
@@ -231,7 +237,7 @@ vfs::dir::load_thread()
         }
 
         const auto file_name = dfile.path().filename();
-        const auto full_path = this->path / file_name;
+        const auto full_path = this->path_ / file_name;
 
         // MOD ignore if in .hidden
         if (hidden_files)
@@ -317,7 +323,7 @@ vfs::dir::find_file(const std::filesystem::path& file_name,
 bool
 vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
 {
-    const auto file_path = std::filesystem::path() / this->path / ".hidden";
+    const auto file_path = std::filesystem::path() / this->path_ / ".hidden";
     const std::string data = std::format("{}\n", file->name());
 
     return write_file(file_path, data);
@@ -338,10 +344,10 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_b
 void
 vfs::dir::load(const std::filesystem::path& path) noexcept
 {
-    this->path = path;
-    this->avoid_changes = vfs_volume_dir_avoid_changes(this->path);
+    this->path_ = path;
+    this->avoid_changes = vfs_volume_dir_avoid_changes(this->path_);
 
-    if (this->path.empty())
+    if (this->path_.empty())
     {
         return;
     }
@@ -433,7 +439,7 @@ vfs::dir::update_created_files() noexcept
         if (!file_found)
         {
             // file is not in dir file_list
-            const auto full_path = std::filesystem::path() / this->path / created_file;
+            const auto full_path = std::filesystem::path() / this->path_ / created_file;
             if (std::filesystem::exists(full_path))
             {
                 const auto file = vfs::file::create(full_path);
@@ -507,7 +513,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& file_name, bool force) 
     // if ( !force && dir->avoid_changes )
     //    return;
 
-    if (std::filesystem::equivalent(file_name, this->path))
+    if (std::filesystem::equivalent(file_name, this->path_))
     { // Special Case: The directory itself was created?
         return;
     }
@@ -524,7 +530,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
 {
     std::scoped_lock<std::mutex> lock(this->mutex);
 
-    if (std::filesystem::equivalent(file_name, this->path))
+    if (std::filesystem::equivalent(file_name, this->path_))
     {
         /* Special Case: The directory itself was deleted... */
 
@@ -563,7 +569,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
         return;
     }
 
-    if (std::filesystem::equivalent(file_name, this->path))
+    if (std::filesystem::equivalent(file_name, this->path_))
     {
         // Special Case: The directory itself was changed
         this->run_event<spacefm::signal::file_changed>(nullptr);

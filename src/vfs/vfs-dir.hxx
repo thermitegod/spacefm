@@ -51,7 +51,8 @@ namespace vfs
         dir();
         ~dir();
 
-        std::filesystem::path path{};
+        const std::filesystem::path& path() const noexcept;
+
         std::vector<std::shared_ptr<vfs::file>> file_list{};
 
         /*<private>*/
@@ -70,6 +71,9 @@ namespace vfs
         std::vector<std::filesystem::path> created_files{};
 
         i64 xhidden_count{0};
+
+      private:
+        std::filesystem::path path_{};
 
       public:
         void load(const std::filesystem::path& path) noexcept;
