@@ -101,6 +101,17 @@ struct MainWindow
     bool is_main_tasks_running() const noexcept;
 
     GtkNotebook* get_panel_notebook(const panel_t panel) const noexcept;
+
+  public:
+    // signals
+    void on_file_browser_before_chdir(PtkFileBrowser* file_browser);
+    void on_file_browser_begin_chdir(PtkFileBrowser* file_browser);
+    void on_file_browser_after_chdir(PtkFileBrowser* file_browser);
+    void on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::path& path,
+                                   ptk::open_action action);
+    void on_file_browser_content_change(PtkFileBrowser* file_browser);
+    void on_file_browser_sel_change(PtkFileBrowser* file_browser);
+    void on_file_browser_panel_change(PtkFileBrowser* file_browser);
 };
 
 GType main_window_get_type();

@@ -327,78 +327,61 @@ struct PtkFileBrowser
 
     // Signals
   public:
-    // Signals function types
-    using evt_chdir_before_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_chdir_begin_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_chdir_after_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_open_file_t = void(PtkFileBrowser*, const std::filesystem::path&, ptk::open_action,
-                                 MainWindow*);
-    using evt_change_content_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_change_sel_t = void(PtkFileBrowser*, MainWindow*);
-    using evt_change_pane_mode_t = void(PtkFileBrowser*, MainWindow*);
-
     // Signals Add Event
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::chdir_before, sigc::connection>::type
-    add_event(evt_chdir_before_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_before");
-        this->evt_data_window = window;
-        return this->evt_chdir_before.connect(sigc::ptr_fun(fun));
+        return this->evt_chdir_before.connect(fun);
     }
 
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::chdir_begin, sigc::connection>::type
-    add_event(evt_chdir_begin_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_begin");
-        this->evt_data_window = window;
-        return this->evt_chdir_begin.connect(sigc::ptr_fun(fun));
+        return this->evt_chdir_begin.connect(fun);
     }
 
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::chdir_after, sigc::connection>::type
-    add_event(evt_chdir_after_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_after");
-        this->evt_data_window = window;
-        return this->evt_chdir_after.connect(sigc::ptr_fun(fun));
+        return this->evt_chdir_after.connect(fun);
     }
 
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::open_item, sigc::connection>::type
-    add_event(evt_open_file_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::open_item");
-        this->evt_data_window = window;
-        return this->evt_open_file.connect(sigc::ptr_fun(fun));
+        return this->evt_open_file.connect(fun);
     }
 
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::change_content, sigc::connection>::type
-    add_event(evt_change_content_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::change_content");
-        this->evt_data_window = window;
-        return this->evt_change_content.connect(sigc::ptr_fun(fun));
+        return this->evt_change_content.connect(fun);
     }
 
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::change_sel, sigc::connection>::type
-    add_event(evt_change_sel_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::change_sel");
-        this->evt_data_window = window;
-        return this->evt_change_sel.connect(sigc::ptr_fun(fun));
+        return this->evt_change_sel.connect(fun);
     }
 
-    template<spacefm::signal evt>
+    template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if<evt == spacefm::signal::change_pane, sigc::connection>::type
-    add_event(evt_change_pane_mode_t fun, MainWindow* window)
+    add_event(bind_fun fun)
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::change_pane");
-        this->evt_data_window = window;
-        return this->evt_change_pane_mode.connect(sigc::ptr_fun(fun));
+        return this->evt_change_pane_mode.connect(fun);
     }
 
     // Signals Run Event
@@ -407,7 +390,7 @@ struct PtkFileBrowser
     run_event()
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_before");
-        this->evt_chdir_before.emit(this, this->evt_data_window);
+        this->evt_chdir_before.emit(this);
     }
 
     template<spacefm::signal evt>
@@ -415,7 +398,7 @@ struct PtkFileBrowser
     run_event()
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_begin");
-        this->evt_chdir_begin.emit(this, this->evt_data_window);
+        this->evt_chdir_begin.emit(this);
     }
 
     template<spacefm::signal evt>
@@ -423,7 +406,7 @@ struct PtkFileBrowser
     run_event()
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_after");
-        this->evt_chdir_after.emit(this, this->evt_data_window);
+        this->evt_chdir_after.emit(this);
     }
 
     template<spacefm::signal evt>
@@ -431,7 +414,7 @@ struct PtkFileBrowser
     run_event(const std::filesystem::path& path, ptk::open_action action)
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::open_item");
-        this->evt_open_file.emit(this, path, action, this->evt_data_window);
+        this->evt_open_file.emit(this, path, action);
     }
 
     template<spacefm::signal evt>
@@ -439,7 +422,7 @@ struct PtkFileBrowser
     run_event()
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::change_content");
-        this->evt_change_content.emit(this, this->evt_data_window);
+        this->evt_change_content.emit(this);
     }
 
     template<spacefm::signal evt>
@@ -447,7 +430,7 @@ struct PtkFileBrowser
     run_event()
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::change_sel");
-        this->evt_change_sel.emit(this, this->evt_data_window);
+        this->evt_change_sel.emit(this);
     }
 
     template<spacefm::signal evt>
@@ -455,24 +438,20 @@ struct PtkFileBrowser
     run_event()
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::change_pane");
-        this->evt_change_pane_mode.emit(this, this->evt_data_window);
+        this->evt_change_pane_mode.emit(this);
     }
 
     // Signals
   private:
     // Signal types
-    sigc::signal<evt_chdir_before_t> evt_chdir_before;
-    sigc::signal<evt_chdir_begin_t> evt_chdir_begin;
-    sigc::signal<evt_chdir_after_t> evt_chdir_after;
-    sigc::signal<evt_open_file_t> evt_open_file;
-    sigc::signal<evt_change_content_t> evt_change_content;
-    sigc::signal<evt_change_sel_t> evt_change_sel;
-    sigc::signal<evt_change_pane_mode_t> evt_change_pane_mode;
-
-  private:
-    // Signal data
-    // TODO/FIXME has to be a better way to do this
-    MainWindow* evt_data_window{nullptr};
+    sigc::signal<void(PtkFileBrowser*)> evt_chdir_before;
+    sigc::signal<void(PtkFileBrowser*)> evt_chdir_begin;
+    sigc::signal<void(PtkFileBrowser*)> evt_chdir_after;
+    sigc::signal<void(PtkFileBrowser*, const std::filesystem::path&, ptk::open_action)>
+        evt_open_file;
+    sigc::signal<void(PtkFileBrowser*)> evt_change_content;
+    sigc::signal<void(PtkFileBrowser*)> evt_change_sel;
+    sigc::signal<void(PtkFileBrowser*)> evt_change_pane_mode;
 
   public:
     // Signals we connect to

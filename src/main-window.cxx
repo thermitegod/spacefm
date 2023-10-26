@@ -26,6 +26,8 @@
 
 #include <optional>
 
+#include <functional>
+
 #include <malloc.h>
 
 #include <cassert>
@@ -78,14 +80,6 @@ static void rebuild_menus(MainWindow* main_window);
 
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data);
-static void on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
-static void on_file_browser_open_item(PtkFileBrowser* file_browser,
-                                      const std::filesystem::path& path, ptk::open_action action,
-                                      MainWindow* main_window);
-static void on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window);
-static void on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window);
-static void on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window);
-static void on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window);
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
                                u32 time, PtkFileBrowser* file_browser);
 
@@ -1803,7 +1797,7 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, PtkFileBrowser* file_browse
 {
     (void)widget;
     MainWindow* main_window = file_browser->main_window();
-    on_file_browser_panel_change(file_browser, main_window);
+    main_window->on_file_browser_panel_change(file_browser);
 
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
@@ -1851,20 +1845,26 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, PtkFileBrowser* file_browse
     return false;
 }
 
-static void
-on_file_browser_begin_chdir(PtkFileBrowser* file_browser, MainWindow* main_window)
+void
+MainWindow::on_file_browser_before_chdir(PtkFileBrowser* file_browser)
 {
-    main_window->update_status_bar(file_browser);
+    this->update_status_bar(file_browser);
 }
 
-static void
-on_file_browser_after_chdir(PtkFileBrowser* file_browser, MainWindow* main_window)
+void
+MainWindow::on_file_browser_begin_chdir(PtkFileBrowser* file_browser)
+{
+    this->update_status_bar(file_browser);
+}
+
+void
+MainWindow::on_file_browser_after_chdir(PtkFileBrowser* file_browser)
 {
     // main_window_stop_busy_task( main_window );
 
-    if (main_window->current_file_browser() == file_browser)
+    if (this->current_file_browser() == file_browser)
     {
-        main_window->set_window_title(file_browser);
+        this->set_window_title(file_browser);
     }
 
     if (file_browser->inhibit_focus_)
@@ -2007,13 +2007,24 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 
     gtk_widget_show(GTK_WIDGET(file_browser));
 
-    // file_browser->add_event<spacefm::signal::chdir_before>(on_file_browser_before_chdir, main_window);
-    file_browser->add_event<spacefm::signal::chdir_begin>(on_file_browser_begin_chdir, this);
-    file_browser->add_event<spacefm::signal::chdir_after>(on_file_browser_after_chdir, this);
-    file_browser->add_event<spacefm::signal::open_item>(on_file_browser_open_item, this);
-    file_browser->add_event<spacefm::signal::change_content>(on_file_browser_content_change, this);
-    file_browser->add_event<spacefm::signal::change_sel>(on_file_browser_sel_change, this);
-    file_browser->add_event<spacefm::signal::change_pane>(on_file_browser_panel_change, this);
+    file_browser->add_event<spacefm::signal::chdir_before>(
+        std::bind(&MainWindow::on_file_browser_before_chdir, this, std::placeholders::_1));
+    file_browser->add_event<spacefm::signal::chdir_begin>(
+        std::bind(&MainWindow::on_file_browser_begin_chdir, this, std::placeholders::_1));
+    file_browser->add_event<spacefm::signal::chdir_after>(
+        std::bind(&MainWindow::on_file_browser_after_chdir, this, std::placeholders::_1));
+    file_browser->add_event<spacefm::signal::open_item>(
+        std::bind(&MainWindow::on_file_browser_open_item,
+                  this,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3));
+    file_browser->add_event<spacefm::signal::change_content>(
+        std::bind(&MainWindow::on_file_browser_content_change, this, std::placeholders::_1));
+    file_browser->add_event<spacefm::signal::change_sel>(
+        std::bind(&MainWindow::on_file_browser_sel_change, this, std::placeholders::_1));
+    file_browser->add_event<spacefm::signal::change_pane>(
+        std::bind(&MainWindow::on_file_browser_panel_change, this, std::placeholders::_1));
 
     GtkWidget* tab_label = this->create_tab_label(file_browser);
     const i32 idx =
@@ -2358,9 +2369,9 @@ main_window_open_network(MainWindow* main_window, const std::string_view url, bo
     ptk_location_view_mount_network(file_browser, url, new_tab, false);
 }
 
-static void
-on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::path& path,
-                          ptk::open_action action, MainWindow* main_window)
+void
+MainWindow::on_file_browser_open_item(PtkFileBrowser* file_browser,
+                                      const std::filesystem::path& path, ptk::open_action action)
 {
     if (path.empty())
     {
@@ -2373,7 +2384,7 @@ on_file_browser_open_item(PtkFileBrowser* file_browser, const std::filesystem::p
             file_browser->chdir(path);
             break;
         case ptk::open_action::new_tab:
-            main_window->new_tab(path);
+            this->new_tab(path);
             break;
         case ptk::open_action::new_window:
         case ptk::open_action::terminal:
@@ -2646,27 +2657,27 @@ MainWindow::get_panel_notebook(const panel_t panel) const noexcept
     return this->panels[panel - 1];
 }
 
-static void
-on_file_browser_panel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
+void
+MainWindow::on_file_browser_panel_change(PtkFileBrowser* file_browser)
 {
     // ztd::logger::info("panel_change  panel {}", file_browser->mypanel);
-    main_window->curpanel = file_browser->panel();
-    main_window->notebook = main_window->get_panel_notebook(main_window->curpanel);
-    set_panel_focus(main_window, file_browser);
+    this->curpanel = file_browser->panel();
+    this->notebook = this->get_panel_notebook(this->curpanel);
+    set_panel_focus(this, file_browser);
 }
 
-static void
-on_file_browser_sel_change(PtkFileBrowser* file_browser, MainWindow* main_window)
+void
+MainWindow::on_file_browser_sel_change(PtkFileBrowser* file_browser)
 {
     // ztd::logger::info("sel_change  panel {}", file_browser->mypanel);
-    main_window->update_status_bar(file_browser);
+    this->update_status_bar(file_browser);
 }
 
-static void
-on_file_browser_content_change(PtkFileBrowser* file_browser, MainWindow* main_window)
+void
+MainWindow::on_file_browser_content_change(PtkFileBrowser* file_browser)
 {
     // ztd::logger::info("content_change  panel {}", file_browser->mypanel);
-    main_window->update_status_bar(file_browser);
+    this->update_status_bar(file_browser);
 }
 
 static bool
