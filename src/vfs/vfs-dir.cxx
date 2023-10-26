@@ -55,15 +55,20 @@
 static void vfs_dir_monitor_callback(const vfs::monitor::event event,
                                      const std::filesystem::path& path, void* user_data);
 
-const std::shared_ptr<vfs::dir>
-vfs_dir_new()
-{
-    return std::make_shared<vfs::dir>();
-}
+static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 
-vfs::dir::dir()
+vfs::dir::dir(const std::filesystem::path& path) : path_(path)
 {
-    // ztd::logger::debug("vfs::dir::dir({})", fmt::ptr(this));
+    // ztd::logger::debug("vfs::dir::dir({})   {}", fmt::ptr(this), path);
+
+    this->avoid_changes = vfs_volume_dir_avoid_changes(this->path_);
+
+    this->task = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
+
+    this->signal_task_load_dir = this->task->add_event<spacefm::signal::task_finish>(
+        std::bind(&vfs::dir::on_list_task_finished, this, std::placeholders::_1));
+
+    this->task->run(); /* asynchronous operation */
 }
 
 vfs::dir::~dir()
@@ -76,7 +81,7 @@ vfs::dir::~dir()
     {
         // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
 
-        // ztd::logger::info("vfs_dir_finalize -> vfs_async_task_cancel");
+        // ztd::logger::trace("this->task({})", fmt::ptr(this->task));
         this->task->cancel();
         this->task = nullptr;
     }
@@ -91,68 +96,25 @@ vfs::dir::~dir()
     this->created_files.clear();
 }
 
-/* methods */
-
-// broken signals when multiple tabs have the same vfs::dir
-// Not a problem with the vfs::dir cache, but with the signals
-// REPRO
-//      - open multiple tabs in the same path
-//      - touch and rm new files
-//      - swtich between tabs, new files missing / duplicate of the same new file,
-//                                                 number of duplicates is the same as
-//                                                 the number of tabs opened in that path
-
-// #define ENABLE_BROKEN_VFS_DIR_CACHE_SIGNALS
-
-#if defined(ENABLE_BROKEN_VFS_DIR_CACHE_SIGNALS)
-
-static ztd::weak_smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache(vfs_dir_new);
-
 const std::shared_ptr<vfs::dir>
-vfs_dir_get_by_path_soft(const std::filesystem::path& path)
+vfs::dir::create(const std::filesystem::path& path) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
     if (dir_smart_cache.contains(path))
     {
-        dir = dir_smart_cache.get(path);
-        assert(dir != nullptr);
-        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", fmt::ptr(dir), path);
+        dir = dir_smart_cache.at(path);
+        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", fmt::ptr(dir.get()), path);
     }
-    return dir;
-}
-
-const std::shared_ptr<vfs::dir>
-vfs_dir_get_by_path(const std::filesystem::path& path)
-{
-    auto dir = vfs_dir_get_by_path_soft(path);
-    if (dir == nullptr)
+    else
     {
-        // Create a new blank vfs::dir
-        dir = dir_smart_cache.get(path);
-        assert(dir != nullptr);
-        // ztd::logger::debug("vfs::dir::dir({}) new     {}", fmt::ptr(dir), path);
-
-        dir->load(path); /* asynchronous operation */
+        dir = dir_smart_cache.create(
+            path,
+            std::bind([](const auto& path) { return std::make_shared<vfs::dir>(path); }, path));
+        // ztd::logger::debug("vfs::dir::dir({}) new     {}", fmt::ptr(dir.get()), path);
     }
-
-    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), path);
-
+    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir.get()), path);
     return dir;
 }
-#else
-const std::shared_ptr<vfs::dir>
-vfs_dir_get_by_path(const std::filesystem::path& path)
-{
-    auto dir = vfs_dir_new();
-    assert(dir != nullptr);
-
-    dir->load(path); /* asynchronous operation */
-
-    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), path);
-
-    return dir;
-}
-#endif
 
 void
 vfs::dir::on_list_task_finished(bool is_cancelled)
@@ -339,28 +301,6 @@ void
 vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_big) noexcept
 {
     vfs_thumbnail_request(this->shared_from_this(), file, is_big);
-}
-
-void
-vfs::dir::load(const std::filesystem::path& path) noexcept
-{
-    this->path_ = path;
-    this->avoid_changes = vfs_volume_dir_avoid_changes(this->path_);
-
-    if (this->path_.empty())
-    {
-        return;
-    }
-    // ztd::logger::info("dir->path={}", dir->path);
-    if (!this->task)
-    {
-        this->task = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
-
-        this->signal_task_load_dir = this->task->add_event<spacefm::signal::task_finish>(
-            std::bind(&vfs::dir::on_list_task_finished, this, std::placeholders::_1));
-
-        this->task->run();
-    }
 }
 
 bool

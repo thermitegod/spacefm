@@ -44,8 +44,10 @@ namespace vfs
     struct dir : public std::enable_shared_from_this<dir>
     {
         // dir() = default;
-        dir();
+        dir(const std::filesystem::path& path);
         ~dir();
+
+        static const std::shared_ptr<vfs::dir> create(const std::filesystem::path& path) noexcept;
 
         const std::filesystem::path& path() const noexcept;
 
@@ -72,8 +74,6 @@ namespace vfs
         std::filesystem::path path_{};
 
       public:
-        void load(const std::filesystem::path& path) noexcept;
-
         bool is_file_listed() const noexcept;
         bool is_directory_empty() const noexcept;
 
@@ -213,7 +213,5 @@ namespace vfs
         sigc::connection signal_task_load_dir;
     };
 } // namespace vfs
-
-const std::shared_ptr<vfs::dir> vfs_dir_get_by_path(const std::filesystem::path& path);
 
 void vfs_dir_mime_type_reload();

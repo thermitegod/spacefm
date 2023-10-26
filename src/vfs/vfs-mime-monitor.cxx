@@ -110,7 +110,7 @@ vfs_mime_monitor()
         return;
     }
 
-    user_mime_monitor = mime_monitor::create(vfs_dir_get_by_path(path));
+    user_mime_monitor = mime_monitor::create(vfs::dir::create(path));
 
     // ztd::logger::debug("MIME-UPDATE watch started");
     user_mime_monitor->dir->add_event<spacefm::signal::file_created>(

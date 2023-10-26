@@ -3077,7 +3077,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 
     this->signal_file_listed.disconnect();
     this->busy_ = true;
-    this->dir_ = vfs_dir_get_by_path(path);
+    this->dir_ = vfs::dir::create(path);
 
     this->run_event<spacefm::signal::chdir_begin>();
 
