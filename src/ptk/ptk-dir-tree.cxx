@@ -72,6 +72,8 @@ struct PtkDirTreeNode
     PtkDirTreeNode* prev{nullptr};
     PtkDirTreeNode* last{nullptr};
     PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
+
+    void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
 };
 
 PtkDirTreeNode::~PtkDirTreeNode()
@@ -135,11 +137,6 @@ static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* 
 static i32 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b);
 
 static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
-
-/* signal handlers */
-
-static void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path,
-                             void* user_data);
 
 static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
                                              const std::filesystem::path& path);
@@ -805,7 +802,11 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     {
         if (!node->monitor)
         {
-            node->monitor = vfs::monitor::create(path, on_monitor_event, node);
+            node->monitor = vfs::monitor::create(path,
+                                                 std::bind(&PtkDirTreeNode::on_monitor_event,
+                                                           node,
+                                                           std::placeholders::_1,
+                                                           std::placeholders::_2));
         }
 
         for (const auto& file : std::filesystem::directory_iterator(path))
@@ -884,23 +885,19 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
     return nullptr;
 }
 
-static void
-on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path,
-                 void* user_data)
+void
+PtkDirTreeNode::on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path)
 {
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(user_data);
-    assert(node != nullptr);
-
-    PtkDirTreeNode* child = find_node(node, path.filename().string());
+    PtkDirTreeNode* child = find_node(this, path.filename().string());
 
     if (event == vfs::monitor::event::created)
     {
         if (!child)
         {
             /* remove place holder */
-            if (node->n_children == 1 && !node->children->file)
+            if (this->n_children == 1 && !this->children->file)
             {
-                child = node->children;
+                child = this->children;
             }
             else
             {
@@ -908,10 +905,10 @@ on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& p
             }
             if (std::filesystem::is_directory(path))
             {
-                ptk_dir_tree_insert_child(node->tree, node, path.parent_path(), path.filename());
+                ptk_dir_tree_insert_child(this->tree, this, path.parent_path(), path.filename());
                 if (child)
                 {
-                    ptk_dir_tree_delete_child(node->tree, child);
+                    ptk_dir_tree_delete_child(this->tree, child);
                 }
             }
         }
@@ -920,7 +917,7 @@ on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& p
     {
         if (child)
         {
-            ptk_dir_tree_delete_child(node->tree, child);
+            ptk_dir_tree_delete_child(this->tree, child);
         }
         /* //MOD Change is not needed?  Creates this warning and triggers subsequent
          * errors and causes visible redrawing problems:

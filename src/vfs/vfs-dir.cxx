@@ -52,9 +52,6 @@
 
 #include "vfs/vfs-dir.hxx"
 
-static void vfs_dir_monitor_callback(const vfs::monitor::event event,
-                                     const std::filesystem::path& path, void* user_data);
-
 static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 
 vfs::dir::dir(const std::filesystem::path& path) : path_(path)
@@ -183,10 +180,9 @@ vfs::dir::load_thread()
     this->xhidden_count = 0;
 
     /* Install file alteration monitor */
-    if (!this->monitor)
-    {
-        this->monitor = vfs::monitor::create(this->path_, vfs_dir_monitor_callback, this);
-    }
+    this->monitor = vfs::monitor::create(
+        this->path_,
+        std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
 
     // MOD  dir contains .hidden file?
     const auto hidden_files = this->get_hidden_files();
@@ -229,23 +225,19 @@ vfs::dir::load_thread()
 }
 
 /* Callback function which will be called when monitored events happen */
-static void
-vfs_dir_monitor_callback(const vfs::monitor::event event, const std::filesystem::path& path,
-                         void* user_data)
+void
+vfs::dir::on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path)
 {
-    assert(user_data != nullptr);
-    const auto dir = static_cast<vfs::dir*>(user_data)->shared_from_this();
-
     switch (event)
     {
         case vfs::monitor::event::created:
-            dir->emit_file_created(path.filename(), false);
+            this->emit_file_created(path.filename(), false);
             break;
         case vfs::monitor::event::deleted:
-            dir->emit_file_deleted(path.filename(), nullptr);
+            this->emit_file_deleted(path.filename(), nullptr);
             break;
         case vfs::monitor::event::changed:
-            dir->emit_file_changed(path.filename(), nullptr, false);
+            this->emit_file_changed(path.filename(), nullptr, false);
             break;
         case vfs::monitor::event::other:
             break;

@@ -93,12 +93,10 @@ vfs_mime_type_reload()
 }
 
 static void
-on_mime_cache_changed(const vfs::monitor::event event, const std::filesystem::path& path,
-                      void* user_data)
+on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path)
 {
     (void)event;
     (void)path;
-    (void)user_data;
 
     // ztd::logger::debug("reloading all mime caches");
     std::jthread idle_thread(
@@ -126,8 +124,7 @@ vfs_mime_type_init()
             continue;
         }
 
-        const auto monitor =
-            vfs::monitor::create(cache->file_path(), on_mime_cache_changed, nullptr);
+        const auto monitor = vfs::monitor::create(cache->file_path(), &on_monitor_event);
 
         mime_caches_monitors.emplace_back(monitor);
     }

@@ -102,6 +102,8 @@ namespace vfs
       private:
         void load_thread();
 
+        void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
+
         // signal callback
         void on_list_task_finished(bool is_cancelled);
 

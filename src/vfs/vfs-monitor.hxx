@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <functional>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
@@ -40,15 +42,15 @@ namespace vfs
         };
 
         // Callback function which will be called when monitored events happen
-        using callback_t = void (*)(const event event, const std::filesystem::path& path,
-                                    void* user_data);
+        using callback_t =
+            std::function<void(const vfs::monitor::event event, const std::filesystem::path& path)>;
 
         monitor() = delete;
-        monitor(const std::filesystem::path& path, callback_t callback, void* user_data);
+        monitor(const std::filesystem::path& path, const callback_t& callback);
         ~monitor();
 
         static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
-                                                     callback_t callback, void* user_data) noexcept;
+                                                     const callback_t& callback) noexcept;
 
       private:
         bool on_inotify_event(const Glib::IOCondition condition);
@@ -60,18 +62,12 @@ namespace vfs
         std::filesystem::path path_{};
 
 #if (GTK_MAJOR_VERSION == 4)
-        Glib::RefPtr<Glib::IOChannel> inotify_io_channel = nullptr;
+        Glib::RefPtr<Glib::IOChannel> inotify_io_channel_ = nullptr;
 #elif (GTK_MAJOR_VERSION == 3)
-        Glib::RefPtr<Glib::IOChannel> inotify_io_channel;
+        Glib::RefPtr<Glib::IOChannel> inotify_io_channel_;
 #endif
-        sigc::connection signal_io_handler;
+        sigc::connection signal_io_handler_;
 
-        struct callback_entry
-        {
-            callback_t callback{nullptr};
-            void* user_data{nullptr};
-        };
-        // std::vector<callback_entry> callbacks_{};
-        callback_entry callback_{};
+        callback_t callback_{};
     };
 } // namespace vfs

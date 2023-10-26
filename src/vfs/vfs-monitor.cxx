@@ -41,14 +41,13 @@ inline constexpr u32 EVENT_SIZE = (sizeof(inotify_event));
 inline constexpr u32 EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
 
 const std::shared_ptr<vfs::monitor>
-vfs::monitor::create(const std::filesystem::path& path, callback_t callback,
-                     void* user_data) noexcept
+vfs::monitor::create(const std::filesystem::path& path, const callback_t& callback) noexcept
 {
-    return std::make_shared<vfs::monitor>(path, callback, user_data);
+    return std::make_shared<vfs::monitor>(path, callback);
 }
 
-vfs::monitor::monitor(const std::filesystem::path& path, callback_t callback, void* user_data)
-    : path_(path)
+vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callback)
+    : path_(path), callback_(callback)
 {
     this->inotify_fd_ = inotify_init();
     if (this->inotify_fd_ == -1)
@@ -57,17 +56,17 @@ vfs::monitor::monitor(const std::filesystem::path& path, callback_t callback, vo
         throw std::runtime_error("failed to initialize inotify");
     }
 
-    this->inotify_io_channel = Glib::IOChannel::create_from_fd(this->inotify_fd_);
-    this->inotify_io_channel->set_buffered(true);
+    this->inotify_io_channel_ = Glib::IOChannel::create_from_fd(this->inotify_fd_);
+    this->inotify_io_channel_->set_buffered(true);
 #if (GTK_MAJOR_VERSION == 4)
     this->inotify_io_channel->set_flags(Glib::IOFlags::NONBLOCK);
 #elif (GTK_MAJOR_VERSION == 3)
-    this->inotify_io_channel->set_flags(Glib::IO_FLAG_NONBLOCK);
+    this->inotify_io_channel_->set_flags(Glib::IO_FLAG_NONBLOCK);
 #endif
 
-    this->signal_io_handler =
+    this->signal_io_handler_ =
         Glib::signal_io().connect(sigc::mem_fun(this, &monitor::on_inotify_event),
-                                  this->inotify_io_channel,
+                                  this->inotify_io_channel_,
                                   Glib::IOCondition::IO_IN | Glib::IOCondition::IO_PRI |
                                       Glib::IOCondition::IO_HUP | Glib::IOCondition::IO_ERR);
 
@@ -85,11 +84,6 @@ vfs::monitor::monitor(const std::filesystem::path& path, callback_t callback, vo
                                              this->path_.string()));
     }
 
-    if (callback)
-    { // Install a callback
-        this->callback_ = callback_entry{callback, user_data};
-    }
-
     // ztd::logger::debug("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", fmt::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
 }
 
@@ -97,7 +91,7 @@ vfs::monitor::~monitor()
 {
     // ztd::logger::debug("vfs::monitor::~monitor({}) {}", fmt::ptr(this),this->path_);
 
-    this->signal_io_handler.disconnect();
+    this->signal_io_handler_.disconnect();
 
     inotify_rm_watch(this->inotify_fd_, this->inotify_wd_);
     close(this->inotify_fd_);
@@ -109,7 +103,7 @@ vfs::monitor::dispatch_event(const vfs::monitor::event event,
 {
     // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", fmt::ptr(this), magic_enum::enum_name(event), this->path_);
 
-    this->callback_.callback(event, path, this->callback_.user_data);
+    this->callback_(event, path);
 }
 
 bool
