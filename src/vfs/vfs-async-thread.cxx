@@ -19,8 +19,8 @@
 
 #include "vfs/vfs-async-thread.hxx"
 
-vfs::async_thread::async_thread(vfs::async_thread::function_t task_function, void* user_data)
-    : task_function_(task_function), user_data_(user_data)
+vfs::async_thread::async_thread(const vfs::async_thread::function_t& task_function)
+    : task_function_(task_function)
 {
 }
 
@@ -30,9 +30,9 @@ vfs::async_thread::~async_thread()
 }
 
 const std::shared_ptr<vfs::async_thread>
-vfs::async_thread::create(vfs::async_thread::function_t task_function, void* user_data) noexcept
+vfs::async_thread::create(const vfs::async_thread::function_t& task_function) noexcept
 {
-    return std::make_shared<vfs::async_thread>(task_function, user_data);
+    return std::make_shared<vfs::async_thread>(task_function);
 }
 
 void
@@ -47,8 +47,7 @@ vfs::async_thread::run()
     this->finished_ = false;
     this->canceled_ = false;
 
-    this->thread_ = std::jthread(
-        [this]() { this->task_function_(this->shared_from_this(), this->user_data_); });
+    this->thread_ = std::jthread([this]() { this->task_function_(); });
 
     this->thread_.join();
     this->running_ = false;
@@ -70,12 +69,6 @@ vfs::async_thread::cancel()
     this->cancel_ = true;
     this->cleanup(false);
     this->canceled_ = true;
-}
-
-void*
-vfs::async_thread::user_data() const
-{
-    return this->user_data_;
 }
 
 bool

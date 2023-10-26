@@ -18,6 +18,8 @@
 #include <thread>
 #include <atomic>
 
+#include <functional>
+
 #include <memory>
 
 #include <sigc++/sigc++.h>
@@ -33,18 +35,16 @@ namespace vfs
 
     struct async_thread : public std::enable_shared_from_this<async_thread>
     {
-        using function_t = void* (*)(const std::shared_ptr<async_thread>&, void*);
+        using function_t = std::function<void()>;
 
-        async_thread(vfs::async_thread::function_t task_function, void* user_data);
+        async_thread(const vfs::async_thread::function_t& task_function);
         ~async_thread();
 
         static const std::shared_ptr<vfs::async_thread>
-        create(vfs::async_thread::function_t task_function, void* user_data) noexcept;
+        create(const vfs::async_thread::function_t& task_function) noexcept;
 
         void run();
         void cancel();
-
-        void* user_data() const;
 
         bool is_running() const;
         bool is_finished() const;
@@ -54,7 +54,6 @@ namespace vfs
 
       private:
         function_t task_function_;
-        void* user_data_;
 
         std::jthread thread_;
         // std::mutex mutex_{};

@@ -72,7 +72,7 @@ namespace vfs
         i64 xhidden_count{0};
 
       public:
-        void load() noexcept;
+        void load(const std::filesystem::path& path) noexcept;
 
         bool is_file_listed() const noexcept;
         bool is_directory_empty() const noexcept;
@@ -100,6 +100,8 @@ namespace vfs
         void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
       private:
+        void load_thread();
+
         const std::shared_ptr<vfs::file>
         find_file(const std::filesystem::path& file_name,
                   const std::shared_ptr<vfs::file>& file) const noexcept;

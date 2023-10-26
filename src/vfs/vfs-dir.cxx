@@ -29,6 +29,8 @@
 
 #include <memory>
 
+#include <functional>
+
 #include <fstream>
 
 #include <cassert>
@@ -130,13 +132,10 @@ vfs_dir_get_by_path(const std::filesystem::path& path)
         assert(dir != nullptr);
         // ztd::logger::debug("vfs::dir::dir({}) new     {}", fmt::ptr(dir), path);
 
-        dir->path = path;
-        dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
-
-        dir->load(); /* asynchronous operation */
+        dir->load(path); /* asynchronous operation */
     }
 
-    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), dir->path);
+    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), path);
 
     return dir;
 }
@@ -147,12 +146,9 @@ vfs_dir_get_by_path(const std::filesystem::path& path)
     auto dir = vfs_dir_new();
     assert(dir != nullptr);
 
-    dir->path = path;
-    dir->avoid_changes = vfs_volume_dir_avoid_changes(path);
+    dir->load(path); /* asynchronous operation */
 
-    dir->load(); /* asynchronous operation */
-
-    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), dir->path);
+    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir), path);
 
     return dir;
 }
@@ -211,32 +207,31 @@ vfs::dir::get_hidden_files() const noexcept
     return hidden;
 }
 
-static void*
-vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
-                    const std::shared_ptr<vfs::dir>& dir)
+void
+vfs::dir::load_thread()
 {
-    dir->file_listed = false;
-    dir->load_complete = false;
-    dir->xhidden_count = 0;
+    this->file_listed = false;
+    this->load_complete = false;
+    this->xhidden_count = 0;
 
     /* Install file alteration monitor */
-    if (!dir->monitor)
+    if (!this->monitor)
     {
-        dir->monitor = vfs::monitor::create(dir->path, vfs_dir_monitor_callback, dir.get());
+        this->monitor = vfs::monitor::create(this->path, vfs_dir_monitor_callback, this);
     }
 
     // MOD  dir contains .hidden file?
-    const auto hidden_files = dir->get_hidden_files();
+    const auto hidden_files = this->get_hidden_files();
 
-    for (const auto& dfile : std::filesystem::directory_iterator(dir->path))
+    for (const auto& dfile : std::filesystem::directory_iterator(this->path))
     {
-        if (task->is_canceled())
+        if (this->task->is_canceled())
         {
             break;
         }
 
         const auto file_name = dfile.path().filename();
-        const auto full_path = std::filesystem::path() / dir->path / file_name;
+        const auto full_path = this->path / file_name;
 
         // MOD ignore if in .hidden
         if (hidden_files)
@@ -250,7 +245,7 @@ vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
                 if (!ec && equivalent)
                 {
                     hide_file = true;
-                    dir->xhidden_count++;
+                    this->xhidden_count++;
                     break;
                 }
             }
@@ -261,11 +256,8 @@ vfs_dir_load_thread(const std::shared_ptr<vfs::async_thread>& task,
         }
 
         const auto file = vfs::file::create(full_path);
-
-        dir->file_list.emplace_back(file);
+        this->file_list.emplace_back(file);
     }
-
-    return nullptr;
 }
 
 /* Callback function which will be called when monitored events happen */
@@ -344,8 +336,11 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_b
 }
 
 void
-vfs::dir::load() noexcept
+vfs::dir::load(const std::filesystem::path& path) noexcept
 {
+    this->path = path;
+    this->avoid_changes = vfs_volume_dir_avoid_changes(this->path);
+
     if (this->path.empty())
     {
         return;
@@ -353,8 +348,7 @@ vfs::dir::load() noexcept
     // ztd::logger::info("dir->path={}", dir->path);
     if (!this->task)
     {
-        this->task =
-            vfs::async_thread::create((vfs::async_thread::function_t)vfs_dir_load_thread, this);
+        this->task = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
 
         this->signal_task_load_dir =
             this->task->add_event<spacefm::signal::task_finish>(on_list_task_finished,
