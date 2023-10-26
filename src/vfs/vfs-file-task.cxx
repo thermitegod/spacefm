@@ -140,7 +140,7 @@ vfs::file_task::unlock()
 }
 
 void
-vfs::file_task::set_state_callback(state_callback_t cb, void* user_data)
+vfs::file_task::set_state_callback(const state_callback_t& cb, void* user_data)
 {
     this->state_cb = cb;
     this->state_cb_data = user_data;

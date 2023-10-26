@@ -790,12 +790,12 @@ compare_file_mtime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
     return (a->mtime() > b->mtime()) ? 1 : ((a->mtime() == b->mtime()) ? 0 : -1);
 }
 
-using compare_function_ptr = i32 (*)(const std::shared_ptr<vfs::file>&,
-                                     const std::shared_ptr<vfs::file>&, PtkFileList*);
+using compare_function_t = std::function<i32(const std::shared_ptr<vfs::file>&,
+                                             const std::shared_ptr<vfs::file>&, PtkFileList*)>;
 
 static i32
 compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-             PtkFileList* list, compare_function_ptr func)
+             PtkFileList* list, const compare_function_t& func)
 {
     // dirs before/after files
     if (list->sort_dir != ptk::file_list::sort_dir::mixed)
@@ -812,7 +812,7 @@ compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::fil
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
 
-static const std::map<ptk::file_list::column, compare_function_ptr> compare_function_ptr_table{
+static const std::map<ptk::file_list::column, compare_function_t> compare_function_ptr_table{
     {ptk::file_list::column::name, &compare_file_name},
     {ptk::file_list::column::size, &compare_file_size},
     {ptk::file_list::column::bytes, &compare_file_size},

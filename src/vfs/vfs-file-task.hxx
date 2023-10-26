@@ -29,6 +29,8 @@
 
 #include <memory>
 
+#include <functional>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -103,11 +105,11 @@ namespace vfs
         void lock();
         void unlock();
 
-        using state_callback_t = bool (*)(const std::shared_ptr<vfs::file_task>& task,
-                                          const vfs::file_task::state state, void* state_data,
-                                          void* user_data);
+        using state_callback_t = std::function<bool(const std::shared_ptr<vfs::file_task>& task,
+                                                    const vfs::file_task::state state,
+                                                    void* state_data, void* user_data)>;
 
-        void set_state_callback(state_callback_t cb, void* user_data);
+        void set_state_callback(const state_callback_t& cb, void* user_data);
 
         void set_chmod(std::array<u8, 12> new_chmod_actions);
         void set_chown(uid_t new_uid, gid_t new_gid);

@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <functional>
+
 #include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>

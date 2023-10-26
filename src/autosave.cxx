@@ -69,7 +69,7 @@ const auto autosave = std::make_unique<AutoSave>();
 std::vector<std::jthread> threads;
 
 static void
-autosave_thread(autosave_f autosave_func) noexcept
+autosave_thread(const autosave_t& autosave_func) noexcept
 {
     const std::chrono::duration<u64> duration(autosave->timer);
     while (autosave->wait(duration))
@@ -117,7 +117,7 @@ autosave_request_cancel() noexcept
 }
 
 void
-autosave_init(autosave_f autosave_func) noexcept
+autosave_init(const autosave_t& autosave_func) noexcept
 {
     // ztd::logger::debug("AUTOSAVE init");
     threads.emplace_back(std::jthread([autosave_func] { autosave_thread(autosave_func); }));

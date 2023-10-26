@@ -15,10 +15,12 @@
 
 #pragma once
 
-using autosave_f = void (*)(void);
+#include <functional>
+
+using autosave_t = std::function<void()>;
 
 void autosave_request_add() noexcept;
 void autosave_request_cancel() noexcept;
 
-void autosave_init(autosave_f autosave_func) noexcept;
+void autosave_init(const autosave_t& autosave_func) noexcept;
 void autosave_terminate() noexcept;
