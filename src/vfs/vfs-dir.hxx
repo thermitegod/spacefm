@@ -37,10 +37,6 @@
 
 #include "signals.hxx"
 
-// forward declare types
-struct PtkFileBrowser;
-struct PtkFileList;
-
 namespace vfs
 {
     struct thumbnailer;
@@ -117,133 +113,49 @@ namespace vfs
       private:
         std::mutex mutex;
 
-        // Signals
+        // Signals //
       public:
-        // Signals function types
-        using evt_file_created__run_first__t = void(const std::shared_ptr<vfs::file>&,
-                                                    PtkFileBrowser*);
-        using evt_file_created__run_last__t = void(const std::shared_ptr<vfs::file>&, PtkFileList*);
-
-        using evt_file_changed__run_first__t = void(const std::shared_ptr<vfs::file>&,
-                                                    PtkFileBrowser*);
-        using evt_file_changed__run_last__t = void(const std::shared_ptr<vfs::file>&, PtkFileList*);
-
-        using evt_file_deleted__run_first__t = void(const std::shared_ptr<vfs::file>&,
-                                                    PtkFileBrowser*);
-        using evt_file_deleted__run_last__t = void(const std::shared_ptr<vfs::file>&, PtkFileList*);
-
-        using evt_file_listed_t = void(PtkFileBrowser*, bool);
-
-        using evt_file_thumbnail_loaded_t = void(const std::shared_ptr<vfs::file>&, PtkFileList*);
-
-        using evt_mime_change_t = void();
-
         // Signals Add Event
-        template<spacefm::signal evt>
+
+        template<spacefm::signal evt, typename bind_fun>
         typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
-        add_event(evt_file_created__run_first__t fun, PtkFileBrowser* browser) noexcept
+        add_event(bind_fun fun)
         {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
-            this->evt_data_browser = browser;
-            return this->evt_file_created__first.connect(sigc::ptr_fun(fun));
+            // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+            return this->evt_file_created.connect(fun);
         }
 
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
-        add_event(evt_file_created__run_last__t fun, PtkFileList* list) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
-            this->evt_data_list = list;
-            return this->evt_file_created__last.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
-        add_event(evt_mime_change_t fun) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
-            return this->evt_mime_change.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
+        template<spacefm::signal evt, typename bind_fun>
         typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
-        add_event(evt_file_changed__run_first__t fun, PtkFileBrowser* browser) noexcept
+        add_event(bind_fun fun)
         {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
-            this->evt_data_browser = browser;
-            return this->evt_file_changed__first.connect(sigc::ptr_fun(fun));
+            // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+            return this->evt_file_changed.connect(fun);
         }
 
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
-        add_event(evt_file_changed__run_last__t fun, PtkFileList* list) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
-            this->evt_data_list = list;
-            return this->evt_file_changed__last.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
-        add_event(evt_mime_change_t fun) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
-            return this->evt_mime_change.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
+        template<spacefm::signal evt, typename bind_fun>
         typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
-        add_event(evt_file_deleted__run_first__t fun, PtkFileBrowser* browser) noexcept
+        add_event(bind_fun fun)
         {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
-            this->evt_data_browser = browser;
-            return this->evt_file_deleted__first.connect(sigc::ptr_fun(fun));
+            // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+            return this->evt_file_deleted.connect(fun);
         }
 
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
-        add_event(evt_file_deleted__run_last__t fun, PtkFileList* list) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
-            this->evt_data_list = list;
-            return this->evt_file_deleted__last.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
-        add_event(evt_mime_change_t fun) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
-            return this->evt_mime_change.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
+        template<spacefm::signal evt, typename bind_fun>
         typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
-        add_event(evt_file_listed_t fun, PtkFileBrowser* browser) noexcept
+        add_event(bind_fun fun) noexcept
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
-            // this->evt_data_listed_browser = browser;
-            this->evt_data_browser = browser;
-            return this->evt_file_listed.connect(sigc::ptr_fun(fun));
+            return this->evt_file_listed.connect(fun);
         }
 
-        template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
-        add_event(evt_mime_change_t fun) noexcept
-        {
-            // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
-            return this->evt_mime_change.connect(sigc::ptr_fun(fun));
-        }
-
-        template<spacefm::signal evt>
+        template<spacefm::signal evt, typename bind_fun>
         typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded,
                                 sigc::connection>::type
-        add_event(evt_file_thumbnail_loaded_t fun, PtkFileList* list) noexcept
+        add_event(bind_fun fun) noexcept
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::file_thumbnail_loaded");
-            // this->evt_data_thumb_list = list;
-            this->evt_data_list = list;
-            return this->evt_file_thumbnail_loaded.connect(sigc::ptr_fun(fun));
+            return this->evt_file_thumbnail_loaded.connect(fun);
         }
 
         // Signals Run Event
@@ -252,9 +164,7 @@ namespace vfs
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
-            this->evt_mime_change.emit();
-            this->evt_file_created__first.emit(file, this->evt_data_browser);
-            this->evt_file_created__last.emit(file, this->evt_data_list);
+            this->evt_file_created.emit(file);
         }
 
         template<spacefm::signal evt>
@@ -262,9 +172,7 @@ namespace vfs
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
-            this->evt_mime_change.emit();
-            this->evt_file_changed__first.emit(file, this->evt_data_browser);
-            this->evt_file_changed__last.emit(file, this->evt_data_list);
+            this->evt_file_changed.emit(file);
         }
 
         template<spacefm::signal evt>
@@ -272,9 +180,7 @@ namespace vfs
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
-            this->evt_mime_change.emit();
-            this->evt_file_deleted__first.emit(file, this->evt_data_browser);
-            this->evt_file_deleted__last.emit(file, this->evt_data_list);
+            this->evt_file_deleted.emit(file);
         }
 
         template<spacefm::signal evt>
@@ -282,8 +188,7 @@ namespace vfs
         run_event(bool is_cancelled) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_listed");
-            this->evt_mime_change.emit();
-            this->evt_file_listed.emit(this->evt_data_browser, is_cancelled);
+            this->evt_file_listed.emit(is_cancelled);
         }
 
         template<spacefm::signal evt>
@@ -291,34 +196,16 @@ namespace vfs
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
-            this->evt_file_thumbnail_loaded.emit(file, this->evt_data_list);
+            this->evt_file_thumbnail_loaded.emit(file);
         }
 
-        // Signals
       private:
         // Signal types
-        sigc::signal<evt_file_created__run_first__t> evt_file_created__first;
-        sigc::signal<evt_file_created__run_last__t> evt_file_created__last;
-
-        sigc::signal<evt_file_changed__run_first__t> evt_file_changed__first;
-        sigc::signal<evt_file_changed__run_last__t> evt_file_changed__last;
-
-        sigc::signal<evt_file_deleted__run_first__t> evt_file_deleted__first;
-        sigc::signal<evt_file_deleted__run_last__t> evt_file_deleted__last;
-
-        sigc::signal<evt_file_listed_t> evt_file_listed;
-
-        sigc::signal<evt_file_thumbnail_loaded_t> evt_file_thumbnail_loaded;
-
-        sigc::signal<evt_mime_change_t> evt_mime_change;
-
-      private:
-        // Signal data
-        // TODO/FIXME has to be a better way to do this
-        // PtkFileBrowser* evt_data_listed_browser{nullptr};
-        PtkFileBrowser* evt_data_browser{nullptr};
-        PtkFileList* evt_data_list{nullptr};
-        // PtkFileList* evt_data_thumb_list{nullptr};
+        sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_created;
+        sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_changed;
+        sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_deleted;
+        sigc::signal<void(bool)> evt_file_listed;
+        sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_thumbnail_loaded;
 
       public:
         // private:

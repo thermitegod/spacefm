@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <functional>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -32,7 +34,46 @@
 #include "vfs/vfs-mime-monitor.hxx"
 
 static u32 mime_change_timer = 0;
-static std::shared_ptr<vfs::dir> mime_dir = nullptr;
+static bool on_mime_change_timer(void* user_data);
+
+struct mime_monitor
+{
+    mime_monitor(const std::shared_ptr<vfs::dir>& dir) : dir(dir){};
+    ~mime_monitor() = default;
+
+    static const std::shared_ptr<mime_monitor>
+    create(const std::shared_ptr<vfs::dir>& dir) noexcept;
+
+    std::shared_ptr<vfs::dir> dir;
+
+    // signals
+    void on_mime_change(const std::shared_ptr<vfs::file>& file);
+};
+
+const std::shared_ptr<mime_monitor>
+mime_monitor::create(const std::shared_ptr<vfs::dir>& dir) noexcept
+{
+    return std::make_shared<mime_monitor>(dir);
+}
+
+void
+mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file)
+{
+    (void)file;
+
+    if (mime_change_timer != 0)
+    {
+        // timer is already running, so ignore request
+        // ztd::logger::debug("MIME-UPDATE already set");
+        return;
+    }
+
+    // update mime database in 2 seconds
+    mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
+    // ztd::logger::debug("MIME-UPDATE timer started");
+}
+
+std::shared_ptr<mime_monitor> user_mime_monitor = nullptr;
 
 static bool
 on_mime_change_timer(void* user_data)
@@ -55,29 +96,10 @@ on_mime_change_timer(void* user_data)
     return false;
 }
 
-static void
-mime_change()
-{
-    if (mime_change_timer != 0)
-    {
-        // timer is already running, so ignore request
-        // ztd::logger::debug("MIME-UPDATE already set");
-        return;
-    }
-
-    if (mime_dir)
-    {
-        // update mime database in 2 seconds
-        mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
-        // ztd::logger::debug("MIME-UPDATE timer started");
-    }
-}
-
 void
 vfs_mime_monitor()
 {
-    // start watching for changes
-    if (mime_dir)
+    if (user_mime_monitor)
     {
         return;
     }
@@ -88,15 +110,13 @@ vfs_mime_monitor()
         return;
     }
 
-    mime_dir = vfs_dir_get_by_path(path);
-    if (!mime_dir)
-    {
-        return;
-    }
+    user_mime_monitor = mime_monitor::create(vfs_dir_get_by_path(path));
 
     // ztd::logger::debug("MIME-UPDATE watch started");
-    mime_dir->add_event<spacefm::signal::file_listed>(mime_change);
-    mime_dir->add_event<spacefm::signal::file_changed>(mime_change);
-    mime_dir->add_event<spacefm::signal::file_deleted>(mime_change);
-    mime_dir->add_event<spacefm::signal::file_changed>(mime_change);
+    user_mime_monitor->dir->add_event<spacefm::signal::file_created>(
+        std::bind(&mime_monitor::on_mime_change, user_mime_monitor, std::placeholders::_1));
+    user_mime_monitor->dir->add_event<spacefm::signal::file_changed>(
+        std::bind(&mime_monitor::on_mime_change, user_mime_monitor, std::placeholders::_1));
+    user_mime_monitor->dir->add_event<spacefm::signal::file_deleted>(
+        std::bind(&mime_monitor::on_mime_change, user_mime_monitor, std::placeholders::_1));
 }

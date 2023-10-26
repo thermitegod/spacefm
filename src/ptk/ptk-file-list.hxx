@@ -84,6 +84,13 @@ struct PtkFileList
     const i32 stamp{std::rand()};
 
   public:
+    // signals
+    void on_file_list_file_created(const std::shared_ptr<vfs::file>& file);
+    void on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file);
+    void on_file_list_file_changed(const std::shared_ptr<vfs::file>& file);
+    void on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file);
+
+  public:
     // Signals we connect to
     sigc::connection signal_file_created;
     sigc::connection signal_file_deleted;

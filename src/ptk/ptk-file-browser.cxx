@@ -29,6 +29,8 @@
 
 #include <memory>
 
+#include <functional>
+
 #include <cassert>
 
 #include <malloc.h>
@@ -102,8 +104,6 @@ static GtkWidget* create_folder_view(PtkFileBrowser* file_browser,
 static void init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view);
 
 static GtkWidget* ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser);
-
-static void on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled);
 
 /* Get GtkTreePath of the item at coordinate x, y */
 static GtkTreePath* folder_view_get_tree_path_at_pos(PtkFileBrowser* file_browser, i32 x, i32 y);
@@ -1219,36 +1219,36 @@ ptk_file_browser_content_changed(PtkFileBrowser* file_browser)
     return false;
 }
 
-static void
-on_folder_content_changed(const std::shared_ptr<vfs::file>& file, PtkFileBrowser* file_browser)
+void
+PtkFileBrowser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file)
 {
     if (file == nullptr)
     {
         // The current directory itself changed
-        if (!std::filesystem::is_directory(file_browser->cwd()))
+        if (!std::filesystem::is_directory(this->cwd()))
         {
             // current directory does not exist - was renamed
-            file_browser->close_tab();
+            this->close_tab();
         }
     }
     else
     {
-        g_idle_add((GSourceFunc)ptk_file_browser_content_changed, file_browser);
+        g_idle_add((GSourceFunc)ptk_file_browser_content_changed, this);
     }
 }
 
-static void
-on_file_deleted(const std::shared_ptr<vfs::file>& file, PtkFileBrowser* file_browser)
+void
+PtkFileBrowser::on_folder_content_deleted(const std::shared_ptr<vfs::file>& file)
 {
     if (file == nullptr)
     {
         // The directory itself was deleted
-        file_browser->close_tab();
+        this->close_tab();
         // file_browser->chdir(vfs::user_dirs->home_dir());
     }
     else
     {
-        on_folder_content_changed(file, file_browser);
+        this->on_folder_content_changed(file);
     }
 }
 
@@ -1353,29 +1353,27 @@ PtkFileBrowser::update_model() noexcept
     //    g_main_context_iteration(nullptr, true);
 }
 
-static void
-on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
+void
+PtkFileBrowser::on_dir_file_listed(bool is_cancelled)
 {
-    const auto& dir = file_browser->dir_;
-
-    file_browser->n_sel_files_ = 0;
+    this->n_sel_files_ = 0;
 
     if (!is_cancelled)
     {
-        file_browser->signal_file_created.disconnect();
-        file_browser->signal_file_deleted.disconnect();
-        file_browser->signal_file_changed.disconnect();
+        this->signal_file_created.disconnect();
+        this->signal_file_deleted.disconnect();
+        this->signal_file_changed.disconnect();
 
-        file_browser->signal_file_created =
-            dir->add_event<spacefm::signal::file_created>(on_folder_content_changed, file_browser);
-        file_browser->signal_file_deleted =
-            dir->add_event<spacefm::signal::file_deleted>(on_file_deleted, file_browser);
-        file_browser->signal_file_changed =
-            dir->add_event<spacefm::signal::file_changed>(on_folder_content_changed, file_browser);
+        this->signal_file_created = this->dir_->add_event<spacefm::signal::file_created>(
+            std::bind(&PtkFileBrowser::on_folder_content_changed, this, std::placeholders::_1));
+        this->signal_file_deleted = this->dir_->add_event<spacefm::signal::file_deleted>(
+            std::bind(&PtkFileBrowser::on_folder_content_deleted, this, std::placeholders::_1));
+        this->signal_file_changed = this->dir_->add_event<spacefm::signal::file_changed>(
+            std::bind(&PtkFileBrowser::on_folder_content_changed, this, std::placeholders::_1));
     }
 
-    file_browser->update_model();
-    file_browser->busy_ = false;
+    this->update_model();
+    this->busy_ = false;
 
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility that changing the directory results in
@@ -1383,27 +1381,27 @@ on_dir_file_listed(PtkFileBrowser* file_browser, bool is_cancelled)
      * released by SpaceFM */
     malloc_trim(0);
 
-    file_browser->run_event<spacefm::signal::chdir_after>();
-    file_browser->run_event<spacefm::signal::change_content>();
-    file_browser->run_event<spacefm::signal::change_sel>();
+    this->run_event<spacefm::signal::chdir_after>();
+    this->run_event<spacefm::signal::change_content>();
+    this->run_event<spacefm::signal::change_sel>();
 
-    if (file_browser->side_dir)
+    if (this->side_dir)
     {
-        ptk_dir_tree_view_chdir(GTK_TREE_VIEW(file_browser->side_dir), file_browser->cwd());
+        ptk_dir_tree_view_chdir(GTK_TREE_VIEW(this->side_dir), this->cwd());
     }
 
-    if (file_browser->side_dev)
+    if (this->side_dev)
     {
-        ptk_location_view_chdir(GTK_TREE_VIEW(file_browser->side_dev), file_browser->cwd());
+        ptk_location_view_chdir(GTK_TREE_VIEW(this->side_dev), this->cwd());
     }
 
     // FIXME:  This is already done in update_model, but is there any better way to
     //            reduce unnecessary code?
-    if (file_browser->view_mode_ == ptk::file_browser::view_mode::compact_view)
+    if (this->view_mode_ == ptk::file_browser::view_mode::compact_view)
     { // sfm why is this needed for compact view???
-        if (!is_cancelled && file_browser->file_list_)
+        if (!is_cancelled && this->file_list_)
         {
-            file_browser->show_thumbnails(file_browser->max_thumbnail_);
+            this->show_thumbnails(this->max_thumbnail_);
         }
     }
 }
@@ -3085,7 +3083,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 
     if (this->dir_->is_file_listed())
     {
-        on_dir_file_listed(this, false);
+        this->on_dir_file_listed(false);
         this->busy_ = false;
     }
     else
@@ -3093,8 +3091,8 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
         this->busy_ = true;
     }
 
-    this->signal_file_listed =
-        this->dir_->add_event<spacefm::signal::file_listed>(on_dir_file_listed, this);
+    this->signal_file_listed = this->dir_->add_event<spacefm::signal::file_listed>(
+        std::bind(&PtkFileBrowser::on_dir_file_listed, this, std::placeholders::_1));
 
     this->update_tab_label();
 
@@ -3316,7 +3314,7 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
 
     if (this->dir_->is_file_listed())
     {
-        on_dir_file_listed(this, false);
+        this->on_dir_file_listed(false);
         this->busy_ = false;
     }
     else
