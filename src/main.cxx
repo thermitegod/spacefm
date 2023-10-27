@@ -42,6 +42,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
@@ -288,8 +289,11 @@ main(int argc, char* argv[])
     const auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     std::srand(seed);
 
-    // Initialize our mime-type system
+    // Initialize vfs system
     vfs_mime_type_init();
+    vfs_volume_init();
+    vfs_thumbnail_init();
+    vfs_trash_init();
 
     // load config file
     load_settings();
@@ -308,9 +312,6 @@ main(int argc, char* argv[])
     std::atexit(vfs_volume_finalize);
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
-
-    vfs_volume_init();
-    vfs_thumbnail_init();
 
     GtkApplication* app = gtk_application_new(PACKAGE_APPLICATION_NAME, G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), opt.get());

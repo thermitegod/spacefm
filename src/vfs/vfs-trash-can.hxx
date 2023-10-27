@@ -39,7 +39,9 @@ namespace vfs
     // https://standards.freedesktop.org/trash-spec/trashspec-1.0.html
     struct trash_can
     {
-      public:
+        trash_can() noexcept;
+        static const std::shared_ptr<vfs::trash_can> create() noexcept;
+
         // Move a file or directory into the trash.
         static bool trash(const std::filesystem::path& path) noexcept;
 
@@ -58,7 +60,6 @@ namespace vfs
       private:
         struct trash_dir
         {
-          public:
             // Create the trash directory and subdirectories if they do not exist.
             trash_dir(const std::filesystem::path& path) noexcept;
             ~trash_dir() = default;
@@ -90,18 +91,6 @@ namespace vfs
             std::filesystem::path info_path_{};
         };
 
-        // Not for public use. Use instance() or the static methods instead.
-        trash_can() noexcept;
-        virtual ~trash_can() = default;
-
-        // Return the singleton object for this class. The first use will create
-        // the singleton. Notice that the static methods all access the singleton,
-        // too, so the first call to any of those static methods will already
-        // create the singleton.
-        // static std::shared_ptr<VFSTrash> instance() noexcept;
-        static trash_can* instance() noexcept;
-        static trash_can* single_instance;
-
         // return the mount point id for the file or directory
         static u64 mount_id(const std::filesystem::path& path) noexcept;
 
@@ -112,6 +101,8 @@ namespace vfs
         const std::shared_ptr<trash_dir> get_trash_dir(const std::filesystem::path& path) noexcept;
 
         // Data Members
-        std::map<dev_t, std::shared_ptr<trash_dir>> trash_dirs_;
+        std::map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
     };
 } // namespace vfs
+
+void vfs_trash_init();

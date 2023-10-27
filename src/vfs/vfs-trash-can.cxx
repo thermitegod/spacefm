@@ -33,22 +33,15 @@
 
 #include "vfs/vfs-trash-can.hxx"
 
-// std::shared_ptr<VFSTrash>
-// VFSTrash::instance() noexcept
-// {
-//     static std::shared_ptr<VFSTrash> instance = std::make_shared<VFSTrash>();
-//     return instance;
-// }
+static std::shared_ptr<vfs::trash_can> global_trash_can = nullptr;
 
-vfs::trash_can* vfs::trash_can::single_instance = nullptr;
-
-vfs::trash_can*
-vfs::trash_can::instance() noexcept
+void
+vfs_trash_init()
 {
-    if (!trash_can::single_instance)
-        trash_can::single_instance = new vfs::trash_can();
-    return trash_can::single_instance;
+    global_trash_can = vfs::trash_can::create();
 }
+
+////////////////
 
 vfs::trash_can::trash_can() noexcept
 {
@@ -62,6 +55,12 @@ u64
 vfs::trash_can::mount_id(const std::filesystem::path& path) noexcept
 {
     return ztd::statx(path, ztd::statx::symlink::no_follow).mount_id();
+}
+
+const std::shared_ptr<vfs::trash_can>
+vfs::trash_can::create() noexcept
+{
+    return std::make_shared<vfs::trash_can>();
 }
 
 const std::filesystem::path
@@ -115,7 +114,7 @@ vfs::trash_can::get_trash_dir(const std::filesystem::path& path) noexcept
 bool
 vfs::trash_can::trash(const std::filesystem::path& path) noexcept
 {
-    const auto trash_dir = trash_can::instance()->get_trash_dir(path);
+    const auto trash_dir = global_trash_can->get_trash_dir(path);
     if (!trash_dir)
     {
         return false;
