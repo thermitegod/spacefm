@@ -56,9 +56,8 @@
 #include "utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
-
+#include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-file-task.hxx"
-#include "vfs/vfs-file-trash.hxx"
 
 inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
     // User
@@ -893,7 +892,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file)
         return;
     }
 
-    const bool result = VFSTrash::trash(src_file);
+    const bool result = vfs::trash_can::trash(src_file);
 
     if (!result)
     {
