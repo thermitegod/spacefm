@@ -209,27 +209,18 @@ vfs::dir::load_thread()
             break;
         }
 
-        const auto file_name = dfile.path().filename();
-        const auto full_path = this->path_ / file_name;
+        const auto filename = dfile.path().filename();
+        const auto full_path = this->path_ / filename;
 
         // MOD ignore if in .hidden
         if (hidden_files)
         {
-            bool hide_file = false;
-            for (const auto& hidden_file : hidden_files.value())
-            {
-                // if (ztd::same(hidden_file.string(), file_name.string()))
-                std::error_code ec;
-                const bool equivalent = std::filesystem::equivalent(hidden_file, file_name, ec);
-                if (!ec && equivalent)
-                {
-                    hide_file = true;
-                    this->xhidden_count_++;
-                    break;
-                }
-            }
+            const auto is_user_hidden = [&filename](const auto& hide_filename)
+            { return filename == hide_filename; };
+            const bool hide_file = std::ranges::any_of(hidden_files.value(), is_user_hidden);
             if (hide_file)
             {
+                this->xhidden_count_++;
                 continue;
             }
         }
