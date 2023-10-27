@@ -43,7 +43,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "write.hxx"
-#include "utils.hxx"
 
 #include "vfs/vfs-async-thread.hxx"
 #include "vfs/vfs-async-task.hxx"
@@ -143,37 +142,34 @@ vfs::dir::update_avoid_changes() noexcept
     this->avoid_changes_ = vfs_volume_dir_avoid_changes(this->path_);
 }
 
-const std::optional<std::vector<std::filesystem::path>>
-vfs::dir::get_hidden_files() const noexcept
+void
+vfs::dir::load_user_hidden_files() noexcept
 {
-    std::vector<std::filesystem::path> hidden;
-
     // Read .hidden into string
+
     const auto hidden_path = this->path_ / ".hidden";
 
     if (!std::filesystem::is_regular_file(hidden_path))
     {
-        return std::nullopt;
-    }
-
-    // test access first because open() on missing file may cause
-    // long delay on nfs
-    if (!have_rw_access(hidden_path))
-    {
-        return std::nullopt;
+        this->user_hidden_files = std::nullopt;
+        return;
     }
 
     std::ifstream file(hidden_path);
     if (!file)
     {
         ztd::logger::error("Failed to open the file: {}", hidden_path.string());
-        return std::nullopt;
+
+        this->user_hidden_files = std::nullopt;
+        return;
     }
+
+    std::vector<std::filesystem::path> hidden;
 
     std::string line;
     while (std::getline(file, line))
     {
-        const auto hidden_file = std::filesystem::path(ztd::strip(line));
+        const std::filesystem::path hidden_file = ztd::strip(line); // remove newline
         if (hidden_file.is_absolute())
         {
             ztd::logger::warn("Absolute path ignored in {}", hidden_path.string());
@@ -182,9 +178,8 @@ vfs::dir::get_hidden_files() const noexcept
 
         hidden.push_back(hidden_file);
     }
-    file.close();
 
-    return hidden;
+    this->user_hidden_files = hidden;
 }
 
 void
@@ -200,7 +195,7 @@ vfs::dir::load_thread()
         std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
 
     // MOD  dir contains .hidden file?
-    const auto hidden_files = this->get_hidden_files();
+    this->load_user_hidden_files();
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
@@ -213,11 +208,12 @@ vfs::dir::load_thread()
         const auto full_path = this->path_ / filename;
 
         // MOD ignore if in .hidden
-        if (hidden_files)
+        if (this->user_hidden_files)
         {
             const auto is_user_hidden = [&filename](const auto& hide_filename)
             { return filename == hide_filename; };
-            const bool hide_file = std::ranges::any_of(hidden_files.value(), is_user_hidden);
+            const bool hide_file =
+                std::ranges::any_of(this->user_hidden_files.value(), is_user_hidden);
             if (hide_file)
             {
                 this->xhidden_count_++;
