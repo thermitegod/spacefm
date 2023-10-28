@@ -2981,7 +2981,7 @@ ptk_file_browser_read_access(const std::filesystem::path& cwd)
 */
 
 bool
-PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
+PtkFileBrowser::chdir(const std::filesystem::path& new_path,
                       const ptk::file_browser::chdir_mode mode) noexcept
 {
     // ztd::logger::debug("PtkFileBrowser::chdir");
@@ -2998,11 +2998,12 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
         this->skip_release_ = false;
     }
 
-    if (!std::filesystem::exists(folder_path))
+    if (!std::filesystem::exists(new_path))
     {
+        ztd::logger::error("Failed to chdir into nonexistent path '{}'", new_path.string());
         return false;
     }
-    const auto path = std::filesystem::canonical(folder_path);
+    const auto path = std::filesystem::absolute(new_path);
 
     if (!std::filesystem::is_directory(path))
     {

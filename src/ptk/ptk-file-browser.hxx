@@ -189,7 +189,7 @@ struct PtkFileBrowser
 
   public:
     bool chdir(
-        const std::filesystem::path& folder_path,
+        const std::filesystem::path& new_path,
         const ptk::file_browser::chdir_mode mode = ptk::file_browser::chdir_mode::normal) noexcept;
 
     const std::filesystem::path& cwd() const noexcept;
