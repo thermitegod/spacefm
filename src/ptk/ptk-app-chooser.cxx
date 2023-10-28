@@ -609,15 +609,15 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
             break;
         }
 
-        const auto file_name = file.path().filename();
-        const auto file_path = dir_path / file_name;
+        const auto filename = file.path().filename();
+        const auto file_path = dir_path / filename;
         if (std::filesystem::is_directory(file_path))
         {
             /* recursively load sub dirs */
             load_all_apps_in_dir(file_path, list, task);
             continue;
         }
-        if (!file_name.string().ends_with(".desktop"))
+        if (!filename.string().ends_with(".desktop"))
         {
             continue;
         }

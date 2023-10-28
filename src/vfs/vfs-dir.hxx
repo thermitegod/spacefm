@@ -72,10 +72,10 @@ namespace vfs
         const std::optional<std::vector<std::filesystem::path>> get_hidden_files() const noexcept;
 
         /* emit signals */
-        void emit_file_created(const std::filesystem::path& file_name, bool force) noexcept;
-        void emit_file_deleted(const std::filesystem::path& file_name,
+        void emit_file_created(const std::filesystem::path& filename, bool force) noexcept;
+        void emit_file_deleted(const std::filesystem::path& filename,
                                const std::shared_ptr<vfs::file>& file) noexcept;
-        void emit_file_changed(const std::filesystem::path& file_name,
+        void emit_file_changed(const std::filesystem::path& filename,
                                const std::shared_ptr<vfs::file>& file, bool force) noexcept;
         void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
@@ -94,7 +94,7 @@ namespace vfs
         void on_list_task_finished(bool is_cancelled);
 
         const std::shared_ptr<vfs::file>
-        find_file(const std::filesystem::path& file_name,
+        find_file(const std::filesystem::path& filename,
                   const std::shared_ptr<vfs::file>& file) const noexcept;
         bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
 

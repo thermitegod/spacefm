@@ -387,8 +387,8 @@ vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir)
 void
 vfs::file_task::file_copy(const std::filesystem::path& src_file)
 {
-    const auto file_name = src_file.filename();
-    const auto dest_file = this->dest_dir.value() / file_name;
+    const auto filename = src_file.filename();
+    const auto dest_file = this->dest_dir.value() / filename;
 
     this->do_file_copy(src_file, dest_file);
 }
@@ -463,13 +463,13 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
 
             for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
-                const auto file_name = file.path().filename();
+                const auto filename = file.path().filename();
                 if (this->should_abort())
                 {
                     break;
                 }
-                const auto sub_src_file = src_file / file_name;
-                const auto sub_dest_file = actual_dest_file / file_name;
+                const auto sub_src_file = src_file / filename;
+                const auto sub_dest_file = actual_dest_file / filename;
                 if (!this->do_file_copy(sub_src_file, sub_dest_file) && !copy_fail)
                 {
                     copy_fail = true;
@@ -724,8 +724,8 @@ vfs::file_task::file_move(const std::filesystem::path& src_file)
     this->current_file = src_file;
     this->unlock();
 
-    const auto file_name = src_file.filename();
-    const auto dest_file = this->dest_dir.value() / file_name;
+    const auto filename = src_file.filename();
+    const auto dest_file = this->dest_dir.value() / filename;
 
     const auto src_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
     const auto dest_stat = ztd::statx(this->dest_dir.value());
@@ -810,13 +810,13 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
         // moving a directory onto a directory that exists
         for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
-            const auto file_name = file.path().filename();
+            const auto filename = file.path().filename();
             if (this->should_abort())
             {
                 break;
             }
-            const auto sub_src_file = src_file / file_name;
-            const auto sub_dest_file = dest_file / file_name;
+            const auto sub_src_file = src_file / filename;
+            const auto sub_dest_file = dest_file / filename;
             this->do_file_move(sub_src_file, sub_dest_file);
         }
         // remove moved src dir if empty
@@ -933,12 +933,12 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file)
     {
         for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
-            const auto file_name = file.path().filename();
+            const auto filename = file.path().filename();
             if (this->should_abort())
             {
                 break;
             }
-            const auto sub_src_file = src_file / file_name;
+            const auto sub_src_file = src_file / filename;
             this->file_delete(sub_src_file);
         }
 
@@ -979,8 +979,8 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
         return;
     }
 
-    const auto file_name = src_file.filename();
-    const auto old_dest_file = this->dest_dir.value() / file_name;
+    const auto filename = src_file.filename();
+    const auto old_dest_file = this->dest_dir.value() / filename;
     auto dest_file = old_dest_file;
 
     // MOD  setup task for check overwrite
@@ -1138,12 +1138,12 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
         {
             for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
-                const auto file_name = file.path().filename();
+                const auto filename = file.path().filename();
                 if (this->should_abort())
                 {
                     break;
                 }
-                const auto sub_src_file = src_file / file_name;
+                const auto sub_src_file = src_file / filename;
                 this->file_chown_chmod(sub_src_file);
             }
         }
@@ -2041,13 +2041,13 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path)
 
     for (const auto& file : std::filesystem::directory_iterator(path))
     {
-        const auto file_name = file.path().filename();
+        const auto filename = file.path().filename();
         if (this->state_ == vfs::file_task::state::size_timeout || this->abort)
         {
             break;
         }
 
-        const auto full_path = path / file_name;
+        const auto full_path = path / filename;
         if (std::filesystem::exists(full_path))
         {
             const auto dir_file_stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);

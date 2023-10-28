@@ -811,11 +811,11 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
 
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
-            const auto file_name = file.path().filename();
-            const auto file_path = path / file_name;
+            const auto filename = file.path().filename();
+            const auto file_path = path / filename;
             if (std::filesystem::is_directory(file_path))
             {
-                ptk_dir_tree_insert_child(tree, node, file_path, file_name);
+                ptk_dir_tree_insert_child(tree, node, file_path, filename);
             }
         }
 

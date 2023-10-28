@@ -246,9 +246,9 @@ GdkPixbuf*
 vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
 {
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
-    const std::string file_name = std::format("{}.png", file_hash);
+    const std::string filename = std::format("{}.png", file_hash);
 
-    const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / file_name;
+    const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / filename;
 
     // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 

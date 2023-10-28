@@ -102,9 +102,9 @@ struct PtkFileListClass
 {
     GObjectClass parent;
     /* Default signal handlers */
-    // void (*file_created)(const std::shared_ptr<vfs::dir>& dir, const char* file_name);
-    // void (*file_deleted)(const std::shared_ptr<vfs::dir>& dir, const char* file_name);
-    // void (*file_changed)(const std::shared_ptr<vfs::dir>& dir, const char* file_name);
+    // void (*file_created)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
+    // void (*file_deleted)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
+    // void (*file_changed)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
     // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
 };
 

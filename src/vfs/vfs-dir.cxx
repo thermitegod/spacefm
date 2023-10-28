@@ -271,7 +271,7 @@ vfs_dir_mime_type_reload()
 */
 
 const std::shared_ptr<vfs::file>
-vfs::dir::find_file(const std::filesystem::path& file_name,
+vfs::dir::find_file(const std::filesystem::path& filename,
                     const std::shared_ptr<vfs::file>& file) const noexcept
 {
     for (const auto& file2 : this->files_)
@@ -280,7 +280,7 @@ vfs::dir::find_file(const std::filesystem::path& file_name,
         {
             return file2;
         }
-        if (ztd::same(file2->name(), file_name.string()))
+        if (ztd::same(file2->name(), filename.string()))
         {
             return file2;
         }
@@ -450,7 +450,7 @@ vfs::dir::reload_mime_type() noexcept
 
 /* signal handlers */
 void
-vfs::dir::emit_file_created(const std::filesystem::path& file_name, bool force) noexcept
+vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) noexcept
 {
     (void)force;
     // Ignore avoid_changes for creation of files
@@ -459,24 +459,24 @@ vfs::dir::emit_file_created(const std::filesystem::path& file_name, bool force) 
     //     return;
     // }
 
-    if (std::filesystem::equivalent(file_name, this->path_))
+    if (std::filesystem::equivalent(filename, this->path_))
     { // Special Case: The directory itself was created?
         return;
     }
 
-    this->created_files_.emplace_back(file_name);
+    this->created_files_.emplace_back(filename);
 
     this->update_changed_files();
     this->update_created_files();
 }
 
 void
-vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
+vfs::dir::emit_file_deleted(const std::filesystem::path& filename,
                             const std::shared_ptr<vfs::file>& file) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
-    if (std::filesystem::equivalent(file_name, this->path_))
+    if (std::filesystem::equivalent(filename, this->path_))
     {
         /* Special Case: The directory itself was deleted... */
 
@@ -488,7 +488,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
         return;
     }
 
-    const auto file_found = this->find_file(file_name, file);
+    const auto file_found = this->find_file(filename, file);
     if (file_found)
     {
         if (!ztd::contains(this->changed_files_, file_found))
@@ -502,26 +502,26 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
 }
 
 void
-vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
+vfs::dir::emit_file_changed(const std::filesystem::path& filename,
                             const std::shared_ptr<vfs::file>& file, bool force) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
-    // ztd::logger::info("vfs::dir::emit_file_changed dir={} file_name={} avoid={}", this->path_, file_name, this->avoid_changes_);
+    // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, filename, this->avoid_changes_);
 
     if (!force && this->avoid_changes_)
     {
         return;
     }
 
-    if (std::filesystem::equivalent(file_name, this->path_))
+    if (std::filesystem::equivalent(filename, this->path_))
     {
         // Special Case: The directory itself was changed
         this->run_event<spacefm::signal::file_changed>(nullptr);
         return;
     }
 
-    const auto file_found = this->find_file(file_name, file);
+    const auto file_found = this->find_file(filename, file);
     if (file_found)
     {
         if (!ztd::contains(this->changed_files_, file_found))

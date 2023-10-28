@@ -148,10 +148,10 @@ seek_path(GtkEntry* entry)
                 break;
             }
 
-            const auto file_name = file.path().filename();
-            if (file_name.string().starts_with(seek_name.string()))
+            const auto filename = file.path().filename();
+            if (filename.string().starts_with(seek_name.string()))
             {
-                const auto full_path = seek_dir / file_name;
+                const auto full_path = seek_dir / filename;
                 if (std::filesystem::is_directory(full_path))
                 {
                     count++;
@@ -243,11 +243,10 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
         std::vector<std::filesystem::path> name_list;
         for (const auto& file : std::filesystem::directory_iterator(cwd))
         {
-            const auto file_name = file.path().filename();
-            const auto full_path = cwd / file_name;
-            if (std::filesystem::is_directory(full_path))
+            const auto& path = file.path();
+            if (std::filesystem::is_directory(path))
             {
-                name_list.emplace_back(full_path);
+                name_list.emplace_back(path);
             }
         }
 
@@ -328,33 +327,33 @@ insert_complete(GtkEntry* entry)
 
     for (const auto& file : std::filesystem::directory_iterator(cwd))
     {
-        const auto file_name = file.path().filename();
-        const auto full_path = cwd / file_name;
+        const auto filename = file.path().filename();
+        const auto& path = file.path();
 
-        if (!std::filesystem::is_directory(full_path))
+        if (!std::filesystem::is_directory(path))
         {
             continue;
         }
 
         if (prefix_name.empty())
         { // full match
-            last_path = full_path;
+            last_path = path;
             if (++count > 1)
             {
                 break;
             }
         }
-        else if (file_name.string().starts_with(prefix_name))
+        else if (filename.string().starts_with(prefix_name))
         { // prefix matches
             count++;
             if (long_prefix.empty())
             {
-                long_prefix = file_name;
+                long_prefix = filename;
             }
             else
             {
                 i32 i = 0;
-                while (file_name.string()[i] && file_name.string()[i] == long_prefix[i])
+                while (filename.string()[i] && filename.string()[i] == long_prefix[i])
                 {
                     i++;
                 }
@@ -362,7 +361,7 @@ insert_complete(GtkEntry* entry)
                 if (i && long_prefix[i])
                 {
                     // shorter prefix found
-                    long_prefix = file_name;
+                    long_prefix = filename;
                 }
             }
         }

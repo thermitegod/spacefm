@@ -2165,13 +2165,13 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
                 str = multi_input_get_text(query_input);
             }
-            const auto file_name = std::filesystem::path(str.value());
-            if (str && !file_name.empty() && ptask->task->current_dest)
+            const auto filename = std::filesystem::path(str.value());
+            if (str && !filename.empty() && ptask->task->current_dest)
             {
                 const auto current_dest = ptask->task->current_dest.value();
 
                 const auto dir_name = current_dest.parent_path();
-                const auto path = dir_name / file_name;
+                const auto path = dir_name / filename;
                 *ptask->query_new_dest = ztd::strdup(path);
             }
             break;

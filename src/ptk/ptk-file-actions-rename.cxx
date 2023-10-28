@@ -2166,8 +2166,8 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
 
     for (const auto& file : std::filesystem::directory_iterator(templates_path))
     {
-        const auto file_name = file.path().filename();
-        const auto path = templates_path / file_name;
+        const auto filename = file.path().filename();
+        const auto path = templates_path / filename;
         if (getdir)
         {
             if (std::filesystem::is_directory(path))
@@ -2175,11 +2175,11 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
                 std::filesystem::path subsubdir;
                 if (subdir.empty())
                 {
-                    subsubdir = file_name;
+                    subsubdir = filename;
                 }
                 else
                 {
-                    subsubdir = subdir / file_name;
+                    subsubdir = subdir / filename;
                 }
 
                 templates.emplace_back(subsubdir);
@@ -2200,11 +2200,11 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
             {
                 if (subdir.empty())
                 {
-                    templates.emplace_back(file_name);
+                    templates.emplace_back(filename);
                 }
                 else
                 {
-                    templates.emplace_back(subdir / file_name);
+                    templates.emplace_back(subdir / filename);
                 }
             }
             else if (std::filesystem::is_directory(path) &&
@@ -2214,13 +2214,13 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
                 if (subdir.empty())
                 {
                     const std::vector<std::filesystem::path> subsubdir_templates =
-                        get_templates(templates_dir, file_name, getdir);
+                        get_templates(templates_dir, filename, getdir);
 
                     templates = ztd::merge(templates, subsubdir_templates);
                 }
                 else
                 {
-                    const auto subsubdir = subdir / file_name;
+                    const auto subsubdir = subdir / filename;
                     const std::vector<std::filesystem::path> subsubdir_templates =
                         get_templates(templates_dir, subsubdir, getdir);
 

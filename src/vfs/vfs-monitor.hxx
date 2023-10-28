@@ -54,7 +54,7 @@ namespace vfs
 
       private:
         bool on_inotify_event(const Glib::IOCondition condition);
-        void dispatch_event(const event event, const std::filesystem::path& file_name) noexcept;
+        void dispatch_event(const event event, const std::filesystem::path& filename) noexcept;
 
         i32 inotify_fd_{-1};
         i32 inotify_wd_{-1};
