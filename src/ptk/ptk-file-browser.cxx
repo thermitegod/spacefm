@@ -5474,112 +5474,107 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
         return;
     }
 
-    std::string name;
-    std::string prog;
-
-    if (set->name.starts_with("perm_"))
-    {
-        name = ztd::removeprefix(set->name, "perm_");
-        if (name.starts_with("go") || name.starts_with("ugo"))
-        {
-            prog = "chmod -R";
-        }
-        else
-        {
-            prog = "chmod";
-        }
-    }
-    else
+    if (!set->name.starts_with("perm_"))
     {
         return;
     }
 
+    std::string prog;
+    if (set->name.starts_with("perm_go") || set->name.starts_with("perm_ugo"))
+    {
+        prog = "chmod -R";
+    }
+    else
+    {
+        prog = "chmod";
+    }
+
     std::string cmd;
-    if (ztd::same(name, "r"))
+    if (set->xset_name == xset::name::perm_r)
     {
         cmd = "u+r-wx,go-rwx";
     }
-    else if (ztd::same(name, "rw"))
+    else if (set->xset_name == xset::name::perm_rw)
     {
         cmd = "u+rw-x,go-rwx";
     }
-    else if (ztd::same(name, "rwx"))
+    else if (set->xset_name == xset::name::perm_rwx)
     {
         cmd = "u+rwx,go-rwx";
     }
-    else if (ztd::same(name, "r_r"))
+    else if (set->xset_name == xset::name::perm_r_r)
     {
         cmd = "u+r-wx,g+r-wx,o-rwx";
     }
-    else if (ztd::same(name, "rw_r"))
+    else if (set->xset_name == xset::name::perm_rw_r)
     {
         cmd = "u+rw-x,g+r-wx,o-rwx";
     }
-    else if (ztd::same(name, "rw_rw"))
+    else if (set->xset_name == xset::name::perm_rw_rw)
     {
         cmd = "u+rw-x,g+rw-x,o-rwx";
     }
-    else if (ztd::same(name, "rwxr_x"))
+    else if (set->xset_name == xset::name::perm_rwxr_x)
     {
         cmd = "u+rwx,g+rx-w,o-rwx";
     }
-    else if (ztd::same(name, "rwxrwx"))
+    else if (set->xset_name == xset::name::perm_rwxrwx)
     {
         cmd = "u+rwx,g+rwx,o-rwx";
     }
-    else if (ztd::same(name, "r_r_r"))
+    else if (set->xset_name == xset::name::perm_r_r_r)
     {
         cmd = "ugo+r,ugo-wx";
     }
-    else if (ztd::same(name, "rw_r_r"))
+    else if (set->xset_name == xset::name::perm_rw_r_r)
     {
         cmd = "u+rw-x,go+r-wx";
     }
-    else if (ztd::same(name, "rw_rw_rw"))
+    else if (set->xset_name == xset::name::perm_rw_rw_rw)
     {
         cmd = "ugo+rw-x";
     }
-    else if (ztd::same(name, "rwxr_r"))
+    else if (set->xset_name == xset::name::perm_rwxr_r)
     {
         cmd = "u+rwx,go+r-wx";
     }
-    else if (ztd::same(name, "rwxr_xr_x"))
+    else if (set->xset_name == xset::name::perm_rwxr_xr_x)
     {
         cmd = "u+rwx,go+rx-w";
     }
-    else if (ztd::same(name, "rwxrwxrwx"))
+    else if (set->xset_name == xset::name::perm_rwxrwxrwx)
     {
         cmd = "ugo+rwx,-t";
     }
-    else if (ztd::same(name, "rwxrwxrwt"))
+    else if (set->xset_name == xset::name::perm_rwxrwxrwt)
     {
         cmd = "ugo+rwx,+t";
     }
-    else if (ztd::same(name, "unstick"))
+    else if (set->xset_name == xset::name::perm_unstick)
     {
         cmd = "-t";
     }
-    else if (ztd::same(name, "stick"))
+    else if (set->xset_name == xset::name::perm_stick)
     {
         cmd = "+t";
     }
-    else if (ztd::same(name, "go_w"))
+    else if (set->xset_name == xset::name::perm_go_w)
     {
         cmd = "go-w";
     }
-    else if (ztd::same(name, "go_rwx"))
+    else if (set->xset_name == xset::name::perm_go_rwx)
     {
         cmd = "go-rwx";
     }
-    else if (ztd::same(name, "ugo_w"))
+    else if (set->xset_name == xset::name::perm_ugo_w)
     {
         cmd = "ugo+w";
     }
-    else if (ztd::same(name, "ugo_rx"))
+    else if (set->xset_name == xset::name::perm_ugo_rx)
     {
         cmd = "ugo+rX";
     }
-    else if (ztd::same(name, "ugo_rwx"))
+    else if (set->xset_name == xset::name::perm_ugo_rwx)
     {
         cmd = "ugo+rwX";
     }
