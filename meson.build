@@ -3,7 +3,8 @@ project(
     version : '3.0.0-dev',
     license : 'GPL3',
     default_options : [
-        'cpp_std=c++20',
+        # 'c_std=c23',
+        'cpp_std=c++23',
         'buildtype=debug',
         'warning_level=3',
         'optimization=2',
