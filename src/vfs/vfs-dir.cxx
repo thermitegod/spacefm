@@ -58,14 +58,14 @@ vfs::dir::dir(const std::filesystem::path& path) : path_(path)
 {
     // ztd::logger::debug("vfs::dir::dir({})   {}", fmt::ptr(this), path);
 
-    this->avoid_changes = vfs_volume_dir_avoid_changes(this->path_);
+    this->update_avoid_changes();
 
-    this->task = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
+    this->task_ = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
 
-    this->signal_task_load_dir = this->task->add_event<spacefm::signal::task_finish>(
+    this->signal_task_load_dir = this->task_->add_event<spacefm::signal::task_finish>(
         std::bind(&vfs::dir::on_list_task_finished, this, std::placeholders::_1));
 
-    this->task->run(); /* asynchronous operation */
+    this->task_->run(); /* asynchronous operation */
 }
 
 vfs::dir::~dir()
@@ -74,23 +74,13 @@ vfs::dir::~dir()
 
     this->signal_task_load_dir.disconnect();
 
-    if (this->task)
+    if (this->task_)
     {
         // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
 
         // ztd::logger::trace("this->task({})", fmt::ptr(this->task));
-        this->task->cancel();
-        this->task = nullptr;
+        this->task_->cancel();
     }
-
-    // ztd::logger::trace("this->monitor({})", fmt::ptr(this->monitor));
-    // ztd::logger::trace("this->thumbnailer({})", fmt::ptr(this->thumbnailer));
-    this->monitor = nullptr;
-    this->thumbnailer = nullptr;
-
-    this->file_list.clear();
-    this->changed_files.clear();
-    this->created_files.clear();
 }
 
 const std::shared_ptr<vfs::dir>
@@ -116,16 +106,40 @@ vfs::dir::create(const std::filesystem::path& path) noexcept
 void
 vfs::dir::on_list_task_finished(bool is_cancelled)
 {
-    this->task = nullptr;
+    this->task_ = nullptr;
     this->run_event<spacefm::signal::file_listed>(is_cancelled);
-    this->file_listed = true;
-    this->load_complete = true;
+    this->file_listed_ = true;
+    this->load_complete_ = true;
 }
 
 const std::filesystem::path&
 vfs::dir::path() const noexcept
 {
     return this->path_;
+}
+
+const std::span<const std::shared_ptr<vfs::file>>
+vfs::dir::files() const noexcept
+{
+    return this->files_;
+}
+
+bool
+vfs::dir::avoid_changes() const noexcept
+{
+    return this->avoid_changes_;
+}
+
+u64
+vfs::dir::hidden_files() const noexcept
+{
+    return this->xhidden_count_;
+}
+
+void
+vfs::dir::update_avoid_changes() noexcept
+{
+    this->avoid_changes_ = vfs_volume_dir_avoid_changes(this->path_);
 }
 
 const std::optional<std::vector<std::filesystem::path>>
@@ -175,12 +189,12 @@ vfs::dir::get_hidden_files() const noexcept
 void
 vfs::dir::load_thread()
 {
-    this->file_listed = false;
-    this->load_complete = false;
-    this->xhidden_count = 0;
+    this->file_listed_ = false;
+    this->load_complete_ = false;
+    this->xhidden_count_ = 0;
 
     /* Install file alteration monitor */
-    this->monitor = vfs::monitor::create(
+    this->monitor_ = vfs::monitor::create(
         this->path_,
         std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -189,7 +203,7 @@ vfs::dir::load_thread()
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
-        if (this->task->is_canceled())
+        if (this->task_->is_canceled())
         {
             break;
         }
@@ -209,7 +223,7 @@ vfs::dir::load_thread()
                 if (!ec && equivalent)
                 {
                     hide_file = true;
-                    this->xhidden_count++;
+                    this->xhidden_count_++;
                     break;
                 }
             }
@@ -220,7 +234,7 @@ vfs::dir::load_thread()
         }
 
         const auto file = vfs::file::create(full_path);
-        this->file_list.emplace_back(file);
+        this->files_.emplace_back(file);
     }
 }
 
@@ -260,7 +274,7 @@ const std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& file_name,
                     const std::shared_ptr<vfs::file>& file) const noexcept
 {
-    for (const auto& file2 : this->file_list)
+    for (const auto& file2 : this->files_)
     {
         if (file == file2)
         {
@@ -298,13 +312,13 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_b
 bool
 vfs::dir::is_file_listed() const noexcept
 {
-    return this->file_listed;
+    return this->file_listed_;
 }
 
 bool
 vfs::dir::is_directory_empty() const noexcept
 {
-    return this->file_list.empty();
+    return this->files_.empty();
 }
 
 bool
@@ -319,9 +333,9 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
     }
     else /* The file does not exist */
     {
-        if (ztd::contains(this->file_list, file))
+        if (ztd::contains(this->files_, file))
         {
-            ztd::remove(this->file_list, file);
+            ztd::remove(this->files_, file);
             if (file)
             {
                 this->run_event<spacefm::signal::file_deleted>(file);
@@ -338,12 +352,12 @@ vfs::dir::update_changed_files() noexcept
 {
     //std::scoped_lock<std::mutex> lock(this->mutex);
 
-    if (this->changed_files.empty())
+    if (this->changed_files_.empty())
     {
         return;
     }
 
-    for (const auto& file : this->changed_files)
+    for (const auto& file : this->changed_files_)
     {
         if (this->update_file_info(file))
         {
@@ -351,7 +365,7 @@ vfs::dir::update_changed_files() noexcept
         }
         // else was deleted, signaled, and unrefed in update_file_info
     }
-    this->changed_files.clear();
+    this->changed_files_.clear();
 }
 
 void
@@ -359,23 +373,22 @@ vfs::dir::update_created_files() noexcept
 {
     // std::scoped_lock<std::mutex> lock(this->mutex);
 
-    if (this->created_files.empty())
+    if (this->created_files_.empty())
     {
         return;
     }
 
-    for (const auto& created_file : this->created_files)
+    for (const auto& created_file : this->created_files_)
     {
         const auto file_found = this->find_file(created_file, nullptr);
         if (!file_found)
         {
-            // file is not in dir file_list
+            // file is not in dir this->files_
             const auto full_path = std::filesystem::path() / this->path_ / created_file;
             if (std::filesystem::exists(full_path))
             {
                 const auto file = vfs::file::create(full_path);
-                // add new file to dir file_list
-                this->file_list.emplace_back(file);
+                this->files_.emplace_back(file);
 
                 this->run_event<spacefm::signal::file_created>(file);
             }
@@ -383,7 +396,7 @@ vfs::dir::update_created_files() noexcept
         }
         else
         {
-            // file already exists in dir file_list
+            // file already exists in dir this->files_
             if (this->update_file_info(file_found))
             {
                 this->run_event<spacefm::signal::file_changed>(file_found);
@@ -391,15 +404,15 @@ vfs::dir::update_created_files() noexcept
             // else was deleted, signaled, and unrefed in update_file_info
         }
     }
-    this->created_files.clear();
+    this->created_files_.clear();
 }
 
 void
 vfs::dir::unload_thumbnails(bool is_big) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->lock_);
 
-    for (const auto& file : this->file_list)
+    for (const auto& file : this->files_)
     {
         if (is_big)
         {
@@ -420,7 +433,7 @@ vfs::dir::unload_thumbnails(bool is_big) noexcept
 void
 vfs::dir::reload_mime_type() noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->lock_);
 
     if (this->is_directory_empty())
     {
@@ -428,11 +441,11 @@ vfs::dir::reload_mime_type() noexcept
     }
 
     const auto reload_file_mime_action = [](const auto& file) { file->reload_mime_type(); };
-    std::ranges::for_each(this->file_list, reload_file_mime_action);
+    std::ranges::for_each(this->files_, reload_file_mime_action);
 
     const auto signal_file_changed_action = [this](const auto& file)
     { this->run_event<spacefm::signal::file_changed>(file); };
-    std::ranges::for_each(this->file_list, signal_file_changed_action);
+    std::ranges::for_each(this->files_, signal_file_changed_action);
 }
 
 /* signal handlers */
@@ -441,15 +454,17 @@ vfs::dir::emit_file_created(const std::filesystem::path& file_name, bool force) 
 {
     (void)force;
     // Ignore avoid_changes for creation of files
-    // if ( !force && dir->avoid_changes )
-    //    return;
+    // if (!force && this->avoid_changes_)
+    // {
+    //     return;
+    // }
 
     if (std::filesystem::equivalent(file_name, this->path_))
     { // Special Case: The directory itself was created?
         return;
     }
 
-    this->created_files.emplace_back(file_name);
+    this->created_files_.emplace_back(file_name);
 
     this->update_changed_files();
     this->update_created_files();
@@ -459,14 +474,14 @@ void
 vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
                             const std::shared_ptr<vfs::file>& file) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->lock_);
 
     if (std::filesystem::equivalent(file_name, this->path_))
     {
         /* Special Case: The directory itself was deleted... */
 
         /* clear the whole list */
-        this->file_list.clear();
+        this->files_.clear();
 
         this->run_event<spacefm::signal::file_deleted>(nullptr);
 
@@ -476,9 +491,9 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& file_name,
     const auto file_found = this->find_file(file_name, file);
     if (file_found)
     {
-        if (!ztd::contains(this->changed_files, file_found))
+        if (!ztd::contains(this->changed_files_, file_found))
         {
-            this->changed_files.emplace_back(file_found);
+            this->changed_files_.emplace_back(file_found);
 
             this->update_changed_files();
             this->update_created_files();
@@ -490,12 +505,11 @@ void
 vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
                             const std::shared_ptr<vfs::file>& file, bool force) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->lock_);
 
-    // ztd::logger::info("vfs_dir_emit_file_changed dir={} file_name={} avoid={}", dir->path,
-    // file_name, this->avoid_changes ? "true" : "false");
+    // ztd::logger::info("vfs::dir::emit_file_changed dir={} file_name={} avoid={}", this->path_, file_name, this->avoid_changes_);
 
-    if (!force && this->avoid_changes)
+    if (!force && this->avoid_changes_)
     {
         return;
     }
@@ -510,18 +524,18 @@ vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
     const auto file_found = this->find_file(file_name, file);
     if (file_found)
     {
-        if (!ztd::contains(this->changed_files, file_found))
+        if (!ztd::contains(this->changed_files_, file_found))
         {
             if (force)
             {
-                this->changed_files.emplace_back(file_found);
+                this->changed_files_.emplace_back(file_found);
 
                 this->update_changed_files();
                 this->update_created_files();
             }
             else if (this->update_file_info(file_found)) // update file info the first time
             {
-                this->changed_files.emplace_back(file_found);
+                this->changed_files_.emplace_back(file_found);
 
                 this->update_changed_files();
                 this->update_created_files();
@@ -535,7 +549,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& file_name,
 void
 vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->mutex);
+    std::scoped_lock<std::mutex> lock(this->lock_);
 
     const auto file_found = this->find_file(file->name(), file);
     if (file_found)

@@ -254,7 +254,7 @@ ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden)
 void
 PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file)
 {
-    if (!file || !this->dir || this->dir->cancel)
+    if (!file || !this->dir)
     {
         return;
     }
@@ -328,15 +328,12 @@ ptk_file_list_set_dir(PtkFileList* list, const std::shared_ptr<vfs::dir>& dir)
     list->signal_file_changed = list->dir->add_event<spacefm::signal::file_changed>(
         std::bind(&PtkFileList::on_file_list_file_changed, list, std::placeholders::_1));
 
-    if (dir && !dir->file_list.empty())
+    for (const auto& file : dir->files())
     {
-        for (const auto& file : dir->file_list)
+        if (list->show_hidden || !file->is_hidden())
         {
-            if (list->show_hidden || !file->is_hidden())
-            {
-                list->files = g_list_prepend(list->files, file.get());
-                ++list->n_files;
-            }
+            list->files = g_list_prepend(list->files, file.get());
+            ++list->n_files;
         }
     }
 }
@@ -556,7 +553,7 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
     assert(list != nullptr);
 
     /* No rows => no first row */
-    if (list->dir->file_list.size() == 0)
+    if (list->dir->files().empty())
     {
         return false;
     }

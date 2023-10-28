@@ -43,42 +43,22 @@ namespace vfs
 
     struct dir : public std::enable_shared_from_this<dir>
     {
-        // dir() = default;
+        dir() = delete;
         dir(const std::filesystem::path& path);
         ~dir();
 
         static const std::shared_ptr<vfs::dir> create(const std::filesystem::path& path) noexcept;
 
         const std::filesystem::path& path() const noexcept;
+        const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
 
-        std::vector<std::shared_ptr<vfs::file>> file_list{};
+        u64 hidden_files() const noexcept;
 
-        /*<private>*/
-        std::shared_ptr<vfs::monitor> monitor{nullptr};
-        std::shared_ptr<vfs::async_thread> task{nullptr};
+        bool avoid_changes() const noexcept;
+        void update_avoid_changes() noexcept;
 
-        bool file_listed{true};
-        bool load_complete{true};
-        bool cancel{true};
-        bool show_hidden{true};
-        bool avoid_changes{true};
-
-        std::shared_ptr<vfs::thumbnailer> thumbnailer{nullptr};
-
-        std::vector<std::shared_ptr<vfs::file>> changed_files{};
-        std::vector<std::filesystem::path> created_files{};
-
-        i64 xhidden_count{0};
-
-      private:
-        std::filesystem::path path_{};
-
-      public:
         bool is_file_listed() const noexcept;
         bool is_directory_empty() const noexcept;
-
-        void update_created_files() noexcept;
-        void update_changed_files() noexcept;
 
         void unload_thumbnails(bool is_big) noexcept;
 
@@ -99,10 +79,16 @@ namespace vfs
                                const std::shared_ptr<vfs::file>& file, bool force) noexcept;
         void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
+        // TODO private
+        std::shared_ptr<vfs::thumbnailer> thumbnailer{nullptr};
+
       private:
         void load_thread();
 
         void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
+
+        void update_created_files() noexcept;
+        void update_changed_files() noexcept;
 
         // signal callback
         void on_list_task_finished(bool is_cancelled);
@@ -113,7 +99,25 @@ namespace vfs
         bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
 
       private:
-        std::mutex mutex;
+        std::filesystem::path path_{};
+
+        std::vector<std::shared_ptr<vfs::file>> files_{};
+
+        std::shared_ptr<vfs::monitor> monitor_{nullptr};
+        std::shared_ptr<vfs::async_thread> task_{nullptr};
+
+        std::vector<std::shared_ptr<vfs::file>> changed_files_{};
+        std::vector<std::filesystem::path> created_files_{};
+
+        bool file_listed_{true};
+        bool load_complete_{true};
+        // bool cancel_{true};
+        // bool show_hidden_{true};
+        bool avoid_changes_{true};
+
+        i64 xhidden_count_{0};
+
+        std::mutex lock_;
 
         // Signals //
       public:

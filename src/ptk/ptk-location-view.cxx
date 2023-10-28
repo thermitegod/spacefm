@@ -192,9 +192,8 @@ update_change_detection()
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 if (file_browser)
                 {
-                    const auto cwd = file_browser->cwd();
                     // update current dir change detection
-                    file_browser->dir_->avoid_changes = vfs_volume_dir_avoid_changes(cwd);
+                    file_browser->dir_->update_avoid_changes();
                     // update thumbnail visibility
                     file_browser->show_thumbnails(
                         app_settings.show_thumbnail() ? app_settings.max_thumb_size() : 0);

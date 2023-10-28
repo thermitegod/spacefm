@@ -2611,7 +2611,7 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
 
         // count for .hidden files
         const u32 num_hid = file_browser->get_n_all_files() - num_vis;
-        const u32 num_hidx = file_browser->dir_ ? file_browser->dir_->xhidden_count : 0;
+        const u32 num_hidx = file_browser->dir_ ? file_browser->dir_->hidden_files() : 0;
         if (num_hid || num_hidx)
         {
             statusbar_txt.append(std::format("{:L} visible ({:L} hidden)  ({} / {})",

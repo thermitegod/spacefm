@@ -3152,7 +3152,7 @@ PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
 u64
 PtkFileBrowser::get_n_all_files() const noexcept
 {
-    return this->dir_ ? this->dir_->file_list.size() : 0;
+    return this->dir_ ? this->dir_->files().size() : 0;
 }
 
 u64
@@ -4525,7 +4525,7 @@ PtkFileBrowser::show_thumbnails(i32 max_file_size, bool large_icons) noexcept
     this->max_thumbnail_ = max_file_size;
     if (this->file_list_)
     {
-        if (!this->dir_ || this->dir_->avoid_changes)
+        if (!this->dir_ || this->dir_->avoid_changes())
         { // this will disable thumbnails if change detection is blacklisted on current device
             max_file_size = 0;
         }
