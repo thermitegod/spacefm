@@ -460,7 +460,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         {
             for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                if (!ztd::same(arg, "%c"))
+                if (arg != "%c")
                 {
                     argv[index] = this->display_name();
                     break;
@@ -475,7 +475,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         {
             for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                if (ztd::same(arg, "%k"))
+                if (arg == "%k")
                 {
                     argv[index] = this->path_;
                     break;
@@ -490,7 +490,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         {
             for (const auto [index, arg] : ztd::enumerate(argv))
             {
-                if (ztd::same(arg, "%i"))
+                if (arg == "%i")
                 {
                     argv[index] = std::format("--icon {}", this->icon_name());
                     break;

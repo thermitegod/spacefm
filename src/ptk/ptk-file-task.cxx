@@ -1267,7 +1267,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 
                 const auto current_file_filename = current_file.filename();
                 const auto current_dest_filename = current_dest.filename();
-                if (!ztd::same(current_file_filename.string(), current_dest_filename.string()))
+                if (current_file_filename != current_dest_filename)
                 {
                     // source and dest filenames differ, user renamed - show all
                     udest = current_dest;
@@ -2059,7 +2059,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, PtkFileTask* ptask)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
 #endif
 
-        if (new_name && old_name && !ztd::same(new_name.value(), old_name))
+        if (new_name && old_name && new_name.value() != old_name)
         {
             gtk_dialog_response(GTK_DIALOG(parent), ptk::file_task::response::rename);
         }
@@ -2079,7 +2079,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
     const auto new_name = multi_input_get_text(query_input);
     const char* old_name =
         static_cast<const char*>(g_object_get_data(G_OBJECT(query_input), "old_name"));
-    const bool can_rename = new_name && old_name && (!ztd::same(new_name.value(), old_name));
+    const bool can_rename = new_name && old_name && (new_name.value() != old_name);
 
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(query_input)));

@@ -235,7 +235,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     /* Special hack to add an icon chooser button when this dialog is called
      * to set icons - see xset_menu_cb() and set init "main_icon"
      * and xset_design_job */
-    if (ztd::same(title, "Set Icon") || ztd::same(title, "Set Window Icon"))
+    if (title == "Set Icon" || title == "Set Window Icon")
     {
         btn_icon_choose = GTK_BUTTON(gtk_button_new_with_mnemonic("C_hoose"));
         gtk_dialog_add_action_widget(GTK_DIALOG(dlg),

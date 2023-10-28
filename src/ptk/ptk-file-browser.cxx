@@ -1828,7 +1828,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
         const char* title = gtk_tree_view_column_get_title(col);
         for (const auto column : columns)
         {
-            if (ztd::same(title, column.title))
+            if (title == column.title)
             {
                 // save column position
                 xset_t set = xset_get_panel(file_browser->panel_, column.xset_name);
@@ -4717,7 +4717,7 @@ PtkFileBrowser::update_views() noexcept
                 const char* title = gtk_tree_view_column_get_title(col);
                 for (const auto [index, column] : ztd::enumerate(columns))
                 {
-                    if (ztd::same(title, column.title))
+                    if (title == column.title)
                     {
                         // get column width for this panel context
                         set = xset_get_panel_mode(p, column.xset_name, mode);
@@ -4845,7 +4845,7 @@ PtkFileBrowser::save_column_widths(GtkTreeView* view) noexcept
             const char* title = gtk_tree_view_column_get_title(col);
             for (const auto column : columns)
             {
-                if (ztd::same(title, column.title))
+                if (title == column.title)
                 {
                     // save column width for this panel context
                     const xset_t set = xset_get_panel_mode(p, column.xset_name, mode);
@@ -5018,7 +5018,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& filename,
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                if (ztd::same(file->name(), select_filename))
+                if (file->name() == select_filename)
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
@@ -5110,7 +5110,7 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
             if (file)
             {
-                if (ztd::same(file->name(), unselect_filename))
+                if (file->name() == unselect_filename)
                 {
                     GtkTreePath* tree_path = gtk_tree_model_get_path(GTK_TREE_MODEL(list), &it);
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
@@ -5791,11 +5791,11 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             xset_t set2;
             const std::string fullxname = std::format("panel{}_", panel_num);
             const std::string xname = ztd::removeprefix(set->name, fullxname);
-            if (ztd::same(xname, "show_hidden")) // shared key
+            if (xname == "show_hidden") // shared key
             {
                 this->show_hidden_files(xset_get_b_panel(this->panel_, xset::panel::show_hidden));
             }
-            else if (ztd::same(xname, "show"))
+            else if (xname == "show")
             { // main View|Panel N
                 show_panels_all_windows(nullptr, this->main_window_);
             }
@@ -5805,19 +5805,19 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
                 set2->b = set2->b == xset::b::xtrue ? xset::b::unset : xset::b::xtrue;
                 update_views_all_windows(nullptr, this);
             }
-            else if (ztd::same(xname, "list_detailed"))
+            else if (xname == "list_detailed")
             { // shared key
                 on_popup_list_detailed(nullptr, this);
             }
-            else if (ztd::same(xname, "list_icons"))
+            else if (xname == "list_icons")
             { // shared key
                 on_popup_list_icons(nullptr, this);
             }
-            else if (ztd::same(xname, "list_compact"))
+            else if (xname == "list_compact")
             { // shared key
                 on_popup_list_compact(nullptr, this);
             }
-            else if (ztd::same(xname, "list_large")) // shared key
+            else if (xname == "list_large") // shared key
             {
                 if (this->view_mode_ != ptk::file_browser::view_mode::icon_view)
                 {
@@ -5836,7 +5836,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
     }
     else if (set->name.starts_with("status_"))
     {
-        if (ztd::same(set->name, "status_border") || ztd::same(set->name, "status_text"))
+        if (set->name == "status_border" || set->name == "status_text")
         {
             on_status_effect_change(nullptr, this);
         }

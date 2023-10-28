@@ -147,7 +147,7 @@ vfs::mime_type::mime_type(const std::string_view type_name) : type_(type_name)
 {
     const auto icon_data = mime_type_get_desc_icon(this->type_);
     this->description_ = icon_data[1];
-    if (this->description_.empty() && !ztd::same(this->type_, XDG_MIME_TYPE_UNKNOWN))
+    if (this->description_.empty() && this->type_ != XDG_MIME_TYPE_UNKNOWN)
     {
         ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
         const auto mime_unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
@@ -212,7 +212,7 @@ vfs::mime_type::icon(bool big) noexcept
 
     GdkPixbuf* icon = nullptr;
 
-    if (ztd::same(this->type_, XDG_MIME_TYPE_DIRECTORY))
+    if (this->type_ == XDG_MIME_TYPE_DIRECTORY)
     {
         icon = vfs_load_icon(ICON_FULLCOLOR_FOLDER, icon_size);
         if (big)
@@ -274,7 +274,7 @@ vfs::mime_type::icon(bool big) noexcept
     if (!icon)
     {
         /* prevent endless recursion of XDG_MIME_TYPE_UNKNOWN */
-        if (!ztd::same(this->type_, XDG_MIME_TYPE_UNKNOWN))
+        if (this->type_ != XDG_MIME_TYPE_UNKNOWN)
         {
             /* FIXME: fallback to icon of parent mime-type */
             const auto unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);

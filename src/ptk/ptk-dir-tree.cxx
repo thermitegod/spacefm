@@ -877,7 +877,7 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
     PtkDirTreeNode* child;
     for (child = parent->children; child; child = child->next)
     {
-        if (child->file && ztd::same(child->file->name(), name))
+        if (child->file && child->file->name() == name)
         {
             return child;
         }

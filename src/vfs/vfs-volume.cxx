@@ -127,7 +127,7 @@ parse_mounts(bool report)
     for (const auto& mount : vfs::linux::procfs::mountinfo())
     {
         // mount where only a subtree of a filesystem is mounted?
-        const bool subdir_mount = !ztd::same(mount.root, "/");
+        const bool subdir_mount = mount.root != "/";
 
         if (mount.mount_point.empty())
         {
@@ -236,7 +236,7 @@ parse_mounts(bool report)
             if (found)
             {
                 // ztd::logger::debug("    found");
-                if (ztd::same(found->mount_points, devmount->mount_points))
+                if (found->mount_points == devmount->mount_points)
                 {
                     // ztd::logger::debug("    freed");
                     // no change to mount points, so remove from old list
@@ -363,25 +363,25 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
         }
 
         // print action
-        if (ztd::same(action, "add"))
+        if (action == "add")
         {
             ztd::logger::info("udev added:   {}", devnode);
         }
-        else if (ztd::same(action, "remove"))
+        else if (action == "remove")
         {
             ztd::logger::info("udev removed: {}", devnode);
         }
-        else if (ztd::same(action, "change"))
+        else if (action == "change")
         {
             ztd::logger::info("udev changed: {}", devnode);
         }
-        else if (ztd::same(action, "move"))
+        else if (action == "move")
         {
             ztd::logger::info("udev moved:   {}", devnode);
         }
 
         // add/remove volume
-        if (ztd::same(action, "add") || ztd::same(action, "change"))
+        if (action == "add" || action == "change")
         {
             const auto volume = vfs_volume_read_by_device(udevice);
             if (volume != nullptr)
@@ -389,7 +389,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
                 volume->device_added();
             }
         }
-        else if (ztd::same(action, "remove"))
+        else if (action == "remove")
         {
             vfs_volume_device_removed(udevice);
         }
@@ -598,7 +598,7 @@ vfs_volume_get_by_device(const std::string_view device_file)
             continue;
         }
 
-        if (ztd::same(device_file, volume->device_file()))
+        if (device_file == volume->device_file())
         {
             return volume;
         }

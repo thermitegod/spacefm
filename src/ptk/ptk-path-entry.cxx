@@ -228,7 +228,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
     const std::string cwd = get_cwd(entry);
     const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
-    if (old_dir && ztd::same(cwd, old_dir))
+    if (old_dir && cwd == old_dir)
     {
         return;
     }

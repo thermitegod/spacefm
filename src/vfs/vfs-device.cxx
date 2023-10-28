@@ -168,7 +168,7 @@ vfs::device::info_mount_points() noexcept
     {
         // ignore mounts where only a subtree of a filesystem is mounted
         // this function is only used for block devices.
-        if (ztd::same(mount.root, "/"))
+        if (mount.root == "/")
         {
             continue;
         }

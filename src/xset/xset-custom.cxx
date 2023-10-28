@@ -284,7 +284,7 @@ xset_find_custom(const std::string_view search)
         {
             // custom submenu or custom command - label or name matches?
             const std::string str = clean_label(set->menu_label.value(), true, false);
-            if (ztd::same(set->name, search) || ztd::same(str, label))
+            if (set->name == search || str == label)
             {
                 // match
                 return set;

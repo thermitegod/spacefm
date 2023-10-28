@@ -867,7 +867,7 @@ ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, const std::shared_pt
     for (GList* l = list->files; l; l = g_list_next(l))
     {
         const auto file2 = static_cast<vfs::file*>(l->data)->shared_from_this();
-        if (file1 == file2 || ztd::same(file1->name(), file2->name()))
+        if (file1 == file2 || file1->name() == file2->name())
         {
             it->stamp = list->stamp;
             it->user_data = l;

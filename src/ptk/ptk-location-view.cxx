@@ -401,7 +401,7 @@ ptk_location_view_open_block(const std::filesystem::path& block, bool new_tab)
             continue;
         }
 
-        if (ztd::same(volume->device_file(), canon.string()))
+        if (volume->device_file() == canon.string())
         {
             if (new_tab)
             {

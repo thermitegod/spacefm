@@ -281,7 +281,7 @@ vfs::dir::find_file(const std::filesystem::path& filename,
         {
             return file2;
         }
-        if (ztd::same(file2->name(), filename.string()))
+        if (file2->name() == filename.string())
         {
             return file2;
         }

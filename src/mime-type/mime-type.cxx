@@ -167,7 +167,7 @@ mime_type_get_by_file(const std::filesystem::path& filepath)
 
     const auto basename = filepath.filename();
     const std::string filename_type = mime_type_get_by_filename(basename, status);
-    if (!ztd::same(filename_type, XDG_MIME_TYPE_UNKNOWN))
+    if (filename_type != XDG_MIME_TYPE_UNKNOWN)
     {
         return filename_type;
     }
@@ -413,7 +413,7 @@ mime_type_is_text_file(const std::filesystem::path& file_path, const std::string
 
     if (!mime_type.empty())
     {
-        if (ztd::same(mime_type, "application/pdf"))
+        if (mime_type == "application/pdf")
         {
             // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
             return false;
@@ -478,7 +478,7 @@ mime_type_is_executable_file(const std::filesystem::path& file_path,
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    if (!ztd::same(file_mime_type, XDG_MIME_TYPE_UNKNOWN) &&
+    if (file_mime_type != XDG_MIME_TYPE_UNKNOWN &&
         (mime_type_is_subclass(file_mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
          mime_type_is_subclass(file_mime_type, "application/x-shellscript")))
     {
@@ -584,7 +584,7 @@ static bool
 mime_type_is_subclass(const std::string_view type, const std::string_view parent)
 {
     /* special case, the type specified is identical to the parent type. */
-    if (ztd::same(type, parent))
+    if (type == parent)
     {
         return true;
     }
@@ -594,7 +594,7 @@ mime_type_is_subclass(const std::string_view type, const std::string_view parent
         const std::vector<std::string> parents = cache->lookup_parents(type);
         for (const std::string_view p : parents)
         {
-            if (ztd::same(parent, p))
+            if (parent == p)
             {
                 return true;
             }

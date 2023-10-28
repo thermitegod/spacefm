@@ -236,7 +236,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
                 {
                     for (auto& r : removed)
                     {
-                        if (ztd::same(r.data(), a.data()))
+                        if (r == a)
                         {
                             // ztd::logger::info("                REMOVED");
                             is_removed = true;
@@ -374,7 +374,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
 
         for (const Glib::ustring& known_type : types)
         {
-            if (ztd::same(known_type.data(), type))
+            if (known_type.data() == type)
             {
                 // our mime-type is already found in the desktop file.
                 // no further check is needed
@@ -408,7 +408,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
     for (const std::string_view action : actions)
     {
         /* Try to match directly by desktop_id first */
-        if (is_desktop && ztd::same(action, desktop_id))
+        if (is_desktop && action == desktop_id)
         {
             found = true;
             break;
@@ -445,7 +445,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
 #elif (GTK_MAJOR_VERSION == 3)
             const Glib::ustring cmd2 = kf.get_string("Desktop Entry", "Exec");
 #endif
-            if (ztd::same(cmd.data(), cmd2.data())) /* 2 desktop files have same "Exec" */
+            if (cmd == cmd2) /* 2 desktop files have same "Exec" */
             {
                 if (is_desktop)
                 {
@@ -455,7 +455,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
                     const Glib::ustring name2 = kf.get_string("Desktop Entry", "Name");
 #endif
                     /* Then, check if the "Name" keys of 2 desktop files are the same. */
-                    if (ztd::same(name.data(), name2.data()))
+                    if (name == name2)
                     {
                         /* Both "Exec" and "Name" keys of the 2 desktop files are
                          *  totally the same. So, despite having different desktop id

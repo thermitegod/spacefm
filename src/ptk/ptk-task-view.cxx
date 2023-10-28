@@ -127,7 +127,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         const char* title = gtk_tree_view_column_get_title(col);
         for (const auto [index, value] : ztd::enumerate(task_names))
         {
-            if (ztd::same(title, task_titles.at(task_view_column(index))))
+            if (title == task_titles.at(task_view_column(index)))
             {
                 const xset_t set = xset_get(value);
                 // save column position

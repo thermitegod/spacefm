@@ -87,7 +87,7 @@ vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file, bool is
         req = queued_req;
         // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
         // If file with the same name is already in our queue
-        if (req->file == file || ztd::same(req->file->name(), file->name()))
+        if (req->file == file || req->file->name() == file->name())
         {
             break;
         }

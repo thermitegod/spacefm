@@ -630,7 +630,7 @@ vfs::file::is_desktop_entry() const noexcept
 bool
 vfs::file::is_unknown_type() const noexcept
 {
-    return ztd::same(this->mime_type_->type(), XDG_MIME_TYPE_UNKNOWN);
+    return this->mime_type_->type() == XDG_MIME_TYPE_UNKNOWN;
 }
 
 // full path of the file is required by this function

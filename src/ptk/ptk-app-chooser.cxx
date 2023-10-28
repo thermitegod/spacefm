@@ -123,7 +123,7 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
             if (file)
             {
                 const auto desktop = vfs::desktop::create(path);
-                if (ztd::same(file, desktop->name()))
+                if (file == desktop->name())
                 {
                     // already exists
                     std::free(file);
@@ -440,8 +440,8 @@ app_chooser_dialog(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mim
     gtk_box_pack_start(vbox, GTK_WIDGET(btn_set_as_default), false, false, 0);
     // Do not set default handler for directories and files with unknown type
     if (!show_default ||
-        /*  ztd::same(mime_type->type(), XDG_MIME_TYPE_UNKNOWN) || */
-        (ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY) && !dir_default))
+        /* mime_type->type() == XDG_MIME_TYPE_UNKNOWN || */
+        (mime_type->type() == XDG_MIME_TYPE_DIRECTORY && !dir_default))
     {
         gtk_widget_hide(GTK_WIDGET(btn_set_as_default));
     }
@@ -581,8 +581,8 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
             {
                 mime_type->set_default_action(app.value());
             }
-            else if (/* !ztd::same(mime_type->get_type(), XDG_MIME_TYPE_UNKNOWN) && */
-                     (dir_default || !ztd::same(mime_type->type(), XDG_MIME_TYPE_DIRECTORY)))
+            else if (/* mime_type->get_type() != XDG_MIME_TYPE_UNKNOWN && */
+                     (dir_default || mime_type->type() != XDG_MIME_TYPE_DIRECTORY))
             {
                 const std::string custom = mime_type->add_action(app.value());
                 app = custom;

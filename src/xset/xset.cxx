@@ -71,7 +71,7 @@ xset_get(const std::string_view name) noexcept
     for (const xset_t& set : xsets)
     { // check for existing xset
         assert(set != nullptr);
-        if (ztd::same(name, set->name))
+        if (name == set->name)
         {
             return set;
         }
@@ -119,7 +119,7 @@ xset_is(const std::string_view name) noexcept
     for (const xset_t& set : xsets)
     { // check for existing xset
         assert(set != nullptr);
-        if (ztd::same(name, set->name))
+        if (name == set->name)
         {
             return set;
         }
@@ -145,7 +145,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::b:
         {
-            if (ztd::same(value, "1"))
+            if (value == "1")
             {
                 set->b = xset::b::xtrue;
             }
@@ -251,7 +251,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         {
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
             // only save if custom or not default label
-            if (!set->lock || !ztd::same(set->menu_label.value(), value))
+            if (!set->lock || set->menu_label.value() != value)
             {
                 set->menu_label = value;
                 if (set->lock)
