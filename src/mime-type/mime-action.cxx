@@ -39,6 +39,8 @@
 #include <array>
 #include <vector>
 
+#include <algorithm>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -133,7 +135,7 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
     for (auto& r : removed)
     {
         const std::string rem = r;
-        if (ztd::contains(actions, rem))
+        if (std::ranges::contains(actions, rem))
         {
             ztd::remove(actions, rem);
             // ztd::logger::info("        ACTION-REMOVED {}", rem);
@@ -245,7 +247,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
                     }
                 }
                 const std::string app = a;
-                if (!is_removed && !ztd::contains(actions, app))
+                if (!is_removed && !std::ranges::contains(actions, app))
                 {
                     /* check for app existence */
                     if (mime_type_locate_desktop_file(app))
@@ -294,7 +296,7 @@ mime_type_get_actions(const std::string_view mime_type)
     if (check_default_app)
     {
         const auto& default_app = check_default_app.value();
-        if (!ztd::contains(actions, default_app))
+        if (!std::ranges::contains(actions, default_app))
         {
             // default app is not in the list, add it!
             actions.emplace_back(default_app);

@@ -351,7 +351,7 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
     }
     else /* The file does not exist */
     {
-        if (ztd::contains(this->files_, file))
+        if (std::ranges::contains(this->files_, file))
         {
             ztd::remove(this->files_, file);
             if (file)
@@ -509,7 +509,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename,
     const auto file_found = this->find_file(filename, file);
     if (file_found)
     {
-        if (!ztd::contains(this->changed_files_, file_found))
+        if (!std::ranges::contains(this->changed_files_, file_found))
         {
             this->changed_files_.emplace_back(file_found);
 
@@ -542,7 +542,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& filename,
     const auto file_found = this->find_file(filename, file);
     if (file_found)
     {
-        if (!ztd::contains(this->changed_files_, file_found))
+        if (!std::ranges::contains(this->changed_files_, file_found))
         {
             if (force)
             {

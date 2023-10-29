@@ -178,7 +178,7 @@ vfs::device::info_mount_points() noexcept
             continue;
         }
 
-        if (!ztd::contains(device_mount_points, mount.mount_point))
+        if (!std::ranges::contains(device_mount_points, mount.mount_point))
         {
             device_mount_points.emplace_back(mount.mount_point);
         }

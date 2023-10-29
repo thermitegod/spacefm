@@ -196,7 +196,7 @@ parse_mounts(bool report)
             }
         }
 
-        if (devmount && !ztd::contains(devmount->mounts, mount.mount_point))
+        if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point))
         {
             // ztd::logger::debug("    prepended");
             devmount->mounts.emplace_back(mount.mount_point);
@@ -673,16 +673,18 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
 
     const auto dev_change = xset_get_s(xset::name::dev_change).value_or("");
     const auto blacklisted = ztd::split(dev_change, " ");
-    for (const auto& blacklist : blacklisted)
-    {
-        if (ztd::contains(fstype, blacklist))
-        {
-            // ztd::logger::debug("    fstype matches blacklisted filesystem {}", blacklist);
-            return true;
-        }
-    }
-    // ztd::logger::debug("    fstype does not match any blacklisted filesystems");
-    return false;
+
+    const auto has_blacklisted = [fstype](const std::string_view blacklisted)
+    { return fstype.contains(blacklisted); };
+
+    const auto is_blacklisted = std::ranges::any_of(blacklisted, has_blacklisted);
+
+    // if (is_blacklisted)
+    // {
+    //     ztd::logger::debug("    fstype '{}' matches blacklisted filesystem", fstype);
+    // }
+
+    return is_blacklisted;
 }
 
 /*
