@@ -1900,8 +1900,7 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 #endif
 
     GtkBox* box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-    GtkWidget* icon =
-        gtk_image_new_from_icon_name(ICON_FULLCOLOR_FOLDER.data(), GtkIconSize::GTK_ICON_SIZE_MENU);
+    GtkWidget* icon = gtk_image_new_from_icon_name("folder", GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(box, icon, false, false, 4);
 
     const auto& cwd = file_browser->cwd();

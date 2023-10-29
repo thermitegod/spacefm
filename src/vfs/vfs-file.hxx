@@ -155,6 +155,7 @@ namespace vfs
 
         void load_special_info() noexcept;
 
-        const std::string_view special_directory_get_icon_name() const noexcept;
+        const std::string_view
+        special_directory_get_icon_name(const bool symbolic = false) const noexcept;
     };
 } // namespace vfs

@@ -214,7 +214,7 @@ vfs::mime_type::icon(bool big) noexcept
 
     if (this->type_ == XDG_MIME_TYPE_DIRECTORY)
     {
-        icon = vfs_load_icon(ICON_FULLCOLOR_FOLDER, icon_size);
+        icon = vfs_load_icon("folder", icon_size);
         if (big)
         {
             this->big_icon_ = icon;

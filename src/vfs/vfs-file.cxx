@@ -207,49 +207,47 @@ vfs::file::reload_mime_type() noexcept
 }
 
 const std::string_view
-vfs::file::special_directory_get_icon_name() const noexcept
+vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 {
-    const bool symbolic = this->is_symlink();
-
     if (vfs::user_dirs->home_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_HOME : ICON_FULLCOLOR_FOLDER_HOME;
+        return (symbolic) ? "user-home-symbolic" : "user-home";
     }
     else if (vfs::user_dirs->desktop_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_DESKTOP : ICON_FULLCOLOR_FOLDER_DESKTOP;
+        return (symbolic) ? "user-desktop-symbolic" : "user-desktop";
     }
     else if (vfs::user_dirs->documents_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_DOCUMENTS : ICON_FULLCOLOR_FOLDER_DOCUMENTS;
+        return (symbolic) ? "folder-documents-symbolic" : "folder-documents";
     }
     else if (vfs::user_dirs->download_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_DOWNLOAD : ICON_FULLCOLOR_FOLDER_DOWNLOAD;
+        return (symbolic) ? "folder-download-symbolic" : "folder-download";
     }
     else if (vfs::user_dirs->music_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_MUSIC : ICON_FULLCOLOR_FOLDER_MUSIC;
+        return (symbolic) ? "folder-music-symbolic" : "folder-music";
     }
     else if (vfs::user_dirs->pictures_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_PICTURES : ICON_FULLCOLOR_FOLDER_PICTURES;
+        return (symbolic) ? "folder-pictures-symbolic" : "folder-pictures";
     }
     else if (vfs::user_dirs->public_share_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_PUBLIC_SHARE : ICON_FULLCOLOR_FOLDER_PUBLIC_SHARE;
+        return (symbolic) ? "folder-publicshare-symbolic" : "folder-publicshare";
     }
     else if (vfs::user_dirs->template_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_TEMPLATES : ICON_FULLCOLOR_FOLDER_TEMPLATES;
+        return (symbolic) ? "folder-templates-symbolic" : "folder-templates";
     }
     else if (vfs::user_dirs->videos_dir() == this->path_)
     {
-        return (symbolic) ? ICON_FOLDER_VIDEOS : ICON_FULLCOLOR_FOLDER_VIDEOS;
+        return (symbolic) ? "folder-videos-symbolic" : "folder-videos";
     }
     else
     {
-        return (symbolic) ? ICON_FOLDER : ICON_FULLCOLOR_FOLDER;
+        return (symbolic) ? "folder-symbolic" : "folder";
     }
 }
 

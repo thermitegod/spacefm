@@ -2027,7 +2027,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 
             if (!image)
             {
-                image = xset_get_image(icon_name ? icon_name.value() : ICON_FULLCOLOR_FOLDER,
+                image = xset_get_image(icon_name ? icon_name.value() : "folder",
                                        (GtkIconSize)icon_size);
             }
 
