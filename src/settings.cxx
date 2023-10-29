@@ -32,6 +32,8 @@
 
 #include <memory>
 
+#include <ranges>
+
 #include <cassert>
 
 #include <gtkmm.h>
@@ -352,7 +354,7 @@ save_settings()
                     if (pages) // panel was shown
                     {
                         std::string tabs;
-                        for (const auto i : ztd::range(pages))
+                        for (const auto i : std::views::iota(0z, pages))
                         {
                             PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), i));
@@ -2233,7 +2235,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
                 stop_b4 = default_tools.size();
             }
             set_target = set_child;
-            for (const auto i : ztd::range(stop_b4))
+            for (const auto i : std::views::iota(0z, stop_b4))
             {
                 set = xset_new_builtin_toolitem(default_tools.at(i));
                 xset_custom_insert_after(set_target, set);

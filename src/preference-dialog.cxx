@@ -239,7 +239,7 @@ namespace preference::large_icons
             {
                 GtkNotebook* notebook = window->get_panel_notebook(p);
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                for (const auto i : ztd::range(total_pages))
+                for (const auto i : std::views::iota(0z, total_pages))
                 {
                     PtkFileBrowser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -361,7 +361,7 @@ namespace preference::small_icons
             {
                 GtkNotebook* notebook = window->get_panel_notebook(p);
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                for (const auto i : ztd::range(total_pages))
+                for (const auto i : std::views::iota(0z, total_pages))
                 {
                     PtkFileBrowser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -515,7 +515,7 @@ namespace preference::single_click
                 {
                     GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                    for (const auto i : ztd::range(total_pages))
+                    for (const auto i : std::views::iota(0z, total_pages))
                     {
                         PtkFileBrowser* file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -555,7 +555,7 @@ namespace preference::hover_selects
                 {
                     GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                    for (const auto i : ztd::range(total_pages))
+                    for (const auto i : std::views::iota(0z, total_pages))
                     {
                         PtkFileBrowser* file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -745,7 +745,7 @@ namespace preference::hide_close_tab
                 {
                     GtkNotebook* notebook = window->get_panel_notebook(p);
                     const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                    for (const auto i : ztd::range(total_pages))
+                    for (const auto i : std::views::iota(0z, total_pages))
                     {
                         PtkFileBrowser* file_browser =
                             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

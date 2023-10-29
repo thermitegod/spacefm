@@ -22,6 +22,7 @@
 
 #include <map>
 
+#include <ranges>
 #include <algorithm>
 
 #include <memory>
@@ -329,7 +330,7 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     PtkDirTreeNode* node = tree->root;
     assert(node != nullptr);
 
-    for (const auto i : ztd::range(depth))
+    for (const auto i : std::views::iota(0z, depth))
     {
         node = get_nth_node(node, indices[i]);
         if (!node)

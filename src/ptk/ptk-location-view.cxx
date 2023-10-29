@@ -27,6 +27,8 @@
 
 #include <memory>
 
+#include <ranges>
+
 #include <glibmm.h>
 
 #include <magic_enum.hpp>
@@ -186,7 +188,7 @@ update_change_detection()
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
             const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : ztd::range(num_pages))
+            for (const auto i : std::views::iota(0z, num_pages))
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));

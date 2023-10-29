@@ -39,6 +39,7 @@
 #include <array>
 #include <vector>
 
+#include <ranges>
 #include <algorithm>
 
 #include <gtkmm.h>
@@ -168,7 +169,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
     };
 
     // ztd::logger::info("get_actions( {}/, {} )", dir, mime_type);
-    for (const auto n : ztd::range(names.size()))
+    for (const auto n : std::views::iota(0uz, names.size()))
     {
         const auto path = dir / names.at(n);
         // ztd::logger::info( "    {}", path);

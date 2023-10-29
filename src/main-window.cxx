@@ -28,6 +28,8 @@
 
 #include <functional>
 
+#include <ranges>
+
 #include <malloc.h>
 
 #include <cassert>
@@ -288,7 +290,7 @@ main_window_rubberband_all()
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
             const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : ztd::range(num_pages))
+            for (const auto i : std::views::iota(0z, num_pages))
             {
                 PtkFileBrowser* a_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -311,7 +313,7 @@ main_window_refresh_all()
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
             const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : ztd::range(num_pages))
+            for (const auto i : std::views::iota(0z, num_pages))
             {
                 PtkFileBrowser* a_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -337,7 +339,7 @@ main_window_close_all_invalid_tabs()
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
             const i32 pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto cur_tabx : ztd::range(pages))
+            for (const auto cur_tabx : std::views::iota(0z, pages))
             {
                 PtkFileBrowser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
@@ -378,7 +380,7 @@ main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser)
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
             const i32 pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto cur_tabx : ztd::range(pages))
+            for (const auto cur_tabx : std::views::iota(0z, pages))
             {
                 PtkFileBrowser* a_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
@@ -437,7 +439,7 @@ main_window_reload_thumbnails_all_windows()
         {
             GtkNotebook* notebook = window->get_panel_notebook(p);
             const i32 num_pages = gtk_notebook_get_n_pages(notebook);
-            for (const auto i : ztd::range(num_pages))
+            for (const auto i : std::views::iota(0z, num_pages))
             {
                 PtkFileBrowser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
@@ -3211,7 +3213,7 @@ main_write_exports(const std::shared_ptr<vfs::file_task>& vtask, const std::stri
 
         // tabs
         const i32 num_pages = gtk_notebook_get_n_pages(main_window->get_panel_notebook(p));
-        for (const auto i : ztd::range(num_pages))
+        for (const auto i : std::views::iota(0z, num_pages))
         {
             PtkFileBrowser* t_browser = PTK_FILE_BROWSER_REINTERPRET(
                 gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), i));

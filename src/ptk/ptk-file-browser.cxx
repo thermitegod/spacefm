@@ -814,7 +814,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEvent* event, PtkFileBrowser* f
                 xset::name::status_hide,
             };
 
-            for (const auto i : ztd::range(setnames.size()))
+            for (const auto i : std::views::iota(0uz, setnames.size()))
             {
                 if (!xset_get_b(setnames.at(i)))
                 {
@@ -1820,7 +1820,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
         return;
     }
 
-    for (const auto i : ztd::range(columns.size()))
+    for (const auto i : std::views::iota(0uz, columns.size()))
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
         if (!col)
@@ -4706,7 +4706,7 @@ PtkFileBrowser::update_views() noexcept
         if (GTK_IS_TREE_VIEW(this->folder_view_))
         {
             // ztd::logger::info("    set widths   mode = {}", mode);
-            for (const auto i : ztd::range(columns.size()))
+            for (const auto i : std::views::iota(0uz, columns.size()))
             {
                 GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(this->folder_view_),
                                                                   static_cast<i32>(i));
@@ -4835,7 +4835,7 @@ PtkFileBrowser::save_column_widths(GtkTreeView* view) noexcept
         const panel_t p = this->panel_;
         const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
         // ztd::logger::debug("save_columns  fb={} (panel {})  mode = {}", fmt::ptr(this), p, mode);
-        for (const auto i : ztd::range(columns.size()))
+        for (const auto i : std::views::iota(0uz, columns.size()))
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
             if (!col)

@@ -24,6 +24,8 @@
 
 #include <span>
 
+#include <ranges>
+
 #include <fcntl.h>
 
 #include <glibmm.h>
@@ -262,7 +264,7 @@ MimeCache::lookup_glob(const std::string_view filename, i32* glob_len)
     /* entry size is changed in mime.cache 1.1 */
     static constexpr usize entry_size = 12;
 
-    for (const auto i : ztd::range(this->n_globs))
+    for (const auto i : std::views::iota(0uz, this->n_globs))
     {
         (void)i;
 
@@ -296,7 +298,7 @@ MimeCache::lookup_parents(const std::string_view mime_type)
 
     result.reserve(n);
 
-    for (const auto i : ztd::range(n))
+    for (const auto i : std::views::iota(0uz, n))
     {
         const u32 parent_off = VAL32(found_parents, i * 4);
         const std::string parent = this->buffer + parent_off;
@@ -518,7 +520,7 @@ MimeCache::lookup_reverse_suffix_nodes(const char* buf, const char* nodes, u32 n
     const u32 uchar = suffix ? g_unichar_tolower(g_utf8_get_char(suffix)) : 0;
     // ztd::logger::debug("{}: suffix= '{}'", name, suffix);
 
-    for (const auto i : ztd::range(n))
+    for (const auto i : std::views::iota(0uz, n))
     {
         const char* node = nodes + i * 12;
         const u32 ch = VAL32(node, 0);

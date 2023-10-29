@@ -119,7 +119,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         return;
     }
 
-    for (const auto i : ztd::range(task_names.size()))
+    for (const auto i : std::views::iota(0uz, task_names.size()))
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(view), static_cast<i32>(i));
         if (!col)
@@ -1429,7 +1429,7 @@ main_task_view_new(MainWindow* main_window)
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(view), false);
 
     // Columns
-    for (const auto i : ztd::range(task_names.size()))
+    for (const auto i : std::views::iota(0uz, task_names.size()))
     {
         col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -1440,7 +1440,7 @@ main_task_view_new(MainWindow* main_window)
         i64 j = 0;
         for (const auto [index, value] : std::views::enumerate(task_names))
         {
-            if (xset_get_int(value, xset::var::x) == i)
+            if (xset_get_int(value, xset::var::x) == static_cast<i32>(i))
             {
                 // column width
                 i32 width = xset_get_int(value, xset::var::y);

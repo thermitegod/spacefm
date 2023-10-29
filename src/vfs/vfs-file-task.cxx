@@ -28,6 +28,8 @@
 
 #include <memory>
 
+#include <ranges>
+
 #include <fcntl.h>
 #include <utime.h>
 
@@ -1100,7 +1102,8 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
 
             const auto new_chmod_actions = chmod_actions.value();
 
-            for (const auto i : ztd::range(magic_enum::enum_count<vfs::file_task::chmod_action>()))
+            for (const auto i :
+                 std::views::iota(0uz, magic_enum::enum_count<vfs::file_task::chmod_action>()))
             {
                 if (new_chmod_actions[i] == 2)
                 { /* Do not change */
