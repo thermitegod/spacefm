@@ -217,7 +217,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
     PtkFileBrowser* file_browser = main_window->current_file_browser();
-    const auto cwd = file_browser->cwd();
+    const auto& cwd = file_browser->cwd();
 
     const std::vector<std::filesystem::path> search_dirs{cwd};
 
@@ -1901,7 +1901,7 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
         gtk_image_new_from_icon_name(ICON_FULLCOLOR_FOLDER.data(), GtkIconSize::GTK_ICON_SIZE_MENU);
     gtk_box_pack_start(box, icon, false, false, 4);
 
-    const auto cwd = file_browser->cwd();
+    const auto& cwd = file_browser->cwd();
     GtkLabel* label = GTK_LABEL(gtk_label_new(cwd.filename().c_str()));
 
     if (cwd.string().size() < 30)
@@ -2232,7 +2232,7 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
     }
     else
     {
-        const auto cwd = file_browser->cwd();
+        const auto& cwd = file_browser->cwd();
         if (!cwd.empty())
         {
             disp_path = cwd;
@@ -2386,7 +2386,7 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
 {
     assert(file_browser != nullptr);
 
-    const auto cwd = file_browser->cwd();
+    const auto& cwd = file_browser->cwd();
     if (cwd.empty())
     {
         return;
@@ -3130,7 +3130,7 @@ main_write_exports(const vfs::file_task& vtask, const std::string_view value)
         }
 
         // cwd
-        const auto cwd = a_browser->cwd();
+        const auto& cwd = a_browser->cwd();
         buf.append(std::format("set fm_pwd_panel[{}] {}\n", p, ztd::shell::quote(cwd.string())));
         buf.append(std::format("set fm_tab_panel[{}] {}\n", p, current_page + 1));
 

@@ -1181,7 +1181,7 @@ PtkFileBrowser::update_tab_label() noexcept
     // TODO: Change the icon
     // GtkWidget* icon = GTK_WIDGET(g_object_get_data(G_OBJECT(box), "icon"));
 
-    const auto cwd = this->cwd();
+    const auto& cwd = this->cwd();
     const std::string name = std::filesystem::equivalent(cwd, "/") ? "/" : cwd.filename();
     gtk_label_set_text(label, name.data());
     if (name.size() < 30)
@@ -1497,7 +1497,6 @@ show_popup_menu(PtkFileBrowser* file_browser, GdkEvent* event)
 {
     (void)event;
 
-    const auto cwd = file_browser->cwd();
     const auto selected_files = file_browser->selected_files();
 
     GtkWidget* popup = ptk_file_menu_new(file_browser, selected_files);
@@ -3115,7 +3114,7 @@ PtkFileBrowser::chdir(const std::filesystem::path& folder_path,
 
     this->update_tab_label();
 
-    const auto cwd = this->cwd();
+    const auto& cwd = this->cwd();
     if (!this->inhibit_focus_)
     {
 #if (GTK_MAJOR_VERSION == 4)
@@ -3141,7 +3140,7 @@ PtkFileBrowser::cwd() const noexcept
 void
 PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
 {
-    const auto cwd = this->cwd();
+    const auto& cwd = this->cwd();
     const auto canon = std::filesystem::canonical(path);
     if (std::filesystem::equivalent(canon, cwd) || std::filesystem::equivalent(canon, path))
     {
@@ -4158,7 +4157,7 @@ void
 PtkFileBrowser::select_last() noexcept
 {
     // ztd::logger::debug("select_last");
-    const auto cwd = this->cwd();
+    const auto& cwd = this->cwd();
     if (this->selection_history->selection_history.contains(cwd))
     {
         this->select_files(this->selection_history->selection_history.at(cwd));
@@ -4948,7 +4947,7 @@ PtkFileBrowser::rebuild_toolbars() noexcept
     if (this->toolbar)
     {
         rebuild_toolbox(nullptr, this);
-        const auto cwd = this->cwd();
+        const auto& cwd = this->cwd();
 #if (GTK_MAJOR_VERSION == 4)
         gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
 #elif (GTK_MAJOR_VERSION == 3)
@@ -4966,7 +4965,7 @@ PtkFileBrowser::rebuild_toolbars() noexcept
 void
 PtkFileBrowser::update_selection_history() noexcept
 {
-    const auto cwd = this->cwd();
+    const auto& cwd = this->cwd();
     // ztd::logger::debug("selection history: {}", cwd.string());
     this->selection_history->selection_history.contains(cwd);
     {
@@ -5188,7 +5187,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
 {
     // change to dir seek_dir if needed; select first dir or else file with
     // prefix seek_name
-    const auto cwd = this->cwd();
+    const auto& cwd = this->cwd();
 
     if (!std::filesystem::equivalent(cwd, seek_dir))
     {

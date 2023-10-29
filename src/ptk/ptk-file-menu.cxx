@@ -1006,7 +1006,7 @@ ptk_file_menu_new(PtkFileBrowser* browser, const std::span<const vfs::file_info>
         file_path = file->path();
     }
 
-    const auto cwd = browser->cwd();
+    const auto& cwd = browser->cwd();
 
     const auto data = new PtkFileMenu;
     data->cwd = cwd;
@@ -2694,7 +2694,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
     // ztd::logger::debug("ptk_file_menu_action()={}", set->name);
 
     // setup data
-    const auto cwd = browser->cwd();
+    const auto& cwd = browser->cwd();
     const auto sel_files = browser->selected_files();
 
     vfs::file_info file = nullptr;
