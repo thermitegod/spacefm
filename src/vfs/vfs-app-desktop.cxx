@@ -24,7 +24,6 @@
 
 #include <span>
 
-#include <array>
 #include <vector>
 
 #include <map>
@@ -366,9 +365,7 @@ vfs::desktop::supported_mime_types() const noexcept
 bool
 vfs::desktop::open_multiple_files() const noexcept
 {
-    static constexpr std::array<const std::string_view, 2> keys{"%U", "%F"};
-
-    return ztd::contains(this->desktop_entry_.exec, keys);
+    return this->desktop_entry_.exec.contains("%F") || this->desktop_entry_.exec.contains("%U");
 }
 
 const std::optional<std::vector<std::vector<std::string>>>
@@ -381,19 +378,16 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
 
     bool add_files = false;
 
-    const auto has_key = [this](const std::string_view key)
-    { return this->desktop_entry_.exec.ends_with(key); };
-
-    static constexpr std::array<const std::string_view, 2> open_files_keys{"%F", "%U"};
-    if (ztd::contains(this->desktop_entry_.exec, open_files_keys))
+    if (this->desktop_entry_.exec.contains("%F") || this->desktop_entry_.exec.contains("%U"))
     {
         // %F and %U must always be at the end
-        if (!std::ranges::any_of(open_files_keys, has_key))
-        {
-            ztd::logger::error("Malformed desktop file, %F and %U must always be at the end: {}",
-                               this->path_.string());
-            return std::nullopt;
-        }
+        // if (!this->desktop_entry_.exec.ends_with("%F") ||
+        //     !this->desktop_entry_.exec.ends_with("%U"))
+        // {
+        //     ztd::logger::error("Malformed desktop file, %F and %U must always be at the end: {}",
+        //                        this->path_.string());
+        //     return std::nullopt;
+        // }
 
         for (auto& argv : commands)
         {
@@ -414,16 +408,16 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         add_files = true;
     }
 
-    static constexpr std::array<const std::string_view, 2> open_file_keys{"%f", "%u"};
-    if (ztd::contains(this->desktop_entry_.exec, open_file_keys))
+    if (this->desktop_entry_.exec.contains("%f") || this->desktop_entry_.exec.contains("%e"))
     {
         // %f and %u must always be at the end
-        if (!std::ranges::any_of(open_file_keys, has_key))
-        {
-            ztd::logger::error("Malformed desktop file, %f and %u must always be at the end: {}",
-                               this->path_.string());
-            return std::nullopt;
-        }
+        // if (!this->desktop_entry_.exec.ends_with("%f") ||
+        //     !this->desktop_entry_.exec.ends_with("%u"))
+        // {
+        //     ztd::logger::error("Malformed desktop file, %f and %u must always be at the end: {}",
+        //                        this->path_.string());
+        //     return std::nullopt;
+        // }
 
         // desktop files with these keys can only open one file.
         // spawn multiple copies of the program for each selected file
@@ -454,7 +448,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
                            this->path_.string());
     }
 
-    if (ztd::contains(this->desktop_entry_.exec, "%c"))
+    if (this->desktop_entry_.exec.contains("%c"))
     {
         for (auto& argv : commands)
         {
@@ -469,7 +463,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         }
     }
 
-    if (ztd::contains(this->desktop_entry_.exec, "%k"))
+    if (this->desktop_entry_.exec.contains("%k"))
     {
         for (auto& argv : commands)
         {
@@ -484,7 +478,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
         }
     }
 
-    if (ztd::contains(this->desktop_entry_.exec, "%i"))
+    if (this->desktop_entry_.exec.contains("%i"))
     {
         for (auto& argv : commands)
         {

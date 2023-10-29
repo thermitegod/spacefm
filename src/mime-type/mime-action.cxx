@@ -619,7 +619,7 @@ locate_desktop_file(const std::filesystem::path& dir, const std::string_view des
     // mime-mime-mime.desktop, mime/mime-mime.desktop, or mime/mime/mime.desktop.
     // not supported is mime-mime/mime.desktop
     std::string new_desktop_id = desktop_id.data();
-    while (ztd::contains(new_desktop_id, "-"))
+    while (new_desktop_id.contains('-'))
     {
         new_desktop_id = ztd::replace(new_desktop_id, "-", "/", 1);
         auto new_desktop_path = dir / "applications" / new_desktop_id;

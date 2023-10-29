@@ -188,7 +188,7 @@ activate(GtkApplication* app, void* user_data)
                 open_file(real_path);
             }
         }
-        else if ((!file.string().starts_with('/') && ztd::contains(file.string(), ":/")) ||
+        else if ((!file.string().starts_with('/') && file.string().contains(":/")) ||
                  file.string().starts_with("//"))
         {
             main_window_open_network(main_window, file.string(), true);

@@ -2263,8 +2263,7 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
         fmt = "%d";
     }
 
-    static constexpr std::array<const std::string_view, 4> keys{"%t", "%T", "%p", "%P"};
-    if (ztd::contains(fmt, keys))
+    if (fmt.contains("%t") || fmt.contains("%T") || fmt.contains("%p") || fmt.contains("%P"))
     {
         // get panel/tab info
         const auto counts = main_window_get_counts(file_browser);
@@ -2277,15 +2276,15 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
         fmt = ztd::replace(fmt, "%p", std::to_string(this->curpanel));
         fmt = ztd::replace(fmt, "%P", std::to_string(panel_count));
     }
-    if (ztd::contains(fmt, "*") && !this->is_main_tasks_running())
+    if (fmt.contains('*') && !this->is_main_tasks_running())
     {
         fmt = ztd::replace(fmt, "*", "");
     }
-    if (ztd::contains(fmt, "%n"))
+    if (fmt.contains("%n"))
     {
         fmt = ztd::replace(fmt, "%n", disp_name);
     }
-    if (orig_fmt && ztd::contains(orig_fmt.value(), "%d"))
+    if (orig_fmt && orig_fmt.value().contains("%d"))
     {
         fmt = ztd::replace(fmt, "%d", disp_path.string());
     }

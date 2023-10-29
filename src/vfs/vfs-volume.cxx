@@ -707,7 +707,7 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device)
     this->ever_mounted_ = false;
     if (!device->mount_points().empty())
     {
-        if (ztd::contains(device->mount_points(), ","))
+        if (device->mount_points().contains(','))
         {
             this->mount_point_ = ztd::partition(device->mount_points(), ",")[0];
         }

@@ -457,7 +457,7 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
 
     GtkWidget* item;
 
-    if (ztd::contains(label, "\\_"))
+    if (label.contains("\\_"))
     {
         // allow escape of underscore
         const std::string str = clean_label(label, false, false);

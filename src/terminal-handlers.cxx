@@ -72,7 +72,7 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal)
         return {};
     }
 
-    if (ztd::contains(terminal, "/"))
+    if (terminal.contains("/"))
     {
         const auto terminal_name = ztd::rpartition(terminal, "/")[2];
         if (this->handlers.contains(terminal_name))

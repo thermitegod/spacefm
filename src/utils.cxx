@@ -159,7 +159,7 @@ clean_label(const std::string_view menu_label, bool kill_special, bool escape) n
 
     std::string new_menu_label = menu_label.data();
 
-    if (ztd::contains(menu_label, "\\_"))
+    if (menu_label.contains("\\_"))
     {
         new_menu_label = ztd::replace(new_menu_label, "\\_", "@UNDERSCORE@");
         new_menu_label = ztd::replace(new_menu_label, "_", "");

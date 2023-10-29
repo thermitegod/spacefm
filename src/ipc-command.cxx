@@ -189,7 +189,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             i32 width = 0;
 
             // size format '620x480'
-            if (!ztd::contains(value, "x"))
+            if (!value.contains('x'))
             {
                 return {SOCKET_INVALID, std::format("invalid size format {}", value)};
             }

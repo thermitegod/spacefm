@@ -120,7 +120,7 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
         return false;
     }
 
-    if (ztd::contains(path.string(), "Trash"))
+    if (path.string().contains("Trash"))
     {
         if (path.string().ends_with("/Trash") ||
             path.string().ends_with(std::format("/.Trash-{}", getuid())))

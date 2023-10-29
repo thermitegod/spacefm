@@ -545,7 +545,7 @@ on_address_bar_activate(GtkWidget* entry, PtkFileBrowser* file_browser)
     gtk_editable_select_region(GTK_EDITABLE(entry), 0, 0); // clear selection
 
     // network path
-    if ((!text.starts_with('/') && ztd::contains(text, ":/")) || text.starts_with("//"))
+    if ((!text.starts_with('/') && text.contains(":/")) || text.starts_with("//"))
     {
         save_command_history(GTK_ENTRY(entry));
         ptk_location_view_mount_network(file_browser, text, false, false);
@@ -1862,12 +1862,10 @@ on_folder_view_destroy(GtkTreeView* view, PtkFileBrowser* file_browser)
 }
 
 static bool
-folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeIter* it,
+folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTreeIter* it,
                          void* search_data)
 {
     (void)search_data;
-    char* name;
-    char* lower_name = nullptr;
     bool no_match;
 
     const auto column = ptk::file_list::column(col);
@@ -1876,22 +1874,24 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
         return true;
     }
 
-    gtk_tree_model_get(model, it, col, &name, -1);
+    char* c_name;
 
-    if (!name || !key)
+    gtk_tree_model_get(model, it, col, &c_name, -1);
+    if (!c_name || !c_key)
     {
         return true;
     }
 
-    char* lower_key = g_utf8_strdown(key, -1);
-    if (ztd::same(lower_key, key))
+    std::string key = c_key;
+    std::string name = c_name;
+
+    if (ztd::lower(key) == key)
     {
         // key is all lowercase so do icase search
-        lower_name = g_utf8_strdown(name, -1);
-        name = lower_name;
+        name = ztd::lower(name);
     }
 
-    if (ztd::contains(key, "*") || ztd::contains(key, "?"))
+    if (key.contains("*") || key.contains('?'))
     {
         const std::string key2 = std::format("*{}*", key);
         no_match = !ztd::fnmatch(key2, name);
@@ -1899,7 +1899,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
     else
     {
         const bool end = ztd::endswith(key, "$");
-        bool start = !end && (std::strlen(key) < 3);
+        bool start = !end && (key.size() < 3);
         char* key2 = ztd::strdup(key);
         char* keyp = key2;
         if (key[0] == '^')
@@ -1913,24 +1913,22 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* key, GtkTreeI
         }
         if (start && end)
         {
-            no_match = !ztd::contains(name, keyp);
+            no_match = !name.contains(keyp);
         }
         else if (start)
         {
-            no_match = !ztd::startswith(name, keyp);
+            no_match = !name.starts_with(keyp);
         }
         else if (end)
         {
-            no_match = !ztd::endswith(name, keyp);
+            no_match = !name.ends_with(keyp);
         }
         else
         {
-            no_match = !ztd::contains(name, key);
+            no_match = !name.contains(key);
         }
         std::free(key2);
     }
-    std::free(lower_name);
-    std::free(lower_key);
     return no_match; // return false for match
 }
 

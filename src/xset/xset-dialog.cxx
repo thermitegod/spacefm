@@ -65,8 +65,8 @@ on_multi_input_insert(GtkTextBuffer* buf)
     // buffer contains linefeeds?
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
-    const char* all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-    if (!ztd::contains(all, "\n"))
+    const std::string all = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    if (!all.contains("\n"))
     {
         return;
     }
@@ -290,7 +290,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                 gtk_text_buffer_get_start_iter(buf, &siter);
                 gtk_text_buffer_get_end_iter(buf, &iter);
                 ans = gtk_text_buffer_get_text(buf, &siter, &iter, false);
-                if (ztd::contains(ans, "\n"))
+                if (ans.contains("\n"))
                 {
                     ptk_show_error(GTK_WINDOW(dlgparent),
                                    "Error",

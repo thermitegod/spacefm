@@ -254,7 +254,7 @@ vfs::mime_type::icon(bool big) noexcept
     if (!icon)
     {
         // guess icon
-        if (ztd::contains(this->type_, "/"))
+        if (this->type_.contains('/'))
         {
             // convert mime-type foo/bar to foo-bar
             const std::string icon_name = ztd::replace(this->type_, "/", "-");

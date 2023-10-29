@@ -2256,7 +2256,7 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     {
         // ext = ztd::strip(text);
         ext = ztd::rpartition(ext, "/")[2];
-        if (ztd::contains(ext, "."))
+        if (ext.contains('.'))
         {
             ext = ztd::rpartition(ext, ".")[2];
         }
@@ -2935,8 +2935,9 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
             GtkTextIter siter;
             gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
             gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-            const char* text = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
-            if (ztd::contains(text, "\n"))
+            const std::string text =
+                gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
+            if (text.contains("\n"))
             {
                 ptk_show_error(GTK_WINDOW(mset->dlg), "Error", "Path contains linefeeds");
                 continue;
