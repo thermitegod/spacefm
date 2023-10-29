@@ -18,6 +18,8 @@
 
 #include <array>
 
+#include <ranges>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -1057,8 +1059,8 @@ namespace preference::terminal
     create_combobox()
     {
         GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-        for (const auto [index, terminal] :
-             ztd::enumerate(terminal_handlers->get_supported_terminal_names()))
+        const auto terminals = terminal_handlers->get_supported_terminal_names();
+        for (const auto [index, terminal] : std::views::enumerate(terminals))
         {
             GtkTreeIter iter;
             gtk_list_store_append(model, &iter);

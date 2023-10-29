@@ -26,6 +26,8 @@
 
 #include <optional>
 
+#include <ranges>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -125,7 +127,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
             return;
         }
         const char* title = gtk_tree_view_column_get_title(col);
-        for (const auto [index, value] : ztd::enumerate(task_names))
+        for (const auto [index, value] : std::views::enumerate(task_names))
         {
             if (title == task_titles.at(task_view_column(index)))
             {
@@ -1435,8 +1437,8 @@ main_task_view_new(MainWindow* main_window)
         gtk_tree_view_column_set_min_width(col, 20);
 
         // column order
-        i32 j = 0;
-        for (const auto [index, value] : ztd::enumerate(task_names))
+        i64 j = 0;
+        for (const auto [index, value] : std::views::enumerate(task_names))
         {
             if (xset_get_int(value, xset::var::x) == i)
             {

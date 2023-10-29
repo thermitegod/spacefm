@@ -32,6 +32,8 @@
 
 #include <memory>
 
+#include <ranges>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -452,7 +454,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
     {
         for (auto& argv : commands)
         {
-            for (const auto [index, arg] : ztd::enumerate(argv))
+            for (const auto [index, arg] : std::views::enumerate(argv))
             {
                 if (arg != "%c")
                 {
@@ -467,7 +469,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
     {
         for (auto& argv : commands)
         {
-            for (const auto [index, arg] : ztd::enumerate(argv))
+            for (const auto [index, arg] : std::views::enumerate(argv))
             {
                 if (arg == "%k")
                 {
@@ -482,7 +484,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
     {
         for (auto& argv : commands)
         {
-            for (const auto [index, arg] : ztd::enumerate(argv))
+            for (const auto [index, arg] : std::views::enumerate(argv))
             {
                 if (arg == "%i")
                 {

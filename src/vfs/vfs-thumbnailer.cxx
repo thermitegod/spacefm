@@ -26,6 +26,8 @@
 
 #include <memory>
 
+#include <ranges>
+
 #include <cassert>
 
 #include <glibmm.h>
@@ -152,7 +154,7 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
         loader->queue.pop_front();
 
         bool need_update = false;
-        for (const auto [index, value] : ztd::enumerate(req->n_requests))
+        for (const auto [index, value] : std::views::enumerate(req->n_requests))
         {
             if (value.second == 0)
             {

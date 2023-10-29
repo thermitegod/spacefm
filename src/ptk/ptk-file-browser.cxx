@@ -31,6 +31,8 @@
 
 #include <functional>
 
+#include <ranges>
+
 #include <cassert>
 
 #include <malloc.h>
@@ -2151,7 +2153,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
 
         // column order
         usize idx;
-        for (const auto [order_index, order_value] : ztd::enumerate(columns))
+        for (const auto [order_index, order_value] : std::views::enumerate(columns))
         {
             idx = order_index;
             if (xset_get_int_panel(p, columns.at(order_index).xset_name, xset::var::x) ==
@@ -4713,7 +4715,7 @@ PtkFileBrowser::update_views() noexcept
                     break;
                 }
                 const char* title = gtk_tree_view_column_get_title(col);
-                for (const auto [index, column] : ztd::enumerate(columns))
+                for (const auto [index, column] : std::views::enumerate(columns))
                 {
                     if (title == column.title)
                     {

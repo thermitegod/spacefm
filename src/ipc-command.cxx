@@ -25,6 +25,8 @@
 
 #include <optional>
 
+#include <ranges>
+
 #include <malloc.h>
 
 #include <fmt/format.h>
@@ -534,7 +536,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 bool found = false;
                 GtkTreeViewColumn* col;
-                for (const auto [index, column_title] : ztd::enumerate(column_titles))
+                for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
                                                    static_cast<i32>(index));
@@ -1101,7 +1103,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
-                for (const auto [index, column_title] : ztd::enumerate(column_titles))
+                for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
                                                    static_cast<i32>(index));

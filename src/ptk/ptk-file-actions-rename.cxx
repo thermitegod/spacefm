@@ -25,6 +25,7 @@
 
 #include <optional>
 
+#include <ranges>
 #include <algorithm>
 
 #include <memory>
@@ -1120,7 +1121,7 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
         file_misc_mode::path,
     };
 
-    for (const auto [index, value] : ztd::enumerate(misc_modes))
+    for (const auto [index, value] : std::views::enumerate(misc_modes))
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
         {
@@ -1233,7 +1234,7 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
                                  true);
     gtk_box_pack_start(hbox, gtk_label_new("Insert as"), false, true, 2);
 
-    for (const auto [index, value] : ztd::enumerate(misc_modes))
+    for (const auto [index, value] : std::views::enumerate(misc_modes))
     {
         gtk_widget_set_focus_on_click(GTK_WIDGET(mode[index]), false);
         g_signal_connect(G_OBJECT(mode[index]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
@@ -1267,7 +1268,7 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     // bogus GTK warning here: Unable to retrieve the file info for...
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-        for (const auto [index, value] : ztd::enumerate(misc_modes))
+        for (const auto [index, value] : std::views::enumerate(misc_modes))
         {
             if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
             {
@@ -1308,7 +1309,7 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(allocation.height));
 
     // save mode
-    for (const auto [index, value] : ztd::enumerate(misc_modes))
+    for (const auto [index, value] : std::views::enumerate(misc_modes))
     {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
         {
