@@ -63,7 +63,7 @@ static u32 mime_cache_max_extent = 0;
 /* free all mime.cache files on the system */
 static void mime_cache_free_all();
 
-static bool mime_type_is_data_plain_text(const std::span<const char8_t> data);
+static bool mime_type_is_data_plain_text(const std::span<const std::byte> data);
 
 /*
  * Get mime-type of the specified file (quick, but less accurate):
@@ -183,7 +183,7 @@ mime_type_get_by_file(const std::filesystem::path& path)
         if (fd != -1)
         {
             // mime header size
-            std::array<char8_t, 512> data;
+            std::array<std::byte, 512> data;
 
             const auto length = read(fd, data.data(), data.size());
             if (length == -1)
@@ -388,7 +388,7 @@ mime_cache_reload(const mime_cache_t& cache)
 }
 
 static bool
-mime_type_is_data_plain_text(const std::span<const char8_t> data)
+mime_type_is_data_plain_text(const std::span<const std::byte> data)
 {
     if (data.size() == 0)
     {
@@ -397,7 +397,7 @@ mime_type_is_data_plain_text(const std::span<const char8_t> data)
 
     for (const auto d : data)
     {
-        if (d == '\0')
+        if (d == (std::byte)'\0')
         {
             return false;
         }

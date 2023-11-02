@@ -235,7 +235,7 @@ MimeCache::lookup_suffix(const std::string_view filename, const char** suffix_po
 }
 
 const char*
-MimeCache::lookup_magic(const std::span<const char8_t> data)
+MimeCache::lookup_magic(const std::span<const std::byte> data)
 {
     const char* magic = this->magics;
 
@@ -364,7 +364,8 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, const std::string_v
 }
 
 bool
-MimeCache::magic_rule_match(const char* buf, const char* rule, const std::span<const char8_t> data)
+MimeCache::magic_rule_match(const char* buf, const char* rule,
+                            const std::span<const std::byte> data)
 {
     u32 offset = VAL32(rule, 0);
     const u32 range = VAL32(rule, 4);
@@ -387,7 +388,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const std::span<c
             usize i = 0;
             for (; i < val_len; ++i)
             {
-                if ((data[offset + i] & mask[i]) != value[i])
+                if ((data[offset + i] & (std::byte)mask[i]) != (std::byte)value[i])
                 {
                     break;
                 }
@@ -430,7 +431,7 @@ MimeCache::magic_rule_match(const char* buf, const char* rule, const std::span<c
 }
 
 bool
-MimeCache::magic_match(const char* buf, const char* magic, const std::span<const char8_t> data)
+MimeCache::magic_match(const char* buf, const char* magic, const std::span<const std::byte> data)
 {
     const u32 n_rules = VAL32(magic, 8);
     const u32 rules_off = VAL32(magic, 12);
