@@ -21,8 +21,6 @@
 
 #include <deque>
 
-#include <mutex>
-
 #include <memory>
 
 #include <gdkmm.h>
@@ -52,8 +50,6 @@ namespace vfs
         vfs::async_task* task{nullptr};
 
         u32 idle_handler{0};
-
-        std::mutex mtx;
 
         struct request
         {

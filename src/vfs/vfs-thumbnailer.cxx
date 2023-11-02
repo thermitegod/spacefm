@@ -24,8 +24,6 @@
 
 #include <chrono>
 
-#include <mutex>
-
 #include <memory>
 
 #include <cassert>
@@ -141,7 +139,6 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
     // ztd::logger::debug("thumbnailer_thread");
     while (!task->is_canceled())
     {
-        std::scoped_lock<std::mutex> lock(loader->mtx);
         if (loader->queue.empty())
         {
             break;
