@@ -68,5 +68,5 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt)
     // Everything else
     app.add_option("files", opt->files, "[DIR | FILE | URL]...")->expected(0, -1);
 
-    app.callback([opt]() { run_commandline(opt); });
+    app.callback([&opt]() { run_commandline(opt); });
 }

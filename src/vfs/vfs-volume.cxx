@@ -674,7 +674,7 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     const auto dev_change = xset_get_s(xset::name::dev_change).value_or("");
     const auto blacklisted = ztd::split(dev_change, " ");
 
-    const auto has_blacklisted = [fstype](const std::string_view blacklisted)
+    const auto has_blacklisted = [&fstype](const std::string_view blacklisted)
     { return fstype.contains(blacklisted); };
 
     const auto is_blacklisted = std::ranges::any_of(blacklisted, has_blacklisted);

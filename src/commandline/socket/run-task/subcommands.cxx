@@ -104,8 +104,7 @@ commandline::socket::run_task::cmd(CLI::App* app, const socket_subcommand_data_t
 
     sub->add_option("command", task_opt->cmd, "cmd to run")->required(true)->expected(1, -1);
 
-    // const auto run_subcommand = [opt]() { opt->property = "cmd"; };
-    const auto run_subcommand = [opt, task_opt]() { run_subcommand_cmd(opt, task_opt); };
+    const auto run_subcommand = [&opt, &task_opt]() { run_subcommand_cmd(opt, task_opt); };
     sub->callback(run_subcommand);
 }
 
@@ -120,7 +119,7 @@ commandline::socket::run_task::edit(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("value", opt->socket_data, "File to edit")->required(true)->expected(1);
 
-    const auto run_subcommand = [opt]() { opt->property = "edit"; };
+    const auto run_subcommand = [&opt]() { opt->property = "edit"; };
     sub->callback(run_subcommand);
 }
 
@@ -135,7 +134,7 @@ commandline::socket::run_task::mount(CLI::App* app, const socket_subcommand_data
 
     sub->add_option("value", opt->socket_data, "Device to mount")->required(true)->expected(1);
 
-    const auto run_subcommand = [opt]() { opt->property = "mount"; };
+    const auto run_subcommand = [&opt]() { opt->property = "mount"; };
     sub->callback(run_subcommand);
 }
 
@@ -150,7 +149,7 @@ commandline::socket::run_task::umount(CLI::App* app, const socket_subcommand_dat
 
     sub->add_option("value", opt->socket_data, "Device to umount")->required(true)->expected(1);
 
-    const auto run_subcommand = [opt]() { opt->property = "umount"; };
+    const auto run_subcommand = [&opt]() { opt->property = "umount"; };
     sub->callback(run_subcommand);
 }
 
@@ -189,7 +188,7 @@ commandline::socket::run_task::copy(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("FILES", file_opt->files, "Files to copy")->required(true)->expected(1, -1);
 
-    const auto run_subcommand = [opt, file_opt]()
+    const auto run_subcommand = [&opt, &file_opt]()
     { run_subcommand_file_action(opt, file_opt, "copy"); };
     sub->callback(run_subcommand);
 }
@@ -209,7 +208,7 @@ commandline::socket::run_task::move(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("FILES", file_opt->files, "Files to move")->required(true)->expected(1, -1);
 
-    const auto run_subcommand = [opt, file_opt]()
+    const auto run_subcommand = [&opt, &file_opt]()
     { run_subcommand_file_action(opt, file_opt, "move"); };
     sub->callback(run_subcommand);
 }
@@ -229,7 +228,7 @@ commandline::socket::run_task::link(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("FILES", file_opt->files, "Files to link")->required(true)->expected(1, -1);
 
-    const auto run_subcommand = [opt, file_opt]()
+    const auto run_subcommand = [&opt, &file_opt]()
     { run_subcommand_file_action(opt, file_opt, "link"); };
     sub->callback(run_subcommand);
 }
@@ -249,7 +248,7 @@ commandline::socket::run_task::del(CLI::App* app, const socket_subcommand_data_t
 
     sub->add_option("FILES", file_opt->files, "Files to delete")->required(true)->expected(1, -1);
 
-    const auto run_subcommand = [opt, file_opt]()
+    const auto run_subcommand = [&opt, &file_opt]()
     { run_subcommand_file_action(opt, file_opt, "delete"); };
     sub->callback(run_subcommand);
 }
@@ -269,7 +268,7 @@ commandline::socket::run_task::trash(CLI::App* app, const socket_subcommand_data
 
     sub->add_option("FILES", file_opt->files, "Files to trash")->required(true)->expected(1, -1);
 
-    const auto run_subcommand = [opt, file_opt]()
+    const auto run_subcommand = [&opt, &file_opt]()
     { run_subcommand_file_action(opt, file_opt, "trash"); };
     sub->callback(run_subcommand);
 }
