@@ -772,14 +772,14 @@ vfs::file::load_thumbnail_small() noexcept
             vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
         if (thumbnail)
         {
-            this->big_thumbnail_ = thumbnail;
+            this->small_thumbnail_ = thumbnail;
             return;
         }
     }
 
     // fallback to mime_type icon
     // ztd::logger::debug("mime={}", this->mime_type_->type());
-    this->big_thumbnail_ = this->small_icon();
+    this->small_thumbnail_ = this->small_icon();
 }
 
 void
