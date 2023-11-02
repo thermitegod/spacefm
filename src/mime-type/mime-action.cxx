@@ -138,7 +138,7 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
         const std::string rem = r;
         if (std::ranges::contains(actions, rem))
         {
-            ztd::remove(actions, rem);
+            std::ranges::remove(actions, rem);
             // ztd::logger::info("        ACTION-REMOVED {}", rem);
         }
     }

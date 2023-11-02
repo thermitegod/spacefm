@@ -240,7 +240,7 @@ parse_mounts(bool report)
                 {
                     // ztd::logger::debug("    freed");
                     // no change to mount points, so remove from old list
-                    ztd::remove(devmounts, found);
+                    std::ranges::remove(devmounts, found);
                 }
             }
             else
@@ -457,7 +457,7 @@ vfs_volume_device_removed(const libudev::device& udevice)
         if (volume->is_device_type(vfs::volume::device_type::block) && volume->devnum() == devnum)
         { // remove volume
             // ztd::logger::debug("remove volume {}", volume->device_file);
-            volumes.erase(std::remove(volumes.begin(), volumes.end(), volume), volumes.end());
+            std::ranges::remove(volumes, volume);
             call_callbacks(volume, vfs::volume::state::removed);
             if (volume->is_mounted() && !volume->mount_point().empty())
             {
@@ -635,7 +635,7 @@ vfs_volume_remove_callback(vfs::volume::callback_t cb, void* user_data)
     {
         if (callback->cb == cb && callback->user_data == user_data)
         {
-            ztd::remove(callbacks, callback);
+            std::ranges::remove(callbacks, callback);
             break;
         }
     }

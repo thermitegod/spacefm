@@ -1387,7 +1387,7 @@ main_window_init(MainWindow* main_window)
 static void
 main_window_finalize(GObject* obj)
 {
-    ztd::remove(all_windows, MAIN_WINDOW_REINTERPRET(obj));
+    std::ranges::remove(all_windows, MAIN_WINDOW_REINTERPRET(obj));
 
     g_object_unref((MAIN_WINDOW_REINTERPRET(obj))->wgroup);
 
