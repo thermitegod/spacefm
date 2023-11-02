@@ -236,10 +236,10 @@ vfs::dir::on_monitor_event(const vfs::monitor::event event, const std::filesyste
             this->emit_file_created(path.filename(), false);
             break;
         case vfs::monitor::event::deleted:
-            this->emit_file_deleted(path.filename(), nullptr);
+            this->emit_file_deleted(path.filename());
             break;
         case vfs::monitor::event::changed:
-            this->emit_file_changed(path.filename(), nullptr, false);
+            this->emit_file_changed(path.filename(), false);
             break;
         case vfs::monitor::event::other:
             break;
@@ -259,19 +259,13 @@ vfs_dir_mime_type_reload()
 */
 
 const std::shared_ptr<vfs::file>
-vfs::dir::find_file(const std::filesystem::path& filename,
-                    const std::shared_ptr<vfs::file>& file) const noexcept
+vfs::dir::find_file(const std::filesystem::path& filename) const noexcept
 {
-    for (const auto& file2 : this->files_)
+    const auto action = [&filename](const auto& file) { return file->name() == filename.string(); };
+    const auto it = std::ranges::find_if(this->files_, action);
+    if (it != this->files_.cend())
     {
-        if (file == file2)
-        {
-            return file2;
-        }
-        if (file2->name() == filename.string())
-        {
-            return file2;
-        }
+        return *it;
     }
     return nullptr;
 }
@@ -329,27 +323,22 @@ vfs::dir::is_directory_empty() const noexcept
 bool
 vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    bool ret = false;
-
-    const bool is_file_valid = file->update();
-    if (is_file_valid)
-    {
-        ret = true;
-    }
-    else /* The file does not exist */
-    {
+    const bool file_updated = file->update();
+    if (!file_updated)
+    { /* The file does not exist */
         if (std::ranges::contains(this->files_, file))
         {
+            // TODO - FIXME - using std::ranges::remove here will
+            // caues a segfault when deleting/moving/loading thumbails
+            // std::ranges::remove(this->files_, file);
             ztd::remove(this->files_, file);
             if (file)
             {
                 this->run_event<spacefm::signal::file_deleted>(file);
             }
         }
-        ret = false;
     }
-
-    return ret;
+    return file_updated;
 }
 
 void
@@ -385,7 +374,7 @@ vfs::dir::update_created_files() noexcept
 
     for (const auto& created_file : this->created_files_)
     {
-        const auto file_found = this->find_file(created_file, nullptr);
+        const auto file_found = this->find_file(created_file);
         if (!file_found)
         {
             // file is not in dir this->files_
@@ -476,8 +465,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) n
 }
 
 void
-vfs::dir::emit_file_deleted(const std::filesystem::path& filename,
-                            const std::shared_ptr<vfs::file>& file) noexcept
+vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
@@ -493,7 +481,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename,
         return;
     }
 
-    const auto file_found = this->find_file(filename, file);
+    const auto file_found = this->find_file(filename);
     if (file_found)
     {
         if (!std::ranges::contains(this->changed_files_, file_found))
@@ -507,8 +495,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename,
 }
 
 void
-vfs::dir::emit_file_changed(const std::filesystem::path& filename,
-                            const std::shared_ptr<vfs::file>& file, bool force) noexcept
+vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
@@ -526,7 +513,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& filename,
         return;
     }
 
-    const auto file_found = this->find_file(filename, file);
+    const auto file_found = this->find_file(filename);
     if (file_found)
     {
         if (!std::ranges::contains(this->changed_files_, file_found))
@@ -556,10 +543,8 @@ vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
-    const auto file_found = this->find_file(file->name(), file);
-    if (file_found)
+    if (std::ranges::contains(this->files_, file))
     {
-        assert(file == file_found);
-        this->run_event<spacefm::signal::file_thumbnail_loaded>(file_found);
+        this->run_event<spacefm::signal::file_thumbnail_loaded>(file);
     }
 }
