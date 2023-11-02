@@ -41,6 +41,7 @@
 #include "main-window.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-thumbnailer.hxx"

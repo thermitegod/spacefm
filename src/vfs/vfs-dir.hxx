@@ -31,14 +31,13 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/vfs-monitor.hxx"
-#include "vfs/vfs-file.hxx"
-
-#include "vfs/vfs-async-thread.hxx"
 
 #include "signals.hxx"
 
 namespace vfs
 {
+    struct async_thread;
+    struct file;
     struct thumbnailer;
 
     struct dir : public std::enable_shared_from_this<dir>

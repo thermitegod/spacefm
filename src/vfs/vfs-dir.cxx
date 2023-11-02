@@ -45,10 +45,10 @@
 #include "write.hxx"
 #include "utils.hxx"
 
-#include "vfs/vfs-volume.hxx"
-#include "vfs/vfs-thumbnailer.hxx"
-
 #include "vfs/vfs-async-thread.hxx"
+#include "vfs/vfs-file.hxx"
+#include "vfs/vfs-thumbnailer.hxx"
+#include "vfs/vfs-volume.hxx"
 
 #include "vfs/vfs-dir.hxx"
 
