@@ -107,14 +107,6 @@ vfs::file::update() noexcept
     // hidden
     this->is_hidden_ = this->name_.starts_with('.');
 
-    // collate keys
-    this->collate_key_ = g_utf8_collate_key_for_filename(this->display_name_.data(), -1);
-    const std::string str = g_utf8_casefold(this->display_name_.data(), -1);
-    this->collate_icase_key_ = g_utf8_collate_key_for_filename(str.data(), -1);
-
-    // this->collate_key_ = Glib::ustring(this->display_name_).collate_key();
-    // this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
-
     // owner
     const auto pw = ztd::passwd(this->file_stat_.uid());
     this->display_owner_ = pw.name();
@@ -150,15 +142,7 @@ vfs::file::display_name() const noexcept
 void
 vfs::file::update_display_name(const std::string_view new_display_name) noexcept
 {
-    this->display_name_ = new_display_name.data();
-    // sfm get new collate keys
-
-    this->collate_key_ = g_utf8_collate_key_for_filename(this->display_name_.data(), -1);
-    const std::string str = g_utf8_casefold(this->display_name_.data(), -1);
-    this->collate_icase_key_ = g_utf8_collate_key_for_filename(str.data(), -1);
-
-    //this->collate_key_ = Glib::ustring(this->display_name_).collate_key();
-    //this->collate_icase_key_ = Glib::ustring(this->display_name_).casefold_collate_key();
+    this->display_name_ = new_display_name;
 }
 
 const std::filesystem::path&
@@ -171,18 +155,6 @@ const std::string_view
 vfs::file::uri() const noexcept
 {
     return this->uri_;
-}
-
-const std::string_view
-vfs::file::collate_key() const noexcept
-{
-    return this->collate_key_;
-}
-
-const std::string_view
-vfs::file::collate_icase_key() const noexcept
-{
-    return this->collate_icase_key_;
 }
 
 u64

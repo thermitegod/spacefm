@@ -411,6 +411,8 @@ sources = files(
     'src/ptk/ptk-task-view.cxx',
     'src/ptk/ptk-utils.cxx',
 
+    'src/ptk/natsort/strnatcmp.c',
+
     'src/vfs/vfs-app-desktop.cxx',
     'src/vfs/vfs-async-task.cxx',
     'src/vfs/vfs-async-thread.cxx',

@@ -32,6 +32,8 @@
 
 #include "compat/type-conversion.hxx"
 
+#include "ptk/natsort/strnatcmp.h"
+
 #include "ptk/ptk-file-list.hxx"
 
 #include "vfs/vfs-file.hxx"
@@ -692,17 +694,17 @@ compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
         // natural
         if (list->sort_case)
         {
-            result = ztd::sort::compare(a->collate_key(), b->collate_key());
+            result = strnatcmp(a->name().data(), b->name().data());
         }
         else
         {
-            result = ztd::sort::compare(a->collate_icase_key(), b->collate_icase_key());
+            result = strnatcasecmp(a->name().data(), b->name().data());
         }
     }
     else
     {
         // non-natural
-        result = ztd::sort::compare(a->display_name(), b->display_name());
+        result = ztd::sort::compare(a->name(), b->name());
     }
     return result;
 }

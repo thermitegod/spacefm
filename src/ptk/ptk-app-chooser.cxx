@@ -38,6 +38,8 @@
 
 #include "vfs/vfs-async-task.hxx"
 
+#include "ptk/natsort/strnatcmp.h"
+
 #include "ptk/ptk-app-chooser.hxx"
 
 enum class app_chooser_column
@@ -94,7 +96,7 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
         gtk_tree_model_get(model, b, app_chooser_column::app_name, &name_b, -1);
         if (name_b)
         {
-            ret = g_ascii_strcasecmp(name_a, name_b);
+            ret = strnatcasecmp(name_a, name_b);
             std::free(name_b);
         }
         std::free(name_a);

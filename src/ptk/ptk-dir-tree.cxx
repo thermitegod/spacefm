@@ -44,6 +44,8 @@
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-utils.hxx"
 
+#include "ptk/natsort/strnatcmp.h"
+
 #include "ptk/ptk-dir-tree.hxx"
 
 #define PTK_TYPE_DIR_TREE    (ptk_dir_tree_get_type())
@@ -610,9 +612,7 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
     {
         return 0;
     }
-    /* FIXME: UTF-8 strings should not be treated as ASCII when sorted  */
-    const i32 ret = g_ascii_strcasecmp(file2->display_name().data(), file1->display_name().data());
-    return ret;
+    return strnatcasecmp(file2->name().data(), file1->name().data());
 }
 
 static PtkDirTreeNode*

@@ -51,9 +51,6 @@ namespace vfs
         const std::filesystem::path& path() const noexcept;
         const std::string_view uri() const noexcept;
 
-        const std::string_view collate_key() const noexcept;
-        const std::string_view collate_icase_key() const noexcept;
-
         u64 size() const noexcept;
         u64 size_on_disk() const noexcept;
 
@@ -134,8 +131,6 @@ namespace vfs
 
         std::string name_{};                          // real name on file system
         std::string display_name_{};                  // displayed name (in UTF-8)
-        std::string collate_key_{};                   // sfm sort key
-        std::string collate_icase_key_{};             // sfm case folded sort key
         std::string display_size_{};                  // displayed human-readable file size
         std::string display_size_bytes_{};            // displayed file size in bytes
         std::string display_disk_size_{};             // displayed human-readable file size on disk
