@@ -46,6 +46,7 @@
 #include "utils.hxx"
 
 #include "vfs/vfs-async-thread.hxx"
+#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-volume.hxx"
@@ -306,7 +307,24 @@ vfs::dir::cancel_all_thumbnail_requests() noexcept
 void
 vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_big) noexcept
 {
-    vfs_thumbnail_request(this->shared_from_this(), file, is_big);
+    bool new_task = false;
+
+    // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name(), is_big);
+    if (!this->thumbnailer)
+    {
+        // ztd::logger::debug("new_task: !this->thumbnailer");
+        this->thumbnailer = vfs::thumbnailer::create(this->shared_from_this());
+        assert(this->thumbnailer != nullptr);
+        new_task = true;
+    }
+
+    this->thumbnailer->loader_request(file, is_big);
+
+    if (new_task)
+    {
+        // ztd::logger::debug("new_task: this->thumbnailer->queue={}", this->thumbnailer->queue.size());
+        this->thumbnailer->task->run();
+    }
 }
 
 bool

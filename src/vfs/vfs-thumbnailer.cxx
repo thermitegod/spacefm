@@ -217,31 +217,6 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
     return nullptr;
 }
 
-void
-vfs_thumbnail_request(const std::shared_ptr<vfs::dir>& dir, const std::shared_ptr<vfs::file>& file,
-                      const bool is_big)
-{
-    bool new_task = false;
-
-    // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name(), is_big);
-    if (!dir->thumbnailer)
-    {
-        // ztd::logger::debug("new_task: !dir->thumbnailer");
-        dir->thumbnailer = vfs::thumbnailer::create(dir);
-        assert(dir->thumbnailer != nullptr);
-        new_task = true;
-    }
-
-    const auto loader = dir->thumbnailer;
-    loader->loader_request(file, is_big);
-
-    if (new_task)
-    {
-        // ztd::logger::debug("new_task: loader->queue={}", loader->queue.size());
-        loader->task->run();
-    }
-}
-
 GdkPixbuf*
 vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
 {

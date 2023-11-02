@@ -74,7 +74,4 @@ namespace vfs
 // Ensure the thumbnail dirs exist and have proper file permission.
 void vfs_thumbnail_init();
 
-void vfs_thumbnail_request(const std::shared_ptr<vfs::dir>& dir,
-                           const std::shared_ptr<vfs::file>& file, const bool is_big);
-
 GdkPixbuf* vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size);
