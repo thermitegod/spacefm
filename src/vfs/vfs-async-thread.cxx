@@ -49,7 +49,10 @@ vfs::async_thread::run()
 
     this->thread_ = std::jthread([this]() { this->task_function_(); });
 
+    // TODO this blocks
     this->thread_.join();
+    // this->thread_.detach();
+
     this->running_ = false;
     this->finished_ = true;
 
