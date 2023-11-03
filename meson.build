@@ -62,6 +62,8 @@ if get_option('buildtype') == 'release'
     flags += cpp.get_supported_arguments(release_flags)
 endif
 
+# Warnings
+
 default_warning_flags = [
     # '-Wconversion',
     '-Wchar-subscripts',
@@ -114,13 +116,9 @@ default_warning_flags = [
     # TODO
     # '-Wcast-qual',
     # '-Wconversion',
-    # '-Wint-conversion',
 
     # TODO - fix these warnings
     '-Wno-deprecated-declarations',
-
-    # Sanitizer
-    # '-fsanitize=undefined,address',
 ]
 
 flags += cpp.get_supported_arguments(default_warning_flags)
@@ -162,11 +160,25 @@ endif
 # Clang only warning flags
 if cpp.get_id() == 'clang'
     default_warning_flags_clang = [
+        '-Wint-conversion',
+
         # Disabled Warnings
     ]
 
     flags += cpp.get_supported_arguments(default_warning_flags_clang)
 endif
+
+# Codegen
+
+default_codegen_flags = [
+    '-fwrapv',
+    # '-fwrapv-pointer',
+    '-ftrivial-auto-var-init=zero',
+]
+
+flags += cpp.get_supported_arguments(default_codegen_flags)
+
+# Linker
 
 if cpp.has_link_argument('-Wl,--as-needed')
     link_flags += '-Wl,--as-needed'
@@ -217,7 +229,6 @@ libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
 openssl_dep = dependency('openssl', required : true)
 
 exo_dep = dependency('exo-2', required : true)
-# x11_dep = dependency('x11', required : true)
 spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
@@ -287,8 +298,6 @@ preprocessor = [
     '-DMAGIC_ENUM_RANGE_MAX=2000',
     # '-DMAGIC_ENUM_RANGE_MAX=32767',
 
-    '-DZMQ_PORT=59172',
-
     '-DLIBDIR_PATH="@0@"'.format(libdir),
 
     '-DGTK_DISABLE_DEPRECATED',
@@ -314,13 +323,7 @@ if get_option('deprecated')
     features += '-DHAVE_DEPRECATED'
 endif
 
-if get_option('deprecated-ini-loading')
-  features += '-DHAVE_DEPRECATED_INI_CONFIG_LOADING'
-endif
-
-if get_option('nonlatin')
-  features += '-DHAVE_NONLATIN_KEYBOARD_SUPPORT'
-endif
+features += '-DZMQ_PORT="@0@"'.format(get_option('zmp_port'))
 
 foreach a : features
     add_project_arguments(a, language : ['c', 'cpp'])

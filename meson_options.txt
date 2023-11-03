@@ -1,4 +1,3 @@
 # misc features
 option('deprecated', type : 'boolean', value: false, description : 'enable deprecated features')
-option('deprecated-ini-loading', type : 'boolean', value: false, description : 'support for reading old session files')
-option('nonlatin', type : 'boolean', value: false, description : 'support for non-latin keyboards')
+option('zmp_port', type : 'integer', value: 59172, description : 'Port number to use for socket commands')

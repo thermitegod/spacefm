@@ -43,7 +43,7 @@ run_commandline(const commandline_opt_data_t& opt)
 
     if (opt->version)
     {
-        fmt::print("{} {}\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
+        fmt::print("{} {}\nZMQ Port: {}\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION, ZMQ_PORT);
         std::exit(EXIT_SUCCESS);
     }
 }
