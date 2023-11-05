@@ -801,15 +801,15 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     // this crashes if !browser->file_list so do not allow
     if (browser->file_list_)
     {
-        set = xset_get(xset::name::sortx_alphanum);
+        set = xset_get(xset::name::sortx_natural);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
-        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_alphanum ? xset::b::xtrue
-                                                                               : xset::b::xfalse;
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_natural ? xset::b::xtrue
+                                                                              : xset::b::xfalse;
         set = xset_get(xset::name::sortx_case);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_case ? xset::b::xtrue
                                                                            : xset::b::xfalse;
-        set->disable = !PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_alphanum;
+        set->disable = !PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_natural;
 
 #if 0
         set = xset_get(xset::name::sortx_natural);

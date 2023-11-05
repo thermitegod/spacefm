@@ -67,7 +67,6 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::column_width(sub, opt);
     commandline::socket::set::sort_by(sub, opt);
     commandline::socket::set::sort_ascend(sub, opt);
-    commandline::socket::set::sort_alphanum(sub, opt);
     commandline::socket::set::sort_natural(sub, opt);
     commandline::socket::set::sort_case(sub, opt);
     commandline::socket::set::sort_hidden_first(sub, opt);
@@ -137,7 +136,6 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::get::column_width(sub, opt);
     commandline::socket::get::sort_by(sub, opt);
     commandline::socket::get::sort_ascend(sub, opt);
-    commandline::socket::get::sort_alphanum(sub, opt);
     commandline::socket::get::sort_natural(sub, opt);
     commandline::socket::get::sort_case(sub, opt);
     commandline::socket::get::sort_hidden_first(sub, opt);

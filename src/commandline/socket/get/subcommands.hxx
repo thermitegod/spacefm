@@ -51,7 +51,6 @@ namespace commandline::socket::get
     void column_width(CLI::App* app, const socket_subcommand_data_t& opt);
     void sort_by(CLI::App* app, const socket_subcommand_data_t& opt);
     void sort_ascend(CLI::App* app, const socket_subcommand_data_t& opt);
-    void sort_alphanum(CLI::App* app, const socket_subcommand_data_t& opt);
     void sort_natural(CLI::App* app, const socket_subcommand_data_t& opt);
     void sort_case(CLI::App* app, const socket_subcommand_data_t& opt);
     void sort_hidden_first(CLI::App* app, const socket_subcommand_data_t& opt);

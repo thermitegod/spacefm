@@ -689,7 +689,7 @@ compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 {
     i32 result;
     // by display name
-    if (list->sort_alphanum)
+    if (list->sort_natural)
     {
         // natural
         if (list->sort_case)

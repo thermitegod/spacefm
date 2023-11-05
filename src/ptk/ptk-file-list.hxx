@@ -74,7 +74,6 @@ struct PtkFileList
 
     ptk::file_list::column sort_col{ptk::file_list::column::name};
     GtkSortType sort_order;
-    bool sort_alphanum{false};
     bool sort_natural{false};
     bool sort_case{false};
     bool sort_hidden_first{false};

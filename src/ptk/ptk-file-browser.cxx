@@ -3985,18 +3985,11 @@ PtkFileBrowser::set_sort_extra(xset::name setname) const noexcept
         return;
     }
 
-    if (set->xset_name == xset::name::sortx_alphanum)
+    if (set->xset_name == xset::name::sortx_natural)
     {
-        list->sort_alphanum = set->b == xset::b::xtrue;
-        xset_set_b_panel(this->panel_, xset::panel::sort_extra, list->sort_alphanum);
+        list->sort_natural = set->b == xset::b::xtrue;
+        xset_set_b_panel(this->panel_, xset::panel::sort_extra, list->sort_natural);
     }
-#if 0
-    else if (set->xset_name ==  xset::name::sortx_natural)
-    {
-        list->sort_natural = set->b == xset::b::XSET_B_TRUE;
-        xset_set_b_panel(this->panel_, xset::panel::SORT_EXTRA, list->sort_natural);
-    }
-#endif
     else if (set->xset_name == xset::name::sortx_case)
     {
         list->sort_case = set->b == xset::b::xtrue;
@@ -4051,10 +4044,7 @@ PtkFileBrowser::read_sort_extra() const noexcept
         return;
     }
 
-    list->sort_alphanum = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
-#if 0
-    list->sort_natural = xset_get_b_panel(this->mypanel, xset::panel::SORT_EXTRA);
-#endif
+    list->sort_natural = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
     list->sort_case =
         xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) == xset::b::xtrue;
     list->sort_dir = ptk::file_list::sort_dir(

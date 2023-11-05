@@ -992,24 +992,6 @@ commandline::socket::set::sort_ascend(CLI::App* app, const socket_subcommand_dat
 }
 
 /*
- * subcommand sort-alphanum
- */
-
-void
-commandline::socket::set::sort_alphanum(CLI::App* app, const socket_subcommand_data_t& opt)
-{
-    auto* sub = app->add_subcommand("sort-alphanum", "Set property sort-alphanum");
-
-    const auto run_subcommand = [opt]() { opt->property = "sort-alphanum"; };
-    sub->callback(run_subcommand);
-
-    sub->require_subcommand();
-
-    setup_subcommand_value_true(sub, opt);
-    setup_subcommand_value_false(sub, opt);
-}
-
-/*
  * subcommand sort-natural
  */
 

@@ -1080,7 +1080,7 @@ xset_defaults()
             xset::name::sortby_owner,  xset::name::sortby_group,      xset::name::sortby_atime,
             xset::name::sortby_btime,  xset::name::sortby_ctime,      xset::name::sortby_mtime,
             xset::name::separator,     xset::name::sortby_ascend,     xset::name::sortby_descend,
-            xset::name::separator,     xset::name::sortx_alphanum,    xset::name::sortx_case,
+            xset::name::separator,     xset::name::sortx_natural,     xset::name::sortx_case,
             xset::name::separator,     xset::name::sortx_directories, xset::name::sortx_files,
             xset::name::sortx_mix,     xset::name::separator,         xset::name::sortx_hidfirst,
             xset::name::sortx_hidlast,
@@ -1142,8 +1142,8 @@ xset_defaults()
     xset_set_var(set, xset::var::menu_label, "_Descending");
     set->menu_style = xset::menu::radio;
 
-    set = xset_get(xset::name::sortx_alphanum);
-    xset_set_var(set, xset::var::menu_label, "_Alphanumeric");
+    set = xset_get(xset::name::sortx_natural);
+    xset_set_var(set, xset::var::menu_label, "_Natural");
     set->menu_style = xset::menu::check;
 
 #if 0

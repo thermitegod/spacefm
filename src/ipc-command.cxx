@@ -641,20 +641,13 @@ run_ipc_command(const std::string_view socket_commands_json)
                                             ? GtkSortType::GTK_SORT_ASCENDING
                                             : GtkSortType::GTK_SORT_DESCENDING);
         }
-        else if (ztd::same(property, "sort-alphanum"))
+        else if (ztd::same(property, "sort-natural"))
         {
             const std::string subproperty = json["subproperty"];
 
-            xset_set_b(xset::name::sortx_alphanum, ztd::same(subproperty, "true"));
-            file_browser->set_sort_extra(xset::name::sortx_alphanum);
+            xset_set_b(xset::name::sortx_natural, ztd::same(subproperty, "true"));
+            file_browser->set_sort_extra(xset::name::sortx_natural);
         }
-        // else if (ztd::same(property, "sort-natural"))
-        // {
-        //     const std::string subproperty = json["subproperty"];
-        //
-        //     xset_set_b(xset::name::sortx_alphanum, ztd::same(subproperty, "true"));
-        //     file_browser->set_sort_extra(xset::name::sortx_alphanum);
-        // }
         else if (ztd::same(property, "sort-case"))
         {
             const std::string subproperty = json["subproperty"];
@@ -1186,9 +1179,8 @@ run_ipc_command(const std::string_view socket_commands_json)
             }
         }
         else if (ztd::same(property, "sort-ascend") || ztd::same(property, "sort-natural") ||
-                 ztd::same(property, "sort-alphanum") || ztd::same(property, "sort-case") ||
-                 ztd::same(property, "sort-hidden-first") || ztd::same(property, "sort-first") ||
-                 ztd::same(property, "panel-hslider-top"))
+                 ztd::same(property, "sort-case") || ztd::same(property, "sort-hidden-first") ||
+                 ztd::same(property, "sort-first") || ztd::same(property, "panel-hslider-top"))
         {
             if (ztd::same(property, "sort-ascend"))
             {
@@ -1197,13 +1189,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                             "{}",
                             file_browser->is_sort_type(GtkSortType::GTK_SORT_ASCENDING) ? 1 : 0)};
             }
-#if 0
             else if (ztd::same(property, "sort-natural"))
-            {
-
-            }
-#endif
-            else if (ztd::same(property, "sort-alphanum"))
             {
                 return {SOCKET_SUCCESS,
                         std::format("{}",
