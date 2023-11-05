@@ -245,7 +245,6 @@ namespace xset
         new_app,
         con_go,
 
-        go_refresh,
         go_back,
         go_forward,
         go_up,

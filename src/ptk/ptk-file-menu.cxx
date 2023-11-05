@@ -1364,7 +1364,6 @@ ptk_file_menu_new(PtkFileBrowser* browser,
                     (GFunc)ptk_file_browser_set_default_folder,
                     browser);
         xset_set_cb(xset::name::edit_canon, (GFunc)on_popup_canon, data);
-        xset_set_cb("go_refresh", (GFunc)ptk_file_browser_refresh, browser);
         set = xset_get(xset::name::focus_path_bar);
         xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
         xset_set_ob1_int(set, "job", 0);
