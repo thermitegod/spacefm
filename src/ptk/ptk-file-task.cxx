@@ -75,13 +75,11 @@ PtkFileTask::PtkFileTask(const vfs::file_task::type type,
     this->task->set_state_callback(on_vfs_file_task_state_cb, this);
     this->parent_window = parent_window;
     this->task_view = task_view;
-    this->task->exec_ptask = (void*)this;
     this->progress_dlg = nullptr;
     this->complete = false;
     this->aborted = false;
     this->pause_change = false;
     this->pause_change_view = true;
-    this->force_scroll = false;
     this->keep_dlg = false;
     this->err_count = 0;
     if (xset_get_b(xset::name::task_err_any))
@@ -109,7 +107,6 @@ PtkFileTask::PtkFileTask(const vfs::file_task::type type,
     this->user_data = nullptr;
 
     this->progress_count = 0;
-    this->pop_handler = nullptr;
 
     this->query_cond = nullptr;
     this->query_cond_last = nullptr;
@@ -160,36 +157,9 @@ PtkFileTask::~PtkFileTask()
         gtk_widget_destroy(this->progress_dlg);
         this->progress_dlg = nullptr;
     }
-    if (this->task->type_ == vfs::file_task::type::exec)
-    {
-        // ztd::logger::info("    g_io_channel_shutdown");
-        // channel shutdowns are needed to stop channel reads after task ends.
-        // Cannot be placed in cb_exec_child_watch because it causes single
-        // line output to be lost
-        if (this->task->exec_channel_out)
-        {
-            g_io_channel_shutdown(this->task->exec_channel_out, true, nullptr);
-        }
-        if (this->task->exec_channel_err)
-        {
-            g_io_channel_shutdown(this->task->exec_channel_err, true, nullptr);
-        }
-        this->task->exec_channel_out = this->task->exec_channel_err = nullptr;
-        if (this->task->child_watch)
-        {
-            g_source_remove(this->task->child_watch);
-            this->task->child_watch = 0;
-        }
-        // ztd::logger::info("    g_io_channel_shutdown DONE");
-    }
 
     gtk_text_buffer_set_text(this->log_buf, "", -1);
     g_object_unref(this->log_buf);
-
-    if (this->pop_handler)
-    {
-        std::free(this->pop_handler);
-    }
 
     // ztd::logger::info("ptk_file_task_destroy DONE ptask={}", fmt::ptr(ptask));
 }
@@ -489,28 +459,11 @@ ptk_file_task_cancel(PtkFileTask* ptask)
 
         ptask->task->abort_task();
 
-        if (ptask->task->exec_pid)
-        {
-            // ztd::logger::info("SIGTERM {}", ptask->task->exec_pid);
-
-            const std::string command =
-                std::format("/usr/bin/kill -{} {}", SIGTERM, ptask->task->exec_pid);
-            ztd::logger::info("COMMAND={}", command);
-            Glib::spawn_command_line_async(command);
-
-            const std::string command2 =
-                std::format("sleep 5 && /usr/bin/kill -{} {}", SIGKILL, ptask->task->exec_pid);
-            ztd::logger::info("COMMAND={}", command2);
-            Glib::spawn_command_line_async(command2);
-        }
-        else
-        {
-            // no pid (exited)
-            // user pressed Stop on an exited process, remove task
-            // this may be needed because if process is killed, channels may not
-            // receive HUP and may remain open, leaving the task listed
-            ptask->complete = true;
-        }
+        // no pid (exited)
+        // user pressed Stop on an exited process, remove task
+        // this may be needed because if process is killed, channels may not
+        // receive HUP and may remain open, leaving the task listed
+        ptask->complete = true;
 
         if (ptask->task->exec_cond)
         {
@@ -562,8 +515,7 @@ set_button_states(PtkFileTask* ptask)
             //  icon = "media-playback-pause";
             break;
     }
-    const bool sens = !ptask->complete &&
-                      !(ptask->task->type_ == vfs::file_task::type::exec && !ptask->task->exec_pid);
+    const bool sens = !ptask->complete && !(ptask->task->type_ == vfs::file_task::type::exec);
 
     gtk_widget_set_sensitive(GTK_WIDGET(ptask->progress_btn_pause), sens);
     gtk_button_set_label(ptask->progress_btn_pause, label.data());
@@ -574,41 +526,7 @@ set_button_states(PtkFileTask* ptask)
 void
 ptk_file_task_pause(PtkFileTask* ptask, const vfs::file_task::state state)
 {
-    if (ptask->task->type_ == vfs::file_task::type::exec)
-    {
-        // exec task
-        // ptask->keep_dlg = true;
-        i32 sig;
-        if (state == vfs::file_task::state::pause ||
-            (ptask->task->state_pause_ == vfs::file_task::state::running &&
-             state == vfs::file_task::state::queue))
-        {
-            sig = SIGSTOP;
-            ptask->task->state_pause_ = (vfs::file_task::state)state;
-            ptask->task->timer.stop();
-        }
-        else if (state == vfs::file_task::state::queue)
-        {
-            sig = 0;
-            ptask->task->state_pause_ = (vfs::file_task::state)state;
-        }
-        else
-        {
-            sig = SIGCONT;
-            ptask->task->state_pause_ = vfs::file_task::state::running;
-            ptask->task->timer.start();
-        }
-
-        if (sig && ptask->task->exec_pid)
-        {
-            // send signal
-            const std::string command =
-                std::format("/usr/bin/kill -{} {}", sig, ptask->task->exec_pid);
-            ztd::logger::info("COMMAND={}", command);
-            Glib::spawn_command_line_async(command);
-        }
-    }
-    else if (state == vfs::file_task::state::pause)
+    if (state == vfs::file_task::state::pause)
     {
         ptask->task->state_pause_ = vfs::file_task::state::pause;
     }
@@ -1158,15 +1076,12 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
     set_progress_icon(ptask);
 
     // auto scroll - must be after show_all
-    if (!task->exec_scroll_lock)
-    {
-        gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(ptask->error_view),
-                                     ptask->log_end,
-                                     0.0,
-                                     false,
-                                     0,
-                                     0);
-    }
+    gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(ptask->error_view),
+                                 ptask->log_end,
+                                 0.0,
+                                 false,
+                                 0,
+                                 0);
 
     ptask->progress_count = 50; // trigger fast display
     // ztd::logger::info("ptk_file_task_progress_open DONE");
@@ -1323,7 +1238,7 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     {
         if (!ptask->task->custom_percent)
         {
-            if (task->exec_is_error || ptask->aborted)
+            if (ptask->aborted)
             {
                 gtk_progress_bar_set_fraction(ptask->progress_bar, 0);
             }
@@ -1386,26 +1301,18 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
     }
 
     // error/output log
-    if (ptask->log_appended || ptask->force_scroll)
+    if (ptask->log_appended)
     {
-        if (!task->exec_scroll_lock)
-        {
-            // scroll to end if scrollbar is mostly down or force_scroll
-            GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment(ptask->scroll);
-            if (ptask->force_scroll ||
-                gtk_adjustment_get_upper(adj) - gtk_adjustment_get_value(adj) <
-                    gtk_adjustment_get_page_size(adj) + 40)
-            {
-                // ztd::logger::info("    scroll to end line {}", ptask->log_end,
-                // gtk_text_buffer_get_line_count(ptask->log_buf));
-                gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(ptask->error_view),
-                                             ptask->log_end,
-                                             0.0,
-                                             false,
-                                             0,
-                                             0);
-            }
-        }
+        // scroll to end if scrollbar is mostly down
+
+        // ztd::logger::info("    scroll to end line {}", ptask->log_end,
+        // gtk_text_buffer_get_line_count(ptask->log_buf));
+        gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(ptask->error_view),
+                                     ptask->log_end,
+                                     0.0,
+                                     false,
+                                     0,
+                                     0);
         ptask->log_appended = false;
     }
 
@@ -1458,84 +1365,27 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
             }
             else
             {
-                if (task->exec_exit_status)
-                {
-                    errs = std::format("Finished with error  ( exit status {} )",
-                                       task->exec_exit_status);
-                }
-                else if (task->exec_is_error)
-                {
-                    errs = "Finished with error";
-                }
-                else
-                {
-                    errs = "Done";
-                }
+                errs = "Done";
             }
         }
     }
     else if (task->state_pause_ == vfs::file_task::state::pause)
     {
-        if (task->type_ != vfs::file_task::type::exec)
-        {
-            errs = "Paused";
-        }
-        else
-        {
-            if (task->exec_pid)
-            {
-                errs = std::format("Paused  ( pid {} )", task->exec_pid);
-            }
-            else
-            {
-                errs = std::format("Paused  ( exit status {} )", task->exec_exit_status);
-                set_button_states(ptask);
-            }
-        }
+        errs = "Paused";
     }
     else if (task->state_pause_ == vfs::file_task::state::queue)
     {
-        if (task->type_ != vfs::file_task::type::exec)
-        {
-            errs = "Queued";
-        }
-        else
-        {
-            if (task->exec_pid)
-            {
-                errs = std::format("Queued  ( pid {} )", task->exec_pid);
-            }
-            else
-            {
-                errs = std::format("Queued  ( exit status {} )", task->exec_exit_status);
-                set_button_states(ptask);
-            }
-        }
+        errs = "Queued";
     }
     else
     {
-        if (task->type_ != vfs::file_task::type::exec)
+        if (task->err_count)
         {
-            if (task->err_count)
-            {
-                errs = std::format("Running with {} error", task->err_count);
-            }
-            else
-            {
-                errs = "Running...";
-            }
+            errs = std::format("Running with {} error", task->err_count);
         }
         else
         {
-            if (task->exec_pid)
-            {
-                errs = std::format("Running...  ( pid {} )", task->exec_pid);
-            }
-            else
-            {
-                errs = std::format("Running...  ( exit status {} )", task->exec_exit_status);
-                set_button_states(ptask);
-            }
+            errs = "Running...";
         }
     }
     gtk_label_set_text(ptask->errors, errs.data());
@@ -1576,53 +1426,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     u64 cur_speed;
     const f64 timer_elapsed = task->timer.elapsed();
 
-    if (task->type_ == vfs::file_task::type::exec)
-    {
-        // test for zombie process
-        i32 status = 0;
-        if (!ptask->complete && task->exec_pid && waitpid(task->exec_pid, &status, WNOHANG))
-        {
-            // process is no longer running (defunct zombie)
-            // glib should detect this but sometimes process goes defunct
-            // with no watch callback, so remove it from task list
-            if (task->child_watch)
-            {
-                g_source_remove(task->child_watch);
-                task->child_watch = 0;
-            }
-            g_spawn_close_pid(task->exec_pid);
-            if (task->exec_channel_out)
-            {
-                g_io_channel_shutdown(task->exec_channel_out, true, nullptr);
-            }
-            if (task->exec_channel_err)
-            {
-                g_io_channel_shutdown(task->exec_channel_err, true, nullptr);
-            }
-            task->exec_channel_out = task->exec_channel_err = nullptr;
-            if (status)
-            {
-                if (WIFEXITED(status))
-                {
-                    task->exec_exit_status = WEXITSTATUS(status);
-                }
-                else
-                {
-                    task->exec_exit_status = -1;
-                }
-            }
-            else
-            {
-                task->exec_exit_status = 0;
-            }
-            ztd::logger::info("child ZOMBIED  pid={} exit_status={}",
-                              task->exec_pid,
-                              task->exec_exit_status);
-            task->exec_pid = 0;
-            ptask->complete = true;
-        }
-    }
-    else
+    if (task->type_ != vfs::file_task::type::exec)
     {
         // cur speed
         if (task->state_pause_ == vfs::file_task::state::running)
@@ -1908,11 +1712,6 @@ ptk_file_task_update(PtkFileTask* ptask)
             {
                 ptask->keep_dlg = true;
                 ptk_file_task_progress_open(ptask);
-                // If error opens dialog after command finishes, gtk will not
-                // scroll to end on initial attempts, so force_scroll
-                // ensures it will try to scroll again - still sometimes
-                // does not work
-                ptask->force_scroll = ptask->complete && !task->exec_scroll_lock;
             }
         }
     }
@@ -1997,7 +1796,6 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
 
             if (task->type_ == vfs::file_task::type::exec)
             {
-                task->exec_is_error = true;
                 ret = false;
             }
             else if (ptask->err_mode == ptk::file_task::ptask_error::any ||

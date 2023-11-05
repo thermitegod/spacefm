@@ -15,7 +15,6 @@ project(
 )
 
 bash = find_program('bash', required : true)
-fish = find_program('fish', required : true)
 python = find_program('python3', required : true)
 
 build_root = meson.project_build_root()
@@ -287,8 +286,6 @@ preprocessor = [
     '-DPACKAGE_BUGREPORT="TODO"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
 
-    '-DFISH_PATH="@0@"'.format(fish.full_path()),
-
     '-DG_DISABLE_ASSERT',
     '-DG_DISABLE_CAST_CHECKS',
     '-DG_DISABLE_CHECKS',
@@ -336,7 +333,6 @@ data_args = [
     '-DDATADIR="/usr/share"',
     '-DSYSCONFDIR="/etc"',
     '-DPACKAGE_SCRIPTS_PATH="/usr/share/spacefm/scripts"',
-    '-DFISH_FMLIB="/usr/share/spacefm/lib/fmlib.fish"',
 ]
 
 foreach a : data_args

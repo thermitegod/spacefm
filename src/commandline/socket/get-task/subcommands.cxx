@@ -226,16 +226,3 @@ commandline::socket::get_task::queue_state(CLI::App* app, const socket_subcomman
     const auto run_subcommand = [&opt]() { opt->property = "queue_state"; };
     sub->callback(run_subcommand);
 }
-
-/*
- * subcommand popup_handler
- */
-
-void
-commandline::socket::get_task::popup_handler(CLI::App* app, const socket_subcommand_data_t& opt)
-{
-    auto* sub = app->add_subcommand("popup-handler", "Get task popup-handler");
-
-    const auto run_subcommand = [&opt]() { opt->property = "popup_handler"; };
-    sub->callback(run_subcommand);
-}

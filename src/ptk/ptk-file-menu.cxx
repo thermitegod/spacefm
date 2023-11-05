@@ -2013,11 +2013,11 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         {
             const auto data_dir = vfs::user_dirs->data_dir();
             command = std::format("update-mime-database {}/mime", data_dir.string());
-            ztd::logger::info("COMMAND={}", command);
+            ztd::logger::info("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
 
             command = std::format("update-desktop-database {}/applications", data_dir.string());
-            ztd::logger::info("COMMAND={}", command);
+            ztd::logger::info("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
             break;
         }

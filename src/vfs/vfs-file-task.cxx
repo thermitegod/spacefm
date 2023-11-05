@@ -50,14 +50,11 @@
 
 #include "terminal-handlers.hxx"
 
-#include "main-window.hxx"
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-utils.hxx"
 
-#include "write.hxx"
 #include "utils.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-file-task.hxx"
 
@@ -1184,203 +1181,16 @@ call_state_callback(const std::shared_ptr<vfs::file_task>& task, const vfs::file
     }
 }
 
-static void
-cb_exec_child_cleanup(pid_t pid, i32 status, char* tmp_file)
-{ // delete tmp files after async task terminates
-    // ztd::logger::info("cb_exec_child_cleanup pid={} status={} file={}", pid, status, tmp_file );
-    g_spawn_close_pid(pid);
-    if (tmp_file)
-    {
-        std::filesystem::remove(tmp_file);
-        std::free(tmp_file);
-    }
-    ztd::logger::info("async child finished  pid={} status={}", pid, status);
-}
-
-static void
-cb_exec_child_watch(pid_t pid, i32 status, const std::shared_ptr<vfs::file_task>& task)
-{
-    bool bad_status = false;
-    g_spawn_close_pid(pid);
-    task->exec_pid = 0;
-    task->child_watch = 0;
-
-    if (status)
-    {
-        if (WIFEXITED(status))
-        {
-            task->exec_exit_status = WEXITSTATUS(status);
-        }
-        else
-        {
-            bad_status = true;
-            task->exec_exit_status = -1;
-        }
-    }
-    else
-    {
-        task->exec_exit_status = 0;
-    }
-
-    if (!task->exec_keep_tmp && task->exec_script)
-    {
-        const auto checked_exec_script = task->exec_script.value();
-        if (std::filesystem::exists(checked_exec_script))
-        {
-            std::filesystem::remove(checked_exec_script);
-        }
-    }
-
-    ztd::logger::info("child finished  pid={} exit_status={}",
-                      pid,
-                      bad_status ? -1 : task->exec_exit_status);
-
-    if (!task->exec_exit_status && !bad_status)
-    {
-        if (!task->custom_percent)
-        {
-            task->percent = 100;
-        }
-    }
-    else
-    {
-        call_state_callback(task, vfs::file_task::state::error);
-    }
-
-    if (bad_status || (!task->exec_channel_out && !task->exec_channel_err))
-    {
-        call_state_callback(task, vfs::file_task::state::finish);
-    }
-}
-
-static bool
-cb_exec_out_watch(GIOChannel* channel, GIOCondition cond,
-                  const std::shared_ptr<vfs::file_task>& task)
-{
-    if ((cond & G_IO_NVAL))
-    {
-        g_io_channel_unref(channel);
-        return false;
-    }
-    else if (!(cond & G_IO_IN))
-    {
-        if ((cond & G_IO_HUP))
-        {
-            g_io_channel_unref(channel);
-            if (channel == task->exec_channel_out)
-            {
-                task->exec_channel_out = nullptr;
-            }
-            else if (channel == task->exec_channel_err)
-            {
-                task->exec_channel_err = nullptr;
-            }
-            if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
-            {
-                call_state_callback(task, vfs::file_task::state::finish);
-            }
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    else if (!(fcntl(g_io_channel_unix_get_fd(channel), F_GETFL) != -1 || errno != EBADF))
-    {
-        // bad file descriptor - occurs with stop on fast output
-        g_io_channel_unref(channel);
-        if (channel == task->exec_channel_out)
-        {
-            task->exec_channel_out = nullptr;
-        }
-        else if (channel == task->exec_channel_err)
-        {
-            task->exec_channel_err = nullptr;
-        }
-        if (!task->exec_channel_out && !task->exec_channel_err && !task->exec_pid)
-        {
-            call_state_callback(task, vfs::file_task::state::finish);
-        }
-        return false;
-    }
-
-    // GError *error = nullptr;
-    u64 size;
-    char buf[2048];
-    if (g_io_channel_read_chars(channel, buf, sizeof(buf), &size, nullptr) == G_IO_STATUS_NORMAL &&
-        size > 0)
-    {
-        task->append_add_log(buf);
-    }
-    else
-    {
-        ztd::logger::info("cb_exec_out_watch: g_io_channel_read_chars != G_IO_STATUS_NORMAL");
-    }
-
-    return true;
-}
-
 void
 vfs::file_task::file_exec(const std::filesystem::path& src_file)
 {
-    // this function is now thread safe but is not currently run in
-    // another thread because gio adds watches to main loop thread anyway
-
-    // ztd::logger::info("vfs_file_task_exec");
-    // this->exec_keep_tmp = true;
-
-    this->lock();
-
-    GtkWidget* parent = nullptr;
-    if (this->exec_browser)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this->exec_browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_browser));
-#endif
-    }
-    else if (this->exec_desktop)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(this->exec_desktop)));
-#elif (GTK_MAJOR_VERSION == 3)
-        parent = gtk_widget_get_toplevel(GTK_WIDGET(this->exec_desktop));
-#endif
-    }
-
     this->state_ = vfs::file_task::state::running;
     this->current_file = src_file;
-    this->total_size = 0;
-    this->percent = 0;
-    this->unlock();
 
-    if (this->should_abort())
-    {
-        return;
-    }
-
-    // make tmpdir
-    const auto tmp = vfs::user_dirs->program_tmp_dir();
-    if (!std::filesystem::is_directory(tmp))
-    {
-        // do not use ptk_show_message() if non-main thread
-        // this->task_error(0, str);
-        ptk_show_message(GTK_WINDOW(parent),
-                         GtkMessageType::GTK_MESSAGE_ERROR,
-                         "Error",
-                         GtkButtonsType::GTK_BUTTONS_OK,
-                         "Cannot create temporary directory");
-        call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
-        // ztd::logger::info("vfs_file_task_exec DONE ERROR");
-        return;
-    }
-
-    std::string terminal;
     if (this->exec_terminal)
     {
         // get terminal
+        std::string terminal;
         const auto terminal_s = xset_get_s(xset::name::main_terminal);
         if (terminal_s)
         {
@@ -1389,273 +1199,35 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file)
 
         if (terminal.empty())
         {
-            // do not use ptk_show_message() if non-main thread
-            // this->task_error(0, str);
-            ptk_show_message(GTK_WINDOW(parent),
+            ptk_show_message(nullptr,
                              GtkMessageType::GTK_MESSAGE_ERROR,
                              "Terminal Not Available",
                              GtkButtonsType::GTK_BUTTONS_OK,
                              "Please set a valid terminal program in View|Preferences|Advanced");
 
             call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
-            // ztd::logger::info("vfs_file_task_exec DONE ERROR");
-            return;
-        }
-    }
-
-    // Build exec script
-    if (!this->exec_direct)
-    {
-        // get script name
-        while (true)
-        {
-            const std::filesystem::path hexname = std::format("{}.fish", ztd::randhex());
-            const auto new_exec_script = tmp / hexname;
-            if (!std::filesystem::exists(new_exec_script))
-            {
-                this->exec_script = new_exec_script;
-                break;
-            }
-        }
-
-        const auto checked_exec_script = this->exec_script.value();
-
-        // open buffer
-        std::string buf;
-
-        // build - header
-        buf.append(std::format("#!{}\nsource {}\n\n", FISH_PATH, FISH_FMLIB));
-
-        // build - exports
-        if (this->exec_export && (this->exec_browser || this->exec_desktop))
-        {
-            if (!this->exec_browser)
-            {
-                this->task_error(errno, "Error writing temporary file");
-
-                if (!this->exec_keep_tmp && this->exec_script)
-                {
-                    if (std::filesystem::exists(checked_exec_script))
-                    {
-                        std::filesystem::remove(checked_exec_script);
-                    }
-                }
-                call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
-                // ztd::logger::info("vfs_file_task_exec DONE ERROR");
-                return;
-            }
-
-            if (this->current_dest)
-            {
-                const auto checked_current_dest = this->current_dest.value();
-                buf.append(
-                    main_write_exports(this->shared_from_this(), checked_current_dest.string()));
-            }
-        }
-        else
-        {
-            if (this->exec_export && !this->exec_browser && !this->exec_desktop)
-            {
-                this->exec_export = false;
-                ztd::logger::warn("exec_export set without exec_browser/exec_desktop");
-            }
-        }
-
-        // build - export vars
-        if (this->exec_export)
-        {
-            buf.append(
-                std::format("set fm_import {}\n", ztd::shell::quote(checked_exec_script.string())));
-        }
-        else
-        {
-            buf.append(std::format("set fm_import\n"));
-        }
-
-        buf.append(
-            std::format("set fm_source {}\n\n", ztd::shell::quote(checked_exec_script.string())));
-
-        // build - command
-        ztd::logger::info("TASK_COMMAND({})={}", fmt::ptr(this->exec_ptask), this->exec_command);
-
-        buf.append(std::format("{}\n\n", this->exec_command));
-        buf.append(std::format("set fm_err $status\n\n"));
-
-        // build - press enter to close
-        if (!terminal.empty() && this->exec_keep_terminal)
-        {
-            buf.append("fm_enter_for_shell\n\n");
-        }
-
-        buf.append(std::format("exit $fm_err\n"));
-        // ztd::logger::debug(buf);
-
-        const bool result = write_file(this->exec_script.value(), buf);
-        if (!result)
-        {
-            this->task_error(errno, "Error writing temporary file");
-
-            if (!this->exec_keep_tmp)
-            {
-                if (std::filesystem::exists(checked_exec_script))
-                {
-                    std::filesystem::remove(checked_exec_script);
-                }
-            }
-            call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
-            // ztd::logger::info("vfs_file_task_exec DONE ERROR");
             return;
         }
 
-        // set permissions
-        chmod(checked_exec_script.c_str(), 0700);
-    }
-
-    this->percent = 50;
-
-    // Spawn
-    std::vector<std::string> argv;
-
-    if (!terminal.empty())
-    {
-        // terminal
-        const auto terminal_s = xset_get_s(xset::name::main_terminal);
-        if (terminal_s)
+        std::string term_exec_command;
+        const auto terminal_args = terminal_handlers->get_terminal_args(terminal_s.value());
+        for (const std::string_view terminal_arg : terminal_args)
         {
-            const auto terminal_args = terminal_handlers->get_terminal_args(terminal_s.value());
-            argv.reserve(terminal_args.size());
-            for (const std::string_view terminal_arg : terminal_args)
-            {
-                argv.emplace_back(terminal_arg);
-            }
+            term_exec_command.append(terminal_arg);
+            term_exec_command.append(" ");
         }
-    }
+        term_exec_command.append(ztd::shell::quote(this->exec_command));
 
-    if (this->exec_direct)
-    {
-        // add direct args - not currently used
-        argv = this->exec_argv;
+        ztd::logger::info("COMMAND({})", term_exec_command);
+        Glib::spawn_command_line_async(term_exec_command);
     }
     else
     {
-        argv.emplace_back(this->exec_script.value());
+        ztd::logger::info("COMMAND({})", this->exec_command);
+        Glib::spawn_command_line_async(this->exec_command);
     }
 
-    pid_t pid;
-    i32 out, err;
-    try
-    {
-        std::filesystem::path working_directory;
-        if (this->dest_dir)
-        {
-            working_directory = this->dest_dir.value();
-        }
-        else
-        {
-            working_directory = vfs::user_dirs->home_dir();
-        }
-
-        Glib::spawn_async_with_pipes(working_directory,
-                                     argv,
-#if (GTK_MAJOR_VERSION == 4)
-                                     Glib::SpawnFlags::DO_NOT_REAP_CHILD,
-#elif (GTK_MAJOR_VERSION == 3)
-                                     Glib::SpawnFlags::SPAWN_DO_NOT_REAP_CHILD,
-#endif
-                                     Glib::SlotSpawnChildSetup(),
-                                     &pid,
-                                     nullptr,
-                                     this->exec_sync ? &out : nullptr,
-                                     this->exec_sync ? &err : nullptr);
-    }
-    catch (const Glib::SpawnError& e)
-    {
-        ztd::logger::error("    glib_error_code={}", magic_enum::enum_integer(e.code()));
-
-        if (errno)
-        {
-            const std::string errno_msg = std::strerror(errno);
-            ztd::logger::info("    result={} ( {} )", errno, errno_msg);
-        }
-
-        if (!this->exec_keep_tmp && this->exec_sync && this->exec_script)
-        {
-            const auto checked_exec_script = this->exec_script.value();
-            if (std::filesystem::exists(checked_exec_script))
-            {
-                std::filesystem::remove(checked_exec_script);
-            }
-        }
-        const std::string cmd = ztd::join(argv, " ");
-        const std::string msg =
-            std::format("Error executing '{}'\nGlib Spawn Error Code {}, {}\nRun in a terminal "
-                        "for full debug info\n",
-                        cmd,
-                        magic_enum::enum_integer(e.code()),
-                        Glib::strerror(e.code()).c_str());
-        this->task_error(errno, msg);
-        call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
-        // ztd::logger::info("vfs_file_task_exec DONE ERROR");
-        return;
-    }
-
-    ztd::logger::info("SPAWN=\"{}\" pid={}", ztd::join(argv, " "), pid);
-
-    if (!this->exec_sync)
-    {
-        // catch termination to waitpid and delete tmp if needed
-        // task can be destroyed while this watch is still active
-        if (!this->exec_keep_tmp && !this->exec_direct && this->exec_script)
-        {
-            const auto checked_exec_script = this->exec_script.value();
-            g_child_watch_add(pid,
-                              (GChildWatchFunc)cb_exec_child_cleanup,
-                              ztd::strdup(checked_exec_script));
-        }
-        else
-        {
-            g_child_watch_add(pid, (GChildWatchFunc)cb_exec_child_cleanup, nullptr);
-        }
-        call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
-        return;
-    }
-
-    this->exec_pid = pid;
-
-    // catch termination (always is run in the main loop thread)
-    this->child_watch = g_child_watch_add(pid, (GChildWatchFunc)cb_exec_child_watch, this);
-
-    // create channels for output
-    fcntl(out, F_SETFL, O_NONBLOCK);
-    fcntl(err, F_SETFL, O_NONBLOCK);
-    this->exec_channel_out = g_io_channel_unix_new(out);
-    this->exec_channel_err = g_io_channel_unix_new(err);
-    g_io_channel_set_close_on_unref(this->exec_channel_out, true);
-    g_io_channel_set_close_on_unref(this->exec_channel_err, true);
-
-    // Add watches to channels
-    // These are run in the main loop thread so use G_PRIORITY_LOW to not
-    // interfere with g_idle_add in vfs-dir/vfs-async-task etc
-    // "Use this for very low priority background tasks. It is not used within
-    // GLib or GTK+."
-    g_io_add_watch_full(this->exec_channel_out,
-                        G_PRIORITY_LOW,
-                        GIOCondition(G_IO_IN | G_IO_HUP | G_IO_NVAL | G_IO_ERR), // want ERR?
-                        (GIOFunc)cb_exec_out_watch,
-                        this,
-                        nullptr);
-    g_io_add_watch_full(this->exec_channel_err,
-                        G_PRIORITY_LOW,
-                        GIOCondition(G_IO_IN | G_IO_HUP | G_IO_NVAL | G_IO_ERR), // want ERR?
-                        (GIOFunc)cb_exec_out_watch,
-                        this,
-                        nullptr);
-
-    // running
-    this->state_ = vfs::file_task::state::running;
-
-    // ztd::logger::info("vfs_file_task_exec DONE");
-    return; // exit thread
+    call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
 }
 
 static bool

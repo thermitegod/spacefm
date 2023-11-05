@@ -83,12 +83,12 @@ on_mime_change_timer(void* user_data)
     // ztd::logger::debug("MIME-UPDATE on_timer");
     const auto data_dir = vfs::user_dirs->data_dir();
     const std::string command1 = std::format("update-mime-database {}/mime", data_dir.string());
-    ztd::logger::info("COMMAND={}", command1);
+    ztd::logger::info("COMMAND({})", command1);
     Glib::spawn_command_line_async(command1);
 
     const std::string command2 =
         std::format("update-desktop-database {}/applications", data_dir.string());
-    ztd::logger::info("COMMAND={}", command2);
+    ztd::logger::info("COMMAND({})", command2);
     Glib::spawn_command_line_async(command2);
 
     g_source_remove(mime_change_timer);

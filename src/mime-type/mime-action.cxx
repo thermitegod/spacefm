@@ -70,7 +70,7 @@ update_desktop_database()
 {
     const auto path = vfs::user_dirs->data_dir() / "applications";
     const std::string command = std::format("update-desktop-database {}", path.string());
-    ztd::logger::info("COMMAND={}", command);
+    ztd::logger::info("COMMAND({})", command);
     Glib::spawn_command_line_sync(command);
 }
 
@@ -671,7 +671,7 @@ mime_type_get_default_action(const std::string_view mime_type)
     assert(mime_type.empty() != true);
 
     const auto command = std::format("xdg-mime query default {}", mime_type);
-    // ztd::logger::debug("COMMAND={}", command);
+    // ztd::logger::debug("COMMAND({})", command);
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output, nullptr, nullptr);
     if (standard_output.empty())
@@ -689,6 +689,6 @@ mime_type_set_default_action(const std::string_view mime_type, const std::string
     assert(desktop_id.empty() != true);
 
     const auto command = std::format("xdg-mime default {} {}", desktop_id, mime_type);
-    ztd::logger::debug("COMMAND={}", command);
+    ztd::logger::debug("COMMAND({})", command);
     Glib::spawn_command_line_sync(command);
 }

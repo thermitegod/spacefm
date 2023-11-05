@@ -37,8 +37,6 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "xset/xset.hxx"
-
 namespace vfs
 {
     struct file_task : public std::enable_shared_from_this<file_task>
@@ -214,26 +212,8 @@ namespace vfs
         bool exec_show_output{false};
         bool exec_show_error{false};
         bool exec_terminal{false};
-        bool exec_keep_terminal{false};
-        bool exec_export{false};
-        bool exec_direct{false};
-        std::vector<std::string> exec_argv{}; // for exec_direct, command ignored
-                                              // for su commands, must use fish -c
-                                              // as su does not execute binaries
-        std::optional<std::filesystem::path> exec_script{};
-        bool exec_keep_tmp{false}; // diagnostic to keep temp files
         void* exec_browser{nullptr};
-        void* exec_desktop{nullptr};
         std::string exec_icon{};
-        pid_t exec_pid{0};
-        i32 exec_exit_status{0};
-        u32 child_watch{0};
-        bool exec_is_error{false};
-        GIOChannel* exec_channel_out{nullptr};
-        GIOChannel* exec_channel_err{nullptr};
-        bool exec_scroll_lock{false};
-        xset_t exec_set{nullptr};
         GCond* exec_cond{nullptr};
-        void* exec_ptask{nullptr};
     };
 } // namespace vfs

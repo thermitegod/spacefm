@@ -71,7 +71,7 @@ ptk_archiver_create(PtkFileBrowser* file_browser,
     const auto shell_file_list = archiver_create_shell_file_list(sel_files);
 
     const auto command = std::format("file-roller --add {}", shell_file_list);
-    ztd::logger::info("COMMAND={}", command);
+    ztd::logger::info("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }
 
@@ -100,7 +100,7 @@ ptk_archiver_extract(PtkFileBrowser* file_browser,
     }
     command.append(shell_file_list);
 
-    ztd::logger::info("COMMAND={}", command);
+    ztd::logger::info("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }
 
@@ -118,6 +118,6 @@ ptk_archiver_open(PtkFileBrowser* file_browser,
     const auto shell_file_list = archiver_create_shell_file_list(sel_files);
 
     const auto command = std::format("file-roller {}", shell_file_list);
-    ztd::logger::info("COMMAND={}", command);
+    ztd::logger::info("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }

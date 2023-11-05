@@ -3067,7 +3067,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptask->task->exec_export = false;
                 if (auto_open)
                 {
                     auto_open->path = full_path;
@@ -3127,7 +3126,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptask->task->exec_export = false;
                 if (auto_open)
                 {
                     auto_open->path = full_path;
@@ -3186,7 +3184,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptask->task->exec_export = false;
                 if (auto_open)
                 {
                     auto_open->path = full_path;
@@ -3237,7 +3234,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptask->task->exec_export = false;
                 ptk_file_task_run(ptask);
             }
             else if (link || link_target)
@@ -3273,7 +3269,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptask->task->exec_export = false;
                 ptk_file_task_run(ptask);
             }
             // need move?  (do move as task in case it takes a long time)
@@ -3297,7 +3292,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptask->task->exec_export = false;
                 ptk_file_task_run(ptask);
             }
             else

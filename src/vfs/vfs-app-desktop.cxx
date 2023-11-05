@@ -508,9 +508,7 @@ vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
     ptask->task->exec_command = command;
 
     ptask->task->exec_terminal = true;
-    // ptask->task->exec_keep_terminal = true;  // for test only
     ptask->task->exec_sync = false;
-    ptask->task->exec_export = false;
 
     ptk_file_task_run(ptask);
 }

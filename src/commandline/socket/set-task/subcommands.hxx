@@ -34,6 +34,5 @@ namespace commandline::socket::set_task
     void avgspeed(CLI::App* app, const socket_subcommand_data_t& opt);
     void avgremain(CLI::App* app, const socket_subcommand_data_t& opt);
     void queue_state(CLI::App* app, const socket_subcommand_data_t& opt);
-    void popup_handler(CLI::App* app, const socket_subcommand_data_t& opt);
 
 } // namespace commandline::socket::set_task

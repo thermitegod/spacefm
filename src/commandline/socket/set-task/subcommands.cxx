@@ -262,18 +262,3 @@ commandline::socket::set_task::queue_state(CLI::App* app, const socket_subcomman
     setup_subcommand_set_task_queue_state_queued(app, opt);
     setup_subcommand_set_task_queue_state_stop(app, opt);
 }
-
-/*
- * subcommand popup_handler
- */
-
-void
-commandline::socket::set_task::popup_handler(CLI::App* app, const socket_subcommand_data_t& opt)
-{
-    auto* sub = app->add_subcommand("popup-handler", "Set task popup-handler");
-
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
-
-    const auto run_subcommand = [&opt]() { opt->property = "popup_handler"; };
-    sub->callback(run_subcommand);
-}

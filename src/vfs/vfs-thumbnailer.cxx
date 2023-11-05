@@ -294,7 +294,7 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
                                              thumb_size,
                                              ztd::shell::quote(file->path().string()),
                                              ztd::shell::quote(thumbnail_file.string()));
-            // ztd::logger::info("COMMAND={}", command);
+            // ztd::logger::info("COMMAND({})", command);
             Glib::spawn_command_line_sync(command);
 
             if (!std::filesystem::exists(thumbnail_file))

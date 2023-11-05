@@ -186,7 +186,6 @@ setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set_task::avgspeed(sub, opt);
     commandline::socket::set_task::avgremain(sub, opt);
     commandline::socket::set_task::queue_state(sub, opt);
-    commandline::socket::set_task::popup_handler(sub, opt);
 }
 
 /*
@@ -222,7 +221,6 @@ setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::get_task::started(sub, opt);
     commandline::socket::get_task::status(sub, opt);
     commandline::socket::get_task::queue_state(sub, opt);
-    commandline::socket::get_task::popup_handler(sub, opt);
 }
 
 /*

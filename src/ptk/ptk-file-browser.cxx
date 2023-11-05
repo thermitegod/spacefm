@@ -5588,7 +5588,6 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     ptask->task->exec_sync = true;
     ptask->task->exec_show_error = true;
     ptask->task->exec_show_output = false;
-    ptask->task->exec_export = false;
     ptk_file_task_run(ptask);
 }
 

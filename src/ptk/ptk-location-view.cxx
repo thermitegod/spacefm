@@ -55,8 +55,6 @@
 #include "settings.hxx"
 #include "settings/app.hxx"
 
-#include "utils.hxx"
-
 // This limits the small icon size for side panes and task list
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
@@ -743,7 +741,6 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
-    ptask->task->exec_export = !!file_browser;
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
@@ -787,7 +784,6 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = unmount_command;
     ptask->task->exec_sync = true;
-    ptask->task->exec_export = !!file_browser;
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
@@ -833,7 +829,6 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = unmount_command;
         ptask->task->exec_sync = true;
-        ptask->task->exec_export = !!file_browser;
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_show_error = true;
         ptask->task->exec_terminal = false;
@@ -942,7 +937,6 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
     PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view());
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
-    ptask->task->exec_export = true;
     ptask->task->exec_browser = file_browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
@@ -1015,7 +1009,6 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
         PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view());
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
-        ptask->task->exec_export = true;
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;
@@ -1090,7 +1083,6 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
-        ptask->task->exec_export = !!file_browser;
         ptask->task->exec_browser = file_browser;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;

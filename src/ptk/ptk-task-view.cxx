@@ -383,8 +383,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, PtkFileTask
                 gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
             }
             if (ptask && ptask->task && !ptask->complete &&
-                (ptask->task->type_ != vfs::file_task::type::exec || ptask->task->exec_pid ||
-                 job == main_window_job::stop))
+                (ptask->task->type_ != vfs::file_task::type::exec || job == main_window_job::stop))
             {
                 switch (job)
                 {
@@ -721,13 +720,6 @@ ptk_task_view_get_selected_task(GtkWidget* view)
     return ptask;
 }
 
-static void
-on_show_task_dialog(GtkWidget* widget, GtkWidget* view)
-{
-    (void)widget;
-    ptk_task_view_show_task_dialog(view);
-}
-
 void
 ptk_task_view_show_task_dialog(GtkWidget* view)
 {
@@ -878,23 +870,20 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             set = xset_get(xset::name::task_pause);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
-            set->disable =
-                (!ptask || ptask->task->state_pause_ == vfs::file_task::state::pause ||
-                 (ptask->task->type_ == vfs::file_task::type::exec && !ptask->task->exec_pid));
+            set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::pause ||
+                            ptask->task->type_ == vfs::file_task::type::exec);
 
             set = xset_get(xset::name::task_que);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
-            set->disable =
-                (!ptask || ptask->task->state_pause_ == vfs::file_task::state::queue ||
-                 (ptask->task->type_ == vfs::file_task::type::exec && !ptask->task->exec_pid));
+            set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::queue ||
+                            ptask->task->type_ == vfs::file_task::type::exec);
 
             set = xset_get(xset::name::task_resume);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob1(set, "task", ptask);
-            set->disable =
-                (!ptask || ptask->task->state_pause_ == vfs::file_task::state::running ||
-                 (ptask->task->type_ == vfs::file_task::type::exec && !ptask->task->exec_pid));
+            set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::running ||
+                            ptask->task->type_ == vfs::file_task::type::exec);
 
             xset_set_cb(xset::name::task_stop_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_pause_all, (GFunc)on_task_stop, view);
@@ -903,48 +892,22 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             set = xset_get(xset::name::task_all);
             set->disable = !is_tasks;
 
-            std::vector<xset::name> context_menu_entries;
-            if (ptask && ptask->pop_handler)
-            {
-                xset_set_cb(xset::name::task_showout, (GFunc)on_show_task_dialog, view);
-
-                context_menu_entries = {
-                    xset::name::task_stop,
-                    xset::name::separator,
-                    xset::name::task_pause,
-                    xset::name::task_que,
-                    xset::name::task_resume,
-                    xset::name::task_showout,
-                    xset::name::task_all,
-                    xset::name::separator,
-                    xset::name::task_show_manager,
-                    xset::name::task_hide_manager,
-                    xset::name::separator,
-                    xset::name::task_columns,
-                    xset::name::task_popups,
-                    xset::name::task_errors,
-                    xset::name::task_queue,
-                };
-            }
-            else
-            {
-                context_menu_entries = {
-                    xset::name::task_stop,
-                    xset::name::separator,
-                    xset::name::task_pause,
-                    xset::name::task_que,
-                    xset::name::task_resume,
-                    xset::name::task_all,
-                    xset::name::separator,
-                    xset::name::task_show_manager,
-                    xset::name::task_hide_manager,
-                    xset::name::separator,
-                    xset::name::task_columns,
-                    xset::name::task_popups,
-                    xset::name::task_errors,
-                    xset::name::task_queue,
-                };
-            }
+            std::vector<xset::name> context_menu_entries = {
+                xset::name::task_stop,
+                xset::name::separator,
+                xset::name::task_pause,
+                xset::name::task_que,
+                xset::name::task_resume,
+                xset::name::task_all,
+                xset::name::separator,
+                xset::name::task_show_manager,
+                xset::name::task_hide_manager,
+                xset::name::separator,
+                xset::name::task_columns,
+                xset::name::task_popups,
+                xset::name::task_errors,
+                xset::name::task_queue,
+            };
 
 #if (GTK_MAJOR_VERSION == 4)
             GtkEventController* accel_group = gtk_shortcut_controller_new();
@@ -998,18 +961,8 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
     gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
     if (ptask)
     {
-        if (ptask->pop_handler)
-        {
-            // show custom dialog
-            ztd::logger::info("TASK_POPUP >>> {}", ptask->pop_handler);
-            const std::string command = std::format("{} -c {}", FISH_PATH, ptask->pop_handler);
-            Glib::spawn_command_line_async(command);
-        }
-        else
-        {
-            // show normal dialog
-            ptk_task_view_show_task_dialog(view);
-        }
+        // show normal dialog
+        ptk_task_view_show_task_dialog(view);
     }
 }
 

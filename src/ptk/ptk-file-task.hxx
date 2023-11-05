@@ -81,7 +81,6 @@ struct PtkFileTask
     bool aborted{false};
     bool pause_change{false};
     bool pause_change_view{false};
-    bool force_scroll{false};
 
     /* <private> */
     u32 timeout{0};
@@ -92,7 +91,6 @@ struct PtkFileTask
     void* user_data{nullptr};
     bool keep_dlg{false};
     bool pop_detail{false};
-    char* pop_handler{nullptr};
 
     GCond* query_cond{nullptr};
     GCond* query_cond_last{nullptr};

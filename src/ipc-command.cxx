@@ -1517,19 +1517,6 @@ run_ipc_command(const std::string_view socket_commands_json)
             main_task_start_queued(main_window->task_view, nullptr);
             return {SOCKET_SUCCESS, ""};
         }
-        else if (property == "popup-handler")
-        {
-            std::free(ptask->pop_handler);
-            if (value.empty())
-            {
-                ptask->pop_handler = nullptr;
-            }
-            else
-            {
-                ptask->pop_handler = ztd::strdup(value.data());
-            }
-            return {SOCKET_SUCCESS, ""};
-        }
         else
         {
             return {SOCKET_INVALID, std::format("invalid task property '{}'", subproperty)};
@@ -1643,14 +1630,6 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_SUCCESS, "stop"};
             }
         }
-        else if (property == "popup-handler")
-        {
-            if (ptask->pop_handler)
-            {
-                return {SOCKET_SUCCESS, std::format("{}", ptask->pop_handler)};
-            }
-            return {SOCKET_SUCCESS, ""};
-        }
         else
         {
             return {SOCKET_INVALID, std::format("invalid task property '{}'", property)};
@@ -1679,7 +1658,6 @@ run_ipc_command(const std::string_view socket_commands_json)
             // flags
             bool opt_task = json["task"];
             bool opt_popup = json["popup"];
-            bool opt_scroll = json["scroll"];
             bool opt_terminal = json["terminal"];
             const std::string opt_user = json["user"];
             const std::string opt_title = json["title"];
@@ -1707,13 +1685,10 @@ run_ipc_command(const std::string_view socket_commands_json)
             ptask->task->exec_command = cmd;
             ptask->task->exec_icon = opt_icon;
             ptask->task->exec_terminal = opt_terminal;
-            ptask->task->exec_keep_terminal = false;
             ptask->task->exec_sync = opt_task;
             ptask->task->exec_popup = opt_popup;
             ptask->task->exec_show_output = opt_popup;
             ptask->task->exec_show_error = true;
-            ptask->task->exec_scroll_lock = !opt_scroll;
-            ptask->task->exec_export = true;
             if (opt_popup)
             {
                 gtk_window_present(GTK_WINDOW(main_window));
@@ -1814,11 +1789,8 @@ run_ipc_command(const std::string_view socket_commands_json)
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_terminal = false;
-            ptask->task->exec_keep_terminal = false;
             ptask->task->exec_sync = true;
-            ptask->task->exec_export = false;
             ptask->task->exec_show_error = true;
-            ptask->task->exec_scroll_lock = false;
             ptk_file_task_run(ptask);
         }
         else if (property == "copy" || property == "move" || property == "link" ||

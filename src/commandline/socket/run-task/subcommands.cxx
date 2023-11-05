@@ -70,7 +70,6 @@ run_subcommand_cmd(const socket_subcommand_data_t& opt, const run_task_cmd_opt_d
     // cmd task flags
     json["task"] = task_opt->task;
     json["popup"] = task_opt->popup;
-    json["scroll"] = task_opt->scroll;
     json["terminal"] = task_opt->terminal;
     json["user"] = task_opt->user;
     json["title"] = task_opt->title;
@@ -95,7 +94,6 @@ commandline::socket::run_task::cmd(CLI::App* app, const socket_subcommand_data_t
     // named flags
     sub->add_flag("--task", task_opt->task);
     sub->add_flag("--popup", task_opt->task);
-    sub->add_flag("--scroll", task_opt->task);
     sub->add_flag("--terminal", task_opt->terminal);
     sub->add_option("--user", task_opt->user)->expected(1);
     sub->add_option("--title", task_opt->title)->expected(1);
