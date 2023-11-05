@@ -48,28 +48,10 @@ vfs::file::create(const std::filesystem::path& path) noexcept
 
 vfs::file::file(const std::filesystem::path& path) : path_(path)
 {
-    // ztd::logger::debug("vfs::file::file({})    {}", fmt::ptr(this), this->path);
+    // ztd::logger::debug("vfs::file::file({})    {}", fmt::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
-    this->update();
-}
 
-vfs::file::~file()
-{
-    // ztd::logger::debug("vfs::file::~file({})   {}", fmt::ptr(this), this->path);
-    if (this->big_thumbnail_)
-    {
-        g_object_unref(this->big_thumbnail_);
-    }
-    if (this->small_thumbnail_)
-    {
-        g_object_unref(this->small_thumbnail_);
-    }
-}
-
-bool
-vfs::file::update() noexcept
-{
-    if (std::filesystem::equivalent(this->path_, "/"))
+    if (this->path_ == "/")
     {
         // special case, using std::filesystem::path::filename() on the root
         // directory returns an empty string. that causes subtle bugs
@@ -83,6 +65,28 @@ vfs::file::update() noexcept
         this->display_name_ = this->path_.filename();
     }
 
+    // Is a hidden file
+    this->is_hidden_ = this->name_.starts_with('.');
+
+    this->update();
+}
+
+vfs::file::~file()
+{
+    // ztd::logger::debug("vfs::file::~file({})   {}", fmt::ptr(this), this->path_);
+    if (this->big_thumbnail_)
+    {
+        g_object_unref(this->big_thumbnail_);
+    }
+    if (this->small_thumbnail_)
+    {
+        g_object_unref(this->small_thumbnail_);
+    }
+}
+
+bool
+vfs::file::update() noexcept
+{
     this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow);
     if (!this->file_stat_)
     {
@@ -103,9 +107,6 @@ vfs::file::update() noexcept
 
     // disk file size formated
     this->display_disk_size_ = vfs_file_size_format(this->size_on_disk());
-
-    // hidden
-    this->is_hidden_ = this->name_.starts_with('.');
 
     // owner
     const auto pw = ztd::passwd(this->file_stat_.uid());
