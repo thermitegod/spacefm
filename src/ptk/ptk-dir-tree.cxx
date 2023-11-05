@@ -198,7 +198,6 @@ ptk_dir_tree_init(PtkDirTree* tree)
     tree->root->tree = tree;
     tree->root->n_children = 1;
     PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/");
-    child->file->update_display_name("File System");
     tree->root->children = child;
 }
 
@@ -430,7 +429,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
         {
             if (file)
             {
-                g_value_set_string(value, file->display_name().data());
+                g_value_set_string(value, file->name().data());
             }
             else
             {

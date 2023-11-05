@@ -469,7 +469,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             }
             break;
         case ptk::file_list::column::name:
-            g_value_set_string(value, file->display_name().data());
+            g_value_set_string(value, file->name().data());
             break;
         case ptk::file_list::column::size:
             g_value_set_string(value, file->display_size().data());

@@ -4290,7 +4290,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
             }
 
             // test name
-            const auto name = file->display_name();
+            const auto name = file->name();
             const bool select = ztd::fnmatch(key, name);
 
             // do selection and scroll to first selected
@@ -5216,7 +5216,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
             }
 
             // test name
-            const auto name = file->display_name();
+            const auto name = file->name();
             if (std::filesystem::equivalent(name, seek_name))
             {
                 // exact match (may be file or dir)

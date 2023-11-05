@@ -57,12 +57,10 @@ vfs::file::file(const std::filesystem::path& path) : path_(path)
         // directory returns an empty string. that causes subtle bugs
         // so hard code "/" as the value for root.
         this->name_ = "/";
-        this->display_name_ = "/";
     }
     else
     {
         this->name_ = this->path_.filename();
-        this->display_name_ = this->path_.filename();
     }
 
     // Is a hidden file
@@ -131,19 +129,6 @@ const std::string_view
 vfs::file::name() const noexcept
 {
     return this->name_;
-}
-
-// Get displayed name encoded in UTF-8
-const std::string_view
-vfs::file::display_name() const noexcept
-{
-    return this->display_name_;
-}
-
-void
-vfs::file::update_display_name(const std::string_view new_display_name) noexcept
-{
-    this->display_name_ = new_display_name;
 }
 
 const std::filesystem::path&
@@ -794,12 +779,6 @@ vfs::file::load_special_info() noexcept
 
     this->is_special_desktop_entry_ = true;
     const auto desktop = vfs::desktop::create(this->path_);
-
-    // MOD  display real filenames of .desktop files not in desktop directory
-    // if (std::filesystem::equivalent(this->path_.parent_path(), vfs::user_dirs->desktop_dir()))
-    // {
-    //     this->update_display_name(desktop->display_name());
-    // }
 
     if (desktop->icon_name().empty())
     {

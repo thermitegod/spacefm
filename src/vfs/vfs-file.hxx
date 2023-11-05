@@ -46,8 +46,6 @@ namespace vfs
         const std::string_view name() const noexcept;
         const std::string_view display_name() const noexcept;
 
-        void update_display_name(const std::string_view new_display_name) noexcept;
-
         const std::filesystem::path& path() const noexcept;
         const std::string_view uri() const noexcept;
 
@@ -130,7 +128,6 @@ namespace vfs
         std::string uri_{};            // uri of the real path on file system
 
         std::string name_{};                          // real name on file system
-        std::string display_name_{};                  // displayed name (in UTF-8)
         std::string display_size_{};                  // displayed human-readable file size
         std::string display_size_bytes_{};            // displayed file size in bytes
         std::string display_disk_size_{};             // displayed human-readable file size on disk
