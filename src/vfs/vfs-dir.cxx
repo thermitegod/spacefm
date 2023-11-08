@@ -273,7 +273,7 @@ vfs::dir::find_file(const std::filesystem::path& filename) const noexcept
 bool
 vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
 {
-    const auto file_path = std::filesystem::path() / this->path_ / ".hidden";
+    const auto file_path = this->path_ / ".hidden";
     const std::string data = std::format("{}\n", file->name());
 
     return write_file(file_path, data);
@@ -378,7 +378,7 @@ vfs::dir::update_created_files() noexcept
         if (!file_found)
         {
             // file is not in dir this->files_
-            const auto full_path = std::filesystem::path() / this->path_ / created_file;
+            const auto full_path = this->path_ / created_file;
             if (std::filesystem::exists(full_path))
             {
                 const auto file = vfs::file::create(full_path);
