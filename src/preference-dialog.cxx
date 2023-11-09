@@ -40,13 +40,10 @@
 
 #include "xset/xset-lookup.hxx"
 
-#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
 #include "preference-dialog.hxx"
-
-// #define TODO_VFS_DIR_FOREACH_UNLOAD_THUMB_SIGNAL
 
 class PreferenceSection
 {
@@ -165,14 +162,6 @@ class PreferencePage
     }
 };
 
-#if defined(TODO_VFS_DIR_FOREACH_UNLOAD_THUMB_SIGNAL)
-static void
-dir_unload_thumbnails(const std::shared_ptr<vfs::dir>& dir, bool user_data)
-{
-    dir->unload_thumbnails(user_data);
-}
-#endif
-
 /**
  * General Tab
  */
@@ -218,20 +207,11 @@ namespace preference::large_icons
 
         if (value != app_settings.icon_size_big())
         {
-#if defined(TODO_VFS_DIR_FOREACH_UNLOAD_THUMB_SIGNAL)
-            vfs_dir_foreach(&dir_unload_thumbnails, true);
-#else
-            ptk_show_message(nullptr,
-                             GtkMessageType::GTK_MESSAGE_INFO,
-                             "Setting Changed",
-                             GtkButtonsType::GTK_BUTTONS_CLOSE,
-                             "Relaunch to apply setting");
-#endif
+            vfs::dir::global_unload_thumbnails(true);
         }
 
         app_settings.icon_size_big(value);
 
-#if defined(TODO_VFS_DIR_FOREACH_UNLOAD_THUMB_SIGNAL)
         // update all windows/all panels/all browsers
         for (MainWindow* window : main_window_get_all())
         {
@@ -256,7 +236,6 @@ namespace preference::large_icons
             }
         }
         update_volume_icons();
-#endif
     }
 
     GtkComboBox*
@@ -340,20 +319,11 @@ namespace preference::small_icons
 
         if (value != app_settings.icon_size_small())
         {
-#if defined(TODO_VFS_DIR_FOREACH_UNLOAD_THUMB_SIGNAL)
-            vfs_dir_foreach(&dir_unload_thumbnails, false);
-#else
-            ptk_show_message(nullptr,
-                             GtkMessageType::GTK_MESSAGE_INFO,
-                             "Setting Changed",
-                             GtkButtonsType::GTK_BUTTONS_CLOSE,
-                             "Relaunch to apply setting");
-#endif
+            vfs::dir::global_unload_thumbnails(false);
         }
 
         app_settings.icon_size_small(value);
 
-#if defined(TODO_VFS_DIR_FOREACH_UNLOAD_THUMB_SIGNAL)
         // update all windows/all panels/all browsers
         for (MainWindow* window : main_window_get_all())
         {
@@ -378,7 +348,6 @@ namespace preference::small_icons
             }
         }
         update_volume_icons();
-#endif
     }
 
     GtkComboBox*

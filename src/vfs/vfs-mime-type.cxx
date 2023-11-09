@@ -87,7 +87,7 @@ vfs_mime_type_reload()
     std::unique_lock<std::mutex> lock(mime_map_lock);
     mime_map.clear();
     // ztd::logger::debug("reload mime-types");
-    vfs_dir_mime_type_reload();
+    vfs::dir::global_reload_mime_type();
     mime_type_regen_all_caches();
     return false;
 }

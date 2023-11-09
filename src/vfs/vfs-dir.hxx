@@ -48,6 +48,11 @@ namespace vfs
 
         static const std::shared_ptr<vfs::dir> create(const std::filesystem::path& path) noexcept;
 
+        // unloads thumbnails in every vfs::dir
+        static void global_unload_thumbnails(const bool big) noexcept;
+        // reload mime types in every vfs::dir
+        static void global_reload_mime_type() noexcept;
+
         const std::filesystem::path& path() const noexcept;
         const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
 
@@ -216,5 +221,3 @@ namespace vfs
         sigc::connection signal_task_load_dir;
     };
 } // namespace vfs
-
-void vfs_dir_mime_type_reload();

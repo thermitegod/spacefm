@@ -247,16 +247,18 @@ vfs::dir::on_monitor_event(const vfs::monitor::event event, const std::filesyste
 }
 
 void
-vfs_dir_mime_type_reload()
+vfs::dir::global_unload_thumbnails(const bool big) noexcept
 {
-    // ztd::logger::debug("reload mime-type");
-    // const auto action = [](const auto& dir) { dir.second.lock()->reload_mime_type(); };
-    // std::ranges::for_each(dir_smart_cache, action);
+    const auto action = [&big](const auto& dir) { dir->unload_thumbnails(big); };
+    std::ranges::for_each(dir_smart_cache.items(), action);
 }
 
-/**
-* vfs::dir class
-*/
+void
+vfs::dir::global_reload_mime_type() noexcept
+{
+    const auto action = [](const auto& dir) { dir->reload_mime_type(); };
+    std::ranges::for_each(dir_smart_cache.items(), action);
+}
 
 const std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& filename) const noexcept
