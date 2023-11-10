@@ -49,8 +49,8 @@
 #include "mime-type/mime-type.hxx"
 #include "mime-type/mime-cache.hxx"
 
-/* max extent used to checking text files */
-inline constexpr i32 TEXT_MAX_EXTENT = 512;
+// https://www.rfc-editor.org/rfc/rfc6838#section-4.2
+inline constexpr u32 MIME_HEADER_MAX_SIZE = 127;
 
 /* Check if the specified mime_type is the subclass of the specified parent type */
 static bool mime_type_is_subclass(const std::string_view type, const std::string_view parent);
@@ -62,8 +62,6 @@ static u32 mime_cache_max_extent = 0;
 
 /* free all mime.cache files on the system */
 static void mime_cache_free_all();
-
-static bool mime_type_is_data_plain_text(const std::span<const std::byte> data);
 
 /*
  * Get mime-type of the specified file (quick, but less accurate):
@@ -132,6 +130,24 @@ mime_type_get_by_filename(const std::filesystem::path& filename,
     return XDG_MIME_TYPE_UNKNOWN.data();
 }
 
+static bool
+mime_type_is_data_plain_text(const std::span<const std::byte> data)
+{
+    if (data.size() == 0)
+    {
+        return false;
+    }
+
+    for (const auto d : data)
+    {
+        if (d == (std::byte)'\0')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 /*
  * Get mime-type info of the specified file (slow, but more accurate):
  * To determine the mime-type of the file, mime_type_get_by_filename() is
@@ -171,53 +187,47 @@ mime_type_get_by_file(const std::filesystem::path& path)
         return filename_type;
     }
 
-    const char* type = nullptr;
-
-    // check for reg or link due to hangs on fifo and chr dev
     const auto file_size = std::filesystem::file_size(path);
-    if (file_size > 0 &&
-        (std::filesystem::is_regular_file(status) || std::filesystem::is_symlink(status)))
+    if (file_size == 0 || std::filesystem::is_other(status))
     {
-        /* Open the file and map it into memory */
-        const i32 fd = open(path.c_str(), O_RDONLY, 0);
-        if (fd != -1)
-        {
-            // mime header size
-            std::array<std::byte, 512> data;
-
-            const auto length = read(fd, data.data(), data.size());
-            if (length == -1)
-            {
-                return XDG_MIME_TYPE_UNKNOWN.data();
-            }
-
-            for (usize i = 0; !type && i < caches.size(); ++i)
-            {
-                type = caches.at(i)->lookup_magic(data);
-            }
-
-            /* Check for executable file */
-            if (!type && have_x_access(path))
-            {
-                type = XDG_MIME_TYPE_EXECUTABLE.data();
-            }
-
-            /* fallback: check for plain text */
-            if (!type)
-            {
-                if (mime_type_is_data_plain_text(data))
-                {
-                    type = XDG_MIME_TYPE_PLAIN_TEXT.data();
-                }
-            }
-
-            close(fd);
-        }
+        // empty file can be viewed as text file
+        return XDG_MIME_TYPE_PLAIN_TEXT.data();
     }
-    else
+
+    const char* type = nullptr;
+    /* Open the file and read it into memory */
+    const auto fd = open(path.c_str(), O_RDONLY, 0);
+    if (fd != -1)
     {
-        /* empty file can be viewed as text file */
-        type = XDG_MIME_TYPE_PLAIN_TEXT.data();
+        std::array<std::byte, MIME_HEADER_MAX_SIZE> data;
+
+        const auto length = read(fd, data.data(), data.size());
+        if (length == -1)
+        {
+            return XDG_MIME_TYPE_UNKNOWN.data();
+        }
+
+        for (usize i = 0; !type && i < caches.size(); ++i)
+        {
+            type = caches.at(i)->lookup_magic(data);
+        }
+
+        /* Check for executable file */
+        if (!type && have_x_access(path))
+        {
+            type = XDG_MIME_TYPE_EXECUTABLE.data();
+        }
+
+        /* fallback: check for plain text */
+        if (!type)
+        {
+            if (mime_type_is_data_plain_text(data))
+            {
+                type = XDG_MIME_TYPE_PLAIN_TEXT.data();
+            }
+        }
+
+        close(fd);
     }
 
     if (type && *type)
@@ -385,24 +395,6 @@ mime_cache_reload(const mime_cache_t& cache)
             mime_cache_max_extent = mcache->magic_max_extent();
         }
     }
-}
-
-static bool
-mime_type_is_data_plain_text(const std::span<const std::byte> data)
-{
-    if (data.size() == 0)
-    {
-        return false;
-    }
-
-    for (const auto d : data)
-    {
-        if (d == (std::byte)'\0')
-        {
-            return false;
-        }
-    }
-    return true;
 }
 
 bool
