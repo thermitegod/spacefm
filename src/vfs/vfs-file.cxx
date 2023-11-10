@@ -122,6 +122,9 @@ vfs::file::update() noexcept
 
     this->load_special_info();
 
+    // Cause file prem string to be regenerated of needed
+    this->display_perm_.clear();
+
     return true;
 }
 
@@ -371,8 +374,8 @@ vfs::file::mtime() const noexcept
     return this->file_stat_.mtime().tv_sec;
 }
 
-static const std::string
-get_file_perm_string(std::filesystem::file_status status)
+const std::string
+vfs::file::create_file_perm_string() noexcept
 {
     static constexpr u8 file_type{0};
 
@@ -392,36 +395,36 @@ get_file_perm_string(std::filesystem::file_status status)
     std::string perm = "----------";
 
     // File Type Permissions
-    if (std::filesystem::is_regular_file(status))
+    if (std::filesystem::is_regular_file(this->status_))
     {
         perm[file_type] = '-';
     }
-    else if (std::filesystem::is_directory(status))
+    else if (std::filesystem::is_directory(this->status_))
     {
         perm[file_type] = 'd';
     }
-    else if (std::filesystem::is_symlink(status))
+    else if (std::filesystem::is_symlink(this->status_))
     {
         perm[file_type] = 'l';
     }
-    else if (std::filesystem::is_character_file(status))
+    else if (std::filesystem::is_character_file(this->status_))
     {
         perm[file_type] = 'c';
     }
-    else if (std::filesystem::is_block_file(status))
+    else if (std::filesystem::is_block_file(this->status_))
     {
         perm[file_type] = 'b';
     }
-    else if (std::filesystem::is_fifo(status))
+    else if (std::filesystem::is_fifo(this->status_))
     {
         perm[file_type] = 'p';
     }
-    else if (std::filesystem::is_socket(status))
+    else if (std::filesystem::is_socket(this->status_))
     {
         perm[file_type] = 's';
     }
 
-    const std::filesystem::perms p = status.permissions();
+    const std::filesystem::perms p = this->status_.permissions();
 
     // Owner
     if ((p & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
@@ -521,7 +524,7 @@ vfs::file::display_permissions() noexcept
 {
     if (this->display_perm_.empty())
     {
-        this->display_perm_ = get_file_perm_string(this->status_);
+        this->display_perm_ = this->create_file_perm_string();
     }
     return this->display_perm_;
 }
