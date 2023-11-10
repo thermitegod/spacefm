@@ -1037,7 +1037,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
 
     const bool is_dir = (file && file->is_directory());
     // Note: network filesystems may become unresponsive here
-    const bool is_text = file && file->is_text();
+    const bool is_text = file && file->mime_type()->is_text();
 
     // test R/W access to cwd instead of selected file
     // Note: network filesystems may become unresponsive here
@@ -1095,10 +1095,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
         GtkWidget* submenu = gtk_menu_item_get_submenu(item);
 
         // Execute
-        if (!is_dir && file &&
-            (file->is_desktop_entry() ||
-
-             file->is_executable()))
+        if (!is_dir && file && (file->is_desktop_entry() || file->mime_type()->is_executable()))
         {
             // Note: network filesystems may become unresponsive here
             set = xset_get(xset::name::open_execute);
@@ -1111,7 +1108,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
         xset_t set_archive_extract_to = nullptr;
         xset_t set_archive_open = nullptr;
 
-        const auto is_archive = [](const auto& file) { return file->is_archive(); };
+        const auto is_archive = [](const auto& file) { return file->mime_type()->is_archive(); };
         if (mime_type && std::ranges::all_of(sel_files, is_archive))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);

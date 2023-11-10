@@ -146,9 +146,9 @@ mime_type_get_by_filename(const std::filesystem::path& filename,
  * the specified file again.
  */
 const std::string
-mime_type_get_by_file(const std::filesystem::path& filepath)
+mime_type_get_by_file(const std::filesystem::path& path)
 {
-    const auto status = std::filesystem::status(filepath);
+    const auto status = std::filesystem::status(path);
 
     if (!std::filesystem::exists(status))
     {
@@ -165,8 +165,7 @@ mime_type_get_by_file(const std::filesystem::path& filepath)
         return XDG_MIME_TYPE_DIRECTORY.data();
     }
 
-    const auto basename = filepath.filename();
-    const std::string filename_type = mime_type_get_by_filename(basename, status);
+    auto filename_type = mime_type_get_by_filename(path.filename(), status);
     if (filename_type != XDG_MIME_TYPE_UNKNOWN)
     {
         return filename_type;
@@ -175,12 +174,12 @@ mime_type_get_by_file(const std::filesystem::path& filepath)
     const char* type = nullptr;
 
     // check for reg or link due to hangs on fifo and chr dev
-    const auto file_size = std::filesystem::file_size(filepath);
+    const auto file_size = std::filesystem::file_size(path);
     if (file_size > 0 &&
         (std::filesystem::is_regular_file(status) || std::filesystem::is_symlink(status)))
     {
         /* Open the file and map it into memory */
-        const i32 fd = open(filepath.c_str(), O_RDONLY, 0);
+        const i32 fd = open(path.c_str(), O_RDONLY, 0);
         if (fd != -1)
         {
             // mime header size
@@ -198,7 +197,7 @@ mime_type_get_by_file(const std::filesystem::path& filepath)
             }
 
             /* Check for executable file */
-            if (!type && have_x_access(filepath))
+            if (!type && have_x_access(path))
             {
                 type = XDG_MIME_TYPE_EXECUTABLE.data();
             }
@@ -231,12 +230,12 @@ mime_type_get_by_file(const std::filesystem::path& filepath)
 
 // returns - icon_name, icon_desc
 static std::optional<std::array<std::string, 2>>
-mime_type_parse_xml_file(const std::filesystem::path& filepath, bool is_local)
+mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
 {
-    // ztd::logger::info("MIME XML = {}", file_path);
+    // ztd::logger::info("MIME XML = {}", path);
 
     pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(filepath.c_str());
+    pugi::xml_parse_result result = doc.load_file(path.c_str());
 
     if (!result)
     {
@@ -301,11 +300,11 @@ mime_type_get_desc_icon(const std::string_view type)
      * Since the spec really sucks, we do not follow it here.
      */
 
-    const std::string file_path =
+    const std::string user_path =
         std::format("{}/mime/{}.xml", vfs::user_dirs->data_dir().string(), type);
-    if (faccessat(0, file_path.data(), F_OK, AT_EACCESS) != -1)
+    if (faccessat(0, user_path.data(), F_OK, AT_EACCESS) != -1)
     {
-        const auto icon_data = mime_type_parse_xml_file(file_path, true);
+        const auto icon_data = mime_type_parse_xml_file(user_path, true);
         if (icon_data)
         {
             return icon_data.value();
@@ -315,10 +314,10 @@ mime_type_get_desc_icon(const std::string_view type)
     // look in system dirs
     for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const std::string sys_file_path = std::format("{}/mime/{}.xml", sys_dir, type);
-        if (faccessat(0, sys_file_path.data(), F_OK, AT_EACCESS) != -1)
+        const std::string sys_path = std::format("{}/mime/{}.xml", sys_dir, type);
+        if (faccessat(0, sys_path.data(), F_OK, AT_EACCESS) != -1)
         {
-            const auto icon_data = mime_type_parse_xml_file(sys_file_path, false);
+            const auto icon_data = mime_type_parse_xml_file(sys_path, false);
             if (icon_data)
             {
                 return icon_data.value();
@@ -407,91 +406,35 @@ mime_type_is_data_plain_text(const std::span<const char8_t> data)
 }
 
 bool
-mime_type_is_text_file(const std::filesystem::path& file_path, const std::string_view mime_type)
+mime_type_is_text(const std::string_view mime_type) noexcept
 {
-    bool ret = false;
-
-    if (!mime_type.empty())
+    if (mime_type == "application/pdf")
     {
-        if (mime_type == "application/pdf")
-        {
-            // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
-            return false;
-        }
-        if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
-        {
-            return true;
-        }
-        if (!mime_type.starts_with("text/") && !mime_type.starts_with("application/"))
-        {
-            return false;
-        }
+        // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
+        return false;
     }
-
-    if (file_path.empty())
+    if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
+    {
+        return true;
+    }
+    if (!mime_type.starts_with("text/") && !mime_type.starts_with("application/"))
     {
         return false;
     }
-
-    const i32 fd = open(file_path.c_str(), O_RDONLY);
-    if (fd != -1)
-    {
-        const auto file_stat = ztd::statx(file_path);
-        if (file_stat)
-        {
-            if (file_stat.is_regular_file())
-            {
-                std::array<char8_t, TEXT_MAX_EXTENT> data;
-                const auto length = read(fd, data.data(), data.size());
-                if (length == -1)
-                {
-                    ztd::logger::error("failed to read {}", file_path.string());
-                    ret = false;
-                }
-                else
-                {
-                    ret = mime_type_is_data_plain_text(data);
-                }
-            }
-        }
-        close(fd);
-    }
-    return ret;
+    return false;
 }
 
 bool
-mime_type_is_executable_file(const std::filesystem::path& file_path,
-                             const std::string_view mime_type)
+mime_type_is_executable(const std::string_view mime_type) noexcept
 {
-    std::string file_mime_type;
-    if (mime_type.empty())
-    {
-        file_mime_type = mime_type_get_by_file(file_path);
-    }
-    else
-    {
-        file_mime_type = mime_type;
-    }
-
     /*
      * Only executable types can be executale.
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    if (file_mime_type != XDG_MIME_TYPE_UNKNOWN &&
-        (mime_type_is_subclass(file_mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
-         mime_type_is_subclass(file_mime_type, "application/x-shellscript")))
-    {
-        if (!file_path.empty())
-        {
-            if (!have_x_access(file_path))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
+    return mime_type != XDG_MIME_TYPE_UNKNOWN &&
+           (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
+            mime_type_is_subclass(mime_type, "application/x-shellscript"));
 }
 
 // Taken from file-roller .desktop file
@@ -564,19 +507,27 @@ inline constexpr std::array<std::string_view, 65> archive_mime_types{
 };
 
 bool
-mime_type_is_archive_file(const std::filesystem::path& file_path, const std::string_view mime_type)
+mime_type_is_archive(const std::string_view mime_type) noexcept
 {
-    std::string file_mime_type;
-    if (mime_type.empty())
-    {
-        file_mime_type = mime_type_get_by_file(file_path);
-    }
-    else
-    {
-        file_mime_type = mime_type;
-    }
+    return std::ranges::find(archive_mime_types, mime_type) != archive_mime_types.cend();
+}
 
-    return std::ranges::find(archive_mime_types, file_mime_type) != archive_mime_types.cend();
+bool
+mime_type_is_image(const std::string_view mime_type) noexcept
+{
+    return mime_type.starts_with("image/");
+}
+
+bool
+mime_type_is_video(const std::string_view mime_type) noexcept
+{
+    return mime_type.starts_with("video/");
+}
+
+bool
+mime_type_is_unknown(const std::string_view mime_type) noexcept
+{
+    return mime_type == XDG_MIME_TYPE_UNKNOWN;
 }
 
 /* Check if the specified mime_type is the subclass of the specified parent type */

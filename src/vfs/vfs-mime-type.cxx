@@ -363,6 +363,36 @@ vfs::mime_type::add_action(const std::string_view desktop_id) noexcept
     return desktop_id.data();
 }
 
+bool
+vfs::mime_type::is_archive() const noexcept
+{
+    return mime_type_is_archive(this->type_);
+}
+
+bool
+vfs::mime_type::is_executable() const noexcept
+{
+    return mime_type_is_executable(this->type_);
+}
+
+bool
+vfs::mime_type::is_text() const noexcept
+{
+    return mime_type_is_text(this->type_);
+}
+
+bool
+vfs::mime_type::is_image() const noexcept
+{
+    return mime_type_is_image(this->type_);
+}
+
+bool
+vfs::mime_type::is_video() const noexcept
+{
+    return mime_type_is_video(this->type_);
+}
+
 const std::optional<std::filesystem::path>
 vfs_mime_type_locate_desktop_file(const std::string_view desktop_id)
 {

@@ -62,7 +62,7 @@ static bool
 open_archives(const std::shared_ptr<ParentInfo>& parent,
               const std::span<const std::shared_ptr<vfs::file>> selected_files)
 {
-    const auto is_archive = [](const auto& file) { return file->is_archive(); };
+    const auto is_archive = [](const auto& file) { return file->mime_type()->is_archive(); };
     if (!std::ranges::all_of(selected_files, is_archive))
     {
         return false;
@@ -170,7 +170,8 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         }
 
         // If this file is an executable file, run it.
-        if (!xnever && file->is_executable() && (app_settings.click_executes() || xforce))
+        if (!xnever && file->mime_type()->is_executable() &&
+            (app_settings.click_executes() || xforce))
         {
             Glib::spawn_command_line_async(file->path());
             if (file_browser)
@@ -205,7 +206,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             }
         }
 
-        if (!alloc_desktop && mime_type_is_text_file(file->path(), mime_type->type()))
+        if (!alloc_desktop && mime_type->is_text())
         {
             // FIXME: special handling for plain text file
             mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);

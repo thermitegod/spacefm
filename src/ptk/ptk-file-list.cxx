@@ -267,8 +267,9 @@ PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file)
     // See also desktop-window.c:on_file_changed()
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    if (this->max_thumbnail != 0 && ((file->is_video() && (now - file->mtime() > 5)) ||
-                                     (file->size() < this->max_thumbnail && file->is_image())))
+    if (this->max_thumbnail != 0 &&
+        ((file->mime_type()->is_video() && (now - file->mtime() > 5)) ||
+         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
     {
         if (!file->is_thumbnail_loaded(this->big_thumbnail))
         {
@@ -284,7 +285,8 @@ PtkFileList::on_file_list_file_created(const std::shared_ptr<vfs::file>& file)
 
     /* check if reloading of thumbnail is needed. */
     if (this->max_thumbnail != 0 &&
-        (file->is_video() || (file->size() < this->max_thumbnail && file->is_image())))
+        (file->mime_type()->is_video() ||
+         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
     {
         if (!file->is_thumbnail_loaded(this->big_thumbnail))
         {
@@ -436,7 +438,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             /* special file can use special icons saved as thumbnails*/
             if (file && !file->is_desktop_entry() &&
                 (list->max_thumbnail > file->size() ||
-                 (list->max_thumbnail != 0 && file->is_video())))
+                 (list->max_thumbnail != 0 && file->mime_type()->is_video())))
             {
                 icon = file->big_thumbnail();
             }
@@ -454,7 +456,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
         case ptk::file_list::column::small_icon:
             /* special file can use special icons saved as thumbnails*/
             if (file && (list->max_thumbnail > file->size() ||
-                         (list->max_thumbnail != 0 && file->is_video())))
+                         (list->max_thumbnail != 0 && file->mime_type()->is_video())))
             {
                 icon = file->small_thumbnail();
             }
@@ -997,7 +999,7 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
             for (GList* l = list->files; l; l = g_list_next(l))
             {
                 const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
-                if ((file->is_image() || file->is_video()) &&
+                if ((file->mime_type()->is_image() || file->mime_type()->is_video()) &&
                     file->is_thumbnail_loaded(list->big_thumbnail))
                 {
                     /* update the model */
@@ -1022,7 +1024,8 @@ ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
     {
         const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
         if (list->max_thumbnail != 0 &&
-            (file->is_video() || (file->size() < list->max_thumbnail && file->is_image())))
+            (file->mime_type()->is_video() ||
+             (file->size() < list->max_thumbnail && file->mime_type()->is_image())))
         {
             if (file->is_thumbnail_loaded(list->big_thumbnail))
             {

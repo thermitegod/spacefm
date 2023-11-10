@@ -99,14 +99,7 @@ namespace vfs
 
         bool is_hidden() const noexcept;
 
-        bool is_image() const noexcept;
-        bool is_video() const noexcept;
-        bool is_archive() const noexcept;
         bool is_desktop_entry() const noexcept;
-        bool is_unknown_type() const noexcept;
-
-        bool is_executable() const noexcept;
-        bool is_text() const noexcept;
 
         // File attributes
         bool is_compressed() const noexcept; // file is compressed by the filesystem
@@ -152,7 +145,7 @@ namespace vfs
 
         void load_special_info() noexcept;
 
-        const std::string create_file_perm_string() noexcept;
+        const std::string create_file_perm_string() const noexcept;
 
         const std::string_view
         special_directory_get_icon_name(const bool symbolic = false) const noexcept;

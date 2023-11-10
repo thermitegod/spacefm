@@ -65,6 +65,12 @@ namespace vfs
         // If user-custom desktop file is created, it is returned in custom_desktop.
         const std::string add_action(const std::string_view desktop_id) noexcept;
 
+        [[nodiscard]] bool is_archive() const noexcept;
+        [[nodiscard]] bool is_executable() const noexcept;
+        [[nodiscard]] bool is_text() const noexcept;
+        [[nodiscard]] bool is_image() const noexcept;
+        [[nodiscard]] bool is_video() const noexcept;
+
       private:
         std::string type_{};        // mime_type-type string
         std::string description_{}; // description of the mime type

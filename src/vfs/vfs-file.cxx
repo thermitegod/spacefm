@@ -375,7 +375,7 @@ vfs::file::mtime() const noexcept
 }
 
 const std::string
-vfs::file::create_file_perm_string() noexcept
+vfs::file::create_file_perm_string() const noexcept
 {
     static constexpr u8 file_type{0};
 
@@ -595,48 +595,9 @@ vfs::file::is_hidden() const noexcept
 }
 
 bool
-vfs::file::is_image() const noexcept
-{
-    // FIXME: We had better use functions of xdg_mime to check this
-    return this->mime_type_->type().starts_with("image/");
-}
-
-bool
-vfs::file::is_video() const noexcept
-{
-    // FIXME: We had better use functions of xdg_mime to check this
-    return this->mime_type_->type().starts_with("video/");
-}
-
-bool
 vfs::file::is_desktop_entry() const noexcept
 {
     return this->is_special_desktop_entry_;
-}
-
-bool
-vfs::file::is_unknown_type() const noexcept
-{
-    return this->mime_type_->type() == XDG_MIME_TYPE_UNKNOWN;
-}
-
-// full path of the file is required by this function
-bool
-vfs::file::is_executable() const noexcept
-{
-    return mime_type_is_executable_file(this->path(), this->mime_type_->type());
-}
-
-bool
-vfs::file::is_text() const noexcept
-{
-    return mime_type_is_text_file(this->path(), this->mime_type_->type());
-}
-
-bool
-vfs::file::is_archive() const noexcept
-{
-    return mime_type_is_archive_file(this->path(), this->mime_type_->type());
 }
 
 bool
@@ -725,7 +686,7 @@ vfs::file::load_thumbnail_small() noexcept
         return;
     }
 
-    if (this->is_image() || this->is_video())
+    if (this->mime_type_->is_image() || this->mime_type_->is_video())
     {
         GdkPixbuf* thumbnail =
             vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
@@ -756,7 +717,7 @@ vfs::file::load_thumbnail_big() noexcept
         return;
     }
 
-    if (this->is_image() || this->is_video())
+    if (this->mime_type_->is_image() || this->mime_type_->is_video())
     {
         GdkPixbuf* thumbnail =
             vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_big());
