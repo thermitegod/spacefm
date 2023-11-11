@@ -896,7 +896,11 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
                 }
                 else
                 {
-                    open_in_prog(volume->mount_point());
+                    const std::string exe = ztd::program::exe();
+                    const std::string qpath = ztd::shell::quote(volume->mount_point());
+                    const std::string command = std::format("{} {}", exe, qpath);
+                    ztd::logger::info("COMMAND({})", command);
+                    Glib::spawn_command_line_async(command);
                 }
             }
             break;
@@ -1111,7 +1115,11 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     else
     {
-        open_in_prog(vol->mount_point());
+        const std::string exe = ztd::program::exe();
+        const std::string qpath = ztd::shell::quote(vol->mount_point());
+        const std::string command = std::format("{} {}", exe, qpath);
+        ztd::logger::info("COMMAND({})", command);
+        Glib::spawn_command_line_async(command);
     }
 }
 

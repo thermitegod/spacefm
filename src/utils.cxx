@@ -25,31 +25,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "xset/xset.hxx"
-
 #include "utils.hxx"
-
-const std::string
-replace_line_subs(const std::string_view line) noexcept
-{
-    std::string cmd = line.data();
-
-    cmd = ztd::replace(cmd, "%f", "\"${fm_file}\"");
-    cmd = ztd::replace(cmd, "%F", "\"${fm_files[@]}\"");
-    cmd = ztd::replace(cmd, "%n", "\"${fm_filename}\"");
-    cmd = ztd::replace(cmd, "%N", "\"${fm_filenames[@]}\"");
-    cmd = ztd::replace(cmd, "%d", "\"${fm_pwd}\"");
-    cmd = ztd::replace(cmd, "%D", "\"${fm_pwd}\"");
-    cmd = ztd::replace(cmd, "%v", "\"${fm_device}\"");
-    cmd = ztd::replace(cmd, "%l", "\"${fm_device_label}\"");
-    cmd = ztd::replace(cmd, "%m", "\"${fm_device_mount_point}\"");
-    cmd = ztd::replace(cmd, "%y", "\"${fm_device_fstype}\"");
-    cmd = ztd::replace(cmd, "%t", "\"${fm_task_pwd}\"");
-    cmd = ztd::replace(cmd, "%p", "\"${fm_task_pid}\"");
-    cmd = ztd::replace(cmd, "%a", "\"${fm_value}\"");
-
-    return cmd;
-}
 
 bool
 have_x_access(const std::filesystem::path& path) noexcept
@@ -85,25 +61,6 @@ have_rw_access(const std::filesystem::path& path) noexcept
                 std::filesystem::perms::none);
 }
 
-bool
-dir_has_files(const std::filesystem::path& path) noexcept
-{
-    if (!std::filesystem::is_directory(path))
-    {
-        return false;
-    }
-
-    for (const auto& file : std::filesystem::directory_iterator(path))
-    {
-        if (file.exists())
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 const split_basename_extension_data
 split_basename_extension(const std::filesystem::path& filename) noexcept
 {
@@ -137,16 +94,6 @@ split_basename_extension(const std::filesystem::path& filename) noexcept
 
     // No valid extension found, return the whole filename as the basename
     return {filename.string()};
-}
-
-void
-open_in_prog(const std::filesystem::path& path) noexcept
-{
-    const std::string exe = ztd::program::exe();
-    const std::string qpath = ztd::shell::quote(path.string());
-    const std::string command = std::format("{} {}", exe, qpath);
-    ztd::logger::info("COMMAND={}", command);
-    Glib::spawn_command_line_async(command);
 }
 
 const std::string

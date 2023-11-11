@@ -39,11 +39,5 @@ split_basename_extension(const std::filesystem::path& filename) noexcept;
 bool have_rw_access(const std::filesystem::path& path) noexcept;
 bool have_x_access(const std::filesystem::path& path) noexcept;
 
-bool dir_has_files(const std::filesystem::path& path) noexcept;
-
-const std::string replace_line_subs(const std::string_view line) noexcept;
-
-void open_in_prog(const std::filesystem::path& path) noexcept;
-
 const std::string clean_label(const std::string_view menu_label, bool kill_special,
                               bool escape) noexcept;
