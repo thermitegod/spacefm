@@ -1,7 +1,4 @@
 /**
- * Copyright (C) 2015 IgnorantGuru <ignorantguru@gmx.com>
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -18,6 +15,15 @@
 
 #pragma once
 
-void load_settings();
-void save_settings();
-void free_settings();
+#include <string_view>
+
+#include <filesystem>
+
+#include <gtkmm.h>
+#include <gdkmm.h>
+
+#include <ztd/ztd.hxx>
+
+GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size);
+
+void xset_edit(GtkWidget* parent, const std::filesystem::path& path);

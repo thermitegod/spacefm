@@ -41,9 +41,8 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
-
-#include "settings.hxx"
 
 #include "utils.hxx"
 

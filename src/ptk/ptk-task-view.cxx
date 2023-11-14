@@ -42,8 +42,7 @@
 #include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
-
-#include "settings.hxx"
+#include "xset/xset-context-menu.hxx"
 
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-utils.hxx"

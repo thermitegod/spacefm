@@ -372,6 +372,7 @@ sources = files(
     'src/commandline/socket/set-task/subcommands.cxx',
 
     'src/xset/xset.cxx',
+    'src/xset/xset-context-menu.cxx',
     'src/xset/xset-custom.cxx',
     'src/xset/xset-defaults.cxx',
     'src/xset/xset-design.cxx',
@@ -379,6 +380,8 @@ sources = files(
     'src/xset/xset-dialog.cxx',
     'src/xset/xset-keyboard.cxx',
     'src/xset/xset-lookup.cxx',
+    'src/xset/xset-misc.cxx',
+    'src/xset/xset-toolbar.cxx',
 
     'src/settings/app.cxx',
     'src/settings/config-load.cxx',

@@ -24,13 +24,12 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "settings.hxx"
 #include "utils.hxx"
 
 #include "ptk/ptk-keyboard.hxx"
 
 #include "xset/xset.hxx"
-
+#include "xset/xset-toolbar.hxx"
 #include "xset/xset-keyboard.hxx"
 
 const std::string

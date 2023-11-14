@@ -27,18 +27,13 @@
 
 #include "utils.hxx"
 
-#include "write.hxx"
-#include "settings.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-custom.hxx"
-#include "xset/xset-design-clipboard.hxx"
+#include "xset/xset-toolbar.hxx"
 
 const std::string
 xset_custom_new_name()
@@ -292,4 +287,55 @@ xset_find_custom(const std::string_view search)
         }
     }
     return nullptr;
+}
+
+void
+xset_custom_insert_after(const xset_t& target, const xset_t& set)
+{ // inserts single set 'set', no next
+
+    assert(target != nullptr);
+    assert(set != nullptr);
+    assert(target != nullptr);
+
+#if 0
+    if (!set)
+    {
+        ztd::logger::warn("xset_custom_insert_after set == nullptr");
+        return;
+    }
+    if (!target)
+    {
+        ztd::logger::warn("xset_custom_insert_after target == nullptr");
+        return;
+    }
+#endif
+
+    if (set->parent)
+    {
+        set->parent = std::nullopt;
+    }
+
+    set->prev = target->name;
+    set->next = target->next;
+    if (target->next)
+    {
+        const xset_t target_next = xset_get(target->next.value());
+        target_next->prev = set->name;
+    }
+    target->next = set->name;
+    if (target->tool != xset::tool::NOT)
+    {
+        if (set->tool < xset::tool::custom)
+        {
+            set->tool = xset::tool::custom;
+        }
+    }
+    else
+    {
+        if (set->tool > xset::tool::custom)
+        {
+            ztd::logger::warn("xset_custom_insert_after builtin tool inserted after non-tool");
+        }
+        set->tool = xset::tool::NOT;
+    }
 }

@@ -45,10 +45,11 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-custom.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset-misc.hxx"
 
 #include "settings/app.hxx"
 
-#include "settings.hxx"
 #include "terminal-handlers.hxx"
 
 #include "vfs/vfs-utils.hxx"

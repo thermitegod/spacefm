@@ -61,6 +61,7 @@
 #include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-context-menu.hxx"
 
 #include "settings/app.hxx"
 #include "settings/disk-format.hxx"

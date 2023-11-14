@@ -40,6 +40,7 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -53,8 +54,6 @@
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-utils.hxx"
-
-#include "settings.hxx"
 
 #include "utils.hxx"
 

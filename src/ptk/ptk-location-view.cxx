@@ -39,6 +39,7 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
 
 #include "types.hxx"
@@ -52,7 +53,6 @@
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-utils.hxx"
 
-#include "settings.hxx"
 #include "settings/app.hxx"
 
 // This limits the small icon size for side panes and task list

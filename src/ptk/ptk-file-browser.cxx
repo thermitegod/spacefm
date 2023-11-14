@@ -53,7 +53,10 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
+#include "xset/xset-toolbar.hxx"
+#include "xset/xset-misc.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -86,7 +89,6 @@
 #include "types.hxx"
 
 #include "autosave.hxx"
-#include "settings.hxx"
 #include "utils.hxx"
 
 #include "ptk/ptk-file-browser.hxx"

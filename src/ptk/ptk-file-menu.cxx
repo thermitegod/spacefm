@@ -41,6 +41,8 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset-misc.hxx"
 
 #include "write.hxx"
 
@@ -64,7 +66,6 @@
 
 #include "types.hxx"
 
-#include "settings.hxx"
 #include "main-window.hxx"
 
 #include "ptk/ptk-file-list.hxx"

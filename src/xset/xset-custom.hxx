@@ -30,3 +30,4 @@ const std::string xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** i
 const xset_t xset_custom_copy(const xset_t& set, bool copy_next);
 
 const xset_t xset_find_custom(const std::string_view search);
+void xset_custom_insert_after(const xset_t& target, const xset_t& set);
