@@ -20,4 +20,3 @@
 
 void load_settings();
 void save_settings();
-void free_settings();

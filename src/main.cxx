@@ -306,7 +306,6 @@ main(int argc, char* argv[])
     autosave_init(save_settings);
 
     std::atexit(ztd::Logger->shutdown);
-    std::atexit(free_settings);
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
     std::atexit(vfs_mime_type_finalize);

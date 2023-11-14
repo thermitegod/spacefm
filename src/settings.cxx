@@ -247,12 +247,6 @@ save_settings()
     save_user_confing();
 }
 
-void
-free_settings()
-{
-    xsets.clear();
-}
-
 #if 0
 void
 multi_input_select_region(GtkWidget* input, i32 start, i32 end)
