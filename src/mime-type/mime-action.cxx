@@ -55,17 +55,6 @@
 #include "mime-type/mime-action.hxx"
 
 static void
-save_to_file(const std::filesystem::path& path, const Glib::ustring& data)
-{
-    write_file(path, data);
-
-    if (std::filesystem::exists(path))
-    {
-        std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-    }
-}
-
-static void
 update_desktop_database()
 {
     const auto path = vfs::user_dirs->data_dir() / "applications";
@@ -579,7 +568,7 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
         const auto path = dir / cust;
         if (!std::filesystem::exists(path))
         { /* this generated filename can be used */
-            save_to_file(path, file_content);
+            write_file(path, file_content);
             break;
         }
     }
