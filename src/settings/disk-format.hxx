@@ -17,8 +17,6 @@
 
 #include <string>
 
-#include <map>
-
 #include <ztd/ztd.hxx>
 
 // delimiter used in config file for tabs
@@ -31,11 +29,6 @@ const std::string CONFIG_FILE_TABS_DELIM = "///";
  */
 
 // toml11 does not work with std::string_view
-
-// map<var, value>
-using setvars_t = std::map<std::string, std::string>;
-// map<xset_name, setvars_t>
-using xsetpak_t = std::map<std::string, setvars_t>;
 
 /**
  * TOML

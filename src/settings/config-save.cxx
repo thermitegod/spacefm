@@ -15,6 +15,8 @@
 
 #include <format>
 
+#include <map>
+
 #include <cassert>
 
 #include <magic_enum.hpp>
@@ -33,8 +35,13 @@
 #include "settings/app.hxx"
 #include "settings/disk-format.hxx"
 
+// map<var, value>
+using setvars_t = std::map<std::string, std::string>;
+// map<xset_name, setvars_t>
+using xsetpak_t = std::map<std::string, setvars_t>;
+
 const setvars_t
-xset_pack_set(const xset_t& set)
+pack_xset(const xset_t& set)
 {
     assert(set != nullptr);
 
@@ -235,7 +242,7 @@ xset_pack_set(const xset_t& set)
 }
 
 const xsetpak_t
-xset_pack_sets()
+pack_xsets()
 {
     // this is stupid, but it works.
     // trying to .emplace_back() a toml::value into a toml::value
@@ -251,7 +258,7 @@ xset_pack_sets()
     {
         assert(set != nullptr);
 
-        const setvars_t setvars = xset_pack_set(set);
+        const setvars_t setvars = pack_xset(set);
         if (!setvars.empty())
         {
             xsetpak.insert({std::format("{}", set->name), setvars});
@@ -304,7 +311,7 @@ save_user_confing()
 
         {TOML_SECTION_XSET,
          toml::value{
-             xset_pack_sets(),
+             pack_xsets(),
          }},
     };
 

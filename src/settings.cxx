@@ -23,8 +23,6 @@
 
 #include <filesystem>
 
-#include <vector>
-
 #include <optional>
 
 #include <ranges>
@@ -47,6 +45,7 @@
 #include "settings/app.hxx"
 #include "settings/config-load.hxx"
 #include "settings/config-save.hxx"
+#include "settings/disk-format.hxx"
 
 #include "terminal-handlers.hxx"
 
