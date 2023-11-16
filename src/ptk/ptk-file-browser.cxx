@@ -4217,7 +4217,7 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     // show
     gtk_widget_show_all(GTK_WIDGET(dialog));
 
-    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
 
     std::string pattern;
     bool ret = false;

@@ -20,9 +20,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-i32 gtk4_dialog_run(GtkDialog* dialog);
-
 #if (GTK_MAJOR_VERSION == 4)
+
+i32 gtk_dialog_run(GtkDialog* dialog);
 
 // TODO
 //  - rename accel_group to shortcut_controller or controller. reusing the old name to avoid even more #if blocks.

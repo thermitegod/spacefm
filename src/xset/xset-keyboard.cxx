@@ -258,7 +258,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set)
     gtk_widget_show_all(GTK_WIDGET(dialog));
     gtk_window_set_title(GTK_WINDOW(dialog), "Set Key");
 
-    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 
     if (response == GtkResponseType::GTK_RESPONSE_OK ||

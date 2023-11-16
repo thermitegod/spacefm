@@ -568,7 +568,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
 
     std::optional<std::string> app = std::nullopt;
 
-    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
         app = app_chooser_dialog_get_selected_app(dialog);

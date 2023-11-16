@@ -167,7 +167,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 
     gtk_widget_show_all(GTK_WIDGET(dialog));
 
-    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
     return response == GtkResponseType::GTK_RESPONSE_ACCEPT;
 }

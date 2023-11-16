@@ -966,7 +966,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     gtk_notebook_set_current_page(notebook, page);
 
-    gtk4_dialog_run(GTK_DIALOG(dialog));
+    gtk_dialog_run(GTK_DIALOG(dialog));
 
     //
     if (data->update_label_timer)

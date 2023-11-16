@@ -281,7 +281,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     std::string ans;
     i32 response;
     bool ret = false;
-    while ((response = gtk4_dialog_run(GTK_DIALOG(dlg))))
+    while ((response = gtk_dialog_run(GTK_DIALOG(dlg))))
     {
         bool exit_loop = false;
         switch (response)
@@ -446,7 +446,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
 #endif
     }
 
-    const auto response = gtk4_dialog_run(GTK_DIALOG(dlg));
+    const auto response = gtk_dialog_run(GTK_DIALOG(dlg));
 
     // Saving dialog dimensions
     GtkAllocation allocation;

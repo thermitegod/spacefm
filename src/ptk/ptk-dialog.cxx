@@ -42,7 +42,7 @@ ptk_show_error(GtkWindow* parent, const std::string_view title,
     // g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(g_object_unref), nullptr);
     // gtk_widget_show(GTK_WIDGET(dialog));
 
-    gtk4_dialog_run(GTK_DIALOG(dialog));
+    gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
 
@@ -70,7 +70,7 @@ ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_vie
     }
 
     gtk_widget_show_all(GTK_WIDGET(dialog));
-    const auto response = gtk4_dialog_run(GTK_DIALOG(dialog));
+    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 
     return response;

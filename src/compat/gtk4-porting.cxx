@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -23,15 +21,9 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#if (GTK_MAJOR_VERSION == 3)
+#if (GTK_MAJOR_VERSION == 4)
 
-i32
-gtk4_dialog_run(GtkDialog* dialog)
-{
-    return gtk_dialog_run(dialog);
-}
-
-#elif (GTK_MAJOR_VERSION == 4)
+#include <cassert>
 
 static void
 dialog_response_cb(GObject* object, i32 response_id, void* user_data)
@@ -45,7 +37,7 @@ dialog_response_cb(GObject* object, i32 response_id, void* user_data)
 }
 
 i32
-gtk4_dialog_run(GtkDialog* dialog)
+gtk_dialog_run(GtkDialog* dialog)
 {
     assert(GTK_IS_DIALOG(dialog));
 
