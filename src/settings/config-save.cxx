@@ -15,7 +15,7 @@
 
 #include <format>
 
-#include <map>
+#include <unordered_map>
 
 #include <cassert>
 
@@ -36,9 +36,9 @@
 #include "settings/disk-format.hxx"
 
 // map<var, value>
-using setvars_t = std::map<std::string, std::string>;
+using setvars_t = std::unordered_map<std::string, std::string>;
 // map<xset_name, setvars_t>
-using xsetpak_t = std::map<std::string, setvars_t>;
+using xsetpak_t = std::unordered_map<std::string, setvars_t>;
 
 const setvars_t
 pack_xset(const xset_t& set)

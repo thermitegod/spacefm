@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <map>
+#include <unordered_map>
 
 #include <thread>
 #include <mutex>
@@ -48,7 +48,7 @@
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-mime-type.hxx"
 
-static std::map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
+static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
 std::mutex mime_map_lock;
 
 static std::vector<std::shared_ptr<vfs::monitor>> mime_caches_monitors;

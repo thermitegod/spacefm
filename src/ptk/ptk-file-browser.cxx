@@ -24,6 +24,7 @@
 
 #include <array>
 #include <vector>
+#include <unordered_map>
 
 #include <optional>
 
@@ -183,11 +184,12 @@ static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 std::vector<std::string> xset_cmd_history;
 
 // history of closed tabs
-static std::map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
+static std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
 struct selection_history_data
 {
-    std::map<std::filesystem::path, std::vector<std::filesystem::path>> selection_history{};
+    std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>>
+        selection_history{};
 };
 
 void

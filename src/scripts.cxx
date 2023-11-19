@@ -17,7 +17,7 @@
 
 #include <filesystem>
 
-#include <map>
+#include <unordered_map>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -28,7 +28,7 @@
 
 using namespace std::literals::string_view_literals;
 
-static const std::map<spacefm::script, const std::string_view> script_map{
+static const std::unordered_map<spacefm::script, const std::string_view> script_map{
     {spacefm::script::config_update, "config-update"sv},
     {spacefm::script::config_update_git, "config-update-git"sv},
 };

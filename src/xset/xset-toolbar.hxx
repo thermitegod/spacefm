@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include <unordered_map>
+
 #include <optional>
 
 #include <gtkmm.h>
@@ -39,4 +41,4 @@ struct builtin_tool_data
     std::optional<std::string> icon;
     std::optional<xset::name> shared_key;
 };
-const std::map<xset::tool, builtin_tool_data>& xset_toolbar_get_builtin_tools();
+const std::unordered_map<xset::tool, builtin_tool_data>& xset_toolbar_get_builtin_tools();

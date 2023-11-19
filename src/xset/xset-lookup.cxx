@@ -19,7 +19,7 @@
 
 #include <array>
 
-#include <map>
+#include <unordered_map>
 
 #include <cassert>
 
@@ -38,7 +38,7 @@ struct panel_lookup_data
     std::array<std::array<xset::name, 4>, MAX_PANELS> panel_mode{};
 };
 
-const std::map<xset::panel, panel_lookup_data> xset_panel_lookup{
+const std::unordered_map<xset::panel, panel_lookup_data> xset_panel_lookup{
     {
         xset::panel::show,
         {
@@ -1056,7 +1056,7 @@ const std::map<xset::panel, panel_lookup_data> xset_panel_lookup{
 
 using namespace std::literals::string_view_literals;
 
-static const std::map<xset::main_window_panel, std::string_view> main_window_panel_mode_map{
+static const std::unordered_map<xset::main_window_panel, std::string_view> main_window_panel_mode_map{
     {xset::main_window_panel::panel_neither, "0"sv},
     {xset::main_window_panel::panel_horiz,   "1"sv},
     {xset::main_window_panel::panel_vert,    "2"sv},

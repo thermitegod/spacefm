@@ -25,8 +25,7 @@
 #include <span>
 
 #include <vector>
-
-#include <map>
+#include <unordered_map>
 
 #include <optional>
 
@@ -64,7 +63,7 @@ static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
 static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
 static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
 
-std::map<std::filesystem::path, std::shared_ptr<vfs::desktop>> desktops_cache;
+std::unordered_map<std::filesystem::path, std::shared_ptr<vfs::desktop>> desktops_cache;
 
 const std::shared_ptr<vfs::desktop>
 vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept

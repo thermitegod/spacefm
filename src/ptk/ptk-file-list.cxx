@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <map>
+#include <unordered_map>
 
 #include <algorithm>
 
@@ -105,7 +105,7 @@ static void ptk_file_list_file_changed(const std::shared_ptr<vfs::file>& file, P
 
 static GObjectClass* parent_class = nullptr;
 
-static std::map<ptk::file_list::column, GType> column_types;
+static std::unordered_map<ptk::file_list::column, GType> column_types;
 
 GType
 ptk_file_list_get_type()
@@ -813,20 +813,21 @@ compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::fil
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
 
-static const std::map<ptk::file_list::column, compare_function_t> compare_function_ptr_table{
-    {ptk::file_list::column::name, &compare_file_name},
-    {ptk::file_list::column::size, &compare_file_size},
-    {ptk::file_list::column::bytes, &compare_file_size},
-    {ptk::file_list::column::type, &compare_file_type},
-    {ptk::file_list::column::mime, &compare_file_mime},
-    {ptk::file_list::column::perm, &compare_file_perm},
-    {ptk::file_list::column::owner, &compare_file_owner},
-    {ptk::file_list::column::group, &compare_file_group},
-    {ptk::file_list::column::atime, &compare_file_atime},
-    {ptk::file_list::column::btime, &compare_file_btime},
-    {ptk::file_list::column::ctime, &compare_file_ctime},
-    {ptk::file_list::column::mtime, &compare_file_mtime},
-};
+static const std::unordered_map<ptk::file_list::column, compare_function_t>
+    compare_function_ptr_table{
+        {ptk::file_list::column::name, &compare_file_name},
+        {ptk::file_list::column::size, &compare_file_size},
+        {ptk::file_list::column::bytes, &compare_file_size},
+        {ptk::file_list::column::type, &compare_file_type},
+        {ptk::file_list::column::mime, &compare_file_mime},
+        {ptk::file_list::column::perm, &compare_file_perm},
+        {ptk::file_list::column::owner, &compare_file_owner},
+        {ptk::file_list::column::group, &compare_file_group},
+        {ptk::file_list::column::atime, &compare_file_atime},
+        {ptk::file_list::column::btime, &compare_file_btime},
+        {ptk::file_list::column::ctime, &compare_file_ctime},
+        {ptk::file_list::column::mtime, &compare_file_mtime},
+    };
 
 static GList*
 ptk_file_info_list_sort(PtkFileList* list)

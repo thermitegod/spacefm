@@ -20,7 +20,7 @@
 
 #include <filesystem>
 
-#include <map>
+#include <unordered_map>
 
 #include <ranges>
 #include <algorithm>
@@ -146,7 +146,7 @@ static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* p
 
 static GObjectClass* parent_class = nullptr;
 
-static std::map<ptk::dir_tree::column, GType> column_types;
+static std::unordered_map<ptk::dir_tree::column, GType> column_types;
 
 GType
 ptk_dir_tree_get_type()

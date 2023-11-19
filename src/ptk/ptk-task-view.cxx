@@ -21,6 +21,7 @@
 #include <filesystem>
 
 #include <array>
+#include <unordered_map>
 
 #include <chrono>
 
@@ -49,7 +50,7 @@
 
 #include "ptk/ptk-task-view.hxx"
 
-const std::map<task_view_column, const std::string_view> task_titles{
+const std::unordered_map<task_view_column, const std::string_view> task_titles{
     // If you change "Status", also change it in on_task_button_press_event
     {task_view_column::status, "Status"},
     {task_view_column::count, "#"},
@@ -1019,7 +1020,7 @@ main_task_view_update_task(PtkFileTask* ptask)
     xset_t set;
 
     // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
-    const std::map<vfs::file_task::type, const std::string_view> job_titles{
+    const std::unordered_map<vfs::file_task::type, const std::string_view> job_titles{
         {vfs::file_task::type::move, "moving"},
         {vfs::file_task::type::copy, "copying"},
         {vfs::file_task::type::trash, "trashing"},

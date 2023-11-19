@@ -20,7 +20,6 @@
 #include <filesystem>
 
 #include <vector>
-
 #include <map>
 
 #include <gtkmm.h>
@@ -56,6 +55,7 @@ struct MainWindow
     i32 panel_slide_x[4];
     i32 panel_slide_y[4];
     i32 panel_slide_s[4];
+    // the c class GType will cause segfaults if this is a std::unordered_map
     std::map<panel_t, xset::main_window_panel> panel_context;
     bool panel_change;
 

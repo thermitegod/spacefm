@@ -20,8 +20,8 @@
 
 #include <filesystem>
 
-#include <map>
 #include <vector>
+#include <unordered_map>
 
 #include <memory>
 
@@ -227,14 +227,16 @@ namespace libudev
         [[nodiscard]] bool set_sysattr(const std::string_view named,
                                        const std::string_view value) const noexcept;
         [[nodiscard]] const std::vector<std::string> get_sysattr_keys() const noexcept;
-        [[nodiscard]] const std::map<std::string, std::string> get_sysattr_map() const noexcept;
+        [[nodiscard]] const std::unordered_map<std::string, std::string>
+        get_sysattr_map() const noexcept;
 
         [[nodiscard]] const std::vector<std::string> get_devlinks() const noexcept;
 
         [[nodiscard]] bool has_property(const std::string_view named) const noexcept;
         [[nodiscard]] const std::optional<std::string>
         get_property(const std::string_view named) const noexcept;
-        [[nodiscard]] const std::map<std::string, std::string> get_properties() const noexcept;
+        [[nodiscard]] const std::unordered_map<std::string, std::string>
+        get_properties() const noexcept;
 
         [[nodiscard]] bool has_tag(const std::string_view named) const noexcept;
         [[nodiscard]] const std::vector<std::string> get_tags() const noexcept;

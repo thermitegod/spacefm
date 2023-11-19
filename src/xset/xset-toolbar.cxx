@@ -19,7 +19,7 @@
 
 #include <array>
 
-#include <map>
+#include <unordered_map>
 
 #include <optional>
 
@@ -59,7 +59,7 @@
 #include "ptk/ptk-file-menu.hxx"
 
 // must match xset::tool:: enum
-const std::map<xset::tool, builtin_tool_data> builtin_tools{
+const std::unordered_map<xset::tool, builtin_tool_data> builtin_tools{
     {xset::tool::NOT,
      {
          std::nullopt,
@@ -176,7 +176,7 @@ const std::map<xset::tool, builtin_tool_data> builtin_tools{
      }},
 };
 
-const std::map<xset::tool, builtin_tool_data>&
+const std::unordered_map<xset::tool, builtin_tool_data>&
 xset_toolbar_get_builtin_tools()
 {
     return builtin_tools;

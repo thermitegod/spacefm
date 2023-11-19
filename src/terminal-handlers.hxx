@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <map>
+#include <unordered_map>
 
 class TerminalHandler
 {
@@ -44,7 +44,7 @@ class TerminalHandlers
     const std::vector<std::string> get_supported_terminal_names();
 
   private:
-    std::map<std::string, TerminalHandler> handlers;
+    std::unordered_map<std::string, TerminalHandler> handlers;
 };
 
 using terminal_handlers_t = std::unique_ptr<TerminalHandlers>;

@@ -23,6 +23,7 @@
 #include <span>
 
 #include <vector>
+#include <unordered_map>
 
 #include <algorithm>
 
@@ -159,7 +160,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
     // No app specified - Use default app for each file
 
     std::vector<std::filesystem::path> dirs_to_open;
-    std::map<std::string, std::vector<std::filesystem::path>> files_to_open;
+    std::unordered_map<std::string, std::vector<std::filesystem::path>> files_to_open;
     for (const auto& file : selected_files)
     {
         // Is a dir?  Open in browser

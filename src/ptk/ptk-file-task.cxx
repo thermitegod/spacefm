@@ -24,6 +24,7 @@
 
 #include <array>
 #include <vector>
+#include <unordered_map>
 
 #include <optional>
 
@@ -704,7 +705,7 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 void
 ptk_file_task_progress_open(PtkFileTask* ptask)
 {
-    const std::map<vfs::file_task::type, const std::string_view> job_actions{
+    const std::unordered_map<vfs::file_task::type, const std::string_view> job_actions{
         {vfs::file_task::type::move, "Move: "},
         {vfs::file_task::type::copy, "Copy: "},
         {vfs::file_task::type::trash, "Trash: "},
@@ -713,7 +714,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
         {vfs::file_task::type::chmod_chown, "Change: "},
         {vfs::file_task::type::exec, "Run: "},
     };
-    const std::map<vfs::file_task::type, const std::string_view> job_titles{
+    const std::unordered_map<vfs::file_task::type, const std::string_view> job_titles{
         {vfs::file_task::type::move, "Moving..."},
         {vfs::file_task::type::copy, "Copying..."},
         {vfs::file_task::type::trash, "Trashing..."},

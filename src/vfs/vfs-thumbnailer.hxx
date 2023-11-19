@@ -17,9 +17,8 @@
 
 #pragma once
 
-#include <map>
-
 #include <deque>
+#include <unordered_map>
 
 #include <memory>
 
@@ -59,7 +58,7 @@ namespace vfs
                 small,
             };
             std::shared_ptr<vfs::file> file{nullptr};
-            std::map<size, i32> n_requests;
+            std::unordered_map<size, i32> n_requests;
         };
 
         std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};

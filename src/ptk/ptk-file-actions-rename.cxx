@@ -1214,7 +1214,6 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         file_misc_mode::path,
     };
 
-    // std::map<FileMiscMode, GtkWidget*> mode;
     GtkWidget* mode[3];
 
     GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4));

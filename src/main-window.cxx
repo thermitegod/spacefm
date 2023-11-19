@@ -22,6 +22,8 @@
 #include <filesystem>
 
 #include <array>
+#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include <optional>
@@ -597,9 +599,6 @@ show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window)
 void
 MainWindow::show_panels() noexcept
 {
-    // start the index at 1 for clarity
-    std::array<bool, 5> show;
-
     // save column widths and side sliders of visible panels
     if (this->panel_change)
     {
@@ -627,10 +626,12 @@ MainWindow::show_panels() noexcept
     }
 
     // which panels to show
-    for (const panel_t p : PANELS)
-    {
-        show[p] = xset_get_b_panel(p, xset::panel::show);
-    }
+    const std::unordered_map<panel_t, bool> show{
+        {panel_1, xset_get_b_panel(panel_1, xset::panel::show)},
+        {panel_2, xset_get_b_panel(panel_2, xset::panel::show)},
+        {panel_3, xset_get_b_panel(panel_3, xset::panel::show)},
+        {panel_4, xset_get_b_panel(panel_4, xset::panel::show)},
+    };
 
     // TODO - write and move this to MainWindow constructor
     if (this->panel_context.empty())
@@ -651,20 +652,20 @@ MainWindow::show_panels() noexcept
         switch (p)
         {
             case panel_1:
-                horiz = show[panel_2];
-                vert = show[panel_3] || show[panel_4];
+                horiz = show.at(panel_2);
+                vert = show.at(panel_3) || show.at(panel_4);
                 break;
             case panel_2:
-                horiz = show[panel_1];
-                vert = show[panel_3] || show[panel_4];
+                horiz = show.at(panel_1);
+                vert = show.at(panel_3) || show.at(panel_4);
                 break;
             case panel_3:
-                horiz = show[panel_4];
-                vert = show[panel_1] || show[panel_2];
+                horiz = show.at(panel_4);
+                vert = show.at(panel_1) || show.at(panel_2);
                 break;
             case panel_4:
-                horiz = show[panel_3];
-                vert = show[panel_1] || show[panel_2];
+                horiz = show.at(panel_3);
+                vert = show.at(panel_1) || show.at(panel_2);
                 break;
         }
 
@@ -685,7 +686,7 @@ MainWindow::show_panels() noexcept
             this->panel_context.at(p) = xset::main_window_panel::panel_neither;
         }
 
-        if (show[p])
+        if (show.at(p))
         {
             // shown
             // test if panel and mode exists
@@ -856,7 +857,7 @@ MainWindow::show_panels() noexcept
             gtk_widget_hide(GTK_WIDGET(this->get_panel_notebook(p)));
         }
     }
-    if (show[panel_1] || show[panel_2])
+    if (show.at(panel_1) || show.at(panel_2))
     {
         gtk_widget_show(GTK_WIDGET(this->hpane_top));
     }
@@ -864,7 +865,7 @@ MainWindow::show_panels() noexcept
     {
         gtk_widget_hide(GTK_WIDGET(this->hpane_top));
     }
-    if (show[panel_3] || show[panel_4])
+    if (show.at(panel_3) || show.at(panel_4))
     {
         gtk_widget_show(GTK_WIDGET(this->hpane_bottom));
     }
@@ -900,7 +901,7 @@ MainWindow::show_panels() noexcept
     // update views all panels
     for (const panel_t p : PANELS)
     {
-        if (show[p])
+        if (show.at(p))
         {
             const tab_t cur_tabx = gtk_notebook_get_current_page(this->get_panel_notebook(p));
             if (cur_tabx != -1)

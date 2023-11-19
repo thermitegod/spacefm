@@ -20,7 +20,7 @@
 
 #include <filesystem>
 
-#include <map>
+#include <unordered_map>
 
 #include <memory>
 
@@ -101,7 +101,7 @@ namespace vfs
         const std::shared_ptr<trash_dir> get_trash_dir(const std::filesystem::path& path) noexcept;
 
         // Data Members
-        std::map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
+        std::unordered_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
     };
 } // namespace vfs
 
