@@ -123,7 +123,7 @@ namespace vfs
         // Signals Add Event
 
         template<spacefm::signal evt, typename bind_fun>
-        typename std::enable_if<evt == spacefm::signal::file_created, sigc::connection>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_created, sigc::connection>
         add_event(bind_fun fun)
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
@@ -131,7 +131,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt, typename bind_fun>
-        typename std::enable_if<evt == spacefm::signal::file_changed, sigc::connection>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_changed, sigc::connection>
         add_event(bind_fun fun)
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
@@ -139,7 +139,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt, typename bind_fun>
-        typename std::enable_if<evt == spacefm::signal::file_deleted, sigc::connection>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_deleted, sigc::connection>
         add_event(bind_fun fun)
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
@@ -147,7 +147,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt, typename bind_fun>
-        typename std::enable_if<evt == spacefm::signal::file_listed, sigc::connection>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_listed, sigc::connection>
         add_event(bind_fun fun) noexcept
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
@@ -155,8 +155,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt, typename bind_fun>
-        typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded,
-                                sigc::connection>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_thumbnail_loaded, sigc::connection>
         add_event(bind_fun fun) noexcept
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::file_thumbnail_loaded");
@@ -165,7 +164,7 @@ namespace vfs
 
         // Signals Run Event
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_created, void>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_created, void>
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
@@ -173,7 +172,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_changed, void>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_changed, void>
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
@@ -181,7 +180,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_deleted, void>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_deleted, void>
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
@@ -189,7 +188,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_listed, void>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_listed, void>
         run_event(bool is_cancelled) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_listed");
@@ -197,7 +196,7 @@ namespace vfs
         }
 
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::file_thumbnail_loaded, void>::type
+        typename std::enable_if_t<evt == spacefm::signal::file_thumbnail_loaded, void>
         run_event(const std::shared_ptr<vfs::file>& file) const noexcept
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");

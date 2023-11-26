@@ -82,7 +82,7 @@ namespace vfs
 
         // Signals Add Event
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::task_finish, sigc::connection>::type
+        typename std::enable_if_t<evt == spacefm::signal::task_finish, sigc::connection>
         add_event(evt_task_finished_load_app_t fun, GtkWidget* app)
         {
             // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
@@ -92,7 +92,7 @@ namespace vfs
 
         // Signals Run Event
         template<spacefm::signal evt>
-        typename std::enable_if<evt == spacefm::signal::task_finish, void>::type
+        typename std::enable_if_t<evt == spacefm::signal::task_finish, void>
         run_event(bool is_cancelled)
         {
             // ztd::logger::trace("Signal Execute   : spacefm::signal::task_finish");
