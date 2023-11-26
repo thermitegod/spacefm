@@ -24,135 +24,133 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-const vfs::user_dirs_t vfs::user_dirs = std::make_unique<VFSUserDirs>();
+const vfs::user_dirs_t vfs::user_dirs = std::make_unique<vfs::impl::user_dirs>();
 
 const std::filesystem::path&
-VFSUserDirs::desktop_dir() const noexcept
+vfs::impl::user_dirs::desktop_dir() const noexcept
 {
-    return this->user_desktop;
+    return this->user_desktop_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::documents_dir() const noexcept
+vfs::impl::user_dirs::documents_dir() const noexcept
 {
-    return this->user_documents;
+    return this->user_documents_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::download_dir() const noexcept
+vfs::impl::user_dirs::download_dir() const noexcept
 {
-    return this->user_download;
+    return this->user_download_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::music_dir() const noexcept
+vfs::impl::user_dirs::music_dir() const noexcept
 {
-    return this->user_music;
+    return this->user_music_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::pictures_dir() const noexcept
+vfs::impl::user_dirs::pictures_dir() const noexcept
 {
-    return this->user_pictures;
+    return this->user_pictures_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::public_share_dir() const noexcept
+vfs::impl::user_dirs::public_share_dir() const noexcept
 {
-    return this->user_share;
+    return this->user_share_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::template_dir() const noexcept
+vfs::impl::user_dirs::template_dir() const noexcept
 {
-    return this->user_template;
+    return this->user_template_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::videos_dir() const noexcept
+vfs::impl::user_dirs::videos_dir() const noexcept
 {
-    return this->user_videos;
+    return this->user_videos_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::home_dir() const noexcept
+vfs::impl::user_dirs::home_dir() const noexcept
 {
-    return this->user_home;
+    return this->user_home_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::cache_dir() const noexcept
+vfs::impl::user_dirs::cache_dir() const noexcept
 {
-    return this->user_cache;
+    return this->user_cache_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::data_dir() const noexcept
+vfs::impl::user_dirs::data_dir() const noexcept
 {
-    return this->user_data;
+    return this->user_data_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::config_dir() const noexcept
+vfs::impl::user_dirs::config_dir() const noexcept
 {
-    return this->user_config;
+    return this->user_config_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::runtime_dir() const noexcept
+vfs::impl::user_dirs::runtime_dir() const noexcept
 {
-    return this->user_runtime;
+    return this->user_runtime_;
 }
 
 const std::vector<std::string>&
-VFSUserDirs::system_data_dirs() const noexcept
+vfs::impl::user_dirs::system_data_dirs() const noexcept
 {
-    return this->sys_data;
+    return this->sys_data_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::current_dir() const noexcept
+vfs::impl::user_dirs::current_dir() const noexcept
 {
-    return this->current;
+    return this->current_;
 }
 
 void
-VFSUserDirs::program_config_dir(const std::filesystem::path& config_dir) noexcept
+vfs::impl::user_dirs::program_config_dir(const std::filesystem::path& config_dir) noexcept
 {
     if (!std::filesystem::exists(config_dir))
     {
         std::filesystem::create_directories(config_dir);
         std::filesystem::permissions(config_dir, std::filesystem::perms::owner_all);
     }
-    this->program_config = std::filesystem::canonical(config_dir);
+    this->program_config_ = std::filesystem::canonical(config_dir);
 }
 
 const std::filesystem::path&
-VFSUserDirs::program_config_dir() const noexcept
+vfs::impl::user_dirs::program_config_dir() const noexcept
 {
-    return this->program_config;
+    return this->program_config_;
 }
 
 const std::filesystem::path&
-VFSUserDirs::program_tmp_dir() const noexcept
+vfs::impl::user_dirs::program_tmp_dir() const noexcept
 {
-    if (!std::filesystem::exists(this->tmp))
+    if (!std::filesystem::exists(this->tmp_))
     {
-        std::filesystem::create_directories(this->tmp);
-        std::filesystem::permissions(this->tmp, std::filesystem::perms::owner_all);
+        std::filesystem::create_directories(this->tmp_);
+        std::filesystem::permissions(this->tmp_, std::filesystem::perms::owner_all);
     }
-
-    return this->tmp;
+    return this->tmp_;
 }
 
 void
-VFSUserDirs::program_tmp_dir(const std::filesystem::path& tmp_dir) noexcept
+vfs::impl::user_dirs::program_tmp_dir(const std::filesystem::path& tmp_dir) noexcept
 {
-    this->tmp = tmp_dir;
-
-    if (!std::filesystem::exists(this->tmp))
+    this->tmp_ = tmp_dir;
+    if (!std::filesystem::exists(this->tmp_))
     {
-        std::filesystem::create_directories(this->tmp);
-        std::filesystem::permissions(this->tmp, std::filesystem::perms::owner_all);
+        std::filesystem::create_directories(this->tmp_);
+        std::filesystem::permissions(this->tmp_, std::filesystem::perms::owner_all);
     }
 }
