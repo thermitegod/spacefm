@@ -641,9 +641,9 @@ load_all_known_apps_thread(vfs::async_task* task)
     const auto dir = vfs::user_dirs->data_dir() / "applications";
     load_all_apps_in_dir(dir, list, task);
 
-    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const auto sdir = std::filesystem::path() / sys_dir / "applications";
+        const auto sdir = sys_dir / "applications";
         load_all_apps_in_dir(sdir, list, task);
     }
 

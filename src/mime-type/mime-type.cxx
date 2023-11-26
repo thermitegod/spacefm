@@ -322,9 +322,9 @@ mime_type_get_desc_icon(const std::string_view type)
     }
 
     // look in system dirs
-    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const std::string sys_path = std::format("{}/mime/{}.xml", sys_dir, type);
+        const std::string sys_path = std::format("{}/mime/{}.xml", sys_dir.string(), type);
         if (faccessat(0, sys_path.data(), F_OK, AT_EACCESS) != -1)
         {
             const auto icon_data = mime_type_parse_xml_file(sys_path, false);
@@ -360,9 +360,9 @@ mime_type_init()
     }
 
     caches.reserve(vfs::user_dirs->system_data_dirs().size());
-    for (const std::string_view dir : vfs::user_dirs->system_data_dirs())
+    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const auto sys_mime_cache = std::filesystem::path() / dir.data() / "mime/mime.cache";
+        const auto sys_mime_cache = sys_dir / "mime/mime.cache";
         const mime_cache_t dir_cache = std::make_shared<MimeCache>(sys_mime_cache);
         caches.emplace_back(dir_cache);
 

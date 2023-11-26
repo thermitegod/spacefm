@@ -283,9 +283,9 @@ mime_type_get_actions(const std::string_view mime_type)
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
-        const auto sdir = std::filesystem::path() / sys_dir / "applications";
+        const auto sdir = sys_dir / "applications";
         get_actions(sdir, mime_type, actions);
     }
 
@@ -653,7 +653,7 @@ mime_type_locate_desktop_file(const std::string_view desktop_id)
         return data_desktop.value();
     }
 
-    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const auto sys_desktop = locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)

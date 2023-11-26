@@ -1699,7 +1699,7 @@ namespace ptk::file_menu
 static const std::optional<std::filesystem::path>
 get_shared_desktop_file_location(const std::string_view name)
 {
-    for (const std::string_view sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
         auto ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
         if (ret)

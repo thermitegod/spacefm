@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <filesystem>
 
 #include <memory>
@@ -25,6 +23,15 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 const vfs::user_dirs_t vfs::user_dirs = std::make_unique<vfs::impl::user_dirs>();
+
+vfs::impl::user_dirs::user_dirs()
+{
+    // typechange from std::string to std::filesystem::path
+    for (const auto& sys_data : Glib::get_system_data_dirs())
+    {
+        this->sys_data_.emplace_back(sys_data);
+    }
+}
 
 const std::filesystem::path&
 vfs::impl::user_dirs::desktop_dir() const noexcept
@@ -104,7 +111,7 @@ vfs::impl::user_dirs::runtime_dir() const noexcept
     return this->user_runtime_;
 }
 
-const std::vector<std::string>&
+const std::span<const std::filesystem::path>
 vfs::impl::user_dirs::system_data_dirs() const noexcept
 {
     return this->sys_data_;

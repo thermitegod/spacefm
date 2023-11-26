@@ -15,11 +15,11 @@
 
 #pragma once
 
-#include <string>
-
 #include <filesystem>
 
 #include <vector>
+
+#include <span>
 
 #include <memory>
 
@@ -32,7 +32,8 @@ namespace vfs
     {
         struct user_dirs
         {
-          public:
+            user_dirs();
+
             const std::filesystem::path& desktop_dir() const noexcept;
             const std::filesystem::path& documents_dir() const noexcept;
             const std::filesystem::path& download_dir() const noexcept;
@@ -48,7 +49,7 @@ namespace vfs
             const std::filesystem::path& config_dir() const noexcept;
             const std::filesystem::path& runtime_dir() const noexcept;
 
-            const std::vector<std::string>& system_data_dirs() const noexcept;
+            const std::span<const std::filesystem::path> system_data_dirs() const noexcept;
 
             const std::filesystem::path& current_dir() const noexcept;
 
@@ -104,7 +105,7 @@ namespace vfs
             const std::filesystem::path user_runtime_{Glib::get_user_runtime_dir()};
 
             // System
-            const std::vector<std::string> sys_data_{Glib::get_system_data_dirs()};
+            std::vector<std::filesystem::path> sys_data_{};
 
             // Current runtime dir
             const std::filesystem::path current_{Glib::get_current_dir()};
