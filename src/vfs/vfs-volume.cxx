@@ -224,12 +224,14 @@ parse_mounts(bool report)
             // ztd::logger::debug("finding {}:{}", devmount->major, devmount->minor);
 
             devmount_t found = nullptr;
-
             for (const devmount_t& search : devmounts)
             {
-                if (devmount->major == search->major && devmount->minor == search->minor)
+                if (search)
                 {
-                    found = search;
+                    if (devmount->major == search->major && devmount->minor == search->minor)
+                    {
+                        found = search;
+                    }
                 }
             }
 
@@ -262,7 +264,7 @@ parse_mounts(bool report)
     for (const devmount_t& devmount : devmounts)
     {
         // ztd::logger::debug("remain {}:{}", devmount->major, devmount->minor);
-        if (report)
+        if (devmount && report)
         {
             changed.emplace_back(devmount);
         }
