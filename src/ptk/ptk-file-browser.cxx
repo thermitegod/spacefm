@@ -5598,9 +5598,6 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
     const xset_t set = xset_get(setname);
     // ztd::logger::info("PtkFileBrowser::on_action {}", set->name);
 
-    assert(is_valid_panel(this->panel_));
-    const auto mode = this->main_window_->panel_context.at(this->panel_);
-
     if (set->name.starts_with("book_"))
     {
         if (set->xset_name == xset::name::book_add)
@@ -5666,7 +5663,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
             }
             else
             {
-                i = std::stoi(set->name);
+                i = std::stoi(ztd::removeprefix(set->name, "tab_"));
             }
             this->go_tab(i);
         }
@@ -5784,6 +5781,8 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
     }
     else if (set->name.starts_with("panel"))
     {
+        const auto mode = this->main_window_->panel_context.at(this->panel_);
+
         const panel_t panel_num = std::stoi(set->name.substr(5, 1));
         // ztd::logger::debug("ACTION panel={}", panel_num);
 
