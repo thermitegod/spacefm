@@ -4654,8 +4654,10 @@ PtkFileBrowser::update_views() noexcept
 
     // set slider positions
 
+    i32 pos;
+
     // hpane
-    i32 pos = this->main_window_->panel_slide_x[p - 1];
+    pos = this->main_window_->panel_slide_x[p];
     if (pos < 100)
     {
         pos = -1;
@@ -4667,7 +4669,7 @@ PtkFileBrowser::update_views() noexcept
     }
 
     // side_vpane_top
-    pos = this->main_window_->panel_slide_y[p - 1];
+    pos = this->main_window_->panel_slide_y[p];
     if (pos < 20)
     {
         pos = -1;
@@ -4676,12 +4678,12 @@ PtkFileBrowser::update_views() noexcept
     gtk_paned_set_position(this->side_vpane_top, pos);
 
     // side_vpane_bottom
-    pos = this->main_window_->panel_slide_s[p - 1];
+    pos = this->main_window_->panel_slide_s[p];
     if (pos < 20)
     {
         pos = -1;
     }
-    // ztd::logger::info( "slide_s = {}", pos);
+    // ztd::logger::info( "    slide_s = {}", pos);
     gtk_paned_set_position(this->side_vpane_bottom, pos);
 
     // Large Icons - option for Detailed and Compact list views
@@ -4882,7 +4884,7 @@ PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
         {
             set->x = std::to_string(pos);
         }
-        this->main_window_->panel_slide_x[p - 1] = pos;
+        this->main_window_->panel_slide_x[p] = pos;
         // ztd::logger::debug("    slide_x = {}", pos);
     }
     else
@@ -4894,7 +4896,7 @@ PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
         {
             set->y = std::to_string(pos);
         }
-        this->main_window_->panel_slide_y[p - 1] = pos;
+        this->main_window_->panel_slide_y[p] = pos;
         // ztd::logger::debug("    slide_y = {}  ", pos);
 
         pos = gtk_paned_get_position(this->side_vpane_bottom);
@@ -4902,8 +4904,8 @@ PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
         {
             set->s = std::to_string(pos);
         }
-        this->main_window_->panel_slide_s[p - 1] = pos;
-        // ztd::logger::debug("slide_s = {}", pos);
+        this->main_window_->panel_slide_s[p] = pos;
+        // ztd::logger::debug("    slide_s = {}", pos);
     }
     return false;
 }

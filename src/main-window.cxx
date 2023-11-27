@@ -185,7 +185,7 @@ on_devices_show(GtkMenuItem* item, MainWindow* main_window)
     {
         return;
     }
-    const xset::main_window_panel mode = main_window->panel_context[file_browser->panel() - 1];
+    const xset::main_window_panel mode = main_window->panel_context[file_browser->panel()];
 
     xset_set_b_panel_mode(file_browser->panel(),
                           xset::panel::show_devmon,
@@ -633,17 +633,6 @@ MainWindow::show_panels() noexcept
         {panel_4, xset_get_b_panel(panel_4, xset::panel::show)},
     };
 
-    // TODO - write and move this to MainWindow constructor
-    if (this->panel_context.empty())
-    {
-        this->panel_context = {
-            {panel_1, xset::main_window_panel::panel_neither},
-            {panel_2, xset::main_window_panel::panel_neither},
-            {panel_3, xset::main_window_panel::panel_neither},
-            {panel_4, xset::main_window_panel::panel_neither},
-        };
-    }
-
     bool horiz;
     bool vert;
     for (const panel_t p : PANELS)
@@ -771,9 +760,9 @@ MainWindow::show_panels() noexcept
                 set->s = set_old->s ? set_old->s : "0";
             }
             // load dynamic slider positions for this panel context
-            this->panel_slide_x[p - 1] = set->x ? std::stoi(set->x.value()) : 0;
-            this->panel_slide_y[p - 1] = set->y ? std::stoi(set->y.value()) : 0;
-            this->panel_slide_s[p - 1] = set->s ? std::stoi(set->s.value()) : 0;
+            this->panel_slide_x[p] = set->x ? std::stoi(set->x.value()) : 0;
+            this->panel_slide_y[p] = set->y ? std::stoi(set->y.value()) : 0;
+            this->panel_slide_s[p] = set->s ? std::stoi(set->s.value()) : 0;
             // ztd::logger::info("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(this->get_panel_notebook(p)))
             {
@@ -1285,6 +1274,38 @@ main_window_init(MainWindow* main_window)
     main_window->hpane_bottom = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
     // clang-format on
 
+    // GType requires init here
+    main_window->panels = {
+        {panel_1, nullptr},
+        {panel_2, nullptr},
+        {panel_3, nullptr},
+        {panel_4, nullptr},
+    };
+    main_window->panel_slide_x = {
+        {panel_1, 0},
+        {panel_2, 0},
+        {panel_3, 0},
+        {panel_4, 0},
+    };
+    main_window->panel_slide_y = {
+        {panel_1, 0},
+        {panel_2, 0},
+        {panel_3, 0},
+        {panel_4, 0},
+    };
+    main_window->panel_slide_s = {
+        {panel_1, 0},
+        {panel_2, 0},
+        {panel_3, 0},
+        {panel_4, 0},
+    };
+    main_window->panel_context = {
+        {panel_1, xset::main_window_panel::panel_neither},
+        {panel_2, xset::main_window_panel::panel_neither},
+        {panel_3, xset::main_window_panel::panel_neither},
+        {panel_4, xset::main_window_panel::panel_neither},
+    };
+
     for (const panel_t p : PANELS)
     {
         GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
@@ -1295,7 +1316,7 @@ main_window_init(MainWindow* main_window)
         g_signal_connect(G_OBJECT(notebook), "switch-page", G_CALLBACK(on_folder_notebook_switch_pape), main_window);
         // clang-format on
 
-        main_window->panels[p - 1] = notebook;
+        main_window->panels[p] = notebook;
     }
 
     main_window->task_scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
@@ -2653,8 +2674,7 @@ GtkNotebook*
 MainWindow::get_panel_notebook(const panel_t panel) const noexcept
 {
     assert(is_valid_panel(panel));
-    // need to convert the panel number to an array index
-    return this->panels[panel - 1];
+    return this->panels.at(panel);
 }
 
 void

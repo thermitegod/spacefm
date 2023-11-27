@@ -51,11 +51,11 @@ struct MainWindow
     GtkWidget* help_menu_item;
     GtkWidget* dev_menu;
     GtkNotebook* notebook; // MOD changed use to current panel
-    GtkNotebook* panels[4];
-    i32 panel_slide_x[4];
-    i32 panel_slide_y[4];
-    i32 panel_slide_s[4];
-    // the c class GType will cause segfaults if this is a std::unordered_map
+    // GType will cause segfaults if this is a std::unordered_map
+    std::map<panel_t, GtkNotebook*> panels;
+    std::map<panel_t, i32> panel_slide_x;
+    std::map<panel_t, i32> panel_slide_y;
+    std::map<panel_t, i32> panel_slide_s;
     std::map<panel_t, xset::main_window_panel> panel_context;
     bool panel_change;
 
