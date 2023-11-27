@@ -19,6 +19,10 @@
 
 #include <format>
 
+#if defined(__cpp_lib_print)
+#include <print>
+#endif
+
 #include <filesystem>
 
 #include <span>

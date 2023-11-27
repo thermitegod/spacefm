@@ -16,13 +16,17 @@
 #include <string>
 #include <string_view>
 
+#if defined(__cpp_lib_print)
+#include <print>
+#else
+#include <fmt/format.h>
+#endif
+
 #include <filesystem>
 
 #include <vector>
 
 #include <memory>
-
-#include <fmt/format.h>
 
 #include <CLI/CLI.hpp>
 
@@ -77,7 +81,11 @@ run_subcommand_cmd(const socket_subcommand_data_t& opt, const run_task_cmd_opt_d
     json["cwd"] = task_opt->cwd;
     // actual command to be run
     json["cmd"] = task_opt->cmd;
+#if defined(__cpp_lib_print)
+    // std::println("JSON : {}", json.dump());
+#else
     // fmt::print("JSON : {}\n", json.dump());
+#endif
 
     opt->property = "cmd";
     // cursed but works
@@ -164,7 +172,12 @@ run_subcommand_file_action(const socket_subcommand_data_t& opt,
     json["dir"] = file_opt->dir;
     // actual command to be run
     json["files"] = file_opt->files;
-    fmt::print("JSON : {}\n", json.dump());
+
+#if defined(__cpp_lib_print)
+    // std::println("JSON : {}", json.dump());
+#else
+    // fmt::print("JSON : {}\n", json.dump());
+#endif
 
     opt->command = command;
     // cursed but works

@@ -17,9 +17,13 @@
 
 #include <format>
 
-#include <memory>
-
+#if defined(__cpp_lib_print)
+#include <print>
+#else
 #include <fmt/format.h>
+#endif
+
+#include <memory>
 
 #include <CLI/CLI.hpp>
 
@@ -50,7 +54,11 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     }
     catch (const zmqpp::exception& e)
     {
+#if defined(__cpp_lib_print)
+        std::println("Failed to connect to server");
+#else
         fmt::print("Failed to connect to server\n");
+#endif
         std::exit(EXIT_FAILURE);
     }
 
@@ -65,13 +73,21 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     server_json["property"] = opt->property;
     server_json["subproperty"] = opt->subproperty;
     server_json["data"] = opt->socket_data;
+#if defined(__cpp_lib_print)
+    // std::println("JSON : {}", server_json.dump());
+#else
     // fmt::print("JSON : {}\n", server_json.dump());
+#endif
 
     // ztd::logger::debug("Sending message {}\n", server_json.dump());
     const bool sent = socket_send_command(socket, server_json.dump());
     if (!sent)
     {
+#if defined(__cpp_lib_print)
+        std::println("Failed to send command to server");
+#else
         fmt::print("Failed to send command to server\n");
+#endif
         std::exit(EXIT_FAILURE);
     }
 
@@ -79,7 +95,11 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     const auto server_response = socket_receive_response(socket);
     if (!server_response)
     {
+#if defined(__cpp_lib_print)
+        std::println("Failed to receive response from server");
+#else
         fmt::print("Failed to receive response from server\n");
+#endif
         std::exit(EXIT_FAILURE);
     }
     const nlohmann::json response_json = nlohmann::json::parse(server_response.value());
@@ -88,7 +108,11 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 
     if (!response.empty())
     {
+#if defined(__cpp_lib_print)
+        std::println("{}", response);
+#else
         fmt::print("{}\n", response);
+#endif
     }
     std::exit(ret);
 }
