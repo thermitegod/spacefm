@@ -129,33 +129,33 @@ MimeCache::load_mime_file()
 
     u32 offset;
 
-    this->buffer = buf;
-    this->buffer_size = mime_stat.size();
+    this->buffer_ = buf;
+    this->buffer_size_ = mime_stat.size();
 
-    offset = VAL32(this->buffer, ALIAS_LIST);
-    this->alias = this->buffer + offset + 4;
-    this->n_alias = VAL32(this->buffer, offset);
+    offset = VAL32(this->buffer_, ALIAS_LIST);
+    this->alias_ = this->buffer_ + offset + 4;
+    this->n_alias_ = VAL32(this->buffer_, offset);
 
-    offset = VAL32(this->buffer, PARENT_LIST);
-    this->parents = this->buffer + offset + 4;
-    this->n_parents = VAL32(this->buffer, offset);
+    offset = VAL32(this->buffer_, PARENT_LIST);
+    this->parents_ = this->buffer_ + offset + 4;
+    this->n_parents_ = VAL32(this->buffer_, offset);
 
-    offset = VAL32(this->buffer, LITERAL_LIST);
-    this->literals = this->buffer + offset + 4;
-    this->n_literals = VAL32(this->buffer, offset);
+    offset = VAL32(this->buffer_, LITERAL_LIST);
+    this->literals_ = this->buffer_ + offset + 4;
+    this->n_literals_ = VAL32(this->buffer_, offset);
 
-    offset = VAL32(this->buffer, GLOB_LIST);
-    this->globs = this->buffer + offset + 4;
-    this->n_globs = VAL32(this->buffer, offset);
+    offset = VAL32(this->buffer_, GLOB_LIST);
+    this->globs_ = this->buffer_ + offset + 4;
+    this->n_globs_ = VAL32(this->buffer_, offset);
 
-    offset = VAL32(this->buffer, SUFFIX_TREE);
-    this->suffix_roots = this->buffer + VAL32(this->buffer + offset, 4);
-    this->n_suffix_roots = VAL32(this->buffer, offset);
+    offset = VAL32(this->buffer_, SUFFIX_TREE);
+    this->suffix_roots_ = this->buffer_ + VAL32(this->buffer_ + offset, 4);
+    this->n_suffix_roots_ = VAL32(this->buffer_, offset);
 
-    offset = VAL32(this->buffer, MAGIC_LIST);
-    this->n_magics = VAL32(this->buffer, offset);
-    this->magic_max_extent_ = VAL32(this->buffer + offset, 4);
-    this->magics = this->buffer + VAL32(this->buffer + offset, 8);
+    offset = VAL32(this->buffer_, MAGIC_LIST);
+    this->n_magics_ = VAL32(this->buffer_, offset);
+    this->magic_max_extent_ = VAL32(this->buffer_ + offset, 4);
+    this->magics_ = this->buffer_ + VAL32(this->buffer_ + offset, 8);
 }
 
 void
@@ -170,8 +170,8 @@ MimeCache::lookup_literal(const std::string_view filename)
     /* FIXME: weight is used in literal lookup after mime.cache v1.1.
      * However, it is poorly documented. So I have no idea how to implement this. */
 
-    const char* entries = this->literals;
-    const i32 n = this->n_literals;
+    const char* entries = this->literals_;
+    const i32 n = this->n_literals_;
     i32 upper = n;
     i32 lower = 0;
     i32 middle = upper / 2;
@@ -186,7 +186,7 @@ MimeCache::lookup_literal(const std::string_view filename)
     {
         /* The entry size is different in v 1.1 */
         const char* entry = entries + middle * 12;
-        const char* str = this->buffer + VAL32(entry, 0);
+        const char* str = this->buffer_ + VAL32(entry, 0);
         const i32 comp = ztd::compare(filename, str);
         if (comp < 0)
         {
@@ -198,7 +198,7 @@ MimeCache::lookup_literal(const std::string_view filename)
         }
         else
         { /* comp == 0 */
-            return (this->buffer + VAL32(entry, 4));
+            return (this->buffer_ + VAL32(entry, 4));
         }
         middle = (upper + lower) / 2;
     }
@@ -209,8 +209,8 @@ MimeCache::lookup_literal(const std::string_view filename)
 const char*
 MimeCache::lookup_suffix(const std::string_view filename, const char** suffix_pos)
 {
-    const char* root = this->suffix_roots;
-    const u32 n = this->n_suffix_roots;
+    const char* root = this->suffix_roots_;
+    const u32 n = this->n_suffix_roots_;
 
     if (n == 0)
     {
@@ -221,14 +221,14 @@ MimeCache::lookup_suffix(const std::string_view filename, const char** suffix_po
     const usize fn_len = filename.size();
     const char* suffix = g_utf8_find_prev_char(filename.data(), filename.substr(fn_len).data());
     const char* leaf_node =
-        this->lookup_reverse_suffix_nodes(this->buffer, root, n, filename, suffix, &_suffix_pos);
+        this->lookup_reverse_suffix_nodes(this->buffer_, root, n, filename, suffix, &_suffix_pos);
 
     if (!leaf_node)
     {
         return nullptr;
     }
 
-    const char* mime_type = this->buffer + VAL32(leaf_node, 4);
+    const char* mime_type = this->buffer_ + VAL32(leaf_node, 4);
     // ztd::logger::debug("found: {}", mime_type);
     *suffix_pos = _suffix_pos;
     return mime_type;
@@ -237,18 +237,18 @@ MimeCache::lookup_suffix(const std::string_view filename, const char** suffix_po
 const char*
 MimeCache::lookup_magic(const std::span<const std::byte> data)
 {
-    const char* magic = this->magics;
+    const char* magic = this->magics_;
 
     if (data.size() == 0 || !magic)
     {
         return nullptr;
     }
 
-    for (usize i = 0; i < this->n_magics; ++i, magic += 16)
+    for (usize i = 0; i < this->n_magics_; ++i, magic += 16)
     {
-        if (magic_match(this->buffer, magic, data))
+        if (magic_match(this->buffer_, magic, data))
         {
-            return this->buffer + VAL32(magic, 4);
+            return this->buffer_ + VAL32(magic, 4);
         }
     }
     return nullptr;
@@ -257,23 +257,23 @@ MimeCache::lookup_magic(const std::span<const std::byte> data)
 const char*
 MimeCache::lookup_glob(const std::string_view filename, i32* glob_len)
 {
-    const char* entry = this->globs;
+    const char* entry = this->globs_;
     const char* type = nullptr;
     i32 max_glob_len = 0;
 
     /* entry size is changed in mime.cache 1.1 */
     static constexpr usize entry_size = 12;
 
-    for (const auto i : std::views::iota(0uz, this->n_globs))
+    for (const auto i : std::views::iota(0uz, this->n_globs_))
     {
         (void)i;
 
-        const char* glob = this->buffer + VAL32(entry, 0);
+        const char* glob = this->buffer_ + VAL32(entry, 0);
         const i32 _glob_len = std::strlen(glob);
         if (ztd::fnmatch(glob, filename) && _glob_len > max_glob_len)
         {
             max_glob_len = _glob_len;
-            type = (this->buffer + VAL32(entry, 4));
+            type = (this->buffer_ + VAL32(entry, 4));
         }
         entry += entry_size;
     }
@@ -287,7 +287,7 @@ MimeCache::lookup_parents(const std::string_view mime_type)
     std::vector<std::string> result;
 
     const char* found_parents =
-        this->lookup_str_in_entries(this->parents, this->n_parents, mime_type);
+        this->lookup_str_in_entries(this->parents_, this->n_parents_, mime_type);
     if (!found_parents)
     {
         return result;
@@ -301,7 +301,7 @@ MimeCache::lookup_parents(const std::string_view mime_type)
     for (const auto i : std::views::iota(0uz, n))
     {
         const u32 parent_off = VAL32(found_parents, i * 4);
-        const std::string parent = this->buffer + parent_off;
+        const std::string parent = this->buffer_ + parent_off;
         result.emplace_back(parent);
     }
     return result;
@@ -310,7 +310,7 @@ MimeCache::lookup_parents(const std::string_view mime_type)
 const char*
 MimeCache::lookup_alias(const std::string_view mime_type)
 {
-    return this->lookup_str_in_entries(this->alias, this->n_alias, mime_type);
+    return this->lookup_str_in_entries(this->alias_, this->n_alias_, mime_type);
 }
 
 const std::filesystem::path&
@@ -341,7 +341,7 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, const std::string_v
     while (upper >= lower)
     {
         const char* entry = entries + middle * 8;
-        const char* str2 = this->buffer + VAL32(entry, 0);
+        const char* str2 = this->buffer_ + VAL32(entry, 0);
 
         const i32 comp = ztd::compare(str, str2);
         if (comp < 0)
@@ -354,7 +354,7 @@ MimeCache::lookup_str_in_entries(const char* entries, u32 n, const std::string_v
         }
         else
         { /* comp == 0 */
-            return (this->buffer + VAL32(entry, 4));
+            return (this->buffer_ + VAL32(entry, 4));
         }
 
         middle = (upper + lower) / 2;

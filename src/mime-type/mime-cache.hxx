@@ -63,26 +63,26 @@ class MimeCache
   private:
     std::filesystem::path file_path_{};
 
-    usize buffer_size{0};
-    const char* buffer{nullptr};
+    usize buffer_size_{0};
+    const char* buffer_{nullptr};
 
-    u32 n_alias{0};
-    const char* alias{nullptr};
+    u32 n_alias_{0};
+    const char* alias_{nullptr};
 
-    u32 n_parents{0};
-    const char* parents{nullptr};
+    u32 n_parents_{0};
+    const char* parents_{nullptr};
 
-    u32 n_literals{0};
-    const char* literals{nullptr};
+    u32 n_literals_{0};
+    const char* literals_{nullptr};
 
-    u32 n_globs{0};
-    const char* globs{nullptr};
+    u32 n_globs_{0};
+    const char* globs_{nullptr};
 
-    u32 n_suffix_roots{0};
-    const char* suffix_roots{nullptr};
+    u32 n_suffix_roots_{0};
+    const char* suffix_roots_{nullptr};
 
-    u32 n_magics{0};
-    const char* magics{nullptr};
+    u32 n_magics_{0};
+    const char* magics_{nullptr};
 
     u32 magic_max_extent_{0};
 };
