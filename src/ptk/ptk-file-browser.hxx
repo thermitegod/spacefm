@@ -184,8 +184,8 @@ struct PtkFileBrowser
     GSList* toolbar_widgets[10];
 
     // private:
-    std::shared_ptr<selection_history_data> selection_history;
-    std::shared_ptr<navigation_history_data> navigation_history;
+    std::unique_ptr<selection_history_data> selection_history;
+    std::unique_ptr<navigation_history_data> navigation_history;
 
   public:
     bool chdir(

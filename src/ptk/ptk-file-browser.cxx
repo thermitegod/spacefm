@@ -1038,8 +1038,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
     // clang-format on
 
-    file_browser->selection_history = std::make_shared<selection_history_data>();
-    file_browser->navigation_history = std::make_shared<navigation_history_data>();
+    file_browser->selection_history = std::make_unique<selection_history_data>();
+    file_browser->navigation_history = std::make_unique<navigation_history_data>();
 }
 
 static void
