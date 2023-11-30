@@ -36,8 +36,6 @@
 
 #include <cassert>
 
-#include <malloc.h>
-
 #include <fmt/format.h>
 
 #include <gtkmm.h>
@@ -84,6 +82,8 @@
 #include "vfs/vfs-file.hxx"
 
 #include "settings/app.hxx"
+
+#include "utils/memory.hxx"
 
 #include "signals.hxx"
 
@@ -1079,7 +1079,7 @@ ptk_file_browser_finalize(GObject* obj)
      * mainly to deal with the possibility that killing the browser results in
      * thousands of large thumbnails being freed, but the memory not actually
      * released by SpaceFM */
-    malloc_trim(0);
+    memory_trim();
 }
 
 static void
@@ -1385,7 +1385,7 @@ PtkFileBrowser::on_dir_file_listed(bool is_cancelled)
      * mainly to deal with the possibility that changing the directory results in
      * thousands of large thumbnails being freed, but the memory not actually
      * released by SpaceFM */
-    malloc_trim(0);
+    memory_trim();
 
     this->run_event<spacefm::signal::chdir_after>();
     this->run_event<spacefm::signal::change_content>();
@@ -3310,7 +3310,7 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-    malloc_trim(0);
+    memory_trim();
 
     // begin reload dir
     this->busy_ = true;

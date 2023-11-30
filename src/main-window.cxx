@@ -32,8 +32,6 @@
 
 #include <ranges>
 
-#include <malloc.h>
-
 #include <cassert>
 
 #include <fmt/format.h>
@@ -67,6 +65,8 @@
 
 #include "settings/app.hxx"
 #include "settings/disk-format.hxx"
+
+#include "utils/memory.hxx"
 
 #include "bookmarks.hxx"
 #include "settings.hxx"
@@ -453,7 +453,7 @@ main_window_reload_thumbnails_all_windows()
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-    malloc_trim(0);
+    memory_trim();
 }
 
 void

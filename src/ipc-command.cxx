@@ -27,8 +27,6 @@
 
 #include <ranges>
 
-#include <malloc.h>
-
 #include <fmt/format.h>
 
 #include <glibmm.h>

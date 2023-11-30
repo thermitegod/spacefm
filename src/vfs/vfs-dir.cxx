@@ -37,12 +37,12 @@
 
 #include <glibmm.h>
 
-#include <malloc.h>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "write.hxx"
+
+#include "utils/memory.hxx"
 
 #include "vfs/vfs-async-thread.hxx"
 #include "vfs/vfs-async-task.hxx"
@@ -423,7 +423,7 @@ vfs::dir::unload_thumbnails(bool is_big) noexcept
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-    malloc_trim(0);
+    memory_trim();
 }
 
 void

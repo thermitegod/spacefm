@@ -389,6 +389,8 @@ sources = files(
 
     'src/settings/upgrade/config-upgrade.cxx',
 
+    'src/utils/memory.cxx',
+
     'src/mime-type/mime-action.cxx',
     'src/mime-type/mime-cache.cxx',
     'src/mime-type/mime-type.cxx',
