@@ -83,12 +83,12 @@ split_basename_extension(const std::filesystem::path& filename) noexcept
             // Find the second last dot in the filename
             const auto split_second = ztd::rpartition(split[0], ".");
 
-            return {split_second[0], std::format("{}.{}", split_second[2], split[2]), true};
+            return {split_second[0], std::format(".{}.{}", split_second[2], split[2]), true};
         }
         else
         {
             // Return the basename and the extension
-            return {split[0], split[2]};
+            return {split[0], std::format(".{}", split[2]), false};
         }
     }
 

@@ -23,35 +23,19 @@
 #include <filesystem>
 
 #include <array>
-#include <span>
-
-#include "mime-type/mime-cache.hxx"
 
 inline constexpr std::string_view XDG_MIME_TYPE_UNKNOWN{"application/octet-stream"};
 inline constexpr std::string_view XDG_MIME_TYPE_DIRECTORY{"inode/directory"};
 inline constexpr std::string_view XDG_MIME_TYPE_EXECUTABLE{"application/x-executable"};
 inline constexpr std::string_view XDG_MIME_TYPE_PLAIN_TEXT{"text/plain"};
 
-/* Initialize the library */
-void mime_type_init();
-
-/* Finalize the library and free related resources */
-void mime_type_finalize();
-
 /*
- * Get mime-type info of the specified file (slow, but more accurate):
- * To determine the mime-type of the file, mime_type_get_by_filename() is
- * tried first.  If the mime-type could not be determined, the content of
+ * Get mime-type info of the specified file. To determine the mime-type
+ * of the file, lookup the mime-type of file extension from mime.cache.
+ * If the mime-type could not be determined, the content of
  * the file will be checked, which is much more time-consuming.
- * If statbuf is not nullptr, it will be used to determine if the file is a directory,
- * or if the file is an executable file; otherwise, the function will call stat()
- * to gather this info itself. So if you already have stat info of the file,
- * pass it to the function to prevent checking the file stat again.
- * If you have basename of the file, pass it to the function can improve the
- * efifciency, too. Otherwise, the function will try to get the basename of
- * the specified file again.
  */
-const std::string mime_type_get_by_file(const std::filesystem::path& path);
+const std::string mime_type_get_by_file(const std::filesystem::path& path) noexcept;
 
 bool mime_type_is_text(const std::string_view mime_type) noexcept;
 bool mime_type_is_executable(const std::string_view mime_type) noexcept;
@@ -60,14 +44,10 @@ bool mime_type_is_video(const std::string_view mime_type) noexcept;
 bool mime_type_is_image(const std::string_view mime_type) noexcept;
 bool mime_type_is_unknown(const std::string_view mime_type) noexcept;
 
-/**
- * Get human-readable description and icon name of the mime-type
+/* Get human-readable description and icon name of the mime-type.
+ *
+ * Note: Spec is not followed for icon.  If icon tag is found in .local
+ * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
+ * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed.
  */
 const std::array<std::string, 2> mime_type_get_desc_icon(const std::string_view type);
-
-/*
- * Get mime caches
- */
-const std::span<const mime_cache_t> mime_type_get_caches();
-
-void mime_type_regen_all_caches();

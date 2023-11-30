@@ -81,9 +81,6 @@ namespace vfs
     };
 } // namespace vfs
 
-void vfs_mime_type_init();
-void vfs_mime_type_finalize();
-
 const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_get_from_file(const std::filesystem::path& file_path);
 const std::shared_ptr<vfs::mime_type> vfs_mime_type_get_from_type(const std::string_view type);

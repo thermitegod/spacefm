@@ -24,9 +24,7 @@
 
 #include <unordered_map>
 
-#include <thread>
 #include <mutex>
-#include <chrono>
 
 #include <optional>
 
@@ -43,15 +41,11 @@
 #include "mime-type/mime-action.hxx"
 #include "mime-type/mime-type.hxx"
 
-#include "vfs/vfs-monitor.hxx"
-#include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-mime-type.hxx"
 
 static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
 std::mutex mime_map_lock;
-
-static std::vector<std::shared_ptr<vfs::monitor>> mime_caches_monitors;
 
 const std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create(const std::string_view type_name) noexcept
@@ -70,7 +64,6 @@ const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_get_from_type(const std::string_view type)
 {
     std::unique_lock<std::mutex> lock(mime_map_lock);
-
     if (mime_map.contains(type.data()))
     {
         return mime_map.at(type.data());
@@ -79,66 +72,6 @@ vfs_mime_type_get_from_type(const std::string_view type)
     const auto mime_type = vfs::mime_type::create(type);
     mime_map.insert({mime_type->type().data(), mime_type});
     return mime_type;
-}
-
-static bool
-vfs_mime_type_reload()
-{
-    std::unique_lock<std::mutex> lock(mime_map_lock);
-    mime_map.clear();
-    // ztd::logger::debug("reload mime-types");
-    vfs::dir::global_reload_mime_type();
-    mime_type_regen_all_caches();
-    return false;
-}
-
-static void
-on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path)
-{
-    (void)event;
-    (void)path;
-
-    // ztd::logger::debug("reloading all mime caches");
-    std::jthread idle_thread(
-        []()
-        {
-            vfs_mime_type_reload();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        });
-
-    idle_thread.join();
-}
-
-void
-vfs_mime_type_init()
-{
-    mime_type_init();
-
-    /* install file alteration monitor for mime-cache */
-    for (const mime_cache_t& cache : mime_type_get_caches())
-    {
-        // MOD NOTE1  check to see if path exists - otherwise it later tries to
-        //  remove nullptr monitor with inotify which caused segfault
-        if (!std::filesystem::exists(cache->file_path()))
-        {
-            continue;
-        }
-
-        const auto monitor = vfs::monitor::create(cache->file_path(), &on_monitor_event);
-
-        mime_caches_monitors.emplace_back(monitor);
-    }
-}
-
-void
-vfs_mime_type_finalize()
-{
-    // remove file alteration monitor for mime-cache
-    mime_caches_monitors.clear();
-
-    mime_type_finalize();
-
-    mime_map.clear();
 }
 
 /////////////////////////////////////

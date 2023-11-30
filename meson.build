@@ -392,8 +392,8 @@ sources = files(
     'src/utils/memory.cxx',
 
     'src/mime-type/mime-action.cxx',
-    'src/mime-type/mime-cache.cxx',
     'src/mime-type/mime-type.cxx',
+    'src/mime-type/chrome/mime-utils.cxx',
 
     'src/ptk/ptk-app-chooser.cxx',
     'src/ptk/ptk-archiver.cxx',

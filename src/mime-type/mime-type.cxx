@@ -25,15 +25,12 @@
 #include <filesystem>
 
 #include <array>
-#include <vector>
 
 #include <span>
 
 #include <optional>
 
 #include <algorithm>
-
-#include <memory>
 
 #include <fcntl.h>
 
@@ -46,89 +43,12 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "mime-type/chrome/mime-utils.hxx"
+
 #include "mime-type/mime-type.hxx"
-#include "mime-type/mime-cache.hxx"
 
 // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
 inline constexpr u32 MIME_HEADER_MAX_SIZE = 127;
-
-/* Check if the specified mime_type is the subclass of the specified parent type */
-static bool mime_type_is_subclass(const std::string_view type, const std::string_view parent);
-
-static std::vector<mime_cache_t> caches;
-
-/* max magic extent of all caches */
-static u32 mime_cache_max_extent = 0;
-
-/* free all mime.cache files on the system */
-static void mime_cache_free_all();
-
-/*
- * Get mime-type of the specified file (quick, but less accurate):
- * Mime-type of the file is determined by cheking the filename only.
- */
-static const std::string
-mime_type_get_by_filename(const std::filesystem::path& filename,
-                          const std::filesystem::file_status& status)
-{
-    const char* type = nullptr;
-    const char* suffix_pos = nullptr;
-    const char* prev_suffix_pos = (const char*)-1;
-
-    if (std::filesystem::is_directory(status))
-    {
-        return XDG_MIME_TYPE_DIRECTORY.data();
-    }
-
-    for (const mime_cache_t& cache : caches)
-    {
-        type = cache->lookup_literal(filename.c_str());
-        if (type)
-        {
-            break;
-        }
-
-        const char* _type = cache->lookup_suffix(filename.c_str(), &suffix_pos);
-        if (_type && suffix_pos < prev_suffix_pos)
-        {
-            type = _type;
-            prev_suffix_pos = suffix_pos;
-
-            if (type)
-            {
-                break;
-            }
-        }
-    }
-
-    if (!type) /* glob matching */
-    {
-        i32 max_glob_len = 0;
-        i32 glob_len = 0;
-        for (const mime_cache_t& cache : caches)
-        {
-            const char* matched_type = cache->lookup_glob(filename.c_str(), &glob_len);
-            /* according to the mime.cache 1.0 spec, we should use the longest glob matched. */
-            if (matched_type && glob_len > max_glob_len)
-            {
-                type = matched_type;
-                max_glob_len = glob_len;
-            }
-
-            if (type)
-            {
-                break;
-            }
-        }
-    }
-
-    if (type && *type)
-    {
-        return type;
-    }
-
-    return XDG_MIME_TYPE_UNKNOWN.data();
-}
 
 static bool
 mime_type_is_data_plain_text(const std::span<const std::byte> data)
@@ -148,21 +68,8 @@ mime_type_is_data_plain_text(const std::span<const std::byte> data)
     return true;
 }
 
-/*
- * Get mime-type info of the specified file (slow, but more accurate):
- * To determine the mime-type of the file, mime_type_get_by_filename() is
- * tried first.  If the mime-type could not be determined, the content of
- * the file will be checked, which is much more time-consuming.
- * If statbuf is not nullptr, it will be used to determine if the file is a directory,
- * or if the file is an executable file; otherwise, the function will call stat()
- * to gather this info itself. So if you already have stat info of the file,
- * pass it to the function to prevent checking the file stat again.
- * If you have basename of the file, pass it to the function can improve the
- * efifciency, too. Otherwise, the function will try to get the basename of
- * the specified file again.
- */
 const std::string
-mime_type_get_by_file(const std::filesystem::path& path)
+mime_type_get_by_file(const std::filesystem::path& path) noexcept
 {
     const auto status = std::filesystem::status(path);
 
@@ -181,10 +88,10 @@ mime_type_get_by_file(const std::filesystem::path& path)
         return XDG_MIME_TYPE_DIRECTORY.data();
     }
 
-    auto filename_type = mime_type_get_by_filename(path.filename(), status);
-    if (filename_type != XDG_MIME_TYPE_UNKNOWN)
+    auto type = GetFileMimeType(path);
+    if (type != XDG_MIME_TYPE_UNKNOWN)
     {
-        return filename_type;
+        return type;
     }
 
     const auto file_size = std::filesystem::file_size(path);
@@ -194,8 +101,12 @@ mime_type_get_by_file(const std::filesystem::path& path)
         return XDG_MIME_TYPE_PLAIN_TEXT.data();
     }
 
-    const char* type = nullptr;
-    /* Open the file and read it into memory */
+    /* Check for executable file */
+    if (have_x_access(path))
+    {
+        return XDG_MIME_TYPE_EXECUTABLE.data();
+    }
+
     const auto fd = open(path.c_str(), O_RDONLY, 0);
     if (fd != -1)
     {
@@ -207,31 +118,14 @@ mime_type_get_by_file(const std::filesystem::path& path)
             return XDG_MIME_TYPE_UNKNOWN.data();
         }
 
-        for (usize i = 0; !type && i < caches.size(); ++i)
+        /* check for plain text */
+        if (mime_type_is_data_plain_text(data))
         {
-            type = caches.at(i)->lookup_magic(data);
-        }
-
-        /* Check for executable file */
-        if (!type && have_x_access(path))
-        {
-            type = XDG_MIME_TYPE_EXECUTABLE.data();
-        }
-
-        /* fallback: check for plain text */
-        if (!type)
-        {
-            if (mime_type_is_data_plain_text(data))
-            {
-                type = XDG_MIME_TYPE_PLAIN_TEXT.data();
-            }
+            type = XDG_MIME_TYPE_PLAIN_TEXT.data();
         }
 
         close(fd);
-    }
 
-    if (type && *type)
-    {
         return type;
     }
 
@@ -291,14 +185,6 @@ mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
     return std::array{icon_name, comment};
 }
 
-/* Get human-readable description and icon name of the mime-type
- * If locale is nullptr, current locale will be used.
- * The returned string should be freed when no longer used.
- * The icon_name will only be set if points to nullptr, and must be freed.
- *
- * Note: Spec is not followed for icon.  If icon tag is found in .local
- * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
- * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed. */
 const std::array<std::string, 2>
 mime_type_get_desc_icon(const std::string_view type)
 {
@@ -337,66 +223,6 @@ mime_type_get_desc_icon(const std::string_view type)
     return {"", ""};
 }
 
-void
-mime_type_finalize()
-{
-    mime_cache_free_all();
-}
-
-// load all mime.cache files on the system,
-// including /usr/share/mime/mime.cache,
-// /usr/local/share/mime/mime.cache,
-// and $HOME/.local/share/mime/mime.cache.
-void
-mime_type_init()
-{
-    const auto user_mime_cache = vfs::user_dirs->data_dir() / "mime/mime.cache";
-    const mime_cache_t cache = std::make_shared<MimeCache>(user_mime_cache);
-    caches.emplace_back(cache);
-
-    if (cache->magic_max_extent() > mime_cache_max_extent)
-    {
-        mime_cache_max_extent = cache->magic_max_extent();
-    }
-
-    caches.reserve(vfs::user_dirs->system_data_dirs().size());
-    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
-    {
-        const auto sys_mime_cache = sys_dir / "mime/mime.cache";
-        const mime_cache_t dir_cache = std::make_shared<MimeCache>(sys_mime_cache);
-        caches.emplace_back(dir_cache);
-
-        if (dir_cache->magic_max_extent() > mime_cache_max_extent)
-        {
-            mime_cache_max_extent = dir_cache->magic_max_extent();
-        }
-    }
-}
-
-/* free all mime.cache files on the system */
-static void
-mime_cache_free_all()
-{
-    caches.clear();
-
-    mime_cache_max_extent = 0;
-}
-
-void
-mime_cache_reload(const mime_cache_t& cache)
-{
-    cache->reload();
-
-    /* recalculate max magic extent */
-    for (const mime_cache_t& mcache : caches)
-    {
-        if (mcache->magic_max_extent() > mime_cache_max_extent)
-        {
-            mime_cache_max_extent = mcache->magic_max_extent();
-        }
-    }
-}
-
 bool
 mime_type_is_text(const std::string_view mime_type) noexcept
 {
@@ -404,10 +230,6 @@ mime_type_is_text(const std::string_view mime_type) noexcept
     {
         // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
         return false;
-    }
-    if (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_PLAIN_TEXT))
-    {
-        return true;
     }
     if (!mime_type.starts_with("text/") && !mime_type.starts_with("application/"))
     {
@@ -424,9 +246,8 @@ mime_type_is_executable(const std::string_view mime_type) noexcept
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    return mime_type != XDG_MIME_TYPE_UNKNOWN &&
-           (mime_type_is_subclass(mime_type, XDG_MIME_TYPE_EXECUTABLE) ||
-            mime_type_is_subclass(mime_type, "application/x-shellscript"));
+    return (mime_type != XDG_MIME_TYPE_UNKNOWN || mime_type == XDG_MIME_TYPE_EXECUTABLE ||
+            mime_type == "application/x-shellscript");
 }
 
 // Taken from file-roller .desktop file
@@ -520,46 +341,4 @@ bool
 mime_type_is_unknown(const std::string_view mime_type) noexcept
 {
     return mime_type == XDG_MIME_TYPE_UNKNOWN;
-}
-
-/* Check if the specified mime_type is the subclass of the specified parent type */
-static bool
-mime_type_is_subclass(const std::string_view type, const std::string_view parent)
-{
-    /* special case, the type specified is identical to the parent type. */
-    if (type == parent)
-    {
-        return true;
-    }
-
-    for (const mime_cache_t& cache : caches)
-    {
-        const std::vector<std::string> parents = cache->lookup_parents(type);
-        for (const std::string_view p : parents)
-        {
-            if (parent == p)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/*
- * Get mime caches
- */
-const std::span<const mime_cache_t>
-mime_type_get_caches()
-{
-    return caches;
-}
-
-/*
- * Reload all mime caches
- */
-void
-mime_type_regen_all_caches()
-{
-    std::ranges::for_each(caches, mime_cache_reload);
 }

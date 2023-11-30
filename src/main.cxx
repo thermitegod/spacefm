@@ -291,7 +291,6 @@ main(int argc, char* argv[])
     std::srand(seed);
 
     // Initialize vfs system
-    vfs_mime_type_init();
     vfs_volume_init();
     vfs_thumbnail_init();
     vfs_trash_init();
@@ -308,7 +307,6 @@ main(int argc, char* argv[])
     std::atexit(ztd::Logger->shutdown);
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
-    std::atexit(vfs_mime_type_finalize);
     std::atexit(vfs_volume_finalize);
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
