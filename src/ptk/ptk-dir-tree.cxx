@@ -29,8 +29,6 @@
 
 #include <cassert>
 
-#include <malloc.h>
-
 #include <gdkmm.h>
 #include <glibmm.h>
 
@@ -38,8 +36,6 @@
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
-
-#include "types.hxx"
 
 #include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-file.hxx"
@@ -631,54 +627,6 @@ ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const std::files
     return node;
 }
 
-static char*
-dir_path_from_tree_node(PtkDirTree* tree, PtkDirTreeNode* node)
-{
-    if (!node)
-    {
-        return nullptr;
-    }
-
-    GSList* names = nullptr;
-    while (node != tree->root)
-    {
-        if (!node->file)
-        {
-            g_slist_free(names);
-            return nullptr;
-        }
-        const auto name = node->file->name();
-
-        names = g_slist_prepend(names, ztd::strdup(name.data()));
-        node = node->parent;
-    }
-
-    i32 len;
-    GSList* l;
-    for (len = 1, l = names; l; l = g_slist_next(l))
-    {
-        len += std::strlen((char*)l->data) + 1;
-    }
-    char* dir_path = CHAR(malloc(len));
-
-    char* p;
-    for (p = dir_path, l = names; l; l = g_slist_next(l))
-    {
-        char* name = (char*)l->data;
-        len = std::strlen(name);
-        memcpy(p, name, len * sizeof(char));
-        p += len;
-        if (l->next && !ztd::same(name, "/"))
-        {
-            *p = '/';
-            ++p;
-        }
-    }
-    *p = '\0';
-    g_slist_free(names);
-    return dir_path;
-}
-
 static void
 ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
                           const std::filesystem::path& file_path = "",
@@ -796,7 +744,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
     }
 
     PtkDirTreeNode* place_holder = node->children;
-    char* path = dir_path_from_tree_node(tree, node);
+    const auto& path = node->file->path();
 
     if (std::filesystem::is_directory(path))
     {
@@ -824,7 +772,6 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
             ptk_dir_tree_delete_child(tree, place_holder);
         }
     }
-    std::free(path);
 }
 
 void
@@ -867,8 +814,15 @@ ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path
 char*
 ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter)
 {
+    (void)tree;
     assert(iter->user_data != nullptr);
-    return dir_path_from_tree_node(tree, PTK_DIR_TREE_NODE(iter->user_data));
+
+    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    if (node != nullptr && node->file != nullptr)
+    {
+        return ztd::strdup(node->file->path().c_str());
+    }
+    return nullptr;
 }
 
 static PtkDirTreeNode*
