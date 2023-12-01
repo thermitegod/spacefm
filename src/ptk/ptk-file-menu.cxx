@@ -1721,7 +1721,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     std::string command;
 
     const std::string desktop_file =
-        CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+        static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     const auto desktop = vfs::desktop::create(desktop_file);
     if (desktop->name().empty())
     {
@@ -2038,7 +2038,8 @@ app_menu_keypress(GtkWidget* menu, GdkEvent* event, PtkFileMenu* data)
     }
 
     // if original menu, desktop will be set
-    const std::string desktop_file = CONST_CHAR(g_object_get_data(G_OBJECT(item), "desktop_file"));
+    const std::string desktop_file =
+        static_cast<const char*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
     const auto desktop = vfs::desktop::create(desktop_file);
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
@@ -2104,7 +2105,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     }
 
     const std::string desktop_file =
-        CONST_CHAR(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+        static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
     const auto desktop = vfs::desktop::create(desktop_file);
 
     GtkWidget* app_menu = gtk_menu_new();

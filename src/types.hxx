@@ -19,9 +19,6 @@
 
 #include <ztd/ztd.hxx>
 
-#define CHAR(obj)       (static_cast<char*>(obj))
-#define CONST_CHAR(obj) (static_cast<const char*>(obj))
-
 // clang-format off
 
 // better type names

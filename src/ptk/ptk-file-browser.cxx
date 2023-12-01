@@ -1197,7 +1197,8 @@ PtkFileBrowser::update_tab_label() noexcept
 static void
 on_history_menu_item_activate(GtkWidget* menu_item, PtkFileBrowser* file_browser)
 {
-    const std::filesystem::path path = CONST_CHAR(g_object_get_data(G_OBJECT(menu_item), "path"));
+    const std::filesystem::path path =
+        static_cast<const char*>(g_object_get_data(G_OBJECT(menu_item), "path"));
     file_browser->chdir(path);
 }
 
