@@ -424,9 +424,21 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* 
                 if (button == 3)
                 {
                     // right click
-                    const std::filesystem::path dir_path =
-                        ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-                    if (file_browser->chdir(dir_path))
+                    std::filesystem::path path;
+                    char* c_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+                    if (c_path)
+                    {
+                        path = c_path;
+                        std::free(c_path);
+                    }
+                    if (path.empty())
+                    {
+                        // path will be empty if the right click is on
+                        // the  "( no subdirectory )" label.
+                        return true;
+                    }
+
+                    if (file_browser->chdir(path))
                     {
                         /* show right-click menu
                          * This simulates a right-click in the file list when
