@@ -3272,9 +3272,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
             // need move?  (do move as task in case it takes a long time)
             else if (!std::filesystem::equivalent(old_path, path))
             {
-            _move_task:
-                // move task - this is jumped to from the below rename block on
-                // EXDEV error
                 PtkFileTask* ptask = ptk_file_exec_new("Move", mset->parent, task_view);
                 from_path = ztd::shell::quote(mset->full_path.string());
                 to_path = ztd::shell::quote(full_path.string());
@@ -3297,14 +3294,6 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                 // rename (does overwrite)
                 if (rename(mset->full_path.c_str(), full_path.c_str()) != 0)
                 {
-                    // Respond to an EXDEV error by switching to a move (e.g. aufs
-                    // directory rename fails due to the directory existing in
-                    // multiple underlying branches)
-                    if (errno == EXDEV)
-                    {
-                        goto _move_task;
-                    }
-
                     // Unknown error has occurred - alert user as usual
                     ptk_show_error(GTK_WINDOW(mset->dlg),
                                    "Rename Error",
