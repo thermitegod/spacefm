@@ -613,6 +613,8 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         mset->full_path_same = full_path_same;
         mset->mode_change = false;
 
+        gtk_widget_set_sensitive(mset->revert, !full_path_same);
+
         if (full_path_same && (mset->create_new == ptk::rename_mode::rename ||
                                mset->create_new == ptk::rename_mode::new_link))
         {
