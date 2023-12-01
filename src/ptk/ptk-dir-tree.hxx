@@ -22,6 +22,9 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/vfs-monitor.hxx"
+#include "vfs/vfs-file.hxx"
+
 #define PTK_DIR_TREE(obj)             (static_cast<PtkDirTree*>(obj))
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<PtkDirTree*>(obj))
 
@@ -36,20 +39,43 @@ namespace ptk::dir_tree
     };
 }
 
-struct PtkDirTreeNode;
-
-struct PtkDirTree
+struct PtkDirTree // : public Gtk::TreeModel
 {
     GObject parent;
-    /* <private> */
 
-    PtkDirTreeNode* root{nullptr};
+    /* <private> */
+    struct Node
+    {
+        Node() = default;
+        ~Node();
+
+        static Node* create(PtkDirTree* tree, PtkDirTree::Node* parent,
+                            const std::filesystem::path& path);
+
+        std::shared_ptr<vfs::file> file{nullptr};
+        Node* children{nullptr};
+        i32 n_children{0};
+        std::shared_ptr<vfs::monitor> monitor{nullptr};
+        i32 n_expand{0};
+        Node* parent{nullptr};
+        Node* next{nullptr};
+        Node* prev{nullptr};
+        Node* last{nullptr};
+        PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
+
+        Node* get_nth_node(i32 n);
+        isize get_node_index(PtkDirTree::Node* child);
+        Node* find_node(const std::string_view name);
+
+        /* file monitor callback */
+        void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
+    };
+    Node* root{nullptr};
+
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
     const i32 stamp{std::rand()};
 };
-
-GType ptk_dir_tree_get_type();
 
 PtkDirTree* ptk_dir_tree_new();
 

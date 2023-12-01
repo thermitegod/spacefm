@@ -48,49 +48,13 @@
 #define PTK_TYPE_DIR_TREE    (ptk_dir_tree_get_type())
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))
 
-#define PTK_DIR_TREE_NODE(obj) (static_cast<PtkDirTreeNode*>(obj))
+#define PTK_DIR_TREE_NODE(obj) (static_cast<PtkDirTree::Node*>(obj))
 
 struct PtkDirTreeClass
 {
     GObjectClass parent;
     /* Default signal handlers */
 };
-
-struct PtkDirTreeNode
-{
-    PtkDirTreeNode() = default;
-    ~PtkDirTreeNode();
-
-    std::shared_ptr<vfs::file> file{nullptr};
-    PtkDirTreeNode* children{nullptr};
-    i32 n_children{0};
-    std::shared_ptr<vfs::monitor> monitor{nullptr};
-    i32 n_expand{0};
-    PtkDirTreeNode* parent{nullptr};
-    PtkDirTreeNode* next{nullptr};
-    PtkDirTreeNode* prev{nullptr};
-    PtkDirTreeNode* last{nullptr};
-    PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
-
-    void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
-};
-
-PtkDirTreeNode::~PtkDirTreeNode()
-{
-    this->file = nullptr;
-    this->monitor = nullptr;
-
-    std::vector<PtkDirTreeNode*> childs;
-    for (PtkDirTreeNode* child = this->children; child; child = child->next)
-    {
-        childs.emplace_back(child);
-    }
-    std::ranges::reverse(childs);
-    for (PtkDirTreeNode* child : childs)
-    {
-        delete child;
-    }
-}
 
 static void ptk_dir_tree_init(PtkDirTree* tree);
 
@@ -133,12 +97,9 @@ static gboolean ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIte
 static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
                                          GtkTreeIter* child);
 
-static i32 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b);
+static i32 ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTree::Node* a, PtkDirTree::Node* b);
 
-static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child);
-
-static PtkDirTreeNode* ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent,
-                                             const std::filesystem::path& path);
+static void ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTree::Node* child);
 
 static GObjectClass* parent_class = nullptr;
 
@@ -190,10 +151,10 @@ ptk_dir_tree_get_type()
 static void
 ptk_dir_tree_init(PtkDirTree* tree)
 {
-    tree->root = new PtkDirTreeNode;
+    tree->root = new PtkDirTree::Node;
     tree->root->tree = tree;
     tree->root->n_children = 1;
-    PtkDirTreeNode* child = ptk_dir_tree_node_new(tree, tree->root, "/");
+    PtkDirTree::Node* child = PtkDirTree::Node::create(tree, tree->root, "/");
     tree->root->children = child;
 }
 
@@ -288,25 +249,6 @@ ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index)
     return column_types[ptk::dir_tree::column(index)];
 }
 
-static PtkDirTreeNode*
-get_nth_node(PtkDirTreeNode* parent, i32 n)
-{
-    if (n >= parent->n_children || n < 0)
-    {
-        return nullptr;
-    }
-
-    PtkDirTreeNode* node = parent->children;
-    assert(node != nullptr);
-
-    while (n > 0 && node)
-    {
-        node = node->next;
-        --n;
-    }
-    return node;
-}
-
 static gboolean
 ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
 {
@@ -322,12 +264,12 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     const i32* indices = gtk_tree_path_get_indices(path);
     const i32 depth = gtk_tree_path_get_depth(path);
 
-    PtkDirTreeNode* node = tree->root;
+    PtkDirTree::Node* node = tree->root;
     assert(node != nullptr);
 
     for (const auto i : std::views::iota(0z, depth))
     {
-        node = get_nth_node(node, indices[i]);
+        node = node->get_nth_node(indices[i]);
         if (!node)
         {
             return false;
@@ -343,26 +285,6 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
     return true;
 }
 
-static i32
-get_node_index(PtkDirTreeNode* parent, PtkDirTreeNode* child)
-{
-    if (!parent || !child)
-    {
-        return -1;
-    }
-
-    i32 i = 0;
-    for (PtkDirTreeNode* node = parent->children; node; node = node->next)
-    {
-        if (node == child)
-        {
-            return i;
-        }
-        ++i;
-    }
-    return -1;
-}
-
 static GtkTreePath*
 ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
@@ -374,13 +296,13 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
     assert(iter->user_data != nullptr);
 
     GtkTreePath* path = gtk_tree_path_new();
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     assert(node != nullptr);
     assert(node->parent != nullptr);
 
     while (node != tree->root)
     {
-        const i32 i = get_node_index(node->parent, node);
+        const auto i = node->parent->get_node_index(node);
         if (i == -1)
         {
             gtk_tree_path_free(path);
@@ -399,7 +321,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     assert(iter != nullptr);
     // assert(column > (i32)G_N_ELEMENTS(column_types));
 
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     assert(node != nullptr);
 
     g_value_init(value, column_types[ptk::dir_tree::column(column)]);
@@ -457,7 +379,7 @@ ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
     PtkDirTree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     assert(node != nullptr);
 
     /* Is this the last child in the parent node? */
@@ -477,7 +399,7 @@ ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 static gboolean
 ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent)
 {
-    PtkDirTreeNode* parent_node;
+    PtkDirTree::Node* parent_node;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(parent != nullptr);
     assert(parent->user_data != nullptr);
@@ -513,7 +435,7 @@ ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     (void)tree_model;
     assert(iter != nullptr);
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     assert(node != nullptr);
     return node->n_children != 0;
 }
@@ -526,7 +448,7 @@ ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
     assert(tree != nullptr);
 
     /* special case: if iter == nullptr, return number of top-level rows */
-    PtkDirTreeNode* node;
+    PtkDirTree::Node* node;
     if (!iter)
     {
         node = tree->root;
@@ -551,7 +473,7 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
     PtkDirTree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
 
-    PtkDirTreeNode* parent_node;
+    PtkDirTree::Node* parent_node;
     if (parent)
     {
         parent_node = PTK_DIR_TREE_NODE(parent->user_data);
@@ -568,7 +490,7 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
         return false;
     }
 
-    PtkDirTreeNode* node = get_nth_node(parent_node, n);
+    PtkDirTree::Node* node = parent_node->get_nth_node(n);
     assert(node != nullptr);
 
     iter->stamp = tree->stamp;
@@ -585,7 +507,7 @@ ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIte
     assert(child != nullptr);
     PtkDirTree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     assert(tree != nullptr);
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(child->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(child->user_data);
     assert(node != nullptr);
 
     if (node->parent != tree->root)
@@ -598,7 +520,7 @@ ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIte
 }
 
 static i32
-ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b)
+ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTree::Node* a, PtkDirTree::Node* b)
 {
     (void)tree;
     const auto& file1 = a->file;
@@ -611,31 +533,15 @@ ptk_dir_tree_node_compare(PtkDirTree* tree, PtkDirTreeNode* a, PtkDirTreeNode* b
     return strnatcasecmp(file2->name().data(), file1->name().data());
 }
 
-static PtkDirTreeNode*
-ptk_dir_tree_node_new(PtkDirTree* tree, PtkDirTreeNode* parent, const std::filesystem::path& path)
-{
-    const auto node = new PtkDirTreeNode;
-    node->tree = tree;
-    node->parent = parent;
-    if (!path.empty())
-    {
-        node->file = vfs::file::create(path);
-        node->n_children = 1;
-        node->children = ptk_dir_tree_node_new(tree, node, std::filesystem::path());
-        node->last = node->children;
-    }
-    return node;
-}
-
 static void
-ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
+ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTree::Node* parent,
                           const std::filesystem::path& file_path = "",
                           const std::filesystem::path& name = "")
 {
     (void)name;
 
-    PtkDirTreeNode* node;
-    PtkDirTreeNode* child_node = ptk_dir_tree_node_new(tree, parent, file_path);
+    PtkDirTree::Node* node;
+    PtkDirTree::Node* child_node = PtkDirTree::Node::create(tree, parent, file_path);
     for (node = parent->children; node; node = node->next)
     {
         if (ptk_dir_tree_node_compare(tree, child_node, node) >= 0)
@@ -684,7 +590,7 @@ ptk_dir_tree_insert_child(PtkDirTree* tree, PtkDirTreeNode* parent,
 }
 
 static void
-ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child)
+ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTree::Node* child)
 {
     if (!child)
     {
@@ -700,7 +606,7 @@ ptk_dir_tree_delete_child(PtkDirTree* tree, PtkDirTreeNode* child)
     gtk_tree_model_row_deleted(GTK_TREE_MODEL(tree), tree_path);
     gtk_tree_path_free(tree_path);
 
-    PtkDirTreeNode* parent = child->parent;
+    PtkDirTree::Node* parent = child->parent;
     --parent->n_children;
 
     if (child == parent->children)
@@ -736,14 +642,14 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
 {
     (void)tree_path;
 
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     ++node->n_expand;
     if (node->n_expand > 1 || node->n_children > 1)
     {
         return;
     }
 
-    PtkDirTreeNode* place_holder = node->children;
+    PtkDirTree::Node* place_holder = node->children;
     const auto& path = node->file->path();
 
     if (std::filesystem::is_directory(path))
@@ -751,7 +657,7 @@ ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* tree_p
         if (!node->monitor)
         {
             node->monitor = vfs::monitor::create(path,
-                                                 std::bind(&PtkDirTreeNode::on_monitor_event,
+                                                 std::bind(&PtkDirTree::Node::on_monitor_event,
                                                            node,
                                                            std::placeholders::_1,
                                                            std::placeholders::_2));
@@ -778,7 +684,7 @@ void
 ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path)
 {
     (void)path;
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     assert(node != nullptr);
     --node->n_expand;
 
@@ -801,8 +707,8 @@ ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path
         {
             node->monitor = nullptr;
         }
-        PtkDirTreeNode* child;
-        PtkDirTreeNode* next;
+        PtkDirTree::Node* child;
+        PtkDirTree::Node* next;
         for (child = node->children; child; child = next)
         {
             next = child->next;
@@ -817,7 +723,7 @@ ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter)
     (void)tree;
     assert(iter->user_data != nullptr);
 
-    PtkDirTreeNode* node = PTK_DIR_TREE_NODE(iter->user_data);
+    PtkDirTree::Node* node = PTK_DIR_TREE_NODE(iter->user_data);
     if (node != nullptr && node->file != nullptr)
     {
         return ztd::strdup(node->file->path().c_str());
@@ -825,11 +731,86 @@ ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter)
     return nullptr;
 }
 
-static PtkDirTreeNode*
-find_node(PtkDirTreeNode* parent, const std::string_view name)
+// PtkDirTree::Node
+
+PtkDirTree::Node::~Node()
 {
-    PtkDirTreeNode* child;
-    for (child = parent->children; child; child = child->next)
+    this->file = nullptr;
+    this->monitor = nullptr;
+
+    std::vector<PtkDirTree::Node*> childs;
+    for (PtkDirTree::Node* child = this->children; child; child = child->next)
+    {
+        childs.emplace_back(child);
+    }
+    std::ranges::reverse(childs);
+    for (PtkDirTree::Node* child : childs)
+    {
+        delete child;
+    }
+}
+
+PtkDirTree::Node*
+PtkDirTree::Node::create(PtkDirTree* tree, PtkDirTree::Node* parent,
+                         const std::filesystem::path& path)
+{
+    const auto node = new PtkDirTree::Node;
+    node->tree = tree;
+    node->parent = parent;
+    if (!path.empty())
+    {
+        node->file = vfs::file::create(path);
+        node->n_children = 1;
+        node->children = PtkDirTree::Node::create(tree, node, std::filesystem::path());
+        node->last = node->children;
+    }
+    return node;
+}
+
+PtkDirTree::Node*
+PtkDirTree::Node::get_nth_node(i32 n)
+{
+    if (n >= this->n_children || n < 0)
+    {
+        return nullptr;
+    }
+
+    PtkDirTree::Node* node = this->children;
+    assert(node != nullptr);
+
+    while (n > 0 && node)
+    {
+        node = node->next;
+        --n;
+    }
+    return node;
+}
+
+isize
+PtkDirTree::Node::get_node_index(PtkDirTree::Node* child)
+{
+    if (!child)
+    {
+        return -1;
+    }
+
+    i32 i = 0;
+    for (PtkDirTree::Node* node = this->children; node; node = node->next)
+    {
+        if (node == child)
+        {
+            return i;
+        }
+        ++i;
+    }
+    return -1;
+}
+
+PtkDirTree::Node*
+PtkDirTree::Node::find_node(const std::string_view name)
+{
+    PtkDirTree::Node* child;
+    for (child = this->children; child; child = child->next)
     {
         if (child->file && child->file->name() == name)
         {
@@ -840,9 +821,10 @@ find_node(PtkDirTreeNode* parent, const std::string_view name)
 }
 
 void
-PtkDirTreeNode::on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path)
+PtkDirTree::Node::on_monitor_event(const vfs::monitor::event event,
+                                   const std::filesystem::path& path)
 {
-    PtkDirTreeNode* child = find_node(this, path.filename().string());
+    PtkDirTree::Node* child = this->find_node(path.filename().string());
 
     if (event == vfs::monitor::event::created)
     {
