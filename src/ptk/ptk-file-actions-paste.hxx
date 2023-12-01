@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -17,24 +15,8 @@
 
 #pragma once
 
-#include <gtkmm.h>
+#include <filesystem>
 
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-file-menu.hxx"
 
-#include "vfs/vfs-file.hxx"
-
-namespace ptk
-{
-    enum class rename_mode
-    {
-        rename,
-        new_file,
-        new_dir,
-        new_link
-    };
-}
-
-i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
-                    const std::shared_ptr<vfs::file>& file, const char* dest_dir, bool clip_copy,
-                    ptk::rename_mode create_new, AutoOpenCreate* auto_open);
+void ptk_paste_file(PtkFileBrowser* file_browser, const std::filesystem::path& cwd);

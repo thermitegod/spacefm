@@ -48,12 +48,10 @@
 
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-utils.hxx"
 
 #include "utils.hxx"
 
@@ -3334,55 +3332,4 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
     gtk_widget_destroy(mset->dlg);
 
     return ret;
-}
-
-/////////////////////////////////////////////////////////////
-
-void
-ptk_file_misc_paste_as(PtkFileBrowser* file_browser, const std::filesystem::path& cwd,
-                       GFunc callback)
-{
-    (void)callback;
-    bool is_cut = false;
-    i32 missing_targets;
-
-    const std::vector<std::filesystem::path> files =
-        ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);
-
-    for (const auto& file_path : files)
-    {
-        const auto file = vfs::file::create(file_path);
-        const std::string file_dir = std::filesystem::path(file_path).parent_path();
-
-        if (!ptk_rename_file(file_browser,
-                             file_dir.data(),
-                             file,
-                             cwd.c_str(),
-                             !is_cut,
-                             ptk::rename_mode::rename,
-                             nullptr))
-        {
-            missing_targets = 0;
-            break;
-        }
-    }
-
-    if (missing_targets > 0)
-    {
-        GtkWidget* parent = nullptr;
-        if (file_browser)
-        {
-#if (GTK_MAJOR_VERSION == 4)
-            parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
-#elif (GTK_MAJOR_VERSION == 3)
-            parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
-#endif
-        }
-
-        ptk_show_error(GTK_WINDOW(parent),
-                       "Error",
-                       std::format("{} target{} missing",
-                                   missing_targets,
-                                   missing_targets > 1 ? "s are" : " is"));
-    }
 }

@@ -58,6 +58,7 @@
 #include "ptk/ptk-file-actions-open.hxx"
 #include "ptk/ptk-file-actions-misc.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
+#include "ptk/ptk-file-actions-paste.hxx"
 #include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
@@ -2451,7 +2452,7 @@ static void
 on_popup_paste_as_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // sfm added
 {
     (void)menuitem;
-    ptk_file_misc_paste_as(data->browser, data->cwd, nullptr);
+    ptk_paste_file(data->browser, data->cwd);
 }
 
 static void

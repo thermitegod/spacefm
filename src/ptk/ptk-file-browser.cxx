@@ -61,6 +61,7 @@
 
 #include "ptk/ptk-file-actions-open.hxx"
 #include "ptk/ptk-file-actions-rename.hxx"
+#include "ptk/ptk-file-actions-paste.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-properties.hxx"
@@ -5865,7 +5866,7 @@ PtkFileBrowser::on_action(const xset::name setname) noexcept
         }
         else if (set->xset_name == xset::name::paste_as)
         {
-            ptk_file_misc_paste_as(this, this->cwd(), nullptr);
+            ptk_paste_file(this, this->cwd());
         }
     }
     else if (set->name.starts_with("select_"))
