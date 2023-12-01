@@ -41,11 +41,26 @@ namespace ptk::dir_tree
     };
 }
 
-struct PtkDirTree // : public Gtk::TreeModel
+struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::TreeModel
 {
+    struct Node;
+
     GObject parent;
 
+    static PtkDirTree* create() noexcept;
+
+    void expand_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
+    void collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
+    char* get_dir_path(GtkTreeIter* iter) const noexcept;
+
     /* <private> */
+    void insert_child(const std::shared_ptr<Node>& parent,
+                      const std::filesystem::path& file_path = "") noexcept;
+    void delete_child(const std::shared_ptr<PtkDirTree::Node>& child) noexcept;
+
+    i32 node_compare(const std::shared_ptr<PtkDirTree::Node>& a,
+                     const std::shared_ptr<PtkDirTree::Node>& b) const noexcept;
+
     struct Node : public std::enable_shared_from_this<Node>
     {
         static const std::shared_ptr<Node> create();
@@ -77,11 +92,3 @@ struct PtkDirTree // : public Gtk::TreeModel
     /* Random integer to check whether an iter belongs to our model */
     const i32 stamp{std::rand()};
 };
-
-PtkDirTree* ptk_dir_tree_new();
-
-void ptk_dir_tree_expand_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path);
-
-void ptk_dir_tree_collapse_row(PtkDirTree* tree, GtkTreeIter* iter, GtkTreePath* path);
-
-char* ptk_dir_tree_get_dir_path(PtkDirTree* tree, GtkTreeIter* iter);
