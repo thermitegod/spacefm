@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -44,33 +46,32 @@ struct PtkDirTree // : public Gtk::TreeModel
     GObject parent;
 
     /* <private> */
-    struct Node
+    struct Node : public std::enable_shared_from_this<Node>
     {
-        Node() = default;
-        ~Node();
-
-        static Node* create(PtkDirTree* tree, PtkDirTree::Node* parent,
-                            const std::filesystem::path& path);
+        static const std::shared_ptr<Node> create();
+        static const std::shared_ptr<Node> create(PtkDirTree* tree,
+                                                  const std::shared_ptr<Node>& parent,
+                                                  const std::filesystem::path& path);
 
         std::shared_ptr<vfs::file> file{nullptr};
-        Node* children{nullptr};
+        std::shared_ptr<Node> children{nullptr};
         i32 n_children{0};
         std::shared_ptr<vfs::monitor> monitor{nullptr};
         i32 n_expand{0};
-        Node* parent{nullptr};
-        Node* next{nullptr};
-        Node* prev{nullptr};
-        Node* last{nullptr};
+        std::shared_ptr<Node> parent{nullptr};
+        std::shared_ptr<Node> next{nullptr};
+        std::shared_ptr<Node> prev{nullptr};
+        std::shared_ptr<Node> last{nullptr};
         PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
-        Node* get_nth_node(i32 n);
-        isize get_node_index(PtkDirTree::Node* child);
-        Node* find_node(const std::string_view name);
+        const std::shared_ptr<Node> get_nth_node(i32 n);
+        const std::shared_ptr<Node> find_node(const std::string_view name);
+        isize get_node_index(const std::shared_ptr<Node>& child);
 
         /* file monitor callback */
         void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
     };
-    Node* root{nullptr};
+    std::shared_ptr<Node> root{nullptr};
 
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
