@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <optional>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -292,7 +294,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
 }
 
 /* FIXME: should this API be put here? Maybe it belongs to prk-dir-tree.c */
-char*
+const std::optional<std::filesystem::path>
 ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
 {
     GtkTreeIter real_it;
@@ -304,18 +306,17 @@ ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
 }
 
 /* Return a newly allocated string containing path of current selected dir. */
-char*
+const std::optional<std::filesystem::path>
 ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
 {
     GtkTreeModel* model;
     GtkTreeIter it;
-
     GtkTreeSelection* selection = gtk_tree_view_get_selection(dir_tree_view);
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
         return ptk_dir_view_get_dir_path(model, &it);
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 static GtkTreeModel*
@@ -426,11 +427,10 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* 
                 {
                     // right click
                     std::filesystem::path path;
-                    char* c_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-                    if (c_path)
+                    const auto check_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+                    if (check_path)
                     {
-                        path = c_path;
-                        std::free(c_path);
+                        path = check_path.value();
                     }
                     if (path.empty())
                     {
@@ -548,9 +548,8 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* fil
                 return false;
             }
 
-            const std::filesystem::path dir_path =
-                ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
-            if (file_browser->chdir(dir_path))
+            const auto dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+            if (dir_path && file_browser->chdir(dir_path.value()))
             {
                 /* show right-click menu
                  * This simulates a right-click in the file list when
@@ -573,10 +572,10 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* fil
 }
 
 // MOD drag n drop
-static char*
+static const std::optional<std::filesystem::path>
 dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 {
-    char* dest_path = nullptr;
+    std::optional<std::filesystem::path> dest_path = std::nullopt;
 
     // if drag is in progress, get the dest row path
     GtkTreePath* tree_path = nullptr;
@@ -627,9 +626,11 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
         (gtk_selection_data_get_format(sel_data) == 8))
     {
-        char* dest_dir = dir_tree_view_get_drop_dir(widget, x, y);
-        if (dest_dir)
+        const auto check_dest_dir = dir_tree_view_get_drop_dir(widget, x, y);
+        if (check_dest_dir)
         {
+            const auto& dest_dir = check_dest_dir.value();
+
             char** list;
             char** puri;
             puri = list = gtk_selection_data_get_uris(sel_data);
@@ -668,7 +669,6 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                     gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                 }
 
-                std::free(dest_dir);
                 g_strfreev(list);
                 file_browser->pending_drag_status_tree(false);
                 return;
@@ -738,11 +738,9 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         ptk_file_task_run(ptask);
                     }
                 }
-                std::free(dest_dir);
                 gtk_drag_finish(drag_context, true, false, time);
                 return;
             }
-            std::free(dest_dir);
         }
         else
         {

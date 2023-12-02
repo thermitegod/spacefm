@@ -701,7 +701,7 @@ PtkDirTree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
     }
 }
 
-char*
+const std::optional<std::filesystem::path>
 PtkDirTree::get_dir_path(GtkTreeIter* iter) const noexcept
 {
     assert(iter->user_data != nullptr);
@@ -709,9 +709,9 @@ PtkDirTree::get_dir_path(GtkTreeIter* iter) const noexcept
     const auto node = static_cast<PtkDirTree::Node*>(iter->user_data)->shared_from_this();
     if (node != nullptr && node->file != nullptr)
     {
-        return ztd::strdup(node->file->path().c_str());
+        return node->file->path();
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 // PtkDirTree::Node

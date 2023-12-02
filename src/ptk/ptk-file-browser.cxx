@@ -1782,22 +1782,24 @@ on_dir_tree_update_sel(PtkFileBrowser* file_browser)
     {
         return false;
     }
-    char* dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_dir));
 
-    if (dir_path)
+    const auto check_dir_path =
+        ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_dir));
+    if (check_dir_path)
     {
+        const auto& dir_path = check_dir_path.value();
+
         if (!std::filesystem::equivalent(dir_path, file_browser->cwd()))
         {
             if (file_browser->chdir(dir_path))
             {
 #if (GTK_MAJOR_VERSION == 4)
-                gtk_editable_set_text(GTK_EDITABLE(file_browser->path_bar_), dir_path);
+                gtk_editable_set_text(GTK_EDITABLE(file_browser->path_bar_), dir_path.c_str());
 #elif (GTK_MAJOR_VERSION == 3)
-                gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar_), dir_path);
+                gtk_entry_set_text(GTK_ENTRY(file_browser->path_bar_), dir_path.c_str());
 #endif
             }
         }
-        std::free(dir_path);
     }
     return false;
 }
@@ -2853,9 +2855,14 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_
                 gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
                 if (file)
                 {
-                    const auto file_path = ptk_dir_view_get_dir_path(model, &it);
-                    file_browser->run_event<spacefm::signal::open_item>(file_path,
-                                                                        ptk::open_action::new_tab);
+                    const auto check_file_path = ptk_dir_view_get_dir_path(model, &it);
+                    if (check_file_path)
+                    {
+                        const auto& file_path = check_file_path.value();
+                        file_browser->run_event<spacefm::signal::open_item>(
+                            file_path,
+                            ptk::open_action::new_tab);
+                    }
                 }
             }
             gtk_tree_path_free(tree_path);

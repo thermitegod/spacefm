@@ -17,7 +17,11 @@
 
 #pragma once
 
+#include <filesystem>
+
 #include <memory>
+
+#include <optional>
 
 #include <gtkmm.h>
 #include <glibmm.h>
@@ -51,7 +55,7 @@ struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::Tre
 
     void expand_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
     void collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
-    char* get_dir_path(GtkTreeIter* iter) const noexcept;
+    const std::optional<std::filesystem::path> get_dir_path(GtkTreeIter* iter) const noexcept;
 
     /* <private> */
     void insert_child(const std::shared_ptr<Node>& parent,
