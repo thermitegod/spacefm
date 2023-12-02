@@ -61,12 +61,12 @@ namespace libudev
          * @param name Name can be "udev" or "kernel" (default is "udev")
          * @return A {@link monitor} instance
          */
-        [[nodiscard]] std::optional<monitor>
+        [[nodiscard]] const std::optional<monitor>
         monitor_new_from_netlink(const std::string_view name = "udev");
-        [[nodiscard]] std::optional<monitor>
+        [[nodiscard]] const std::optional<monitor>
         monitor_new_from_netlink(netlink_type name = netlink_type::udev);
 
-        [[nodiscard]] std::optional<device>
+        [[nodiscard]] const std::optional<device>
         device_from_syspath(const std::filesystem::path& syspath) const noexcept;
 
         enum class device_type
@@ -75,10 +75,10 @@ namespace libudev
             character,
         };
 
-        [[nodiscard]] std::optional<device> device_from_devnum(char type,
-                                                               dev_t devnum) const noexcept;
-        [[nodiscard]] std::optional<device> device_from_devnum(device_type type,
-                                                               dev_t devnum) const noexcept;
+        [[nodiscard]] const std::optional<device> device_from_devnum(char type,
+                                                                     dev_t devnum) const noexcept;
+        [[nodiscard]] const std::optional<device> device_from_devnum(device_type type,
+                                                                     dev_t devnum) const noexcept;
 
         /**
          * Create new udev enumerator
@@ -112,7 +112,7 @@ namespace libudev
         [[nodiscard]] bool enable_receiving() const noexcept;
         [[nodiscard]] int get_fd() const noexcept;
 
-        [[nodiscard]] std::optional<device> receive_device() const noexcept;
+        [[nodiscard]] const std::optional<device> receive_device() const noexcept;
 
         [[nodiscard]] bool
         filter_add_match_subsystem_devtype(const std::string_view subsystem) const noexcept;

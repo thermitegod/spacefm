@@ -22,7 +22,7 @@
 
 #include "libudevpp.hxx"
 
-std::optional<libudev::monitor>
+const std::optional<libudev::monitor>
 libudev::udev::monitor_new_from_netlink(const std::string_view name)
 {
     assert(std::string(name) == "udev" || std::string(name) == "kernel");
@@ -35,7 +35,7 @@ libudev::udev::monitor_new_from_netlink(const std::string_view name)
     return std::nullopt;
 }
 
-std::optional<libudev::monitor>
+const std::optional<libudev::monitor>
 libudev::udev::monitor_new_from_netlink(netlink_type name)
 {
     if (name == netlink_type::udev)
@@ -57,7 +57,7 @@ libudev::udev::monitor_new_from_netlink(netlink_type name)
     return std::nullopt;
 }
 
-std::optional<libudev::device>
+const std::optional<libudev::device>
 libudev::udev::device_from_syspath(const std::filesystem::path& syspath) const noexcept
 {
     const auto device = udev_device_new_from_syspath(this->handle.get(), syspath.c_str());
@@ -68,7 +68,7 @@ libudev::udev::device_from_syspath(const std::filesystem::path& syspath) const n
     return std::nullopt;
 }
 
-std::optional<libudev::device>
+const std::optional<libudev::device>
 libudev::udev::device_from_devnum(char type, dev_t devnum) const noexcept
 {
     assert(type == 'b' || type == 'c');
@@ -80,7 +80,7 @@ libudev::udev::device_from_devnum(char type, dev_t devnum) const noexcept
     return std::nullopt;
 }
 
-std::optional<libudev::device>
+const std::optional<libudev::device>
 libudev::udev::device_from_devnum(device_type type, dev_t devnum) const noexcept
 {
     if (type == device_type::block)

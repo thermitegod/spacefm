@@ -37,7 +37,7 @@
 #include "xset/xset.hxx"
 #include "xset/xset-dialog.hxx"
 
-std::optional<std::string>
+const std::optional<std::string>
 multi_input_get_text(GtkWidget* input)
 { // returns a string or nullopt if input is empty
     if (!GTK_IS_TEXT_VIEW(input))

@@ -27,7 +27,7 @@
 #include <gtkmm.h>
 
 GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
-std::optional<std::string> multi_input_get_text(GtkWidget* input);
+const std::optional<std::string> multi_input_get_text(GtkWidget* input);
 
 const std::tuple<bool, std::string>
 xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
