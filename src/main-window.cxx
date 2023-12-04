@@ -3048,11 +3048,15 @@ get_desktop_index(GtkWindow* win)
         // get current desktop
         display = gdk_display_get_default();
         if (display)
+        {
             window = gdk_x11_window_lookup_for_display(display, gdk_x11_get_default_root_xwindow());
+        }
     }
 
     if (!(GDK_IS_DISPLAY(display) && GDK_IS_WINDOW(window)))
+    {
         return desktop;
+    }
 
     // find out what desktop (workspace) window is on   #include <gdk/gdkx.h>
     Atom type;
@@ -3064,7 +3068,9 @@ get_desktop_index(GtkWindow* win)
     Atom net_wm_desktop = gdk_x11_get_xatom_by_name_for_display(display, atom_name);
 
     if (net_wm_desktop == None)
+    {
         ztd::logger::error("atom not found: {}", atom_name);
+    }
     else if (XGetWindowProperty(GDK_DISPLAY_XDISPLAY(display),
                                 GDK_WINDOW_XID(window),
                                 net_wm_desktop,
@@ -3080,11 +3086,17 @@ get_desktop_index(GtkWindow* win)
              type == None || data == nullptr)
     {
         if (type == None)
+        {
             ztd::logger::error("No such property from XGetWindowProperty() {}", atom_name);
+        }
         else if (data == nullptr)
+        {
             ztd::logger::error("No data returned from XGetWindowProperty() {}", atom_name);
+        }
         else
+        {
             ztd::logger::error("XGetWindowProperty() {} failed\n", atom_name);
+        }
     }
     else
     {

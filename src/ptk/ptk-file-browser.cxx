@@ -177,8 +177,8 @@ static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GT
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
 
-#define GDK_ACTION_ALL                                                              \
-    GdkDragAction(GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY | \
+#define GDK_ACTION_ALL                                                                             \
+    GdkDragAction(GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |                \
                   GdkDragAction::GDK_ACTION_LINK)
 
 // instance-wide command history
@@ -4160,21 +4160,21 @@ on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
 }
 
 // stolen from the fnmatch man page
-#define FNMATCH_HELP                                                                              \
-    "'?(pattern-list)'\n"                                                                         \
-    "The pattern matches if zero or one occurrences of any of the patterns in the pattern-list "  \
-    "match the input string.\n\n"                                                                 \
-    "'*(pattern-list)'\n"                                                                         \
-    "The pattern matches if zero or more occurrences of any of the patterns in the pattern-list " \
-    "match the input string.\n\n"                                                                 \
-    "'+(pattern-list)'\n"                                                                         \
-    "The pattern matches if one or more occurrences of any of the patterns in the pattern-list "  \
-    "match the input string.\n\n"                                                                 \
-    "'@(pattern-list)'\n"                                                                         \
-    "The pattern matches if exactly one occurrence of any of the patterns in the pattern-list "   \
-    "match the input string.\n\n"                                                                 \
-    "'!(pattern-list)'\n"                                                                         \
-    "The pattern matches if the input string cannot be matched with any of the patterns in the "  \
+#define FNMATCH_HELP                                                                               \
+    "'?(pattern-list)'\n"                                                                          \
+    "The pattern matches if zero or one occurrences of any of the patterns in the pattern-list "   \
+    "match the input string.\n\n"                                                                  \
+    "'*(pattern-list)'\n"                                                                          \
+    "The pattern matches if zero or more occurrences of any of the patterns in the pattern-list "  \
+    "match the input string.\n\n"                                                                  \
+    "'+(pattern-list)'\n"                                                                          \
+    "The pattern matches if one or more occurrences of any of the patterns in the pattern-list "   \
+    "match the input string.\n\n"                                                                  \
+    "'@(pattern-list)'\n"                                                                          \
+    "The pattern matches if exactly one occurrence of any of the patterns in the pattern-list "    \
+    "match the input string.\n\n"                                                                  \
+    "'!(pattern-list)'\n"                                                                          \
+    "The pattern matches if the input string cannot be matched with any of the patterns in the "   \
     "pattern-list.\n"
 
 static const std::tuple<bool, std::string>
