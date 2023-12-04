@@ -81,13 +81,13 @@ static void on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, 
 
 namespace ptk::location_view
 {
-    enum class column
-    {
-        icon,
-        name,
-        path,
-        data,
-    };
+enum class column
+{
+    icon,
+    name,
+    path,
+    data,
+};
 }
 
 struct AutoOpen

@@ -34,12 +34,12 @@
 
 namespace ptk::file_task
 {
-    enum class ptask_error
-    {
-        first,
-        any,
-        cont
-    };
+enum class ptask_error
+{
+    first,
+    any,
+    cont
+};
 }
 
 struct PtkFileTask

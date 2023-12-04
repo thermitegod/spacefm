@@ -32,95 +32,95 @@
 
 namespace vfs
 {
-    struct device;
+struct device;
 
-    struct volume : public std::enable_shared_from_this<volume>
+struct volume : public std::enable_shared_from_this<volume>
+{
+    enum class state
     {
-        enum class state
-        {
-            added,
-            removed,
-            mounted,   // Not implemented
-            unmounted, // Not implemented
-            eject,
-            changed,
-        };
-
-        enum class device_type
-        {
-            block,
-            network,
-            other, // eg fuseiso mounted file
-        };
-
-        volume() = delete;
-        volume(const std::shared_ptr<vfs::device>& device);
-        ~volume() = default;
-        // ~volume() { ztd::logger::debug("vfs::volume::~volume({})", fmt::ptr(this)); };
-
-        static const std::shared_ptr<vfs::volume>
-        create(const std::shared_ptr<vfs::device>& device) noexcept;
-
-        using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,
-                                    const vfs::volume::state state, void* user_data);
-
-      public:
-        const std::string_view display_name() const noexcept;
-        const std::string_view mount_point() const noexcept;
-        const std::string_view device_file() const noexcept;
-        const std::string_view fstype() const noexcept;
-        const std::string_view icon() const noexcept;
-        const std::string_view udi() const noexcept;
-        const std::string_view label() const noexcept;
-
-        dev_t devnum() const noexcept;
-        u64 size() const noexcept;
-
-        const std::optional<std::string> device_mount_cmd() noexcept;
-        const std::optional<std::string> device_unmount_cmd() noexcept;
-
-        bool is_device_type(const vfs::volume::device_type type) const noexcept;
-
-        bool is_mounted() const noexcept;
-        bool is_removable() const noexcept;
-        bool is_mountable() const noexcept;
-
-        bool is_user_visible() const noexcept;
-
-        bool is_optical() const noexcept;
-        bool requires_eject() const noexcept;
-
-        bool ever_mounted() const noexcept;
-
-        // private:
-        void set_info() noexcept;
-
-        void device_added() noexcept;
-
-      private:
-        dev_t devnum_{0};
-        std::string device_file_{};
-        std::string udi_{};
-        std::string disp_name_{};
-        std::string icon_{};
-        std::string mount_point_{};
-        u64 size_{0};
-        std::string label_{};
-        std::string fstype_{};
-
-        vfs::volume::device_type device_type_;
-
-        bool is_mounted_{false};
-        bool is_removable_{false};
-        bool is_mountable_{false};
-
-        bool is_user_visible_{false};
-
-        bool is_optical_{false};
-        bool requires_eject_{false};
-
-        bool ever_mounted_{false};
+        added,
+        removed,
+        mounted,   // Not implemented
+        unmounted, // Not implemented
+        eject,
+        changed,
     };
+
+    enum class device_type
+    {
+        block,
+        network,
+        other, // eg fuseiso mounted file
+    };
+
+    volume() = delete;
+    volume(const std::shared_ptr<vfs::device>& device);
+    ~volume() = default;
+    // ~volume() { ztd::logger::debug("vfs::volume::~volume({})", fmt::ptr(this)); };
+
+    static const std::shared_ptr<vfs::volume>
+    create(const std::shared_ptr<vfs::device>& device) noexcept;
+
+    using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,
+                                const vfs::volume::state state, void* user_data);
+
+  public:
+    const std::string_view display_name() const noexcept;
+    const std::string_view mount_point() const noexcept;
+    const std::string_view device_file() const noexcept;
+    const std::string_view fstype() const noexcept;
+    const std::string_view icon() const noexcept;
+    const std::string_view udi() const noexcept;
+    const std::string_view label() const noexcept;
+
+    dev_t devnum() const noexcept;
+    u64 size() const noexcept;
+
+    const std::optional<std::string> device_mount_cmd() noexcept;
+    const std::optional<std::string> device_unmount_cmd() noexcept;
+
+    bool is_device_type(const vfs::volume::device_type type) const noexcept;
+
+    bool is_mounted() const noexcept;
+    bool is_removable() const noexcept;
+    bool is_mountable() const noexcept;
+
+    bool is_user_visible() const noexcept;
+
+    bool is_optical() const noexcept;
+    bool requires_eject() const noexcept;
+
+    bool ever_mounted() const noexcept;
+
+    // private:
+    void set_info() noexcept;
+
+    void device_added() noexcept;
+
+  private:
+    dev_t devnum_{0};
+    std::string device_file_{};
+    std::string udi_{};
+    std::string disp_name_{};
+    std::string icon_{};
+    std::string mount_point_{};
+    u64 size_{0};
+    std::string label_{};
+    std::string fstype_{};
+
+    vfs::volume::device_type device_type_;
+
+    bool is_mounted_{false};
+    bool is_removable_{false};
+    bool is_mountable_{false};
+
+    bool is_user_visible_{false};
+
+    bool is_optical_{false};
+    bool requires_eject_{false};
+
+    bool ever_mounted_{false};
+};
 } // namespace vfs
 
 bool vfs_volume_init();

@@ -39,11 +39,11 @@
 
 namespace ptk::path_entry
 {
-    enum column
-    {
-        name,
-        path,
-    };
+enum column
+{
+    name,
+    path,
+};
 }
 
 EntryData::EntryData(PtkFileBrowser* file_browser)

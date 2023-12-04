@@ -36,67 +36,66 @@
 
 namespace vfs
 {
-    class desktop
+class desktop
+{
+  public:
+    desktop() = delete;
+    ~desktop() = default;
+    // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", fmt::ptr(this)) };
+
+    desktop(const std::filesystem::path& desktop_file) noexcept;
+
+    static const std::shared_ptr<desktop> create(const std::filesystem::path& path) noexcept;
+
+    [[nodiscard]] const std::string_view name() const noexcept;
+    [[nodiscard]] const std::string_view display_name() const noexcept;
+    [[nodiscard]] const std::string_view exec() const noexcept;
+    [[nodiscard]] const std::filesystem::path& path() const noexcept;
+    [[nodiscard]] const std::string_view icon_name() const noexcept;
+    [[nodiscard]] GdkPixbuf* icon(i32 size) const noexcept;
+    [[nodiscard]] bool use_terminal() const noexcept;
+    [[nodiscard]] bool open_file(const std::filesystem::path& working_dir,
+                                 const std::filesystem::path& file_path) const;
+    [[nodiscard]] bool open_files(const std::filesystem::path& working_dir,
+                                  const std::span<const std::filesystem::path> file_paths) const;
+
+    const std::vector<std::string> supported_mime_types() const noexcept;
+
+  private:
+    bool open_multiple_files() const noexcept;
+    const std::optional<std::vector<std::vector<std::string>>>
+    app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
+                                   bool quote_file_list) const noexcept;
+    void exec_in_terminal(const std::filesystem::path& cwd,
+                          const std::string_view cmd) const noexcept;
+    void exec_desktop(const std::filesystem::path& working_dir,
+                      const std::span<const std::filesystem::path> file_paths) const noexcept;
+
+  private:
+    std::string filename_{};
+    std::filesystem::path path_{};
+    bool loaded_{false};
+
+    struct desktop_entry_data
     {
-      public:
-        desktop() = delete;
-        ~desktop() = default;
-        // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", fmt::ptr(this)) };
-
-        desktop(const std::filesystem::path& desktop_file) noexcept;
-
-        static const std::shared_ptr<desktop> create(const std::filesystem::path& path) noexcept;
-
-        [[nodiscard]] const std::string_view name() const noexcept;
-        [[nodiscard]] const std::string_view display_name() const noexcept;
-        [[nodiscard]] const std::string_view exec() const noexcept;
-        [[nodiscard]] const std::filesystem::path& path() const noexcept;
-        [[nodiscard]] const std::string_view icon_name() const noexcept;
-        [[nodiscard]] GdkPixbuf* icon(i32 size) const noexcept;
-        [[nodiscard]] bool use_terminal() const noexcept;
-        [[nodiscard]] bool open_file(const std::filesystem::path& working_dir,
-                                     const std::filesystem::path& file_path) const;
-        [[nodiscard]] bool
-        open_files(const std::filesystem::path& working_dir,
-                   const std::span<const std::filesystem::path> file_paths) const;
-
-        const std::vector<std::string> supported_mime_types() const noexcept;
-
-      private:
-        bool open_multiple_files() const noexcept;
-        const std::optional<std::vector<std::vector<std::string>>>
-        app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
-                                       bool quote_file_list) const noexcept;
-        void exec_in_terminal(const std::filesystem::path& cwd,
-                              const std::string_view cmd) const noexcept;
-        void exec_desktop(const std::filesystem::path& working_dir,
-                          const std::span<const std::filesystem::path> file_paths) const noexcept;
-
-      private:
-        std::string filename_{};
-        std::filesystem::path path_{};
-        bool loaded_{false};
-
-        struct desktop_entry_data
-        {
-            // https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
-            std::string type{};
-            std::string name{};
-            std::string generic_name{};
-            bool no_display{false};
-            std::string comment{};
-            std::string icon{};
-            std::string exec{};
-            std::string try_exec{};
-            std::string path{}; // working dir
-            bool terminal{false};
-            std::string actions{};
-            std::string mime_type{};
-            std::string categories{};
-            std::string keywords{};
-            bool startup_notify{false};
-        };
-
-        desktop_entry_data desktop_entry_;
+        // https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
+        std::string type{};
+        std::string name{};
+        std::string generic_name{};
+        bool no_display{false};
+        std::string comment{};
+        std::string icon{};
+        std::string exec{};
+        std::string try_exec{};
+        std::string path{}; // working dir
+        bool terminal{false};
+        std::string actions{};
+        std::string mime_type{};
+        std::string categories{};
+        std::string keywords{};
+        bool startup_notify{false};
     };
+
+    desktop_entry_data desktop_entry_;
+};
 } // namespace vfs

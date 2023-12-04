@@ -2990,8 +2990,8 @@ ptk_file_browser_read_access(const std::filesystem::path& cwd)
 }
 
 /**
-* PtkFileBrowser
-*/
+ * PtkFileBrowser
+ */
 
 bool
 PtkFileBrowser::chdir(const std::filesystem::path& new_path,

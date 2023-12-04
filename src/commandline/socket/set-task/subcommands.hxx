@@ -21,18 +21,18 @@
 
 namespace commandline::socket::set_task
 {
-    void icon(CLI::App* app, const socket_subcommand_data_t& opt);
-    void count(CLI::App* app, const socket_subcommand_data_t& opt);
-    void directory(CLI::App* app, const socket_subcommand_data_t& opt);
-    void from(CLI::App* app, const socket_subcommand_data_t& opt);
-    void item(CLI::App* app, const socket_subcommand_data_t& opt);
-    void to(CLI::App* app, const socket_subcommand_data_t& opt);
-    void progress(CLI::App* app, const socket_subcommand_data_t& opt);
-    void total(CLI::App* app, const socket_subcommand_data_t& opt);
-    void curspeed(CLI::App* app, const socket_subcommand_data_t& opt);
-    void curremain(CLI::App* app, const socket_subcommand_data_t& opt);
-    void avgspeed(CLI::App* app, const socket_subcommand_data_t& opt);
-    void avgremain(CLI::App* app, const socket_subcommand_data_t& opt);
-    void queue_state(CLI::App* app, const socket_subcommand_data_t& opt);
+void icon(CLI::App* app, const socket_subcommand_data_t& opt);
+void count(CLI::App* app, const socket_subcommand_data_t& opt);
+void directory(CLI::App* app, const socket_subcommand_data_t& opt);
+void from(CLI::App* app, const socket_subcommand_data_t& opt);
+void item(CLI::App* app, const socket_subcommand_data_t& opt);
+void to(CLI::App* app, const socket_subcommand_data_t& opt);
+void progress(CLI::App* app, const socket_subcommand_data_t& opt);
+void total(CLI::App* app, const socket_subcommand_data_t& opt);
+void curspeed(CLI::App* app, const socket_subcommand_data_t& opt);
+void curremain(CLI::App* app, const socket_subcommand_data_t& opt);
+void avgspeed(CLI::App* app, const socket_subcommand_data_t& opt);
+void avgremain(CLI::App* app, const socket_subcommand_data_t& opt);
+void queue_state(CLI::App* app, const socket_subcommand_data_t& opt);
 
 } // namespace commandline::socket::set_task

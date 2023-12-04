@@ -37,144 +37,144 @@ struct PtkFileBrowser;
 
 namespace xset
 {
-    struct XSet;
+struct XSet;
 }
 using xset_t = std::shared_ptr<xset::XSet>;
 
 namespace xset
 {
-    enum class cmd
-    {
-        line,
-        script,
-        app,
-        bookmark,
-        invalid // Must be last
-    };
+enum class cmd
+{
+    line,
+    script,
+    app,
+    bookmark,
+    invalid // Must be last
+};
 
-    enum class menu
-    {
-        // do not reorder - these values are saved in session files
-        normal,
-        check,
-        string,
-        radio,
-        reserved_00,
-        reserved_01,
-        reserved_02,
-        reserved_03,
-        reserved_04,
-        reserved_05,
-        reserved_06,
-        reserved_07,
-        reserved_08,
-        reserved_09,
-        reserved_10,
-        reserved_11,
-        reserved_12,
-        submenu, // add new before submenu
-        sep,
-    };
+enum class menu
+{
+    // do not reorder - these values are saved in session files
+    normal,
+    check,
+    string,
+    radio,
+    reserved_00,
+    reserved_01,
+    reserved_02,
+    reserved_03,
+    reserved_04,
+    reserved_05,
+    reserved_06,
+    reserved_07,
+    reserved_08,
+    reserved_09,
+    reserved_10,
+    reserved_11,
+    reserved_12,
+    submenu, // add new before submenu
+    sep,
+};
 
-    enum class tool
-    {
-        // do not reorder - these values are saved in session files
-        // also update builtin_tool_name builtin_tool_icon in settings.c
-        NOT, // TODO RENAME
-        custom,
-        devices,
-        bookmarks,
-        tree,
-        home,
-        DEFAULT, // TODO RENAME
-        up,
-        back,
-        back_menu,
-        fwd,
-        fwd_menu,
-        refresh,
-        new_tab,
-        new_tab_here,
-        show_hidden,
-        show_thumb,
-        large_icons,
-        invalid // Must be last
-    };
+enum class tool
+{
+    // do not reorder - these values are saved in session files
+    // also update builtin_tool_name builtin_tool_icon in settings.c
+    NOT, // TODO RENAME
+    custom,
+    devices,
+    bookmarks,
+    tree,
+    home,
+    DEFAULT, // TODO RENAME
+    up,
+    back,
+    back_menu,
+    fwd,
+    fwd_menu,
+    refresh,
+    new_tab,
+    new_tab_here,
+    show_hidden,
+    show_thumb,
+    large_icons,
+    invalid // Must be last
+};
 
-    enum class job
-    {
-        key,
-        add_tool,
-        cut,
-        copy,
-        paste,
-        remove,
-        remove_book,
-        invalid // Must be last
-    };
+enum class job
+{
+    key,
+    add_tool,
+    cut,
+    copy,
+    paste,
+    remove,
+    remove_book,
+    invalid // Must be last
+};
 
-    enum b
-    {
-        unset,
-        xtrue,
-        xfalse
-    };
+enum b
+{
+    unset,
+    xtrue,
+    xfalse
+};
 
-    struct XSet : public std::enable_shared_from_this<XSet>
-    {
-        XSet() = delete;
-        XSet(const std::string_view set_name, xset::name xset_name);
-        ~XSet();
+struct XSet : public std::enable_shared_from_this<XSet>
+{
+    XSet() = delete;
+    XSet(const std::string_view set_name, xset::name xset_name);
+    ~XSet();
 
-        std::string name{};
-        xset::name xset_name;
+    std::string name{};
+    xset::name xset_name;
 
-        xset::b b{xset::b::unset}; // saved, tri-state enum 0=unset(false) 1=true 2=false
-        std::optional<std::string> s{std::nullopt}; // saved
-        std::optional<std::string> x{std::nullopt}; // saved
-        std::optional<std::string> y{std::nullopt}; // saved
-        std::optional<std::string> z{std::nullopt}; // saved, for menu_string locked, stores default
-        bool disable{false};                        // not saved
-        std::optional<std::string> menu_label{std::nullopt}; // saved
-        xset::menu menu_style{xset::menu::normal}; // saved if ( !lock ), or read if locked
-        GFunc cb_func{nullptr};                    // not saved
-        void* cb_data{nullptr};                    // not saved
-        char* ob1{nullptr};                        // not saved
-        void* ob1_data{nullptr};                   // not saved
-        char* ob2{nullptr};                        // not saved
-        void* ob2_data{nullptr};                   // not saved
-        PtkFileBrowser* browser{nullptr};          // not saved - set automatically
-        u32 key{0};                                // saved
-        u32 keymod{0};                             // saved
-        xset_t shared_key{nullptr};                // not saved
+    xset::b b{xset::b::unset}; // saved, tri-state enum 0=unset(false) 1=true 2=false
+    std::optional<std::string> s{std::nullopt}; // saved
+    std::optional<std::string> x{std::nullopt}; // saved
+    std::optional<std::string> y{std::nullopt}; // saved
+    std::optional<std::string> z{std::nullopt}; // saved, for menu_string locked, stores default
+    bool disable{false};                        // not saved
+    std::optional<std::string> menu_label{std::nullopt}; // saved
+    xset::menu menu_style{xset::menu::normal};           // saved if ( !lock ), or read if locked
+    GFunc cb_func{nullptr};                              // not saved
+    void* cb_data{nullptr};                              // not saved
+    char* ob1{nullptr};                                  // not saved
+    void* ob1_data{nullptr};                             // not saved
+    char* ob2{nullptr};                                  // not saved
+    void* ob2_data{nullptr};                             // not saved
+    PtkFileBrowser* browser{nullptr};                    // not saved - set automatically
+    u32 key{0};                                          // saved
+    u32 keymod{0};                                       // saved
+    xset_t shared_key{nullptr};                          // not saved
 
-        std::optional<std::string> icon{std::nullopt};    // saved
-        std::optional<std::string> desc{std::nullopt};    // saved if ( !lock ), or read if locked
-        std::optional<std::string> title{std::nullopt};   // saved if ( !lock ), or read if locked
-        std::optional<std::string> next{std::nullopt};    // saved
-        std::optional<std::string> context{std::nullopt}; // saved
-        xset::tool tool{xset::tool::NOT};                 // saved
-        bool lock{true};                                  // not saved
+    std::optional<std::string> icon{std::nullopt};    // saved
+    std::optional<std::string> desc{std::nullopt};    // saved if ( !lock ), or read if locked
+    std::optional<std::string> title{std::nullopt};   // saved if ( !lock ), or read if locked
+    std::optional<std::string> next{std::nullopt};    // saved
+    std::optional<std::string> context{std::nullopt}; // saved
+    xset::tool tool{xset::tool::NOT};                 // saved
+    bool lock{true};                                  // not saved
 
-        std::vector<xset::name> context_menu_entries{}; // not saved, in order
+    std::vector<xset::name> context_menu_entries{}; // not saved, in order
 
-        // Custom Command ( !lock )
-        std::optional<std::string> prev{std::nullopt};   // saved
-        std::optional<std::string> parent{std::nullopt}; // saved
-        std::optional<std::string> child{std::nullopt};  // saved
-        std::optional<std::string> line{std::nullopt};   // saved or help if lock
-        // x = xset::cmd::LINE..xset::cmd::BOOKMARK
-        // y = user
-        // z = custom executable
-        bool task{false};          // saved
-        bool task_pop{false};      // saved
-        bool task_err{false};      // saved
-        bool task_out{false};      // saved
-        bool in_terminal{false};   // saved, or save menu_label if lock
-        bool keep_terminal{false}; // saved, or save icon if lock
-        bool scroll_lock{false};   // saved
-        char opener{0};            // saved
-    };
+    // Custom Command ( !lock )
+    std::optional<std::string> prev{std::nullopt};   // saved
+    std::optional<std::string> parent{std::nullopt}; // saved
+    std::optional<std::string> child{std::nullopt};  // saved
+    std::optional<std::string> line{std::nullopt};   // saved or help if lock
+    // x = xset::cmd::LINE..xset::cmd::BOOKMARK
+    // y = user
+    // z = custom executable
+    bool task{false};          // saved
+    bool task_pop{false};      // saved
+    bool task_err{false};      // saved
+    bool task_out{false};      // saved
+    bool in_terminal{false};   // saved, or save menu_label if lock
+    bool keep_terminal{false}; // saved, or save icon if lock
+    bool scroll_lock{false};   // saved
+    char opener{0};            // saved
+};
 } // namespace xset
 
 // all xsets

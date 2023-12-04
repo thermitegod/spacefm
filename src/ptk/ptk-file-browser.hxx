@@ -42,47 +42,47 @@
 
 namespace ptk
 {
-    enum class open_action
-    {
-        dir,
-        new_tab,
-        new_window,
-        terminal,
-        file,
-    };
+enum class open_action
+{
+    dir,
+    new_tab,
+    new_window,
+    terminal,
+    file,
+};
 }
 
 namespace ptk::file_browser
 {
-    enum class view_mode
-    {
-        icon_view,
-        list_view,
-        compact_view,
-    };
+enum class view_mode
+{
+    icon_view,
+    list_view,
+    compact_view,
+};
 
-    enum class sort_order
-    {
-        name,
-        size,
-        bytes,
-        type,
-        mime,
-        perm,
-        owner,
-        group,
-        atime,
-        btime,
-        ctime,
-        mtime,
-    };
+enum class sort_order
+{
+    name,
+    size,
+    bytes,
+    type,
+    mime,
+    perm,
+    owner,
+    group,
+    atime,
+    btime,
+    ctime,
+    mtime,
+};
 
-    enum class chdir_mode
-    {
-        normal,
-        back,
-        forward,
-    };
+enum class chdir_mode
+{
+    normal,
+    back,
+    forward,
+};
 
 } // namespace ptk::file_browser
 

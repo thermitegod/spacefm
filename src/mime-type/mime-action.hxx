@@ -28,12 +28,12 @@
 
 namespace mime_type
 {
-    enum class action
-    {
-        DEFAULT,
-        append,
-        remove,
-    };
+enum class action
+{
+    DEFAULT,
+    append,
+    remove,
+};
 }
 
 /*

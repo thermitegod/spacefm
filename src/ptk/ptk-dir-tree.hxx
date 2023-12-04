@@ -37,12 +37,12 @@
 /* Columns of folder view */
 namespace ptk::dir_tree
 {
-    enum class column
-    {
-        icon,
-        disp_name,
-        info,
-    };
+enum class column
+{
+    icon,
+    disp_name,
+    info,
+};
 }
 
 struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::TreeModel

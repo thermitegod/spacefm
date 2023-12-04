@@ -29,41 +29,41 @@
 
 namespace vfs
 {
-    struct async_task;
-    struct dir;
-    struct file;
+struct async_task;
+struct dir;
+struct file;
 
-    struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
+struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
+{
+  public:
+    thumbnailer() = delete;
+    thumbnailer(const std::shared_ptr<vfs::dir>& dir);
+    ~thumbnailer();
+
+    static const std::shared_ptr<vfs::thumbnailer>
+    create(const std::shared_ptr<vfs::dir>& dir) noexcept;
+
+    void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
+
+    std::shared_ptr<vfs::dir> dir{nullptr};
+    vfs::async_task* task{nullptr};
+
+    u32 idle_handler{0};
+
+    struct request
     {
-      public:
-        thumbnailer() = delete;
-        thumbnailer(const std::shared_ptr<vfs::dir>& dir);
-        ~thumbnailer();
-
-        static const std::shared_ptr<vfs::thumbnailer>
-        create(const std::shared_ptr<vfs::dir>& dir) noexcept;
-
-        void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
-
-        std::shared_ptr<vfs::dir> dir{nullptr};
-        vfs::async_task* task{nullptr};
-
-        u32 idle_handler{0};
-
-        struct request
+        enum class size
         {
-            enum class size
-            {
-                big,
-                small,
-            };
-            std::shared_ptr<vfs::file> file{nullptr};
-            std::unordered_map<size, i32> n_requests;
+            big,
+            small,
         };
-
-        std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};
-        std::deque<std::shared_ptr<vfs::file>> update_queue{};
+        std::shared_ptr<vfs::file> file{nullptr};
+        std::unordered_map<size, i32> n_requests;
     };
+
+    std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};
+    std::deque<std::shared_ptr<vfs::file>> update_queue{};
+};
 } // namespace vfs
 
 // Ensure the thumbnail dirs exist and have proper file permission.

@@ -36,49 +36,48 @@
 
 namespace vfs
 {
-    struct mime_type
-    {
-      public:
-        mime_type(const std::string_view type_name);
-        ~mime_type();
+struct mime_type
+{
+  public:
+    mime_type(const std::string_view type_name);
+    ~mime_type();
 
-        static const std::shared_ptr<vfs::mime_type>
-        create(const std::string_view type_name) noexcept;
+    static const std::shared_ptr<vfs::mime_type> create(const std::string_view type_name) noexcept;
 
-        GdkPixbuf* icon(bool big) noexcept;
+    GdkPixbuf* icon(bool big) noexcept;
 
-        // Get mime-type string
-        const std::string_view type() const noexcept;
+    // Get mime-type string
+    const std::string_view type() const noexcept;
 
-        // Get human-readable description of mime-type
-        const std::string_view description() noexcept;
+    // Get human-readable description of mime-type
+    const std::string_view description() noexcept;
 
-        // Get available actions (applications) for this mime-type
-        // returned vector should be freed with g_strfreev when not needed.
-        const std::vector<std::string> actions() const noexcept;
+    // Get available actions (applications) for this mime-type
+    // returned vector should be freed with g_strfreev when not needed.
+    const std::vector<std::string> actions() const noexcept;
 
-        // returned string should be freed with g_strfreev when not needed.
-        const std::optional<std::string> default_action() const noexcept;
+    // returned string should be freed with g_strfreev when not needed.
+    const std::optional<std::string> default_action() const noexcept;
 
-        void set_default_action(const std::string_view desktop_id) noexcept;
+    void set_default_action(const std::string_view desktop_id) noexcept;
 
-        // If user-custom desktop file is created, it is returned in custom_desktop.
-        const std::string add_action(const std::string_view desktop_id) noexcept;
+    // If user-custom desktop file is created, it is returned in custom_desktop.
+    const std::string add_action(const std::string_view desktop_id) noexcept;
 
-        [[nodiscard]] bool is_archive() const noexcept;
-        [[nodiscard]] bool is_executable() const noexcept;
-        [[nodiscard]] bool is_text() const noexcept;
-        [[nodiscard]] bool is_image() const noexcept;
-        [[nodiscard]] bool is_video() const noexcept;
+    [[nodiscard]] bool is_archive() const noexcept;
+    [[nodiscard]] bool is_executable() const noexcept;
+    [[nodiscard]] bool is_text() const noexcept;
+    [[nodiscard]] bool is_image() const noexcept;
+    [[nodiscard]] bool is_video() const noexcept;
 
-      private:
-        std::string type_{};        // mime_type-type string
-        std::string description_{}; // description of the mime type
-        GdkPixbuf* big_icon_{nullptr};
-        GdkPixbuf* small_icon_{nullptr};
-        i32 icon_size_big_{0};
-        i32 icon_size_small_{0};
-    };
+  private:
+    std::string type_{};        // mime_type-type string
+    std::string description_{}; // description of the mime type
+    GdkPixbuf* big_icon_{nullptr};
+    GdkPixbuf* small_icon_{nullptr};
+    i32 icon_size_big_{0};
+    i32 icon_size_small_{0};
+};
 } // namespace vfs
 
 const std::shared_ptr<vfs::mime_type>

@@ -35,119 +35,118 @@
 
 namespace vfs
 {
-    struct file : public std::enable_shared_from_this<file>
-    {
-      public:
-        file(const std::filesystem::path& file_path);
-        ~file();
+struct file : public std::enable_shared_from_this<file>
+{
+  public:
+    file(const std::filesystem::path& file_path);
+    ~file();
 
-        static const std::shared_ptr<vfs::file> create(const std::filesystem::path& path) noexcept;
+    static const std::shared_ptr<vfs::file> create(const std::filesystem::path& path) noexcept;
 
-        const std::string_view name() const noexcept;
-        const std::string_view display_name() const noexcept;
+    const std::string_view name() const noexcept;
 
-        const std::filesystem::path& path() const noexcept;
-        const std::string_view uri() const noexcept;
+    const std::filesystem::path& path() const noexcept;
+    const std::string_view uri() const noexcept;
 
-        u64 size() const noexcept;
-        u64 size_on_disk() const noexcept;
+    u64 size() const noexcept;
+    u64 size_on_disk() const noexcept;
 
-        const std::string_view display_size() const noexcept;
-        const std::string_view display_size_in_bytes() const noexcept;
-        const std::string_view display_size_on_disk() const noexcept;
+    const std::string_view display_size() const noexcept;
+    const std::string_view display_size_in_bytes() const noexcept;
+    const std::string_view display_size_on_disk() const noexcept;
 
-        u64 blocks() const noexcept;
+    u64 blocks() const noexcept;
 
-        std::filesystem::perms permissions() const noexcept;
+    std::filesystem::perms permissions() const noexcept;
 
-        const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
-        void reload_mime_type() noexcept;
+    const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
+    void reload_mime_type() noexcept;
 
-        const std::string_view display_owner() const noexcept;
-        const std::string_view display_group() const noexcept;
-        const std::string_view display_atime() const noexcept;
-        const std::string_view display_btime() const noexcept;
-        const std::string_view display_ctime() const noexcept;
-        const std::string_view display_mtime() const noexcept;
-        const std::string_view display_permissions() noexcept;
+    const std::string_view display_owner() const noexcept;
+    const std::string_view display_group() const noexcept;
+    const std::string_view display_atime() const noexcept;
+    const std::string_view display_btime() const noexcept;
+    const std::string_view display_ctime() const noexcept;
+    const std::string_view display_mtime() const noexcept;
+    const std::string_view display_permissions() noexcept;
 
-        std::time_t atime() const noexcept;
-        std::time_t btime() const noexcept;
-        std::time_t ctime() const noexcept;
-        std::time_t mtime() const noexcept;
+    std::time_t atime() const noexcept;
+    std::time_t btime() const noexcept;
+    std::time_t ctime() const noexcept;
+    std::time_t mtime() const noexcept;
 
-        void load_thumbnail(bool big) noexcept;
-        bool is_thumbnail_loaded(bool big) const noexcept;
+    void load_thumbnail(bool big) noexcept;
+    bool is_thumbnail_loaded(bool big) const noexcept;
 
-        GdkPixbuf* big_icon() noexcept;
-        GdkPixbuf* small_icon() noexcept;
+    GdkPixbuf* big_icon() noexcept;
+    GdkPixbuf* small_icon() noexcept;
 
-        GdkPixbuf* big_thumbnail() const noexcept;
-        GdkPixbuf* small_thumbnail() const noexcept;
+    GdkPixbuf* big_thumbnail() const noexcept;
+    GdkPixbuf* small_thumbnail() const noexcept;
 
-        void unload_big_thumbnail() noexcept;
-        void unload_small_thumbnail() noexcept;
+    void unload_big_thumbnail() noexcept;
+    void unload_small_thumbnail() noexcept;
 
-        bool is_directory() const noexcept;
-        bool is_regular_file() const noexcept;
-        bool is_symlink() const noexcept;
-        bool is_socket() const noexcept;
-        bool is_fifo() const noexcept;
-        bool is_block_file() const noexcept;
-        bool is_character_file() const noexcept;
-        bool is_other() const noexcept;
+    bool is_directory() const noexcept;
+    bool is_regular_file() const noexcept;
+    bool is_symlink() const noexcept;
+    bool is_socket() const noexcept;
+    bool is_fifo() const noexcept;
+    bool is_block_file() const noexcept;
+    bool is_character_file() const noexcept;
+    bool is_other() const noexcept;
 
-        bool is_hidden() const noexcept;
+    bool is_hidden() const noexcept;
 
-        bool is_desktop_entry() const noexcept;
+    bool is_desktop_entry() const noexcept;
 
-        // File attributes
-        bool is_compressed() const noexcept; // file is compressed by the filesystem
-        bool is_immutable() const noexcept;  // file cannot be modified
-        bool is_append() const noexcept;     // file can only be opened in append mode for writing
-        bool is_nodump() const noexcept;     // file is not a candidate for backup
-        bool is_encrypted() const noexcept; // file requires a key to be encrypted by the filesystem
-        bool is_verity() const noexcept;    // file has fs-verity enabled
-        bool is_dax() const noexcept;       // file is in the DAX (cpu direct access) state
+    // File attributes
+    bool is_compressed() const noexcept; // file is compressed by the filesystem
+    bool is_immutable() const noexcept;  // file cannot be modified
+    bool is_append() const noexcept;     // file can only be opened in append mode for writing
+    bool is_nodump() const noexcept;     // file is not a candidate for backup
+    bool is_encrypted() const noexcept;  // file requires a key to be encrypted by the filesystem
+    bool is_verity() const noexcept;     // file has fs-verity enabled
+    bool is_dax() const noexcept;        // file is in the DAX (cpu direct access) state
 
-        // update file info
-        bool update() noexcept;
+    // update file info
+    bool update() noexcept;
 
-      private:
-        ztd::statx file_stat_; // cached copy of struct statx()
-        std::filesystem::file_status status_;
+  private:
+    ztd::statx file_stat_; // cached copy of struct statx()
+    std::filesystem::file_status status_;
 
-        std::filesystem::path path_{}; // real path on file system
-        std::string uri_{};            // uri of the real path on file system
+    std::filesystem::path path_{}; // real path on file system
+    std::string uri_{};            // uri of the real path on file system
 
-        std::string name_{};                          // real name on file system
-        std::string display_size_{};                  // displayed human-readable file size
-        std::string display_size_bytes_{};            // displayed file size in bytes
-        std::string display_disk_size_{};             // displayed human-readable file size on disk
-        std::string display_owner_{};                 // displayed owner
-        std::string display_group_{};                 // displayed group
-        std::string display_atime_{};                 // displayed accessed time
-        std::string display_btime_{};                 // displayed created time
-        std::string display_ctime_{};                 // displayed last status change time
-        std::string display_mtime_{};                 // displayed modification time
-        std::string display_perm_{};                  // displayed permission in string form
-        std::shared_ptr<vfs::mime_type> mime_type_{}; // mime type related information
-        GdkPixbuf* big_thumbnail_{};                  // thumbnail of the file
-        GdkPixbuf* small_thumbnail_{};                // thumbnail of the file
+    std::string name_{};                          // real name on file system
+    std::string display_size_{};                  // displayed human-readable file size
+    std::string display_size_bytes_{};            // displayed file size in bytes
+    std::string display_disk_size_{};             // displayed human-readable file size on disk
+    std::string display_owner_{};                 // displayed owner
+    std::string display_group_{};                 // displayed group
+    std::string display_atime_{};                 // displayed accessed time
+    std::string display_btime_{};                 // displayed created time
+    std::string display_ctime_{};                 // displayed last status change time
+    std::string display_mtime_{};                 // displayed modification time
+    std::string display_perm_{};                  // displayed permission in string form
+    std::shared_ptr<vfs::mime_type> mime_type_{}; // mime type related information
+    GdkPixbuf* big_thumbnail_{};                  // thumbnail of the file
+    GdkPixbuf* small_thumbnail_{};                // thumbnail of the file
 
-        bool is_special_desktop_entry_{false}; // is a .desktop file
+    bool is_special_desktop_entry_{false}; // is a .desktop file
 
-        bool is_hidden_{false}; // if the filename starts with '.'
+    bool is_hidden_{false}; // if the filename starts with '.'
 
-      private:
-        void load_thumbnail_small() noexcept;
-        void load_thumbnail_big() noexcept;
+  private:
+    void load_thumbnail_small() noexcept;
+    void load_thumbnail_big() noexcept;
 
-        void load_special_info() noexcept;
+    void load_special_info() noexcept;
 
-        const std::string create_file_perm_string() const noexcept;
+    const std::string create_file_perm_string() const noexcept;
 
-        const std::string_view
-        special_directory_get_icon_name(const bool symbolic = false) const noexcept;
-    };
+    const std::string_view
+    special_directory_get_icon_name(const bool symbolic = false) const noexcept;
+};
 } // namespace vfs

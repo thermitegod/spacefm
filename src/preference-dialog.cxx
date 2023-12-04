@@ -168,162 +168,315 @@ class PreferencePage
 
 namespace preference::large_icons
 {
-    struct big_icon_sizes_data
+struct big_icon_sizes_data
+{
+    i32 value;
+    std::string_view name;
+};
+
+constexpr std::array<big_icon_sizes_data, 13> big_icon_sizes{{
+    {512, "512"},
+    {384, "384"},
+    {256, "256"},
+    {192, "192"},
+    {128, "128"},
+    {96, "96"},
+    {72, "72"},
+    {64, "64"},
+    {48, "48"},
+    {36, "36"},
+    {32, "32"},
+    {24, "24"},
+    {22, "22"},
+}};
+
+static void
+changed_cb(GtkComboBox* combobox, void* user_data)
+{
+    (void)user_data;
+
+    GtkTreeIter iter;
+    GtkTreeModel* model = gtk_combo_box_get_model(combobox);
+    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
     {
-        i32 value;
-        std::string_view name;
-    };
+        return;
+    }
 
-    constexpr std::array<big_icon_sizes_data, 13> big_icon_sizes{{
-        {512, "512"},
-        {384, "384"},
-        {256, "256"},
-        {192, "192"},
-        {128, "128"},
-        {96, "96"},
-        {72, "72"},
-        {64, "64"},
-        {48, "48"},
-        {36, "36"},
-        {32, "32"},
-        {24, "24"},
-        {22, "22"},
-    }};
+    i32 value;
+    gtk_tree_model_get(model, &iter, 1, &value, -1);
 
-    static void
-    changed_cb(GtkComboBox* combobox, void* user_data)
+    if (value != app_settings.icon_size_big())
     {
-        (void)user_data;
+        vfs::dir::global_unload_thumbnails(true);
+    }
 
-        GtkTreeIter iter;
-        GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-        if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    app_settings.icon_size_big(value);
+
+    // update all windows/all panels/all browsers
+    for (MainWindow* window : main_window_get_all())
+    {
+        for (const panel_t p : PANELS)
         {
-            return;
-        }
-
-        i32 value;
-        gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-        if (value != app_settings.icon_size_big())
-        {
-            vfs::dir::global_unload_thumbnails(true);
-        }
-
-        app_settings.icon_size_big(value);
-
-        // update all windows/all panels/all browsers
-        for (MainWindow* window : main_window_get_all())
-        {
-            for (const panel_t p : PANELS)
+            GtkNotebook* notebook = window->get_panel_notebook(p);
+            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0z, total_pages))
             {
-                GtkNotebook* notebook = window->get_panel_notebook(p);
-                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                for (const auto i : std::views::iota(0z, total_pages))
+                PtkFileBrowser* file_browser =
+                    PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+                // update views
+                gtk_widget_destroy(file_browser->folder_view());
+                file_browser->folder_view(nullptr);
+                if (file_browser->side_dir)
                 {
-                    PtkFileBrowser* file_browser =
-                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                    // update views
-                    gtk_widget_destroy(file_browser->folder_view());
-                    file_browser->folder_view(nullptr);
-                    if (file_browser->side_dir)
-                    {
-                        gtk_widget_destroy(file_browser->side_dir);
-                        file_browser->side_dir = nullptr;
-                    }
-                    file_browser->update_views();
+                    gtk_widget_destroy(file_browser->side_dir);
+                    file_browser->side_dir = nullptr;
                 }
+                file_browser->update_views();
             }
         }
-        update_volume_icons();
     }
+    update_volume_icons();
+}
 
-    GtkComboBox*
-    create_combobox()
+GtkComboBox*
+create_combobox()
+{
+    GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    for (const auto& action : big_icon_sizes)
     {
-        GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-        for (const auto& action : big_icon_sizes)
-        {
-            GtkTreeIter iter;
-            gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
-        }
-
-        GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
-
         GtkTreeIter iter;
-        if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
-        {
-            const i32 current_big_icon_size = app_settings.icon_size_big();
-            do
-            {
-                i32 value;
-                gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
-                if (value == current_big_icon_size)
-                {
-                    gtk_combo_box_set_active_iter(box, &iter);
-                    break;
-                }
-            } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
-        }
-
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
-
-        return box;
+        gtk_list_store_append(model, &iter);
+        gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
     }
+
+    GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
+    GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
+
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+    {
+        const i32 current_big_icon_size = app_settings.icon_size_big();
+        do
+        {
+            i32 value;
+            gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
+            if (value == current_big_icon_size)
+            {
+                gtk_combo_box_set_active_iter(box, &iter);
+                break;
+            }
+        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
+    }
+
+    g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
+
+    return box;
+}
 } // namespace preference::large_icons
 
 namespace preference::small_icons
 {
-    struct small_icon_sizes_data
+struct small_icon_sizes_data
+{
+    i32 value;
+    std::string_view name;
+};
+
+constexpr std::array<small_icon_sizes_data, 15> small_icon_sizes{{
+    {512, "512"},
+    {384, "384"},
+    {256, "256"},
+    {192, "192"},
+    {128, "128"},
+    {96, "96"},
+    {72, "72"},
+    {64, "64"},
+    {48, "48"},
+    {36, "36"},
+    {32, "32"},
+    {24, "24"},
+    {22, "22"},
+    {16, "16"},
+    {12, "12"},
+}};
+
+static void
+changed_cb(GtkComboBox* combobox, void* user_data)
+{
+    (void)user_data;
+
+    GtkTreeIter iter;
+    GtkTreeModel* model = gtk_combo_box_get_model(combobox);
+    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
     {
-        i32 value;
-        std::string_view name;
-    };
+        return;
+    }
 
-    constexpr std::array<small_icon_sizes_data, 15> small_icon_sizes{{
-        {512, "512"},
-        {384, "384"},
-        {256, "256"},
-        {192, "192"},
-        {128, "128"},
-        {96, "96"},
-        {72, "72"},
-        {64, "64"},
-        {48, "48"},
-        {36, "36"},
-        {32, "32"},
-        {24, "24"},
-        {22, "22"},
-        {16, "16"},
-        {12, "12"},
-    }};
+    i32 value;
+    gtk_tree_model_get(model, &iter, 1, &value, -1);
 
-    static void
-    changed_cb(GtkComboBox* combobox, void* user_data)
+    if (value != app_settings.icon_size_small())
     {
-        (void)user_data;
+        vfs::dir::global_unload_thumbnails(false);
+    }
 
+    app_settings.icon_size_small(value);
+
+    // update all windows/all panels/all browsers
+    for (MainWindow* window : main_window_get_all())
+    {
+        for (const panel_t p : PANELS)
+        {
+            GtkNotebook* notebook = window->get_panel_notebook(p);
+            const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+            for (const auto i : std::views::iota(0z, total_pages))
+            {
+                PtkFileBrowser* file_browser =
+                    PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+                // update views
+                gtk_widget_destroy(file_browser->folder_view());
+                file_browser->folder_view(nullptr);
+                if (file_browser->side_dir)
+                {
+                    gtk_widget_destroy(file_browser->side_dir);
+                    file_browser->side_dir = nullptr;
+                }
+                file_browser->update_views();
+            }
+        }
+    }
+    update_volume_icons();
+}
+
+GtkComboBox*
+create_combobox()
+{
+    GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    for (const auto& action : small_icon_sizes)
+    {
         GtkTreeIter iter;
-        GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-        if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+        gtk_list_store_append(model, &iter);
+        gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
+    }
+
+    GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
+    GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
+
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+    {
+        const i32 current_small_icon_size = app_settings.icon_size_small();
+        do
         {
-            return;
-        }
+            i32 value;
+            gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
+            if (value == current_small_icon_size)
+            {
+                gtk_combo_box_set_active_iter(box, &iter);
+                break;
+            }
+        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
+    }
 
-        i32 value;
-        gtk_tree_model_get(model, &iter, 1, &value, -1);
+    g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
 
-        if (value != app_settings.icon_size_small())
+    return box;
+}
+} // namespace preference::small_icons
+
+namespace preference::tool_icons
+{
+struct tool_icon_sizes_data
+{
+    i32 value;
+    std::string_view name;
+};
+
+constexpr std::array<tool_icon_sizes_data, 7> tool_icon_sizes{{
+    {0, "GTK Default Size"}, // GtkIconSize::GTK_ICON_SIZE_INVALID,
+    {1, "Menu"},             // GtkIconSize::GTK_ICON_SIZE_MENU,
+    {2, "Small Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
+    {3, "Large Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
+    {4, "Button"},           // GtkIconSize::GTK_ICON_SIZE_BUTTON,
+    {5, "DND"},              // GtkIconSize::GTK_ICON_SIZE_DND,
+    {6, "Dialog"},           // GtkIconSize::GTK_ICON_SIZE_DIALOG
+}};
+
+static void
+changed_cb(GtkComboBox* combobox, void* user_data)
+{
+    (void)user_data;
+
+    GtkTreeIter iter;
+    GtkTreeModel* model = gtk_combo_box_get_model(combobox);
+    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    {
+        return;
+    }
+
+    i32 value;
+    gtk_tree_model_get(model, &iter, 1, &value, -1);
+
+    if (value != app_settings.icon_size_tool())
+    {
+        app_settings.icon_size_tool(value);
+        main_window_rebuild_all_toolbars(nullptr);
+    }
+}
+
+GtkComboBox*
+create_combobox()
+{
+    GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    for (const auto& action : tool_icon_sizes)
+    {
+        GtkTreeIter iter;
+        gtk_list_store_append(model, &iter);
+        gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
+    }
+
+    GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
+    GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
+
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+    {
+        const i32 current_tool_icon_size = app_settings.icon_size_tool();
+        do
         {
-            vfs::dir::global_unload_thumbnails(false);
-        }
+            i32 value;
+            gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
+            if (value == current_tool_icon_size)
+            {
+                gtk_combo_box_set_active_iter(box, &iter);
+                break;
+            }
+        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
+    }
 
-        app_settings.icon_size_small(value);
+    g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
 
+    return box;
+}
+} // namespace preference::tool_icons
+
+namespace preference::single_click
+{
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool single_click = gtk_toggle_button_get_active(button);
+
+    if (single_click != app_settings.single_click())
+    {
+        app_settings.single_click(single_click);
         // update all windows/all panels/all browsers
         for (MainWindow* window : main_window_get_all())
         {
@@ -335,321 +488,167 @@ namespace preference::small_icons
                 {
                     PtkFileBrowser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                    // update views
-                    gtk_widget_destroy(file_browser->folder_view());
-                    file_browser->folder_view(nullptr);
-                    if (file_browser->side_dir)
-                    {
-                        gtk_widget_destroy(file_browser->side_dir);
-                        file_browser->side_dir = nullptr;
-                    }
-                    file_browser->update_views();
-                }
-            }
-        }
-        update_volume_icons();
-    }
-
-    GtkComboBox*
-    create_combobox()
-    {
-        GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-        for (const auto& action : small_icon_sizes)
-        {
-            GtkTreeIter iter;
-            gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
-        }
-
-        GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
-
-        GtkTreeIter iter;
-        if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
-        {
-            const i32 current_small_icon_size = app_settings.icon_size_small();
-            do
-            {
-                i32 value;
-                gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
-                if (value == current_small_icon_size)
-                {
-                    gtk_combo_box_set_active_iter(box, &iter);
-                    break;
-                }
-            } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
-        }
-
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
-
-        return box;
-    }
-} // namespace preference::small_icons
-
-namespace preference::tool_icons
-{
-    struct tool_icon_sizes_data
-    {
-        i32 value;
-        std::string_view name;
-    };
-
-    constexpr std::array<tool_icon_sizes_data, 7> tool_icon_sizes{{
-        {0, "GTK Default Size"}, // GtkIconSize::GTK_ICON_SIZE_INVALID,
-        {1, "Menu"},             // GtkIconSize::GTK_ICON_SIZE_MENU,
-        {2, "Small Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
-        {3, "Large Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
-        {4, "Button"},           // GtkIconSize::GTK_ICON_SIZE_BUTTON,
-        {5, "DND"},              // GtkIconSize::GTK_ICON_SIZE_DND,
-        {6, "Dialog"},           // GtkIconSize::GTK_ICON_SIZE_DIALOG
-    }};
-
-    static void
-    changed_cb(GtkComboBox* combobox, void* user_data)
-    {
-        (void)user_data;
-
-        GtkTreeIter iter;
-        GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-        if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
-        {
-            return;
-        }
-
-        i32 value;
-        gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-        if (value != app_settings.icon_size_tool())
-        {
-            app_settings.icon_size_tool(value);
-            main_window_rebuild_all_toolbars(nullptr);
-        }
-    }
-
-    GtkComboBox*
-    create_combobox()
-    {
-        GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-        for (const auto& action : tool_icon_sizes)
-        {
-            GtkTreeIter iter;
-            gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
-        }
-
-        GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
-
-        GtkTreeIter iter;
-        if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
-        {
-            const i32 current_tool_icon_size = app_settings.icon_size_tool();
-            do
-            {
-                i32 value;
-                gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
-                if (value == current_tool_icon_size)
-                {
-                    gtk_combo_box_set_active_iter(box, &iter);
-                    break;
-                }
-            } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
-        }
-
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
-
-        return box;
-    }
-} // namespace preference::tool_icons
-
-namespace preference::single_click
-{
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool single_click = gtk_toggle_button_get_active(button);
-
-        if (single_click != app_settings.single_click())
-        {
-            app_settings.single_click(single_click);
-            // update all windows/all panels/all browsers
-            for (MainWindow* window : main_window_get_all())
-            {
-                for (const panel_t p : PANELS)
-                {
-                    GtkNotebook* notebook = window->get_panel_notebook(p);
-                    const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                    for (const auto i : std::views::iota(0z, total_pages))
-                    {
-                        PtkFileBrowser* file_browser =
-                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        file_browser->set_single_click(app_settings.single_click());
-                    }
+                    file_browser->set_single_click(app_settings.single_click());
                 }
             }
         }
     }
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.single_click();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.single_click();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::single_click
 
 namespace preference::hover_selects
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool single_hover = gtk_toggle_button_get_active(button);
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool single_hover = gtk_toggle_button_get_active(button);
 
-        if (single_hover != app_settings.single_hover())
+    if (single_hover != app_settings.single_hover())
+    {
+        app_settings.single_hover(single_hover);
+        // update all windows/all panels/all browsers
+        for (MainWindow* window : main_window_get_all())
         {
-            app_settings.single_hover(single_hover);
-            // update all windows/all panels/all browsers
-            for (MainWindow* window : main_window_get_all())
+            for (const panel_t p : PANELS)
             {
-                for (const panel_t p : PANELS)
+                GtkNotebook* notebook = window->get_panel_notebook(p);
+                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+                for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    GtkNotebook* notebook = window->get_panel_notebook(p);
-                    const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                    for (const auto i : std::views::iota(0z, total_pages))
-                    {
-                        PtkFileBrowser* file_browser =
-                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        // TODO
-                        (void)file_browser;
-                        // file_browser->set_single_hover(app_settings.single_hover());
-                    }
+                    PtkFileBrowser* file_browser =
+                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+                    // TODO
+                    (void)file_browser;
+                    // file_browser->set_single_hover(app_settings.single_hover());
                 }
             }
         }
     }
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.single_hover();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.single_hover();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::hover_selects
 
 namespace preference::thumbnail_show
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool show_thumbnail = gtk_toggle_button_get_active(button);
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool show_thumbnail = gtk_toggle_button_get_active(button);
 
-        // thumbnail settings are changed
-        if (app_settings.show_thumbnail() != show_thumbnail)
-        {
-            app_settings.show_thumbnail(show_thumbnail);
-            // update all windows/all panels/all browsers
-            main_window_reload_thumbnails_all_windows();
-        }
-    }
-
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
+    // thumbnail settings are changed
+    if (app_settings.show_thumbnail() != show_thumbnail)
     {
-        const bool value = app_settings.show_thumbnail();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
+        app_settings.show_thumbnail(show_thumbnail);
+        // update all windows/all panels/all browsers
+        main_window_reload_thumbnails_all_windows();
     }
+}
+
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.show_thumbnail();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::thumbnail_show
 
 namespace preference::thumbnail_size_limits
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.thumbnail_size_limit(value);
-    }
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.thumbnail_size_limit(value);
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.thumbnail_size_limit();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.thumbnail_size_limit();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::thumbnail_size_limits
 
 namespace preference::thumbnailer_api
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.thumbnailer_use_api(value);
-    }
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.thumbnailer_use_api(value);
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.thumbnailer_use_api();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.thumbnailer_use_api();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::thumbnailer_api
 
 namespace preference::thumbnail_max_size
 {
-    void
-    spinner_cb(GtkSpinButton* spinbutton, void* user_data)
+void
+spinner_cb(GtkSpinButton* spinbutton, void* user_data)
+{
+    (void)user_data;
+    const double value = gtk_spin_button_get_value(spinbutton);
+
+    // convert size from MiB to B
+    const u32 max_thumb_size = static_cast<u32>(value) * 1024 * 1024;
+
+    if (app_settings.max_thumb_size() != max_thumb_size)
     {
-        (void)user_data;
-        const double value = gtk_spin_button_get_value(spinbutton);
-
-        // convert size from MiB to B
-        const u32 max_thumb_size = static_cast<u32>(value) * 1024 * 1024;
-
-        if (app_settings.max_thumb_size() != max_thumb_size)
-        {
-            app_settings.max_thumb_size(max_thumb_size);
-            // update all windows/all panels/all browsers
-            main_window_reload_thumbnails_all_windows();
-        }
+        app_settings.max_thumb_size(max_thumb_size);
+        // update all windows/all panels/all browsers
+        main_window_reload_thumbnails_all_windows();
     }
+}
 
-    GtkSpinButton*
-    create_pref_spinner(double scale, double lower, double upper, double step_incr,
-                        double page_incr, i32 digits)
-    {
-        const double value = app_settings.max_thumb_size() / scale;
+GtkSpinButton*
+create_pref_spinner(double scale, double lower, double upper, double step_incr, double page_incr,
+                    i32 digits)
+{
+    const double value = app_settings.max_thumb_size() / scale;
 
-        GtkAdjustment* adjustment =
-            gtk_adjustment_new(value, lower, upper, step_incr, page_incr, 0.0);
-        GtkSpinButton* spinner = GTK_SPIN_BUTTON(gtk_spin_button_new(adjustment, 0.0, digits));
-        gtk_widget_set_size_request(GTK_WIDGET(spinner), 80, -1);
-        g_signal_connect(G_OBJECT(spinner), "value-changed", G_CALLBACK(spinner_cb), nullptr);
-        return spinner;
-    }
+    GtkAdjustment* adjustment = gtk_adjustment_new(value, lower, upper, step_incr, page_incr, 0.0);
+    GtkSpinButton* spinner = GTK_SPIN_BUTTON(gtk_spin_button_new(adjustment, 0.0, digits));
+    gtk_widget_set_size_request(GTK_WIDGET(spinner), 80, -1);
+    g_signal_connect(G_OBJECT(spinner), "value-changed", G_CALLBACK(spinner_cb), nullptr);
+    return spinner;
+}
 } // namespace preference::thumbnail_max_size
 
 /**
@@ -658,270 +657,270 @@ namespace preference::thumbnail_max_size
 
 namespace preference::show_tab_bar
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool always_show_tabs = gtk_toggle_button_get_active(button);
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool always_show_tabs = gtk_toggle_button_get_active(button);
 
-        if (always_show_tabs != app_settings.always_show_tabs())
-        {
-            app_settings.always_show_tabs(always_show_tabs);
-            for (MainWindow* window : main_window_get_all())
-            { // update all windows/all panels
-                for (const panel_t p : PANELS)
+    if (always_show_tabs != app_settings.always_show_tabs())
+    {
+        app_settings.always_show_tabs(always_show_tabs);
+        for (MainWindow* window : main_window_get_all())
+        { // update all windows/all panels
+            for (const panel_t p : PANELS)
+            {
+                GtkNotebook* notebook = window->get_panel_notebook(p);
+                const i32 n = gtk_notebook_get_n_pages(notebook);
+                if (always_show_tabs)
                 {
-                    GtkNotebook* notebook = window->get_panel_notebook(p);
-                    const i32 n = gtk_notebook_get_n_pages(notebook);
-                    if (always_show_tabs)
-                    {
-                        gtk_notebook_set_show_tabs(notebook, true);
-                    }
-                    else if (n == 1)
-                    {
-                        gtk_notebook_set_show_tabs(notebook, false);
-                    }
+                    gtk_notebook_set_show_tabs(notebook, true);
+                }
+                else if (n == 1)
+                {
+                    gtk_notebook_set_show_tabs(notebook, false);
                 }
             }
         }
     }
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.always_show_tabs();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.always_show_tabs();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::show_tab_bar
 
 namespace preference::hide_close_tab
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool show_close_tab_buttons = gtk_toggle_button_get_active(button);
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool show_close_tab_buttons = gtk_toggle_button_get_active(button);
 
-        if (show_close_tab_buttons != app_settings.show_close_tab_buttons())
-        {
-            app_settings.show_close_tab_buttons(show_close_tab_buttons);
-            for (MainWindow* window : main_window_get_all())
-            { // update all windows/all panels/all browsers
-                for (const panel_t p : PANELS)
+    if (show_close_tab_buttons != app_settings.show_close_tab_buttons())
+    {
+        app_settings.show_close_tab_buttons(show_close_tab_buttons);
+        for (MainWindow* window : main_window_get_all())
+        { // update all windows/all panels/all browsers
+            for (const panel_t p : PANELS)
+            {
+                GtkNotebook* notebook = window->get_panel_notebook(p);
+                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+                for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    GtkNotebook* notebook = window->get_panel_notebook(p);
-                    const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                    for (const auto i : std::views::iota(0z, total_pages))
-                    {
-                        PtkFileBrowser* file_browser =
-                            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                        GtkWidget* tab_label = window->create_tab_label(file_browser);
-                        gtk_notebook_set_tab_label(notebook,
-                                                   GTK_WIDGET(file_browser),
-                                                   GTK_WIDGET(tab_label));
-                        file_browser->update_tab_label();
-                    }
+                    PtkFileBrowser* file_browser =
+                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+                    GtkWidget* tab_label = window->create_tab_label(file_browser);
+                    gtk_notebook_set_tab_label(notebook,
+                                               GTK_WIDGET(file_browser),
+                                               GTK_WIDGET(tab_label));
+                    file_browser->update_tab_label();
                 }
             }
         }
     }
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.show_close_tab_buttons();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.show_close_tab_buttons();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::hide_close_tab
 
 namespace preference::confirm
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.confirm(value);
-    }
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.confirm(value);
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.confirm();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.confirm();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::confirm
 
 namespace preference::confirm_trash
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.confirm_trash(value);
-    }
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.confirm_trash(value);
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.confirm_trash();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.confirm_trash();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::confirm_trash
 
 namespace preference::confirm_delete
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.confirm_delete(value);
-    }
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.confirm_delete(value);
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.confirm_delete();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.confirm_delete();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::confirm_delete
 
 namespace preference::si_prefix
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.use_si_prefix(value);
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.use_si_prefix(value);
 
-        main_window_refresh_all();
-    }
+    main_window_refresh_all();
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.use_si_prefix();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.use_si_prefix();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::si_prefix
 
 namespace preference::click_executes
 {
-    void
-    check_button_cb(GtkToggleButton* button, void* user_data)
-    {
-        (void)user_data;
-        const bool value = gtk_toggle_button_get_active(button);
-        app_settings.click_executes(value);
-    }
+void
+check_button_cb(GtkToggleButton* button, void* user_data)
+{
+    (void)user_data;
+    const bool value = gtk_toggle_button_get_active(button);
+    app_settings.click_executes(value);
+}
 
-    GtkCheckButton*
-    create_pref_check_button(const std::string_view label)
-    {
-        const bool value = app_settings.click_executes();
-        GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-        g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-        return button;
-    }
+GtkCheckButton*
+create_pref_check_button(const std::string_view label)
+{
+    const bool value = app_settings.click_executes();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
 } // namespace preference::click_executes
 
 namespace preference::drag_actions
 {
-    struct drag_actions_data
+struct drag_actions_data
+{
+    i32 value;
+    std::string_view name;
+};
+
+constexpr std::array<drag_actions_data, 4> drag_actions_new{{
+    {0, "Automatic"},
+    {1, "Copy (Ctrl+Drag)"},
+    {2, "Move (Shift+Drag)"},
+    {3, "Link (Ctrl+Shift+Drag)"},
+}};
+
+static void
+changed_cb(GtkComboBox* combobox, void* user_data)
+{
+    (void)user_data;
+
+    GtkTreeIter iter;
+    GtkTreeModel* model = gtk_combo_box_get_model(combobox);
+    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
     {
-        i32 value;
-        std::string_view name;
-    };
-
-    constexpr std::array<drag_actions_data, 4> drag_actions_new{{
-        {0, "Automatic"},
-        {1, "Copy (Ctrl+Drag)"},
-        {2, "Move (Shift+Drag)"},
-        {3, "Link (Ctrl+Shift+Drag)"},
-    }};
-
-    static void
-    changed_cb(GtkComboBox* combobox, void* user_data)
-    {
-        (void)user_data;
-
-        GtkTreeIter iter;
-        GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-        if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
-        {
-            return;
-        }
-
-        i32 value;
-        gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-        const i32 last_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
-        if (value == last_drag_action)
-        {
-            return;
-        }
-
-        xset_set(xset::name::drag_action, xset::var::x, std::to_string(value));
+        return;
     }
 
-    GtkComboBox*
-    create_combobox()
+    i32 value;
+    gtk_tree_model_get(model, &iter, 1, &value, -1);
+
+    const i32 last_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
+    if (value == last_drag_action)
     {
-        GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-        for (const auto& action : drag_actions_new)
-        {
-            GtkTreeIter iter;
-            gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
-        }
+        return;
+    }
 
-        GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
+    xset_set(xset::name::drag_action, xset::var::x, std::to_string(value));
+}
 
+GtkComboBox*
+create_combobox()
+{
+    GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    for (const auto& action : drag_actions_new)
+    {
         GtkTreeIter iter;
-        if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+        gtk_list_store_append(model, &iter);
+        gtk_list_store_set(model, &iter, 0, action.name.data(), 1, action.value, -1);
+    }
+
+    GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
+    GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
+
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+    {
+        const i32 current_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
+        do
         {
-            const i32 current_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
-            do
+            i32 value;
+            gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
+            if (value == current_drag_action)
             {
-                i32 value;
-                gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
-                if (value == current_drag_action)
-                {
-                    gtk_combo_box_set_active_iter(box, &iter);
-                    break;
-                }
-            } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
-        }
-
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
-
-        return box;
+                gtk_combo_box_set_active_iter(box, &iter);
+                break;
+            }
+        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
     }
+
+    g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
+
+    return box;
+}
 } // namespace preference::drag_actions
 
 /**
@@ -930,139 +929,139 @@ namespace preference::drag_actions
 
 namespace preference::date_format
 {
-    static void
-    pref_text_box_cb(GtkEntry* entry, const void* user_data)
-    {
-        (void)user_data;
+static void
+pref_text_box_cb(GtkEntry* entry, const void* user_data)
+{
+    (void)user_data;
 
 #if (GTK_MAJOR_VERSION == 4)
-        const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
 #elif (GTK_MAJOR_VERSION == 3)
-        const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
 #endif
 
-        app_settings.date_format(text);
+    app_settings.date_format(text);
 
-        // main_window_refresh_all();
-    }
+    // main_window_refresh_all();
+}
 
-    GtkEntry*
-    create_pref_text_box()
-    {
-        GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
+GtkEntry*
+create_pref_text_box()
+{
+    GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
 #if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(entry), app_settings.date_format().data());
+    gtk_editable_set_text(GTK_EDITABLE(entry), app_settings.date_format().data());
 #elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(entry), app_settings.date_format().data());
+    gtk_entry_set_text(GTK_ENTRY(entry), app_settings.date_format().data());
 #endif
 
-        g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+    g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
 
-        return entry;
-    }
+    return entry;
+}
 } // namespace preference::date_format
 
 namespace preference::editor
 {
-    static void
-    pref_text_box_cb(GtkEntry* entry, const void* user_data)
-    {
-        (void)user_data;
+static void
+pref_text_box_cb(GtkEntry* entry, const void* user_data)
+{
+    (void)user_data;
 
 #if (GTK_MAJOR_VERSION == 4)
-        const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
 #elif (GTK_MAJOR_VERSION == 3)
-        const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
 #endif
 
-        xset_set(xset::name::editor, xset::var::s, text);
-    }
+    xset_set(xset::name::editor, xset::var::s, text);
+}
 
-    GtkEntry*
-    create_pref_text_box()
-    {
-        const auto editor = xset_get_s(xset::name::editor).value_or("");
+GtkEntry*
+create_pref_text_box()
+{
+    const auto editor = xset_get_s(xset::name::editor).value_or("");
 
-        GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
+    GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
 #if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(entry), editor.data());
+    gtk_editable_set_text(GTK_EDITABLE(entry), editor.data());
 #elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(entry), editor.data());
+    gtk_entry_set_text(GTK_ENTRY(entry), editor.data());
 #endif
 
-        g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
+    g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
 
-        return entry;
-    }
+    return entry;
+}
 } // namespace preference::editor
 
 namespace preference::terminal
 {
-    static void
-    changed_cb(GtkComboBox* combobox, void* user_data)
+static void
+changed_cb(GtkComboBox* combobox, void* user_data)
+{
+    (void)user_data;
+
+    GtkTreeIter iter;
+    GtkTreeModel* model = gtk_combo_box_get_model(combobox);
+    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
     {
-        (void)user_data;
-
-        GtkTreeIter iter;
-        GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-        if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
-        {
-            return;
-        }
-
-        i32 value;
-        gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-        const auto new_terminal = terminal_handlers->get_supported_terminal_names()[value];
-        const std::filesystem::path terminal = Glib::find_program_in_path(new_terminal.data());
-        if (terminal.empty())
-        {
-            ztd::logger::error("Failed to set new terminal: {}, not installed", new_terminal);
-            return;
-        }
-        xset_set(xset::name::main_terminal, xset::var::s, new_terminal);
-        xset_set_b(xset::name::main_terminal, true); // discovery
+        return;
     }
 
-    GtkComboBox*
-    create_combobox()
+    i32 value;
+    gtk_tree_model_get(model, &iter, 1, &value, -1);
+
+    const auto new_terminal = terminal_handlers->get_supported_terminal_names()[value];
+    const std::filesystem::path terminal = Glib::find_program_in_path(new_terminal.data());
+    if (terminal.empty())
     {
-        GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-        const auto terminals = terminal_handlers->get_supported_terminal_names();
-        for (const auto [index, terminal] : std::views::enumerate(terminals))
-        {
-            GtkTreeIter iter;
-            gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter, 0, terminal.data(), 1, index, -1);
-        }
+        ztd::logger::error("Failed to set new terminal: {}, not installed", new_terminal);
+        return;
+    }
+    xset_set(xset::name::main_terminal, xset::var::s, new_terminal);
+    xset_set_b(xset::name::main_terminal, true); // discovery
+}
 
-        GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
-        gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
-
+GtkComboBox*
+create_combobox()
+{
+    GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    const auto terminals = terminal_handlers->get_supported_terminal_names();
+    for (const auto [index, terminal] : std::views::enumerate(terminals))
+    {
         GtkTreeIter iter;
-        if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+        gtk_list_store_append(model, &iter);
+        gtk_list_store_set(model, &iter, 0, terminal.data(), 1, index, -1);
+    }
+
+    GtkComboBox* box = GTK_COMBO_BOX(gtk_combo_box_new_with_model(GTK_TREE_MODEL(model)));
+    GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(box), renderer, true);
+    gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(box), renderer, "text", 0, nullptr);
+
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
+    {
+        const auto current_terminal = xset_get_s(xset::name::main_terminal).value_or("");
+        const i32 current_terminal_index =
+            ztd::index(terminal_handlers->get_supported_terminal_names(), current_terminal);
+        do
         {
-            const auto current_terminal = xset_get_s(xset::name::main_terminal).value_or("");
-            const i32 current_terminal_index =
-                ztd::index(terminal_handlers->get_supported_terminal_names(), current_terminal);
-            do
+            i32 value;
+            gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
+            if (value == current_terminal_index)
             {
-                i32 value;
-                gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
-                if (value == current_terminal_index)
-                {
-                    gtk_combo_box_set_active_iter(box, &iter);
-                    break;
-                }
-            } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
-        }
-
-        g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
-
-        return box;
+                gtk_combo_box_set_active_iter(box, &iter);
+                break;
+            }
+        } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
     }
+
+    g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(changed_cb), nullptr);
+
+    return box;
+}
 } // namespace preference::terminal
 
 /////////////////////////////////////////////////////////////////

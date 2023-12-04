@@ -30,33 +30,33 @@
 
 namespace ptk::file_list
 {
-    enum class column
-    { // Columns of directory view
-        big_icon,
-        small_icon,
-        name,
-        size,
-        bytes,
-        type,
-        mime,
-        perm,
-        owner,
-        group,
-        atime,
-        btime,
-        ctime,
-        mtime,
-        info,
-    };
+enum class column
+{ // Columns of directory view
+    big_icon,
+    small_icon,
+    name,
+    size,
+    bytes,
+    type,
+    mime,
+    perm,
+    owner,
+    group,
+    atime,
+    btime,
+    ctime,
+    mtime,
+    info,
+};
 
-    // sort_dir of directory view - do not change order, saved
-    // see also: ipc-command.cxx run_ipc_command() get sort_first
-    enum class sort_dir
-    {
-        mixed,
-        first,
-        last
-    };
+// sort_dir of directory view - do not change order, saved
+// see also: ipc-command.cxx run_ipc_command() get sort_first
+enum class sort_dir
+{
+    mixed,
+    first,
+    last
+};
 } // namespace ptk::file_list
 
 struct PtkFileList

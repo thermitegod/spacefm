@@ -28,61 +28,61 @@
 
 namespace vfs
 {
-    struct device
-    {
-        device() = delete;
-        device(const libudev::device& udevice);
-        ~device() = default;
+struct device
+{
+    device() = delete;
+    device(const libudev::device& udevice);
+    ~device() = default;
 
-        static const std::shared_ptr<vfs::device> create(const libudev::device& udevice) noexcept;
+    static const std::shared_ptr<vfs::device> create(const libudev::device& udevice) noexcept;
 
-        libudev::device udevice;
+    libudev::device udevice;
 
-        dev_t devnum() const noexcept;
+    dev_t devnum() const noexcept;
 
-        const std::string_view devnode() const noexcept;
-        const std::string_view native_path() const noexcept;
-        const std::string_view mount_points() const noexcept;
+    const std::string_view devnode() const noexcept;
+    const std::string_view native_path() const noexcept;
+    const std::string_view mount_points() const noexcept;
 
-        bool is_valid() const noexcept;
+    bool is_valid() const noexcept;
 
-        bool is_system_internal() const noexcept;
-        bool is_removable() const noexcept;
-        bool is_media_available() const noexcept;
-        bool is_optical_disc() const noexcept;
-        bool is_mounted() const noexcept;
-        bool is_media_ejectable() const noexcept;
+    bool is_system_internal() const noexcept;
+    bool is_removable() const noexcept;
+    bool is_media_available() const noexcept;
+    bool is_optical_disc() const noexcept;
+    bool is_mounted() const noexcept;
+    bool is_media_ejectable() const noexcept;
 
-        const std::string_view id() const noexcept;
-        const std::string_view id_label() const noexcept;
-        u64 size() const noexcept;
-        u64 block_size() const noexcept;
-        const std::string_view fstype() const noexcept;
+    const std::string_view id() const noexcept;
+    const std::string_view id_label() const noexcept;
+    u64 size() const noexcept;
+    u64 block_size() const noexcept;
+    const std::string_view fstype() const noexcept;
 
-      private:
-        dev_t devnum_{0};
+  private:
+    dev_t devnum_{0};
 
-        std::string devnode_{};
-        std::string native_path_{};
-        std::string mount_points_{};
+    std::string devnode_{};
+    std::string native_path_{};
+    std::string mount_points_{};
 
-        bool is_valid_{false};
+    bool is_valid_{false};
 
-        bool is_system_internal_{true};
-        bool is_removable_{false};
-        bool is_media_available_{false};
-        bool is_optical_disc_{false};
-        bool is_mounted_{false};
-        bool is_media_ejectable_{false};
+    bool is_system_internal_{true};
+    bool is_removable_{false};
+    bool is_media_available_{false};
+    bool is_optical_disc_{false};
+    bool is_mounted_{false};
+    bool is_media_ejectable_{false};
 
-        std::string id_{};
-        u64 size_{0};
-        u64 block_size_{0};
-        std::string id_label_{};
-        std::string fstype_{};
+    std::string id_{};
+    u64 size_{0};
+    u64 block_size_{0};
+    std::string id_label_{};
+    std::string fstype_{};
 
-      private:
-        const std::optional<std::string> info_mount_points() noexcept;
-        bool device_get_info() noexcept;
-    };
+  private:
+    const std::optional<std::string> info_mount_points() noexcept;
+    bool device_get_info() noexcept;
+};
 } // namespace vfs

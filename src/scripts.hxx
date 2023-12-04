@@ -19,11 +19,11 @@
 
 namespace spacefm
 {
-    enum class script
-    {
-        config_update,
-        config_update_git,
-    };
+enum class script
+{
+    config_update,
+    config_update_git,
+};
 }
 
 bool script_exists(spacefm::script script) noexcept;

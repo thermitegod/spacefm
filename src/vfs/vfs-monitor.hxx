@@ -31,43 +31,43 @@
 
 namespace vfs
 {
-    struct monitor
+struct monitor
+{
+    enum class event
     {
-        enum class event
-        {
-            created,
-            deleted,
-            changed,
-            other,
-        };
+        created,
+        deleted,
+        changed,
+        other,
+    };
 
-        // Callback function which will be called when monitored events happen
-        using callback_t =
-            std::function<void(const vfs::monitor::event event, const std::filesystem::path& path)>;
+    // Callback function which will be called when monitored events happen
+    using callback_t =
+        std::function<void(const vfs::monitor::event event, const std::filesystem::path& path)>;
 
-        monitor() = delete;
-        monitor(const std::filesystem::path& path, const callback_t& callback);
-        ~monitor();
+    monitor() = delete;
+    monitor(const std::filesystem::path& path, const callback_t& callback);
+    ~monitor();
 
-        static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
-                                                     const callback_t& callback) noexcept;
+    static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
+                                                 const callback_t& callback) noexcept;
 
-      private:
-        bool on_inotify_event(const Glib::IOCondition condition);
-        void dispatch_event(const event event, const std::filesystem::path& filename) noexcept;
+  private:
+    bool on_inotify_event(const Glib::IOCondition condition);
+    void dispatch_event(const event event, const std::filesystem::path& filename) noexcept;
 
-        i32 inotify_fd_{-1};
-        i32 inotify_wd_{-1};
+    i32 inotify_fd_{-1};
+    i32 inotify_wd_{-1};
 
-        std::filesystem::path path_{};
+    std::filesystem::path path_{};
 
 #if (GTK_MAJOR_VERSION == 4)
-        Glib::RefPtr<Glib::IOChannel> inotify_io_channel_ = nullptr;
+    Glib::RefPtr<Glib::IOChannel> inotify_io_channel_ = nullptr;
 #elif (GTK_MAJOR_VERSION == 3)
-        Glib::RefPtr<Glib::IOChannel> inotify_io_channel_;
+    Glib::RefPtr<Glib::IOChannel> inotify_io_channel_;
 #endif
-        sigc::connection signal_io_handler_;
+    sigc::connection signal_io_handler_;
 
-        callback_t callback_{};
-    };
+    callback_t callback_{};
+};
 } // namespace vfs

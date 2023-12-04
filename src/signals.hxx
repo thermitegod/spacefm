@@ -17,26 +17,26 @@
 
 namespace spacefm
 {
-    enum class signal
-    {
-        // vfs::dir
-        file_created,
-        file_changed,
-        file_deleted,
-        file_listed,
-        file_thumbnail_loaded,
-        // file_load_complete,
+enum class signal
+{
+    // vfs::dir
+    file_created,
+    file_changed,
+    file_deleted,
+    file_listed,
+    file_thumbnail_loaded,
+    // file_load_complete,
 
-        // vfs::file_task
-        task_finish,
+    // vfs::file_task
+    task_finish,
 
-        // PTKFileBrowser
-        chdir_before,
-        chdir_begin,
-        chdir_after,
-        open_item,
-        change_content,
-        change_sel,
-        change_pane,
-    };
+    // PTKFileBrowser
+    chdir_before,
+    chdir_begin,
+    chdir_after,
+    open_item,
+    change_content,
+    change_sel,
+    change_pane,
+};
 }

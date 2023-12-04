@@ -26,13 +26,13 @@
 
 namespace ptk
 {
-    enum class rename_mode
-    {
-        rename,
-        new_file,
-        new_dir,
-        new_link
-    };
+enum class rename_mode
+{
+    rename,
+    new_file,
+    new_dir,
+    new_link
+};
 }
 
 i32 ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
