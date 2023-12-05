@@ -83,13 +83,21 @@ struct PtkFileList
     const i32 stamp{std::rand()};
 
   public:
-    // signals
-    void on_file_list_file_created(const std::shared_ptr<vfs::file>& file);
-    void on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file);
-    void on_file_list_file_changed(const std::shared_ptr<vfs::file>& file);
-    void on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file);
+    void set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept;
+    void show_thumbnails(bool is_big, u64 max_file_size) noexcept;
+    void sort() noexcept;
+
+  private:
+    void file_created(const std::shared_ptr<vfs::file>& file) noexcept;
+    void file_changed(const std::shared_ptr<vfs::file>& file) noexcept;
 
   public:
+    // signals
+    void on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept;
+    void on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept;
+    void on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept;
+    void on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
+
     // Signals we connect to
     sigc::connection signal_file_created;
     sigc::connection signal_file_deleted;
@@ -110,11 +118,3 @@ struct PtkFileListClass
 GType ptk_file_list_get_type();
 
 PtkFileList* ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden);
-
-void ptk_file_list_set_dir(PtkFileList* list, const std::shared_ptr<vfs::dir>& dir);
-
-bool ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it,
-                             const std::shared_ptr<vfs::file>& file);
-
-void ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size);
-void ptk_file_list_sort(PtkFileList* list); // sfm

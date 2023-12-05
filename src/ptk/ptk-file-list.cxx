@@ -95,11 +95,6 @@ static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
                                                 GtkTreeIterCompareFunc sort_func, void* user_data,
                                                 GDestroyNotify destroy);
 
-/* signal handlers */
-
-static void ptk_file_list_file_created(const std::shared_ptr<vfs::file>& file, PtkFileList* list);
-static void ptk_file_list_file_changed(const std::shared_ptr<vfs::file>& file, PtkFileList* list);
-
 #define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
 
@@ -239,7 +234,7 @@ ptk_file_list_finalize(GObject* object)
 {
     PtkFileList* list = PTK_FILE_LIST_REINTERPRET(object);
 
-    ptk_file_list_set_dir(list, nullptr);
+    list->set_dir(nullptr);
     /* must chain up - finalize parent */
     (*parent_class->finalize)(object);
 }
@@ -249,97 +244,8 @@ ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden)
 {
     PtkFileList* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;
-    ptk_file_list_set_dir(list, dir);
+    list->set_dir(dir);
     return list;
-}
-
-void
-PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file)
-{
-    if (!file || !this->dir)
-    {
-        return;
-    }
-
-    ptk_file_list_file_changed(file, this);
-
-    // check if reloading of thumbnail is needed.
-    // See also desktop-window.c:on_file_changed()
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    if (this->max_thumbnail != 0 &&
-        ((file->mime_type()->is_video() && (now - file->mtime() > 5)) ||
-         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
-    {
-        if (!file->is_thumbnail_loaded(this->big_thumbnail))
-        {
-            this->dir->load_thumbnail(file, this->big_thumbnail);
-        }
-    }
-}
-
-void
-PtkFileList::on_file_list_file_created(const std::shared_ptr<vfs::file>& file)
-{
-    ptk_file_list_file_created(file, this);
-
-    /* check if reloading of thumbnail is needed. */
-    if (this->max_thumbnail != 0 &&
-        (file->mime_type()->is_video() ||
-         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
-    {
-        if (!file->is_thumbnail_loaded(this->big_thumbnail))
-        {
-            this->dir->load_thumbnail(file, this->big_thumbnail);
-        }
-    }
-}
-
-void
-ptk_file_list_set_dir(PtkFileList* list, const std::shared_ptr<vfs::dir>& dir)
-{
-    if (list->dir == dir)
-    {
-        return;
-    }
-
-    if (list->dir)
-    {
-        if (list->max_thumbnail > 0)
-        { // cancel all possible pending requests
-            list->dir->cancel_all_thumbnail_requests();
-        }
-        g_list_free(list->files);
-
-        list->signal_file_created.disconnect();
-        list->signal_file_deleted.disconnect();
-        list->signal_file_changed.disconnect();
-        list->signal_file_thumbnail_loaded.disconnect();
-    }
-
-    list->dir = dir;
-    list->files = nullptr;
-    list->n_files = 0;
-    if (!dir)
-    {
-        return;
-    }
-
-    list->signal_file_created = list->dir->add_event<spacefm::signal::file_created>(
-        std::bind(&PtkFileList::on_file_list_file_created, list, std::placeholders::_1));
-    list->signal_file_deleted = list->dir->add_event<spacefm::signal::file_deleted>(
-        std::bind(&PtkFileList::on_file_list_file_deleted, list, std::placeholders::_1));
-    list->signal_file_changed = list->dir->add_event<spacefm::signal::file_changed>(
-        std::bind(&PtkFileList::on_file_list_file_changed, list, std::placeholders::_1));
-
-    for (const auto& file : dir->files())
-    {
-        if (list->show_hidden || !file->is_hidden())
-        {
-            list->files = g_list_prepend(list->files, file.get());
-            ++list->n_files;
-        }
-    }
 }
 
 static GtkTreeModelFlags
@@ -658,7 +564,7 @@ ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, 
     list->sort_col = ptk::file_list::column(sort_column_id);
     list->sort_order = order;
     gtk_tree_sortable_sort_column_changed(sortable);
-    ptk_file_list_sort(list);
+    list->sort();
 }
 
 static void
@@ -847,67 +753,164 @@ ptk_file_info_list_sort(PtkFileList* list)
     return vector_to_glist_vfs_file(file_list);
 }
 
+// PtkFileList
+
 void
-ptk_file_list_sort(PtkFileList* list)
+PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 {
-    if (list->n_files <= 1)
+    if (this->dir == new_dir)
+    {
+        return;
+    }
+
+    if (this->dir)
+    {
+        if (this->max_thumbnail > 0)
+        { // cancel all possible pending requests
+            this->dir->cancel_all_thumbnail_requests();
+        }
+        g_list_free(this->files);
+
+        this->signal_file_created.disconnect();
+        this->signal_file_deleted.disconnect();
+        this->signal_file_changed.disconnect();
+        this->signal_file_thumbnail_loaded.disconnect();
+    }
+
+    this->dir = new_dir;
+    this->files = nullptr;
+    this->n_files = 0;
+    if (!new_dir)
+    {
+        return;
+    }
+
+    this->signal_file_created = this->dir->add_event<spacefm::signal::file_created>(
+        std::bind(&PtkFileList::on_file_list_file_created, this, std::placeholders::_1));
+    this->signal_file_deleted = this->dir->add_event<spacefm::signal::file_deleted>(
+        std::bind(&PtkFileList::on_file_list_file_deleted, this, std::placeholders::_1));
+    this->signal_file_changed = this->dir->add_event<spacefm::signal::file_changed>(
+        std::bind(&PtkFileList::on_file_list_file_changed, this, std::placeholders::_1));
+
+    for (const auto& file : new_dir->files())
+    {
+        if (this->show_hidden || !file->is_hidden())
+        {
+            this->files = g_list_prepend(this->files, file.get());
+            ++this->n_files;
+        }
+    }
+}
+
+void
+PtkFileList::sort() noexcept
+{
+    if (this->n_files <= 1)
     {
         return;
     }
 
     /* sort the list */
-    // list->files = g_list_sort_with_data(list->files, ptk_file_info_list_sort, list);
-    list->files = ptk_file_info_list_sort(list);
+    this->files = ptk_file_info_list_sort(this);
 
     GtkTreePath* path = gtk_tree_path_new();
-    gtk_tree_model_rows_reordered(GTK_TREE_MODEL(list), path, nullptr, nullptr);
-    gtk_tree_path_free(path);
-}
-
-bool
-ptk_file_list_find_iter(PtkFileList* list, GtkTreeIter* it, const std::shared_ptr<vfs::file>& file1)
-{
-    for (GList* l = list->files; l; l = g_list_next(l))
-    {
-        const auto file2 = static_cast<vfs::file*>(l->data)->shared_from_this();
-        if (file1 == file2 || file1->name() == file2->name())
-        {
-            it->stamp = list->stamp;
-            it->user_data = l;
-            it->user_data2 = file2.get();
-            return true;
-        }
-    }
-    return false;
-}
-
-static void
-ptk_file_list_file_created(const std::shared_ptr<vfs::file>& file, PtkFileList* list)
-{
-    if (!list->show_hidden && file->is_hidden())
-    {
-        return;
-    }
-
-    list->files = g_list_append(list->files, file.get());
-    ++list->n_files;
-
-    ptk_file_list_sort(list);
-
-    GList* l = g_list_find(list->files, file.get());
-
-    GtkTreeIter it;
-    it.stamp = list->stamp;
-    it.user_data = l;
-    it.user_data2 = file.get();
-
-    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
-    gtk_tree_model_row_inserted(GTK_TREE_MODEL(list), path, &it);
+    gtk_tree_model_rows_reordered(GTK_TREE_MODEL(this), path, nullptr, nullptr);
     gtk_tree_path_free(path);
 }
 
 void
-PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file)
+PtkFileList::file_created(const std::shared_ptr<vfs::file>& file) noexcept
+{
+    if (!this->show_hidden && file->is_hidden())
+    {
+        return;
+    }
+
+    this->files = g_list_append(this->files, file.get());
+    ++this->n_files;
+
+    this->sort();
+
+    GList* l = g_list_find(this->files, file.get());
+
+    GtkTreeIter it;
+    it.stamp = this->stamp;
+    it.user_data = l;
+    it.user_data2 = file.get();
+
+    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files, l->data), -1);
+    gtk_tree_model_row_inserted(GTK_TREE_MODEL(this), path, &it);
+    gtk_tree_path_free(path);
+}
+
+void
+PtkFileList::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+{
+    if (!this->show_hidden && file->is_hidden())
+    {
+        return;
+    }
+
+    GList* l = g_list_find(this->files, file.get());
+    if (!l)
+    {
+        return;
+    }
+
+    GtkTreeIter it;
+    it.stamp = this->stamp;
+    it.user_data = l;
+    it.user_data2 = l->data;
+
+    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(this->files, l->data), -1);
+    gtk_tree_model_row_changed(GTK_TREE_MODEL(this), path, &it);
+    gtk_tree_path_free(path);
+}
+
+void
+PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+{
+    if (!file || !this->dir)
+    {
+        return;
+    }
+
+    this->file_changed(file);
+
+    // check if reloading of thumbnail is needed.
+    // See also desktop-window.c:on_file_changed()
+    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    if (this->max_thumbnail != 0 &&
+        ((file->mime_type()->is_video() && (now - file->mtime() > 5)) ||
+         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
+    {
+        if (!file->is_thumbnail_loaded(this->big_thumbnail))
+        {
+            this->dir->load_thumbnail(file, this->big_thumbnail);
+        }
+    }
+}
+
+void
+PtkFileList::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept
+{
+    this->file_created(file);
+
+    /* check if reloading of thumbnail is needed. */
+    if (this->max_thumbnail != 0 &&
+        (file->mime_type()->is_video() ||
+         (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
+    {
+        if (!file->is_thumbnail_loaded(this->big_thumbnail))
+        {
+            this->dir->load_thumbnail(file, this->big_thumbnail);
+        }
+    }
+}
+
+void
+PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept
 {
     /* If there is no file info, that means the dir itself was deleted. */
     if (!file)
@@ -947,94 +950,65 @@ PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file)
 }
 
 void
-ptk_file_list_file_changed(const std::shared_ptr<vfs::file>& file, PtkFileList* list)
-{
-    if (!list->show_hidden && file->is_hidden())
-    {
-        return;
-    }
-
-    GList* l = g_list_find(list->files, file.get());
-    if (!l)
-    {
-        return;
-    }
-
-    GtkTreeIter it;
-    it.stamp = list->stamp;
-    it.user_data = l;
-    it.user_data2 = l->data;
-
-    GtkTreePath* path = gtk_tree_path_new_from_indices(g_list_index(list->files, l->data), -1);
-    gtk_tree_model_row_changed(GTK_TREE_MODEL(list), path, &it);
-    gtk_tree_path_free(path);
-}
-
-void
-PtkFileList::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file)
+PtkFileList::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
     // ztd::logger::debug("LOADED: {}", file->name());
-    ptk_file_list_file_changed(file, this);
+    this->file_changed(file);
 }
 
 void
-ptk_file_list_show_thumbnails(PtkFileList* list, bool is_big, u64 max_file_size)
+PtkFileList::show_thumbnails(bool is_big, u64 max_file_size) noexcept
 {
-    if (!list)
-    {
-        return;
-    }
-
-    const u64 old_max_thumbnail = list->max_thumbnail;
-    list->max_thumbnail = max_file_size;
-    list->big_thumbnail = is_big;
+    const u64 old_max_thumbnail = this->max_thumbnail;
+    this->max_thumbnail = max_file_size;
+    this->big_thumbnail = is_big;
     // FIXME: This is buggy!!! Further testing might be needed.
     if (max_file_size == 0)
     {
         if (old_max_thumbnail > 0) /* cancel thumbnails */
         {
-            list->dir->cancel_all_thumbnail_requests();
+            this->dir->cancel_all_thumbnail_requests();
 
-            list->signal_file_thumbnail_loaded.disconnect();
+            this->signal_file_thumbnail_loaded.disconnect();
 
-            for (GList* l = list->files; l; l = g_list_next(l))
+            for (GList* l = this->files; l; l = g_list_next(l))
             {
                 const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
                 if ((file->mime_type()->is_image() || file->mime_type()->is_video()) &&
-                    file->is_thumbnail_loaded(list->big_thumbnail))
+                    file->is_thumbnail_loaded(this->big_thumbnail))
                 {
                     /* update the model */
-                    ptk_file_list_file_changed(file, list);
+                    this->file_changed(file);
                 }
             }
 
             /* Thumbnails are being disabled so ensure the large thumbnails are
              * freed - with up to 256x256 images this is a lot of memory */
-            list->dir->unload_thumbnails(list->big_thumbnail);
+            this->dir->unload_thumbnails(this->big_thumbnail);
         }
         return;
     }
 
-    list->signal_file_thumbnail_loaded =
-        list->dir->add_event<spacefm::signal::file_thumbnail_loaded>(
+    this->signal_file_thumbnail_loaded =
+        this->dir->add_event<spacefm::signal::file_thumbnail_loaded>(
             std::bind(&PtkFileList::on_file_list_file_thumbnail_loaded,
-                      list,
+                      this,
                       std::placeholders::_1));
 
-    for (GList* l = list->files; l; l = g_list_next(l))
+    for (GList* l = this->files; l; l = g_list_next(l))
     {
         const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
-        if (list->max_thumbnail != 0 &&
+        if (this->max_thumbnail != 0 &&
             (file->mime_type()->is_video() ||
-             (file->size() < list->max_thumbnail && file->mime_type()->is_image())))
+             (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
         {
-            if (file->is_thumbnail_loaded(list->big_thumbnail))
+            if (file->is_thumbnail_loaded(this->big_thumbnail))
             {
-                ptk_file_list_file_changed(file, list);
+                this->file_changed(file);
             }
             else
             {
-                list->dir->load_thumbnail(file, list->big_thumbnail);
+                this->dir->load_thumbnail(file, this->big_thumbnail);
                 // ztd::logger::debug("REQUEST: {}", file->name());
             }
         }

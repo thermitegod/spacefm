@@ -4045,7 +4045,7 @@ PtkFileBrowser::set_sort_extra(xset::name setname) const noexcept
                        xset::var::z,
                        std::to_string(set->b == xset::b::xtrue ? xset::b::xfalse : xset::b::xtrue));
     }
-    ptk_file_list_sort(list);
+    list->sort();
 }
 
 void
@@ -4534,9 +4534,8 @@ PtkFileBrowser::show_thumbnails(i32 max_file_size, bool large_icons) noexcept
             max_file_size = 0;
         }
 
-        ptk_file_list_show_thumbnails(PTK_FILE_LIST_REINTERPRET(this->file_list_),
-                                      large_icons,
-                                      max_file_size);
+        PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+        list->show_thumbnails(large_icons, max_file_size);
         this->update_toolbar_widgets(xset::tool::show_thumb);
     }
 }
