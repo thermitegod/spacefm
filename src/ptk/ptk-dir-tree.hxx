@@ -47,8 +47,6 @@ enum class column
 
 struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::TreeModel
 {
-    struct Node;
-
     GObject parent;
 
     static PtkDirTree* create() noexcept;
@@ -58,13 +56,6 @@ struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::Tre
     const std::optional<std::filesystem::path> get_dir_path(GtkTreeIter* iter) const noexcept;
 
     /* <private> */
-    void insert_child(const std::shared_ptr<Node>& parent,
-                      const std::filesystem::path& file_path = "") noexcept;
-    void delete_child(const std::shared_ptr<PtkDirTree::Node>& child) noexcept;
-
-    i32 node_compare(const std::shared_ptr<PtkDirTree::Node>& a,
-                     const std::shared_ptr<PtkDirTree::Node>& b) const noexcept;
-
     struct Node : public std::enable_shared_from_this<Node>
     {
         static const std::shared_ptr<Node> create();
@@ -95,4 +86,12 @@ struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::Tre
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
     /* Random integer to check whether an iter belongs to our model */
     const i32 stamp{std::rand()};
+
+  private:
+    void insert_child(const std::shared_ptr<Node>& parent,
+                      const std::filesystem::path& file_path = "") noexcept;
+    void delete_child(const std::shared_ptr<PtkDirTree::Node>& child) noexcept;
+
+    i32 node_compare(const std::shared_ptr<PtkDirTree::Node>& a,
+                     const std::shared_ptr<PtkDirTree::Node>& b) const noexcept;
 };
