@@ -105,7 +105,23 @@ static void ptk_file_list_file_changed(const std::shared_ptr<vfs::file>& file, P
 
 static GObjectClass* parent_class = nullptr;
 
-static std::unordered_map<ptk::file_list::column, GType> column_types;
+static const std::unordered_map<ptk::file_list::column, GType> column_types{
+    {ptk::file_list::column::big_icon, GDK_TYPE_PIXBUF},
+    {ptk::file_list::column::small_icon, GDK_TYPE_PIXBUF},
+    {ptk::file_list::column::name, G_TYPE_STRING},
+    {ptk::file_list::column::size, G_TYPE_STRING},
+    {ptk::file_list::column::bytes, G_TYPE_STRING},
+    {ptk::file_list::column::type, G_TYPE_STRING},
+    {ptk::file_list::column::mime, G_TYPE_STRING},
+    {ptk::file_list::column::perm, G_TYPE_STRING},
+    {ptk::file_list::column::owner, G_TYPE_STRING},
+    {ptk::file_list::column::group, G_TYPE_STRING},
+    {ptk::file_list::column::atime, G_TYPE_STRING},
+    {ptk::file_list::column::btime, G_TYPE_STRING},
+    {ptk::file_list::column::ctime, G_TYPE_STRING},
+    {ptk::file_list::column::mtime, G_TYPE_STRING},
+    {ptk::file_list::column::info, G_TYPE_POINTER},
+};
 
 GType
 ptk_file_list_get_type()
@@ -191,22 +207,6 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
     iface->iter_n_children = ptk_file_list_iter_n_children;
     iface->iter_nth_child = ptk_file_list_iter_nth_child;
     iface->iter_parent = ptk_file_list_iter_parent;
-
-    column_types[ptk::file_list::column::big_icon] = GDK_TYPE_PIXBUF;
-    column_types[ptk::file_list::column::small_icon] = GDK_TYPE_PIXBUF;
-    column_types[ptk::file_list::column::name] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::size] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::bytes] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::type] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::mime] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::perm] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::owner] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::group] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::atime] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::btime] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::ctime] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::mtime] = G_TYPE_STRING;
-    column_types[ptk::file_list::column::info] = G_TYPE_POINTER;
 }
 
 static void
@@ -362,8 +362,8 @@ ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    // assert(index > (i32)G_N_ELEMENTS(column_types));
-    return column_types[ptk::file_list::column(index)];
+    // assert(index > column_types.size());
+    return column_types.at(ptk::file_list::column(index));
 }
 
 static gboolean
@@ -424,9 +424,9 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(iter != nullptr);
-    // assert(column > (i32)G_N_ELEMENTS(column_types));
+    // assert(column > column_types.size());
 
-    g_value_init(value, column_types[ptk::file_list::column(column)]);
+    g_value_init(value, column_types.at(ptk::file_list::column(column)));
 
     const auto file = static_cast<vfs::file*>(iter->user_data2)->shared_from_this();
 
