@@ -562,7 +562,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
-    if (std::filesystem::equivalent(filename, this->path_))
+    if (filename == this->path_.filename() && !std::filesystem::exists(this->path_))
     {
         /* Special Case: The directory itself was deleted... */
 
