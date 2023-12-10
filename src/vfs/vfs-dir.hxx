@@ -32,6 +32,7 @@
 
 #include <ztd/ztd.hxx>
 
+#include "vfs/vfs-file.hxx"
 #include "vfs/vfs-monitor.hxx"
 
 #include "signals.hxx"
@@ -39,7 +40,6 @@
 namespace vfs
 {
 struct async_thread;
-struct file;
 struct thumbnailer;
 
 struct dir : public std::enable_shared_from_this<dir>
@@ -51,7 +51,7 @@ struct dir : public std::enable_shared_from_this<dir>
     static const std::shared_ptr<vfs::dir> create(const std::filesystem::path& path) noexcept;
 
     // unloads thumbnails in every vfs::dir
-    static void global_unload_thumbnails(const bool big) noexcept;
+    static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
     // reload mime types in every vfs::dir
     static void global_reload_mime_type() noexcept;
 
@@ -68,12 +68,12 @@ struct dir : public std::enable_shared_from_this<dir>
     bool is_file_listed() const noexcept;
     bool is_directory_empty() const noexcept;
 
-    void unload_thumbnails(bool is_big) noexcept;
-
     bool add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept;
 
+    void load_thumbnail(const std::shared_ptr<vfs::file>& file,
+                        const vfs::file::thumbnail_size size) noexcept;
+    void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
     void cancel_all_thumbnail_requests() noexcept;
-    void load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_big) noexcept;
 
     void reload_mime_type() noexcept;
 

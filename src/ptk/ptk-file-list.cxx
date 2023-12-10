@@ -345,12 +345,12 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
                 (list->max_thumbnail > file->size() ||
                  (list->max_thumbnail != 0 && file->mime_type()->is_video())))
             {
-                icon = file->big_thumbnail();
+                icon = file->thumbnail(vfs::file::thumbnail_size::big);
             }
 
             if (!icon)
             {
-                icon = file->big_icon();
+                icon = file->icon(vfs::file::thumbnail_size::big);
             }
             if (icon)
             {
@@ -363,11 +363,11 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
             if (file && (list->max_thumbnail > file->size() ||
                          (list->max_thumbnail != 0 && file->mime_type()->is_video())))
             {
-                icon = file->small_thumbnail();
+                icon = file->thumbnail(vfs::file::thumbnail_size::small);
             }
             if (!icon)
             {
-                icon = file->small_icon();
+                icon = file->icon(vfs::file::thumbnail_size::small);
             }
             if (icon)
             {
@@ -881,9 +881,9 @@ PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) n
         ((file->mime_type()->is_video() && (now - file->mtime() > 5)) ||
          (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
     {
-        if (!file->is_thumbnail_loaded(this->big_thumbnail))
+        if (!file->is_thumbnail_loaded(this->thumbnail_size))
         {
-            this->dir->load_thumbnail(file, this->big_thumbnail);
+            this->dir->load_thumbnail(file, this->thumbnail_size);
         }
     }
 }
@@ -898,9 +898,9 @@ PtkFileList::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) n
         (file->mime_type()->is_video() ||
          (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
     {
-        if (!file->is_thumbnail_loaded(this->big_thumbnail))
+        if (!file->is_thumbnail_loaded(this->thumbnail_size))
         {
-            this->dir->load_thumbnail(file, this->big_thumbnail);
+            this->dir->load_thumbnail(file, this->thumbnail_size);
         }
     }
 }
@@ -947,11 +947,11 @@ PtkFileList::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>
 }
 
 void
-PtkFileList::show_thumbnails(bool is_big, u64 max_file_size) noexcept
+PtkFileList::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept
 {
     const u64 old_max_thumbnail = this->max_thumbnail;
     this->max_thumbnail = max_file_size;
-    this->big_thumbnail = is_big;
+    this->thumbnail_size = size;
     // FIXME: This is buggy!!! Further testing might be needed.
     if (max_file_size == 0)
     {
@@ -965,7 +965,7 @@ PtkFileList::show_thumbnails(bool is_big, u64 max_file_size) noexcept
             {
                 const auto file = static_cast<vfs::file*>(l->data)->shared_from_this();
                 if ((file->mime_type()->is_image() || file->mime_type()->is_video()) &&
-                    file->is_thumbnail_loaded(this->big_thumbnail))
+                    file->is_thumbnail_loaded(this->thumbnail_size))
                 {
                     /* update the model */
                     this->file_changed(file);
@@ -974,7 +974,7 @@ PtkFileList::show_thumbnails(bool is_big, u64 max_file_size) noexcept
 
             /* Thumbnails are being disabled so ensure the large thumbnails are
              * freed - with up to 256x256 images this is a lot of memory */
-            this->dir->unload_thumbnails(this->big_thumbnail);
+            this->dir->unload_thumbnails(this->thumbnail_size);
         }
         return;
     }
@@ -992,13 +992,13 @@ PtkFileList::show_thumbnails(bool is_big, u64 max_file_size) noexcept
             (file->mime_type()->is_video() ||
              (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
         {
-            if (file->is_thumbnail_loaded(this->big_thumbnail))
+            if (file->is_thumbnail_loaded(this->thumbnail_size))
             {
                 this->file_changed(file);
             }
             else
             {
-                this->dir->load_thumbnail(file, this->big_thumbnail);
+                this->dir->load_thumbnail(file, this->thumbnail_size);
                 // ztd::logger::debug("REQUEST: {}", file->name());
             }
         }

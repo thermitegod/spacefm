@@ -4537,7 +4537,9 @@ PtkFileBrowser::show_thumbnails(i32 max_file_size, bool large_icons) noexcept
         }
 
         PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
-        list->show_thumbnails(large_icons, max_file_size);
+        list->show_thumbnails(large_icons ? vfs::file::thumbnail_size::big
+                                          : vfs::file::thumbnail_size::small,
+                              max_file_size);
         this->update_toolbar_widgets(xset::tool::show_thumb);
     }
 }

@@ -24,6 +24,7 @@
 #include <ztd/ztd.hxx>
 
 #include "vfs/vfs-dir.hxx"
+#include "vfs/vfs-file.hxx"
 
 #define PTK_FILE_LIST(obj)             (static_cast<PtkFileList*>(obj))
 #define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<PtkFileList*>(obj))
@@ -68,7 +69,7 @@ struct PtkFileList
     GList* files{nullptr};
 
     bool show_hidden{true};
-    bool big_thumbnail{true};
+    vfs::file::thumbnail_size thumbnail_size{vfs::file::thumbnail_size::big};
     u64 max_thumbnail{0};
 
     ptk::file_list::column sort_col{ptk::file_list::column::name};
@@ -83,7 +84,7 @@ struct PtkFileList
 
   public:
     void set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept;
-    void show_thumbnails(bool is_big, u64 max_file_size) noexcept;
+    void show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept;
     void sort() noexcept;
 
   private:

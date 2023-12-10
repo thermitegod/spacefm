@@ -207,7 +207,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     if (value != app_settings.icon_size_big())
     {
-        vfs::dir::global_unload_thumbnails(true);
+        vfs::dir::global_unload_thumbnails(vfs::file::thumbnail_size::big);
     }
 
     app_settings.icon_size_big(value);
@@ -319,7 +319,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     if (value != app_settings.icon_size_small())
     {
-        vfs::dir::global_unload_thumbnails(false);
+        vfs::dir::global_unload_thumbnails(vfs::file::thumbnail_size::small);
     }
 
     app_settings.icon_size_small(value);

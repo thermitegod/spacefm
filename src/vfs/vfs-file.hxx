@@ -75,17 +75,16 @@ struct file : public std::enable_shared_from_this<file>
     std::time_t ctime() const noexcept;
     std::time_t mtime() const noexcept;
 
-    void load_thumbnail(bool big) noexcept;
-    bool is_thumbnail_loaded(bool big) const noexcept;
-
-    GdkPixbuf* big_icon() noexcept;
-    GdkPixbuf* small_icon() noexcept;
-
-    GdkPixbuf* big_thumbnail() const noexcept;
-    GdkPixbuf* small_thumbnail() const noexcept;
-
-    void unload_big_thumbnail() noexcept;
-    void unload_small_thumbnail() noexcept;
+    enum class thumbnail_size
+    {
+        big,
+        small,
+    };
+    GdkPixbuf* icon(const thumbnail_size size) noexcept;
+    GdkPixbuf* thumbnail(const thumbnail_size size) const noexcept;
+    void load_thumbnail(const thumbnail_size size) noexcept;
+    void unload_thumbnail(const thumbnail_size size) noexcept;
+    bool is_thumbnail_loaded(const thumbnail_size size) const noexcept;
 
     bool is_directory() const noexcept;
     bool is_regular_file() const noexcept;
@@ -139,9 +138,6 @@ struct file : public std::enable_shared_from_this<file>
     bool is_hidden_{false}; // if the filename starts with '.'
 
   private:
-    void load_thumbnail_small() noexcept;
-    void load_thumbnail_big() noexcept;
-
     void load_special_info() noexcept;
 
     const std::string create_file_perm_string() const noexcept;

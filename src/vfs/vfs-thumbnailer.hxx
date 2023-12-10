@@ -27,11 +27,12 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "vfs/vfs-file.hxx"
+
 namespace vfs
 {
 struct async_task;
 struct dir;
-struct file;
 
 struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
 {
@@ -43,7 +44,8 @@ struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
     static const std::shared_ptr<vfs::thumbnailer>
     create(const std::shared_ptr<vfs::dir>& dir) noexcept;
 
-    void loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept;
+    void loader_request(const std::shared_ptr<vfs::file>& file,
+                        const vfs::file::thumbnail_size size) noexcept;
 
     std::shared_ptr<vfs::dir> dir{nullptr};
     vfs::async_task* task{nullptr};
@@ -52,13 +54,8 @@ struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
 
     struct request
     {
-        enum class size
-        {
-            big,
-            small,
-        };
         std::shared_ptr<vfs::file> file{nullptr};
-        std::unordered_map<size, i32> n_requests;
+        std::unordered_map<vfs::file::thumbnail_size, i32> n_requests;
     };
 
     std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};

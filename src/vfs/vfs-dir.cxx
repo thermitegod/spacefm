@@ -273,15 +273,15 @@ vfs::dir::refresh() noexcept
         }
 
         // reload thumbnails if already loaded
-        if (file->is_thumbnail_loaded(true))
+        if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::big))
         {
-            file->unload_big_thumbnail();
-            file->load_thumbnail(true);
+            file->unload_thumbnail(vfs::file::thumbnail_size::big);
+            file->load_thumbnail(vfs::file::thumbnail_size::big);
         }
-        if (file->is_thumbnail_loaded(false))
+        if (file->is_thumbnail_loaded(vfs::file::thumbnail_size::small))
         {
-            file->unload_small_thumbnail();
-            file->load_thumbnail(false);
+            file->unload_thumbnail(vfs::file::thumbnail_size::small);
+            file->load_thumbnail(vfs::file::thumbnail_size::small);
         }
     }
 }
@@ -307,9 +307,9 @@ vfs::dir::on_monitor_event(const vfs::monitor::event event, const std::filesyste
 }
 
 void
-vfs::dir::global_unload_thumbnails(const bool big) noexcept
+vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
-    const auto action = [&big](const auto& dir) { dir->unload_thumbnails(big); };
+    const auto action = [size](const auto& dir) { dir->unload_thumbnails(size); };
     std::ranges::for_each(dir_smart_cache.items(), action);
 }
 
@@ -348,11 +348,12 @@ vfs::dir::cancel_all_thumbnail_requests() noexcept
 }
 
 void
-vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_big) noexcept
+vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
+                         const vfs::file::thumbnail_size size) noexcept
 {
     bool new_task = false;
 
-    // ztd::logger::debug("request thumbnail: {}, is_big: {}", file->name(), is_big);
+    // ztd::logger::debug("request thumbnail: {}, size: {}", file->name(), magic_enum::enum_name(size));
     if (!this->thumbnailer)
     {
         // ztd::logger::debug("new_task: !this->thumbnailer");
@@ -361,7 +362,7 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file, const bool is_b
         new_task = true;
     }
 
-    this->thumbnailer->loader_request(file, is_big);
+    this->thumbnailer->loader_request(file, size);
 
     if (new_task)
     {
@@ -496,20 +497,13 @@ vfs::dir::update_created_files() noexcept
 }
 
 void
-vfs::dir::unload_thumbnails(bool is_big) noexcept
+vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
     std::scoped_lock<std::mutex> lock(this->lock_);
 
     for (const auto& file : this->files_)
     {
-        if (is_big)
-        {
-            file->unload_big_thumbnail();
-        }
-        else
-        {
-            file->unload_small_thumbnail();
-        }
+        file->unload_thumbnail(size);
     }
 
     /* Ensuring free space at the end of the heap is freed to the OS,

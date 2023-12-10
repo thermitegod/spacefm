@@ -122,7 +122,7 @@ vfs::file::update() noexcept
 
     this->load_special_info();
 
-    // Cause file prem string to be regenerated of needed
+    // Cause file prem string to be regenerated as needed
     this->display_perm_.clear();
 
     return true;
@@ -241,76 +241,79 @@ vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 }
 
 GdkPixbuf*
-vfs::file::big_icon() noexcept
+vfs::file::icon(const thumbnail_size size) noexcept
 {
-    if (this->is_desktop_entry() && this->big_thumbnail_)
+    if (size == thumbnail_size::big)
     {
-        return g_object_ref(this->big_thumbnail_);
-    }
+        if (this->is_desktop_entry() && this->big_thumbnail_)
+        {
+            return g_object_ref(this->big_thumbnail_);
+        }
 
-    if (this->is_directory())
-    {
-        const auto icon_name = this->special_directory_get_icon_name();
-        return vfs_load_icon(icon_name, app_settings.icon_size_big());
-    }
+        if (this->is_directory())
+        {
+            const auto icon_name = this->special_directory_get_icon_name();
+            return vfs_load_icon(icon_name, app_settings.icon_size_big());
+        }
 
-    if (!this->mime_type_)
-    {
-        return nullptr;
+        if (!this->mime_type_)
+        {
+            return nullptr;
+        }
+        return this->mime_type_->icon(true);
     }
-    return this->mime_type_->icon(true);
+    else
+    {
+        if (this->is_desktop_entry() && this->small_thumbnail_)
+        {
+            return g_object_ref(this->small_thumbnail_);
+        }
+
+        if (this->is_directory())
+        {
+            const auto icon_name = this->special_directory_get_icon_name();
+            return vfs_load_icon(icon_name, app_settings.icon_size_small());
+        }
+
+        if (!this->mime_type_)
+        {
+            return nullptr;
+        }
+        return this->mime_type_->icon(false);
+    }
 }
 
 GdkPixbuf*
-vfs::file::small_icon() noexcept
+vfs::file::thumbnail(const thumbnail_size size) const noexcept
 {
-    if (this->is_desktop_entry() && this->small_thumbnail_)
+    if (size == thumbnail_size::big)
     {
-        return g_object_ref(this->small_thumbnail_);
+        return this->big_thumbnail_ ? g_object_ref(this->big_thumbnail_) : nullptr;
     }
-
-    if (this->is_directory())
+    else
     {
-        const auto icon_name = this->special_directory_get_icon_name();
-        return vfs_load_icon(icon_name, app_settings.icon_size_small());
-    }
-
-    if (!this->mime_type_)
-    {
-        return nullptr;
-    }
-    return this->mime_type_->icon(false);
-}
-
-GdkPixbuf*
-vfs::file::big_thumbnail() const noexcept
-{
-    return this->big_thumbnail_ ? g_object_ref(this->big_thumbnail_) : nullptr;
-}
-
-GdkPixbuf*
-vfs::file::small_thumbnail() const noexcept
-{
-    return this->small_thumbnail_ ? g_object_ref(this->small_thumbnail_) : nullptr;
-}
-
-void
-vfs::file::unload_big_thumbnail() noexcept
-{
-    if (this->big_thumbnail_)
-    {
-        g_object_unref(this->big_thumbnail_);
-        this->big_thumbnail_ = nullptr;
+        return this->small_thumbnail_ ? g_object_ref(this->small_thumbnail_) : nullptr;
     }
 }
 
 void
-vfs::file::unload_small_thumbnail() noexcept
+vfs::file::unload_thumbnail(const thumbnail_size size) noexcept
 {
-    if (this->small_thumbnail_)
+    if (size == thumbnail_size::big)
     {
-        g_object_unref(this->small_thumbnail_);
-        this->small_thumbnail_ = nullptr;
+        if (this->big_thumbnail_)
+        {
+            g_object_unref(this->big_thumbnail_);
+            this->big_thumbnail_ = nullptr;
+        }
+    }
+    else
+    {
+        if (this->small_thumbnail_)
+        {
+            g_object_unref(this->small_thumbnail_);
+            this->small_thumbnail_ = nullptr;
+        }
     }
 }
 
@@ -649,88 +652,79 @@ vfs::file::permissions() const noexcept
 }
 
 bool
-vfs::file::is_thumbnail_loaded(bool big) const noexcept
+vfs::file::is_thumbnail_loaded(const thumbnail_size size) const noexcept
 {
-    if (big)
+    if (size == thumbnail_size::big)
     {
         return (this->big_thumbnail_ != nullptr);
     }
-    return (this->small_thumbnail_ != nullptr);
+    else
+    {
+        return (this->small_thumbnail_ != nullptr);
+    }
 }
 
 void
-vfs::file::load_thumbnail(bool big) noexcept
+vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 {
-    if (big)
+    if (size == thumbnail_size::big)
     {
-        load_thumbnail_big();
+        if (this->big_thumbnail_)
+        {
+            return;
+        }
+
+        std::error_code ec;
+        const bool exists = std::filesystem::exists(this->path_, ec);
+        if (ec || !exists)
+        {
+            return;
+        }
+
+        if (this->mime_type_->is_image() || this->mime_type_->is_video())
+        {
+            GdkPixbuf* thumbnail =
+                vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_big());
+            if (thumbnail)
+            {
+                this->big_thumbnail_ = thumbnail;
+                return;
+            }
+        }
+
+        // fallback to mime_type icon
+        // ztd::logger::debug("mime={}", this->mime_type_->type());
+        this->big_thumbnail_ = this->icon(thumbnail_size::big);
     }
     else
     {
-        load_thumbnail_small();
-    }
-}
-
-void
-vfs::file::load_thumbnail_small() noexcept
-{
-    if (this->small_thumbnail_)
-    {
-        return;
-    }
-
-    std::error_code ec;
-    const bool exists = std::filesystem::exists(this->path_, ec);
-    if (ec || !exists)
-    {
-        return;
-    }
-
-    if (this->mime_type_->is_image() || this->mime_type_->is_video())
-    {
-        GdkPixbuf* thumbnail =
-            vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
-        if (thumbnail)
+        if (this->small_thumbnail_)
         {
-            this->small_thumbnail_ = thumbnail;
             return;
         }
-    }
 
-    // fallback to mime_type icon
-    // ztd::logger::debug("mime={}", this->mime_type_->type());
-    this->small_thumbnail_ = this->small_icon();
-}
-
-void
-vfs::file::load_thumbnail_big() noexcept
-{
-    if (this->big_thumbnail_)
-    {
-        return;
-    }
-
-    std::error_code ec;
-    const bool exists = std::filesystem::exists(this->path_, ec);
-    if (ec || !exists)
-    {
-        return;
-    }
-
-    if (this->mime_type_->is_image() || this->mime_type_->is_video())
-    {
-        GdkPixbuf* thumbnail =
-            vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_big());
-        if (thumbnail)
+        std::error_code ec;
+        const bool exists = std::filesystem::exists(this->path_, ec);
+        if (ec || !exists)
         {
-            this->big_thumbnail_ = thumbnail;
             return;
         }
-    }
 
-    // fallback to mime_type icon
-    // ztd::logger::debug("mime={}", this->mime_type_->type());
-    this->big_thumbnail_ = this->big_icon();
+        if (this->mime_type_->is_image() || this->mime_type_->is_video())
+        {
+            GdkPixbuf* thumbnail =
+                vfs_thumbnail_load(this->shared_from_this(), app_settings.icon_size_small());
+            if (thumbnail)
+            {
+                this->small_thumbnail_ = thumbnail;
+                return;
+            }
+        }
+
+        // fallback to mime_type icon
+        // ztd::logger::debug("mime={}", this->mime_type_->type());
+        this->small_thumbnail_ = this->icon(vfs::file::thumbnail_size::small);
+    }
 }
 
 void

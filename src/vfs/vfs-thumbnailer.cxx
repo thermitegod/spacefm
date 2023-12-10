@@ -80,7 +80,8 @@ vfs::thumbnailer::create(const std::shared_ptr<vfs::dir>& dir) noexcept
 }
 
 void
-vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file, bool is_big) noexcept
+vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file,
+                                 const vfs::file::thumbnail_size size) noexcept
 {
     // Check if the request is already scheduled
     std::shared_ptr<vfs::thumbnailer::request> req;
@@ -103,8 +104,7 @@ vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file, bool is
         this->queue.push_back(req);
     }
 
-    ++req->n_requests[is_big ? vfs::thumbnailer::request::size::big
-                             : vfs::thumbnailer::request::size::small];
+    ++req->n_requests[size];
 }
 
 static bool
@@ -161,14 +161,13 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
                 continue;
             }
 
-            const bool load_big = (value.first == vfs::thumbnailer::request::size::big);
-            if (!req->file->is_thumbnail_loaded(load_big))
+            if (!req->file->is_thumbnail_loaded(value.first))
             {
                 // ztd::logger::debug("loader->dir->path    = {}", loader->dir->path);
                 // ztd::logger::debug("req->file->name()    = {}", req->file->name());
                 // ztd::logger::debug("req->file->path()    = {}", req->file->path().string());
 
-                req->file->load_thumbnail(load_big);
+                req->file->load_thumbnail(value.first);
 
                 // Slow down for debugging.
                 // ztd::logger::debug("DELAY!!");
