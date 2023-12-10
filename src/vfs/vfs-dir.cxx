@@ -158,7 +158,7 @@ vfs::dir::load_user_hidden_files() noexcept
 
     if (!std::filesystem::is_regular_file(hidden_path))
     {
-        this->user_hidden_files = std::nullopt;
+        this->user_hidden_files_ = std::nullopt;
         return;
     }
 
@@ -167,7 +167,7 @@ vfs::dir::load_user_hidden_files() noexcept
     {
         ztd::logger::error("Failed to open the file: {}", hidden_path.string());
 
-        this->user_hidden_files = std::nullopt;
+        this->user_hidden_files_ = std::nullopt;
         return;
     }
 
@@ -186,7 +186,22 @@ vfs::dir::load_user_hidden_files() noexcept
         hidden.push_back(hidden_file);
     }
 
-    this->user_hidden_files = hidden;
+    this->user_hidden_files_ = hidden;
+}
+
+bool
+vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
+{
+    // ignore if in .hidden
+    if (this->user_hidden_files_)
+    {
+        const auto filename = path.filename();
+
+        const auto is_user_hidden = [&filename](const auto& hide_filename)
+        { return filename == hide_filename; };
+        return std::ranges::any_of(this->user_hidden_files_.value(), is_user_hidden);
+    }
+    return false;
 }
 
 void
@@ -201,7 +216,7 @@ vfs::dir::load_thread()
         this->path_,
         std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
 
-    // MOD  dir contains .hidden file?
+    // load this dirs .hidden file
     this->load_user_hidden_files();
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
@@ -211,25 +226,63 @@ vfs::dir::load_thread()
             break;
         }
 
-        const auto filename = dfile.path().filename();
-        const auto full_path = this->path_ / filename;
-
-        // MOD ignore if in .hidden
-        if (this->user_hidden_files)
+        if (this->is_file_user_hidden(dfile.path()))
         {
-            const auto is_user_hidden = [&filename](const auto& hide_filename)
-            { return filename == hide_filename; };
-            const bool hide_file =
-                std::ranges::any_of(this->user_hidden_files.value(), is_user_hidden);
-            if (hide_file)
-            {
-                this->xhidden_count_++;
-                continue;
-            }
+            this->xhidden_count_++;
+            continue;
         }
 
-        const auto file = vfs::file::create(full_path);
-        this->files_.emplace_back(file);
+        this->files_.emplace_back(vfs::file::create(dfile.path()));
+    }
+}
+
+void
+vfs::dir::refresh() noexcept
+{
+    this->xhidden_count_ = 0;
+
+    // reload this dirs .hidden file
+    this->load_user_hidden_files();
+
+    for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
+    {
+        // Check if new files are hidden
+        if (this->is_file_user_hidden(dfile.path()))
+        {
+            this->xhidden_count_++;
+            continue;
+        }
+
+        const auto filename = dfile.path().filename();
+        if (this->find_file(filename) == nullptr)
+        {
+            this->emit_file_created(filename, false);
+        }
+    }
+
+    for (const auto& file : this->files_)
+    {
+        // Check if existing files have been hidden
+        if (this->is_file_user_hidden(file->path()))
+        {
+            // Use the delete signal to properly remove this file from the file list.
+            this->emit_file_deleted(file->name());
+
+            this->xhidden_count_++;
+            continue;
+        }
+
+        // reload thumbnails if already loaded
+        if (file->is_thumbnail_loaded(true))
+        {
+            file->unload_big_thumbnail();
+            file->load_thumbnail(true);
+        }
+        if (file->is_thumbnail_loaded(false))
+        {
+            file->unload_small_thumbnail();
+            file->load_thumbnail(false);
+        }
     }
 }
 
@@ -416,6 +469,12 @@ vfs::dir::update_created_files() noexcept
             const auto full_path = this->path_ / created_file;
             if (std::filesystem::exists(full_path))
             {
+                if (this->is_file_user_hidden(created_file))
+                {
+                    this->xhidden_count_++;
+                    continue;
+                }
+
                 const auto file = vfs::file::create(full_path);
                 this->files_.emplace_back(file);
 

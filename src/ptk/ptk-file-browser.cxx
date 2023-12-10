@@ -3328,6 +3328,8 @@ PtkFileBrowser::refresh(const bool update_selected_files) noexcept
 
     if (this->dir_->is_file_listed())
     {
+        this->dir_->refresh();
+
         this->on_dir_file_listed(false);
         this->busy_ = false;
     }

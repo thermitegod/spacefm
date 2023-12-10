@@ -58,6 +58,8 @@ struct dir : public std::enable_shared_from_this<dir>
     const std::filesystem::path& path() const noexcept;
     const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
 
+    void refresh() noexcept;
+
     u64 hidden_files() const noexcept;
 
     bool avoid_changes() const noexcept;
@@ -103,11 +105,10 @@ struct dir : public std::enable_shared_from_this<dir>
 
     // dir .hidden file
     void load_user_hidden_files() noexcept;
-    std::optional<std::vector<std::filesystem::path>> user_hidden_files{std::nullopt};
+    bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
+    std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
 
-  private:
     std::filesystem::path path_{};
-
     std::vector<std::shared_ptr<vfs::file>> files_{};
 
     std::shared_ptr<vfs::monitor> monitor_{nullptr};
