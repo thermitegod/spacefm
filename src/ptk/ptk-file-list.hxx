@@ -66,7 +66,6 @@ struct PtkFileList
     /* <private> */
     std::shared_ptr<vfs::dir> dir{nullptr};
     GList* files{nullptr};
-    u32 n_files{0};
 
     bool show_hidden{true};
     bool big_thumbnail{true};

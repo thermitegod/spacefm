@@ -170,7 +170,6 @@ ptk_file_list_get_type()
 static void
 ptk_file_list_init(PtkFileList* list)
 {
-    list->n_files = 0;
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
     list->sort_col = ptk::file_list::column::name;
@@ -289,7 +288,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 
     const u32 n = indices[0]; /* the n-th top level row */
 
-    if (n >= list->n_files /* || n < 0 */)
+    if (n >= g_list_length(list->files) /* || n < 0 */)
     {
         return false;
     }
@@ -493,7 +492,7 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
     {
-        return list->n_files;
+        return g_list_length(list->files);
     }
     return 0; /* otherwise, this is easy again for a list */
 }
@@ -514,7 +513,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
     }
 
     /* special case: if parent == nullptr, set iter to n-th top-level row */
-    if (static_cast<u32>(n) >= list->n_files)
+    if (static_cast<u32>(n) >= g_list_length(list->files))
     { //  || n < 0)
         return false;
     }
@@ -779,7 +778,6 @@ PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 
     this->dir = new_dir;
     this->files = nullptr;
-    this->n_files = 0;
     if (!new_dir)
     {
         return;
@@ -797,7 +795,6 @@ PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
         if (this->show_hidden || !file->is_hidden())
         {
             this->files = g_list_prepend(this->files, file.get());
-            ++this->n_files;
         }
     }
 }
@@ -805,7 +802,7 @@ PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 void
 PtkFileList::sort() noexcept
 {
-    if (this->n_files <= 1)
+    if (g_list_length(this->files) <= 1)
     {
         return;
     }
@@ -827,7 +824,6 @@ PtkFileList::file_created(const std::shared_ptr<vfs::file>& file) noexcept
     }
 
     this->files = g_list_append(this->files, file.get());
-    ++this->n_files;
 
     this->sort();
 
@@ -920,12 +916,7 @@ PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) n
         for (GList* l = this->files; l; l = this->files)
         {
             gtk_tree_model_row_deleted(GTK_TREE_MODEL(this), path);
-            // file = VFS_FILE_INFO(l->data);
-            // this->files = g_list_delete_link(list->files, l);
-            // --this->n_files;
         }
-        // g_list_free(this->files);
-        this->n_files = 0;
         gtk_tree_path_free(path);
         return;
     }
@@ -946,7 +937,6 @@ PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) n
     gtk_tree_path_free(path);
 
     this->files = g_list_delete_link(this->files, l);
-    --this->n_files;
 }
 
 void
