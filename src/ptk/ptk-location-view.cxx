@@ -1379,7 +1379,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
     if (vol && vol->is_device_type(vfs::volume::device_type::network) &&
         (vol->device_file().starts_with("//") || vol->device_file().contains(":/")))
     {
-        context_menu_entries.emplace_back(xset::name::dev_menu_mark);
+        context_menu_entries.push_back(xset::name::dev_menu_mark);
     }
 
     xset_add_menu(file_browser, popup, accel_group, context_menu_entries);

@@ -78,7 +78,7 @@ xset_get(const std::string_view name) noexcept
     }
 
     const xset_t set = xset_new(name, xset::get_xsetname_from_name(name));
-    xsets.emplace_back(set);
+    xsets.push_back(set);
     return set;
 }
 
@@ -95,7 +95,7 @@ xset_get(xset::name name) noexcept
     }
 
     const xset_t set = xset_new(xset::get_name_from_xsetname(name), name);
-    xsets.emplace_back(set);
+    xsets.push_back(set);
     return set;
 }
 

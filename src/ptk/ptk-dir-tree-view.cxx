@@ -697,7 +697,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         file_path = Glib::filename_from_uri(*puri);
                     }
 
-                    file_list.emplace_back(file_path);
+                    file_list.push_back(file_path);
                 }
                 g_strfreev(list);
 

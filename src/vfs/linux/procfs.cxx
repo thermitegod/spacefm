@@ -78,7 +78,7 @@ vfs::linux::procfs::mountinfo()
         // ztd::logger::info("mount.mount_source    = {}", mount.mount_source);
         // ztd::logger::info("mount.super_options   = {}", mount.super_options);
 
-        mounts.emplace_back(mount);
+        mounts.push_back(mount);
     }
     return mounts;
 }

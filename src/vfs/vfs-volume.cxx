@@ -168,7 +168,7 @@ parse_mounts(bool report)
                 devmount = std::make_shared<DeviceMount>(mount.major, mount.minor);
                 devmount->fstype = mount.filesystem_type;
 
-                newmounts.emplace_back(devmount);
+                newmounts.push_back(devmount);
             }
             else
             {
@@ -190,7 +190,7 @@ parse_mounts(bool report)
                         devmount = std::make_shared<DeviceMount>(mount.major, mount.minor);
                         devmount->fstype = mount.filesystem_type;
 
-                        newmounts.emplace_back(devmount);
+                        newmounts.push_back(devmount);
                     }
                 }
             }
@@ -199,7 +199,7 @@ parse_mounts(bool report)
         if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point))
         {
             // ztd::logger::debug("    prepended");
-            devmount->mounts.emplace_back(mount.mount_point);
+            devmount->mounts.push_back(mount.mount_point);
         }
     }
     // ztd::logger::debug("LINES DONE");
@@ -254,7 +254,7 @@ parse_mounts(bool report)
                 devcopy->mount_points = devmount->mount_points;
                 devcopy->fstype = devmount->fstype;
 
-                changed.emplace_back(devcopy);
+                changed.push_back(devcopy);
             }
         }
     }
@@ -266,7 +266,7 @@ parse_mounts(bool report)
         // ztd::logger::debug("remain {}:{}", devmount->major, devmount->minor);
         if (devmount && report)
         {
-            changed.emplace_back(devmount);
+            changed.push_back(devmount);
         }
     }
 
@@ -627,7 +627,7 @@ vfs_volume_add_callback(vfs::volume::callback_t cb, void* user_data)
 
     const volume_callback_data_t data = std::make_shared<VFSVolumeCallbackData>(cb, user_data);
 
-    callbacks.emplace_back(data);
+    callbacks.push_back(data);
 }
 
 void
@@ -949,7 +949,7 @@ vfs::volume::device_added() noexcept
     }
 
     // add as new volume
-    volumes.emplace_back(this->shared_from_this());
+    volumes.push_back(this->shared_from_this());
     call_callbacks(this->shared_from_this(), vfs::volume::state::added);
 
     // refresh tabs containing changed mount point

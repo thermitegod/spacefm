@@ -245,7 +245,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
             const auto& path = file.path();
             if (std::filesystem::is_directory(path))
             {
-                name_list.emplace_back(path);
+                name_list.push_back(path);
             }
         }
 

@@ -397,11 +397,11 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.emplace_back(ztd::shell::quote(file.string()));
+                    argv.push_back(ztd::shell::quote(file.string()));
                 }
                 else
                 {
-                    argv.emplace_back(file.string());
+                    argv.push_back(file.string());
                 }
             }
         }
@@ -431,11 +431,11 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.emplace_back(ztd::shell::quote(file.string()));
+                    argv.push_back(ztd::shell::quote(file.string()));
                 }
                 else
                 {
-                    argv.emplace_back(file);
+                    argv.push_back(file);
                 }
             }
         }

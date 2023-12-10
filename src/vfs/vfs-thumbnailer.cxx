@@ -100,7 +100,7 @@ vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file, bool is
     {
         req = std::make_shared<vfs::thumbnailer::request>(file);
         // ztd::logger::debug("this->queue add file={}", req->file->name());
-        this->queue.emplace_back(req);
+        this->queue.push_back(req);
     }
 
     ++req->n_requests[is_big ? vfs::thumbnailer::request::size::big
@@ -180,7 +180,7 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
         // ztd::logger::debug("task->is_canceled()={} need_update={}", task->is_canceled(), need_update);
         if (!task->is_canceled() && need_update)
         {
-            loader->update_queue.emplace_back(req->file);
+            loader->update_queue.push_back(req->file);
             if (loader->idle_handler == 0)
             {
                 loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,

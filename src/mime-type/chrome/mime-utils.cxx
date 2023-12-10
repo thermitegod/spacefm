@@ -184,12 +184,12 @@ LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files)
     std::vector<std::filesystem::path> mime_cache_files;
 
     const auto user_mime_cache = vfs::user_dirs->data_dir() / "mime/mime.cache";
-    mime_cache_files.emplace_back(user_mime_cache);
+    mime_cache_files.push_back(user_mime_cache);
 
     for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
     {
         const auto sys_mime_cache = sys_dir / "mime/mime.cache";
-        mime_cache_files.emplace_back(sys_mime_cache);
+        mime_cache_files.push_back(sys_mime_cache);
     }
 
     for (const auto& mime_cache : mime_cache_files)

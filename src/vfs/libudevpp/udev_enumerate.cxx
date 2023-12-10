@@ -112,7 +112,7 @@ libudev::enumerate::enumerate_devices() const noexcept
     udev_list_entry_foreach(entry, enumeration_list)
     {
         const char* device_path = udev_list_entry_get_name(entry);
-        devices.emplace_back(
+        devices.push_back(
             udev_device_new_from_syspath(udev_enumerate_get_udev(this->handle.get()), device_path));
     }
 

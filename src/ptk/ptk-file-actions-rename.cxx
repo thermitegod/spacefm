@@ -2181,7 +2181,7 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
                     subsubdir = subdir / filename;
                 }
 
-                templates.emplace_back(subsubdir);
+                templates.push_back(subsubdir);
 
                 // prevent filesystem loops during recursive find
                 if (!std::filesystem::is_symlink(path))
@@ -2199,11 +2199,11 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
             {
                 if (subdir.empty())
                 {
-                    templates.emplace_back(filename);
+                    templates.push_back(filename);
                 }
                 else
                 {
-                    templates.emplace_back(subdir / filename);
+                    templates.push_back(subdir / filename);
                 }
             }
             else if (std::filesystem::is_directory(path) &&

@@ -1837,7 +1837,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 if (file.starts_with('/'))
                 { // absolute path
-                    file_list.emplace_back(file);
+                    file_list.push_back(file);
                 }
                 else
                 { // relative path
@@ -1846,7 +1846,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                         return {SOCKET_INVALID,
                                 std::format("relative path '{}' requires option --dir DIR", file)};
                     }
-                    file_list.emplace_back(opt_cwd / file);
+                    file_list.push_back(opt_cwd / file);
                 }
             }
 

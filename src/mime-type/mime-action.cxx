@@ -243,7 +243,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
                     if (mime_type_locate_desktop_file(app))
                     {
                         // ztd::logger::info("                EXISTS");
-                        actions.emplace_back(app);
+                        actions.push_back(app);
                     }
                     else
                     {
@@ -289,7 +289,7 @@ mime_type_get_actions(const std::string_view mime_type)
         if (!std::ranges::contains(actions, default_app))
         {
             // default app is not in the list, add it!
-            actions.emplace_back(default_app);
+            actions.push_back(default_app);
         }
         else /* default app is in the list, move it to the first. */
         {

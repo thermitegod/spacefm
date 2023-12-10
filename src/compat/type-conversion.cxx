@@ -36,7 +36,7 @@ glist_to_vector_path(GList* list)
     for (GList* l = list; l; l = g_list_next(l))
     {
         const std::filesystem::path open_file = (const char*)(l->data);
-        vec.emplace_back(open_file);
+        vec.push_back(open_file);
     }
     return vec;
 }
@@ -53,7 +53,7 @@ glist_to_vector_string(GList* list)
     for (GList* l = list; l; l = g_list_next(l))
     {
         const std::string open_file = (const char*)(l->data);
-        vec.emplace_back(open_file);
+        vec.push_back(open_file);
     }
     return vec;
 }
@@ -69,7 +69,7 @@ glist_to_vector_vfs_file(GList* list)
     vec.reserve(g_list_length(list));
     for (GList* l = list; l; l = g_list_next(l))
     {
-        vec.emplace_back(static_cast<vfs::file*>(l->data)->shared_from_this());
+        vec.push_back(static_cast<vfs::file*>(l->data)->shared_from_this());
     }
     return vec;
 }

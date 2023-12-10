@@ -1780,7 +1780,7 @@ xset_default_keys()
 
         if (set->key)
         {
-            keysets.emplace_back(set);
+            keysets.push_back(set);
         }
     }
 

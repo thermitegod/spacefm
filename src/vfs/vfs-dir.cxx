@@ -232,7 +232,7 @@ vfs::dir::load_thread()
             continue;
         }
 
-        this->files_.emplace_back(vfs::file::create(dfile.path()));
+        this->files_.push_back(vfs::file::create(dfile.path()));
     }
 }
 
@@ -476,7 +476,7 @@ vfs::dir::update_created_files() noexcept
                 }
 
                 const auto file = vfs::file::create(full_path);
-                this->files_.emplace_back(file);
+                this->files_.push_back(file);
 
                 this->run_event<spacefm::signal::file_created>(file);
             }
@@ -552,7 +552,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) n
         return;
     }
 
-    this->created_files_.emplace_back(filename);
+    this->created_files_.push_back(filename);
 
     this->notify_file_change(std::chrono::milliseconds(200));
 }
@@ -579,7 +579,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
     {
         if (!std::ranges::contains(this->changed_files_, file_found))
         {
-            this->changed_files_.emplace_back(file_found);
+            this->changed_files_.push_back(file_found);
 
             this->notify_file_change(std::chrono::milliseconds(200));
         }
@@ -612,13 +612,13 @@ vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) n
         {
             if (force)
             {
-                this->changed_files_.emplace_back(file_found);
+                this->changed_files_.push_back(file_found);
 
                 this->notify_file_change(std::chrono::milliseconds(100));
             }
             else if (this->update_file_info(file_found)) // update file info the first time
             {
-                this->changed_files_.emplace_back(file_found);
+                this->changed_files_.push_back(file_found);
 
                 this->notify_file_change(std::chrono::milliseconds(500));
 

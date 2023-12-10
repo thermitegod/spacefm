@@ -84,7 +84,7 @@ find_subdirectories(const std::filesystem::path& directory,
         {
             const std::filesystem::path& subdirectory = entry.path();
 
-            subdirectories.emplace_back(subdirectory);
+            subdirectories.push_back(subdirectory);
             const auto nested_subdirectories = find_subdirectories(subdirectory, data);
             subdirectories.insert(subdirectories.cend(),
                                   nested_subdirectories.cbegin(),

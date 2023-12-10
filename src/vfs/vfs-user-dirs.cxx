@@ -29,7 +29,7 @@ vfs::impl::user_dirs::user_dirs()
     // typechange from std::string to std::filesystem::path
     for (const auto& sys_data : Glib::get_system_data_dirs())
     {
-        this->sys_data_.emplace_back(sys_data);
+        this->sys_data_.push_back(sys_data);
     }
 }
 

@@ -201,7 +201,7 @@ navigation_history_data::go_back() noexcept
         // ztd::logger::debug("Back navigation history is empty");
         return;
     }
-    this->forward_.emplace_back(this->current_);
+    this->forward_.push_back(this->current_);
     this->current_ = this->back_.back();
     this->back_.pop_back();
 }
@@ -226,7 +226,7 @@ navigation_history_data::go_forward() noexcept
         // ztd::logger::debug("Forward navigation history is empty");
         return;
     }
-    this->back_.emplace_back(this->current_);
+    this->back_.push_back(this->current_);
     this->current_ = this->forward_.back();
     this->forward_.pop_back();
 }
@@ -249,7 +249,7 @@ navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
     // ztd::logger::debug("New Forward navigation history");
     if (!this->current_.empty())
     {
-        this->back_.emplace_back(this->current_);
+        this->back_.push_back(this->current_);
     }
     this->current_ = path;
     this->forward_.clear();
@@ -517,7 +517,7 @@ save_command_history(GtkEntry* entry)
         return;
     }
 
-    xset_cmd_history.emplace_back(text);
+    xset_cmd_history.push_back(text);
 
     // shorten to 200 entries
     while (xset_cmd_history.size() > 200)
@@ -2457,7 +2457,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                         file_path = Glib::filename_from_uri(*puri);
                     }
 
-                    file_list.emplace_back(file_path);
+                    file_list.push_back(file_path);
                 }
                 g_strfreev(list);
 
@@ -3445,7 +3445,7 @@ PtkFileBrowser::new_tab_here() noexcept
 void
 PtkFileBrowser::close_tab() noexcept
 {
-    closed_tabs_restore[this->panel_].emplace_back(this->cwd());
+    closed_tabs_restore[this->panel_].push_back(this->cwd());
     // ztd::logger::info("close_tab() fb={}, path={}", fmt::ptr(this), closed_tabs_restore[this->panel_].back());
 
     GtkNotebook* notebook =
@@ -3592,7 +3592,7 @@ PtkFileBrowser::selected_files() noexcept
         std::shared_ptr<vfs::file> file;
         gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data);
         gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
-        file_list.emplace_back(file);
+        file_list.push_back(file);
     }
     g_list_foreach(selected_files, (GFunc)gtk_tree_path_free, nullptr);
     g_list_free(selected_files);
@@ -3920,7 +3920,7 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
         file_list.reserve(sel_files.size());
         for (const auto& file : sel_files)
         {
-            file_list.emplace_back(file->path());
+            file_list.push_back(file->path());
         }
 
 #if (GTK_MAJOR_VERSION == 4)
@@ -4967,7 +4967,7 @@ PtkFileBrowser::update_selection_history() noexcept
 
     for (const auto& file : selected_files)
     {
-        selected_filenames.emplace_back(file->name());
+        selected_filenames.push_back(file->name());
     }
     this->selection_history->selection_history.insert({cwd, selected_filenames});
 }

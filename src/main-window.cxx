@@ -1222,7 +1222,7 @@ main_window_init(MainWindow* main_window)
     gtk_window_group_add_window(main_window->wgroup, GTK_WINDOW(main_window));
 
     /* Add to total window count */
-    all_windows.emplace_back(main_window);
+    all_windows.push_back(main_window);
 
     // g_signal_connect(G_OBJECT(main_window), "task-notify", G_CALLBACK(ptk_file_task_notify_handler), nullptr);
 

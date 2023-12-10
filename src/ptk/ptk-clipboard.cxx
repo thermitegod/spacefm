@@ -138,7 +138,7 @@ uri_list_extract_uris(const char* uri_list_str)
 
     for (; *c_uri; ++c_uri)
     {
-        uri_list.emplace_back(*c_uri);
+        uri_list.push_back(*c_uri);
     }
     g_strfreev(c_uri_list);
 
@@ -275,7 +275,7 @@ ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>
     file_list.reserve(sel_files.size());
     for (const auto& file : sel_files)
     {
-        file_list.emplace_back(file->path());
+        file_list.push_back(file->path());
     }
 
     gtk_clipboard_set_with_data(clip,
@@ -316,7 +316,7 @@ ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files
     {
         if (std::filesystem::path(file).is_absolute())
         {
-            file_list.emplace_back(file);
+            file_list.push_back(file);
         }
     }
 
@@ -413,7 +413,7 @@ ptk_clipboard_paste_files(GtkWindow* parent_win, const std::filesystem::path& de
                 continue;
             }
 
-            file_list.emplace_back(file_path);
+            file_list.push_back(file_path);
         }
 
         /*
@@ -501,7 +501,7 @@ ptk_clipboard_paste_links(GtkWindow* parent_win, const std::filesystem::path& de
                 continue;
             }
 
-            file_list.emplace_back(file_path);
+            file_list.push_back(file_path);
         }
 
         PtkFileTask* ptask = ptk_file_task_new(action,
@@ -595,7 +595,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
             const auto file_stat = ztd::statx(file_path, ztd::statx::symlink::no_follow);
             if (file_stat)
             { // need to see broken symlinks
-                file_list.emplace_back(file_path);
+                file_list.push_back(file_path);
             }
             else
             {
@@ -702,7 +702,7 @@ ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32
 
         if (std::filesystem::exists(file_path))
         {
-            file_list.emplace_back(file_path);
+            file_list.push_back(file_path);
         }
         else
         { // no *missing_targets++ here to avoid -Wunused-value compiler warning

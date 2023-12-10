@@ -150,7 +150,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         files_to_open.reserve(selected_files.size());
         for (const auto& file : selected_files)
         {
-            files_to_open.emplace_back(file->path());
+            files_to_open.push_back(file->path());
         }
 
         open_files_with_app(parent, files_to_open, app_desktop);
@@ -166,7 +166,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         // Is a dir?  Open in browser
         if (file->is_directory())
         {
-            dirs_to_open.emplace_back(file->path());
+            dirs_to_open.push_back(file->path());
             continue;
         }
 
@@ -273,7 +273,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         const auto desktop = alloc_desktop.value();
         if (files_to_open.contains(desktop))
         {
-            files_to_open[desktop].emplace_back(file->path());
+            files_to_open[desktop].push_back(file->path());
         }
         else
         {
