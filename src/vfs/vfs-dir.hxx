@@ -25,6 +25,8 @@
 
 #include <memory>
 
+#include <chrono>
+
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
 
@@ -80,15 +82,17 @@ struct dir : public std::enable_shared_from_this<dir>
     void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // TODO private
+    void update_created_files() noexcept;
+    void update_changed_files() noexcept;
     std::shared_ptr<vfs::thumbnailer> thumbnailer{nullptr};
+    u32 change_notify_timeout{0};
 
   private:
     void load_thread();
 
     void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
 
-    void update_created_files() noexcept;
-    void update_changed_files() noexcept;
+    void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
     // signal callback
     void on_list_task_finished(bool is_cancelled);

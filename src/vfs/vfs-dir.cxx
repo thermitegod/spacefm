@@ -29,6 +29,8 @@
 
 #include <memory>
 
+#include <chrono>
+
 #include <functional>
 
 #include <fstream>
@@ -80,6 +82,11 @@ vfs::dir::~dir()
 
         // ztd::logger::trace("this->task({})", fmt::ptr(this->task));
         this->task_->cancel();
+    }
+
+    if (change_notify_timeout)
+    {
+        g_source_remove(this->change_notify_timeout);
     }
 }
 
@@ -343,6 +350,32 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
     return file_updated;
 }
 
+static bool
+notify_file_change(void* user_data)
+{
+    const auto dir = static_cast<vfs::dir*>(user_data)->shared_from_this();
+
+    dir->update_changed_files();
+    dir->update_created_files();
+
+    /* remove the timeout */
+    dir->change_notify_timeout = 0;
+    return false;
+}
+
+void
+vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
+{
+    if (this->change_notify_timeout == 0)
+    {
+        this->change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
+                                                         timeout.count(),
+                                                         (GSourceFunc)::notify_file_change,
+                                                         this,
+                                                         nullptr);
+    }
+}
+
 void
 vfs::dir::update_changed_files() noexcept
 {
@@ -462,8 +495,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) n
 
     this->created_files_.emplace_back(filename);
 
-    this->update_changed_files();
-    this->update_created_files();
+    this->notify_file_change(std::chrono::milliseconds(200));
 }
 
 void
@@ -490,8 +522,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
         {
             this->changed_files_.emplace_back(file_found);
 
-            this->update_changed_files();
-            this->update_created_files();
+            this->notify_file_change(std::chrono::milliseconds(200));
         }
     }
 }
@@ -524,15 +555,13 @@ vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) n
             {
                 this->changed_files_.emplace_back(file_found);
 
-                this->update_changed_files();
-                this->update_created_files();
+                this->notify_file_change(std::chrono::milliseconds(100));
             }
             else if (this->update_file_info(file_found)) // update file info the first time
             {
                 this->changed_files_.emplace_back(file_found);
 
-                this->update_changed_files();
-                this->update_created_files();
+                this->notify_file_change(std::chrono::milliseconds(500));
 
                 this->run_event<spacefm::signal::file_changed>(file_found);
             }
