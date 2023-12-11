@@ -17,4 +17,8 @@
 
 #include <gtkmm.h>
 
+#if (GTK_MAJOR_VERSION == 3)
+#define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK)
+#endif
+
 void ptk_set_window_icon(GtkWindow* win);

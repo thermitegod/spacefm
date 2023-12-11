@@ -33,6 +33,7 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-keyboard.hxx"
+#include "ptk/ptk-utils.hxx"
 
 #include "ptk/ptk-dir-tree-view.hxx"
 
@@ -69,10 +70,6 @@ static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_
 
 static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
                                        i32 y, u32 time, PtkFileBrowser* file_browser);
-
-inline constexpr GdkDragAction GDK_ACTION_ALL =
-    GdkDragAction(GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |
-                  GdkDragAction::GDK_ACTION_LINK);
 
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)

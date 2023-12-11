@@ -73,9 +73,10 @@
 #include "ptk/ptk-file-list.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-clipboard.hxx"
-
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-path-entry.hxx"
+#include "ptk/ptk-utils.hxx"
+
 #include "main-window.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
@@ -176,10 +177,6 @@ static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GT
 
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
-
-#define GDK_ACTION_ALL                                                                             \
-    GdkDragAction(GdkDragAction::GDK_ACTION_MOVE | GdkDragAction::GDK_ACTION_COPY |                \
-                  GdkDragAction::GDK_ACTION_LINK)
 
 // instance-wide command history
 std::vector<std::string> xset_cmd_history;
