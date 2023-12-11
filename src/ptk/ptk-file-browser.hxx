@@ -176,7 +176,6 @@ struct PtkFileBrowser
     GtkWidget* side_dir{nullptr};
     GtkWidget* side_dev{nullptr};
     GtkStatusbar* statusbar{nullptr};
-    GtkFrame* status_frame{nullptr};
     GtkLabel* status_label{nullptr};
     GtkToolbar* toolbar{nullptr};
     GSList* toolbar_widgets[10];

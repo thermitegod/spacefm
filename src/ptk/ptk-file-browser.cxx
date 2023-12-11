@@ -941,10 +941,7 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     // status bar
     file_browser->statusbar = GTK_STATUSBAR(gtk_statusbar_new());
 
-    GList* children = gtk_container_get_children(GTK_CONTAINER(file_browser->statusbar));
-    file_browser->status_frame = GTK_FRAME(children->data);
-    g_list_free(children);
-    children = gtk_container_get_children(
+    GList* children = gtk_container_get_children(
         GTK_CONTAINER(gtk_statusbar_get_message_area(file_browser->statusbar)));
     file_browser->status_label = GTK_LABEL(children->data);
     g_list_free(children);
