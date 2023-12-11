@@ -39,7 +39,6 @@ void new_tab(CLI::App* app, const socket_subcommand_data_t& opt);
 void devices_visible(CLI::App* app, const socket_subcommand_data_t& opt);
 void dirtree_visible(CLI::App* app, const socket_subcommand_data_t& opt);
 void toolbar_visible(CLI::App* app, const socket_subcommand_data_t& opt);
-void sidetoolbar_visible(CLI::App* app, const socket_subcommand_data_t& opt);
 void hidden_files_visible(CLI::App* app, const socket_subcommand_data_t& opt);
 void panel1_visible(CLI::App* app, const socket_subcommand_data_t& opt);
 void panel2_visible(CLI::App* app, const socket_subcommand_data_t& opt);

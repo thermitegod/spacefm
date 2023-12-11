@@ -447,16 +447,6 @@ run_ipc_command(const std::string_view socket_commands_json)
                                   subproperty == "true");
             update_views_all_windows(nullptr, file_browser);
         }
-        else if (property == "sidetoolbar-visible")
-        {
-            const std::string subproperty = json["subproperty"];
-
-            xset_set_b_panel_mode(panel,
-                                  xset::panel::show_sidebar,
-                                  main_window->panel_context.at(panel),
-                                  subproperty == "true");
-            update_views_all_windows(nullptr, file_browser);
-        }
         else if (property == "hidden-files-visible")
         {
             const std::string subproperty = json["subproperty"];
@@ -1017,10 +1007,9 @@ run_ipc_command(const std::string_view socket_commands_json)
             return {SOCKET_SUCCESS, std::format("{}", tab_count)};
         }
         else if (property == "devices-visible" || property == "dirtree-visible" ||
-                 property == "toolbar-visible" || property == "sidetoolbar-visible" ||
-                 property == "hidden-files-visible" || property == "panel1-visible" ||
-                 property == "panel2-visible" || property == "panel3-visible" ||
-                 property == "panel4-visible")
+                 property == "toolbar-visible" || property == "hidden-files-visible" ||
+                 property == "panel1-visible" || property == "panel2-visible" ||
+                 property == "panel3-visible" || property == "panel4-visible")
         {
             bool valid = false;
             bool use_mode = false;
@@ -1040,12 +1029,6 @@ run_ipc_command(const std::string_view socket_commands_json)
             else if (property == "toolbar-visible")
             {
                 xset_panel_var = xset::panel::show_toolbox;
-                use_mode = true;
-                valid = true;
-            }
-            else if (property == "sidetoolbar-visible")
-            {
-                xset_panel_var = xset::panel::show_sidebar;
                 use_mode = true;
                 valid = true;
             }

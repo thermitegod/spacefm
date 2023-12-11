@@ -163,43 +163,6 @@ const std::unordered_map<xset::panel, panel_lookup_data> xset_panel_lookup{
         },
     },
     {
-        xset::panel::show_sidebar,
-        {
-            {
-                xset::name::panel1_show_sidebar,
-                xset::name::panel2_show_sidebar,
-                xset::name::panel3_show_sidebar,
-                xset::name::panel4_show_sidebar,
-            },
-            {{
-                {
-                    xset::name::panel1_show_sidebar0,
-                    xset::name::panel1_show_sidebar1,
-                    xset::name::panel1_show_sidebar2,
-                    xset::name::panel1_show_sidebar3,
-                },
-                {
-                    xset::name::panel2_show_sidebar0,
-                    xset::name::panel2_show_sidebar1,
-                    xset::name::panel2_show_sidebar2,
-                    xset::name::panel2_show_sidebar3,
-                },
-                {
-                    xset::name::panel3_show_sidebar0,
-                    xset::name::panel3_show_sidebar1,
-                    xset::name::panel3_show_sidebar2,
-                    xset::name::panel3_show_sidebar3,
-                },
-                {
-                    xset::name::panel4_show_sidebar0,
-                    xset::name::panel4_show_sidebar1,
-                    xset::name::panel4_show_sidebar2,
-                    xset::name::panel4_show_sidebar3,
-                },
-            }},
-        },
-    },
-    {
         xset::panel::slider_positions,
         {
             {

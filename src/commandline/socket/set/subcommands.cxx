@@ -535,24 +535,6 @@ commandline::socket::set::toolbar_visible(CLI::App* app, const socket_subcommand
 }
 
 /*
- * subcommand sidetoolbar-visible
- */
-
-void
-commandline::socket::set::sidetoolbar_visible(CLI::App* app, const socket_subcommand_data_t& opt)
-{
-    auto* sub = app->add_subcommand("sidetoolbar-visible", "Set property sidetoolbar-visible");
-
-    const auto run_subcommand = [&opt]() { opt->property = "sidetoolbar-visible"; };
-    sub->callback(run_subcommand);
-
-    sub->require_subcommand();
-
-    setup_subcommand_value_true(sub, opt);
-    setup_subcommand_value_false(sub, opt);
-}
-
-/*
  * subcommand hidden-files-visible
  */
 

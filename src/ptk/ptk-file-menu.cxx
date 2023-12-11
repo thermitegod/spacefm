@@ -413,8 +413,6 @@ on_popup_toggle_view(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
     set->b = xset_get_panel(p, xset::panel::show_devmon)->b;
     set = xset_get_panel_mode(p, xset::panel::show_dirtree, mode);
     set->b = xset_get_panel(p, xset::panel::show_dirtree)->b;
-    set = xset_get_panel_mode(p, xset::panel::show_sidebar, mode);
-    set->b = xset_get_panel(p, xset::panel::show_sidebar)->b;
 
     update_views_all_windows(nullptr, file_browser);
 }
@@ -487,7 +485,6 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     const MainWindow* main_window = browser->main_window();
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
-    bool show_side = false;
     xset_set_cb(xset::name::view_refresh, (GFunc)ptk_file_browser_refresh, browser);
     set = xset_get_panel(p, xset::panel::show_toolbox);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
@@ -495,21 +492,9 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     set = xset_get_panel(p, xset::panel::show_devmon);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, xset::panel::show_devmon, mode)->b;
-    if (set->b == xset::b::xtrue)
-    {
-        show_side = true;
-    }
     set = xset_get_panel(p, xset::panel::show_dirtree);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, xset::panel::show_dirtree, mode)->b;
-    if (set->b == xset::b::xtrue)
-    {
-        show_side = true;
-    }
-    set = xset_get_panel(p, xset::panel::show_sidebar);
-    xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, xset::panel::show_sidebar, mode)->b;
-    set->disable = !show_side;
     xset_set_cb_panel(p, xset::panel::show_hidden, (GFunc)on_popup_show_hidden, browser);
 
     if (browser->is_view_mode(ptk::file_browser::view_mode::list_view))
@@ -917,7 +902,6 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     {
         context_menu_entries = {
             xset::name::panel1_show_toolbox,
-            xset::name::panel1_show_sidebar,
             xset::name::panel1_show_devmon,
             xset::name::panel1_show_dirtree,
             xset::name::separator,
@@ -933,7 +917,6 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     {
         context_menu_entries = {
             xset::name::panel2_show_toolbox,
-            xset::name::panel2_show_sidebar,
             xset::name::panel2_show_devmon,
             xset::name::panel2_show_dirtree,
             xset::name::separator,
@@ -949,7 +932,6 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     {
         context_menu_entries = {
             xset::name::panel3_show_toolbox,
-            xset::name::panel3_show_sidebar,
             xset::name::panel3_show_devmon,
             xset::name::panel3_show_dirtree,
             xset::name::separator,
@@ -965,7 +947,6 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
     {
         context_menu_entries = {
             xset::name::panel4_show_toolbox,
-            xset::name::panel4_show_sidebar,
             xset::name::panel4_show_devmon,
             xset::name::panel4_show_dirtree,
             xset::name::separator,

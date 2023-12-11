@@ -702,10 +702,6 @@ MainWindow::show_panels() noexcept
                                       mode,
                                       xset_get_b_panel(p, xset::panel::show_dirtree));
                 xset_set_b_panel_mode(p,
-                                      xset::panel::show_sidebar,
-                                      mode,
-                                      xset_get_b_panel(p, xset::panel::show_sidebar));
-                xset_set_b_panel_mode(p,
                                       xset::panel::detcol_name,
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_name));

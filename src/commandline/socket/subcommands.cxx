@@ -55,7 +55,6 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::set::devices_visible(sub, opt);
     commandline::socket::set::dirtree_visible(sub, opt);
     commandline::socket::set::toolbar_visible(sub, opt);
-    commandline::socket::set::sidetoolbar_visible(sub, opt);
     commandline::socket::set::hidden_files_visible(sub, opt);
     commandline::socket::set::panel1_visible(sub, opt);
     commandline::socket::set::panel2_visible(sub, opt);
@@ -124,7 +123,6 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
     commandline::socket::get::devices_visible(sub, opt);
     commandline::socket::get::dirtree_visible(sub, opt);
     commandline::socket::get::toolbar_visible(sub, opt);
-    commandline::socket::get::sidetoolbar_visible(sub, opt);
     commandline::socket::get::hidden_files_visible(sub, opt);
     commandline::socket::get::panel1_visible(sub, opt);
     commandline::socket::get::panel2_visible(sub, opt);

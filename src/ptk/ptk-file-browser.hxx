@@ -180,7 +180,6 @@ struct PtkFileBrowser
     GtkLabel* status_label{nullptr};
     GtkWidget* status_image{nullptr};
     GtkToolbar* toolbar{nullptr};
-    GtkToolbar* side_toolbar{nullptr};
     GSList* toolbar_widgets[10];
 
     // private:

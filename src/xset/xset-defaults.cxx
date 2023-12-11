@@ -1532,15 +1532,6 @@ xset_defaults()
             set->shared_key = xset_get(xset::name::panel1_show_dirtree);
         }
 
-        set = xset_get_panel(p, xset::panel::show_sidebar);
-        xset_set_var(set, xset::var::menu_label, "_Side Toolbar");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::unset;
-        if (p != 1)
-        {
-            set->shared_key = xset_get(xset::name::panel1_show_sidebar);
-        }
-
         set = xset_get_panel(p, xset::panel::list_detailed);
         xset_set_var(set, xset::var::menu_label, "_Detailed");
         set->menu_style = xset::menu::radio;

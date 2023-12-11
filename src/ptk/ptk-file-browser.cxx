@@ -170,7 +170,6 @@ static i32 file_list_order_from_sort_order(ptk::file_browser::sort_order order);
 static GtkPanedClass* parent_class = nullptr;
 
 static void rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
-static void rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser);
 
 static u32 folder_view_auto_scroll_timer = 0;
 static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_TAB_FORWARD;
@@ -750,52 +749,6 @@ rebuild_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
     }
 }
 
-static void
-rebuild_side_toolbox(GtkWidget* widget, PtkFileBrowser* file_browser)
-{
-    (void)widget;
-    const panel_t p = file_browser->panel_;
-    const xset::main_window_panel mode = file_browser->main_window_
-                                             ? file_browser->main_window_->panel_context.at(p)
-                                             : xset::main_window_panel::panel_neither;
-
-    const bool show_tooltips = !xset_get_b_panel(1, xset::panel::tool_l);
-
-    // destroy
-    if (file_browser->side_toolbar)
-    {
-        gtk_widget_destroy(GTK_WIDGET(file_browser->side_toolbar));
-    }
-
-    // create side toolbar
-    file_browser->side_toolbar = GTK_TOOLBAR(gtk_toolbar_new());
-
-    gtk_box_pack_start(file_browser->side_toolbox,
-                       GTK_WIDGET(file_browser->side_toolbar),
-                       true,
-                       true,
-                       0);
-    gtk_toolbar_set_style(file_browser->side_toolbar, GtkToolbarStyle::GTK_TOOLBAR_ICONS);
-    if (app_settings.icon_size_tool() > 0 &&
-        app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
-    {
-        gtk_toolbar_set_icon_size(file_browser->side_toolbar,
-                                  (GtkIconSize)app_settings.icon_size_tool());
-    }
-    // fill side toolbar
-    xset_fill_toolbar(GTK_WIDGET(file_browser),
-                      file_browser,
-                      file_browser->side_toolbar,
-                      xset_get_panel(p, xset::panel::tool_s),
-                      show_tooltips);
-
-    // show
-    if (xset_get_b_panel_mode(p, xset::panel::show_sidebar, mode))
-    {
-        gtk_widget_show_all(GTK_WIDGET(file_browser->side_toolbox));
-    }
-}
-
 static bool
 on_status_bar_button_press(GtkWidget* widget, GdkEvent* event, PtkFileBrowser* file_browser)
 {
@@ -955,7 +908,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     // fill side
     file_browser->side_toolbox =
         GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-    file_browser->side_toolbar = nullptr;
     file_browser->side_vpane_top =
         GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_VERTICAL));
     file_browser->side_vpane_bottom =
@@ -4565,28 +4517,6 @@ PtkFileBrowser::update_views() noexcept
         gtk_widget_hide(GTK_WIDGET(this->toolbox_));
     }
 
-    if (xset_get_b_panel_mode(p, xset::panel::show_sidebar, mode))
-    {
-        if (!this->side_toolbar)
-        {
-            rebuild_side_toolbox(nullptr, this);
-            need_enable_toolbar = true;
-        }
-        gtk_widget_show_all(GTK_WIDGET(this->side_toolbox));
-    }
-    else
-    {
-        //  toolboxes must be destroyed together for toolbar_widgets[]
-#if 0
-        if ( this->side_toolbar )
-        {
-            gtk_widget_destroy(GTK_WIDGET(this->side_toolbar));
-            this->side_toolbar = nullptr;
-        }
-#endif
-        gtk_widget_hide(GTK_WIDGET(this->side_toolbox));
-    }
-
     if (xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
     {
         if (!this->side_dir)
@@ -4936,10 +4866,6 @@ PtkFileBrowser::rebuild_toolbars() noexcept
 #elif (GTK_MAJOR_VERSION == 3)
         gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
 #endif
-    }
-    if (this->side_toolbar)
-    {
-        rebuild_side_toolbox(nullptr, this);
     }
 
     this->enable_toolbar();
