@@ -906,9 +906,11 @@ static void
 on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
 #if (GTK_MAJOR_VERSION == 4)
-    ptk_show_message(GTK_WINDOW(parent),
-                     "Needs Update",
-                     "Gtk4 changed and then deprecated the GtkFileChooser API");
+    (void)widget;
+    (void)mset;
+    ptk_show_error(nullptr,
+                   "Needs Update",
+                   "Gtk4 changed and then deprecated the GtkFileChooser API");
     return;
 #elif (GTK_MAJOR_VERSION == 3)
     i32 action;
@@ -1159,9 +1161,9 @@ static void
 on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
 #if (GTK_MAJOR_VERSION == 4)
-    ptk_show_message(GTK_WINDOW(parent),
-                     "Needs Update",
-                     "Gtk4 changed and then deprecated the GtkFileChooser API");
+    ptk_show_error(nullptr,
+                   "Needs Update",
+                   "Gtk4 changed and then deprecated the GtkFileChooser API");
     return;
 #elif (GTK_MAJOR_VERSION == 3)
     (void)widget;

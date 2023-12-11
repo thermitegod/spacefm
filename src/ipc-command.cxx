@@ -912,10 +912,14 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (property == "window-position")
         {
+#if (GTK_MAJOR_VERSION == 4)
+            return {SOCKET_INVALID, "Not Implemented"};
+#elif (GTK_MAJOR_VERSION == 3)
             i32 width;
             i32 height;
             gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
+#endif
         }
         else if (property == "window-maximized")
         {

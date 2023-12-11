@@ -59,16 +59,22 @@ vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callb
     this->inotify_io_channel_ = Glib::IOChannel::create_from_fd(this->inotify_fd_);
     this->inotify_io_channel_->set_buffered(true);
 #if (GTK_MAJOR_VERSION == 4)
-    this->inotify_io_channel->set_flags(Glib::IOFlags::NONBLOCK);
+    this->inotify_io_channel_->set_flags(Glib::IOFlags::NONBLOCK);
+
+    this->signal_io_handler_ =
+        Glib::signal_io().connect(sigc::mem_fun(*this, &monitor::on_inotify_event),
+                                  this->inotify_io_channel_,
+                                  Glib::IOCondition::IO_IN | Glib::IOCondition::IO_PRI |
+                                      Glib::IOCondition::IO_HUP | Glib::IOCondition::IO_ERR);
 #elif (GTK_MAJOR_VERSION == 3)
     this->inotify_io_channel_->set_flags(Glib::IO_FLAG_NONBLOCK);
-#endif
 
     this->signal_io_handler_ =
         Glib::signal_io().connect(sigc::mem_fun(this, &monitor::on_inotify_event),
                                   this->inotify_io_channel_,
                                   Glib::IOCondition::IO_IN | Glib::IOCondition::IO_PRI |
                                       Glib::IOCondition::IO_HUP | Glib::IOCondition::IO_ERR);
+#endif
 
     // inotify does not follow symlinks, need to get real path
     const auto real_path = std::filesystem::absolute(this->path_);
