@@ -943,18 +943,18 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
 
     GList* children = gtk_container_get_children(
         GTK_CONTAINER(gtk_statusbar_get_message_area(file_browser->statusbar)));
-    file_browser->status_label = GTK_LABEL(children->data);
+    file_browser->statusbar_label = GTK_LABEL(children->data);
     g_list_free(children);
     // required for button event
-    gtk_label_set_selectable(file_browser->status_label, true);
-    gtk_widget_set_can_focus(GTK_WIDGET(file_browser->status_label), false);
-    gtk_widget_set_hexpand(GTK_WIDGET(file_browser->status_label), true);
-    gtk_widget_set_halign(GTK_WIDGET(file_browser->status_label), GtkAlign::GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(file_browser->status_label), GtkAlign::GTK_ALIGN_CENTER);
+    gtk_label_set_selectable(file_browser->statusbar_label, true);
+    gtk_widget_set_can_focus(GTK_WIDGET(file_browser->statusbar_label), false);
+    gtk_widget_set_hexpand(GTK_WIDGET(file_browser->statusbar_label), true);
+    gtk_widget_set_halign(GTK_WIDGET(file_browser->statusbar_label), GtkAlign::GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(file_browser->statusbar_label), GtkAlign::GTK_ALIGN_CENTER);
 
     // clang-format off
-    g_signal_connect(G_OBJECT(file_browser->status_label), "button-press-event", G_CALLBACK(on_status_bar_button_press), file_browser);
-    g_signal_connect(G_OBJECT(file_browser->status_label), "populate-popup", G_CALLBACK(on_status_bar_popup), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->statusbar_label), "button-press-event", G_CALLBACK(on_status_bar_button_press), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->statusbar_label), "populate-popup", G_CALLBACK(on_status_bar_popup), file_browser);
     // clang-format on
 
     // pack fb vbox
