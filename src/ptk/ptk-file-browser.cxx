@@ -948,13 +948,6 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
         GTK_CONTAINER(gtk_statusbar_get_message_area(file_browser->statusbar)));
     file_browser->status_label = GTK_LABEL(children->data);
     g_list_free(children);
-    // do not know panel yet
-    file_browser->status_image = xset_get_image("gtk-yes", GtkIconSize::GTK_ICON_SIZE_MENU);
-    gtk_box_pack_start(GTK_BOX(file_browser->statusbar),
-                       file_browser->status_image,
-                       false,
-                       false,
-                       0);
     // required for button event
     gtk_label_set_selectable(file_browser->status_label, true);
     gtk_widget_set_can_focus(GTK_WIDGET(file_browser->status_label), false);
@@ -1101,11 +1094,6 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
                                   GTK_WIDGET(file_browser->folder_view_));
     // gtk_widget_show_all(GTK_WIDGET(file_browser->folder_view_scroll_));
-
-    // set status bar icon
-    gtk_image_set_from_icon_name(GTK_IMAGE(file_browser->status_image),
-                                 "gtk-yes",
-                                 GtkIconSize::GTK_ICON_SIZE_MENU);
 
     gtk_widget_show_all(GTK_WIDGET(file_browser));
 
