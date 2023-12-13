@@ -394,7 +394,8 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
             // TODO - FIXME - using std::ranges::remove here will
             // caues a segfault when deleting/moving/loading thumbails
             // std::ranges::remove(this->files_, file);
-            ztd::remove(this->files_, file);
+            this->files_.erase(std::remove(this->files_.begin(), this->files_.end(), file),
+                               this->files_.end());
             if (file)
             {
                 this->run_event<spacefm::signal::file_deleted>(file);

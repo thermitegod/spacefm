@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+#include <cstring>
+
 #include <glibmm.h>
 
 #include <magic_enum.hpp>
@@ -27,6 +29,8 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "compat/gtk4-porting.hxx"
+
+#include "utils/strdup.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
@@ -223,7 +227,10 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
     // dir completion
     const std::string fn = ztd::rpartition(text, "/")[2];
-    g_object_set_data_full(G_OBJECT(completion), "fn", ztd::strdup(fn), (GDestroyNotify)std::free);
+    g_object_set_data_full(G_OBJECT(completion),
+                           "fn",
+                           utils::strdup(fn),
+                           (GDestroyNotify)std::free);
 
     const std::string cwd = get_cwd(entry);
     const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
@@ -234,7 +241,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
     g_object_set_data_full(G_OBJECT(completion),
                            "cwd",
-                           ztd::strdup(cwd),
+                           utils::strdup(cwd),
                            (GDestroyNotify)std::free);
 
     if (std::filesystem::is_directory(cwd))

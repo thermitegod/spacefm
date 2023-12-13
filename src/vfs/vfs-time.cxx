@@ -33,8 +33,9 @@
 #if 1
 
 const std::string
-vfs_create_display_date(const std::time_t time) noexcept
+vfs_create_display_date(const std::chrono::system_clock::time_point time_point) noexcept
 {
+    time_t time = std::chrono::system_clock::to_time_t(time_point);
     std::tm* local_time = std::localtime(&time);
     std::stringstream ss;
     ss << std::put_time(local_time, app_settings.date_format().data());

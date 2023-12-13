@@ -190,7 +190,7 @@ vfs::device::info_mount_points() noexcept
     }
 
     // Sort the list to ensure that shortest mount paths appear first
-    std::ranges::sort(device_mount_points, ztd::compare);
+    // std::ranges::sort(device_mount_points, ztd::sort::compare);
 
     return ztd::join(device_mount_points, ",");
 }
@@ -289,7 +289,7 @@ vfs::device::device_get_info() noexcept
         const auto check_size = vfs::linux::sysfs::get_u64(this->native_path_, "size");
         if (check_size)
         {
-            this->size_ = check_size.value() * ztd::BLOCK_SIZE;
+            this->size_ = check_size.value() * 512;
         }
 
         //  This is not available on all devices so fall back to 512 if unavailable.
@@ -306,12 +306,12 @@ vfs::device::device_get_info() noexcept
             }
             else
             {
-                this->block_size_ = ztd::BLOCK_SIZE;
+                this->block_size_ = 512;
             }
         }
         else
         {
-            this->block_size_ = ztd::BLOCK_SIZE;
+            this->block_size_ = 512;
         }
     }
 

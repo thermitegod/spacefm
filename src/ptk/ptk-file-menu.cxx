@@ -63,6 +63,8 @@
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
 
+#include "utils/strdup.hxx"
+
 #include "settings/app.hxx"
 
 #include "types.hxx"
@@ -1210,7 +1212,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
 
                 // clang-format off
                 g_object_set_data(G_OBJECT(app_menu_item), "menu", submenu);
-                g_object_set_data_full(G_OBJECT(app_menu_item), "desktop_file", ztd::strdup(app.data()), free);
+                g_object_set_data_full(G_OBJECT(app_menu_item), "desktop_file", utils::strdup(app.data()), free);
 
                 g_signal_connect(G_OBJECT(app_menu_item), "activate", G_CALLBACK(on_popup_run_app), (void*)data);
                 g_signal_connect(G_OBJECT(app_menu_item), "button-press-event", G_CALLBACK(on_app_button_press), (void*)data);
@@ -1909,7 +1911,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
 
                 if (!contents.empty())
                 {
-                    char* contents2 = ztd::strdup(contents);
+                    char* contents2 = utils::strdup(contents);
                     char* start = nullptr;
                     str = strstr(contents2, "\n<mime-type ");
                     if (str)

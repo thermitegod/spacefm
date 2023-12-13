@@ -25,6 +25,10 @@
 
 #include <memory>
 
+#include <chrono>
+
+#include <system_error>
+
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
@@ -109,8 +113,9 @@ calc_total_size_of_files(const std::filesystem::path& path,
         return;
     }
 
-    const auto file_stat = ztd::lstat(path);
-    if (!file_stat)
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(path, ec);
+    if (ec)
     {
         return;
     }
@@ -366,9 +371,9 @@ create_prop_text_box_no_focus(const std::string_view data)
 }
 
 GtkEntry*
-create_prop_text_box_date(const std::time_t time)
+create_prop_text_box_date(const std::chrono::system_clock::time_point time_point)
 {
-    const auto time_formated = vfs_create_display_date(time);
+    const auto time_formated = vfs_create_display_date(time_point);
 
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
 #if (GTK_MAJOR_VERSION == 4)

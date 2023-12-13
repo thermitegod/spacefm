@@ -39,7 +39,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-// sfm breaks vfs independence for exec_in_terminal
+#include "utils/shell_quote.hxx"
+
+// sfm break vfs independence for exec_in_terminal
 #include "ptk/ptk-file-task.hxx"
 
 #include "vfs/vfs-utils.hxx"
@@ -397,7 +399,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(ztd::shell::quote(file.string()));
+                    argv.push_back(utils::shell_quote(file.string()));
                 }
                 else
                 {
@@ -431,7 +433,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(ztd::shell::quote(file.string()));
+                    argv.push_back(utils::shell_quote(file.string()));
                 }
                 else
                 {

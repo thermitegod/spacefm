@@ -196,7 +196,7 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 ## dependencies
 
 # ztd use system or subproject
-ztd_dep = dependency('ztd', required : false)
+ztd_dep = dependency('ztd', version : '>=0.2.0', required : false)
 if not ztd_dep.found() # using subproject
   ztd_proj = subproject('ztd', required : true)
   ztd_dep = ztd_proj.get_variable('ztd_dep')
@@ -306,8 +306,7 @@ preprocessor = [
   '-DGLIBMM_DISABLE_DEPRECATED',
   '-DGIOMM_DISABLE_DEPRECATED',
 
-  # '-DZTD_LOGGER_USE_STD_FORMAT',
-  '-DZTD_DISABLE_GLOBAL_LOG_MACROS',
+  '-DZTD_VERSION=2',
 ]
 
 foreach a : preprocessor
@@ -390,6 +389,8 @@ sources = files(
   'src/settings/upgrade/config-upgrade.cxx',
 
   'src/utils/memory.cxx',
+  'src/utils/shell_quote.cxx',
+  'src/utils/strdup.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-type.cxx',
@@ -442,6 +443,7 @@ sources = files(
   'src/vfs/libudevpp/udev_monitor.cxx',
 
   'src/vfs/linux/procfs.cxx',
+  'src/vfs/linux/self.cxx',
   'src/vfs/linux/sysfs.cxx',
 )
 

@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -17,7 +19,29 @@
 
 #include <string>
 
-#include <chrono>
+#include <filesystem>
 
-const std::string
-vfs_create_display_date(const std::chrono::system_clock::time_point time_point) noexcept;
+namespace vfs::linux::proc::self
+{
+namespace detail
+{
+const std::filesystem::path proc{"/proc"};
+const std::filesystem::path proc_self{"/proc/self"};
+const std::filesystem::path proc_self_exe{"/proc/self/exe"};
+const std::filesystem::path proc_self_stat{"/proc/self/stat"};
+} // namespace detail
+
+/**
+ * @brief Program Executable
+ *
+ * @return Current executing program path
+ */
+[[nodiscard]] const std::filesystem::path exe() noexcept;
+
+/**
+ * @brief Program Name
+ *
+ * @return Current executing program name
+ */
+[[nodiscard]] const std::string name() noexcept;
+} // namespace vfs::linux::proc::self

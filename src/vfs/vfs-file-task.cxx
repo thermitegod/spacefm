@@ -30,6 +30,10 @@
 
 #include <ranges>
 
+#include <system_error>
+
+#include <cstring>
+
 #include <fcntl.h>
 #include <utime.h>
 
@@ -43,6 +47,9 @@
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include "utils/strdup.hxx"
+#include "utils/shell_quote.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -113,7 +120,7 @@ vfs::file_task::file_task(const vfs::file_task::type task_type,
     gtk_text_buffer_get_end_iter(this->add_log_buf, &iter);
     gtk_text_buffer_add_mark(this->add_log_buf, this->add_log_end, &iter);
 
-    this->start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    this->start_time = std::chrono::system_clock::now();
     this->timer = ztd::timer();
 }
 
@@ -213,7 +220,7 @@ bool
 vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
                                 char** new_dest_file)
 {
-    const auto dest_file_stat = ztd::lstat(dest_file);
+    const auto exists = std::filesystem::exists(dest_file);
 
     while (true)
     {
@@ -223,7 +230,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
             const auto checked_current_file = this->current_file.value_or("");
             const auto checked_current_dest = this->current_dest.value_or("");
 
-            *dest_exists = !!dest_file_stat;
+            *dest_exists = exists;
             if (std::filesystem::equivalent(checked_current_file, checked_current_dest))
             {
                 // src and dest are same file - do not overwrite (truncates)
@@ -234,12 +241,12 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
         }
         else if (this->overwrite_mode_ == vfs::file_task::overwrite_mode::skip_all)
         {
-            *dest_exists = !!dest_file_stat;
+            *dest_exists = exists;
             return !*dest_exists;
         }
         else if (this->overwrite_mode_ == vfs::file_task::overwrite_mode::auto_rename)
         {
-            *dest_exists = !!dest_file_stat;
+            *dest_exists = exists;
             if (!*dest_exists)
             {
                 return !this->abort;
@@ -251,9 +258,10 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
 
             const auto filename_parts = split_basename_extension(old_name);
 
-            *new_dest_file = ztd::strdup(vfs_get_unique_name(dest_file_dir,
-                                                             filename_parts.basename,
-                                                             filename_parts.extension));
+            *new_dest_file = utils::strdup(vfs_get_unique_name(dest_file_dir,
+                                                               filename_parts.basename,
+                                                               filename_parts.extension)
+                                               .c_str());
             *dest_exists = false;
             if (*new_dest_file)
             {
@@ -262,7 +270,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
             // else ran out of names - fall through to query user
         }
 
-        *dest_exists = !!dest_file_stat;
+        *dest_exists = exists;
         if (!*dest_exists)
         {
             return !this->abort;
@@ -313,7 +321,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
                     const auto checked_current_file = this->current_file.value_or("");
                     const auto checked_current_dest = this->current_dest.value_or("");
 
-                    *dest_exists = !!dest_file_stat;
+                    *dest_exists = exists;
                     if (std::filesystem::equivalent(checked_current_file, checked_current_dest))
                     {
                         // src and dest are same file - do not overwrite (truncates)
@@ -408,8 +416,9 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     this->current_item++;
     this->unlock();
 
-    const auto file_stat = ztd::lstat(src_file);
-    if (!file_stat)
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(src_file, ec);
+    if (ec)
     {
         this->task_error(errno, "Accessing", src_file);
         return false;
@@ -476,8 +485,9 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
             }
 
             chmod(actual_dest_file.c_str(), file_stat.mode());
-            times.actime = file_stat.atime();
-            times.modtime = file_stat.mtime();
+
+            times.actime = std::chrono::system_clock::to_time_t(file_stat.atime());
+            times.modtime = std::chrono::system_clock::to_time_t(file_stat.mtime());
             utime(actual_dest_file.c_str(), &times);
 
             /* Move files to different device: Need to delete source dir */
@@ -669,8 +679,9 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                     {
                         chmod(actual_dest_file.c_str(), file_stat.mode());
                         struct utimbuf times;
-                        times.actime = file_stat.atime();
-                        times.modtime = file_stat.mtime();
+
+                        times.actime = std::chrono::system_clock::to_time_t(file_stat.atime());
+                        times.modtime = std::chrono::system_clock::to_time_t(file_stat.mtime());
                         utime(actual_dest_file.c_str(), &times);
                     }
 
@@ -726,10 +737,13 @@ vfs::file_task::file_move(const std::filesystem::path& src_file)
     const auto filename = src_file.filename();
     const auto dest_file = this->dest_dir.value() / filename;
 
-    const auto src_stat = ztd::lstat(src_file);
-    const auto dest_stat = ztd::stat(this->dest_dir.value());
+    std::error_code src_ec;
+    const auto src_stat = ztd::lstat(src_file, src_ec);
 
-    if (src_stat && dest_stat)
+    std::error_code dest_ec;
+    const auto dest_stat = ztd::stat(this->dest_dir.value(), dest_ec);
+
+    if (!src_ec && !dest_ec)
     {
         /* Not on the same device */
         if (src_stat.dev() != dest_stat.dev())
@@ -772,8 +786,9 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     this->unlock();
 
     // ztd::logger::debug("move '{}' to '{}'", src_file, dest_file);
-    const auto file_stat = ztd::lstat(src_file);
-    if (!file_stat)
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(src_file, ec);
+    if (ec)
     {
         this->task_error(errno, "Accessing", src_file);
         return 0;
@@ -877,8 +892,9 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file)
     this->current_item++;
     this->unlock();
 
-    const auto file_stat = ztd::lstat(src_file);
-    if (!file_stat)
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(src_file, ec);
+    if (ec)
     {
         this->task_error(errno, "Accessing", src_file);
         return;
@@ -921,8 +937,9 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file)
     this->current_item++;
     this->unlock();
 
-    const auto file_stat = ztd::lstat(src_file);
-    if (!file_stat)
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(src_file, ec);
+    if (ec)
     {
         this->task_error(errno, "Accessing", src_file);
         return;
@@ -994,8 +1011,9 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
     this->current_item++;
     this->unlock();
 
-    const auto src_stat = ztd::stat(src_file);
-    if (!src_stat)
+    std::error_code ec;
+    const auto src_stat = ztd::stat(src_file, ec);
+    if (ec)
     {
         // MOD allow link to broken symlink
         if (errno != 2 || !std::filesystem::is_symlink(src_file))
@@ -1073,8 +1091,9 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
     this->unlock();
     // ztd::logger::debug("chmod_chown: {}", src_file);
 
-    const auto src_stat = ztd::lstat(src_file);
-    if (src_stat)
+    std::error_code ec;
+    const auto src_stat = ztd::lstat(src_file, ec);
+    if (!ec)
     {
         /* chown */
         if (!this->uid || !this->gid)
@@ -1117,9 +1136,9 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
             }
             if (new_perms != orig_perms)
             {
-                std::error_code ec;
-                std::filesystem::permissions(src_file, new_perms, ec);
-                if (ec)
+                std::error_code ec_perm;
+                std::filesystem::permissions(src_file, new_perms, ec_perm);
+                if (ec_perm)
                 {
                     this->task_error(errno, "chmod", src_file);
                     if (this->should_abort())
@@ -1216,7 +1235,7 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file)
             term_exec_command.append(terminal_arg);
             term_exec_command.append(" ");
         }
-        term_exec_command.append(ztd::shell::quote(this->exec_command));
+        term_exec_command.append(utils::shell_quote(this->exec_command));
 
         ztd::logger::info("COMMAND({})", term_exec_command);
         Glib::spawn_command_line_async(term_exec_command);
@@ -1287,13 +1306,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         for (const auto& src_path : task->src_paths)
         {
-            const auto file_stat = ztd::lstat(src_path);
-            if (!file_stat)
-            {
-                // do not report error here since its reported later
-                // this->task_error(errno, "Accessing"sv, (char*)l->data);
-            }
-            else
+            if (std::filesystem::exists(src_path))
             {
                 const u64 size = task->get_total_size_of_dir(src_path);
                 task->lock();
@@ -1331,8 +1344,9 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         if (task->type_ != vfs::file_task::type::chmod_chown)
         {
-            const auto file_stat = ztd::lstat(task->dest_dir.value());
-            if (!(task->dest_dir && file_stat))
+            std::error_code ec;
+            const auto file_stat = ztd::lstat(task->dest_dir.value(), ec);
+            if (!(task->dest_dir && !ec))
             {
                 task->task_error(errno, "Accessing", task->dest_dir.value());
                 task->abort = true;
@@ -1352,8 +1366,9 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
 
         for (const auto& src_path : task->src_paths)
         {
-            const auto file_stat = ztd::lstat(src_path);
-            if (!file_stat)
+            std::error_code ec;
+            const auto file_stat = ztd::lstat(src_path, ec);
+            if (ec)
             {
                 // do not report error here since it is reported later
                 // task->error(errno, "Accessing", (char*)l->data);
@@ -1599,8 +1614,9 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path)
         return 0;
     }
 
-    const auto file_stat = ztd::lstat(path);
-    if (!file_stat)
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(path, ec);
+    if (ec)
     {
         return 0;
     }

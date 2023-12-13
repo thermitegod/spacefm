@@ -34,7 +34,12 @@
 
 #include <ranges>
 
+#include <system_error>
+
+#include <cstring>
 #include <cassert>
+
+#include <fnmatch.h>
 
 #include <fmt/format.h>
 
@@ -86,6 +91,8 @@
 #include "settings/app.hxx"
 
 #include "utils/memory.hxx"
+#include "utils/shell_quote.hxx"
+#include "utils/strdup.hxx"
 
 #include "signals.hxx"
 
@@ -175,7 +182,7 @@ static u32 folder_view_auto_scroll_timer = 0;
 static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_TAB_FORWARD;
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
 // instance-wide command history
 std::vector<std::string> xset_cmd_history;
@@ -1143,7 +1150,7 @@ add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu,
     GtkWidget* menu_item = gtk_menu_item_new_with_label(path.filename().c_str());
     g_object_set_data_full(G_OBJECT(menu_item),
                            "path",
-                           ztd::strdup(path.c_str()),
+                           utils::strdup(path.c_str()),
                            (GDestroyNotify)std::free);
 
     // clang-format off
@@ -1838,13 +1845,13 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTre
     if (key.contains("*") || key.contains('?'))
     {
         const std::string key2 = std::format("*{}*", key);
-        no_match = !ztd::fnmatch(key2, name);
+        no_match = !(fnmatch(key2.data(), name.data(), 0) == 0);
     }
     else
     {
         const bool end = ztd::endswith(key, "$");
         bool start = !end && (key.size() < 3);
-        char* key2 = ztd::strdup(key);
+        char* key2 = utils::strdup(key);
         char* keyp = key2;
         if (key[0] == '^')
         {
@@ -2282,7 +2289,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
     {
         dest_path = file_browser->cwd();
     }
-    return ztd::strdup(dest_path);
+    return utils::strdup(dest_path.c_str());
 }
 
 static void
@@ -2337,8 +2344,9 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     {
                         const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
-                        const auto file_path_stat = ztd::stat(file_path);
-                        if (file_path_stat)
+                        std::error_code ec;
+                        const auto file_path_stat = ztd::stat(file_path, ec);
+                        if (!ec)
                         {
                             if (file_path_stat.dev() != dest_dev)
                             {
@@ -2350,8 +2358,10 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                             {
                                 // same device - store source parent inode
                                 const auto src_dir = file_path.parent_path();
-                                const auto src_dir_stat = ztd::stat(src_dir);
-                                if (src_dir_stat)
+
+                                std::error_code src_ec;
+                                const auto src_dir_stat = ztd::stat(src_dir, src_ec);
+                                if (!src_ec)
                                 {
                                     file_browser->drag_source_inode_ = src_dir_stat.ino();
                                 }
@@ -4195,7 +4205,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
         const auto [response, answer] =
             select_pattern_dialog(GTK_WIDGET(this->main_window_), set->ob1 ? set->ob1 : "");
 
-        set->ob1 = ztd::strdup(answer);
+        set->ob1 = utils::strdup(answer);
         if (!response || !set->ob1)
         {
             return;
@@ -4240,7 +4250,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
 
             // test name
             const auto name = file->name();
-            const bool select = ztd::fnmatch(key, name);
+            const bool select = (fnmatch(key.data(), name.data(), 0) == 0);
 
             // do selection and scroll to first selected
             GtkTreePath* path =
@@ -5502,7 +5512,7 @@ PtkFileBrowser::on_permission(GtkMenuItem* item,
     std::string file_paths;
     for (const auto& file : selected_files)
     {
-        const std::string file_path = ztd::shell::quote(file->name());
+        const std::string file_path = utils::shell_quote(file->name());
         file_paths = std::format("{} {}", file_paths, file_path);
     }
 

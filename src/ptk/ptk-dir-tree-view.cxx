@@ -24,10 +24,14 @@
 
 #include <optional>
 
+#include <system_error>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "compat/gtk4-porting.hxx"
+
+#include "utils/strdup.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"
 #include "ptk/ptk-file-menu.hxx"
@@ -56,7 +60,7 @@ static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePa
                      bool path_currently_selected, void* data);
 
 /*  Drag & Drop/Clipboard targets  */
-static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
 // MOD drag n drop...
 static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
@@ -634,8 +638,9 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             if (file_browser->pending_drag_status_tree())
             {
                 // We only want to update drag status, not really want to drop
-                const auto dest_statbuf = ztd::stat(dest_dir);
-                if (dest_statbuf)
+                std::error_code ec;
+                const auto dest_statbuf = ztd::stat(dest_dir, ec);
+                if (!ec)
                 {
                     if (file_browser->drag_source_dev_tree_ == 0)
                     {
@@ -644,8 +649,8 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         {
                             const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
-                            const auto statbuf = ztd::stat(file_path);
-                            if (statbuf && statbuf.dev() != dest_statbuf.dev())
+                            const auto statbuf = ztd::stat(file_path, ec);
+                            if (!ec && statbuf.dev() != dest_statbuf.dev())
                             {
                                 file_browser->drag_source_dev_tree_ = statbuf.dev();
                                 break;

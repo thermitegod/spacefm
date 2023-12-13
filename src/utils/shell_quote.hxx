@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,12 +17,19 @@
 
 #pragma once
 
-#include <chrono>
+#include <string>
+#include <string_view>
 
-#include <ztd/ztd.hxx>
-
-namespace program_timer
+namespace utils
 {
-void start() noexcept;
-const std::chrono::seconds elapsed() noexcept;
-} // namespace program_timer
+/**
+ * @brief Shell Quote
+ *
+ * - quote string so that is will work with ztd::Execute
+ *
+ * @param[in] str The string to be quoted
+ *
+ * @return a quoted string, if string is empty returns empty quotes
+ */
+[[nodiscard]] const std::string shell_quote(const std::string_view str) noexcept;
+} // namespace utils

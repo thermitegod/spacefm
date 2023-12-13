@@ -12,6 +12,8 @@
 
 #include <chrono>
 
+#include <system_error>
+
 #include <utility>
 
 #include <cstdint>
@@ -194,11 +196,11 @@ LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files)
 
     for (const auto& mime_cache : mime_cache_files)
     {
-        const auto mime_stat = ztd::stat(mime_cache);
-        if (mime_stat && ParseMimeTypes(mime_cache, map))
+        std::error_code ec;
+        const auto mime_stat = ztd::stat(mime_cache, ec);
+        if (!ec && ParseMimeTypes(mime_cache, map))
         {
-            files.emplace_back(mime_cache,
-                               std::chrono::system_clock::from_time_t(mime_stat.mtime()));
+            files.emplace_back(mime_cache, mime_stat.mtime());
         }
     }
 }
@@ -443,8 +445,7 @@ GetFileMimeType(const std::filesystem::path& filepath)
                                     [](const FileInfo& file_info)
                                     {
                                         const auto info = ztd::stat(file_info.path);
-                                        return file_info.last_modified !=
-                                               std::chrono::system_clock::from_time_t(info.mtime());
+                                        return file_info.last_modified != info.mtime();
                                     }))
             {
                 mime_type_map.clear();

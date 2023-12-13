@@ -32,6 +32,8 @@
 
 #include <ranges>
 
+#include <system_error>
+
 #include <cassert>
 
 #include <fmt/format.h>
@@ -67,6 +69,7 @@
 #include "settings/disk-format.hxx"
 
 #include "utils/memory.hxx"
+#include "utils/strdup.hxx"
 
 #include "bookmarks.hxx"
 #include "settings.hxx"
@@ -106,7 +109,7 @@ static GtkApplicationWindowClass* parent_class = nullptr;
 static std::vector<MainWindow*> all_windows;
 
 //  Drag & Drop/Clipboard targets
-static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
+static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
 struct MainWindowClass
 {
@@ -1134,8 +1137,8 @@ rebuild_menu_bookmarks(MainWindow* main_window, PtkFileBrowser* file_browser)
         GtkWidget* item = gtk_menu_item_new_with_label(book_path.c_str());
 
         g_object_set_data(G_OBJECT(item), "file_browser", file_browser);
-        g_object_set_data(G_OBJECT(item), "path", ztd::strdup(book_path));
-        g_object_set_data(G_OBJECT(item), "name", ztd::strdup(book_name));
+        g_object_set_data(G_OBJECT(item), "path", utils::strdup(book_path.c_str()));
+        g_object_set_data(G_OBJECT(item), "name", utils::strdup(book_name.c_str()));
 
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(bookmark_menu_keypress), nullptr);
 
@@ -2506,8 +2509,9 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
                     }
                     else
                     {
-                        const auto results = ztd::stat(target_path);
-                        if (results)
+                        std::error_code ec;
+                        const auto results = ztd::stat(target_path, ec);
+                        if (!ec)
                         {
                             const std::string lsize = vfs_file_size_format(results.size());
                             statusbar_txt.append(

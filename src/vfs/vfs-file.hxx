@@ -70,10 +70,10 @@ struct file : public std::enable_shared_from_this<file>
     const std::string_view display_mtime() const noexcept;
     const std::string_view display_permissions() noexcept;
 
-    std::time_t atime() const noexcept;
-    std::time_t btime() const noexcept;
-    std::time_t ctime() const noexcept;
-    std::time_t mtime() const noexcept;
+    const std::chrono::system_clock::time_point atime() const noexcept;
+    const std::chrono::system_clock::time_point btime() const noexcept;
+    const std::chrono::system_clock::time_point ctime() const noexcept;
+    const std::chrono::system_clock::time_point mtime() const noexcept;
 
     enum class thumbnail_size
     {

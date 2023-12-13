@@ -27,6 +27,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "utils/shell_quote.hxx"
+
 #include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
@@ -51,7 +53,7 @@ archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file>
     std::string file_list;
     for (const auto& file : sel_files)
     {
-        file_list.append(ztd::shell::quote(file->path().string()));
+        file_list.append(utils::shell_quote(file->path().string()));
         file_list.append(" ");
     }
     return file_list;
@@ -96,7 +98,7 @@ ptk_archiver_extract(PtkFileBrowser* file_browser,
     else
     {
         command.append(
-            std::format("--extract-to={} ", ztd::shell::quote(file_browser->cwd().string())));
+            std::format("--extract-to={} ", utils::shell_quote(file_browser->cwd().string())));
     }
     command.append(shell_file_list);
 

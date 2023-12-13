@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,12 +17,33 @@
 
 #pragma once
 
-#include <chrono>
+#include <string_view>
 
 #include <ztd/ztd.hxx>
 
-namespace program_timer
+namespace utils
 {
-void start() noexcept;
-const std::chrono::seconds elapsed() noexcept;
-} // namespace program_timer
+/**
+ * @brief strdup
+ *
+ * - Returns a pointer to a null-terminated byte string.
+ *
+ * @param[in] str string to duplicate
+ *
+ * @return A pointer to the newly allocated string.
+ * New string must be freed by caller.
+ */
+[[nodiscard]] char* strdup(const char* str) noexcept;
+
+/**
+ * @brief strdup
+ *
+ * - Returns a pointer to a null-terminated byte string.
+ *
+ * @param[in] str string to duplicate
+ *
+ * @return A pointer to the newly allocated string.
+ * New string must be freed by caller.
+ */
+[[nodiscard]] char* strdup(const std::string_view str) noexcept;
+} // namespace utils

@@ -28,6 +28,8 @@
 
 #include <optional>
 
+#include <chrono>
+
 #include <sys/wait.h>
 
 #include <fmt/format.h>
@@ -46,6 +48,7 @@
 #include "xset/xset-dialog.hxx"
 
 #include "utils.hxx"
+#include "utils/strdup.hxx"
 
 #include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
@@ -497,12 +500,12 @@ set_button_states(PtkFileTask* ptask)
     {
         case vfs::file_task::state::pause:
             label = "Q_ueue";
-            // iconset = ztd::strdup("task_que");
+            // iconset = utils::strdup("task_que");
             //  icon = "list-add";
             break;
         case vfs::file_task::state::queue:
             label = "Res_ume";
-            // iconset = ztd::strdup("task_resume");
+            // iconset = utils::strdup("task_resume");
             //  icon = "media-playback-start";
             break;
         case vfs::file_task::state::running:
@@ -511,7 +514,7 @@ set_button_states(PtkFileTask* ptask)
         case vfs::file_task::state::error:
         case vfs::file_task::state::finish:
             label = "Pa_use";
-            // iconset = ztd::strdup("task_pause");
+            // iconset = utils::strdup("task_pause");
             //  icon = "media-playback-pause";
             break;
     }
@@ -1424,26 +1427,25 @@ ptk_file_task_update(PtkFileTask* ptask)
 
     const auto& task = ptask->task;
     u64 cur_speed;
-    const f64 timer_elapsed = task->timer.elapsed();
+    const auto elapsed = task->timer.elapsed();
 
     if (task->type_ != vfs::file_task::type::exec)
     {
         // cur speed
         if (task->state_pause_ == vfs::file_task::state::running)
         {
-            const f64 since_last = timer_elapsed - task->last_elapsed;
-            if (since_last >= 2.0)
+            const auto since_last = elapsed - task->last_elapsed;
+            if (since_last >= std::chrono::seconds(2))
             {
-                cur_speed = (task->progress - task->last_progress) / since_last;
-                // ztd::logger::info("( {} - {} ) / {} = {}", task->progress,
-                //                task->last_progress, since_last, cur_speed);
-                task->last_elapsed = timer_elapsed;
+                cur_speed = (task->progress - task->last_progress) / since_last.count();
+                // ztd::logger::info("( {} - {} ) / {} = {}", task->progress, task->last_progress, since_last, cur_speed);
+                task->last_elapsed = elapsed;
                 task->last_speed = cur_speed;
                 task->last_progress = task->progress;
             }
-            else if (since_last > 0.1)
+            else if (since_last > std::chrono::milliseconds(100))
             {
-                cur_speed = (task->progress - task->last_progress) / since_last;
+                cur_speed = (task->progress - task->last_progress) / since_last.count();
             }
             else
             {
@@ -1468,53 +1470,53 @@ ptk_file_task_update(PtkFileTask* ptask)
     }
 
     // elapsed
-    u32 hours = timer_elapsed / 3600.0;
-    std::string elapsed;
-    std::string elapsed2;
-    if (hours != 0)
+    const auto hours = std::chrono::duration_cast<std::chrono::hours>(elapsed);
+    const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(elapsed - hours);
+    const auto seconds =
+        std::chrono::duration_cast<std::chrono::seconds>(elapsed - hours - minutes);
+
+    std::string dsp_elapsed;
+    if (hours >= std::chrono::hours(1))
     {
-        elapsed = std::format("{}", hours);
+        // elapsed = std::format("{0:%H}:{1:%M}:{2:%S}", hours, minutes, seconds);
+        dsp_elapsed = std::format("{}:{}:{}", hours, minutes, seconds);
     }
-    u32 mins = (timer_elapsed - (hours * 3600)) / 60;
-    if (hours > 0)
+    else if (minutes >= std::chrono::minutes(1))
     {
-        elapsed2 = std::format("{}:{:02d}", elapsed, mins);
-    }
-    else if (mins > 0)
-    {
-        elapsed2 = std::format("{}", mins);
+        // elapsed = std::format("{0:%M}:{1:%S}", minutes, seconds);
+        dsp_elapsed = std::format("{}:{}", minutes, seconds);
     }
     else
     {
-        elapsed2 = elapsed;
+        // elapsed = std::format("{0:%S}", seconds);
+        dsp_elapsed = std::format("{}", seconds);
     }
-    u32 secs = (timer_elapsed - (hours * 3600) - (mins * 60));
-    const std::string elapsed3 = std::format("{}:{:02d}", elapsed2, secs);
-    ptask->dsp_elapsed = elapsed3;
+
+    ptask->dsp_elapsed = dsp_elapsed;
 
     if (task->type_ != vfs::file_task::type::exec)
     {
-        std::string speed1;
-        std::string speed2;
-        std::string remain1;
-        std::string remain2;
+        std::string speed_current;
+        std::string speed_average;
+        std::string remaining_current;
+        std::string remaining_average;
 
-        std::string size_str;
-        std::string size_str2;
+        std::string size_current;
+        std::string size_average;
 
         // count
         const std::string file_count = std::to_string(task->current_item);
         // size
-        size_str = vfs_file_size_format(task->progress);
+        size_current = vfs_file_size_format(task->progress);
         if (task->total_size)
         {
-            size_str2 = vfs_file_size_format(task->total_size);
+            size_average = vfs_file_size_format(task->total_size);
         }
         else
         {
-            size_str2 = "??"; // total_size calculation timed out
+            size_average = "??"; // total_size calculation timed out
         }
-        const std::string size_tally = std::format("{} / {}", size_str, size_str2);
+        const std::string size_tally = std::format("{} / {}", size_current, size_average);
         // cur speed display
         if (task->last_speed != 0)
         {
@@ -1525,106 +1527,112 @@ ptk_file_task_update(PtkFileTask* ptask)
         {
             if (task->state_pause_ == vfs::file_task::state::pause)
             {
-                speed1 = "paused";
+                speed_current = "paused";
             }
             else if (task->state_pause_ == vfs::file_task::state::queue)
             {
-                speed1 = "queued";
+                speed_current = "queued";
             }
             else
             {
-                speed1 = "stalled";
+                speed_current = "stalled";
             }
         }
         else
         {
-            size_str = vfs_file_size_format(cur_speed);
-            speed1 = std::format("{}/s", size_str);
+            size_current = vfs_file_size_format(cur_speed);
+            speed_current = std::format("{}/s", size_current);
         }
         // avg speed
-        std::time_t avg_speed;
-        if (timer_elapsed > 0)
+        u64 avg_speed;
+        if (elapsed > std::chrono::seconds::zero())
         {
-            avg_speed = task->progress / timer_elapsed;
+            avg_speed = task->progress / elapsed.count();
         }
         else
         {
             avg_speed = 0;
         }
-        size_str2 = vfs_file_size_format(avg_speed);
-        speed2 = std::format("{}/s", size_str2);
+        size_average = vfs_file_size_format(avg_speed);
+        speed_average = std::format("{}/s", size_average);
 
         // remain cur
-        u64 remain;
+        std::chrono::seconds remaining_seconds;
         if (cur_speed > 0 && task->total_size != 0)
         {
-            remain = (task->total_size - task->progress) / cur_speed;
+            remaining_seconds =
+                std::chrono::seconds((task->total_size - task->progress) / cur_speed);
         }
         else
         {
-            remain = 0;
+            remaining_seconds = std::chrono::seconds::zero();
         }
-        if (remain <= 0)
+        if (remaining_seconds <= std::chrono::seconds::zero())
         {
-            remain1 = ""; // n/a
+            remaining_current = ""; // n/a
         }
-        else if (remain > 3599)
+        else if (remaining_seconds > std::chrono::hours(1))
         {
-            hours = remain / 3600;
-            if (remain - (hours * 3600) > 1799)
-            {
-                hours++;
-            }
-            remain1 = std::format("{}/h", hours);
+            const auto remaining_hours =
+                std::chrono::duration_cast<std::chrono::hours>(remaining_seconds);
+
+            remaining_current = std::format("{}/h", remaining_hours);
         }
-        else if (remain > 59)
+        else if (remaining_seconds > std::chrono::minutes(1))
         {
-            remain1 =
-                std::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
+            const auto remaining_hours =
+                std::chrono::duration_cast<std::chrono::hours>(remaining_seconds);
+            const auto remaining_minutes = std::chrono::duration_cast<std::chrono::minutes>(
+                remaining_seconds - remaining_hours);
+
+            remaining_current = std::format("{}:{}", remaining_seconds, remaining_minutes);
         }
         else
         {
-            remain1 = std::format(":{:02}", remain);
+            remaining_current = std::format("0:{}", remaining_seconds);
         }
 
         // remain avg
         if (avg_speed > 0 && task->total_size != 0)
         {
-            remain = (task->total_size - task->progress) / avg_speed;
+            remaining_seconds =
+                std::chrono::seconds((task->total_size - task->progress) / avg_speed);
         }
         else
         {
-            remain = 0;
+            remaining_seconds = std::chrono::seconds::zero();
         }
-        if (remain <= 0)
+        if (remaining_seconds <= std::chrono::seconds::zero())
         {
-            remain2 = ""; // n/a
+            remaining_average = ""; // n/a
         }
-        else if (remain > 3599)
+        else if (remaining_seconds > std::chrono::hours(1))
         {
-            hours = remain / 3600;
-            if (remain - (hours * 3600) > 1799)
-            {
-                hours++;
-            }
-            remain2 = std::format("{}/h", hours);
+            const auto remaining_hours =
+                std::chrono::duration_cast<std::chrono::hours>(remaining_seconds);
+
+            remaining_average = std::format("{}/h", remaining_hours);
         }
-        else if (remain > 59)
+        else if (remaining_seconds > std::chrono::minutes(1))
         {
-            remain2 =
-                std::format("{}:{:02}", remain / 60, remain - ((unsigned int)(remain / 60) * 60));
+            const auto remaining_hours =
+                std::chrono::duration_cast<std::chrono::hours>(remaining_seconds);
+            const auto remaining_minutes = std::chrono::duration_cast<std::chrono::minutes>(
+                remaining_seconds - remaining_hours);
+
+            remaining_average = std::format("{}:{}", remaining_seconds, remaining_minutes);
         }
         else
         {
-            remain2 = std::format(":{:02}", remain);
+            remaining_average = std::format("0:{}", remaining_seconds);
         }
 
         ptask->dsp_file_count = file_count;
         ptask->dsp_size_tally = size_tally;
-        ptask->dsp_curspeed = speed1;
-        ptask->dsp_avgspeed = speed2;
-        ptask->dsp_curest = remain1;
-        ptask->dsp_avgest = remain2;
+        ptask->dsp_curspeed = speed_current;
+        ptask->dsp_avgspeed = speed_average;
+        ptask->dsp_curest = remaining_current;
+        ptask->dsp_avgest = remaining_average;
     }
 
     // move log lines from add_log_buf to log_buf
@@ -1970,7 +1978,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 
                 const auto dir_name = current_dest.parent_path();
                 const auto path = dir_name / filename;
-                *ptask->query_new_dest = ztd::strdup(path);
+                *ptask->query_new_dest = utils::strdup(path.c_str());
             }
             break;
         }
@@ -2161,8 +2169,7 @@ query_overwrite(PtkFileTask* ptask)
             }
             else
             {
-                const time_t src_mtime = src_stat.mtime();
-                src_time = vfs_create_display_date(src_mtime);
+                src_time = vfs_create_display_date(src_stat.mtime());
 
                 if (src_stat.mtime() > dest_stat.mtime())
                 {
@@ -2178,8 +2185,7 @@ query_overwrite(PtkFileTask* ptask)
             const std::string dest_size =
                 std::format("{}\t( {:L} bytes )", size_str, dest_stat.size());
 
-            const time_t dest_mtime = dest_stat.mtime();
-            const auto dest_time = vfs_create_display_date(dest_mtime);
+            const auto dest_time = vfs_create_display_date(dest_stat.mtime());
 
             std::string src_rel;
             if (src_rel_time.empty())

@@ -29,6 +29,8 @@
 
 #include <ranges>
 
+#include <cstring>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -803,7 +805,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             {
                 return false;
             }
-            if (button == 1 && !ztd::same(gtk_tree_view_column_get_title(col), "Status"))
+            if (button == 1 && std::strcmp(gtk_tree_view_column_get_title(col), "Status") != 0)
             {
                 return false;
             }
@@ -1067,24 +1069,25 @@ main_task_view_update_task(PtkFileTask* ptask)
     if (ptaskt != ptask)
     {
         // new row
-        const auto point = std::chrono::system_clock::from_time_t(ptask->task->start_time);
+        const auto point = ptask->task->start_time;
         const auto midnight = point - std::chrono::floor<std::chrono::days>(point);
         const auto hours = std::chrono::duration_cast<std::chrono::hours>(midnight);
         const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(midnight - hours);
         const auto started = std::format("{0:%H}:{1:%M}", hours, minutes);
 
-        gtk_list_store_insert_with_values(GTK_LIST_STORE(model),
-                                          &it,
-                                          0,
-                                          task_view_column::to,
-                                          dest_dir.empty() ? nullptr : dest_dir.c_str(),
-                                          task_view_column::started,
-                                          started.data(),
-                                          task_view_column::starttime,
-                                          (i64)ptask->task->start_time,
-                                          task_view_column::data,
-                                          ptask,
-                                          -1);
+        gtk_list_store_insert_with_values(
+            GTK_LIST_STORE(model),
+            &it,
+            0,
+            task_view_column::to,
+            dest_dir.empty() ? nullptr : dest_dir.c_str(),
+            task_view_column::started,
+            started.data(),
+            task_view_column::starttime,
+            std::chrono::system_clock::to_time_t(ptask->task->start_time),
+            task_view_column::data,
+            ptask,
+            -1);
     }
 
     if (ptask->task->state_pause_ == vfs::file_task::state::running || ptask->pause_change_view)

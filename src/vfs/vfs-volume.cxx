@@ -31,10 +31,14 @@
 
 #include <memory>
 
+#include <system_error>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
+
+#include "utils/shell_quote.hxx"
 
 #include "xset/xset.hxx"
 
@@ -207,7 +211,7 @@ parse_mounts(bool report)
     for (const devmount_t& devmount : newmounts)
     {
         // Sort the list to ensure that shortest mount paths appear first
-        std::ranges::sort(devmount->mounts, ztd::compare);
+        // std::ranges::sort(devmount->mounts, ztd::sort::compare);
 
         devmount->mount_points = ztd::join(devmount->mounts, ",");
         devmount->mounts.clear();
@@ -658,8 +662,10 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     }
 
     const auto canon = std::filesystem::canonical(dir);
+
+    std::error_code ec;
     const auto stat = ztd::stat(canon);
-    if (!stat || stat.is_block_file())
+    if (ec || stat.is_block_file())
     {
         return false;
     }
@@ -759,7 +765,7 @@ vfs::volume::device_mount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), ztd::shell::quote(this->device_file_));
+    return std::format("{} {}", path.string(), utils::shell_quote(this->device_file_));
 }
 
 const std::optional<std::string>
@@ -770,7 +776,7 @@ vfs::volume::device_unmount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), ztd::shell::quote(this->mount_point_));
+    return std::format("{} {}", path.string(), utils::shell_quote(this->mount_point_));
 }
 
 const std::string_view

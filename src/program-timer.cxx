@@ -13,6 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
+
 #include <ztd/ztd.hxx>
 
 #include "program-timer.hxx"
@@ -31,7 +33,7 @@ program_timer::start() noexcept
     ptimer.timer.start();
 }
 
-f64
+const std::chrono::seconds
 program_timer::elapsed() noexcept
 {
     return ptimer.timer.elapsed();

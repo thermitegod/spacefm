@@ -33,6 +33,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "utils/strdup.hxx"
+
 #include "types.hxx"
 
 #include "xset/xset.hxx"
@@ -918,7 +920,7 @@ xset_set_ob1_int(const xset_t& set, const char* ob1, i32 ob1_int) noexcept
     {
         std::free(set->ob1);
     }
-    set->ob1 = ztd::strdup(ob1);
+    set->ob1 = utils::strdup(ob1);
     set->ob1_data = GINT_TO_POINTER(ob1_int);
 }
 
@@ -930,7 +932,7 @@ xset_set_ob1(const xset_t& set, const char* ob1, void* ob1_data) noexcept
     {
         std::free(set->ob1);
     }
-    set->ob1 = ztd::strdup(ob1);
+    set->ob1 = utils::strdup(ob1);
     set->ob1_data = ob1_data;
 }
 
@@ -942,6 +944,6 @@ xset_set_ob2(const xset_t& set, const char* ob2, void* ob2_data) noexcept
     {
         std::free(set->ob2);
     }
-    set->ob2 = ztd::strdup(ob2);
+    set->ob2 = utils::strdup(ob2);
     set->ob2_data = ob2_data;
 }

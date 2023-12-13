@@ -24,6 +24,8 @@
 
 #include <memory>
 
+#include <system_error>
+
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -85,8 +87,9 @@ vfs::file::~file()
 bool
 vfs::file::update() noexcept
 {
-    this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow);
-    if (!this->file_stat_)
+    std::error_code ec;
+    this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow, ec);
+    if (ec)
     {
         this->mime_type_ = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         return false;
@@ -353,28 +356,28 @@ vfs::file::display_mtime() const noexcept
     return this->display_mtime_;
 }
 
-std::time_t
+const std::chrono::system_clock::time_point
 vfs::file::atime() const noexcept
 {
-    return this->file_stat_.atime().tv_sec;
+    return this->file_stat_.atime();
 }
 
-std::time_t
+const std::chrono::system_clock::time_point
 vfs::file::btime() const noexcept
 {
-    return this->file_stat_.btime().tv_sec;
+    return this->file_stat_.btime();
 }
 
-std::time_t
+const std::chrono::system_clock::time_point
 vfs::file::ctime() const noexcept
 {
-    return this->file_stat_.ctime().tv_sec;
+    return this->file_stat_.ctime();
 }
 
-std::time_t
+const std::chrono::system_clock::time_point
 vfs::file::mtime() const noexcept
 {
-    return this->file_stat_.mtime().tv_sec;
+    return this->file_stat_.mtime();
 }
 
 const std::string

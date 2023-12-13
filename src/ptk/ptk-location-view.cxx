@@ -38,6 +38,8 @@
 
 #include "compat/gtk4-porting.hxx"
 
+#include "utils/shell_quote.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
@@ -52,6 +54,8 @@
 
 #include "vfs/vfs-volume.hxx"
 #include "vfs/vfs-utils.hxx"
+
+#include "vfs/linux/self.hxx"
 
 #include "settings/app.hxx"
 
@@ -124,7 +128,7 @@ static bool volume_is_visible(const std::shared_ptr<vfs::volume>& vol);
 static void update_all();
 
 /*  Drag & Drop/Clipboard targets  */
-// static GtkTargetEntry drag_targets[] = {{ztd::strdup("text/uri-list"), 0, 0}};
+// static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
 static void
 on_model_destroy(void* data, GObject* object)
@@ -891,8 +895,8 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
                 }
                 else
                 {
-                    const std::string exe = ztd::program::exe();
-                    const std::string qpath = ztd::shell::quote(volume->mount_point());
+                    const std::string exe = vfs::linux::proc::self::exe();
+                    const std::string qpath = utils::shell_quote(volume->mount_point());
                     const std::string command = std::format("{} {}", exe, qpath);
                     ztd::logger::info("COMMAND({})", command);
                     Glib::spawn_command_line_async(command);
@@ -1107,8 +1111,8 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     else
     {
-        const std::string exe = ztd::program::exe();
-        const std::string qpath = ztd::shell::quote(vol->mount_point());
+        const std::string exe = vfs::linux::proc::self::exe();
+        const std::string qpath = utils::shell_quote(vol->mount_point());
         const std::string command = std::format("{} {}", exe, qpath);
         ztd::logger::info("COMMAND({})", command);
         Glib::spawn_command_line_async(command);
@@ -1699,7 +1703,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr
 static i32
 cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::volume>& b)
 {
-    return ztd::compare(a->display_name(), b->display_name());
+    return a->display_name().compare(b->display_name());
 }
 #endif
 

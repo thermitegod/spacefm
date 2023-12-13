@@ -611,7 +611,7 @@ compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
     else
     {
         // non-natural
-        result = ztd::sort::compare(a->name(), b->name());
+        result = a->name().compare(b->name());
     }
     return result;
 }
@@ -629,7 +629,7 @@ compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
                   PtkFileList* list)
 {
     (void)list;
-    return ztd::sort::compare(a->mime_type()->description(), b->mime_type()->description());
+    return a->mime_type()->description().compare(b->mime_type()->description());
 }
 
 static i32
@@ -637,7 +637,7 @@ compare_file_mime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
                   PtkFileList* list)
 {
     (void)list;
-    return ztd::sort::compare(a->mime_type()->description(), b->mime_type()->description());
+    return a->mime_type()->description().compare(b->mime_type()->description());
 }
 
 static i32
@@ -645,7 +645,7 @@ compare_file_perm(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
                   PtkFileList* list)
 {
     (void)list;
-    return ztd::sort::compare(a->display_permissions(), b->display_permissions());
+    return a->display_permissions().compare(b->display_permissions());
 }
 
 static i32
@@ -653,7 +653,7 @@ compare_file_owner(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
                    PtkFileList* list)
 {
     (void)list;
-    return ztd::sort::compare(a->display_owner(), b->display_owner());
+    return a->display_owner().compare(b->display_owner());
 }
 
 static i32
@@ -661,7 +661,7 @@ compare_file_group(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
                    PtkFileList* list)
 {
     (void)list;
-    return ztd::sort::compare(a->display_group(), b->display_group());
+    return a->display_group().compare(b->display_group());
 }
 
 static i32
@@ -875,10 +875,10 @@ PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) n
 
     // check if reloading of thumbnail is needed.
     // See also desktop-window.c:on_file_changed()
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const auto now = std::chrono::system_clock::now();
 
     if (this->max_thumbnail != 0 &&
-        ((file->mime_type()->is_video() && (now - file->mtime() > 5)) ||
+        ((file->mime_type()->is_video() && (now - file->mtime() > std::chrono::seconds(5))) ||
          (file->size() < this->max_thumbnail && file->mime_type()->is_image())))
     {
         if (!file->is_thumbnail_loaded(this->thumbnail_size))

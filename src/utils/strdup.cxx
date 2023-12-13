@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -13,14 +15,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <string_view>
 
-#include <chrono>
+#include <cstring>
 
 #include <ztd/ztd.hxx>
 
-namespace program_timer
+#include "utils/strdup.hxx"
+
+[[nodiscard]] char*
+utils::strdup(const char* str) noexcept
 {
-void start() noexcept;
-const std::chrono::seconds elapsed() noexcept;
-} // namespace program_timer
+    if (str == nullptr)
+    {
+        return nullptr;
+    }
+    return ::strndup(str, std::strlen(str));
+}
+
+[[nodiscard]] char*
+utils::strdup(const std::string_view str) noexcept
+{
+    return ::strndup(str.data(), str.size());
+}

@@ -25,6 +25,8 @@
 #include <array>
 #include <vector>
 
+#include <chrono>
+
 #include <optional>
 
 #include <memory>
@@ -171,11 +173,11 @@ struct file_task : public std::enable_shared_from_this<file_task>
     bool custom_percent{false};
     u64 last_speed{0};
     u64 last_progress{0};
-    f64 last_elapsed{0.0};
+    std::chrono::seconds last_elapsed{std::chrono::seconds::zero()};
     u32 current_item{0};
 
     ztd::timer timer;
-    std::time_t start_time;
+    std::chrono::system_clock::time_point start_time;
 
     // copy of Current processed file
     std::optional<std::filesystem::path> current_file{std::nullopt};

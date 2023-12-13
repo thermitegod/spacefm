@@ -96,7 +96,7 @@ autosave_request_add() noexcept
     }
     else
     { // At program start lots of requests can be sent, this ignores them
-        if (program_timer::elapsed() >= 10.0)
+        if (program_timer::elapsed() >= std::chrono::seconds(10))
         {
             // ztd::logger::debug("AUTOSAVE now accepting request add");
             autosave->accepting_requests.store(true);

@@ -23,6 +23,8 @@
 
 #include <chrono>
 
+#include <system_error>
+
 #include <cassert>
 
 #include <CLI/CLI.hpp>
@@ -46,9 +48,14 @@
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 
+#include "vfs/linux/self.hxx"
+
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-location-view.hxx"
+
+#include "utils/strdup.hxx"
+#include "utils/shell_quote.hxx"
 
 #include "settings/app.hxx"
 
@@ -107,7 +114,7 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
         {
             // set panel to load real_path on panel load
             const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
-            set->ob1 = ztd::strdup(real_path);
+            set->ob1 = utils::strdup(real_path.c_str());
             tab_added = true;
             set->b = xset::b::xtrue;
             show_panels_all_windows(nullptr, main_window);
@@ -177,8 +184,9 @@ activate(GtkApplication* app, void* user_data)
         }
         else if (std::filesystem::exists(real_path))
         {
-            const auto file_stat = ztd::stat(real_path);
-            if (file_stat && file_stat.is_block_file())
+            std::error_code ec;
+            const auto file_stat = ztd::stat(real_path, ec);
+            if (!ec && file_stat.is_block_file())
             {
                 // open block device eg /dev/sda1
                 ptk_location_view_open_block(real_path, true);
@@ -224,7 +232,7 @@ main(int argc, char* argv[])
     std::locale::global(std::locale(""));
 
     // logging init
-    ztd::Logger->initialize();
+    ztd::logger::initialize();
 
     // CLI11
     CLI::App cli_app{PACKAGE_NAME_FANCY, "A multi-panel tabbed file manager"};
@@ -272,8 +280,8 @@ main(int argc, char* argv[])
                 continue;
             }
             const auto command = std::format("{} socket set new-tab {}",
-                                             ztd::program::exe().string(),
-                                             ztd::shell::quote(file.string()));
+                                             vfs::linux::proc::self::exe().string(),
+                                             utils::shell_quote(file.string()));
             Glib::spawn_command_line_sync(command);
         }
 
@@ -304,7 +312,6 @@ main(int argc, char* argv[])
     // start autosave thread
     autosave_init(save_settings);
 
-    std::atexit(ztd::Logger->shutdown);
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
     std::atexit(vfs_volume_finalize);

@@ -22,6 +22,13 @@
 
 #include <memory>
 
+#include <system_error>
+
+#include <cerrno>
+
+#include <cerrno>
+#include <cstring>
+
 #include <sys/inotify.h>
 
 #include <gtkmm.h>

@@ -38,6 +38,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "utils/shell_quote.hxx"
+
 #include "settings/app.hxx"
 
 #include "vfs/vfs-dir.hxx"
@@ -229,8 +231,8 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
     // do not create a thumbnail. This means that newly created files
     // will not have a thumbnail until a refresh
     const auto mtime = file->mtime();
-    const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    if (now - mtime < 5)
+    const auto now = std::chrono::system_clock::now();
+    if (now - mtime < std::chrono::seconds(5))
     {
         return nullptr;
     }
@@ -238,7 +240,7 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
     // load existing thumbnail
     i32 w;
     i32 h;
-    std::time_t embeded_mtime = 0;
+    std::chrono::system_clock::time_point embeded_mtime;
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
@@ -251,12 +253,15 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
             const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
             if (thumb_mtime != nullptr)
             {
-                embeded_mtime = std::stol(thumb_mtime);
+                embeded_mtime = std::chrono::system_clock::from_time_t(std::stol(thumb_mtime));
             }
         }
     }
 
-    if (!thumbnail || (w < thumb_size && h < thumb_size) || embeded_mtime != mtime)
+    if (!thumbnail || (w < thumb_size && h < thumb_size) ||
+        // TODO? on disk thumbnail mtime metadata does not store nanoseconds
+        std::chrono::time_point_cast<std::chrono::seconds>(embeded_mtime) !=
+            std::chrono::time_point_cast<std::chrono::seconds>(mtime))
     {
         // ztd::logger::debug("New thumb: {}", thumbnail_file);
 
@@ -291,8 +296,8 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
         {
             const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
                                              thumb_size,
-                                             ztd::shell::quote(file->path().string()),
-                                             ztd::shell::quote(thumbnail_file.string()));
+                                             utils::shell_quote(file->path().string()),
+                                             utils::shell_quote(thumbnail_file.string()));
             // ztd::logger::info("COMMAND({})", command);
             Glib::spawn_command_line_sync(command);
 

@@ -27,6 +27,8 @@
 
 #include <ranges>
 
+#include <system_error>
+
 #include <fmt/format.h>
 
 #include <glibmm.h>
@@ -45,6 +47,9 @@
 #include "xset/xset-custom.hxx"
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-misc.hxx"
+
+#include "utils/strdup.hxx"
+#include "utils/shell_quote.hxx"
 
 #include "settings/app.hxx"
 
@@ -1310,7 +1315,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             std::string str;
             for (const std::string_view path : pathv)
             {
-                str.append(std::format("{} ", ztd::shell::quote(path)));
+                str.append(std::format("{} ", utils::shell_quote(path)));
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
 #endif
@@ -1331,7 +1336,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                 {
                     continue;
                 }
-                str.append(std::format("{} ", ztd::shell::quote(file->name())));
+                str.append(std::format("{} ", utils::shell_quote(file->name())));
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }
@@ -1712,14 +1717,15 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_INVALID, std::format("path does not exist '{}'", value)};
             }
 
-            const auto real_path_stat = ztd::stat(value);
+            std::error_code ec;
+            const auto real_path_stat = ztd::stat(value, ec);
             std::shared_ptr<vfs::volume> vol = nullptr;
             if (property == "umount" && std::filesystem::is_directory(value))
             {
                 // umount DIR
                 if (is_path_mountpoint(value))
                 {
-                    if (!real_path_stat || !real_path_stat.is_block_file())
+                    if (ec || !real_path_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
                         vol = vfs_volume_get_by_device(value);
@@ -1730,7 +1736,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                     }
                 }
             }
-            else if (real_path_stat && real_path_stat.is_block_file())
+            else if (!ec && real_path_stat.is_block_file())
             {
                 // block device eg /dev/sda1
                 vol = vfs_volume_get_by_device(value);
@@ -1955,6 +1961,7 @@ run_ipc_command(const std::string_view socket_commands_json)
     }
     else if (command == "add-event" || command == "replace-event" || command == "remove-event")
     {
+#if 0
         const std::vector<std::string> data = json["data"];
 
         xset_t set = xset_is(data[i]);
@@ -1975,14 +1982,16 @@ run_ipc_command(const std::string_view socket_commands_json)
         GList* l = nullptr;
         if (command == "remove-event")
         {
-            l = g_list_find_custom((GList*)set->ob2_data, str.data(), (GCompareFunc)ztd::compare);
+            l = g_list_find_custom((GList*)set->ob2_data,
+                                   str.data(),
+                                   (GCompareFunc)ztd::sort::compare);
             if (!l)
             {
                 // remove replace event
                 const std::string str2 = std::format("*{}", str);
                 l = g_list_find_custom((GList*)set->ob2_data,
                                        str2.data(),
-                                       (GCompareFunc)ztd::compare);
+                                       (GCompareFunc)ztd::sort::compare);
             }
             if (!l)
             {
@@ -1992,9 +2001,12 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else
         {
-            l = g_list_append((GList*)set->ob2_data, ztd::strdup(str));
+            l = g_list_append((GList*)set->ob2_data, utils::strdup(str));
         }
         set->ob2_data = (void*)l;
+#else
+        return {SOCKET_INVALID, "Not Implemented"};
+#endif
     }
     else if (command == "help")
     {

@@ -30,6 +30,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "utils/strdup.hxx"
+#include "utils/shell_quote.hxx"
+
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-task.hxx"
 
@@ -217,7 +220,7 @@ ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel
     std::string file_text;
     for (const auto& file : sel_files)
     {
-        const auto quoted = ztd::shell::quote(file->path().string());
+        const auto quoted = utils::shell_quote(file->path().string());
         file_text = std::format("{} {}", file_text, quoted);
     }
     gtk_clipboard_set_text(clip, file_text.data(), -1);
@@ -263,10 +266,10 @@ ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>
     n_targets += 2;
     targets = g_renew(GtkTargetEntry, targets, n_targets);
     GtkTargetEntry* new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = ztd::strdup("x-special/gnome-copied-files");
+    new_target->target = utils::strdup("x-special/gnome-copied-files");
     memmove(&(targets[n_targets - 2]), new_target, sizeof(GtkTargetEntry));
     new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = ztd::strdup("text/uri-list");
+    new_target->target = utils::strdup("text/uri-list");
     memmove(&(targets[n_targets - 1]), new_target, sizeof(GtkTargetEntry));
 
     gtk_target_list_unref(target_list);
@@ -303,10 +306,10 @@ ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files
     n_targets += 2;
     targets = g_renew(GtkTargetEntry, targets, n_targets);
     GtkTargetEntry* new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = ztd::strdup("x-special/gnome-copied-files");
+    new_target->target = utils::strdup("x-special/gnome-copied-files");
     memmove(&(targets[n_targets - 2]), new_target, sizeof(GtkTargetEntry));
     new_target = g_new0(GtkTargetEntry, 1);
-    new_target->target = ztd::strdup("text/uri-list");
+    new_target->target = utils::strdup("text/uri-list");
     memmove(&(targets[n_targets - 1]), new_target, sizeof(GtkTargetEntry));
 
     gtk_target_list_unref(target_list);
@@ -592,8 +595,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
                 file_path = std::filesystem::read_symlink(file_path);
             }
 
-            const auto file_stat = ztd::lstat(file_path);
-            if (file_stat)
+            if (std::filesystem::exists(file_path))
             { // need to see broken symlinks
                 file_list.push_back(file_path);
             }
