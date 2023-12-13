@@ -50,7 +50,7 @@ vfs::file::create(const std::filesystem::path& path) noexcept
 
 vfs::file::file(const std::filesystem::path& path) : path_(path)
 {
-    // ztd::logger::debug("vfs::file::file({})    {}", fmt::ptr(this), this->path_);
+    // ztd::logger::debug("vfs::file::file({})    {}", ztd::logger::utils::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
 
     if (this->path_ == "/")
@@ -73,7 +73,7 @@ vfs::file::file(const std::filesystem::path& path) : path_(path)
 
 vfs::file::~file()
 {
-    // ztd::logger::debug("vfs::file::~file({})   {}", fmt::ptr(this), this->path_);
+    // ztd::logger::debug("vfs::file::~file({})   {}", ztd::logger::utils::ptr(this), this->path_);
     if (this->big_thumbnail_)
     {
         g_object_unref(this->big_thumbnail_);
@@ -95,7 +95,7 @@ vfs::file::update() noexcept
         return false;
     }
 
-    // ztd::logger::debug("vfs::file::update({})    {}  size={}", fmt::ptr(this), this->name, this->file_stat.size());
+    // ztd::logger::debug("vfs::file::update({})    {}  size={}", ztd::logger::utils::ptr(this), this->name, this->file_stat.size());
 
     // this->status = std::filesystem::status(file_path);
     this->status_ = std::filesystem::symlink_status(this->path_);

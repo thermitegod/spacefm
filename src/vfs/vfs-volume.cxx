@@ -701,7 +701,7 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
 
 vfs::volume::volume(const std::shared_ptr<vfs::device>& device)
 {
-    // ztd::logger::debug("vfs::volume::volume({})", fmt::ptr(this));
+    // ztd::logger::debug("vfs::volume::volume({})", ztd::logger::utils::ptr(this));
 
     this->devnum_ = device->devnum();
     this->device_type_ = vfs::volume::device_type::block;

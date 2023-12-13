@@ -59,9 +59,6 @@
 #include <cassert>
 #include <exception>
 
-// FMT
-#include <fmt/format.h>
-
 // SIGNALS
 #include <sigc++/sigc++.h>
 

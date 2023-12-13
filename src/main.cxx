@@ -29,8 +29,6 @@
 
 #include <CLI/CLI.hpp>
 
-#include <fmt/format.h>
-
 #include <gtkmm.h>
 #include <gdkmm.h>
 #include <glibmm.h>
@@ -169,7 +167,7 @@ activate(GtkApplication* app, void* user_data)
     assert(GTK_IS_APPLICATION_WINDOW(main_window));
 
     // ztd::logger::debug("main_window = {}  {} {}",
-    //                    fmt::ptr(main_window),
+    //                    ztd::logger::utils::ptr(main_window),
     //                    opt->new_tab ? "new_tab" : "",
     //                    opt->reuse_tab ? "reuse_tab" : "");
 

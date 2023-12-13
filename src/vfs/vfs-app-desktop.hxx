@@ -41,7 +41,7 @@ class desktop
   public:
     desktop() = delete;
     ~desktop() = default;
-    // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", fmt::ptr(this)) };
+    // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", ztd::logger::utils::ptr(this)) };
 
     desktop(const std::filesystem::path& desktop_file) noexcept;
 

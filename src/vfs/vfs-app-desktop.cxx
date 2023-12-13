@@ -73,19 +73,19 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
     if (desktops_cache.contains(desktop_file))
     {
         auto desktop = desktops_cache.at(desktop_file);
-        // ztd::logger::info("vfs::desktop::desktop({})  cache   {}", fmt::ptr(desktop), desktop_file.string());
+        // ztd::logger::info("vfs::desktop::desktop({})  cache   {}", ztd::logger::utils::ptr(desktop), desktop_file.string());
         return desktop;
     }
 
     auto desktop = std::make_shared<vfs::desktop>(desktop_file);
     desktops_cache.insert({desktop_file, desktop});
-    // ztd::logger::info("vfs::desktop::desktop({})  new     {}", fmt::ptr(desktop), desktop_file.string());
+    // ztd::logger::info("vfs::desktop::desktop({})  new     {}", ztd::logger::utils::ptr(desktop), desktop_file.string());
     return desktop;
 }
 
 vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
 {
-    // ztd::logger::info("vfs::desktop::desktop({})", fmt::ptr(this));
+    // ztd::logger::info("vfs::desktop::desktop({})", ztd::logger::utils::ptr(this));
 #if (GTK_MAJOR_VERSION == 4)
 
     const auto kf = Glib::KeyFile::create();

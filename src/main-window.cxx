@@ -36,8 +36,6 @@
 
 #include <cassert>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -814,7 +812,7 @@ MainWindow::show_panels() noexcept
                                 gtk_notebook_get_nth_page(this->get_panel_notebook(p), cur_tabx));
                             // if (file_browser->folder_view)
                             //      gtk_widget_grab_focus(file_browser->folder_view);
-                            // ztd::logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, fmt::ptr(file_browser->folder_view_), fmt::ptr(main_window));
+                            // ztd::logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, ztd::logger::utils::ptr(file_browser->folder_view_), ztd::logger::utils::ptr(this));
                             g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
                         }
                     }
@@ -1996,7 +1994,7 @@ MainWindow::create_tab_label(PtkFileBrowser* file_browser) const noexcept
 void
 MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 {
-    // ztd::logger::debug("New tab fb={} panel={} path={}", fmt::ptr(file_browser), this->curpanel, folder_path);
+    // ztd::logger::debug("New tab fb={} panel={} path={}", ztd::logger::utils::ptr(file_browser), this->curpanel, folder_path);
 
     PtkFileBrowser* current_file_browser = this->current_file_browser();
     if (GTK_IS_WIDGET(current_file_browser))
@@ -2076,8 +2074,8 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     //    while(g_main_context_pending(nullptr))  // wait for chdir to grab focus
     //        g_main_context_iteration(nullptr, true);
     // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view_));
-    // ztd::logger::info("focus browser {} {}", idx, fmt::ptr(file_browser->folder_view_));
-    // ztd::logger::info("call delayed (newtab) #{} {}", idx, fmt::ptr(file_browser->folder_view_));
+    // ztd::logger::info("focus browser {} {}", idx, ztd::logger::utils::ptr(file_browser->folder_view_));
+    // ztd::logger::info("call delayed (newtab) #{} {}", idx, ztd::logger::utils::ptr(file_browser->folder_view_));
     // g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
 }
 
@@ -2183,7 +2181,7 @@ delayed_focus_file_browser(PtkFileBrowser* file_browser)
 {
     if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
     {
-        // ztd::logger::info("delayed_focus_file_browser fb={}", fmt::ptr(file_browser));
+        // ztd::logger::info("delayed_focus_file_browser fb={}", ztd::logger::utils::ptr(file_browser));
         if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
         {
             gtk_widget_grab_focus(file_browser->folder_view());
@@ -2351,7 +2349,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     }
 
     file_browser = PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_num));
-    // ztd::logger::info("on_folder_notebook_switch_pape fb={}   panel={}   page={}", fmt::ptr(file_browser), file_browser->mypanel, page_num);
+    // ztd::logger::info("on_folder_notebook_switch_pape fb={}   panel={}   page={}", ztd::logger::utils::ptr(file_browser), file_browser->mypanel, page_num);
     main_window->curpanel = file_browser->panel();
     main_window->notebook = main_window->get_panel_notebook(main_window->curpanel);
 
@@ -3120,7 +3118,7 @@ main_window_get_on_current_desktop()
     for (MainWindow* window : all_windows)
     {
         const i64 desktop = get_desktop_index(GTK_WINDOW(window));
-        // ztd::logger::info( "    test win {} = {}", fmt::ptr(window), desktop);
+        // ztd::logger::info( "    test win {} = {}", ztd::logger::utils::ptr(window), desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
         {
             return window;

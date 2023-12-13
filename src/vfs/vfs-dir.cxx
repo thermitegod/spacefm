@@ -58,7 +58,7 @@ static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 
 vfs::dir::dir(const std::filesystem::path& path) : path_(path)
 {
-    // ztd::logger::debug("vfs::dir::dir({})   {}", fmt::ptr(this), path);
+    // ztd::logger::debug("vfs::dir::dir({})   {}", ztd::logger::utils::ptr(this), path);
 
     this->update_avoid_changes();
 
@@ -72,7 +72,7 @@ vfs::dir::dir(const std::filesystem::path& path) : path_(path)
 
 vfs::dir::~dir()
 {
-    // ztd::logger::debug("vfs::dir::~dir({})  {}", fmt::ptr(this), path);
+    // ztd::logger::debug("vfs::dir::~dir({})  {}", ztd::logger::utils::ptr(this), path);
 
     this->signal_task_load_dir.disconnect();
 
@@ -80,7 +80,7 @@ vfs::dir::~dir()
     {
         // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
 
-        // ztd::logger::trace("this->task({})", fmt::ptr(this->task));
+        // ztd::logger::trace("this->task({})", ztd::logger::utils::ptr(this->task));
         this->task_->cancel();
     }
 
@@ -97,16 +97,16 @@ vfs::dir::create(const std::filesystem::path& path) noexcept
     if (dir_smart_cache.contains(path))
     {
         dir = dir_smart_cache.at(path);
-        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", fmt::ptr(dir.get()), path);
+        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", ztd::logger::utils::ptr(dir.get()), path);
     }
     else
     {
         dir = dir_smart_cache.create(
             path,
             std::bind([](const auto& path) { return std::make_shared<vfs::dir>(path); }, path));
-        // ztd::logger::debug("vfs::dir::dir({}) new     {}", fmt::ptr(dir.get()), path);
+        // ztd::logger::debug("vfs::dir::dir({}) new     {}", ztd::logger::utils::ptr(dir.get()), path);
     }
-    // ztd::logger::debug("dir({})     {}", fmt::ptr(dir.get()), path);
+    // ztd::logger::debug("dir({})     {}", ztd::logger::utils::ptr(dir.get()), path);
     return dir;
 }
 

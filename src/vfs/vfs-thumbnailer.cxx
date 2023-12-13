@@ -55,14 +55,14 @@ static bool on_thumbnail_idle(void* user_data);
 
 vfs::thumbnailer::thumbnailer(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
 {
-    // ztd::logger::debug("vfs::dir::thumbnailer({})", fmt::ptr(this));
+    // ztd::logger::debug("vfs::dir::thumbnailer({})", ztd::logger::utils::ptr(this));
 
     this->task = vfs::async_task::create((vfs::async_task::function_t)thumbnailer_thread, this);
 }
 
 vfs::thumbnailer::~thumbnailer()
 {
-    // ztd::logger::debug("vfs::dir::~thumbnailer({})", fmt::ptr(this));
+    // ztd::logger::debug("vfs::dir::~thumbnailer({})", ztd::logger::utils::ptr(this));
 
     if (this->idle_handler)
     {
@@ -128,7 +128,7 @@ on_thumbnail_idle(void* user_data)
     if (loader->task->is_finished())
     {
         // ztd::logger::debug("FREE LOADER IN IDLE HANDLER");
-        // ztd::logger::trace("dir->thumbnailer({})", fmt::ptr(loader->dir->thumbnailer));
+        // ztd::logger::trace("dir->thumbnailer({})", ztd::logger::utils::ptr(loader->dir->thumbnailer));
         loader->dir->thumbnailer = nullptr;
     }
 

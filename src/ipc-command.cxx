@@ -29,8 +29,6 @@
 
 #include <system_error>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -139,7 +137,7 @@ run_ipc_command(const std::string_view socket_commands_json)
     {
         for (MainWindow* window2 : main_window_get_all())
         {
-            const std::string str = std::format("{}", fmt::ptr(window2));
+            const std::string str = std::format("{}", ztd::logger::utils::ptr(window2));
             if (str == window)
             {
                 main_window = window2;
@@ -1395,7 +1393,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             do
             {
                 gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
-                const std::string str = std::format("{}", fmt::ptr(ptask));
+                const std::string str = std::format("{}", ztd::logger::utils::ptr(ptask));
                 if (str == data[i])
                 {
                     break;
@@ -1525,7 +1523,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             do
             {
                 gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
-                const std::string str = std::format("{}", fmt::ptr(ptask));
+                const std::string str = std::format("{}", ztd::logger::utils::ptr(ptask));
                 if (str == property)
                 {
                     break;
@@ -1691,8 +1689,8 @@ run_ipc_command(const std::string_view socket_commands_json)
                         std::format("Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
                                     "new_task_id={}",
-                                    fmt::ptr(main_window),
-                                    fmt::ptr(ptask))};
+                                    ztd::logger::utils::ptr(main_window),
+                                    ztd::logger::utils::ptr(ptask))};
             }
         }
         else if (property == "edit")
@@ -1896,8 +1894,8 @@ run_ipc_command(const std::string_view socket_commands_json)
                     std::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
                                 "new_task_id={}",
-                                fmt::ptr(main_window),
-                                fmt::ptr(ptask))};
+                                ztd::logger::utils::ptr(main_window),
+                                ztd::logger::utils::ptr(ptask))};
         }
         else
         {

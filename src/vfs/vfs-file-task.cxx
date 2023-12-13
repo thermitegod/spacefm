@@ -39,8 +39,6 @@
 
 #include <malloc.h>
 
-#include <fmt/format.h>
-
 #include <glibmm.h>
 
 #include <magic_enum.hpp>

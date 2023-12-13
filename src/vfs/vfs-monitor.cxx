@@ -97,12 +97,12 @@ vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callb
                                              this->path_.string()));
     }
 
-    // ztd::logger::debug("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", fmt::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
+    // ztd::logger::debug("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", ztd::logger::utils::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
 }
 
 vfs::monitor::~monitor()
 {
-    // ztd::logger::debug("vfs::monitor::~monitor({}) {}", fmt::ptr(this),this->path_);
+    // ztd::logger::debug("vfs::monitor::~monitor({}) {}", ztd::logger::utils::ptr(this),this->path_);
 
     this->signal_io_handler_.disconnect();
 
@@ -114,7 +114,7 @@ void
 vfs::monitor::dispatch_event(const vfs::monitor::event event,
                              const std::filesystem::path& path) noexcept
 {
-    // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", fmt::ptr(this), magic_enum::enum_name(event), this->path_);
+    // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", ztd::logger::utils::ptr(this), magic_enum::enum_name(event), this->path_);
 
     this->callback_(event, path);
 }
@@ -122,7 +122,7 @@ vfs::monitor::dispatch_event(const vfs::monitor::event event,
 bool
 vfs::monitor::on_inotify_event(const Glib::IOCondition condition)
 {
-    // ztd::logger::debug("vfs::monitor::on_inotify_event({})  {}", fmt::ptr(this), this->path_);
+    // ztd::logger::debug("vfs::monitor::on_inotify_event({})  {}", ztd::logger::utils::ptr(this), this->path_);
 
     if (condition == Glib::IOCondition::IO_HUP || condition == Glib::IOCondition::IO_ERR)
     {
