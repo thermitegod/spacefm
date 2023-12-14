@@ -86,27 +86,22 @@ vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file,
                                  const vfs::file::thumbnail_size size) noexcept
 {
     // Check if the request is already scheduled
-    std::shared_ptr<vfs::thumbnailer::request> req;
-    for (const auto& queued_req : this->queue)
+    for (const auto& req : this->queue)
     {
-        req = queued_req;
         // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
         // If file with the same name is already in our queue
         if (req->file == file || req->file->name() == file->name())
         {
-            break;
+            ++req->n_requests[size];
+            return;
         }
-        req = nullptr;
     }
 
-    if (!req)
-    {
-        req = std::make_shared<vfs::thumbnailer::request>(file);
-        // ztd::logger::debug("this->queue add file={}", req->file->name());
-        this->queue.push_back(req);
-    }
-
+    // ztd::logger::debug("this->queue add file={}", file->name());
+    const auto req = std::make_shared<vfs::thumbnailer::request>(file);
     ++req->n_requests[size];
+
+    this->queue.push_back(req);
 }
 
 static bool
@@ -172,9 +167,8 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
                 req->file->load_thumbnail(value.first);
 
                 // Slow down for debugging.
-                // ztd::logger::debug("DELAY!!");
-                // Glib::usleep(G_USEC_PER_SEC/2);
                 // ztd::logger::debug("thumbnail loaded: {}", req->file);
+                // std::this_thread::sleep_for(std::chrono::seconds(1));
             }
             need_update = true;
         }
