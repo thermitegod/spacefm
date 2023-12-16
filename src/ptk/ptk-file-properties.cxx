@@ -38,7 +38,6 @@
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-file-properties.hxx"
@@ -373,7 +372,8 @@ create_prop_text_box_no_focus(const std::string_view data)
 GtkEntry*
 create_prop_text_box_date(const std::chrono::system_clock::time_point time_point)
 {
-    const auto time_formated = vfs_create_display_date(time_point);
+    const auto time_formated =
+        std::format("{}", std::chrono::floor<std::chrono::seconds>(time_point));
 
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
 #if (GTK_MAJOR_VERSION == 4)

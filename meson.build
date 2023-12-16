@@ -431,7 +431,6 @@ sources = files(
   'src/vfs/vfs-mime-monitor.cxx',
   'src/vfs/vfs-monitor.cxx',
   'src/vfs/vfs-thumbnailer.cxx',
-  'src/vfs/vfs-time.cxx',
   'src/vfs/vfs-trash-can.cxx',
   'src/vfs/vfs-user-dirs.cxx',
   'src/vfs/vfs-utils.cxx',

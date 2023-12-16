@@ -128,16 +128,6 @@ load_settings()
     // MOD turn off fullscreen
     xset_set_b(xset::name::main_full, false);
 
-    const auto date_format = xset_get_s(xset::name::date_format);
-    if (date_format)
-    {
-        app_settings.date_format(date_format.value());
-    }
-    else
-    {
-        xset_set(xset::name::date_format, xset::var::s, app_settings.date_format());
-    }
-
     // MOD terminal discovery
     const auto main_terminal = xset_get_s(xset::name::main_terminal);
     if (!main_terminal)

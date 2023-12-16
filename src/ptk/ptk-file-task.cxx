@@ -48,7 +48,6 @@
 #include "utils.hxx"
 #include "utils/strdup.hxx"
 
-#include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/ptk-task-view.hxx"
@@ -2167,7 +2166,8 @@ query_overwrite(PtkFileTask* ptask)
             }
             else
             {
-                src_time = vfs_create_display_date(src_stat.mtime());
+                src_time =
+                    std::format("{}", std::chrono::floor<std::chrono::seconds>(src_stat.mtime()));
 
                 if (src_stat.mtime() > dest_stat.mtime())
                 {
@@ -2183,7 +2183,8 @@ query_overwrite(PtkFileTask* ptask)
             const std::string dest_size =
                 std::format("{}\t( {:L} bytes )", size_str, dest_stat.size());
 
-            const auto dest_time = vfs_create_display_date(dest_stat.mtime());
+            const auto dest_time =
+                std::format("{}", std::chrono::floor<std::chrono::seconds>(dest_stat.mtime()));
 
             std::string src_rel;
             if (src_rel_time.empty())

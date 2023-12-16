@@ -179,26 +179,6 @@ AppSettings::load_saved_tabs(bool val) noexcept
     this->load_saved_tabs_ = val;
 }
 
-const std::string_view
-AppSettings::date_format() const noexcept
-{
-    if (this->date_format_custom_.empty())
-    {
-        return this->date_format_default_;
-    }
-    return this->date_format_custom_;
-}
-
-void
-AppSettings::date_format(const std::string_view val) noexcept
-{
-    if (val.empty())
-    {
-        return;
-    }
-    this->date_format_custom_ = val.data();
-}
-
 u64
 AppSettings::width() const noexcept
 {

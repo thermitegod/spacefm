@@ -36,7 +36,6 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
-#include "vfs/vfs-time.hxx"
 #include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -118,10 +117,14 @@ vfs::file::update() noexcept
     this->display_group_ = gr.name();
 
     // time
-    this->display_atime_ = vfs_create_display_date(this->atime());
-    this->display_btime_ = vfs_create_display_date(this->btime());
-    this->display_ctime_ = vfs_create_display_date(this->ctime());
-    this->display_mtime_ = vfs_create_display_date(this->mtime());
+    this->display_atime_ =
+        std::format("{}", std::chrono::floor<std::chrono::seconds>(this->atime()));
+    this->display_btime_ =
+        std::format("{}", std::chrono::floor<std::chrono::seconds>(this->btime()));
+    this->display_ctime_ =
+        std::format("{}", std::chrono::floor<std::chrono::seconds>(this->ctime()));
+    this->display_mtime_ =
+        std::format("{}", std::chrono::floor<std::chrono::seconds>(this->mtime()));
 
     this->load_special_info();
 

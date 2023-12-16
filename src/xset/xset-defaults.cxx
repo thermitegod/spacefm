@@ -765,7 +765,6 @@ xset_defaults()
     set->menu_style = xset::menu::check;
 
     // PANELS COMMON
-    xset_set(xset::name::date_format, xset::var::s, "%Y-%m-%d %H:%M");
 
     set = xset_get(xset::name::con_open);
     xset_set_var(set, xset::var::menu_label, "_Open");

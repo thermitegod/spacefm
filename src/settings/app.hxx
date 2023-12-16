@@ -62,9 +62,6 @@ struct AppSettings
     [[nodiscard]] bool load_saved_tabs() const noexcept;
     void load_saved_tabs(bool val) noexcept;
 
-    [[nodiscard]] const std::string_view date_format() const noexcept;
-    void date_format(const std::string_view val) noexcept;
-
     [[nodiscard]] u64 width() const noexcept;
     void width(u64 val) noexcept;
 
@@ -109,9 +106,6 @@ struct AppSettings
     bool confirm_trash_{true};
 
     bool load_saved_tabs_{true};
-
-    const std::string date_format_default_{"%Y-%m-%d %H:%M:%S"};
-    std::string date_format_custom_{};
 
     // Window State
     u64 width_{640};

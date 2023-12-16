@@ -927,40 +927,6 @@ create_combobox()
  * Advanced Tab
  */
 
-namespace preference::date_format
-{
-static void
-pref_text_box_cb(GtkEntry* entry, const void* user_data)
-{
-    (void)user_data;
-
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
-    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
-    app_settings.date_format(text);
-
-    // main_window_refresh_all();
-}
-
-GtkEntry*
-create_pref_text_box()
-{
-    GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_editable_set_text(GTK_EDITABLE(entry), app_settings.date_format().data());
-#elif (GTK_MAJOR_VERSION == 3)
-    gtk_entry_set_text(GTK_ENTRY(entry), app_settings.date_format().data());
-#endif
-
-    g_signal_connect(G_OBJECT(entry), "changed", G_CALLBACK(pref_text_box_cb), nullptr);
-
-    return entry;
-}
-} // namespace preference::date_format
-
 namespace preference::editor
 {
 static void
@@ -1165,11 +1131,6 @@ init_advanced_tab()
 
     page.add_row(GTK_WIDGET(gtk_label_new("Editor")),
                  GTK_WIDGET(preference::editor::create_pref_text_box()));
-
-    page.new_section("Date Format");
-
-    page.add_row(GTK_WIDGET(gtk_label_new("Date Format")),
-                 GTK_WIDGET(preference::date_format::create_pref_text_box()));
 
     return GTK_WIDGET(page.box());
 }

@@ -192,7 +192,6 @@ enum class name
     task_q_pause,
 
     // PANELS COMMON  //
-    date_format,
     con_open,
     open_execute,
     open_edit,
