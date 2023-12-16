@@ -238,19 +238,18 @@ vfs::trash_can::trash_dir::create_trash_dir() const noexcept
 }
 
 const std::string
-vfs::trash_can::trash_dir::create_trash_date(const std::time_t time) const noexcept
+vfs::trash_can::trash_dir::create_trash_date(
+    const std::chrono::system_clock::time_point time_point) const noexcept
 {
-    const auto point = std::chrono::system_clock::from_time_t(time);
+    const auto date = std::chrono::floor<std::chrono::days>(time_point);
 
-    const auto date = std::chrono::floor<std::chrono::days>(point);
-
-    const auto midnight = point - std::chrono::floor<std::chrono::days>(point);
+    const auto midnight = time_point - std::chrono::floor<std::chrono::days>(time_point);
     const auto hours = std::chrono::duration_cast<std::chrono::hours>(midnight);
     const auto minutes = std::chrono::duration_cast<std::chrono::minutes>(midnight - hours);
     const auto seconds =
         std::chrono::duration_cast<std::chrono::seconds>(midnight - hours - minutes);
 
-    return std::format("{0:%Y-%m-%d}T{1:%H}:{2:%M}:{3:%S}", date, hours, minutes, seconds);
+    return std::format("{0:%Y-%m-%d}T{1:%H}:{2:%M}:{3:%S}Z", date, hours, minutes, seconds);
 }
 
 void
@@ -259,8 +258,7 @@ vfs::trash_can::trash_dir::create_trash_info(const std::filesystem::path& path,
 {
     const auto trash_info = this->info_path_ / std::format("{}.trashinfo", target_name);
 
-    const auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    const auto iso_time = create_trash_date(time);
+    const auto iso_time = create_trash_date(std::chrono::system_clock::now());
 
     const std::string trash_info_content =
         std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time);

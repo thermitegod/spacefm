@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <chrono>
+
 #include <gtkmm.h>
 
 #include "xset/xset.hxx"
@@ -24,6 +26,7 @@ void xset_design_job(GtkWidget* item, const xset_t& set);
 bool xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set);
 
 GtkWidget* xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_insert,
-                                 u32 button, std::time_t time);
+                                 u32 button,
+                                 const std::chrono::system_clock::time_point time_point);
 
 bool xset_job_is_valid(const xset_t& set, xset::job job);

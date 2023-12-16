@@ -25,6 +25,8 @@
 
 #include <vector>
 
+#include <chrono>
+
 #include <memory>
 
 #include <ranges>
@@ -1322,10 +1324,11 @@ ptk_location_view_on_action(GtkWidget* view, const xset_t& set)
 
 static void
 show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
-                  PtkFileBrowser* file_browser, u32 button, std::time_t time)
+                  PtkFileBrowser* file_browser, u32 button,
+                  const std::chrono::system_clock::time_point time_point)
 {
     (void)button;
-    (void)time;
+    (void)time_point;
     xset_t set;
     GtkWidget* popup = gtk_menu_new();
 
@@ -1426,8 +1429,8 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
     bool ret = false;
 
     const auto button = gdk_button_event_get_button(event);
-    const auto time = gdk_event_get_time(event);
     const auto type = gdk_event_get_event_type(event);
+    const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (type != GdkEventType::GDK_BUTTON_PRESS)
     {
@@ -1481,7 +1484,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
             break;
         case 3:
             // right button
-            show_devices_menu(view, vol, file_browser, button, time);
+            show_devices_menu(view, vol, file_browser, button, time_point);
             ret = true;
             break;
     }
@@ -1499,7 +1502,7 @@ on_key_press_event(GtkWidget* w, GdkEvent* event, PtkFileBrowser* file_browser)
     (void)w;
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
-    const auto time = gdk_event_get_time(event);
+    const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (keyval == GDK_KEY_Menu ||
         (keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
@@ -1509,7 +1512,7 @@ on_key_press_event(GtkWidget* w, GdkEvent* event, PtkFileBrowser* file_browser)
                           ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev)),
                           file_browser,
                           3,
-                          time);
+                          time_point);
         return true;
     }
     return false;
@@ -1524,10 +1527,10 @@ on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
 
 static void
 show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr<vfs::volume>& vol,
-                     u32 button, std::time_t time)
+                     u32 button, const std::chrono::system_clock::time_point time_point)
 {
     (void)dev_item;
-    (void)time;
+    (void)time_point;
     PtkFileBrowser* file_browser;
 
     // validate vol
@@ -1639,7 +1642,7 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
     if (item)
     {
         const auto keyval = gdk_key_event_get_keyval(event);
-        const auto time = gdk_event_get_time(event);
+        const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
         // vfs::volume vol = VFS_VOLUME(g_object_get_data(G_OBJECT(item), "vol"));
         void* object_vol = g_object_get_data(G_OBJECT(item), "vol");
@@ -1648,13 +1651,13 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
         if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_space)
         {
             // simulate left-click (mount)
-            show_dev_design_menu(menu, item, vol, 1, time);
+            show_dev_design_menu(menu, item, vol, 1, time_point);
             return true;
         }
         else if (keyval == GDK_KEY_Menu || keyval == GDK_KEY_F2)
         {
             // simulate right-click (menu)
-            show_dev_design_menu(menu, item, vol, 3, time);
+            show_dev_design_menu(menu, item, vol, 3, time_point);
         }
     }
     return false;
@@ -1666,8 +1669,8 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
-    const auto time = gdk_event_get_time(event);
     const auto type = gdk_event_get_event_type(event);
+    const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -1695,7 +1698,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr
         return false;
     }
 
-    show_dev_design_menu(menu, item, vol, button, time);
+    show_dev_design_menu(menu, item, vol, button, time_point);
     return true;
 }
 

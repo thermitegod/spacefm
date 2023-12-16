@@ -348,10 +348,10 @@ xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job
 
 GtkWidget*
 xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_insert, u32 button,
-                      std::time_t time)
+                      const std::chrono::system_clock::time_point time_point)
 {
     (void)button;
-    (void)time;
+    (void)time_point;
 
     GtkWidget* newitem;
     GtkWidget* submenu;
@@ -544,8 +544,8 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
-    const auto time = gdk_event_get_time(event);
     const auto type = gdk_event_get_event_type(event);
+    const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -585,7 +585,7 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
                     if (button == 3)
                     {
                         // right
-                        xset_design_show_menu(menu, set, nullptr, button, time);
+                        xset_design_show_menu(menu, set, nullptr, button, time_point);
                         return true;
                     }
                     else if (button == 1 && set->tool != xset::tool::NOT && !set->lock)
@@ -630,7 +630,7 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
                     // no modifier
                     if (set->lock)
                     {
-                        xset_design_show_menu(menu, set, nullptr, button, time);
+                        xset_design_show_menu(menu, set, nullptr, button, time_point);
                         return true;
                     }
                     break;
@@ -662,7 +662,7 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
         }
         else
         {
-            xset_design_show_menu(menu, set, nullptr, button, time);
+            xset_design_show_menu(menu, set, nullptr, button, time_point);
         }
         return true;
     }

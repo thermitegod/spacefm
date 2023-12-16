@@ -25,6 +25,8 @@
 #include <array>
 #include <vector>
 
+#include <chrono>
+
 #include <optional>
 
 #include <memory>
@@ -81,7 +83,7 @@
 static bool on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data);
 static bool app_menu_keypress(GtkWidget* widget, GdkEvent* event, PtkFileMenu* data);
 static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button,
-                          std::time_t time);
+                          const std::chrono::system_clock::time_point time_point);
 
 /* Signal handlers for popup menu */
 static void on_popup_open_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -2029,13 +2031,13 @@ app_menu_keypress(GtkWidget* menu, GdkEvent* event, PtkFileMenu* data)
 
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
-    const auto time = gdk_event_get_time(event);
+    const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (keymod == 0)
     {
         if (keyval == GDK_KEY_F2 || keyval == GDK_KEY_Menu)
         {
-            show_app_menu(menu, item, data, 0, time);
+            show_app_menu(menu, item, data, 0, time_point);
             return true;
         }
     }
@@ -2063,10 +2065,11 @@ app_menu_additem(GtkWidget* menu, const std::string_view label, ptk::file_menu::
 }
 
 static void
-show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button, std::time_t time)
+show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button,
+              const std::chrono::system_clock::time_point time_point)
 {
     (void)button;
-    (void)time;
+    (void)time_point;
     GtkWidget* newitem;
     GtkWidget* submenu;
     std::string str;
@@ -2246,8 +2249,8 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data)
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
-    const auto time = gdk_event_get_time(event);
     const auto type = gdk_event_get_event_type(event);
+    const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
     if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
@@ -2286,7 +2289,7 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data)
                 if (button == 3)
                 {
                     // right
-                    show_app_menu(menu, item, data, button, time);
+                    show_app_menu(menu, item, data, button, time_point);
                     return true;
                 }
             }
@@ -2296,7 +2299,7 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data)
             if (keymod == 0)
             {
                 // no modifier
-                show_app_menu(menu, item, data, button, time);
+                show_app_menu(menu, item, data, button, time_point);
                 return true;
             }
             break;
