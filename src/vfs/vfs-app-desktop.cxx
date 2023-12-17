@@ -22,6 +22,8 @@
 
 #include <filesystem>
 
+#include <chrono>
+
 #include <span>
 
 #include <vector>
@@ -65,21 +67,32 @@ static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
 static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
 static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
 
-std::unordered_map<std::filesystem::path, std::shared_ptr<vfs::desktop>> desktops_cache;
+struct desktop_cache_data
+{
+    std::shared_ptr<vfs::desktop> desktop;
+    std::chrono::system_clock::time_point desktop_mtime;
+};
+
+std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
 
 const std::shared_ptr<vfs::desktop>
 vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 {
     if (desktops_cache.contains(desktop_file))
     {
-        auto desktop = desktops_cache.at(desktop_file);
-        // ztd::logger::info("vfs::desktop::desktop({})  cache   {}", ztd::logger::utils::ptr(desktop), desktop_file.string());
-        return desktop;
-    }
+        // ztd::logger::info("vfs::desktop({})  cache   {}", ztd::logger::utils::ptr(desktop), desktop_file.string());
+        const auto cache = desktops_cache.at(desktop_file);
 
-    auto desktop = std::make_shared<vfs::desktop>(desktop_file);
-    desktops_cache.insert({desktop_file, desktop});
-    // ztd::logger::info("vfs::desktop::desktop({})  new     {}", ztd::logger::utils::ptr(desktop), desktop_file.string());
+        const auto desktop_stat = ztd::stat(cache.desktop->path());
+        if (desktop_stat.mtime() == cache.desktop_mtime)
+        {
+            return cache.desktop;
+        }
+        // ztd::logger::info("vfs::desktop({}) changed on disk, reloading", ztd::logger::utils::ptr(desktop));
+    }
+    const auto desktop = std::make_shared<vfs::desktop>(desktop_file);
+    desktops_cache.insert({desktop_file, {desktop, ztd::stat(desktop->path()).mtime()}});
+    // ztd::logger::info("vfs::desktop({})  new     {}", ztd::logger::utils::ptr(desktop), desktop_file.string());
     return desktop;
 }
 
