@@ -559,6 +559,8 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
         bool is_same_value_append = true;
         bool is_same_value_nodump = true;
         bool is_same_value_encrypted = true;
+        bool is_same_value_automount = true;
+        bool is_same_value_mount_root = true;
         bool is_same_value_verity = true;
         bool is_same_value_dax = true;
 
@@ -584,6 +586,14 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
             if (is_same_value_encrypted)
             {
                 is_same_value_encrypted = selected_file->is_encrypted() == file->is_encrypted();
+            }
+            if (is_same_value_automount)
+            {
+                is_same_value_automount = selected_file->is_automount() == file->is_automount();
+            }
+            if (is_same_value_mount_root)
+            {
+                is_same_value_mount_root = selected_file->is_mount_root() == file->is_mount_root();
             }
             if (is_same_value_verity)
             {
@@ -665,6 +675,34 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
             page.add_row("Encrypted:  ", gtk_label_new(" ( Multiple Values ) "));
         }
 
+        if (is_same_value_automount)
+        {
+            GtkWidget* check_button_automount =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_automount), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_automount),
+                                         selected_file->is_automount());
+            page.add_row("Automount:  ", GTK_WIDGET(check_button_automount));
+        }
+        else
+        {
+            page.add_row("Automount:  ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
+        if (is_same_value_mount_root)
+        {
+            GtkWidget* check_button_mount_root =
+                gtk_check_button_new_with_label(" ( All Selected Files ) ");
+            gtk_widget_set_sensitive(GTK_WIDGET(check_button_mount_root), false);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_mount_root),
+                                         selected_file->is_mount_root());
+            page.add_row("Mount Root: ", GTK_WIDGET(check_button_mount_root));
+        }
+        else
+        {
+            page.add_row("Mount Root: ", gtk_label_new(" ( Multiple Values ) "));
+        }
+
         if (is_same_value_verity)
         {
             GtkWidget* check_button_verity =
@@ -724,6 +762,18 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_encrypted),
                                      selected_file->is_encrypted());
         page.add_row("Encrypted:  ", GTK_WIDGET(check_button_encrypted));
+
+        GtkWidget* check_button_automount = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_automount), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_automount),
+                                     selected_file->is_automount());
+        page.add_row("Automount:  ", GTK_WIDGET(check_button_automount));
+
+        GtkWidget* check_button_mount_root = gtk_check_button_new();
+        gtk_widget_set_sensitive(GTK_WIDGET(check_button_mount_root), false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_button_mount_root),
+                                     selected_file->is_mount_root());
+        page.add_row("Mount Root: ", GTK_WIDGET(check_button_mount_root));
 
         GtkWidget* check_button_verity = gtk_check_button_new();
         gtk_widget_set_sensitive(GTK_WIDGET(check_button_verity), false);

@@ -105,6 +105,8 @@ struct file : public std::enable_shared_from_this<file>
     bool is_append() const noexcept;     // file can only be opened in append mode for writing
     bool is_nodump() const noexcept;     // file is not a candidate for backup
     bool is_encrypted() const noexcept;  // file requires a key to be encrypted by the filesystem
+    bool is_automount() const noexcept;  // file is a automount trigger
+    bool is_mount_root() const noexcept; // file is the root of a mount
     bool is_verity() const noexcept;     // file has fs-verity enabled
     bool is_dax() const noexcept;        // file is in the DAX (cpu direct access) state
 

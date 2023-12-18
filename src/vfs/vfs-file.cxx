@@ -640,6 +640,18 @@ vfs::file::is_encrypted() const noexcept
 }
 
 bool
+vfs::file::is_automount() const noexcept
+{
+    return this->file_stat_.is_automount();
+}
+
+bool
+vfs::file::is_mount_root() const noexcept
+{
+    return this->file_stat_.is_mount_root();
+}
+
+bool
 vfs::file::is_verity() const noexcept
 {
     return this->file_stat_.is_verity();
