@@ -2506,7 +2506,7 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
                     }
                     else
                     {
-                        const auto results = ztd::statx(target_path);
+                        const auto results = ztd::stat(target_path);
                         if (results)
                         {
                             const std::string lsize = vfs_file_size_format(results.size());
@@ -2615,7 +2615,7 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
         u64 disk_size_disk = 0;
         for (const auto& file : std::filesystem::directory_iterator(cwd))
         {
-            const auto file_stat = ztd::statx(file.path());
+            const auto file_stat = ztd::stat(file.path());
             if (!file_stat.is_regular_file())
             {
                 continue;

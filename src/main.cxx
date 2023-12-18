@@ -177,7 +177,7 @@ activate(GtkApplication* app, void* user_data)
         }
         else if (std::filesystem::exists(real_path))
         {
-            const auto file_stat = ztd::statx(real_path);
+            const auto file_stat = ztd::stat(real_path);
             if (file_stat && file_stat.is_block_file())
             {
                 // open block device eg /dev/sda1

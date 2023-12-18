@@ -109,7 +109,7 @@ calc_total_size_of_files(const std::filesystem::path& path,
         return;
     }
 
-    const auto file_stat = ztd::statx(path, ztd::statx::symlink::no_follow);
+    const auto file_stat = ztd::lstat(path);
     if (!file_stat)
     {
         return;
@@ -144,8 +144,7 @@ calc_total_size_of_files(const std::filesystem::path& path,
                 return;
             }
 
-            const auto directory_file_stat =
-                ztd::statx(directory_file, ztd::statx::symlink::no_follow);
+            const auto directory_file_stat = ztd::lstat(directory_file);
 
             data->total_size += directory_file_stat.size();
             data->size_on_disk += directory_file_stat.size_on_disk();

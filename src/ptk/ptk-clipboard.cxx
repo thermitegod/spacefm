@@ -592,7 +592,7 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
                 file_path = std::filesystem::read_symlink(file_path);
             }
 
-            const auto file_stat = ztd::statx(file_path, ztd::statx::symlink::no_follow);
+            const auto file_stat = ztd::lstat(file_path);
             if (file_stat)
             { // need to see broken symlinks
                 file_list.push_back(file_path);

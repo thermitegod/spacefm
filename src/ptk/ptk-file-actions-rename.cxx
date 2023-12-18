@@ -549,7 +549,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         if (mset->create_new != ptk::rename_mode::rename &&
             gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_link)))
         {
-            const auto file_stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+            const auto file_stat = ztd::lstat(full_path);
             if (file_stat)
             {
                 full_path_exists = true;
@@ -562,9 +562,9 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     }
     else
     {
-        const auto path_stat = ztd::statx(path, ztd::statx::symlink::no_follow);
+        const auto path_stat = ztd::lstat(path);
 
-        const auto full_path_stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+        const auto full_path_stat = ztd::lstat(full_path);
         if (full_path_stat)
         {
             full_path_exists = true;
@@ -2114,7 +2114,7 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
     }
 
     u32 n = 1;
-    while (ztd::statx(path, ztd::statx::symlink::no_follow)) // need to see broken symlinks
+    while (ztd::lstat(path)) // need to see broken symlinks
     {
         std::string name;
         if (ext.empty())
@@ -2279,7 +2279,7 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     const char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
 
     // need to see broken symlinks
-    const auto stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+    const auto stat = ztd::lstat(full_path);
     if (stat)
     {
         const auto dir = std::filesystem::path(full_path).parent_path();
@@ -3009,8 +3009,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
                     continue;
                 }
             }
-            else if (ztd::statx(full_path,
-                                ztd::statx::symlink::no_follow)) // need to see broken symlinks
+            else if (ztd::lstat(full_path)) // need to see broken symlinks
             {
                 // overwrite
                 if (std::filesystem::is_directory(full_path))

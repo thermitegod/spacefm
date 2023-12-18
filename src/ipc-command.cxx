@@ -1712,7 +1712,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_INVALID, std::format("path does not exist '{}'", value)};
             }
 
-            const auto real_path_stat = ztd::statx(value);
+            const auto real_path_stat = ztd::stat(value);
             std::shared_ptr<vfs::volume> vol = nullptr;
             if (property == "umount" && std::filesystem::is_directory(value))
             {

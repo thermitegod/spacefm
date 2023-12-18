@@ -2326,7 +2326,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
             if (puri)
             {
                 // We only want to update drag status, not really want to drop
-                const auto dest_dir_stat = ztd::statx(dest_dir);
+                const auto dest_dir_stat = ztd::stat(dest_dir);
 
                 const dev_t dest_dev = dest_dir_stat.dev();
                 const ino_t dest_inode = dest_dir_stat.ino();
@@ -2337,7 +2337,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     {
                         const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
-                        const auto file_path_stat = ztd::statx(file_path);
+                        const auto file_path_stat = ztd::stat(file_path);
                         if (file_path_stat)
                         {
                             if (file_path_stat.dev() != dest_dev)
@@ -2350,7 +2350,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                             {
                                 // same device - store source parent inode
                                 const auto src_dir = file_path.parent_path();
-                                const auto src_dir_stat = ztd::statx(src_dir);
+                                const auto src_dir_stat = ztd::stat(src_dir);
                                 if (src_dir_stat)
                                 {
                                     file_browser->drag_source_inode_ = src_dir_stat.ino();

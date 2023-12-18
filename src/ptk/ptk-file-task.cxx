@@ -2096,8 +2096,8 @@ query_overwrite(PtkFileTask* ptask)
 
     const bool different_files = (!std::filesystem::equivalent(current_file, current_dest));
 
-    const auto src_stat = ztd::statx(current_file, ztd::statx::symlink::no_follow);
-    const auto dest_stat = ztd::statx(current_dest, ztd::statx::symlink::no_follow);
+    const auto src_stat = ztd::lstat(current_file);
+    const auto dest_stat = ztd::lstat(current_dest);
 
     const bool is_src_dir = std::filesystem::is_directory(current_file);
     const bool is_dest_dir = std::filesystem::is_directory(current_dest);
@@ -2155,16 +2155,16 @@ query_overwrite(PtkFileTask* ptask)
                 }
             }
 
-            if (src_stat.mtime().tv_sec == dest_stat.mtime().tv_sec)
+            if (src_stat.mtime() == dest_stat.mtime())
             {
                 src_time = "<b>( same time )</b>\t";
             }
             else
             {
-                const time_t src_mtime = src_stat.mtime().tv_sec;
+                const time_t src_mtime = src_stat.mtime();
                 src_time = vfs_create_display_date(src_mtime);
 
-                if (src_stat.mtime().tv_sec > dest_stat.mtime().tv_sec)
+                if (src_stat.mtime() > dest_stat.mtime())
                 {
                     src_rel_time = "newer";
                 }
@@ -2178,7 +2178,7 @@ query_overwrite(PtkFileTask* ptask)
             const std::string dest_size =
                 std::format("{}\t( {:L} bytes )", size_str, dest_stat.size());
 
-            const time_t dest_mtime = dest_stat.mtime().tv_sec;
+            const time_t dest_mtime = dest_stat.mtime();
             const auto dest_time = vfs_create_display_date(dest_mtime);
 
             std::string src_rel;

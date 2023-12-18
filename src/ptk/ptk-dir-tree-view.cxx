@@ -634,7 +634,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             if (file_browser->pending_drag_status_tree())
             {
                 // We only want to update drag status, not really want to drop
-                const auto dest_statbuf = ztd::statx(dest_dir);
+                const auto dest_statbuf = ztd::stat(dest_dir);
                 if (dest_statbuf)
                 {
                     if (file_browser->drag_source_dev_tree_ == 0)
@@ -644,7 +644,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         {
                             const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
-                            const auto statbuf = ztd::statx(file_path);
+                            const auto statbuf = ztd::stat(file_path);
                             if (statbuf && statbuf.dev() != dest_statbuf.dev())
                             {
                                 file_browser->drag_source_dev_tree_ = statbuf.dev();

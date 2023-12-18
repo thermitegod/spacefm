@@ -213,7 +213,7 @@ bool
 vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
                                 char** new_dest_file)
 {
-    const auto dest_file_stat = ztd::statx(dest_file, ztd::statx::symlink::no_follow);
+    const auto dest_file_stat = ztd::lstat(dest_file);
 
     while (true)
     {
@@ -408,7 +408,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     this->current_item++;
     this->unlock();
 
-    const auto file_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
+    const auto file_stat = ztd::lstat(src_file);
     if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
@@ -476,8 +476,8 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
             }
 
             chmod(actual_dest_file.c_str(), file_stat.mode());
-            times.actime = file_stat.atime().tv_sec;
-            times.modtime = file_stat.mtime().tv_sec;
+            times.actime = file_stat.atime();
+            times.modtime = file_stat.mtime();
             utime(actual_dest_file.c_str(), &times);
 
             /* Move files to different device: Need to delete source dir */
@@ -669,8 +669,8 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                     {
                         chmod(actual_dest_file.c_str(), file_stat.mode());
                         struct utimbuf times;
-                        times.actime = file_stat.atime().tv_sec;
-                        times.modtime = file_stat.mtime().tv_sec;
+                        times.actime = file_stat.atime();
+                        times.modtime = file_stat.mtime();
                         utime(actual_dest_file.c_str(), &times);
                     }
 
@@ -726,8 +726,8 @@ vfs::file_task::file_move(const std::filesystem::path& src_file)
     const auto filename = src_file.filename();
     const auto dest_file = this->dest_dir.value() / filename;
 
-    const auto src_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
-    const auto dest_stat = ztd::statx(this->dest_dir.value());
+    const auto src_stat = ztd::lstat(src_file);
+    const auto dest_stat = ztd::stat(this->dest_dir.value());
 
     if (src_stat && dest_stat)
     {
@@ -772,7 +772,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     this->unlock();
 
     // ztd::logger::debug("move '{}' to '{}'", src_file, dest_file);
-    const auto file_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
+    const auto file_stat = ztd::lstat(src_file);
     if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
@@ -877,7 +877,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file)
     this->current_item++;
     this->unlock();
 
-    const auto file_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
+    const auto file_stat = ztd::lstat(src_file);
     if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
@@ -921,7 +921,7 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file)
     this->current_item++;
     this->unlock();
 
-    const auto file_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
+    const auto file_stat = ztd::lstat(src_file);
     if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
@@ -994,7 +994,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
     this->current_item++;
     this->unlock();
 
-    const auto src_stat = ztd::statx(src_file);
+    const auto src_stat = ztd::stat(src_file);
     if (!src_stat)
     {
         // MOD allow link to broken symlink
@@ -1073,7 +1073,7 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
     this->unlock();
     // ztd::logger::debug("chmod_chown: {}", src_file);
 
-    const auto src_stat = ztd::statx(src_file, ztd::statx::symlink::no_follow);
+    const auto src_stat = ztd::lstat(src_file);
     if (src_stat)
     {
         /* chown */
@@ -1287,7 +1287,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         for (const auto& src_path : task->src_paths)
         {
-            const auto file_stat = ztd::statx(src_path, ztd::statx::symlink::no_follow);
+            const auto file_stat = ztd::lstat(src_path);
             if (!file_stat)
             {
                 // do not report error here since its reported later
@@ -1331,8 +1331,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         if (task->type_ != vfs::file_task::type::chmod_chown)
         {
-            const auto file_stat =
-                ztd::statx(task->dest_dir.value(), ztd::statx::symlink::no_follow);
+            const auto file_stat = ztd::lstat(task->dest_dir.value());
             if (!(task->dest_dir && file_stat))
             {
                 task->task_error(errno, "Accessing", task->dest_dir.value());
@@ -1353,7 +1352,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
 
         for (const auto& src_path : task->src_paths)
         {
-            const auto file_stat = ztd::statx(src_path, ztd::statx::symlink::no_follow);
+            const auto file_stat = ztd::lstat(src_path);
             if (!file_stat)
             {
                 // do not report error here since it is reported later
@@ -1600,7 +1599,7 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path)
         return 0;
     }
 
-    const auto file_stat = ztd::statx(path, ztd::statx::symlink::no_follow);
+    const auto file_stat = ztd::lstat(path);
     if (!file_stat)
     {
         return 0;
@@ -1625,7 +1624,7 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path)
         const auto full_path = path / filename;
         if (std::filesystem::exists(full_path))
         {
-            const auto dir_file_stat = ztd::statx(full_path, ztd::statx::symlink::no_follow);
+            const auto dir_file_stat = ztd::lstat(full_path);
 
             if (dir_file_stat.is_directory())
             {
