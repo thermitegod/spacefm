@@ -25,8 +25,6 @@
 #include <system_error>
 
 #include <cerrno>
-
-#include <cerrno>
 #include <cstring>
 
 #include <sys/inotify.h>
@@ -59,8 +57,7 @@ vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callb
     this->inotify_fd_ = inotify_init();
     if (this->inotify_fd_ == -1)
     {
-        // ztd::logger::error("failed to initialize inotify");
-        throw std::runtime_error("failed to initialize inotify");
+        throw std::system_error(errno, std::generic_category(), "Failed to initialize inotify");
     }
 
     this->inotify_io_channel_ = Glib::IOChannel::create_from_fd(this->inotify_fd_);
@@ -92,9 +89,11 @@ vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callb
                                               IN_MOVE | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB);
     if (this->inotify_wd_ == -1)
     {
-        throw std::runtime_error(std::format("Failed to add inotify watch on '{}' ({})",
-                                             real_path.string(),
-                                             this->path_.string()));
+        throw std::system_error(errno,
+                                std::generic_category(),
+                                std::format("Failed to add inotify watch on '{}' ({})",
+                                            real_path.string(),
+                                            this->path_.string()));
     }
 
     // ztd::logger::debug("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", ztd::logger::utils::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
