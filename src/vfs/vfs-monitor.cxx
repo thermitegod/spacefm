@@ -40,10 +40,8 @@
 
 #include "vfs/vfs-monitor.hxx"
 
-// #define VFS_MONITOR_DEBUG
-
-inline constexpr u32 EVENT_SIZE = (sizeof(inotify_event));
-inline constexpr u32 EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
+inline constexpr auto EVENT_SIZE = (sizeof(inotify_event));
+inline constexpr auto EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
 
 const std::shared_ptr<vfs::monitor>
 vfs::monitor::create(const std::filesystem::path& path, const callback_t& callback) noexcept
@@ -158,32 +156,22 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition)
             vfs::monitor::event monitor_event;
             if (event->mask & (IN_CREATE | IN_MOVED_TO))
             {
-                monitor_event = vfs::monitor::event::created;
-#if defined(VFS_MONITOR_DEBUG)
-                ztd::logger::debug("inotify-event MASK={} CREATE={}", event->mask, event_path);
-#endif
+                monitor_event = event::created;
             }
             else if (event->mask & (IN_DELETE | IN_MOVED_FROM | IN_DELETE_SELF | IN_UNMOUNT))
             {
-                monitor_event = vfs::monitor::event::deleted;
-#if defined(VFS_MONITOR_DEBUG)
-                ztd::logger::debug("inotify-event MASK={} DELETE={}", event->mask, event_path);
-#endif
+                monitor_event = event::deleted;
             }
             else if (event->mask & (IN_MODIFY | IN_ATTRIB))
             {
-                monitor_event = vfs::monitor::event::changed;
-#if defined(VFS_MONITOR_DEBUG)
-                ztd::logger::debug("inotify-event MASK={} CHANGE={}", event->mask, event_path);
-#endif
+                monitor_event = event::changed;
             }
             else
-            { // IN_IGNORED not handled
-                monitor_event = vfs::monitor::event::other;
-#if defined(VFS_MONITOR_DEBUG)
-                ztd::logger::debug("inotify-event MASK={} OTHER={}", event->mask, event_path);
-#endif
+            {
+                monitor_event = event::other;
             }
+
+            // ztd::logger::debug("inotify-event MASK={} EVENT({})={}", event->mask, magic_enum::enum_name(monitor_event), event_path.string());
 
             this->dispatch_event(monitor_event, event_path);
         }
