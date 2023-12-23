@@ -62,7 +62,7 @@ static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePa
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
-// MOD drag n drop...
+// drag n drop...
 static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
                                                 i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
                                                 u32 time, void* user_data);
@@ -117,7 +117,7 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     gtk_tree_view_set_headers_visible(dir_tree_view, false);
     gtk_tree_view_set_enable_tree_lines(dir_tree_view, true);
 
-    // MOD enabled DND   FIXME: Temporarily disable drag & drop since it does not work right now.
+    // FIXME: Temporarily disable drag & drop since it does not work right now.
     /*    exo_icon_view_enable_model_drag_dest (
                 EXO_ICON_VIEW( dir_tree_view ),
                 drag_targets, G_N_ELEMENTS( drag_targets ), GDK_ACTION_ALL ); */
@@ -187,7 +187,7 @@ ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
     g_signal_connect(G_OBJECT(dir_tree_view), "button-press-event", G_CALLBACK(on_dir_tree_view_button_press), browser);
     g_signal_connect(G_OBJECT(dir_tree_view), "key-press-event", G_CALLBACK(on_dir_tree_view_key_press), browser);
 
-    // MOD drag n drop
+    // drag n drop
     g_signal_connect(G_OBJECT(dir_tree_view), "drag-data-received", G_CALLBACK(on_dir_tree_view_drag_data_received), browser);
     g_signal_connect(G_OBJECT(dir_tree_view), "drag-motion", G_CALLBACK(on_dir_tree_view_drag_motion), browser);
     g_signal_connect(G_OBJECT(dir_tree_view), "drag-leave", G_CALLBACK(on_dir_tree_view_drag_leave), browser);
@@ -572,7 +572,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* fil
     return true;
 }
 
-// MOD drag n drop
+// drag n drop
 static const std::optional<std::filesystem::path>
 dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 {
@@ -615,8 +615,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 
 static void
 on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                                    GtkSelectionData* sel_data, u32 info, u32 time,
-                                    void* user_data) // MOD added
+                                    GtkSelectionData* sel_data, u32 info, u32 time, void* user_data)
 {
     (void)info;
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER(user_data);
@@ -761,7 +760,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
 static bool
 on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
-                           PtkFileBrowser* file_browser) // MOD added
+                           PtkFileBrowser* file_browser)
 {
     (void)x;
     (void)y;
@@ -777,8 +776,7 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 
 
 static bool
 on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                             u32 time,
-                             PtkFileBrowser* file_browser) // MOD added
+                             u32 time, PtkFileBrowser* file_browser)
 {
     (void)x;
     (void)y;

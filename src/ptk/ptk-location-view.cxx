@@ -550,7 +550,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
         return;
     }
 
-    // sfm - vol already exists?
+    // vol already exists?
     std::shared_ptr<vfs::volume> v = nullptr;
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))

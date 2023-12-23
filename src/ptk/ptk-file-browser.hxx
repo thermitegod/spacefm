@@ -158,7 +158,6 @@ struct PtkFileBrowser
     GtkScrolledWindow* folder_view_scroll_{nullptr};
     GtkCellRenderer* icon_render_{nullptr};
 
-    // MOD
     panel_t panel_{0};
 
     MainWindow* main_window_{nullptr};
@@ -481,8 +480,6 @@ bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
 bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
 
 void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget);
-
-// MOD
 
 // xset callback wrapper functions
 void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);

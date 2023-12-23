@@ -43,7 +43,7 @@
 
 #include "utils/shell_quote.hxx"
 
-// sfm break vfs independence for exec_in_terminal
+// break vfs independence for exec_in_terminal
 #include "ptk/ptk-file-task.hxx"
 
 #include "vfs/vfs-utils.hxx"

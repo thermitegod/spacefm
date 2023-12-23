@@ -547,7 +547,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 this->unlock();
             }
 
-            // MOD delete it first to prevent exists error
+            // delete it first to prevent exists error
             if (dest_exists)
             {
                 std::filesystem::remove(actual_dest_file);
@@ -614,7 +614,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 this->unlock();
             }
 
-            // MOD if dest is a symlink, delete it first to prevent overwriting target!
+            // if dest is a symlink, delete it first to prevent overwriting target!
             if (std::filesystem::is_symlink(actual_dest_file))
             {
                 std::filesystem::remove(actual_dest_file);
@@ -672,7 +672,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 }
                 else
                 {
-                    // MOD do not chmod link
+                    // do not chmod link
                     if (!std::filesystem::is_symlink(actual_dest_file))
                     {
                         chmod(actual_dest_file.c_str(), file_stat.mode());
@@ -754,7 +754,7 @@ vfs::file_task::file_move(const std::filesystem::path& src_file)
             // ztd::logger::info("on the same dev: {}", src_file);
             if (this->do_file_move(src_file, dest_file) == EXDEV)
             {
-                // MOD Invalid cross-device link (st_dev not always accurate test)
+                // Invalid cross-device link (st_dev not always accurate test)
                 // so now redo move as copy
                 this->do_file_copy(src_file, dest_file);
             }
@@ -997,7 +997,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
     const auto old_dest_file = this->dest_dir.value() / filename;
     auto dest_file = old_dest_file;
 
-    // MOD  setup task for check overwrite
+    // setup task for check overwrite
     if (this->should_abort())
     {
         return;
@@ -1013,7 +1013,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
     const auto src_stat = ztd::stat(src_file, ec);
     if (ec)
     {
-        // MOD allow link to broken symlink
+        // allow link to broken symlink
         if (errno != 2 || !std::filesystem::is_symlink(src_file))
         {
             this->task_error(errno, "Accessing", src_file);
@@ -1024,7 +1024,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
         }
     }
 
-    /* FIXME: Check overwrite!! */ // MOD added check overwrite
+    // FIXME: Check overwrite!!
     bool dest_exists;
     char* new_dest_file = nullptr;
     if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
@@ -1040,7 +1040,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
         this->unlock();
     }
 
-    // MOD if dest exists, delete it first to prevent exists error
+    // if dest exists, delete it first to prevent exists error
     if (dest_exists)
     {
         std::filesystem::remove(dest_file);

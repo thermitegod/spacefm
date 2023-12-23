@@ -200,11 +200,11 @@ struct file_task : public std::enable_shared_from_this<file_task>
 
     GMutex* mutex{nullptr};
 
-    // sfm write directly to gtk buffer for speed
+    // write directly to gtk buffer for speed
     GtkTextBuffer* add_log_buf{nullptr};
     GtkTextMark* add_log_end{nullptr};
 
-    // MOD run task
+    // run task
     std::string exec_action{};
     std::string exec_command{};
     bool exec_sync{true};

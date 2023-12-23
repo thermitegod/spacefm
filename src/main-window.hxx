@@ -42,7 +42,6 @@ struct MainWindow
     GtkBox* main_vbox;
     GtkWidget* menu_bar;
 
-    // MOD
     GtkWidget* file_menu_item;
     GtkWidget* view_menu_item;
     GtkWidget* dev_menu_item;
@@ -50,7 +49,7 @@ struct MainWindow
     GtkWidget* tool_menu_item;
     GtkWidget* help_menu_item;
     GtkWidget* dev_menu;
-    GtkNotebook* notebook; // MOD changed use to current panel
+    GtkNotebook* notebook; // current panel
     // GType will cause segfaults if this is a std::unordered_map
     std::map<panel_t, GtkNotebook*> panels;
     std::map<panel_t, i32> panel_slide_x;

@@ -278,7 +278,7 @@ mime_type_get_actions(const std::string_view mime_type)
         get_actions(sdir, mime_type, actions);
     }
 
-    /* remove actions for this file type */ // sfm
+    /* remove actions for this file type */
     remove_actions(mime_type, actions);
 
     /* ensure default app is in the list */

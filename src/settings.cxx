@@ -62,7 +62,6 @@ load_settings()
 
     app_settings.load_saved_tabs(true);
 
-    // MOD extra settings
     xset_defaults();
 
     const auto session = std::filesystem::path() / settings_config_dir / CONFIG_FILE_FILENAME;
@@ -125,10 +124,10 @@ load_settings()
         ztd::logger::info("No config file found, using defaults.");
     }
 
-    // MOD turn off fullscreen
+    // turn off fullscreen
     xset_set_b(xset::name::main_full, false);
 
-    // MOD terminal discovery
+    // terminal discovery
     const auto main_terminal = xset_get_s(xset::name::main_terminal);
     if (!main_terminal)
     {
@@ -148,7 +147,7 @@ load_settings()
         }
     }
 
-    // MOD editor discovery
+    // editor discovery
     const auto main_editor = xset_get_s(xset::name::editor);
     if (!main_editor)
     {

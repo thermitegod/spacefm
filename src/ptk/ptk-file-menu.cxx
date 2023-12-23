@@ -94,13 +94,13 @@ static void on_new_bookmark(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_cut_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_copy_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_paste_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
-static void on_popup_paste_link_activate(GtkMenuItem* menuitem, PtkFileMenu* data);   // MOD added
-static void on_popup_paste_target_activate(GtkMenuItem* menuitem, PtkFileMenu* data); // MOD added
-static void on_popup_copy_text_activate(GtkMenuItem* menuitem, PtkFileMenu* data);    // MOD added
-static void on_popup_copy_name_activate(GtkMenuItem* menuitem, PtkFileMenu* data);    // MOD added
-static void on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* data);  // MOD added
+static void on_popup_paste_link_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
+static void on_popup_paste_target_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
+static void on_popup_copy_text_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
+static void on_popup_copy_name_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
+static void on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 
-static void on_popup_paste_as_activate(GtkMenuItem* menuitem, PtkFileMenu* data); // sfm added
+static void on_popup_paste_as_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 
 static void on_popup_trash_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
 static void on_popup_delete_activate(GtkMenuItem* menuitem, PtkFileMenu* data);
@@ -2412,21 +2412,21 @@ on_popup_paste_target_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 }
 
 static void
-on_popup_copy_text_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD added
+on_popup_copy_text_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     ptk_clipboard_copy_as_text(data->sel_files);
 }
 
 static void
-on_popup_copy_name_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD added
+on_popup_copy_name_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     ptk_clipboard_copy_name(data->sel_files);
 }
 
 static void
-on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD added
+on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     if (!data->cwd.empty())
@@ -2436,7 +2436,7 @@ on_popup_copy_parent_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // MOD a
 }
 
 static void
-on_popup_paste_as_activate(GtkMenuItem* menuitem, PtkFileMenu* data) // sfm added
+on_popup_paste_as_activate(GtkMenuItem* menuitem, PtkFileMenu* data)
 {
     (void)menuitem;
     ptk_paste_file(data->browser, data->cwd);

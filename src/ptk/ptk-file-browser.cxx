@@ -1345,7 +1345,7 @@ PtkFileBrowser::on_dir_file_listed(bool is_cancelled)
     // FIXME:  This is already done in update_model, but is there any better way to
     //            reduce unnecessary code?
     if (this->view_mode_ == ptk::file_browser::view_mode::compact_view)
-    { // sfm why is this needed for compact view???
+    { // why is this needed for compact view???
         if (!is_cancelled && this->file_list_)
         {
             this->show_thumbnails(this->max_thumbnail_);
@@ -1540,7 +1540,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
                 if (col &&
                     ptk::file_list::column(gtk_tree_view_column_get_sort_column_id(col)) !=
                         ptk::file_list::column::name &&
-                    tree_path) // MOD
+                    tree_path)
                 {
                     gtk_tree_path_free(tree_path);
                     tree_path = nullptr;
