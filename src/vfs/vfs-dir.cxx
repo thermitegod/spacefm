@@ -84,7 +84,7 @@ vfs::dir::~dir()
         this->task_->cancel();
     }
 
-    if (change_notify_timeout)
+    if (this->change_notify_timeout)
     {
         g_source_remove(this->change_notify_timeout);
     }
