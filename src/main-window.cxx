@@ -616,8 +616,7 @@ MainWindow::show_panels() noexcept
                     {
                         if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
                         {
-                            file_browser->save_column_widths(
-                                GTK_TREE_VIEW(file_browser->folder_view()));
+                            file_browser->save_column_widths();
                         }
                         // file_browser->slider_release(nullptr);
                     }
@@ -1519,7 +1518,7 @@ main_window_store_positions(MainWindow* main_window)
                     gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), page_x));
                 if (a_browser && a_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
                 {
-                    a_browser->save_column_widths(GTK_TREE_VIEW(a_browser->folder_view()));
+                    a_browser->save_column_widths();
                 }
             }
         }
@@ -2002,7 +2001,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
         // save sliders of current fb ( new tab while task manager is shown changes vals )
         current_file_browser->slider_release(nullptr);
         // save column widths of fb so new tab has same
-        current_file_browser->save_column_widths(GTK_TREE_VIEW(current_file_browser->folder_view_));
+        current_file_browser->save_column_widths();
     }
     PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
         ptk_file_browser_new(this->curpanel, this->notebook, this->task_view, this));
@@ -2222,7 +2221,7 @@ main_window_fullscreen_activate(MainWindow* main_window)
     {
         if (file_browser && file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
         {
-            file_browser->save_column_widths(GTK_TREE_VIEW(file_browser->folder_view()));
+            file_browser->save_column_widths();
         }
         gtk_widget_hide(GTK_WIDGET(main_window->menu_bar));
         gtk_window_fullscreen(GTK_WINDOW(main_window));
@@ -2343,8 +2342,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
         current_file_browser->slider_release(nullptr);
         if (current_file_browser->view_mode_ == ptk::file_browser::view_mode::list_view)
         {
-            current_file_browser->save_column_widths(
-                GTK_TREE_VIEW(current_file_browser->folder_view_));
+            current_file_browser->save_column_widths();
         }
     }
 

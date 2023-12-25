@@ -258,7 +258,7 @@ struct PtkFileBrowser
     void update_views() noexcept;
     void focus(i32 job) noexcept;
     void focus_me() noexcept;
-    void save_column_widths(GtkTreeView* view) noexcept;
+    void save_column_widths() const noexcept;
     bool slider_release(GtkPaned* pane) noexcept;
 
     void rebuild_toolbars() noexcept;

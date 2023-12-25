@@ -3399,7 +3399,7 @@ PtkFileBrowser::close_tab() noexcept
 
     // save solumns and slider positions of tab to be closed
     this->slider_release(nullptr);
-    this->save_column_widths(GTK_TREE_VIEW(this->folder_view_));
+    this->save_column_widths();
 
     // remove page can also be used to destroy - same result
     // gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
@@ -4753,8 +4753,9 @@ PtkFileBrowser::focus_me() noexcept
 }
 
 void
-PtkFileBrowser::save_column_widths(GtkTreeView* view) noexcept
+PtkFileBrowser::save_column_widths() const noexcept
 {
+    GtkTreeView* view = GTK_TREE_VIEW(this->folder_view_);
     if (!GTK_IS_TREE_VIEW(view))
     {
         return;
