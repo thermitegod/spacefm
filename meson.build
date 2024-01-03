@@ -42,6 +42,8 @@ cflags_opt += [
   [ '-Wvla' ],
   [ '-fomit-frame-pointer' ],
   [ '-fno-common' ],
+  [ '-Wno-incompatible-function-pointer-types' ],
+  [ '-Wno-int-conversion' ],
 ]
 ldflags_opt += [
   [ '-Wl,-O2' ],
