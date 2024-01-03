@@ -90,7 +90,8 @@ static void vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 
 static void vfs_async_task_init(VFSAsyncTask* task)
 {
-    g_mutex_init(&task->lock);
+    task->lock = g_malloc(sizeof(GMutex));
+    g_mutex_init(task->lock);
 }
 
 void vfs_async_task_lock(VFSAsyncTask* task)

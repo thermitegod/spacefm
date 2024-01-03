@@ -189,7 +189,8 @@ static void vfs_dir_class_init(VFSDirClass* klass)
 /* constructor */
 static void vfs_dir_init(VFSDir* dir)
 {
-    g_mutex_init(&dir->mutex);
+    dir->mutex = g_malloc(sizeof(GMutex));
+    g_mutex_init(dir->mutex);
 }
 
 void vfs_dir_lock(VFSDir* dir)
@@ -204,7 +205,8 @@ void vfs_dir_unlock(VFSDir* dir)
 
 static void vfs_dir_clear(VFSDir* dir)
 {
-    g_mutex_clear(&dir->mutex);
+    g_mutex_clear(dir->mutex);
+    g_free(dir->mutex);
 }
 
 /* destructor */

@@ -69,7 +69,8 @@ static bool should_abort(VFSFileTask* task);
 
 static void vfs_file_task_init(VFSFileTask* task)
 {
-    g_mutex_init(&task->mutex);
+    task->mutex = g_malloc(sizeof(GMutex));
+    g_mutex_init(task->mutex);
 }
 
 void vfs_file_task_lock(VFSFileTask* task)
@@ -84,7 +85,8 @@ void vfs_file_task_unlock(VFSFileTask* task)
 
 static void vfs_file_task_clear(VFSFileTask* task)
 {
-    g_mutex_clear(&task->mutex);
+    g_mutex_clear(task->mutex);
+    g_free(task->mutex);
 }
 
 static void append_add_log(VFSFileTask* task, const char* msg, int msg_len)
