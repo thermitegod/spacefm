@@ -849,8 +849,6 @@ static void xset_free_all()
         }
 
         xset_free(set);
-
-        g_slice_free(XSet, set);
     }
     g_list_free(xsets);
     xsets = NULL;
@@ -866,44 +864,26 @@ static void xset_free_all()
 
 static void xset_free(XSet* set)
 {
-    if (set->name)
-        g_free(set->name);
-    if (set->s)
-        g_free(set->s);
-    if (set->x)
-        g_free(set->x);
-    if (set->y)
-        g_free(set->y);
-    if (set->z)
-        g_free(set->z);
-    if (set->menu_label)
-        g_free(set->menu_label);
-    if (set->shared_key)
-        g_free(set->shared_key);
-    if (set->icon)
-        g_free(set->icon);
-    if (set->desc)
-        g_free(set->desc);
-    if (set->title)
-        g_free(set->title);
-    if (set->next)
-        g_free(set->next);
-    if (set->parent)
-        g_free(set->parent);
-    if (set->child)
-        g_free(set->child);
-    if (set->prev)
-        g_free(set->prev);
-    if (set->line)
-        g_free(set->line);
-    if (set->context)
-        g_free(set->context);
+    g_free(set->name);
+    g_free(set->s);
+    g_free(set->x);
+    g_free(set->y);
+    g_free(set->z);
+    g_free(set->menu_label);
+    g_free(set->shared_key);
+    g_free(set->icon);
+    g_free(set->desc);
+    g_free(set->title);
+    g_free(set->next);
+    g_free(set->parent);
+    g_free(set->child);
+    g_free(set->prev);
+    g_free(set->line);
+    g_free(set->context);
     if (set->plugin)
     {
-        if (set->plug_dir)
-            g_free(set->plug_dir);
-        if (set->plug_name)
-            g_free(set->plug_name);
+        g_free(set->plug_dir);
+        g_free(set->plug_name);
     }
 
     xsets = g_list_remove(xsets, set);
