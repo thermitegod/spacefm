@@ -3918,6 +3918,12 @@ const GList* fm_main_window_get_all()
 
 static long get_desktop_index(GtkWindow* win)
 {
+    const gchar* wayland = g_getenv("WAYLAND_DISPLAY");
+    if (wayland != NULL)
+    {
+        return -1;
+    }
+
     long desktop = -1;
     GdkDisplay* display;
     GdkWindow* window = NULL;
