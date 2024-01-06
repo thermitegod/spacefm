@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <filesystem>
+
 #include <vector>
 
 #include <memory>
@@ -39,6 +41,10 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
 
     std::filesystem::path config_dir{};
     bool git_backed_settings{true};
+
+    std::string loglevel{"trace"};
+    // std::filesystem::path logfile{"/tmp/test.log"};
+    std::filesystem::path logfile{};
 
     bool version{false};
 };

@@ -229,9 +229,6 @@ main(int argc, char* argv[])
     // set locale to system default
     std::locale::global(std::locale(""));
 
-    // logging init
-    ztd::logger::initialize();
-
     // CLI11
     CLI::App cli_app{PACKAGE_NAME_FANCY, "A multi-panel tabbed file manager"};
 
