@@ -214,6 +214,7 @@ struct PtkFileBrowser
     void set_default_folder() const noexcept;
 
     const std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
+    const std::vector<GtkTreePath*> selected_items(GtkTreeModel** model) const noexcept;
 
     void open_selected_files() noexcept;
     void open_selected_files_with_app(const std::string_view app_desktop = "") noexcept;
@@ -236,7 +237,6 @@ struct PtkFileBrowser
 
     void update_selection_history() noexcept;
 
-    GList* selected_items(GtkTreeModel** model) const noexcept;
     void select_all() const noexcept;
     void unselect_all() const noexcept;
     void select_last() noexcept;

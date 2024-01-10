@@ -32,6 +32,8 @@
 
 #include <functional>
 
+#include <algorithm>
+
 #include <ranges>
 
 #include <system_error>
@@ -1365,13 +1367,13 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
     file_browser->sel_size_ = 0;
     file_browser->sel_disk_size_ = 0;
 
-    GtkTreeModel* model;
-    GList* selected_files = file_browser->selected_items(&model);
+    GtkTreeModel* model = nullptr;
+    const std::vector<GtkTreePath*> selected_files = file_browser->selected_items(&model);
 
-    for (GList* sel = selected_files; sel; sel = g_list_next(sel))
+    for (GtkTreePath* sel : selected_files)
     {
         GtkTreeIter it;
-        if (gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data))
+        if (gtk_tree_model_get_iter(model, &it, sel))
         {
             std::shared_ptr<vfs::file> file;
             gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
@@ -1383,10 +1385,9 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
         }
     }
 
-    file_browser->n_sel_files_ = g_list_length(selected_files);
+    file_browser->n_sel_files_ = selected_files.size();
 
-    g_list_foreach(selected_files, (GFunc)gtk_tree_path_free, nullptr);
-    g_list_free(selected_files);
+    std::ranges::for_each(selected_files, gtk_tree_path_free);
 
     file_browser->run_event<spacefm::signal::change_sel>();
     file_browser->sel_change_idle_ = 0;
@@ -3499,23 +3500,23 @@ PtkFileBrowser::selected_files() const noexcept
 {
     GtkTreeModel* model = nullptr;
     std::vector<std::shared_ptr<vfs::file>> file_list;
-    GList* selected_files = this->selected_items(&model);
-    if (!selected_files)
+    const std::vector<GtkTreePath*> selected_files = this->selected_items(&model);
+    if (selected_files.empty())
     {
         return file_list;
     }
 
-    file_list.reserve(g_list_length(selected_files));
-    for (GList* sel = selected_files; sel; sel = g_list_next(sel))
+    file_list.reserve(selected_files.size());
+    for (GtkTreePath* sel : selected_files)
     {
         GtkTreeIter it;
         std::shared_ptr<vfs::file> file;
-        gtk_tree_model_get_iter(model, &it, (GtkTreePath*)sel->data);
+        gtk_tree_model_get_iter(model, &it, sel);
         gtk_tree_model_get(model, &it, ptk::file_list::column::info, &file, -1);
         file_list.push_back(file);
     }
-    g_list_foreach(selected_files, (GFunc)gtk_tree_path_free, nullptr);
-    g_list_free(selected_files);
+
+    std::ranges::for_each(selected_files, gtk_tree_path_free);
 
     return file_list;
 }
@@ -4870,9 +4871,10 @@ PtkFileBrowser::update_selection_history() noexcept
     this->selection_history->selection_history.insert({cwd, selected_filenames});
 }
 
-GList*
+const std::vector<GtkTreePath*>
 PtkFileBrowser::selected_items(GtkTreeModel** model) const noexcept
 {
+    GList* selected = nullptr;
     GtkTreeSelection* selection = nullptr;
 
     switch (this->view_mode_)
@@ -4880,14 +4882,21 @@ PtkFileBrowser::selected_items(GtkTreeModel** model) const noexcept
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
             *model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
-            return exo_icon_view_get_selected_items(EXO_ICON_VIEW(this->folder_view_));
+            selected = exo_icon_view_get_selected_items(EXO_ICON_VIEW(this->folder_view_));
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
-            return gtk_tree_selection_get_selected_rows(selection, model);
+            selected = gtk_tree_selection_get_selected_rows(selection, model);
             break;
     }
-    return nullptr;
+
+    std::vector<GtkTreePath*> selected_items;
+    selected_items.reserve(g_list_length(selected));
+    for (GList* sel = selected; sel; sel = g_list_next(sel))
+    {
+        selected_items.push_back((GtkTreePath*)sel->data);
+    }
+    return selected_items;
 }
 
 void
