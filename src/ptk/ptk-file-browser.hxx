@@ -213,7 +213,7 @@ struct PtkFileBrowser
     void open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept;
     void set_default_folder() const noexcept;
 
-    const std::vector<std::shared_ptr<vfs::file>> selected_files() noexcept;
+    const std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
 
     void open_selected_files() noexcept;
     void open_selected_files_with_app(const std::string_view app_desktop = "") noexcept;
@@ -236,7 +236,7 @@ struct PtkFileBrowser
 
     void update_selection_history() noexcept;
 
-    GList* selected_items(GtkTreeModel** model) noexcept;
+    GList* selected_items(GtkTreeModel** model) const noexcept;
     void select_all() const noexcept;
     void unselect_all() const noexcept;
     void select_last() noexcept;
@@ -269,6 +269,8 @@ struct PtkFileBrowser
     void update_toolbar_widgets(const xset_t& set_ptr, xset::tool tool_type) noexcept;
 
     void show_history_menu(bool is_back_history, GdkEvent* event) noexcept;
+
+    void update_statusbar() const noexcept;
 
     void on_permission(GtkMenuItem* item,
                        const std::span<const std::shared_ptr<vfs::file>> selected_files,

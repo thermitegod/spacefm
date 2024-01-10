@@ -92,7 +92,6 @@ struct MainWindow
     void open_path_in_current_tab(const std::filesystem::path& path) noexcept;
 
     void set_window_title(PtkFileBrowser* file_browser) noexcept;
-    void update_status_bar(PtkFileBrowser* file_browser) const noexcept;
 
     bool is_main_tasks_running() const noexcept;
 

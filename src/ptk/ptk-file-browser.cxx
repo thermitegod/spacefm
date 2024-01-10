@@ -58,7 +58,6 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/xset-toolbar.hxx"
-#include "xset/xset-misc.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -85,6 +84,7 @@
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
+#include "vfs/vfs-utils.hxx"
 
 #include "settings/app.hxx"
 
@@ -3444,7 +3444,7 @@ PtkFileBrowser::close_tab() noexcept
         PtkFileBrowser* a_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, cur_tabx));
         a_browser->update_views();
-        main_window->update_status_bar(a_browser);
+        a_browser->update_statusbar();
         // g_idle_add((GSourceFunc)delayed_focus, a_browser->folder_view());
     }
 
@@ -3517,7 +3517,7 @@ PtkFileBrowser::set_default_folder() const noexcept
 }
 
 const std::vector<std::shared_ptr<vfs::file>>
-PtkFileBrowser::selected_files() noexcept
+PtkFileBrowser::selected_files() const noexcept
 {
     GtkTreeModel* model = nullptr;
     std::vector<std::shared_ptr<vfs::file>> file_list;
@@ -4892,7 +4892,7 @@ PtkFileBrowser::update_selection_history() noexcept
 }
 
 GList*
-PtkFileBrowser::selected_items(GtkTreeModel** model) noexcept
+PtkFileBrowser::selected_items(GtkTreeModel** model) const noexcept
 {
     GtkTreeSelection* selection = nullptr;
 
@@ -5381,6 +5381,261 @@ PtkFileBrowser::show_history_menu(bool is_back_history, GdkEvent* event) noexcep
     {
         gtk_widget_destroy(menu);
     }
+}
+
+void
+PtkFileBrowser::update_statusbar() const noexcept
+{
+    std::string statusbar_txt;
+
+    const auto cwd = this->cwd();
+    if (cwd.empty())
+    {
+        // browser has just been created / is still loading
+        return;
+    }
+
+    if (std::filesystem::exists(cwd))
+    {
+        const auto fs_stat = ztd::statvfs(cwd);
+
+        // calc free space
+        const std::string free_size = vfs_file_size_format(fs_stat.bsize() * fs_stat.bavail());
+        // calc total space
+        const std::string disk_size = vfs_file_size_format(fs_stat.frsize() * fs_stat.blocks());
+
+        statusbar_txt.append(std::format(" {} / {}   ", free_size, disk_size));
+    }
+
+    // Show Reading... while sill loading
+    if (this->is_busy())
+    {
+        statusbar_txt.append(std::format("Reading {} ...", cwd.string()));
+        gtk_statusbar_pop(this->statusbar, 0);
+        gtk_statusbar_push(this->statusbar, 0, statusbar_txt.data());
+        return;
+    }
+
+    u64 total_size;
+    u64 total_on_disk_size;
+
+    // note: total size will not include content changes since last selection change
+    const u32 num_sel = this->get_n_sel(&total_size, &total_on_disk_size);
+    const u32 num_vis = this->get_n_visible_files();
+
+    if (num_sel > 0)
+    {
+        const auto selected_files = this->selected_files();
+        if (selected_files.empty())
+        {
+            return;
+        }
+
+        const std::string file_size = vfs_file_size_format(total_size);
+        const std::string disk_size = vfs_file_size_format(total_on_disk_size);
+
+        statusbar_txt.append(
+            std::format("{:L} / {:L} ({} / {})", num_sel, num_vis, file_size, disk_size));
+
+        if (num_sel == 1)
+        // display file name or symlink info in status bar if one file selected
+        {
+            const auto& file = selected_files.front();
+            if (!file)
+            {
+                return;
+            }
+
+            if (file->is_symlink())
+            {
+                const auto target = std::filesystem::absolute(file->path());
+                if (!target.empty())
+                {
+                    std::filesystem::path target_path;
+
+                    // ztd::logger::info("LINK: {}", file->path());
+                    if (!target.is_absolute())
+                    {
+                        // relative link
+                        target_path = cwd / target;
+                    }
+                    else
+                    {
+                        target_path = target;
+                    }
+
+                    if (file->is_directory())
+                    {
+                        if (std::filesystem::exists(target_path))
+                        {
+                            statusbar_txt.append(std::format("  Link -> {}/", target.string()));
+                        }
+                        else
+                        {
+                            statusbar_txt.append(
+                                std::format("  !Link -> {}/ (missing)", target.string()));
+                        }
+                    }
+                    else
+                    {
+                        std::error_code ec;
+                        const auto results = ztd::stat(target_path, ec);
+                        if (!ec)
+                        {
+                            const std::string lsize = vfs_file_size_format(results.size());
+                            statusbar_txt.append(
+                                std::format("  Link -> {} ({})", target.string(), lsize));
+                        }
+                        else
+                        {
+                            statusbar_txt.append(
+                                std::format("  !Link -> {} (missing)", target.string()));
+                        }
+                    }
+                }
+                else
+                {
+                    statusbar_txt.append(std::format("  !Link -> (error reading target)"));
+                }
+            }
+            else
+            {
+                statusbar_txt.append(std::format("  {}", file->name()));
+            }
+        }
+        else
+        {
+            u32 count_dir = 0;
+            u32 count_file = 0;
+            u32 count_symlink = 0;
+            u32 count_socket = 0;
+            u32 count_pipe = 0;
+            u32 count_block = 0;
+            u32 count_char = 0;
+
+            for (const auto& file : selected_files)
+            {
+                if (!file)
+                {
+                    continue;
+                }
+
+                if (file->is_directory())
+                {
+                    ++count_dir;
+                }
+                else if (file->is_regular_file())
+                {
+                    ++count_file;
+                }
+                else if (file->is_symlink())
+                {
+                    ++count_symlink;
+                }
+                else if (file->is_socket())
+                {
+                    ++count_socket;
+                }
+                else if (file->is_fifo())
+                {
+                    ++count_pipe;
+                }
+                else if (file->is_block_file())
+                {
+                    ++count_block;
+                }
+                else if (file->is_character_file())
+                {
+                    ++count_char;
+                }
+            }
+
+            if (count_dir)
+            {
+                statusbar_txt.append(std::format("  Directories ({:L})", count_dir));
+            }
+            if (count_file)
+            {
+                statusbar_txt.append(std::format("  Files ({:L})", count_file));
+            }
+            if (count_symlink)
+            {
+                statusbar_txt.append(std::format("  Symlinks ({:L})", count_symlink));
+            }
+            if (count_socket)
+            {
+                statusbar_txt.append(std::format("  Sockets ({:L})", count_socket));
+            }
+            if (count_pipe)
+            {
+                statusbar_txt.append(std::format("  Named Pipes ({:L})", count_pipe));
+            }
+            if (count_block)
+            {
+                statusbar_txt.append(std::format("  Block Devices ({:L})", count_block));
+            }
+            if (count_char)
+            {
+                statusbar_txt.append(std::format("  Character Devices ({:L})", count_char));
+            }
+        }
+    }
+    else
+    {
+        // size of files in dir, does not get subdir size
+        // TODO, could use this->dir_->files();
+        u64 disk_size_bytes = 0;
+        u64 disk_size_disk = 0;
+        for (const auto& file : std::filesystem::directory_iterator(cwd))
+        {
+            const auto file_stat = ztd::lstat(file.path());
+            if (file_stat.is_regular_file() || file_stat.is_directory())
+            {
+                disk_size_bytes += file_stat.size();
+                disk_size_disk += file_stat.size_on_disk();
+            }
+        }
+        const std::string file_size = vfs_file_size_format(disk_size_bytes);
+        const std::string disk_size = vfs_file_size_format(disk_size_disk);
+
+        // count for .hidden files
+        const u32 num_hid = this->get_n_all_files() - num_vis;
+        const u32 num_hidx = this->dir_ ? this->dir_->hidden_files() : 0;
+        if (num_hid || num_hidx)
+        {
+            statusbar_txt.append(std::format("{:L} visible ({:L} hidden)  ({} / {})",
+                                             num_vis,
+                                             num_hid,
+                                             file_size,
+                                             disk_size));
+        }
+        else
+        {
+            statusbar_txt.append(std::format("{:L} {}  ({} / {})",
+                                             num_vis,
+                                             num_vis == 1 ? "item" : "items",
+                                             file_size,
+                                             disk_size));
+        }
+
+        // cur dir is a symlink? canonicalize path
+        if (std::filesystem::is_symlink(cwd))
+        {
+            const auto canon = std::filesystem::read_symlink(cwd);
+            statusbar_txt.append(std::format("  {} -> {}", cwd.string(), canon.string()));
+        }
+        else
+        {
+            statusbar_txt.append(std::format("  {}", cwd.string()));
+        }
+    }
+
+    // too much padding
+    gtk_widget_set_margin_top(GTK_WIDGET(this->statusbar), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(this->statusbar), 0);
+
+    gtk_statusbar_pop(this->statusbar, 0);
+    gtk_statusbar_push(this->statusbar, 0, statusbar_txt.data());
 }
 
 void
