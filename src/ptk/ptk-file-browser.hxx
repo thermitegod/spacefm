@@ -321,7 +321,6 @@ struct PtkFileBrowser
   public:
     // signal
     void on_folder_content_changed(const std::shared_ptr<vfs::file>& file);
-    void on_folder_content_deleted(const std::shared_ptr<vfs::file>& file);
     void on_dir_file_listed(bool is_cancelled);
 
     // Signals

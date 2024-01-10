@@ -1159,13 +1159,6 @@ add_history_menu_item(PtkFileBrowser* file_browser, GtkWidget* menu,
     return menu_item;
 }
 
-static bool
-ptk_file_browser_content_changed(PtkFileBrowser* file_browser)
-{
-    file_browser->run_event<spacefm::signal::change_content>();
-    return false;
-}
-
 void
 PtkFileBrowser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file)
 {
@@ -1180,22 +1173,7 @@ PtkFileBrowser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file
     }
     else
     {
-        g_idle_add((GSourceFunc)ptk_file_browser_content_changed, this);
-    }
-}
-
-void
-PtkFileBrowser::on_folder_content_deleted(const std::shared_ptr<vfs::file>& file)
-{
-    if (file == nullptr)
-    {
-        // The directory itself was deleted
-        this->close_tab();
-        // file_browser->chdir(vfs::user_dirs->home_dir());
-    }
-    else
-    {
-        this->on_folder_content_changed(file);
+        this->run_event<spacefm::signal::change_content>();
     }
 }
 
@@ -1314,7 +1292,7 @@ PtkFileBrowser::on_dir_file_listed(bool is_cancelled)
         this->signal_file_created = this->dir_->add_event<spacefm::signal::file_created>(
             std::bind(&PtkFileBrowser::on_folder_content_changed, this, std::placeholders::_1));
         this->signal_file_deleted = this->dir_->add_event<spacefm::signal::file_deleted>(
-            std::bind(&PtkFileBrowser::on_folder_content_deleted, this, std::placeholders::_1));
+            std::bind(&PtkFileBrowser::on_folder_content_changed, this, std::placeholders::_1));
         this->signal_file_changed = this->dir_->add_event<spacefm::signal::file_changed>(
             std::bind(&PtkFileBrowser::on_folder_content_changed, this, std::placeholders::_1));
     }
