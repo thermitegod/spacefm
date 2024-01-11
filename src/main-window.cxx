@@ -2615,13 +2615,12 @@ MainWindow::update_status_bar(PtkFileBrowser* file_browser) const noexcept
         u64 disk_size_disk = 0;
         for (const auto& file : std::filesystem::directory_iterator(cwd))
         {
-            const auto file_stat = ztd::stat(file.path());
-            if (!file_stat.is_regular_file())
+            const auto file_stat = ztd::lstat(file.path());
+            if (file_stat.is_regular_file() || file_stat.is_directory())
             {
-                continue;
+                disk_size_bytes += file_stat.size();
+                disk_size_disk += file_stat.size_on_disk();
             }
-            disk_size_bytes += file_stat.size();
-            disk_size_disk += file_stat.size_on_disk();
         }
         const std::string file_size = vfs_file_size_format(disk_size_bytes);
         const std::string disk_size = vfs_file_size_format(disk_size_disk);
