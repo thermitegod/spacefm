@@ -174,7 +174,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::key:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -189,7 +189,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::keymod:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -204,7 +204,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::style:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -308,7 +308,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::task:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -323,7 +323,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::task_pop:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -338,7 +338,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::task_err:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -353,7 +353,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::task_out:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -368,7 +368,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::run_in_terminal:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -383,7 +383,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::keep_terminal:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -398,7 +398,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::scroll_lock:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -413,7 +413,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::disable:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())
@@ -428,7 +428,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::opener:
         {
-            i32 result{};
+            u32 result{};
             const auto [ptr, ec] =
                 std::from_chars(value.data(), value.data() + value.size(), result);
             if (ec != std::errc())

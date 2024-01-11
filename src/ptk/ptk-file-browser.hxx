@@ -123,7 +123,7 @@ struct PtkFileBrowser
     /* <private> */
     std::shared_ptr<vfs::dir> dir_{nullptr};
     GtkTreeModel* file_list_{nullptr};
-    i32 max_thumbnail_{0};
+    u32 max_thumbnail_{0};
     u64 n_sel_files_{0};
     u64 sel_size_{0};
     u64 sel_disk_size_{0};
@@ -252,8 +252,9 @@ struct PtkFileBrowser
     void view_as_compact_list() noexcept;
     void view_as_list() noexcept;
 
-    void show_thumbnails(i32 max_file_size) noexcept; // sets icons size using this->large_icons_
-    void show_thumbnails(i32 max_file_size, bool large_icons) noexcept;
+    void
+    show_thumbnails(const u32 max_file_size) noexcept; // sets icons size using this->large_icons_
+    void show_thumbnails(const u32 max_file_size, const bool large_icons) noexcept;
 
     void update_views() noexcept;
     void focus(i32 job) noexcept;

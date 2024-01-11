@@ -124,7 +124,7 @@ struct dir : public std::enable_shared_from_this<dir>
     // bool show_hidden_{true};
     bool avoid_changes_{true};
 
-    i64 xhidden_count_{0};
+    u64 xhidden_count_{0};
 
     std::mutex lock_;
 

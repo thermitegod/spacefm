@@ -4462,26 +4462,27 @@ PtkFileBrowser::view_as_list() noexcept
 }
 
 void
-PtkFileBrowser::show_thumbnails(i32 max_file_size) noexcept
+PtkFileBrowser::show_thumbnails(const u32 max_file_size) noexcept
 {
     this->show_thumbnails(max_file_size, this->large_icons_);
 }
 
 void
-PtkFileBrowser::show_thumbnails(i32 max_file_size, bool large_icons) noexcept
+PtkFileBrowser::show_thumbnails(const u32 max_file_size, const bool large_icons) noexcept
 {
     this->max_thumbnail_ = max_file_size;
     if (this->file_list_)
     {
+        bool thumbs_blacklisted = false;
         if (!this->dir_ || this->dir_->avoid_changes())
         { // this will disable thumbnails if change detection is blacklisted on current device
-            max_file_size = 0;
+            thumbs_blacklisted = true;
         }
 
         PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
         list->show_thumbnails(large_icons ? vfs::file::thumbnail_size::big
                                           : vfs::file::thumbnail_size::small,
-                              max_file_size);
+                              thumbs_blacklisted ? 0 : max_file_size);
         this->update_toolbar_widgets(xset::tool::show_thumb);
     }
 }
@@ -5420,8 +5421,8 @@ PtkFileBrowser::update_statusbar() const noexcept
     u64 total_on_disk_size;
 
     // note: total size will not include content changes since last selection change
-    const u32 num_sel = this->get_n_sel(&total_size, &total_on_disk_size);
-    const u32 num_vis = this->get_n_visible_files();
+    const auto num_sel = this->get_n_sel(&total_size, &total_on_disk_size);
+    const auto num_vis = this->get_n_visible_files();
 
     if (num_sel > 0)
     {
@@ -5597,8 +5598,8 @@ PtkFileBrowser::update_statusbar() const noexcept
         const std::string disk_size = vfs_file_size_format(disk_size_disk);
 
         // count for .hidden files
-        const u32 num_hid = this->get_n_all_files() - num_vis;
-        const u32 num_hidx = this->dir_ ? this->dir_->hidden_files() : 0;
+        const auto num_hid = this->get_n_all_files() - num_vis;
+        const auto num_hidx = this->dir_ ? this->dir_->hidden_files() : 0;
         if (num_hid || num_hidx)
         {
             statusbar_txt.append(std::format("{:L} visible ({:L} hidden)  ({} / {})",

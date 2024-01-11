@@ -50,11 +50,11 @@ vfs::linux::procfs::mountinfo()
 
         MountInfoEntry mount;
 
-        mount.mount_id = std::stol(fields[0]);
-        mount.parent_id = std::stol(fields[1]);
+        mount.mount_id = std::stoul(fields[0]);
+        mount.parent_id = std::stoul(fields[1]);
         const auto minor_major = ztd::partition(fields[2], ":");
-        mount.major = std::stol(minor_major[0]);
-        mount.minor = std::stol(minor_major[2]);
+        mount.major = std::stoul(minor_major[0]);
+        mount.minor = std::stoul(minor_major[2]);
         mount.root = Glib::strcompress(fields[3]);        // Encoded Field
         mount.mount_point = Glib::strcompress(fields[4]); // Encoded Field
         mount.mount_options = fields[5];
