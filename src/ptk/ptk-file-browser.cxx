@@ -5583,16 +5583,14 @@ PtkFileBrowser::update_statusbar() const noexcept
     else
     {
         // size of files in dir, does not get subdir size
-        // TODO, could use this->dir_->files();
         u64 disk_size_bytes = 0;
         u64 disk_size_disk = 0;
-        for (const auto& file : std::filesystem::directory_iterator(cwd))
+        if (this->dir_ && this->dir_->is_loaded())
         {
-            const auto file_stat = ztd::lstat(file.path());
-            if (file_stat.is_regular_file() || file_stat.is_directory())
+            for (const auto& file : this->dir_->files())
             {
-                disk_size_bytes += file_stat.size();
-                disk_size_disk += file_stat.size_on_disk();
+                disk_size_bytes += file->size();
+                disk_size_disk += file->size_on_disk();
             }
         }
         const std::string file_size = vfs_file_size_format(disk_size_bytes);

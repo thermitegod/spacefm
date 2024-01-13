@@ -372,6 +372,12 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
 }
 
 bool
+vfs::dir::is_loaded() const noexcept
+{
+    return this->load_complete_;
+}
+
+bool
 vfs::dir::is_file_listed() const noexcept
 {
     return this->file_listed_;

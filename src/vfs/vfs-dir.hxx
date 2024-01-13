@@ -65,6 +65,7 @@ struct dir : public std::enable_shared_from_this<dir>
     bool avoid_changes() const noexcept;
     void update_avoid_changes() noexcept;
 
+    bool is_loaded() const noexcept;
     bool is_file_listed() const noexcept;
     bool is_directory_empty() const noexcept;
 
