@@ -87,7 +87,6 @@ static bool on_main_window_keypress_found_key(MainWindow* main_window, const xse
 static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
                                          MainWindow* main_window);
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
-static void main_window_close(MainWindow* main_window);
 
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
@@ -273,7 +272,6 @@ on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
     main_window_delete_event(GTK_WIDGET(user_data), nullptr);
-    // main_window_close( GTK_WIDGET( user_data ) );
 }
 
 void
@@ -1414,15 +1412,10 @@ main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamS
     (void)pspec;
 }
 
-static void
-main_window_close(MainWindow* main_window)
+void
+MainWindow::close_window() noexcept
 {
-    /*
-    ztd::logger::info("DISC={}", g_signal_handlers_disconnect_by_func(
-                            G_OBJECT(main_window),
-                            G_CALLBACK(ptk_file_task_notify_handler), nullptr));
-    */
-    gtk_widget_destroy(GTK_WIDGET(main_window));
+    gtk_widget_destroy(GTK_WIDGET(this));
 }
 
 void
@@ -1530,7 +1523,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
                              "MainWindow Delete Event",
                              GtkButtonsType::GTK_BUTTONS_CLOSE,
                              "Aborting tasks...");
-            main_window_close(main_window);
+            main_window->close_window();
 
             ptk_task_view_task_stop(main_window->task_view,
                                     xset_get(xset::name::task_stop_all),
@@ -1548,7 +1541,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
             return true;
         }
     }
-    main_window_close(main_window);
+    main_window->close_window();
     return true;
 }
 

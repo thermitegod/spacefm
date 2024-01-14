@@ -101,6 +101,8 @@ struct MainWindow
 
     void store_positions() noexcept;
 
+    void close_window() noexcept;
+
     void open_terminal() const noexcept;
 
     void rebuild_menus() noexcept;
