@@ -96,6 +96,8 @@ struct MainWindow
 
     GtkNotebook* get_panel_notebook(const panel_t panel) const noexcept;
 
+    void open_network(const std::string_view url, const bool new_tab) const noexcept;
+
     void store_positions() noexcept;
 
   public:
@@ -134,8 +136,6 @@ void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
-
-void main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab);
 
 void main_window_fullscreen_activate(MainWindow* main_window);
 bool main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);

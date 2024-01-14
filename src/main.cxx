@@ -197,7 +197,7 @@ activate(GtkApplication* app, void* user_data)
         else if ((!file.string().starts_with('/') && file.string().contains(":/")) ||
                  file.string().starts_with("//"))
         {
-            main_window_open_network(main_window, file.string(), true);
+            main_window->open_network(file.string(), true);
         }
         else
         {

@@ -2136,9 +2136,9 @@ MainWindow::open_path_in_current_tab(const std::filesystem::path& path) noexcept
 }
 
 void
-main_window_open_network(MainWindow* main_window, const std::string_view url, bool new_tab)
+MainWindow::open_network(const std::string_view url, const bool new_tab) const noexcept
 {
-    PtkFileBrowser* file_browser = main_window->current_file_browser();
+    PtkFileBrowser* file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
