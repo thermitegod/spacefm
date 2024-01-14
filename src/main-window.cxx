@@ -96,7 +96,6 @@ static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
 static void update_window_title(MainWindow* main_window);
 static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window);
 static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window);
-static bool delayed_focus_file_browser(PtkFileBrowser* file_browser);
 
 static GtkApplicationWindowClass* parent_class = nullptr;
 
@@ -808,7 +807,7 @@ MainWindow::show_panels() noexcept
                             // if (file_browser->folder_view)
                             //      gtk_widget_grab_focus(file_browser->folder_view);
                             // ztd::logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, ztd::logger::utils::ptr(file_browser->folder_view_), ztd::logger::utils::ptr(this));
-                            g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
+                            g_idle_add((GSourceFunc)ptk_file_browser_delay_focus, file_browser);
                         }
                     }
                     std::free(set->ob1);
@@ -1597,83 +1596,6 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
     return true;
 }
 
-void
-main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
-                          const std::filesystem::path& file_path)
-{
-    if (!file_browser)
-    {
-        return;
-    }
-    MainWindow* main_window = file_browser->main_window();
-    panel_t panel_x = file_browser->panel();
-
-    switch (panel_num)
-    {
-        case panel_control_code_prev:
-            // prev
-            do
-            {
-                if (!is_valid_panel(--panel_x))
-                { // loop to end
-                    panel_x = 4;
-                }
-                if (panel_x == file_browser->panel())
-                {
-                    return;
-                }
-            } while (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel_x))));
-            break;
-        case panel_control_code_next:
-            // next
-            do
-            {
-                if (!is_valid_panel(++panel_x))
-                { // loop to start
-                    panel_x = 1;
-                }
-                if (panel_x == file_browser->panel())
-                {
-                    return;
-                }
-            } while (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel_x))));
-            break;
-        default:
-            panel_x = panel_num;
-            break;
-    }
-
-    if (!is_valid_panel(panel_x))
-    {
-        return;
-    }
-
-    // show panel
-    if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel_x))))
-    {
-        xset_set_b_panel(panel_x, xset::panel::show, true);
-        show_panels_all_windows(nullptr, main_window);
-    }
-
-    // open in tab in panel
-    const i32 save_curpanel = main_window->curpanel;
-
-    main_window->curpanel = panel_x;
-    main_window->notebook = main_window->get_panel_notebook(panel_x);
-
-    main_window->new_tab(file_path);
-
-    main_window->curpanel = save_curpanel;
-    main_window->notebook = main_window->get_panel_notebook(main_window->curpanel);
-
-    // focus original panel
-    // while(g_main_context_pending(nullptr))
-    //    g_main_context_iteration(nullptr, true);
-    // gtk_widget_grab_focus(GTK_WIDGET(main_window->notebook));
-    // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
-    g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
-}
-
 bool
 main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
 {
@@ -1975,7 +1897,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view_));
     // ztd::logger::info("focus browser {} {}", idx, ztd::logger::utils::ptr(file_browser->folder_view_));
     // ztd::logger::info("call delayed (newtab) #{} {}", idx, ztd::logger::utils::ptr(file_browser->folder_view_));
-    // g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
+    // g_idle_add((GSourceFunc)ptk_file_browser_delay_focus, file_browser);
 }
 
 PtkFileBrowser*
@@ -2073,21 +1995,6 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
     main_window_store_positions(main_window);
     save_settings();
     main_window_add_new_window(main_window);
-}
-
-static bool
-delayed_focus_file_browser(PtkFileBrowser* file_browser)
-{
-    if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
-    {
-        // ztd::logger::info("delayed_focus_file_browser fb={}", ztd::logger::utils::ptr(file_browser));
-        if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
-        {
-            gtk_widget_grab_focus(file_browser->folder_view());
-            set_panel_focus(nullptr, file_browser);
-        }
-    }
-    return false;
 }
 
 void
@@ -2259,7 +2166,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 
     if (GTK_IS_WIDGET(file_browser))
     {
-        g_idle_add((GSourceFunc)delayed_focus_file_browser, file_browser);
+        g_idle_add((GSourceFunc)ptk_file_browser_delay_focus, file_browser);
     }
 }
 

@@ -3173,6 +3173,81 @@ PtkFileBrowser::panel_cwd(const panel_t panel_num) const noexcept
     return panel_file_browser->cwd();
 }
 
+void
+PtkFileBrowser::open_in_panel(const panel_t panel_num,
+                              const std::filesystem::path& file_path) noexcept
+{
+    panel_t panel_x = this->panel();
+
+    switch (panel_num)
+    {
+        case panel_control_code_prev:
+            // prev
+            do
+            {
+                if (!is_valid_panel(--panel_x))
+                { // loop to end
+                    panel_x = 4;
+                }
+                if (panel_x == this->panel())
+                {
+                    return;
+                }
+            } while (!gtk_widget_get_visible(
+                GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))));
+            break;
+        case panel_control_code_next:
+            // next
+            do
+            {
+                if (!is_valid_panel(++panel_x))
+                { // loop to start
+                    panel_x = 1;
+                }
+                if (panel_x == this->panel())
+                {
+                    return;
+                }
+            } while (!gtk_widget_get_visible(
+                GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))));
+            break;
+        default:
+            panel_x = panel_num;
+            break;
+    }
+
+    if (!is_valid_panel(panel_x))
+    {
+        return;
+    }
+
+    // show panel
+    if (!gtk_widget_get_visible(GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))))
+    {
+        xset_set_b_panel(panel_x, xset::panel::show, true);
+        show_panels_all_windows(nullptr, this->main_window_);
+    }
+
+    // open in tab in panel
+    const auto save_curpanel = this->main_window_->curpanel;
+
+    this->main_window_->curpanel = panel_x;
+    this->main_window_->notebook = this->main_window_->get_panel_notebook(panel_x);
+
+    this->main_window_->new_tab(file_path);
+
+    this->main_window_->curpanel = save_curpanel;
+    this->main_window_->notebook =
+        this->main_window_->get_panel_notebook(this->main_window_->curpanel);
+
+    // focus original panel
+    // while(g_main_context_pending(nullptr))
+    //    g_main_context_iteration(nullptr, true);
+    // gtk_widget_grab_focus(GTK_WIDGET(this->main_window_->notebook));
+    // gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view));
+    g_idle_add((GSourceFunc)ptk_file_browser_delay_focus, this);
+}
+
 u64
 PtkFileBrowser::get_n_all_files() const noexcept
 {
@@ -6173,6 +6248,21 @@ PtkFileBrowser::enable_toolbar() noexcept
     this->update_toolbar_widgets(xset::tool::show_hidden);
     this->update_toolbar_widgets(xset::tool::show_thumb);
     this->update_toolbar_widgets(xset::tool::large_icons);
+}
+
+bool
+ptk_file_browser_delay_focus(PtkFileBrowser* file_browser)
+{
+    if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
+    {
+        // ztd::logger::info("delayed_focus_file_browser fb={}", ztd::logger::utils::ptr(file_browser));
+        if (GTK_IS_WIDGET(file_browser) && GTK_IS_WIDGET(file_browser->folder_view()))
+        {
+            gtk_widget_grab_focus(file_browser->folder_view());
+            set_panel_focus(nullptr, file_browser);
+        }
+    }
+    return false;
 }
 
 // xset callback wrapper functions

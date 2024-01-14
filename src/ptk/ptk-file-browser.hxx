@@ -194,6 +194,8 @@ struct PtkFileBrowser
     const std::optional<std::filesystem::path> tab_cwd(const tab_t tab_num) const noexcept;
     const std::optional<std::filesystem::path> panel_cwd(const panel_t panel_num) const noexcept;
 
+    void open_in_panel(const panel_t panel_num, const std::filesystem::path& file_path) noexcept;
+
     u64 get_n_all_files() const noexcept;
     u64 get_n_visible_files() const noexcept;
     u64 get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept;
@@ -485,6 +487,8 @@ bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
 bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
 
 void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget);
+
+bool ptk_file_browser_delay_focus(PtkFileBrowser* file_browser);
 
 // xset callback wrapper functions
 void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);

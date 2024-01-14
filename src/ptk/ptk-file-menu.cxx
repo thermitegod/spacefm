@@ -283,7 +283,7 @@ on_open_in_panel(GtkMenuItem* menuitem, PtkFileMenu* data)
     const panel_t panel_num = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "panel"));
     if (data->browser)
     {
-        main_window_open_in_panel(data->browser, panel_num, data->file_path);
+        data->browser->open_in_panel(panel_num, data->file_path);
     }
 }
 
@@ -2844,7 +2844,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
         {
             i = std::stol(set->name);
         }
-        main_window_open_in_panel(data->browser, i, data->file_path);
+        data->browser->open_in_panel(i, data->file_path);
     }
     else if (set->name.starts_with("opentab_"))
     {
