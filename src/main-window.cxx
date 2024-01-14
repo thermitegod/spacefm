@@ -1438,54 +1438,45 @@ main_window_close(MainWindow* main_window)
 }
 
 void
-main_window_store_positions(MainWindow* main_window)
+MainWindow::store_positions() noexcept
 {
-    if (main_window == nullptr)
-    {
-        main_window = main_window_get_last_active();
-        if (main_window == nullptr)
-        {
-            return;
-        }
-    }
-
     // if the window is not fullscreen (is normal or maximized) save sliders
     // and columns
-    if (!main_window->fullscreen)
+    if (!this->fullscreen)
     {
         // store width/height + sliders
         i32 pos;
         GtkAllocation allocation;
-        gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
+        gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
 
-        if (!main_window->maximized && allocation.width > 0)
+        if (!this->maximized && allocation.width > 0)
         {
             app_settings.width(allocation.width);
             app_settings.height(allocation.height);
         }
-        if (GTK_IS_PANED(main_window->hpane_top))
+        if (GTK_IS_PANED(this->hpane_top))
         {
-            pos = gtk_paned_get_position(main_window->hpane_top);
+            pos = gtk_paned_get_position(this->hpane_top);
             if (pos)
             {
                 xset_set(xset::name::panel_sliders, xset::var::x, std::to_string(pos));
             }
 
-            pos = gtk_paned_get_position(main_window->hpane_bottom);
+            pos = gtk_paned_get_position(this->hpane_bottom);
             if (pos)
             {
                 xset_set(xset::name::panel_sliders, xset::var::y, std::to_string(pos));
             }
 
-            pos = gtk_paned_get_position(main_window->vpane);
+            pos = gtk_paned_get_position(this->vpane);
             if (pos)
             {
                 xset_set(xset::name::panel_sliders, xset::var::s, std::to_string(pos));
             }
 
-            if (gtk_widget_get_visible(GTK_WIDGET(main_window->task_scroll)))
+            if (gtk_widget_get_visible(GTK_WIDGET(this->task_scroll)))
             {
-                pos = gtk_paned_get_position(main_window->task_vpane);
+                pos = gtk_paned_get_position(this->task_vpane);
                 if (pos)
                 {
                     // save absolute height
@@ -1500,17 +1491,17 @@ main_window_store_positions(MainWindow* main_window)
 
         // store fb columns
         PtkFileBrowser* a_browser;
-        if (main_window->maximized)
+        if (this->maximized)
         {
-            main_window->opened_maximized = true; // force save of columns
+            this->opened_maximized = true; // force save of columns
         }
         for (const panel_t p : PANELS)
         {
-            const i32 page_x = gtk_notebook_get_current_page(main_window->get_panel_notebook(p));
+            const i32 page_x = gtk_notebook_get_current_page(this->get_panel_notebook(p));
             if (page_x != -1)
             {
                 a_browser = PTK_FILE_BROWSER_REINTERPRET(
-                    gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), page_x));
+                    gtk_notebook_get_nth_page(this->get_panel_notebook(p), page_x));
                 if (a_browser && a_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
                 {
                     a_browser->save_column_widths();
@@ -1528,7 +1519,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 
     MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
 
-    main_window_store_positions(main_window);
+    main_window->store_positions();
 
     // save settings
     app_settings.maximized(main_window->maximized);
@@ -1955,7 +1946,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
     MainWindow* main_window = MAIN_WINDOW(user_data);
 
     autosave_request_cancel();
-    main_window_store_positions(main_window);
+    main_window->store_positions();
     save_settings();
     main_window_add_new_window(main_window);
 }
