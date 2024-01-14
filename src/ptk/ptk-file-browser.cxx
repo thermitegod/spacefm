@@ -3118,6 +3118,61 @@ PtkFileBrowser::tab_cwd(const tab_t tab_num) const noexcept
     return std::nullopt;
 }
 
+const std::optional<std::filesystem::path>
+PtkFileBrowser::panel_cwd(const panel_t panel_num) const noexcept
+{
+    panel_t panel_x = this->panel();
+
+    switch (panel_num)
+    {
+        case panel_control_code_prev:
+            // prev
+            do
+            {
+                if (--panel_x < 1)
+                {
+                    panel_x = 4;
+                }
+                if (panel_x == this->panel())
+                {
+                    return std::nullopt;
+                }
+            } while (!gtk_widget_get_visible(
+                GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))));
+            break;
+        case panel_control_code_next:
+            // next
+            do
+            {
+                if (!is_valid_panel(++panel_x))
+                {
+                    panel_x = 1;
+                }
+                if (panel_x == this->panel())
+                {
+                    return std::nullopt;
+                }
+            } while (!gtk_widget_get_visible(
+                GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))));
+            break;
+        default:
+            panel_x = panel_num;
+            if (!gtk_widget_get_visible(
+                    GTK_WIDGET(this->main_window_->get_panel_notebook(panel_x))))
+            {
+                return std::nullopt;
+            }
+            break;
+    }
+
+    GtkNotebook* notebook = this->main_window_->get_panel_notebook(panel_x);
+    const i32 page_x = gtk_notebook_get_current_page(notebook);
+
+    const PtkFileBrowser* panel_file_browser =
+        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_x));
+    return panel_file_browser->cwd();
+}
+
 u64
 PtkFileBrowser::get_n_all_files() const noexcept
 {
@@ -3698,27 +3753,27 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
     }
     else if (setname == xset::name::copy_panel_prev)
     {
-        copy_dest = main_window_get_panel_cwd(this, panel_control_code_prev);
+        copy_dest = this->panel_cwd(panel_control_code_prev);
     }
     else if (setname == xset::name::copy_panel_next)
     {
-        copy_dest = main_window_get_panel_cwd(this, panel_control_code_next);
+        copy_dest = this->panel_cwd(panel_control_code_next);
     }
     else if (setname == xset::name::copy_panel_1)
     {
-        copy_dest = main_window_get_panel_cwd(this, panel_1);
+        copy_dest = this->panel_cwd(panel_1);
     }
     else if (setname == xset::name::copy_panel_2)
     {
-        copy_dest = main_window_get_panel_cwd(this, panel_2);
+        copy_dest = this->panel_cwd(panel_2);
     }
     else if (setname == xset::name::copy_panel_3)
     {
-        copy_dest = main_window_get_panel_cwd(this, panel_3);
+        copy_dest = this->panel_cwd(panel_3);
     }
     else if (setname == xset::name::copy_panel_4)
     {
-        copy_dest = main_window_get_panel_cwd(this, panel_4);
+        copy_dest = this->panel_cwd(panel_4);
     }
     else if (setname == xset::name::copy_loc_last)
     {
@@ -3775,27 +3830,27 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
     }
     else if (setname == xset::name::move_panel_prev)
     {
-        move_dest = main_window_get_panel_cwd(this, panel_control_code_prev);
+        move_dest = this->panel_cwd(panel_control_code_prev);
     }
     else if (setname == xset::name::move_panel_next)
     {
-        move_dest = main_window_get_panel_cwd(this, panel_control_code_next);
+        move_dest = this->panel_cwd(panel_control_code_next);
     }
     else if (setname == xset::name::move_panel_1)
     {
-        move_dest = main_window_get_panel_cwd(this, panel_1);
+        move_dest = this->panel_cwd(panel_1);
     }
     else if (setname == xset::name::move_panel_2)
     {
-        move_dest = main_window_get_panel_cwd(this, panel_2);
+        move_dest = this->panel_cwd(panel_2);
     }
     else if (setname == xset::name::move_panel_3)
     {
-        move_dest = main_window_get_panel_cwd(this, panel_3);
+        move_dest = this->panel_cwd(panel_3);
     }
     else if (setname == xset::name::move_panel_4)
     {
-        move_dest = main_window_get_panel_cwd(this, panel_4);
+        move_dest = this->panel_cwd(panel_4);
     }
     else if (setname == xset::name::move_loc_last)
     {

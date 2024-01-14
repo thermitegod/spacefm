@@ -1597,63 +1597,6 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
     return true;
 }
 
-const std::optional<std::filesystem::path>
-main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
-{
-    if (!file_browser)
-    {
-        return std::nullopt;
-    }
-    const MainWindow* main_window = file_browser->main_window();
-    panel_t panel_x = file_browser->panel();
-
-    switch (panel_num)
-    {
-        case panel_control_code_prev:
-            // prev
-            do
-            {
-                if (--panel_x < 1)
-                {
-                    panel_x = 4;
-                }
-                if (panel_x == file_browser->panel())
-                {
-                    return std::nullopt;
-                }
-            } while (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel_x))));
-            break;
-        case panel_control_code_next:
-            // next
-            do
-            {
-                if (!is_valid_panel(++panel_x))
-                {
-                    panel_x = 1;
-                }
-                if (panel_x == file_browser->panel())
-                {
-                    return std::nullopt;
-                }
-            } while (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel_x))));
-            break;
-        default:
-            panel_x = panel_num;
-            if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel_x))))
-            {
-                return std::nullopt;
-            }
-            break;
-    }
-
-    GtkNotebook* notebook = main_window->get_panel_notebook(panel_x);
-    const i32 page_x = gtk_notebook_get_current_page(notebook);
-
-    const PtkFileBrowser* panel_file_browser =
-        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_x));
-    return panel_file_browser->cwd();
-}
-
 void
 main_window_open_in_panel(PtkFileBrowser* file_browser, panel_t panel_num,
                           const std::filesystem::path& file_path)
