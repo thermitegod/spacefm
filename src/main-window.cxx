@@ -1888,14 +1888,14 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data)
     show_about_dialog(GTK_WINDOW(main_window));
 }
 
-static void
-main_window_add_new_window(MainWindow* main_window)
+void
+MainWindow::add_new_window() noexcept
 {
-    if (main_window && !main_window->maximized && !main_window->fullscreen)
+    if (!this->maximized && !this->fullscreen)
     {
         // use current main_window's size for new window
         GtkAllocation allocation;
-        gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
+        gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
         if (allocation.width > 0)
         {
             app_settings.width(allocation.width);
@@ -1907,12 +1907,12 @@ main_window_add_new_window(MainWindow* main_window)
 
     ztd::logger::info("Opening another window");
 
-    GtkApplication* app = gtk_window_get_application(GTK_WINDOW(main_window));
+    GtkApplication* app = gtk_window_get_application(GTK_WINDOW(this));
     assert(GTK_IS_APPLICATION(app));
 
     MainWindow* another_main_window =
         MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
-    gtk_window_set_application(GTK_WINDOW(main_window), app);
+    gtk_window_set_application(GTK_WINDOW(this), app);
     assert(GTK_IS_APPLICATION_WINDOW(another_main_window));
 
     gtk_window_present(GTK_WINDOW(another_main_window));
@@ -1929,7 +1929,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
     autosave_request_cancel();
     main_window->store_positions();
     save_settings();
-    main_window_add_new_window(main_window);
+    main_window->add_new_window();
 }
 
 void

@@ -102,6 +102,7 @@ struct MainWindow
     void store_positions() noexcept;
 
     void close_window() noexcept;
+    void add_new_window() noexcept;
 
     void open_terminal() const noexcept;
 
