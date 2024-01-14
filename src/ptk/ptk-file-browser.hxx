@@ -191,6 +191,8 @@ struct PtkFileBrowser
     const std::filesystem::path& cwd() const noexcept;
     void canon(const std::filesystem::path& path) noexcept;
 
+    const std::optional<std::filesystem::path> tab_cwd(const tab_t tab_num) const noexcept;
+
     u64 get_n_all_files() const noexcept;
     u64 get_n_visible_files() const noexcept;
     u64 get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept;

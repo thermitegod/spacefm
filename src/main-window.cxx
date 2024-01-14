@@ -1598,45 +1598,6 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
 }
 
 const std::optional<std::filesystem::path>
-main_window_get_tab_cwd(PtkFileBrowser* file_browser, tab_t tab_num)
-{
-    if (!file_browser)
-    {
-        return std::nullopt;
-    }
-    i32 page_x;
-    MainWindow* main_window = file_browser->main_window();
-    GtkNotebook* notebook = main_window->get_panel_notebook(file_browser->panel());
-    const i32 pages = gtk_notebook_get_n_pages(notebook);
-    const i32 page_num = gtk_notebook_page_num(notebook, GTK_WIDGET(file_browser));
-
-    switch (tab_num)
-    {
-        case tab_control_code_prev:
-            // prev
-            page_x = page_num - 1;
-            break;
-        case tab_control_code_next:
-            // next
-            page_x = page_num + 1;
-            break;
-        default:
-            // tab_num starts counting at 1
-            page_x = tab_num - 1;
-            break;
-    }
-
-    if (page_x > -1 && page_x < pages)
-    {
-        const PtkFileBrowser* tab_file_browser =
-            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_x));
-        return tab_file_browser->cwd();
-    }
-
-    return std::nullopt;
-}
-
-const std::optional<std::filesystem::path>
 main_window_get_panel_cwd(PtkFileBrowser* file_browser, panel_t panel_num)
 {
     if (!file_browser)

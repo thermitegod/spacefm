@@ -3084,6 +3084,40 @@ PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
     }
 }
 
+const std::optional<std::filesystem::path>
+PtkFileBrowser::tab_cwd(const tab_t tab_num) const noexcept
+{
+    tab_t tab_x;
+    GtkNotebook* notebook = this->main_window_->get_panel_notebook(this->panel());
+    const i32 pages = gtk_notebook_get_n_pages(notebook);
+    const i32 page_num = gtk_notebook_page_num(notebook, GTK_WIDGET(this));
+
+    switch (tab_num)
+    {
+        case tab_control_code_prev:
+            // prev
+            tab_x = page_num - 1;
+            break;
+        case tab_control_code_next:
+            // next
+            tab_x = page_num + 1;
+            break;
+        default:
+            // tab_num starts counting at 1
+            tab_x = tab_num - 1;
+            break;
+    }
+
+    if (tab_x > -1 && tab_x < pages)
+    {
+        const PtkFileBrowser* tab_file_browser =
+            PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, tab_x));
+        return tab_file_browser->cwd();
+    }
+
+    return std::nullopt;
+}
+
 u64
 PtkFileBrowser::get_n_all_files() const noexcept
 {
@@ -3616,51 +3650,51 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
 
     if (setname == xset::name::copy_tab_prev)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_control_code_prev);
+        copy_dest = this->tab_cwd(tab_control_code_prev);
     }
     else if (setname == xset::name::copy_tab_next)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_control_code_next);
+        copy_dest = this->tab_cwd(tab_control_code_next);
     }
     else if (setname == xset::name::copy_tab_1)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_1);
+        copy_dest = this->tab_cwd(tab_1);
     }
     else if (setname == xset::name::copy_tab_2)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_2);
+        copy_dest = this->tab_cwd(tab_2);
     }
     else if (setname == xset::name::copy_tab_3)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_3);
+        copy_dest = this->tab_cwd(tab_3);
     }
     else if (setname == xset::name::copy_tab_4)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_4);
+        copy_dest = this->tab_cwd(tab_4);
     }
     else if (setname == xset::name::copy_tab_5)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_5);
+        copy_dest = this->tab_cwd(tab_5);
     }
     else if (setname == xset::name::copy_tab_6)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_6);
+        copy_dest = this->tab_cwd(tab_6);
     }
     else if (setname == xset::name::copy_tab_7)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_7);
+        copy_dest = this->tab_cwd(tab_7);
     }
     else if (setname == xset::name::copy_tab_8)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_8);
+        copy_dest = this->tab_cwd(tab_8);
     }
     else if (setname == xset::name::copy_tab_9)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_9);
+        copy_dest = this->tab_cwd(tab_9);
     }
     else if (setname == xset::name::copy_tab_10)
     {
-        copy_dest = main_window_get_tab_cwd(this, tab_10);
+        copy_dest = this->tab_cwd(tab_10);
     }
     else if (setname == xset::name::copy_panel_prev)
     {
@@ -3693,51 +3727,51 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
     }
     else if (setname == xset::name::move_tab_prev)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_control_code_prev);
+        move_dest = this->tab_cwd(tab_control_code_prev);
     }
     else if (setname == xset::name::move_tab_next)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_control_code_next);
+        move_dest = this->tab_cwd(tab_control_code_next);
     }
     else if (setname == xset::name::move_tab_1)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_1);
+        move_dest = this->tab_cwd(tab_1);
     }
     else if (setname == xset::name::move_tab_2)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_2);
+        move_dest = this->tab_cwd(tab_2);
     }
     else if (setname == xset::name::move_tab_3)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_3);
+        move_dest = this->tab_cwd(tab_3);
     }
     else if (setname == xset::name::move_tab_4)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_4);
+        move_dest = this->tab_cwd(tab_4);
     }
     else if (setname == xset::name::move_tab_5)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_5);
+        move_dest = this->tab_cwd(tab_5);
     }
     else if (setname == xset::name::move_tab_6)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_6);
+        move_dest = this->tab_cwd(tab_6);
     }
     else if (setname == xset::name::move_tab_7)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_7);
+        move_dest = this->tab_cwd(tab_7);
     }
     else if (setname == xset::name::move_tab_8)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_8);
+        move_dest = this->tab_cwd(tab_8);
     }
     else if (setname == xset::name::move_tab_9)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_9);
+        move_dest = this->tab_cwd(tab_9);
     }
     else if (setname == xset::name::move_tab_10)
     {
-        move_dest = main_window_get_tab_cwd(this, tab_10);
+        move_dest = this->tab_cwd(tab_10);
     }
     else if (setname == xset::name::move_panel_prev)
     {
