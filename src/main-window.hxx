@@ -101,6 +101,8 @@ struct MainWindow
 
     void store_positions() noexcept;
 
+    void open_terminal() const noexcept;
+
   public:
     // signals
     void on_file_browser_before_chdir(PtkFileBrowser* file_browser);

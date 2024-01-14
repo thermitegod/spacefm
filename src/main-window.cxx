@@ -219,10 +219,10 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
     find_files(search_dirs);
 }
 
-static void
-main_window_open_terminal(MainWindow* main_window)
+void
+MainWindow::open_terminal() const noexcept
 {
-    PtkFileBrowser* file_browser = main_window->current_file_browser();
+    PtkFileBrowser* file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
@@ -232,12 +232,12 @@ main_window_open_terminal(MainWindow* main_window)
     if (!main_term)
     {
 #if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+        GtkWidget* parent_win = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+        GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 #endif
 
-        ptk_show_error(GTK_WINDOW(parent),
+        ptk_show_error(GTK_WINDOW(parent_win),
                        "Terminal Not Available",
                        "Please set your terminal program in View|Preferences|Advanced");
         return;
@@ -267,7 +267,7 @@ on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
-    main_window_open_terminal(main_window);
+    main_window->open_terminal();
 }
 
 static void
