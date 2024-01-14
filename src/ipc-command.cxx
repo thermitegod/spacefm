@@ -236,7 +236,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             const std::string subproperty = json["subproperty"];
 
             xset_set_b(xset::name::main_full, subproperty == "true");
-            main_window_fullscreen_activate(main_window);
+            main_window->fullscreen_activate();
         }
         else if (property == "window-vslider-top" || property == "window-vslider-bottom" ||
                  property == "window-hslider" || property == "window-tslider")

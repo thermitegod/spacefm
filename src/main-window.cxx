@@ -1975,28 +1975,28 @@ MainWindow::is_main_tasks_running() const noexcept
 }
 
 void
-main_window_fullscreen_activate(MainWindow* main_window)
+MainWindow::fullscreen_activate() noexcept
 {
-    PtkFileBrowser* file_browser = main_window->current_file_browser();
+    PtkFileBrowser* file_browser = this->current_file_browser();
     if (xset_get_b(xset::name::main_full))
     {
         if (file_browser && file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
         {
             file_browser->save_column_widths();
         }
-        gtk_widget_hide(GTK_WIDGET(main_window->menu_bar));
-        gtk_window_fullscreen(GTK_WINDOW(main_window));
-        main_window->fullscreen = true;
+        gtk_widget_hide(GTK_WIDGET(this->menu_bar));
+        gtk_window_fullscreen(GTK_WINDOW(this));
+        this->fullscreen = true;
     }
     else
     {
-        main_window->fullscreen = false;
-        gtk_window_unfullscreen(GTK_WINDOW(main_window));
-        gtk_widget_show(main_window->menu_bar);
+        this->fullscreen = false;
+        gtk_window_unfullscreen(GTK_WINDOW(this));
+        gtk_widget_show(this->menu_bar);
 
-        if (!main_window->maximized)
+        if (!this->maximized)
         {
-            main_window->show_panels(); // restore columns
+            this->show_panels(); // restore columns
         }
     }
 }
@@ -2005,7 +2005,7 @@ static void
 on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
 {
     (void)menuitem;
-    main_window_fullscreen_activate(main_window);
+    main_window->fullscreen_activate();
 }
 
 void
