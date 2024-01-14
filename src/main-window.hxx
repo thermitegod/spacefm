@@ -99,6 +99,9 @@ struct MainWindow
     void open_network(const std::string_view url, const bool new_tab) const noexcept;
     void fullscreen_activate() noexcept;
 
+    bool keypress(GdkEvent* event, void* user_data) noexcept;
+    bool keypress_found_key(const xset_t& set) noexcept;
+
     void store_positions() noexcept;
 
     void close_window() noexcept;
@@ -149,5 +152,3 @@ void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);
-
-bool main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);

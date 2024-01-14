@@ -83,7 +83,6 @@ static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, 
                                u32 time, PtkFileBrowser* file_browser);
 
 static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);
-static bool on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set);
 static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
                                          MainWindow* main_window);
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
@@ -2222,8 +2221,8 @@ on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* mai
     return false;
 }
 
-static bool
-on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data)
+bool
+MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
 {
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -2232,7 +2231,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
     if (user_data)
     {
         const xset_t known_set = static_cast<xset::XSet*>(user_data)->shared_from_this();
-        return on_main_window_keypress_found_key(main_window, known_set);
+        return this->keypress_found_key(known_set);
     }
 
     if (keyval == 0)
@@ -2251,7 +2250,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
         (keyval == GDK_KEY_BackSpace && keymod == 0) ||
         (keymod == 0 && keyval != GDK_KEY_Escape && gdk_keyval_to_unicode(keyval))) // visible char
     {
-        browser = main_window->current_file_browser();
+        browser = this->current_file_browser();
         if (browser && browser->path_bar() && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar())))
         {
             return false; // send to pathbar
@@ -2272,7 +2271,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
                 if (shared_key_set->name.starts_with("panel"))
                 {
                     // use current panel's set
-                    browser = main_window->current_file_browser();
+                    browser = this->current_file_browser();
                     if (browser)
                     {
                         const std::string new_set_name =
@@ -2286,7 +2285,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
                         return false;
                     }
                 }
-                return on_main_window_keypress_found_key(main_window, shared_key_set);
+                return this->keypress_found_key(shared_key_set);
             }
             else
             {
@@ -2295,7 +2294,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
         }
         if (set->key == keyval && set->keymod == keymod)
         {
-            return on_main_window_keypress_found_key(main_window, set);
+            return this->keypress_found_key(set);
         }
     }
 
@@ -2305,22 +2304,22 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
     if ((keymod & GdkModifierType::GDK_MOD1_MASK))
 #endif
     {
-        main_window->rebuild_menus();
+        this->rebuild_menus();
     }
 
     return false;
 }
 
-bool
-main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data)
+static bool
+on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data)
 {
-    return on_main_window_keypress(main_window, event, user_data);
+    return main_window->keypress(event, user_data);
 }
 
-static bool
-on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set)
+bool
+MainWindow::keypress_found_key(const xset_t& set) noexcept
 {
-    PtkFileBrowser* browser = main_window->current_file_browser();
+    PtkFileBrowser* browser = this->current_file_browser();
     if (!browser)
     {
         return true;
@@ -2365,40 +2364,40 @@ on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set)
     {
         if (set->xset_name == xset::name::main_new_window)
         {
-            on_new_window_activate(nullptr, main_window);
+            on_new_window_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_search)
         {
-            on_find_file_activate(nullptr, main_window);
+            on_find_file_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_terminal)
         {
-            on_open_terminal_activate(nullptr, main_window);
+            on_open_terminal_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_save_session)
         {
-            on_open_url(nullptr, main_window);
+            on_open_url(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_exit)
         {
-            on_quit_activate(nullptr, main_window);
+            on_quit_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_full)
         {
-            xset_set_b(xset::name::main_full, !main_window->fullscreen);
-            on_fullscreen_activate(nullptr, main_window);
+            xset_set_b(xset::name::main_full, !this->fullscreen);
+            on_fullscreen_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_prefs)
         {
-            on_preference_activate(nullptr, main_window);
+            on_preference_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_title)
         {
-            main_window->set_window_title(browser);
+            this->set_window_title(browser);
         }
         else if (set->xset_name == xset::name::main_about)
         {
-            on_about_activate(nullptr, main_window);
+            on_about_activate(nullptr, this);
         }
     }
     else if (set->name.starts_with("panel_"))
@@ -2420,13 +2419,13 @@ on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set)
         {
             i = std::stoi(set->name);
         }
-        main_window->focus_panel(i);
+        this->focus_panel(i);
     }
     else if (set->name.starts_with("task_"))
     {
         if (set->xset_name == xset::name::task_manager)
         {
-            ptk_task_view_popup_show(main_window, set->name);
+            ptk_task_view_popup_show(this, set->name);
         }
         else if (set->xset_name == xset::name::task_col_reorder)
         {
@@ -2467,7 +2466,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set)
         }
         else if (set->name.starts_with("task_err_"))
         {
-            ptk_task_view_popup_errset(main_window, set->name);
+            ptk_task_view_popup_errset(this, set->name);
         }
     }
     else if (set->xset_name == xset::name::rubberband)

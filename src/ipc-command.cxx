@@ -1914,7 +1914,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         if (event->keyval)
         {
             gtk_window_present(GTK_WINDOW(main_window));
-            main_window_keypress(main_window, event, nullptr);
+            main_window->keypress(event, nullptr);
         }
         else
         {
@@ -1954,7 +1954,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         else
         {
             // activate item
-            main_window_keypress(nullptr, nullptr, set.get());
+            main_window->keypress(nullptr, set.get());
         }
     }
     else if (command == "add-event" || command == "replace-event" || command == "remove-event")
