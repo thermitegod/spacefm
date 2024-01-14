@@ -2528,7 +2528,7 @@ main_window_get_last_active()
     return nullptr;
 }
 
-const std::vector<MainWindow*>&
+const std::span<MainWindow*>
 main_window_get_all()
 {
     return all_windows;

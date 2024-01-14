@@ -19,7 +19,6 @@
 
 #include <filesystem>
 
-#include <vector>
 #include <map>
 
 #include <gtkmm.h>
@@ -120,11 +119,7 @@ PtkFileBrowser* main_window_get_current_file_browser();
 MainWindow* main_window_get_last_active();
 MainWindow* main_window_get_on_current_desktop();
 
-/* get all windows
- * The returned GList is owned and used internally by MainWindow, and
- * should not be freed.
- */
-const std::vector<MainWindow*>& main_window_get_all();
+const std::span<MainWindow*> main_window_get_all();
 
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
 void update_views_all_windows(GtkWidget* item, PtkFileBrowser* file_browser);
