@@ -201,6 +201,14 @@ struct PtkFileBrowser
     u64 get_n_visible_files() const noexcept;
     u64 get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept;
 
+    struct browser_count_data
+    {
+        panel_t panel_count;
+        tab_t tab_count;
+        tab_t tab_num;
+    };
+    const browser_count_data get_tab_panel_counts() const noexcept;
+
     void go_home() noexcept;
     void go_default() noexcept;
     void go_tab(tab_t tab) noexcept;

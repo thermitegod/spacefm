@@ -1596,32 +1596,6 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
     return true;
 }
 
-const main_window_counts_data
-main_window_get_counts(PtkFileBrowser* file_browser)
-{
-    if (!file_browser)
-    {
-        return {0, 0, 0};
-    }
-
-    MainWindow* main_window = file_browser->main_window();
-    GtkNotebook* notebook = main_window->get_panel_notebook(file_browser->panel());
-    const tab_t tab_count = gtk_notebook_get_n_pages(notebook);
-
-    // tab_num starts counting from 1
-    const tab_t tab_num = gtk_notebook_page_num(notebook, GTK_WIDGET(file_browser)) + 1;
-    panel_t panel_count = 0;
-    for (const panel_t p : PANELS)
-    {
-        if (gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(p))))
-        {
-            panel_count++;
-        }
-    }
-
-    return {panel_count, tab_count, tab_num};
-}
-
 static bool
 notebook_clicked(GtkWidget* widget, GdkEvent* event, PtkFileBrowser* file_browser)
 {
@@ -2080,7 +2054,7 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
     if (fmt.contains("%t") || fmt.contains("%T") || fmt.contains("%p") || fmt.contains("%P"))
     {
         // get panel/tab info
-        const auto counts = main_window_get_counts(file_browser);
+        const auto counts = file_browser->get_tab_panel_counts();
         const panel_t panel_count = counts.panel_count;
         const tab_t tab_count = counts.tab_count;
         const tab_t tab_num = counts.tab_num;

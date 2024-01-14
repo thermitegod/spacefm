@@ -143,11 +143,3 @@ void main_window_store_positions(MainWindow* main_window);
 
 void main_window_fullscreen_activate(MainWindow* main_window);
 bool main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);
-
-struct main_window_counts_data
-{
-    panel_t panel_count;
-    tab_t tab_count;
-    tab_t tab_num;
-};
-const main_window_counts_data main_window_get_counts(PtkFileBrowser* file_browser);

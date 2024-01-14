@@ -993,7 +993,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (property == "panel-count")
         {
-            const auto counts = main_window_get_counts(file_browser);
+            const auto counts = file_browser->get_tab_panel_counts();
             const panel_t panel_count = counts.panel_count;
             // const tab_t tab_count = counts.tab_count;
             // const tab_t tab_num = counts.tab_num;
@@ -1002,7 +1002,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
         else if (property == "tab-count")
         {
-            const auto counts = main_window_get_counts(file_browser);
+            const auto counts = file_browser->get_tab_panel_counts();
             // const panel_t panel_count = counts.panel_count;
             const tab_t tab_count = counts.tab_count;
             // const tab_t tab_num = counts.tab_num;

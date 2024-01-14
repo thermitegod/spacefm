@@ -1052,7 +1052,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
 
     const panel_t p = browser->panel();
 
-    const auto counts = main_window_get_counts(browser);
+    const auto counts = browser->get_tab_panel_counts();
     const panel_t panel_count = counts.panel_count;
     const tab_t tab_count = counts.tab_count;
     const tab_t tab_num = counts.tab_num;

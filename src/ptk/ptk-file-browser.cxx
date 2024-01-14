@@ -3258,6 +3258,26 @@ PtkFileBrowser::is_panel_visible(const panel_t panel) const noexcept
     return gtk_widget_get_visible(GTK_WIDGET(this->main_window_->get_panel_notebook(panel)));
 }
 
+const PtkFileBrowser::browser_count_data
+PtkFileBrowser::get_tab_panel_counts() const noexcept
+{
+    GtkNotebook* notebook = this->main_window_->get_panel_notebook(this->panel_);
+    const tab_t tab_count = gtk_notebook_get_n_pages(notebook);
+
+    // tab_num starts counting from 1
+    const tab_t tab_num = gtk_notebook_page_num(notebook, GTK_WIDGET(this)) + 1;
+    panel_t panel_count = 0;
+    for (const panel_t p : PANELS)
+    {
+        if (gtk_widget_get_visible(GTK_WIDGET(this->main_window_->get_panel_notebook(p))))
+        {
+            panel_count++;
+        }
+    }
+
+    return {panel_count, tab_count, tab_num};
+}
+
 u64
 PtkFileBrowser::get_n_all_files() const noexcept
 {
