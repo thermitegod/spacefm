@@ -68,9 +68,9 @@ struct MainWindow
     GtkWidget* task_view;
 
 #if (GTK_MAJOR_VERSION == 4)
-    GtkEventController* accel_group;
+    GtkEventController* accel_group_;
 #elif (GTK_MAJOR_VERSION == 3)
-    GtkAccelGroup* accel_group;
+    GtkAccelGroup* accel_group_;
 #endif
 
     GtkWindowGroup* wgroup;
@@ -102,6 +102,13 @@ struct MainWindow
     void store_positions() noexcept;
 
     void open_terminal() const noexcept;
+
+    void rebuild_menus() noexcept;
+    void rebuild_menu_file(PtkFileBrowser* file_browser) noexcept;
+    void rebuild_menu_view(PtkFileBrowser* file_browser) noexcept;
+    void rebuild_menu_device(PtkFileBrowser* file_browser) noexcept;
+    void rebuild_menu_bookmarks(PtkFileBrowser* file_browser) noexcept;
+    void rebuild_menu_help(PtkFileBrowser* file_browser) noexcept;
 
   public:
     // signals
