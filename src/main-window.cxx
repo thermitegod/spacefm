@@ -90,7 +90,6 @@ static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
 
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
-static void update_window_title(MainWindow* main_window);
 static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window);
 static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window);
 
@@ -1940,13 +1939,12 @@ set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser)
         return;
     }
 
-    MainWindow* mw = main_window;
-    if (mw == nullptr)
+    if (main_window == nullptr)
     {
-        mw = file_browser->main_window();
+        main_window = file_browser->main_window();
     }
 
-    update_window_title(mw);
+    main_window->set_window_title(file_browser);
 }
 
 bool
@@ -1992,7 +1990,11 @@ on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
 void
 MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
 {
-    assert(file_browser != nullptr);
+    if (file_browser == nullptr)
+    {
+        file_browser = this->current_file_browser();
+        assert(file_browser != nullptr);
+    }
 
     std::filesystem::path disp_path;
     std::string disp_name;
@@ -2053,20 +2055,10 @@ MainWindow::set_window_title(PtkFileBrowser* file_browser) noexcept
 }
 
 static void
-update_window_title(MainWindow* main_window)
-{
-    PtkFileBrowser* file_browser = main_window->current_file_browser();
-    if (file_browser)
-    {
-        main_window->set_window_title(file_browser);
-    }
-}
-
-static void
 on_update_window_title(GtkMenuItem* item, MainWindow* main_window)
 {
     (void)item;
-    update_window_title(main_window);
+    main_window->set_window_title(nullptr);
 }
 
 static void
@@ -2402,7 +2394,7 @@ on_main_window_keypress_found_key(MainWindow* main_window, const xset_t& set)
         }
         else if (set->xset_name == xset::name::main_title)
         {
-            update_window_title(main_window);
+            main_window->set_window_title(browser);
         }
         else if (set->xset_name == xset::name::main_about)
         {
