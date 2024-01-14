@@ -195,6 +195,7 @@ struct PtkFileBrowser
     const std::optional<std::filesystem::path> panel_cwd(const panel_t panel_num) const noexcept;
 
     void open_in_panel(const panel_t panel_num, const std::filesystem::path& file_path) noexcept;
+    bool is_panel_visible(const panel_t panel) const noexcept;
 
     u64 get_n_all_files() const noexcept;
     u64 get_n_visible_files() const noexcept;

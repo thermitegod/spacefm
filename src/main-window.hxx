@@ -134,7 +134,6 @@ void main_window_refresh_all_tabs_matching(const std::filesystem::path& path);
 void main_window_close_all_invalid_tabs();
 void main_window_rebuild_all_toolbars(PtkFileBrowser* file_browser);
 
-bool main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel);
 void main_window_rubberband_all();
 void main_window_refresh_all();
 void set_panel_focus(MainWindow* main_window, PtkFileBrowser* file_browser);

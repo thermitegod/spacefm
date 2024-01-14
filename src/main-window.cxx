@@ -1596,17 +1596,6 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
     return true;
 }
 
-bool
-main_window_panel_is_visible(PtkFileBrowser* file_browser, panel_t panel)
-{
-    if (!is_valid_panel(panel))
-    {
-        return false;
-    }
-    const MainWindow* main_window = file_browser->main_window();
-    return gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(panel)));
-}
-
 const main_window_counts_data
 main_window_get_counts(PtkFileBrowser* file_browser)
 {

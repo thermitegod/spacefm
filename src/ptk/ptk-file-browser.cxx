@@ -3248,6 +3248,16 @@ PtkFileBrowser::open_in_panel(const panel_t panel_num,
     g_idle_add((GSourceFunc)ptk_file_browser_delay_focus, this);
 }
 
+bool
+PtkFileBrowser::is_panel_visible(const panel_t panel) const noexcept
+{
+    if (!is_valid_panel(panel))
+    {
+        return false;
+    }
+    return gtk_widget_get_visible(GTK_WIDGET(this->main_window_->get_panel_notebook(panel)));
+}
+
 u64
 PtkFileBrowser::get_n_all_files() const noexcept
 {

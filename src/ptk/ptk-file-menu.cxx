@@ -1506,7 +1506,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
 
         for (panel_t panel : PANELS)
         {
-            const bool b = main_window_panel_is_visible(browser, panel);
+            const bool b = browser->is_panel_visible(panel);
 
             const auto copy_panel = std::format("copy_panel_{}", panel);
             set = xset_get(copy_panel);
