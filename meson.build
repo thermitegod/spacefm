@@ -228,7 +228,6 @@ libudev_dep = dependency('libudev', required : true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
 openssl_dep = dependency('openssl', required : true)
 
-exo_dep = dependency('exo-2', required : true)
 spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
@@ -253,8 +252,6 @@ dependencies = [
   gtkmm_dep,
   glibmm_dep,
   giomm_dep,
-
-  exo_dep,
 
   magic_enum_dep,
   toml11_dep,
@@ -318,6 +315,12 @@ features = []
 
 if get_option('deprecated')
   features += '-DHAVE_DEPRECATED'
+endif
+
+if get_option('exo')
+  exo_dep = dependency('exo-2', required : true)
+  dependencies += exo_dep
+  features += '-DUSE_EXO'
 endif
 
 features += '-DZMQ_PORT="@0@"'.format(get_option('zmp_port'))

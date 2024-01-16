@@ -47,7 +47,9 @@
 #include <gdkmm.h>
 #include <glibmm.h>
 
+#if defined(USE_EXO) && (GTK_MAJOR_VERSION == 3)
 #include <exo/exo.h>
+#endif
 
 #include <magic_enum.hpp>
 
@@ -103,6 +105,10 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
+#if defined(USE_EXO) && (GTK_MAJOR_VERSION == 4)
+#undef USE_EXO
+#endif
+
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
 static void ptk_file_browser_init(PtkFileBrowser* file_browser);
 static void ptk_file_browser_finalize(GObject* obj);
@@ -123,11 +129,19 @@ static GtkWidget* ptk_file_browser_create_dir_tree(PtkFileBrowser* file_browser)
 static GtkTreePath* folder_view_get_tree_path_at_pos(PtkFileBrowser* file_browser, i32 x, i32 y);
 
 /* signal handlers */
+
+#if defined(USE_EXO)
 static void on_folder_view_item_activated(ExoIconView* iconview, GtkTreePath* path,
                                           PtkFileBrowser* file_browser);
+static void on_folder_view_item_sel_change(ExoIconView* iconview, PtkFileBrowser* file_browser);
+#else
+static void on_folder_view_item_activated(GtkIconView* iconview, GtkTreePath* path,
+                                          PtkFileBrowser* file_browser);
+static void on_folder_view_item_sel_change(GtkIconView* iconview, PtkFileBrowser* file_browser);
+#endif
+
 static void on_folder_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path,
                                          GtkTreeViewColumn* col, PtkFileBrowser* file_browser);
-static void on_folder_view_item_sel_change(ExoIconView* iconview, PtkFileBrowser* file_browser);
 
 static bool on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
                                               PtkFileBrowser* file_browser);
@@ -1268,7 +1282,11 @@ PtkFileBrowser::update_model() noexcept
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), GTK_TREE_MODEL(list));
+#else
+            gtk_icon_view_set_model(GTK_ICON_VIEW(this->folder_view_), GTK_TREE_MODEL(list));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             gtk_tree_view_set_model(GTK_TREE_VIEW(this->folder_view_), GTK_TREE_MODEL(list));
@@ -1336,8 +1354,13 @@ PtkFileBrowser::on_dir_file_listed(bool is_cancelled)
 /* signal handlers */
 
 static void
-on_folder_view_item_activated(ExoIconView* iconview, GtkTreePath* path,
-                              PtkFileBrowser* file_browser)
+on_folder_view_item_activated(
+#if defined(USE_EXO)
+    ExoIconView* iconview,
+#else
+    GtkIconView* iconview,
+#endif
+    GtkTreePath* path, PtkFileBrowser* file_browser)
 {
     (void)iconview;
     (void)path;
@@ -1395,7 +1418,13 @@ on_folder_view_item_sel_change_idle(PtkFileBrowser* file_browser)
 }
 
 static void
-on_folder_view_item_sel_change(ExoIconView* iconview, PtkFileBrowser* file_browser)
+on_folder_view_item_sel_change(
+#if defined(USE_EXO)
+    ExoIconView* iconview,
+#else
+    GtkIconView* iconview,
+#endif
+    PtkFileBrowser* file_browser)
 {
     (void)iconview;
     /* //sfm on_folder_view_item_sel_change fires for each selected file
@@ -1496,13 +1525,21 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
         {
             case ptk::file_browser::view_mode::icon_view:
             case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
                 tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget), x, y);
                 model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
-
+#else
+                tree_path = gtk_icon_view_get_path_at_pos(GTK_ICON_VIEW(widget), x, y);
+                model = gtk_icon_view_get_model(GTK_ICON_VIEW(widget));
+#endif
                 /* deselect selected files when right click on blank area */
                 if (!tree_path && button == 3)
                 {
+#if defined(USE_EXO)
                     exo_icon_view_unselect_all(EXO_ICON_VIEW(widget));
+#else
+                    gtk_icon_view_unselect_all(GTK_ICON_VIEW(widget));
+#endif
                 }
                 break;
             case ptk::file_browser::view_mode::list_view:
@@ -1555,10 +1592,20 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
                 case ptk::file_browser::view_mode::icon_view:
                 case ptk::file_browser::view_mode::compact_view:
                     if (tree_path &&
-                        !exo_icon_view_path_is_selected(EXO_ICON_VIEW(widget), tree_path))
+#if defined(USE_EXO)
+                        !exo_icon_view_path_is_selected(EXO_ICON_VIEW(widget), tree_path)
+#else
+                        !gtk_icon_view_path_is_selected(GTK_ICON_VIEW(widget), tree_path)
+#endif
+                    )
                     {
+#if defined(USE_EXO)
                         exo_icon_view_unselect_all(EXO_ICON_VIEW(widget));
                         exo_icon_view_select_path(EXO_ICON_VIEW(widget), tree_path);
+#else
+                        gtk_icon_view_unselect_all(GTK_ICON_VIEW(widget));
+                        gtk_icon_view_select_path(GTK_ICON_VIEW(widget), tree_path);
+#endif
                     }
                     break;
                 case ptk::file_browser::view_mode::list_view:
@@ -1878,30 +1925,53 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             folder_view = exo_icon_view_new();
+#else
+            folder_view = gtk_icon_view_new();
+#endif
 
             if (view_mode == ptk::file_browser::view_mode::compact_view)
             {
                 icon_size = file_browser->large_icons_ ? big_icon_size : small_icon_size;
 
+#if defined(USE_EXO)
                 exo_icon_view_set_layout_mode(EXO_ICON_VIEW(folder_view),
                                               EXO_ICON_VIEW_LAYOUT_COLS);
                 exo_icon_view_set_orientation(EXO_ICON_VIEW(folder_view),
                                               GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
+#else
+                // gtk_icon_view_set_layout_mode(GTK_ICON_VIEW(folder_view),
+                //                               GTK_ICON_VIEW_LAYOUT_COLS);
+                gtk_icon_view_set_item_orientation(GTK_ICON_VIEW(folder_view),
+                                                   GtkOrientation::GTK_ORIENTATION_HORIZONTAL);
+#endif
             }
             else
             {
                 icon_size = big_icon_size;
 
+#if defined(USE_EXO)
                 exo_icon_view_set_column_spacing(EXO_ICON_VIEW(folder_view), 4);
                 exo_icon_view_set_item_width(EXO_ICON_VIEW(folder_view),
                                              icon_size < 110 ? 110 : icon_size);
+#else
+                gtk_icon_view_set_column_spacing(GTK_ICON_VIEW(folder_view), 4);
+                gtk_icon_view_set_item_width(GTK_ICON_VIEW(folder_view),
+                                             icon_size < 110 ? 110 : icon_size);
+#endif
             }
 
+#if defined(USE_EXO)
             exo_icon_view_set_selection_mode(EXO_ICON_VIEW(folder_view),
                                              GtkSelectionMode::GTK_SELECTION_MULTIPLE);
+#else
+            gtk_icon_view_set_selection_mode(GTK_ICON_VIEW(folder_view),
+                                             GtkSelectionMode::GTK_SELECTION_MULTIPLE);
+#endif
 
             // search
+#if defined(USE_EXO)
             exo_icon_view_set_enable_search(EXO_ICON_VIEW(folder_view), true);
             exo_icon_view_set_search_column(EXO_ICON_VIEW(folder_view),
                                             magic_enum::enum_integer(ptk::file_list::column::name));
@@ -1910,6 +1980,17 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                 (ExoIconViewSearchEqualFunc)folder_view_search_equal,
                 nullptr,
                 nullptr);
+#else
+            // TODO - no gtk equivalent api
+            // gtk_icon_view_set_enable_search(GTK_ICON_VIEW(folder_view), true);
+            // gtk_icon_view_set_search_column(GTK_ICON_VIEW(folder_view),
+            //                                 magic_enum::enum_integer(ptk::file_list::column::name));
+            // gtk_icon_view_set_search_equal_func(
+            //     GTK_ICON_VIEW(folder_view),
+            //     (GtkIconViewSearchEqualFunc)folder_view_search_equal,
+            //     nullptr,
+            //     nullptr);
+#endif
 
             gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(folder_view),
                                                        file_browser->single_click_);
@@ -1974,6 +2055,7 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                                           "text",
                                           magic_enum::enum_integer(ptk::file_list::column::name));
 
+#if defined(USE_EXO)
             exo_icon_view_enable_model_drag_source(
                 EXO_ICON_VIEW(folder_view),
                 GdkModifierType(GdkModifierType::GDK_CONTROL_MASK |
@@ -1987,6 +2069,21 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
                                                  drag_targets,
                                                  G_N_ELEMENTS(drag_targets),
                                                  GDK_ACTION_ALL);
+#else
+            gtk_icon_view_enable_model_drag_source(
+                GTK_ICON_VIEW(folder_view),
+                GdkModifierType(GdkModifierType::GDK_CONTROL_MASK |
+                                GdkModifierType::GDK_BUTTON1_MASK |
+                                GdkModifierType::GDK_BUTTON3_MASK),
+                drag_targets,
+                G_N_ELEMENTS(drag_targets),
+                GDK_ACTION_ALL);
+
+            gtk_icon_view_enable_model_drag_dest(GTK_ICON_VIEW(folder_view),
+                                                 drag_targets,
+                                                 G_N_ELEMENTS(drag_targets),
+                                                 GDK_ACTION_ALL);
+#endif
 
             // clang-format off
             g_signal_connect(G_OBJECT(folder_view), "item-activated", G_CALLBACK(on_folder_view_item_activated), file_browser);
@@ -2204,7 +2301,11 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
                 &x,
                 &y);
             tree_path = folder_view_get_tree_path_at_pos(file_browser, x, y);
+#if defined(USE_EXO)
             model = exo_icon_view_get_model(EXO_ICON_VIEW(file_browser->folder_view_));
+#else
+            model = gtk_icon_view_get_model(GTK_ICON_VIEW(file_browser->folder_view_));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             // if drag is in progress, get the dest row path
@@ -2458,8 +2559,13 @@ folder_view_get_tree_path_at_pos(PtkFileBrowser* file_browser, i32 x, i32 y)
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             tree_path =
                 exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(file_browser->folder_view_), x, y);
+#else
+            tree_path =
+                gtk_icon_view_get_path_at_pos(GTK_ICON_VIEW(file_browser->folder_view_), x, y);
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(file_browser->folder_view_),
@@ -2557,8 +2663,14 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
             file_browser->drag_x_ = x;
             file_browser->drag_y_ = y;
             gtk_icon_view_convert_widget_to_bin_window_coords(GTK_ICON_VIEW(widget), x, y, &x, &y);
+
+#if defined(USE_EXO)
             tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget), x, y);
             model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
+#else
+            tree_path = gtk_icon_view_get_path_at_pos(GTK_ICON_VIEW(widget), x, y);
+            model = gtk_icon_view_get_model(GTK_ICON_VIEW(widget));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             // store x and y because == 0 for update drag status when is last row
@@ -2604,9 +2716,16 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+
+#if defined(USE_EXO)
             exo_icon_view_set_drag_dest_item(EXO_ICON_VIEW(widget),
                                              tree_path,
                                              EXO_ICON_VIEW_DROP_INTO);
+#else
+            gtk_icon_view_set_drag_dest_item(GTK_ICON_VIEW(widget),
+                                             tree_path,
+                                             GTK_ICON_VIEW_DROP_INTO);
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             gtk_tree_view_set_drag_dest_row(
@@ -2730,9 +2849,15 @@ on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             exo_icon_view_set_drag_dest_item(EXO_ICON_VIEW(widget),
                                              nullptr,
                                              (ExoIconViewDropPosition)0);
+#else
+            gtk_icon_view_set_drag_dest_item(GTK_ICON_VIEW(widget),
+                                             nullptr,
+                                             (GtkIconViewDropPosition)0);
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             gtk_tree_view_set_drag_dest_row(GTK_TREE_VIEW(widget),
@@ -3001,7 +3126,11 @@ PtkFileBrowser::chdir(const std::filesystem::path& new_path,
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), nullptr);
+#else
+            gtk_icon_view_set_model(GTK_ICON_VIEW(this->folder_view_), nullptr);
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             gtk_tree_view_set_model(GTK_TREE_VIEW(this->folder_view_), nullptr);
@@ -4224,7 +4353,11 @@ PtkFileBrowser::select_all() const noexcept
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             exo_icon_view_select_all(EXO_ICON_VIEW(this->folder_view_));
+#else
+            gtk_icon_view_select_all(GTK_ICON_VIEW(this->folder_view_));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
@@ -4242,7 +4375,12 @@ PtkFileBrowser::unselect_all() const noexcept
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+
+#if defined(USE_EXO)
             exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
+#else
+            gtk_icon_view_unselect_all(GTK_ICON_VIEW(this->folder_view_));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
@@ -4397,7 +4535,11 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
+#else
+            model = gtk_icon_view_get_model(GTK_ICON_VIEW(this->folder_view_));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
@@ -4433,6 +4575,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
                 case ptk::file_browser::view_mode::icon_view:
                 case ptk::file_browser::view_mode::compact_view:
                     // select
+#if defined(USE_EXO)
                     if (exo_icon_view_path_is_selected(EXO_ICON_VIEW(this->folder_view_), path))
                     {
                         if (!select)
@@ -4444,10 +4587,24 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
                     {
                         exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), path);
                     }
+#else
+                    if (gtk_icon_view_path_is_selected(GTK_ICON_VIEW(this->folder_view_), path))
+                    {
+                        if (!select)
+                        {
+                            gtk_icon_view_unselect_path(GTK_ICON_VIEW(this->folder_view_), path);
+                        }
+                    }
+                    else if (select)
+                    {
+                        gtk_icon_view_select_path(GTK_ICON_VIEW(this->folder_view_), path);
+                    }
+#endif
 
                     // scroll to first and set cursor
                     if (first_select && select)
                     {
+#if defined(USE_EXO)
                         exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
                                                  path,
                                                  nullptr,
@@ -4457,6 +4614,17 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
                                                      true,
                                                      .25,
                                                      0);
+#else
+                        gtk_icon_view_set_cursor(GTK_ICON_VIEW(this->folder_view_),
+                                                 path,
+                                                 nullptr,
+                                                 false);
+                        gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(this->folder_view_),
+                                                     path,
+                                                     true,
+                                                     .25,
+                                                     0);
+#endif
                         first_select = false;
                     }
                     break;
@@ -4510,6 +4678,7 @@ invert_selection(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* it,
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             if (exo_icon_view_path_is_selected(EXO_ICON_VIEW(file_browser->folder_view_), path))
             {
                 exo_icon_view_unselect_path(EXO_ICON_VIEW(file_browser->folder_view_), path);
@@ -4518,6 +4687,16 @@ invert_selection(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* it,
             {
                 exo_icon_view_select_path(EXO_ICON_VIEW(file_browser->folder_view_), path);
             }
+#else
+            if (gtk_icon_view_path_is_selected(GTK_ICON_VIEW(file_browser->folder_view_), path))
+            {
+                gtk_icon_view_unselect_path(GTK_ICON_VIEW(file_browser->folder_view_), path);
+            }
+            else
+            {
+                gtk_icon_view_select_path(GTK_ICON_VIEW(file_browser->folder_view_), path);
+            }
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(file_browser->folder_view_));
@@ -4544,15 +4723,25 @@ PtkFileBrowser::invert_selection() noexcept
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
             gtk_tree_model_foreach(model, (GtkTreeModelForeachFunc)::invert_selection, this);
             on_folder_view_item_sel_change(EXO_ICON_VIEW(this->folder_view_), this);
+#else
+            model = gtk_icon_view_get_model(GTK_ICON_VIEW(this->folder_view_));
+            gtk_tree_model_foreach(model, (GtkTreeModelForeachFunc)::invert_selection, this);
+            on_folder_view_item_sel_change(GTK_ICON_VIEW(this->folder_view_), this);
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(this->folder_view_));
             gtk_tree_model_foreach(model, (GtkTreeModelForeachFunc)::invert_selection, this);
+#if defined(USE_EXO)
             on_folder_view_item_sel_change(EXO_ICON_VIEW(selection), this);
+#else
+            on_folder_view_item_sel_change(GTK_ICON_VIEW(selection), this);
+#endif
             break;
     }
 }
@@ -4574,7 +4763,11 @@ PtkFileBrowser::view_as_icons() noexcept
         gtk_widget_destroy(this->folder_view_);
     }
     this->folder_view_ = create_folder_view(this, ptk::file_browser::view_mode::icon_view);
+#if defined(USE_EXO)
     exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), this->file_list_);
+#else
+    gtk_icon_view_set_model(GTK_ICON_VIEW(this->folder_view_), this->file_list_);
+#endif
     gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
@@ -4600,7 +4793,11 @@ PtkFileBrowser::view_as_compact_list() noexcept
         gtk_widget_destroy(this->folder_view_);
     }
     this->folder_view_ = create_folder_view(this, ptk::file_browser::view_mode::compact_view);
+#if defined(USE_EXO)
     exo_icon_view_set_model(EXO_ICON_VIEW(this->folder_view_), this->file_list_);
+#else
+    gtk_icon_view_set_model(GTK_ICON_VIEW(this->folder_view_), this->file_list_);
+#endif
     gtk_scrolled_window_set_policy(this->folder_view_scroll_,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
@@ -5075,8 +5272,13 @@ PtkFileBrowser::selected_items(GtkTreeModel** model) const noexcept
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             *model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
             selected = exo_icon_view_get_selected_items(EXO_ICON_VIEW(this->folder_view_));
+#else
+            *model = gtk_icon_view_get_model(GTK_ICON_VIEW(this->folder_view_));
+            selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(this->folder_view_));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
@@ -5106,9 +5308,17 @@ PtkFileBrowser::select_file(const std::filesystem::path& filename,
     {
         if (unselect_others)
         {
+#if defined(USE_EXO)
             exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
+#else
+            gtk_icon_view_unselect_all(GTK_ICON_VIEW(this->folder_view_));
+#endif
         }
+#if defined(USE_EXO)
         model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
+#else
+        model = gtk_icon_view_get_model(GTK_ICON_VIEW(this->folder_view_));
+#endif
     }
     else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
     {
@@ -5141,6 +5351,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& filename,
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
                         this->view_mode_ == ptk::file_browser::view_mode::compact_view)
                     {
+#if defined(USE_EXO)
                         exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), tree_path);
                         exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
                                                  tree_path,
@@ -5151,6 +5362,18 @@ PtkFileBrowser::select_file(const std::filesystem::path& filename,
                                                      true,
                                                      .25,
                                                      0);
+#else
+                        gtk_icon_view_select_path(GTK_ICON_VIEW(this->folder_view_), tree_path);
+                        gtk_icon_view_set_cursor(GTK_ICON_VIEW(this->folder_view_),
+                                                 tree_path,
+                                                 nullptr,
+                                                 false);
+                        gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(this->folder_view_),
+                                                     tree_path,
+                                                     true,
+                                                     .25,
+                                                     0);
+#endif
                     }
                     else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
                     {
@@ -5198,9 +5421,17 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
     {
         if (unselect_others)
         {
+#if defined(USE_EXO)
             exo_icon_view_unselect_all(EXO_ICON_VIEW(this->folder_view_));
+#else
+            gtk_icon_view_unselect_all(GTK_ICON_VIEW(this->folder_view_));
+#endif
         }
+#if defined(USE_EXO)
         model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
+#else
+        model = gtk_icon_view_get_model(GTK_ICON_VIEW(this->folder_view_));
+#endif
     }
     else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
     {
@@ -5233,6 +5464,7 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
                     if (this->view_mode_ == ptk::file_browser::view_mode::icon_view ||
                         this->view_mode_ == ptk::file_browser::view_mode::compact_view)
                     {
+#if defined(USE_EXO)
                         exo_icon_view_unselect_path(EXO_ICON_VIEW(this->folder_view_), tree_path);
                         exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_),
                                                  tree_path,
@@ -5243,6 +5475,18 @@ PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
                                                      true,
                                                      .25,
                                                      0);
+#else
+                        gtk_icon_view_unselect_path(GTK_ICON_VIEW(this->folder_view_), tree_path);
+                        gtk_icon_view_set_cursor(GTK_ICON_VIEW(this->folder_view_),
+                                                 tree_path,
+                                                 nullptr,
+                                                 false);
+                        gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(this->folder_view_),
+                                                     tree_path,
+                                                     true,
+                                                     .25,
+                                                     0);
+#endif
                     }
                     else if (this->view_mode_ == ptk::file_browser::view_mode::list_view)
                     {
@@ -5307,7 +5551,11 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             model = exo_icon_view_get_model(EXO_ICON_VIEW(this->folder_view_));
+#else
+            model = gtk_icon_view_get_model(GTK_ICON_VIEW(this->folder_view_));
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(this->folder_view_));
@@ -5385,12 +5633,23 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
     {
         case ptk::file_browser::view_mode::icon_view:
         case ptk::file_browser::view_mode::compact_view:
+#if defined(USE_EXO)
             // select
             exo_icon_view_select_path(EXO_ICON_VIEW(this->folder_view_), path);
 
             // scroll and set cursor
             exo_icon_view_set_cursor(EXO_ICON_VIEW(this->folder_view_), path, nullptr, false);
             exo_icon_view_scroll_to_path(EXO_ICON_VIEW(this->folder_view_), path, true, .25, 0);
+
+#else
+            // select
+            gtk_icon_view_select_path(GTK_ICON_VIEW(this->folder_view_), path);
+
+            // scroll and set cursor
+            gtk_icon_view_set_cursor(GTK_ICON_VIEW(this->folder_view_), path, nullptr, false);
+            gtk_icon_view_scroll_to_path(GTK_ICON_VIEW(this->folder_view_), path, true, .25, 0);
+
+#endif
             break;
         case ptk::file_browser::view_mode::list_view:
             // select
