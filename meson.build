@@ -87,7 +87,6 @@ default_warning_flags = [
   '-Wstack-protector',
   '-Wstrict-aliasing',
   '-Wswitch',
-  '-Wswitch-default',
   '-Wswitch-enum',
   '-Wtrigraphs',
   '-Wundef',
@@ -142,10 +141,7 @@ if cpp.get_id() == 'gcc'
     # '-Weffc++',
 
     # Disabled Warnings
-    '-Wno-array-bounds',
-    '-Wno-stringop-overflow',
-    '-Wno-switch-default',
-    '-Wno-shadow',
+    '-Wno-shadow', # gcc is a lot stricter than clang
     '-Wno-maybe-uninitialized',
     '-Wno-cast-function-type',
   ]
