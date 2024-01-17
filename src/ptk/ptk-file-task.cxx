@@ -1781,11 +1781,14 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             task->lock();
             ptask->query_new_dest = (char**)state_data;
             *ptask->query_new_dest = nullptr;
-            ptask->query_cond = g_cond_new();
+
+            ptask->query_cond = g_new(GCond, 1);
+            g_cond_init(ptask->query_cond);
             task->timer.stop();
             g_cond_wait(ptask->query_cond, task->mutex);
-            g_cond_free(ptask->query_cond);
+            g_cond_clear(ptask->query_cond);
             ptask->query_cond = nullptr;
+
             ret = ptask->query_ret;
             task->last_elapsed = task->timer.elapsed();
             task->last_progress = task->progress;

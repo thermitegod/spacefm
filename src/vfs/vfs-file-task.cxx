@@ -193,11 +193,14 @@ vfs::file_task::should_abort()
         // paused or queued - suspend thread
         this->lock();
         this->timer.stop();
-        this->pause_cond = g_cond_new();
+
+        this->pause_cond = g_new(GCond, 1);
+        g_cond_init(this->pause_cond);
         g_cond_wait(this->pause_cond, this->mutex);
         // resume
-        g_cond_free(this->pause_cond);
+        g_cond_clear(this->pause_cond);
         this->pause_cond = nullptr;
+
         this->last_elapsed = this->timer.elapsed();
         this->last_progress = this->progress;
         this->last_speed = 0;

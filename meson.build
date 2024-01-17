@@ -116,9 +116,6 @@ default_warning_flags = [
   # TODO
   # '-Wcast-qual',
   # '-Wconversion',
-
-  # TODO - fix these warnings
-  '-Wno-deprecated-declarations',
 ]
 
 flags += cpp.get_supported_arguments(default_warning_flags)
