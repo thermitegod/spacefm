@@ -15,10 +15,6 @@
 
 #pragma once
 
-#include <string>
-
-#include <filesystem>
-
 #include <span>
 #include <vector>
 
@@ -26,12 +22,5 @@
 
 #include "vfs/vfs-file.hxx"
 
-// std::filesystem::path
-const std::vector<std::filesystem::path> glist_to_vector_path(GList* list);
-
-// std::string
-const std::vector<std::string> glist_to_vector_string(GList* list);
-
-// vfs::file
 const std::vector<std::shared_ptr<vfs::file>> glist_to_vector_vfs_file(GList* list);
 GList* vector_to_glist_vfs_file(const std::span<const std::shared_ptr<vfs::file>> list);
