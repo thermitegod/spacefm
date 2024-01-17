@@ -313,7 +313,8 @@ main(int argc, char* argv[])
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
 
-    GtkApplication* app = gtk_application_new(PACKAGE_APPLICATION_NAME, G_APPLICATION_FLAGS_NONE);
+    GtkApplication* app =
+        gtk_application_new(PACKAGE_APPLICATION_NAME, G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), opt.get());
     // Do not pass argc/argv, the CLI is not handled by GTK
     const auto status = g_application_run(G_APPLICATION(app), 0, nullptr);
