@@ -292,6 +292,8 @@ navigation_history_data::path(const ptk::file_browser::chdir_mode mode) const no
         case ptk::file_browser::chdir_mode::forward:
             assert(!this->forward_.empty());
             return this->forward_.back();
+        default:
+            return this->current_;
     }
 }
 
