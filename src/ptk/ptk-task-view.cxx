@@ -22,6 +22,7 @@
 
 #include <array>
 #include <unordered_map>
+#include <vector>
 
 #include <chrono>
 
@@ -232,32 +233,32 @@ main_task_pause_all_queued(PtkFileTask* ptask)
 void
 main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 {
-    GtkTreeIter it;
-    PtkFileTask* qtask;
-    GSList* running = nullptr;
-    GSList* queued = nullptr;
-    const bool smart = xset_get_b(xset::name::task_q_smart);
     if (!GTK_IS_TREE_VIEW(view))
     {
         return;
     }
 
+    std::vector<PtkFileTask*> running;
+    std::vector<PtkFileTask*> queued;
+
+    GtkTreeIter it;
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
         {
+            PtkFileTask* qtask = nullptr;
             gtk_tree_model_get(model, &it, task_view_column::data, &qtask, -1);
             if (qtask && qtask->task && !qtask->complete &&
                 qtask->task->state_ == vfs::file_task::state::running)
             {
                 if (qtask->task->state_pause_ == vfs::file_task::state::queue)
                 {
-                    queued = g_slist_append(queued, qtask);
+                    queued.push_back(qtask);
                 }
                 else if (qtask->task->state_pause_ == vfs::file_task::state::running)
                 {
-                    running = g_slist_append(running, qtask);
+                    running.push_back(qtask);
                 }
             }
         } while (gtk_tree_model_iter_next(model, &it));
@@ -267,39 +268,32 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
         new_ptask->task->state_pause_ == vfs::file_task::state::queue &&
         new_ptask->task->state_ == vfs::file_task::state::running)
     {
-        queued = g_slist_append(queued, new_ptask);
+        queued.push_back(new_ptask);
     }
 
-    if (!queued || (!smart && running))
+    const bool smart = xset_get_b(xset::name::task_q_smart);
+    if (queued.empty() || (!smart && running.empty()))
     {
-        g_slist_free(queued);
-        g_slist_free(running);
         return;
     }
 
     if (!smart)
     {
-        ptk_file_task_pause(PTK_FILE_TASK(queued->data), vfs::file_task::state::running);
-
-        g_slist_free(queued);
-        g_slist_free(running);
+        ptk_file_task_pause(queued.back(), vfs::file_task::state::running);
         return;
     }
 
     // smart
-    for (GSList* q = queued; q; q = g_slist_next(q))
+    for (PtkFileTask* qtask : queued)
     {
-        qtask = PTK_FILE_TASK(q->data);
         if (qtask)
         {
             // qtask has no devices so run it
-            running = g_slist_append(running, qtask);
+            running.push_back(qtask);
             ptk_file_task_pause(qtask, vfs::file_task::state::running);
             continue;
         }
     }
-    g_slist_free(queued);
-    g_slist_free(running);
 }
 
 static void
