@@ -241,7 +241,7 @@ main(int argc, char* argv[])
     program_timer::start();
 
     // Gtk
-    g_set_prgname(PACKAGE_NAME);
+    Glib::set_prgname(PACKAGE_NAME);
 
     // FIXME - This directs all writes to stderr into /dev/null, should try
     // and only have writes from ffmpeg get redirected.
