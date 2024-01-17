@@ -33,7 +33,7 @@
 #include "xset/xset-keyboard.hxx"
 
 const std::string
-xset_get_keyname(const xset_t& set, i32 key_val, i32 key_mod)
+xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod)
 {
     u32 keyval;
     u32 keymod;

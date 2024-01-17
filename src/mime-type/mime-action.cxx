@@ -293,7 +293,9 @@ mime_type_get_actions(const std::string_view mime_type)
         }
         else /* default app is in the list, move it to the first. */
         {
-            if (const usize index = ztd::index(actions, default_app) != 0)
+            const auto it = std::ranges::find(actions, default_app);
+            const auto index = std::ranges::distance(actions.cbegin(), it);
+            if (index != 0)
             {
                 ztd::move(actions, index, 0);
             }

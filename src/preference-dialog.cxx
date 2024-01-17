@@ -1010,11 +1010,12 @@ create_combobox()
     if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
     {
         const auto current_terminal = xset_get_s(xset::name::main_terminal).value_or("");
-        const i32 current_terminal_index =
-            ztd::index(terminal_handlers->get_supported_terminal_names(), current_terminal);
+
+        const auto it = std::ranges::find(terminals, current_terminal);
+        const auto current_terminal_index = std::ranges::distance(terminals.cbegin(), it);
         do
         {
-            i32 value;
+            isize value;
             gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
             if (value == current_terminal_index)
             {
