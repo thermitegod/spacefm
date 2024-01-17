@@ -147,7 +147,6 @@ if cpp.get_id() == 'gcc'
     '-Wno-switch-default',
     '-Wno-shadow',
     '-Wno-maybe-uninitialized',
-    '-Wno-unused-result',
     '-Wno-cast-function-type',
   ]
 

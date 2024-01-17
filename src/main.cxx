@@ -256,7 +256,11 @@ main(int argc, char* argv[])
     // libffmpegthumbnailer CLI program and not the C++ interface. Not a solution that I want to do.
     //
     // In closing stderr is not used by this program for output, and this should only affect ffmpeg.
-    (void)freopen("/dev/null", "w", stderr);
+    const auto stream = std::freopen("/dev/null", "w", stderr);
+    if (stream == nullptr)
+    {
+        ztd::logger::error("Failed to freopen() stderr");
+    }
 
     // ensure that there is only one instance of spacefm.
     // if there is an existing instance, only the FILES
