@@ -33,13 +33,6 @@
 // https://source.chromium.org/chromium/chromium/src/+/main:base/third_party/icu/icu_utf.h
 
 /**
- * The maximum number of UTF-8 code units (bytes) per Unicode code point (U+0000..U+10ffff).
- * @return 4
- * @stable ICU 2.4
- */
-#define CBU8_MAX_LENGTH 4
-
-/**
  * Append a code point to a string, overwriting 1 to 4 bytes.
  * The offset points to the current end of the string contents
  * and is advanced (post-increment).
@@ -94,6 +87,9 @@ WriteUnicodeCharacter(i32 code_point, std::string* output)
         output->push_back(static_cast<char>(code_point));
         return 1;
     }
+
+    // The maximum number of UTF-8 code units (bytes) per Unicode code point (U+0000..U+10ffff).
+    static constexpr uint8_t CBU8_MAX_LENGTH = 4;
 
     // CBU8_APPEND_UNSAFE can append up to 4 bytes.
     auto char_offset = output->length();

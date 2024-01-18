@@ -88,14 +88,14 @@ delayed_show_menu(GtkWidget* menu)
     return false;
 }
 
-// These are also the sockets return code
-#define SOCKET_SUCCESS 0 // Successful exit status.
-#define SOCKET_FAILURE 1 // Failing exit status.
-#define SOCKET_INVALID 2 // Invalid request exit status.
-
 const std::tuple<char, std::string>
 run_ipc_command(const std::string_view socket_commands_json)
 {
+    // These are also the sockets return code
+    static constexpr i8 SOCKET_SUCCESS = 0; // Successful exit status.
+    static constexpr i8 SOCKET_FAILURE = 1; // Failing exit status.
+    static constexpr i8 SOCKET_INVALID = 2; // Invalid request exit status.
+
     const nlohmann::json json = nlohmann::json::parse(socket_commands_json);
 
     // socket flags

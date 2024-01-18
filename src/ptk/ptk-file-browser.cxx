@@ -4419,27 +4419,28 @@ on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
     return false;
 }
 
-// stolen from the fnmatch man page
-#define FNMATCH_HELP                                                                               \
-    "'?(pattern-list)'\n"                                                                          \
-    "The pattern matches if zero or one occurrences of any of the patterns in the pattern-list "   \
-    "match the input string.\n\n"                                                                  \
-    "'*(pattern-list)'\n"                                                                          \
-    "The pattern matches if zero or more occurrences of any of the patterns in the pattern-list "  \
-    "match the input string.\n\n"                                                                  \
-    "'+(pattern-list)'\n"                                                                          \
-    "The pattern matches if one or more occurrences of any of the patterns in the pattern-list "   \
-    "match the input string.\n\n"                                                                  \
-    "'@(pattern-list)'\n"                                                                          \
-    "The pattern matches if exactly one occurrence of any of the patterns in the pattern-list "    \
-    "match the input string.\n\n"                                                                  \
-    "'!(pattern-list)'\n"                                                                          \
-    "The pattern matches if the input string cannot be matched with any of the patterns in the "   \
-    "pattern-list.\n"
-
 static const std::tuple<bool, std::string>
 select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern) noexcept
 {
+    // stolen from the fnmatch man page
+    static constexpr std::string_view FNMATCH_HELP =
+        "'?(pattern-list)'\n"
+        "The pattern matches if zero or one occurrences of any of the patterns in the pattern-list "
+        "match the input string.\n\n"
+        "'*(pattern-list)'\n"
+        "The pattern matches if zero or more occurrences of any of the patterns in the "
+        "pattern-list "
+        "match the input string.\n\n"
+        "'+(pattern-list)'\n"
+        "The pattern matches if one or more occurrences of any of the patterns in the pattern-list "
+        "match the input string.\n\n"
+        "'@(pattern-list)'\n"
+        "The pattern matches if exactly one occurrence of any of the patterns in the pattern-list "
+        "match the input string.\n\n"
+        "'!(pattern-list)'\n"
+        "The pattern matches if the input string cannot be matched with any of the patterns in the "
+        "pattern-list.\n";
+
     GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
                                                GtkDialogFlags::GTK_DIALOG_MODAL,
                                                GtkMessageType::GTK_MESSAGE_QUESTION,
@@ -4451,7 +4452,7 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 400);
     gtk_window_set_resizable(GTK_WINDOW(dialog), true);
 
-    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), FNMATCH_HELP);
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), FNMATCH_HELP.data());
 
     GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
 
