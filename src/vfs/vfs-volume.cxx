@@ -97,7 +97,6 @@ struct DeviceMount
 {
     DeviceMount() = delete;
     DeviceMount(dev_t major, dev_t minor);
-    ~DeviceMount() = default;
 
     dev_t major{0};
     dev_t minor{0};

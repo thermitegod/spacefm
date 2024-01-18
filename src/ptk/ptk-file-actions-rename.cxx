@@ -65,7 +65,6 @@
 struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {
     MoveSet(const std::shared_ptr<vfs::file>& file) : file(file){};
-    ~MoveSet() = default;
 
     std::shared_ptr<vfs::file> file;
 

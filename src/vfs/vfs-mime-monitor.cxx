@@ -39,7 +39,6 @@ static bool on_mime_change_timer(void* user_data);
 struct mime_monitor
 {
     mime_monitor(const std::shared_ptr<vfs::dir>& dir) : dir(dir){};
-    ~mime_monitor() = default;
 
     static const std::shared_ptr<mime_monitor>
     create(const std::shared_ptr<vfs::dir>& dir) noexcept;

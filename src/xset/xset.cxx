@@ -50,15 +50,6 @@ xset::XSet::XSet(const std::string_view set_name, xset::name xset_name)
     this->xset_name = xset_name;
 }
 
-xset::XSet::~XSet()
-{
-    // if (this->ob2_data)
-    // {
-    //     g_list_foreach((GList*)this->ob2_data, (GFunc)std::free, nullptr);
-    //     g_list_free((GList*)this->ob2_data);
-    // }
-}
-
 const xset_t
 xset_new(const std::string_view name, xset::name xset_name) noexcept
 {
