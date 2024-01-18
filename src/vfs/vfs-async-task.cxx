@@ -144,7 +144,7 @@ vfs_async_task_finish(vfs::async_task* task, bool is_cancelled)
 }
 
 void*
-vfs::async_task::user_data()
+vfs::async_task::user_data() const
 {
     return this->user_data_;
 }
@@ -156,13 +156,13 @@ vfs::async_task::run()
 }
 
 bool
-vfs::async_task::is_finished()
+vfs::async_task::is_finished() const
 {
     return this->thread_finished;
 }
 
 bool
-vfs::async_task::is_canceled()
+vfs::async_task::is_canceled() const
 {
     return this->thread_cancel;
 }

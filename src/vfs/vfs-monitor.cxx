@@ -109,7 +109,7 @@ vfs::monitor::~monitor()
 
 void
 vfs::monitor::dispatch_event(const vfs::monitor::event event,
-                             const std::filesystem::path& path) noexcept
+                             const std::filesystem::path& path) const noexcept
 {
     // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", ztd::logger::utils::ptr(this), magic_enum::enum_name(event), this->path_);
 
@@ -117,7 +117,7 @@ vfs::monitor::dispatch_event(const vfs::monitor::event event,
 }
 
 bool
-vfs::monitor::on_inotify_event(const Glib::IOCondition condition)
+vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
 {
     // ztd::logger::debug("vfs::monitor::on_inotify_event({})  {}", ztd::logger::utils::ptr(this), this->path_);
 

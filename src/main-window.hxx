@@ -88,7 +88,7 @@ struct MainWindow
 
     GtkWidget* create_tab_label(PtkFileBrowser* file_browser) const noexcept;
     void new_tab(const std::filesystem::path& folder_path) noexcept;
-    void open_path_in_current_tab(const std::filesystem::path& path) noexcept;
+    void open_path_in_current_tab(const std::filesystem::path& path) const noexcept;
 
     void set_window_title(PtkFileBrowser* file_browser) noexcept;
 
@@ -113,7 +113,7 @@ struct MainWindow
     void rebuild_menu_file(PtkFileBrowser* file_browser) noexcept;
     void rebuild_menu_view(PtkFileBrowser* file_browser) noexcept;
     void rebuild_menu_device(PtkFileBrowser* file_browser) noexcept;
-    void rebuild_menu_bookmarks(PtkFileBrowser* file_browser) noexcept;
+    void rebuild_menu_bookmarks(PtkFileBrowser* file_browser) const noexcept;
     void rebuild_menu_help(PtkFileBrowser* file_browser) noexcept;
 
   public:

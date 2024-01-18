@@ -131,13 +131,13 @@ vfs::file_task::~file_task()
 }
 
 void
-vfs::file_task::lock()
+vfs::file_task::lock() const
 {
     g_mutex_lock(this->mutex);
 }
 
 void
-vfs::file_task::unlock()
+vfs::file_task::unlock() const
 {
     g_mutex_unlock(this->mutex);
 }
@@ -175,7 +175,7 @@ vfs::file_task::set_overwrite_mode(const vfs::file_task::overwrite_mode mode)
 }
 
 void
-vfs::file_task::append_add_log(const std::string_view msg)
+vfs::file_task::append_add_log(const std::string_view msg) const
 {
     this->lock();
     GtkTextIter iter;

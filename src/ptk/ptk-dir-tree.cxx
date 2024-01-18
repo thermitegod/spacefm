@@ -740,7 +740,7 @@ PtkDirTree::Node::create(PtkDirTree* tree, const std::shared_ptr<PtkDirTree::Nod
 }
 
 const std::shared_ptr<PtkDirTree::Node>
-PtkDirTree::Node::get_nth_node(i32 n)
+PtkDirTree::Node::get_nth_node(i32 n) const
 {
     if (n >= this->n_children || n < 0)
     {
@@ -759,7 +759,7 @@ PtkDirTree::Node::get_nth_node(i32 n)
 }
 
 isize
-PtkDirTree::Node::get_node_index(const std::shared_ptr<PtkDirTree::Node>& child)
+PtkDirTree::Node::get_node_index(const std::shared_ptr<PtkDirTree::Node>& child) const
 {
     if (!child)
     {
@@ -780,7 +780,7 @@ PtkDirTree::Node::get_node_index(const std::shared_ptr<PtkDirTree::Node>& child)
 }
 
 const std::shared_ptr<PtkDirTree::Node>
-PtkDirTree::Node::find_node(const std::string_view name)
+PtkDirTree::Node::find_node(const std::string_view name) const
 {
     std::shared_ptr<PtkDirTree::Node> child;
     for (child = this->children; child; child = child->next)

@@ -74,9 +74,9 @@ struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::Tre
         std::shared_ptr<Node> last{nullptr};
         PtkDirTree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
-        const std::shared_ptr<Node> get_nth_node(i32 n);
-        const std::shared_ptr<Node> find_node(const std::string_view name);
-        isize get_node_index(const std::shared_ptr<Node>& child);
+        const std::shared_ptr<Node> get_nth_node(i32 n) const;
+        const std::shared_ptr<Node> find_node(const std::string_view name) const;
+        isize get_node_index(const std::shared_ptr<Node>& child) const;
 
         /* file monitor callback */
         void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);

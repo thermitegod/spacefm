@@ -64,10 +64,10 @@ struct async_task
     // NOTE: Only can be called from main thread.
     void cancel();
 
-    void* user_data();
+    void* user_data() const;
 
-    bool is_finished();
-    bool is_canceled();
+    bool is_finished() const;
+    bool is_canceled() const;
 
     // private
     void cleanup(bool finalize);

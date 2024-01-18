@@ -5180,7 +5180,7 @@ PtkFileBrowser::save_column_widths() const noexcept
 }
 
 bool
-PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
+PtkFileBrowser::slider_release(GtkPaned* pane) const noexcept
 {
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
@@ -5243,7 +5243,7 @@ PtkFileBrowser::rebuild_toolbars() noexcept
 }
 
 void
-PtkFileBrowser::update_selection_history() noexcept
+PtkFileBrowser::update_selection_history() const noexcept
 {
     const auto& cwd = this->cwd();
     // ztd::logger::debug("selection history: {}", cwd.string());
@@ -5303,7 +5303,7 @@ PtkFileBrowser::selected_items(GtkTreeModel** model) const noexcept
 
 void
 PtkFileBrowser::select_file(const std::filesystem::path& filename,
-                            const bool unselect_others) noexcept
+                            const bool unselect_others) const noexcept
 {
     GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;
@@ -5404,7 +5404,7 @@ PtkFileBrowser::select_file(const std::filesystem::path& filename,
 }
 
 void
-PtkFileBrowser::select_files(const std::span<std::filesystem::path> select_filenames) noexcept
+PtkFileBrowser::select_files(const std::span<std::filesystem::path> select_filenames) const noexcept
 {
     this->unselect_all();
 
@@ -5416,7 +5416,7 @@ PtkFileBrowser::select_files(const std::span<std::filesystem::path> select_filen
 
 void
 PtkFileBrowser::unselect_file(const std::filesystem::path& filename,
-                              const bool unselect_others) noexcept
+                              const bool unselect_others) const noexcept
 {
     GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;

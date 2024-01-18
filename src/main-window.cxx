@@ -1102,7 +1102,7 @@ MainWindow::rebuild_menu_device(PtkFileBrowser* file_browser) noexcept
 }
 
 void
-MainWindow::rebuild_menu_bookmarks(PtkFileBrowser* file_browser) noexcept
+MainWindow::rebuild_menu_bookmarks(PtkFileBrowser* file_browser) const noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     GtkEventController* accel_group = gtk_shortcut_controller_new();
@@ -2097,7 +2097,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 }
 
 void
-MainWindow::open_path_in_current_tab(const std::filesystem::path& path) noexcept
+MainWindow::open_path_in_current_tab(const std::filesystem::path& path) const noexcept
 {
     PtkFileBrowser* file_browser = this->current_file_browser();
     if (!file_browser)

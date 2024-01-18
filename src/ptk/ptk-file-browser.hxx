@@ -249,16 +249,16 @@ struct PtkFileBrowser
     void paste_link() const noexcept;
     void paste_target() const noexcept;
 
-    void update_selection_history() noexcept;
+    void update_selection_history() const noexcept;
 
     void select_all() const noexcept;
     void unselect_all() const noexcept;
     void select_last() noexcept;
     void select_file(const std::filesystem::path& filename,
-                     const bool unselect_others = true) noexcept;
-    void select_files(const std::span<std::filesystem::path> select_filenames) noexcept;
+                     const bool unselect_others = true) const noexcept;
+    void select_files(const std::span<std::filesystem::path> select_filenames) const noexcept;
     void unselect_file(const std::filesystem::path& filename,
-                       const bool unselect_others = true) noexcept;
+                       const bool unselect_others = true) const noexcept;
     void select_pattern(const std::string_view search_key = "") noexcept;
     void invert_selection() noexcept;
 
@@ -274,7 +274,7 @@ struct PtkFileBrowser
     void focus(i32 job) noexcept;
     void focus_me() noexcept;
     void save_column_widths() const noexcept;
-    bool slider_release(GtkPaned* pane) noexcept;
+    bool slider_release(GtkPaned* pane) const noexcept;
 
     void rebuild_toolbars() noexcept;
 

@@ -102,8 +102,8 @@ struct file_task : public std::enable_shared_from_this<file_task>
     create(const type type, const std::span<const std::filesystem::path> src_files,
            const std::filesystem::path& dest_dir) noexcept;
 
-    void lock();
-    void unlock();
+    void lock() const;
+    void unlock() const;
 
     using state_callback_t =
         std::function<bool(const std::shared_ptr<vfs::file_task>& task,
@@ -143,7 +143,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
 
     u64 get_total_size_of_dir(const std::filesystem::path& path);
 
-    void append_add_log(const std::string_view msg);
+    void append_add_log(const std::string_view msg) const;
 
     void task_error(i32 errnox, const std::string_view action);
     void task_error(i32 errnox, const std::string_view action, const std::filesystem::path& target);

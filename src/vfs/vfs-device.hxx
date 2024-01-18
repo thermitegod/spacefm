@@ -82,7 +82,7 @@ struct device
     std::string fstype_{};
 
   private:
-    const std::optional<std::string> info_mount_points() noexcept;
+    const std::optional<std::string> info_mount_points() const noexcept;
     bool device_get_info() noexcept;
 };
 } // namespace vfs

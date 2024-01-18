@@ -140,7 +140,7 @@ vfs::device::fstype() const noexcept
 }
 
 const std::optional<std::string>
-vfs::device::info_mount_points() noexcept
+vfs::device::info_mount_points() const noexcept
 {
     const dev_t dmajor = gnu_dev_major(this->devnum_);
     const dev_t dminor = gnu_dev_minor(this->devnum_);
