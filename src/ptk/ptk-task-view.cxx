@@ -760,8 +760,6 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
         return false;
     }
 
-    std::string menu_elements;
-
     f64 x = NAN;
     f64 y = NAN;
     gdk_event_get_position(event, &x, &y);
@@ -890,7 +888,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             set = xset_get(xset::name::task_all);
             set->disable = !is_tasks;
 
-            std::vector<xset::name> context_menu_entries = {
+            const std::vector<xset::name> context_menu_entries = {
                 xset::name::task_stop,
                 xset::name::separator,
                 xset::name::task_pause,

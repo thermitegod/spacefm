@@ -167,7 +167,7 @@ PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Left
 PPIndentWidth:   -1
-QualifierAlignment: Leave
+QualifierAlignment: Left
 ReferenceAlignment: Pointer
 ReflowComments:  false
 RemoveBracesLLVM: false

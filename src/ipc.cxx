@@ -34,7 +34,7 @@
 void
 socket_server_thread()
 {
-    zmqpp::context context;
+    const zmqpp::context context;
     zmqpp::socket server(context, zmqpp::socket_type::pair);
 
     server.bind(std::format("tcp://*:{}", ZMQ_PORT));

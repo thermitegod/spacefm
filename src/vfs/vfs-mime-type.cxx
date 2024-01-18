@@ -63,7 +63,7 @@ vfs_mime_type_get_from_file(const std::filesystem::path& file_path)
 const std::shared_ptr<vfs::mime_type>
 vfs_mime_type_get_from_type(const std::string_view type)
 {
-    std::unique_lock<std::mutex> lock(mime_map_lock);
+    const std::unique_lock<std::mutex> lock(mime_map_lock);
     if (mime_map.contains(type.data()))
     {
         return mime_map.at(type.data());

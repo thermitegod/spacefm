@@ -1111,7 +1111,7 @@ MainWindow::rebuild_menu_bookmarks(PtkFileBrowser* file_browser) noexcept
 #endif
 
     GtkWidget* newmenu = gtk_menu_new();
-    xset_t set = xset_get(xset::name::book_add);
+    const xset_t set = xset_get(xset::name::book_add);
     xset_set_cb(set, (GFunc)ptk_bookmark_view_add_bookmark_cb, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);

@@ -139,7 +139,7 @@ mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
     // ztd::logger::info("MIME XML = {}", path);
 
     pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(path.c_str());
+    const pugi::xml_parse_result result = doc.load_file(path.c_str());
 
     if (!result)
     {
@@ -148,8 +148,8 @@ mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
     }
 
     std::string comment;
-    pugi::xml_node mime_type_node = doc.child("mime-type");
-    pugi::xml_node comment_node = mime_type_node.child("comment");
+    const pugi::xml_node mime_type_node = doc.child("mime-type");
+    const pugi::xml_node comment_node = mime_type_node.child("comment");
     if (comment_node)
     {
         comment = comment_node.child_value();
@@ -158,10 +158,10 @@ mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
     std::string icon_name;
     if (is_local)
     {
-        pugi::xml_node icon_node = mime_type_node.child("icon");
+        const pugi::xml_node icon_node = mime_type_node.child("icon");
         if (icon_node)
         {
-            pugi::xml_attribute name_attr = icon_node.attribute("name");
+            const pugi::xml_attribute name_attr = icon_node.attribute("name");
             if (name_attr)
             {
                 icon_name = name_attr.value();
@@ -170,10 +170,10 @@ mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
     }
     else
     {
-        pugi::xml_node generic_icon_node = mime_type_node.child("generic-icon");
+        const pugi::xml_node generic_icon_node = mime_type_node.child("generic-icon");
         if (generic_icon_node)
         {
-            pugi::xml_attribute name_attr = generic_icon_node.attribute("name");
+            const pugi::xml_attribute name_attr = generic_icon_node.attribute("name");
             if (name_attr)
             {
                 icon_name = name_attr.value();

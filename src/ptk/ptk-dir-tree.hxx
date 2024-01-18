@@ -84,6 +84,7 @@ struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::Tre
     std::shared_ptr<Node> root{nullptr};
 
     /* GtkSortType sort_order; */ /* I do not want to support this :-( */
+
     /* Random integer to check whether an iter belongs to our model */
     const i32 stamp{std::rand()};
 

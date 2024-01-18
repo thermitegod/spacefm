@@ -357,7 +357,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
                 p += 4;
                 if (n.ext.size() > 0 && n.ext[0] == '.')
                 {
-                    std::string ext = n.ext.substr(1);
+                    const std::string ext = n.ext.substr(1);
                     auto it = out_mime_types.find(ext);
                     if (it == out_mime_types.end() || weight > it->second.weight)
                     {
@@ -432,9 +432,9 @@ GetFileMimeType(const std::filesystem::path& filepath)
     // Lock is required since this may be called on any thread.
     static std::mutex lock;
     {
-        std::scoped_lock<std::mutex> scoped_lock(lock);
+        const std::scoped_lock<std::mutex> scoped_lock(lock);
 
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         if (last_check + std::chrono::seconds(5) < now)
         {
             if (std::ranges::any_of(xdg_mime_files,

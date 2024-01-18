@@ -45,7 +45,7 @@
 run_subcommand_socket(const socket_subcommand_data_t& opt)
 {
     // connect to server
-    zmqpp::context context;
+    const zmqpp::context context;
     zmqpp::socket socket(context, zmqpp::socket_type::pair);
     socket.set(zmqpp::socket_option::receive_timeout, 1000);
     try

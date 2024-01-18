@@ -179,7 +179,7 @@ run_ipc_command(const std::string_view socket_commands_json)
 
     // command
 
-    i8 i = 0; // socket commands index
+    const i8 i = 0; // socket commands index
 
     if (command == "set")
     {
@@ -1645,9 +1645,9 @@ run_ipc_command(const std::string_view socket_commands_json)
             const nlohmann::json cmd_json = nlohmann::json::parse(data[0]);
 
             // flags
-            bool opt_task = json["task"];
-            bool opt_popup = json["popup"];
-            bool opt_terminal = json["terminal"];
+            const bool opt_task = json["task"];
+            const bool opt_popup = json["popup"];
+            const bool opt_terminal = json["terminal"];
             const std::string opt_user = json["user"];
             const std::string opt_title = json["title"];
             const std::string opt_icon = json["icon"];

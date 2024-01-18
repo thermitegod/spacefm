@@ -664,7 +664,7 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     const auto canon = std::filesystem::canonical(dir);
 
     std::error_code ec;
-    const auto stat = ztd::stat(canon);
+    const auto stat = ztd::stat(canon, ec);
     if (ec || stat.is_block_file())
     {
         return false;

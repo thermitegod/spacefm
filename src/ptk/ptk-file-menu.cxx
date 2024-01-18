@@ -476,7 +476,7 @@ ptk_file_menu_add_panel_view_menu(PtkFileBrowser* browser, GtkWidget* menu,
 {
     xset_t set;
     xset_t set_radio;
-    std::string desc;
+    const std::string desc;
 
     std::vector<xset::name> context_menu_entries;
 

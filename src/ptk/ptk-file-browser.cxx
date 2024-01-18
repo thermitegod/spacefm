@@ -1810,7 +1810,7 @@ on_folder_view_columns_changed(GtkTreeView* view, PtkFileBrowser* file_browser)
             if (title == column.title)
             {
                 // save column position
-                xset_t set = xset_get_panel(file_browser->panel_, column.xset_name);
+                const xset_t set = xset_get_panel(file_browser->panel_, column.xset_name);
                 set->x = std::to_string(i);
 
                 break;

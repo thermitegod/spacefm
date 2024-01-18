@@ -347,7 +347,7 @@ libudev::device::get_parent_device() const noexcept
         const auto parent_syspath = device(parent).get_syspath();
         if (parent_syspath)
         {
-            udev udev;
+            const udev udev;
 
             return udev.device_from_syspath(parent_syspath.value());
         }

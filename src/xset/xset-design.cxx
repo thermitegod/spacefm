@@ -285,7 +285,7 @@ xset_job_is_valid(const xset_t& set, xset::job job)
 {
     assert(set != nullptr);
 
-    bool no_remove = false;
+    const bool no_remove = false;
     bool no_paste = false;
 
     switch (job)
@@ -355,7 +355,7 @@ xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_ins
 
     GtkWidget* newitem = nullptr;
     GtkWidget* submenu = nullptr;
-    bool no_remove = false;
+    const bool no_remove = false;
     bool no_paste = false;
 
     // xset_t mset;

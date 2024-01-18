@@ -528,7 +528,7 @@ PtkDirTree::insert_child(const std::shared_ptr<PtkDirTree::Node>& parent_node,
                          const std::filesystem::path& file_path) noexcept
 {
     std::shared_ptr<PtkDirTree::Node> node;
-    std::shared_ptr<PtkDirTree::Node> child_node =
+    const std::shared_ptr<PtkDirTree::Node> child_node =
         PtkDirTree::Node::create(this, parent_node, file_path);
     for (node = parent_node->children; node; node = node->next)
     {

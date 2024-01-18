@@ -506,7 +506,7 @@ vfs::dir::update_created_files() noexcept
 void
 vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> lock(this->lock_);
 
     for (const auto& file : this->files_)
     {
@@ -522,7 +522,7 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 void
 vfs::dir::reload_mime_type() noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> lock(this->lock_);
 
     if (this->is_directory_empty())
     {
@@ -561,7 +561,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) n
 void
 vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> lock(this->lock_);
 
     if (filename == this->path_.filename() && !std::filesystem::exists(this->path_))
     {
@@ -590,7 +590,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
 void
 vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> lock(this->lock_);
 
     // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, filename, this->avoid_changes_);
 
@@ -632,7 +632,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) n
 void
 vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> lock(this->lock_);
 
     if (std::ranges::contains(this->files_, file))
     {
