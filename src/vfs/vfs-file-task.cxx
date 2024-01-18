@@ -679,7 +679,6 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                     {
                         chmod(actual_dest_file.c_str(), file_stat.mode());
                         struct utimbuf times;
-
                         times.actime = std::chrono::system_clock::to_time_t(file_stat.atime());
                         times.modtime = std::chrono::system_clock::to_time_t(file_stat.mtime());
                         utime(actual_dest_file.c_str(), &times);

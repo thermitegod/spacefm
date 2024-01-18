@@ -110,7 +110,7 @@ mime_type_get_by_file(const std::filesystem::path& path) noexcept
     const auto fd = open(path.c_str(), O_RDONLY, 0);
     if (fd != -1)
     {
-        std::array<std::byte, MIME_HEADER_MAX_SIZE> data;
+        std::array<std::byte, MIME_HEADER_MAX_SIZE> data{};
 
         const auto length = read(fd, data.data(), data.size());
         if (length == -1)

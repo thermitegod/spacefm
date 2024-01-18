@@ -139,8 +139,8 @@ ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& cont
 // Mime type with weight.
 struct WeightedMime
 {
-    std::string mime_type;
-    uint8_t weight;
+    std::string mime_type{};
+    uint8_t weight{0};
 };
 
 // Map of file extension to weighted mime type.
@@ -300,9 +300,9 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
 
     struct Node
     {
-        std::string ext;
-        uint32_t n_children;
-        uint32_t first_child_offset;
+        std::string ext{};
+        uint32_t n_children{0};
+        uint32_t first_child_offset{0};
     };
 
     // Read root node and put it on the stack.
