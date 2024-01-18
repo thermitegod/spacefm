@@ -109,7 +109,7 @@ vfs::file_task::file_task(const vfs::file_task::type task_type,
         (this->type_ == vfs::file_task::type::copy || this->type_ == vfs::file_task::type::del);
 
     // Init GMutex
-    this->mutex = (GMutex*)malloc(sizeof(GMutex));
+    this->mutex = g_new(GMutex, 1);
     g_mutex_init(this->mutex);
 
     GtkTextIter iter;
@@ -125,7 +125,6 @@ vfs::file_task::file_task(const vfs::file_task::type task_type,
 vfs::file_task::~file_task()
 {
     g_mutex_clear(this->mutex);
-    std::free(this->mutex);
 
     gtk_text_buffer_set_text(this->add_log_buf, "", -1);
     g_object_unref(this->add_log_buf);
