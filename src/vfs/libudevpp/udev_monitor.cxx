@@ -34,7 +34,7 @@ libudev::monitor::get_fd() const noexcept
 const std::optional<libudev::device>
 libudev::monitor::receive_device() const noexcept
 {
-    const auto device = udev_monitor_receive_device(this->handle.get());
+    auto* const device = udev_monitor_receive_device(this->handle.get());
     if (device)
     {
         return libudev::device(device);

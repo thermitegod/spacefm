@@ -168,7 +168,7 @@ ptk_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files, GtkWindow* parent_window,
                   GtkWidget* task_view)
 {
-    const auto ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
+    auto* const ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
 
     return ptask;
 }
@@ -179,7 +179,7 @@ ptk_file_task_new(const vfs::file_task::type type,
                   const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                   GtkWidget* task_view)
 {
-    const auto ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
+    auto* const ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
 
     return ptask;
 }
@@ -198,11 +198,11 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
-    const auto ptask = new PtkFileTask(vfs::file_task::type::exec,
-                                       file_list,
-                                       "",
-                                       GTK_WINDOW(parent_win),
-                                       task_view);
+    auto* const ptask = new PtkFileTask(vfs::file_task::type::exec,
+                                        file_list,
+                                        "",
+                                        GTK_WINDOW(parent_win),
+                                        task_view);
 
     return ptask;
 }
@@ -222,11 +222,11 @@ ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path&
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
-    const auto ptask = new PtkFileTask(vfs::file_task::type::exec,
-                                       file_list,
-                                       dest_dir,
-                                       GTK_WINDOW(parent_win),
-                                       task_view);
+    auto* const ptask = new PtkFileTask(vfs::file_task::type::exec,
+                                        file_list,
+                                        dest_dir,
+                                        GTK_WINDOW(parent_win),
+                                        task_view);
 
     return ptask;
 }

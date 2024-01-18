@@ -212,7 +212,7 @@ libudev::device::get_sysattr_keys() const noexcept
 {
     std::vector<std::string> keys;
 
-    auto sysattr_list = udev_device_get_sysattr_list_entry(this->handle.get());
+    auto* sysattr_list = udev_device_get_sysattr_list_entry(this->handle.get());
     struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, sysattr_list)
     {
@@ -227,7 +227,7 @@ libudev::device::get_sysattr_map() const noexcept
 {
     std::unordered_map<std::string, std::string> attr;
 
-    auto sysattr_list = udev_device_get_sysattr_list_entry(this->handle.get());
+    auto* sysattr_list = udev_device_get_sysattr_list_entry(this->handle.get());
     struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, sysattr_list)
     {
@@ -341,7 +341,7 @@ libudev::device::get_parent_device() const noexcept
         return std::nullopt;
     }
 
-    const auto parent = udev_device_get_parent(this->handle.get());
+    auto* const parent = udev_device_get_parent(this->handle.get());
     if (parent)
     {
         const auto parent_syspath = device(parent).get_syspath();
@@ -364,9 +364,9 @@ libudev::device::get_parent_device(const std::string_view subsystem,
         return std::nullopt;
     }
 
-    const auto parent = udev_device_get_parent_with_subsystem_devtype(this->handle.get(),
-                                                                      subsystem.data(),
-                                                                      type.data());
+    auto* const parent = udev_device_get_parent_with_subsystem_devtype(this->handle.get(),
+                                                                       subsystem.data(),
+                                                                       type.data());
     if (parent)
     {
         return device(parent);

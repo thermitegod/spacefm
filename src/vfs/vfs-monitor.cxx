@@ -138,7 +138,7 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition)
     u32 i = 0;
     while (i < length)
     {
-        const auto event = (inotify_event*)&buffer[i];
+        auto* const event = (inotify_event*)&buffer[i];
         if (event->len)
         {
             const std::filesystem::path event_filename = event->name;

@@ -950,7 +950,7 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
     ptask->task->exec_icon = vol->icon();
 
     // autoopen
-    const auto ao = new AutoOpen(file_browser);
+    auto* const ao = new AutoOpen(file_browser);
     ao->devnum = vol->devnum();
 
     if (xset_get_b(xset::name::dev_newtab))
@@ -1022,7 +1022,7 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
         ptask->task->exec_icon = vol->icon();
 
         // autoopen
-        const auto ao = new AutoOpen(file_browser);
+        auto* const ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum();
         ao->job = ptk::open_action::new_tab;
 
@@ -1096,7 +1096,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
         ptask->task->exec_icon = vol->icon();
 
         // autoopen
-        const auto ao = new AutoOpen(file_browser);
+        auto* const ao = new AutoOpen(file_browser);
         ao->devnum = vol->devnum();
         ao->job = ptk::open_action::dir;
 

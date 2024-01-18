@@ -580,7 +580,7 @@ ptk_path_entry_new(PtkFileBrowser* file_browser)
     gtk_entry_set_has_frame(entry, true);
     gtk_widget_set_size_request(GTK_WIDGET(entry), 50, -1);
 
-    const auto edata = new EntryData(file_browser);
+    auto* const edata = new EntryData(file_browser);
 
     // clang-format off
     g_signal_connect(G_OBJECT(entry), "focus-in-event", G_CALLBACK(on_focus_in), nullptr);

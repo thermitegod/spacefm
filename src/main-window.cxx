@@ -916,7 +916,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
             return false;
         }
 
-        const auto file_browser =
+        auto* const file_browser =
             static_cast<PtkFileBrowser*>(g_object_get_data(G_OBJECT(widget), "file_browser"));
         MainWindow* main_window = file_browser->main_window();
 

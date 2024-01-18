@@ -302,7 +302,7 @@ init_all_apps_tab(GtkWidget* dialog)
                                             G_TYPE_STRING,
                                             G_TYPE_STRING,
                                             G_TYPE_STRING);
-    const auto task =
+    auto* const task =
         vfs::async_task::create((vfs::async_task::function_t)load_all_known_apps_thread, list);
     g_object_set_data(G_OBJECT(task), "view", tree_view);
     g_object_set_data(G_OBJECT(dialog), "task", task);
@@ -532,7 +532,7 @@ on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
         id == GtkResponseType::GTK_RESPONSE_NONE ||
         id == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
     {
-        const auto task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dialog), "task"));
+        auto* const task = VFS_ASYNC_TASK(g_object_get_data(G_OBJECT(dialog), "task"));
         if (task)
         {
             // ztd::logger::info("app-chooser.cxx -> vfs_async_task_cancel");

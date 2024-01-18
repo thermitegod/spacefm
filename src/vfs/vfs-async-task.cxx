@@ -89,7 +89,7 @@ vfs_async_task_init(vfs::async_task* task)
 vfs::async_task*
 vfs::async_task::create(vfs::async_task::function_t task_func, void* user_data) noexcept
 {
-    const auto task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
+    auto* const task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;
     task->user_data_ = user_data;
     return VFS_ASYNC_TASK(task);
@@ -116,7 +116,7 @@ vfs_async_task_finalize(GObject* object)
 static bool
 on_idle(void* _task)
 {
-    const auto task = VFS_ASYNC_TASK(_task);
+    auto* const task = VFS_ASYNC_TASK(_task);
     task->cleanup(false);
     return true; // the idle handler is removed in task->cleanup.
 }
@@ -124,7 +124,7 @@ on_idle(void* _task)
 void*
 vfs_async_task_thread(void* _task)
 {
-    const auto task = VFS_ASYNC_TASK(_task);
+    auto* const task = VFS_ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data_);
 
     const std::unique_lock<std::mutex> lock(task->mutex);

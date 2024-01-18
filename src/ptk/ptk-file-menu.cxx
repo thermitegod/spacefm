@@ -996,7 +996,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
 
     const auto& cwd = browser->cwd();
 
-    const auto data = new PtkFileMenu;
+    auto* const data = new PtkFileMenu;
     data->cwd = cwd;
     data->browser = browser;
     data->file_path = file_path;
@@ -2579,7 +2579,7 @@ create_new_file(PtkFileMenu* data, ptk::rename_mode create_new)
         return;
     }
 
-    const auto ao = new AutoOpenCreate(data->browser, false);
+    auto* const ao = new AutoOpenCreate(data->browser, false);
 
     std::shared_ptr<vfs::file> file = nullptr;
     if (!data->sel_files.empty())
@@ -2690,7 +2690,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
         file_path = file->path();
     }
 
-    const auto data = new PtkFileMenu;
+    auto* const data = new PtkFileMenu;
     data->cwd = cwd;
     data->browser = browser;
     data->sel_files = sel_files;
