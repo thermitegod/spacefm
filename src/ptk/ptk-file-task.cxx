@@ -1635,7 +1635,8 @@ ptk_file_task_update(PtkFileTask* ptask)
     // move log lines from add_log_buf to log_buf
     if (gtk_text_buffer_get_char_count(task->add_log_buf))
     {
-        GtkTextIter iter, siter;
+        GtkTextIter iter;
+        GtkTextIter siter;
         char* text = nullptr;
         // get add_log text and delete
         gtk_text_buffer_get_start_iter(task->add_log_buf, &siter);

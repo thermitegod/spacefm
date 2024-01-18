@@ -513,7 +513,8 @@ xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_ins
      * where menu == nullptr.  So pass 0 for button if !menu. */
 
     // Get the pointer location
-    i32 x = 0, y = 0;
+    i32 x = 0;
+    i32 y = 0;
     GdkModifierType mods;
     gdk_window_get_device_position(gtk_widget_get_window(menu), nullptr, &x, &y, &mods);
 

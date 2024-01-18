@@ -520,7 +520,8 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
     std::string str;
 
     // get real icon size from gtk icon size
-    i32 icon_w = 0, icon_h = 0;
+    i32 icon_w = 0;
+    i32 icon_h = 0;
     gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
     const i32 real_icon_size = icon_w > icon_h ? icon_w : icon_h;
 

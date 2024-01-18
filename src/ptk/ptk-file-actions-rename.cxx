@@ -280,7 +280,8 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 
     std::filesystem::path full_path;
     std::filesystem::path path;
-    GtkTextIter iter, siter;
+    GtkTextIter iter;
+    GtkTextIter siter;
 
     if (widget == GTK_WIDGET(mset->buf_name) || widget == GTK_WIDGET(mset->entry_ext))
     {
@@ -776,7 +777,8 @@ select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     }
     else
     {
-        GtkTextIter iter, siter;
+        GtkTextIter iter;
+        GtkTextIter siter;
         GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
         if (widget == GTK_WIDGET(mset->input_full_name) &&
             !gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
@@ -2272,7 +2274,8 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 #endif
 
     // need new name due to extension added?
-    GtkTextIter iter, siter;
+    GtkTextIter iter;
+    GtkTextIter siter;
     gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
     gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
     const char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);

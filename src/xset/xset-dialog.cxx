@@ -45,7 +45,8 @@ multi_input_get_text(GtkWidget* input)
         return std::nullopt;
     }
 
-    GtkTextIter iter, siter;
+    GtkTextIter iter;
+    GtkTextIter siter;
     GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(input));
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
@@ -60,7 +61,8 @@ multi_input_get_text(GtkWidget* input)
 static void
 on_multi_input_insert(GtkTextBuffer* buf)
 { // remove linefeeds from pasted text
-    GtkTextIter iter, siter;
+    GtkTextIter iter;
+    GtkTextIter siter;
 
     // buffer contains linefeeds?
     gtk_text_buffer_get_start_iter(buf, &siter);
