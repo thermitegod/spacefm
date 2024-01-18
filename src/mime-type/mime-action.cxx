@@ -203,7 +203,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
         for (i32 k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
         {
             // ztd::logger::info("        {} [{}]", groups[k], k);
-            bool is_removed;
+            bool is_removed = false;
             std::vector<Glib::ustring> apps;
             try
             {

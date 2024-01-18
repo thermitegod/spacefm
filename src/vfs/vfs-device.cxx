@@ -237,7 +237,7 @@ vfs::device::device_get_info() noexcept
     }
     else if (this->is_removable())
     {
-        bool is_cd;
+        bool is_cd = false;
 
         const auto prop_id_cdrom = this->udevice.get_property("ID_CDROM");
         if (prop_id_cdrom)

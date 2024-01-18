@@ -69,7 +69,7 @@ default_warning_flags = [
   '-Wchar-subscripts',
   '-Wcomment',
   '-Wdisabled-optimization',
-  '-Wdouble-promotion',
+  # '-Wdouble-promotion', # warns when using NAN
   '-Wfloat-equal',
   '-Wformat=2',
   '-Wimplicit-fallthrough',

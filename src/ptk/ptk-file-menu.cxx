@@ -312,9 +312,9 @@ on_popup_sort_extra(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, const x
 void
 on_popup_sortby(GtkMenuItem* menuitem, PtkFileBrowser* file_browser, i32 order)
 {
-    i32 v;
+    i32 v = 0;
 
-    i32 sort_order;
+    i32 sort_order = 0;
     if (menuitem)
     {
         sort_order = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menuitem), "sortorder"));
@@ -1036,7 +1036,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
     bool is_clip = false;
 #elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-    bool is_clip;
+    bool is_clip = false;
     if (!gtk_clipboard_wait_is_target_available(
             clip,
             gdk_atom_intern("x-special/gnome-copied-files", false)) &&
@@ -1069,7 +1069,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
     xset_t set_radio;
     xset_t set;
     xset_t set2;
-    GtkMenuItem* item;
+    GtkMenuItem* item = nullptr;
 
     // Open >
     const bool set_disable = sel_files.empty();
@@ -1179,10 +1179,10 @@ ptk_file_menu_new(PtkFileBrowser* browser,
             }
         }
 
-        GtkWidget* app_menu_item;
+        GtkWidget* app_menu_item = nullptr;
 
-        i32 icon_w;
-        i32 icon_h;
+        i32 icon_w = 0;
+        i32 icon_h = 0;
 
         // add apps
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
@@ -1700,7 +1700,7 @@ get_shared_desktop_file_location(const std::string_view name)
 void
 app_job(GtkWidget* item, GtkWidget* app_item)
 {
-    char* str;
+    char* str = nullptr;
     std::string str2;
 
     std::string command;
@@ -2070,8 +2070,8 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
 {
     (void)button;
     (void)time_point;
-    GtkWidget* newitem;
-    GtkWidget* submenu;
+    GtkWidget* newitem = nullptr;
+    GtkWidget* submenu = nullptr;
     std::string str;
 
     if (!(data && data->file))
@@ -2831,7 +2831,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
     }
     if (set->name.starts_with("open_in_panel"))
     {
-        panel_t i;
+        panel_t i = 0;
         if (set->xset_name == xset::name::open_in_panel_prev)
         {
             i = panel_control_code_prev;
@@ -2848,7 +2848,7 @@ ptk_file_menu_action(PtkFileBrowser* browser, const xset_t& set)
     }
     else if (set->name.starts_with("opentab_"))
     {
-        tab_t i;
+        tab_t i = 0;
         if (set->xset_name == xset::name::opentab_new)
         {
             on_popup_open_in_new_tab_activate(nullptr, data);

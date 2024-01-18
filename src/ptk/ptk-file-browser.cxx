@@ -40,6 +40,7 @@
 
 #include <cstring>
 #include <cassert>
+#include <cmath>
 
 #include <fnmatch.h>
 
@@ -637,7 +638,7 @@ ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget)
         return;
     }
 
-    unsigned char x;
+    unsigned char x = 0;
 
     switch (set->tool)
     {
@@ -1198,7 +1199,7 @@ PtkFileBrowser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file
 static void
 on_sort_col_changed(GtkTreeSortable* sortable, PtkFileBrowser* file_browser)
 {
-    i32 col;
+    i32 col = 0;
     gtk_tree_sortable_get_sort_column_id(sortable, &col, &file_browser->sort_type_);
 
     const auto column = ptk::file_list::column(col);
@@ -1520,7 +1521,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, PtkFileBro
             return true;
         }
 
-        f64 x, y;
+        f64 x = NAN;
+        f64 y = NAN;
         gdk_event_get_position(event, &x, &y);
 
         switch (file_browser->view_mode_)
@@ -1843,7 +1845,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTre
                          void* search_data)
 {
     (void)search_data;
-    bool no_match;
+    bool no_match = false;
 
     const auto column = ptk::file_list::column(col);
     if (column != ptk::file_list::column::name)
@@ -1851,7 +1853,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTre
         return true;
     }
 
-    char* c_name;
+    char* c_name = nullptr;
 
     gtk_tree_model_get(model, it, col, &c_name, -1);
     if (!c_name || !c_key)
@@ -1914,7 +1916,7 @@ create_folder_view(PtkFileBrowser* file_browser, ptk::file_browser::view_mode vi
 {
     GtkWidget* folder_view = nullptr;
     GtkTreeSelection* selection = nullptr;
-    GtkCellRenderer* renderer;
+    GtkCellRenderer* renderer = nullptr;
 
     i32 icon_size = 0;
     const i32 big_icon_size = app_settings.icon_size_big();
@@ -2177,7 +2179,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
         GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 
         // column order
-        usize idx;
+        usize idx = 0;
         for (const auto [order_index, order_value] : std::views::enumerate(columns))
         {
             idx = order_index;
@@ -2243,7 +2245,7 @@ init_list_view(PtkFileBrowser* file_browser, GtkTreeView* list_view)
 
             // g_signal_connect(G_OBJECT(renderer), "editing-started", G_CALLBACK(on_filename_editing_started), nullptr);
 
-            GtkCellRenderer* pix_renderer;
+            GtkCellRenderer* pix_renderer = nullptr;
             file_browser->icon_render_ = pix_renderer = gtk_cell_renderer_pixbuf_new();
 
             gtk_tree_view_column_pack_start(col, pix_renderer, false);
@@ -2289,7 +2291,7 @@ folder_view_get_drop_dir(PtkFileBrowser* file_browser, i32 x, i32 y)
 {
     GtkTreePath* tree_path = nullptr;
     GtkTreeModel* model = nullptr;
-    GtkTreeViewColumn* col;
+    GtkTreeViewColumn* col = nullptr;
     GtkTreeIter it;
 
     switch (file_browser->view_mode_)
@@ -2406,8 +2408,8 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 return;
             }
 
-            char** list;
-            char** puri;
+            char** list = nullptr;
+            char** puri = nullptr;
             puri = list = gtk_selection_data_get_uris(sel_data);
 
             if (puri)
@@ -2555,7 +2557,7 @@ on_folder_view_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
 static GtkTreePath*
 folder_view_get_tree_path_at_pos(PtkFileBrowser* file_browser, i32 x, i32 y)
 {
-    GtkTreePath* tree_path;
+    GtkTreePath* tree_path = nullptr;
 
     switch (file_browser->view_mode_)
     {
@@ -2653,7 +2655,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
         folder_view_auto_scroll_timer = 0;
     }
 
-    GtkTreeViewColumn* col;
+    GtkTreeViewColumn* col = nullptr;
     GtkTreeModel* model = nullptr;
     GtkTreePath* tree_path = nullptr;
 
@@ -2883,10 +2885,11 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_
         /* left and right click handled in ptk-dir-tree-view.c
          * on_dir_tree_view_button_press() */
 
-        f64 x, y;
+        f64 x = NAN;
+        f64 y = NAN;
         gdk_event_get_position(event, &x, &y);
 
-        GtkTreePath* tree_path;
+        GtkTreePath* tree_path = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
                                           x,
@@ -3218,7 +3221,7 @@ PtkFileBrowser::canon(const std::filesystem::path& path) noexcept
 const std::optional<std::filesystem::path>
 PtkFileBrowser::tab_cwd(const tab_t tab_num) const noexcept
 {
-    tab_t tab_x;
+    tab_t tab_x = 0;
     GtkNotebook* notebook = this->main_window_->get_panel_notebook(this->panel());
     const i32 pages = gtk_notebook_get_n_pages(notebook);
     const i32 page_num = gtk_notebook_page_num(notebook, GTK_WIDGET(this));
@@ -3789,7 +3792,7 @@ PtkFileBrowser::open_in_tab(const std::filesystem::path& file_path, const tab_t 
     const tab_t cur_page = gtk_notebook_get_current_page(this->notebook_);
     const tab_t pages = gtk_notebook_get_n_pages(this->notebook_);
 
-    tab_t page_x;
+    tab_t page_x = 0;
     switch (tab)
     {
         case tab_control_code_prev:
@@ -4220,7 +4223,7 @@ PtkFileBrowser::set_sort_type(GtkSortType order) noexcept
         this->sort_type_ = order;
         if (this->file_list_)
         {
-            i32 col;
+            i32 col = 0;
             GtkSortType old_order;
             gtk_tree_sortable_get_sort_column_id(GTK_TREE_SORTABLE(this->file_list_),
                                                  &col,
@@ -4528,7 +4531,7 @@ PtkFileBrowser::select_pattern(const std::string_view search_key) noexcept
         key = search_key;
     }
 
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     GtkTreeSelection* selection = nullptr;
 
@@ -4718,7 +4721,7 @@ invert_selection(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* it,
 void
 PtkFileBrowser::invert_selection() noexcept
 {
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeSelection* selection = nullptr;
 
     switch (this->view_mode_)
@@ -4959,7 +4962,7 @@ PtkFileBrowser::update_views() noexcept
 
     // set slider positions
 
-    i32 pos;
+    i32 pos = 0;
 
     // hpane
     pos = this->main_window_->panel_slide_x[p];
@@ -5072,7 +5075,7 @@ PtkFileBrowser::update_views() noexcept
 void
 PtkFileBrowser::focus(i32 job) noexcept
 {
-    GtkWidget* widget;
+    GtkWidget* widget = nullptr;
 
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
@@ -5195,7 +5198,7 @@ PtkFileBrowser::slider_release(GtkPaned* pane) noexcept
     }
     else
     {
-        i32 pos;
+        i32 pos = 0;
         // ztd::logger::debug("PtkFileBrowser::slider_release fb={}  (panel {})  mode = {}", ztd::logger::utils::ptr(this), p, ztd::logger::utils::ptr(mode));
         pos = gtk_paned_get_position(this->side_vpane_top);
         if (!this->main_window_->fullscreen)
@@ -5545,7 +5548,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
     }
 
     // get model, treesel, and stop signals
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     GtkTreeSelection* selection = nullptr;
 
@@ -5623,7 +5626,7 @@ PtkFileBrowser::seek_path(const std::filesystem::path& seek_dir,
     }
 
     // do selection and scroll to selected
-    GtkTreePath* path;
+    GtkTreePath* path = nullptr;
     path =
         gtk_tree_model_get_path(GTK_TREE_MODEL(PTK_FILE_LIST_REINTERPRET(this->file_list_)), &it);
     if (!path)
@@ -5711,7 +5714,7 @@ PtkFileBrowser::update_toolbar_widgets(xset::tool tool_type) noexcept
 {
     // builtin tool
     bool b = false;
-    unsigned char x;
+    unsigned char x = 0;
 
     switch (tool_type)
     {
@@ -5859,8 +5862,8 @@ PtkFileBrowser::update_statusbar() const noexcept
         return;
     }
 
-    u64 total_size;
-    u64 total_on_disk_size;
+    u64 total_size = 0;
+    u64 total_on_disk_size = 0;
 
     // note: total size will not include content changes since last selection change
     const auto num_sel = this->get_n_sel(&total_size, &total_on_disk_size);

@@ -300,7 +300,7 @@ libudev::device::get_tags() const noexcept
 {
     std::vector<std::string> tags;
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     struct udev_list_entry* tags_list = udev_device_get_tags_list_entry(this->handle.get());
 
     udev_list_entry_foreach(entry, tags_list)
@@ -322,7 +322,7 @@ libudev::device::get_current_tags() const noexcept
 {
     std::vector<std::string> tags;
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     struct udev_list_entry* tags_list = udev_device_get_current_tags_list_entry(this->handle.get());
 
     udev_list_entry_foreach(entry, tags_list)

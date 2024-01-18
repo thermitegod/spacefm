@@ -70,7 +70,7 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
 {
     (void)icon;
 
-    GtkWidget* item;
+    GtkWidget* item = nullptr;
 
     if (label.contains("\\_"))
     {
@@ -102,7 +102,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 #endif
 {
     GtkWidget* item = nullptr;
-    GtkWidget* submenu;
+    GtkWidget* submenu = nullptr;
     xset_t keyset;
     xset_t set_next;
     std::string icon_name;
@@ -220,8 +220,8 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
     if (!item)
     {
         // get menu icon size
-        i32 icon_w;
-        i32 icon_h;
+        i32 icon_w = 0;
+        i32 icon_h = 0;
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         const i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
 

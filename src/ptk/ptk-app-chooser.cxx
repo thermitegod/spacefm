@@ -55,7 +55,7 @@ static void* load_all_known_apps_thread(vfs::async_task* task);
 static void
 init_list_view(GtkTreeView* tree_view)
 {
-    GtkCellRenderer* renderer;
+    GtkCellRenderer* renderer = nullptr;
     GtkTreeViewColumn* column = gtk_tree_view_column_new();
 
     gtk_tree_view_column_set_title(column, "Applications");
@@ -87,12 +87,12 @@ static i32
 sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
 {
     (void)user_data;
-    char* name_a;
+    char* name_a = nullptr;
     i32 ret = 0;
     gtk_tree_model_get(model, a, app_chooser_column::app_name, &name_a, -1);
     if (name_a)
     {
-        char* name_b;
+        char* name_b = nullptr;
         gtk_tree_model_get(model, b, app_chooser_column::app_name, &name_b, -1);
         if (name_b)
         {
@@ -494,7 +494,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
     GtkTreeView* tree_view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(scroll), "view"));
     GtkTreeSelection* selection = gtk_tree_view_get_selection(tree_view);
 
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {

@@ -232,8 +232,8 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
     }
 
     // load existing thumbnail
-    i32 w;
-    i32 h;
+    i32 w = 0;
+    i32 h = 0;
     std::chrono::system_clock::time_point embeded_mtime;
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))

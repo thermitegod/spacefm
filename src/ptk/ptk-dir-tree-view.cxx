@@ -26,6 +26,8 @@
 
 #include <system_error>
 
+#include <cmath>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -106,12 +108,12 @@ on_destroy(GtkWidget* w)
 GtkWidget*
 ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
 {
-    GtkTreeViewColumn* col;
-    GtkCellRenderer* renderer;
-    GtkTreeModel* model;
+    GtkTreeViewColumn* col = nullptr;
+    GtkCellRenderer* renderer = nullptr;
+    GtkTreeModel* model = nullptr;
     GtkTreeSelection* selection = nullptr;
-    GtkTreePath* tree_path;
-    GtkTreeModel* filter;
+    GtkTreePath* tree_path = nullptr;
+    GtkTreeModel* filter = nullptr;
 
     GtkTreeView* dir_tree_view = GTK_TREE_VIEW(gtk_tree_view_new());
     gtk_tree_view_set_headers_visible(dir_tree_view, false);
@@ -310,7 +312,7 @@ ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
 const std::optional<std::filesystem::path>
 ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
 {
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     GtkTreeSelection* selection = gtk_tree_view_get_selection(dir_tree_view);
     if (gtk_tree_selection_get_selected(selection, &model, &it))
@@ -398,14 +400,15 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 static bool
 on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_browser)
 {
-    GtkTreePath* tree_path;
-    GtkTreeViewColumn* tree_col;
+    GtkTreePath* tree_path = nullptr;
+    GtkTreeViewColumn* tree_col = nullptr;
     GtkTreeIter it;
 
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
 
-    f64 x, y;
+    f64 x = NAN;
+    f64 y = NAN;
     gdk_event_get_position(event, &x, &y);
 
     if (type == GdkEventType::GDK_BUTTON_PRESS && (button == 1 || button == 3))
@@ -492,7 +495,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* 
 static bool
 on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_browser)
 {
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter iter;
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
 
@@ -631,8 +634,8 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
         {
             const auto& dest_dir = check_dest_dir.value();
 
-            char** list;
-            char** puri;
+            char** list = nullptr;
+            char** puri = nullptr;
             puri = list = gtk_selection_data_get_uris(sel_data);
             if (file_browser->pending_drag_status_tree())
             {

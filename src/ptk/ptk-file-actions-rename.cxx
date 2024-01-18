@@ -912,8 +912,8 @@ on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>&
                    "Gtk4 changed and then deprecated the GtkFileChooser API");
     return;
 #elif (GTK_MAJOR_VERSION == 3)
-    i32 action;
-    const char* title;
+    i32 action = 0;
+    const char* title = nullptr;
 
     std::filesystem::path dir;
     std::filesystem::path name;
@@ -1058,7 +1058,7 @@ on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>&
     {
         const char* new_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
         const char* path = new_path;
-        GtkWidget* w;
+        GtkWidget* w = nullptr;
         if (widget == GTK_WIDGET(mset->browse_target))
         {
             w = GTK_WIDGET(mset->entry_target);
@@ -1986,7 +1986,7 @@ copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     }
     else if (widget == GTK_WIDGET(mset->label_template))
     {
-        GtkWidget* w;
+        GtkWidget* w = nullptr;
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
         {
             w = gtk_bin_get_child(GTK_BIN(mset->combo_template));
@@ -2924,7 +2924,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
     // run
     std::string to_path;
     std::string from_path;
-    i32 response;
+    i32 response = 0;
     while ((response = gtk_dialog_run(GTK_DIALOG(mset->dlg))))
     {
         if (response == GtkResponseType::GTK_RESPONSE_OK ||

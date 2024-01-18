@@ -31,6 +31,8 @@
 
 #include <ranges>
 
+#include <cmath>
+
 #include <glibmm.h>
 
 #include <magic_enum.hpp>
@@ -707,7 +709,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
 static void
 on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
-    GtkWidget* view;
+    GtkWidget* view = nullptr;
     if (!item)
     {
         view = view2;
@@ -759,7 +761,7 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
 static void
 on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
-    GtkWidget* view;
+    GtkWidget* view = nullptr;
     if (!item)
     {
         view = view2;
@@ -802,7 +804,7 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
 static void
 on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
-    GtkWidget* view;
+    GtkWidget* view = nullptr;
     if (!item)
     {
         view = view2;
@@ -974,8 +976,8 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
 static void
 on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
-    PtkFileBrowser* file_browser;
-    GtkWidget* view;
+    PtkFileBrowser* file_browser = nullptr;
+    GtkWidget* view = nullptr;
 
     if (!item)
     {
@@ -1042,8 +1044,8 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
 static void
 on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
-    PtkFileBrowser* file_browser;
-    GtkWidget* view;
+    PtkFileBrowser* file_browser = nullptr;
+    GtkWidget* view = nullptr;
     if (!item)
     {
         view = view2;
@@ -1125,7 +1127,7 @@ static void
 on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     std::string msg;
-    GtkWidget* view;
+    GtkWidget* view = nullptr;
     if (!item)
     {
         view = view2;
@@ -1163,7 +1165,7 @@ static void
 on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
 {
     std::string msg;
-    GtkWidget* view;
+    GtkWidget* view = nullptr;
     if (!item)
     {
         view = view2;
@@ -1444,7 +1446,8 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
 
     // get selected vol
 
-    f64 x, y;
+    f64 x = NAN;
+    f64 y = NAN;
     gdk_event_get_position(event, &x, &y);
 
     GtkTreePath* tree_path = nullptr;
@@ -1531,7 +1534,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 {
     (void)dev_item;
     (void)time_point;
-    PtkFileBrowser* file_browser;
+    PtkFileBrowser* file_browser = nullptr;
 
     // validate vol
     for (const auto& volume : vfs_volume_get_all_volumes())
@@ -1584,7 +1587,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 
     // create menu
     xset_t set;
-    GtkWidget* item;
+    GtkWidget* item = nullptr;
     GtkWidget* popup = gtk_menu_new();
 
     set = xset_get(xset::name::dev_menu_remove);

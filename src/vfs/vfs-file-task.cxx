@@ -282,7 +282,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
             return false;
         }
 
-        char* new_dest;
+        char* new_dest = nullptr;
         std::filesystem::path use_dest_file = dest_file;
         do
         {
@@ -425,7 +425,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     }
 
     char* new_dest_file = nullptr;
-    bool dest_exists;
+    bool dest_exists = false;
     bool copy_fail = false;
 
     std::filesystem::path actual_dest_file = dest_file;
@@ -639,7 +639,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 // if (this->avoid_changes)
                 //    emit_created(actual_dest_file);
                 char buffer[4096];
-                isize rsize;
+                isize rsize = 0;
                 while ((rsize = read(rfd, buffer, sizeof(buffer))) > 0)
                 {
                     if (this->should_abort())
@@ -805,7 +805,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     }
 
     char* new_dest_file = nullptr;
-    bool dest_exists;
+    bool dest_exists = false;
     if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
     {
         return 0;
@@ -1027,7 +1027,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
     }
 
     // FIXME: Check overwrite!!
-    bool dest_exists;
+    bool dest_exists = false;
     char* new_dest_file = nullptr;
     if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
     {
@@ -1437,7 +1437,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
             xset_get_b(xset::name::task_q_smart))
         {
             // make queue exception for smaller tasks
-            u64 exlimit;
+            u64 exlimit = 0;
             switch (task->type_)
             {
                 case vfs::file_task::type::move:

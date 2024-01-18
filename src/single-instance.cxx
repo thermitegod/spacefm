@@ -52,7 +52,7 @@ single_instance_check() noexcept
     std::ifstream pid_file(pid_path);
     if (pid_file)
     {
-        pid_t pid;
+        pid_t pid = 0;
         pid_file >> pid;
         pid_file.close();
 

@@ -1423,7 +1423,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     }
 
     const auto& task = ptask->task;
-    u64 cur_speed;
+    u64 cur_speed = 0;
     const auto elapsed = task->timer.elapsed();
 
     if (task->type_ != vfs::file_task::type::exec)
@@ -1450,7 +1450,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             }
         }
         // calc percent
-        i32 ipercent;
+        i32 ipercent = 0;
         if (task->total_size)
         {
             const f64 dpercent = ((f64)task->progress) / task->total_size;
@@ -1541,7 +1541,7 @@ ptk_file_task_update(PtkFileTask* ptask)
             speed_current = std::format("{}/s", size_current);
         }
         // avg speed
-        u64 avg_speed;
+        u64 avg_speed = 0;
         if (elapsed > std::chrono::seconds::zero())
         {
             avg_speed = task->progress / elapsed.count();
@@ -1636,7 +1636,7 @@ ptk_file_task_update(PtkFileTask* ptask)
     if (gtk_text_buffer_get_char_count(task->add_log_buf))
     {
         GtkTextIter iter, siter;
-        char* text;
+        char* text = nullptr;
         // get add_log text and delete
         gtk_text_buffer_get_start_iter(task->add_log_buf, &siter);
         gtk_text_buffer_get_iter_at_mark(task->add_log_buf, &iter, task->add_log_end);
@@ -2049,7 +2049,7 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
     {
         return;
     }
-    i32 response;
+    i32 response = 0;
     if (widget == rename_button)
     {
         response = ptk::file_task::response::rename;
@@ -2069,8 +2069,8 @@ static void
 query_overwrite(PtkFileTask* ptask)
 {
     // ztd::logger::info("query_overwrite ptask={}", ztd::logger::utils::ptr(ptask));
-    GtkWidget* dlg;
-    GtkWidget* parent_win;
+    GtkWidget* dlg = nullptr;
+    GtkWidget* parent_win = nullptr;
     GtkTextIter iter;
 
     bool has_overwrite_btn = true;

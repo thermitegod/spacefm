@@ -178,7 +178,7 @@ ptk_file_list_init(PtkFileList* list)
 static void
 ptk_file_list_class_init(PtkFileListClass* klass)
 {
-    GObjectClass* object_class;
+    GObjectClass* object_class = nullptr;
 
     parent_class = (GObjectClass*)g_type_class_peek_parent(klass);
     object_class = (GObjectClass*)klass;
@@ -594,7 +594,7 @@ static i32
 compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
                   PtkFileList* list)
 {
-    i32 result;
+    i32 result = 0;
     // by display name
     if (list->sort_natural)
     {

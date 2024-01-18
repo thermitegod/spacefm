@@ -72,7 +72,7 @@ vfs_async_task_get_type()
 static void
 vfs_async_task_class_init(VFSAsyncTaskClass* klass)
 {
-    GObjectClass* g_object_class;
+    GObjectClass* g_object_class = nullptr;
     g_object_class = G_OBJECT_CLASS(klass);
     g_object_class->finalize = vfs_async_task_finalize;
     parent_class = (GObjectClass*)g_type_class_peek(G_TYPE_OBJECT);
@@ -98,7 +98,7 @@ vfs::async_task::create(vfs::async_task::function_t task_func, void* user_data) 
 static void
 vfs_async_task_finalize(GObject* object)
 {
-    vfs::async_task* task;
+    vfs::async_task* task = nullptr;
     // FIXME: destroying the object without calling vfs_async_task_cancel
     // currently induces unknown errors.
     task = VFS_ASYNC_TASK_REINTERPRET(object);

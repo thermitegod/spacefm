@@ -218,7 +218,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dlg);
 
     // buttons
-    GtkButton* btn_edit;
+    GtkButton* btn_edit = nullptr;
     GtkButton* btn_default = nullptr;
     GtkButton* btn_icon_choose = nullptr;
 
@@ -279,7 +279,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
 
     std::string answer;
     std::string ans;
-    i32 response;
+    i32 response = 0;
     bool ret = false;
     while ((response = gtk_dialog_run(GTK_DIALOG(dlg))))
     {

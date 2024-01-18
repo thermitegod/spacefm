@@ -320,8 +320,8 @@ class PropertiesPage
         }
         else
         {
-            GtkBox* left_box;
-            GtkBox* right_box;
+            GtkBox* left_box = nullptr;
+            GtkBox* right_box = nullptr;
             this->section_.new_split_vboxes(&left_box, &right_box);
             gtk_box_pack_start(left_box, GTK_WIDGET(left_item), true, true, 0);
             gtk_box_pack_start(right_box, GTK_WIDGET(right_item), true, true, 0);

@@ -114,9 +114,9 @@ compare_left(nat_char const *a, nat_char const *b)
 static int
 strnatcmp0(nat_char const *a, nat_char const *b, int fold_case)
 {
-     int ai, bi;
-     nat_char ca, cb;
-     int fractional, result;
+     int ai = 0, bi = 0;
+     nat_char ca = 0, cb = 0;
+     int fractional = 0, result = 0;
 
      ai = bi = 0;
      while (1) {

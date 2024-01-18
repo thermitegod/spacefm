@@ -186,7 +186,7 @@ void
 xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event)
 {
     xset_t set2;
-    panel_t p;
+    panel_t p = 0;
     xset::main_window_panel mode;
     PtkFileBrowser* file_browser = nullptr;
     MainWindow* main_window = main_window_get_last_active();
@@ -520,7 +520,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
     std::string str;
 
     // get real icon size from gtk icon size
-    i32 icon_w, icon_h;
+    i32 icon_w = 0, icon_h = 0;
     gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
     const i32 real_icon_size = icon_w > icon_h ? icon_w : icon_h;
 
@@ -601,7 +601,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
         menu_style = xset::menu::string;
     }
 
-    GtkBox* hbox;
+    GtkBox* hbox = nullptr;
     xset_t set_child;
     xset::cmd cmd_type;
 
@@ -843,7 +843,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             gtk_widget_set_vexpand(GTK_WIDGET(btn), false);
             gtk_button_set_always_show_image(btn, true);
 
-            GtkEventBox* ebox;
+            GtkEventBox* ebox = nullptr;
 
             // create eventbox for btn
             ebox = GTK_EVENT_BOX(gtk_event_box_new());
@@ -877,9 +877,9 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
             ebox = GTK_EVENT_BOX(gtk_event_box_new());
             gtk_event_box_set_visible_window(ebox, false);
             gtk_event_box_set_above_child(ebox, true);
-            GtkWidget* menu_btn;
-            GtkWidget* hbox_menu;
-            GList* children;
+            GtkWidget* menu_btn = nullptr;
+            GtkWidget* hbox_menu = nullptr;
+            GList* children = nullptr;
 
             menu_btn = GTK_WIDGET(gtk_menu_tool_button_new(nullptr, nullptr));
             hbox_menu = gtk_bin_get_child(GTK_BIN(menu_btn));
@@ -994,7 +994,7 @@ xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
         xset::tool::up,
         xset::tool::DEFAULT,
     };
-    i32 stop_b4;
+    i32 stop_b4 = 0;
     xset_t set;
     xset_t set_target;
 

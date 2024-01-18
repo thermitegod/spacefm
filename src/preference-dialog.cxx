@@ -147,8 +147,8 @@ class PreferencePage
         }
         else
         {
-            GtkBox* left_box;
-            GtkBox* right_box;
+            GtkBox* left_box = nullptr;
+            GtkBox* right_box = nullptr;
             this->section_.new_split_vboxes(&left_box, &right_box);
             gtk_box_pack_start(left_box, GTK_WIDGET(left_item), true, true, 0);
             gtk_box_pack_start(right_box, GTK_WIDGET(right_item), true, true, 0);
@@ -202,7 +202,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
         return;
     }
 
-    i32 value;
+    i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
 
     if (value != app_settings.icon_size_big())
@@ -260,7 +260,7 @@ create_combobox()
         const i32 current_big_icon_size = app_settings.icon_size_big();
         do
         {
-            i32 value;
+            i32 value = 0;
             gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
             if (value == current_big_icon_size)
             {
@@ -314,7 +314,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
         return;
     }
 
-    i32 value;
+    i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
 
     if (value != app_settings.icon_size_small())
@@ -372,7 +372,7 @@ create_combobox()
         const i32 current_small_icon_size = app_settings.icon_size_small();
         do
         {
-            i32 value;
+            i32 value = 0;
             gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
             if (value == current_small_icon_size)
             {
@@ -418,7 +418,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
         return;
     }
 
-    i32 value;
+    i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
 
     if (value != app_settings.icon_size_tool())
@@ -450,7 +450,7 @@ create_combobox()
         const i32 current_tool_icon_size = app_settings.icon_size_tool();
         do
         {
-            i32 value;
+            i32 value = 0;
             gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
             if (value == current_tool_icon_size)
             {
@@ -873,7 +873,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
         return;
     }
 
-    i32 value;
+    i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
 
     const i32 last_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
@@ -907,7 +907,7 @@ create_combobox()
         const i32 current_drag_action = xset_get_int(xset::name::drag_action, xset::var::x);
         do
         {
-            i32 value;
+            i32 value = 0;
             gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
             if (value == current_drag_action)
             {
@@ -975,7 +975,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
         return;
     }
 
-    i32 value;
+    i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
 
     const auto new_terminal = terminal_handlers->get_supported_terminal_names()[value];
@@ -1015,7 +1015,7 @@ create_combobox()
         const auto current_terminal_index = std::ranges::distance(terminals.cbegin(), it);
         do
         {
-            isize value;
+            isize value = 0;
             gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 1, &value, -1);
             if (value == current_terminal_index)
             {

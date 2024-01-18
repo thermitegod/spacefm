@@ -106,7 +106,7 @@ vfs::mime_type::~mime_type()
 GdkPixbuf*
 vfs::mime_type::icon(bool big) noexcept
 {
-    i32 icon_size;
+    i32 icon_size = 0;
 
     if (big)
     { // big icon

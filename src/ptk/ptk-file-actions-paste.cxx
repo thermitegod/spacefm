@@ -43,7 +43,7 @@ void
 ptk_paste_file(PtkFileBrowser* file_browser, const std::filesystem::path& cwd)
 {
     bool is_cut = false;
-    i32 missing_targets;
+    i32 missing_targets = 0;
 
     const std::vector<std::filesystem::path> files =
         ptk_clipboard_get_file_paths(cwd, &is_cut, &missing_targets);

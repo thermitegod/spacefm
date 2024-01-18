@@ -142,8 +142,8 @@ main_window_get_type()
 static void
 main_window_class_init(MainWindowClass* klass)
 {
-    GObjectClass* object_class;
-    GtkWidgetClass* widget_class;
+    GObjectClass* object_class = nullptr;
+    GtkWidgetClass* widget_class = nullptr;
 
     object_class = (GObjectClass*)klass;
     parent_class = (GtkApplicationWindowClass*)g_type_class_peek_parent(klass);
@@ -458,8 +458,8 @@ main_window_toggle_thumbnails_all_windows()
 void
 MainWindow::focus_panel(const panel_t panel) noexcept
 {
-    panel_t panel_focus;
-    panel_t panel_hide;
+    panel_t panel_focus = 0;
+    panel_t panel_hide = 0;
 
     switch (panel)
     {
@@ -622,8 +622,8 @@ MainWindow::show_panels() noexcept
         {panel_4, xset_get_b_panel(panel_4, xset::panel::show)},
     };
 
-    bool horiz;
-    bool vert;
+    bool horiz = false;
+    bool vert = false;
     for (const panel_t p : PANELS)
     {
         // panel context - how panels share horiz and vert space with other panels
@@ -1424,7 +1424,7 @@ MainWindow::store_positions() noexcept
     if (!this->fullscreen)
     {
         // store width/height + sliders
-        i32 pos;
+        i32 pos = 0;
         GtkAllocation allocation;
         gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
 
@@ -1469,7 +1469,7 @@ MainWindow::store_positions() noexcept
         }
 
         // store fb columns
-        PtkFileBrowser* a_browser;
+        PtkFileBrowser* a_browser = nullptr;
         if (this->maximized)
         {
             this->opened_maximized = true; // force save of columns
@@ -2066,7 +2066,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 {
     (void)page;
     MainWindow* main_window = MAIN_WINDOW(user_data);
-    PtkFileBrowser* file_browser;
+    PtkFileBrowser* file_browser = nullptr;
 
     // save sliders of current fb ( new tab while task manager is shown changes vals )
     PtkFileBrowser* current_file_browser = main_window->current_file_browser();
@@ -2239,7 +2239,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         return false;
     }
 
-    PtkFileBrowser* browser;
+    PtkFileBrowser* browser = nullptr;
 
     if ((keyval == GDK_KEY_Home && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
         (keyval == GDK_KEY_End && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
@@ -2402,7 +2402,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
     }
     else if (set->name.starts_with("panel_"))
     {
-        i32 i;
+        i32 i = 0;
         if (set->xset_name == xset::name::panel_prev)
         {
             i = panel_control_code_prev;

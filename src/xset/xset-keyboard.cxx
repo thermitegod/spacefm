@@ -35,8 +35,8 @@
 const std::string
 xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod)
 {
-    u32 keyval;
-    u32 keymod;
+    u32 keyval = 0;
+    u32 keymod = 0;
     if (set)
     {
         keyval = set->key;

@@ -154,7 +154,7 @@ ptk_dir_tree_init(PtkDirTree* tree)
 static void
 ptk_dir_tree_class_init(PtkDirTreeClass* klass)
 {
-    GObjectClass* object_class;
+    GObjectClass* object_class = nullptr;
 
     parent_class = (GObjectClass*)g_type_class_peek_parent(klass);
     object_class = (GObjectClass*)klass;

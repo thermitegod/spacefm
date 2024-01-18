@@ -337,7 +337,7 @@ on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
 static GtkWidget*
 xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job, const xset_t& set)
 {
-    GtkWidget* item;
+    GtkWidget* item = nullptr;
     item = gtk_menu_item_new_with_mnemonic(label.data());
 
     g_object_set_data(G_OBJECT(item), "job", GINT_TO_POINTER(magic_enum::enum_integer(job)));
@@ -353,8 +353,8 @@ xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_ins
     (void)button;
     (void)time_point;
 
-    GtkWidget* newitem;
-    GtkWidget* submenu;
+    GtkWidget* newitem = nullptr;
+    GtkWidget* submenu = nullptr;
     bool no_remove = false;
     bool no_paste = false;
 
@@ -513,7 +513,7 @@ xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_ins
      * where menu == nullptr.  So pass 0 for button if !menu. */
 
     // Get the pointer location
-    i32 x, y;
+    i32 x = 0, y = 0;
     GdkModifierType mods;
     gdk_window_get_device_position(gtk_widget_get_window(menu), nullptr, &x, &y, &mods);
 

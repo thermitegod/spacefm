@@ -13,6 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 
@@ -65,7 +67,7 @@ gtk_dialog_run(GtkDialog* dialog)
 guint
 gdk_key_event_get_keyval(GdkEvent* event)
 {
-    guint keyval;
+    guint keyval = 0;
     gdk_event_get_keyval(event, &keyval);
     return keyval;
 }
@@ -81,7 +83,7 @@ gdk_event_get_modifier_state(GdkEvent* event)
 guint
 gdk_button_event_get_button(GdkEvent* event)
 {
-    guint button;
+    guint button = 0;
     gdk_event_get_button(event, &button);
     return button;
 }
@@ -89,8 +91,8 @@ gdk_button_event_get_button(GdkEvent* event)
 gboolean
 gdk_event_get_position(GdkEvent* event, double* x, double* y)
 {
-    double xx;
-    double yy;
+    double xx = NAN;
+    double yy = NAN;
     const auto ret = gdk_event_get_coords(event, &xx, &yy);
     *x = xx;
     *y = yy;

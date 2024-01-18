@@ -249,7 +249,7 @@ run_ipc_command(const std::string_view socket_commands_json)
                 return {SOCKET_INVALID, "invalid slider value"};
             }
 
-            GtkPaned* pane;
+            GtkPaned* pane = nullptr;
             if (property == "window-vslider-top")
             {
                 pane = main_window->hpane_top;
@@ -496,7 +496,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
             }
-            GtkPaned* pane;
+            GtkPaned* pane = nullptr;
             if (property == "panel-hslider-top")
             {
                 pane = file_browser->side_vpane_top;
@@ -527,7 +527,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
             {
                 bool found = false;
-                GtkTreeViewColumn* col;
+                GtkTreeViewColumn* col = nullptr;
                 for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
                     col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
@@ -898,8 +898,8 @@ run_ipc_command(const std::string_view socket_commands_json)
         // get
         if (property == "window-size")
         {
-            i32 width;
-            i32 height;
+            i32 width = 0;
+            i32 height = 0;
             gtk_window_get_default_size(GTK_WINDOW(main_window), &width, &height);
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
         }
@@ -908,8 +908,8 @@ run_ipc_command(const std::string_view socket_commands_json)
 #if (GTK_MAJOR_VERSION == 4)
             return {SOCKET_INVALID, "Not Implemented"};
 #elif (GTK_MAJOR_VERSION == 3)
-            i32 width;
-            i32 height;
+            i32 width = 0;
+            i32 height = 0;
             gtk_window_get_position(GTK_WINDOW(main_window), &width, &height);
             return {SOCKET_SUCCESS, std::format("{}x{}", width, height)};
 #endif
@@ -936,7 +936,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (property == "window-vslider-top" || property == "window-vslider-bottom" ||
                  property == "window-hslider" || property == "window-tslider")
         {
-            GtkPaned* pane;
+            GtkPaned* pane = nullptr;
             if (property == "window-vslider-top")
             {
                 pane = main_window->hpane_top;
@@ -1065,7 +1065,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         else if (property == "panel-hslider-top" || property == "panel-hslider-bottom" ||
                  property == "panel-vslider")
         {
-            GtkPaned* pane;
+            GtkPaned* pane = nullptr;
             if (property == "panel-hslider-top")
             {
                 pane = file_browser->side_vpane_top;
@@ -1268,9 +1268,9 @@ run_ipc_command(const std::string_view socket_commands_json)
             return {SOCKET_INVALID, "Not Implemented"};
 #elif (GTK_MAJOR_VERSION == 3)
             GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-            GdkAtom gnome_target;
-            GdkAtom uri_list_target;
-            GtkSelectionData* sel_data;
+            GdkAtom gnome_target = nullptr;
+            GdkAtom uri_list_target = nullptr;
+            GtkSelectionData* sel_data = nullptr;
 
             gnome_target = gdk_atom_intern("x-special/gnome-copied-files", false);
             sel_data = gtk_clipboard_wait_for_contents(clip, gnome_target);
@@ -1411,7 +1411,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
 
         // set model value
-        i32 j;
+        i32 j = 0;
         if (property == "icon")
         {
             ptk_file_task_lock(ptask);
@@ -1537,7 +1537,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         }
 
         // get model value
-        i32 j;
+        i32 j = 0;
         if (property == "icon")
         {
             ptk_file_task_lock(ptask);
@@ -1623,7 +1623,7 @@ run_ipc_command(const std::string_view socket_commands_json)
         {
             return {SOCKET_INVALID, std::format("invalid task property '{}'", property)};
         }
-        char* str2;
+        char* str2 = nullptr;
         gtk_tree_model_get(model, &it, j, &str2, -1);
         if (str2)
         {

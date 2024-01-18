@@ -31,6 +31,7 @@
 #include <ranges>
 
 #include <cstring>
+#include <cmath>
 
 #include <glibmm.h>
 
@@ -213,7 +214,7 @@ main_task_pause_all_queued(PtkFileTask* ptask)
         return;
     }
 
-    PtkFileTask* qtask;
+    PtkFileTask* qtask = nullptr;
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ptask->task_view));
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
@@ -578,7 +579,7 @@ static void
 on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* name2)
 {
     (void)main_window;
-    const char* name;
+    const char* name = nullptr;
     if (item)
     {
         name = static_cast<const char*>(g_object_get_data(G_OBJECT(item), "name"));
@@ -692,7 +693,7 @@ ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu)
 PtkFileTask*
 ptk_task_view_get_selected_task(GtkWidget* view)
 {
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeSelection* selection = nullptr;
     GtkTreeIter it;
     PtkFileTask* ptask = nullptr;
@@ -744,12 +745,12 @@ static bool
 on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_window)
 {
     GtkTreeModel* model = nullptr;
-    GtkTreePath* tree_path;
+    GtkTreePath* tree_path = nullptr;
     GtkTreeViewColumn* col = nullptr;
     GtkTreeIter it;
     PtkFileTask* ptask = nullptr;
     xset_t set;
-    bool is_tasks;
+    bool is_tasks = false;
 
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
@@ -761,7 +762,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
 
     std::string menu_elements;
 
-    f64 x, y;
+    f64 x = NAN;
+    f64 y = NAN;
     gdk_event_get_position(event, &x, &y);
 
     switch (button)
@@ -848,13 +850,13 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             }
 
             // build popup
-            PtkFileBrowser* file_browser;
+            PtkFileBrowser* file_browser = nullptr;
             file_browser = main_window->current_file_browser();
             if (!file_browser)
             {
                 return false;
             }
-            GtkWidget* popup;
+            GtkWidget* popup = nullptr;
 
             popup = gtk_menu_new();
 
@@ -938,9 +940,9 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
 {
     (void)col;
     (void)user_data;
-    GtkTreeModel* model;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter it;
-    PtkFileTask* ptask;
+    PtkFileTask* ptask = nullptr;
 
     MainWindow* main_window = get_task_view_window(view);
     if (main_window == nullptr)
@@ -1010,8 +1012,8 @@ void
 main_task_view_update_task(PtkFileTask* ptask)
 {
     PtkFileTask* ptaskt = nullptr;
-    GtkWidget* view;
-    GtkTreeModel* model;
+    GtkWidget* view = nullptr;
+    GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     xset_t set;
 
@@ -1328,9 +1330,9 @@ main_task_view_update_task(PtkFileTask* ptask)
 GtkWidget*
 main_task_view_new(MainWindow* main_window)
 {
-    GtkTreeViewColumn* col;
-    GtkCellRenderer* renderer;
-    GtkCellRenderer* pix_renderer;
+    GtkTreeViewColumn* col = nullptr;
+    GtkCellRenderer* renderer = nullptr;
+    GtkCellRenderer* pix_renderer = nullptr;
 
     static constexpr std::array<task_view_column, 16> cols{
         task_view_column::status,
