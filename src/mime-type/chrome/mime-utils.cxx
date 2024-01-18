@@ -355,7 +355,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
                     weight = static_cast<uint8_t>(buf[p + 3]);
                 }
                 p += 4;
-                if (n.ext.size() > 0 && n.ext[0] == '.')
+                if (!n.ext.empty() && n.ext[0] == '.')
                 {
                     const std::string ext = n.ext.substr(1);
                     auto it = out_mime_types.find(ext);

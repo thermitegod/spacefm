@@ -53,7 +53,7 @@ inline constexpr u32 MIME_HEADER_MAX_SIZE = 127;
 static bool
 mime_type_is_data_plain_text(const std::span<const std::byte> data)
 {
-    if (data.size() == 0)
+    if (data.empty())
     {
         return false;
     }

@@ -286,7 +286,7 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         open_files_with_app(parent, open_files, desktop);
     }
 
-    if (file_browser && dirs_to_open.size() != 0)
+    if (file_browser && !dirs_to_open.empty())
     {
         if (dirs_to_open.size() == 1)
         {
