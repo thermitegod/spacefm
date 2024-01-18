@@ -46,7 +46,7 @@ struct mime_monitor
     std::shared_ptr<vfs::dir> dir;
 
     // signals
-    void on_mime_change(const std::shared_ptr<vfs::file>& file);
+    static void on_mime_change(const std::shared_ptr<vfs::file>& file);
 };
 
 const std::shared_ptr<mime_monitor>
@@ -113,9 +113,9 @@ vfs_mime_monitor()
 
     // ztd::logger::debug("MIME-UPDATE watch started");
     user_mime_monitor->dir->add_event<spacefm::signal::file_created>(
-        std::bind(&mime_monitor::on_mime_change, user_mime_monitor, std::placeholders::_1));
+        std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
     user_mime_monitor->dir->add_event<spacefm::signal::file_changed>(
-        std::bind(&mime_monitor::on_mime_change, user_mime_monitor, std::placeholders::_1));
+        std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
     user_mime_monitor->dir->add_event<spacefm::signal::file_deleted>(
-        std::bind(&mime_monitor::on_mime_change, user_mime_monitor, std::placeholders::_1));
+        std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
 }

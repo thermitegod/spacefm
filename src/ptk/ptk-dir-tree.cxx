@@ -511,7 +511,7 @@ PtkDirTree::create() noexcept
 
 i32
 PtkDirTree::node_compare(const std::shared_ptr<PtkDirTree::Node>& a,
-                         const std::shared_ptr<PtkDirTree::Node>& b) const noexcept
+                         const std::shared_ptr<PtkDirTree::Node>& b) noexcept
 {
     const auto& file1 = a->file;
     const auto& file2 = b->file;
@@ -702,7 +702,7 @@ PtkDirTree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
 }
 
 const std::optional<std::filesystem::path>
-PtkDirTree::get_dir_path(GtkTreeIter* iter) const noexcept
+PtkDirTree::get_dir_path(GtkTreeIter* iter) noexcept
 {
     assert(iter->user_data != nullptr);
 

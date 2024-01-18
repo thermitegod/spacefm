@@ -238,7 +238,7 @@ vfs::trash_can::trash_dir::create_trash_dir() const noexcept
 
 const std::string
 vfs::trash_can::trash_dir::create_trash_date(
-    const std::chrono::system_clock::time_point time_point) const noexcept
+    const std::chrono::system_clock::time_point time_point) noexcept
 {
     const auto date = std::chrono::floor<std::chrono::days>(time_point);
 
