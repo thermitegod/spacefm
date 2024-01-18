@@ -134,8 +134,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
         switch (set->menu_style)
         {
             case xset::menu::check:
-                if (!(!set->lock &&
-                      (xset::cmd(xset_get_int(set, xset::var::x)) > xset::cmd::script)))
+                if (set->lock || (xset::cmd(xset_get_int(set, xset::var::x)) <= xset::cmd::script))
                 {
                     item = gtk_check_menu_item_new_with_mnemonic(set->menu_label.value().data());
                     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),

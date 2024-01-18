@@ -192,7 +192,7 @@ xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* ev
     MainWindow* main_window = main_window_get_last_active();
 
     // set may be a submenu that does not match tool_type
-    if (!(set && !set->lock && tool_type > xset::tool::custom))
+    if (!set || set->lock || tool_type <= xset::tool::custom)
     {
         ztd::logger::warn("xset_builtin_tool_activate invalid");
         return;
@@ -467,8 +467,8 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
         {
             // show custom submenu
             xset_t set_child;
-            if (!(set && !set->lock && set->child && set->menu_style == xset::menu::submenu &&
-                  (set_child = xset_is(set->child.value()))))
+            if (!set || set->lock || !set->child || set->menu_style != xset::menu::submenu ||
+                !(set_child = xset_is(set->child.value())))
             {
                 return true;
             }

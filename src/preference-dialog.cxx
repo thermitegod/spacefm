@@ -194,7 +194,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     GtkTreeIter iter;
     GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    if (!gtk_combo_box_get_active_iter(combobox, &iter))
     {
         return;
     }
@@ -306,7 +306,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     GtkTreeIter iter;
     GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    if (!gtk_combo_box_get_active_iter(combobox, &iter))
     {
         return;
     }
@@ -410,7 +410,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     GtkTreeIter iter;
     GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    if (!gtk_combo_box_get_active_iter(combobox, &iter))
     {
         return;
     }
@@ -865,7 +865,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     GtkTreeIter iter;
     GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    if (!gtk_combo_box_get_active_iter(combobox, &iter))
     {
         return;
     }
@@ -967,7 +967,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     GtkTreeIter iter;
     GtkTreeModel* model = gtk_combo_box_get_model(combobox);
-    if (gtk_combo_box_get_active_iter(combobox, &iter) == false)
+    if (!gtk_combo_box_get_active_iter(combobox, &iter))
     {
         return;
     }

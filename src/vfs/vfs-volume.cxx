@@ -347,11 +347,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
     }
     else if (condition != Glib::IOCondition::IO_IN)
     {
-        if (condition == Glib::IOCondition::IO_HUP)
-        {
-            return false;
-        }
-        return true;
+        return condition != Glib::IOCondition::IO_HUP;
     }
 
     const auto check_udevice = umonitor.receive_device();

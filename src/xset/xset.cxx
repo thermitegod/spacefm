@@ -309,7 +309,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->task = result == 1 ? true : false;
+            set->task = result == 1;
             break;
         }
         case xset::var::task_pop:
@@ -324,7 +324,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->task_pop = result == 1 ? true : false;
+            set->task_pop = result == 1;
             break;
         }
         case xset::var::task_err:
@@ -339,7 +339,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->task_err = result == 1 ? true : false;
+            set->task_err = result == 1;
             break;
         }
         case xset::var::task_out:
@@ -354,7 +354,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->task_out = result == 1 ? true : false;
+            set->task_out = result == 1;
             break;
         }
         case xset::var::run_in_terminal:
@@ -369,7 +369,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->in_terminal = result == 1 ? true : false;
+            set->in_terminal = result == 1;
             break;
         }
         case xset::var::keep_terminal:
@@ -384,7 +384,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->keep_terminal = result == 1 ? true : false;
+            set->keep_terminal = result == 1;
             break;
         }
         case xset::var::scroll_lock:
@@ -399,7 +399,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->scroll_lock = result == 1 ? true : false;
+            set->scroll_lock = result == 1;
             break;
         }
         case xset::var::disable:
@@ -414,7 +414,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->disable = result == 1 ? true : false;
+            set->disable = result == 1;
             break;
         }
         case xset::var::opener:
@@ -429,7 +429,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->opener = result == 1 ? true : false;
+            set->opener = result == 1;
             break;
         }
         case xset::var::shared_key:

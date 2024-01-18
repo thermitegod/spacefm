@@ -1036,18 +1036,11 @@ ptk_file_menu_new(PtkFileBrowser* browser,
     bool is_clip = false;
 #elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-    bool is_clip = false;
-    if (!gtk_clipboard_wait_is_target_available(
+    const bool is_clip =
+        gtk_clipboard_wait_is_target_available(
             clip,
-            gdk_atom_intern("x-special/gnome-copied-files", false)) &&
-        !gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false)))
-    {
-        is_clip = false;
-    }
-    else
-    {
-        is_clip = true;
-    }
+            gdk_atom_intern("x-special/gnome-copied-files", false)) ||
+        gtk_clipboard_wait_is_target_available(clip, gdk_atom_intern("text/uri-list", false));
 #endif
 
     const panel_t p = browser->panel();

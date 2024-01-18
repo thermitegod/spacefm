@@ -1345,7 +1345,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
         {
             std::error_code ec;
             const auto file_stat = ztd::lstat(task->dest_dir.value(), ec);
-            if (!(task->dest_dir && !ec))
+            if (!task->dest_dir || ec)
             {
                 task->task_error(errno, "Accessing", task->dest_dir.value());
                 task->abort = true;

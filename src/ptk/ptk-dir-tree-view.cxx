@@ -91,11 +91,8 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
 
     std::shared_ptr<vfs::file> file;
     gtk_tree_model_get(model, iter, ptk::dir_tree::column::info, &file, -1);
-    if (file && file->is_hidden())
-    {
-        return false;
-    }
-    return true;
+
+    return !(file && file->is_hidden());
 }
 static void
 on_destroy(GtkWidget* w)
@@ -354,11 +351,8 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
     }
     std::shared_ptr<vfs::file> file;
     gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
-    if (!file)
-    {
-        return false;
-    }
-    return true;
+
+    return file != nullptr;
 }
 
 void
