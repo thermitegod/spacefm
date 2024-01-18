@@ -976,7 +976,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
     gtk_tree_model_get(model, &iter, 1, &value, -1);
 
     const auto new_terminal = terminal_handlers->get_supported_terminal_names()[value];
-    const std::filesystem::path terminal = Glib::find_program_in_path(new_terminal.data());
+    const std::filesystem::path terminal = Glib::find_program_in_path(new_terminal);
     if (terminal.empty())
     {
         ztd::logger::error("Failed to set new terminal: {}, not installed", new_terminal);

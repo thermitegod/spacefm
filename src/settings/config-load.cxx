@@ -208,13 +208,13 @@ config_parse_xset(const toml::value& tbl, u64 version)
         // get [XSet.name] and all vars
         for (const auto& [toml_name, toml_vars] : section.as_table())
         {
-            const std::string name = toml_name.data();
+            const std::string name = toml_name;
             const xset_t set = xset_get(name);
 
             // get var and value
             for (const auto& [toml_var, toml_value] : toml_vars.as_table())
             {
-                const std::string setvar = toml_var.data();
+                const std::string setvar = toml_var;
                 const std::string value =
                     ztd::strip(toml::format(toml_value, std::numeric_limits<usize>::max()), "\"");
 

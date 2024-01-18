@@ -1315,7 +1315,7 @@ ptk_file_menu_new(PtkFileBrowser* browser,
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
         plain_type = std::format("open_all_type_{}", plain_type);
-        set = xset_get(plain_type.data());
+        set = xset_get(plain_type);
         xset_set_cb(set, (GFunc)on_popup_open_all, data);
         set->lock = true;
         set->menu_style = xset::menu::normal;
