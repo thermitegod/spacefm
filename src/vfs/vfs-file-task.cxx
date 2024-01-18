@@ -97,8 +97,8 @@ vfs::file_task::create(const vfs::file_task::type task_type,
 vfs::file_task::file_task(const vfs::file_task::type task_type,
                           const std::span<const std::filesystem::path> src_files,
                           const std::filesystem::path& dest_dir)
+    : type_(task_type)
 {
-    this->type_ = task_type;
     this->src_paths = std::vector<std::filesystem::path>(src_files.begin(), src_files.end());
     if (!dest_dir.empty())
     {

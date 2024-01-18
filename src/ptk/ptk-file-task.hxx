@@ -80,14 +80,14 @@ struct PtkFileTask
     bool complete{false};
     bool aborted{false};
     bool pause_change{false};
-    bool pause_change_view{false};
+    bool pause_change_view{true};
 
     /* <private> */
     u32 timeout{0};
     bool restart_timeout{false};
     u32 progress_timer{0};
-    char progress_count{false};
-    GFunc complete_notify{};
+    u8 progress_count{0};
+    GFunc complete_notify{nullptr};
     void* user_data{nullptr};
     bool keep_dlg{false};
     bool pop_detail{false};

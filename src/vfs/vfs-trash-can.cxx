@@ -176,9 +176,8 @@ vfs::trash_can::empty(const std::filesystem::path& path) noexcept
 
 /////////////////////////////
 
-vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept
+vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept : trash_path_(path)
 {
-    this->trash_path_ = path;
     this->files_path_ = this->trash_path_ / "files";
     this->info_path_ = this->trash_path_ / "info";
 

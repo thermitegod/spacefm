@@ -68,9 +68,8 @@ struct VFSVolumeCallbackData
 };
 
 VFSVolumeCallbackData::VFSVolumeCallbackData(vfs::volume::callback_t callback, void* callback_data)
+    : cb(callback), user_data(callback_data)
 {
-    this->cb = callback;
-    this->user_data = callback_data;
 }
 
 using volume_callback_data_t = std::shared_ptr<VFSVolumeCallbackData>;
@@ -703,7 +702,6 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device)
     // ztd::logger::debug("vfs::volume::volume({})", ztd::logger::utils::ptr(this));
 
     this->devnum_ = device->devnum();
-    this->device_type_ = vfs::volume::device_type::block;
     this->device_file_ = device->devnode();
     this->udi_ = device->id();
     this->is_optical_ = device->is_optical_disc();
@@ -713,7 +711,7 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device)
     this->is_mounted_ = device->is_mounted();
     this->is_user_visible_ = device->udevice.is_partition() ||
                              (device->udevice.is_removable() && !device->udevice.is_disk());
-    this->ever_mounted_ = false;
+
     if (!device->mount_points().empty())
     {
         if (device->mount_points().contains(','))

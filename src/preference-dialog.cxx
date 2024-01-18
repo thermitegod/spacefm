@@ -48,15 +48,13 @@
 class PreferenceSection
 {
   private:
-    GtkBox* box_{nullptr};
-    GtkBox* content_box_{nullptr};
+    GtkBox* box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
+    GtkBox* content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
 
   public:
     PreferenceSection() = default;
     PreferenceSection(const std::string_view header)
     {
-        this->content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
-
         GtkLabel* label = GTK_LABEL(gtk_label_new(header.data()));
         PangoAttrList* attr_list = pango_attr_list_new();
         PangoAttribute* attr = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
@@ -71,7 +69,6 @@ class PreferenceSection
         gtk_box_pack_start(hbox, GTK_WIDGET(this->content_box_), true, true, 0);
         // clang-format on
 
-        this->box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
         gtk_box_pack_start(this->box_, GTK_WIDGET(label), false, false, 0);
         gtk_box_pack_start(this->box_, GTK_WIDGET(hbox), false, false, 6);
     }

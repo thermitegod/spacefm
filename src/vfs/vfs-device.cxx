@@ -38,10 +38,8 @@ vfs::device::create(const libudev::device& udevice) noexcept
     return std::make_shared<vfs::device>(udevice);
 }
 
-vfs::device::device(const libudev::device& udevice)
+vfs::device::device(const libudev::device& udevice) : udevice(udevice)
 {
-    this->udevice = udevice;
-
     this->is_valid_ = this->device_get_info();
 }
 

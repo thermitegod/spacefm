@@ -108,7 +108,7 @@ struct volume : public std::enable_shared_from_this<volume>
     std::string label_{};
     std::string fstype_{};
 
-    vfs::volume::device_type device_type_;
+    vfs::volume::device_type device_type_{vfs::volume::device_type::block};
 
     bool is_mounted_{false};
     bool is_removable_{false};

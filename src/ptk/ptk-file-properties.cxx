@@ -232,21 +232,18 @@ on_update_labels(const std::shared_ptr<properties_dialog_data>& data)
 class PropertiesSection
 {
   private:
-    GtkBox* box_{nullptr};
-    GtkBox* content_box_{nullptr};
+    GtkBox* box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
+    GtkBox* content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
 
   public:
     PropertiesSection()
     {
-        this->content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
-
         // clang-format off
         GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
         gtk_box_pack_start(hbox, gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0), false, false, 0);
         gtk_box_pack_start(hbox, GTK_WIDGET(this->content_box_), true, true, 0);
         // clang-format on
 
-        this->box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
         gtk_box_pack_start(this->box_, GTK_WIDGET(hbox), false, false, 0);
     }
 

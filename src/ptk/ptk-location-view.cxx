@@ -111,10 +111,7 @@ struct AutoOpen
     ptk::open_action job{ptk::open_action::dir};
 };
 
-AutoOpen::AutoOpen(PtkFileBrowser* file_browser)
-{
-    this->file_browser = file_browser;
-}
+AutoOpen::AutoOpen(PtkFileBrowser* file_browser) : file_browser(file_browser) {}
 
 AutoOpen::~AutoOpen()
 {

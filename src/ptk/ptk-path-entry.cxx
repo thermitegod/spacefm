@@ -50,11 +50,7 @@ enum column
 };
 }
 
-EntryData::EntryData(PtkFileBrowser* file_browser)
-{
-    this->browser = file_browser;
-    this->seek_timer = 0;
-}
+EntryData::EntryData(PtkFileBrowser* file_browser) : browser(file_browser) {}
 
 static const std::filesystem::path
 get_cwd(GtkEntry* entry)
