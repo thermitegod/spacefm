@@ -58,14 +58,8 @@ mime_type_is_data_plain_text(const std::span<const std::byte> data)
         return false;
     }
 
-    for (const auto d : data)
-    {
-        if (d == (std::byte)'\0')
-        {
-            return false;
-        }
-    }
-    return true;
+    const auto is_text = [](const auto& byte) { return byte != (std::byte)'\0'; };
+    return std::ranges::all_of(data, is_text);
 }
 
 const std::string
