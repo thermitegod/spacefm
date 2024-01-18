@@ -5263,7 +5263,7 @@ PtkFileBrowser::update_selection_history() noexcept
 
     for (const auto& file : selected_files)
     {
-        selected_filenames.push_back(file->name());
+        selected_filenames.emplace_back(file->name());
     }
     this->selection_history->selection_history.insert({cwd, selected_filenames});
 }

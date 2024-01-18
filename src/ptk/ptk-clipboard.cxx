@@ -141,7 +141,7 @@ uri_list_extract_uris(const char* uri_list_str)
 
     for (; *c_uri; ++c_uri)
     {
-        uri_list.push_back(*c_uri);
+        uri_list.emplace_back(*c_uri);
     }
     g_strfreev(c_uri_list);
 
@@ -319,7 +319,7 @@ ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files
     {
         if (std::filesystem::path(file).is_absolute())
         {
-            file_list.push_back(file);
+            file_list.emplace_back(file);
         }
     }
 
@@ -704,7 +704,7 @@ ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32
 
         if (std::filesystem::exists(file_path))
         {
-            file_list.push_back(file_path);
+            file_list.emplace_back(file_path);
         }
         else
         { // no *missing_targets++ here to avoid -Wunused-value compiler warning

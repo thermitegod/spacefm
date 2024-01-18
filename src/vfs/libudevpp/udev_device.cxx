@@ -216,7 +216,7 @@ libudev::device::get_sysattr_keys() const noexcept
     struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, sysattr_list)
     {
-        keys.push_back(udev_list_entry_get_name(entry));
+        keys.emplace_back(udev_list_entry_get_name(entry));
     }
 
     return keys;
@@ -253,7 +253,7 @@ libudev::device::get_devlinks() const noexcept
     struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, udev_device_get_devlinks_list_entry(this->handle.get()))
     {
-        links.push_back(udev_list_entry_get_name(entry));
+        links.emplace_back(udev_list_entry_get_name(entry));
     }
     return links;
 }
@@ -305,7 +305,7 @@ libudev::device::get_tags() const noexcept
 
     udev_list_entry_foreach(entry, tags_list)
     {
-        tags.push_back(udev_list_entry_get_name(entry));
+        tags.emplace_back(udev_list_entry_get_name(entry));
     }
 
     return tags;
@@ -327,7 +327,7 @@ libudev::device::get_current_tags() const noexcept
 
     udev_list_entry_foreach(entry, tags_list)
     {
-        tags.push_back(udev_list_entry_get_name(entry));
+        tags.emplace_back(udev_list_entry_get_name(entry));
     }
 
     return tags;

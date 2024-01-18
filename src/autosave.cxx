@@ -120,7 +120,7 @@ void
 autosave_init(const autosave_t& autosave_func) noexcept
 {
     // ztd::logger::debug("AUTOSAVE init");
-    threads.push_back(std::jthread([autosave_func] { autosave_thread(autosave_func); }));
+    threads.emplace_back([autosave_func] { autosave_thread(autosave_func); });
 }
 
 void

@@ -1828,7 +1828,7 @@ run_ipc_command(const std::string_view socket_commands_json)
             {
                 if (file.starts_with('/'))
                 { // absolute path
-                    file_list.push_back(file);
+                    file_list.emplace_back(file);
                 }
                 else
                 { // relative path
