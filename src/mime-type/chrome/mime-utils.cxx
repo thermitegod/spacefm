@@ -414,7 +414,7 @@ GetFileMimeType(const std::filesystem::path& filepath)
     const std::string ext = split_basename_extension(filepath).extension;
     if (ext.empty())
     {
-        return std::string("application/octet-stream");
+        return "application/octet-stream";
     }
 
     static std::vector<FileInfo> xdg_mime_files;

@@ -105,7 +105,7 @@ libudev::udev::device_from_devnum(device_type type, dev_t devnum) const noexcept
 libudev::enumerate
 libudev::udev::enumerate_new()
 {
-    return libudev::enumerate(udev_enumerate_new(this->handle.get()));
+    return {udev_enumerate_new(this->handle.get())};
 }
 
 bool
