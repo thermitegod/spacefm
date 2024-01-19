@@ -284,9 +284,9 @@ update_names()
 }
 
 bool
-ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& cur_dir)
+ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& current_path)
 {
-    if (cur_dir.empty() || !GTK_IS_TREE_VIEW(location_view))
+    if (current_path.empty() || !GTK_IS_TREE_VIEW(location_view))
     {
         return false;
     }
@@ -300,7 +300,7 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
             std::shared_ptr<vfs::volume> vol;
             gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
             const auto mount_point = vol->mount_point();
-            if (std::filesystem::equivalent(cur_dir, mount_point))
+            if (std::filesystem::equivalent(current_path, mount_point))
             {
                 gtk_tree_selection_select_iter(selection, &it);
                 GtkTreePath* path = gtk_tree_model_get_path(model, &it);

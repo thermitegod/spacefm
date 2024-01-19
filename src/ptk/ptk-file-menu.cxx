@@ -81,7 +81,7 @@
 #define PTK_FILE_MENU(obj) (static_cast<PtkFileMenu*>(obj))
 
 static bool on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data);
-static bool app_menu_keypress(GtkWidget* widget, GdkEvent* event, PtkFileMenu* data);
+static bool app_menu_keypress(GtkWidget* menu, GdkEvent* event, PtkFileMenu* data);
 static void show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 button,
                           const std::chrono::system_clock::time_point time_point);
 

@@ -44,7 +44,8 @@ class desktop
 
     desktop(const std::filesystem::path& desktop_file) noexcept;
 
-    static const std::shared_ptr<desktop> create(const std::filesystem::path& path) noexcept;
+    static const std::shared_ptr<desktop>
+    create(const std::filesystem::path& desktop_file) noexcept;
 
     [[nodiscard]] const std::string_view name() const noexcept;
     [[nodiscard]] const std::string_view display_name() const noexcept;
@@ -66,7 +67,7 @@ class desktop
     app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
                                    bool quote_file_list) const noexcept;
     void exec_in_terminal(const std::filesystem::path& cwd,
-                          const std::string_view cmd) const noexcept;
+                          const std::string_view command) const noexcept;
     void exec_desktop(const std::filesystem::path& working_dir,
                       const std::span<const std::filesystem::path> file_paths) const noexcept;
 

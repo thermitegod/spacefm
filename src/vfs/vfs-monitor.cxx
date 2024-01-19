@@ -111,8 +111,7 @@ void
 vfs::monitor::dispatch_event(const vfs::monitor::event event,
                              const std::filesystem::path& path) const noexcept
 {
-    // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", ztd::logger::utils::ptr(this), magic_enum::enum_name(event), this->path_);
-
+    // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", ztd::logger::utils::ptr(this), magic_enum::enum_name(event), path.string());
     this->callback_(event, path);
 }
 

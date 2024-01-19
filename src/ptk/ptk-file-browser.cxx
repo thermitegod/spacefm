@@ -3936,7 +3936,7 @@ PtkFileBrowser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> 
 }
 
 void
-PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_files,
+PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                         const std::filesystem::path& cwd, xset::name setname) noexcept
 {
     std::optional<std::filesystem::path> copy_dest;
@@ -4166,8 +4166,8 @@ PtkFileBrowser::copycmd(const std::span<const std::shared_ptr<vfs::file>> sel_fi
 
         // rebuild sel_files with full paths
         std::vector<std::filesystem::path> file_list;
-        file_list.reserve(sel_files.size());
-        for (const auto& file : sel_files)
+        file_list.reserve(selected_files.size());
+        for (const auto& file : selected_files)
         {
             file_list.push_back(file->path());
         }

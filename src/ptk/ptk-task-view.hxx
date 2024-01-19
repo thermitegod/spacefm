@@ -43,7 +43,7 @@ enum task_view_column
     data
 };
 
-void main_task_start_queued(GtkWidget* view, PtkFileTask* new_task);
+void main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask);
 
 void main_task_view_update_task(PtkFileTask* ptask);
 void main_task_view_remove_task(PtkFileTask* ptask);

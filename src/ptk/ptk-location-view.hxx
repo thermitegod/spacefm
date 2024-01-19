@@ -28,7 +28,7 @@
 
 // Location View
 GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);
-bool ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& path);
+bool ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& current_path);
 void ptk_location_view_on_action(GtkWidget* view, const xset_t& set);
 const std::shared_ptr<vfs::volume> ptk_location_view_get_selected_vol(GtkTreeView* location_view);
 void update_volume_icons();
