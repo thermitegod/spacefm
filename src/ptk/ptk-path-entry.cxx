@@ -427,7 +427,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata)
 }
 
 static bool
-on_insert_prefix(GtkEntryCompletion* completion, char* prefix, GtkWidget* entry)
+on_insert_prefix(GtkEntryCompletion* completion, const char* prefix, GtkWidget* entry)
 {
     (void)completion;
     (void)prefix;
