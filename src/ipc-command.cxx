@@ -29,6 +29,7 @@
 
 #include <system_error>
 
+#include <gtkmm.h>
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -36,7 +37,9 @@
 
 #include <nlohmann/json.hpp>
 
+#if (GTK_MAJOR_VERSION == 4)
 #include "compat/gtk4-porting.hxx"
+#endif
 
 #include "ptk/ptk-file-browser.hxx"
 #include "types.hxx"
@@ -46,7 +49,6 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-misc.hxx"
 
-#include "utils/strdup.hxx"
 #include "utils/shell_quote.hxx"
 
 #include "settings/app.hxx"

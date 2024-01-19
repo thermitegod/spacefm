@@ -37,8 +37,6 @@
 #include <fcntl.h>
 #include <utime.h>
 
-#include <malloc.h>
-
 #include <glibmm.h>
 
 #include <magic_enum.hpp>

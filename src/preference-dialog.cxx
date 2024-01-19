@@ -26,7 +26,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#if (GTK_MAJOR_VERSION == 4)
 #include "compat/gtk4-porting.hxx"
+#endif
 
 #include "types.hxx"
 

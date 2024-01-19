@@ -25,7 +25,6 @@
 #include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-file.hxx"
 

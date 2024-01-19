@@ -24,7 +24,6 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include <src/types.hxx>
 

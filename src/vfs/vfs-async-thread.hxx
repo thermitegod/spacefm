@@ -25,7 +25,6 @@
 #include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "signals.hxx"
 

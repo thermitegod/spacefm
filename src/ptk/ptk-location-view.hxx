@@ -26,6 +26,8 @@
 
 #include "vfs/vfs-volume.hxx"
 
+#include "ptk/ptk-file-browser.hxx"
+
 // Location View
 GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);
 bool ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& current_path);

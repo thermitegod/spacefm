@@ -21,11 +21,11 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "compat/gtk4-porting.hxx"
-
 #if (GTK_MAJOR_VERSION == 4)
 
 #include <cassert>
+
+#include "compat/gtk4-porting.hxx"
 
 static void
 dialog_response_cb(GObject* object, i32 response_id, void* user_data)

@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <memory>
 #include <string>
 #include <string_view>
 
@@ -21,9 +20,9 @@
 
 #include <filesystem>
 
-#include <optional>
+#include <memory>
 
-#include <cassert>
+#include <optional>
 
 #include <magic_enum.hpp>
 

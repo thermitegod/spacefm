@@ -27,7 +27,6 @@
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-mime-type.hxx"
 

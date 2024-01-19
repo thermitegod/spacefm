@@ -18,7 +18,6 @@
 #include <vector>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 inline const std::string MOUNTINFO{"/proc/self/mountinfo"};
 // inline const std::string MTAB{"/proc/self/mounts"};

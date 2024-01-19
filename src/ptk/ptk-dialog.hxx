@@ -20,7 +20,6 @@
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 i32 ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
                      GtkButtonsType buttons, const std::string_view message,

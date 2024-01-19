@@ -21,7 +21,6 @@
 #include <optional>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 namespace vfs::linux::sysfs
 {
