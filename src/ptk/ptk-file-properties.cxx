@@ -155,7 +155,6 @@ calc_total_size_of_files(const std::filesystem::path& path,
             ++data->total_count_file;
         }
     }
-    return;
 }
 
 static void*

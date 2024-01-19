@@ -2439,5 +2439,4 @@ query_overwrite(PtkFileTask* ptask)
 
     // cannot run gtk_dialog_run here because it does not unlock a low level
     // mutex when run from inside the timer handler
-    return;
 }
