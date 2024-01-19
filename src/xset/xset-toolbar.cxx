@@ -49,7 +49,6 @@
 #include "xset/xset-design.hxx"
 #include "xset/xset-misc.hxx"
 #include "xset/xset-toolbar.hxx"
-#include "xset/xset-context-menu.hxx"
 
 #include "utils.hxx"
 
