@@ -89,7 +89,7 @@ open_file(const std::filesystem::path& path)
 
     const auto desktop = vfs::desktop::create(app_name);
 
-    const bool opened = desktop->open_file(vfs::user_dirs->current_dir(), path);
+    const bool opened = desktop->open_file(Glib::get_current_dir(), path);
     if (!opened)
     {
         ptk_show_error(
@@ -144,7 +144,7 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
 static void
 tmp_clean()
 {
-    const auto& tmp = vfs::user_dirs->program_tmp_dir();
+    const auto tmp = vfs::program::tmp();
     if (std::filesystem::exists(tmp))
     {
         std::filesystem::remove_all(tmp);

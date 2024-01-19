@@ -73,7 +73,7 @@ load_bookmarks() noexcept
 
     if (bookmark_file.empty())
     {
-        bookmark_file = vfs::user_dirs->config_dir() / "gtk-3.0" / "bookmarks";
+        bookmark_file = vfs::user::config() / "gtk-3.0" / "bookmarks";
     }
 
     // no bookmark file

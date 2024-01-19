@@ -217,7 +217,7 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
     const std::string filename = std::format("{}.png", file_hash);
 
-    const auto thumbnail_file = vfs::user_dirs->cache_dir() / "thumbnails/normal" / filename;
+    const auto thumbnail_file = vfs::user::cache() / "thumbnails/normal" / filename;
 
     // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
@@ -339,7 +339,7 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
 void
 vfs_thumbnail_init()
 {
-    const auto dir = vfs::user_dirs->cache_dir() / "thumbnails/normal";
+    const auto dir = vfs::user::cache() / "thumbnails/normal";
     if (!std::filesystem::is_directory(dir))
     {
         std::filesystem::create_directories(dir);

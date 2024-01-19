@@ -45,8 +45,8 @@ vfs_trash_init()
 
 vfs::trash_can::trash_can() noexcept
 {
-    const auto home_id = ztd::statx(vfs::user_dirs->home_dir()).mount_id();
-    const auto user_trash = vfs::user_dirs->data_dir() / "Trash";
+    const auto home_id = ztd::statx(vfs::user::home()).mount_id();
+    const auto user_trash = vfs::user::data() / "Trash";
     auto home_trash = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
     this->trash_dirs_[home_id] = home_trash;
 }

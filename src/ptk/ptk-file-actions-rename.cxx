@@ -2135,11 +2135,10 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
 static const std::optional<std::filesystem::path>
 get_template_dir()
 {
-    const auto templates_path = vfs::user_dirs->template_dir();
+    const auto templates_path = vfs::user::templates();
 
     std::error_code ec;
-    const bool equivalent =
-        std::filesystem::equivalent(templates_path, vfs::user_dirs->home_dir(), ec);
+    const bool equivalent = std::filesystem::equivalent(vfs::user::home(), templates_path, ec);
     if (ec || equivalent)
     {
         /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Do not

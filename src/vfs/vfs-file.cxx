@@ -204,39 +204,39 @@ vfs::file::reload_mime_type() noexcept
 const std::string_view
 vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 {
-    if (vfs::user_dirs->home_dir() == this->path_)
+    if (vfs::user::home() == this->path_)
     {
         return (symbolic) ? "user-home-symbolic" : "user-home";
     }
-    else if (vfs::user_dirs->desktop_dir() == this->path_)
+    else if (vfs::user::desktop() == this->path_)
     {
         return (symbolic) ? "user-desktop-symbolic" : "user-desktop";
     }
-    else if (vfs::user_dirs->documents_dir() == this->path_)
+    else if (vfs::user::documents() == this->path_)
     {
         return (symbolic) ? "folder-documents-symbolic" : "folder-documents";
     }
-    else if (vfs::user_dirs->download_dir() == this->path_)
+    else if (vfs::user::download() == this->path_)
     {
         return (symbolic) ? "folder-download-symbolic" : "folder-download";
     }
-    else if (vfs::user_dirs->music_dir() == this->path_)
+    else if (vfs::user::music() == this->path_)
     {
         return (symbolic) ? "folder-music-symbolic" : "folder-music";
     }
-    else if (vfs::user_dirs->pictures_dir() == this->path_)
+    else if (vfs::user::pictures() == this->path_)
     {
         return (symbolic) ? "folder-pictures-symbolic" : "folder-pictures";
     }
-    else if (vfs::user_dirs->public_share_dir() == this->path_)
+    else if (vfs::user::public_share() == this->path_)
     {
         return (symbolic) ? "folder-publicshare-symbolic" : "folder-publicshare";
     }
-    else if (vfs::user_dirs->template_dir() == this->path_)
+    else if (vfs::user::templates() == this->path_)
     {
         return (symbolic) ? "folder-templates-symbolic" : "folder-templates";
     }
-    else if (vfs::user_dirs->videos_dir() == this->path_)
+    else if (vfs::user::videos() == this->path_)
     {
         return (symbolic) ? "folder-videos-symbolic" : "folder-videos";
     }

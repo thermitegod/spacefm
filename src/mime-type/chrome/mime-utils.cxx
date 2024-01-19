@@ -22,6 +22,8 @@
 
 #include <arpa/inet.h>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -181,10 +183,10 @@ LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files)
 {
     std::vector<std::filesystem::path> mime_cache_files;
 
-    const auto user_mime_cache = vfs::user_dirs->data_dir() / "mime/mime.cache";
+    const auto user_mime_cache = vfs::user::data() / "mime/mime.cache";
     mime_cache_files.push_back(user_mime_cache);
 
-    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
         const auto sys_mime_cache = sys_dir / "mime/mime.cache";
         mime_cache_files.push_back(sys_mime_cache);

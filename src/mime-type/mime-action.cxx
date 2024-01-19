@@ -57,7 +57,7 @@
 static void
 update_desktop_database()
 {
-    const auto path = vfs::user_dirs->data_dir() / "applications";
+    const auto path = vfs::user::data() / "applications";
     const std::string command = std::format("update-desktop-database {}", path.string());
     ztd::logger::info("COMMAND({})", command);
     Glib::spawn_command_line_sync(command);
@@ -77,7 +77,7 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
     try
     {
         // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-        const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
+        const auto path = vfs::user::config() / "mimeapps.list";
 
 #if (GTK_MAJOR_VERSION == 4)
         kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
@@ -90,7 +90,7 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
         try
         {
             // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
-            const auto path = vfs::user_dirs->data_dir() / "applications/mimeapps.list";
+            const auto path = vfs::user::data() / "applications/mimeapps.list";
 
 #if (GTK_MAJOR_VERSION == 4)
             kf->load_from_file(path, Glib::KeyFile::Flags::NONE);
@@ -265,14 +265,14 @@ mime_type_get_actions(const std::string_view mime_type)
     /* get all actions for this file type */
 
     // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-    get_actions(vfs::user_dirs->config_dir(), mime_type, actions);
+    get_actions(vfs::user::config(), mime_type, actions);
 
     // $XDG_DATA_HOME=[~/.local]/share/applications/mimeapps.list
-    const auto dir = vfs::user_dirs->data_dir() / "applications";
+    const auto dir = vfs::user::data() / "applications";
     get_actions(dir, mime_type, actions);
 
     // $XDG_DATA_DIRS=[/usr/[local/]share]/applications/mimeapps.list
-    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
         const auto sdir = sys_dir / "applications";
         get_actions(sdir, mime_type, actions);
@@ -557,7 +557,7 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
     }
 
     /* generate unique file name */
-    const auto dir = vfs::user_dirs->data_dir() / "applications";
+    const auto dir = vfs::user::data() / "applications";
     std::filesystem::create_directories(dir);
     std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
     std::string cust;
@@ -636,7 +636,7 @@ mime_type_locate_desktop_file(const std::filesystem::path& dir, const std::strin
 const std::optional<std::filesystem::path>
 mime_type_locate_desktop_file(const std::string_view desktop_id)
 {
-    const auto data_dir = vfs::user_dirs->data_dir();
+    const auto data_dir = vfs::user::data();
 
     const auto data_desktop = locate_desktop_file(data_dir, desktop_id);
     if (data_desktop)
@@ -644,7 +644,7 @@ mime_type_locate_desktop_file(const std::string_view desktop_id)
         return data_desktop.value();
     }
 
-    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
         const auto sys_desktop = locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)

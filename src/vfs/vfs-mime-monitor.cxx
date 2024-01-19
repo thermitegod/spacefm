@@ -80,7 +80,7 @@ on_mime_change_timer(void* user_data)
     (void)user_data;
 
     // ztd::logger::debug("MIME-UPDATE on_timer");
-    const auto data_dir = vfs::user_dirs->data_dir();
+    const auto data_dir = vfs::user::data();
     const std::string command1 = std::format("update-mime-database {}/mime", data_dir.string());
     ztd::logger::info("COMMAND({})", command1);
     Glib::spawn_command_line_async(command1);
@@ -103,7 +103,7 @@ vfs_mime_monitor()
         return;
     }
 
-    const auto path = vfs::user_dirs->data_dir() / "mime" / "packages";
+    const auto path = vfs::user::data() / "mime" / "packages";
     if (!std::filesystem::is_directory(path))
     {
         return;

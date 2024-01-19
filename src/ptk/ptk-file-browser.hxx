@@ -112,7 +112,7 @@ struct navigation_history_data
   private:
     std::vector<std::filesystem::path> forward_{};
     std::vector<std::filesystem::path> back_{};
-    std::filesystem::path current_{vfs::user_dirs->home_dir()};
+    std::filesystem::path current_{vfs::user::home()};
 };
 
 struct PtkFileBrowser

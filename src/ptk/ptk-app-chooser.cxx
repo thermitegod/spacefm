@@ -26,6 +26,8 @@
 
 #include <magic_enum.hpp>
 
+#include <glibmm.h>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -637,10 +639,10 @@ load_all_known_apps_thread(vfs::async_task* task)
 {
     GtkListStore* list = GTK_LIST_STORE(task->user_data());
 
-    const auto dir = vfs::user_dirs->data_dir() / "applications";
+    const auto dir = vfs::user::data() / "applications";
     load_all_apps_in_dir(dir, list, task);
 
-    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
         const auto sdir = sys_dir / "applications";
         load_all_apps_in_dir(sdir, list, task);

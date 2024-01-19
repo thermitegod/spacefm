@@ -1679,7 +1679,7 @@ namespace ptk::file_menu
 static const std::optional<std::filesystem::path>
 get_shared_desktop_file_location(const std::string_view name)
 {
-    for (const auto& sys_dir : vfs::user_dirs->system_data_dirs())
+    for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
         auto ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
         if (ret)
@@ -1728,7 +1728,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::edit:
         {
-            const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->name();
+            const auto path = vfs::user::data() / "applications" / desktop->name();
             if (!std::filesystem::exists(path))
             {
                 const auto check_share_desktop = vfs_mime_type_locate_desktop_file(desktop->name());
@@ -1778,13 +1778,13 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         case ptk::file_menu::app_job::edit_list:
         {
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
-            const auto path = vfs::user_dirs->config_dir() / "mimeapps.list";
+            const auto path = vfs::user::config() / "mimeapps.list";
             xset_edit(GTK_WIDGET(data->browser), path);
             break;
         }
         case ptk::file_menu::app_job::browse:
         {
-            const auto path = vfs::user_dirs->data_dir() / "applications";
+            const auto path = vfs::user::data() / "applications";
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
 
@@ -1816,12 +1816,12 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         break;
         case ptk::file_menu::app_job::edit_type:
         {
-            const auto mime_path = vfs::user_dirs->data_dir() / "mime" / "packages";
+            const auto mime_path = vfs::user::data() / "mime" / "packages";
             std::filesystem::create_directories(mime_path);
             std::filesystem::permissions(mime_path, std::filesystem::perms::owner_all);
             str2 = ztd::replace(mime_type->type(), "/", "-");
             str2 = std::format("{}.xml", str2);
-            const auto mime_file = vfs::user_dirs->data_dir() / "mime" / "packages" / str2;
+            const auto mime_file = vfs::user::data() / "mime" / "packages" / str2;
             if (!std::filesystem::exists(mime_file))
             {
                 std::string msg;
@@ -1978,7 +1978,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::browse_mime:
         {
-            const auto path = vfs::user_dirs->data_dir() / "mime" / "packages";
+            const auto path = vfs::user::data() / "mime" / "packages";
             std::filesystem::create_directories(path);
             std::filesystem::permissions(path, std::filesystem::perms::owner_all);
             if (data->browser)
@@ -1991,7 +1991,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
         }
         case ptk::file_menu::app_job::update:
         {
-            const auto data_dir = vfs::user_dirs->data_dir();
+            const auto data_dir = vfs::user::data();
             command = std::format("update-mime-database {}/mime", data_dir.string());
             ztd::logger::info("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
@@ -2102,7 +2102,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // *.desktop (missing)
     if (!desktop->name().empty())
     {
-        const auto path = vfs::user_dirs->data_dir() / "applications" / desktop->name();
+        const auto path = vfs::user::data() / "applications" / desktop->name();
         if (std::filesystem::exists(path))
         {
             str = ztd::replace(desktop->name(), ".desktop", "._desktop");
@@ -2136,7 +2136,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, PtkFileMenu* data, u32 butto
     // *.xml (missing)
     str = ztd::replace(type, "/", "-");
     str = std::format("{}.xml", str);
-    const auto usr_mime_path = vfs::user_dirs->data_dir() / "mime/packages" / str;
+    const auto usr_mime_path = vfs::user::data() / "mime/packages" / str;
     if (std::filesystem::exists(usr_mime_path))
     {
         str = ztd::replace(type, "/", "-");

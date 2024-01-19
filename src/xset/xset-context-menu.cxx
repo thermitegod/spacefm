@@ -116,8 +116,7 @@ xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* 
 
     if (icon_name.empty())
     {
-        const auto icon_file =
-            vfs::user_dirs->program_config_dir() / "scripts" / set->name / "icon";
+        const auto icon_file = vfs::program::config() / "scripts" / set->name / "icon";
         if (std::filesystem::exists(icon_file))
         {
             icon_name = icon_file;

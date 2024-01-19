@@ -63,13 +63,13 @@ get_cwd(GtkEntry* entry)
 
     if (text.empty())
     {
-        return vfs::user_dirs->home_dir();
+        return vfs::user::home();
     }
 
     const std::filesystem::path path = text;
     if (path.empty())
     {
-        return vfs::user_dirs->home_dir();
+        return vfs::user::home();
     }
 
     if (path.is_absolute())
@@ -81,7 +81,7 @@ get_cwd(GtkEntry* entry)
     //     ztd::logger::warn("entered path in pathbar is invalid: {}", path);
     // }
 
-    return vfs::user_dirs->home_dir();
+    return vfs::user::home();
 }
 
 static bool

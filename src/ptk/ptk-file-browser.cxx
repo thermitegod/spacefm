@@ -3442,7 +3442,7 @@ void
 PtkFileBrowser::go_home() noexcept
 {
     this->focus_folder_view();
-    this->chdir(vfs::user_dirs->home_dir());
+    this->chdir(vfs::user::home());
 }
 
 void
@@ -3456,7 +3456,7 @@ PtkFileBrowser::go_default() noexcept
     }
     else
     {
-        this->chdir(vfs::user_dirs->home_dir());
+        this->chdir(vfs::user::home());
     }
 }
 
@@ -3650,7 +3650,7 @@ PtkFileBrowser::new_tab() noexcept
     }
     else
     {
-        dir_path = vfs::user_dirs->home_dir();
+        dir_path = vfs::user::home();
     }
 
     if (!std::filesystem::is_directory(dir_path))
@@ -3678,7 +3678,7 @@ PtkFileBrowser::new_tab_here() noexcept
         }
         else
         {
-            dir_path = vfs::user_dirs->home_dir();
+            dir_path = vfs::user::home();
         }
     }
     if (!std::filesystem::is_directory(dir_path))
@@ -3730,7 +3730,7 @@ PtkFileBrowser::close_tab() noexcept
         }
         else
         {
-            path = vfs::user_dirs->home_dir();
+            path = vfs::user::home();
         }
         main_window->new_tab(path);
         PtkFileBrowser* a_browser =

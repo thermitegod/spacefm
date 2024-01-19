@@ -15,149 +15,140 @@
 
 #include <filesystem>
 
-#include <memory>
+#include <gtkmm.h>
+#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-user-dirs.hxx"
 
-const vfs::user_dirs_t vfs::user_dirs = std::make_unique<vfs::impl::user_dirs>();
-
-vfs::impl::user_dirs::user_dirs()
+const std::filesystem::path
+vfs::user::desktop() noexcept
 {
-    // typechange from std::string to std::filesystem::path
-    for (const auto& sys_data : Glib::get_system_data_dirs())
-    {
-        this->sys_data_.emplace_back(sys_data);
-    }
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DESKTOP);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::desktop_dir() const noexcept
+const std::filesystem::path
+vfs::user::documents() noexcept
 {
-    return this->user_desktop_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::DOCUMENTS);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOCUMENTS);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::documents_dir() const noexcept
+const std::filesystem::path
+vfs::user::download() noexcept
 {
-    return this->user_documents_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::DOWNLOAD);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOWNLOAD);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::download_dir() const noexcept
+const std::filesystem::path
+vfs::user::music() noexcept
 {
-    return this->user_download_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::MUSIC);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_MUSIC);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::music_dir() const noexcept
+const std::filesystem::path
+vfs::user::pictures() noexcept
 {
-    return this->user_music_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::PICTURES);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PICTURES);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::pictures_dir() const noexcept
+const std::filesystem::path
+vfs::user::public_share() noexcept
 {
-    return this->user_pictures_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PUBLIC_SHARE);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::public_share_dir() const noexcept
+const std::filesystem::path
+vfs::user::templates() noexcept
 {
-    return this->user_share_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_TEMPLATES);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::template_dir() const noexcept
+const std::filesystem::path
+vfs::user::videos() noexcept
 {
-    return this->user_template_;
+#if (GTK_MAJOR_VERSION == 4)
+    return Glib::get_user_special_dir(Glib::UserDirectory::VIDEOS);
+#elif (GTK_MAJOR_VERSION == 3)
+    return Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_VIDEOS);
+#endif
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::videos_dir() const noexcept
+const std::filesystem::path
+vfs::user::home() noexcept
 {
-    return this->user_videos_;
+    return Glib::get_home_dir();
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::home_dir() const noexcept
+const std::filesystem::path
+vfs::user::cache() noexcept
 {
-    return this->user_home_;
+    return Glib::get_user_cache_dir();
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::cache_dir() const noexcept
+const std::filesystem::path
+vfs::user::data() noexcept
 {
-    return this->user_cache_;
+    return Glib::get_user_data_dir();
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::data_dir() const noexcept
+const std::filesystem::path
+vfs::user::config() noexcept
 {
-    return this->user_data_;
+    return Glib::get_user_config_dir();
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::config_dir() const noexcept
+const std::filesystem::path
+vfs::user::runtime() noexcept
 {
-    return this->user_config_;
+    return Glib::get_user_runtime_dir();
 }
 
-const std::filesystem::path&
-vfs::impl::user_dirs::runtime_dir() const noexcept
-{
-    return this->user_runtime_;
-}
+std::filesystem::path global_config_path = vfs::user::config() / PACKAGE_NAME;
 
-const std::span<const std::filesystem::path>
-vfs::impl::user_dirs::system_data_dirs() const noexcept
+const std::filesystem::path
+vfs::program::config() noexcept
 {
-    return this->sys_data_;
-}
-
-const std::filesystem::path&
-vfs::impl::user_dirs::current_dir() const noexcept
-{
-    return this->current_;
-}
-
-void
-vfs::impl::user_dirs::program_config_dir(const std::filesystem::path& config_dir) noexcept
-{
-    if (!std::filesystem::exists(config_dir))
-    {
-        std::filesystem::create_directories(config_dir);
-        std::filesystem::permissions(config_dir, std::filesystem::perms::owner_all);
-    }
-    this->program_config_ = std::filesystem::canonical(config_dir);
-}
-
-const std::filesystem::path&
-vfs::impl::user_dirs::program_config_dir() const noexcept
-{
-    return this->program_config_;
-}
-
-const std::filesystem::path&
-vfs::impl::user_dirs::program_tmp_dir() const noexcept
-{
-    if (!std::filesystem::exists(this->tmp_))
-    {
-        std::filesystem::create_directories(this->tmp_);
-        std::filesystem::permissions(this->tmp_, std::filesystem::perms::owner_all);
-    }
-    return this->tmp_;
+    return global_config_path;
 }
 
 void
-vfs::impl::user_dirs::program_tmp_dir(const std::filesystem::path& tmp_dir) noexcept
+vfs::program::config(const std::filesystem::path& path) noexcept
 {
-    this->tmp_ = tmp_dir;
-    if (!std::filesystem::exists(this->tmp_))
-    {
-        std::filesystem::create_directories(this->tmp_);
-        std::filesystem::permissions(this->tmp_, std::filesystem::perms::owner_all);
-    }
+    global_config_path = path;
+}
+
+const std::filesystem::path
+vfs::program::tmp() noexcept
+{
+    return vfs::user::cache() / PACKAGE_NAME;
 }

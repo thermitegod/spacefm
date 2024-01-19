@@ -17,105 +17,120 @@
 
 #include <filesystem>
 
-#include <vector>
-
-#include <span>
-
-#include <memory>
-
-#include <gtkmm.h>
-#include <glibmm.h>
-
-namespace vfs
+namespace vfs::user
 {
-namespace impl
+/**
+ * @brief User desktop directory
+ *
+ * @return The XDG directory XDG_DESKTOP_DIR.
+ */
+[[nodiscard]] const std::filesystem::path desktop() noexcept;
+
+/**
+ * @brief User documents directory
+ *
+ * @return The XDG directory XDG_DOCUMENTS_DIR.
+ */
+[[nodiscard]] const std::filesystem::path documents() noexcept;
+
+/**
+ * @brief User download directory
+ *
+ * @return The XDG directory XDG_DOWNLOAD_DIR.
+ */
+[[nodiscard]] const std::filesystem::path download() noexcept;
+
+/**
+ * @brief User music directory
+ *
+ * @return The XDG directory XDG_MUSIC_DIR.
+ */
+[[nodiscard]] const std::filesystem::path music() noexcept;
+
+/**
+ * @brief User pictures directory
+ *
+ * @return The XDG directory XDG_PICTURES_DIR.
+ */
+[[nodiscard]] const std::filesystem::path pictures() noexcept;
+
+/**
+ * @brief User share directory
+ *
+ * @return The XDG directory XDG_PUBLICSHARE_DIR.
+ */
+[[nodiscard]] const std::filesystem::path public_share() noexcept;
+
+/**
+ * @brief User templates directory
+ *
+ * @return The XDG directory XDG_TEMPLATES_DIR.
+ */
+[[nodiscard]] const std::filesystem::path templates() noexcept;
+
+/**
+ * @brief User videos directory
+ *
+ * @return The XDG directory XDG_VIDEOS_DIR.
+ */
+[[nodiscard]] const std::filesystem::path videos() noexcept;
+
+/**
+ * @brief User home directory
+ *
+ * @return The users home directory.
+ */
+[[nodiscard]] const std::filesystem::path home() noexcept;
+
+/**
+ * @brief User cache directory
+ *
+ * @return The XDG directory XDG_CACHE_HOME.
+ */
+[[nodiscard]] const std::filesystem::path cache() noexcept;
+
+/**
+ * @brief User data directory
+ *
+ * @return The XDG directory XDG_DATA_HOME.
+ */
+[[nodiscard]] const std::filesystem::path data() noexcept;
+
+/**
+ * @brief User config directory
+ *
+ * @return The XDG directory XDG_CONFIG_HOME.
+ */
+[[nodiscard]] const std::filesystem::path config() noexcept;
+
+/**
+ * @brief User runtime directory
+ *
+ * @return The XDG directory XDG_RUNTIME_DIR.
+ */
+[[nodiscard]] const std::filesystem::path runtime() noexcept;
+} // namespace vfs::user
+
+namespace vfs::program
 {
-struct user_dirs
-{
-    user_dirs();
+/**
+ * @brief Set the Programs config directory
+ *
+ * @param[in] path Set the path for the programs config directory
+ */
+void config(const std::filesystem::path& path) noexcept;
 
-    const std::filesystem::path& desktop_dir() const noexcept;
-    const std::filesystem::path& documents_dir() const noexcept;
-    const std::filesystem::path& download_dir() const noexcept;
-    const std::filesystem::path& music_dir() const noexcept;
-    const std::filesystem::path& pictures_dir() const noexcept;
-    const std::filesystem::path& public_share_dir() const noexcept;
-    const std::filesystem::path& template_dir() const noexcept;
-    const std::filesystem::path& videos_dir() const noexcept;
+/**
+ * @brief Programs config directory
+ *
+ * @return The Programs config directory.
+ */
+[[nodiscard]] const std::filesystem::path config() noexcept;
 
-    const std::filesystem::path& home_dir() const noexcept;
-    const std::filesystem::path& cache_dir() const noexcept;
-    const std::filesystem::path& data_dir() const noexcept;
-    const std::filesystem::path& config_dir() const noexcept;
-    const std::filesystem::path& runtime_dir() const noexcept;
-
-    const std::span<const std::filesystem::path> system_data_dirs() const noexcept;
-
-    const std::filesystem::path& current_dir() const noexcept;
-
-    void program_config_dir(const std::filesystem::path& config_dir) noexcept;
-    const std::filesystem::path& program_config_dir() const noexcept;
-
-    void program_tmp_dir(const std::filesystem::path& tmp_dir) noexcept;
-    const std::filesystem::path& program_tmp_dir() const noexcept;
-
-  private:
-    // GUserDirectory
-#if (GTK_MAJOR_VERSION == 4)
-    const std::filesystem::path user_desktop_{
-        Glib::get_user_special_dir(Glib::UserDirectory::DESKTOP)};
-    const std::filesystem::path user_documents_{
-        Glib::get_user_special_dir(Glib::UserDirectory::DOCUMENTS)};
-    const std::filesystem::path user_download_{
-        Glib::get_user_special_dir(Glib::UserDirectory::DOWNLOAD)};
-    const std::filesystem::path user_music_{Glib::get_user_special_dir(Glib::UserDirectory::MUSIC)};
-    const std::filesystem::path user_pictures_{
-        Glib::get_user_special_dir(Glib::UserDirectory::PICTURES)};
-    const std::filesystem::path user_share_{
-        Glib::get_user_special_dir(Glib::UserDirectory::PUBLIC_SHARE)};
-    const std::filesystem::path user_template_{
-        Glib::get_user_special_dir(Glib::UserDirectory::TEMPLATES)};
-    const std::filesystem::path user_videos_{
-        Glib::get_user_special_dir(Glib::UserDirectory::VIDEOS)};
-#elif (GTK_MAJOR_VERSION == 3)
-    const std::filesystem::path user_desktop_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DESKTOP)};
-    const std::filesystem::path user_documents_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOCUMENTS)};
-    const std::filesystem::path user_download_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_DOWNLOAD)};
-    const std::filesystem::path user_music_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_MUSIC)};
-    const std::filesystem::path user_pictures_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PICTURES)};
-    const std::filesystem::path user_share_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_PUBLIC_SHARE)};
-    const std::filesystem::path user_template_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_TEMPLATES)};
-    const std::filesystem::path user_videos_{
-        Glib::get_user_special_dir(Glib::UserDirectory::USER_DIRECTORY_VIDEOS)};
-#endif
-
-    // User
-    const std::filesystem::path user_home_{Glib::get_home_dir()};
-    const std::filesystem::path user_cache_{Glib::get_user_cache_dir()};
-    const std::filesystem::path user_data_{Glib::get_user_data_dir()};
-    const std::filesystem::path user_config_{Glib::get_user_config_dir()};
-    const std::filesystem::path user_runtime_{Glib::get_user_runtime_dir()};
-
-    // System
-    std::vector<std::filesystem::path> sys_data_{};
-
-    // Current runtime dir
-    const std::filesystem::path current_{Glib::get_current_dir()};
-
-    // Program config dir
-    std::filesystem::path program_config_{this->user_config_ / PACKAGE_NAME};
-    std::filesystem::path tmp_{this->user_cache_ / PACKAGE_NAME};
-};
-} // namespace impl
-
-using user_dirs_t = std::unique_ptr<vfs::impl::user_dirs>;
-
-const extern user_dirs_t user_dirs;
-} // namespace vfs
+/**
+ * @brief Programs tmp directory
+ *
+ * @return The Programs tmp directory.
+ */
+[[nodiscard]] const std::filesystem::path tmp() noexcept;
+} // namespace vfs::program

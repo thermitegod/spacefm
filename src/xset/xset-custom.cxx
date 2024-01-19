@@ -45,7 +45,7 @@ xset_custom_new_name()
         setname = std::format("cstm_{}", ztd::randhex());
         if (!xset_is(setname))
         {
-            const auto path1 = vfs::user_dirs->program_config_dir() / "scripts" / setname;
+            const auto path1 = vfs::program::config() / "scripts" / setname;
 
             // only use free xset name if no aux data dirs exist for that name too.
             if (!std::filesystem::exists(path1))

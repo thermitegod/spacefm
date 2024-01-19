@@ -783,7 +783,7 @@ MainWindow::show_panels() noexcept
                         }
                         else
                         {
-                            folder_path = vfs::user_dirs->home_dir();
+                            folder_path = vfs::user::home();
                         }
                         this->new_tab(folder_path);
                         tab_added = true;
@@ -818,7 +818,7 @@ MainWindow::show_panels() noexcept
                     }
                     else
                     {
-                        folder_path = vfs::user_dirs->home_dir();
+                        folder_path = vfs::user::home();
                     }
                     this->new_tab(folder_path);
                 }

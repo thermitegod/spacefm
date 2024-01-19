@@ -582,7 +582,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
     {
         // custom 'icon' file?
         const std::filesystem::path icon_file =
-            vfs::user_dirs->program_config_dir() / "scripts" / set->name / "icon";
+            vfs::program::config() / "scripts" / set->name / "icon";
         if (std::filesystem::exists(icon_file))
         {
             icon_name = icon_file;

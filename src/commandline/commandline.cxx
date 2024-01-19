@@ -43,7 +43,13 @@ run_commandline(const commandline_opt_data_t& opt)
 
     if (!opt->config_dir.empty())
     {
-        vfs::user_dirs->program_config_dir(opt->config_dir);
+        if (!std::filesystem::exists(opt->config_dir))
+        {
+            std::filesystem::create_directories(opt->config_dir);
+            std::filesystem::permissions(opt->config_dir, std::filesystem::perms::owner_all);
+        }
+
+        vfs::program::config(opt->config_dir);
     }
 
     if (opt->git_backed_settings != app_settings.git_backed_settings())

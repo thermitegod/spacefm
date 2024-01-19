@@ -58,7 +58,7 @@
 void
 load_settings()
 {
-    const auto settings_config_dir = vfs::user_dirs->program_config_dir();
+    const auto settings_config_dir = vfs::program::config();
 
     app_settings.load_saved_tabs(true);
 
@@ -225,7 +225,7 @@ save_settings()
     }
 
     /* save settings */
-    const auto settings_config_dir = vfs::user_dirs->program_config_dir();
+    const auto settings_config_dir = vfs::program::config();
     if (!std::filesystem::exists(settings_config_dir))
     {
         std::filesystem::create_directories(settings_config_dir);
