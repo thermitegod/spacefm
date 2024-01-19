@@ -36,7 +36,7 @@
 
 namespace vfs
 {
-class desktop
+struct desktop
 {
   public:
     desktop() = delete;

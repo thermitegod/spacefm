@@ -24,9 +24,8 @@
 
 #include <unordered_map>
 
-class TerminalHandler
+struct TerminalHandler
 {
-  public:
     TerminalHandler() = delete;
     TerminalHandler(const std::string_view name, const std::string_view exec);
 
@@ -35,9 +34,8 @@ class TerminalHandler
     std::string exec;
 };
 
-class TerminalHandlers
+struct TerminalHandlers
 {
-  public:
     TerminalHandlers();
 
     const std::vector<std::string> get_terminal_args(const std::string_view terminal);
