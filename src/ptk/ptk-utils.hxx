@@ -17,8 +17,22 @@
 
 #include <gtkmm.h>
 
+#include <ztd/ztd.hxx>
+
 #if (GTK_MAJOR_VERSION == 3)
 #define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK)
 #endif
 
 void ptk_set_window_icon(GtkWindow* win);
+
+namespace ptk::utils
+{
+/**
+ *  @brief stamp
+ *
+ *  - Use std::mt19937 to get a random i32 between (0, INT_MAX)
+ *
+ * @return a random i32
+ */
+[[nodiscard]] i32 stamp() noexcept;
+} // namespace ptk::utils

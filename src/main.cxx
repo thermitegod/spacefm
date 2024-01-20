@@ -21,8 +21,6 @@
 
 #include <memory>
 
-#include <chrono>
-
 #include <system_error>
 
 #include <cassert>
@@ -291,11 +289,6 @@ main(int argc, char* argv[])
 
     // Start a thread to receive socket messages
     const std::jthread socket_server(socket_server_thread);
-
-    // Seed RNG
-    // using the current time is a good enough seed
-    const auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    std::srand(seed);
 
     // Initialize vfs system
     vfs_volume_init();

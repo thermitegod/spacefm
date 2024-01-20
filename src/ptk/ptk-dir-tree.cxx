@@ -41,6 +41,7 @@
 #include "vfs/vfs-utils.hxx"
 
 #include "ptk/natsort/strnatcmp.h"
+#include "ptk/ptk-utils.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"
 
@@ -149,6 +150,7 @@ ptk_dir_tree_init(PtkDirTree* tree)
     tree->root->n_children = 1;
     const auto child = PtkDirTree::Node::create(tree, tree->root, "/");
     tree->root->children = child;
+    tree->stamp = ptk::utils::stamp();
 }
 
 static void

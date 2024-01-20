@@ -32,11 +32,12 @@
 
 #include "compat/type-conversion.hxx"
 
+#include "vfs/vfs-file.hxx"
+
 #include "ptk/natsort/strnatcmp.h"
+#include "ptk/ptk-utils.hxx"
 
 #include "ptk/ptk-file-list.hxx"
-
-#include "vfs/vfs-file.hxx"
 
 static void ptk_file_list_init(PtkFileList* list);
 
@@ -173,6 +174,7 @@ ptk_file_list_init(PtkFileList* list)
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
     list->sort_col = ptk::file_list::column::name;
+    list->stamp = ptk::utils::stamp();
 }
 
 static void

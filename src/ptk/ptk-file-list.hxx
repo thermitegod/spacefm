@@ -80,7 +80,7 @@ struct PtkFileList
     ptk::file_list::sort_dir sort_dir{ptk::file_list::sort_dir::mixed};
 
     // Random integer to check whether an iter belongs to our model
-    const i32 stamp{std::rand()};
+    i32 stamp{0};
 
   public:
     void set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept;

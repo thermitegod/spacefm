@@ -13,11 +13,28 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <limits>
+#include <random>
+
 #include <gtkmm.h>
 #include <glibmm.h>
+
+#include <ztd/ztd.hxx>
+
+#include "ptk/ptk-utils.hxx"
 
 void
 ptk_set_window_icon(GtkWindow* window)
 {
     gtk_window_set_icon_name(GTK_WINDOW(window), "spacefm");
+}
+
+i32
+ptk::utils::stamp() noexcept
+{
+    std::mt19937 rng;
+    rng.seed(std::random_device{}());
+    std::uniform_int_distribution<i32> dist(0, std::numeric_limits<i32>::max());
+
+    return dist(rng);
 }
