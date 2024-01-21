@@ -50,4 +50,4 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
 
 using commandline_opt_data_t = std::shared_ptr<commandline_opt_data>;
 
-void setup_commandline(CLI::App& app, const commandline_opt_data_t& opt);
+void setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept;

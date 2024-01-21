@@ -363,6 +363,9 @@ sources = files(
   'src/commandline/socket/set/subcommands.cxx',
   'src/commandline/socket/set-task/subcommands.cxx',
 
+  'src/socket/commands.cxx',
+  'src/socket/server.cxx',
+
   'src/xset/xset.cxx',
   'src/xset/xset-context-menu.cxx',
   'src/xset/xset-custom.cxx',
@@ -380,9 +383,6 @@ sources = files(
   'src/settings/config-save.cxx',
 
   'src/settings/upgrade/config-upgrade.cxx',
-
-  'src/socket/commands.cxx',
-  'src/socket/server.cxx',
 
   'src/utils/memory.cxx',
   'src/utils/shell_quote.cxx',

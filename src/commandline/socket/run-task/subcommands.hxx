@@ -21,13 +21,13 @@
 
 namespace commandline::socket::run_task
 {
-void cmd(CLI::App* app, const socket_subcommand_data_t& opt);
-void edit(CLI::App* app, const socket_subcommand_data_t& opt);
-void mount(CLI::App* app, const socket_subcommand_data_t& opt);
-void umount(CLI::App* app, const socket_subcommand_data_t& opt);
-void copy(CLI::App* app, const socket_subcommand_data_t& opt);
-void move(CLI::App* app, const socket_subcommand_data_t& opt);
-void link(CLI::App* app, const socket_subcommand_data_t& opt);
-void del(CLI::App* app, const socket_subcommand_data_t& opt);
-void trash(CLI::App* app, const socket_subcommand_data_t& opt);
+void cmd(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void edit(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void mount(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void umount(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void copy(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void move(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void link(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void del(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void trash(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 } // namespace commandline::socket::run_task

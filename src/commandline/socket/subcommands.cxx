@@ -30,7 +30,7 @@
  */
 
 void
-setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("set", "Sets a property");
 
@@ -96,7 +96,7 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("get", "Gets a property");
 
@@ -161,7 +161,7 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("set-task", "Sets a task property");
 
@@ -191,7 +191,7 @@ setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("get-task", "Gets a task property");
 
@@ -226,7 +226,7 @@ setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_run_task(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_run_task(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("run-task", "Starts a new task");
 
@@ -252,7 +252,7 @@ setup_subcommand_run_task(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub =
         app->add_subcommand("emit-key", "Activates a menu item by emitting its shortcut key");
@@ -270,7 +270,7 @@ setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("activate", "Runs custom command or shows submenu named NAME");
 
@@ -285,7 +285,7 @@ setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("add-event", "Add asynchronous handler COMMAND to EVENT");
 
@@ -302,7 +302,7 @@ setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub =
         app->add_subcommand("replace-event",
@@ -321,7 +321,7 @@ setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& op
  */
 
 void
-setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("remove-event", "Remove handler COMMAND from EVENT");
 
@@ -338,7 +338,7 @@ setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt
  */
 
 void
-setup_subcommand_help(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_help(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("help", "Show socket help");
 
@@ -351,7 +351,7 @@ setup_subcommand_help(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-setup_subcommand_ping(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_ping(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("ping", "Test socket read/write");
 

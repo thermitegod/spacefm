@@ -39,4 +39,4 @@ struct socket_subcommand_data
 
 using socket_subcommand_data_t = std::shared_ptr<socket_subcommand_data>;
 
-void setup_subcommand_socket(CLI::App& app);
+void setup_subcommand_socket(CLI::App& app) noexcept;

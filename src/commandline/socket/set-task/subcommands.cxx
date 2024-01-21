@@ -24,7 +24,7 @@
  */
 
 void
-commandline::socket::set_task::icon(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::icon(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("icon", "Set task icon");
 
@@ -39,7 +39,7 @@ commandline::socket::set_task::icon(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::set_task::count(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::count(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("count", "Set task count");
 
@@ -54,7 +54,8 @@ commandline::socket::set_task::count(CLI::App* app, const socket_subcommand_data
  */
 
 void
-commandline::socket::set_task::directory(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::directory(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("directory", "Set task directory");
 
@@ -69,7 +70,7 @@ commandline::socket::set_task::directory(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set_task::from(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::from(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("from", "Set task from");
 
@@ -84,7 +85,7 @@ commandline::socket::set_task::from(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::set_task::item(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::item(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("item", "Set task item");
 
@@ -99,7 +100,7 @@ commandline::socket::set_task::item(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::set_task::to(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::to(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("to", "Set task to");
 
@@ -114,7 +115,7 @@ commandline::socket::set_task::to(CLI::App* app, const socket_subcommand_data_t&
  */
 
 void
-commandline::socket::set_task::progress(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::progress(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("progress", "Set task progress");
 
@@ -129,7 +130,7 @@ commandline::socket::set_task::progress(CLI::App* app, const socket_subcommand_d
  */
 
 void
-commandline::socket::set_task::total(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::total(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("total", "Set task total");
 
@@ -144,7 +145,7 @@ commandline::socket::set_task::total(CLI::App* app, const socket_subcommand_data
  */
 
 void
-commandline::socket::set_task::curspeed(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::curspeed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("curspeed", "Set task curspeed");
 
@@ -159,7 +160,8 @@ commandline::socket::set_task::curspeed(CLI::App* app, const socket_subcommand_d
  */
 
 void
-commandline::socket::set_task::curremain(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::curremain(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("curremain", "Set task curremain");
 
@@ -174,7 +176,7 @@ commandline::socket::set_task::curremain(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set_task::avgspeed(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::avgspeed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("avgspeed", "Set task avgspeed");
 
@@ -187,7 +189,8 @@ commandline::socket::set_task::avgspeed(CLI::App* app, const socket_subcommand_d
  */
 
 void
-commandline::socket::set_task::avgremain(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::avgremain(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("avgremain", "Set task avgremain");
 
@@ -202,7 +205,8 @@ commandline::socket::set_task::avgremain(CLI::App* app, const socket_subcommand_
  */
 
 void
-setup_subcommand_set_task_queue_state_run(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_task_queue_state_run(CLI::App* app,
+                                          const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("run", "Set task property run");
 
@@ -211,7 +215,8 @@ setup_subcommand_set_task_queue_state_run(CLI::App* app, const socket_subcommand
 }
 
 void
-setup_subcommand_set_task_queue_state_pause(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_task_queue_state_pause(CLI::App* app,
+                                            const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("pause", "Set task property pause");
 
@@ -220,7 +225,8 @@ setup_subcommand_set_task_queue_state_pause(CLI::App* app, const socket_subcomma
 }
 
 void
-setup_subcommand_set_task_queue_state_queue(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_task_queue_state_queue(CLI::App* app,
+                                            const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("queue", "Set task property queue");
 
@@ -229,7 +235,8 @@ setup_subcommand_set_task_queue_state_queue(CLI::App* app, const socket_subcomma
 }
 
 void
-setup_subcommand_set_task_queue_state_queued(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_task_queue_state_queued(CLI::App* app,
+                                             const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("queued", "Set task property queued");
 
@@ -238,7 +245,8 @@ setup_subcommand_set_task_queue_state_queued(CLI::App* app, const socket_subcomm
 }
 
 void
-setup_subcommand_set_task_queue_state_stop(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_task_queue_state_stop(CLI::App* app,
+                                           const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("stop", "Set task property stop");
 
@@ -247,7 +255,8 @@ setup_subcommand_set_task_queue_state_stop(CLI::App* app, const socket_subcomman
 }
 
 void
-commandline::socket::set_task::queue_state(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set_task::queue_state(CLI::App* app,
+                                           const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("queue-state", "Set task queue-state");
 

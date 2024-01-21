@@ -24,7 +24,7 @@
  */
 
 void
-commandline::socket::get_task::icon(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::icon(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("icon", "Get task icon");
 
@@ -37,7 +37,7 @@ commandline::socket::get_task::icon(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::get_task::count(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::count(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("count", "Get task count");
 
@@ -50,7 +50,8 @@ commandline::socket::get_task::count(CLI::App* app, const socket_subcommand_data
  */
 
 void
-commandline::socket::get_task::directory(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::directory(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("directory", "Get task directory");
 
@@ -63,7 +64,7 @@ commandline::socket::get_task::directory(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::get_task::from(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::from(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("from", "Get task from");
 
@@ -76,7 +77,7 @@ commandline::socket::get_task::from(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::get_task::item(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::item(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("item", "Get task item");
 
@@ -89,7 +90,7 @@ commandline::socket::get_task::item(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::get_task::to(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::to(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("to", "Get task to");
 
@@ -102,7 +103,7 @@ commandline::socket::get_task::to(CLI::App* app, const socket_subcommand_data_t&
  */
 
 void
-commandline::socket::get_task::progress(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::progress(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("progress", "Get task progress");
 
@@ -115,7 +116,7 @@ commandline::socket::get_task::progress(CLI::App* app, const socket_subcommand_d
  */
 
 void
-commandline::socket::get_task::total(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::total(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("total", "Get task total");
 
@@ -128,7 +129,7 @@ commandline::socket::get_task::total(CLI::App* app, const socket_subcommand_data
  */
 
 void
-commandline::socket::get_task::curspeed(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::curspeed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("curspeed", "Get task curspeed");
 
@@ -141,7 +142,8 @@ commandline::socket::get_task::curspeed(CLI::App* app, const socket_subcommand_d
  */
 
 void
-commandline::socket::get_task::curremain(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::curremain(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("curremain", "Get task curremain");
 
@@ -154,7 +156,7 @@ commandline::socket::get_task::curremain(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::get_task::avgspeed(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::avgspeed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("avgspeed", "Get task avgspeed");
 
@@ -167,7 +169,8 @@ commandline::socket::get_task::avgspeed(CLI::App* app, const socket_subcommand_d
  */
 
 void
-commandline::socket::get_task::avgremain(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::avgremain(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("avgremain", "Get task avgremain");
 
@@ -180,7 +183,7 @@ commandline::socket::get_task::avgremain(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::get_task::elapsed(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::elapsed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("elapsed", "Get task elapsed");
 
@@ -193,7 +196,7 @@ commandline::socket::get_task::elapsed(CLI::App* app, const socket_subcommand_da
  */
 
 void
-commandline::socket::get_task::started(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::started(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("started", "Get task started");
 
@@ -206,7 +209,7 @@ commandline::socket::get_task::started(CLI::App* app, const socket_subcommand_da
  */
 
 void
-commandline::socket::get_task::status(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::status(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("status", "Get task status");
 
@@ -219,7 +222,8 @@ commandline::socket::get_task::status(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-commandline::socket::get_task::queue_state(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::get_task::queue_state(CLI::App* app,
+                                           const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("queue-state", "Get task queue-state");
 

@@ -24,7 +24,7 @@
  */
 
 void
-setup_subcommand_value_true(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_value_true(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("true", "Set value true");
 
@@ -33,7 +33,7 @@ setup_subcommand_value_true(CLI::App* app, const socket_subcommand_data_t& opt)
 }
 
 void
-setup_subcommand_value_false(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_value_false(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("false", "Set value false");
 
@@ -46,7 +46,7 @@ setup_subcommand_value_false(CLI::App* app, const socket_subcommand_data_t& opt)
  */
 
 void
-commandline::socket::set::window_size(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_size(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-size", "Set property window-size");
 
@@ -61,7 +61,8 @@ commandline::socket::set::window_size(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-commandline::socket::set::window_position(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_position(CLI::App* app,
+                                          const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-position", "Set property window-position");
 
@@ -76,7 +77,8 @@ commandline::socket::set::window_position(CLI::App* app, const socket_subcommand
  */
 
 void
-commandline::socket::set::window_maximized(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_maximized(CLI::App* app,
+                                           const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-maximized", "Set property window-maximized");
 
@@ -94,7 +96,8 @@ commandline::socket::set::window_maximized(CLI::App* app, const socket_subcomman
  */
 
 void
-commandline::socket::set::window_fullscreen(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_fullscreen(CLI::App* app,
+                                            const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-fullscreen", "Set property window-fullscreen");
 
@@ -112,7 +115,8 @@ commandline::socket::set::window_fullscreen(CLI::App* app, const socket_subcomma
  */
 
 void
-commandline::socket::set::window_vslider_top(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_vslider_top(CLI::App* app,
+                                             const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-vslider-top", "Set property window-vslider-top");
 
@@ -127,7 +131,8 @@ commandline::socket::set::window_vslider_top(CLI::App* app, const socket_subcomm
  */
 
 void
-commandline::socket::set::window_vslider_bottom(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_vslider_bottom(CLI::App* app,
+                                                const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-vslider-bottom", "Set property window-vslider-bottom");
 
@@ -142,7 +147,8 @@ commandline::socket::set::window_vslider_bottom(CLI::App* app, const socket_subc
  */
 
 void
-commandline::socket::set::window_hslider(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_hslider(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-hslider", "Set property window-hslider");
 
@@ -157,7 +163,8 @@ commandline::socket::set::window_hslider(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::window_tslider(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::window_tslider(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("window-tslider", "Set property window-tslider");
 
@@ -172,7 +179,7 @@ commandline::socket::set::window_tslider(CLI::App* app, const socket_subcommand_
  */
 
 void
-setup_subcommand_focused_panel_prev(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_prev(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("prev", "switch focus to the prev panel");
 
@@ -181,7 +188,7 @@ setup_subcommand_focused_panel_prev(CLI::App* app, const socket_subcommand_data_
 }
 
 void
-setup_subcommand_focused_panel_next(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_next(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("next", "switch focus to the next panel");
 
@@ -190,7 +197,7 @@ setup_subcommand_focused_panel_next(CLI::App* app, const socket_subcommand_data_
 }
 
 void
-setup_subcommand_focused_panel_hide(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_hide(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("hide", "hide the focused panel");
 
@@ -199,7 +206,7 @@ setup_subcommand_focused_panel_hide(CLI::App* app, const socket_subcommand_data_
 }
 
 void
-setup_subcommand_focused_panel_panel1(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_panel1(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel1", "focus panel 1");
 
@@ -208,7 +215,7 @@ setup_subcommand_focused_panel_panel1(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_focused_panel_panel2(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_panel2(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel2", "focus panel 2");
 
@@ -217,7 +224,7 @@ setup_subcommand_focused_panel_panel2(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_focused_panel_panel3(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_panel3(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel3", "focus panel 3");
 
@@ -226,7 +233,7 @@ setup_subcommand_focused_panel_panel3(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_focused_panel_panel4(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_panel_panel4(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel4", "focus panel 4");
 
@@ -235,7 +242,7 @@ setup_subcommand_focused_panel_panel4(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-commandline::socket::set::focused_panel(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::focused_panel(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("focused-panel", "Set property focused-panel");
 
@@ -258,7 +265,7 @@ commandline::socket::set::focused_panel(CLI::App* app, const socket_subcommand_d
  */
 
 void
-setup_subcommand_focused_pane_filelist(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_pane_filelist(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("filelist", "focus filelist");
 
@@ -267,7 +274,7 @@ setup_subcommand_focused_pane_filelist(CLI::App* app, const socket_subcommand_da
 }
 
 void
-setup_subcommand_focused_pane_devices(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_pane_devices(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("devices", "focus devices");
 
@@ -276,7 +283,7 @@ setup_subcommand_focused_pane_devices(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_focused_pane_dirtree(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_pane_dirtree(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("dirtree", "focus dirtree");
 
@@ -285,7 +292,7 @@ setup_subcommand_focused_pane_dirtree(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_focused_pane_pathbar(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_focused_pane_pathbar(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("pathbar", "focus pathbar");
 
@@ -294,7 +301,7 @@ setup_subcommand_focused_pane_pathbar(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-commandline::socket::set::focused_pane(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::focused_pane(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("focused-pane", "Set property focused-pane");
 
@@ -314,7 +321,7 @@ commandline::socket::set::focused_pane(CLI::App* app, const socket_subcommand_da
  */
 
 void
-setup_subcommand_current_tab_prev(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_prev(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("prev", "Goto prev tab");
 
@@ -323,7 +330,7 @@ setup_subcommand_current_tab_prev(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_next(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_next(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("next", "Goto next tab");
 
@@ -332,7 +339,7 @@ setup_subcommand_current_tab_next(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_close(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_close(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("close", "Close current tab");
 
@@ -341,7 +348,7 @@ setup_subcommand_current_tab_close(CLI::App* app, const socket_subcommand_data_t
 }
 
 void
-setup_subcommand_current_tab_restore(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_restore(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("restore", "Restore last closed tab");
 
@@ -350,7 +357,7 @@ setup_subcommand_current_tab_restore(CLI::App* app, const socket_subcommand_data
 }
 
 void
-setup_subcommand_current_tab_tab1(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab1(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab1", "Open tab 1");
 
@@ -359,7 +366,7 @@ setup_subcommand_current_tab_tab1(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab2(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab2(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab2", "Open tab 2");
 
@@ -368,7 +375,7 @@ setup_subcommand_current_tab_tab2(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab3(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab3(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab3", "Open tab 3");
 
@@ -377,7 +384,7 @@ setup_subcommand_current_tab_tab3(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab4(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab4(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab4", "Open tab 4");
 
@@ -386,7 +393,7 @@ setup_subcommand_current_tab_tab4(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab5(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab5(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab5", "Open tab 5");
 
@@ -395,7 +402,7 @@ setup_subcommand_current_tab_tab5(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab6(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab6(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab6", "Open tab 6");
 
@@ -404,7 +411,7 @@ setup_subcommand_current_tab_tab6(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab7(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab7(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab7", "Open tab 7");
 
@@ -413,7 +420,7 @@ setup_subcommand_current_tab_tab7(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab8(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab8(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab8", "Open tab 8");
 
@@ -422,7 +429,7 @@ setup_subcommand_current_tab_tab8(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab9(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab9(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab9", "Open tab 9");
 
@@ -431,7 +438,7 @@ setup_subcommand_current_tab_tab9(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_current_tab_tab10(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_current_tab_tab10(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("tab10", "Open tab 10");
 
@@ -440,7 +447,7 @@ setup_subcommand_current_tab_tab10(CLI::App* app, const socket_subcommand_data_t
 }
 
 void
-commandline::socket::set::current_tab(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::current_tab(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("current-tab", "Set property current-tab");
 
@@ -470,7 +477,7 @@ commandline::socket::set::current_tab(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-commandline::socket::set::new_tab(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::new_tab(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("new-tab", "Set property new-tab");
 
@@ -485,7 +492,8 @@ commandline::socket::set::new_tab(CLI::App* app, const socket_subcommand_data_t&
  */
 
 void
-commandline::socket::set::devices_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::devices_visible(CLI::App* app,
+                                          const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("devices-visible", "Set property devices-visible");
 
@@ -503,7 +511,8 @@ commandline::socket::set::devices_visible(CLI::App* app, const socket_subcommand
  */
 
 void
-commandline::socket::set::dirtree_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::dirtree_visible(CLI::App* app,
+                                          const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("dirtree-visible", "Set property dirtree-visible");
 
@@ -521,7 +530,8 @@ commandline::socket::set::dirtree_visible(CLI::App* app, const socket_subcommand
  */
 
 void
-commandline::socket::set::toolbar_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::toolbar_visible(CLI::App* app,
+                                          const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("toolbar-visible", "Set property toolbar-visible");
 
@@ -539,7 +549,8 @@ commandline::socket::set::toolbar_visible(CLI::App* app, const socket_subcommand
  */
 
 void
-commandline::socket::set::hidden_files_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::hidden_files_visible(CLI::App* app,
+                                               const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("hidden-files-visible", "Set property hidden-files-visible");
 
@@ -557,7 +568,8 @@ commandline::socket::set::hidden_files_visible(CLI::App* app, const socket_subco
  */
 
 void
-commandline::socket::set::panel1_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel1_visible(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel1-visible", "Set property panel1-visible");
 
@@ -575,7 +587,8 @@ commandline::socket::set::panel1_visible(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::panel2_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel2_visible(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel2-visible", "Set property panel2-visible");
 
@@ -593,7 +606,8 @@ commandline::socket::set::panel2_visible(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::panel3_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel3_visible(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel3-visible", "Set property panel3-visible");
 
@@ -611,7 +625,8 @@ commandline::socket::set::panel3_visible(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::panel4_visible(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel4_visible(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel4-visible", "Set property panel4-visible");
 
@@ -629,7 +644,8 @@ commandline::socket::set::panel4_visible(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::panel_hslider_top(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel_hslider_top(CLI::App* app,
+                                            const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel-hslider-top", "Set property panel-hslider-top");
 
@@ -644,7 +660,8 @@ commandline::socket::set::panel_hslider_top(CLI::App* app, const socket_subcomma
  */
 
 void
-commandline::socket::set::panel_hslider_bottom(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel_hslider_bottom(CLI::App* app,
+                                               const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel-hslider-bottom", "Set property panel-hslider-bottom");
 
@@ -659,7 +676,7 @@ commandline::socket::set::panel_hslider_bottom(CLI::App* app, const socket_subco
  */
 
 void
-commandline::socket::set::panel_vslider(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::panel_vslider(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("panel-vslider", "Set property panel-vslider");
 
@@ -674,7 +691,7 @@ commandline::socket::set::panel_vslider(CLI::App* app, const socket_subcommand_d
  */
 
 void
-setup_subcommand_set_column_width_name(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_name(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("name", "Set property name");
 
@@ -685,7 +702,7 @@ setup_subcommand_set_column_width_name(CLI::App* app, const socket_subcommand_da
 }
 
 void
-setup_subcommand_set_column_width_size(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_size(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("size", "Set property size");
 
@@ -696,7 +713,7 @@ setup_subcommand_set_column_width_size(CLI::App* app, const socket_subcommand_da
 }
 
 void
-setup_subcommand_set_column_width_bytes(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_bytes(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("bytes", "Set property bytes");
 
@@ -707,7 +724,7 @@ setup_subcommand_set_column_width_bytes(CLI::App* app, const socket_subcommand_d
 }
 
 void
-setup_subcommand_set_column_width_type(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_type(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("type", "Set property type");
 
@@ -718,7 +735,7 @@ setup_subcommand_set_column_width_type(CLI::App* app, const socket_subcommand_da
 }
 
 void
-setup_subcommand_set_column_width_mime(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_mime(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("mime", "Set property mime");
 
@@ -729,7 +746,8 @@ setup_subcommand_set_column_width_mime(CLI::App* app, const socket_subcommand_da
 }
 
 void
-setup_subcommand_set_column_width_permission(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_permission(CLI::App* app,
+                                             const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("permission", "Set property permission");
 
@@ -740,7 +758,7 @@ setup_subcommand_set_column_width_permission(CLI::App* app, const socket_subcomm
 }
 
 void
-setup_subcommand_set_column_width_owner(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_owner(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("owner", "Set property owner");
 
@@ -751,7 +769,7 @@ setup_subcommand_set_column_width_owner(CLI::App* app, const socket_subcommand_d
 }
 
 void
-setup_subcommand_set_column_width_group(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_group(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("group", "Set property group");
 
@@ -762,7 +780,8 @@ setup_subcommand_set_column_width_group(CLI::App* app, const socket_subcommand_d
 }
 
 void
-setup_subcommand_set_column_width_date_accessed(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_date_accessed(CLI::App* app,
+                                                const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("accessed", "Set property accessed");
 
@@ -773,7 +792,8 @@ setup_subcommand_set_column_width_date_accessed(CLI::App* app, const socket_subc
 }
 
 void
-setup_subcommand_set_column_width_date_created(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_date_created(CLI::App* app,
+                                               const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("created", "Set property created");
 
@@ -784,7 +804,8 @@ setup_subcommand_set_column_width_date_created(CLI::App* app, const socket_subco
 }
 
 void
-setup_subcommand_set_column_width_date_metadata(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_date_metadata(CLI::App* app,
+                                                const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("metadata", "Set property metadata");
 
@@ -795,7 +816,8 @@ setup_subcommand_set_column_width_date_metadata(CLI::App* app, const socket_subc
 }
 
 void
-setup_subcommand_set_column_width_date_modified(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_column_width_date_modified(CLI::App* app,
+                                                const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("modified", "Set property modified");
 
@@ -806,7 +828,7 @@ setup_subcommand_set_column_width_date_modified(CLI::App* app, const socket_subc
 }
 
 void
-commandline::socket::set::column_width(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::column_width(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("column-width", "Set property column-width");
 
@@ -834,7 +856,7 @@ commandline::socket::set::column_width(CLI::App* app, const socket_subcommand_da
  */
 
 void
-setup_subcommand_set_sort_by_name(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_name(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("name", "Set property name");
 
@@ -843,7 +865,7 @@ setup_subcommand_set_sort_by_name(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_set_sort_by_size(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_size(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("size", "Set property size");
 
@@ -852,7 +874,7 @@ setup_subcommand_set_sort_by_size(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_set_sort_by_bytes(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_bytes(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("bytes", "Set property bytes");
 
@@ -861,7 +883,7 @@ setup_subcommand_set_sort_by_bytes(CLI::App* app, const socket_subcommand_data_t
 }
 
 void
-setup_subcommand_set_sort_by_type(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_type(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("type", "Set property type");
 
@@ -870,7 +892,7 @@ setup_subcommand_set_sort_by_type(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_set_sort_by_mime(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_mime(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("mime", "Set property mime");
 
@@ -879,7 +901,7 @@ setup_subcommand_set_sort_by_mime(CLI::App* app, const socket_subcommand_data_t&
 }
 
 void
-setup_subcommand_set_sort_by_permission(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_permission(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("permission", "Set property permission");
 
@@ -888,7 +910,7 @@ setup_subcommand_set_sort_by_permission(CLI::App* app, const socket_subcommand_d
 }
 
 void
-setup_subcommand_set_sort_by_owner(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_owner(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("owner", "Set property owner");
 
@@ -897,7 +919,7 @@ setup_subcommand_set_sort_by_owner(CLI::App* app, const socket_subcommand_data_t
 }
 
 void
-setup_subcommand_set_sort_by_group(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_group(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("group", "Set property group");
 
@@ -906,7 +928,7 @@ setup_subcommand_set_sort_by_group(CLI::App* app, const socket_subcommand_data_t
 }
 
 void
-setup_subcommand_set_sort_by_accessed(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_accessed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("accessed", "Set property accessed");
 
@@ -915,7 +937,7 @@ setup_subcommand_set_sort_by_accessed(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_set_sort_by_modified(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_modified(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("modified", "Set property modified");
 
@@ -924,7 +946,7 @@ setup_subcommand_set_sort_by_modified(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_set_sort_by_created(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_by_created(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("created", "Set property created");
 
@@ -933,7 +955,7 @@ setup_subcommand_set_sort_by_created(CLI::App* app, const socket_subcommand_data
 }
 
 void
-commandline::socket::set::sort_by(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::sort_by(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("sort-by", "Set property sort-by");
 
@@ -960,7 +982,7 @@ commandline::socket::set::sort_by(CLI::App* app, const socket_subcommand_data_t&
  */
 
 void
-commandline::socket::set::sort_ascend(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::sort_ascend(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("sort-ascend", "Set property sort-ascend");
 
@@ -978,7 +1000,7 @@ commandline::socket::set::sort_ascend(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-commandline::socket::set::sort_natural(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::sort_natural(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("sort-natural", "Set property sort-natural");
 
@@ -996,7 +1018,7 @@ commandline::socket::set::sort_natural(CLI::App* app, const socket_subcommand_da
  */
 
 void
-commandline::socket::set::sort_case(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::sort_case(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("sort-case", "Set property sort-case");
 
@@ -1014,7 +1036,8 @@ commandline::socket::set::sort_case(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::set::sort_hidden_first(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::sort_hidden_first(CLI::App* app,
+                                            const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("sort-hidden-first", "Set property sort-hidden-first");
 
@@ -1032,7 +1055,7 @@ commandline::socket::set::sort_hidden_first(CLI::App* app, const socket_subcomma
  */
 
 void
-setup_subcommand_set_sort_first_files(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_first_files(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("files", "Set property files");
 
@@ -1041,7 +1064,8 @@ setup_subcommand_set_sort_first_files(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-setup_subcommand_set_sort_first_directories(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_first_directories(CLI::App* app,
+                                            const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("directories", "Set property directories");
 
@@ -1050,7 +1074,7 @@ setup_subcommand_set_sort_first_directories(CLI::App* app, const socket_subcomma
 }
 
 void
-setup_subcommand_set_sort_first_mixed(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_set_sort_first_mixed(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("mixed", "Set property mixed");
 
@@ -1059,7 +1083,7 @@ setup_subcommand_set_sort_first_mixed(CLI::App* app, const socket_subcommand_dat
 }
 
 void
-commandline::socket::set::sort_first(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::sort_first(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("sort-first", "Set property sort-first");
 
@@ -1078,7 +1102,8 @@ commandline::socket::set::sort_first(CLI::App* app, const socket_subcommand_data
  */
 
 void
-commandline::socket::set::show_thumbnails(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::show_thumbnails(CLI::App* app,
+                                          const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("show-thumbnails", "Set property show-thumbnails");
 
@@ -1096,7 +1121,8 @@ commandline::socket::set::show_thumbnails(CLI::App* app, const socket_subcommand
  */
 
 void
-commandline::socket::set::max_thumbnail_size(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::max_thumbnail_size(CLI::App* app,
+                                             const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("max-thumbnail-size", "Set property max-thumbnail-size");
 
@@ -1111,7 +1137,7 @@ commandline::socket::set::max_thumbnail_size(CLI::App* app, const socket_subcomm
  */
 
 void
-commandline::socket::set::large_icons(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::large_icons(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("large-icons", "Set property large-icons");
 
@@ -1129,7 +1155,7 @@ commandline::socket::set::large_icons(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-commandline::socket::set::pathbar_text(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::pathbar_text(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("pathbar-text", "Set property pathbar-text");
 
@@ -1144,7 +1170,7 @@ commandline::socket::set::pathbar_text(CLI::App* app, const socket_subcommand_da
  */
 
 void
-commandline::socket::set::current_dir(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::current_dir(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("current-dir", "Set property current-dir");
 
@@ -1159,7 +1185,7 @@ commandline::socket::set::current_dir(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-setup_subcommand_thumbnailer_api(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_thumbnailer_api(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("api", "Set thumbnailer api");
 
@@ -1168,7 +1194,7 @@ setup_subcommand_thumbnailer_api(CLI::App* app, const socket_subcommand_data_t& 
 }
 
 void
-setup_subcommand_thumbnailer_cli(CLI::App* app, const socket_subcommand_data_t& opt)
+setup_subcommand_thumbnailer_cli(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("cli", "Set thumbnailer cli");
 
@@ -1177,7 +1203,7 @@ setup_subcommand_thumbnailer_cli(CLI::App* app, const socket_subcommand_data_t& 
 }
 
 void
-commandline::socket::set::thumbnailer(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::thumbnailer(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("thumbnailer", "Get property thumbnailer");
 
@@ -1195,7 +1221,8 @@ commandline::socket::set::thumbnailer(CLI::App* app, const socket_subcommand_dat
  */
 
 void
-commandline::socket::set::selected_files(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::selected_files(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("selected-files", "Set property selected-files");
 
@@ -1210,7 +1237,8 @@ commandline::socket::set::selected_files(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::selected_filenames(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::selected_filenames(CLI::App* app,
+                                             const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("selected-filenames", "Set property selected-filenames");
 
@@ -1225,7 +1253,8 @@ commandline::socket::set::selected_filenames(CLI::App* app, const socket_subcomm
  */
 
 void
-commandline::socket::set::unselected_files(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::unselected_files(CLI::App* app,
+                                           const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("unselected-files", "Set property unselected-files");
 
@@ -1240,7 +1269,8 @@ commandline::socket::set::unselected_files(CLI::App* app, const socket_subcomman
  */
 
 void
-commandline::socket::set::unselected_filenames(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::unselected_filenames(CLI::App* app,
+                                               const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("unselected-filenames", "Set property unselected-filenames");
 
@@ -1255,7 +1285,8 @@ commandline::socket::set::unselected_filenames(CLI::App* app, const socket_subco
  */
 
 void
-commandline::socket::set::selected_pattern(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::selected_pattern(CLI::App* app,
+                                           const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("selected-pattern", "Set property selected-pattern");
 
@@ -1270,7 +1301,8 @@ commandline::socket::set::selected_pattern(CLI::App* app, const socket_subcomman
  */
 
 void
-commandline::socket::set::clipboard_text(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::clipboard_text(CLI::App* app,
+                                         const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("clipboard-text", "Set property clipboard-text");
 
@@ -1285,7 +1317,8 @@ commandline::socket::set::clipboard_text(CLI::App* app, const socket_subcommand_
  */
 
 void
-commandline::socket::set::clipboard_primary_text(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::clipboard_primary_text(CLI::App* app,
+                                                 const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub =
         app->add_subcommand("clipboard-primary-text", "Set property clipboard-primary-text");
@@ -1301,7 +1334,8 @@ commandline::socket::set::clipboard_primary_text(CLI::App* app, const socket_sub
  */
 
 void
-commandline::socket::set::clipboard_from_file(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::clipboard_from_file(CLI::App* app,
+                                              const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("clipboard-from-file", "Set property clipboard-from-file");
 
@@ -1317,7 +1351,7 @@ commandline::socket::set::clipboard_from_file(CLI::App* app, const socket_subcom
 
 void
 commandline::socket::set::clipboard_primary_from_file(CLI::App* app,
-                                                      const socket_subcommand_data_t& opt)
+                                                      const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("clipboard-primary-from-file",
                                     "Set property clipboard-primary-from-file");
@@ -1333,7 +1367,8 @@ commandline::socket::set::clipboard_primary_from_file(CLI::App* app,
  */
 
 void
-commandline::socket::set::clipboard_copy_files(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::clipboard_copy_files(CLI::App* app,
+                                               const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("clipboard-copy-files", "Set property clipboard-copy-files");
 
@@ -1348,7 +1383,8 @@ commandline::socket::set::clipboard_copy_files(CLI::App* app, const socket_subco
  */
 
 void
-commandline::socket::set::clipboard_cut_files(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::clipboard_cut_files(CLI::App* app,
+                                              const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("clipboard-cut-files", "Set property clipboard-cut-files");
 
@@ -1363,7 +1399,7 @@ commandline::socket::set::clipboard_cut_files(CLI::App* app, const socket_subcom
  */
 
 void
-commandline::socket::set::editor(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::editor(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("editor", "Set property editor");
 
@@ -1378,7 +1414,7 @@ commandline::socket::set::editor(CLI::App* app, const socket_subcommand_data_t& 
  */
 
 void
-commandline::socket::set::terminal(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::set::terminal(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("terminal", "Set property terminal");
 

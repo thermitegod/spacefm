@@ -68,7 +68,8 @@ using run_task_cmd_opt_data_t = std::shared_ptr<run_task_cmd_opt_data>;
  */
 
 void
-run_subcommand_cmd(const socket_subcommand_data_t& opt, const run_task_cmd_opt_data_t& task_opt)
+run_subcommand_cmd(const socket_subcommand_data_t& opt,
+                   const run_task_cmd_opt_data_t& task_opt) noexcept
 {
     nlohmann::json json;
     // cmd task flags
@@ -93,7 +94,7 @@ run_subcommand_cmd(const socket_subcommand_data_t& opt, const run_task_cmd_opt_d
 }
 
 void
-commandline::socket::run_task::cmd(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::cmd(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto task_opt = std::make_shared<run_task_cmd_opt_data>();
 
@@ -119,7 +120,7 @@ commandline::socket::run_task::cmd(CLI::App* app, const socket_subcommand_data_t
  */
 
 void
-commandline::socket::run_task::edit(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::edit(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("edit", "Run task edit");
 
@@ -134,7 +135,7 @@ commandline::socket::run_task::edit(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::run_task::mount(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::mount(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("mount", "Run task mount");
 
@@ -149,7 +150,7 @@ commandline::socket::run_task::mount(CLI::App* app, const socket_subcommand_data
  */
 
 void
-commandline::socket::run_task::umount(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::umount(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("umount", "Run task mount");
 
@@ -165,7 +166,8 @@ commandline::socket::run_task::umount(CLI::App* app, const socket_subcommand_dat
 
 void
 run_subcommand_file_action(const socket_subcommand_data_t& opt,
-                           const run_task_file_opt_data_t& file_opt, const std::string_view command)
+                           const run_task_file_opt_data_t& file_opt,
+                           const std::string_view command) noexcept
 {
     nlohmann::json json;
     // file task flags
@@ -189,7 +191,7 @@ run_subcommand_file_action(const socket_subcommand_data_t& opt,
  */
 
 void
-commandline::socket::run_task::copy(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::copy(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto file_opt = std::make_shared<run_task_file_opt_data>();
 
@@ -209,7 +211,7 @@ commandline::socket::run_task::copy(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::run_task::move(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::move(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto file_opt = std::make_shared<run_task_file_opt_data>();
 
@@ -229,7 +231,7 @@ commandline::socket::run_task::move(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::run_task::link(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::link(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto file_opt = std::make_shared<run_task_file_opt_data>();
 
@@ -249,7 +251,7 @@ commandline::socket::run_task::link(CLI::App* app, const socket_subcommand_data_
  */
 
 void
-commandline::socket::run_task::del(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::del(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto file_opt = std::make_shared<run_task_file_opt_data>();
 
@@ -269,7 +271,7 @@ commandline::socket::run_task::del(CLI::App* app, const socket_subcommand_data_t
  */
 
 void
-commandline::socket::run_task::trash(CLI::App* app, const socket_subcommand_data_t& opt)
+commandline::socket::run_task::trash(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto file_opt = std::make_shared<run_task_file_opt_data>();
 

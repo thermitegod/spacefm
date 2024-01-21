@@ -42,7 +42,7 @@
 #include "commandline/socket.hxx"
 
 [[noreturn]] void
-run_subcommand_socket(const socket_subcommand_data_t& opt)
+run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
 {
     // connect to server
     const zmqpp::context context;
@@ -118,7 +118,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 }
 
 void
-setup_subcommand_socket(CLI::App& app)
+setup_subcommand_socket(CLI::App& app) noexcept
 {
     auto opt = std::make_shared<socket_subcommand_data>();
     CLI::App* sub = app.add_subcommand("socket", "Send a socket command (See subcommand help)");

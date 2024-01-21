@@ -37,7 +37,7 @@
 #include "commandline/commandline.hxx"
 
 void
-run_commandline(const commandline_opt_data_t& opt)
+run_commandline(const commandline_opt_data_t& opt) noexcept
 {
     (void)opt;
 
@@ -99,7 +99,7 @@ run_commandline(const commandline_opt_data_t& opt)
 }
 
 void
-setup_commandline(CLI::App& app, const commandline_opt_data_t& opt)
+setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
 {
     app.add_flag("-t,--new-tab",
                  opt->new_tab,

@@ -19,15 +19,15 @@
 
 #include "commandline/socket.hxx"
 
-void setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_run_task(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_help(CLI::App* app, const socket_subcommand_data_t& opt);
-void setup_subcommand_ping(CLI::App* app, const socket_subcommand_data_t& opt);
+void setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_run_task(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_help(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
+void setup_subcommand_ping(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
