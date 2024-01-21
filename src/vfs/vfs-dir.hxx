@@ -79,9 +79,9 @@ struct dir : public std::enable_shared_from_this<dir>
     void reload_mime_type() noexcept;
 
     /* emit signals */
-    void emit_file_created(const std::filesystem::path& filename, bool force) noexcept;
-    void emit_file_deleted(const std::filesystem::path& filename) noexcept;
-    void emit_file_changed(const std::filesystem::path& filename, bool force) noexcept;
+    void emit_file_created(const std::filesystem::path& path, bool force) noexcept;
+    void emit_file_deleted(const std::filesystem::path& path) noexcept;
+    void emit_file_changed(const std::filesystem::path& path, bool force) noexcept;
     void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // TODO private

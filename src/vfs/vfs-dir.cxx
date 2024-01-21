@@ -293,13 +293,13 @@ vfs::dir::on_monitor_event(const vfs::monitor::event event, const std::filesyste
     switch (event)
     {
         case vfs::monitor::event::created:
-            this->emit_file_created(path.filename(), false);
+            this->emit_file_created(path, false);
             break;
         case vfs::monitor::event::deleted:
-            this->emit_file_deleted(path.filename());
+            this->emit_file_deleted(path);
             break;
         case vfs::monitor::event::changed:
-            this->emit_file_changed(path.filename(), false);
+            this->emit_file_changed(path, false);
             break;
         case vfs::monitor::event::other:
             break;
@@ -539,31 +539,30 @@ vfs::dir::reload_mime_type() noexcept
 
 /* signal handlers */
 void
-vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) noexcept
+vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexcept
 {
-    (void)force;
     // Ignore avoid_changes for creation of files
-    // if (!force && this->avoid_changes_)
-    // {
-    //     return;
-    // }
+    if (!force && this->avoid_changes_)
+    {
+        return;
+    }
 
-    if (filename == this->path_)
+    if (path == this->path_)
     { // Special Case: The directory itself was created?
         return;
     }
 
-    this->created_files_.push_back(filename);
+    this->created_files_.push_back(path.filename());
 
     this->notify_file_change(std::chrono::milliseconds(200));
 }
 
 void
-vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
+vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
 {
     const std::scoped_lock<std::mutex> lock(this->lock_);
 
-    if (filename == this->path_.filename() && !std::filesystem::exists(this->path_))
+    if (path.filename() == this->path_.filename() && !std::filesystem::exists(this->path_))
     {
         /* Special Case: The directory itself was deleted... */
 
@@ -575,7 +574,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
         return;
     }
 
-    const auto file_found = this->find_file(filename);
+    const auto file_found = this->find_file(path.filename());
     if (file_found)
     {
         if (!std::ranges::contains(this->changed_files_, file_found))
@@ -588,25 +587,25 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& filename) noexcept
 }
 
 void
-vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) noexcept
+vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexcept
 {
     const std::scoped_lock<std::mutex> lock(this->lock_);
 
-    // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, filename, this->avoid_changes_);
+    // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
 
     if (!force && this->avoid_changes_)
     {
         return;
     }
 
-    if (filename == this->path_)
+    if (path == this->path_)
     {
         // Special Case: The directory itself was changed
         this->run_event<spacefm::signal::file_changed>(nullptr);
         return;
     }
 
-    const auto file_found = this->find_file(filename);
+    const auto file_found = this->find_file(path.filename());
     if (file_found)
     {
         if (!std::ranges::contains(this->changed_files_, file_found))
