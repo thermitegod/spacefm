@@ -1,4 +1,19 @@
-# misc features
-option('deprecated', type : 'boolean', value: false, description : 'enable deprecated features')
-option('exo', type : 'boolean', value: true, description : 'Build PtkFileBrowser to use gtk wrapper exo (EXPERIMENTAL)')
-option('zmp_port', type : 'integer', value: 59172, description : 'Port number to use for socket commands')
+option('deprecated',
+       type : 'boolean',
+       value: false,
+       description : 'enable deprecated features')
+
+option('exo',
+       type : 'boolean',
+       value: true,
+       description : 'Build PtkFileBrowser to use gtk wrapper exo (EXPERIMENTAL)')
+
+option('socket',
+       type : 'boolean',
+       value: true,
+       description : 'Enable socket commands')
+
+option('zmp_port',
+       type : 'integer',
+       value: 59172,
+       description : 'Port number to use for socket commands')

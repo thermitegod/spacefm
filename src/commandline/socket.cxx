@@ -50,7 +50,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
     socket.set(zmqpp::socket_option::receive_timeout, 1000);
     try
     {
-        socket.connect(std::format("tcp://localhost:{}", ZMQ_PORT));
+        socket.connect(std::format("tcp://localhost:{}", SOCKET_PORT));
     }
     catch (const zmqpp::exception& e)
     {

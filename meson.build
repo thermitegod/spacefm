@@ -224,11 +224,6 @@ spdlog_dep = dependency('spdlog', required : true)
 fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 pugixml_dep = dependency('pugixml', required : true)
-nlohmann_json_dep = dependency('nlohmann_json', required : true)
-
-# zmqpp does not provide a pkgconfig file
-libzmq_dep = dependency('libzmq', required : true)
-libzmqpp_dep = cc.find_library('zmqpp', has_headers: ['zmqpp/zmqpp.hpp'], required: true)
 
 # Gtk3 CPP
 gtkmm_dep = dependency('gtkmm-3.0', required : true)
@@ -252,11 +247,7 @@ dependencies = [
   fmt_dep,
   sigc_dep,
   pugixml_dep,
-  nlohmann_json_dep,
   cli11_dep,
-
-  libzmq_dep,
-  libzmqpp_dep,
 
   libudev_dep,
   libffmpegthumbnailer_dep,
@@ -264,6 +255,9 @@ dependencies = [
 
   ztd_dep,
 ]
+
+## Source files
+sources = files()
 
 ## preprocessor static
 
@@ -315,7 +309,36 @@ if get_option('exo')
   features += '-DUSE_EXO'
 endif
 
-features += '-DZMQ_PORT="@0@"'.format(get_option('zmp_port'))
+if get_option('socket')
+  nlohmann_json_dep = dependency('nlohmann_json', required : true)
+
+  # zmqpp does not provide a pkgconfig file
+  libzmq_dep = dependency('libzmq', required : true)
+  libzmqpp_dep = cc.find_library('zmqpp', has_headers: ['zmqpp/zmqpp.hpp'], required: true)
+
+  dependencies += [
+    nlohmann_json_dep,
+
+    libzmq_dep,
+    libzmqpp_dep,
+  ]
+
+  features += '-DHAVE_SOCKET'
+  features += '-DSOCKET_PORT="@0@"'.format(get_option('zmp_port'))
+
+  sources += files(
+    'src/commandline/socket.cxx',
+    'src/commandline/socket/subcommands.cxx',
+    'src/commandline/socket/get/subcommands.cxx',
+    'src/commandline/socket/get-task/subcommands.cxx',
+    'src/commandline/socket/run-task/subcommands.cxx',
+    'src/commandline/socket/set/subcommands.cxx',
+    'src/commandline/socket/set-task/subcommands.cxx',
+
+    'src/socket/commands.cxx',
+    'src/socket/server.cxx',
+  )
+endif
 
 foreach a : features
   add_project_arguments(a, language : ['c', 'cpp'])
@@ -333,9 +356,9 @@ foreach a : data_args
   add_project_arguments(a, language : ['c', 'cpp'])
 endforeach
 
-## Source files
+## Required Base Source files
 
-sources = files(
+sources += files(
   'src/about.cxx',
   'src/autosave.cxx',
   'src/bookmarks.cxx',
@@ -355,16 +378,6 @@ sources = files(
   'src/compat/type-conversion.cxx',
 
   'src/commandline/commandline.cxx',
-  'src/commandline/socket.cxx',
-  'src/commandline/socket/subcommands.cxx',
-  'src/commandline/socket/get/subcommands.cxx',
-  'src/commandline/socket/get-task/subcommands.cxx',
-  'src/commandline/socket/run-task/subcommands.cxx',
-  'src/commandline/socket/set/subcommands.cxx',
-  'src/commandline/socket/set-task/subcommands.cxx',
-
-  'src/socket/commands.cxx',
-  'src/socket/server.cxx',
 
   'src/xset/xset.cxx',
   'src/xset/xset-context-menu.cxx',

@@ -59,7 +59,9 @@
 #include "program-timer.hxx"
 #include "autosave.hxx"
 
+#if defined(HAVE_SOCKET)
 #include "socket/server.hxx"
+#endif
 
 #include "settings.hxx"
 
@@ -288,8 +290,10 @@ main(int argc, char* argv[])
     // If we reach this point, we are the first instance.
     // Subsequent processes will exit and will not reach here.
 
+#if defined(HAVE_SOCKET)
     // Start a thread to receive socket messages
     const std::jthread socket_server(socket::server_thread);
+#endif
 
     // Initialize vfs system
     vfs_volume_init();
