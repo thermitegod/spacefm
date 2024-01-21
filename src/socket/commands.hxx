@@ -20,4 +20,7 @@
 
 #include <tuple>
 
-const std::tuple<char, std::string> run_ipc_command(const std::string_view socket_commands_json);
+namespace socket
+{
+const std::tuple<char, std::string> command(const std::string_view socket_commands_json) noexcept;
+}

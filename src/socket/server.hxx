@@ -22,7 +22,10 @@
 
 #include <zmqpp/zmqpp.hpp>
 
-[[noreturn]] void socket_server_thread();
+namespace socket
+{
+[[noreturn]] void server_thread() noexcept;
 
-[[nodiscard]] bool socket_send_command(zmqpp::socket& socket, const std::string_view message);
-const std::optional<std::string> socket_receive_response(zmqpp::socket& socket);
+[[nodiscard]] bool send_command(zmqpp::socket& socket, const std::string_view message) noexcept;
+[[nodiscard]] const std::optional<std::string> receive_response(zmqpp::socket& socket) noexcept;
+} // namespace socket

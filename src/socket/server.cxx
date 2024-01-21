@@ -27,12 +27,11 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "ipc-command.hxx"
-
-#include "ipc.hxx"
+#include "socket/commands.hxx"
+#include "socket/server.hxx"
 
 void
-socket_server_thread()
+socket::server_thread() noexcept
 {
     const zmqpp::context context;
     zmqpp::socket server(context, zmqpp::socket_type::pair);
@@ -50,7 +49,7 @@ socket_server_thread()
         request >> command;
 
         ztd::logger::info("SOCKET({})", command);
-        const auto [ret, response] = run_ipc_command(command);
+        const auto [ret, response] = socket::command(command);
 
         nlohmann::json json;
         json["exit"] = ret;
@@ -64,7 +63,7 @@ socket_server_thread()
 }
 
 bool
-socket_send_command(zmqpp::socket& socket, const std::string_view message)
+socket::send_command(zmqpp::socket& socket, const std::string_view message) noexcept
 {
     zmqpp::message msg;
     msg << message.data();
@@ -81,7 +80,7 @@ socket_send_command(zmqpp::socket& socket, const std::string_view message)
 }
 
 const std::optional<std::string>
-socket_receive_response(zmqpp::socket& socket)
+socket::receive_response(zmqpp::socket& socket) noexcept
 {
     zmqpp::message msg;
     socket.receive(msg);

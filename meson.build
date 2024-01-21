@@ -340,8 +340,6 @@ sources = files(
   'src/autosave.cxx',
   'src/bookmarks.cxx',
   'src/file-search.cxx',
-  'src/ipc.cxx',
-  'src/ipc-command.cxx',
   'src/main.cxx',
   'src/main-window.cxx',
   'src/preference-dialog.cxx',
@@ -382,6 +380,9 @@ sources = files(
   'src/settings/config-save.cxx',
 
   'src/settings/upgrade/config-upgrade.cxx',
+
+  'src/socket/commands.cxx',
+  'src/socket/server.cxx',
 
   'src/utils/memory.cxx',
   'src/utils/shell_quote.cxx',

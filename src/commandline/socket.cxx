@@ -35,7 +35,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "ipc.hxx"
+#include "socket/server.hxx"
 
 #include "commandline/socket/subcommands.hxx"
 
@@ -80,7 +80,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 #endif
 
     // ztd::logger::debug("Sending message {}\n", server_json.dump());
-    const bool sent = socket_send_command(socket, server_json.dump());
+    const bool sent = socket::send_command(socket, server_json.dump());
     if (!sent)
     {
 #if defined(__cpp_lib_print)
@@ -92,7 +92,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     }
 
     // server response
-    const auto server_response = socket_receive_response(socket);
+    const auto server_response = socket::receive_response(socket);
     if (!server_response)
     {
 #if defined(__cpp_lib_print)

@@ -59,7 +59,8 @@
 #include "program-timer.hxx"
 #include "autosave.hxx"
 
-#include "ipc.hxx"
+#include "socket/server.hxx"
+
 #include "settings.hxx"
 
 #include "bookmarks.hxx"
@@ -288,7 +289,7 @@ main(int argc, char* argv[])
     // Subsequent processes will exit and will not reach here.
 
     // Start a thread to receive socket messages
-    const std::jthread socket_server(socket_server_thread);
+    const std::jthread socket_server(socket::server_thread);
 
     // Initialize vfs system
     vfs_volume_init();

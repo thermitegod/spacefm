@@ -64,8 +64,10 @@
 
 #include "main-window.hxx"
 
+#include "socket/commands.hxx"
+
 static const std::string
-unescape(const std::string_view t)
+unescape(const std::string_view t) noexcept
 {
     std::string unescaped = t.data();
     unescaped = ztd::replace(unescaped, "\\\n", "\\n");
@@ -77,7 +79,7 @@ unescape(const std::string_view t)
 }
 
 static bool
-delayed_show_menu(GtkWidget* menu)
+delayed_show_menu(GtkWidget* menu) noexcept
 {
     MainWindow* main_window = main_window_get_last_active();
     if (main_window)
@@ -91,7 +93,7 @@ delayed_show_menu(GtkWidget* menu)
 }
 
 const std::tuple<char, std::string>
-run_ipc_command(const std::string_view socket_commands_json)
+socket::command(const std::string_view socket_commands_json) noexcept
 {
     // These are also the sockets return code
     static constexpr i8 SOCKET_SUCCESS = 0; // Successful exit status.
