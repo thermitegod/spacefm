@@ -321,8 +321,10 @@ vfs::dir::global_reload_mime_type() noexcept
 }
 
 const std::shared_ptr<vfs::file>
-vfs::dir::find_file(const std::filesystem::path& filename) const noexcept
+vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 {
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+
     const auto action = [&filename](const auto& file) { return file->name() == filename.string(); };
     const auto it = std::ranges::find_if(this->files_, action);
     if (it != this->files_.cend())
@@ -440,7 +442,7 @@ vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
 void
 vfs::dir::update_changed_files() noexcept
 {
-    //std::scoped_lock<std::mutex> lock(this->mutex);
+    const std::scoped_lock<std::mutex> changed_files_lock(this->changed_files_lock_);
 
     if (this->changed_files_.empty())
     {
@@ -461,7 +463,7 @@ vfs::dir::update_changed_files() noexcept
 void
 vfs::dir::update_created_files() noexcept
 {
-    // std::scoped_lock<std::mutex> lock(this->mutex);
+    const std::scoped_lock<std::mutex> created_files_lock(this->created_files_lock_);
 
     if (this->created_files_.empty())
     {
@@ -482,6 +484,8 @@ vfs::dir::update_created_files() noexcept
                     this->xhidden_count_++;
                     continue;
                 }
+
+                const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
                 const auto file = vfs::file::create(full_path);
                 this->files_.push_back(file);
@@ -506,7 +510,7 @@ vfs::dir::update_created_files() noexcept
 void
 vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
     for (const auto& file : this->files_)
     {
@@ -522,12 +526,12 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 void
 vfs::dir::reload_mime_type() noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->lock_);
-
     if (this->is_directory_empty())
     {
         return;
     }
+
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
     const auto reload_file_mime_action = [](const auto& file) { file->reload_mime_type(); };
     std::ranges::for_each(this->files_, reload_file_mime_action);
@@ -552,6 +556,8 @@ vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexc
         return;
     }
 
+    const std::scoped_lock<std::mutex> created_files_lock(this->created_files_lock_);
+
     this->created_files_.push_back(path.filename());
 
     this->notify_file_change(std::chrono::milliseconds(200));
@@ -560,11 +566,10 @@ vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexc
 void
 vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->lock_);
-
     if (path.filename() == this->path_.filename() && !std::filesystem::exists(this->path_))
     {
         /* Special Case: The directory itself was deleted... */
+        const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
         /* clear the whole list */
         this->files_.clear();
@@ -577,6 +582,8 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
     const auto file_found = this->find_file(path.filename());
     if (file_found)
     {
+        const std::scoped_lock<std::mutex> changed_files_lock(this->changed_files_lock_);
+
         if (!std::ranges::contains(this->changed_files_, file_found))
         {
             this->changed_files_.push_back(file_found);
@@ -589,8 +596,6 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
 void
 vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->lock_);
-
     // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
 
     if (!force && this->avoid_changes_)
@@ -608,6 +613,8 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
     const auto file_found = this->find_file(path.filename());
     if (file_found)
     {
+        const std::scoped_lock<std::mutex> changed_files_lock(this->changed_files_lock_);
+
         if (!std::ranges::contains(this->changed_files_, file_found))
         {
             if (force)
@@ -631,7 +638,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
 void
 vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    const std::scoped_lock<std::mutex> lock(this->lock_);
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
     if (std::ranges::contains(this->files_, file))
     {

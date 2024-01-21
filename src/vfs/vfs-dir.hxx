@@ -100,8 +100,7 @@ struct dir : public std::enable_shared_from_this<dir>
     // signal callback
     void on_list_task_finished(bool is_cancelled);
 
-    const std::shared_ptr<vfs::file>
-    find_file(const std::filesystem::path& filename) const noexcept;
+    const std::shared_ptr<vfs::file> find_file(const std::filesystem::path& filename) noexcept;
     bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // dir .hidden file
@@ -126,7 +125,9 @@ struct dir : public std::enable_shared_from_this<dir>
 
     u64 xhidden_count_{0};
 
-    std::mutex lock_;
+    std::mutex files_lock_;
+    std::mutex changed_files_lock_;
+    std::mutex created_files_lock_;
 
     // Signals //
   public:
