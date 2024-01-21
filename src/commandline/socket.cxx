@@ -57,7 +57,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 #if defined(__cpp_lib_print)
         std::println("Failed to connect to server");
 #else
-        fmt::print("Failed to connect to server\n");
+        fmt::println("Failed to connect to server");
 #endif
         std::exit(EXIT_FAILURE);
     }
@@ -76,7 +76,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 #if defined(__cpp_lib_print)
     // std::println("JSON : {}", server_json.dump());
 #else
-    // fmt::print("JSON : {}\n", server_json.dump());
+    // fmt::println("JSON : {}", server_json.dump());
 #endif
 
     // ztd::logger::debug("Sending message {}\n", server_json.dump());
@@ -86,7 +86,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 #if defined(__cpp_lib_print)
         std::println("Failed to send command to server");
 #else
-        fmt::print("Failed to send command to server\n");
+        fmt::println("Failed to send command to server");
 #endif
         std::exit(EXIT_FAILURE);
     }
@@ -98,7 +98,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 #if defined(__cpp_lib_print)
         std::println("Failed to receive response from server");
 #else
-        fmt::print("Failed to receive response from server\n");
+        fmt::println("Failed to receive response from server");
 #endif
         std::exit(EXIT_FAILURE);
     }
@@ -111,7 +111,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
 #if defined(__cpp_lib_print)
         std::println("{}", response);
 #else
-        fmt::print("{}\n", response);
+        fmt::println("{}", response);
 #endif
     }
     std::exit(ret);

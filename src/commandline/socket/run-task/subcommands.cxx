@@ -84,7 +84,7 @@ run_subcommand_cmd(const socket_subcommand_data_t& opt, const run_task_cmd_opt_d
 #if defined(__cpp_lib_print)
     // std::println("JSON : {}", json.dump());
 #else
-    // fmt::print("JSON : {}\n", json.dump());
+    // fmt::println("JSON : {}", json.dump());
 #endif
 
     opt->property = "cmd";
@@ -176,7 +176,7 @@ run_subcommand_file_action(const socket_subcommand_data_t& opt,
 #if defined(__cpp_lib_print)
     // std::println("JSON : {}", json.dump());
 #else
-    // fmt::print("JSON : {}\n", json.dump());
+    // fmt::println("JSON : {}", json.dump());
 #endif
 
     opt->command = command;

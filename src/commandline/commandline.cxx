@@ -62,7 +62,7 @@ run_commandline(const commandline_opt_data_t& opt)
 #if defined(__cpp_lib_print)
         std::println("{} {}\nZMQ Port: {}", PACKAGE_NAME_FANCY, PACKAGE_VERSION, ZMQ_PORT);
 #else
-        fmt::print("{} {}\nZMQ Port: {}\n", PACKAGE_NAME_FANCY, PACKAGE_VERSION, ZMQ_PORT);
+        fmt::println("{} {}\nZMQ Port: {}", PACKAGE_NAME_FANCY, PACKAGE_VERSION, ZMQ_PORT);
 #endif
 
         std::exit(EXIT_SUCCESS);
