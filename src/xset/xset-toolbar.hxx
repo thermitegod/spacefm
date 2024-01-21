@@ -28,7 +28,7 @@
 
 #include "xset/xset.hxx"
 
-void xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
+void xset_fill_toolbar(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar,
                        const xset_t& set_parent, bool show_tooltips);
 
 const std::string xset_get_builtin_toolitem_label(xset::tool tool_type);

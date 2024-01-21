@@ -32,7 +32,7 @@ ptk_bookmark_view_add_bookmark(const std::filesystem::path& book_path)
 }
 
 void
-ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, PtkFileBrowser* file_browser)
+ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, ptk::browser* file_browser)
 {
     (void)menuitem;
 

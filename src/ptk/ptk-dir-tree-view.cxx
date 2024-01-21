@@ -53,10 +53,9 @@ static void on_dir_tree_view_row_expanded(GtkTreeView* treeview, GtkTreeIter* it
 static void on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter,
                                            GtkTreePath* path, void* user_data);
 
-static bool on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event,
-                                          PtkFileBrowser* browser);
+static bool on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser);
 
-static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* browser);
+static bool on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser);
 
 static bool sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
                      bool path_currently_selected, void* data);
@@ -69,13 +68,13 @@ static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContex
                                                 i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
                                                 u32 time, void* user_data);
 static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                         i32 y, u32 time, PtkFileBrowser* file_browser);
+                                         i32 y, u32 time, ptk::browser* file_browser);
 
 static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
-                                        PtkFileBrowser* file_browser);
+                                        ptk::browser* file_browser);
 
 static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                       i32 y, u32 time, PtkFileBrowser* file_browser);
+                                       i32 y, u32 time, ptk::browser* file_browser);
 
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
@@ -103,7 +102,7 @@ on_destroy(GtkWidget* w)
 }
 /* Create a new dir tree view */
 GtkWidget*
-ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden)
+ptk_dir_tree_view_new(ptk::browser* browser, bool show_hidden)
 {
     GtkTreeViewColumn* col = nullptr;
     GtkCellRenderer* renderer = nullptr;
@@ -392,7 +391,7 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 }
 
 static bool
-on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_browser)
+on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_browser)
 {
     GtkTreePath* tree_path = nullptr;
     GtkTreeViewColumn* tree_col = nullptr;
@@ -487,7 +486,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* 
 }
 
 static bool
-on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, PtkFileBrowser* file_browser)
+on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_browser)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter iter;
@@ -615,7 +614,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                     GtkSelectionData* sel_data, u32 info, u32 time, void* user_data)
 {
     (void)info;
-    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(user_data);
+    ptk::browser* file_browser = PTK_FILE_BROWSER(user_data);
 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");
@@ -757,7 +756,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
 static bool
 on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
-                           PtkFileBrowser* file_browser)
+                           ptk::browser* file_browser)
 {
     (void)x;
     (void)y;
@@ -773,7 +772,7 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 
 
 static bool
 on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                             u32 time, PtkFileBrowser* file_browser)
+                             u32 time, ptk::browser* file_browser)
 {
     (void)x;
     (void)y;
@@ -880,7 +879,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
 
 static bool
 on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
-                            PtkFileBrowser* file_browser)
+                            ptk::browser* file_browser)
 {
     (void)widget;
     (void)drag_context;

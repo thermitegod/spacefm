@@ -79,7 +79,7 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
 
     GtkWidget* dlg{nullptr};
     GtkWidget* parent{nullptr};
-    PtkFileBrowser* browser{nullptr};
+    ptk::browser* browser{nullptr};
 
     GtkLabel* label_type{nullptr};
     GtkLabel* label_mime{nullptr};
@@ -2289,7 +2289,7 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 i32
-ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
+ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                 const std::shared_ptr<vfs::file>& file, const char* dest_dir, bool clip_copy,
                 ptk::rename_mode create_new, AutoOpenCreate* auto_open)
 {

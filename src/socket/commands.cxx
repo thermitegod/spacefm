@@ -178,7 +178,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     {
         return {SOCKET_INVALID, std::format("invalid tab {}", tab)};
     }
-    PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
+    ptk::browser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
         gtk_notebook_get_nth_page(main_window->get_panel_notebook(panel), tab - 1));
 
     // command
@@ -528,7 +528,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, "invalid column width"};
             }
-            if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
+            if (file_browser->is_view_mode(ptk::browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
@@ -573,54 +573,54 @@ socket::command(const std::string_view socket_commands_json) noexcept
         { // COLUMN
             const std::string subproperty = json["subproperty"];
 
-            auto j = ptk::file_browser::sort_order::name;
+            auto j = ptk::browser::sort_order::name;
             if (subproperty == "name")
             {
-                j = ptk::file_browser::sort_order::name;
+                j = ptk::browser::sort_order::name;
             }
             else if (subproperty == "size")
             {
-                j = ptk::file_browser::sort_order::size;
+                j = ptk::browser::sort_order::size;
             }
             else if (subproperty == "bytes")
             {
-                j = ptk::file_browser::sort_order::bytes;
+                j = ptk::browser::sort_order::bytes;
             }
             else if (subproperty == "type")
             {
-                j = ptk::file_browser::sort_order::type;
+                j = ptk::browser::sort_order::type;
             }
             else if (subproperty == "mime")
             {
-                j = ptk::file_browser::sort_order::mime;
+                j = ptk::browser::sort_order::mime;
             }
             else if (subproperty == "permission")
             {
-                j = ptk::file_browser::sort_order::perm;
+                j = ptk::browser::sort_order::perm;
             }
             else if (subproperty == "owner")
             {
-                j = ptk::file_browser::sort_order::owner;
+                j = ptk::browser::sort_order::owner;
             }
             else if (subproperty == "group")
             {
-                j = ptk::file_browser::sort_order::group;
+                j = ptk::browser::sort_order::group;
             }
             else if (subproperty == "accessed")
             {
-                j = ptk::file_browser::sort_order::atime;
+                j = ptk::browser::sort_order::atime;
             }
             else if (subproperty == "created")
             {
-                j = ptk::file_browser::sort_order::btime;
+                j = ptk::browser::sort_order::btime;
             }
             else if (subproperty == "metadata")
             {
-                j = ptk::file_browser::sort_order::ctime;
+                j = ptk::browser::sort_order::ctime;
             }
             else if (subproperty == "modified")
             {
-                j = ptk::file_browser::sort_order::mtime;
+                j = ptk::browser::sort_order::mtime;
             }
 
             else
@@ -701,7 +701,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string subproperty = json["subproperty"];
 
-            if (!file_browser->is_view_mode(ptk::file_browser::view_mode::icon_view))
+            if (!file_browser->is_view_mode(ptk::browser::view_mode::icon_view))
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
@@ -1092,7 +1092,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         { // COLUMN
             const std::string subproperty = json["subproperty"];
 
-            if (file_browser->is_view_mode(ptk::file_browser::view_mode::list_view))
+            if (file_browser->is_view_mode(ptk::browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
@@ -1134,31 +1134,31 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "sort-by")
         { // COLUMN
-            switch (file_browser->sort_order())
+            switch (file_browser->sort_order_)
             {
-                case ptk::file_browser::sort_order::name:
+                case ptk::browser::sort_order::name:
                     return {SOCKET_SUCCESS, "name"};
-                case ptk::file_browser::sort_order::size:
+                case ptk::browser::sort_order::size:
                     return {SOCKET_SUCCESS, "size"};
-                case ptk::file_browser::sort_order::bytes:
+                case ptk::browser::sort_order::bytes:
                     return {SOCKET_SUCCESS, "bytes"};
-                case ptk::file_browser::sort_order::type:
+                case ptk::browser::sort_order::type:
                     return {SOCKET_SUCCESS, "type"};
-                case ptk::file_browser::sort_order::mime:
+                case ptk::browser::sort_order::mime:
                     return {SOCKET_SUCCESS, "mime"};
-                case ptk::file_browser::sort_order::perm:
+                case ptk::browser::sort_order::perm:
                     return {SOCKET_SUCCESS, "permission"};
-                case ptk::file_browser::sort_order::owner:
+                case ptk::browser::sort_order::owner:
                     return {SOCKET_SUCCESS, "owner"};
-                case ptk::file_browser::sort_order::group:
+                case ptk::browser::sort_order::group:
                     return {SOCKET_SUCCESS, "group"};
-                case ptk::file_browser::sort_order::atime:
+                case ptk::browser::sort_order::atime:
                     return {SOCKET_SUCCESS, "accessed"};
-                case ptk::file_browser::sort_order::btime:
+                case ptk::browser::sort_order::btime:
                     return {SOCKET_SUCCESS, "created"};
-                case ptk::file_browser::sort_order::ctime:
+                case ptk::browser::sort_order::ctime:
                     return {SOCKET_SUCCESS, "metadata"};
-                case ptk::file_browser::sort_order::mtime:
+                case ptk::browser::sort_order::mtime:
                     return {SOCKET_SUCCESS, "modified"};
             }
         }

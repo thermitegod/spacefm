@@ -60,7 +60,7 @@ archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file>
 }
 
 void
-ptk_archiver_create(PtkFileBrowser* file_browser,
+ptk_archiver_create(ptk::browser* file_browser,
                     const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     (void)file_browser;
@@ -78,7 +78,7 @@ ptk_archiver_create(PtkFileBrowser* file_browser,
 }
 
 void
-ptk_archiver_extract(PtkFileBrowser* file_browser,
+ptk_archiver_extract(ptk::browser* file_browser,
                      const std::span<const std::shared_ptr<vfs::file>> sel_files,
                      const std::filesystem::path& dest_dir)
 {
@@ -107,7 +107,7 @@ ptk_archiver_extract(PtkFileBrowser* file_browser,
 }
 
 void
-ptk_archiver_open(PtkFileBrowser* file_browser,
+ptk_archiver_open(ptk::browser* file_browser,
                   const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
     (void)file_browser;

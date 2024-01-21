@@ -19,4 +19,4 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-void ptk_paste_file(PtkFileBrowser* file_browser, const std::filesystem::path& cwd);
+void ptk_paste_file(ptk::browser* file_browser, const std::filesystem::path& cwd);

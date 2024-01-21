@@ -32,5 +32,5 @@
 // if xnever, never execute an executable
 void ptk_open_files_with_app(const std::filesystem::path& cwd,
                              const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                             const std::string_view app_desktop, PtkFileBrowser* file_browser,
+                             const std::string_view app_desktop, ptk::browser* file_browser,
                              bool xforce, bool xnever);

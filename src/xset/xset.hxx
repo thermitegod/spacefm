@@ -33,7 +33,10 @@
 #include "xset/xset-lookup.hxx"
 
 // need to forward declare to avoid circular header dependencies
-struct PtkFileBrowser;
+namespace ptk
+{
+struct browser;
+}
 
 namespace xset
 {
@@ -142,7 +145,7 @@ struct XSet : public std::enable_shared_from_this<XSet>
     void* ob1_data{nullptr};                             // not saved
     char* ob2{nullptr};                                  // not saved
     void* ob2_data{nullptr};                             // not saved
-    PtkFileBrowser* browser{nullptr};                    // not saved - set automatically
+    ptk::browser* browser{nullptr};                      // not saved - set automatically
     u32 key{0};                                          // saved
     u32 keymod{0};                                       // saved
     xset_t shared_key{nullptr};                          // not saved

@@ -50,7 +50,7 @@ enum column
 };
 }
 
-EntryData::EntryData(PtkFileBrowser* file_browser) : browser(file_browser) {}
+EntryData::EntryData(ptk::browser* file_browser) : browser(file_browser) {}
 
 static const std::filesystem::path
 get_cwd(GtkEntry* entry)
@@ -534,7 +534,7 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 }
 
 static void
-on_populate_popup(GtkEntry* entry, GtkMenu* menu, PtkFileBrowser* file_browser)
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser)
 {
     if (!file_browser)
     {
@@ -574,7 +574,7 @@ entry_data_free(EntryData* edata)
 }
 
 GtkEntry*
-ptk_path_entry_new(PtkFileBrowser* file_browser)
+ptk_path_entry_new(ptk::browser* file_browser)
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_has_frame(entry, true);

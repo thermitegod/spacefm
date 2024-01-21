@@ -187,7 +187,7 @@ xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* ev
     xset_t set2;
     panel_t p = 0;
     xset::main_window_panel mode;
-    PtkFileBrowser* file_browser = nullptr;
+    ptk::browser* file_browser = nullptr;
     MainWindow* main_window = main_window_get_last_active();
 
     // set may be a submenu that does not match tool_type
@@ -260,7 +260,7 @@ xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* ev
             main_window_toggle_thumbnails_all_windows();
             break;
         case xset::tool::large_icons:
-            if (!file_browser->is_view_mode(ptk::file_browser::view_mode::icon_view))
+            if (!file_browser->is_view_mode(ptk::browser::view_mode::icon_view))
             {
                 xset_set_b_panel(p, xset::panel::list_large, !file_browser->using_large_icons());
                 on_popup_list_large(nullptr, file_browser);
@@ -322,7 +322,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
 
     // get and focus browser
-    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     file_browser->focus_me();
     set->browser = file_browser;
 
@@ -457,7 +457,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     }
 
     // get and focus browser
-    PtkFileBrowser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
     file_browser->focus_me();
 
     if (button == 1)
@@ -493,8 +493,8 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 }
 
 static GtkWidget*
-xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
-                  i32 icon_size, const xset_t& set, bool show_tooltips)
+xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar, i32 icon_size,
+                  const xset_t& set, bool show_tooltips)
 {
     if (!set)
     {
@@ -982,7 +982,7 @@ xset_add_toolitem(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* t
 }
 
 void
-xset_fill_toolbar(GtkWidget* parent, PtkFileBrowser* file_browser, GtkToolbar* toolbar,
+xset_fill_toolbar(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar,
                   const xset_t& set_parent, bool show_tooltips)
 {
     static constexpr std::array<xset::tool, 7> default_tools{

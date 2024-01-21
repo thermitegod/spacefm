@@ -23,18 +23,18 @@
 #include "xset/xset.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
-void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+void xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
                    const std::vector<xset::name>& submenu_entries);
 #elif (GTK_MAJOR_VERSION == 3)
-void xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+void xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                    const std::vector<xset::name>& submenu_entries);
 #endif
 
 #if (GTK_MAJOR_VERSION == 4)
-GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
+GtkWidget* xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu,
                              GtkEventController* accel_group, const xset_t& set);
 #elif (GTK_MAJOR_VERSION == 3)
-GtkWidget* xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu,
+GtkWidget* xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu,
                              GtkAccelGroup* accel_group, const xset_t& set);
 #endif
 

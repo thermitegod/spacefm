@@ -27,10 +27,10 @@
 
 struct EntryData
 {
-    EntryData(PtkFileBrowser* browser);
+    EntryData(ptk::browser* browser);
 
-    PtkFileBrowser* browser{nullptr};
+    ptk::browser* browser{nullptr};
     u32 seek_timer{0};
 };
 
-GtkEntry* ptk_path_entry_new(PtkFileBrowser* file_browser);
+GtkEntry* ptk_path_entry_new(ptk::browser* file_browser);

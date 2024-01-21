@@ -220,7 +220,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
             const i32 total_pages = gtk_notebook_get_n_pages(notebook);
             for (const auto i : std::views::iota(0z, total_pages))
             {
-                PtkFileBrowser* file_browser =
+                ptk::browser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 // update views
                 gtk_widget_destroy(file_browser->folder_view());
@@ -332,7 +332,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
             const i32 total_pages = gtk_notebook_get_n_pages(notebook);
             for (const auto i : std::views::iota(0z, total_pages))
             {
-                PtkFileBrowser* file_browser =
+                ptk::browser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 // update views
                 gtk_widget_destroy(file_browser->folder_view());
@@ -485,7 +485,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    PtkFileBrowser* file_browser =
+                    ptk::browser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                     file_browser->set_single_click(app_settings.single_click());
                 }
@@ -525,7 +525,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    PtkFileBrowser* file_browser =
+                    ptk::browser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                     // TODO
                     (void)file_browser;
@@ -714,7 +714,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    PtkFileBrowser* file_browser =
+                    ptk::browser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                     GtkWidget* tab_label = window->create_tab_label(file_browser);
                     gtk_notebook_set_tab_label(notebook,

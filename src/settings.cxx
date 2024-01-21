@@ -192,7 +192,7 @@ save_settings()
                         std::string tabs;
                         for (const auto i : std::views::iota(0z, pages))
                         {
-                            PtkFileBrowser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
+                            ptk::browser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), i));
                             tabs = std::format("{}{}{}",
                                                tabs,

@@ -55,7 +55,7 @@
 
 struct ParentInfo
 {
-    PtkFileBrowser* file_browser{nullptr};
+    ptk::browser* file_browser{nullptr};
     std::filesystem::path cwd{};
 };
 
@@ -134,8 +134,8 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 void
 ptk_open_files_with_app(const std::filesystem::path& cwd,
                         const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                        const std::string_view app_desktop, PtkFileBrowser* file_browser,
-                        bool xforce, bool xnever)
+                        const std::string_view app_desktop, ptk::browser* file_browser, bool xforce,
+                        bool xnever)
 {
     if (selected_files.empty())
     {
@@ -177,8 +177,9 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
             Glib::spawn_command_line_async(file->path());
             if (file_browser)
             {
-                file_browser->run_event<spacefm::signal::open_item>(file->path(),
-                                                                    ptk::open_action::file);
+                file_browser->run_event<spacefm::signal::open_item>(
+                    file->path(),
+                    ptk::browser::open_action::file);
             }
             continue;
         }
@@ -291,13 +292,15 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
         if (dirs_to_open.size() == 1)
         {
             file_browser->run_event<spacefm::signal::open_item>(dirs_to_open.front(),
-                                                                ptk::open_action::dir);
+                                                                ptk::browser::open_action::dir);
         }
         else
         {
             for (const auto& dir : dirs_to_open)
             {
-                file_browser->run_event<spacefm::signal::open_item>(dir, ptk::open_action::new_tab);
+                file_browser->run_event<spacefm::signal::open_item>(
+                    dir,
+                    ptk::browser::open_action::new_tab);
             }
         }
     }

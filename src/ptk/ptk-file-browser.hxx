@@ -37,62 +37,57 @@
 
 #include "types.hxx"
 
-#define PTK_FILE_BROWSER(obj)             (static_cast<PtkFileBrowser*>(obj))
-#define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<PtkFileBrowser*>(obj))
+#define PTK_FILE_BROWSER(obj)             (static_cast<ptk::browser*>(obj))
+#define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))
 
 #define PTK_TYPE_FILE_BROWSER (ptk_file_browser_get_type())
-
-namespace ptk
-{
-enum class open_action
-{
-    dir,
-    new_tab,
-    new_window,
-    terminal,
-    file,
-};
-}
-
-namespace ptk::file_browser
-{
-enum class view_mode
-{
-    icon_view,
-    list_view,
-    compact_view,
-};
-
-enum class sort_order
-{
-    name,
-    size,
-    bytes,
-    type,
-    mime,
-    perm,
-    owner,
-    group,
-    atime,
-    btime,
-    ctime,
-    mtime,
-};
-
-enum class chdir_mode
-{
-    normal,
-    back,
-    forward,
-};
-
-} // namespace ptk::file_browser
 
 // forward declare
 struct MainWindow;
 
-struct PtkFileBrowser
+namespace ptk
 {
+struct browser
+{
+    enum class view_mode
+    {
+        icon_view,
+        list_view,
+        compact_view,
+    };
+
+    enum class sort_order
+    {
+        name,
+        size,
+        bytes,
+        type,
+        mime,
+        perm,
+        owner,
+        group,
+        atime,
+        btime,
+        ctime,
+        mtime,
+    };
+
+    enum class chdir_mode
+    {
+        normal,
+        back,
+        forward,
+    };
+
+    enum class open_action
+    {
+        dir,
+        new_tab,
+        new_window,
+        terminal,
+        file,
+    };
+
     /* parent class */
     GtkBox parent;
 
@@ -111,8 +106,8 @@ struct PtkFileBrowser
 
     // sorting
     GtkSortType sort_type_;
-    ptk::file_browser::sort_order sort_order_{ptk::file_browser::sort_order::perm};
-    ptk::file_browser::view_mode view_mode_{ptk::file_browser::view_mode::compact_view};
+    ptk::browser::sort_order sort_order_{ptk::browser::sort_order::perm};
+    ptk::browser::view_mode view_mode_{ptk::browser::view_mode::compact_view};
 
     bool single_click_{true};
     bool show_hidden_files_{true};
@@ -171,8 +166,7 @@ struct PtkFileBrowser
         void reset() noexcept;
 
         [[nodiscard]] const std::filesystem::path&
-        path(const ptk::file_browser::chdir_mode mode =
-                 ptk::file_browser::chdir_mode::normal) const noexcept;
+        path(const ptk::browser::chdir_mode mode = ptk::browser::chdir_mode::normal) const noexcept;
 
       private:
         std::vector<std::filesystem::path> forward_{};
@@ -189,9 +183,8 @@ struct PtkFileBrowser
     std::unique_ptr<selection_history_data> selection_history;
 
   public:
-    bool chdir(
-        const std::filesystem::path& new_path,
-        const ptk::file_browser::chdir_mode mode = ptk::file_browser::chdir_mode::normal) noexcept;
+    bool chdir(const std::filesystem::path& new_path,
+               const ptk::browser::chdir_mode mode = ptk::browser::chdir_mode::normal) noexcept;
 
     const std::filesystem::path& cwd() const noexcept;
     void canon(const std::filesystem::path& path) noexcept;
@@ -246,7 +239,7 @@ struct PtkFileBrowser
     void copycmd(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                  const std::filesystem::path& cwd, xset::name setname) noexcept;
 
-    void set_sort_order(ptk::file_browser::sort_order order) noexcept;
+    void set_sort_order(ptk::browser::sort_order order) noexcept;
     void set_sort_type(GtkSortType order) noexcept;
     void set_sort_extra(xset::name setname) const noexcept;
     void read_sort_extra() const noexcept;
@@ -313,15 +306,9 @@ struct PtkFileBrowser
     void pending_drag_status_tree(bool val) noexcept;
 
     // sorting
-
-    GtkSortType sort_type() const noexcept;
     bool is_sort_type(GtkSortType type) const noexcept;
-
-    ptk::file_browser::sort_order sort_order() const noexcept;
-    bool is_sort_order(ptk::file_browser::sort_order type) const noexcept;
-
-    ptk::file_browser::view_mode view_mode() const noexcept;
-    bool is_view_mode(ptk::file_browser::view_mode type) const noexcept;
+    bool is_sort_order(const ptk::browser::sort_order type) const noexcept;
+    bool is_view_mode(const ptk::browser::view_mode type) const noexcept;
 
     // directory view
 
@@ -428,7 +415,7 @@ struct PtkFileBrowser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::open_item, void>
-    run_event(const std::filesystem::path& path, ptk::open_action action)
+    run_event(const std::filesystem::path& path, ptk::browser::open_action action)
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::open_item");
         this->evt_open_file.emit(this, path, action);
@@ -461,14 +448,14 @@ struct PtkFileBrowser
     // Signals
   private:
     // Signal types
-    sigc::signal<void(PtkFileBrowser*)> evt_chdir_before;
-    sigc::signal<void(PtkFileBrowser*)> evt_chdir_begin;
-    sigc::signal<void(PtkFileBrowser*)> evt_chdir_after;
-    sigc::signal<void(PtkFileBrowser*, const std::filesystem::path&, ptk::open_action)>
+    sigc::signal<void(ptk::browser*)> evt_chdir_before;
+    sigc::signal<void(ptk::browser*)> evt_chdir_begin;
+    sigc::signal<void(ptk::browser*)> evt_chdir_after;
+    sigc::signal<void(ptk::browser*, const std::filesystem::path&, ptk::browser::open_action)>
         evt_open_file;
-    sigc::signal<void(PtkFileBrowser*)> evt_change_content;
-    sigc::signal<void(PtkFileBrowser*)> evt_change_sel;
-    sigc::signal<void(PtkFileBrowser*)> evt_change_pane_mode;
+    sigc::signal<void(ptk::browser*)> evt_change_content;
+    sigc::signal<void(ptk::browser*)> evt_change_sel;
+    sigc::signal<void(ptk::browser*)> evt_change_pane_mode;
 
   public:
     // Signals we connect to
@@ -477,19 +464,20 @@ struct PtkFileBrowser
     sigc::connection signal_file_changed;
     sigc::connection signal_file_listed;
 };
+} // namespace ptk
 
 struct PtkFileBrowserClass
 {
     GtkPanedClass parent;
 
     /* Default signal handlers */
-    void (*before_chdir)(PtkFileBrowser* file_browser, const std::filesystem::path& path);
-    void (*begin_chdir)(PtkFileBrowser* file_browser);
-    void (*after_chdir)(PtkFileBrowser* file_browser);
-    void (*open_item)(PtkFileBrowser* file_browser, const std::filesystem::path& path, i32 action);
-    void (*content_change)(PtkFileBrowser* file_browser);
-    void (*sel_change)(PtkFileBrowser* file_browser);
-    void (*pane_mode_change)(PtkFileBrowser* file_browser);
+    void (*before_chdir)(ptk::browser* file_browser, const std::filesystem::path& path);
+    void (*begin_chdir)(ptk::browser* file_browser);
+    void (*after_chdir)(ptk::browser* file_browser);
+    void (*open_item)(ptk::browser* file_browser, const std::filesystem::path& path, i32 action);
+    void (*content_change)(ptk::browser* file_browser);
+    void (*sel_change)(ptk::browser* file_browser);
+    void (*pane_mode_change)(ptk::browser* file_browser);
 };
 
 GType ptk_file_browser_get_type();
@@ -502,28 +490,28 @@ bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
 
 void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget);
 
-bool ptk_file_browser_delay_focus(PtkFileBrowser* file_browser);
+bool ptk_file_browser_delay_focus(ptk::browser* file_browser);
 
 // xset callback wrapper functions
-void ptk_file_browser_go_home(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_default(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_back(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_forward(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_go_up(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_go_home(GtkWidget* item, ptk::browser* file_browser);
+void ptk_file_browser_go_default(GtkWidget* item, ptk::browser* file_browser);
+void ptk_file_browser_go_tab(GtkMenuItem* item, ptk::browser* file_browser);
+void ptk_file_browser_go_back(GtkWidget* item, ptk::browser* file_browser);
+void ptk_file_browser_go_forward(GtkWidget* item, ptk::browser* file_browser);
+void ptk_file_browser_go_up(GtkWidget* item, ptk::browser* file_browser);
 
-void ptk_file_browser_refresh(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_refresh(GtkWidget* item, ptk::browser* file_browser);
 
-void ptk_file_browser_new_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_new_tab_here(GtkMenuItem* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_close_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_restore_tab(GtkMenuItem* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_set_default_folder(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_new_tab(GtkMenuItem* item, ptk::browser* file_browser);
+void ptk_file_browser_new_tab_here(GtkMenuItem* item, ptk::browser* file_browser);
+void ptk_file_browser_close_tab(GtkMenuItem* item, ptk::browser* file_browser);
+void ptk_file_browser_restore_tab(GtkMenuItem* item, ptk::browser* file_browser);
+void ptk_file_browser_set_default_folder(GtkWidget* item, ptk::browser* file_browser);
 
-void ptk_file_browser_select_all(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_unselect_all(GtkWidget* item, PtkFileBrowser* file_browser);
-void ptk_file_browser_invert_selection(GtkWidget* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_select_all(GtkWidget* item, ptk::browser* file_browser);
+void ptk_file_browser_unselect_all(GtkWidget* item, ptk::browser* file_browser);
+void ptk_file_browser_invert_selection(GtkWidget* item, ptk::browser* file_browser);
 
-void ptk_file_browser_focus(GtkMenuItem* item, PtkFileBrowser* file_browser);
+void ptk_file_browser_focus(GtkMenuItem* item, ptk::browser* file_browser);
 bool ptk_file_browser_slider_release(GtkWidget* widget, GdkEvent* event,
-                                     PtkFileBrowser* file_browser);
+                                     ptk::browser* file_browser);

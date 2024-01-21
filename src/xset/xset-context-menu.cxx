@@ -45,11 +45,11 @@
 
 #if (GTK_MAJOR_VERSION == 4)
 void
-xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
               const std::vector<xset::name>& submenu_entries)
 #elif (GTK_MAJOR_VERSION == 3)
 void
-xset_add_menu(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
               const std::vector<xset::name>& submenu_entries)
 #endif
 {
@@ -93,11 +93,11 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
 
 #if (GTK_MAJOR_VERSION == 4)
 GtkWidget*
-xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
                   const xset_t& set)
 #elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
-xset_add_menuitem(PtkFileBrowser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                   const xset_t& set)
 #endif
 {

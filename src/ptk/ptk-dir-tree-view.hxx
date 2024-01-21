@@ -26,7 +26,7 @@
 #include "ptk/ptk-file-browser.hxx"
 
 /* Create a new dir tree view */
-GtkWidget* ptk_dir_tree_view_new(PtkFileBrowser* browser, bool show_hidden);
+GtkWidget* ptk_dir_tree_view_new(ptk::browser* browser, bool show_hidden);
 
 bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path);
 

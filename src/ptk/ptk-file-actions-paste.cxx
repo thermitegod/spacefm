@@ -40,7 +40,7 @@
 #include "ptk/ptk-file-actions-paste.hxx"
 
 void
-ptk_paste_file(PtkFileBrowser* file_browser, const std::filesystem::path& cwd)
+ptk_paste_file(ptk::browser* file_browser, const std::filesystem::path& cwd)
 {
     bool is_cut = false;
     i32 missing_targets = 0;

@@ -29,12 +29,12 @@
 #include "ptk/ptk-file-browser.hxx"
 
 // Location View
-GtkWidget* ptk_location_view_new(PtkFileBrowser* file_browser);
+GtkWidget* ptk_location_view_new(ptk::browser* file_browser);
 bool ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& current_path);
 void ptk_location_view_on_action(GtkWidget* view, const xset_t& set);
 const std::shared_ptr<vfs::volume> ptk_location_view_get_selected_vol(GtkTreeView* location_view);
 void update_volume_icons();
-void ptk_location_view_mount_network(PtkFileBrowser* file_browser, const std::string_view url,
+void ptk_location_view_mount_network(ptk::browser* file_browser, const std::string_view url,
                                      bool new_tab, bool force_new_mount);
-void ptk_location_view_dev_menu(GtkWidget* parent, PtkFileBrowser* file_browser, GtkWidget* menu);
+void ptk_location_view_dev_menu(GtkWidget* parent, ptk::browser* file_browser, GtkWidget* menu);
 bool ptk_location_view_open_block(const std::filesystem::path& block, bool new_tab);
