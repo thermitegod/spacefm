@@ -20,6 +20,8 @@
 #include <filesystem>
 
 #include <span>
+#include <unordered_map>
+#include <vector>
 
 #include <optional>
 
@@ -87,33 +89,7 @@ enum class chdir_mode
 } // namespace ptk::file_browser
 
 // forward declare
-struct PtkFileBrowser;
 struct MainWindow;
-
-struct selection_history_data;
-
-struct navigation_history_data
-{
-    void go_back() noexcept;
-    bool has_back() const noexcept;
-    const std::vector<std::filesystem::path>& get_back() const noexcept;
-
-    void go_forward() noexcept;
-    bool has_forward() const noexcept;
-    const std::vector<std::filesystem::path>& get_forward() const noexcept;
-
-    void new_forward(const std::filesystem::path& path) noexcept;
-
-    void reset() noexcept;
-
-    const std::filesystem::path& path(const ptk::file_browser::chdir_mode mode =
-                                          ptk::file_browser::chdir_mode::normal) const noexcept;
-
-  private:
-    std::vector<std::filesystem::path> forward_{};
-    std::vector<std::filesystem::path> back_{};
-    std::filesystem::path current_{vfs::user::home()};
-};
 
 struct PtkFileBrowser
 {
@@ -180,8 +156,37 @@ struct PtkFileBrowser
     GSList* toolbar_widgets[10];
 
     // private:
-    std::unique_ptr<selection_history_data> selection_history;
+    struct navigation_history_data
+    {
+        void go_back() noexcept;
+        [[nodiscard]] bool has_back() const noexcept;
+        [[nodiscard]] const std::span<const std::filesystem::path> get_back() const noexcept;
+
+        void go_forward() noexcept;
+        [[nodiscard]] bool has_forward() const noexcept;
+        [[nodiscard]] const std::span<const std::filesystem::path> get_forward() const noexcept;
+
+        void new_forward(const std::filesystem::path& path) noexcept;
+
+        void reset() noexcept;
+
+        [[nodiscard]] const std::filesystem::path&
+        path(const ptk::file_browser::chdir_mode mode =
+                 ptk::file_browser::chdir_mode::normal) const noexcept;
+
+      private:
+        std::vector<std::filesystem::path> forward_{};
+        std::vector<std::filesystem::path> back_{};
+        std::filesystem::path current_{vfs::user::home()};
+    };
     std::unique_ptr<navigation_history_data> navigation_history;
+
+    struct selection_history_data
+    {
+        std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>>
+            selection_history{};
+    };
+    std::unique_ptr<selection_history_data> selection_history;
 
   public:
     bool chdir(

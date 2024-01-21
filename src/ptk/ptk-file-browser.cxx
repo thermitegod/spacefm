@@ -205,14 +205,8 @@ std::vector<std::string> xset_cmd_history;
 // history of closed tabs
 static std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
-struct selection_history_data
-{
-    std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>>
-        selection_history{};
-};
-
 void
-navigation_history_data::go_back() noexcept
+PtkFileBrowser::navigation_history_data::go_back() noexcept
 {
     if (this->back_.empty())
     {
@@ -225,19 +219,19 @@ navigation_history_data::go_back() noexcept
 }
 
 bool
-navigation_history_data::has_back() const noexcept
+PtkFileBrowser::navigation_history_data::has_back() const noexcept
 {
     return !this->back_.empty();
 }
 
-const std::vector<std::filesystem::path>&
-navigation_history_data::get_back() const noexcept
+const std::span<const std::filesystem::path>
+PtkFileBrowser::navigation_history_data::get_back() const noexcept
 {
     return this->back_;
 }
 
 void
-navigation_history_data::go_forward() noexcept
+PtkFileBrowser::navigation_history_data::go_forward() noexcept
 {
     if (this->forward_.empty())
     {
@@ -250,19 +244,19 @@ navigation_history_data::go_forward() noexcept
 }
 
 bool
-navigation_history_data::has_forward() const noexcept
+PtkFileBrowser::navigation_history_data::has_forward() const noexcept
 {
     return !this->forward_.empty();
 }
 
-const std::vector<std::filesystem::path>&
-navigation_history_data::get_forward() const noexcept
+const std::span<const std::filesystem::path>
+PtkFileBrowser::navigation_history_data::get_forward() const noexcept
 {
     return this->forward_;
 }
 
 void
-navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
+PtkFileBrowser::navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
 {
     // ztd::logger::debug("New Forward navigation history");
     if (!this->current_.empty())
@@ -274,14 +268,15 @@ navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
 }
 
 void
-navigation_history_data::reset() noexcept
+PtkFileBrowser::navigation_history_data::reset() noexcept
 {
     this->back_.clear();
     this->forward_.clear();
 }
 
 const std::filesystem::path&
-navigation_history_data::path(const ptk::file_browser::chdir_mode mode) const noexcept
+PtkFileBrowser::navigation_history_data::path(
+    const ptk::file_browser::chdir_mode mode) const noexcept
 {
     switch (mode)
     {
@@ -1002,8 +997,8 @@ ptk_file_browser_init(PtkFileBrowser* file_browser)
     g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
     // clang-format on
 
-    file_browser->selection_history = std::make_unique<selection_history_data>();
-    file_browser->navigation_history = std::make_unique<navigation_history_data>();
+    file_browser->selection_history = std::make_unique<PtkFileBrowser::selection_history_data>();
+    file_browser->navigation_history = std::make_unique<PtkFileBrowser::navigation_history_data>();
 }
 
 static void
