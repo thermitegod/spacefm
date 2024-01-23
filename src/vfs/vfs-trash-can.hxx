@@ -43,11 +43,11 @@ struct trash_can
     [[nodiscard]] static const std::shared_ptr<vfs::trash_can> create() noexcept;
 
     // Move a file or directory into the trash.
-    static bool trash(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static bool trash(const std::filesystem::path& path) noexcept;
 
     // Restore a file or directory from the trash to its original location.
     // Currently a NOOP
-    static bool restore(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static bool restore(const std::filesystem::path& path) noexcept;
 
     // Empty all trash cans
     // Currently a NOOP
@@ -65,7 +65,8 @@ struct trash_can
         ~trash_dir() = default;
 
         // Get a unique name for use within the trash directory
-        const std::string unique_name(const std::filesystem::path& path) const noexcept;
+        [[nodiscard]] const std::string
+        unique_name(const std::filesystem::path& path) const noexcept;
 
         void create_trash_dir() const noexcept;
 
@@ -78,7 +79,7 @@ struct trash_can
                   const std::string_view target_name) const noexcept;
 
       private:
-        static const std::string
+        [[nodiscard]] static const std::string
         create_trash_date(const std::chrono::system_clock::time_point time_point) noexcept;
 
         // Create a directory if it does not exist
@@ -93,13 +94,15 @@ struct trash_can
     };
 
     // return the mount point id for the file or directory
-    static u64 mount_id(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static u64 mount_id(const std::filesystem::path& path) noexcept;
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
-    static const std::filesystem::path toplevel(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static const std::filesystem::path
+    toplevel(const std::filesystem::path& path) noexcept;
 
     // Return the trash dir to use for 'path'.
-    const std::shared_ptr<trash_dir> get_trash_dir(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] const std::shared_ptr<trash_dir>
+    get_trash_dir(const std::filesystem::path& path) noexcept;
 
     // Data Members
     std::unordered_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;

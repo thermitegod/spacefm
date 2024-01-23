@@ -121,16 +121,17 @@ struct file_task : public std::enable_shared_from_this<file_task>
     void abort_task();
 
   public: // private: // TODO
-    bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                         char** new_dest_file);
-    bool check_dest_in_src(const std::filesystem::path& src_dir);
+    [[nodiscard]] bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
+                                       char** new_dest_file);
+    [[nodiscard]] bool check_dest_in_src(const std::filesystem::path& src_dir);
 
     void file_copy(const std::filesystem::path& src_file);
-    bool do_file_copy(const std::filesystem::path& src_file,
-                      const std::filesystem::path& dest_file);
+    [[nodiscard]] bool do_file_copy(const std::filesystem::path& src_file,
+                                    const std::filesystem::path& dest_file);
 
     void file_move(const std::filesystem::path& src_file);
-    i32 do_file_move(const std::filesystem::path& src_file, const std::filesystem::path& dest_path);
+    [[nodiscard]] i32 do_file_move(const std::filesystem::path& src_file,
+                                   const std::filesystem::path& dest_path);
 
     void file_trash(const std::filesystem::path& src_file);
     void file_delete(const std::filesystem::path& src_file);
@@ -138,9 +139,9 @@ struct file_task : public std::enable_shared_from_this<file_task>
     void file_chown_chmod(const std::filesystem::path& src_file);
     void file_exec(const std::filesystem::path& src_file);
 
-    bool should_abort();
+    [[nodiscard]] bool should_abort();
 
-    u64 get_total_size_of_dir(const std::filesystem::path& path);
+    [[nodiscard]] u64 get_total_size_of_dir(const std::filesystem::path& path);
 
     void append_add_log(const std::string_view msg) const;
 

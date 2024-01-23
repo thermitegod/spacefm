@@ -45,9 +45,9 @@ struct async_thread : public std::enable_shared_from_this<async_thread>
     void run();
     void cancel();
 
-    bool is_running() const;
-    bool is_finished() const;
-    bool is_canceled() const;
+    [[nodiscard]] bool is_running() const;
+    [[nodiscard]] bool is_finished() const;
+    [[nodiscard]] bool is_canceled() const;
 
     void cleanup(bool finalize);
 

@@ -59,11 +59,11 @@ struct desktop
     [[nodiscard]] bool open_files(const std::filesystem::path& working_dir,
                                   const std::span<const std::filesystem::path> file_paths) const;
 
-    const std::vector<std::string> supported_mime_types() const noexcept;
+    [[nodiscard]] const std::vector<std::string> supported_mime_types() const noexcept;
 
   private:
-    bool open_multiple_files() const noexcept;
-    const std::optional<std::vector<std::vector<std::string>>>
+    [[nodiscard]] bool open_multiple_files() const noexcept;
+    [[nodiscard]] const std::optional<std::vector<std::vector<std::string>>>
     app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
                                    bool quote_file_list) const noexcept;
     void exec_in_terminal(const std::filesystem::path& cwd,

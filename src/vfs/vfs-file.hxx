@@ -43,37 +43,37 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] static const std::shared_ptr<vfs::file>
     create(const std::filesystem::path& path) noexcept;
 
-    const std::string_view name() const noexcept;
+    [[nodiscard]] const std::string_view name() const noexcept;
 
-    const std::filesystem::path& path() const noexcept;
-    const std::string_view uri() const noexcept;
+    [[nodiscard]] const std::filesystem::path& path() const noexcept;
+    [[nodiscard]] const std::string_view uri() const noexcept;
 
-    u64 size() const noexcept;
-    u64 size_on_disk() const noexcept;
+    [[nodiscard]] u64 size() const noexcept;
+    [[nodiscard]] u64 size_on_disk() const noexcept;
 
-    const std::string_view display_size() const noexcept;
-    const std::string_view display_size_in_bytes() const noexcept;
-    const std::string_view display_size_on_disk() const noexcept;
+    [[nodiscard]] const std::string_view display_size() const noexcept;
+    [[nodiscard]] const std::string_view display_size_in_bytes() const noexcept;
+    [[nodiscard]] const std::string_view display_size_on_disk() const noexcept;
 
-    u64 blocks() const noexcept;
+    [[nodiscard]] u64 blocks() const noexcept;
 
-    std::filesystem::perms permissions() const noexcept;
+    [[nodiscard]] std::filesystem::perms permissions() const noexcept;
 
-    const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
+    [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
     void reload_mime_type() noexcept;
 
-    const std::string_view display_owner() const noexcept;
-    const std::string_view display_group() const noexcept;
-    const std::string_view display_atime() const noexcept;
-    const std::string_view display_btime() const noexcept;
-    const std::string_view display_ctime() const noexcept;
-    const std::string_view display_mtime() const noexcept;
-    const std::string_view display_permissions() noexcept;
+    [[nodiscard]] const std::string_view display_owner() const noexcept;
+    [[nodiscard]] const std::string_view display_group() const noexcept;
+    [[nodiscard]] const std::string_view display_atime() const noexcept;
+    [[nodiscard]] const std::string_view display_btime() const noexcept;
+    [[nodiscard]] const std::string_view display_ctime() const noexcept;
+    [[nodiscard]] const std::string_view display_mtime() const noexcept;
+    [[nodiscard]] const std::string_view display_permissions() noexcept;
 
-    const std::chrono::system_clock::time_point atime() const noexcept;
-    const std::chrono::system_clock::time_point btime() const noexcept;
-    const std::chrono::system_clock::time_point ctime() const noexcept;
-    const std::chrono::system_clock::time_point mtime() const noexcept;
+    [[nodiscard]] const std::chrono::system_clock::time_point atime() const noexcept;
+    [[nodiscard]] const std::chrono::system_clock::time_point btime() const noexcept;
+    [[nodiscard]] const std::chrono::system_clock::time_point ctime() const noexcept;
+    [[nodiscard]] const std::chrono::system_clock::time_point mtime() const noexcept;
 
     enum class thumbnail_size
     {
@@ -84,34 +84,36 @@ struct file : public std::enable_shared_from_this<file>
     GdkPixbuf* thumbnail(const thumbnail_size size) const noexcept;
     void load_thumbnail(const thumbnail_size size) noexcept;
     void unload_thumbnail(const thumbnail_size size) noexcept;
-    bool is_thumbnail_loaded(const thumbnail_size size) const noexcept;
+    [[nodiscard]] bool is_thumbnail_loaded(const thumbnail_size size) const noexcept;
 
-    bool is_directory() const noexcept;
-    bool is_regular_file() const noexcept;
-    bool is_symlink() const noexcept;
-    bool is_socket() const noexcept;
-    bool is_fifo() const noexcept;
-    bool is_block_file() const noexcept;
-    bool is_character_file() const noexcept;
-    bool is_other() const noexcept;
+    [[nodiscard]] bool is_directory() const noexcept;
+    [[nodiscard]] bool is_regular_file() const noexcept;
+    [[nodiscard]] bool is_symlink() const noexcept;
+    [[nodiscard]] bool is_socket() const noexcept;
+    [[nodiscard]] bool is_fifo() const noexcept;
+    [[nodiscard]] bool is_block_file() const noexcept;
+    [[nodiscard]] bool is_character_file() const noexcept;
+    [[nodiscard]] bool is_other() const noexcept;
 
-    bool is_hidden() const noexcept;
+    [[nodiscard]] bool is_hidden() const noexcept;
 
-    bool is_desktop_entry() const noexcept;
+    [[nodiscard]] bool is_desktop_entry() const noexcept;
 
     // File attributes
-    bool is_compressed() const noexcept; // file is compressed by the filesystem
-    bool is_immutable() const noexcept;  // file cannot be modified
-    bool is_append() const noexcept;     // file can only be opened in append mode for writing
-    bool is_nodump() const noexcept;     // file is not a candidate for backup
-    bool is_encrypted() const noexcept;  // file requires a key to be encrypted by the filesystem
-    bool is_automount() const noexcept;  // file is a automount trigger
-    bool is_mount_root() const noexcept; // file is the root of a mount
-    bool is_verity() const noexcept;     // file has fs-verity enabled
-    bool is_dax() const noexcept;        // file is in the DAX (cpu direct access) state
+    [[nodiscard]] bool is_compressed() const noexcept; // file is compressed by the filesystem
+    [[nodiscard]] bool is_immutable() const noexcept;  // file cannot be modified
+    [[nodiscard]] bool
+    is_append() const noexcept; // file can only be opened in append mode for writing
+    [[nodiscard]] bool is_nodump() const noexcept; // file is not a candidate for backup
+    [[nodiscard]] bool
+    is_encrypted() const noexcept; // file requires a key to be encrypted by the filesystem
+    [[nodiscard]] bool is_automount() const noexcept;  // file is a automount trigger
+    [[nodiscard]] bool is_mount_root() const noexcept; // file is the root of a mount
+    [[nodiscard]] bool is_verity() const noexcept;     // file has fs-verity enabled
+    [[nodiscard]] bool is_dax() const noexcept; // file is in the DAX (cpu direct access) state
 
     // update file info
-    bool update() noexcept;
+    [[nodiscard]] bool update() noexcept;
 
   private:
     ztd::statx file_stat_; // cached copy of struct statx()
@@ -142,9 +144,9 @@ struct file : public std::enable_shared_from_this<file>
   private:
     void load_special_info() noexcept;
 
-    const std::string create_file_perm_string() const noexcept;
+    [[nodiscard]] const std::string create_file_perm_string() const noexcept;
 
-    const std::string_view
+    [[nodiscard]] const std::string_view
     special_directory_get_icon_name(const bool symbolic = false) const noexcept;
 };
 } // namespace vfs

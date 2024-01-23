@@ -56,21 +56,21 @@ struct dir : public std::enable_shared_from_this<dir>
     // reload mime types in every vfs::dir
     static void global_reload_mime_type() noexcept;
 
-    const std::filesystem::path& path() const noexcept;
-    const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
+    [[nodiscard]] const std::filesystem::path& path() const noexcept;
+    [[nodiscard]] const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
 
     void refresh() noexcept;
 
-    u64 hidden_files() const noexcept;
+    [[nodiscard]] u64 hidden_files() const noexcept;
 
-    bool avoid_changes() const noexcept;
+    [[nodiscard]] bool avoid_changes() const noexcept;
     void update_avoid_changes() noexcept;
 
-    bool is_loaded() const noexcept;
-    bool is_file_listed() const noexcept;
-    bool is_directory_empty() const noexcept;
+    [[nodiscard]] bool is_loaded() const noexcept;
+    [[nodiscard]] bool is_file_listed() const noexcept;
+    [[nodiscard]] bool is_directory_empty() const noexcept;
 
-    bool add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept;
+    [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept;
 
     void load_thumbnail(const std::shared_ptr<vfs::file>& file,
                         const vfs::file::thumbnail_size size) noexcept;
@@ -101,12 +101,13 @@ struct dir : public std::enable_shared_from_this<dir>
     // signal callback
     void on_list_task_finished(bool is_cancelled);
 
-    const std::shared_ptr<vfs::file> find_file(const std::filesystem::path& filename) noexcept;
-    bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
+    [[nodiscard]] const std::shared_ptr<vfs::file>
+    find_file(const std::filesystem::path& filename) noexcept;
+    [[nodiscard]] bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
 
     // dir .hidden file
     void load_user_hidden_files() noexcept;
-    bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
+    [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
     std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
 
     std::filesystem::path path_{};

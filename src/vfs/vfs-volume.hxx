@@ -64,32 +64,32 @@ struct volume : public std::enable_shared_from_this<volume>
                                 const vfs::volume::state state, void* user_data);
 
   public:
-    const std::string_view display_name() const noexcept;
-    const std::string_view mount_point() const noexcept;
-    const std::string_view device_file() const noexcept;
-    const std::string_view fstype() const noexcept;
-    const std::string_view icon() const noexcept;
-    const std::string_view udi() const noexcept;
-    const std::string_view label() const noexcept;
+    [[nodiscard]] const std::string_view display_name() const noexcept;
+    [[nodiscard]] const std::string_view mount_point() const noexcept;
+    [[nodiscard]] const std::string_view device_file() const noexcept;
+    [[nodiscard]] const std::string_view fstype() const noexcept;
+    [[nodiscard]] const std::string_view icon() const noexcept;
+    [[nodiscard]] const std::string_view udi() const noexcept;
+    [[nodiscard]] const std::string_view label() const noexcept;
 
-    dev_t devnum() const noexcept;
-    u64 size() const noexcept;
+    [[nodiscard]] dev_t devnum() const noexcept;
+    [[nodiscard]] u64 size() const noexcept;
 
-    const std::optional<std::string> device_mount_cmd() noexcept;
-    const std::optional<std::string> device_unmount_cmd() noexcept;
+    [[nodiscard]] const std::optional<std::string> device_mount_cmd() noexcept;
+    [[nodiscard]] const std::optional<std::string> device_unmount_cmd() noexcept;
 
-    bool is_device_type(const vfs::volume::device_type type) const noexcept;
+    [[nodiscard]] bool is_device_type(const vfs::volume::device_type type) const noexcept;
 
-    bool is_mounted() const noexcept;
-    bool is_removable() const noexcept;
-    bool is_mountable() const noexcept;
+    [[nodiscard]] bool is_mounted() const noexcept;
+    [[nodiscard]] bool is_removable() const noexcept;
+    [[nodiscard]] bool is_mountable() const noexcept;
 
-    bool is_user_visible() const noexcept;
+    [[nodiscard]] bool is_user_visible() const noexcept;
 
-    bool is_optical() const noexcept;
-    bool requires_eject() const noexcept;
+    [[nodiscard]] bool is_optical() const noexcept;
+    [[nodiscard]] bool requires_eject() const noexcept;
 
-    bool ever_mounted() const noexcept;
+    [[nodiscard]] bool ever_mounted() const noexcept;
 
     // private:
     void set_info() noexcept;

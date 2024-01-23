@@ -53,7 +53,7 @@ struct monitor
                                                                const callback_t& callback) noexcept;
 
   private:
-    bool on_inotify_event(const Glib::IOCondition condition) const noexcept;
+    [[nodiscard]] bool on_inotify_event(const Glib::IOCondition condition) const noexcept;
     void dispatch_event(const event event, const std::filesystem::path& path) const noexcept;
 
     i32 inotify_fd_{-1};

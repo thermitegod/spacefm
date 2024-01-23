@@ -48,22 +48,22 @@ struct mime_type
     GdkPixbuf* icon(bool big) noexcept;
 
     // Get mime-type string
-    const std::string_view type() const noexcept;
+    [[nodiscard]] const std::string_view type() const noexcept;
 
     // Get human-readable description of mime-type
-    const std::string_view description() noexcept;
+    [[nodiscard]] const std::string_view description() noexcept;
 
     // Get available actions (applications) for this mime-type
     // returned vector should be freed with g_strfreev when not needed.
-    const std::vector<std::string> actions() const noexcept;
+    [[nodiscard]] const std::vector<std::string> actions() const noexcept;
 
     // returned string should be freed with g_strfreev when not needed.
-    const std::optional<std::string> default_action() const noexcept;
+    [[nodiscard]] const std::optional<std::string> default_action() const noexcept;
 
     void set_default_action(const std::string_view desktop_id) noexcept;
 
     // If user-custom desktop file is created, it is returned in custom_desktop.
-    const std::string add_action(const std::string_view desktop_id) noexcept;
+    [[nodiscard]] const std::string add_action(const std::string_view desktop_id) noexcept;
 
     [[nodiscard]] bool is_archive() const noexcept;
     [[nodiscard]] bool is_executable() const noexcept;

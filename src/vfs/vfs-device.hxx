@@ -39,26 +39,26 @@ struct device
 
     libudev::device udevice;
 
-    dev_t devnum() const noexcept;
+    [[nodiscard]] dev_t devnum() const noexcept;
 
-    const std::string_view devnode() const noexcept;
-    const std::string_view native_path() const noexcept;
-    const std::string_view mount_points() const noexcept;
+    [[nodiscard]] const std::string_view devnode() const noexcept;
+    [[nodiscard]] const std::string_view native_path() const noexcept;
+    [[nodiscard]] const std::string_view mount_points() const noexcept;
 
-    bool is_valid() const noexcept;
+    [[nodiscard]] bool is_valid() const noexcept;
 
-    bool is_system_internal() const noexcept;
-    bool is_removable() const noexcept;
-    bool is_media_available() const noexcept;
-    bool is_optical_disc() const noexcept;
-    bool is_mounted() const noexcept;
-    bool is_media_ejectable() const noexcept;
+    [[nodiscard]] bool is_system_internal() const noexcept;
+    [[nodiscard]] bool is_removable() const noexcept;
+    [[nodiscard]] bool is_media_available() const noexcept;
+    [[nodiscard]] bool is_optical_disc() const noexcept;
+    [[nodiscard]] bool is_mounted() const noexcept;
+    [[nodiscard]] bool is_media_ejectable() const noexcept;
 
-    const std::string_view id() const noexcept;
-    const std::string_view id_label() const noexcept;
-    u64 size() const noexcept;
-    u64 block_size() const noexcept;
-    const std::string_view fstype() const noexcept;
+    [[nodiscard]] const std::string_view id() const noexcept;
+    [[nodiscard]] const std::string_view id_label() const noexcept;
+    [[nodiscard]] u64 size() const noexcept;
+    [[nodiscard]] u64 block_size() const noexcept;
+    [[nodiscard]] const std::string_view fstype() const noexcept;
 
   private:
     dev_t devnum_{0};
@@ -83,7 +83,7 @@ struct device
     std::string fstype_{};
 
   private:
-    const std::optional<std::string> info_mount_points() const noexcept;
-    bool device_get_info() noexcept;
+    [[nodiscard]] const std::optional<std::string> info_mount_points() const noexcept;
+    [[nodiscard]] bool device_get_info() noexcept;
 };
 } // namespace vfs

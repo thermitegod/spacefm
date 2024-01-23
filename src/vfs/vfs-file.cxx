@@ -67,7 +67,11 @@ vfs::file::file(const std::filesystem::path& path) : path_(path)
     // Is a hidden file
     this->is_hidden_ = this->name_.starts_with('.');
 
-    this->update();
+    const auto result = this->update();
+    if (!result)
+    {
+        ztd::logger::error("Failed to create vfs::file for {}", path.string());
+    }
 }
 
 vfs::file::~file()
