@@ -48,7 +48,8 @@ struct dir : public std::enable_shared_from_this<dir>
     dir(const std::filesystem::path& path);
     ~dir();
 
-    static const std::shared_ptr<vfs::dir> create(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static const std::shared_ptr<vfs::dir>
+    create(const std::filesystem::path& path) noexcept;
 
     // unloads thumbnails in every vfs::dir
     static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;

@@ -40,7 +40,7 @@ struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
     thumbnailer(const std::shared_ptr<vfs::dir>& dir);
     ~thumbnailer();
 
-    static const std::shared_ptr<vfs::thumbnailer>
+    [[nodiscard]] static const std::shared_ptr<vfs::thumbnailer>
     create(const std::shared_ptr<vfs::dir>& dir) noexcept;
 
     void loader_request(const std::shared_ptr<vfs::file>& file,

@@ -42,7 +42,8 @@ struct mime_type
     mime_type(const std::string_view type_name);
     ~mime_type();
 
-    static const std::shared_ptr<vfs::mime_type> create(const std::string_view type_name) noexcept;
+    [[nodiscard]] static const std::shared_ptr<vfs::mime_type>
+    create(const std::string_view type_name) noexcept;
 
     GdkPixbuf* icon(bool big) noexcept;
 

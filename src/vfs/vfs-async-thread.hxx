@@ -39,7 +39,7 @@ struct async_thread : public std::enable_shared_from_this<async_thread>
     async_thread(const vfs::async_thread::function_t& task_function);
     ~async_thread();
 
-    static const std::shared_ptr<vfs::async_thread>
+    [[nodiscard]] static const std::shared_ptr<vfs::async_thread>
     create(const vfs::async_thread::function_t& task_function) noexcept;
 
     void run();

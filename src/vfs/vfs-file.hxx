@@ -40,7 +40,8 @@ struct file : public std::enable_shared_from_this<file>
     file(const std::filesystem::path& file_path);
     ~file();
 
-    static const std::shared_ptr<vfs::file> create(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static const std::shared_ptr<vfs::file>
+    create(const std::filesystem::path& path) noexcept;
 
     const std::string_view name() const noexcept;
 

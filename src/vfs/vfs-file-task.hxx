@@ -97,7 +97,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
               const std::filesystem::path& dest_dir);
     ~file_task();
 
-    static const std::shared_ptr<vfs::file_task>
+    [[nodiscard]] static const std::shared_ptr<vfs::file_task>
     create(const type type, const std::span<const std::filesystem::path> src_files,
            const std::filesystem::path& dest_dir) noexcept;
 

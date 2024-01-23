@@ -54,7 +54,8 @@
 
 #include "vfs/vfs-volume.hxx"
 
-static const std::shared_ptr<vfs::volume> vfs_volume_read_by_device(const libudev::device& udevice);
+[[nodiscard]] static const std::shared_ptr<vfs::volume>
+vfs_volume_read_by_device(const libudev::device& udevice);
 static void vfs_volume_device_removed(const libudev::device& udevice);
 static void call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state);
 
@@ -404,7 +405,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
     return true;
 }
 
-static const std::shared_ptr<vfs::volume>
+[[nodiscard]] static const std::shared_ptr<vfs::volume>
 vfs_volume_read_by_device(const libudev::device& udevice)
 { // uses udev to read device parameters into returned volume
     if (!udevice.is_initialized())

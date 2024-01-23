@@ -49,8 +49,8 @@ struct monitor
     monitor(const std::filesystem::path& path, const callback_t& callback);
     ~monitor();
 
-    static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
-                                                 const callback_t& callback) noexcept;
+    [[nodiscard]] static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
+                                                               const callback_t& callback) noexcept;
 
   private:
     bool on_inotify_event(const Glib::IOCondition condition) const noexcept;

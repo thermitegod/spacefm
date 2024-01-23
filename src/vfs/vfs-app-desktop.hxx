@@ -44,7 +44,7 @@ struct desktop
 
     desktop(const std::filesystem::path& desktop_file) noexcept;
 
-    static const std::shared_ptr<desktop>
+    [[nodiscard]] static const std::shared_ptr<desktop>
     create(const std::filesystem::path& desktop_file) noexcept;
 
     [[nodiscard]] const std::string_view name() const noexcept;

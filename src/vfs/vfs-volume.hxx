@@ -57,7 +57,7 @@ struct volume : public std::enable_shared_from_this<volume>
     ~volume() = default;
     // ~volume() { ztd::logger::debug("vfs::volume::~volume({})", ztd::logger::utils::ptr(this)); };
 
-    static const std::shared_ptr<vfs::volume>
+    [[nodiscard]] static const std::shared_ptr<vfs::volume>
     create(const std::shared_ptr<vfs::device>& device) noexcept;
 
     using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,

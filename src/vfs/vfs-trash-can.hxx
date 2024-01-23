@@ -40,7 +40,7 @@ namespace vfs
 struct trash_can
 {
     trash_can() noexcept;
-    static const std::shared_ptr<vfs::trash_can> create() noexcept;
+    [[nodiscard]] static const std::shared_ptr<vfs::trash_can> create() noexcept;
 
     // Move a file or directory into the trash.
     static bool trash(const std::filesystem::path& path) noexcept;

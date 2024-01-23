@@ -40,7 +40,7 @@ struct mime_monitor
 {
     mime_monitor(const std::shared_ptr<vfs::dir>& dir) : dir(dir){};
 
-    static const std::shared_ptr<mime_monitor>
+    [[nodiscard]] static const std::shared_ptr<mime_monitor>
     create(const std::shared_ptr<vfs::dir>& dir) noexcept;
 
     std::shared_ptr<vfs::dir> dir;

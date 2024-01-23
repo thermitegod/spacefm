@@ -58,10 +58,10 @@ struct PtkDirTree // : public std::enable_shared_from_this<PtkDirTree>, Gtk::Tre
     /* <private> */
     struct Node : public std::enable_shared_from_this<Node>
     {
-        static const std::shared_ptr<Node> create();
-        static const std::shared_ptr<Node> create(PtkDirTree* tree,
-                                                  const std::shared_ptr<Node>& parent,
-                                                  const std::filesystem::path& path);
+        [[nodiscard]] static const std::shared_ptr<Node> create();
+        [[nodiscard]] static const std::shared_ptr<Node> create(PtkDirTree* tree,
+                                                                const std::shared_ptr<Node>& parent,
+                                                                const std::filesystem::path& path);
 
         std::shared_ptr<vfs::file> file{nullptr};
         std::shared_ptr<Node> children{nullptr};
