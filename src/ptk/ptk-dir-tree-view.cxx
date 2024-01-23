@@ -66,15 +66,15 @@ static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 // drag n drop...
 static void on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
                                                 i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
-                                                u32 time, void* user_data);
+                                                std::time_t time, void* user_data);
 static bool on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                         i32 y, u32 time, ptk::browser* file_browser);
+                                         i32 y, std::time_t time, ptk::browser* file_browser);
 
-static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
-                                        ptk::browser* file_browser);
+static bool on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context,
+                                        std::time_t time, ptk::browser* file_browser);
 
 static bool on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                       i32 y, u32 time, ptk::browser* file_browser);
+                                       i32 y, std::time_t time, ptk::browser* file_browser);
 
 static bool
 filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
@@ -611,7 +611,8 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
 
 static void
 on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                                    GtkSelectionData* sel_data, u32 info, u32 time, void* user_data)
+                                    GtkSelectionData* sel_data, u32 info, std::time_t time,
+                                    void* user_data)
 {
     (void)info;
     ptk::browser* file_browser = PTK_FILE_BROWSER(user_data);
@@ -755,8 +756,8 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 }
 
 static bool
-on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
-                           ptk::browser* file_browser)
+on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
+                           std::time_t time, ptk::browser* file_browser)
 {
     (void)x;
     (void)y;
@@ -772,7 +773,7 @@ on_dir_tree_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 
 
 static bool
 on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                             u32 time, ptk::browser* file_browser)
+                             std::time_t time, ptk::browser* file_browser)
 {
     (void)x;
     (void)y;
@@ -878,7 +879,7 @@ on_dir_tree_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i3
 }
 
 static bool
-on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
+on_dir_tree_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, std::time_t time,
                             ptk::browser* file_browser)
 {
     (void)widget;

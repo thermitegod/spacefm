@@ -155,23 +155,23 @@ void on_dir_tree_row_activated(GtkTreeView* view, GtkTreePath* path, GtkTreeView
 /* Drag & Drop */
 static void on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
                                               i32 x, i32 y, GtkSelectionData* sel_data, u32 info,
-                                              u32 time, void* user_data);
+                                              std::time_t time, void* user_data);
 
 static void on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
-                                         GtkSelectionData* sel_data, u32 info, u32 time,
+                                         GtkSelectionData* sel_data, u32 info, std::time_t time,
                                          ptk::browser* file_browser);
 
 static void on_folder_view_drag_begin(GtkWidget* widget, GdkDragContext* drag_context,
                                       ptk::browser* file_browser);
 
 static bool on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x,
-                                       i32 y, u32 time, ptk::browser* file_browser);
+                                       i32 y, std::time_t time, ptk::browser* file_browser);
 
-static bool on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
-                                      ptk::browser* file_browser);
+static bool on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context,
+                                      std::time_t time, ptk::browser* file_browser);
 
 static bool on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                                     u32 time, ptk::browser* file_browser);
+                                     std::time_t time, ptk::browser* file_browser);
 
 static void on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
                                     ptk::browser* file_browser);
@@ -2351,7 +2351,8 @@ folder_view_get_drop_dir(ptk::browser* file_browser, i32 x, i32 y)
 
 static void
 on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                                  GtkSelectionData* sel_data, u32 info, u32 time, void* user_data)
+                                  GtkSelectionData* sel_data, u32 info, std::time_t time,
+                                  void* user_data)
 {
     (void)widget;
     (void)x;
@@ -2496,7 +2497,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
 
 static void
 on_folder_view_drag_data_get(GtkWidget* widget, GdkDragContext* drag_context,
-                             GtkSelectionData* sel_data, u32 info, u32 time,
+                             GtkSelectionData* sel_data, u32 info, std::time_t time,
                              ptk::browser* file_browser)
 {
     (void)widget;
@@ -2596,8 +2597,8 @@ on_folder_view_auto_scroll(GtkScrolledWindow* scroll)
 }
 
 static bool
-on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
-                           ptk::browser* file_browser)
+on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
+                           std::time_t time, ptk::browser* file_browser)
 {
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_widget_get_parent(widget));
 
@@ -2782,7 +2783,7 @@ on_folder_view_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 
 }
 
 static bool
-on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 time,
+on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, std::time_t time,
                           ptk::browser* file_browser)
 {
     (void)widget;
@@ -2801,8 +2802,8 @@ on_folder_view_drag_leave(GtkWidget* widget, GdkDragContext* drag_context, u32 t
 }
 
 static bool
-on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
-                         ptk::browser* file_browser)
+on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
+                         std::time_t time, ptk::browser* file_browser)
 {
     (void)x;
     (void)y;

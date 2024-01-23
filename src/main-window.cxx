@@ -78,7 +78,7 @@
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data);
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                               u32 time, ptk::browser* file_browser);
+                               std::time_t time, ptk::browser* file_browser);
 
 static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);
 static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
@@ -2171,7 +2171,7 @@ MainWindow::on_file_browser_content_change(ptk::browser* file_browser)
 }
 
 static bool
-on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, u32 time,
+on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, std::time_t time,
                    ptk::browser* file_browser)
 {
     (void)widget;
