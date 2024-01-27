@@ -85,9 +85,8 @@ struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
     GFunc callback{nullptr};
 };
 
-GtkWidget* ptk_file_menu_new(ptk::browser* browser);
 GtkWidget* ptk_file_menu_new(ptk::browser* browser,
-                             const std::span<const std::shared_ptr<vfs::file>> sel_files);
+                             const std::span<const std::shared_ptr<vfs::file>> sel_files = {});
 
 #if (GTK_MAJOR_VERSION == 4)
 void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,

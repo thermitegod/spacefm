@@ -947,12 +947,6 @@ ptk_file_menu_free(ptk::file_menu* data)
 
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
-ptk_file_menu_new(ptk::browser* browser)
-{
-    return ptk_file_menu_new(browser, {});
-}
-
-GtkWidget*
 ptk_file_menu_new(ptk::browser* browser,
                   const std::span<const std::shared_ptr<vfs::file>> sel_files)
 {
