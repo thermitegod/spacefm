@@ -24,5 +24,5 @@ find_files(const std::span<const std::filesystem::path> search_dirs)
 {
     (void)search_dirs;
 
-    ptk_show_error(nullptr, "Disabled", "File search requires a rewrite");
+    ptk::dialog::error(nullptr, "Disabled", "File search requires a rewrite");
 }

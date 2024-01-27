@@ -122,7 +122,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
             file_list.append(file.string());
             file_list.append("\n");
         }
-        ptk_show_error(
+        ptk::dialog::error(
             nullptr,
             "Error",
             std::format("Unable to use '{}' to open files:\n{}", app_desktop, file_list));
@@ -230,12 +230,13 @@ ptk_open_files_with_app(const std::filesystem::path& cwd,
                     GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 #endif
 
-                    ptk_show_error(GTK_WINDOW(toplevel),
-                                   "Broken Link",
-                                   std::format("This symlink's target is missing or you do not "
-                                               "have permission to access it:\n{}\n\nTarget: {}",
-                                               file->path().string(),
-                                               target_path.string()));
+                    ptk::dialog::error(
+                        GTK_WINDOW(toplevel),
+                        "Broken Link",
+                        std::format("This symlink's target is missing or you do not "
+                                    "have permission to access it:\n{}\n\nTarget: {}",
+                                    file->path().string(),
+                                    target_path.string()));
                     continue;
                 }
             }

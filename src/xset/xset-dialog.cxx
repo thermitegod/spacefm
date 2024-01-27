@@ -294,9 +294,9 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                 ans = gtk_text_buffer_get_text(buf, &siter, &iter, false);
                 if (ans.contains("\n"))
                 {
-                    ptk_show_error(GTK_WINDOW(dlgparent),
-                                   "Error",
-                                   "Your input is invalid because it contains linefeeds");
+                    ptk::dialog::error(GTK_WINDOW(dlgparent),
+                                       "Error",
+                                       "Your input is invalid because it contains linefeeds");
                     break;
                 }
 
@@ -329,7 +329,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                 break;
             case GtkResponseType::GTK_RESPONSE_ACCEPT:
                 // show icon chooser
-                ptk_show_error(nullptr, "Removed", "removed xset_icon_chooser_dialog()");
+                ptk::dialog::error(nullptr, "Removed", "removed xset_icon_chooser_dialog()");
 
                 exit_loop = true;
                 break;
@@ -371,9 +371,9 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     (void)title;
     (void)deffolder;
     (void)deffile;
-    ptk_show_error(nullptr,
-                   "Needs Update",
-                   "Gtk4 changed and then deprecated the GtkFileChooser API");
+    ptk::dialog::error(nullptr,
+                       "Needs Update",
+                       "Gtk4 changed and then deprecated the GtkFileChooser API");
     return std::nullopt;
 #elif (GTK_MAJOR_VERSION == 3)
     /*  Actions:

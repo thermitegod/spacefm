@@ -618,11 +618,11 @@ ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& 
 
         if (missing_targets > 0)
         {
-            ptk_show_error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                           "Error",
-                           std::format("{} target{} missing",
-                                       missing_targets,
-                                       missing_targets > 1 ? "s are" : " is"));
+            ptk::dialog::error(parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                               "Error",
+                               std::format("{} target{} missing",
+                                           missing_targets,
+                                           missing_targets > 1 ? "s are" : " is"));
         }
     }
     gtk_selection_data_free(sel_data);

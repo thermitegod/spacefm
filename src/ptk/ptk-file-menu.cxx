@@ -1685,7 +1685,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 }
                 const auto& share_desktop = check_share_desktop.value();
 
-                const auto response = ptk_show_message(
+                const auto response = ptk::dialog::message(
                     GTK_WINDOW(data->browser),
                     GtkMessageType::GTK_MESSAGE_QUESTION,
                     "Copy Desktop File",
@@ -1794,7 +1794,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                                     mime_type->type());
                 }
 
-                const auto response = ptk_show_message(GTK_WINDOW(data->browser),
+                const auto response = ptk::dialog::message(GTK_WINDOW(data->browser),
                                                        GtkMessageType::GTK_MESSAGE_QUESTION,
                                                        "Create New XML",
                                                        GtkButtonsType::GTK_BUTTONS_YES_NO,

@@ -27,8 +27,8 @@
 #include "ptk/ptk-dialog.hxx"
 
 void
-ptk_show_error(GtkWindow* parent, const std::string_view title,
-               const std::string_view message) noexcept
+ptk::dialog::error(GtkWindow* parent, const std::string_view title,
+                   const std::string_view message) noexcept
 {
     GtkWidget* dialog =
         gtk_message_dialog_new(GTK_WINDOW(parent),
@@ -49,9 +49,9 @@ ptk_show_error(GtkWindow* parent, const std::string_view title,
 }
 
 i32
-ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
-                 GtkButtonsType buttons, const std::string_view message,
-                 const std::string_view secondary_message) noexcept
+ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
+                     GtkButtonsType buttons, const std::string_view message,
+                     const std::string_view secondary_message) noexcept
 {
     GtkWidget* dialog =
         gtk_message_dialog_new(GTK_WINDOW(parent),

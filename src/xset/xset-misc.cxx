@@ -82,9 +82,9 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     const auto check_editor = xset_get_s(xset::name::editor);
     if (!check_editor)
     {
-        ptk_show_error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
-                       "Editor Not Set",
-                       "Please set your editor in View|Preferences|Advanced");
+        ptk::dialog::error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+                           "Editor Not Set",
+                           "Please set your editor in View|Preferences|Advanced");
         return;
     }
     const auto& editor = check_editor.value();
@@ -105,8 +105,9 @@ xset_edit(GtkWidget* parent, const std::filesystem::path& path)
     const bool opened = desktop->open_files(path.parent_path(), open_files);
     if (!opened)
     {
-        ptk_show_error(nullptr,
-                       "Error",
-                       std::format("Unable to use '{}' to open file:\n{}", editor, path.string()));
+        ptk::dialog::error(
+            nullptr,
+            "Error",
+            std::format("Unable to use '{}' to open file:\n{}", editor, path.string()));
     }
 }

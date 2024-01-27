@@ -906,9 +906,9 @@ on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>&
 #if (GTK_MAJOR_VERSION == 4)
     (void)widget;
     (void)mset;
-    ptk_show_error(nullptr,
-                   "Needs Update",
-                   "Gtk4 changed and then deprecated the GtkFileChooser API");
+    ptk::dialog::error(nullptr,
+                       "Needs Update",
+                       "Gtk4 changed and then deprecated the GtkFileChooser API");
     return;
 #elif (GTK_MAJOR_VERSION == 3)
     i32 action = 0;
@@ -1159,9 +1159,9 @@ static void
 on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 {
 #if (GTK_MAJOR_VERSION == 4)
-    ptk_show_error(nullptr,
-                   "Needs Update",
-                   "Gtk4 changed and then deprecated the GtkFileChooser API");
+    ptk::dialog::error(nullptr,
+                       "Needs Update",
+                       "Gtk4 changed and then deprecated the GtkFileChooser API");
     return;
 #elif (GTK_MAJOR_VERSION == 3)
     (void)widget;
@@ -2937,7 +2937,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                 gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
             if (text.contains("\n"))
             {
-                ptk_show_error(GTK_WINDOW(mset->dlg), "Error", "Path contains linefeeds");
+                ptk::dialog::error(GTK_WINDOW(mset->dlg), "Error", "Path contains linefeeds");
                 continue;
             }
             auto full_path = std::filesystem::path(text);
@@ -2984,11 +2984,12 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                 // create parent directory
                 if (xset_get_b(xset::name::move_dlg_confirm_create))
                 {
-                    response = ptk_show_message(GTK_WINDOW(mset->parent),
-                                                GtkMessageType::GTK_MESSAGE_QUESTION,
-                                                "Create Parent Directory",
-                                                GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                                "The parent directory does not exist. Create it?");
+                    response =
+                        ptk::dialog::message(GTK_WINDOW(mset->parent),
+                                             GtkMessageType::GTK_MESSAGE_QUESTION,
+                                             "Create Parent Directory",
+                                             GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                             "The parent directory does not exist. Create it?");
                     if (response != GtkResponseType::GTK_RESPONSE_YES)
                     {
                         continue;
@@ -2999,7 +3000,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
 
                 if (!std::filesystem::is_directory(path))
                 {
-                    ptk_show_error(
+                    ptk::dialog::error(
                         GTK_WINDOW(mset->dlg),
                         "Mkdir Error",
                         std::format("Error creating parent directory\n\n{}", std::strerror(errno)));
@@ -3014,12 +3015,12 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                     // just in case
                     continue;
                 }
-                response = ptk_show_message(GTK_WINDOW(mset->parent),
-                                            GtkMessageType::GTK_MESSAGE_WARNING,
-                                            "Overwrite Existing File",
-                                            GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                            "OVERWRITE WARNING",
-                                            "The file path exists.  Overwrite existing file?");
+                response = ptk::dialog::message(GTK_WINDOW(mset->parent),
+                                                GtkMessageType::GTK_MESSAGE_WARNING,
+                                                "Overwrite Existing File",
+                                                GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                "OVERWRITE WARNING",
+                                                "The file path exists.  Overwrite existing file?");
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
@@ -3092,9 +3093,9 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                             const auto template_file = template_path.value() / str;
                             if (!std::filesystem::is_regular_file(template_file))
                             {
-                                ptk_show_error(GTK_WINDOW(mset->dlg),
-                                               "Template Missing",
-                                               "The specified template does not exist");
+                                ptk::dialog::error(GTK_WINDOW(mset->dlg),
+                                                   "Template Missing",
+                                                   "The specified template does not exist");
                                 continue;
                             }
                             from_path = utils::shell_quote(template_file.string());
@@ -3156,9 +3157,9 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                             const auto template_file = template_path.value() / str;
                             if (!std::filesystem::is_directory(template_file))
                             {
-                                ptk_show_error(GTK_WINDOW(mset->dlg),
-                                               "Template Missing",
-                                               "The specified template does not exist");
+                                ptk::dialog::error(GTK_WINDOW(mset->dlg),
+                                                   "Template Missing",
+                                                   "The specified template does not exist");
                                 continue;
                             }
                             from_path = utils::shell_quote(template_file.string());
@@ -3204,9 +3205,9 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                     const auto real_path = std::filesystem::read_symlink(mset->full_path);
                     if (std::filesystem::equivalent(real_path, mset->full_path))
                     {
-                        ptk_show_error(GTK_WINDOW(mset->dlg),
-                                       "Copy Target Error",
-                                       "Error determining link's target");
+                        ptk::dialog::error(GTK_WINDOW(mset->dlg),
+                                           "Copy Target Error",
+                                           "Error determining link's target");
                         continue;
                     }
                     from_path = utils::shell_quote(real_path.string());
@@ -3246,9 +3247,9 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                     const auto real_path = std::filesystem::read_symlink(mset->full_path);
                     if (std::filesystem::equivalent(real_path, mset->full_path))
                     {
-                        ptk_show_error(GTK_WINDOW(mset->dlg),
-                                       "Link Target Error",
-                                       "Error determining link's target");
+                        ptk::dialog::error(GTK_WINDOW(mset->dlg),
+                                           "Link Target Error",
+                                           "Error determining link's target");
                         continue;
                     }
                     from_path = utils::shell_quote(real_path.string());
@@ -3294,9 +3295,10 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                 if (rename(mset->full_path.c_str(), full_path.c_str()) != 0)
                 {
                     // Unknown error has occurred - alert user as usual
-                    ptk_show_error(GTK_WINDOW(mset->dlg),
-                                   "Rename Error",
-                                   std::format("Error renaming file\n\n{}", std::strerror(errno)));
+                    ptk::dialog::error(
+                        GTK_WINDOW(mset->dlg),
+                        "Rename Error",
+                        std::format("Error renaming file\n\n{}", std::strerror(errno)));
                     continue;
                 }
             }

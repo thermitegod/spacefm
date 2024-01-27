@@ -93,7 +93,7 @@ open_file(const std::filesystem::path& path)
     const bool opened = desktop->open_file(Glib::get_current_dir(), path);
     if (!opened)
     {
-        ptk_show_error(
+        ptk::dialog::error(
             nullptr,
             "Error",
             std::format("Unable to use '{}' to open file:\n{}", app_name, path.string()));

@@ -78,10 +78,10 @@ ptk_paste_file(ptk::browser* file_browser, const std::filesystem::path& cwd)
 #endif
         }
 
-        ptk_show_error(GTK_WINDOW(parent),
-                       "Error",
-                       std::format("{} target{} missing",
-                                   missing_targets,
-                                   missing_targets > 1 ? "s are" : " is"));
+        ptk::dialog::error(GTK_WINDOW(parent),
+                           "Error",
+                           std::format("{} target{} missing",
+                                       missing_targets,
+                                       missing_targets > 1 ? "s are" : " is"));
     }
 }

@@ -3053,9 +3053,9 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
             GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
 #endif
 
-            ptk_show_error(GTK_WINDOW(parent_win),
-                           "Error",
-                           std::format("Directory does not exist\n\n{}", path.string()));
+            ptk::dialog::error(GTK_WINDOW(parent_win),
+                               "Error",
+                               std::format("Directory does not exist\n\n{}", path.string()));
         }
         return false;
     }
@@ -3070,7 +3070,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
             GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
 #endif
 
-            ptk_show_error(
+            ptk::dialog::error(
                 GTK_WINDOW(parent_win),
                 "Error",
                 std::format("Unable to access {}\n\n{}", path.string(), std::strerror(errno)));
@@ -3870,7 +3870,7 @@ ptk::browser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> se
 {
     (void)cwd;
 
-    const auto response = ptk_show_message(
+    const auto response = ptk::dialog::message(
         GTK_WINDOW(this),
         GtkMessageType::GTK_MESSAGE_INFO,
         "Hide File",
@@ -3893,7 +3893,7 @@ ptk::browser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> se
 
     if (selected_files.empty())
     {
-        ptk_show_error(GTK_WINDOW(parent_win), "Error", "No files are selected");
+        ptk::dialog::error(GTK_WINDOW(parent_win), "Error", "No files are selected");
         return;
     }
 
@@ -3901,7 +3901,7 @@ ptk::browser::hide_selected(const std::span<const std::shared_ptr<vfs::file>> se
     {
         if (!this->dir_->add_hidden(file))
         {
-            ptk_show_error(GTK_WINDOW(parent_win), "Error", "Error hiding files");
+            ptk::dialog::error(GTK_WINDOW(parent_win), "Error", "Error hiding files");
         }
     }
 
@@ -4130,11 +4130,11 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
 
         if (std::filesystem::equivalent(dest_dir.value(), cwd))
         {
-            ptk_show_message(GTK_WINDOW(this),
-                             GtkMessageType::GTK_MESSAGE_ERROR,
-                             "Invalid Destination",
-                             GtkButtonsType::GTK_BUTTONS_OK,
-                             "Destination same as source");
+            ptk::dialog::message(GTK_WINDOW(this),
+                                 GtkMessageType::GTK_MESSAGE_ERROR,
+                                 "Invalid Destination",
+                                 GtkButtonsType::GTK_BUTTONS_OK,
+                                 "Destination same as source");
             return;
         }
 
@@ -4162,11 +4162,11 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
     }
     else
     {
-        ptk_show_message(GTK_WINDOW(this),
-                         GtkMessageType::GTK_MESSAGE_ERROR,
-                         "Invalid Destination",
-                         GtkButtonsType::GTK_BUTTONS_OK,
-                         "Invalid destination");
+        ptk::dialog::message(GTK_WINDOW(this),
+                             GtkMessageType::GTK_MESSAGE_ERROR,
+                             "Invalid Destination",
+                             GtkButtonsType::GTK_BUTTONS_OK,
+                             "Invalid destination");
     }
 }
 

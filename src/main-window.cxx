@@ -229,9 +229,9 @@ MainWindow::open_terminal() const noexcept
         GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 #endif
 
-        ptk_show_error(GTK_WINDOW(parent_win),
-                       "Terminal Not Available",
-                       "Please set your terminal program in View|Preferences|Advanced");
+        ptk::dialog::error(GTK_WINDOW(parent_win),
+                           "Terminal Not Available",
+                           "Please set your terminal program in View|Preferences|Advanced");
         return;
     }
 
@@ -1505,19 +1505,19 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
     // tasks running?
     if (main_window->is_main_tasks_running())
     {
-        const auto response = ptk_show_message(GTK_WINDOW(widget),
-                                               GtkMessageType::GTK_MESSAGE_QUESTION,
-                                               "MainWindow Delete Event",
-                                               GtkButtonsType::GTK_BUTTONS_YES_NO,
-                                               "Stop all tasks running in this window?");
+        const auto response = ptk::dialog::message(GTK_WINDOW(widget),
+                                                   GtkMessageType::GTK_MESSAGE_QUESTION,
+                                                   "MainWindow Delete Event",
+                                                   GtkButtonsType::GTK_BUTTONS_YES_NO,
+                                                   "Stop all tasks running in this window?");
 
         if (response == GtkResponseType::GTK_RESPONSE_YES)
         {
-            ptk_show_message(GTK_WINDOW(widget),
-                             GtkMessageType::GTK_MESSAGE_INFO,
-                             "MainWindow Delete Event",
-                             GtkButtonsType::GTK_BUTTONS_CLOSE,
-                             "Aborting tasks...");
+            ptk::dialog::message(GTK_WINDOW(widget),
+                                 GtkMessageType::GTK_MESSAGE_INFO,
+                                 "MainWindow Delete Event",
+                                 GtkButtonsType::GTK_BUTTONS_CLOSE,
+                                 "Aborting tasks...");
             main_window->close_window();
 
             ptk_task_view_task_stop(main_window->task_view,

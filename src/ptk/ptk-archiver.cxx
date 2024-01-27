@@ -41,7 +41,7 @@ is_archiver_installed()
     const auto archiver = Glib::find_program_in_path("file-roller");
     if (archiver.empty())
     {
-        ptk_show_error(nullptr, "Missing Archiver", "Failed to find file-roller in $PATH");
+        ptk::dialog::error(nullptr, "Missing Archiver", "Failed to find file-roller in $PATH");
         return false;
     }
     return true;

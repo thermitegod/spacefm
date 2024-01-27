@@ -1239,11 +1239,12 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file)
 
         if (terminal.empty())
         {
-            ptk_show_message(nullptr,
-                             GtkMessageType::GTK_MESSAGE_ERROR,
-                             "Terminal Not Available",
-                             GtkButtonsType::GTK_BUTTONS_OK,
-                             "Please set a valid terminal program in View|Preferences|Advanced");
+            ptk::dialog::message(
+                nullptr,
+                GtkMessageType::GTK_MESSAGE_ERROR,
+                "Terminal Not Available",
+                GtkButtonsType::GTK_BUTTONS_OK,
+                "Please set a valid terminal program in View|Preferences|Advanced");
 
             call_state_callback(this->shared_from_this(), vfs::file_task::state::finish);
             return;

@@ -21,9 +21,12 @@
 
 #include <ztd/ztd.hxx>
 
-i32 ptk_show_message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
-                     GtkButtonsType buttons, const std::string_view message,
-                     const std::string_view secondary_message = "") noexcept;
+namespace ptk::dialog
+{
+i32 message(GtkWindow* parent, GtkMessageType action, const std::string_view title,
+            GtkButtonsType buttons, const std::string_view message,
+            const std::string_view secondary_message = "") noexcept;
 
-void ptk_show_error(GtkWindow* parent, const std::string_view title,
-                    const std::string_view message) noexcept;
+void error(GtkWindow* parent, const std::string_view title,
+           const std::string_view message) noexcept;
+} // namespace ptk::dialog

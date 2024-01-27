@@ -92,7 +92,7 @@ void
 on_reorder(GtkWidget* item, GtkWidget* parent)
 {
     (void)item;
-    ptk_show_message(
+    ptk::dialog::message(
         GTK_WINDOW(parent),
         GtkMessageType::GTK_MESSAGE_INFO,
         "Reorder Columns Help",

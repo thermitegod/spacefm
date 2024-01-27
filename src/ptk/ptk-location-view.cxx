@@ -673,7 +673,7 @@ ptk_location_view_mount_network(ptk::browser* file_browser, const std::string_vi
 
     // TODO - rewrite netmount parser and mount code, kept entry point shims.
 
-    ptk_show_error(nullptr, "Netmounting is Disabled", "Recommended to mount through a shell");
+    ptk::dialog::error(nullptr, "Netmounting is Disabled", "Recommended to mount through a shell");
 }
 
 static void
@@ -689,7 +689,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
         cmd = "unmount";
     }
 
-    ptk_show_message(
+    ptk::dialog::message(
         GTK_WINDOW(view),
         GtkMessageType::GTK_MESSAGE_ERROR,
         "Handler Not Found",

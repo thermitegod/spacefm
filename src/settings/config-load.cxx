@@ -227,9 +227,9 @@ config_parse_xset(const toml::value& tbl, u64 version)
                 }
                 catch (const std::logic_error& e)
                 {
-                    ptk_show_error(nullptr,
-                                   "Error",
-                                   std::format("XSet parse error:\n\n{}", e.what()));
+                    ptk::dialog::error(nullptr,
+                                       "Error",
+                                       std::format("XSet parse error:\n\n{}", e.what()));
                     return;
                 }
 
