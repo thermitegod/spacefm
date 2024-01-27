@@ -27,12 +27,15 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-void ptk_archiver_create(ptk::browser* file_browser,
-                         const std::span<const std::shared_ptr<vfs::file>> sel_files);
+namespace ptk::archiver
+{
+void create(ptk::browser* file_browser,
+            const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept;
 
-void ptk_archiver_extract(ptk::browser* file_browser,
-                          const std::span<const std::shared_ptr<vfs::file>> sel_files,
-                          const std::filesystem::path& dest_dir);
+void extract(ptk::browser* file_browser,
+             const std::span<const std::shared_ptr<vfs::file>> sel_files,
+             const std::filesystem::path& dest_dir) noexcept;
 
-void ptk_archiver_open(ptk::browser* file_browser,
-                       const std::span<const std::shared_ptr<vfs::file>> sel_files);
+void open(ptk::browser* file_browser,
+          const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept;
+} // namespace ptk::archiver

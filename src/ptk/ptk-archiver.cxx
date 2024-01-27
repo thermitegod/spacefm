@@ -36,7 +36,7 @@
 #include "ptk/ptk-archiver.hxx"
 
 static bool
-is_archiver_installed()
+is_archiver_installed() noexcept
 {
     const auto archiver = Glib::find_program_in_path("file-roller");
     if (archiver.empty())
@@ -48,7 +48,8 @@ is_archiver_installed()
 }
 
 static const std::string
-archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file>> sel_files)
+archiver_create_shell_file_list(
+    const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
 {
     std::string file_list;
     for (const auto& file : sel_files)
@@ -60,8 +61,8 @@ archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file>
 }
 
 void
-ptk_archiver_create(ptk::browser* file_browser,
-                    const std::span<const std::shared_ptr<vfs::file>> sel_files)
+ptk::archiver::create(ptk::browser* file_browser,
+                      const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
 {
     (void)file_browser;
 
@@ -78,9 +79,9 @@ ptk_archiver_create(ptk::browser* file_browser,
 }
 
 void
-ptk_archiver_extract(ptk::browser* file_browser,
-                     const std::span<const std::shared_ptr<vfs::file>> sel_files,
-                     const std::filesystem::path& dest_dir)
+ptk::archiver::extract(ptk::browser* file_browser,
+                       const std::span<const std::shared_ptr<vfs::file>> sel_files,
+                       const std::filesystem::path& dest_dir) noexcept
 {
     if (!is_archiver_installed() || sel_files.empty())
     {
@@ -107,8 +108,8 @@ ptk_archiver_extract(ptk::browser* file_browser,
 }
 
 void
-ptk_archiver_open(ptk::browser* file_browser,
-                  const std::span<const std::shared_ptr<vfs::file>> sel_files)
+ptk::archiver::open(ptk::browser* file_browser,
+                    const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
 {
     (void)file_browser;
 

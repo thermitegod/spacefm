@@ -80,18 +80,18 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
     if (extract_here && ::utils::have_rw_access(parent->cwd))
     {
         // Extract Here
-        ptk_archiver_extract(parent->file_browser, selected_files, parent->cwd);
+        ptk::archiver::extract(parent->file_browser, selected_files, parent->cwd);
         return true;
     }
     else if (extract_here || xset_get_b(xset::name::archive_default_extract_to))
     {
         // Extract Here but no write access or Extract To option
-        ptk_archiver_extract(parent->file_browser, selected_files, "");
+        ptk::archiver::extract(parent->file_browser, selected_files, "");
         return true;
     }
     else if (xset_get_b(xset::name::archive_default_open_with_archiver))
     {
-        ptk_archiver_open(parent->file_browser, selected_files);
+        ptk::archiver::open(parent->file_browser, selected_files);
         return true;
     }
 

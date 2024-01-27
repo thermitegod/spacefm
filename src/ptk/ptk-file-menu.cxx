@@ -2449,21 +2449,21 @@ static void
 on_popup_compress_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_archiver_create(data->browser, data->sel_files);
+    ptk::archiver::create(data->browser, data->sel_files);
 }
 
 static void
 on_popup_extract_to_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_archiver_extract(data->browser, data->sel_files, "");
+    ptk::archiver::extract(data->browser, data->sel_files, "");
 }
 
 static void
 on_popup_extract_here_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_archiver_extract(data->browser, data->sel_files, data->cwd);
+    ptk::archiver::extract(data->browser, data->sel_files, data->cwd);
 }
 
 static void
@@ -2471,7 +2471,7 @@ on_popup_extract_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
     // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk_archiver_open(data->browser, data->sel_files);
+    ptk::archiver::open(data->browser, data->sel_files);
 }
 
 static void
