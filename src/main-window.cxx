@@ -236,10 +236,10 @@ MainWindow::open_terminal() const noexcept
     }
 
     // task
-    PtkFileTask* ptask = ptk_file_exec_new("Open Terminal",
-                                           file_browser->cwd(),
-                                           GTK_WIDGET(file_browser),
-                                           file_browser->task_view());
+    ptk::file_task* ptask = ptk_file_exec_new("Open Terminal",
+                                              file_browser->cwd(),
+                                              GTK_WIDGET(file_browser),
+                                              file_browser->task_view());
 
     const std::string terminal = Glib::find_program_in_path(main_term.value());
     if (terminal.empty())
@@ -2454,7 +2454,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
                  set->xset_name == xset::name::task_resume ||
                  set->xset_name == xset::name::task_resume_all)
         {
-            PtkFileTask* ptask = ptk_task_view_get_selected_task(browser->task_view());
+            ptk::file_task* ptask = ptk_task_view_get_selected_task(browser->task_view());
             ptk_task_view_task_stop(browser->task_view(), set, ptask);
         }
         else if (set->xset_name == xset::name::task_showout)

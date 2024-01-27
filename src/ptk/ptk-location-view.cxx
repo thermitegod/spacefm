@@ -738,7 +738,7 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
-    PtkFileTask* ptask =
+    ptk::file_task* ptask =
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
@@ -781,7 +781,7 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
     const auto& unmount_command = check_unmount_command.value();
 
     const std::string task_name = std::format("Unmount {}", vol->device_file());
-    PtkFileTask* ptask =
+    ptk::file_task* ptask =
         ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
     ptask->task->exec_command = unmount_command;
     ptask->task->exec_sync = true;
@@ -826,7 +826,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         const auto& unmount_command = check_unmount_command.value();
 
         const std::string task_name = std::format("Remove {}", vol->device_file());
-        PtkFileTask* ptask =
+        ptk::file_task* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = unmount_command;
         ptask->task->exec_sync = true;
@@ -843,7 +843,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         // task
         const std::string line = std::format("eject {}", vol->device_file());
         const std::string task_name = std::format("Remove {}", vol->device_file());
-        PtkFileTask* ptask =
+        ptk::file_task* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
@@ -857,7 +857,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         // task
         const std::string line = "sync";
         const std::string task_name = std::format("Remove {}", vol->device_file());
-        PtkFileTask* ptask =
+        ptk::file_task* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
@@ -935,7 +935,8 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
     const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
-    PtkFileTask* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view());
+    ptk::file_task* ptask =
+        ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view());
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
     ptask->task->exec_browser = file_browser;
@@ -1007,7 +1008,7 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
 
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
-        PtkFileTask* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view());
+        ptk::file_task* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view());
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
         ptask->task->exec_browser = file_browser;
@@ -1080,7 +1081,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
 
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
-        PtkFileTask* ptask =
+        ptk::file_task* ptask =
             ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;

@@ -3031,7 +3031,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
             if (create_new != ptk::rename_mode::rename && new_link)
             {
                 // new link task
-                PtkFileTask* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
+                ptk::file_task* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
 
 #if (GTK_MAJOR_VERSION == 4)
                 std::string entry_text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
@@ -3108,7 +3108,8 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                     over_cmd = std::format("rm -f {} && ", to_path);
                 }
 
-                PtkFileTask* ptask = ptk_file_exec_new("Create New File", mset->parent, task_view);
+                ptk::file_task* ptask =
+                    ptk_file_exec_new("Create New File", mset->parent, task_view);
                 if (from_path.empty())
                 {
                     ptask->task->exec_command = std::format("{}touch {}", over_cmd, to_path);
@@ -3166,7 +3167,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
                 }
                 to_path = utils::shell_quote(full_path.string());
 
-                PtkFileTask* ptask =
+                ptk::file_task* ptask =
                     ptk_file_exec_new("Create New Directory", mset->parent, task_view);
                 if (from_path.empty())
                 {
@@ -3192,7 +3193,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
             else if (copy || copy_target)
             {
                 // copy task
-                PtkFileTask* ptask = ptk_file_exec_new("Copy", mset->parent, task_view);
+                ptk::file_task* ptask = ptk_file_exec_new("Copy", mset->parent, task_view);
                 to_path = utils::shell_quote(full_path.string());
                 if (copy || !mset->is_link)
                 {
@@ -3235,7 +3236,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
             else if (link || link_target)
             {
                 // link task
-                PtkFileTask* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
+                ptk::file_task* ptask = ptk_file_exec_new("Create Link", mset->parent, task_view);
                 if (link || !mset->is_link)
                 {
                     from_path = utils::shell_quote(mset->full_path.string());
@@ -3270,7 +3271,7 @@ ptk_rename_file(ptk::browser* file_browser, const char* file_dir,
             // need move?  (do move as task in case it takes a long time)
             else if (!std::filesystem::equivalent(old_path, path))
             {
-                PtkFileTask* ptask = ptk_file_exec_new("Move", mset->parent, task_view);
+                ptk::file_task* ptask = ptk_file_exec_new("Move", mset->parent, task_view);
                 from_path = utils::shell_quote(mset->full_path.string());
                 to_path = utils::shell_quote(full_path.string());
                 if (overwrite)

@@ -203,10 +203,10 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
         file_list.push_back(file->path());
     }
 
-    PtkFileTask* ptask = ptk_file_task_new(vfs::file_task::type::del,
-                                           file_list,
-                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                           GTK_WIDGET(task_view));
+    ptk::file_task* ptask = ptk_file_task_new(vfs::file_task::type::del,
+                                              file_list,
+                                              parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                              GTK_WIDGET(task_view));
     ptk_file_task_run(ptask);
 }
 
@@ -240,9 +240,9 @@ ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
         file_list.push_back(file->path());
     }
 
-    PtkFileTask* ptask = ptk_file_task_new(vfs::file_task::type::trash,
-                                           file_list,
-                                           parent_win ? GTK_WINDOW(parent_win) : nullptr,
-                                           GTK_WIDGET(task_view));
+    ptk::file_task* ptask = ptk_file_task_new(vfs::file_task::type::trash,
+                                              file_list,
+                                              parent_win ? GTK_WINDOW(parent_win) : nullptr,
+                                              GTK_WIDGET(task_view));
     ptk_file_task_run(ptask);
 }

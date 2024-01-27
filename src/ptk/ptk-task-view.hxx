@@ -43,13 +43,13 @@ enum task_view_column
     data
 };
 
-void main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask);
+void main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask);
 
-void main_task_view_update_task(PtkFileTask* ptask);
-void main_task_view_remove_task(PtkFileTask* ptask);
-void main_task_pause_all_queued(PtkFileTask* ptask);
+void main_task_view_update_task(ptk::file_task* ptask);
+void main_task_view_remove_task(ptk::file_task* ptask);
+void main_task_pause_all_queued(ptk::file_task* ptask);
 
-void ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, PtkFileTask* ptask2);
+void ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2);
 
 void on_reorder(GtkWidget* item, GtkWidget* parent);
 
@@ -62,7 +62,7 @@ void ptk_task_view_column_selected(GtkWidget* view);
 void ptk_task_view_popup_show(MainWindow* main_window, const std::string_view name);
 void ptk_task_view_popup_errset(MainWindow* main_window, const std::string_view name = "");
 
-PtkFileTask* ptk_task_view_get_selected_task(GtkWidget* view);
+ptk::file_task* ptk_task_view_get_selected_task(GtkWidget* view);
 
 void ptk_task_view_show_task_dialog(GtkWidget* view);
 

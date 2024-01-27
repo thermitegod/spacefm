@@ -727,11 +727,11 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 #endif
 
-                        PtkFileTask* ptask = ptk_file_task_new(file_action,
-                                                               file_list,
-                                                               dest_dir,
-                                                               GTK_WINDOW(parent),
-                                                               file_browser->task_view());
+                        ptk::file_task* ptask = ptk_file_task_new(file_action,
+                                                                  file_list,
+                                                                  dest_dir,
+                                                                  GTK_WINDOW(parent),
+                                                                  file_browser->task_view());
                         ptk_file_task_run(ptask);
                     }
                 }

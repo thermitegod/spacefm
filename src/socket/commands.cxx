@@ -1390,7 +1390,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
         // find task
         GtkTreeIter it;
-        PtkFileTask* ptask = nullptr;
+        ptk::file_task* ptask = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
         if (gtk_tree_model_get_iter_first(model, &it))
         {
@@ -1520,7 +1520,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     { // TASKNUM PROPERTY
         // find task
         GtkTreeIter it;
-        PtkFileTask* ptask = nullptr;
+        ptk::file_task* ptask = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(main_window->task_view));
         if (gtk_tree_model_get_iter_first(model, &it))
         {
@@ -1669,7 +1669,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 cmd.append(std::format(" {}", c));
             }
 
-            PtkFileTask* ptask =
+            ptk::file_task* ptask =
                 ptk_file_exec_new(!opt_title.empty() ? opt_title : cmd,
                                   !opt_cwd.empty() ? opt_cwd.data() : file_browser->cwd(),
                                   GTK_WIDGET(file_browser),
@@ -1776,10 +1776,10 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 return {SOCKET_INVALID, std::format("invalid mount TARGET '{}'", value)};
             }
             // Task
-            PtkFileTask* ptask = ptk_file_exec_new(property,
-                                                   file_browser->cwd(),
-                                                   GTK_WIDGET(file_browser),
-                                                   file_browser->task_view());
+            ptk::file_task* ptask = ptk_file_exec_new(property,
+                                                      file_browser->cwd(),
+                                                      GTK_WIDGET(file_browser),
+                                                      file_browser->task_view());
             ptask->task->exec_browser = file_browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_terminal = false;
@@ -1888,11 +1888,11 @@ socket::command(const std::string_view socket_commands_json) noexcept
             GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 #endif
 
-            PtkFileTask* ptask = ptk_file_task_new(task_type,
-                                                   file_list,
-                                                   target_dir,
-                                                   GTK_WINDOW(parent),
-                                                   file_browser->task_view());
+            ptk::file_task* ptask = ptk_file_task_new(task_type,
+                                                      file_list,
+                                                      target_dir,
+                                                      GTK_WINDOW(parent),
+                                                      file_browser->task_view());
             ptk_file_task_run(ptask);
             return {SOCKET_SUCCESS,
                     std::format("# Note: $new_task_id not valid until approx one "

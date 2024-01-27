@@ -2472,11 +2472,11 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                     GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
 #endif
 
-                    PtkFileTask* ptask = ptk_file_task_new(file_action,
-                                                           file_list,
-                                                           dest_dir,
-                                                           GTK_WINDOW(parent),
-                                                           file_browser->task_view_);
+                    ptk::file_task* ptask = ptk_file_task_new(file_action,
+                                                              file_list,
+                                                              dest_dir,
+                                                              GTK_WINDOW(parent),
+                                                              file_browser->task_view_);
                     ptk_file_task_run(ptask);
                 }
                 gtk_drag_finish(drag_context, true, false, time);
@@ -4153,11 +4153,11 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
 #endif
 
         // task
-        PtkFileTask* ptask = ptk_file_task_new(file_action,
-                                               file_list,
-                                               dest_dir.value(),
-                                               GTK_WINDOW(parent_win),
-                                               this->task_view_);
+        ptk::file_task* ptask = ptk_file_task_new(file_action,
+                                                  file_list,
+                                                  dest_dir.value(),
+                                                  GTK_WINDOW(parent_win),
+                                                  this->task_view_);
         ptk_file_task_run(ptask);
     }
     else
@@ -6192,7 +6192,7 @@ ptk::browser::on_permission(GtkMenuItem* item,
     }
 
     // task
-    PtkFileTask* ptask =
+    ptk::file_task* ptask =
         ptk_file_exec_new(set->menu_label.value(), cwd, GTK_WIDGET(this), this->task_view_);
     ptask->task->exec_command = std::format("{} {} {}", prog, cmd, file_paths);
     ptask->task->exec_browser = this;

@@ -30,27 +30,38 @@
 
 #include "vfs/vfs-file-task.hxx"
 
-#define PTK_FILE_TASK(obj) (static_cast<PtkFileTask*>(obj))
+#define PTK_FILE_TASK(obj) (static_cast<ptk::file_task*>(obj))
 
-namespace ptk::file_task
+namespace ptk
 {
-enum class ptask_error
+struct file_task
 {
-    first,
-    any,
-    cont
-};
-}
+    enum class ptask_error
+    {
+        first,
+        any,
+        cont
+    };
 
-struct PtkFileTask
-{
-    PtkFileTask() = delete;
-    ~PtkFileTask();
+    enum response
+    {
+        overwrite = 1 << 0,
+        overwrite_all = 1 << 1,
+        rename = 1 << 2,
+        skip = 1 << 3,
+        skip_all = 1 << 4,
+        auto_rename = 1 << 5,
+        auto_rename_all = 1 << 6,
+        pause = 1 << 7,
+    };
 
-    PtkFileTask(const vfs::file_task::type type,
-                const std::span<const std::filesystem::path> src_files,
-                const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-                GtkWidget* task_view);
+    file_task() = delete;
+    ~file_task();
+
+    file_task(const vfs::file_task::type type,
+              const std::span<const std::filesystem::path> src_files,
+              const std::filesystem::path& dest_dir, GtkWindow* parent_window,
+              GtkWidget* task_view);
 
     std::shared_ptr<vfs::file_task> task{nullptr};
 
@@ -105,37 +116,38 @@ struct PtkFileTask
     std::string dsp_avgspeed{};
     std::string dsp_avgest{};
 };
+} // namespace ptk
 
-void ptk_file_task_lock(PtkFileTask* ptask);
-void ptk_file_task_unlock(PtkFileTask* ptask);
+void ptk_file_task_lock(ptk::file_task* ptask);
+void ptk_file_task_unlock(ptk::file_task* ptask);
 
-PtkFileTask* ptk_file_task_new(const vfs::file_task::type type,
-                               const std::span<const std::filesystem::path> src_files,
-                               GtkWindow* parent_window, GtkWidget* task_view);
+ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
+                                  const std::span<const std::filesystem::path> src_files,
+                                  GtkWindow* parent_window, GtkWidget* task_view);
 
-PtkFileTask* ptk_file_task_new(const vfs::file_task::type type,
-                               const std::span<const std::filesystem::path> src_files,
-                               const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-                               GtkWidget* task_view);
+ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
+                                  const std::span<const std::filesystem::path> src_files,
+                                  const std::filesystem::path& dest_dir, GtkWindow* parent_window,
+                                  GtkWidget* task_view);
 
-PtkFileTask* ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
-                               GtkWidget* task_view);
-PtkFileTask* ptk_file_exec_new(const std::string_view item_name,
-                               const std::filesystem::path& dest_dir, GtkWidget* parent,
-                               GtkWidget* task_view);
+ptk::file_task* ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
+                                  GtkWidget* task_view);
+ptk::file_task* ptk_file_exec_new(const std::string_view item_name,
+                                  const std::filesystem::path& dest_dir, GtkWidget* parent,
+                                  GtkWidget* task_view);
 
-void ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data);
+void ptk_file_task_set_complete_notify(ptk::file_task* ptask, GFunc callback, void* user_data);
 
-void ptk_file_task_set_chmod(PtkFileTask* ptask, std::array<u8, 12> chmod_actions);
+void ptk_file_task_set_chmod(ptk::file_task* ptask, std::array<u8, 12> chmod_actions);
 
-void ptk_file_task_set_chown(PtkFileTask* ptask, uid_t uid, gid_t gid);
+void ptk_file_task_set_chown(ptk::file_task* ptask, uid_t uid, gid_t gid);
 
-void ptk_file_task_set_recursive(PtkFileTask* ptask, bool recursive);
+void ptk_file_task_set_recursive(ptk::file_task* ptask, bool recursive);
 
-void ptk_file_task_run(PtkFileTask* ptask);
+void ptk_file_task_run(ptk::file_task* ptask);
 
-bool ptk_file_task_cancel(PtkFileTask* ptask);
+bool ptk_file_task_cancel(ptk::file_task* ptask);
 
-void ptk_file_task_pause(PtkFileTask* ptask, const vfs::file_task::state state);
+void ptk_file_task_pause(ptk::file_task* ptask, const vfs::file_task::state state);
 
-void ptk_file_task_progress_open(PtkFileTask* ptask);
+void ptk_file_task_progress_open(ptk::file_task* ptask);

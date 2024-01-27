@@ -58,17 +58,17 @@ static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& tas
                                       const vfs::file_task::state state, void* state_data,
                                       void* user_data);
 
-static void query_overwrite(PtkFileTask* ptask);
+static void query_overwrite(ptk::file_task* ptask);
 
-static void ptk_file_task_update(PtkFileTask* ptask);
-static bool ptk_file_task_add_main(PtkFileTask* ptask);
-static void on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask);
-static void save_progress_dialog_size(PtkFileTask* ptask);
+static void ptk_file_task_update(ptk::file_task* ptask);
+static bool ptk_file_task_add_main(ptk::file_task* ptask);
+static void on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask);
+static void save_progress_dialog_size(ptk::file_task* ptask);
 
-PtkFileTask::PtkFileTask(const vfs::file_task::type type,
-                         const std::span<const std::filesystem::path> src_files,
-                         const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-                         GtkWidget* task_view)
+ptk::file_task::file_task(const vfs::file_task::type type,
+                          const std::span<const std::filesystem::path> src_files,
+                          const std::filesystem::path& dest_dir, GtkWindow* parent_window,
+                          GtkWidget* task_view)
     : parent_window(parent_window), task_view(task_view)
 {
     this->task = vfs::file_task::create(type, src_files, dest_dir);
@@ -107,7 +107,7 @@ PtkFileTask::PtkFileTask(const vfs::file_task::type type,
     // ztd::logger::info("ptk_file_task_new DONE ptask={}", ztd::logger::utils::ptr(this));
 }
 
-PtkFileTask::~PtkFileTask()
+ptk::file_task::~file_task()
 {
     // ztd::logger::info("ptk_file_task_destroy ptask={}", ztd::logger::utils::ptr(ptask));
     if (this->timeout)
@@ -146,45 +146,45 @@ PtkFileTask::~PtkFileTask()
 }
 
 void
-ptk_file_task_lock(PtkFileTask* ptask)
+ptk_file_task_lock(ptk::file_task* ptask)
 {
     g_mutex_lock(ptask->task->mutex);
 }
 
 void
-ptk_file_task_unlock(PtkFileTask* ptask)
+ptk_file_task_unlock(ptk::file_task* ptask)
 {
     g_mutex_unlock(ptask->task->mutex);
 }
 
 static bool
-ptk_file_task_trylock(PtkFileTask* ptask)
+ptk_file_task_trylock(ptk::file_task* ptask)
 {
     return g_mutex_trylock(ptask->task->mutex);
 }
 
-PtkFileTask*
+ptk::file_task*
 ptk_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files, GtkWindow* parent_window,
                   GtkWidget* task_view)
 {
-    auto* const ptask = new PtkFileTask(type, src_files, "", parent_window, task_view);
+    auto* const ptask = new ptk::file_task(type, src_files, "", parent_window, task_view);
 
     return ptask;
 }
 
-PtkFileTask*
+ptk::file_task*
 ptk_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files,
                   const std::filesystem::path& dest_dir, GtkWindow* parent_window,
                   GtkWidget* task_view)
 {
-    auto* const ptask = new PtkFileTask(type, src_files, dest_dir, parent_window, task_view);
+    auto* const ptask = new ptk::file_task(type, src_files, dest_dir, parent_window, task_view);
 
     return ptask;
 }
 
-PtkFileTask*
+ptk::file_task*
 ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget* task_view)
 {
     GtkWidget* parent_win = nullptr;
@@ -198,16 +198,16 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
-    auto* const ptask = new PtkFileTask(vfs::file_task::type::exec,
-                                        file_list,
-                                        "",
-                                        GTK_WINDOW(parent_win),
-                                        task_view);
+    auto* const ptask = new ptk::file_task(vfs::file_task::type::exec,
+                                           file_list,
+                                           "",
+                                           GTK_WINDOW(parent_win),
+                                           task_view);
 
     return ptask;
 }
 
-PtkFileTask*
+ptk::file_task*
 ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path& dest_dir,
                   GtkWidget* parent, GtkWidget* task_view)
 {
@@ -222,17 +222,17 @@ ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path&
     }
 
     const std::vector<std::filesystem::path> file_list{item_name.data()};
-    auto* const ptask = new PtkFileTask(vfs::file_task::type::exec,
-                                        file_list,
-                                        dest_dir,
-                                        GTK_WINDOW(parent_win),
-                                        task_view);
+    auto* const ptask = new ptk::file_task(vfs::file_task::type::exec,
+                                           file_list,
+                                           dest_dir,
+                                           GTK_WINDOW(parent_win),
+                                           task_view);
 
     return ptask;
 }
 
 static void
-save_progress_dialog_size(PtkFileTask* ptask)
+save_progress_dialog_size(ptk::file_task* ptask)
 {
     (void)ptask;
 #if 0
@@ -265,14 +265,14 @@ save_progress_dialog_size(PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_set_complete_notify(PtkFileTask* ptask, GFunc callback, void* user_data)
+ptk_file_task_set_complete_notify(ptk::file_task* ptask, GFunc callback, void* user_data)
 {
     ptask->complete_notify = callback;
     ptask->user_data = user_data;
 }
 
 static bool
-on_progress_timer(PtkFileTask* ptask)
+on_progress_timer(ptk::file_task* ptask)
 {
     // GThread *self = g_thread_self ();
     // ztd::logger::info("PROGRESS_TIMER_THREAD = {}", ztd::logger::utils::ptr(self));
@@ -369,7 +369,7 @@ on_progress_timer(PtkFileTask* ptask)
 }
 
 static bool
-ptk_file_task_add_main(PtkFileTask* ptask)
+ptk_file_task_add_main(ptk::file_task* ptask)
 {
     // ztd::logger::info("ptk_file_task_add_main ptask={}", ztd::logger::utils::ptr(ptask));
     if (ptask->timeout)
@@ -398,7 +398,7 @@ ptk_file_task_add_main(PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_run(PtkFileTask* ptask)
+ptk_file_task_run(ptk::file_task* ptask)
 {
     // ztd::logger::info("ptk_file_task_run ptask={}", ztd::logger::utils::ptr(ptask));
     // wait this long to first show task in manager, popup
@@ -418,7 +418,7 @@ ptk_file_task_run(PtkFileTask* ptask)
 }
 
 bool
-ptk_file_task_cancel(PtkFileTask* ptask)
+ptk_file_task_cancel(ptk::file_task* ptask)
 {
     // GThread *self = g_thread_self ();
     // ztd::logger::info("CANCEL_THREAD = {}", ztd::logger::utils::ptr(self));
@@ -465,7 +465,7 @@ ptk_file_task_cancel(PtkFileTask* ptask)
 }
 
 static void
-set_button_states(PtkFileTask* ptask)
+set_button_states(ptk::file_task* ptask)
 {
     if (!ptask->progress_dlg)
     {
@@ -505,7 +505,7 @@ set_button_states(PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_pause(PtkFileTask* ptask, const vfs::file_task::state state)
+ptk_file_task_pause(ptk::file_task* ptask, const vfs::file_task::state state)
 {
     if (state == vfs::file_task::state::pause)
     {
@@ -532,7 +532,7 @@ ptk_file_task_pause(PtkFileTask* ptask, const vfs::file_task::state state)
 }
 
 static bool
-on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, PtkFileTask* ptask)
+on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask)
 {
     (void)widget;
     (void)event;
@@ -541,7 +541,7 @@ on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, PtkFileTask* pt
 }
 
 static void
-on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
+on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask)
 {
     (void)dlg;
     save_progress_dialog_size(ptask);
@@ -601,7 +601,7 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 }
 
 static void
-on_progress_dlg_destroy(GtkDialog* dlg, PtkFileTask* ptask)
+on_progress_dlg_destroy(GtkDialog* dlg, ptk::file_task* ptask)
 {
     (void)dlg;
     ptask->progress_dlg = nullptr;
@@ -626,7 +626,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
 }
 
 static void
-set_progress_icon(PtkFileTask* ptask)
+set_progress_icon(ptk::file_task* ptask)
 {
     std::string icon;
     const auto& task = ptask->task;
@@ -662,7 +662,7 @@ set_progress_icon(PtkFileTask* ptask)
 }
 
 static void
-on_overwrite_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
+on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask)
 {
     i32 overwrite_mode = gtk_combo_box_get_active(box);
     if (overwrite_mode < 0)
@@ -673,7 +673,7 @@ on_overwrite_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 }
 
 static void
-on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
+on_error_combo_changed(GtkComboBox* box, ptk::file_task* ptask)
 {
     i32 error_mode = gtk_combo_box_get_active(box);
     if (error_mode < 0)
@@ -684,7 +684,7 @@ on_error_combo_changed(GtkComboBox* box, PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_progress_open(PtkFileTask* ptask)
+ptk_file_task_progress_open(ptk::file_task* ptask)
 {
     const std::unordered_map<vfs::file_task::type, const std::string_view> job_actions{
         {vfs::file_task::type::move, "Move: "},
@@ -1069,7 +1069,7 @@ ptk_file_task_progress_open(PtkFileTask* ptask)
 }
 
 static void
-ptk_file_task_progress_update(PtkFileTask* ptask)
+ptk_file_task_progress_update(ptk::file_task* ptask)
 {
     if (!ptask->progress_dlg)
     {
@@ -1374,25 +1374,25 @@ ptk_file_task_progress_update(PtkFileTask* ptask)
 }
 
 void
-ptk_file_task_set_chmod(PtkFileTask* ptask, std::array<u8, 12> chmod_actions)
+ptk_file_task_set_chmod(ptk::file_task* ptask, std::array<u8, 12> chmod_actions)
 {
     ptask->task->set_chmod(chmod_actions);
 }
 
 void
-ptk_file_task_set_chown(PtkFileTask* ptask, uid_t uid, gid_t gid)
+ptk_file_task_set_chown(ptk::file_task* ptask, uid_t uid, gid_t gid)
 {
     ptask->task->set_chown(uid, gid);
 }
 
 void
-ptk_file_task_set_recursive(PtkFileTask* ptask, bool recursive)
+ptk_file_task_set_recursive(ptk::file_task* ptask, bool recursive)
 {
     ptask->task->set_recursive(recursive);
 }
 
 static void
-ptk_file_task_update(PtkFileTask* ptask)
+ptk_file_task_update(ptk::file_task* ptask)
 {
     // ztd::logger::info("ptk_file_task_update ptask={}", ztd::logger::utils::ptr(ptask));
     // calculate updated display data
@@ -1738,7 +1738,7 @@ static bool
 on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                           const vfs::file_task::state state, void* state_data, void* user_data)
 {
-    PtkFileTask* ptask = PTK_FILE_TASK(user_data);
+    ptk::file_task* ptask = PTK_FILE_TASK(user_data);
     bool ret = true;
 
     switch (state)
@@ -1814,23 +1814,8 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
     return ret; /* return true to continue */
 }
 
-namespace ptk::file_task
-{
-enum response
-{
-    overwrite = 1 << 0,
-    overwrite_all = 1 << 1,
-    rename = 1 << 2,
-    skip = 1 << 3,
-    skip_all = 1 << 4,
-    auto_rename = 1 << 5,
-    auto_rename_all = 1 << 6,
-    pause = 1 << 7,
-};
-}
-
 static bool
-on_query_input_keypress(GtkWidget* widget, GdkEvent* event, PtkFileTask* ptask)
+on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask)
 {
     (void)ptask;
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -1889,7 +1874,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 }
 
 static void
-query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
+query_overwrite_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask)
 {
     switch (response)
     {
@@ -2017,7 +2002,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 }
 
 static void
-on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
+on_query_button_press(GtkWidget* widget, ptk::file_task* ptask)
 {
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
@@ -2048,7 +2033,7 @@ on_query_button_press(GtkWidget* widget, PtkFileTask* ptask)
 }
 
 static void
-query_overwrite(PtkFileTask* ptask)
+query_overwrite(ptk::file_task* ptask)
 {
     // ztd::logger::info("query_overwrite ptask={}", ztd::logger::utils::ptr(ptask));
     GtkWidget* dlg = nullptr;

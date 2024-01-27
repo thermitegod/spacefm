@@ -207,14 +207,14 @@ ptk_task_view_is_main_tasks_running(GtkWidget* task_view)
 }
 
 void
-main_task_pause_all_queued(PtkFileTask* ptask)
+main_task_pause_all_queued(ptk::file_task* ptask)
 {
     if (!ptask->task_view)
     {
         return;
     }
 
-    PtkFileTask* qtask = nullptr;
+    ptk::file_task* qtask = nullptr;
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ptask->task_view));
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
@@ -232,15 +232,15 @@ main_task_pause_all_queued(PtkFileTask* ptask)
 }
 
 void
-main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
+main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
 {
     if (!GTK_IS_TREE_VIEW(view))
     {
         return;
     }
 
-    std::vector<PtkFileTask*> running;
-    std::vector<PtkFileTask*> queued;
+    std::vector<ptk::file_task*> running;
+    std::vector<ptk::file_task*> queued;
 
     GtkTreeIter it;
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -248,7 +248,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     {
         do
         {
-            PtkFileTask* qtask = nullptr;
+            ptk::file_task* qtask = nullptr;
             gtk_tree_model_get(model, &it, task_view_column::data, &qtask, -1);
             if (qtask && qtask->task && !qtask->complete &&
                 qtask->task->state_ == vfs::file_task::state::running)
@@ -285,7 +285,7 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
     }
 
     // smart
-    for (PtkFileTask* qtask : queued)
+    for (ptk::file_task* qtask : queued)
     {
         if (qtask)
         {
@@ -298,11 +298,11 @@ main_task_start_queued(GtkWidget* view, PtkFileTask* new_ptask)
 }
 
 static void
-on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, PtkFileTask* ptask2)
+on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
-    PtkFileTask* ptask = nullptr;
+    ptk::file_task* ptask = nullptr;
     xset_t set;
 
     enum class main_window_job
@@ -404,7 +404,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, PtkFileTask
 }
 
 void
-ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, PtkFileTask* ptask2)
+ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2)
 {
     on_task_stop(nullptr, view, set2, ptask2);
 }
@@ -690,13 +690,13 @@ ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu)
     xset_set_ob2(set, nullptr, set_radio->name.data());
 }
 
-PtkFileTask*
+ptk::file_task*
 ptk_task_view_get_selected_task(GtkWidget* view)
 {
     GtkTreeModel* model = nullptr;
     GtkTreeSelection* selection = nullptr;
     GtkTreeIter it;
-    PtkFileTask* ptask = nullptr;
+    ptk::file_task* ptask = nullptr;
 
     if (!view)
     {
@@ -720,7 +720,7 @@ ptk_task_view_get_selected_task(GtkWidget* view)
 void
 ptk_task_view_show_task_dialog(GtkWidget* view)
 {
-    PtkFileTask* ptask = ptk_task_view_get_selected_task(view);
+    ptk::file_task* ptask = ptk_task_view_get_selected_task(view);
     if (!ptask)
     {
         return;
@@ -748,7 +748,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
     GtkTreePath* tree_path = nullptr;
     GtkTreeViewColumn* col = nullptr;
     GtkTreeIter it;
-    PtkFileTask* ptask = nullptr;
+    ptk::file_task* ptask = nullptr;
     xset_t set;
     bool is_tasks = false;
 
@@ -940,7 +940,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
     (void)user_data;
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
-    PtkFileTask* ptask = nullptr;
+    ptk::file_task* ptask = nullptr;
 
     MainWindow* main_window = get_task_view_window(view);
     if (main_window == nullptr)
@@ -963,7 +963,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
 }
 
 void
-main_task_view_remove_task(PtkFileTask* ptask)
+main_task_view_remove_task(ptk::file_task* ptask)
 {
     // ztd::logger::info("main_task_view_remove_task  ptask={}", ptask);
 
@@ -979,7 +979,7 @@ main_task_view_remove_task(PtkFileTask* ptask)
         return;
     }
 
-    PtkFileTask* ptaskt = nullptr;
+    ptk::file_task* ptaskt = nullptr;
     GtkTreeIter it;
 
     GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -1007,9 +1007,9 @@ main_task_view_remove_task(PtkFileTask* ptask)
 }
 
 void
-main_task_view_update_task(PtkFileTask* ptask)
+main_task_view_update_task(ptk::file_task* ptask)
 {
-    PtkFileTask* ptaskt = nullptr;
+    ptk::file_task* ptaskt = nullptr;
     GtkWidget* view = nullptr;
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
