@@ -3069,10 +3069,10 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
                 {
                     auto_open->path = full_path;
                     auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
-                    ptask->complete_notify = auto_open->callback;
-                    ptask->user_data = auto_open;
+                    ptask->complete_notify_ = auto_open->callback;
+                    ptask->user_data_ = auto_open;
                 }
-                ptk_file_task_run(ptask);
+                ptask->run();
             }
             else if (create_new != ptk::action::rename_mode::rename && new_file)
             {
@@ -3129,10 +3129,10 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
                 {
                     auto_open->path = full_path;
                     auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
-                    ptask->complete_notify = auto_open->callback;
-                    ptask->user_data = auto_open;
+                    ptask->complete_notify_ = auto_open->callback;
+                    ptask->user_data_ = auto_open;
                 }
-                ptk_file_task_run(ptask);
+                ptask->run();
             }
             else if (create_new != ptk::action::rename_mode::rename)
             {
@@ -3187,10 +3187,10 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
                 {
                     auto_open->path = full_path;
                     auto_open->open_file = (response == GtkResponseType::GTK_RESPONSE_APPLY);
-                    ptask->complete_notify = auto_open->callback;
-                    ptask->user_data = auto_open;
+                    ptask->complete_notify_ = auto_open->callback;
+                    ptask->user_data_ = auto_open;
                 }
-                ptk_file_task_run(ptask);
+                ptask->run();
             }
             else if (copy || copy_target)
             {
@@ -3233,7 +3233,7 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptk_file_task_run(ptask);
+                ptask->run();
             }
             else if (link || link_target)
             {
@@ -3268,7 +3268,7 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptk_file_task_run(ptask);
+                ptask->run();
             }
             // need move?  (do move as task in case it takes a long time)
             else if (!std::filesystem::equivalent(old_path, path))
@@ -3288,7 +3288,7 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
                 ptask->task->exec_popup = false;
                 ptask->task->exec_show_output = false;
                 ptask->task->exec_show_error = true;
-                ptk_file_task_run(ptask);
+                ptask->run();
             }
             else
             {

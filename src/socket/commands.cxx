@@ -1420,7 +1420,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             ptask->lock();
             ptask->task->exec_icon = value;
-            ptask->pause_change_view = ptask->pause_change = true;
+            ptask->pause_change_view_ = ptask->pause_change_ = true;
             ptask->unlock();
             return {SOCKET_SUCCESS, ""};
         }
@@ -1460,7 +1460,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 ptask->task->percent = j;
             }
             ptask->task->custom_percent = value != "0";
-            ptask->pause_change_view = ptask->pause_change = true;
+            ptask->pause_change_view_ = ptask->pause_change_ = true;
             return {SOCKET_SUCCESS, ""};
         }
         else if (property == "total")
@@ -1487,15 +1487,15 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             if (subproperty == "run")
             {
-                ptk_file_task_pause(ptask, vfs::file_task::state::running);
+                ptask->pause(vfs::file_task::state::running);
             }
             else if (subproperty == "pause")
             {
-                ptk_file_task_pause(ptask, vfs::file_task::state::pause);
+                ptask->pause(vfs::file_task::state::pause);
             }
             else if (subproperty == "queue" || subproperty == "queued")
             {
-                ptk_file_task_pause(ptask, vfs::file_task::state::queue);
+                ptask->pause(vfs::file_task::state::queue);
             }
             else if (subproperty == "stop")
             {
@@ -1686,7 +1686,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 gtk_window_present(GTK_WINDOW(main_window));
             }
-            ptk_file_task_run(ptask);
+            ptask->run();
             if (opt_task)
             {
                 return {SOCKET_SUCCESS,
@@ -1785,7 +1785,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             ptask->task->exec_terminal = false;
             ptask->task->exec_sync = true;
             ptask->task->exec_show_error = true;
-            ptk_file_task_run(ptask);
+            ptask->run();
         }
         else if (property == "copy" || property == "move" || property == "link" ||
                  property == "delete" || property == "trash")
@@ -1893,7 +1893,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                                                       target_dir,
                                                       GTK_WINDOW(parent),
                                                       file_browser->task_view());
-            ptk_file_task_run(ptask);
+            ptask->run();
             return {SOCKET_SUCCESS,
                     std::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"

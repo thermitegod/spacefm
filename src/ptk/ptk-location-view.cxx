@@ -748,7 +748,7 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     ptask->task->exec_show_error = true;
     ptask->task->exec_terminal = false;
     ptask->task->exec_icon = vol->icon();
-    ptk_file_task_run(ptask);
+    ptask->run();
 }
 
 static void
@@ -791,7 +791,7 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
     ptask->task->exec_show_error = true;
     ptask->task->exec_terminal = false;
     ptask->task->exec_icon = vol->icon();
-    ptk_file_task_run(ptask);
+    ptask->run();
 }
 
 static void
@@ -835,7 +835,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         ptask->task->exec_terminal = false;
         ptask->task->exec_icon = vol->icon();
 
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     else if (vol->is_device_type(vfs::volume::device_type::block) &&
              (vol->is_optical() || vol->requires_eject()))
@@ -850,7 +850,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         ptask->task->exec_show_error = false;
         ptask->task->exec_icon = vol->icon();
 
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     else
     {
@@ -864,7 +864,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         ptask->task->exec_show_error = false;
         ptask->task->exec_icon = vol->icon();
 
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
 }
 
@@ -959,10 +959,10 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
         ao->job = ptk::browser::open_action::dir;
     }
 
-    ptask->complete_notify = (GFunc)on_autoopen_cb;
-    ptask->user_data = ao;
+    ptask->complete_notify_ = (GFunc)on_autoopen_cb;
+    ptask->user_data_ = ao;
 
-    ptk_file_task_run(ptask);
+    ptask->run();
 
     return vol->is_mounted();
 }
@@ -1023,10 +1023,10 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
         ao->devnum = vol->devnum();
         ao->job = ptk::browser::open_action::new_tab;
 
-        ptask->complete_notify = (GFunc)on_autoopen_cb;
-        ptask->user_data = ao;
+        ptask->complete_notify_ = (GFunc)on_autoopen_cb;
+        ptask->user_data_ = ao;
 
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     else
     {
@@ -1097,10 +1097,10 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
         ao->devnum = vol->devnum();
         ao->job = ptk::browser::open_action::dir;
 
-        ptask->complete_notify = (GFunc)on_autoopen_cb;
-        ptask->user_data = ao;
+        ptask->complete_notify_ = (GFunc)on_autoopen_cb;
+        ptask->user_data_ = ao;
 
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     else if (file_browser)
     {

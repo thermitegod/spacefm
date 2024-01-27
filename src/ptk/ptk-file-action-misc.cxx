@@ -207,7 +207,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
                                               file_list,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               GTK_WIDGET(task_view));
-    ptk_file_task_run(ptask);
+    ptask->run();
 }
 
 void
@@ -244,5 +244,5 @@ ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
                                               file_list,
                                               parent_win ? GTK_WINDOW(parent_win) : nullptr,
                                               GTK_WIDGET(task_view));
-    ptk_file_task_run(ptask);
+    ptask->run();
 }

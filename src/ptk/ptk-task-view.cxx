@@ -209,23 +209,23 @@ ptk_task_view_is_main_tasks_running(GtkWidget* task_view)
 void
 main_task_pause_all_queued(ptk::file_task* ptask)
 {
-    if (!ptask->task_view)
+    if (!ptask->task_view_)
     {
         return;
     }
 
     ptk::file_task* qtask = nullptr;
-    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ptask->task_view));
+    GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(ptask->task_view_));
     GtkTreeIter it;
     if (gtk_tree_model_get_iter_first(model, &it))
     {
         do
         {
             gtk_tree_model_get(model, &it, task_view_column::data, &qtask, -1);
-            if (qtask && qtask != ptask && qtask->task && !qtask->complete &&
+            if (qtask && qtask != ptask && qtask->task && !qtask->complete_ &&
                 qtask->task->state_pause_ == vfs::file_task::state::queue)
             {
-                ptk_file_task_pause(qtask, vfs::file_task::state::pause);
+                qtask->pause(vfs::file_task::state::pause);
             }
         } while (gtk_tree_model_iter_next(model, &it));
     }
@@ -250,7 +250,7 @@ main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
         {
             ptk::file_task* qtask = nullptr;
             gtk_tree_model_get(model, &it, task_view_column::data, &qtask, -1);
-            if (qtask && qtask->task && !qtask->complete &&
+            if (qtask && qtask->task && !qtask->complete_ &&
                 qtask->task->state_ == vfs::file_task::state::running)
             {
                 if (qtask->task->state_pause_ == vfs::file_task::state::queue)
@@ -265,7 +265,7 @@ main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
         } while (gtk_tree_model_iter_next(model, &it));
     }
 
-    if (new_ptask && new_ptask->task && !new_ptask->complete &&
+    if (new_ptask && new_ptask->task && !new_ptask->is_completed() &&
         new_ptask->task->state_pause_ == vfs::file_task::state::queue &&
         new_ptask->task->state_ == vfs::file_task::state::running)
     {
@@ -280,7 +280,7 @@ main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
 
     if (!smart)
     {
-        ptk_file_task_pause(queued.back(), vfs::file_task::state::running);
+        queued.back()->pause(vfs::file_task::state::running);
         return;
     }
 
@@ -291,7 +291,7 @@ main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
         {
             // qtask has no devices so run it
             running.push_back(qtask);
-            ptk_file_task_pause(qtask, vfs::file_task::state::running);
+            qtask->pause(vfs::file_task::state::running);
             continue;
         }
     }
@@ -379,22 +379,22 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, ptk::file_t
             {
                 gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
             }
-            if (ptask && ptask->task && !ptask->complete &&
+            if (ptask && ptask->task && !ptask->is_completed() &&
                 (ptask->task->type_ != vfs::file_task::type::exec || job == main_window_job::stop))
             {
                 switch (job)
                 {
                     case main_window_job::stop:
-                        ptk_file_task_cancel(ptask);
+                        ptask->cancel();
                         break;
                     case main_window_job::pause:
-                        ptk_file_task_pause(ptask, vfs::file_task::state::pause);
+                        ptask->pause(vfs::file_task::state::pause);
                         break;
                     case main_window_job::queue:
-                        ptk_file_task_pause(ptask, vfs::file_task::state::queue);
+                        ptask->pause(vfs::file_task::state::queue);
                         break;
                     case main_window_job::resume:
-                        ptk_file_task_pause(ptask, vfs::file_task::state::running);
+                        ptask->pause(vfs::file_task::state::running);
                         break;
                 }
             }
@@ -727,16 +727,16 @@ ptk_task_view_show_task_dialog(GtkWidget* view)
     }
 
     ptask->lock();
-    ptk_file_task_progress_open(ptask);
+    ptask->progress_open();
     if (ptask->task->state_pause_ != vfs::file_task::state::running)
     {
         // update dlg
-        ptask->pause_change = true;
-        ptask->progress_count = 50; // trigger fast display
+        ptask->pause_change_ = true;
+        ptask->progress_count_ = 50; // trigger fast display
     }
-    if (ptask->progress_dlg)
+    if (ptask->progress_dlg_)
     {
-        gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
+        gtk_window_present(GTK_WINDOW(ptask->progress_dlg_));
     }
     ptask->unlock();
 }
@@ -967,7 +967,7 @@ main_task_view_remove_task(ptk::file_task* ptask)
 {
     // ztd::logger::info("main_task_view_remove_task  ptask={}", ptask);
 
-    GtkWidget* view = ptask->task_view;
+    GtkWidget* view = ptask->task_view_;
     if (!view)
     {
         return;
@@ -1031,7 +1031,7 @@ main_task_view_update_task(ptk::file_task* ptask)
         return;
     }
 
-    view = ptask->task_view;
+    view = ptask->task_view_;
     if (!view)
     {
         return;
@@ -1084,7 +1084,7 @@ main_task_view_update_task(ptk::file_task* ptask)
             -1);
     }
 
-    if (ptask->task->state_pause_ == vfs::file_task::state::running || ptask->pause_change_view)
+    if (ptask->task->state_pause_ == vfs::file_task::state::running || ptask->pause_change_view_)
     {
         // update row
         std::string path;
@@ -1121,14 +1121,15 @@ main_task_view_update_task(ptk::file_task* ptask)
         std::string status_final;
         if (ptask->task->type_ != vfs::file_task::type::exec)
         {
-            if (!ptask->err_count)
+            if (!ptask->err_count_)
             {
                 status = job_titles.at(ptask->task->type_);
             }
             else
             {
-                status =
-                    std::format("{} error {}", ptask->err_count, job_titles.at(ptask->task->type_));
+                status = std::format("{} error {}",
+                                     ptask->err_count_,
+                                     job_titles.at(ptask->task->type_));
             }
         }
         else
@@ -1159,7 +1160,7 @@ main_task_view_update_task(ptk::file_task* ptask)
 
         // update icon if queue state changed
         GdkPixbuf* pixbuf = nullptr;
-        if (ptask->pause_change_view)
+        if (ptask->pause_change_view_)
         {
             // icon
             if (ptask->task->state_pause_ == vfs::file_task::state::pause)
@@ -1172,7 +1173,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                 set = xset_get(xset::name::task_que);
                 pixbuf = vfs::utils::load_icon(set->icon.value_or("list-add"), 22);
             }
-            else if (ptask->err_count && ptask->task->type_ != vfs::file_task::type::exec)
+            else if (ptask->err_count_ && ptask->task->type_ != vfs::file_task::type::exec)
             {
                 pixbuf = vfs::utils::load_icon("error", 22);
             }
@@ -1201,7 +1202,7 @@ main_task_view_update_task(ptk::file_task* ptask)
             {
                 pixbuf = vfs::utils::load_icon("gtk-execute", 22);
             }
-            ptask->pause_change_view = false;
+            ptask->pause_change_view_ = false;
         }
 
         if (ptask->task->type_ != vfs::file_task::type::exec || ptaskt != ptask /* new task */)
@@ -1215,7 +1216,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::status,
                                    status_final.data(),
                                    task_view_column::count,
-                                   ptask->dsp_file_count.data(),
+                                   ptask->dsp_file_count_.data(),
                                    task_view_column::path,
                                    path.data(),
                                    task_view_column::file,
@@ -1223,17 +1224,17 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::progress,
                                    percent,
                                    task_view_column::total,
-                                   ptask->dsp_size_tally.data(),
+                                   ptask->dsp_size_tally_.data(),
                                    task_view_column::elapsed,
-                                   ptask->dsp_elapsed.data(),
+                                   ptask->dsp_elapsed_.data(),
                                    task_view_column::curspeed,
-                                   ptask->dsp_curspeed.data(),
+                                   ptask->dsp_curspeed_.data(),
                                    task_view_column::curest,
-                                   ptask->dsp_curest.data(),
+                                   ptask->dsp_curest_.data(),
                                    task_view_column::avgspeed,
-                                   ptask->dsp_avgspeed.data(),
+                                   ptask->dsp_avgspeed_.data(),
                                    task_view_column::avgest,
-                                   ptask->dsp_avgest.data(),
+                                   ptask->dsp_avgest_.data(),
                                    -1);
             }
             else
@@ -1243,7 +1244,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::status,
                                    status_final.data(),
                                    task_view_column::count,
-                                   ptask->dsp_file_count.data(),
+                                   ptask->dsp_file_count_.data(),
                                    task_view_column::path,
                                    path.data(),
                                    task_view_column::file,
@@ -1251,17 +1252,17 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::progress,
                                    percent,
                                    task_view_column::total,
-                                   ptask->dsp_size_tally.data(),
+                                   ptask->dsp_size_tally_.data(),
                                    task_view_column::elapsed,
-                                   ptask->dsp_elapsed.data(),
+                                   ptask->dsp_elapsed_.data(),
                                    task_view_column::curspeed,
-                                   ptask->dsp_curspeed.data(),
+                                   ptask->dsp_curspeed_.data(),
                                    task_view_column::curest,
-                                   ptask->dsp_curest.data(),
+                                   ptask->dsp_curest_.data(),
                                    task_view_column::avgspeed,
-                                   ptask->dsp_avgspeed.data(),
+                                   ptask->dsp_avgspeed_.data(),
                                    task_view_column::avgest,
-                                   ptask->dsp_avgest.data(),
+                                   ptask->dsp_avgest_.data(),
                                    -1);
             }
         }
@@ -1276,7 +1277,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                task_view_column::progress,
                                percent,
                                task_view_column::elapsed,
-                               ptask->dsp_elapsed.data(),
+                               ptask->dsp_elapsed_.data(),
                                -1);
         }
         else
@@ -1288,7 +1289,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                task_view_column::progress,
                                percent,
                                task_view_column::elapsed,
-                               ptask->dsp_elapsed.data(),
+                               ptask->dsp_elapsed_.data(),
                                -1);
         }
 
@@ -1309,17 +1310,17 @@ main_task_view_update_task(ptk::file_task* ptask)
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
                            task_view_column::total,
-                           ptask->dsp_size_tally.data(),
+                           ptask->dsp_size_tally_.data(),
                            task_view_column::elapsed,
-                           ptask->dsp_elapsed.data(),
+                           ptask->dsp_elapsed_.data(),
                            task_view_column::curspeed,
-                           ptask->dsp_curspeed.data(),
+                           ptask->dsp_curspeed_.data(),
                            task_view_column::curest,
-                           ptask->dsp_curest.data(),
+                           ptask->dsp_curest_.data(),
                            task_view_column::avgspeed,
-                           ptask->dsp_avgspeed.data(),
+                           ptask->dsp_avgspeed_.data(),
                            task_view_column::avgest,
-                           ptask->dsp_avgest.data(),
+                           ptask->dsp_avgest_.data(),
                            -1);
     }
     // ztd::logger::info("DONE main_task_view_update_task");

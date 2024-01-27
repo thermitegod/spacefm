@@ -2477,7 +2477,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                                                               dest_dir,
                                                               GTK_WINDOW(parent),
                                                               file_browser->task_view_);
-                    ptk_file_task_run(ptask);
+                    ptask->run();
                 }
                 gtk_drag_finish(drag_context, true, false, time);
                 return;
@@ -4158,7 +4158,7 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
                                                   dest_dir.value(),
                                                   GTK_WINDOW(parent_win),
                                                   this->task_view_);
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     else
     {
@@ -6199,7 +6199,7 @@ ptk::browser::on_permission(GtkMenuItem* item,
     ptask->task->exec_sync = true;
     ptask->task->exec_show_error = true;
     ptask->task->exec_show_output = false;
-    ptk_file_task_run(ptask);
+    ptask->run();
 }
 
 void

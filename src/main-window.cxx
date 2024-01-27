@@ -251,7 +251,7 @@ MainWindow::open_terminal() const noexcept
     ptask->task->exec_command = terminal;
     ptask->task->exec_sync = false;
     ptask->task->exec_browser = file_browser;
-    ptk_file_task_run(ptask);
+    ptask->run();
 }
 
 static void

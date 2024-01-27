@@ -43,7 +43,7 @@ struct file_task
         cont
     };
 
-    enum response
+    enum class response
     {
         overwrite = 1 << 0,
         overwrite_all = 1 << 1,
@@ -65,60 +65,83 @@ struct file_task
 
     std::shared_ptr<vfs::file_task> task{nullptr};
 
-    GtkWidget* progress_dlg{nullptr};
-    GtkButton* progress_btn_close{nullptr};
-    GtkButton* progress_btn_stop{nullptr};
-    GtkButton* progress_btn_pause{nullptr};
-    GtkWindow* parent_window{nullptr};
-    GtkWidget* task_view{nullptr};
-    GtkLabel* from{nullptr};
-    GtkLabel* to{nullptr};
-    GtkLabel* src_dir{nullptr};
-    GtkLabel* current{nullptr};
-    GtkProgressBar* progress_bar{nullptr};
-    GtkLabel* errors{nullptr};
-    GtkWidget* error_view{nullptr};
-    GtkScrolledWindow* scroll{nullptr};
-    GtkWidget* overwrite_combo{nullptr};
-    GtkWidget* error_combo{nullptr};
+    GtkWidget* progress_dlg_{nullptr};
+    GtkButton* progress_btn_close_{nullptr};
+    GtkButton* progress_btn_stop_{nullptr};
+    GtkButton* progress_btn_pause_{nullptr};
+    GtkWindow* parent_window_{nullptr};
+    GtkWidget* task_view_{nullptr};
+    GtkLabel* from_{nullptr};
+    GtkLabel* to_{nullptr};
+    GtkLabel* src_dir_{nullptr};
+    GtkLabel* current_{nullptr};
+    GtkProgressBar* progress_bar_{nullptr};
+    GtkLabel* errors_{nullptr};
+    GtkWidget* error_view_{nullptr};
+    GtkScrolledWindow* scroll_{nullptr};
+    GtkWidget* overwrite_combo_{nullptr};
+    GtkWidget* error_combo_{nullptr};
 
-    GtkTextBuffer* log_buf{nullptr};
-    GtkTextMark* log_end{nullptr};
-    bool log_appended{false};
-    i32 err_count{0};
-    ptk::file_task::ptask_error err_mode{ptk::file_task::ptask_error::first};
+    GtkTextBuffer* log_buf_{nullptr};
+    GtkTextMark* log_end_{nullptr};
+    bool log_appended_{false};
+    i32 err_count_{0};
+    ptk::file_task::ptask_error err_mode_{ptk::file_task::ptask_error::first};
 
-    bool complete{false};
-    bool aborted{false};
-    bool pause_change{false};
-    bool pause_change_view{true};
+    bool complete_{false};
+    bool aborted_{false};
+    bool pause_change_{false};
+    bool pause_change_view_{true};
 
     /* <private> */
-    u32 timeout{0};
-    bool restart_timeout{false};
-    u32 progress_timer{0};
-    u8 progress_count{0};
-    GFunc complete_notify{nullptr};
-    void* user_data{nullptr};
-    bool keep_dlg{false};
-    bool pop_detail{false};
+    u32 timeout_{0};
+    bool restart_timeout_{false};
+    u32 progress_timer_{0};
+    u8 progress_count_{0};
+    GFunc complete_notify_{nullptr};
+    void* user_data_{nullptr};
+    bool keep_dlg_{false};
+    bool pop_detail_{false};
 
-    GCond* query_cond{nullptr};
-    GCond* query_cond_last{nullptr};
-    char** query_new_dest{nullptr};
-    bool query_ret{false};
+    GCond* query_cond_{nullptr};
+    GCond* query_cond_last_{nullptr};
+    char** query_new_dest_{nullptr};
+    bool query_ret_{false};
 
-    std::string dsp_file_count{};
-    std::string dsp_size_tally{};
-    std::string dsp_elapsed{};
-    std::string dsp_curspeed{};
-    std::string dsp_curest{};
-    std::string dsp_avgspeed{};
-    std::string dsp_avgest{};
+    std::string dsp_file_count_{};
+    std::string dsp_size_tally_{};
+    std::string dsp_elapsed_{};
+    std::string dsp_curspeed_{};
+    std::string dsp_curest_{};
+    std::string dsp_avgspeed_{};
+    std::string dsp_avgest_{};
+
+    [[nodiscard]] bool is_completed() const noexcept;
+    [[nodiscard]] bool is_aborted() const noexcept;
+
+    void set_complete_notify(GFunc callback, void* user_data) noexcept;
+    void set_chmod(const std::array<u8, 12> chmod_actions) noexcept;
+    void set_chown(const uid_t uid, const gid_t gid) noexcept;
+    void set_recursive(const bool recursive) noexcept;
+    void run() noexcept;
+    bool cancel() noexcept;
+    void pause(const vfs::file_task::state state) noexcept;
+    void progress_open() noexcept;
 
     void lock() noexcept;
     bool trylock() noexcept;
     void unlock() noexcept;
+
+    void save_progress_dialog_size() const noexcept; // private
+
+    void query_overwrite() noexcept;
+
+    void update() noexcept;
+
+  private:
+    void set_button_states() noexcept;
+    void set_progress_icon() noexcept;
+    void progress_update() noexcept;
 };
 } // namespace ptk
 
@@ -136,19 +159,3 @@ ptk::file_task* ptk_file_exec_new(const std::string_view item_name, GtkWidget* p
 ptk::file_task* ptk_file_exec_new(const std::string_view item_name,
                                   const std::filesystem::path& dest_dir, GtkWidget* parent,
                                   GtkWidget* task_view);
-
-void ptk_file_task_set_complete_notify(ptk::file_task* ptask, GFunc callback, void* user_data);
-
-void ptk_file_task_set_chmod(ptk::file_task* ptask, std::array<u8, 12> chmod_actions);
-
-void ptk_file_task_set_chown(ptk::file_task* ptask, uid_t uid, gid_t gid);
-
-void ptk_file_task_set_recursive(ptk::file_task* ptask, bool recursive);
-
-void ptk_file_task_run(ptk::file_task* ptask);
-
-bool ptk_file_task_cancel(ptk::file_task* ptask);
-
-void ptk_file_task_pause(ptk::file_task* ptask, const vfs::file_task::state state);
-
-void ptk_file_task_progress_open(ptk::file_task* ptask);

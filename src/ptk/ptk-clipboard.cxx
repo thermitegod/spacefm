@@ -432,9 +432,9 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
                                                   GTK_WIDGET(task_view));
         if (callback && callback_win)
         {
-            ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
+            ptask->set_complete_notify(callback, (void*)callback_win);
         }
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     gtk_selection_data_free(sel_data);
 }
@@ -514,9 +514,9 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
                                                   task_view ? GTK_WIDGET(task_view) : nullptr);
         if (callback && callback_win)
         {
-            ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
+            ptask->set_complete_notify(callback, (void*)callback_win);
         }
-        ptk_file_task_run(ptask);
+        ptask->run();
     }
     gtk_selection_data_free(sel_data);
 }
@@ -612,9 +612,9 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
                                                   GTK_WIDGET(task_view));
         if (callback && callback_win)
         {
-            ptk_file_task_set_complete_notify(ptask, callback, (void*)callback_win);
+            ptask->set_complete_notify(callback, (void*)callback_win);
         }
-        ptk_file_task_run(ptask);
+        ptask->run();
 
         if (missing_targets > 0)
         {

@@ -732,7 +732,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                                                   dest_dir,
                                                                   GTK_WINDOW(parent),
                                                                   file_browser->task_view());
-                        ptk_file_task_run(ptask);
+                        ptask->run();
                     }
                 }
                 gtk_drag_finish(drag_context, true, false, time);

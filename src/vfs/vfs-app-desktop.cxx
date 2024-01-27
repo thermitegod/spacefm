@@ -525,7 +525,7 @@ vfs::desktop::exec_in_terminal(const std::filesystem::path& cwd,
     ptask->task->exec_terminal = true;
     ptask->task->exec_sync = false;
 
-    ptk_file_task_run(ptask);
+    ptask->run();
 }
 
 bool
