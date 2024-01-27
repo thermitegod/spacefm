@@ -40,8 +40,6 @@
 #define PTK_FILE_BROWSER(obj)             (static_cast<ptk::browser*>(obj))
 #define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))
 
-#define PTK_TYPE_FILE_BROWSER (ptk_file_browser_get_type())
-
 // forward declare
 struct MainWindow;
 
@@ -465,22 +463,6 @@ struct browser
     sigc::connection signal_file_listed;
 };
 } // namespace ptk
-
-struct PtkFileBrowserClass
-{
-    GtkPanedClass parent;
-
-    /* Default signal handlers */
-    void (*before_chdir)(ptk::browser* file_browser, const std::filesystem::path& path);
-    void (*begin_chdir)(ptk::browser* file_browser);
-    void (*after_chdir)(ptk::browser* file_browser);
-    void (*open_item)(ptk::browser* file_browser, const std::filesystem::path& path, i32 action);
-    void (*content_change)(ptk::browser* file_browser);
-    void (*sel_change)(ptk::browser* file_browser);
-    void (*pane_mode_change)(ptk::browser* file_browser);
-};
-
-GType ptk_file_browser_get_type();
 
 GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                                 MainWindow* main_window);

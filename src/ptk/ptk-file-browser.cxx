@@ -109,6 +109,24 @@
 #undef USE_EXO
 #endif
 
+struct PtkFileBrowserClass
+{
+    GtkPanedClass parent;
+
+    /* Default signal handlers */
+    void (*before_chdir)(ptk::browser* file_browser, const std::filesystem::path& path);
+    void (*begin_chdir)(ptk::browser* file_browser);
+    void (*after_chdir)(ptk::browser* file_browser);
+    void (*open_item)(ptk::browser* file_browser, const std::filesystem::path& path, i32 action);
+    void (*content_change)(ptk::browser* file_browser);
+    void (*sel_change)(ptk::browser* file_browser);
+    void (*pane_mode_change)(ptk::browser* file_browser);
+};
+
+GType ptk_file_browser_get_type();
+
+#define PTK_TYPE_FILE_BROWSER (ptk_file_browser_get_type())
+
 static void ptk_file_browser_class_init(PtkFileBrowserClass* klass);
 static void ptk_file_browser_init(ptk::browser* file_browser);
 static void ptk_file_browser_finalize(GObject* obj);
