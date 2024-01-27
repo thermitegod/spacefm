@@ -37,9 +37,9 @@
 #include "xset/xset-design-clipboard.hxx"
 #include "xset/xset-keyboard.hxx"
 #include "xset/xset-toolbar.hxx"
+#include "xset/utils/xset-utils.hxx"
 
 #include "autosave.hxx"
-#include "utils.hxx"
 
 #include "main-window.hxx"
 
@@ -133,7 +133,7 @@ xset_design_job_set_remove(const xset_t& set)
     std::string name;
     if (set->menu_label)
     {
-        name = clean_label(set->menu_label.value(), false, false);
+        name = xset::utils::clean_label(set->menu_label.value(), false, false);
     }
     else
     {

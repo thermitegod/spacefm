@@ -35,7 +35,7 @@
 #include "vfs/vfs-file.hxx"
 
 #include "ptk/natsort/strnatcmp.h"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-file-list.hxx"
 

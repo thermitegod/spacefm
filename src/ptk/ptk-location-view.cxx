@@ -42,7 +42,7 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
@@ -57,7 +57,7 @@
 #include "main-window.hxx"
 
 #include "vfs/vfs-volume.hxx"
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/linux/self.hxx"
 
@@ -164,7 +164,7 @@ update_volume_icons()
             gtk_tree_model_get(model, &it, ptk::location_view::column::data, &vol, -1);
             if (vol)
             {
-                GdkPixbuf* icon = vfs_load_icon(vol->icon(), icon_size);
+                GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
                                    ptk::location_view::column::icon,
@@ -583,7 +583,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
             icon_size = PANE_MAX_ICON_SIZE;
         }
 
-        GdkPixbuf* icon = vfs_load_icon(vol->icon(), icon_size);
+        GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
         gtk_list_store_set(GTK_LIST_STORE(model), &it, ptk::location_view::column::icon, icon, -1);
         if (icon)
         {
@@ -645,7 +645,7 @@ update_volume(const std::shared_ptr<vfs::volume>& vol)
         icon_size = PANE_MAX_ICON_SIZE;
     }
 
-    GdkPixbuf* icon = vfs_load_icon(vol->icon(), icon_size);
+    GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),
                        &it,
                        ptk::location_view::column::icon,

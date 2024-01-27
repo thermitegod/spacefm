@@ -27,7 +27,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "write.hxx"
+#include "utils/write.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -262,7 +262,7 @@ vfs::trash_can::trash_dir::create_trash_info(const std::filesystem::path& path,
     const std::string trash_info_content =
         std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time);
 
-    write_file(trash_info, trash_info_content);
+    ::utils::write_file(trash_info, trash_info_content);
 }
 
 void

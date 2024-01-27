@@ -29,8 +29,9 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "utils/misc.hxx"
+
 #include "mime-utils.hxx"
-#include "utils.hxx"
 
 // https://source.chromium.org/chromium/chromium/src/+/main:base/third_party/icu/icu_utf.h
 
@@ -413,7 +414,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
 const std::string
 GetFileMimeType(const std::filesystem::path& filepath)
 {
-    const std::string ext = split_basename_extension(filepath).extension;
+    const std::string ext = ::utils::split_basename_extension(filepath).extension;
     if (ext.empty())
     {
         return "application/octet-stream";

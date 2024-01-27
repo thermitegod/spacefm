@@ -27,7 +27,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -53,7 +53,7 @@ archiver_create_shell_file_list(const std::span<const std::shared_ptr<vfs::file>
     std::string file_list;
     for (const auto& file : sel_files)
     {
-        file_list.append(utils::shell_quote(file->path().string()));
+        file_list.append(::utils::shell_quote(file->path().string()));
         file_list.append(" ");
     }
     return file_list;

@@ -21,10 +21,10 @@
 
 #include <ztd/ztd.hxx>
 
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 void
-ptk_set_window_icon(GtkWindow* window)
+ptk::utils::set_window_icon(GtkWindow* window)
 {
     gtk_window_set_icon_name(GTK_WINDOW(window), "spacefm");
 }

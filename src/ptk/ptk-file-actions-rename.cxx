@@ -52,13 +52,13 @@
 
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "utils.hxx"
-#include "utils/shell_quote.hxx"
+#include "utils/misc.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "ptk/ptk-file-actions-rename.hxx"
 
@@ -376,7 +376,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         }
         else
         {
-            const auto filename_parts = split_basename_extension(full_name);
+            const auto filename_parts = ::utils::split_basename_extension(full_name);
             gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
 #if (GTK_MAJOR_VERSION == 4)
             gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
@@ -489,7 +489,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         }
         else
         {
-            const auto filename_parts = split_basename_extension(full_name);
+            const auto filename_parts = ::utils::split_basename_extension(full_name);
             gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
 #if (GTK_MAJOR_VERSION == 4)
             gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
@@ -794,7 +794,7 @@ select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
             }
             else
             {
-                const auto filename_parts = split_basename_extension(full_name);
+                const auto filename_parts = ::utils::split_basename_extension(full_name);
                 gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_parts.basename.size());
             }
         }
@@ -1023,7 +1023,7 @@ on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>&
                                                  GtkResponseType::GTK_RESPONSE_OK,
                                                  nullptr);
 
-    ptk_set_window_icon(GTK_WINDOW(dlg));
+    ptk::utils::set_window_icon(GTK_WINDOW(dlg));
 
     if (name.empty())
     {

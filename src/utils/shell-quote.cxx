@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -13,26 +15,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <string>
+#include <string_view>
 
-#include <gtkmm.h>
+#include <format>
 
 #include <ztd/ztd.hxx>
 
-#if (GTK_MAJOR_VERSION == 3)
-#define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK)
-#endif
+#include "utils/shell-quote.hxx"
 
-void ptk_set_window_icon(GtkWindow* win);
-
-namespace ptk::utils
+const std::string
+utils::shell_quote(const std::string_view str) noexcept
 {
-/**
- *  @brief stamp
- *
- *  - Use std::mt19937 to get a random i32 between (0, INT_MAX)
- *
- * @return a random i32
- */
-[[nodiscard]] i32 stamp() noexcept;
-} // namespace ptk::utils
+    if (str.empty())
+    {
+        return "\"\"";
+    }
+    return std::format("\"{}\"", ztd::replace(str, "\"", "\\\""));
+}

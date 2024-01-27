@@ -26,7 +26,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "write.hxx"
+#include "utils/write.hxx"
 
 #include "xset/xset.hxx"
 
@@ -321,5 +321,5 @@ save_user_confing()
 
     const auto config_file = vfs::program::config() / CONFIG_FILE_FILENAME;
 
-    write_file(config_file, toml_data);
+    ::utils::write_file(config_file, toml_data);
 }

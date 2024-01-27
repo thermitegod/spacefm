@@ -16,10 +16,11 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
+namespace utils
+{
 struct split_basename_extension_data
 {
     std::string basename{};
@@ -38,6 +39,4 @@ split_basename_extension(const std::filesystem::path& filename) noexcept;
 
 bool have_rw_access(const std::filesystem::path& path) noexcept;
 bool have_x_access(const std::filesystem::path& path) noexcept;
-
-const std::string clean_label(const std::string_view menu_label, bool kill_special,
-                              bool escape) noexcept;
+} // namespace utils

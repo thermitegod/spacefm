@@ -45,10 +45,10 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
 
-#include "utils.hxx"
 #include "utils/strdup.hxx"
+#include "utils/misc.hxx"
 
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-task-view.hxx"
 
@@ -478,12 +478,12 @@ set_button_states(PtkFileTask* ptask)
     {
         case vfs::file_task::state::pause:
             label = "Q_ueue";
-            // iconset = utils::strdup("task_que");
+            // iconset = ::utils::strdup("task_que");
             //  icon = "list-add";
             break;
         case vfs::file_task::state::queue:
             label = "Res_ume";
-            // iconset = utils::strdup("task_resume");
+            // iconset = ::utils::strdup("task_resume");
             //  icon = "media-playback-start";
             break;
         case vfs::file_task::state::running:
@@ -492,7 +492,7 @@ set_button_states(PtkFileTask* ptask)
         case vfs::file_task::state::error:
         case vfs::file_task::state::finish:
             label = "Pa_use";
-            // iconset = utils::strdup("task_pause");
+            // iconset = ::utils::strdup("task_pause");
             //  icon = "media-playback-pause";
             break;
     }
@@ -1485,10 +1485,10 @@ ptk_file_task_update(PtkFileTask* ptask)
         // count
         const std::string file_count = std::to_string(task->current_item);
         // size
-        size_current = vfs_file_size_format(task->progress);
+        size_current = vfs::utils::format_file_size(task->progress);
         if (task->total_size)
         {
-            size_average = vfs_file_size_format(task->total_size);
+            size_average = vfs::utils::format_file_size(task->total_size);
         }
         else
         {
@@ -1518,7 +1518,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         }
         else
         {
-            size_current = vfs_file_size_format(cur_speed);
+            size_current = vfs::utils::format_file_size(cur_speed);
             speed_current = std::format("{}/s", size_current);
         }
         // avg speed
@@ -1531,7 +1531,7 @@ ptk_file_task_update(PtkFileTask* ptask)
         {
             avg_speed = 0;
         }
-        size_average = vfs_file_size_format(avg_speed);
+        size_average = vfs::utils::format_file_size(avg_speed);
         speed_average = std::format("{}/s", size_average);
 
         // remain cur
@@ -1960,7 +1960,7 @@ query_overwrite_response(GtkDialog* dlg, i32 response, PtkFileTask* ptask)
 
                 const auto dir_name = current_dest.parent_path();
                 const auto path = dir_name / filename;
-                *ptask->query_new_dest = utils::strdup(path.c_str());
+                *ptask->query_new_dest = ::utils::strdup(path.c_str());
             }
             break;
         }
@@ -2133,7 +2133,7 @@ query_overwrite(PtkFileTask* ptask)
             }
             else
             {
-                const std::string size_str = vfs_file_size_format(src_stat.size());
+                const std::string size_str = vfs::utils::format_file_size(src_stat.size());
                 src_size = std::format("{}\t( {:L} bytes )", size_str, src_stat.size());
                 if (src_stat.size() > dest_stat.size())
                 {
@@ -2164,7 +2164,7 @@ query_overwrite(PtkFileTask* ptask)
                 }
             }
 
-            const std::string size_str = vfs_file_size_format(dest_stat.size());
+            const std::string size_str = vfs::utils::format_file_size(dest_stat.size());
             const std::string dest_size =
                 std::format("{}\t( {:L} bytes )", size_str, dest_stat.size());
 
@@ -2216,10 +2216,10 @@ query_overwrite(PtkFileTask* ptask)
     const std::string src_dir = current_file.parent_path();
     const std::string dest_dir = current_dest.parent_path();
 
-    const auto filename_parts = split_basename_extension(filename);
+    const auto filename_parts = ::utils::split_basename_extension(filename);
 
     const std::string unique_name =
-        vfs_get_unique_name(dest_dir, filename_parts.basename, filename_parts.extension);
+        vfs::utils::unique_name(dest_dir, filename_parts.basename, filename_parts.extension);
     const std::string new_name_plain =
         !unique_name.empty() ? std::filesystem::path(unique_name).filename() : "";
     const std::string new_name = !new_name_plain.empty() ? new_name_plain : "";

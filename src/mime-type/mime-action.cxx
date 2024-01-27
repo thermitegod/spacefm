@@ -50,7 +50,7 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "write.hxx"
+#include "utils/write.hxx"
 
 #include "mime-type/mime-action.hxx"
 
@@ -570,7 +570,7 @@ make_custom_desktop_file(const std::string_view desktop_id, const std::string_vi
         const auto path = dir / cust;
         if (!std::filesystem::exists(path))
         { /* this generated filename can be used */
-            write_file(path, file_content);
+            ::utils::write_file(path, file_content);
             break;
         }
     }

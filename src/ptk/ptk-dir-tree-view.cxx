@@ -39,7 +39,7 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-dir-tree-view.hxx"
 

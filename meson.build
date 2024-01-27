@@ -372,7 +372,6 @@ sources += files(
   'src/single-instance.cxx',
   'src/terminal-handlers.cxx',
   'src/types.cxx',
-  'src/utils.cxx',
 
   'src/compat/gtk4-porting.cxx',
   'src/compat/type-conversion.cxx',
@@ -391,6 +390,8 @@ sources += files(
   'src/xset/xset-misc.cxx',
   'src/xset/xset-toolbar.cxx',
 
+  'src/xset/utils/xset-utils.cxx',
+
   'src/settings/app.cxx',
   'src/settings/config-load.cxx',
   'src/settings/config-save.cxx',
@@ -398,8 +399,9 @@ sources += files(
   'src/settings/upgrade/config-upgrade.cxx',
 
   'src/utils/memory.cxx',
-  'src/utils/shell_quote.cxx',
+  'src/utils/shell-quote.cxx',
   'src/utils/strdup.cxx',
+  'src/utils/misc.cxx',
 
   'src/mime-type/mime-action.cxx',
   'src/mime-type/mime-type.cxx',
@@ -425,7 +427,8 @@ sources += files(
   'src/ptk/ptk-location-view.cxx',
   'src/ptk/ptk-path-entry.cxx',
   'src/ptk/ptk-task-view.cxx',
-  'src/ptk/ptk-utils.cxx',
+
+  'src/ptk/utils/ptk-utils.cxx',
 
   'src/ptk/natsort/strnatcmp.c',
 
@@ -442,8 +445,9 @@ sources += files(
   'src/vfs/vfs-thumbnailer.cxx',
   'src/vfs/vfs-trash-can.cxx',
   'src/vfs/vfs-user-dirs.cxx',
-  'src/vfs/vfs-utils.cxx',
   'src/vfs/vfs-volume.cxx',
+
+  'src/vfs/utils/vfs-utils.cxx',
 
   'src/vfs/libudevpp/udev.cxx',
   'src/vfs/libudevpp/udev_device.cxx',

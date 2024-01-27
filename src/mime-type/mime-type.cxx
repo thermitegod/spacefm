@@ -41,7 +41,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils.hxx"
+#include "utils/misc.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -98,7 +98,7 @@ mime_type_get_by_file(const std::filesystem::path& path) noexcept
     }
 
     /* Check for executable file */
-    if (have_x_access(path))
+    if (::utils::have_x_access(path))
     {
         return XDG_MIME_TYPE_EXECUTABLE.data();
     }

@@ -35,9 +35,9 @@
 #include "xset/xset-custom.hxx"
 #include "xset/xset-design.hxx"
 #include "xset/xset-dialog.hxx"
+#include "xset/utils/xset-utils.hxx"
 
 #include "autosave.hxx"
-#include "utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -75,7 +75,7 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
     if (label.contains("\\_"))
     {
         // allow escape of underscore
-        const std::string str = clean_label(label, false, false);
+        const std::string str = xset::utils::clean_label(label, false, false);
         item = gtk_menu_item_new_with_label(str.data());
     }
     else
@@ -374,7 +374,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set)
             }
             else
             {
-                title = clean_label(set->menu_label.value(), false, false);
+                title = xset::utils::clean_label(set->menu_label.value(), false, false);
             }
             if (set->lock)
             {

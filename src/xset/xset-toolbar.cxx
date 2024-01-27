@@ -49,8 +49,7 @@
 #include "xset/xset-design.hxx"
 #include "xset/xset-misc.hxx"
 #include "xset/xset-toolbar.hxx"
-
-#include "utils.hxx"
+#include "xset/utils/xset-utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -676,7 +675,7 @@ xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* too
             // tooltip
             if (show_tooltips)
             {
-                str = clean_label(new_menu_label.value(), false, false);
+                str = xset::utils::clean_label(new_menu_label.value(), false, false);
                 gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
             break;
@@ -728,7 +727,7 @@ xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* too
             // tooltip
             if (show_tooltips)
             {
-                str = clean_label(menu_label.value(), false, false);
+                str = xset::utils::clean_label(menu_label.value(), false, false);
                 gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
             break;
@@ -862,7 +861,7 @@ xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* too
             // tooltip
             if (show_tooltips)
             {
-                str = clean_label(menu_label.value(), false, false);
+                str = xset::utils::clean_label(menu_label.value(), false, false);
                 gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
 
@@ -927,7 +926,7 @@ xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* too
             // tooltip
             if (show_tooltips)
             {
-                str = clean_label(menu_label.value(), false, false);
+                str = xset::utils::clean_label(menu_label.value(), false, false);
                 gtk_widget_set_tooltip_text(GTK_WIDGET(ebox), str.data());
             }
             break;

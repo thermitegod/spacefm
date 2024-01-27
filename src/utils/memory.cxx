@@ -18,8 +18,10 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "utils/memory.hxx"
+
 void
-memory_trim() noexcept
+utils::memory_trim() noexcept
 {
     const auto ret = malloc_trim(0);
     if (ret == 0)

@@ -40,7 +40,7 @@
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-file-properties.hxx"
 
@@ -198,8 +198,9 @@ on_update_labels(const std::shared_ptr<properties_dialog_data>& data)
         return true;
     }
 
-    const auto size_str =
-        std::format("{} ( {:L} bytes )", vfs_file_size_format(data->total_size), data->total_size);
+    const auto size_str = std::format("{} ( {:L} bytes )",
+                                      vfs::utils::format_file_size(data->total_size),
+                                      data->total_size);
     if (data->cancel)
     {
         return true;
@@ -207,7 +208,7 @@ on_update_labels(const std::shared_ptr<properties_dialog_data>& data)
     gtk_label_set_text(data->total_size_label, size_str.data());
 
     const auto disk_str = std::format("{} ( {:L} bytes )",
-                                      vfs_file_size_format(data->size_on_disk),
+                                      vfs::utils::format_file_size(data->size_on_disk),
                                       data->size_on_disk);
     if (data->cancel)
     {

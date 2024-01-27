@@ -25,10 +25,10 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils.hxx"
+#include "utils/misc.hxx"
 
 bool
-have_x_access(const std::filesystem::path& path) noexcept
+utils::have_x_access(const std::filesystem::path& path) noexcept
 {
     const auto status = std::filesystem::status(path);
 
@@ -41,7 +41,7 @@ have_x_access(const std::filesystem::path& path) noexcept
 }
 
 bool
-have_rw_access(const std::filesystem::path& path) noexcept
+utils::have_rw_access(const std::filesystem::path& path) noexcept
 {
     const auto status = std::filesystem::status(path);
 
@@ -61,8 +61,8 @@ have_rw_access(const std::filesystem::path& path) noexcept
                 std::filesystem::perms::none);
 }
 
-const split_basename_extension_data
-split_basename_extension(const std::filesystem::path& filename) noexcept
+const ::utils::split_basename_extension_data
+utils::split_basename_extension(const std::filesystem::path& filename) noexcept
 {
     if (std::filesystem::is_directory(filename))
     {
@@ -94,37 +94,4 @@ split_basename_extension(const std::filesystem::path& filename) noexcept
 
     // No valid extension found, return the whole filename as the basename
     return {filename.string()};
-}
-
-const std::string
-clean_label(const std::string_view menu_label, bool kill_special, bool escape) noexcept
-{
-    if (menu_label.empty())
-    {
-        return "";
-    }
-
-    std::string new_menu_label = menu_label.data();
-
-    if (menu_label.contains("\\_"))
-    {
-        new_menu_label = ztd::replace(new_menu_label, "\\_", "@UNDERSCORE@");
-        new_menu_label = ztd::replace(new_menu_label, "_", "");
-        new_menu_label = ztd::replace(new_menu_label, "@UNDERSCORE@", "_");
-    }
-    else
-    {
-        new_menu_label = ztd::replace(new_menu_label, "_", "");
-    }
-    if (kill_special)
-    {
-        new_menu_label = ztd::replace(new_menu_label, "&", "");
-        new_menu_label = ztd::replace(new_menu_label, " ", "-");
-    }
-    else if (escape)
-    {
-        new_menu_label = Glib::Markup::escape_text(new_menu_label);
-    }
-
-    return new_menu_label;
 }

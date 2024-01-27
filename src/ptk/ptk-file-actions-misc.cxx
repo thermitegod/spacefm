@@ -35,7 +35,7 @@
 #include "settings/app.hxx"
 
 #include "vfs/vfs-file.hxx"
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-file-task.hxx"
 
@@ -161,7 +161,8 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     gtk_box_pack_start(box, GTK_WIDGET(scrolled_window), true, true, 0);
 
     // Create the label for total size
-    const auto total_size = std::format("Total Size: {}", vfs_file_size_format(total_size_bytes));
+    const auto total_size =
+        std::format("Total Size: {}", vfs::utils::format_file_size(total_size_bytes));
     GtkLabel* total_size_label = GTK_LABEL(gtk_label_new(total_size.c_str()));
     gtk_box_pack_start(box, GTK_WIDGET(total_size_label), false, false, 0);
 

@@ -82,27 +82,27 @@
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-path-entry.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "main-window.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "settings/app.hxx"
 
 #include "utils/memory.hxx"
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 #include "utils/strdup.hxx"
+#include "utils/misc.hxx"
 
 #include "signals.hxx"
 
 #include "types.hxx"
 
 #include "autosave.hxx"
-#include "utils.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 
@@ -1018,7 +1018,7 @@ ptk_file_browser_finalize(GObject* obj)
      * mainly to deal with the possibility that killing the browser results in
      * thousands of large thumbnails being freed, but the memory not actually
      * released by SpaceFM */
-    memory_trim();
+    ::utils::memory_trim();
 }
 
 static void
@@ -1142,7 +1142,7 @@ add_history_menu_item(ptk::browser* file_browser, GtkWidget* menu,
     GtkWidget* menu_item = gtk_menu_item_new_with_label(path.filename().c_str());
     g_object_set_data_full(G_OBJECT(menu_item),
                            "path",
-                           utils::strdup(path.c_str()),
+                           ::utils::strdup(path.c_str()),
                            (GDestroyNotify)std::free);
 
     // clang-format off
@@ -1302,7 +1302,7 @@ ptk::browser::on_dir_file_listed(bool is_cancelled)
      * mainly to deal with the possibility that changing the directory results in
      * thousands of large thumbnails being freed, but the memory not actually
      * released by SpaceFM */
-    memory_trim();
+    ::utils::memory_trim();
 
     this->run_event<spacefm::signal::chdir_after>();
     this->run_event<spacefm::signal::change_content>();
@@ -1854,7 +1854,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTre
     {
         const bool end = ztd::endswith(key, "$");
         bool start = !end && (key.size() < 3);
-        char* key2 = utils::strdup(key);
+        char* key2 = ::utils::strdup(key);
         char* keyp = key2;
         if (key[0] == '^')
         {
@@ -2346,7 +2346,7 @@ folder_view_get_drop_dir(ptk::browser* file_browser, i32 x, i32 y)
     {
         dest_path = file_browser->cwd();
     }
-    return utils::strdup(dest_path.c_str());
+    return ::utils::strdup(dest_path.c_str());
 }
 
 static void
@@ -3061,7 +3061,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
         return false;
     }
 
-    if (!have_x_access(path))
+    if (!::utils::have_x_access(path))
     {
         if (!this->inhibit_focus_)
         {
@@ -3543,7 +3543,7 @@ ptk::browser::refresh(const bool update_selected_files) noexcept
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-    memory_trim();
+    ::utils::memory_trim();
 
     // begin reload dir
     this->busy_ = true;
@@ -5822,9 +5822,11 @@ ptk::browser::update_statusbar() const noexcept
         const auto fs_stat = ztd::statvfs(cwd);
 
         // calc free space
-        const std::string free_size = vfs_file_size_format(fs_stat.bsize() * fs_stat.bavail());
+        const std::string free_size =
+            vfs::utils::format_file_size(fs_stat.bsize() * fs_stat.bavail());
         // calc total space
-        const std::string disk_size = vfs_file_size_format(fs_stat.frsize() * fs_stat.blocks());
+        const std::string disk_size =
+            vfs::utils::format_file_size(fs_stat.frsize() * fs_stat.blocks());
 
         statusbar_txt.append(std::format(" {} / {}   ", free_size, disk_size));
     }
@@ -5853,8 +5855,8 @@ ptk::browser::update_statusbar() const noexcept
             return;
         }
 
-        const std::string file_size = vfs_file_size_format(total_size);
-        const std::string disk_size = vfs_file_size_format(total_on_disk_size);
+        const std::string file_size = vfs::utils::format_file_size(total_size);
+        const std::string disk_size = vfs::utils::format_file_size(total_on_disk_size);
 
         statusbar_txt.append(
             std::format("{:L} / {:L} ({} / {})", num_sel, num_vis, file_size, disk_size));
@@ -5904,7 +5906,7 @@ ptk::browser::update_statusbar() const noexcept
                         const auto results = ztd::stat(target_path, ec);
                         if (!ec)
                         {
-                            const std::string lsize = vfs_file_size_format(results.size());
+                            const std::string lsize = vfs::utils::format_file_size(results.size());
                             statusbar_txt.append(
                                 std::format("  Link -> {} ({})", target.string(), lsize));
                         }
@@ -6015,8 +6017,8 @@ ptk::browser::update_statusbar() const noexcept
                 disk_size_disk += file->size_on_disk();
             }
         }
-        const std::string file_size = vfs_file_size_format(disk_size_bytes);
-        const std::string disk_size = vfs_file_size_format(disk_size_disk);
+        const std::string file_size = vfs::utils::format_file_size(disk_size_bytes);
+        const std::string disk_size = vfs::utils::format_file_size(disk_size_disk);
 
         // count for .hidden files
         const auto num_hid = this->get_n_all_files() - num_vis;

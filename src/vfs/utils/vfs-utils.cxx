@@ -27,10 +27,10 @@
 
 #include "settings/app.hxx"
 
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 GdkPixbuf*
-vfs_load_icon(const std::string_view icon_name, i32 icon_size)
+vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size)
 {
     GtkIconTheme* icon_theme = gtk_icon_theme_get_default();
 
@@ -62,7 +62,7 @@ vfs_load_icon(const std::string_view icon_name, i32 icon_size)
 }
 
 const std::string
-vfs_file_size_format(u64 size_in_bytes, bool decimal)
+vfs::utils::format_file_size(u64 size_in_bytes, bool decimal)
 {
     if (app_settings.use_si_prefix())
     {
@@ -75,8 +75,8 @@ vfs_file_size_format(u64 size_in_bytes, bool decimal)
 }
 
 const std::filesystem::path
-vfs_get_unique_name(const std::filesystem::path& dest_dir, const std::string_view base_name,
-                    const std::string_view ext)
+vfs::utils::unique_name(const std::filesystem::path& dest_dir, const std::string_view base_name,
+                        const std::string_view ext)
 { // returns nullptr if all names used; otherwise newly allocated string
     std::string new_name;
     if (ext.empty())

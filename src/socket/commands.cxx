@@ -49,15 +49,15 @@
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-misc.hxx"
 
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "settings/app.hxx"
 
 #include "terminal-handlers.hxx"
 
-#include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-volume.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
@@ -1233,7 +1233,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "max-thumbnail-size")
         {
             return {SOCKET_SUCCESS,
-                    std::format("{}", vfs_file_size_format(app_settings.max_thumb_size()))};
+                    std::format("{}", vfs::utils::format_file_size(app_settings.max_thumb_size()))};
         }
         else if (property == "large-icons")
         {
@@ -2003,7 +2003,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else
         {
-            l = g_list_append((GList*)set->ob2_data, utils::strdup(str));
+            l = g_list_append((GList*)set->ob2_data, ::utils::strdup(str));
         }
         set->ob2_data = (void*)l;
 #else

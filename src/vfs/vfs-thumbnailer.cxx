@@ -38,7 +38,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "settings/app.hxx"
 

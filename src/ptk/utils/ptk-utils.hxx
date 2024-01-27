@@ -15,40 +15,24 @@
 
 #pragma once
 
-#include <filesystem>
-
-#include <fstream>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
-template<class T>
-bool
-write_file(const std::filesystem::path& path, const T& data)
+#if (GTK_MAJOR_VERSION == 3)
+#define GDK_ACTION_ALL GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK)
+#endif
+
+namespace ptk::utils
 {
-    std::ofstream file(path);
-    if (!file.is_open())
-    {
-        ztd::logger::error("Failed to open file: {}", path.string());
-        return false;
-    }
+void set_window_icon(GtkWindow* win);
 
-    file << data;
-
-    if (file.fail())
-    {
-        ztd::logger::error("Failed to write file: {}", path.string());
-        file.close();
-        return false;
-    }
-
-    file.close();
-
-    if (file.fail())
-    {
-        ztd::logger::error("Failed to close file: {}", path.string());
-        return false;
-    }
-
-    return true;
-}
+/**
+ *  @brief stamp
+ *
+ *  - Use std::mt19937 to get a random i32 between (0, INT_MAX)
+ *
+ * @return a random i32
+ */
+[[nodiscard]] i32 stamp() noexcept;
+} // namespace ptk::utils

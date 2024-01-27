@@ -225,7 +225,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
     const std::string fn = ztd::rpartition(text, "/")[2];
     g_object_set_data_full(G_OBJECT(completion),
                            "fn",
-                           utils::strdup(fn),
+                           ::utils::strdup(fn),
                            (GDestroyNotify)std::free);
 
     const std::string cwd = get_cwd(entry);
@@ -237,7 +237,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 
     g_object_set_data_full(G_OBJECT(completion),
                            "cwd",
-                           utils::strdup(cwd),
+                           ::utils::strdup(cwd),
                            (GDestroyNotify)std::free);
 
     if (std::filesystem::is_directory(cwd))

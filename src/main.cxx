@@ -51,7 +51,7 @@
 #include "ptk/ptk-location-view.hxx"
 
 #include "utils/strdup.hxx"
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "settings/app.hxx"
 
@@ -113,7 +113,7 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
         {
             // set panel to load real_path on panel load
             const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
-            set->ob1 = utils::strdup(real_path.c_str());
+            set->ob1 = ::utils::strdup(real_path.c_str());
             tab_added = true;
             set->b = xset::b::xtrue;
             show_panels_all_windows(nullptr, main_window);

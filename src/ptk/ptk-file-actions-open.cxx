@@ -49,7 +49,7 @@
 
 #include "settings/app.hxx"
 
-#include "utils.hxx"
+#include "utils/misc.hxx"
 
 #include "ptk/ptk-file-actions-open.hxx"
 
@@ -77,7 +77,7 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
     const bool extract_here = xset_get_b(xset::name::archive_default_extract);
 
     // determine default archive action in this dir
-    if (extract_here && have_rw_access(parent->cwd))
+    if (extract_here && ::utils::have_rw_access(parent->cwd))
     {
         // Extract Here
         ptk_archiver_extract(parent->file_browser, selected_files, parent->cwd);

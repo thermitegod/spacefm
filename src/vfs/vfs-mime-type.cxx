@@ -41,7 +41,8 @@
 #include "mime-type/mime-action.hxx"
 #include "mime-type/mime-type.hxx"
 
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+
 #include "vfs/vfs-mime-type.hxx"
 
 static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
@@ -147,7 +148,7 @@ vfs::mime_type::icon(bool big) noexcept
 
     if (this->type_ == XDG_MIME_TYPE_DIRECTORY)
     {
-        icon = vfs_load_icon("folder", icon_size);
+        icon = vfs::utils::load_icon("folder", icon_size);
         if (big)
         {
             this->big_icon_ = icon;
@@ -165,7 +166,7 @@ vfs::mime_type::icon(bool big) noexcept
 
     if (!mime_icon.empty())
     {
-        icon = vfs_load_icon(mime_icon, icon_size);
+        icon = vfs::utils::load_icon(mime_icon, icon_size);
     }
     if (!mime_desc.empty())
     {
@@ -193,13 +194,13 @@ vfs::mime_type::icon(bool big) noexcept
             const std::string icon_name = ztd::replace(this->type_, "/", "-");
 
             // is there an icon named foo-bar?
-            icon = vfs_load_icon(icon_name, icon_size);
+            icon = vfs::utils::load_icon(icon_name, icon_size);
             // fallback try foo-x-generic
             if (!icon)
             {
                 const auto mime = ztd::partition(this->type_, "/")[0];
                 const std::string generic_icon_name = std::format("{}-x-generic", mime);
-                icon = vfs_load_icon(generic_icon_name, icon_size);
+                icon = vfs::utils::load_icon(generic_icon_name, icon_size);
             }
         }
     }
@@ -215,7 +216,7 @@ vfs::mime_type::icon(bool big) noexcept
         }
         else /* unknown */
         {
-            icon = vfs_load_icon("unknown", icon_size);
+            icon = vfs::utils::load_icon("unknown", icon_size);
         }
     }
 

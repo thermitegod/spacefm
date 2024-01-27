@@ -36,8 +36,8 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
-#include "vfs/vfs-utils.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
 
@@ -106,11 +106,11 @@ vfs::file::update() noexcept
     this->mime_type_ = vfs_mime_type_get_from_file(this->path_);
 
     // file size formated
-    this->display_size_ = vfs_file_size_format(this->size());
+    this->display_size_ = vfs::utils::format_file_size(this->size());
     this->display_size_bytes_ = std::format("{:L}", this->size());
 
     // disk file size formated
-    this->display_disk_size_ = vfs_file_size_format(this->size_on_disk());
+    this->display_disk_size_ = vfs::utils::format_file_size(this->size_on_disk());
 
     // owner
     const auto pw = ztd::passwd(this->file_stat_.uid());
@@ -263,7 +263,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             const auto icon_name = this->special_directory_get_icon_name();
-            return vfs_load_icon(icon_name, app_settings.icon_size_big());
+            return vfs::utils::load_icon(icon_name, app_settings.icon_size_big());
         }
 
         if (!this->mime_type_)
@@ -282,7 +282,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             const auto icon_name = this->special_directory_get_icon_name();
-            return vfs_load_icon(icon_name, app_settings.icon_size_small());
+            return vfs::utils::load_icon(icon_name, app_settings.icon_size_small());
         }
 
         if (!this->mime_type_)

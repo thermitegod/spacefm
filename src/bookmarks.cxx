@@ -27,7 +27,8 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "write.hxx"
+#include "utils/write.hxx"
+
 #include "bookmarks.hxx"
 
 // Bookmark Path, Bookmark Name
@@ -112,7 +113,7 @@ save_bookmarks() noexcept
         book_entry.append(std::format("file://{} {}\n", book_path.string(), book_name.string()));
     }
 
-    write_file(bookmark_file, book_entry);
+    ::utils::write_file(bookmark_file, book_entry);
 }
 
 void

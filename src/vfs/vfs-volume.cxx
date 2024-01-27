@@ -38,15 +38,14 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "xset/xset.hxx"
 
 #include "main-window.hxx"
 
-#include "vfs/vfs-utils.hxx"
-
 #include "vfs/vfs-device.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/procfs.hxx"
@@ -759,7 +758,7 @@ vfs::volume::device_mount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), utils::shell_quote(this->device_file_));
+    return std::format("{} {}", path.string(), ::utils::shell_quote(this->device_file_));
 }
 
 const std::optional<std::string>
@@ -770,7 +769,7 @@ vfs::volume::device_unmount_cmd() noexcept
     {
         return std::nullopt;
     }
-    return std::format("{} {}", path.string(), utils::shell_quote(this->mount_point_));
+    return std::format("{} {}", path.string(), ::utils::shell_quote(this->mount_point_));
 }
 
 const std::string_view
@@ -976,7 +975,7 @@ vfs::volume::set_info() noexcept
 
         if (this->size_ > 0)
         {
-            disp_size = vfs_file_size_format(this->size_, false);
+            disp_size = vfs::utils::format_file_size(this->size_, false);
         }
 
         if (!this->mount_point_.empty())
@@ -994,7 +993,7 @@ vfs::volume::set_info() noexcept
 
         if (this->size_ > 0)
         {
-            disp_size = vfs_file_size_format(this->size_, false);
+            disp_size = vfs::utils::format_file_size(this->size_, false);
         }
         disp_mount = "---";
     }

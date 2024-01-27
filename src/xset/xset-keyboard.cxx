@@ -24,13 +24,12 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "utils.hxx"
-
 #include "ptk/ptk-keyboard.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-toolbar.hxx"
 #include "xset/xset-keyboard.hxx"
+#include "xset/utils/xset-utils.hxx"
 
 const std::string
 xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod)
@@ -150,7 +149,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
             std::string name;
             if (set2->menu_label)
             {
-                name = clean_label(set2->menu_label.value(), false, false);
+                name = xset::utils::clean_label(set2->menu_label.value(), false, false);
             }
             else
             {
@@ -195,7 +194,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set)
     std::string name;
     if (set->menu_label)
     {
-        name = clean_label(set->menu_label.value(), false, true);
+        name = xset::utils::clean_label(set->menu_label.value(), false, true);
     }
     else if (set->tool > xset::tool::custom)
     {

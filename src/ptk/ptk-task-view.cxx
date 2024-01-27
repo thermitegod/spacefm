@@ -50,7 +50,7 @@
 #include "xset/xset-context-menu.hxx"
 
 #include "vfs/vfs-file-task.hxx"
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-task-view.hxx"
 
@@ -1165,41 +1165,41 @@ main_task_view_update_task(PtkFileTask* ptask)
             if (ptask->task->state_pause_ == vfs::file_task::state::pause)
             {
                 set = xset_get(xset::name::task_pause);
-                pixbuf = vfs_load_icon(set->icon.value_or("media-playback-pause"), 22);
+                pixbuf = vfs::utils::load_icon(set->icon.value_or("media-playback-pause"), 22);
             }
             else if (ptask->task->state_pause_ == vfs::file_task::state::queue)
             {
                 set = xset_get(xset::name::task_que);
-                pixbuf = vfs_load_icon(set->icon.value_or("list-add"), 22);
+                pixbuf = vfs::utils::load_icon(set->icon.value_or("list-add"), 22);
             }
             else if (ptask->err_count && ptask->task->type_ != vfs::file_task::type::exec)
             {
-                pixbuf = vfs_load_icon("error", 22);
+                pixbuf = vfs::utils::load_icon("error", 22);
             }
             else if (ptask->task->type_ == vfs::file_task::type::move ||
                      ptask->task->type_ == vfs::file_task::type::copy ||
                      ptask->task->type_ == vfs::file_task::type::link)
             {
-                pixbuf = vfs_load_icon("stock_copy", 22);
+                pixbuf = vfs::utils::load_icon("stock_copy", 22);
             }
             else if (ptask->task->type_ == vfs::file_task::type::trash ||
                      ptask->task->type_ == vfs::file_task::type::del)
             {
-                pixbuf = vfs_load_icon("stock_delete", 22);
+                pixbuf = vfs::utils::load_icon("stock_delete", 22);
             }
             else if (ptask->task->type_ == vfs::file_task::type::exec &&
                      !ptask->task->exec_icon.empty())
             {
-                pixbuf = vfs_load_icon(ptask->task->exec_icon, 22);
+                pixbuf = vfs::utils::load_icon(ptask->task->exec_icon, 22);
             }
             else
             {
-                pixbuf = vfs_load_icon("gtk-execute", 22);
+                pixbuf = vfs::utils::load_icon("gtk-execute", 22);
             }
 
             if (!pixbuf)
             {
-                pixbuf = vfs_load_icon("gtk-execute", 22);
+                pixbuf = vfs::utils::load_icon("gtk-execute", 22);
             }
             ptask->pause_change_view = false;
         }

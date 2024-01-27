@@ -30,7 +30,7 @@
 #include "compat/gtk4-porting.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -187,7 +187,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
                                             GtkButtonsType::GTK_BUTTONS_NONE,
                                             msg1.data(),
                                             nullptr);
-    ptk_set_window_icon(GTK_WINDOW(dlg));
+    ptk::utils::set_window_icon(GTK_WINDOW(dlg));
 
     const auto width = xset_get_int(xset::name::text_dlg, xset::var::s);
     const auto height = xset_get_int(xset::name::text_dlg, xset::var::z);
@@ -400,7 +400,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     // gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg),
     // GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE);
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), true);
-    ptk_set_window_icon(GTK_WINDOW(dlg));
+    ptk::utils::set_window_icon(GTK_WINDOW(dlg));
 
     if (deffolder)
     {

@@ -50,7 +50,7 @@
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-utils.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "about.hxx"
 #include "preference-dialog.hxx"
@@ -315,7 +315,7 @@ main_window_refresh_all()
 void
 MainWindow::update_window_icon() noexcept
 {
-    ptk_set_window_icon(GTK_WINDOW(this));
+    ptk::utils::set_window_icon(GTK_WINDOW(this));
 }
 
 void
@@ -441,7 +441,7 @@ main_window_reload_thumbnails_all_windows()
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-    memory_trim();
+    ::utils::memory_trim();
 }
 
 void
@@ -1121,8 +1121,8 @@ MainWindow::rebuild_menu_bookmarks(ptk::browser* file_browser) const noexcept
         GtkWidget* item = gtk_menu_item_new_with_label(book_path.c_str());
 
         g_object_set_data(G_OBJECT(item), "file_browser", file_browser);
-        g_object_set_data(G_OBJECT(item), "path", utils::strdup(book_path.c_str()));
-        g_object_set_data(G_OBJECT(item), "name", utils::strdup(book_name.c_str()));
+        g_object_set_data(G_OBJECT(item), "path", ::utils::strdup(book_path.c_str()));
+        g_object_set_data(G_OBJECT(item), "name", ::utils::strdup(book_name.c_str()));
 
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(bookmark_menu_keypress), nullptr);
 

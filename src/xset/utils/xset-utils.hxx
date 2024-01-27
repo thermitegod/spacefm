@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,21 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <ztd/ztd.hxx>
-
-#include "utils/shell_quote.hxx"
-
-const std::string
-utils::shell_quote(const std::string_view str) noexcept
+namespace xset::utils
 {
-    if (str.empty())
-    {
-        return "\"\"";
-    }
-    return std::format("\"{}\"", ztd::replace(str, "\"", "\\\""));
-}
+const std::string clean_label(const std::string_view menu_label, bool kill_special,
+                              bool escape) noexcept;
+} // namespace xset::utils

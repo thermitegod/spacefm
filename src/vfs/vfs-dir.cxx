@@ -42,9 +42,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "write.hxx"
-
 #include "utils/memory.hxx"
+#include "utils/write.hxx"
 
 #include "vfs/vfs-async-thread.hxx"
 #include "vfs/vfs-async-task.hxx"
@@ -340,7 +339,7 @@ vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
     const auto file_path = this->path_ / ".hidden";
     const std::string data = std::format("{}\n", file->name());
 
-    return write_file(file_path, data);
+    return ::utils::write_file(file_path, data);
 }
 
 void
@@ -520,7 +519,7 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
-    memory_trim();
+    ::utils::memory_trim();
 }
 
 void

@@ -1,6 +1,4 @@
 /**
- * Copyright 2008 PCMan <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -17,19 +15,43 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
-
 #include <filesystem>
 
-#include <gtkmm.h>
+#include <fstream>
 
 #include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
 
-GdkPixbuf* vfs_load_icon(const std::string_view icon_name, i32 icon_size);
+namespace utils
+{
+template<class T>
+bool
+write_file(const std::filesystem::path& path, const T& data) noexcept
+{
+    std::ofstream file(path);
+    if (!file.is_open())
+    {
+        ztd::logger::error("Failed to open file: {}", path.string());
+        return false;
+    }
 
-[[nodiscard]] const std::string vfs_file_size_format(u64 size_in_bytes, bool decimal = true);
+    file << data;
 
-[[nodiscard]] const std::filesystem::path vfs_get_unique_name(const std::filesystem::path& dest_dir,
-                                                              const std::string_view base_name,
-                                                              const std::string_view ext);
+    if (file.fail())
+    {
+        ztd::logger::error("Failed to write file: {}", path.string());
+        file.close();
+        return false;
+    }
+
+    file.close();
+
+    if (file.fail())
+    {
+        ztd::logger::error("Failed to close file: {}", path.string());
+        return false;
+    }
+
+    return true;
+}
+} // namespace utils

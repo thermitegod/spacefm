@@ -45,7 +45,8 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "utils/strdup.hxx"
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
+#include "utils/misc.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -54,9 +55,7 @@
 #include "terminal-handlers.hxx"
 
 #include "vfs/vfs-volume.hxx"
-#include "vfs/vfs-utils.hxx"
-
-#include "utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-file-task.hxx"
@@ -254,12 +253,12 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
             const auto old_name = dest_file.filename();
             const auto dest_file_dir = dest_file.parent_path();
 
-            const auto filename_parts = split_basename_extension(old_name);
+            const auto filename_parts = ::utils::split_basename_extension(old_name);
 
-            *new_dest_file = utils::strdup(vfs_get_unique_name(dest_file_dir,
-                                                               filename_parts.basename,
-                                                               filename_parts.extension)
-                                               .c_str());
+            *new_dest_file = ::utils::strdup(vfs::utils::unique_name(dest_file_dir,
+                                                                     filename_parts.basename,
+                                                                     filename_parts.extension)
+                                                 .c_str());
             *dest_exists = false;
             if (*new_dest_file)
             {
@@ -922,7 +921,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file)
         return;
     }
 
-    if (!have_rw_access(src_file))
+    if (!::utils::have_rw_access(src_file))
     {
         // this->task_error(errno, "Trashing", src_file);
         ztd::logger::error("Trashing failed missing RW permissions '{}'", src_file.string());
@@ -1257,7 +1256,7 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file)
             term_exec_command.append(terminal_arg);
             term_exec_command.append(" ");
         }
-        term_exec_command.append(utils::shell_quote(this->exec_command));
+        term_exec_command.append(::utils::shell_quote(this->exec_command));
 
         ztd::logger::info("COMMAND({})", term_exec_command);
         Glib::spawn_command_line_async(term_exec_command);

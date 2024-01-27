@@ -25,15 +25,14 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils.hxx"
-
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-custom.hxx"
 #include "xset/xset-toolbar.hxx"
+#include "xset/utils/xset-utils.hxx"
 
 const std::string
 xset_custom_new_name()
@@ -158,7 +157,7 @@ xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size
             }
             if (set->icon)
             {
-                icon_new = vfs_load_icon(set->icon.value(), icon_size);
+                icon_new = vfs::utils::load_icon(set->icon.value(), icon_size);
             }
             if (!icon_new)
             {
@@ -170,21 +169,21 @@ xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size
             // not a desktop file - probably executable
             if (set->icon)
             {
-                icon_new = vfs_load_icon(set->icon.value(), icon_size);
+                icon_new = vfs::utils::load_icon(set->icon.value(), icon_size);
             }
             if (!icon_new && set->z)
             {
                 // guess icon name from executable name
                 const auto path = std::filesystem::path(set->z.value());
                 const auto name = path.filename();
-                icon_new = vfs_load_icon(name.string(), icon_size);
+                icon_new = vfs::utils::load_icon(name.string(), icon_size);
             }
         }
 
         if (!icon_new)
         {
             // fallback
-            icon_new = vfs_load_icon("gtk-execute", icon_size);
+            icon_new = vfs::utils::load_icon("gtk-execute", icon_size);
         }
     }
     else
@@ -267,7 +266,7 @@ const xset_t
 xset_find_custom(const std::string_view search)
 {
     // find a custom command or submenu by label or xset name
-    const std::string label = clean_label(search, true, false);
+    const std::string label = xset::utils::clean_label(search, true, false);
 
     for (const xset_t& set : xsets)
     {
@@ -278,7 +277,7 @@ xset_find_custom(const std::string_view search)
                             xset::cmd(xset_get_int(set, xset::var::x)) <= xset::cmd::bookmark)))
         {
             // custom submenu or custom command - label or name matches?
-            const std::string str = clean_label(set->menu_label.value(), true, false);
+            const std::string str = xset::utils::clean_label(set->menu_label.value(), true, false);
             if (set->name == search || str == label)
             {
                 // match

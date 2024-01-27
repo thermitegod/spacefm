@@ -41,12 +41,13 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/shell_quote.hxx"
+#include "utils/shell-quote.hxx"
 
 // break vfs independence for exec_in_terminal
 #include "ptk/ptk-file-task.hxx"
 
-#include "vfs/vfs-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+
 #include "vfs/vfs-app-desktop.hxx"
 
 static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";
@@ -361,13 +362,13 @@ vfs::desktop::icon(i32 size) const noexcept
 
     if (!this->desktop_entry_.icon.empty())
     {
-        desktop_icon = vfs_load_icon(this->desktop_entry_.icon, size);
+        desktop_icon = vfs::utils::load_icon(this->desktop_entry_.icon, size);
     }
 
     // fallback to generic icon
     if (!desktop_icon)
     {
-        desktop_icon = vfs_load_icon("application-x-executable", size);
+        desktop_icon = vfs::utils::load_icon("application-x-executable", size);
     }
     return desktop_icon;
 }
@@ -412,7 +413,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(utils::shell_quote(file.string()));
+                    argv.push_back(::utils::shell_quote(file.string()));
                 }
                 else
                 {
@@ -446,7 +447,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
             {
                 if (quote_file_list)
                 {
-                    argv.push_back(utils::shell_quote(file.string()));
+                    argv.push_back(::utils::shell_quote(file.string()));
                 }
                 else
                 {

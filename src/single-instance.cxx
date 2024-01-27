@@ -26,7 +26,7 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "write.hxx"
+#include "utils/write.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -66,7 +66,7 @@ single_instance_check() noexcept
 
     // use std::to_string to avoid locale formating of pid
     // from '12345' -> '12,345'
-    write_file(pid_path, std::to_string(::getpid()));
+    ::utils::write_file(pid_path, std::to_string(::getpid()));
 
     return true;
 }
