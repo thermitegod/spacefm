@@ -299,7 +299,7 @@ ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &real_it, it);
     GtkTreeModel* tree_model = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
 
-    PtkDirTree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
+    ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
     return tree->get_dir_path(&real_it);
 }
 
@@ -320,11 +320,11 @@ ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
 static GtkTreeModel*
 get_dir_tree_model()
 {
-    static PtkDirTree* dir_tree_model = nullptr;
+    static ptk::dir_tree* dir_tree_model = nullptr;
 
     if (!dir_tree_model)
     {
-        dir_tree_model = PtkDirTree::create();
+        dir_tree_model = ptk::dir_tree::create();
         g_object_add_weak_pointer(G_OBJECT(dir_tree_model), (void**)GTK_WIDGET(&dir_tree_model));
     }
     else
@@ -367,7 +367,7 @@ on_dir_tree_view_row_expanded(GtkTreeView* treeview, GtkTreeIter* iter, GtkTreeP
 {
     GtkTreeIter real_it;
     GtkTreeModel* filter = gtk_tree_view_get_model(treeview);
-    PtkDirTree* tree = PTK_DIR_TREE(user_data);
+    ptk::dir_tree* tree = PTK_DIR_TREE(user_data);
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), &real_it, iter);
     GtkTreePath* real_path =
         gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(filter), path);
@@ -381,7 +381,7 @@ on_dir_tree_view_row_collapsed(GtkTreeView* treeview, GtkTreeIter* iter, GtkTree
 {
     GtkTreeIter real_it;
     GtkTreeModel* filter = gtk_tree_view_get_model(treeview);
-    PtkDirTree* tree = PTK_DIR_TREE(user_data);
+    ptk::dir_tree* tree = PTK_DIR_TREE(user_data);
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), &real_it, iter);
     GtkTreePath* real_path =
         gtk_tree_model_filter_convert_path_to_child_path(GTK_TREE_MODEL_FILTER(filter), path);
