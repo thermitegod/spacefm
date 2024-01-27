@@ -485,7 +485,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     const MainWindow* main_window = browser->main_window();
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
-    xset_set_cb(xset::name::view_refresh, (GFunc)ptk_file_browser_refresh, browser);
+    xset_set_cb(xset::name::view_refresh, (GFunc)ptk::wrapper::browser::refresh, browser);
     set = xset_get_panel(p, xset::panel::show_toolbox);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
     set->b = xset_get_panel_mode(p, xset::panel::show_toolbox, mode)->b;
@@ -1293,57 +1293,57 @@ ptk_file_menu_new(ptk::browser* browser,
     if (browser)
     {
         set = xset_get(xset::name::go_back);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_back, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_back, browser);
         set->disable = !browser->navigation_history->has_back();
         set = xset_get(xset::name::go_forward);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_forward, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_forward, browser);
         set->disable = !browser->navigation_history->has_forward();
         set = xset_get(xset::name::go_up);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_up, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_up, browser);
         set->disable = std::filesystem::equivalent(cwd, "/");
-        xset_set_cb(xset::name::go_home, (GFunc)ptk_file_browser_go_home, browser);
-        xset_set_cb(xset::name::go_default, (GFunc)ptk_file_browser_go_default, browser);
+        xset_set_cb(xset::name::go_home, (GFunc)ptk::wrapper::browser::go_home, browser);
+        xset_set_cb(xset::name::go_default, (GFunc)ptk::wrapper::browser::go_default, browser);
         xset_set_cb(xset::name::go_set_default,
-                    (GFunc)ptk_file_browser_set_default_folder,
+                    (GFunc)ptk::wrapper::browser::set_default_folder,
                     browser);
         xset_set_cb(xset::name::edit_canon, (GFunc)on_popup_canon, data);
         set = xset_get(xset::name::focus_path_bar);
-        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
         xset_set_ob1_int(set, "job", 0);
         set = xset_get(xset::name::focus_filelist);
-        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
         xset_set_ob1_int(set, "job", 4);
         set = xset_get(xset::name::focus_dirtree);
-        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
         xset_set_ob1_int(set, "job", 1);
         set = xset_get(xset::name::focus_book);
-        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
         xset_set_ob1_int(set, "job", 2);
         set = xset_get(xset::name::focus_device);
-        xset_set_cb(set, (GFunc)ptk_file_browser_focus, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
         xset_set_ob1_int(set, "job", 3);
 
         // Go > Tab >
         set = xset_get(xset::name::tab_prev);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
         xset_set_ob1_int(set, "tab", tab_control_code_prev);
         set->disable = (tab_count < 2);
         set = xset_get(xset::name::tab_next);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
         xset_set_ob1_int(set, "tab", tab_control_code_next);
         set->disable = (tab_count < 2);
         set = xset_get(xset::name::tab_close);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
         xset_set_ob1_int(set, "tab", tab_control_code_close);
         set = xset_get(xset::name::tab_restore);
-        xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
         xset_set_ob1_int(set, "tab", tab_control_code_restore);
 
         for (tab_t tab : TABS)
         {
             const std::string name = std::format("tab_{}", tab);
             set = xset_get(name);
-            xset_set_cb(set, (GFunc)ptk_file_browser_go_tab, browser);
+            xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
             xset_set_ob1_int(set, "tab", tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
         }
@@ -1359,7 +1359,7 @@ ptk_file_menu_new(ptk::browser* browser,
         set->disable = set_disable;
 
         set = xset_get(xset::name::tab_new);
-        xset_set_cb(set, (GFunc)ptk_file_browser_new_tab, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab, browser);
         set->disable = !browser;
         set = xset_get(xset::name::tab_new_here);
         xset_set_cb(set, (GFunc)on_popup_open_in_new_tab_here, data);
@@ -1399,11 +1399,11 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_set_cb(set, (GFunc)on_hide_file, data);
         set->disable = set_disable || no_write_access || !browser;
 
-        xset_set_cb(xset::name::select_all, (GFunc)ptk_file_browser_select_all, data->browser);
+        xset_set_cb(xset::name::select_all, (GFunc)ptk::wrapper::browser::select_all, data->browser);
         set = xset_get(xset::name::select_un);
-        xset_set_cb(set, (GFunc)ptk_file_browser_unselect_all, browser);
+        xset_set_cb(set, (GFunc)ptk::wrapper::browser::unselect_all, browser);
         set->disable = set_disable;
-        xset_set_cb(xset::name::select_invert, (GFunc)ptk_file_browser_invert_selection, browser);
+        xset_set_cb(xset::name::select_invert, (GFunc)ptk::wrapper::browser::invert_selection, browser);
         xset_set_cb(xset::name::select_patt, (GFunc)on_popup_select_pattern, data);
 
         static constexpr std::array<xset::name, 40> copycmds{

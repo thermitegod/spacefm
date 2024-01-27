@@ -1594,16 +1594,16 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser)
             xset_t set;
 
             set = xset_get(xset::name::tab_close);
-            xset_set_cb(set, (GFunc)ptk_file_browser_close_tab, file_browser);
+            xset_set_cb(set, (GFunc)ptk::wrapper::browser::close_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             set = xset_get(xset::name::tab_restore);
-            xset_set_cb(set, (GFunc)ptk_file_browser_restore_tab, file_browser);
+            xset_set_cb(set, (GFunc)ptk::wrapper::browser::restore_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             set = xset_get(xset::name::tab_new);
-            xset_set_cb(set, (GFunc)ptk_file_browser_new_tab, file_browser);
+            xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             set = xset_get(xset::name::tab_new_here);
-            xset_set_cb(set, (GFunc)ptk_file_browser_new_tab_here, file_browser);
+            xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab_here, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             gtk_widget_show_all(GTK_WIDGET(popup));
             // clang-format off
@@ -1700,7 +1700,7 @@ MainWindow::create_tab_label(ptk::browser* file_browser) const noexcept
         gtk_box_pack_end(box, GTK_WIDGET(close_btn), false, false, 0);
 
         // clang-format off
-        g_signal_connect(G_OBJECT(close_btn), "clicked", G_CALLBACK(ptk_file_browser_close_tab), file_browser);
+        g_signal_connect(G_OBJECT(close_btn), "clicked", G_CALLBACK(ptk::wrapper::browser::close_tab), file_browser);
         // clang-format on
     }
 

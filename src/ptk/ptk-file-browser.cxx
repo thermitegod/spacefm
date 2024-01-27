@@ -989,9 +989,9 @@ ptk_file_browser_init(ptk::browser* file_browser)
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
 
     // clang-format off
-    g_signal_connect(G_OBJECT(file_browser->hpane), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
-    g_signal_connect(G_OBJECT(file_browser->side_vpane_top), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
-    g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk_file_browser_slider_release), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->hpane), "button-release-event", G_CALLBACK(ptk::wrapper::browser::slider_release), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->side_vpane_top), "button-release-event", G_CALLBACK(ptk::wrapper::browser::slider_release), file_browser);
+    g_signal_connect(G_OBJECT(file_browser->side_vpane_bottom), "button-release-event", G_CALLBACK(ptk::wrapper::browser::slider_release), file_browser);
     // clang-format on
 
     file_browser->selection_history = std::make_unique<ptk::browser::selection_history_data>();
@@ -3438,7 +3438,7 @@ ptk::browser::go_default() noexcept
 void
 ptk::browser::go_tab(tab_t tab) noexcept
 {
-    // ztd::logger::info("ptk_file_browser_go_tab fb={}", ztd::logger::utils::ptr(this));
+    // ztd::logger::info("ptk::wrapper::browser::go_tab fb={}", ztd::logger::utils::ptr(this));
 
     switch (tab)
     {
@@ -6540,119 +6540,120 @@ ptk_file_browser_delay_focus(ptk::browser* file_browser)
 // xset callback wrapper functions
 
 void
-ptk_file_browser_go_home(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::go_home(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->go_home();
 }
 
 void
-ptk_file_browser_go_default(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::go_default(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->go_default();
 }
 
 void
-ptk_file_browser_go_tab(GtkMenuItem* item, ptk::browser* file_browser)
+ptk::wrapper::browser::go_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     const tab_t tab = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tab"));
     file_browser->go_tab(tab);
 }
 
 void
-ptk_file_browser_go_back(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::go_back(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->go_back();
 }
 
 void
-ptk_file_browser_go_forward(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::go_forward(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->go_forward();
 }
 
 void
-ptk_file_browser_go_up(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::go_up(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->go_up();
 }
 
 void
-ptk_file_browser_refresh(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::refresh(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->refresh();
 }
 
 void
-ptk_file_browser_new_tab(GtkMenuItem* item, ptk::browser* file_browser)
+ptk::wrapper::browser::new_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->new_tab();
 }
 
 void
-ptk_file_browser_new_tab_here(GtkMenuItem* item, ptk::browser* file_browser)
+ptk::wrapper::browser::new_tab_here(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->new_tab_here();
 }
 
 void
-ptk_file_browser_close_tab(GtkMenuItem* item, ptk::browser* file_browser)
+ptk::wrapper::browser::close_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->close_tab();
 }
 
 void
-ptk_file_browser_restore_tab(GtkMenuItem* item, ptk::browser* file_browser)
+ptk::wrapper::browser::restore_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->restore_tab();
 }
 
 void
-ptk_file_browser_set_default_folder(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::set_default_folder(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->set_default_folder();
 }
 
 void
-ptk_file_browser_select_all(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::select_all(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->select_all();
 }
 
 void
-ptk_file_browser_unselect_all(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::unselect_all(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->unselect_all();
 }
 
 void
-ptk_file_browser_invert_selection(GtkWidget* item, ptk::browser* file_browser)
+ptk::wrapper::browser::invert_selection(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     file_browser->invert_selection();
 }
 
 void
-ptk_file_browser_focus(GtkMenuItem* item, ptk::browser* file_browser)
+ptk::wrapper::browser::focus(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
     file_browser->focus(job);
 }
 
 bool
-ptk_file_browser_slider_release(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser)
+ptk::wrapper::browser::slider_release(GtkWidget* widget, GdkEvent* event,
+                                      ptk::browser* file_browser) noexcept
 {
     (void)event;
     return file_browser->slider_release(GTK_PANED(widget));
