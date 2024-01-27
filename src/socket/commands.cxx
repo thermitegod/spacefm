@@ -1317,7 +1317,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             std::string str;
             for (const std::string_view path : pathv)
             {
-                str.append(std::format("{} ", utils::shell_quote(path)));
+                str.append(std::format("{} ", ::utils::shell_quote(path)));
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
 #endif
@@ -1338,7 +1338,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 {
                     continue;
                 }
-                str.append(std::format("{} ", utils::shell_quote(file->name())));
+                str.append(std::format("{} ", ::utils::shell_quote(file->name())));
             }
             return {SOCKET_SUCCESS, std::format("({})", str)};
         }

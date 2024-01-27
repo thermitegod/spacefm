@@ -15,8 +15,25 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <filesystem>
+
+#include <span>
+
+#include <gtkmm.h>
 
 #include "ptk/ptk-file-browser.hxx"
 
-void ptk_paste_file(ptk::browser* file_browser, const std::filesystem::path& cwd);
+#include "vfs/vfs-file.hxx"
+
+namespace ptk::action
+{
+// if app_desktop is empty each file will be opened with its default application
+// if xforce, force execute of executable ignoring app_settings.click_executes
+// if xnever, never execute an executable
+void open_files_with_app(const std::filesystem::path& cwd,
+                         const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                         const std::string_view app_desktop, ptk::browser* file_browser,
+                         const bool xforce, const bool xnever) noexcept;
+} // namespace ptk::action

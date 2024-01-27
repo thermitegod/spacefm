@@ -54,10 +54,10 @@
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-archiver.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
-#include "ptk/ptk-file-actions-open.hxx"
-#include "ptk/ptk-file-actions-misc.hxx"
-#include "ptk/ptk-file-actions-rename.hxx"
-#include "ptk/ptk-file-actions-paste.hxx"
+#include "ptk/ptk-file-action-open.hxx"
+#include "ptk/ptk-file-action-misc.hxx"
+#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-action-paste.hxx"
 #include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
@@ -1559,7 +1559,7 @@ static void
 on_popup_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_open_files_with_app(data->cwd, data->sel_files, "", data->browser, true, false);
+    ptk::action::open_files_with_app(data->cwd, data->sel_files, "", data->browser, true, false);
 }
 
 static void
@@ -1596,7 +1596,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
     if (check_app)
     {
         const auto& app = check_app.value();
-        ptk_open_files_with_app(data->cwd, data->sel_files, app, data->browser, false, false);
+        ptk::action::open_files_with_app(data->cwd, data->sel_files, app, data->browser, false, false);
     }
 }
 
@@ -1604,7 +1604,7 @@ static void
 on_popup_open_all(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_open_files_with_app(data->cwd, data->sel_files, "", data->browser, false, true);
+    ptk::action::open_files_with_app(data->cwd, data->sel_files, "", data->browser, false, true);
 }
 
 static void
@@ -1614,7 +1614,7 @@ on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data)
         static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
     const auto desktop = vfs::desktop::create(desktop_file);
 
-    ptk_open_files_with_app(data->cwd,
+    ptk::action::open_files_with_app(data->cwd,
                             data->sel_files,
                             desktop->name(),
                             data->browser,
@@ -2382,7 +2382,7 @@ static void
 on_popup_paste_as_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_paste_file(data->browser, data->cwd);
+    ptk::action::paste_files(data->browser, data->cwd);
 }
 
 static void
@@ -2403,10 +2403,10 @@ on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
 
-        ptk_delete_files(GTK_WINDOW(parent),
-                         data->cwd,
-                         data->sel_files,
-                         GTK_TREE_VIEW(data->browser->task_view()));
+        ptk::action::delete_files(GTK_WINDOW(parent),
+                                  data->cwd,
+                                  data->sel_files,
+                                  GTK_TREE_VIEW(data->browser->task_view()));
     }
 }
 
@@ -2428,10 +2428,10 @@ on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
 
-        ptk_trash_files(GTK_WINDOW(parent),
-                        data->cwd,
-                        data->sel_files,
-                        GTK_TREE_VIEW(data->browser->task_view()));
+        ptk::action::trash_files(GTK_WINDOW(parent),
+                                 data->cwd,
+                                 data->sel_files,
+                                 GTK_TREE_VIEW(data->browser->task_view()));
     }
 }
 
@@ -2506,7 +2506,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
             {
                 const auto file = vfs::file::create(ao->path);
                 const std::vector<std::shared_ptr<vfs::file>> sel_files{file};
-                ptk_open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
+                ptk::action::open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
             }
         }
     }
@@ -2515,7 +2515,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao)
 }
 
 static void
-create_new_file(ptk::file_menu* data, ptk::rename_mode create_new)
+create_new_file(ptk::file_menu* data, ptk::action::rename_mode create_new)
 {
     if (data->cwd.empty())
     {
@@ -2530,28 +2530,34 @@ create_new_file(ptk::file_menu* data, ptk::rename_mode create_new)
         file = data->sel_files.front();
     }
 
-    ptk_rename_file(data->browser, data->cwd.c_str(), file, nullptr, false, create_new, ao);
+    ptk::action::rename_files(data->browser,
+                              data->cwd.c_str(),
+                              file,
+                              nullptr,
+                              false,
+                              create_new,
+                              ao);
 }
 
 static void
 on_popup_new_folder_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    create_new_file(data, ptk::rename_mode::new_dir);
+    create_new_file(data, ptk::action::rename_mode::new_dir);
 }
 
 static void
 on_popup_new_text_file_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    create_new_file(data, ptk::rename_mode::new_file);
+    create_new_file(data, ptk::action::rename_mode::new_file);
 }
 
 static void
 on_popup_new_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    create_new_file(data, ptk::rename_mode::new_link);
+    create_new_file(data, ptk::action::rename_mode::new_link);
 }
 
 static void

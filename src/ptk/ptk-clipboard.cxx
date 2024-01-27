@@ -220,7 +220,7 @@ ptk::clipboard::copy_as_text(const std::span<const std::shared_ptr<vfs::file>> s
     std::string file_text;
     for (const auto& file : sel_files)
     {
-        const auto quoted = utils::shell_quote(file->path().string());
+        const auto quoted = ::utils::shell_quote(file->path().string());
         file_text = std::format("{} {}", file_text, quoted);
     }
     gtk_clipboard_set_text(clip, file_text.data(), -1);

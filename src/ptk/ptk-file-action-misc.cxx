@@ -39,7 +39,7 @@
 
 #include "ptk/ptk-file-task.hxx"
 
-#include "ptk/ptk-file-actions-misc.hxx"
+#include "ptk/ptk-file-action-misc.hxx"
 
 static bool
 create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
@@ -174,9 +174,9 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 }
 
 void
-ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                 const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                 GtkTreeView* task_view)
+ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
+                          const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                          GtkTreeView* task_view) noexcept
 {
     (void)cwd;
 
@@ -211,9 +211,9 @@ ptk_delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
 }
 
 void
-ptk_trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
-                const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                GtkTreeView* task_view)
+ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
+                         const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                         GtkTreeView* task_view) noexcept
 {
     (void)cwd;
 

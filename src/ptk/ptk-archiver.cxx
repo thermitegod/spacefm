@@ -98,7 +98,7 @@ ptk_archiver_extract(ptk::browser* file_browser,
     else
     {
         command.append(
-            std::format("--extract-to={} ", utils::shell_quote(file_browser->cwd().string())));
+            std::format("--extract-to={} ", ::utils::shell_quote(file_browser->cwd().string())));
     }
     command.append(shell_file_list);
 

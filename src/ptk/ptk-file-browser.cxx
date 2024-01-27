@@ -66,9 +66,9 @@
 
 #include "ptk/ptk-dialog.hxx"
 
-#include "ptk/ptk-file-actions-open.hxx"
-#include "ptk/ptk-file-actions-rename.hxx"
-#include "ptk/ptk-file-actions-paste.hxx"
+#include "ptk/ptk-file-action-open.hxx"
+#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-action-paste.hxx"
 
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-file-properties.hxx"
@@ -3834,7 +3834,7 @@ ptk::browser::open_selected_files_with_app(const std::string_view app_desktop) n
 {
     const auto selected_files = this->selected_files();
 
-    ptk_open_files_with_app(this->cwd(), selected_files, app_desktop, this, false, false);
+    ptk::action::open_files_with_app(this->cwd(), selected_files, app_desktop, this, false, false);
 }
 
 void
@@ -3851,13 +3851,13 @@ ptk::browser::rename_selected_files(
 
     for (const auto& file : selected_files)
     {
-        if (!ptk_rename_file(this,
-                             cwd.c_str(),
-                             file,
-                             nullptr,
-                             false,
-                             ptk::rename_mode::rename,
-                             nullptr))
+        if (!ptk::action::rename_files(this,
+                                       cwd.c_str(),
+                                       file,
+                                       nullptr,
+                                       false,
+                                       ptk::action::rename_mode::rename,
+                                       nullptr))
         {
             break;
         }
@@ -6470,7 +6470,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
         }
         else if (set->xset_name == xset::name::paste_as)
         {
-            ptk_paste_file(this, this->cwd());
+            ptk::action::paste_files(this, this->cwd());
         }
     }
     else if (set->name.starts_with("select_"))

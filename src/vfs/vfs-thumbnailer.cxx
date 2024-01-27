@@ -290,8 +290,8 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
         {
             const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
                                              thumb_size,
-                                             utils::shell_quote(file->path().string()),
-                                             utils::shell_quote(thumbnail_file.string()));
+                                             ::utils::shell_quote(file->path().string()),
+                                             ::utils::shell_quote(thumbnail_file.string()));
             // ztd::logger::info("COMMAND({})", command);
             Glib::spawn_command_line_sync(command);
 

@@ -36,11 +36,11 @@
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-file-actions-rename.hxx"
-#include "ptk/ptk-file-actions-paste.hxx"
+#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-action-paste.hxx"
 
 void
-ptk_paste_file(ptk::browser* file_browser, const std::filesystem::path& cwd)
+ptk::action::paste_files(ptk::browser* file_browser, const std::filesystem::path& cwd) noexcept
 {
     bool is_cut = false;
     i32 missing_targets = 0;
@@ -53,13 +53,13 @@ ptk_paste_file(ptk::browser* file_browser, const std::filesystem::path& cwd)
         const auto file = vfs::file::create(file_path);
         const std::string file_dir = std::filesystem::path(file_path).parent_path();
 
-        if (!ptk_rename_file(file_browser,
-                             file_dir.data(),
-                             file,
-                             cwd.c_str(),
-                             !is_cut,
-                             ptk::rename_mode::rename,
-                             nullptr))
+        if (!ptk::action::rename_files(file_browser,
+                                       file_dir.data(),
+                                       file,
+                                       cwd.c_str(),
+                                       !is_cut,
+                                       ptk::action::rename_mode::rename,
+                                       nullptr))
         {
             missing_targets = 0;
             break;

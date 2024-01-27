@@ -15,22 +15,23 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
 
 #include <span>
 
-#include <gtkmm.h>
+#include <memory>
 
-#include "ptk/ptk-file-browser.hxx"
+#include <gtkmm.h>
 
 #include "vfs/vfs-file.hxx"
 
-// if app_desktop is empty each file will be opened with its default application
-// if xforce, force execute of executable ignoring app_settings.click_executes
-// if xnever, never execute an executable
-void ptk_open_files_with_app(const std::filesystem::path& cwd,
-                             const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                             const std::string_view app_desktop, ptk::browser* file_browser,
-                             bool xforce, bool xnever);
+namespace ptk::action
+{
+void trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
+                 const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                 GtkTreeView* task_view) noexcept;
+
+void delete_files(GtkWindow* parent_win, const std::filesystem::path& cwd,
+                  const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                  GtkTreeView* task_view) noexcept;
+} // namespace ptk::action

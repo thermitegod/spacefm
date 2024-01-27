@@ -51,7 +51,7 @@
 
 #include "utils/misc.hxx"
 
-#include "ptk/ptk-file-actions-open.hxx"
+#include "ptk/ptk-file-action-open.hxx"
 
 struct ParentInfo
 {
@@ -132,10 +132,10 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 }
 
 void
-ptk_open_files_with_app(const std::filesystem::path& cwd,
-                        const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                        const std::string_view app_desktop, ptk::browser* file_browser, bool xforce,
-                        bool xnever)
+ptk::action::open_files_with_app(const std::filesystem::path& cwd,
+                                 const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                                 const std::string_view app_desktop, ptk::browser* file_browser,
+                                 const bool xforce, const bool xnever) noexcept
 {
     if (selected_files.empty())
     {
