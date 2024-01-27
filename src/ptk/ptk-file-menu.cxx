@@ -60,7 +60,7 @@
 #include "ptk/ptk-file-action-paste.hxx"
 #include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-task-view.hxx"
 #include "ptk/ptk-file-list.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/utils/ptk-utils.hxx"
@@ -544,7 +544,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
         set->b = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode)->b;
 
-        xset_set_cb(xset::name::view_reorder_col, (GFunc)on_reorder, browser);
+        xset_set_cb(xset::name::view_reorder_col, (GFunc)ptk::view::file_task::on_reorder, browser);
 
         set = xset_get(xset::name::view_columns);
         xset_set_var(set, xset::var::disable, "0");
@@ -2289,7 +2289,7 @@ static void
 on_new_bookmark(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_bookmark_view_add_bookmark(data->browser->cwd());
+    ptk::view::bookmark::add(data->browser->cwd());
 }
 
 static void
@@ -2700,7 +2700,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set)
         }
         else if (set->xset_name == xset::name::new_bookmark)
         {
-            ptk_bookmark_view_add_bookmark(browser->cwd());
+            ptk::view::bookmark::add(browser->cwd());
         }
         else if (set->xset_name == xset::name::new_archive)
         {

@@ -25,14 +25,12 @@
 
 #include "ptk/ptk-file-browser.hxx"
 
-/* Create a new dir tree view */
-GtkWidget* ptk_dir_tree_view_new(ptk::browser* browser, bool show_hidden);
+namespace ptk::view::dir_tree
+{
+GtkWidget* create(ptk::browser* browser, bool show_hidden) noexcept;
 
-bool ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path);
-
-void ptk_dir_tree_view_show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden);
-
-const std::optional<std::filesystem::path>
-ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view);
-const std::optional<std::filesystem::path> ptk_dir_view_get_dir_path(GtkTreeModel* model,
-                                                                     GtkTreeIter* it);
+bool chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path) noexcept;
+void show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden) noexcept;
+const std::optional<std::filesystem::path> selected_dir(GtkTreeView* dir_tree_view) noexcept;
+const std::optional<std::filesystem::path> dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept;
+} // namespace ptk::view::dir_tree

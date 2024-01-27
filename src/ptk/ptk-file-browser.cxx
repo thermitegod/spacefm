@@ -75,7 +75,7 @@
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/ptk-dir-tree-view.hxx"
 #include "ptk/ptk-dir-tree.hxx"
-#include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-task-view.hxx"
 
 #include "ptk/ptk-file-list.hxx"
 #include "ptk/ptk-clipboard.hxx"
@@ -549,7 +549,7 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* file_browser)
     if ((!text.starts_with('/') && text.contains(":/")) || text.starts_with("//"))
     {
         save_command_history(GTK_ENTRY(entry));
-        ptk_location_view_mount_network(file_browser, text, false, false);
+        ptk::view::location::mount_network(file_browser, text, false, false);
         return;
     }
 
@@ -581,7 +581,7 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* file_browser)
     else if (std::filesystem::is_block_file(dir_path))
     { // open block device
         // ztd::logger::info("opening block device: {}", dir_path);
-        ptk_location_view_open_block(dir_path, false);
+        ptk::view::location::open_block(dir_path, false);
     }
     else
     { // do nothing for other special files
@@ -1309,12 +1309,12 @@ ptk::browser::on_dir_file_listed(bool is_cancelled)
 
     if (this->side_dir)
     {
-        ptk_dir_tree_view_chdir(GTK_TREE_VIEW(this->side_dir), this->cwd());
+        ptk::view::dir_tree::chdir(GTK_TREE_VIEW(this->side_dir), this->cwd());
     }
 
     if (this->side_dev)
     {
-        ptk_location_view_chdir(GTK_TREE_VIEW(this->side_dev), this->cwd());
+        ptk::view::location::chdir(GTK_TREE_VIEW(this->side_dev), this->cwd());
     }
 
     // FIXME:  This is already done in update_model, but is there any better way to
@@ -1727,7 +1727,7 @@ on_dir_tree_update_sel(ptk::browser* file_browser)
     }
 
     const auto check_dir_path =
-        ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(file_browser->side_dir));
+        ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(file_browser->side_dir));
     if (check_dir_path)
     {
         const auto& dir_path = check_dir_path.value();
@@ -2880,7 +2880,7 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_br
                 gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
                 if (file)
                 {
-                    const auto check_file_path = ptk_dir_view_get_dir_path(model, &it);
+                    const auto check_file_path = ptk::view::dir_tree::dir_path(model, &it);
                     if (check_file_path)
                     {
                         const auto& file_path = check_file_path.value();
@@ -2900,7 +2900,8 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_br
 static GtkWidget*
 ptk_file_browser_create_dir_tree(ptk::browser* file_browser)
 {
-    GtkWidget* dir_tree = ptk_dir_tree_view_new(file_browser, file_browser->show_hidden_files_);
+    GtkWidget* dir_tree =
+        ptk::view::dir_tree::create(file_browser, file_browser->show_hidden_files_);
 
     // clang-format off
     g_signal_connect(G_OBJECT(dir_tree), "row-activated", G_CALLBACK(on_dir_tree_row_activated), file_browser);
@@ -3580,8 +3581,8 @@ ptk::browser::show_hidden_files(bool show) noexcept
 
     if (this->side_dir)
     {
-        ptk_dir_tree_view_show_hidden_files(GTK_TREE_VIEW(this->side_dir),
-                                            this->show_hidden_files_);
+        ptk::view::dir_tree::show_hidden_files(GTK_TREE_VIEW(this->side_dir),
+                                               this->show_hidden_files_);
     }
 
     this->update_toolbar_widgets(xset::tool::show_hidden);
@@ -4872,7 +4873,7 @@ ptk::browser::update_views() noexcept
         gtk_widget_show_all(GTK_WIDGET(this->side_dir_scroll));
         if (this->side_dir && this->file_list_)
         {
-            ptk_dir_tree_view_chdir(GTK_TREE_VIEW(this->side_dir), this->cwd());
+            ptk::view::dir_tree::chdir(GTK_TREE_VIEW(this->side_dir), this->cwd());
         }
     }
     else
@@ -4889,7 +4890,7 @@ ptk::browser::update_views() noexcept
     {
         if (!this->side_dev)
         {
-            this->side_dev = ptk_location_view_new(this);
+            this->side_dev = ptk::view::location::create(this);
             gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(this->side_dir_scroll),
                                           GTK_WIDGET(this->side_dir));
         }
@@ -6212,7 +6213,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
     {
         if (set->xset_name == xset::name::book_add)
         {
-            ptk_bookmark_view_add_bookmark(this->cwd());
+            ptk::view::bookmark::add(this->cwd());
         }
     }
     else if (set->name.starts_with("go_"))
@@ -6305,7 +6306,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
     }
     else if (set->xset_name == xset::name::view_reorder_col)
     {
-        on_reorder(nullptr, GTK_WIDGET(this));
+        ptk::view::file_task::on_reorder(nullptr, GTK_WIDGET(this));
     }
     else if (set->xset_name == xset::name::view_refresh)
     {

@@ -52,24 +52,24 @@
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
-#include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-task-view.hxx"
 
-const std::unordered_map<task_view_column, const std::string_view> task_titles{
+const std::unordered_map<ptk::view::file_task::column, const std::string_view> task_titles{
     // If you change "Status", also change it in on_task_button_press_event
-    {task_view_column::status, "Status"},
-    {task_view_column::count, "#"},
-    {task_view_column::path, "Directory"},
-    {task_view_column::file, "Item"},
-    {task_view_column::to, "To"},
-    {task_view_column::progress, "Progress"},
-    {task_view_column::total, "Total"},
-    {task_view_column::started, "Started"},
-    {task_view_column::elapsed, "Elapsed"},
-    {task_view_column::curspeed, "Current"},
-    {task_view_column::curest, "CRemain"},
-    {task_view_column::avgspeed, "Average"},
-    {task_view_column::avgest, "Remain"},
-    {task_view_column::starttime, "StartTime"},
+    {ptk::view::file_task::column::status, "Status"},
+    {ptk::view::file_task::column::count, "#"},
+    {ptk::view::file_task::column::path, "Directory"},
+    {ptk::view::file_task::column::file, "Item"},
+    {ptk::view::file_task::column::to, "To"},
+    {ptk::view::file_task::column::progress, "Progress"},
+    {ptk::view::file_task::column::total, "Total"},
+    {ptk::view::file_task::column::started, "Started"},
+    {ptk::view::file_task::column::elapsed, "Elapsed"},
+    {ptk::view::file_task::column::curspeed, "Current"},
+    {ptk::view::file_task::column::curest, "CRemain"},
+    {ptk::view::file_task::column::avgspeed, "Average"},
+    {ptk::view::file_task::column::avgest, "Remain"},
+    {ptk::view::file_task::column::starttime, "StartTime"},
 };
 
 inline constexpr std::array<xset::name, 13> task_names{
@@ -89,7 +89,7 @@ inline constexpr std::array<xset::name, 13> task_names{
 };
 
 void
-on_reorder(GtkWidget* item, GtkWidget* parent)
+ptk::view::file_task::on_reorder(GtkWidget* item, GtkWidget* parent) noexcept
 {
     (void)item;
     ptk::dialog::message(
@@ -133,7 +133,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
         const char* title = gtk_tree_view_column_get_title(col);
         for (const auto [index, value] : std::views::enumerate(task_names))
         {
-            if (title == task_titles.at(task_view_column(index)))
+            if (title == task_titles.at(ptk::view::file_task::column(index)))
             {
                 const xset_t set = xset_get(value);
                 // save column position
@@ -189,13 +189,13 @@ on_task_column_selected(GtkMenuItem* item, GtkWidget* view)
 }
 
 void
-ptk_task_view_column_selected(GtkWidget* view)
+ptk::view::file_task::column_selected(GtkWidget* view) noexcept
 {
     on_task_columns_changed(view, nullptr);
 }
 
 bool
-ptk_task_view_is_main_tasks_running(GtkWidget* task_view)
+ptk::view::file_task::is_task_running(GtkWidget* task_view) noexcept
 {
     if (!task_view || !GTK_IS_TREE_VIEW(task_view))
     {
@@ -207,7 +207,7 @@ ptk_task_view_is_main_tasks_running(GtkWidget* task_view)
 }
 
 void
-main_task_pause_all_queued(ptk::file_task* ptask)
+ptk::view::file_task::pause_all_queued(ptk::file_task* ptask) noexcept
 {
     if (!ptask->task_view_)
     {
@@ -221,7 +221,7 @@ main_task_pause_all_queued(ptk::file_task* ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, task_view_column::data, &qtask, -1);
+            gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &qtask, -1);
             if (qtask && qtask != ptask && qtask->task && !qtask->complete_ &&
                 qtask->task->state_pause_ == vfs::file_task::state::queue)
             {
@@ -232,7 +232,7 @@ main_task_pause_all_queued(ptk::file_task* ptask)
 }
 
 void
-main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
+ptk::view::file_task::start_queued(GtkWidget* view, ptk::file_task* new_ptask) noexcept
 {
     if (!GTK_IS_TREE_VIEW(view))
     {
@@ -249,7 +249,7 @@ main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask)
         do
         {
             ptk::file_task* qtask = nullptr;
-            gtk_tree_model_get(model, &it, task_view_column::data, &qtask, -1);
+            gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &qtask, -1);
             if (qtask && qtask->task && !qtask->complete_ &&
                 qtask->task->state_ == vfs::file_task::state::running)
             {
@@ -377,7 +377,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, ptk::file_t
         {
             if (model)
             {
-                gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+                gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
             }
             if (ptask && ptask->task && !ptask->is_completed() &&
                 (ptask->task->type_ != vfs::file_task::type::exec || job == main_window_job::stop))
@@ -400,11 +400,11 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, ptk::file_t
             }
         } while (model && gtk_tree_model_iter_next(model, &it));
     }
-    main_task_start_queued(view, nullptr);
+    ptk::view::file_task::start_queued(view, nullptr);
 }
 
 void
-ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2)
+ptk::view::file_task::stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2) noexcept
 {
     on_task_stop(nullptr, view, set2, ptask2);
 }
@@ -570,7 +570,7 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, const char* name2
 }
 
 void
-ptk_task_view_popup_show(MainWindow* main_window, const std::string_view name)
+ptk::view::file_task::popup_show(MainWindow* main_window, const std::string_view name) noexcept
 {
     on_task_popup_show(nullptr, main_window, name.data());
 }
@@ -638,13 +638,13 @@ on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* nam
 }
 
 void
-ptk_task_view_popup_errset(MainWindow* main_window, const std::string_view name)
+ptk::view::file_task::popup_errset(MainWindow* main_window, const std::string_view name) noexcept
 {
     on_task_popup_errset(nullptr, main_window, name.data());
 }
 
 void
-ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu)
+ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noexcept
 {
     (void)menu;
     xset_t set;
@@ -673,7 +673,7 @@ ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu)
     xset_set_cb(xset::name::task_col_curest, (GFunc)on_task_column_selected, parent);
     xset_set_cb(xset::name::task_col_avgspeed, (GFunc)on_task_column_selected, parent);
     xset_set_cb(xset::name::task_col_avgest, (GFunc)on_task_column_selected, parent);
-    xset_set_cb(xset::name::task_col_reorder, (GFunc)on_reorder, parent);
+    xset_set_cb(xset::name::task_col_reorder, (GFunc)ptk::view::file_task::on_reorder, parent);
 
     set = xset_get(xset::name::task_err_first);
     xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
@@ -691,7 +691,7 @@ ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu)
 }
 
 ptk::file_task*
-ptk_task_view_get_selected_task(GtkWidget* view)
+ptk::view::file_task::selected_task(GtkWidget* view) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreeSelection* selection = nullptr;
@@ -712,15 +712,15 @@ ptk_task_view_get_selected_task(GtkWidget* view)
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     if (gtk_tree_selection_get_selected(selection, nullptr, &it))
     {
-        gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+        gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
     }
     return ptask;
 }
 
 void
-ptk_task_view_show_task_dialog(GtkWidget* view)
+ptk::view::file_task::show_task_dialog(GtkWidget* view) noexcept
 {
-    ptk::file_task* ptask = ptk_task_view_get_selected_task(view);
+    ptk::file_task* ptask = ptk::view::file_task::selected_task(view);
     if (!ptask)
     {
         return;
@@ -791,7 +791,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             }
             if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
             {
-                gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+                gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
             }
             gtk_tree_path_free(tree_path);
 
@@ -841,7 +841,11 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
                 {
                     if (tree_path && gtk_tree_model_get_iter(model, &it, tree_path))
                     {
-                        gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+                        gtk_tree_model_get(model,
+                                           &it,
+                                           ptk::view::file_task::column::data,
+                                           &ptask,
+                                           -1);
                     }
                     gtk_tree_path_free(tree_path);
                 }
@@ -911,7 +915,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-            ptk_task_view_prepare_menu(main_window, popup);
+            ptk::view::file_task::prepare_menu(main_window, popup);
 
             xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
 
@@ -954,18 +958,18 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
         return;
     }
 
-    gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+    gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
     if (ptask)
     {
         // show normal dialog
-        ptk_task_view_show_task_dialog(view);
+        ptk::view::file_task::show_task_dialog(view);
     }
 }
 
 void
-main_task_view_remove_task(ptk::file_task* ptask)
+ptk::view::file_task::remove_task(ptk::file_task* ptask) noexcept
 {
-    // ztd::logger::info("main_task_view_remove_task  ptask={}", ptask);
+    // ztd::logger::info("ptk::view::file_task::remove_task  ptask={}", ptask);
 
     GtkWidget* view = ptask->task_view_;
     if (!view)
@@ -987,7 +991,7 @@ main_task_view_remove_task(ptk::file_task* ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, task_view_column::data, &ptaskt, -1);
+            gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptaskt, -1);
         } while (ptaskt != ptask && gtk_tree_model_iter_next(model, &it));
     }
     if (ptaskt == ptask)
@@ -1003,11 +1007,11 @@ main_task_view_remove_task(ptk::file_task* ptask)
         }
     }
 
-    // ztd::logger::info("main_task_view_remove_task DONE ptask={}", ptask);
+    // ztd::logger::info("ptk::view::file_task::remove_task DONE ptask={}", ptask);
 }
 
 void
-main_task_view_update_task(ptk::file_task* ptask)
+ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
 {
     ptk::file_task* ptaskt = nullptr;
     GtkWidget* view = nullptr;
@@ -1015,7 +1019,7 @@ main_task_view_update_task(ptk::file_task* ptask)
     GtkTreeIter it;
     xset_t set;
 
-    // ztd::logger::info("main_task_view_update_task  ptask={}", ptask);
+    // ztd::logger::info("ptk::view::file_task::update_task  ptask={}", ptask);
     const std::unordered_map<vfs::file_task::type, const std::string_view> job_titles{
         {vfs::file_task::type::move, "moving"},
         {vfs::file_task::type::copy, "copying"},
@@ -1057,7 +1061,7 @@ main_task_view_update_task(ptk::file_task* ptask)
     {
         do
         {
-            gtk_tree_model_get(model, &it, task_view_column::data, &ptaskt, -1);
+            gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptaskt, -1);
         } while (ptaskt != ptask && gtk_tree_model_iter_next(model, &it));
     }
     if (ptaskt != ptask)
@@ -1073,13 +1077,13 @@ main_task_view_update_task(ptk::file_task* ptask)
             GTK_LIST_STORE(model),
             &it,
             0,
-            task_view_column::to,
+            ptk::view::file_task::column::to,
             dest_dir.empty() ? nullptr : dest_dir.c_str(),
-            task_view_column::started,
+            ptk::view::file_task::column::started,
             started.data(),
-            task_view_column::starttime,
+            ptk::view::file_task::column::starttime,
             std::chrono::system_clock::to_time_t(ptask->task->start_time),
-            task_view_column::data,
+            ptk::view::file_task::column::data,
             ptask,
             -1);
     }
@@ -1211,29 +1215,29 @@ main_task_view_update_task(ptk::file_task* ptask)
             {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
-                                   task_view_column::icon,
+                                   ptk::view::file_task::column::icon,
                                    pixbuf,
-                                   task_view_column::status,
+                                   ptk::view::file_task::column::status,
                                    status_final.data(),
-                                   task_view_column::count,
+                                   ptk::view::file_task::column::count,
                                    ptask->display_file_count().data(),
-                                   task_view_column::path,
+                                   ptk::view::file_task::column::path,
                                    path.data(),
-                                   task_view_column::file,
+                                   ptk::view::file_task::column::file,
                                    file.data(),
-                                   task_view_column::progress,
+                                   ptk::view::file_task::column::progress,
                                    percent,
-                                   task_view_column::total,
+                                   ptk::view::file_task::column::total,
                                    ptask->display_size_tally().data(),
-                                   task_view_column::elapsed,
+                                   ptk::view::file_task::column::elapsed,
                                    ptask->display_elapsed().data(),
-                                   task_view_column::curspeed,
+                                   ptk::view::file_task::column::curspeed,
                                    ptask->display_current_speed().data(),
-                                   task_view_column::curest,
+                                   ptk::view::file_task::column::curest,
                                    ptask->display_current_estimate().data(),
-                                   task_view_column::avgspeed,
+                                   ptk::view::file_task::column::avgspeed,
                                    ptask->display_average_speed().data(),
-                                   task_view_column::avgest,
+                                   ptk::view::file_task::column::avgest,
                                    ptask->display_average_estimate().data(),
                                    -1);
             }
@@ -1241,27 +1245,27 @@ main_task_view_update_task(ptk::file_task* ptask)
             {
                 gtk_list_store_set(GTK_LIST_STORE(model),
                                    &it,
-                                   task_view_column::status,
+                                   ptk::view::file_task::column::status,
                                    status_final.data(),
-                                   task_view_column::count,
+                                   ptk::view::file_task::column::count,
                                    ptask->display_file_count().data(),
-                                   task_view_column::path,
+                                   ptk::view::file_task::column::path,
                                    path.data(),
-                                   task_view_column::file,
+                                   ptk::view::file_task::column::file,
                                    file.data(),
-                                   task_view_column::progress,
+                                   ptk::view::file_task::column::progress,
                                    percent,
-                                   task_view_column::total,
+                                   ptk::view::file_task::column::total,
                                    ptask->display_size_tally().data(),
-                                   task_view_column::elapsed,
+                                   ptk::view::file_task::column::elapsed,
                                    ptask->display_elapsed().data(),
-                                   task_view_column::curspeed,
+                                   ptk::view::file_task::column::curspeed,
                                    ptask->display_current_speed().data(),
-                                   task_view_column::curest,
+                                   ptk::view::file_task::column::curest,
                                    ptask->display_current_estimate().data(),
-                                   task_view_column::avgspeed,
+                                   ptk::view::file_task::column::avgspeed,
                                    ptask->display_average_speed().data(),
-                                   task_view_column::avgest,
+                                   ptk::view::file_task::column::avgest,
                                    ptask->display_average_estimate().data(),
                                    -1);
             }
@@ -1270,13 +1274,13 @@ main_task_view_update_task(ptk::file_task* ptask)
         {
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
-                               task_view_column::icon,
+                               ptk::view::file_task::column::icon,
                                pixbuf,
-                               task_view_column::status,
+                               ptk::view::file_task::column::status,
                                status_final.data(),
-                               task_view_column::progress,
+                               ptk::view::file_task::column::progress,
                                percent,
-                               task_view_column::elapsed,
+                               ptk::view::file_task::column::elapsed,
                                ptask->display_elapsed().data(),
                                -1);
         }
@@ -1284,11 +1288,11 @@ main_task_view_update_task(ptk::file_task* ptask)
         {
             gtk_list_store_set(GTK_LIST_STORE(model),
                                &it,
-                               task_view_column::status,
+                               ptk::view::file_task::column::status,
                                status_final.data(),
-                               task_view_column::progress,
+                               ptk::view::file_task::column::progress,
                                percent,
-                               task_view_column::elapsed,
+                               ptk::view::file_task::column::elapsed,
                                ptask->display_elapsed().data(),
                                -1);
         }
@@ -1309,47 +1313,47 @@ main_task_view_update_task(ptk::file_task* ptask)
         // task is paused
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
-                           task_view_column::total,
+                           ptk::view::file_task::column::total,
                            ptask->display_size_tally().data(),
-                           task_view_column::elapsed,
+                           ptk::view::file_task::column::elapsed,
                            ptask->display_elapsed().data(),
-                           task_view_column::curspeed,
+                           ptk::view::file_task::column::curspeed,
                            ptask->display_current_speed().data(),
-                           task_view_column::curest,
+                           ptk::view::file_task::column::curest,
                            ptask->display_current_estimate().data(),
-                           task_view_column::avgspeed,
+                           ptk::view::file_task::column::avgspeed,
                            ptask->display_average_speed().data(),
-                           task_view_column::avgest,
+                           ptk::view::file_task::column::avgest,
                            ptask->display_average_estimate().data(),
                            -1);
     }
-    // ztd::logger::info("DONE main_task_view_update_task");
+    // ztd::logger::info("DONE ptk::view::file_task::update_task");
 }
 
 GtkWidget*
-main_task_view_new(MainWindow* main_window)
+ptk::view::file_task::create(MainWindow* main_window)
 {
     GtkTreeViewColumn* col = nullptr;
     GtkCellRenderer* renderer = nullptr;
     GtkCellRenderer* pix_renderer = nullptr;
 
-    static constexpr std::array<task_view_column, 16> cols{
-        task_view_column::status,
-        task_view_column::count,
-        task_view_column::path,
-        task_view_column::file,
-        task_view_column::to,
-        task_view_column::progress,
-        task_view_column::total,
-        task_view_column::started,
-        task_view_column::elapsed,
-        task_view_column::curspeed,
-        task_view_column::curest,
-        task_view_column::avgspeed,
-        task_view_column::avgest,
-        task_view_column::starttime,
-        task_view_column::icon,
-        task_view_column::data,
+    static constexpr std::array<ptk::view::file_task::column, 16> cols{
+        ptk::view::file_task::column::status,
+        ptk::view::file_task::column::count,
+        ptk::view::file_task::column::path,
+        ptk::view::file_task::column::file,
+        ptk::view::file_task::column::to,
+        ptk::view::file_task::column::progress,
+        ptk::view::file_task::column::total,
+        ptk::view::file_task::column::started,
+        ptk::view::file_task::column::elapsed,
+        ptk::view::file_task::column::curspeed,
+        ptk::view::file_task::column::curest,
+        ptk::view::file_task::column::avgspeed,
+        ptk::view::file_task::column::avgest,
+        ptk::view::file_task::column::starttime,
+        ptk::view::file_task::column::icon,
+        ptk::view::file_task::column::data,
     };
 
     // Model
@@ -1411,7 +1415,7 @@ main_task_view_new(MainWindow* main_window)
 
         switch (cols.at(j))
         {
-            case task_view_column::status:
+            case ptk::view::file_task::column::status:
                 // Icon and Text
                 renderer = gtk_cell_renderer_text_new();
                 pix_renderer = gtk_cell_renderer_pixbuf_new();
@@ -1420,12 +1424,12 @@ main_task_view_new(MainWindow* main_window)
                 gtk_tree_view_column_set_attributes(col,
                                                     pix_renderer,
                                                     "pixbuf",
-                                                    task_view_column::icon,
+                                                    ptk::view::file_task::column::icon,
                                                     nullptr);
                 gtk_tree_view_column_set_attributes(col,
                                                     renderer,
                                                     "text",
-                                                    task_view_column::status,
+                                                    ptk::view::file_task::column::status,
                                                     nullptr);
                 gtk_tree_view_column_set_expand(col, false);
                 gtk_tree_view_column_set_sizing(
@@ -1433,15 +1437,15 @@ main_task_view_new(MainWindow* main_window)
                     GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
                 gtk_tree_view_column_set_min_width(col, 60);
                 break;
-            case task_view_column::progress:
+            case ptk::view::file_task::column::progress:
                 // Progress Bar
                 renderer = gtk_cell_renderer_progress_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
                 gtk_tree_view_column_set_attributes(col, renderer, "value", cols.at(j), nullptr);
                 break;
-            case task_view_column::path:
-            case task_view_column::file:
-            case task_view_column::to:
+            case ptk::view::file_task::column::path:
+            case ptk::view::file_task::column::file:
+            case ptk::view::file_task::column::to:
                 // Text Column
                 renderer = gtk_cell_renderer_text_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
@@ -1454,17 +1458,17 @@ main_task_view_new(MainWindow* main_window)
                 g_object_set_property(G_OBJECT(renderer), "ellipsize", &val);
                 g_value_unset(&val);
                 break;
-            case task_view_column::count:
-            case task_view_column::total:
-            case task_view_column::started:
-            case task_view_column::elapsed:
-            case task_view_column::curspeed:
-            case task_view_column::curest:
-            case task_view_column::avgspeed:
-            case task_view_column::avgest:
-            case task_view_column::starttime:
-            case task_view_column::icon:
-            case task_view_column::data:
+            case ptk::view::file_task::column::count:
+            case ptk::view::file_task::column::total:
+            case ptk::view::file_task::column::started:
+            case ptk::view::file_task::column::elapsed:
+            case ptk::view::file_task::column::curspeed:
+            case ptk::view::file_task::column::curest:
+            case ptk::view::file_task::column::avgspeed:
+            case ptk::view::file_task::column::avgest:
+            case ptk::view::file_task::column::starttime:
+            case ptk::view::file_task::column::icon:
+            case ptk::view::file_task::column::data:
                 // Text Column
                 renderer = gtk_cell_renderer_text_new();
                 gtk_tree_view_column_pack_start(col, renderer, true);
@@ -1473,11 +1477,12 @@ main_task_view_new(MainWindow* main_window)
         }
 
         gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
-        gtk_tree_view_column_set_title(col, task_titles.at(task_view_column(j)).data());
+        gtk_tree_view_column_set_title(col, task_titles.at(ptk::view::file_task::column(j)).data());
         gtk_tree_view_column_set_reorderable(col, true);
         gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
-        if (j == task_view_column::file) //|| j == task_view_column::path || j
-                                         //== task_view_column::to
+        if (j ==
+            ptk::view::file_task::column::file) //|| j == ptk::view::file_task::column::path || j
+                                                //== ptk::view::file_task::column::to
         {
             gtk_tree_view_column_set_sizing(col,
                                             GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
@@ -1496,7 +1501,7 @@ main_task_view_new(MainWindow* main_window)
     gtk_tree_view_column_set_attributes(col,
                                         renderer,
                                         "text",
-                                        task_view_column::starttime,
+                                        ptk::view::file_task::column::starttime,
                                         nullptr);
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     gtk_tree_view_column_set_title(col, "StartTime");
@@ -1507,7 +1512,7 @@ main_task_view_new(MainWindow* main_window)
     if (GTK_IS_TREE_SORTABLE(list))
     {
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
-                                             task_view_column::starttime,
+                                             ptk::view::file_task::column::starttime,
                                              GtkSortType::GTK_SORT_ASCENDING);
     }
 

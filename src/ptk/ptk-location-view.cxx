@@ -141,7 +141,7 @@ on_model_destroy(void* data, GObject* object)
 }
 
 void
-update_volume_icons()
+ptk::view::location::update_volume_icons() noexcept
 {
     if (!model)
     {
@@ -283,7 +283,8 @@ update_names()
 }
 
 bool
-ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path& current_path)
+ptk::view::location::chdir(GtkTreeView* location_view,
+                           const std::filesystem::path& current_path) noexcept
 {
     if (current_path.empty() || !GTK_IS_TREE_VIEW(location_view))
     {
@@ -317,9 +318,9 @@ ptk_location_view_chdir(GtkTreeView* location_view, const std::filesystem::path&
 }
 
 const std::shared_ptr<vfs::volume>
-ptk_location_view_get_selected_vol(GtkTreeView* location_view)
+ptk::view::location::selected_volume(GtkTreeView* location_view) noexcept
 {
-    // ztd::logger::info("ptk_location_view_get_selected_vol    view = {}", location_view);
+    // ztd::logger::info("ptk::view::location::selected_volume    view = {}", location_view);
     GtkTreeIter it;
 
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
@@ -378,7 +379,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
         {
             file_browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
                                                                 ptk::browser::open_action::new_tab);
-            ptk_location_view_chdir(view, file_browser->cwd());
+            ptk::view::location::chdir(view, file_browser->cwd());
         }
         else
         {
@@ -391,7 +392,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
 }
 
 bool
-ptk_location_view_open_block(const std::filesystem::path& block, bool new_tab)
+ptk::view::location::open_block(const std::filesystem::path& block, const bool new_tab) noexcept
 {
     // open block device file if in volumes list
 
@@ -437,11 +438,11 @@ ptk_location_view_init_model(GtkListStore* list)
 
         add_volume(volume, false);
     }
-    update_volume_icons();
+    ptk::view::location::update_volume_icons();
 }
 
 GtkWidget*
-ptk_location_view_new(ptk::browser* file_browser)
+ptk::view::location::create(ptk::browser* file_browser) noexcept
 {
     if (!model)
     {
@@ -462,7 +463,7 @@ ptk_location_view_new(ptk::browser* file_browser)
 
     GtkWidget* view = gtk_tree_view_new_with_model(model);
     g_object_unref(G_OBJECT(model));
-    // ztd::logger::info("ptk_location_view_new   view = {}", view);
+    // ztd::logger::info("ptk::view::location::create   view = {}", view);
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     gtk_tree_selection_set_mode(selection, GtkSelectionMode::GTK_SELECTION_SINGLE);
 
@@ -663,8 +664,8 @@ update_volume(const std::shared_ptr<vfs::volume>& vol)
 }
 
 void
-ptk_location_view_mount_network(ptk::browser* file_browser, const std::string_view url,
-                                bool new_tab, bool force_new_mount)
+ptk::view::location::mount_network(ptk::browser* file_browser, const std::string_view url,
+                                   const bool new_tab, const bool force_new_mount) noexcept
 {
     (void)file_browser;
     (void)url;
@@ -905,7 +906,8 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
     if (GTK_IS_WIDGET(ao->file_browser) && ao->job == ptk::browser::open_action::new_tab &&
         ao->file_browser->side_dev)
     {
-        ptk_location_view_chdir(GTK_TREE_VIEW(ao->file_browser->side_dev), ao->file_browser->cwd());
+        ptk::view::location::chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
+                                   ao->file_browser->cwd());
     }
 
     delete ao;
@@ -1252,14 +1254,14 @@ volume_is_visible(const std::shared_ptr<vfs::volume>& vol)
 }
 
 void
-ptk_location_view_on_action(GtkWidget* view, const xset_t& set)
+ptk::view::location::on_action(GtkWidget* view, const xset_t& set) noexcept
 {
-    // ztd::logger::info("ptk_location_view_on_action");
+    // ztd::logger::info("ptk::view::location::on_action");
     if (!view)
     {
         return;
     }
-    const auto vol = ptk_location_view_get_selected_vol(GTK_TREE_VIEW(view));
+    const auto vol = ptk::view::location::selected_volume(GTK_TREE_VIEW(view));
 
     if (set->xset_name == xset::name::dev_show_internal_drives ||
         set->xset_name == xset::name::dev_show_empty ||
@@ -1505,11 +1507,12 @@ on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser)
         (keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
     {
         // simulate right-click (menu)
-        show_devices_menu(GTK_TREE_VIEW(file_browser->side_dev),
-                          ptk_location_view_get_selected_vol(GTK_TREE_VIEW(file_browser->side_dev)),
-                          file_browser,
-                          3,
-                          time_point);
+        show_devices_menu(
+            GTK_TREE_VIEW(file_browser->side_dev),
+            ptk::view::location::selected_volume(GTK_TREE_VIEW(file_browser->side_dev)),
+            file_browser,
+            3,
+            time_point);
         return true;
     }
     return false;
@@ -1708,7 +1711,8 @@ cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::v
 #endif
 
 void
-ptk_location_view_dev_menu(GtkWidget* parent, ptk::browser* file_browser, GtkWidget* menu)
+ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* file_browser,
+                              GtkWidget* menu) noexcept
 { // add currently visible devices to menu with dev design mode callback
     xset_t set;
 

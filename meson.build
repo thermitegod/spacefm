@@ -423,9 +423,9 @@ sources += files(
   'src/ptk/ptk-file-menu.cxx',
   'src/ptk/ptk-file-properties.cxx',
   'src/ptk/ptk-file-task.cxx',
+  'src/ptk/ptk-file-task-view.cxx',
   'src/ptk/ptk-location-view.cxx',
   'src/ptk/ptk-path-entry.cxx',
-  'src/ptk/ptk-task-view.cxx',
 
   'src/ptk/utils/ptk-utils.cxx',
 

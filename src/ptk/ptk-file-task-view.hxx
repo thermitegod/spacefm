@@ -23,7 +23,9 @@
 
 #include "main-window.hxx"
 
-enum task_view_column
+namespace ptk::view::file_task
+{
+enum column
 {
     status,
     count,
@@ -43,27 +45,20 @@ enum task_view_column
     data
 };
 
-void main_task_start_queued(GtkWidget* view, ptk::file_task* new_ptask);
+void stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2) noexcept;
+bool is_task_running(GtkWidget* task_view) noexcept;
+void prepare_menu(MainWindow* main_window, GtkWidget* menu) noexcept;
+void column_selected(GtkWidget* view) noexcept;
+void popup_show(MainWindow* main_window, const std::string_view name) noexcept;
+void popup_errset(MainWindow* main_window, const std::string_view name = "") noexcept;
+ptk::file_task* selected_task(GtkWidget* view) noexcept;
+void show_task_dialog(GtkWidget* view) noexcept;
 
-void main_task_view_update_task(ptk::file_task* ptask);
-void main_task_view_remove_task(ptk::file_task* ptask);
-void main_task_pause_all_queued(ptk::file_task* ptask);
+GtkWidget* create(MainWindow* main_window);
+void start_queued(GtkWidget* view, ptk::file_task* new_ptask) noexcept;
+void update_task(ptk::file_task* ptask) noexcept;
+void remove_task(ptk::file_task* ptask) noexcept;
+void pause_all_queued(ptk::file_task* ptask) noexcept;
 
-void ptk_task_view_task_stop(GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2);
-
-void on_reorder(GtkWidget* item, GtkWidget* parent);
-
-bool ptk_task_view_is_main_tasks_running(GtkWidget* task_view);
-
-void ptk_task_view_prepare_menu(MainWindow* main_window, GtkWidget* menu);
-
-void ptk_task_view_column_selected(GtkWidget* view);
-
-void ptk_task_view_popup_show(MainWindow* main_window, const std::string_view name);
-void ptk_task_view_popup_errset(MainWindow* main_window, const std::string_view name = "");
-
-ptk::file_task* ptk_task_view_get_selected_task(GtkWidget* view);
-
-void ptk_task_view_show_task_dialog(GtkWidget* view);
-
-GtkWidget* main_task_view_new(MainWindow* main_window);
+void on_reorder(GtkWidget* item, GtkWidget* parent) noexcept;
+} // namespace ptk::view::file_task

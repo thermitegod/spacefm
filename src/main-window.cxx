@@ -71,7 +71,7 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-task-view.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
 
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
@@ -194,7 +194,7 @@ on_open_url(GtkWidget* widget, MainWindow* main_window)
     const auto url = xset_get_s(xset::name::main_save_session);
     if (file_browser && url)
     {
-        ptk_location_view_mount_network(file_browser, url.value(), true, true);
+        ptk::view::location::mount_network(file_browser, url.value(), true, true);
     }
 }
 
@@ -1030,7 +1030,7 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    ptk_task_view_prepare_menu(this, newmenu);
+    ptk::view::file_task::prepare_menu(this, newmenu);
 
     xset_add_menu(file_browser,
                   newmenu,
@@ -1083,7 +1083,7 @@ MainWindow::rebuild_menu_device(ptk::browser* file_browser) noexcept
     set = xset_get(xset::name::separator);
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
-    ptk_location_view_dev_menu(GTK_WIDGET(file_browser), file_browser, newmenu);
+    ptk::view::location::dev_menu(GTK_WIDGET(file_browser), file_browser, newmenu);
 
     set = xset_get(xset::name::separator);
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
@@ -1109,7 +1109,7 @@ MainWindow::rebuild_menu_bookmarks(ptk::browser* file_browser) const noexcept
 
     GtkWidget* newmenu = gtk_menu_new();
     const xset_t set = xset_get(xset::name::book_add);
-    xset_set_cb(set, (GFunc)ptk_bookmark_view_add_bookmark_cb, file_browser);
+    xset_set_cb(set, (GFunc)ptk::view::bookmark::add_callback, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
     gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
@@ -1315,7 +1315,7 @@ main_window_init(MainWindow* main_window)
     gtk_scrolled_window_set_policy(main_window->task_scroll,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC,
                                    GtkPolicyType::GTK_POLICY_AUTOMATIC);
-    main_window->task_view = main_task_view_new(main_window);
+    main_window->task_view = ptk::view::file_task::create(main_window);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(main_window->task_scroll), GTK_WIDGET(main_window->task_view));
 
     gtk_widget_show_all(GTK_WIDGET(main_window->main_vbox));
@@ -1337,7 +1337,7 @@ main_window_init(MainWindow* main_window)
     main_window->show_panels();
 
     gtk_widget_hide(GTK_WIDGET(main_window->task_scroll));
-    ptk_task_view_popup_show(main_window, "");
+    ptk::view::file_task::popup_show(main_window, "");
 
     // show window
     gtk_window_set_default_size(GTK_WINDOW(main_window),
@@ -1520,9 +1520,9 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
                                  "Aborting tasks...");
             main_window->close_window();
 
-            ptk_task_view_task_stop(main_window->task_view,
-                                    xset_get(xset::name::task_stop_all),
-                                    nullptr);
+            ptk::view::file_task::stop(main_window->task_view,
+                                       xset_get(xset::name::task_stop_all),
+                                       nullptr);
             while (main_window->is_main_tasks_running())
             {
                 while (g_main_context_pending(nullptr))
@@ -1946,7 +1946,7 @@ set_panel_focus(MainWindow* main_window, ptk::browser* file_browser)
 bool
 MainWindow::is_main_tasks_running() const noexcept
 {
-    return ptk_task_view_is_main_tasks_running(this->task_view);
+    return ptk::view::file_task::is_task_running(this->task_view);
 }
 
 void
@@ -2112,7 +2112,7 @@ MainWindow::open_network(const std::string_view url, const bool new_tab) const n
     {
         return;
     }
-    ptk_location_view_mount_network(file_browser, url, new_tab, false);
+    ptk::view::location::mount_network(file_browser, url, new_tab, false);
 }
 
 void
@@ -2355,7 +2355,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
     // handlers
     if (set->name.starts_with("dev_"))
     {
-        ptk_location_view_on_action(GTK_WIDGET(browser->side_dev), set);
+        ptk::view::location::on_action(GTK_WIDGET(browser->side_dev), set);
     }
     else if (set->name.starts_with("main_"))
     {
@@ -2422,11 +2422,11 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
     {
         if (set->xset_name == xset::name::task_manager)
         {
-            ptk_task_view_popup_show(this, set->name);
+            ptk::view::file_task::popup_show(this, set->name);
         }
         else if (set->xset_name == xset::name::task_col_reorder)
         {
-            on_reorder(nullptr, GTK_WIDGET(browser->task_view()));
+            ptk::view::file_task::on_reorder(nullptr, GTK_WIDGET(browser->task_view()));
         }
         else if (set->xset_name == xset::name::task_col_status ||
                  set->xset_name == xset::name::task_col_count ||
@@ -2443,7 +2443,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
                  set->xset_name == xset::name::task_col_avgest ||
                  set->xset_name == xset::name::task_col_reorder)
         {
-            ptk_task_view_column_selected(browser->task_view());
+            ptk::view::file_task::column_selected(browser->task_view());
         }
         else if (set->xset_name == xset::name::task_stop ||
                  set->xset_name == xset::name::task_stop_all ||
@@ -2454,16 +2454,16 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
                  set->xset_name == xset::name::task_resume ||
                  set->xset_name == xset::name::task_resume_all)
         {
-            ptk::file_task* ptask = ptk_task_view_get_selected_task(browser->task_view());
-            ptk_task_view_task_stop(browser->task_view(), set, ptask);
+            ptk::file_task* ptask = ptk::view::file_task::selected_task(browser->task_view());
+            ptk::view::file_task::stop(browser->task_view(), set, ptask);
         }
         else if (set->xset_name == xset::name::task_showout)
         {
-            ptk_task_view_show_task_dialog(browser->task_view());
+            ptk::view::file_task::show_task_dialog(browser->task_view());
         }
         else if (set->name.starts_with("task_err_"))
         {
-            ptk_task_view_popup_errset(this, set->name);
+            ptk::view::file_task::popup_errset(this, set->name);
         }
     }
     else if (set->xset_name == xset::name::rubberband)

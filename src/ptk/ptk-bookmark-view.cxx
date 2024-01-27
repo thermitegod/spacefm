@@ -21,7 +21,7 @@
 #include "ptk/ptk-bookmark-view.hxx"
 
 void
-ptk_bookmark_view_add_bookmark(const std::filesystem::path& book_path)
+ptk::view::bookmark::add(const std::filesystem::path& book_path) noexcept
 {
     if (book_path.empty())
     {
@@ -32,9 +32,9 @@ ptk_bookmark_view_add_bookmark(const std::filesystem::path& book_path)
 }
 
 void
-ptk_bookmark_view_add_bookmark_cb(GtkMenuItem* menuitem, ptk::browser* file_browser)
+ptk::view::bookmark::add_callback(GtkMenuItem* menuitem, ptk::browser* file_browser) noexcept
 {
     (void)menuitem;
 
-    ptk_bookmark_view_add_bookmark(file_browser->cwd());
+    ptk::view::bookmark::add(file_browser->cwd());
 }

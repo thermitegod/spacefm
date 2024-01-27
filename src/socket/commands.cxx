@@ -60,7 +60,7 @@
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-task-view.hxx"
 
 #include "main-window.hxx"
 
@@ -1396,7 +1396,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             do
             {
-                gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+                gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
                 const std::string str = std::format("{}", ztd::logger::utils::ptr(ptask));
                 if (str == data[i])
                 {
@@ -1426,19 +1426,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "count")
         {
-            j = task_view_column::count;
+            j = ptk::view::file_task::column::count;
         }
         else if (property == "directory" || subproperty == "from")
         {
-            j = task_view_column::path;
+            j = ptk::view::file_task::column::path;
         }
         else if (property == "item")
         {
-            j = task_view_column::file;
+            j = ptk::view::file_task::column::file;
         }
         else if (property == "to")
         {
-            j = task_view_column::to;
+            j = ptk::view::file_task::column::to;
         }
         else if (property == "progress")
         {
@@ -1465,23 +1465,23 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "total")
         {
-            j = task_view_column::total;
+            j = ptk::view::file_task::column::total;
         }
         else if (property == "curspeed")
         {
-            j = task_view_column::curspeed;
+            j = ptk::view::file_task::column::curspeed;
         }
         else if (property == "curremain")
         {
-            j = task_view_column::curest;
+            j = ptk::view::file_task::column::curest;
         }
         else if (property == "avgspeed")
         {
-            j = task_view_column::avgspeed;
+            j = ptk::view::file_task::column::avgspeed;
         }
         else if (property == "avgremain")
         {
-            j = task_view_column::avgest;
+            j = ptk::view::file_task::column::avgest;
         }
         else if (property == "queue_state")
         {
@@ -1499,15 +1499,15 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else if (subproperty == "stop")
             {
-                ptk_task_view_task_stop(main_window->task_view,
-                                        xset_get(xset::name::task_stop_all),
-                                        nullptr);
+                ptk::view::file_task::stop(main_window->task_view,
+                                           xset_get(xset::name::task_stop_all),
+                                           nullptr);
             }
             else
             {
                 return {SOCKET_INVALID, std::format("invalid queue_state '{}'", subproperty)};
             }
-            main_task_start_queued(main_window->task_view, nullptr);
+            ptk::view::file_task::start_queued(main_window->task_view, nullptr);
             return {SOCKET_SUCCESS, ""};
         }
         else
@@ -1526,7 +1526,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             do
             {
-                gtk_tree_model_get(model, &it, task_view_column::data, &ptask, -1);
+                gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
                 const std::string str = std::format("{}", ztd::logger::utils::ptr(ptask));
                 if (str == property)
                 {
@@ -1554,19 +1554,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "count")
         {
-            j = task_view_column::count;
+            j = ptk::view::file_task::column::count;
         }
         else if (property == "directory" || property == "from")
         {
-            j = task_view_column::path;
+            j = ptk::view::file_task::column::path;
         }
         else if (property == "item")
         {
-            j = task_view_column::file;
+            j = ptk::view::file_task::column::file;
         }
         else if (property == "to")
         {
-            j = task_view_column::to;
+            j = ptk::view::file_task::column::to;
         }
         else if (property == "progress")
         {
@@ -1574,35 +1574,35 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "total")
         {
-            j = task_view_column::total;
+            j = ptk::view::file_task::column::total;
         }
         else if (property == "curspeed")
         {
-            j = task_view_column::curspeed;
+            j = ptk::view::file_task::column::curspeed;
         }
         else if (property == "curremain")
         {
-            j = task_view_column::curest;
+            j = ptk::view::file_task::column::curest;
         }
         else if (property == "avgspeed")
         {
-            j = task_view_column::avgspeed;
+            j = ptk::view::file_task::column::avgspeed;
         }
         else if (property == "avgremain")
         {
-            j = task_view_column::avgest;
+            j = ptk::view::file_task::column::avgest;
         }
         else if (property == "elapsed")
         {
-            j = task_view_column::elapsed;
+            j = ptk::view::file_task::column::elapsed;
         }
         else if (property == "started")
         {
-            j = task_view_column::started;
+            j = ptk::view::file_task::column::started;
         }
         else if (property == "status")
         {
-            j = task_view_column::status;
+            j = ptk::view::file_task::column::status;
         }
         else if (property == "queue_state")
         {

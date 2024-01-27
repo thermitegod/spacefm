@@ -92,6 +92,7 @@ filter_func(GtkTreeModel* model, GtkTreeIter* iter, void* data)
 
     return !(file && file->is_hidden());
 }
+
 static void
 on_destroy(GtkWidget* w)
 {
@@ -99,9 +100,10 @@ on_destroy(GtkWidget* w)
     {
     } while (g_source_remove_by_user_data(w));
 }
+
 /* Create a new dir tree view */
 GtkWidget*
-ptk_dir_tree_view_new(ptk::browser* browser, bool show_hidden)
+ptk::view::dir_tree::create(ptk::browser* browser, bool show_hidden) noexcept
 {
     GtkTreeViewColumn* col = nullptr;
     GtkCellRenderer* renderer = nullptr;
@@ -200,7 +202,7 @@ ptk_dir_tree_view_new(ptk::browser* browser, bool show_hidden)
 }
 
 bool
-ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path)
+ptk::view::dir_tree::chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path) noexcept
 {
     GtkTreeIter it;
     GtkTreeIter parent_it;
@@ -293,7 +295,7 @@ ptk_dir_tree_view_chdir(GtkTreeView* dir_tree_view, const std::filesystem::path&
 
 /* FIXME: should this API be put here? Maybe it belongs to prk-dir-tree.c */
 const std::optional<std::filesystem::path>
-ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
+ptk::view::dir_tree::dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept
 {
     GtkTreeIter real_it;
     gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &real_it, it);
@@ -305,14 +307,14 @@ ptk_dir_view_get_dir_path(GtkTreeModel* model, GtkTreeIter* it)
 
 /* Return a newly allocated string containing path of current selected dir. */
 const std::optional<std::filesystem::path>
-ptk_dir_tree_view_get_selected_dir(GtkTreeView* dir_tree_view)
+ptk::view::dir_tree::selected_dir(GtkTreeView* dir_tree_view) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     GtkTreeSelection* selection = gtk_tree_view_get_selection(dir_tree_view);
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
-        return ptk_dir_view_get_dir_path(model, &it);
+        return ptk::view::dir_tree::dir_path(model, &it);
     }
     return std::nullopt;
 }
@@ -354,7 +356,7 @@ sel_func(GtkTreeSelection* selection, GtkTreeModel* model, GtkTreePath* path,
 }
 
 void
-ptk_dir_tree_view_show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden)
+ptk::view::dir_tree::show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden) noexcept
 {
     g_object_set_qdata(G_OBJECT(dir_tree_view), dir_tree_view_data, GINT_TO_POINTER(show_hidden));
     GtkTreeModel* filter = gtk_tree_view_get_model(dir_tree_view);
@@ -423,7 +425,7 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* fi
                 {
                     // right click
                     std::filesystem::path path;
-                    const auto check_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+                    const auto check_path = ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(view));
                     if (check_path)
                     {
                         path = check_path.value();
@@ -544,7 +546,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_
                 return false;
             }
 
-            const auto dir_path = ptk_dir_tree_view_get_selected_dir(GTK_TREE_VIEW(view));
+            const auto dir_path = ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(view));
             if (dir_path && file_browser->chdir(dir_path.value()))
             {
                 /* show right-click menu
@@ -600,7 +602,7 @@ dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y)
             gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
             if (file)
             {
-                dest_path = ptk_dir_view_get_dir_path(model, &it);
+                dest_path = ptk::view::dir_tree::dir_path(model, &it);
             }
         }
         gtk_tree_path_free(tree_path);

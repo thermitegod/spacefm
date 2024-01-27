@@ -51,7 +51,7 @@
 
 #include "vfs/utils/vfs-utils.hxx"
 
-#include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-task-view.hxx"
 
 #include "ptk/ptk-file-task.hxx"
 
@@ -114,8 +114,8 @@ ptk::file_task::~file_task()
         g_source_remove(this->progress_timer_);
         this->progress_timer_ = 0;
     }
-    main_task_view_remove_task(this);
-    main_task_start_queued(this->task_view_, nullptr);
+    ptk::view::file_task::remove_task(this);
+    ptk::view::file_task::start_queued(this->task_view_, nullptr);
 
     if (this->progress_dlg_)
     {
@@ -356,7 +356,7 @@ on_progress_timer(ptk::file_task* ptask)
         }
         else
         {
-            main_task_start_queued(ptask->task_view_, ptask);
+            ptk::view::file_task::start_queued(ptask->task_view_, ptask);
         }
         if (ptask->timeout_ && ptask->task->state_pause_ != vfs::file_task::state::running &&
             ptask->task->state_ == vfs::file_task::state::running)
@@ -387,8 +387,8 @@ on_progress_timer(ptk::file_task* ptask)
             ptask->complete_notify_(ptask->task.get(), ptask->user_data_);
             ptask->complete_notify_ = nullptr;
         }
-        main_task_view_remove_task(ptask);
-        main_task_start_queued(ptask->task_view_, nullptr);
+        ptk::view::file_task::remove_task(ptask);
+        ptk::view::file_task::start_queued(ptask->task_view_, nullptr);
     }
     else if (ptask->task->state_pause_ != vfs::file_task::state::running && !ptask->pause_change_ &&
              ptask->task->type_ != vfs::file_task::type::exec)
@@ -626,7 +626,7 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask)
             {
                 ptask->pause(vfs::file_task::state::pause);
             }
-            main_task_start_queued(ptask->task_view_, nullptr);
+            ptk::view::file_task::start_queued(ptask->task_view_, nullptr);
             break;
         case GtkResponseType::GTK_RESPONSE_OK:
         case GtkResponseType::GTK_RESPONSE_NONE:
@@ -1773,7 +1773,7 @@ ptk::file_task::update() noexcept
 
     if (!this->timeout_ && !this->complete_)
     {
-        main_task_view_update_task(this);
+        ptk::view::file_task::update_task(this);
     }
 
     this->task->unlock();
@@ -1847,7 +1847,7 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
             if (xset_get_b(xset::name::task_q_pause))
             {
                 // pause all queued
-                main_task_pause_all_queued(ptask);
+                ptk::view::file_task::pause_all_queued(ptask);
             }
             break;
         case vfs::file_task::state::running:
@@ -2009,7 +2009,7 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
         case ptk::file_task::response::pause:
         {
             ptask->pause(vfs::file_task::state::pause);
-            main_task_start_queued(ptask->task_view_, ptask);
+            ptk::view::file_task::start_queued(ptask->task_view_, ptask);
             ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode::rename);
             ptask->restart_timeout_ = false;
             break;
@@ -2464,7 +2464,7 @@ ptk::file_task::query_overwrite() noexcept
     if (this->task_view_ &&
         gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(this->task_view_))))
     {
-        main_task_view_update_task(this);
+        ptk::view::file_task::update_task(this);
     }
 
     // show dialog

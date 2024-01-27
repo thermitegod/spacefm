@@ -188,7 +188,7 @@ activate(GtkApplication* app, void* user_data)
             if (!ec && file_stat.is_block_file())
             {
                 // open block device eg /dev/sda1
-                ptk_location_view_open_block(real_path, true);
+                ptk::view::location::open_block(real_path, true);
             }
             else
             {

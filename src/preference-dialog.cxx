@@ -234,7 +234,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
             }
         }
     }
-    update_volume_icons();
+    ptk::view::location::update_volume_icons();
 }
 
 GtkComboBox*
@@ -346,7 +346,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
             }
         }
     }
-    update_volume_icons();
+    ptk::view::location::update_volume_icons();
 }
 
 GtkComboBox*
