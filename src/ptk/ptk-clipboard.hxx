@@ -31,25 +31,27 @@
 
 #include "vfs/vfs-file.hxx"
 
-void ptk_clipboard_cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> sel_files,
-                                     bool copy);
+namespace ptk::clipboard
+{
+void cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> sel_files, bool copy);
 
-void ptk_clipboard_copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel_files);
+void copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel_files);
 
-void ptk_clipboard_copy_name(const std::span<const std::shared_ptr<vfs::file>> sel_files);
+void copy_name(const std::span<const std::shared_ptr<vfs::file>> sel_files);
 
-void ptk_clipboard_paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
-                               GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);
+void paste_files(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+                 GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);
 
-void ptk_clipboard_paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
-                               GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);
+void paste_links(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+                 GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);
 
-void ptk_clipboard_paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
-                                 GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);
+void paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
+                   GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win);
 
-void ptk_clipboard_copy_text(const std::string_view text);
+void copy_text(const std::string_view text);
 
-void ptk_clipboard_cut_or_copy_file_list(const std::span<const std::string> sel_files, bool copy);
+void cut_or_copy_file_list(const std::span<const std::string> sel_files, bool copy);
 
-const std::vector<std::filesystem::path>
-ptk_clipboard_get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32* missing_targets);
+const std::vector<std::filesystem::path> get_file_paths(const std::filesystem::path& cwd,
+                                                        bool* is_cut, i32* missing_targets);
+} // namespace ptk::clipboard

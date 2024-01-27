@@ -772,7 +772,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")
         {
-            ptk_clipboard_cut_or_copy_file_list(data, property == "clipboard_copy_files");
+            ptk::clipboard::cut_or_copy_file_list(data, property == "clipboard_copy_files");
         }
         else if (property == "selected-filenames" || property == "selected-files")
         {

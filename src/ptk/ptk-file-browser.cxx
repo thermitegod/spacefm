@@ -784,11 +784,11 @@ on_status_bar_button_press(GtkWidget* widget, GdkEvent* event, ptk::browser* fil
 
                     if (i == 0)
                     {
-                        ptk_clipboard_copy_name(selected_files);
+                        ptk::clipboard::copy_name(selected_files);
                     }
                     else
                     {
-                        ptk_clipboard_copy_as_text(selected_files);
+                        ptk::clipboard::copy_as_text(selected_files);
                     }
                 }
                 else if (i == 2)
@@ -4300,11 +4300,11 @@ ptk::browser::paste_link() const noexcept
     GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
 #endif
 
-    ptk_clipboard_paste_links(GTK_WINDOW(parent_win),
-                              this->cwd(),
-                              GTK_TREE_VIEW(this->task_view_),
-                              nullptr,
-                              nullptr);
+    ptk::clipboard::paste_links(GTK_WINDOW(parent_win),
+                                this->cwd(),
+                                GTK_TREE_VIEW(this->task_view_),
+                                nullptr,
+                                nullptr);
 }
 
 void
@@ -4316,11 +4316,11 @@ ptk::browser::paste_target() const noexcept
     GtkWidget* parent_win = gtk_widget_get_toplevel(GTK_WIDGET(this));
 #endif
 
-    ptk_clipboard_paste_targets(GTK_WINDOW(parent_win),
-                                this->cwd(),
-                                GTK_TREE_VIEW(this->task_view_),
-                                nullptr,
-                                nullptr);
+    ptk::clipboard::paste_targets(GTK_WINDOW(parent_win),
+                                  this->cwd(),
+                                  GTK_TREE_VIEW(this->task_view_),
+                                  nullptr,
+                                  nullptr);
 }
 
 void

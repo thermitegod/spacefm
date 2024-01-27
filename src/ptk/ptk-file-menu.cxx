@@ -2300,7 +2300,7 @@ on_popup_cut_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
     {
         return;
     }
-    ptk_clipboard_cut_or_copy_files(data->sel_files, false);
+    ptk::clipboard::cut_or_copy_files(data->sel_files, false);
 }
 
 static void
@@ -2311,7 +2311,7 @@ on_popup_copy_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
     {
         return;
     }
-    ptk_clipboard_cut_or_copy_files(data->sel_files, true);
+    ptk::clipboard::cut_or_copy_files(data->sel_files, true);
 }
 
 static void
@@ -2326,11 +2326,11 @@ on_popup_paste_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
         GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
 
-        ptk_clipboard_paste_files(GTK_WINDOW(parent),
-                                  data->cwd,
-                                  GTK_TREE_VIEW(data->browser->task_view()),
-                                  nullptr,
-                                  nullptr);
+        ptk::clipboard::paste_files(GTK_WINDOW(parent),
+                                    data->cwd,
+                                    GTK_TREE_VIEW(data->browser->task_view()),
+                                    nullptr,
+                                    nullptr);
     }
 }
 
@@ -2358,14 +2358,14 @@ static void
 on_popup_copy_text_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_clipboard_copy_as_text(data->sel_files);
+    ptk::clipboard::copy_as_text(data->sel_files);
 }
 
 static void
 on_popup_copy_name_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 {
     (void)menuitem;
-    ptk_clipboard_copy_name(data->sel_files);
+    ptk::clipboard::copy_name(data->sel_files);
 }
 
 static void
@@ -2374,7 +2374,7 @@ on_popup_copy_parent_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
     (void)menuitem;
     if (!data->cwd.empty())
     {
-        ptk_clipboard_copy_text(data->cwd.string());
+        ptk::clipboard::copy_text(data->cwd.string());
     }
 }
 
