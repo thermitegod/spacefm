@@ -3015,24 +3015,6 @@ ptk_file_browser_open_item(ptk::browser* file_browser, const std::filesystem::pa
     (void)action;
 }
 
-////////////////////////////////////////////////////////////////////////////
-
-bool
-ptk_file_browser_write_access(const std::filesystem::path& cwd)
-{
-    const auto status = std::filesystem::status(cwd);
-    return ((status.permissions() & std::filesystem::perms::owner_write) !=
-            std::filesystem::perms::none);
-}
-
-bool
-ptk_file_browser_read_access(const std::filesystem::path& cwd)
-{
-    const auto status = std::filesystem::status(cwd);
-    return ((status.permissions() & std::filesystem::perms::owner_read) !=
-            std::filesystem::perms::none);
-}
-
 /**
  * ptk::browser
  */

@@ -467,9 +467,6 @@ struct browser
 GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                                 MainWindow* main_window);
 
-bool ptk_file_browser_write_access(const std::filesystem::path& cwd);
-bool ptk_file_browser_read_access(const std::filesystem::path& cwd);
-
 void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget);
 
 bool ptk_file_browser_delay_focus(ptk::browser* file_browser);
