@@ -38,10 +38,29 @@
  * free the list after calling this function.
  */
 
-struct PtkFileMenu
+namespace ptk
 {
-    PtkFileMenu() = default;
-    ~PtkFileMenu();
+struct file_menu
+{
+    enum class app_job
+    {
+        default_action,
+        edit,
+        edit_list,
+        browse,
+        browse_shared,
+        edit_type,
+        view,
+        view_type,
+        view_over,
+        update,
+        browse_mime,
+        browse_mime_usr,
+        usr
+    };
+
+    file_menu() = default;
+    ~file_menu();
 
     ptk::browser* browser{nullptr};
     std::filesystem::path cwd{};
@@ -54,6 +73,7 @@ struct PtkFileMenu
     GtkAccelGroup* accel_group{nullptr};
 #endif
 };
+} // namespace ptk
 
 struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 {
@@ -77,7 +97,7 @@ void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
                                        GtkAccelGroup* accel_group);
 #endif
 
-void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, PtkFileMenu* data);
+void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data);
 
 void ptk_file_menu_action(ptk::browser* browser, const xset_t& set);
 
