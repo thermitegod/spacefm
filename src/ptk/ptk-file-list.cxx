@@ -39,7 +39,19 @@
 
 #include "ptk/ptk-file-list.hxx"
 
-static void ptk_file_list_init(PtkFileList* list);
+struct PtkFileListClass
+{
+    GObjectClass parent;
+    /* Default signal handlers */
+    // void (*file_created)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
+    // void (*file_deleted)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
+    // void (*file_changed)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
+    // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
+};
+
+GType ptk_file_list_get_type();
+
+static void ptk_file_list_init(ptk::file_list* list);
 
 static void ptk_file_list_class_init(PtkFileListClass* klass);
 
@@ -131,7 +143,7 @@ ptk_file_list_get_type()
                                             (GClassInitFunc)ptk_file_list_class_init,
                                             nullptr, /* class finalize */
                                             nullptr, /* class_data */
-                                            sizeof(PtkFileList),
+                                            sizeof(ptk::file_list),
                                             0, /* n_preallocs */
                                             (GInstanceInitFunc)ptk_file_list_init,
                                             nullptr /* value_table */};
@@ -169,7 +181,7 @@ ptk_file_list_get_type()
 }
 
 static void
-ptk_file_list_init(PtkFileList* list)
+ptk_file_list_init(ptk::file_list* list)
 {
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
@@ -233,17 +245,17 @@ ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface)
 static void
 ptk_file_list_finalize(GObject* object)
 {
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(object);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(object);
 
     list->set_dir(nullptr);
     /* must chain up - finalize parent */
     (*parent_class->finalize)(object);
 }
 
-PtkFileList*
+ptk::file_list*
 ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden)
 {
-    PtkFileList* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
+    ptk::file_list* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;
     list->set_dir(dir);
     return list;
@@ -279,7 +291,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(path != nullptr);
 
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     const i32* indices = gtk_tree_path_get_indices(path);
@@ -310,7 +322,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 static GtkTreePath*
 ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     assert(iter != nullptr);
@@ -326,7 +338,7 @@ ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 static void
 ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, GValue* value)
 {
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
@@ -428,7 +440,7 @@ ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
     }
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     GList* l = (GList*)iter->user_data;
@@ -460,7 +472,7 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
     assert(parent->user_data != nullptr);
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     /* No rows => no first row */
@@ -489,7 +501,7 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
     /* special case: if iter == nullptr, return number of top-level rows */
     if (!iter)
@@ -505,7 +517,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(tree_model);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
 
     /* a list has only top-level rows */
@@ -542,7 +554,7 @@ ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIt
 static gboolean
 ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id, GtkSortType* order)
 {
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (sort_column_id)
     {
         *sort_column_id = magic_enum::enum_integer(list->sort_col);
@@ -557,7 +569,7 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
 static void
 ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, GtkSortType order)
 {
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(sortable);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (list->sort_col == ptk::file_list::column(sort_column_id) && list->sort_order == order)
     {
         return;
@@ -594,7 +606,7 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
 
 static i32
 compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  PtkFileList* list)
+                  ptk::file_list* list)
 {
     i32 result = 0;
     // by display name
@@ -620,7 +632,7 @@ compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_size(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  PtkFileList* list)
+                  ptk::file_list* list)
 {
     (void)list;
     return (a->size() > b->size()) ? 1 : ((a->size() == b->size()) ? 0 : -1);
@@ -628,7 +640,7 @@ compare_file_size(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  PtkFileList* list)
+                  ptk::file_list* list)
 {
     (void)list;
     return a->mime_type()->description().compare(b->mime_type()->description());
@@ -636,7 +648,7 @@ compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_mime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  PtkFileList* list)
+                  ptk::file_list* list)
 {
     (void)list;
     return a->mime_type()->description().compare(b->mime_type()->description());
@@ -644,7 +656,7 @@ compare_file_mime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_perm(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  PtkFileList* list)
+                  ptk::file_list* list)
 {
     (void)list;
     return a->display_permissions().compare(b->display_permissions());
@@ -652,7 +664,7 @@ compare_file_perm(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_owner(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   PtkFileList* list)
+                   ptk::file_list* list)
 {
     (void)list;
     return a->display_owner().compare(b->display_owner());
@@ -660,7 +672,7 @@ compare_file_owner(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_group(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   PtkFileList* list)
+                   ptk::file_list* list)
 {
     (void)list;
     return a->display_group().compare(b->display_group());
@@ -668,7 +680,7 @@ compare_file_group(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_atime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   PtkFileList* list)
+                   ptk::file_list* list)
 {
     (void)list;
     return (a->atime() > b->atime()) ? 1 : ((a->atime() == b->atime()) ? 0 : -1);
@@ -676,7 +688,7 @@ compare_file_atime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_btime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   PtkFileList* list)
+                   ptk::file_list* list)
 {
     (void)list;
     return (a->btime() > b->btime()) ? 1 : ((a->btime() == b->btime()) ? 0 : -1);
@@ -684,7 +696,7 @@ compare_file_btime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_ctime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   PtkFileList* list)
+                   ptk::file_list* list)
 {
     (void)list;
     return (a->ctime() > b->ctime()) ? 1 : ((a->ctime() == b->ctime()) ? 0 : -1);
@@ -692,26 +704,26 @@ compare_file_ctime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_mtime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   PtkFileList* list)
+                   ptk::file_list* list)
 {
     (void)list;
     return (a->mtime() > b->mtime()) ? 1 : ((a->mtime() == b->mtime()) ? 0 : -1);
 }
 
 using compare_function_t = std::function<i32(const std::shared_ptr<vfs::file>&,
-                                             const std::shared_ptr<vfs::file>&, PtkFileList*)>;
+                                             const std::shared_ptr<vfs::file>&, ptk::file_list*)>;
 
 static i32
 compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-             PtkFileList* list, const compare_function_t& func)
+             ptk::file_list* list, const compare_function_t& func)
 {
     // dirs before/after files
-    if (list->sort_dir != ptk::file_list::sort_dir::mixed)
+    if (list->sort_dir_ != ptk::file_list::sort_dir::mixed)
     {
         const auto result = a->is_directory() - b->is_directory();
         if (result != 0)
         {
-            return list->sort_dir == ptk::file_list::sort_dir::first ? -result : result;
+            return list->sort_dir_ == ptk::file_list::sort_dir::first ? -result : result;
         }
     }
 
@@ -737,7 +749,7 @@ static const std::unordered_map<ptk::file_list::column, compare_function_t>
     };
 
 static GList*
-ptk_file_info_list_sort(PtkFileList* list)
+ptk_file_info_list_sort(ptk::file_list* list)
 {
     assert(list->sort_col != ptk::file_list::column::big_icon);
     assert(list->sort_col != ptk::file_list::column::small_icon);
@@ -754,10 +766,10 @@ ptk_file_info_list_sort(PtkFileList* list)
     return vector_to_glist_vfs_file(file_list);
 }
 
-// PtkFileList
+// ptk::file_list
 
 void
-PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
+ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 {
     if (this->dir == new_dir)
     {
@@ -786,11 +798,11 @@ PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
     }
 
     this->signal_file_created = this->dir->add_event<spacefm::signal::file_created>(
-        std::bind(&PtkFileList::on_file_list_file_created, this, std::placeholders::_1));
+        std::bind(&ptk::file_list::on_file_list_file_created, this, std::placeholders::_1));
     this->signal_file_deleted = this->dir->add_event<spacefm::signal::file_deleted>(
-        std::bind(&PtkFileList::on_file_list_file_deleted, this, std::placeholders::_1));
+        std::bind(&ptk::file_list::on_file_list_file_deleted, this, std::placeholders::_1));
     this->signal_file_changed = this->dir->add_event<spacefm::signal::file_changed>(
-        std::bind(&PtkFileList::on_file_list_file_changed, this, std::placeholders::_1));
+        std::bind(&ptk::file_list::on_file_list_file_changed, this, std::placeholders::_1));
 
     for (const auto& file : new_dir->files())
     {
@@ -802,7 +814,7 @@ PtkFileList::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 }
 
 void
-PtkFileList::sort() noexcept
+ptk::file_list::sort() noexcept
 {
     if (g_list_length(this->files) <= 1)
     {
@@ -818,7 +830,7 @@ PtkFileList::sort() noexcept
 }
 
 void
-PtkFileList::file_created(const std::shared_ptr<vfs::file>& file) noexcept
+ptk::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (!this->show_hidden && file->is_hidden())
     {
@@ -842,7 +854,7 @@ PtkFileList::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 }
 
 void
-PtkFileList::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+ptk::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (!this->show_hidden && file->is_hidden())
     {
@@ -866,7 +878,7 @@ PtkFileList::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 }
 
 void
-PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept
+ptk::file_list::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
     if (!file || !this->dir)
     {
@@ -891,7 +903,7 @@ PtkFileList::on_file_list_file_changed(const std::shared_ptr<vfs::file>& file) n
 }
 
 void
-PtkFileList::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept
+ptk::file_list::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) noexcept
 {
     this->file_created(file);
 
@@ -908,7 +920,7 @@ PtkFileList::on_file_list_file_created(const std::shared_ptr<vfs::file>& file) n
 }
 
 void
-PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept
+ptk::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) noexcept
 {
     /* If there is no file info, that means the dir itself was deleted. */
     if (!file)
@@ -942,14 +954,14 @@ PtkFileList::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file) n
 }
 
 void
-PtkFileList::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
+ptk::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
     // ztd::logger::debug("LOADED: {}", file->name());
     this->file_changed(file);
 }
 
 void
-PtkFileList::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept
+ptk::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept
 {
     const u64 old_max_thumbnail = this->max_thumbnail;
     this->max_thumbnail = max_file_size;
@@ -983,7 +995,7 @@ PtkFileList::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_
 
     this->signal_file_thumbnail_loaded =
         this->dir->add_event<spacefm::signal::file_thumbnail_loaded>(
-            std::bind(&PtkFileList::on_file_list_file_thumbnail_loaded,
+            std::bind(&ptk::file_list::on_file_list_file_thumbnail_loaded,
                       this,
                       std::placeholders::_1));
 

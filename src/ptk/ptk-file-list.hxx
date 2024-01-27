@@ -26,42 +26,39 @@
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
 
-#define PTK_FILE_LIST(obj)             (static_cast<PtkFileList*>(obj))
-#define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<PtkFileList*>(obj))
+#define PTK_FILE_LIST(obj)             (static_cast<ptk::file_list*>(obj))
+#define PTK_FILE_LIST_REINTERPRET(obj) (reinterpret_cast<ptk::file_list*>(obj))
 
-namespace ptk::file_list
+namespace ptk
 {
-enum class column
-{ // Columns of directory view
-    big_icon,
-    small_icon,
-    name,
-    size,
-    bytes,
-    type,
-    mime,
-    perm,
-    owner,
-    group,
-    atime,
-    btime,
-    ctime,
-    mtime,
-    info,
-};
+struct file_list
+{
+    enum class column
+    { // Columns of directory view
+        big_icon,
+        small_icon,
+        name,
+        size,
+        bytes,
+        type,
+        mime,
+        perm,
+        owner,
+        group,
+        atime,
+        btime,
+        ctime,
+        mtime,
+        info,
+    };
 
-// sort_dir of directory view - do not change order, saved
-// see also: ipc-command.cxx run_ipc_command() get sort_first
-enum class sort_dir
-{
-    mixed,
-    first,
-    last
-};
-} // namespace ptk::file_list
+    enum class sort_dir
+    { // sort_dir of directory view - do not change order, saved in config
+        mixed,
+        first,
+        last
+    };
 
-struct PtkFileList
-{
     GObject parent;
 
     /* <private> */
@@ -77,7 +74,7 @@ struct PtkFileList
     bool sort_natural{false};
     bool sort_case{false};
     bool sort_hidden_first{false};
-    ptk::file_list::sort_dir sort_dir{ptk::file_list::sort_dir::mixed};
+    ptk::file_list::sort_dir sort_dir_{ptk::file_list::sort_dir::mixed};
 
     // Random integer to check whether an iter belongs to our model
     i32 stamp{0};
@@ -104,17 +101,6 @@ struct PtkFileList
     sigc::connection signal_file_changed;
     sigc::connection signal_file_thumbnail_loaded;
 };
+} // namespace ptk
 
-struct PtkFileListClass
-{
-    GObjectClass parent;
-    /* Default signal handlers */
-    // void (*file_created)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
-    // void (*file_deleted)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
-    // void (*file_changed)(const std::shared_ptr<vfs::dir>& dir, const char* filename);
-    // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
-};
-
-GType ptk_file_list_get_type();
-
-PtkFileList* ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden);
+ptk::file_list* ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden);

@@ -787,7 +787,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
         set = xset_get(xset::name::sortx_directories);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, nullptr);
-        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir ==
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir_ ==
                          ptk::file_list::sort_dir::first
                      ? xset::b::xtrue
                      : xset::b::xfalse;
@@ -795,14 +795,14 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
         set = xset_get(xset::name::sortx_files);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio->name.data());
-        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir ==
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir_ ==
                          ptk::file_list::sort_dir::last
                      ? xset::b::xtrue
                      : xset::b::xfalse;
         set = xset_get(xset::name::sortx_mix);
         xset_set_cb(set, (GFunc)on_popup_sort_extra, browser);
         xset_set_ob2(set, nullptr, set_radio->name.data());
-        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir ==
+        set->b = PTK_FILE_LIST_REINTERPRET(browser->file_list_)->sort_dir_ ==
                          ptk::file_list::sort_dir::mixed
                      ? xset::b::xtrue
                      : xset::b::xfalse;

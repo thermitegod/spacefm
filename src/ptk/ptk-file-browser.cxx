@@ -1236,7 +1236,7 @@ on_sort_col_changed(GtkTreeSortable* sortable, ptk::browser* file_browser)
 void
 ptk::browser::update_model() noexcept
 {
-    PtkFileList* list = ptk_file_list_new(this->dir_, this->show_hidden_files_);
+    ptk::file_list* list = ptk_file_list_new(this->dir_, this->show_hidden_files_);
     GtkTreeModel* old_list = this->file_list_;
     this->file_list_ = GTK_TREE_MODEL(list);
     if (old_list)
@@ -4217,7 +4217,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
         return;
     }
 
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
     if (!list)
     {
         return;
@@ -4235,7 +4235,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
     }
     else if (set->xset_name == xset::name::sortx_directories)
     {
-        list->sort_dir = ptk::file_list::sort_dir::first;
+        list->sort_dir_ = ptk::file_list::sort_dir::first;
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::y,
@@ -4243,7 +4243,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
     }
     else if (set->xset_name == xset::name::sortx_files)
     {
-        list->sort_dir = ptk::file_list::sort_dir::last;
+        list->sort_dir_ = ptk::file_list::sort_dir::last;
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::y,
@@ -4251,7 +4251,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
     }
     else if (set->xset_name == xset::name::sortx_mix)
     {
-        list->sort_dir = ptk::file_list::sort_dir::mixed;
+        list->sort_dir_ = ptk::file_list::sort_dir::mixed;
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::y,
@@ -4276,7 +4276,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
 void
 ptk::browser::read_sort_extra() const noexcept
 {
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
     if (!list)
     {
         return;
@@ -4285,7 +4285,7 @@ ptk::browser::read_sort_extra() const noexcept
     list->sort_natural = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
     list->sort_case =
         xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) == xset::b::xtrue;
-    list->sort_dir = ptk::file_list::sort_dir(
+    list->sort_dir_ = ptk::file_list::sort_dir(
         xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::y));
     list->sort_hidden_first =
         xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) == xset::b::xtrue;
@@ -4829,7 +4829,7 @@ ptk::browser::show_thumbnails(const u32 max_file_size, const bool large_icons) n
             thumbs_blacklisted = true;
         }
 
-        PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+        ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
         list->show_thumbnails(large_icons ? vfs::file::thumbnail_size::big
                                           : vfs::file::thumbnail_size::small,
                               thumbs_blacklisted ? 0 : max_file_size);
@@ -5282,7 +5282,7 @@ ptk::browser::select_file(const std::filesystem::path& filename,
     GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;
 
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
     if (this->view_mode_ == ptk::browser::view_mode::icon_view ||
         this->view_mode_ == ptk::browser::view_mode::compact_view)
     {
@@ -5395,7 +5395,7 @@ ptk::browser::unselect_file(const std::filesystem::path& filename,
     GtkTreeSelection* tree_sel = nullptr;
     GtkTreeModel* model = nullptr;
 
-    PtkFileList* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
+    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
     if (this->view_mode_ == ptk::browser::view_mode::icon_view ||
         this->view_mode_ == ptk::browser::view_mode::compact_view)
     {
