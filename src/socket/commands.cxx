@@ -1418,10 +1418,10 @@ socket::command(const std::string_view socket_commands_json) noexcept
         i32 j = 0;
         if (property == "icon")
         {
-            ptk_file_task_lock(ptask);
+            ptask->lock();
             ptask->task->exec_icon = value;
             ptask->pause_change_view = ptask->pause_change = true;
-            ptk_file_task_unlock(ptask);
+            ptask->unlock();
             return {SOCKET_SUCCESS, ""};
         }
         else if (property == "count")
@@ -1544,12 +1544,12 @@ socket::command(const std::string_view socket_commands_json) noexcept
         i32 j = 0;
         if (property == "icon")
         {
-            ptk_file_task_lock(ptask);
+            ptask->lock();
             if (!ptask->task->exec_icon.empty())
             {
                 return {SOCKET_SUCCESS, std::format("{}", ptask->task->exec_icon)};
             }
-            ptk_file_task_unlock(ptask);
+            ptask->unlock();
             return {SOCKET_SUCCESS, ""};
         }
         else if (property == "count")

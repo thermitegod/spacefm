@@ -726,7 +726,7 @@ ptk_task_view_show_task_dialog(GtkWidget* view)
         return;
     }
 
-    ptk_file_task_lock(ptask);
+    ptask->lock();
     ptk_file_task_progress_open(ptask);
     if (ptask->task->state_pause_ != vfs::file_task::state::running)
     {
@@ -738,7 +738,7 @@ ptk_task_view_show_task_dialog(GtkWidget* view)
     {
         gtk_window_present(GTK_WINDOW(ptask->progress_dlg));
     }
-    ptk_file_task_unlock(ptask);
+    ptask->unlock();
 }
 
 static bool

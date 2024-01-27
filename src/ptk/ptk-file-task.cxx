@@ -146,21 +146,21 @@ ptk::file_task::~file_task()
 }
 
 void
-ptk_file_task_lock(ptk::file_task* ptask)
+ptk::file_task::lock() noexcept
 {
-    g_mutex_lock(ptask->task->mutex);
+    g_mutex_lock(this->task->mutex);
 }
 
 void
-ptk_file_task_unlock(ptk::file_task* ptask)
+ptk::file_task::unlock() noexcept
 {
-    g_mutex_unlock(ptask->task->mutex);
+    g_mutex_unlock(this->task->mutex);
 }
 
-static bool
-ptk_file_task_trylock(ptk::file_task* ptask)
+bool
+ptk::file_task::trylock() noexcept
 {
-    return g_mutex_trylock(ptask->task->mutex);
+    return g_mutex_trylock(this->task->mutex);
 }
 
 ptk::file_task*
@@ -293,9 +293,9 @@ on_progress_timer(ptk::file_task* ptask)
             ptask->progress_timer = 0;
         }
 
-        ptk_file_task_lock(ptask);
+        ptask->lock();
         query_overwrite(ptask);
-        ptk_file_task_unlock(ptask);
+        ptask->unlock();
         return false;
     }
 
@@ -449,12 +449,12 @@ ptk_file_task_cancel(ptk::file_task* ptask)
         if (ptask->task->exec_cond)
         {
             // this is used only if exec task run in non-main loop thread
-            ptk_file_task_lock(ptask);
+            ptask->lock();
             if (ptask->task->exec_cond)
             {
                 g_cond_broadcast(ptask->task->exec_cond);
             }
-            ptk_file_task_unlock(ptask);
+            ptask->unlock();
         }
     }
     else
@@ -520,9 +520,9 @@ ptk_file_task_pause(ptk::file_task* ptask, const vfs::file_task::state state)
         // Resume
         if (ptask->task->pause_cond)
         {
-            ptk_file_task_lock(ptask);
+            ptask->lock();
             g_cond_broadcast(ptask->task->pause_cond);
-            ptk_file_task_unlock(ptask);
+            ptask->unlock();
         }
         ptask->task->state_pause_ = vfs::file_task::state::running;
     }
@@ -1397,7 +1397,7 @@ ptk_file_task_update(ptk::file_task* ptask)
     // ztd::logger::info("ptk_file_task_update ptask={}", ztd::logger::utils::ptr(ptask));
     // calculate updated display data
 
-    if (!ptk_file_task_trylock(ptask))
+    if (!ptask->trylock())
     {
         // ztd::logger::info("UPDATE LOCKED");
         return;
@@ -1986,12 +1986,12 @@ query_overwrite_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask)
 
     if (ptask->query_cond)
     {
-        ptk_file_task_lock(ptask);
+        ptask->lock();
         ptask->query_ret = (response != GtkResponseType::GTK_RESPONSE_DELETE_EVENT) &&
                            (response != GtkResponseType::GTK_RESPONSE_CANCEL);
         // g_cond_broadcast( ptask->query_cond );
         g_cond_signal(ptask->query_cond);
-        ptk_file_task_unlock(ptask);
+        ptask->unlock();
     }
     if (ptask->restart_timeout)
     {

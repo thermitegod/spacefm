@@ -115,11 +115,12 @@ struct file_task
     std::string dsp_curest{};
     std::string dsp_avgspeed{};
     std::string dsp_avgest{};
+
+    void lock() noexcept;
+    bool trylock() noexcept;
+    void unlock() noexcept;
 };
 } // namespace ptk
-
-void ptk_file_task_lock(ptk::file_task* ptask);
-void ptk_file_task_unlock(ptk::file_task* ptask);
 
 ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
                                   const std::span<const std::filesystem::path> src_files,
