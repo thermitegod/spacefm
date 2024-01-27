@@ -108,16 +108,16 @@ struct file_task
     char** query_new_dest_{nullptr};
     bool query_ret_{false};
 
-    std::string dsp_file_count_{};
-    std::string dsp_size_tally_{};
-    std::string dsp_elapsed_{};
-    std::string dsp_curspeed_{};
-    std::string dsp_curest_{};
-    std::string dsp_avgspeed_{};
-    std::string dsp_avgest_{};
-
     [[nodiscard]] bool is_completed() const noexcept;
     [[nodiscard]] bool is_aborted() const noexcept;
+
+    [[nodiscard]] const std::string_view display_file_count() const noexcept;
+    [[nodiscard]] const std::string_view display_size_tally() const noexcept;
+    [[nodiscard]] const std::string_view display_elapsed() const noexcept;
+    [[nodiscard]] const std::string_view display_current_speed() const noexcept;
+    [[nodiscard]] const std::string_view display_current_estimate() const noexcept;
+    [[nodiscard]] const std::string_view display_average_speed() const noexcept;
+    [[nodiscard]] const std::string_view display_average_estimate() const noexcept;
 
     void set_complete_notify(GFunc callback, void* user_data) noexcept;
     void set_chmod(const std::array<u8, 12> chmod_actions) noexcept;
@@ -142,6 +142,14 @@ struct file_task
     void set_button_states() noexcept;
     void set_progress_icon() noexcept;
     void progress_update() noexcept;
+
+    std::string display_file_count_{};
+    std::string display_size_tally_{};
+    std::string display_elapsed_{};
+    std::string display_current_speed_{};
+    std::string display_current_estimate_{};
+    std::string display_average_speed_{};
+    std::string display_average_estimate_{};
 };
 } // namespace ptk
 

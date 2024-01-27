@@ -1216,7 +1216,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::status,
                                    status_final.data(),
                                    task_view_column::count,
-                                   ptask->dsp_file_count_.data(),
+                                   ptask->display_file_count().data(),
                                    task_view_column::path,
                                    path.data(),
                                    task_view_column::file,
@@ -1224,17 +1224,17 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::progress,
                                    percent,
                                    task_view_column::total,
-                                   ptask->dsp_size_tally_.data(),
+                                   ptask->display_size_tally().data(),
                                    task_view_column::elapsed,
-                                   ptask->dsp_elapsed_.data(),
+                                   ptask->display_elapsed().data(),
                                    task_view_column::curspeed,
-                                   ptask->dsp_curspeed_.data(),
+                                   ptask->display_current_speed().data(),
                                    task_view_column::curest,
-                                   ptask->dsp_curest_.data(),
+                                   ptask->display_current_estimate().data(),
                                    task_view_column::avgspeed,
-                                   ptask->dsp_avgspeed_.data(),
+                                   ptask->display_average_speed().data(),
                                    task_view_column::avgest,
-                                   ptask->dsp_avgest_.data(),
+                                   ptask->display_average_estimate().data(),
                                    -1);
             }
             else
@@ -1244,7 +1244,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::status,
                                    status_final.data(),
                                    task_view_column::count,
-                                   ptask->dsp_file_count_.data(),
+                                   ptask->display_file_count().data(),
                                    task_view_column::path,
                                    path.data(),
                                    task_view_column::file,
@@ -1252,17 +1252,17 @@ main_task_view_update_task(ptk::file_task* ptask)
                                    task_view_column::progress,
                                    percent,
                                    task_view_column::total,
-                                   ptask->dsp_size_tally_.data(),
+                                   ptask->display_size_tally().data(),
                                    task_view_column::elapsed,
-                                   ptask->dsp_elapsed_.data(),
+                                   ptask->display_elapsed().data(),
                                    task_view_column::curspeed,
-                                   ptask->dsp_curspeed_.data(),
+                                   ptask->display_current_speed().data(),
                                    task_view_column::curest,
-                                   ptask->dsp_curest_.data(),
+                                   ptask->display_current_estimate().data(),
                                    task_view_column::avgspeed,
-                                   ptask->dsp_avgspeed_.data(),
+                                   ptask->display_average_speed().data(),
                                    task_view_column::avgest,
-                                   ptask->dsp_avgest_.data(),
+                                   ptask->display_average_estimate().data(),
                                    -1);
             }
         }
@@ -1277,7 +1277,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                task_view_column::progress,
                                percent,
                                task_view_column::elapsed,
-                               ptask->dsp_elapsed_.data(),
+                               ptask->display_elapsed().data(),
                                -1);
         }
         else
@@ -1289,7 +1289,7 @@ main_task_view_update_task(ptk::file_task* ptask)
                                task_view_column::progress,
                                percent,
                                task_view_column::elapsed,
-                               ptask->dsp_elapsed_.data(),
+                               ptask->display_elapsed().data(),
                                -1);
         }
 
@@ -1310,17 +1310,17 @@ main_task_view_update_task(ptk::file_task* ptask)
         gtk_list_store_set(GTK_LIST_STORE(model),
                            &it,
                            task_view_column::total,
-                           ptask->dsp_size_tally_.data(),
+                           ptask->display_size_tally().data(),
                            task_view_column::elapsed,
-                           ptask->dsp_elapsed_.data(),
+                           ptask->display_elapsed().data(),
                            task_view_column::curspeed,
-                           ptask->dsp_curspeed_.data(),
+                           ptask->display_current_speed().data(),
                            task_view_column::curest,
-                           ptask->dsp_curest_.data(),
+                           ptask->display_current_estimate().data(),
                            task_view_column::avgspeed,
-                           ptask->dsp_avgspeed_.data(),
+                           ptask->display_average_speed().data(),
                            task_view_column::avgest,
-                           ptask->dsp_avgest_.data(),
+                           ptask->display_average_estimate().data(),
                            -1);
     }
     // ztd::logger::info("DONE main_task_view_update_task");

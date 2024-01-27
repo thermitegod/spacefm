@@ -169,6 +169,48 @@ ptk::file_task::is_aborted() const noexcept
     return this->aborted_;
 }
 
+const std::string_view
+ptk::file_task::display_file_count() const noexcept
+{
+    return this->display_file_count_;
+}
+
+const std::string_view
+ptk::file_task::display_size_tally() const noexcept
+{
+    return this->display_size_tally_;
+}
+
+const std::string_view
+ptk::file_task::display_elapsed() const noexcept
+{
+    return this->display_elapsed_;
+}
+
+const std::string_view
+ptk::file_task::display_current_speed() const noexcept
+{
+    return this->display_current_speed_;
+}
+
+const std::string_view
+ptk::file_task::display_current_estimate() const noexcept
+{
+    return this->display_current_estimate_;
+}
+
+const std::string_view
+ptk::file_task::display_average_speed() const noexcept
+{
+    return this->display_average_speed_;
+}
+
+const std::string_view
+ptk::file_task::display_average_estimate() const noexcept
+{
+    return this->display_average_estimate_;
+}
+
 ptk::file_task*
 ptk_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files, GtkWindow* parent_window,
@@ -1247,14 +1289,15 @@ ptk::file_task::progress_update() noexcept
             if (this->pop_detail_)
             {
                 stats = std::format("#{}  ({}) [{}] @avg {}",
-                                    this->dsp_file_count_,
-                                    this->dsp_size_tally_,
-                                    this->dsp_elapsed_,
-                                    this->dsp_avgspeed_);
+                                    this->display_file_count_,
+                                    this->display_size_tally_,
+                                    this->display_elapsed_,
+                                    this->display_average_speed_);
             }
             else
             {
-                stats = std::format("{} ({})", this->dsp_size_tally_, this->dsp_avgspeed_);
+                stats =
+                    std::format("{} ({})", this->display_size_tally_, this->display_average_speed_);
             }
         }
         else
@@ -1262,20 +1305,20 @@ ptk::file_task::progress_update() noexcept
             if (this->pop_detail_)
             {
                 stats = std::format("#{} ({}) [{}] @cur {} ({}) @avg {} ({})",
-                                    this->dsp_file_count_,
-                                    this->dsp_size_tally_,
-                                    this->dsp_elapsed_,
-                                    this->dsp_curspeed_,
-                                    this->dsp_curest_,
-                                    this->dsp_avgspeed_,
-                                    this->dsp_avgest_);
+                                    this->display_file_count_,
+                                    this->display_size_tally_,
+                                    this->display_elapsed_,
+                                    this->display_current_speed_,
+                                    this->display_current_estimate_,
+                                    this->display_average_speed_,
+                                    this->display_average_estimate_);
             }
             else
             {
                 stats = std::format("{}  ({})  {} remaining",
-                                    this->dsp_size_tally_,
-                                    this->dsp_avgspeed_,
-                                    this->dsp_avgest_);
+                                    this->display_size_tally_,
+                                    this->display_average_speed_,
+                                    this->display_average_estimate_);
             }
         }
         gtk_label_set_text(this->current_, stats.data());
@@ -1469,7 +1512,7 @@ ptk::file_task::update() noexcept
         dsp_elapsed = std::format("{}", seconds);
     }
 
-    this->dsp_elapsed_ = dsp_elapsed;
+    this->display_elapsed_ = dsp_elapsed;
 
     if (this->task->type_ != vfs::file_task::type::exec)
     {
@@ -1604,12 +1647,12 @@ ptk::file_task::update() noexcept
             remaining_average = std::format("0:{}", remaining_seconds);
         }
 
-        this->dsp_file_count_ = file_count;
-        this->dsp_size_tally_ = size_tally;
-        this->dsp_curspeed_ = speed_current;
-        this->dsp_avgspeed_ = speed_average;
-        this->dsp_curest_ = remaining_current;
-        this->dsp_avgest_ = remaining_average;
+        this->display_file_count_ = file_count;
+        this->display_size_tally_ = size_tally;
+        this->display_current_speed_ = speed_current;
+        this->display_average_speed_ = speed_average;
+        this->display_current_estimate_ = remaining_current;
+        this->display_average_estimate_ = remaining_average;
     }
 
     // move log lines from add_log_buf to log_buf
@@ -2416,7 +2459,7 @@ ptk::file_task::query_overwrite() noexcept
     gtk_box_pack_start(vbox, GTK_WIDGET(hbox), false, true, 0);
 
     // update displays (mutex is already locked)
-    this->dsp_curspeed_ = "stalled";
+    this->display_current_speed_ = "stalled";
     this->progress_update();
     if (this->task_view_ &&
         gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(this->task_view_))))
