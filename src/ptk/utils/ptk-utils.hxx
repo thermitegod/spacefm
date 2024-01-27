@@ -16,6 +16,7 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
 
@@ -26,6 +27,8 @@
 namespace ptk::utils
 {
 void set_window_icon(GtkWindow* win);
+
+u32 get_keymod(GdkModifierType event);
 
 /**
  *  @brief stamp

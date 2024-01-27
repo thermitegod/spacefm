@@ -37,7 +37,7 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-keyboard.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-path-entry.hxx"
 
@@ -411,7 +411,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata)
 
     if (keyval == GDK_KEY_Tab)
     {
-        const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+        const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
         if (keymod)
         {
             return false;

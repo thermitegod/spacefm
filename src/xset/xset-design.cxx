@@ -28,7 +28,7 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "ptk/ptk-keyboard.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
@@ -543,7 +543,7 @@ xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
     xset::job job = xset::job::invalid;
 
     GtkWidget* menu = item ? GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu")) : nullptr;
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));

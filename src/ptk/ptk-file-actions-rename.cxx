@@ -48,8 +48,6 @@
 #include "xset/xset-dialog.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-keyboard.hxx"
-
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/utils/ptk-utils.hxx"
@@ -159,7 +157,7 @@ static bool
 on_move_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
 {
     (void)widget;
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
 
     if (keymod == 0)
@@ -184,7 +182,7 @@ static bool
 on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
 {
     (void)widget;
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
 
     if (keymod == 0)

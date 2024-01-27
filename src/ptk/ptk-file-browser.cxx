@@ -78,7 +78,6 @@
 #include "ptk/ptk-task-view.hxx"
 
 #include "ptk/ptk-file-list.hxx"
-#include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-path-entry.hxx"
@@ -1455,7 +1454,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, ptk::brows
         file_browser->menu_shown_ = false;
     }
 
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
 
@@ -1643,7 +1642,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event, ptk::bro
     (void)widget;
     GtkTreePath* tree_path = nullptr;
 
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
 
     if (file_browser->is_drag_ || button != 1 || file_browser->skip_release_ ||

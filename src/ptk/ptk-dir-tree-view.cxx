@@ -38,7 +38,6 @@
 #include "ptk/ptk-dir-tree.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-keyboard.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-dir-tree-view.hxx"
@@ -497,7 +496,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_
         return false;
     }
 
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
 
     GtkTreePath* path = gtk_tree_model_get_path(model, &iter);

@@ -51,7 +51,6 @@
 #include "vfs/vfs-mime-monitor.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-archiver.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
@@ -62,6 +61,9 @@
 #include "ptk/ptk-file-properties.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-task-view.hxx"
+#include "ptk/ptk-file-list.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "utils/strdup.hxx"
 #include "utils/write.hxx"
@@ -71,11 +73,6 @@
 #include "types.hxx"
 
 #include "main-window.hxx"
-
-#include "ptk/ptk-file-list.hxx"
-
-#include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-keyboard.hxx"
 
 #define PTK_FILE_MENU(obj) (static_cast<PtkFileMenu*>(obj))
 
@@ -1999,7 +1996,7 @@ app_menu_keypress(GtkWidget* menu, GdkEvent* event, PtkFileMenu* data)
     // else if app menu, data will be set
     // PtkFileMenu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
@@ -2217,7 +2214,7 @@ static bool
 on_app_button_press(GtkWidget* item, GdkEvent* event, PtkFileMenu* data)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));

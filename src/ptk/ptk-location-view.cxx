@@ -50,10 +50,11 @@
 
 #include "types.hxx"
 
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-location-view.hxx"
-#include "ptk/ptk-keyboard.hxx"
-#include "ptk/ptk-dialog.hxx"
+#include "ptk/utils/ptk-utils.hxx"
+
 #include "main-window.hxx"
 
 #include "vfs/vfs-volume.hxx"
@@ -1495,7 +1496,7 @@ static bool
 on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser)
 {
     (void)w;
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));
 
@@ -1662,7 +1663,7 @@ static bool
 on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr<vfs::volume>& vol)
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
     const auto time_point = std::chrono::system_clock::from_time_t(gdk_event_get_time(event));

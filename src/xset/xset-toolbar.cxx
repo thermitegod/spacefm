@@ -53,7 +53,8 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-keyboard.hxx"
+#include "ptk/utils/ptk-utils.hxx"
+
 #include "ptk/ptk-file-menu.hxx"
 
 // must match xset::tool:: enum
@@ -318,7 +319,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     {
         return false;
     }
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
 
     // get and focus browser
     ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
@@ -448,7 +449,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     {
         return false;
     }
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
 
     if (keymod != 0 || button != 1)
     {

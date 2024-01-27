@@ -24,7 +24,7 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "ptk/ptk-keyboard.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-toolbar.hxx"
@@ -112,7 +112,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
 
     gtk_widget_set_sensitive(GTK_WIDGET(btn_set), true);
 
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     if (*newkey != 0 && keymod == 0)
     {
         if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)

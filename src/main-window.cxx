@@ -48,7 +48,6 @@
 #include "main-window.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-keyboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
@@ -2222,7 +2221,7 @@ on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* mai
 bool
 MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
 {
-    const auto keymod = ptk_get_keymod(gdk_event_get_modifier_state(event));
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
     // ztd::logger::debug("main_keypress {} {}", keyval, keymod);
 
