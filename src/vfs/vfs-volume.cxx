@@ -58,21 +58,21 @@ vfs_volume_read_by_device(const libudev::device& udevice);
 static void vfs_volume_device_removed(const libudev::device& udevice);
 static void call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state);
 
-struct VFSVolumeCallbackData
+struct volume_callback_data
 {
-    VFSVolumeCallbackData() = delete;
-    VFSVolumeCallbackData(vfs::volume::callback_t callback, void* callback_data);
+    volume_callback_data() = delete;
+    volume_callback_data(vfs::volume::callback_t callback, void* callback_data);
 
     vfs::volume::callback_t cb{nullptr};
     void* user_data{nullptr};
 };
 
-VFSVolumeCallbackData::VFSVolumeCallbackData(vfs::volume::callback_t callback, void* callback_data)
+volume_callback_data::volume_callback_data(vfs::volume::callback_t callback, void* callback_data)
     : cb(callback), user_data(callback_data)
 {
 }
 
-using volume_callback_data_t = std::shared_ptr<VFSVolumeCallbackData>;
+using volume_callback_data_t = std::shared_ptr<volume_callback_data>;
 
 static std::vector<std::shared_ptr<vfs::volume>> volumes;
 static std::vector<volume_callback_data_t> callbacks;
@@ -623,7 +623,7 @@ vfs_volume_add_callback(vfs::volume::callback_t cb, void* user_data)
         return;
     }
 
-    const volume_callback_data_t data = std::make_shared<VFSVolumeCallbackData>(cb, user_data);
+    const volume_callback_data_t data = std::make_shared<volume_callback_data>(cb, user_data);
 
     callbacks.push_back(data);
 }
