@@ -13,6 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <magic_enum.hpp>
 #include <string>
 #include <string_view>
 
@@ -1426,19 +1427,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "count")
         {
-            j = ptk::view::file_task::column::count;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::count);
         }
         else if (property == "directory" || subproperty == "from")
         {
-            j = ptk::view::file_task::column::path;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::path);
         }
         else if (property == "item")
         {
-            j = ptk::view::file_task::column::file;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::file);
         }
         else if (property == "to")
         {
-            j = ptk::view::file_task::column::to;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::to);
         }
         else if (property == "progress")
         {
@@ -1465,23 +1466,23 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "total")
         {
-            j = ptk::view::file_task::column::total;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::total);
         }
         else if (property == "curspeed")
         {
-            j = ptk::view::file_task::column::curspeed;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::curspeed);
         }
         else if (property == "curremain")
         {
-            j = ptk::view::file_task::column::curest;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::curest);
         }
         else if (property == "avgspeed")
         {
-            j = ptk::view::file_task::column::avgspeed;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::avgspeed);
         }
         else if (property == "avgremain")
         {
-            j = ptk::view::file_task::column::avgest;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::avgest);
         }
         else if (property == "queue_state")
         {
@@ -1554,19 +1555,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "count")
         {
-            j = ptk::view::file_task::column::count;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::count);
         }
         else if (property == "directory" || property == "from")
         {
-            j = ptk::view::file_task::column::path;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::path);
         }
         else if (property == "item")
         {
-            j = ptk::view::file_task::column::file;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::file);
         }
         else if (property == "to")
         {
-            j = ptk::view::file_task::column::to;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::to);
         }
         else if (property == "progress")
         {
@@ -1574,35 +1575,35 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "total")
         {
-            j = ptk::view::file_task::column::total;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::total);
         }
         else if (property == "curspeed")
         {
-            j = ptk::view::file_task::column::curspeed;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::curspeed);
         }
         else if (property == "curremain")
         {
-            j = ptk::view::file_task::column::curest;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::curest);
         }
         else if (property == "avgspeed")
         {
-            j = ptk::view::file_task::column::avgspeed;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::avgspeed);
         }
         else if (property == "avgremain")
         {
-            j = ptk::view::file_task::column::avgest;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::avgest);
         }
         else if (property == "elapsed")
         {
-            j = ptk::view::file_task::column::elapsed;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::elapsed);
         }
         else if (property == "started")
         {
-            j = ptk::view::file_task::column::started;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::started);
         }
         else if (property == "status")
         {
-            j = ptk::view::file_task::column::status;
+            j = magic_enum::enum_integer(ptk::view::file_task::column::status);
         }
         else if (property == "queue_state")
         {

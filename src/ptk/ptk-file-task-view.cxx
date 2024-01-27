@@ -35,6 +35,8 @@
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1480,9 +1482,10 @@ ptk::view::file_task::create(MainWindow* main_window)
         gtk_tree_view_column_set_title(col, task_titles.at(ptk::view::file_task::column(j)).data());
         gtk_tree_view_column_set_reorderable(col, true);
         gtk_tree_view_column_set_visible(col, xset_get_b(task_names.at(j)));
-        if (j ==
-            ptk::view::file_task::column::file) //|| j == ptk::view::file_task::column::path || j
-                                                //== ptk::view::file_task::column::to
+        if (ptk::view::file_task::column(j) == ptk::view::file_task::column::file
+            // || ptk::view::file_task::column(j) == ptk::view::file_task::column::path
+            // || ptk::view::file_task::column(j) == ptk::view::file_task::column::to
+        )
         {
             gtk_tree_view_column_set_sizing(col,
                                             GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
@@ -1511,9 +1514,10 @@ ptk::view::file_task::create(MainWindow* main_window)
     // Sort
     if (GTK_IS_TREE_SORTABLE(list))
     {
-        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
-                                             ptk::view::file_task::column::starttime,
-                                             GtkSortType::GTK_SORT_ASCENDING);
+        gtk_tree_sortable_set_sort_column_id(
+            GTK_TREE_SORTABLE(list),
+            magic_enum::enum_integer(ptk::view::file_task::column::starttime),
+            GtkSortType::GTK_SORT_ASCENDING);
     }
 
     // clang-format off
