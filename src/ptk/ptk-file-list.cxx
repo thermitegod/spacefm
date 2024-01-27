@@ -253,7 +253,7 @@ ptk_file_list_finalize(GObject* object)
 }
 
 ptk::file_list*
-ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden)
+ptk::file_list::create(const std::shared_ptr<vfs::dir>& dir, bool show_hidden) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;

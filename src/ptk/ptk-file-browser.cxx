@@ -1236,7 +1236,7 @@ on_sort_col_changed(GtkTreeSortable* sortable, ptk::browser* file_browser)
 void
 ptk::browser::update_model() noexcept
 {
-    ptk::file_list* list = ptk_file_list_new(this->dir_, this->show_hidden_files_);
+    ptk::file_list* list = ptk::file_list::create(this->dir_, this->show_hidden_files_);
     GtkTreeModel* old_list = this->file_list_;
     this->file_list_ = GTK_TREE_MODEL(list);
     if (old_list)

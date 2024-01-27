@@ -59,6 +59,9 @@ struct file_list
         last
     };
 
+    [[nodiscard]] static ptk::file_list* create(const std::shared_ptr<vfs::dir>& dir,
+                                                bool show_hidden) noexcept;
+
     GObject parent;
 
     /* <private> */
@@ -102,5 +105,3 @@ struct file_list
     sigc::connection signal_file_thumbnail_loaded;
 };
 } // namespace ptk
-
-ptk::file_list* ptk_file_list_new(const std::shared_ptr<vfs::dir>& dir, bool show_hidden);
