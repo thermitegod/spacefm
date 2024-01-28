@@ -3293,7 +3293,9 @@ ptk::action::rename_files(ptk::browser* file_browser, const std::filesystem::pat
             else
             {
                 // rename (does overwrite)
-                if (::rename(mset->full_path.c_str(), full_path.c_str()) != 0)
+                std::error_code ec;
+                std::filesystem::rename(mset->full_path, full_path, ec);
+                if (ec)
                 {
                     // Unknown error has occurred - alert user as usual
                     ptk::dialog::error(
