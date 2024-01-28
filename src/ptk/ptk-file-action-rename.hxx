@@ -17,6 +17,10 @@
 
 #pragma once
 
+#include <filesystem>
+
+#include <memory>
+
 #include <gtkmm.h>
 
 #include "ptk/ptk-file-browser.hxx"
@@ -31,10 +35,10 @@ enum class rename_mode
     rename,
     new_file,
     new_dir,
-    new_link
+    new_link,
 };
 
-i32 rename_files(ptk::browser* file_browser, const char* file_dir,
+i32 rename_files(ptk::browser* file_browser, const std::filesystem::path& file_dir,
                  const std::shared_ptr<vfs::file>& file, const char* dest_dir, bool clip_copy,
-                 ptk::action::rename_mode create_new, AutoOpenCreate* auto_open) noexcept;
+                 ptk::action::rename_mode create_new, AutoOpenCreate* auto_open = nullptr) noexcept;
 } // namespace ptk::action

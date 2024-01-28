@@ -2287,7 +2287,7 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 i32
-ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
+ptk::action::rename_files(ptk::browser* file_browser, const std::filesystem::path& file_dir,
                           const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                           bool clip_copy, ptk::action::rename_mode create_new,
                           AutoOpenCreate* auto_open) noexcept
@@ -2296,7 +2296,7 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
     i32 ret = 1;
     bool target_missing = false;
 
-    if (!file_dir)
+    if (file_dir.empty() || !std::filesystem::exists(file_dir))
     {
         return 0;
     }
@@ -2310,7 +2310,7 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
         mset->is_dir = file->is_directory();
         mset->is_link = file->is_symlink();
         mset->clip_copy = clip_copy;
-        mset->full_path = std::filesystem::path() / file_dir / original_filename;
+        mset->full_path = file_dir / original_filename;
         if (dest_dir)
         {
             mset->new_path = std::filesystem::path() / dest_dir / original_filename;
@@ -2323,7 +2323,7 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
     else if (create_new == ptk::action::rename_mode::new_link && file)
     {
         const auto full_name = file->name();
-        mset->full_path = std::filesystem::path() / file_dir / full_name;
+        mset->full_path = file_dir / full_name;
         mset->new_path = mset->full_path;
         mset->is_dir = file->is_directory(); // is_dir is dynamic for create
         mset->is_link = file->is_symlink();
@@ -3316,10 +3316,6 @@ ptk::action::rename_files(ptk::browser* file_browser, const char* file_dir,
     {
         ret = 0;
     }
-
-    // save size
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(mset->dlg), &allocation);
 
     // destroy
     gtk_widget_destroy(mset->dlg);

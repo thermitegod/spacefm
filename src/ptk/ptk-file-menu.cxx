@@ -2530,13 +2530,7 @@ create_new_file(ptk::file_menu* data, ptk::action::rename_mode create_new)
         file = data->sel_files.front();
     }
 
-    ptk::action::rename_files(data->browser,
-                              data->cwd.c_str(),
-                              file,
-                              nullptr,
-                              false,
-                              create_new,
-                              ao);
+    ptk::action::rename_files(data->browser, data->cwd, file, nullptr, false, create_new, ao);
 }
 
 static void

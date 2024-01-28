@@ -3852,13 +3852,13 @@ ptk::browser::rename_selected_files(
 
     for (const auto& file : selected_files)
     {
-        if (!ptk::action::rename_files(this,
-                                       cwd.c_str(),
-                                       file,
-                                       nullptr,
-                                       false,
-                                       ptk::action::rename_mode::rename,
-                                       nullptr))
+        const auto result = ptk::action::rename_files(this,
+                                                      cwd,
+                                                      file,
+                                                      nullptr,
+                                                      false,
+                                                      ptk::action::rename_mode::rename);
+        if (!result)
         {
             break;
         }
