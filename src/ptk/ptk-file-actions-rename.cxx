@@ -2959,7 +2959,7 @@ ptk_rename_file(PtkFileBrowser* file_browser, const char* file_dir,
             }
 
             if (create_new == ptk::rename_mode::rename &&
-                (mset->full_path_same || std::filesystem::equivalent(full_path, mset->full_path)))
+                (mset->full_path_same || full_path == mset->full_path))
             {
                 // not changed, proceed to next file
                 break;

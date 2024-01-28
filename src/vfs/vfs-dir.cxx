@@ -548,7 +548,7 @@ vfs::dir::emit_file_created(const std::filesystem::path& filename, bool force) n
     //     return;
     // }
 
-    if (std::filesystem::equivalent(filename, this->path_))
+    if (filename == this->path_)
     { // Special Case: The directory itself was created?
         return;
     }
@@ -599,7 +599,7 @@ vfs::dir::emit_file_changed(const std::filesystem::path& filename, bool force) n
         return;
     }
 
-    if (std::filesystem::equivalent(filename, this->path_))
+    if (filename == this->path_)
     {
         // Special Case: The directory itself was changed
         this->run_event<spacefm::signal::file_changed>(nullptr);
