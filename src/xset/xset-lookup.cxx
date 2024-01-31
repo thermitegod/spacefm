@@ -15,8 +15,6 @@
 
 #include <string_view>
 
-#include <format>
-
 #include <array>
 
 #include <unordered_map>
@@ -1082,28 +1080,6 @@ xset::get_name_from_panel_mode(panel_t panel, xset::panel name, xset::main_windo
 {
     const auto set_name = xset::get_xsetname_from_panel_mode(panel, name, mode);
     const auto value = magic_enum::enum_name(set_name);
-    return value;
-}
-
-// xset var
-
-xset::var
-xset::get_xsetvar_from_name(const std::string_view name)
-{
-    const auto enum_value = magic_enum::enum_cast<xset::var>(name);
-    if (!enum_value.has_value())
-    {
-        const auto msg = std::format("Invalid xset::var enum name xset::var::{}", name);
-        ztd::logger::critical(msg);
-        throw std::logic_error(msg);
-    }
-    return enum_value.value();
-}
-
-const std::string_view
-xset::get_name_from_xsetvar(xset::var name)
-{
-    const auto value = magic_enum::enum_name(name);
     return value;
 }
 

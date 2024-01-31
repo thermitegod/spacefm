@@ -1117,9 +1117,6 @@ xset::name get_xsetname_from_panel_mode(panel_t panel, xset::panel name,
 const std::string_view get_name_from_panel_mode(panel_t panel, xset::panel name,
                                                 xset::main_window_panel mode);
 
-xset::var get_xsetvar_from_name(const std::string_view name);
-const std::string_view get_name_from_xsetvar(xset::var name);
-
 // main window panel mode
 const std::string_view get_window_panel_mode(xset::main_window_panel mode);
 } // namespace xset

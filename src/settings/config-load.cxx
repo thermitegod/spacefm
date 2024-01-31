@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include <format>
+#include <magic_enum.hpp>
 
 #include <toml.hpp> // toml11
 
@@ -23,8 +23,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
-
-#include "ptk/ptk-dialog.hxx"
 
 #include "settings/upgrade/config-upgrade.hxx"
 
@@ -220,18 +218,13 @@ config_parse_xset(const toml::value& tbl, u64 version)
 
                 // ztd::logger::info("name: {} | var: {} | value: {}", name, setvar, value);
 
-                xset::var var;
-                try
+                const auto enum_value = magic_enum::enum_cast<xset::var>(setvar);
+                if (!enum_value.has_value())
                 {
-                    var = xset::get_xsetvar_from_name(setvar);
+                    ztd::logger::critical("Invalid xset::var enum name xset::var::{}", name);
+                    continue;
                 }
-                catch (const std::logic_error& e)
-                {
-                    ptk::dialog::error(nullptr,
-                                       "Error",
-                                       std::format("XSet parse error:\n\n{}", e.what()));
-                    return;
-                }
+                const xset::var var = enum_value.value();
 
                 if (set->name.starts_with("cstm_"))
                 { // custom

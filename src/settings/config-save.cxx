@@ -49,37 +49,37 @@ pack_xset(const xset_t& set)
 
     if (set->s)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::s);
+        const auto name = magic_enum::enum_name(xset::var::s);
         const auto value = std::format("{}", set->s.value());
         setvars.insert({name.data(), value});
     }
     if (set->x)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::x);
+        const auto name = magic_enum::enum_name(xset::var::x);
         const auto value = std::format("{}", set->x.value());
         setvars.insert({name.data(), value});
     }
     if (set->y)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::y);
+        const auto name = magic_enum::enum_name(xset::var::y);
         const auto value = std::format("{}", set->y.value());
         setvars.insert({name.data(), value});
     }
     if (set->z)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::z);
+        const auto name = magic_enum::enum_name(xset::var::z);
         const auto value = std::format("{}", set->z.value());
         setvars.insert({name.data(), value});
     }
     if (set->key)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::key);
+        const auto name = magic_enum::enum_name(xset::var::key);
         const auto value = std::format("{}", set->key);
         setvars.insert({name.data(), value});
     }
     if (set->keymod)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::keymod);
+        const auto name = magic_enum::enum_name(xset::var::keymod);
         const auto value = std::format("{}", set->keymod);
         setvars.insert({name.data(), value});
     }
@@ -90,14 +90,14 @@ pack_xset(const xset_t& set)
         { // built-in
             if (set->in_terminal && set->menu_label)
             { // only save lbl if menu_label was customized
-                const auto name = xset::get_name_from_xsetvar(xset::var::menu_label);
+                const auto name = magic_enum::enum_name(xset::var::menu_label);
                 const auto value = std::format("{}", set->menu_label.value());
                 setvars.insert({name.data(), value});
             }
         }
         else
         { // custom
-            const auto name = xset::get_name_from_xsetvar(xset::var::menu_label_custom);
+            const auto name = magic_enum::enum_name(xset::var::menu_label_custom);
             const auto value = std::format("{}", set->menu_label.value());
             setvars.insert({name.data(), value});
         }
@@ -107,45 +107,45 @@ pack_xset(const xset_t& set)
     { // built-in
         if (set->keep_terminal)
         { // only save icn if icon was customized
-            const auto name = xset::get_name_from_xsetvar(xset::var::icn);
+            const auto name = magic_enum::enum_name(xset::var::icn);
             const auto value = std::format("{}", set->icon.value());
             setvars.insert({name.data(), value});
         }
     }
     else if (set->icon)
     { // custom
-        const auto name = xset::get_name_from_xsetvar(xset::var::icon);
+        const auto name = magic_enum::enum_name(xset::var::icon);
         const auto value = std::format("{}", set->icon.value());
         setvars.insert({name.data(), value});
     }
 
     if (set->next)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::next);
+        const auto name = magic_enum::enum_name(xset::var::next);
         const auto value = std::format("{}", set->next.value());
         setvars.insert({name.data(), value});
     }
     if (set->child)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::child);
+        const auto name = magic_enum::enum_name(xset::var::child);
         const auto value = std::format("{}", set->child.value());
         setvars.insert({name.data(), value});
     }
     if (set->context)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::context);
+        const auto name = magic_enum::enum_name(xset::var::context);
         const auto value = std::format("{}", set->context.value());
         setvars.insert({name.data(), value});
     }
     if (set->b != xset::b::unset)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::b);
+        const auto name = magic_enum::enum_name(xset::var::b);
         const auto value = std::format("{}", magic_enum::enum_integer(set->b));
         setvars.insert({name.data(), value});
     }
     if (set->tool != xset::tool::NOT)
     {
-        const auto name = xset::get_name_from_xsetvar(xset::var::tool);
+        const auto name = magic_enum::enum_name(xset::var::tool);
         const auto value = std::format("{}", magic_enum::enum_integer(set->tool));
         setvars.insert({name.data(), value});
     }
@@ -154,85 +154,85 @@ pack_xset(const xset_t& set)
     {
         if (set->menu_style != xset::menu::normal)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::style);
+            const auto name = magic_enum::enum_name(xset::var::style);
             const auto value = std::format("{}", magic_enum::enum_integer(set->menu_style));
             setvars.insert({name.data(), value});
         }
         if (set->desc)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::desc);
+            const auto name = magic_enum::enum_name(xset::var::desc);
             const auto value = std::format("{}", set->desc.value());
             setvars.insert({name.data(), value});
         }
         if (set->title)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::title);
+            const auto name = magic_enum::enum_name(xset::var::title);
             const auto value = std::format("{}", set->title.value());
             setvars.insert({name.data(), value});
         }
         if (set->prev)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::prev);
+            const auto name = magic_enum::enum_name(xset::var::prev);
             const auto value = std::format("{}", set->prev.value());
             setvars.insert({name.data(), value});
         }
         if (set->parent)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::parent);
+            const auto name = magic_enum::enum_name(xset::var::parent);
             const auto value = std::format("{}", set->parent.value());
             setvars.insert({name.data(), value});
         }
         if (set->line)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::line);
+            const auto name = magic_enum::enum_name(xset::var::line);
             const auto value = std::format("{}", set->line.value());
             setvars.insert({name.data(), value});
         }
         if (set->task)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::task);
+            const auto name = magic_enum::enum_name(xset::var::task);
             const auto value = std::format("{:d}", set->task);
             setvars.insert({name.data(), value});
         }
         if (set->task_pop)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::task_pop);
+            const auto name = magic_enum::enum_name(xset::var::task_pop);
             const auto value = std::format("{:d}", set->task_pop);
             setvars.insert({name.data(), value});
         }
         if (set->task_err)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::task_err);
+            const auto name = magic_enum::enum_name(xset::var::task_err);
             const auto value = std::format("{:d}", set->task_err);
             setvars.insert({name.data(), value});
         }
         if (set->task_out)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::task_out);
+            const auto name = magic_enum::enum_name(xset::var::task_out);
             const auto value = std::format("{:d}", set->task_out);
             setvars.insert({name.data(), value});
         }
         if (set->in_terminal)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::run_in_terminal);
+            const auto name = magic_enum::enum_name(xset::var::run_in_terminal);
             const auto value = std::format("{:d}", set->in_terminal);
             setvars.insert({name.data(), value});
         }
         if (set->keep_terminal)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::keep_terminal);
+            const auto name = magic_enum::enum_name(xset::var::keep_terminal);
             const auto value = std::format("{:d}", set->keep_terminal);
             setvars.insert({name.data(), value});
         }
         if (set->scroll_lock)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::scroll_lock);
+            const auto name = magic_enum::enum_name(xset::var::scroll_lock);
             const auto value = std::format("{:d}", set->scroll_lock);
             setvars.insert({name.data(), value});
         }
         if (set->opener != 0)
         {
-            const auto name = xset::get_name_from_xsetvar(xset::var::opener);
+            const auto name = magic_enum::enum_name(xset::var::opener);
             const auto value = std::format("{}", set->opener);
             setvars.insert({name.data(), value});
         }
