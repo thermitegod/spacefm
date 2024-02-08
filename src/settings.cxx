@@ -43,9 +43,7 @@
 #include "xset/xset-defaults.hxx"
 
 #include "settings/app.hxx"
-#include "settings/config-load.hxx"
-#include "settings/config-save.hxx"
-#include "settings/disk-format.hxx"
+#include "settings/config.hxx"
 
 #include "terminal-handlers.hxx"
 
@@ -64,7 +62,8 @@ load_settings()
 
     xset_defaults();
 
-    const auto session = std::filesystem::path() / settings_config_dir / CONFIG_FILE_FILENAME;
+    const auto session =
+        std::filesystem::path() / settings_config_dir / config::disk_format::filename;
 
     if (!std::filesystem::exists(settings_config_dir))
     {
@@ -92,8 +91,8 @@ load_settings()
                 std::format("{} --config-dir {} --config-file {} --config-version {}",
                             command_script.string(),
                             settings_config_dir.string(),
-                            CONFIG_FILE_FILENAME,
-                            CONFIG_FILE_VERSION);
+                            config::disk_format::filename,
+                            config::disk_format::version);
 
             ztd::logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);
@@ -108,7 +107,7 @@ load_settings()
             const std::string command_args = std::format("{} --config-dir {} --config-file {}",
                                                          command_script.string(),
                                                          settings_config_dir.string(),
-                                                         CONFIG_FILE_FILENAME);
+                                                         config::disk_format::filename);
 
             ztd::logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);
@@ -117,7 +116,7 @@ load_settings()
 
     if (std::filesystem::is_regular_file(session))
     {
-        load_user_confing(session);
+        config::load(session);
     }
     else
     {
@@ -196,7 +195,7 @@ save_settings()
                                 gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), i));
                             tabs = std::format("{}{}{}",
                                                tabs,
-                                               CONFIG_FILE_TABS_DELIM,
+                                               config::disk_format::tab_delimiter,
                                                // Need to use .string() as libfmt will by default
                                                // format paths with double quotes surrounding them
                                                // which will break config file parsing.
@@ -232,7 +231,7 @@ save_settings()
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    save_user_confing();
+    config::save();
 }
 
 #if 0

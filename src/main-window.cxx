@@ -58,7 +58,7 @@
 #include "xset/xset-context-menu.hxx"
 
 #include "settings/app.hxx"
-#include "settings/disk-format.hxx"
+#include "settings/config.hxx"
 
 #include "utils/memory.hxx"
 #include "utils/strdup.hxx"
@@ -760,11 +760,11 @@ MainWindow::show_panels() noexcept
                     const std::string tabs_add =
                         std::format("{}{}{}",
                                     set->s && app_settings.load_saved_tabs() ? set->s.value() : "",
-                                    set->ob1 ? CONFIG_FILE_TABS_DELIM : "",
+                                    set->ob1 ? config::disk_format::tab_delimiter : "",
                                     set->ob1 ? set->ob1 : "");
 
                     const std::vector<std::string> tab_dirs =
-                        ztd::split(tabs_add, CONFIG_FILE_TABS_DELIM);
+                        ztd::split(tabs_add, config::disk_format::tab_delimiter);
 
                     for (const std::string_view tab_dir : tab_dirs)
                     {

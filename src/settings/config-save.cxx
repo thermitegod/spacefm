@@ -33,7 +33,7 @@
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "settings/app.hxx"
-#include "settings/disk-format.hxx"
+#include "settings/config.hxx"
 
 // map<var, value>
 using setvars_t = std::unordered_map<std::string, std::string>;
@@ -269,47 +269,53 @@ pack_xsets()
 }
 
 void
-save_user_confing()
+config::save() noexcept
 {
     // new values get appened at the top of the file,
     // declare in reverse order
     const toml::value toml_data = toml::value{
-        {TOML_SECTION_VERSION,
+        {config::disk_format::toml::section::version.data(),
          toml::value{
-             {TOML_KEY_VERSION, CONFIG_FILE_VERSION},
+             {config::disk_format::toml::key::version.data(), config::disk_format::version},
          }},
 
-        {TOML_SECTION_GENERAL,
+        {config::disk_format::toml::section::general.data(),
          toml::value{
-             {TOML_KEY_SHOW_THUMBNAIL, app_settings.show_thumbnail()},
-             {TOML_KEY_MAX_THUMB_SIZE, app_settings.max_thumb_size() >> 10},
-             {TOML_KEY_ICON_SIZE_BIG, app_settings.icon_size_big()},
-             {TOML_KEY_ICON_SIZE_SMALL, app_settings.icon_size_small()},
-             {TOML_KEY_ICON_SIZE_TOOL, app_settings.icon_size_tool()},
-             {TOML_KEY_SINGLE_CLICK, app_settings.single_click()},
-             {TOML_KEY_SINGLE_HOVER, app_settings.single_hover()},
-             {TOML_KEY_USE_SI_PREFIX, app_settings.use_si_prefix()},
-             {TOML_KEY_CLICK_EXECUTE, app_settings.click_executes()},
-             {TOML_KEY_CONFIRM, app_settings.confirm()},
-             {TOML_KEY_CONFIRM_DELETE, app_settings.confirm_delete()},
-             {TOML_KEY_CONFIRM_TRASH, app_settings.confirm_trash()},
-             {TOML_KEY_THUMBNAILER_BACKEND, app_settings.thumbnailer_use_api()},
+             // clang-format off
+             {config::disk_format::toml::key::show_thumbnail.data(), app_settings.show_thumbnail()},
+             {config::disk_format::toml::key::max_thumb_size.data(), app_settings.max_thumb_size() >> 10},
+             {config::disk_format::toml::key::icon_size_big.data(), app_settings.icon_size_big()},
+             {config::disk_format::toml::key::icon_size_small.data(), app_settings.icon_size_small()},
+             {config::disk_format::toml::key::icon_size_tool.data(), app_settings.icon_size_tool()},
+             {config::disk_format::toml::key::single_click.data(), app_settings.single_click()},
+             {config::disk_format::toml::key::single_hover.data(), app_settings.single_hover()},
+             {config::disk_format::toml::key::use_si_prefix.data(), app_settings.use_si_prefix()},
+             {config::disk_format::toml::key::click_execute.data(), app_settings.click_executes()},
+             {config::disk_format::toml::key::confirm.data(), app_settings.confirm()},
+             {config::disk_format::toml::key::confirm_delete.data(), app_settings.confirm_delete()},
+             {config::disk_format::toml::key::confirm_trash.data(), app_settings.confirm_trash()},
+             {config::disk_format::toml::key::thumbnailer_backend.data(), app_settings.thumbnailer_use_api()},
+             // clang-format on
          }},
 
-        {TOML_SECTION_WINDOW,
+        {config::disk_format::toml::section::window.data(),
          toml::value{
-             {TOML_KEY_HEIGHT, app_settings.height()},
-             {TOML_KEY_WIDTH, app_settings.width()},
-             {TOML_KEY_MAXIMIZED, app_settings.maximized()},
+             // clang-format off
+             {config::disk_format::toml::key::height.data(), app_settings.height()},
+             {config::disk_format::toml::key::width.data(), app_settings.width()},
+             {config::disk_format::toml::key::maximized.data(), app_settings.maximized()},
+             // clang-format on
          }},
 
-        {TOML_SECTION_INTERFACE,
+        {config::disk_format::toml::section::interface.data(),
          toml::value{
-             {TOML_KEY_SHOW_TABS, app_settings.always_show_tabs()},
-             {TOML_KEY_SHOW_CLOSE, app_settings.show_close_tab_buttons()},
+             // clang-format off
+             {config::disk_format::toml::key::show_tabs.data(), app_settings.always_show_tabs()},
+             {config::disk_format::toml::key::show_close.data(), app_settings.show_close_tab_buttons()},
+             // clang-format on
          }},
 
-        {TOML_SECTION_XSET,
+        {config::disk_format::toml::section::xset.data(),
          toml::value{
              pack_xsets(),
          }},
@@ -319,7 +325,7 @@ save_user_confing()
     // std::cout << "###### TOML DUMP ######" << "\n\n";
     // std::cout << toml_data << "\n\n";
 
-    const auto config_file = vfs::program::config() / CONFIG_FILE_FILENAME;
+    const auto config_file = vfs::program::config() / config::disk_format::filename;
 
     ::utils::write_file(config_file, toml_data);
 }
