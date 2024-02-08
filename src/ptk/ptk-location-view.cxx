@@ -62,7 +62,7 @@
 
 #include "vfs/linux/self.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 // This limits the small icon size for side panes and task list
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
@@ -151,7 +151,7 @@ ptk::view::location::update_volume_icons() noexcept
     GtkTreeIter it;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    i32 icon_size = app_settings.icon_size_small();
+    i32 icon_size = config::settings->icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
     {
         icon_size = PANE_MAX_ICON_SIZE;
@@ -199,8 +199,9 @@ update_change_detection()
                     // update current dir change detection
                     file_browser->dir_->update_avoid_changes();
                     // update thumbnail visibility
-                    file_browser->show_thumbnails(
-                        app_settings.show_thumbnail() ? app_settings.max_thumb_size() : 0);
+                    file_browser->show_thumbnails(config::settings->show_thumbnail()
+                                                      ? config::settings->max_thumb_size()
+                                                      : 0);
                 }
             }
         }
@@ -579,7 +580,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
                                       -1);
     if (set_icon)
     {
-        i32 icon_size = app_settings.icon_size_small();
+        i32 icon_size = config::settings->icon_size_small();
         if (icon_size > PANE_MAX_ICON_SIZE)
         {
             icon_size = PANE_MAX_ICON_SIZE;
@@ -641,7 +642,7 @@ update_volume(const std::shared_ptr<vfs::volume>& vol)
         return;
     }
 
-    i32 icon_size = app_settings.icon_size_small();
+    i32 icon_size = config::settings->icon_size_small();
     if (icon_size > PANE_MAX_ICON_SIZE)
     {
         icon_size = PANE_MAX_ICON_SIZE;

@@ -68,7 +68,7 @@
 #include "utils/strdup.hxx"
 #include "utils/write.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 #include "types.hxx"
 
@@ -634,7 +634,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
 
     set = xset_get(xset::name::view_thumb);
     xset_set_cb(set, (GFunc)main_window_toggle_thumbnails_all_windows, nullptr);
-    set->b = app_settings.show_thumbnail() ? xset::b::xtrue : xset::b::unset;
+    set->b = config::settings->show_thumbnail() ? xset::b::xtrue : xset::b::unset;
 
     if (browser->is_view_mode(ptk::browser::view_mode::icon_view))
     {

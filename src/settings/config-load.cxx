@@ -26,7 +26,7 @@
 
 #include "settings/upgrade/config-upgrade.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 #include "settings/config.hxx"
 
 static u64
@@ -64,91 +64,91 @@ config_parse_general(const toml::value& tbl, u64 version)
     {
         const auto show_thumbnail =
             toml::find<bool>(section, config::disk_format::toml::key::show_thumbnail.data());
-        app_settings.show_thumbnail(show_thumbnail);
+        config::settings->show_thumbnail(show_thumbnail);
     }
 
     if (section.contains(config::disk_format::toml::key::max_thumb_size.data()))
     {
         const auto max_thumb_size =
             toml::find<u32>(section, config::disk_format::toml::key::max_thumb_size.data());
-        app_settings.max_thumb_size(max_thumb_size << 10);
+        config::settings->max_thumb_size(max_thumb_size << 10);
     }
 
     if (section.contains(config::disk_format::toml::key::icon_size_big.data()))
     {
         const auto icon_size_big =
             toml::find<i32>(section, config::disk_format::toml::key::icon_size_big.data());
-        app_settings.icon_size_big(icon_size_big);
+        config::settings->icon_size_big(icon_size_big);
     }
 
     if (section.contains(config::disk_format::toml::key::icon_size_small.data()))
     {
         const auto icon_size_small =
             toml::find<i32>(section, config::disk_format::toml::key::icon_size_small.data());
-        app_settings.icon_size_small(icon_size_small);
+        config::settings->icon_size_small(icon_size_small);
     }
 
     if (section.contains(config::disk_format::toml::key::icon_size_tool.data()))
     {
         const auto icon_size_tool =
             toml::find<i32>(section, config::disk_format::toml::key::icon_size_tool.data());
-        app_settings.icon_size_tool(icon_size_tool);
+        config::settings->icon_size_tool(icon_size_tool);
     }
 
     if (section.contains(config::disk_format::toml::key::single_click.data()))
     {
         const auto single_click =
             toml::find<bool>(section, config::disk_format::toml::key::single_click.data());
-        app_settings.single_click(single_click);
+        config::settings->single_click(single_click);
     }
 
     if (section.contains(config::disk_format::toml::key::single_hover.data()))
     {
         const auto single_hover =
             toml::find<bool>(section, config::disk_format::toml::key::single_hover.data());
-        app_settings.single_hover(single_hover);
+        config::settings->single_hover(single_hover);
     }
 
     if (section.contains(config::disk_format::toml::key::use_si_prefix.data()))
     {
         const auto use_si_prefix =
             toml::find<bool>(section, config::disk_format::toml::key::use_si_prefix.data());
-        app_settings.use_si_prefix(use_si_prefix);
+        config::settings->use_si_prefix(use_si_prefix);
     }
 
     if (section.contains(config::disk_format::toml::key::click_execute.data()))
     {
         const auto click_executes =
             toml::find<bool>(section, config::disk_format::toml::key::click_execute.data());
-        app_settings.click_executes(click_executes);
+        config::settings->click_executes(click_executes);
     }
 
     if (section.contains(config::disk_format::toml::key::confirm.data()))
     {
         const auto confirm =
             toml::find<bool>(section, config::disk_format::toml::key::confirm.data());
-        app_settings.confirm(confirm);
+        config::settings->confirm(confirm);
     }
 
     if (section.contains(config::disk_format::toml::key::confirm_delete.data()))
     {
         const auto confirm_delete =
             toml::find<bool>(section, config::disk_format::toml::key::confirm_delete.data());
-        app_settings.confirm_delete(confirm_delete);
+        config::settings->confirm_delete(confirm_delete);
     }
 
     if (section.contains(config::disk_format::toml::key::confirm_trash.data()))
     {
         const auto confirm_trash =
             toml::find<bool>(section, config::disk_format::toml::key::confirm_trash.data());
-        app_settings.confirm_trash(confirm_trash);
+        config::settings->confirm_trash(confirm_trash);
     }
 
     if (section.contains(config::disk_format::toml::key::thumbnailer_backend.data()))
     {
         const auto thumbnailer_backend =
             toml::find<bool>(section, config::disk_format::toml::key::thumbnailer_backend.data());
-        app_settings.thumbnailer_use_api(thumbnailer_backend);
+        config::settings->thumbnailer_use_api(thumbnailer_backend);
     }
 }
 
@@ -169,20 +169,20 @@ config_parse_window(const toml::value& tbl, u64 version)
     if (section.contains(config::disk_format::toml::key::height.data()))
     {
         const auto height = toml::find<u64>(section, config::disk_format::toml::key::height.data());
-        app_settings.height(height);
+        config::settings->height(height);
     }
 
     if (section.contains(config::disk_format::toml::key::width.data()))
     {
         const auto width = toml::find<u64>(section, config::disk_format::toml::key::width.data());
-        app_settings.width(width);
+        config::settings->width(width);
     }
 
     if (section.contains(config::disk_format::toml::key::maximized.data()))
     {
         const auto maximized =
             toml::find<bool>(section, config::disk_format::toml::key::maximized.data());
-        app_settings.maximized(maximized);
+        config::settings->maximized(maximized);
     }
 }
 
@@ -204,14 +204,14 @@ config_parse_interface(const toml::value& tbl, u64 version)
     {
         const auto always_show_tabs =
             toml::find<bool>(section, config::disk_format::toml::key::show_tabs.data());
-        app_settings.always_show_tabs(always_show_tabs);
+        config::settings->always_show_tabs(always_show_tabs);
     }
 
     if (section.contains(config::disk_format::toml::key::show_close.data()))
     {
         const auto show_close_tab_buttons =
             toml::find<bool>(section, config::disk_format::toml::key::show_close.data());
-        app_settings.show_close_tab_buttons(show_close_tab_buttons);
+        config::settings->show_close_tab_buttons(show_close_tab_buttons);
     }
 }
 

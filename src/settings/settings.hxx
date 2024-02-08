@@ -15,11 +15,16 @@
 
 #pragma once
 
+#include <memory>
+
 #include <ztd/ztd.hxx>
 
-struct AppSettings
+namespace config
 {
-  public:
+namespace detail
+{
+struct settings
+{
     [[nodiscard]] bool show_thumbnail() const noexcept;
     void show_thumbnail(bool val) noexcept;
 
@@ -122,5 +127,7 @@ struct AppSettings
     // Git
     bool git_backed_settings_{true};
 };
+} // namespace detail
 
-extern AppSettings app_settings;
+extern const std::unique_ptr<detail::settings> settings;
+} // namespace config

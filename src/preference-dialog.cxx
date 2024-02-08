@@ -32,7 +32,7 @@
 
 #include "types.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 #include "terminal-handlers.hxx"
 
@@ -203,13 +203,12 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-    if (value != app_settings.icon_size_big())
+    if (value != config::settings->icon_size_big())
     {
         vfs::dir::global_unload_thumbnails(vfs::file::thumbnail_size::big);
     }
 
-    app_settings.icon_size_big(value);
+    config::settings->icon_size_big(value);
 
     // update all windows/all panels/all browsers
     for (MainWindow* window : main_window_get_all())
@@ -256,7 +255,7 @@ create_combobox()
     GtkTreeIter iter;
     if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
     {
-        const i32 current_big_icon_size = app_settings.icon_size_big();
+        const i32 current_big_icon_size = config::settings->icon_size_big();
         do
         {
             i32 value = 0;
@@ -315,13 +314,12 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-    if (value != app_settings.icon_size_small())
+    if (value != config::settings->icon_size_small())
     {
         vfs::dir::global_unload_thumbnails(vfs::file::thumbnail_size::small);
     }
 
-    app_settings.icon_size_small(value);
+    config::settings->icon_size_small(value);
 
     // update all windows/all panels/all browsers
     for (MainWindow* window : main_window_get_all())
@@ -368,7 +366,7 @@ create_combobox()
     GtkTreeIter iter;
     if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
     {
-        const i32 current_small_icon_size = app_settings.icon_size_small();
+        const i32 current_small_icon_size = config::settings->icon_size_small();
         do
         {
             i32 value = 0;
@@ -419,10 +417,9 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 
     i32 value = 0;
     gtk_tree_model_get(model, &iter, 1, &value, -1);
-
-    if (value != app_settings.icon_size_tool())
+    if (value != config::settings->icon_size_tool())
     {
-        app_settings.icon_size_tool(value);
+        config::settings->icon_size_tool(value);
         main_window_rebuild_all_toolbars(nullptr);
     }
 }
@@ -446,7 +443,7 @@ create_combobox()
     GtkTreeIter iter;
     if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter))
     {
-        const i32 current_tool_icon_size = app_settings.icon_size_tool();
+        const i32 current_tool_icon_size = config::settings->icon_size_tool();
         do
         {
             i32 value = 0;
@@ -472,10 +469,9 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool single_click = gtk_toggle_button_get_active(button);
-
-    if (single_click != app_settings.single_click())
+    if (single_click != config::settings->single_click())
     {
-        app_settings.single_click(single_click);
+        config::settings->single_click(single_click);
         // update all windows/all panels/all browsers
         for (MainWindow* window : main_window_get_all())
         {
@@ -487,7 +483,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
                 {
                     ptk::browser* file_browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                    file_browser->set_single_click(app_settings.single_click());
+                    file_browser->set_single_click(config::settings->single_click());
                 }
             }
         }
@@ -497,7 +493,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.single_click();
+    const bool value = config::settings->single_click();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -512,10 +508,9 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool single_hover = gtk_toggle_button_get_active(button);
-
-    if (single_hover != app_settings.single_hover())
+    if (single_hover != config::settings->single_hover())
     {
-        app_settings.single_hover(single_hover);
+        config::settings->single_hover(single_hover);
         // update all windows/all panels/all browsers
         for (MainWindow* window : main_window_get_all())
         {
@@ -529,7 +524,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                     // TODO
                     (void)file_browser;
-                    // file_browser->set_single_hover(app_settings.single_hover());
+                    // file_browser->set_single_hover(config::settings->single_hover());
                 }
             }
         }
@@ -539,7 +534,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.single_hover();
+    const bool value = config::settings->single_hover();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -556,9 +551,9 @@ check_button_cb(GtkToggleButton* button, void* user_data)
     const bool show_thumbnail = gtk_toggle_button_get_active(button);
 
     // thumbnail settings are changed
-    if (app_settings.show_thumbnail() != show_thumbnail)
+    if (config::settings->show_thumbnail() != show_thumbnail)
     {
-        app_settings.show_thumbnail(show_thumbnail);
+        config::settings->show_thumbnail(show_thumbnail);
         // update all windows/all panels/all browsers
         main_window_reload_thumbnails_all_windows();
     }
@@ -567,7 +562,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.show_thumbnail();
+    const bool value = config::settings->show_thumbnail();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -582,13 +577,13 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.thumbnail_size_limit(value);
+    config::settings->thumbnail_size_limit(value);
 }
 
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.thumbnail_size_limit();
+    const bool value = config::settings->thumbnail_size_limit();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -603,13 +598,13 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.thumbnailer_use_api(value);
+    config::settings->thumbnailer_use_api(value);
 }
 
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.thumbnailer_use_api();
+    const bool value = config::settings->thumbnailer_use_api();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -628,9 +623,9 @@ spinner_cb(GtkSpinButton* spinbutton, void* user_data)
     // convert size from MiB to B
     const u32 max_thumb_size = static_cast<u32>(value) * 1024 * 1024;
 
-    if (app_settings.max_thumb_size() != max_thumb_size)
+    if (config::settings->max_thumb_size() != max_thumb_size)
     {
-        app_settings.max_thumb_size(max_thumb_size);
+        config::settings->max_thumb_size(max_thumb_size);
         // update all windows/all panels/all browsers
         main_window_reload_thumbnails_all_windows();
     }
@@ -640,7 +635,7 @@ GtkSpinButton*
 create_pref_spinner(double scale, double lower, double upper, double step_incr, double page_incr,
                     i32 digits)
 {
-    const double value = app_settings.max_thumb_size() / scale;
+    const double value = config::settings->max_thumb_size() / scale;
 
     GtkAdjustment* adjustment = gtk_adjustment_new(value, lower, upper, step_incr, page_incr, 0.0);
     GtkSpinButton* spinner = GTK_SPIN_BUTTON(gtk_spin_button_new(adjustment, 0.0, digits));
@@ -661,10 +656,9 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool always_show_tabs = gtk_toggle_button_get_active(button);
-
-    if (always_show_tabs != app_settings.always_show_tabs())
+    if (always_show_tabs != config::settings->always_show_tabs())
     {
-        app_settings.always_show_tabs(always_show_tabs);
+        config::settings->always_show_tabs(always_show_tabs);
         for (MainWindow* window : main_window_get_all())
         { // update all windows/all panels
             for (const panel_t p : PANELS)
@@ -687,7 +681,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.always_show_tabs();
+    const bool value = config::settings->always_show_tabs();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -703,9 +697,9 @@ check_button_cb(GtkToggleButton* button, void* user_data)
     (void)user_data;
     const bool show_close_tab_buttons = gtk_toggle_button_get_active(button);
 
-    if (show_close_tab_buttons != app_settings.show_close_tab_buttons())
+    if (show_close_tab_buttons != config::settings->show_close_tab_buttons())
     {
-        app_settings.show_close_tab_buttons(show_close_tab_buttons);
+        config::settings->show_close_tab_buttons(show_close_tab_buttons);
         for (MainWindow* window : main_window_get_all())
         { // update all windows/all panels/all browsers
             for (const panel_t p : PANELS)
@@ -730,7 +724,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.show_close_tab_buttons();
+    const bool value = config::settings->show_close_tab_buttons();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -745,13 +739,13 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.confirm(value);
+    config::settings->confirm(value);
 }
 
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.confirm();
+    const bool value = config::settings->confirm();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -766,13 +760,13 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.confirm_trash(value);
+    config::settings->confirm_trash(value);
 }
 
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.confirm_trash();
+    const bool value = config::settings->confirm_trash();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -787,13 +781,13 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.confirm_delete(value);
+    config::settings->confirm_delete(value);
 }
 
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.confirm_delete();
+    const bool value = config::settings->confirm_delete();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -808,7 +802,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.use_si_prefix(value);
+    config::settings->use_si_prefix(value);
 
     main_window_refresh_all();
 }
@@ -816,7 +810,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.use_si_prefix();
+    const bool value = config::settings->use_si_prefix();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
@@ -831,13 +825,13 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
-    app_settings.click_executes(value);
+    config::settings->click_executes(value);
 }
 
 GtkCheckButton*
 create_pref_check_button(const std::string_view label)
 {
-    const bool value = app_settings.click_executes();
+    const bool value = config::settings->click_executes();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
     g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);

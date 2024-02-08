@@ -40,7 +40,7 @@
 
 #include "utils/shell-quote.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
@@ -265,7 +265,7 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
         }
 
         // create new thumbnail
-        if (app_settings.thumbnailer_use_api())
+        if (config::settings->thumbnailer_use_api())
         {
             try
             {

@@ -32,7 +32,7 @@
 
 #include "compat/gtk4-porting.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/utils/vfs-utils.hxx"
@@ -186,7 +186,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
         return;
     }
 
-    if (app_settings.confirm_delete())
+    if (config::settings->confirm_delete())
     {
         const bool confirmed =
             create_file_action_dialog(parent_win, "Delete selected files?", selected_files);
@@ -223,7 +223,7 @@ ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
         return;
     }
 
-    if (app_settings.confirm_trash())
+    if (config::settings->confirm_trash())
     {
         const bool confirmed =
             create_file_action_dialog(parent_win, "Trash selected files?", selected_files);

@@ -392,9 +392,9 @@ sources += files(
 
   'src/xset/utils/xset-utils.cxx',
 
-  'src/settings/app.cxx',
   'src/settings/config-load.cxx',
   'src/settings/config-save.cxx',
+  'src/settings/settings.cxx',
 
   'src/settings/upgrade/config-upgrade.cxx',
 

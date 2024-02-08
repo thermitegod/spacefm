@@ -42,7 +42,7 @@
 #include "xset/xset.hxx"
 #include "xset/xset-defaults.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 #include "settings/config.hxx"
 
 #include "terminal-handlers.hxx"
@@ -58,7 +58,7 @@ load_settings()
 {
     const auto settings_config_dir = vfs::program::config();
 
-    app_settings.load_saved_tabs(true);
+    config::settings->load_saved_tabs(true);
 
     xset_defaults();
 
@@ -71,7 +71,7 @@ load_settings()
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    bool git_backed_settings = app_settings.git_backed_settings();
+    bool git_backed_settings = config::settings->git_backed_settings();
     if (git_backed_settings)
     {
         if (Glib::find_program_in_path("git").empty())

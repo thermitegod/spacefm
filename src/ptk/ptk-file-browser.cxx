@@ -90,7 +90,7 @@
 #include "vfs/vfs-file.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 #include "utils/memory.hxx"
 #include "utils/shell-quote.hxx"
@@ -729,11 +729,11 @@ rebuild_toolbox(GtkWidget* widget, ptk::browser* file_browser)
     file_browser->toolbar = GTK_TOOLBAR(gtk_toolbar_new());
     gtk_box_pack_start(file_browser->toolbox_, GTK_WIDGET(file_browser->toolbar), true, true, 0);
     gtk_toolbar_set_style(file_browser->toolbar, GtkToolbarStyle::GTK_TOOLBAR_ICONS);
-    if (app_settings.icon_size_tool() > 0 &&
-        app_settings.icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
+    if (config::settings->icon_size_tool() > 0 &&
+        config::settings->icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
     {
         gtk_toolbar_set_icon_size(file_browser->toolbar,
-                                  (GtkIconSize)app_settings.icon_size_tool());
+                                  (GtkIconSize)config::settings->icon_size_tool());
     }
 
     // fill left toolbar
@@ -1644,7 +1644,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event, ptk::brows
              * activated or user clicked on non-row */
             ret = true;
         }
-        else if (!app_settings.single_click())
+        else if (!config::settings->single_click())
         {
             /* sfm 1.0.6 set skip_release for Icon/Compact to prevent file
              * under cursor being selected when entering dir with double-click.
@@ -1713,7 +1713,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event, ptk::bro
         case ptk::browser::view_mode::PTK_FB_LIST_VIEW:
             if (gtk_tree_view_is_rubber_banding_active(GTK_TREE_VIEW(widget)))
                 return false;
-            if (app_settings.get_single_click())
+            if (config::settings->get_single_click())
             {
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
@@ -1914,8 +1914,8 @@ create_folder_view(ptk::browser* file_browser, ptk::browser::view_mode view_mode
     GtkCellRenderer* renderer = nullptr;
 
     i32 icon_size = 0;
-    const i32 big_icon_size = app_settings.icon_size_big();
-    const i32 small_icon_size = app_settings.icon_size_small();
+    const i32 big_icon_size = config::settings->icon_size_big();
+    const i32 small_icon_size = config::settings->icon_size_small();
 
     PangoAttrList* attr_list = pango_attr_list_new();
     pango_attr_list_insert(attr_list, pango_attr_insert_hyphens_new(false));
@@ -2192,7 +2192,8 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view)
         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
-            if (column.column == ptk::file_list::column::name && !app_settings.always_show_tabs() &&
+            if (column.column == ptk::file_list::column::name &&
+                !config::settings->always_show_tabs() &&
                 file_browser->view_mode_ == ptk::browser::view_mode::list_view &&
                 gtk_notebook_get_n_pages(file_browser->notebook_) == 1)
             {
@@ -3031,7 +3032,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
     // this->button_press_ = false;
     this->is_drag_ = false;
     this->menu_shown_ = false;
-    if (this->view_mode_ == ptk::browser::view_mode::list_view || app_settings.single_click())
+    if (this->view_mode_ == ptk::browser::view_mode::list_view || config::settings->single_click())
     {
         /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
@@ -3690,7 +3691,7 @@ ptk::browser::close_tab() noexcept
     // gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
     gtk_widget_destroy(GTK_WIDGET(this));
 
-    if (!app_settings.always_show_tabs())
+    if (!config::settings->always_show_tabs())
     {
         if (gtk_notebook_get_n_pages(notebook) == 1)
         {
@@ -5728,7 +5729,7 @@ ptk::browser::update_toolbar_widgets(xset::tool tool_type) noexcept
             break;
         case xset::tool::show_thumb:
             x = 8;
-            b = app_settings.show_thumbnail();
+            b = config::settings->show_thumbnail();
             break;
         case xset::tool::large_icons:
             x = 9;

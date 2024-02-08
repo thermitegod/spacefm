@@ -30,7 +30,7 @@
 
 #include "types.hxx"
 
-#include "settings/app.hxx"
+#include "settings/settings.hxx"
 
 #if defined(HAVE_SOCKET)
 #include "commandline/socket.hxx"
@@ -54,9 +54,9 @@ run_commandline(const commandline_opt_data_t& opt) noexcept
         vfs::program::config(opt->config_dir);
     }
 
-    if (opt->git_backed_settings != app_settings.git_backed_settings())
+    if (opt->git_backed_settings != config::settings->git_backed_settings())
     {
-        app_settings.git_backed_settings(opt->git_backed_settings);
+        config::settings->git_backed_settings(opt->git_backed_settings);
     }
 
     if (opt->version)
