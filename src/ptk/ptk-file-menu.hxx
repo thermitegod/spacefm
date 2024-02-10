@@ -61,6 +61,10 @@ struct file_menu
 
     file_menu() = default;
     ~file_menu();
+    file_menu(const file_menu& other) = delete;
+    file_menu(file_menu&& other) = delete;
+    file_menu& operator=(const file_menu& other) = delete;
+    file_menu& operator=(file_menu&& other) = delete;
 
     ptk::browser* browser{nullptr};
     std::filesystem::path cwd{};
@@ -77,7 +81,13 @@ struct file_menu
 
 struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 {
+    AutoOpenCreate() = delete;
     AutoOpenCreate(ptk::browser* file_browser, bool open_file);
+    ~AutoOpenCreate() = default;
+    AutoOpenCreate(const AutoOpenCreate& other) = delete;
+    AutoOpenCreate(AutoOpenCreate&& other) = delete;
+    AutoOpenCreate& operator=(const AutoOpenCreate& other) = delete;
+    AutoOpenCreate& operator=(AutoOpenCreate&& other) = delete;
 
     ptk::browser* file_browser{nullptr};
     bool open_file{false};

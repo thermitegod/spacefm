@@ -56,12 +56,15 @@ struct file_task
     };
 
     file_task() = delete;
-    ~file_task();
-
     file_task(const vfs::file_task::type type,
               const std::span<const std::filesystem::path> src_files,
               const std::filesystem::path& dest_dir, GtkWindow* parent_window,
               GtkWidget* task_view);
+    ~file_task();
+    file_task(const file_task& other) = delete;
+    file_task(file_task&& other) = delete;
+    file_task& operator=(const file_task& other) = delete;
+    file_task& operator=(file_task&& other) = delete;
 
     std::shared_ptr<vfs::file_task> task{nullptr};
 

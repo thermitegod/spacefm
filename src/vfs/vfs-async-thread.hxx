@@ -36,8 +36,14 @@ struct async_thread : public std::enable_shared_from_this<async_thread>
 {
     using function_t = std::function<void()>;
 
+    async_thread() = delete;
     async_thread(const vfs::async_thread::function_t& task_function);
     ~async_thread();
+
+    async_thread(const async_thread& other) = delete;
+    async_thread(async_thread&& other) = delete;
+    async_thread& operator=(const async_thread& other) = delete;
+    async_thread& operator=(async_thread&& other) = delete;
 
     [[nodiscard]] static const std::shared_ptr<vfs::async_thread>
     create(const vfs::async_thread::function_t& task_function) noexcept;

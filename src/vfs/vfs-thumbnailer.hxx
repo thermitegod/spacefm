@@ -39,6 +39,10 @@ struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
     thumbnailer() = delete;
     thumbnailer(const std::shared_ptr<vfs::dir>& dir);
     ~thumbnailer();
+    thumbnailer(const thumbnailer& other) = delete;
+    thumbnailer(thumbnailer&& other) = delete;
+    thumbnailer& operator=(const thumbnailer& other) = delete;
+    thumbnailer& operator=(thumbnailer&& other) = delete;
 
     [[nodiscard]] static const std::shared_ptr<vfs::thumbnailer>
     create(const std::shared_ptr<vfs::dir>& dir) noexcept;

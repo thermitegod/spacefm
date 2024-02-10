@@ -62,7 +62,13 @@
 
 struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {
-    MoveSet(const std::shared_ptr<vfs::file>& file) : file(file){};
+    MoveSet() = delete;
+    MoveSet(const std::shared_ptr<vfs::file>& file);
+    ~MoveSet() = default;
+    MoveSet(const MoveSet& other) = delete;
+    MoveSet(MoveSet&& other) = delete;
+    MoveSet& operator=(const MoveSet& other) = delete;
+    MoveSet& operator=(MoveSet&& other) = delete;
 
     std::shared_ptr<vfs::file> file;
 
@@ -149,6 +155,8 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
     bool mode_change{false};
     bool is_move{false};
 };
+
+MoveSet::MoveSet(const std::shared_ptr<vfs::file>& file) : file(file) {}
 
 static void on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset);
 static const std::optional<std::filesystem::path> get_template_dir();

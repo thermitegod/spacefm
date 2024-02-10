@@ -62,6 +62,11 @@ struct volume_callback_data
 {
     volume_callback_data() = delete;
     volume_callback_data(vfs::volume::callback_t callback, void* callback_data);
+    ~volume_callback_data() = default;
+    volume_callback_data(const volume_callback_data& other) = delete;
+    volume_callback_data(volume_callback_data&& other) = delete;
+    volume_callback_data& operator=(const volume_callback_data& other) = delete;
+    volume_callback_data& operator=(volume_callback_data&& other) = delete;
 
     vfs::volume::callback_t cb{nullptr};
     void* user_data{nullptr};
@@ -96,6 +101,11 @@ struct DeviceMount
 {
     DeviceMount() = delete;
     DeviceMount(dev_t major, dev_t minor);
+    ~DeviceMount() = default;
+    DeviceMount(const DeviceMount& other) = delete;
+    DeviceMount(DeviceMount&& other) = delete;
+    DeviceMount& operator=(const DeviceMount& other) = delete;
+    DeviceMount& operator=(DeviceMount&& other) = delete;
 
     dev_t major{0};
     dev_t minor{0};

@@ -47,6 +47,10 @@ struct dir : public std::enable_shared_from_this<dir>
     dir() = delete;
     dir(const std::filesystem::path& path);
     ~dir();
+    dir(const dir& other) = delete;
+    dir(dir&& other) = delete;
+    dir& operator=(const dir& other) = delete;
+    dir& operator=(dir&& other) = delete;
 
     [[nodiscard]] static const std::shared_ptr<vfs::dir>
     create(const std::filesystem::path& path) noexcept;

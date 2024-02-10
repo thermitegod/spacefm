@@ -127,6 +127,11 @@ struct XSet : public std::enable_shared_from_this<XSet>
 {
     XSet() = delete;
     XSet(const std::string_view set_name, xset::name xset_name);
+    ~XSet() = default;
+    XSet(const XSet& other) = delete;
+    XSet(XSet&& other) = delete;
+    XSet& operator=(const XSet& other) = delete;
+    XSet& operator=(XSet&& other) = delete;
 
     std::string name{};
     xset::name xset_name;

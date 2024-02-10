@@ -61,8 +61,13 @@ struct trash_can
     struct trash_dir
     {
         // Create the trash directory and subdirectories if they do not exist.
+        trash_dir() = delete;
         trash_dir(const std::filesystem::path& path) noexcept;
         ~trash_dir() = default;
+        trash_dir(const trash_dir& other) = delete;
+        trash_dir(trash_dir&& other) = delete;
+        trash_dir& operator=(const trash_dir& other) = delete;
+        trash_dir& operator=(trash_dir&& other) = delete;
 
         // Get a unique name for use within the trash directory
         [[nodiscard]] const std::string

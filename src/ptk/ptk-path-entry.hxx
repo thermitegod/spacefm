@@ -27,7 +27,13 @@
 
 struct EntryData
 {
+    EntryData() = delete;
     EntryData(ptk::browser* browser);
+    ~EntryData() = default;
+    EntryData(const EntryData& other) = delete;
+    EntryData(EntryData&& other) = delete;
+    EntryData& operator=(const EntryData& other) = delete;
+    EntryData& operator=(EntryData&& other) = delete;
 
     ptk::browser* browser{nullptr};
     u32 seek_timer{0};

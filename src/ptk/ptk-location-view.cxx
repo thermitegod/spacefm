@@ -100,8 +100,13 @@ enum class column
 
 struct AutoOpen
 {
+    AutoOpen() = delete;
     AutoOpen(ptk::browser* file_browser);
     ~AutoOpen();
+    AutoOpen(const AutoOpen& other) = delete;
+    AutoOpen(AutoOpen&& other) = delete;
+    AutoOpen& operator=(const AutoOpen& other) = delete;
+    AutoOpen& operator=(AutoOpen&& other) = delete;
 
     ptk::browser* file_browser{nullptr};
     dev_t devnum{0};

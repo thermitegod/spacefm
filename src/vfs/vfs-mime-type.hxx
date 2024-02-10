@@ -39,8 +39,13 @@ namespace vfs
 struct mime_type
 {
   public:
+    mime_type() = delete;
     mime_type(const std::string_view type_name);
     ~mime_type();
+    mime_type(const mime_type& other) = delete;
+    mime_type(mime_type&& other) = delete;
+    mime_type& operator=(const mime_type& other) = delete;
+    mime_type& operator=(mime_type&& other) = delete;
 
     [[nodiscard]] static const std::shared_ptr<vfs::mime_type>
     create(const std::string_view type_name) noexcept;

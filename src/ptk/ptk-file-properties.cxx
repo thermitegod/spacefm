@@ -46,9 +46,14 @@
 
 struct properties_dialog_data : public std::enable_shared_from_this<properties_dialog_data>
 {
+    properties_dialog_data() = delete;
     properties_dialog_data(std::span<const std::shared_ptr<vfs::file>> file_list,
-                           const std::filesystem::path& cwd)
-        : file_list(file_list), cwd(cwd){};
+                           const std::filesystem::path& cwd);
+    ~properties_dialog_data() = default;
+    properties_dialog_data(const properties_dialog_data& other) = delete;
+    properties_dialog_data(properties_dialog_data&& other) = delete;
+    properties_dialog_data& operator=(const properties_dialog_data& other) = delete;
+    properties_dialog_data& operator=(properties_dialog_data&& other) = delete;
 
     std::span<const std::shared_ptr<vfs::file>> file_list{};
     std::filesystem::path cwd{};
@@ -66,6 +71,12 @@ struct properties_dialog_data : public std::enable_shared_from_this<properties_d
     GThread* calc_size_thread{nullptr};
     u32 update_label_timer{0};
 };
+
+properties_dialog_data::properties_dialog_data(
+    std::span<const std::shared_ptr<vfs::file>> file_list, const std::filesystem::path& cwd)
+    : file_list(file_list), cwd(cwd)
+{
+}
 
 const std::vector<std::filesystem::path>
 find_subdirectories(const std::filesystem::path& directory,

@@ -48,6 +48,10 @@ struct monitor
     monitor() = delete;
     monitor(const std::filesystem::path& path, const callback_t& callback);
     ~monitor();
+    monitor(const monitor& other) = delete;
+    monitor(monitor&& other) = delete;
+    monitor& operator=(const monitor& other) = delete;
+    monitor& operator=(monitor&& other) = delete;
 
     [[nodiscard]] static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
                                                                const callback_t& callback) noexcept;

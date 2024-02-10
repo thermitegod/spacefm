@@ -40,9 +40,13 @@ struct desktop
 {
   public:
     desktop() = delete;
-    // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", ztd::logger::utils::ptr(this)) };
-
     desktop(const std::filesystem::path& desktop_file) noexcept;
+    ~desktop() = default;
+    // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", ztd::logger::utils::ptr(this)) };
+    desktop(const desktop& other) = delete;
+    desktop(desktop&& other) = delete;
+    desktop& operator=(const desktop& other) = delete;
+    desktop& operator=(desktop&& other) = delete;
 
     [[nodiscard]] static const std::shared_ptr<desktop>
     create(const std::filesystem::path& desktop_file) noexcept;
