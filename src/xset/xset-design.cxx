@@ -227,7 +227,7 @@ xset_design_job(GtkWidget* item, const xset_t& set)
     }
 
     // autosave
-    autosave_request_add();
+    autosave::request_add();
 }
 
 static bool

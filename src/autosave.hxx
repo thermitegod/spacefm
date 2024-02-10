@@ -17,10 +17,12 @@
 
 #include <functional>
 
+namespace autosave
+{
+void request_add() noexcept;
+void request_cancel() noexcept;
+
 using autosave_t = std::function<void()>;
-
-void autosave_request_add() noexcept;
-void autosave_request_cancel() noexcept;
-
-void autosave_init(const autosave_t& autosave_func) noexcept;
-void autosave_terminate() noexcept;
+void create(const autosave_t& autosave_func) noexcept;
+void close() noexcept;
+} // namespace autosave

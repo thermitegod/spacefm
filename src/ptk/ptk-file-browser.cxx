@@ -3694,7 +3694,7 @@ ptk::browser::close_tab() noexcept
         main_window->set_window_title(a_browser);
         if (xset_get_b(xset::name::main_save_tabs))
         {
-            autosave_request_add();
+            autosave::request_add();
         }
         return;
     }
@@ -3713,7 +3713,7 @@ ptk::browser::close_tab() noexcept
     main_window->set_window_title(this);
     if (xset_get_b(xset::name::main_save_tabs))
     {
-        autosave_request_add();
+        autosave::request_add();
     }
 }
 
@@ -3737,7 +3737,7 @@ ptk::browser::restore_tab() noexcept
     main_window->set_window_title(this);
     if (xset_get_b(xset::name::main_save_tabs))
     {
-        autosave_request_add();
+        autosave::request_add();
     }
 }
 

@@ -13,125 +13,70 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <thread>
 #include <atomic>
-#include <condition_variable>
-#include <mutex>
-
-#include <vector>
 
 #include <memory>
-
-#include <chrono>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "program-timer.hxx"
+#include "concurrency.hxx"
 
 #include "autosave.hxx"
 
-using namespace std::literals::chrono_literals;
-
-class AutoSave
+struct requests_data
 {
-  public:
-    // returns false when killed:
-    template<class R, class P>
-    bool
-    wait(const std::chrono::duration<R, P>& time) noexcept
-    {
-        std::unique_lock<std::mutex> lock(m);
-        return !cv.wait_for(lock, time, [&] { return terminate; });
-    }
-    void
-    kill() noexcept
-    {
-        const std::unique_lock<std::mutex> lock(m);
-        this->terminate = true;
-        cv.notify_all();
-    }
-
-  public:
-    std::atomic<bool> accepting_requests{false};
-    std::atomic<bool> pending_requests{false};
-    // const std::chrono::seconds timer = 5s; // 5 seconds
-    const std::chrono::seconds timer = 300s; // 5 minutes
-
-  private:
-    std::condition_variable cv;
-    std::mutex m;
-    bool terminate{false};
+    std::atomic<bool> pending{false};
 };
 
-const auto autosave = std::make_unique<AutoSave>();
-
-std::vector<std::jthread> threads;
-
-static void
-autosave_thread(const autosave_t& autosave_func) noexcept
-{
-    const std::chrono::duration<u64> duration(autosave->timer);
-    while (autosave->wait(duration))
-    {
-        // ztd::logger::debug("AUTOSAVE Thread loop");
-        if (!autosave->pending_requests)
-        {
-            continue;
-        }
-
-        // ztd::logger::debug("AUTOSAVE Thread saving_settings");
-        autosave->pending_requests.store(false);
-        autosave_func();
-    }
-}
+const auto requests = std::make_unique<requests_data>();
 
 void
-autosave_request_add() noexcept
+autosave::request_add() noexcept
 {
     // ztd::logger::debug("AUTOSAVE request add");
-    if (autosave->accepting_requests)
-    {
-        autosave->pending_requests.store(true);
-    }
-    else
-    { // At program start lots of requests can be sent, this ignores them
-        if (program_timer::elapsed() >= std::chrono::seconds(10))
-        {
-            // ztd::logger::debug("AUTOSAVE now accepting request add");
-            autosave->accepting_requests.store(true);
-            autosave->pending_requests.store(true);
-        }
-        // else
-        // {
-        //     ztd::logger::debug("AUTOSAVE ignoring request add");
-        // }
-    }
+    requests->pending.store(true);
 }
 
 void
-autosave_request_cancel() noexcept
+autosave::request_cancel() noexcept
 {
     // ztd::logger::debug("AUTOSAVE request cancel");
-    autosave->pending_requests.store(false);
+    requests->pending.store(false);
 }
 
+namespace autosave::detail
+{
+concurrencpp::timer timer;
+} // namespace autosave::detail
+
 void
-autosave_init(const autosave_t& autosave_func) noexcept
+autosave::create(const autosave_t& autosave_func) noexcept
 {
     // ztd::logger::debug("AUTOSAVE init");
-    threads.emplace_back([autosave_func] { autosave_thread(autosave_func); });
+
+    using namespace std::chrono_literals;
+
+    // clang-format off
+    autosave::detail::timer = global::runtime.timer_queue()->make_timer(
+        300000ms, // 5 Minutes
+        300000ms, // 5 Minutes
+        global::runtime.thread_executor(),
+        [autosave_func]
+        {
+            // ztd::logger::debug("AUTOSAVE Thread loop");
+            if (requests->pending)
+            {
+                // ztd::logger::debug("AUTOSAVE Thread saving_settings");
+                requests->pending.store(false);
+                autosave_func();
+            }
+        });
+    // clang-format on
 }
 
 void
-autosave_terminate() noexcept
+autosave::close() noexcept
 {
-    // ztd::logger::debug("AUTOSAVE kill threads");
-    autosave->kill();
-
-    for (auto&& f : threads)
-    {
-        f.request_stop(); // Request that the thread stop
-        f.join();         // Wait for the thread to stop
-    }
+    autosave::detail::timer.cancel();
 }

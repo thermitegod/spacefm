@@ -381,7 +381,7 @@ main_window_rebuild_all_toolbars(ptk::browser* file_browser)
             }
         }
     }
-    autosave_request_add();
+    autosave::request_add();
 }
 
 void
@@ -416,7 +416,7 @@ update_views_all_windows(GtkWidget* item, ptk::browser* file_browser)
             }
         }
     }
-    autosave_request_add();
+    autosave::request_add();
 }
 
 void
@@ -582,7 +582,7 @@ show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window)
         }
     }
 
-    autosave_request_add();
+    autosave::request_add();
 }
 
 void
@@ -1500,7 +1500,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 
     // save settings
     config::settings->maximized(main_window->maximized);
-    autosave_request_cancel();
+    autosave::request_cancel();
     save_settings();
 
     // tasks running?
@@ -1656,7 +1656,7 @@ MainWindow::on_file_browser_after_chdir(ptk::browser* file_browser)
     }
     if (xset_get_b(xset::name::main_save_tabs))
     {
-        autosave_request_add();
+        autosave::request_add();
     }
 }
 
@@ -1920,7 +1920,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
 
-    autosave_request_cancel();
+    autosave::request_cancel();
     main_window->store_positions();
     save_settings();
     main_window->add_new_window();

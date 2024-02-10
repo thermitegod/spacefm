@@ -430,6 +430,6 @@ xset_menu_cb(GtkWidget* item, const xset_t& set)
 
     if (set->menu_style != xset::menu::normal)
     {
-        autosave_request_add();
+        autosave::request_add();
     }
 }

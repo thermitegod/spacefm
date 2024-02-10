@@ -380,7 +380,6 @@ sources += files(
   'src/main.cxx',
   'src/main-window.cxx',
   'src/preference-dialog.cxx',
-  'src/program-timer.cxx',
   'src/scripts.cxx',
   'src/settings.cxx',
   'src/single-instance.cxx',

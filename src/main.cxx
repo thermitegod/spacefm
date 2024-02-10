@@ -54,7 +54,6 @@
 #include "settings/settings.hxx"
 
 #include "single-instance.hxx"
-#include "program-timer.hxx"
 #include "autosave.hxx"
 
 #if defined(HAVE_SOCKET)
@@ -236,9 +235,6 @@ main(int argc, char* argv[])
 
     CLI11_PARSE(cli_app, argc, argv);
 
-    // start program timer
-    program_timer::start();
-
     // Gtk
     Glib::set_prgname(PACKAGE_NAME);
 
@@ -303,10 +299,10 @@ main(int argc, char* argv[])
     load_bookmarks();
 
     // start autosave thread
-    autosave_init(save_settings);
+    autosave::create(save_settings);
 
     std::atexit(tmp_clean);
-    std::atexit(autosave_terminate);
+    std::atexit(autosave::close);
     std::atexit(vfs::volume_finalize);
     std::atexit(save_bookmarks);
 
