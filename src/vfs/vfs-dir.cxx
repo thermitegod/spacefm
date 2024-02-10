@@ -42,10 +42,11 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "concurrency.hxx"
+
 #include "utils/memory.hxx"
 #include "utils/write.hxx"
 
-#include "vfs/vfs-async-thread.hxx"
 #include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
@@ -60,36 +61,23 @@ ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 
 vfs::dir::dir(const std::filesystem::path& path) : path_(path)
 {
-    // ztd::logger::debug("vfs::dir::dir({})   {}", ztd::logger::utils::ptr(this), path);
-
-    this->update_avoid_changes();
-
-    this->task_ = vfs::async_thread::create(std::bind(&vfs::dir::load_thread, this));
-
-    this->signal_task_load_dir = this->task_->add_event<spacefm::signal::task_finish>(
-        std::bind(&vfs::dir::on_list_task_finished, this, std::placeholders::_1));
-
-    this->task_->run(); /* asynchronous operation */
+    // ztd::logger::debug("vfs::dir::dir({})   {}", ztd::logger::utils::ptr(this), this->path_.string());
 }
 
 vfs::dir::~dir()
 {
-    // ztd::logger::debug("vfs::dir::~dir({})  {}", ztd::logger::utils::ptr(this), path);
+    // ztd::logger::debug("vfs::dir::~dir({})  {}", ztd::logger::utils::ptr(this), this->path_.string());
 
     this->signal_task_load_dir.disconnect();
 
-    if (this->task_)
-    {
-        // FIXME: should we generate a "file-list" signal to indicate the dir loading was cancelled?
-
-        // ztd::logger::trace("this->task({})", ztd::logger::utils::ptr(this->task));
-        this->task_->cancel();
-    }
+    this->shutdown_ = true;
 
     if (this->change_notify_timeout)
     {
         g_source_remove(this->change_notify_timeout);
     }
+
+    this->executor_result_.get().get();
 }
 
 const std::shared_ptr<vfs::dir>
@@ -99,26 +87,29 @@ vfs::dir::create(const std::filesystem::path& path) noexcept
     if (global::dir_smart_cache.contains(path))
     {
         dir = global::dir_smart_cache.at(path);
-        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", ztd::logger::utils::ptr(dir.get()), path);
+        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", ztd::logger::utils::ptr(dir.get()), this->path_.string());
     }
     else
     {
         dir = global::dir_smart_cache.create(
             path,
             std::bind([](const auto& path) { return std::make_shared<vfs::dir>(path); }, path));
-        // ztd::logger::debug("vfs::dir::dir({}) new     {}", ztd::logger::utils::ptr(dir.get()), path);
+        // ztd::logger::debug("vfs::dir::dir({}) new     {}", ztd::logger::utils::ptr(dir.get()), this->path_.string());
+        dir->post_initialize();
     }
-    // ztd::logger::debug("dir({})     {}", ztd::logger::utils::ptr(dir.get()), path);
+    // ztd::logger::debug("dir({})     {}", ztd::logger::utils::ptr(dir.get()), path.string());
     return dir;
 }
 
 void
-vfs::dir::on_list_task_finished(bool is_cancelled)
+vfs::dir::post_initialize() noexcept
 {
-    this->task_ = nullptr;
-    this->run_event<spacefm::signal::file_listed>(is_cancelled);
-    this->file_listed_ = true;
-    this->load_complete_ = true;
+    // ztd::logger::debug("vfs::dir::post_initialize({})     {}", ztd::logger::utils::ptr(this), this->path_.string());
+
+    this->update_avoid_changes();
+
+    this->executor_ = global::runtime.thread_executor();
+    this->executor_result_ = this->executor_->submit([this] { return this->load_thread(); });
 }
 
 const std::filesystem::path&
@@ -206,26 +197,24 @@ vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
     return false;
 }
 
-void
-vfs::dir::load_thread()
+concurrencpp::result<bool>
+vfs::dir::load_thread() noexcept
 {
-    this->file_listed_ = false;
+    // ztd::logger::debug("vfs::dir::load_thread({})   {}", ztd::logger::utils::ptr(this), this->path_.string());
+
+    auto guard = co_await this->lock_.lock(this->executor_);
+
     this->load_complete_ = false;
     this->xhidden_count_ = 0;
-
-    /* Install file alteration monitor */
-    this->monitor_ = vfs::monitor::create(
-        this->path_,
-        std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
 
     // load this dirs .hidden file
     this->load_user_hidden_files();
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
-        if (this->task_->is_canceled())
+        if (this->shutdown_)
         {
-            break;
+            co_return true;
         }
 
         if (this->is_file_user_hidden(dfile.path()))
@@ -236,11 +225,39 @@ vfs::dir::load_thread()
 
         this->files_.push_back(vfs::file::create(dfile.path()));
     }
+
+    // Install file alteration monitor
+    // Do this here to avoid catching events while the dir is loading.
+    this->monitor_ = vfs::monitor::create(
+        this->path_,
+        std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
+
+    this->run_event<spacefm::signal::file_listed>();
+
+    this->load_complete_ = true;
+    this->load_complete_initial_ = true;
+
+    co_return true;
 }
 
 void
 vfs::dir::refresh() noexcept
 {
+    if (this->load_complete_initial_ && !this->running_refresh_)
+    {
+        // Only allow a refresh if the inital load has been completed.
+        this->executor_result_ = this->executor_->submit([this] { return this->refresh_thread(); });
+    }
+}
+
+concurrencpp::result<bool>
+vfs::dir::refresh_thread() noexcept
+{
+    auto guard = co_await this->lock_.lock(this->executor_);
+
+    this->load_complete_ = false;
+    this->running_refresh_ = true;
+
     this->xhidden_count_ = 0;
 
     // reload this dirs .hidden file
@@ -248,6 +265,11 @@ vfs::dir::refresh() noexcept
 
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
+        if (this->shutdown_)
+        {
+            break;
+        }
+
         // Check if new files are hidden
         if (this->is_file_user_hidden(dfile.path()))
         {
@@ -264,6 +286,11 @@ vfs::dir::refresh() noexcept
 
     for (const auto& file : this->files_)
     {
+        if (this->shutdown_)
+        {
+            break;
+        }
+
         // Check if existing files have been hidden
         if (this->is_file_user_hidden(file->path()))
         {
@@ -286,6 +313,11 @@ vfs::dir::refresh() noexcept
             file->load_thumbnail(vfs::file::thumbnail_size::small);
         }
     }
+
+    this->load_complete_ = true;
+    this->running_refresh_ = false;
+
+    co_return true;
 }
 
 /* Callback function which will be called when monitored events happen */
@@ -376,15 +408,15 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
 }
 
 bool
-vfs::dir::is_loaded() const noexcept
+vfs::dir::is_loading() const noexcept
 {
-    return this->load_complete_;
+    return !this->load_complete_;
 }
 
 bool
-vfs::dir::is_file_listed() const noexcept
+vfs::dir::is_loaded() const noexcept
 {
-    return this->file_listed_;
+    return this->load_complete_;
 }
 
 bool

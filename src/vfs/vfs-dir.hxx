@@ -32,6 +32,8 @@
 
 #include <ztd/ztd.hxx>
 
+#include "concurrency.hxx"
+
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-monitor.hxx"
 
@@ -39,7 +41,6 @@
 
 namespace vfs
 {
-struct async_thread;
 struct thumbnailer;
 
 struct dir : public std::enable_shared_from_this<dir>
@@ -70,8 +71,11 @@ struct dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool avoid_changes() const noexcept;
     void update_avoid_changes() noexcept;
 
+    // The dir has finished loading
     [[nodiscard]] bool is_loaded() const noexcept;
-    [[nodiscard]] bool is_file_listed() const noexcept;
+    // The dir is still loading
+    [[nodiscard]] bool is_loading() const noexcept;
+
     [[nodiscard]] bool is_directory_empty() const noexcept;
 
     [[nodiscard]] bool add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept;
@@ -96,14 +100,16 @@ struct dir : public std::enable_shared_from_this<dir>
     u32 change_notify_timeout{0};
 
   private:
-    void load_thread();
+    // this function is to be called right after a vfs::dir is created in ::create().
+    // this is because this* only becomes a valid pointer after the constructor has finished.
+    void post_initialize() noexcept;
+
+    concurrencpp::result<bool> load_thread() noexcept;
+    concurrencpp::result<bool> refresh_thread() noexcept;
 
     void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
 
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
-
-    // signal callback
-    void on_list_task_finished(bool is_cancelled);
 
     [[nodiscard]] const std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;
@@ -118,22 +124,29 @@ struct dir : public std::enable_shared_from_this<dir>
     std::vector<std::shared_ptr<vfs::file>> files_{};
 
     std::shared_ptr<vfs::monitor> monitor_{nullptr};
-    std::shared_ptr<vfs::async_thread> task_{nullptr};
 
     std::vector<std::shared_ptr<vfs::file>> changed_files_{};
     std::vector<std::filesystem::path> created_files_{};
 
-    bool file_listed_{true};
-    bool load_complete_{true};
-    // bool cancel_{true};
-    // bool show_hidden_{true};
-    bool avoid_changes_{true};
+    bool avoid_changes_{true}; // disable file events, for nfs mount locations.
+
+    bool load_complete_{false};         // is dir loaded, initial load or refresh
+    bool load_complete_initial_{false}; // is dir loaded, initial load only, blocks refresh
+
+    bool running_refresh_{false}; // is a refresh currently being run.
+
+    bool shutdown_{false}; // use to signal that we are being destructed
 
     u64 xhidden_count_{0};
 
     std::mutex files_lock_;
     std::mutex changed_files_lock_;
     std::mutex created_files_lock_;
+
+    // Concurrency
+    std::shared_ptr<concurrencpp::thread_executor> executor_;
+    concurrencpp::result<concurrencpp::result<bool>> executor_result_;
+    concurrencpp::async_lock lock_;
 
     // Signals //
   public:
@@ -143,7 +156,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_created, sigc::connection>
     add_event(bind_fun fun)
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         return this->evt_file_created.connect(fun);
     }
 
@@ -151,7 +164,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_changed, sigc::connection>
     add_event(bind_fun fun)
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         return this->evt_file_changed.connect(fun);
     }
 
@@ -159,7 +172,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_deleted, sigc::connection>
     add_event(bind_fun fun)
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         return this->evt_file_deleted.connect(fun);
     }
 
@@ -206,10 +219,10 @@ struct dir : public std::enable_shared_from_this<dir>
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::file_listed, void>
-    run_event(bool is_cancelled) const noexcept
+    run_event() const noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::file_listed");
-        this->evt_file_listed.emit(is_cancelled);
+        this->evt_file_listed.emit();
     }
 
     template<spacefm::signal evt>
@@ -225,7 +238,7 @@ struct dir : public std::enable_shared_from_this<dir>
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_created;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_changed;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_deleted;
-    sigc::signal<void(bool)> evt_file_listed;
+    sigc::signal<void()> evt_file_listed;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_thumbnail_loaded;
 
   public:

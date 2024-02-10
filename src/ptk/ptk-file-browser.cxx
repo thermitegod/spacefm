@@ -435,12 +435,6 @@ ptk::browser::using_large_icons() const noexcept
 }
 
 bool
-ptk::browser::is_busy() const noexcept
-{
-    return this->busy_;
-}
-
-bool
 ptk::browser::pending_drag_status_tree() const noexcept
 {
     return this->pending_drag_status_tree_;
@@ -1261,6 +1255,7 @@ void
 ptk::browser::update_model() noexcept
 {
     ptk::file_list* list = ptk::file_list::create(this->dir_, this->show_hidden_files_);
+    assert(list != nullptr);
     GtkTreeModel* old_list = this->file_list_;
     this->file_list_ = GTK_TREE_MODEL(list);
     if (old_list)
@@ -1268,7 +1263,15 @@ ptk::browser::update_model() noexcept
         g_object_unref(G_OBJECT(old_list));
     }
 
-    this->read_sort_extra();
+    // set file sorting settings
+    list->sort_natural = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
+    list->sort_case =
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) == xset::b::xtrue;
+    list->sort_dir_ = ptk::file_list::sort_dir(
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::y));
+    list->sort_hidden_first =
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) == xset::b::xtrue;
+
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
                                          file_list_order_from_sort_order(this->sort_order_),
                                          this->sort_type_);
@@ -1293,33 +1296,25 @@ ptk::browser::update_model() noexcept
             gtk_tree_view_set_model(GTK_TREE_VIEW(this->folder_view_), GTK_TREE_MODEL(list));
             break;
     }
-
-    // try to smooth list bounce created by delayed re-appearance of column headers
-    // while (g_main_context_pending(nullptr))
-    //    g_main_context_iteration(nullptr, true);
 }
 
 void
-ptk::browser::on_dir_file_listed(bool is_cancelled)
+ptk::browser::on_dir_file_listed()
 {
     this->n_sel_files_ = 0;
 
-    if (!is_cancelled)
-    {
-        this->signal_file_created.disconnect();
-        this->signal_file_deleted.disconnect();
-        this->signal_file_changed.disconnect();
+    this->signal_file_created.disconnect();
+    this->signal_file_deleted.disconnect();
+    this->signal_file_changed.disconnect();
 
-        this->signal_file_created = this->dir_->add_event<spacefm::signal::file_created>(
-            std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
-        this->signal_file_deleted = this->dir_->add_event<spacefm::signal::file_deleted>(
-            std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
-        this->signal_file_changed = this->dir_->add_event<spacefm::signal::file_changed>(
-            std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
-    }
+    this->signal_file_created = this->dir_->add_event<spacefm::signal::file_created>(
+        std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
+    this->signal_file_deleted = this->dir_->add_event<spacefm::signal::file_deleted>(
+        std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
+    this->signal_file_changed = this->dir_->add_event<spacefm::signal::file_changed>(
+        std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
 
     this->update_model();
-    this->busy_ = false;
 
     /* Ensuring free space at the end of the heap is freed to the OS,
      * mainly to deal with the possibility that changing the directory results in
@@ -1345,7 +1340,7 @@ ptk::browser::on_dir_file_listed(bool is_cancelled)
     //            reduce unnecessary code?
     if (this->view_mode_ == ptk::browser::view_mode::compact_view)
     { // why is this needed for compact view???
-        if (!is_cancelled && this->file_list_)
+        if (this->file_list_)
         {
             this->show_thumbnails(this->max_thumbnail_);
         }
@@ -3085,10 +3080,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
         return false;
     }
 
-    // bool cancel;
     // this->run_event<spacefm::signal::chdir_before>();
-    // if (cancel)
-    //     return false;
 
     this->update_selection_history();
 
@@ -3126,23 +3118,18 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
     // load new dir
 
     this->signal_file_listed.disconnect();
-    this->busy_ = true;
     this->dir_ = vfs::dir::create(path);
 
     this->run_event<spacefm::signal::chdir_begin>();
 
-    if (this->dir_->is_file_listed())
-    {
-        this->on_dir_file_listed(false);
-        this->busy_ = false;
-    }
-    else
-    {
-        this->busy_ = true;
-    }
-
     this->signal_file_listed = this->dir_->add_event<spacefm::signal::file_listed>(
-        std::bind(&ptk::browser::on_dir_file_listed, this, std::placeholders::_1));
+        std::bind(&ptk::browser::on_dir_file_listed, this));
+    if (this->dir_->is_loaded())
+    {
+        // TODO - if the dir is loaded from cache then it will not run the file_listed signal.
+        // this should be a tmp workaround
+        this->on_dir_file_listed();
+    }
 
     this->update_tab_label();
 
@@ -3526,9 +3513,8 @@ ptk::browser::go_up() noexcept
 void
 ptk::browser::refresh(const bool update_selected_files) noexcept
 {
-    if (this->busy_)
+    if (this->dir_->is_loading())
     {
-        // a dir is already loading
         return;
     }
 
@@ -3552,21 +3538,9 @@ ptk::browser::refresh(const bool update_selected_files) noexcept
     ::utils::memory_trim();
 
     // begin reload dir
-    this->busy_ = true;
-
     this->run_event<spacefm::signal::chdir_begin>();
 
-    if (this->dir_->is_file_listed())
-    {
-        this->dir_->refresh();
-
-        this->on_dir_file_listed(false);
-        this->busy_ = false;
-    }
-    else
-    {
-        this->busy_ = true;
-    }
+    this->dir_->refresh();
 }
 
 void
@@ -4289,24 +4263,6 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
                                        : magic_enum::enum_integer(xset::b::xtrue)));
     }
     list->sort();
-}
-
-void
-ptk::browser::read_sort_extra() const noexcept
-{
-    ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(this->file_list_);
-    if (!list)
-    {
-        return;
-    }
-
-    list->sort_natural = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
-    list->sort_case =
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) == xset::b::xtrue;
-    list->sort_dir_ = ptk::file_list::sort_dir(
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::y));
-    list->sort_hidden_first =
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) == xset::b::xtrue;
 }
 
 void
@@ -5849,7 +5805,7 @@ ptk::browser::update_statusbar() const noexcept
     }
 
     // Show Reading... while sill loading
-    if (this->is_busy())
+    if (!this->dir_ || this->dir_->is_loading())
     {
         statusbar_txt.append(std::format("Reading {} ...", cwd.string()));
         gtk_statusbar_pop(this->statusbar, 0);

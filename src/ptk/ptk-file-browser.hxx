@@ -110,7 +110,6 @@ struct browser
     bool single_click_{true};
     bool show_hidden_files_{true};
     bool large_icons_{true};
-    bool busy_{false};
     bool pending_drag_status_{true};
     dev_t drag_source_dev_{0};
     ino_t drag_source_inode_{0};
@@ -240,7 +239,6 @@ struct browser
     void set_sort_order(ptk::browser::sort_order order) noexcept;
     void set_sort_type(GtkSortType order) noexcept;
     void set_sort_extra(xset::name setname) const noexcept;
-    void read_sort_extra() const noexcept;
 
     void paste_link() const noexcept;
     void paste_target() const noexcept;
@@ -298,7 +296,6 @@ struct browser
     void update_model() noexcept;
 
     bool using_large_icons() const noexcept;
-    bool is_busy() const noexcept;
 
     bool pending_drag_status_tree() const noexcept;
     void pending_drag_status_tree(bool val) noexcept;
@@ -325,7 +322,7 @@ struct browser
   public:
     // signal
     void on_folder_content_changed(const std::shared_ptr<vfs::file>& file);
-    void on_dir_file_listed(bool is_cancelled);
+    void on_dir_file_listed();
 
     // Signals
   public:

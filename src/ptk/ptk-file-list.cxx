@@ -857,6 +857,11 @@ ptk::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 void
 ptk::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
+    if (!this->dir || this->dir->is_loading())
+    {
+        return;
+    }
+
     if (!this->show_hidden && file->is_hidden())
     {
         return;
