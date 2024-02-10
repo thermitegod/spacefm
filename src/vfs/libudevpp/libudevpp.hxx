@@ -42,7 +42,7 @@ struct udev
 {
   public:
     explicit udev() : handle(udev_new(), &udev_unref) {}
-    udev(const udev& other) : handle(other.handle) {}
+    udev(const udev& other) = default;
     udev(udev&& other) noexcept : handle(std::move(other.handle)) {}
     udev& operator=(const udev& other) = default;
     udev& operator=(udev&& other) = default;
@@ -99,7 +99,7 @@ struct monitor
   public:
     monitor() = default;
     monitor(struct ::udev_monitor* device) : handle(device, &udev_monitor_unref){};
-    monitor(const monitor& other) : handle(other.handle) {}
+    monitor(const monitor& other) = default;
     monitor(monitor&& other) noexcept : handle(std::move(other.handle)) {}
     monitor& operator=(const monitor& other) = default;
     monitor& operator=(monitor&& other) = default;
@@ -132,7 +132,7 @@ struct enumerate
   public:
     enumerate() = default;
     enumerate(struct ::udev_enumerate* enumerate) : handle(enumerate, &udev_enumerate_unref){};
-    enumerate(const enumerate& other) : handle(other.handle) {}
+    enumerate(const enumerate& other) = default;
     enumerate(enumerate&& other) noexcept : handle(std::move(other.handle)) {}
     enumerate& operator=(const enumerate& other) = default;
     enumerate& operator=(enumerate&& other) = default;
@@ -176,7 +176,7 @@ struct device
   public:
     device() = default;
     device(struct ::udev_device* device) : handle(device, &udev_device_unref){};
-    device(const device& other) : handle(other.handle) {}
+    device(const device& other) = default;
     device(device&& other) noexcept : handle(std::move(other.handle)) {}
     device& operator=(const device& other) = default;
     device& operator=(device&& other) = default;
