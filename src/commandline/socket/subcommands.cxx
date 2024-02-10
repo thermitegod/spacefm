@@ -34,7 +34,7 @@ setup_subcommand_set(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("set", "Sets a property");
 
-    const auto run_subcommand = [&opt]() { opt->command = "set"; };
+    const auto run_subcommand = [opt]() { opt->command = "set"; };
     sub->callback(run_subcommand);
 
     sub->require_subcommand();
@@ -100,7 +100,7 @@ setup_subcommand_get(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("get", "Gets a property");
 
-    const auto run_subcommand = [&opt]() { opt->command = "get"; };
+    const auto run_subcommand = [opt]() { opt->command = "get"; };
     sub->callback(run_subcommand);
 
     sub->require_subcommand();
@@ -165,7 +165,7 @@ setup_subcommand_set_task(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("set-task", "Sets a task property");
 
-    const auto run_subcommand = [&opt]() { opt->command = "set-task"; };
+    const auto run_subcommand = [opt]() { opt->command = "set-task"; };
     sub->callback(run_subcommand);
 
     sub->require_subcommand();
@@ -197,7 +197,7 @@ setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt)
 
     sub->add_option("property", opt->socket_data, "Property to get")->required(true)->expected(2);
 
-    const auto run_subcommand = [&opt]() { opt->command = "get-task"; };
+    const auto run_subcommand = [opt]() { opt->command = "get-task"; };
     sub->callback(run_subcommand);
 
     sub->require_subcommand();
@@ -230,7 +230,7 @@ setup_subcommand_run_task(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("run-task", "Starts a new task");
 
-    const auto run_subcommand = [&opt]() { opt->command = "run-task"; };
+    const auto run_subcommand = [opt]() { opt->command = "run-task"; };
     sub->callback(run_subcommand);
 
     sub->require_subcommand();
@@ -261,7 +261,7 @@ setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt)
         ->required(true)
         ->expected(1, 2);
 
-    const auto run_subcommand = [&opt]() { opt->command = "emit-key"; };
+    const auto run_subcommand = [opt]() { opt->command = "emit-key"; };
     sub->callback(run_subcommand);
 }
 
@@ -276,7 +276,7 @@ setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt)
 
     sub->add_option("property", opt->socket_data, "Property to get")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->command = "activate"; };
+    const auto run_subcommand = [opt]() { opt->command = "activate"; };
     sub->callback(run_subcommand);
 }
 
@@ -293,7 +293,7 @@ setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt)
         ->required(true)
         ->expected(2, -1);
 
-    const auto run_subcommand = [&opt]() { opt->command = "add-event"; };
+    const auto run_subcommand = [opt]() { opt->command = "add-event"; };
     sub->callback(run_subcommand);
 }
 
@@ -312,7 +312,7 @@ setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& op
         ->required(true)
         ->expected(2, -1);
 
-    const auto run_subcommand = [&opt]() { opt->command = "replace-event"; };
+    const auto run_subcommand = [opt]() { opt->command = "replace-event"; };
     sub->callback(run_subcommand);
 }
 
@@ -329,7 +329,7 @@ setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt
         ->required(true)
         ->expected(2, -1);
 
-    const auto run_subcommand = [&opt]() { opt->command = "remove-event"; };
+    const auto run_subcommand = [opt]() { opt->command = "remove-event"; };
     sub->callback(run_subcommand);
 }
 
@@ -342,7 +342,7 @@ setup_subcommand_help(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("help", "Show socket help");
 
-    const auto run_subcommand = [&opt]() { opt->command = "help"; };
+    const auto run_subcommand = [opt]() { opt->command = "help"; };
     sub->callback(run_subcommand);
 }
 
@@ -355,6 +355,6 @@ setup_subcommand_ping(CLI::App* app, const socket_subcommand_data_t& opt)
 {
     auto* sub = app->add_subcommand("ping", "Test socket read/write");
 
-    const auto run_subcommand = [&opt]() { opt->command = "ping"; };
+    const auto run_subcommand = [opt]() { opt->command = "ping"; };
     sub->callback(run_subcommand);
 }

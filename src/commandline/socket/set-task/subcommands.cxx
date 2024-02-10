@@ -30,7 +30,7 @@ commandline::socket::set_task::icon(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "icon"; };
+    const auto run_subcommand = [opt]() { opt->property = "icon"; };
     sub->callback(run_subcommand);
 }
 
@@ -45,7 +45,7 @@ commandline::socket::set_task::count(CLI::App* app, const socket_subcommand_data
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "count"; };
+    const auto run_subcommand = [opt]() { opt->property = "count"; };
     sub->callback(run_subcommand);
 }
 
@@ -60,7 +60,7 @@ commandline::socket::set_task::directory(CLI::App* app, const socket_subcommand_
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "directory"; };
+    const auto run_subcommand = [opt]() { opt->property = "directory"; };
     sub->callback(run_subcommand);
 }
 
@@ -75,7 +75,7 @@ commandline::socket::set_task::from(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "from"; };
+    const auto run_subcommand = [opt]() { opt->property = "from"; };
     sub->callback(run_subcommand);
 }
 
@@ -90,7 +90,7 @@ commandline::socket::set_task::item(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "item"; };
+    const auto run_subcommand = [opt]() { opt->property = "item"; };
     sub->callback(run_subcommand);
 }
 
@@ -105,7 +105,7 @@ commandline::socket::set_task::to(CLI::App* app, const socket_subcommand_data_t&
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "to"; };
+    const auto run_subcommand = [opt]() { opt->property = "to"; };
     sub->callback(run_subcommand);
 }
 
@@ -120,7 +120,7 @@ commandline::socket::set_task::progress(CLI::App* app, const socket_subcommand_d
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "progress"; };
+    const auto run_subcommand = [opt]() { opt->property = "progress"; };
     sub->callback(run_subcommand);
 }
 
@@ -135,7 +135,7 @@ commandline::socket::set_task::total(CLI::App* app, const socket_subcommand_data
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "total"; };
+    const auto run_subcommand = [opt]() { opt->property = "total"; };
     sub->callback(run_subcommand);
 }
 
@@ -150,7 +150,7 @@ commandline::socket::set_task::curspeed(CLI::App* app, const socket_subcommand_d
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "curspeed"; };
+    const auto run_subcommand = [opt]() { opt->property = "curspeed"; };
     sub->callback(run_subcommand);
 }
 
@@ -165,7 +165,7 @@ commandline::socket::set_task::curremain(CLI::App* app, const socket_subcommand_
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "curremain"; };
+    const auto run_subcommand = [opt]() { opt->property = "curremain"; };
     sub->callback(run_subcommand);
 }
 
@@ -178,7 +178,7 @@ commandline::socket::set_task::avgspeed(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("avgspeed", "Set task avgspeed");
 
-    const auto run_subcommand = [&opt]() { opt->property = "avgspeed"; };
+    const auto run_subcommand = [opt]() { opt->property = "avgspeed"; };
     sub->callback(run_subcommand);
 }
 
@@ -193,7 +193,7 @@ commandline::socket::set_task::avgremain(CLI::App* app, const socket_subcommand_
 
     sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "avgremain"; };
+    const auto run_subcommand = [opt]() { opt->property = "avgremain"; };
     sub->callback(run_subcommand);
 }
 
@@ -206,7 +206,7 @@ setup_subcommand_set_task_queue_state_run(CLI::App* app, const socket_subcommand
 {
     auto* sub = app->add_subcommand("run", "Set task property run");
 
-    const auto run_subcommand = [&opt]() { opt->subproperty = "run"; };
+    const auto run_subcommand = [opt]() { opt->subproperty = "run"; };
     sub->callback(run_subcommand);
 }
 
@@ -215,7 +215,7 @@ setup_subcommand_set_task_queue_state_pause(CLI::App* app, const socket_subcomma
 {
     auto* sub = app->add_subcommand("pause", "Set task property pause");
 
-    const auto run_subcommand = [&opt]() { opt->subproperty = "pause"; };
+    const auto run_subcommand = [opt]() { opt->subproperty = "pause"; };
     sub->callback(run_subcommand);
 }
 
@@ -224,7 +224,7 @@ setup_subcommand_set_task_queue_state_queue(CLI::App* app, const socket_subcomma
 {
     auto* sub = app->add_subcommand("queue", "Set task property queue");
 
-    const auto run_subcommand = [&opt]() { opt->subproperty = "queue"; };
+    const auto run_subcommand = [opt]() { opt->subproperty = "queue"; };
     sub->callback(run_subcommand);
 }
 
@@ -233,7 +233,7 @@ setup_subcommand_set_task_queue_state_queued(CLI::App* app, const socket_subcomm
 {
     auto* sub = app->add_subcommand("queued", "Set task property queued");
 
-    const auto run_subcommand = [&opt]() { opt->subproperty = "queued"; };
+    const auto run_subcommand = [opt]() { opt->subproperty = "queued"; };
     sub->callback(run_subcommand);
 }
 
@@ -242,7 +242,7 @@ setup_subcommand_set_task_queue_state_stop(CLI::App* app, const socket_subcomman
 {
     auto* sub = app->add_subcommand("stop", "Set task property stop");
 
-    const auto run_subcommand = [&opt]() { opt->subproperty = "stop"; };
+    const auto run_subcommand = [opt]() { opt->subproperty = "stop"; };
     sub->callback(run_subcommand);
 }
 
@@ -251,7 +251,7 @@ commandline::socket::set_task::queue_state(CLI::App* app, const socket_subcomman
 {
     auto* sub = app->add_subcommand("queue-state", "Set task queue-state");
 
-    const auto run_subcommand = [&opt]() { opt->property = "queue_state"; };
+    const auto run_subcommand = [opt]() { opt->property = "queue_state"; };
     sub->callback(run_subcommand);
 
     sub->require_subcommand();

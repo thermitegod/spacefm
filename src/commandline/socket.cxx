@@ -128,9 +128,6 @@ setup_subcommand_socket(CLI::App& app)
     sub->add_option("-p,--panel", opt->panel, "Panel to use");
     sub->add_option("-t,--tab", opt->tab, "tab to use");
 
-    const auto run_subcommand = [&opt]() { run_subcommand_socket(opt); };
-    sub->callback(run_subcommand);
-
     // socket subcommand is used to run other subcommands make sure that they are used.
     sub->require_subcommand();
 
@@ -146,4 +143,7 @@ setup_subcommand_socket(CLI::App& app)
     setup_subcommand_remove_event(sub, opt);
     setup_subcommand_help(sub, opt);
     setup_subcommand_ping(sub, opt);
+
+    const auto run_subcommand = [opt]() { run_subcommand_socket(opt); };
+    sub->callback(run_subcommand);
 }

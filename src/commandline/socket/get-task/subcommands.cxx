@@ -28,7 +28,7 @@ commandline::socket::get_task::icon(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("icon", "Get task icon");
 
-    const auto run_subcommand = [&opt]() { opt->property = "icon"; };
+    const auto run_subcommand = [opt]() { opt->property = "icon"; };
     sub->callback(run_subcommand);
 }
 
@@ -41,7 +41,7 @@ commandline::socket::get_task::count(CLI::App* app, const socket_subcommand_data
 {
     auto* sub = app->add_subcommand("count", "Get task count");
 
-    const auto run_subcommand = [&opt]() { opt->property = "count"; };
+    const auto run_subcommand = [opt]() { opt->property = "count"; };
     sub->callback(run_subcommand);
 }
 
@@ -54,7 +54,7 @@ commandline::socket::get_task::directory(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("directory", "Get task directory");
 
-    const auto run_subcommand = [&opt]() { opt->property = "directory"; };
+    const auto run_subcommand = [opt]() { opt->property = "directory"; };
     sub->callback(run_subcommand);
 }
 
@@ -67,7 +67,7 @@ commandline::socket::get_task::from(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("from", "Get task from");
 
-    const auto run_subcommand = [&opt]() { opt->property = "from"; };
+    const auto run_subcommand = [opt]() { opt->property = "from"; };
     sub->callback(run_subcommand);
 }
 
@@ -80,7 +80,7 @@ commandline::socket::get_task::item(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("item", "Get task item");
 
-    const auto run_subcommand = [&opt]() { opt->property = "item"; };
+    const auto run_subcommand = [opt]() { opt->property = "item"; };
     sub->callback(run_subcommand);
 }
 
@@ -93,7 +93,7 @@ commandline::socket::get_task::to(CLI::App* app, const socket_subcommand_data_t&
 {
     auto* sub = app->add_subcommand("to", "Get task to");
 
-    const auto run_subcommand = [&opt]() { opt->property = "to"; };
+    const auto run_subcommand = [opt]() { opt->property = "to"; };
     sub->callback(run_subcommand);
 }
 
@@ -106,7 +106,7 @@ commandline::socket::get_task::progress(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("progress", "Get task progress");
 
-    const auto run_subcommand = [&opt]() { opt->property = "progress"; };
+    const auto run_subcommand = [opt]() { opt->property = "progress"; };
     sub->callback(run_subcommand);
 }
 
@@ -119,7 +119,7 @@ commandline::socket::get_task::total(CLI::App* app, const socket_subcommand_data
 {
     auto* sub = app->add_subcommand("total", "Get task total");
 
-    const auto run_subcommand = [&opt]() { opt->property = "total"; };
+    const auto run_subcommand = [opt]() { opt->property = "total"; };
     sub->callback(run_subcommand);
 }
 
@@ -132,7 +132,7 @@ commandline::socket::get_task::curspeed(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("curspeed", "Get task curspeed");
 
-    const auto run_subcommand = [&opt]() { opt->property = "curspeed"; };
+    const auto run_subcommand = [opt]() { opt->property = "curspeed"; };
     sub->callback(run_subcommand);
 }
 
@@ -145,7 +145,7 @@ commandline::socket::get_task::curremain(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("curremain", "Get task curremain");
 
-    const auto run_subcommand = [&opt]() { opt->property = "curremain"; };
+    const auto run_subcommand = [opt]() { opt->property = "curremain"; };
     sub->callback(run_subcommand);
 }
 
@@ -158,7 +158,7 @@ commandline::socket::get_task::avgspeed(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("avgspeed", "Get task avgspeed");
 
-    const auto run_subcommand = [&opt]() { opt->property = "avgspeed"; };
+    const auto run_subcommand = [opt]() { opt->property = "avgspeed"; };
     sub->callback(run_subcommand);
 }
 
@@ -171,7 +171,7 @@ commandline::socket::get_task::avgremain(CLI::App* app, const socket_subcommand_
 {
     auto* sub = app->add_subcommand("avgremain", "Get task avgremain");
 
-    const auto run_subcommand = [&opt]() { opt->property = "avgremain"; };
+    const auto run_subcommand = [opt]() { opt->property = "avgremain"; };
     sub->callback(run_subcommand);
 }
 
@@ -184,7 +184,7 @@ commandline::socket::get_task::elapsed(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("elapsed", "Get task elapsed");
 
-    const auto run_subcommand = [&opt]() { opt->property = "elapsed"; };
+    const auto run_subcommand = [opt]() { opt->property = "elapsed"; };
     sub->callback(run_subcommand);
 }
 
@@ -197,7 +197,7 @@ commandline::socket::get_task::started(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("started", "Get task started");
 
-    const auto run_subcommand = [&opt]() { opt->property = "started"; };
+    const auto run_subcommand = [opt]() { opt->property = "started"; };
     sub->callback(run_subcommand);
 }
 
@@ -210,7 +210,7 @@ commandline::socket::get_task::status(CLI::App* app, const socket_subcommand_dat
 {
     auto* sub = app->add_subcommand("status", "Get task status");
 
-    const auto run_subcommand = [&opt]() { opt->property = "status"; };
+    const auto run_subcommand = [opt]() { opt->property = "status"; };
     sub->callback(run_subcommand);
 }
 
@@ -223,6 +223,6 @@ commandline::socket::get_task::queue_state(CLI::App* app, const socket_subcomman
 {
     auto* sub = app->add_subcommand("queue-state", "Get task queue-state");
 
-    const auto run_subcommand = [&opt]() { opt->property = "queue_state"; };
+    const auto run_subcommand = [opt]() { opt->property = "queue_state"; };
     sub->callback(run_subcommand);
 }

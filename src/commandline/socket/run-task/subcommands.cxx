@@ -125,7 +125,7 @@ commandline::socket::run_task::edit(CLI::App* app, const socket_subcommand_data_
 
     sub->add_option("value", opt->socket_data, "File to edit")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "edit"; };
+    const auto run_subcommand = [opt]() { opt->property = "edit"; };
     sub->callback(run_subcommand);
 }
 
@@ -140,7 +140,7 @@ commandline::socket::run_task::mount(CLI::App* app, const socket_subcommand_data
 
     sub->add_option("value", opt->socket_data, "Device to mount")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "mount"; };
+    const auto run_subcommand = [opt]() { opt->property = "mount"; };
     sub->callback(run_subcommand);
 }
 
@@ -155,7 +155,7 @@ commandline::socket::run_task::umount(CLI::App* app, const socket_subcommand_dat
 
     sub->add_option("value", opt->socket_data, "Device to umount")->required(true)->expected(1);
 
-    const auto run_subcommand = [&opt]() { opt->property = "umount"; };
+    const auto run_subcommand = [opt]() { opt->property = "umount"; };
     sub->callback(run_subcommand);
 }
 
