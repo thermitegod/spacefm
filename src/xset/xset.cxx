@@ -41,7 +41,7 @@
 
 std::vector<xset_t> xsets;
 
-xset::XSet::XSet(const std::string_view set_name, xset::name xset_name)
+xset::XSet::XSet(const std::string_view set_name, const xset::name xset_name)
 {
     // ztd::logger::info("XSet Constructor");
     assert(set_name.empty() != true);
@@ -51,10 +51,10 @@ xset::XSet::XSet(const std::string_view set_name, xset::name xset_name)
 }
 
 const xset_t
-xset_new(const std::string_view name, xset::name xset_name) noexcept
+xset::XSet::create(const std::string_view name, const xset::name xset_name) noexcept
 {
-    const xset_t set = std::make_shared<xset::XSet>(name, xset_name);
-    assert(set != nullptr);
+    auto set = std::make_shared<xset::XSet>(name, xset_name);
+    xsets.push_back(set);
     return set;
 }
 
@@ -70,9 +70,7 @@ xset_get(const std::string_view name) noexcept
         }
     }
 
-    const xset_t set = xset_new(name, xset::get_xsetname_from_name(name));
-    xsets.push_back(set);
-    return set;
+    return xset::XSet::create(name, xset::get_xsetname_from_name(name));
 }
 
 const xset_t
@@ -87,9 +85,7 @@ xset_get(xset::name name) noexcept
         }
     }
 
-    const xset_t set = xset_new(xset::get_name_from_xsetname(name), name);
-    xsets.push_back(set);
-    return set;
+    return xset::XSet::create(xset::get_name_from_xsetname(name), name);
 }
 
 const xset_t

@@ -126,12 +126,15 @@ enum b
 struct XSet : public std::enable_shared_from_this<XSet>
 {
     XSet() = delete;
-    XSet(const std::string_view set_name, xset::name xset_name);
+    XSet(const std::string_view set_name, const xset::name xset_name);
     ~XSet() = default;
     XSet(const XSet& other) = delete;
     XSet(XSet&& other) = delete;
     XSet& operator=(const XSet& other) = delete;
     XSet& operator=(XSet&& other) = delete;
+
+    [[nodiscard]] static const std::shared_ptr<xset::XSet>
+    create(const std::string_view set_name, const xset::name xset_name) noexcept;
 
     std::string name{};
     xset::name xset_name;
@@ -188,8 +191,6 @@ struct XSet : public std::enable_shared_from_this<XSet>
 extern std::vector<xset_t> xsets;
 
 // get/set //
-
-const xset_t xset_new(const std::string_view name, xset::name xset_name) noexcept;
 
 const xset_t xset_get(xset::name name) noexcept;
 const xset_t xset_get(const std::string_view name) noexcept;
