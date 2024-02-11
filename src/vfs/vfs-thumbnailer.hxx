@@ -17,49 +17,52 @@
 
 #pragma once
 
-#include <deque>
-#include <unordered_map>
+#include <queue>
+
+#include <functional>
 
 #include <memory>
 
+#include <gdkmm.h>
+
 #include <ztd/ztd.hxx>
+
+#include "concurrency.hxx"
 
 #include "vfs/vfs-file.hxx"
 
 namespace vfs
 {
-struct async_task;
-struct dir;
-
-struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
+struct thumbnailer
 {
-  public:
+    using callback_t = std::function<void(const std::shared_ptr<vfs::file>& file)>;
+
     thumbnailer() = delete;
-    thumbnailer(const std::shared_ptr<vfs::dir>& dir);
-    ~thumbnailer();
+    thumbnailer(const callback_t& callback) noexcept;
+    ~thumbnailer() noexcept;
     thumbnailer(const thumbnailer& other) = delete;
     thumbnailer(thumbnailer&& other) = delete;
     thumbnailer& operator=(const thumbnailer& other) = delete;
     thumbnailer& operator=(thumbnailer&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::thumbnailer>
-    create(const std::shared_ptr<vfs::dir>& dir) noexcept;
-
-    void loader_request(const std::shared_ptr<vfs::file>& file,
-                        const vfs::file::thumbnail_size size) noexcept;
-
-    std::shared_ptr<vfs::dir> dir{nullptr};
-    vfs::async_task* task{nullptr};
-
-    u32 idle_handler{0};
-
-    struct request
+    struct request_data
     {
-        std::shared_ptr<vfs::file> file{nullptr};
-        std::unordered_map<vfs::file::thumbnail_size, i32> n_requests;
+        std::shared_ptr<vfs::file> file;
+        vfs::file::thumbnail_size size;
     };
+    concurrencpp::result<void> request(const request_data request) noexcept;
 
-    std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};
-    std::deque<std::shared_ptr<vfs::file>> update_queue{};
+  private:
+    concurrencpp::result<bool> thumbnailer_thread() noexcept;
+
+    std::queue<request_data> queue_{};
+
+    std::shared_ptr<concurrencpp::thread_executor> executor_;
+    concurrencpp::result<concurrencpp::result<bool>> executor_result_;
+    concurrencpp::async_condition_variable condition_;
+    concurrencpp::async_lock lock_;
+    bool abort_{false};
+
+    callback_t callback_{};
 };
 } // namespace vfs

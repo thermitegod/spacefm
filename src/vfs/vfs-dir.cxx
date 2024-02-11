@@ -35,8 +35,6 @@
 
 #include <fstream>
 
-#include <cassert>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -47,7 +45,6 @@
 #include "utils/memory.hxx"
 #include "utils/write.hxx"
 
-#include "vfs/vfs-async-task.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-volume.hxx"
@@ -68,9 +65,15 @@ vfs::dir::~dir()
 {
     // ztd::logger::debug("vfs::dir::~dir({})  {}", ztd::logger::utils::ptr(this), this->path_.string());
 
+    this->shutdown_ = true;
+
     this->signal_task_load_dir.disconnect();
 
-    this->shutdown_ = true;
+    this->evt_file_created.clear();
+    this->evt_file_changed.clear();
+    this->evt_file_deleted.clear();
+    this->evt_file_listed.clear();
+    this->evt_file_thumbnail_loaded.clear();
 
     if (this->change_notify_timeout)
     {
@@ -378,32 +381,19 @@ vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
 }
 
 void
-vfs::dir::cancel_all_thumbnail_requests() noexcept
+vfs::dir::enable_thumbnails(const bool enabled) noexcept
 {
-    this->thumbnailer = nullptr;
+    this->enable_thumbnails_ = enabled;
 }
 
 void
 vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
                          const vfs::file::thumbnail_size size) noexcept
 {
-    bool new_task = false;
-
-    // ztd::logger::debug("request thumbnail: {}, size: {}", file->name(), magic_enum::enum_name(size));
-    if (!this->thumbnailer)
+    if (this->enable_thumbnails_)
     {
-        // ztd::logger::debug("new_task: !this->thumbnailer");
-        this->thumbnailer = vfs::thumbnailer::create(this->shared_from_this());
-        assert(this->thumbnailer != nullptr);
-        new_task = true;
-    }
-
-    this->thumbnailer->loader_request(file, size);
-
-    if (new_task)
-    {
-        // ztd::logger::debug("new_task: this->thumbnailer->queue={}", this->thumbnailer->queue.size());
-        this->thumbnailer->task->run();
+        // ztd::logger::debug("vfs::dir::load_thumbnail()  {}", file->name());
+        this->thumbnailer_.request({file, size});
     }
 }
 
@@ -580,6 +570,11 @@ vfs::dir::reload_mime_type() noexcept
 void
 vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexcept
 {
+    if (this->shutdown_)
+    {
+        return;
+    }
+
     // Ignore avoid_changes for creation of files
     if (!force && this->avoid_changes_)
     {
@@ -601,6 +596,11 @@ vfs::dir::emit_file_created(const std::filesystem::path& path, bool force) noexc
 void
 vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
 {
+    if (this->shutdown_)
+    {
+        return;
+    }
+
     if (path.filename() == this->path_.filename() && !std::filesystem::exists(this->path_))
     {
         /* Special Case: The directory itself was deleted... */
@@ -632,6 +632,11 @@ void
 vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexcept
 {
     // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
+
+    if (this->shutdown_)
+    {
+        return;
+    }
 
     if (!force && this->avoid_changes_)
     {
@@ -673,6 +678,11 @@ vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexc
 void
 vfs::dir::emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
+    if (this->shutdown_)
+    {
+        return;
+    }
+
     const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
     if (std::ranges::contains(this->files_, file))

@@ -18,182 +18,76 @@
 
 #include <memory>
 
-#include <ranges>
-
-#include <cassert>
-
 #include <glibmm.h>
-
-#include <libffmpegthumbnailer/imagetypes.h>
-#include <libffmpegthumbnailer/videothumbnailer.h>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-async-task.hxx"
+#include "concurrency.hxx"
 
 #include "vfs/vfs-thumbnailer.hxx"
 
-static void* thumbnailer_thread(vfs::async_task* task,
-                                const std::shared_ptr<vfs::thumbnailer>& loader);
-static bool on_thumbnail_idle(void* user_data);
-
-vfs::thumbnailer::thumbnailer(const std::shared_ptr<vfs::dir>& dir) : dir(dir)
+vfs::thumbnailer::thumbnailer(const callback_t& callback) noexcept : callback_(callback)
 {
-    // ztd::logger::debug("vfs::dir::thumbnailer({})", ztd::logger::utils::ptr(this));
-
-    this->task = vfs::async_task::create((vfs::async_task::function_t)thumbnailer_thread, this);
+    // ztd::logger::debug("vfs::thumbnailer::thumbnailer({})", ztd::logger::utils::ptr(this));
+    this->executor_ = global::runtime.thread_executor();
+    this->executor_result_ = this->executor_->submit([this] { return this->thumbnailer_thread(); });
 }
 
-vfs::thumbnailer::~thumbnailer()
+vfs::thumbnailer::~thumbnailer() noexcept
 {
-    // ztd::logger::debug("vfs::dir::~thumbnailer({})", ztd::logger::utils::ptr(this));
-
-    if (this->idle_handler)
+    // ztd::logger::debug("vfs::thumbnailer::~thumbnailer({})", ztd::logger::utils::ptr(this));
     {
-        g_source_remove(this->idle_handler);
-        this->idle_handler = 0;
+        auto guard = this->lock_.lock(this->executor_);
+        this->abort_ = true;
     }
+    this->condition_.notify_all();
 
-    // stop the running thread, if any.
-    this->task->cancel();
-    g_object_unref(this->task);
+    this->executor_result_.get().get();
 }
 
-const std::shared_ptr<vfs::thumbnailer>
-vfs::thumbnailer::create(const std::shared_ptr<vfs::dir>& dir) noexcept
+concurrencpp::result<void>
+vfs::thumbnailer::request(vfs::thumbnailer::request_data request) noexcept
 {
-    return std::make_shared<vfs::thumbnailer>(dir);
-}
-
-void
-vfs::thumbnailer::loader_request(const std::shared_ptr<vfs::file>& file,
-                                 const vfs::file::thumbnail_size size) noexcept
-{
-    // Check if the request is already scheduled
-    for (const auto& req : this->queue)
+    // ztd::logger::debug("vfs::thumbnailer::request({})    {}", ztd::logger::utils::ptr(this), request.file->name());
     {
-        // ztd::logger::debug("req->file->name={} | file->name={}", req->file->name(), file->name());
-        // If file with the same name is already in our queue
-        if (req->file == file || req->file->name() == file->name())
-        {
-            ++req->n_requests[size];
-            return;
-        }
+        auto guard = co_await this->lock_.lock(this->executor_);
+        this->queue_.push(request);
     }
-
-    // ztd::logger::debug("this->queue add file={}", file->name());
-    const auto req = std::make_shared<vfs::thumbnailer::request>(file);
-    ++req->n_requests[size];
-
-    this->queue.push_back(req);
+    this->condition_.notify_one();
 }
 
-static bool
-on_thumbnail_idle(void* user_data)
+concurrencpp::result<bool>
+vfs::thumbnailer::thumbnailer_thread() noexcept
 {
-    // ztd::logger::debug("ENTER ON_THUMBNAIL_IDLE");
-    const auto loader = static_cast<vfs::thumbnailer*>(user_data)->shared_from_this();
-
-    while (!loader->update_queue.empty())
+    while (true)
     {
-        const auto& file = loader->update_queue.front();
-        loader->update_queue.pop_front();
+        auto guard = co_await this->lock_.lock(this->executor_);
+        co_await this->condition_.await(this->executor_,
+                                        guard,
+                                        [this] { return this->abort_ || !this->queue_.empty(); });
 
-        loader->dir->emit_thumbnail_loaded(file);
-    }
-
-    loader->idle_handler = 0;
-
-    if (loader->task->is_finished())
-    {
-        // ztd::logger::debug("FREE LOADER IN IDLE HANDLER");
-        // ztd::logger::trace("dir->thumbnailer({})", ztd::logger::utils::ptr(loader->dir->thumbnailer));
-        loader->dir->thumbnailer = nullptr;
-    }
-
-    // ztd::logger::debug("LEAVE ON_THUMBNAIL_IDLE");
-
-    return false;
-}
-
-static void*
-thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer>& loader)
-{
-    // ztd::logger::debug("thumbnailer_thread");
-    while (!task->is_canceled())
-    {
-        if (loader->queue.empty())
+        if (this->abort_)
         {
             break;
         }
-        // ztd::logger::debug("loader->queue={}", loader->queue.size());
 
-        const auto req = loader->queue.front();
-        assert(req != nullptr);
-        assert(req->file != nullptr);
-        // ztd::logger::debug("pop: {}", req->file->name());
-        loader->queue.pop_front();
+        const auto request = this->queue_.front();
+        this->queue_.pop();
 
-        bool need_update = false;
-        for (const auto [index, value] : std::views::enumerate(req->n_requests))
+        if (!request.file->is_thumbnail_loaded(request.size))
         {
-            if (value.second == 0)
-            {
-                continue;
-            }
-
-            if (!req->file->is_thumbnail_loaded(value.first))
-            {
-                // ztd::logger::debug("loader->dir->path    = {}", loader->dir->path);
-                // ztd::logger::debug("req->file->name()    = {}", req->file->name());
-                // ztd::logger::debug("req->file->path()    = {}", req->file->path().string());
-
-                req->file->load_thumbnail(value.first);
-
-                // Slow down for debugging.
-                // ztd::logger::debug("thumbnail loaded: {}", req->file);
-                // std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
-            need_update = true;
+            request.file->load_thumbnail(request.size);
+            // Slow down for debugging.
+            // ztd::logger::debug("thumbnail loaded: {}", request.file->name());
+            // std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        // ztd::logger::debug("task->is_canceled()={} need_update={}", task->is_canceled(), need_update);
-        if (!task->is_canceled() && need_update)
-        {
-            loader->update_queue.push_back(req->file);
-            if (loader->idle_handler == 0)
-            {
-                loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
-                                                       (GSourceFunc)on_thumbnail_idle,
-                                                       loader.get(),
-                                                       nullptr);
-            }
-        }
-        // ztd::logger::debug("NEED_UPDATE: {}", need_update);
-    }
 
-    if (task->is_canceled())
-    {
-        // ztd::logger::debug("THREAD CANCELLED!!!");
-        if (loader->idle_handler)
+        if (!this->abort_)
         {
-            g_source_remove(loader->idle_handler);
-            loader->idle_handler = 0;
+            this->callback_(request.file);
         }
     }
-    else
-    {
-        if (loader->idle_handler == 0)
-        {
-            // ztd::logger::debug("ADD IDLE HANDLER BEFORE THREAD ENDING");
-            loader->idle_handler = g_idle_add_full(G_PRIORITY_LOW,
-                                                   (GSourceFunc)on_thumbnail_idle,
-                                                   loader.get(),
-                                                   nullptr);
-        }
-    }
-    // ztd::logger::debug("THREAD ENDED!");
-    return nullptr;
+
+    co_return true;
 }

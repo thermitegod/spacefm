@@ -36,13 +36,12 @@
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-monitor.hxx"
+#include "vfs/vfs-thumbnailer.hxx"
 
 #include "signals.hxx"
 
 namespace vfs
 {
-struct thumbnailer;
-
 struct dir : public std::enable_shared_from_this<dir>
 {
     dir() = delete;
@@ -83,7 +82,7 @@ struct dir : public std::enable_shared_from_this<dir>
     void load_thumbnail(const std::shared_ptr<vfs::file>& file,
                         const vfs::file::thumbnail_size size) noexcept;
     void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
-    void cancel_all_thumbnail_requests() noexcept;
+    void enable_thumbnails(const bool enabled) noexcept;
 
     void reload_mime_type() noexcept;
 
@@ -96,7 +95,6 @@ struct dir : public std::enable_shared_from_this<dir>
     // TODO private
     void update_created_files() noexcept;
     void update_changed_files() noexcept;
-    std::shared_ptr<vfs::thumbnailer> thumbnailer{nullptr};
     u32 change_notify_timeout{0};
 
   private:
@@ -123,6 +121,8 @@ struct dir : public std::enable_shared_from_this<dir>
     std::filesystem::path path_{};
     std::vector<std::shared_ptr<vfs::file>> files_{};
 
+    vfs::thumbnailer thumbnailer_{
+        std::bind(&vfs::dir::emit_thumbnail_loaded, this, std::placeholders::_1)};
     std::shared_ptr<vfs::monitor> monitor_{nullptr};
 
     std::vector<std::shared_ptr<vfs::file>> changed_files_{};
@@ -134,6 +134,8 @@ struct dir : public std::enable_shared_from_this<dir>
     bool load_complete_initial_{false}; // is dir loaded, initial load only, blocks refresh
 
     bool running_refresh_{false}; // is a refresh currently being run.
+
+    bool enable_thumbnails_{true};
 
     bool shutdown_{false}; // use to signal that we are being destructed
 

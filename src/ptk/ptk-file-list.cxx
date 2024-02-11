@@ -779,10 +779,6 @@ ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 
     if (this->dir)
     {
-        if (this->max_thumbnail > 0)
-        { // cancel all possible pending requests
-            this->dir->cancel_all_thumbnail_requests();
-        }
         g_list_free(this->files);
 
         this->signal_file_created.disconnect();
@@ -977,7 +973,7 @@ ptk::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
     {
         if (old_max_thumbnail > 0) /* cancel thumbnails */
         {
-            this->dir->cancel_all_thumbnail_requests();
+            this->dir->enable_thumbnails(false);
 
             this->signal_file_thumbnail_loaded.disconnect();
 
