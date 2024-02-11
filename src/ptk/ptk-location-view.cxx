@@ -67,7 +67,6 @@
 inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
 static GtkTreeModel* model = nullptr;
-static i32 n_vols = 0;
 
 static void ptk_location_view_init_model(GtkListStore* list);
 
@@ -138,7 +137,6 @@ on_model_destroy(void* data, GObject* object)
     vfs_volume_remove_callback(on_volume_event, (void*)object);
 
     model = nullptr;
-    n_vols = 0;
 }
 
 void
@@ -426,7 +424,6 @@ static void
 ptk_location_view_init_model(GtkListStore* list)
 {
     (void)list;
-    n_vols = 0;
 
     vfs_volume_add_callback(on_volume_event, model);
 
@@ -593,7 +590,6 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
             g_object_unref(icon);
         }
     }
-    ++n_vols;
 }
 
 static void
@@ -618,7 +614,6 @@ remove_volume(const std::shared_ptr<vfs::volume>& vol)
         return;
     }
     gtk_list_store_remove(GTK_LIST_STORE(model), &it);
-    --n_vols;
 }
 
 static void
