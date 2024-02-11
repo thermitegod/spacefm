@@ -19,30 +19,30 @@
 
 #include <glibmm.h>
 
-#include "vfs/vfs-async-task.hxx"
+#include "ptk/deprecated/async-task.hxx"
 
 struct VFSAsyncTaskClass
 {
     GObjectClass parent_class;
-    void (*finish)(vfs::async_task* task, bool is_cancelled);
+    void (*finish)(async_task* task, bool is_cancelled);
 };
 
-GType vfs_async_task_get_type();
+GType async_task_get_type() noexcept;
 
-#define VFS_ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<vfs::async_task*>(obj))
+#define ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<async_task*>(obj))
 
-#define VFS_ASYNC_TASK_TYPE (vfs_async_task_get_type())
+#define ASYNC_TASK_TYPE (async_task_get_type())
 
-static void vfs_async_task_class_init(VFSAsyncTaskClass* klass);
-static void vfs_async_task_init(vfs::async_task* task);
-static void vfs_async_task_finalize(GObject* object);
-static void vfs_async_task_finish(vfs::async_task* task, bool is_cancelled);
+static void async_task_class_init(VFSAsyncTaskClass* klass) noexcept;
+static void async_task_init(async_task* task) noexcept;
+static void async_task_finalize(GObject* object) noexcept;
+static void async_task_finish(async_task* task, bool is_cancelled) noexcept;
 
 /* Local data */
 static GObjectClass* parent_class = nullptr;
 
 GType
-vfs_async_task_get_type()
+async_task_get_type() noexcept
 {
     static GType self_type = 0;
     if (!self_type)
@@ -51,12 +51,12 @@ vfs_async_task_get_type()
             sizeof(VFSAsyncTaskClass),
             nullptr, /* base_init */
             nullptr, /* base_finalize */
-            (GClassInitFunc)vfs_async_task_class_init,
+            (GClassInitFunc)async_task_class_init,
             nullptr, /* class_finalize */
             nullptr, /* class_data */
-            sizeof(vfs::async_task),
+            sizeof(async_task),
             0,
-            (GInstanceInitFunc)vfs_async_task_init,
+            (GInstanceInitFunc)async_task_init,
             nullptr /* value_table */
         };
 
@@ -70,38 +70,38 @@ vfs_async_task_get_type()
 }
 
 static void
-vfs_async_task_class_init(VFSAsyncTaskClass* klass)
+async_task_class_init(VFSAsyncTaskClass* klass) noexcept
 {
     GObjectClass* g_object_class = nullptr;
     g_object_class = G_OBJECT_CLASS(klass);
-    g_object_class->finalize = vfs_async_task_finalize;
+    g_object_class->finalize = async_task_finalize;
     parent_class = (GObjectClass*)g_type_class_peek(G_TYPE_OBJECT);
 
-    klass->finish = vfs_async_task_finish;
+    klass->finish = async_task_finish;
 }
 
 static void
-vfs_async_task_init(vfs::async_task* task)
+async_task_init(async_task* task) noexcept
 {
     (void)task;
 }
 
-vfs::async_task*
-vfs::async_task::create(vfs::async_task::function_t task_func, void* user_data) noexcept
+async_task*
+async_task::create(async_task::function_t task_func, void* user_data) noexcept
 {
-    auto* const task = VFS_ASYNC_TASK(g_object_new(VFS_ASYNC_TASK_TYPE, nullptr));
+    auto* const task = ASYNC_TASK(g_object_new(ASYNC_TASK_TYPE, nullptr));
     task->func = task_func;
     task->user_data_ = user_data;
-    return VFS_ASYNC_TASK(task);
+    return ASYNC_TASK(task);
 }
 
 static void
-vfs_async_task_finalize(GObject* object)
+async_task_finalize(GObject* object) noexcept
 {
-    vfs::async_task* task = nullptr;
-    // FIXME: destroying the object without calling vfs_async_task_cancel
+    async_task* task = nullptr;
+    // FIXME: destroying the object without calling async_task_cancel
     // currently induces unknown errors.
-    task = VFS_ASYNC_TASK_REINTERPRET(object);
+    task = ASYNC_TASK_REINTERPRET(object);
 
     // finalize = true, inhibit the emission of signal
     task->real_cancel(true);
@@ -114,17 +114,17 @@ vfs_async_task_finalize(GObject* object)
 }
 
 static bool
-on_idle(void* _task)
+on_idle(void* _task) noexcept
 {
-    auto* const task = VFS_ASYNC_TASK(_task);
+    auto* const task = ASYNC_TASK(_task);
     task->cleanup(false);
     return true; // the idle handler is removed in task->cleanup.
 }
 
 void*
-vfs_async_task_thread(void* _task)
+async_task_thread(void* _task) noexcept
 {
-    auto* const task = VFS_ASYNC_TASK(_task);
+    auto* const task = ASYNC_TASK(_task);
     void* ret = task->func(task, task->user_data_);
 
     const std::unique_lock<std::mutex> lock(task->mutex);
@@ -136,7 +136,7 @@ vfs_async_task_thread(void* _task)
 }
 
 static void
-vfs_async_task_finish(vfs::async_task* task, bool is_cancelled)
+async_task_finish(async_task* task, bool is_cancelled) noexcept
 {
     (void)task;
     (void)is_cancelled;
@@ -144,31 +144,31 @@ vfs_async_task_finish(vfs::async_task* task, bool is_cancelled)
 }
 
 void*
-vfs::async_task::user_data() const
+async_task::user_data() const noexcept
 {
     return this->user_data_;
 }
 
 void
-vfs::async_task::run()
+async_task::run() noexcept
 {
-    this->thread = g_thread_new("async_task", vfs_async_task_thread, this);
+    this->thread = g_thread_new("async_task", async_task_thread, this);
 }
 
 bool
-vfs::async_task::is_finished() const
+async_task::is_finished() const noexcept
 {
     return this->thread_finished;
 }
 
 bool
-vfs::async_task::is_canceled() const
+async_task::is_canceled() const noexcept
 {
     return this->thread_cancel;
 }
 
 void
-vfs::async_task::real_cancel(bool finalize)
+async_task::real_cancel(bool finalize) noexcept
 {
     if (!this->thread)
     {
@@ -195,13 +195,13 @@ vfs::async_task::real_cancel(bool finalize)
 }
 
 void
-vfs::async_task::cancel()
+async_task::cancel() noexcept
 {
     this->real_cancel(false);
 }
 
 void
-vfs::async_task::cleanup(bool finalize)
+async_task::cleanup(bool finalize) noexcept
 {
     if (this->idle_id)
     {

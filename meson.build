@@ -440,8 +440,9 @@ sources += files(
 
   'src/ptk/natsort/strnatcmp.cxx',
 
+  'src/ptk/deprecated/async-task.cxx',
+
   'src/vfs/vfs-app-desktop.cxx',
-  'src/vfs/vfs-async-task.cxx',
   'src/vfs/vfs-device.cxx',
   'src/vfs/vfs-dir.cxx',
   'src/vfs/vfs-file.cxx',

@@ -28,17 +28,15 @@
 
 #include "signals.hxx"
 
-#define VFS_ASYNC_TASK(obj) (static_cast<vfs::async_task*>(obj))
+#define ASYNC_TASK(obj) (static_cast<async_task*>(obj))
 
-namespace vfs
-{
 struct async_task
 {
-    using function_t = void* (*)(vfs::async_task*, void*);
+    using function_t = void* (*)(async_task*, void*);
 
     GObject parent;
 
-    static vfs::async_task* create(vfs::async_task::function_t task_func, void* user_data) noexcept;
+    static async_task* create(async_task::function_t task_func, void* user_data) noexcept;
 
     /*private*/
 
@@ -57,31 +55,31 @@ struct async_task
 
   public:
     // Execute the async task
-    void run();
+    void run() noexcept;
 
     // Cancel the async task running in another thread.
     // NOTE: Only can be called from main thread.
-    void cancel();
+    void cancel() noexcept;
 
-    void* user_data() const;
+    void* user_data() const noexcept;
 
-    bool is_finished() const;
-    bool is_canceled() const;
+    bool is_finished() const noexcept;
+    bool is_canceled() const noexcept;
 
     // private
-    void cleanup(bool finalize);
-    void real_cancel(bool finalize);
+    void cleanup(bool finalize) noexcept;
+    void real_cancel(bool finalize) noexcept;
     // void* task_thread(void* _task)
 
     // Signals
   public:
     // Signals function types
-    using evt_task_finished_load_app_t = void(vfs::async_task*, bool, GtkWidget*);
+    using evt_task_finished_load_app_t = void(async_task*, bool, GtkWidget*);
 
     // Signals Add Event
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::task_finish, sigc::connection>
-    add_event(evt_task_finished_load_app_t fun, GtkWidget* app)
+    add_event(evt_task_finished_load_app_t fun, GtkWidget* app) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
         this->evt_data_load_app = app;
@@ -91,7 +89,7 @@ struct async_task
     // Signals Run Event
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::task_finish, void>
-    run_event(bool is_cancelled)
+    run_event(bool is_cancelled) noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::task_finish");
         this->evt_task_finished_load_app.emit(this, is_cancelled, this->evt_data_load_app);
@@ -107,4 +105,3 @@ struct async_task
     // TODO/FIXME has to be a better way to do this
     GtkWidget* evt_data_load_app{nullptr};
 };
-} // namespace vfs
