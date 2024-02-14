@@ -956,6 +956,9 @@ ptk_file_browser_init(ptk::browser* file_browser)
 
     // status bar
     file_browser->statusbar = GTK_STATUSBAR(gtk_statusbar_new());
+    // too much padding
+    gtk_widget_set_margin_top(GTK_WIDGET(file_browser->statusbar), 0);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->statusbar), 0);
 
     GList* children = gtk_container_get_children(
         GTK_CONTAINER(gtk_statusbar_get_message_area(file_browser->statusbar)));
@@ -6051,10 +6054,6 @@ ptk::browser::update_statusbar() const noexcept
             statusbar_txt.append(std::format("  {}", cwd.string()));
         }
     }
-
-    // too much padding
-    gtk_widget_set_margin_top(GTK_WIDGET(this->statusbar), 0);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(this->statusbar), 0);
 
     gtk_statusbar_pop(this->statusbar, 0);
     gtk_statusbar_push(this->statusbar, 0, statusbar_txt.data());
