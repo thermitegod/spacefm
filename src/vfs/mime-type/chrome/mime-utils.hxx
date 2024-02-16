@@ -10,6 +10,8 @@
 
 #include <filesystem>
 
+namespace vfs::detail::mime_type::chrome
+{
 // Gets the mime type for a file at |filepath|.
 //
 // The mime type is calculated based only on the file name of |filepath|.  In
@@ -22,4 +24,5 @@
 // threads that disallow blocking.
 //
 // If the mime type is unknown, this will return application/octet-stream.
-const std::string GetFileMimeType(const std::filesystem::path& filepath);
+const std::string GetFileMimeType(const std::filesystem::path& filepath) noexcept;
+} // namespace vfs::detail::mime_type::chrome

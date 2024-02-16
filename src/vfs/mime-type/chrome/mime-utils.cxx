@@ -31,7 +31,7 @@
 
 #include "utils/misc.hxx"
 
-#include "mime-utils.hxx"
+#include "vfs/mime-type/chrome/mime-utils.hxx"
 
 // https://source.chromium.org/chromium/chromium/src/+/main:base/third_party/icu/icu_utf.h
 
@@ -412,7 +412,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
 }
 
 const std::string
-GetFileMimeType(const std::filesystem::path& filepath)
+vfs::detail::mime_type::chrome::GetFileMimeType(const std::filesystem::path& filepath) noexcept
 {
     const std::string ext = ::utils::split_basename_extension(filepath).extension;
     if (ext.empty())

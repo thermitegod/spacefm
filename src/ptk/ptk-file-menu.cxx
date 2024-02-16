@@ -1147,7 +1147,8 @@ ptk_file_menu_new(ptk::browser* browser,
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
         {
-            const auto txt_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            const auto txt_type =
+                vfs::mime_type::create_from_type(vfs::constants::mime_type::plain_text);
             const std::vector<std::string> txt_apps = txt_type->actions();
             if (!txt_apps.empty())
             {
@@ -1573,12 +1574,12 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
         mime_type = data->file->mime_type();
         if (!mime_type)
         {
-            mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+            mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
         }
     }
     else
     {
-        mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_DIRECTORY);
+        mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::directory);
     }
 
     GtkWidget* parent = nullptr;
@@ -1662,7 +1663,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     auto mime_type = data->file->mime_type();
     if (!mime_type)
     {
-        mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
     }
 
     switch (ptk::file_menu::app_job(job))

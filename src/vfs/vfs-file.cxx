@@ -94,7 +94,7 @@ vfs::file::update() noexcept
     this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow, ec);
     if (ec)
     {
-        this->mime_type_ = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        this->mime_type_ = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
         return false;
     }
 
@@ -103,7 +103,7 @@ vfs::file::update() noexcept
     // this->status = std::filesystem::status(file_path);
     this->status_ = std::filesystem::symlink_status(this->path_);
 
-    this->mime_type_ = vfs::mime_type_get_from_file(this->path_);
+    this->mime_type_ = vfs::mime_type::create_from_file(this->path_);
 
     // file size formated
     this->display_size_ = vfs::utils::format_file_size(this->size());
@@ -201,7 +201,7 @@ vfs::file::mime_type() const noexcept
 void
 vfs::file::reload_mime_type() noexcept
 {
-    this->mime_type_ = vfs::mime_type_get_from_file(this->path_);
+    this->mime_type_ = vfs::mime_type::create_from_file(this->path_);
     this->load_special_info();
 }
 

@@ -44,16 +44,17 @@
 #include "utils/misc.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-mime-type.hxx"
 
-#include "mime-type/chrome/mime-utils.hxx"
+#include "vfs/mime-type/chrome/mime-utils.hxx"
 
-#include "mime-type/mime-type.hxx"
+#include "vfs/mime-type/mime-type.hxx"
 
 // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
 inline constexpr u32 MIME_HEADER_MAX_SIZE = 127;
 
-static bool
-mime_type_is_data_plain_text(const std::span<const std::byte> data)
+[[nodiscard]] static bool
+is_data_plain_text(const std::span<const std::byte> data) noexcept
 {
     if (data.empty())
     {
@@ -65,27 +66,27 @@ mime_type_is_data_plain_text(const std::span<const std::byte> data)
 }
 
 const std::string
-mime_type_get_by_file(const std::filesystem::path& path) noexcept
+vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
 {
     const auto status = std::filesystem::status(path);
 
     if (!std::filesystem::exists(status))
     {
-        return XDG_MIME_TYPE_UNKNOWN.data();
+        return vfs::constants::mime_type::unknown.data();
     }
 
     if (std::filesystem::is_other(status))
     {
-        return XDG_MIME_TYPE_UNKNOWN.data();
+        return vfs::constants::mime_type::unknown.data();
     }
 
     if (std::filesystem::is_directory(status))
     {
-        return XDG_MIME_TYPE_DIRECTORY.data();
+        return vfs::constants::mime_type::directory.data();
     }
 
-    auto type = GetFileMimeType(path);
-    if (type != XDG_MIME_TYPE_UNKNOWN)
+    auto type = chrome::GetFileMimeType(path);
+    if (type != vfs::constants::mime_type::unknown)
     {
         return type;
     }
@@ -94,13 +95,13 @@ mime_type_get_by_file(const std::filesystem::path& path) noexcept
     if (file_size == 0 || std::filesystem::is_other(status))
     {
         // empty file can be viewed as text file
-        return XDG_MIME_TYPE_PLAIN_TEXT.data();
+        return vfs::constants::mime_type::plain_text.data();
     }
 
     /* Check for executable file */
     if (::utils::have_x_access(path))
     {
-        return XDG_MIME_TYPE_EXECUTABLE.data();
+        return vfs::constants::mime_type::executable.data();
     }
 
     const auto fd = open(path.c_str(), O_RDONLY, 0);
@@ -111,13 +112,13 @@ mime_type_get_by_file(const std::filesystem::path& path) noexcept
         const auto length = read(fd, data.data(), data.size());
         if (length == -1)
         {
-            return XDG_MIME_TYPE_UNKNOWN.data();
+            return vfs::constants::mime_type::unknown.data();
         }
 
         /* check for plain text */
-        if (mime_type_is_data_plain_text(data))
+        if (is_data_plain_text(data))
         {
-            type = XDG_MIME_TYPE_PLAIN_TEXT.data();
+            type = vfs::constants::mime_type::plain_text.data();
         }
 
         close(fd);
@@ -125,12 +126,12 @@ mime_type_get_by_file(const std::filesystem::path& path) noexcept
         return type;
     }
 
-    return XDG_MIME_TYPE_UNKNOWN.data();
+    return vfs::constants::mime_type::unknown.data();
 }
 
 // returns - icon_name, icon_desc
-static std::optional<std::array<std::string, 2>>
-mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
+[[nodiscard]] static std::optional<std::array<std::string, 2>>
+parse_xml_file(const std::filesystem::path& path, bool is_local) noexcept
 {
     // ztd::logger::info("MIME XML = {}", path);
 
@@ -182,7 +183,7 @@ mime_type_parse_xml_file(const std::filesystem::path& path, bool is_local)
 }
 
 const std::array<std::string, 2>
-mime_type_get_desc_icon(const std::string_view type)
+vfs::detail::mime_type::get_desc_icon(const std::string_view type) noexcept
 {
     /*  //sfm 0.7.7+ FIXED:
      * According to specs on freedesktop.org, user_data_dir has
@@ -195,7 +196,7 @@ mime_type_get_desc_icon(const std::string_view type)
     const std::string user_path = std::format("{}/mime/{}.xml", vfs::user::data().string(), type);
     if (faccessat(0, user_path.data(), F_OK, AT_EACCESS) != -1)
     {
-        const auto icon_data = mime_type_parse_xml_file(user_path, true);
+        const auto icon_data = parse_xml_file(user_path, true);
         if (icon_data)
         {
             return icon_data.value();
@@ -208,7 +209,7 @@ mime_type_get_desc_icon(const std::string_view type)
         const std::string sys_path = std::format("{}/mime/{}.xml", sys_dir.string(), type);
         if (faccessat(0, sys_path.data(), F_OK, AT_EACCESS) != -1)
         {
-            const auto icon_data = mime_type_parse_xml_file(sys_path, false);
+            const auto icon_data = parse_xml_file(sys_path, false);
             if (icon_data)
             {
                 return icon_data.value();
@@ -219,11 +220,11 @@ mime_type_get_desc_icon(const std::string_view type)
 }
 
 bool
-mime_type_is_text(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_text(const std::string_view mime_type) noexcept
 {
     if (mime_type == "application/pdf")
     {
-        // seems to think this is XDG_MIME_TYPE_PLAIN_TEXT
+        // seems to think this is mime_type::type::plain_text
         return false;
     }
     if (!mime_type.starts_with("text/") && !mime_type.starts_with("application/"))
@@ -234,106 +235,107 @@ mime_type_is_text(const std::string_view mime_type) noexcept
 }
 
 bool
-mime_type_is_executable(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_executable(const std::string_view mime_type) noexcept
 {
     /*
      * Only executable types can be executale.
      * Since some common types, such as application/x-shellscript,
      * are not in mime database, we have to add them ourselves.
      */
-    return (mime_type != XDG_MIME_TYPE_UNKNOWN || mime_type == XDG_MIME_TYPE_EXECUTABLE ||
+    return (mime_type != vfs::constants::mime_type::unknown ||
+            mime_type == vfs::constants::mime_type::executable ||
             mime_type == "application/x-shellscript");
 }
 
-// Taken from file-roller .desktop file
-inline constexpr std::array<std::string_view, 65> archive_mime_types{
-    "application/bzip2",
-    "application/gzip",
-    "application/vnd.android.package-archive",
-    "application/vnd.ms-cab-compressed",
-    "application/vnd.debian.binary-package",
-    "application/vnd.rar",
-    "application/x-7z-compressed",
-    "application/x-7z-compressed-tar",
-    "application/x-ace",
-    "application/x-alz",
-    "application/x-apple-diskimage",
-    "application/x-ar",
-    "application/x-archive",
-    "application/x-arj",
-    "application/x-brotli",
-    "application/x-bzip-brotli-tar",
-    "application/x-bzip",
-    "application/x-bzip-compressed-tar",
-    "application/x-bzip1",
-    "application/x-bzip1-compressed-tar",
-    "application/x-cabinet",
-    "application/x-cd-image",
-    "application/x-compress",
-    "application/x-compressed-tar",
-    "application/x-cpio",
-    "application/x-chrome-extension",
-    "application/x-deb",
-    "application/x-ear",
-    "application/x-ms-dos-executable",
-    "application/x-gtar",
-    "application/x-gzip",
-    "application/x-gzpostscript",
-    "application/x-java-archive",
-    "application/x-lha",
-    "application/x-lhz",
-    "application/x-lrzip",
-    "application/x-lrzip-compressed-tar",
-    "application/x-lz4",
-    "application/x-lzip",
-    "application/x-lzip-compressed-tar",
-    "application/x-lzma",
-    "application/x-lzma-compressed-tar",
-    "application/x-lzop",
-    "application/x-lz4-compressed-tar",
-    "application/x-ms-wim",
-    "application/x-rar",
-    "application/x-rar-compressed",
-    "application/x-rpm",
-    "application/x-source-rpm",
-    "application/x-rzip",
-    "application/x-rzip-compressed-tar",
-    "application/x-tar",
-    "application/x-tarz",
-    "application/x-tzo",
-    "application/x-stuffit",
-    "application/x-war",
-    "application/x-xar",
-    "application/x-xz",
-    "application/x-xz-compressed-tar",
-    "application/x-zip",
-    "application/x-zip-compressed",
-    "application/x-zstd-compressed-tar",
-    "application/x-zoo",
-    "application/zip",
-    "application/zstd",
-};
-
 bool
-mime_type_is_archive(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_archive(const std::string_view mime_type) noexcept
 {
+    // Taken from file-roller .desktop file
+    static constexpr std::array<std::string_view, 65> archive_mime_types{
+        "application/bzip2",
+        "application/gzip",
+        "application/vnd.android.package-archive",
+        "application/vnd.ms-cab-compressed",
+        "application/vnd.debian.binary-package",
+        "application/vnd.rar",
+        "application/x-7z-compressed",
+        "application/x-7z-compressed-tar",
+        "application/x-ace",
+        "application/x-alz",
+        "application/x-apple-diskimage",
+        "application/x-ar",
+        "application/x-archive",
+        "application/x-arj",
+        "application/x-brotli",
+        "application/x-bzip-brotli-tar",
+        "application/x-bzip",
+        "application/x-bzip-compressed-tar",
+        "application/x-bzip1",
+        "application/x-bzip1-compressed-tar",
+        "application/x-cabinet",
+        "application/x-cd-image",
+        "application/x-compress",
+        "application/x-compressed-tar",
+        "application/x-cpio",
+        "application/x-chrome-extension",
+        "application/x-deb",
+        "application/x-ear",
+        "application/x-ms-dos-executable",
+        "application/x-gtar",
+        "application/x-gzip",
+        "application/x-gzpostscript",
+        "application/x-java-archive",
+        "application/x-lha",
+        "application/x-lhz",
+        "application/x-lrzip",
+        "application/x-lrzip-compressed-tar",
+        "application/x-lz4",
+        "application/x-lzip",
+        "application/x-lzip-compressed-tar",
+        "application/x-lzma",
+        "application/x-lzma-compressed-tar",
+        "application/x-lzop",
+        "application/x-lz4-compressed-tar",
+        "application/x-ms-wim",
+        "application/x-rar",
+        "application/x-rar-compressed",
+        "application/x-rpm",
+        "application/x-source-rpm",
+        "application/x-rzip",
+        "application/x-rzip-compressed-tar",
+        "application/x-tar",
+        "application/x-tarz",
+        "application/x-tzo",
+        "application/x-stuffit",
+        "application/x-war",
+        "application/x-xar",
+        "application/x-xz",
+        "application/x-xz-compressed-tar",
+        "application/x-zip",
+        "application/x-zip-compressed",
+        "application/x-zstd-compressed-tar",
+        "application/x-zoo",
+        "application/zip",
+        "application/zstd",
+    };
+
     return std::ranges::find(archive_mime_types, mime_type) != archive_mime_types.cend();
 }
 
 bool
-mime_type_is_image(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_image(const std::string_view mime_type) noexcept
 {
     return mime_type.starts_with("image/");
 }
 
 bool
-mime_type_is_video(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_video(const std::string_view mime_type) noexcept
 {
     return mime_type.starts_with("video/");
 }
 
 bool
-mime_type_is_unknown(const std::string_view mime_type) noexcept
+vfs::detail::mime_type::is_unknown(const std::string_view mime_type) noexcept
 {
-    return mime_type == XDG_MIME_TYPE_UNKNOWN;
+    return mime_type == vfs::constants::mime_type::unknown;
 }

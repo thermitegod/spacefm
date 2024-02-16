@@ -26,7 +26,7 @@
 
 #include <optional>
 
-namespace mime_type
+namespace vfs::detail::mime_type
 {
 enum class action
 {
@@ -34,26 +34,26 @@ enum class action
     append,
     remove,
 };
-}
 
 /*
  *  Get a list of applications supporting this mime-type
  */
-const std::vector<std::string> mime_type_get_actions(const std::string_view mime_type);
+[[nodiscard]] const std::vector<std::string> get_actions(const std::string_view mime_type) noexcept;
 
 /*
  * Add an applications used to open this mime-type
  * desktop_id is the name of *.desktop file.
  */
-const std::string mime_type_add_action(const std::string_view mime_type,
-                                       const std::string_view desktop_id);
+[[nodiscard]] const std::string add_action(const std::string_view mime_type,
+                                           const std::string_view desktop_id) noexcept;
 
 /*
  * Get default applications used to open this mime-type
  *
  * If std::nullopt is returned, that means a default app is not set for this mime-type.
  */
-const std::optional<std::string> mime_type_get_default_action(const std::string_view mime_type);
+[[nodiscard]] const std::optional<std::string>
+get_default_action(const std::string_view mime_type) noexcept;
 
 /*
  * Set applications used to open or never used to open this mime-type
@@ -65,11 +65,12 @@ const std::optional<std::string> mime_type_get_default_action(const std::string_
  *
  * http://standards.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html
  */
-void mime_type_set_default_action(const std::string_view mime_type,
-                                  const std::string_view desktop_id);
+void set_default_action(const std::string_view mime_type,
+                        const std::string_view desktop_id) noexcept;
 
 /* Locate the file path of desktop file by desktop_id */
-const std::optional<std::filesystem::path>
-mime_type_locate_desktop_file(const std::string_view desktop_id);
-const std::optional<std::filesystem::path>
-mime_type_locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id);
+[[nodiscard]] const std::optional<std::filesystem::path>
+locate_desktop_file(const std::string_view desktop_id) noexcept;
+[[nodiscard]] const std::optional<std::filesystem::path>
+locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id) noexcept;
+} // namespace vfs::detail::mime_type

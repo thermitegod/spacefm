@@ -235,7 +235,7 @@ init_associated_apps_tab(GtkWidget* dialog, const std::shared_ptr<vfs::mime_type
         const std::vector<std::string> apps = mime_type->actions();
         if (apps.empty() && mime_type->is_text())
         {
-            // mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            // mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::plain_text);
         }
         if (!apps.empty())
         {
@@ -440,8 +440,8 @@ app_chooser_dialog(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mim
     gtk_box_pack_start(vbox, GTK_WIDGET(btn_set_as_default), false, false, 0);
     // Do not set default handler for directories and files with unknown type
     if (!show_default ||
-        /* mime_type->type() == XDG_MIME_TYPE_UNKNOWN || */
-        (mime_type->type() == XDG_MIME_TYPE_DIRECTORY && !dir_default))
+        /* mime_type->type() == vfs::constants::mime_type::unknown || */
+        (mime_type->type() == vfs::constants::mime_type::directory && !dir_default))
     {
         gtk_widget_hide(GTK_WIDGET(btn_set_as_default));
     }
@@ -581,8 +581,8 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
             {
                 mime_type->set_default_action(app.value());
             }
-            else if (/* mime_type->get_type() != XDG_MIME_TYPE_UNKNOWN && */
-                     (dir_default || mime_type->type() != XDG_MIME_TYPE_DIRECTORY))
+            else if (/* mime_type->get_type() != mime_type::type::unknown && */
+                     (dir_default || mime_type->type() != vfs::constants::mime_type::directory))
             {
                 const std::string custom = mime_type->add_action(app.value());
                 app = custom;

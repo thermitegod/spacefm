@@ -403,10 +403,6 @@ sources += files(
   'src/utils/strdup.cxx',
   'src/utils/misc.cxx',
 
-  'src/mime-type/mime-action.cxx',
-  'src/mime-type/mime-type.cxx',
-  'src/mime-type/chrome/mime-utils.cxx',
-
   'src/ptk/ptk-app-chooser.cxx',
   'src/ptk/ptk-archiver.cxx',
   'src/ptk/ptk-bookmark-view.cxx',
@@ -456,6 +452,10 @@ sources += files(
   'src/vfs/linux/procfs.cxx',
   'src/vfs/linux/self.cxx',
   'src/vfs/linux/sysfs.cxx',
+
+  'src/vfs/mime-type/mime-action.cxx',
+  'src/vfs/mime-type/mime-type.cxx',
+  'src/vfs/mime-type/chrome/mime-utils.cxx',
 )
 
 target_name = 'spacefm'

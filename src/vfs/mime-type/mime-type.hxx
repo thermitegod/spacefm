@@ -24,25 +24,22 @@
 
 #include <array>
 
-inline constexpr std::string_view XDG_MIME_TYPE_UNKNOWN{"application/octet-stream"};
-inline constexpr std::string_view XDG_MIME_TYPE_DIRECTORY{"inode/directory"};
-inline constexpr std::string_view XDG_MIME_TYPE_EXECUTABLE{"application/x-executable"};
-inline constexpr std::string_view XDG_MIME_TYPE_PLAIN_TEXT{"text/plain"};
-
+namespace vfs::detail::mime_type
+{
 /*
  * Get mime-type info of the specified file. To determine the mime-type
  * of the file, lookup the mime-type of file extension from mime.cache.
  * If the mime-type could not be determined, the content of
  * the file will be checked, which is much more time-consuming.
  */
-const std::string mime_type_get_by_file(const std::filesystem::path& path) noexcept;
+[[nodiscard]] const std::string get_by_file(const std::filesystem::path& path) noexcept;
 
-bool mime_type_is_text(const std::string_view mime_type) noexcept;
-bool mime_type_is_executable(const std::string_view mime_type) noexcept;
-bool mime_type_is_archive(const std::string_view mime_type) noexcept;
-bool mime_type_is_video(const std::string_view mime_type) noexcept;
-bool mime_type_is_image(const std::string_view mime_type) noexcept;
-bool mime_type_is_unknown(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_text(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_executable(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_archive(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_video(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_image(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_unknown(const std::string_view mime_type) noexcept;
 
 /* Get human-readable description and icon name of the mime-type.
  *
@@ -50,4 +47,5 @@ bool mime_type_is_unknown(const std::string_view mime_type) noexcept;
  * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
  * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed.
  */
-const std::array<std::string, 2> mime_type_get_desc_icon(const std::string_view type);
+[[nodiscard]] const std::array<std::string, 2> get_desc_icon(const std::string_view type) noexcept;
+} // namespace vfs::detail::mime_type

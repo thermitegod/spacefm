@@ -211,7 +211,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
         if (!alloc_desktop && mime_type->is_text())
         {
             // FIXME: special handling for plain text file
-            mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::plain_text);
             alloc_desktop = mime_type->default_action();
         }
 
