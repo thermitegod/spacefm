@@ -50,24 +50,6 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 
-static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";
-
-static constexpr std::string DESKTOP_ENTRY_KEY_TYPE = "Type";
-static constexpr std::string DESKTOP_ENTRY_KEY_NAME = "Name";
-static constexpr std::string DESKTOP_ENTRY_KEY_GENERICNAME = "GenericName";
-static constexpr std::string DESKTOP_ENTRY_KEY_NODISPLAY = "NoDisplay";
-static constexpr std::string DESKTOP_ENTRY_KEY_COMMENT = "Comment";
-static constexpr std::string DESKTOP_ENTRY_KEY_ICON = "Icon";
-static constexpr std::string DESKTOP_ENTRY_KEY_TRYEXEC = "TryExec";
-static constexpr std::string DESKTOP_ENTRY_KEY_EXEC = "Exec";
-static constexpr std::string DESKTOP_ENTRY_KEY_PATH = "Path";
-static constexpr std::string DESKTOP_ENTRY_KEY_TERMINAL = "Terminal";
-static constexpr std::string DESKTOP_ENTRY_KEY_ACTIONS = "Actions";
-static constexpr std::string DESKTOP_ENTRY_KEY_MIMETYPE = "MimeType";
-static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
-static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
-static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
-
 struct desktop_cache_data
 {
     std::shared_ptr<vfs::desktop> desktop;
@@ -100,6 +82,25 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
 {
     // ztd::logger::info("vfs::desktop::desktop({})", ztd::logger::utils::ptr(this));
+
+    static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";
+
+    static constexpr std::string DESKTOP_ENTRY_KEY_TYPE = "Type";
+    static constexpr std::string DESKTOP_ENTRY_KEY_NAME = "Name";
+    static constexpr std::string DESKTOP_ENTRY_KEY_GENERICNAME = "GenericName";
+    static constexpr std::string DESKTOP_ENTRY_KEY_NODISPLAY = "NoDisplay";
+    static constexpr std::string DESKTOP_ENTRY_KEY_COMMENT = "Comment";
+    static constexpr std::string DESKTOP_ENTRY_KEY_ICON = "Icon";
+    static constexpr std::string DESKTOP_ENTRY_KEY_TRYEXEC = "TryExec";
+    static constexpr std::string DESKTOP_ENTRY_KEY_EXEC = "Exec";
+    static constexpr std::string DESKTOP_ENTRY_KEY_PATH = "Path";
+    static constexpr std::string DESKTOP_ENTRY_KEY_TERMINAL = "Terminal";
+    static constexpr std::string DESKTOP_ENTRY_KEY_ACTIONS = "Actions";
+    static constexpr std::string DESKTOP_ENTRY_KEY_MIMETYPE = "MimeType";
+    static constexpr std::string DESKTOP_ENTRY_KEY_CATEGORIES = "Categories";
+    static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
+    static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
+
 #if (GTK_MAJOR_VERSION == 4)
 
     const auto kf = Glib::KeyFile::create();

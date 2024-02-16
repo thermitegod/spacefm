@@ -32,15 +32,18 @@
 #include "bookmarks.hxx"
 
 // Bookmark Path, Bookmark Name
-static all_bookmarks_t bookmarks;
+namespace global
+{
+all_bookmarks_t bookmarks;
 
-static bool bookmarks_changed = false;
-static std::filesystem::path bookmark_file;
+bool bookmarks_changed = false;
+std::filesystem::path bookmark_file;
+} // namespace global
 
 const all_bookmarks_t&
 get_all_bookmarks() noexcept
 {
-    return bookmarks;
+    return global::bookmarks;
 }
 
 static void
@@ -60,33 +63,33 @@ parse_bookmarks(const std::string_view raw_line) noexcept
 
     // ztd::logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
 
-    bookmarks.push_back({ztd::removeprefix(book_path, "file://"), book_name});
+    global::bookmarks.push_back({ztd::removeprefix(book_path, "file://"), book_name});
 }
 
 void
 load_bookmarks() noexcept
 {
     // If not the first time calling then need to remove loaded bookmarks
-    if (!bookmarks.empty())
+    if (!global::bookmarks.empty())
     {
-        bookmarks.clear();
+        global::bookmarks.clear();
     }
 
-    if (bookmark_file.empty())
+    if (global::bookmark_file.empty())
     {
-        bookmark_file = vfs::user::config() / "gtk-3.0" / "bookmarks";
+        global::bookmark_file = vfs::user::config() / "gtk-3.0" / "bookmarks";
     }
 
     // no bookmark file
-    if (!std::filesystem::exists(bookmark_file))
+    if (!std::filesystem::exists(global::bookmark_file))
     {
         return;
     }
 
-    std::ifstream file(bookmark_file);
+    std::ifstream file(global::bookmark_file);
     if (!file)
     {
-        ztd::logger::error("Failed to open the file: {}", bookmark_file.string());
+        ztd::logger::error("Failed to open the file: {}", global::bookmark_file.string());
         return;
     }
 
@@ -101,35 +104,35 @@ load_bookmarks() noexcept
 void
 save_bookmarks() noexcept
 {
-    if (!bookmarks_changed)
+    if (!global::bookmarks_changed)
     {
         return;
     }
-    bookmarks_changed = false;
+    global::bookmarks_changed = false;
 
     std::string book_entry;
-    for (auto [book_path, book_name] : bookmarks)
+    for (auto [book_path, book_name] : global::bookmarks)
     {
         book_entry.append(std::format("file://{} {}\n", book_path.string(), book_name.string()));
     }
 
-    ::utils::write_file(bookmark_file, book_entry);
+    ::utils::write_file(global::bookmark_file, book_entry);
 }
 
 void
 add_bookmarks(const std::filesystem::path& book_path) noexcept
 {
-    bookmarks_changed = true;
+    global::bookmarks_changed = true;
 
     const auto book_name = book_path.filename();
 
-    bookmarks.push_back({book_path, book_name});
+    global::bookmarks.push_back({book_path, book_name});
 }
 
 void
 remove_bookmarks() noexcept
 {
-    bookmarks_changed = true;
+    global::bookmarks_changed = true;
 
     // TODO
 }

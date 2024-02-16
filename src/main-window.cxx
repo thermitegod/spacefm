@@ -91,7 +91,10 @@ static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_windo
 
 static GtkApplicationWindowClass* parent_class = nullptr;
 
-static std::vector<MainWindow*> all_windows;
+namespace global
+{
+std::vector<MainWindow*> all_windows;
+}
 
 //  Drag & Drop/Clipboard targets
 static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
@@ -272,7 +275,7 @@ on_quit_activate(GtkMenuItem* menuitem, void* user_data)
 void
 main_window_rubberband_all()
 {
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         for (const panel_t p : PANELS)
         {
@@ -295,7 +298,7 @@ main_window_rubberband_all()
 void
 main_window_refresh_all()
 {
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         for (const panel_t p : PANELS)
         {
@@ -321,7 +324,7 @@ void
 main_window_close_all_invalid_tabs()
 {
     // do all windows all panels all tabs
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         for (const panel_t p : PANELS)
         {
@@ -362,7 +365,7 @@ main_window_rebuild_all_toolbars(ptk::browser* file_browser)
     }
 
     // do all windows all panels all tabs
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         for (const panel_t p : PANELS)
         {
@@ -397,7 +400,7 @@ update_views_all_windows(GtkWidget* item, ptk::browser* file_browser)
     file_browser->update_views();
 
     // do other windows
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         if (gtk_widget_get_visible(GTK_WIDGET(window->get_panel_notebook(p))))
         {
@@ -421,7 +424,7 @@ void
 main_window_reload_thumbnails_all_windows()
 {
     // update all windows/all panels/all browsers
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         for (const panel_t p : PANELS)
         {
@@ -572,7 +575,7 @@ show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window)
 
     // do other windows
     main_window->panel_change = false; // do not save columns for other windows
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         if (main_window != window)
         {
@@ -1194,7 +1197,7 @@ main_window_init(MainWindow* main_window)
     gtk_window_group_add_window(main_window->wgroup, GTK_WINDOW(main_window));
 
     /* Add to total window count */
-    all_windows.push_back(main_window);
+    global::all_windows.push_back(main_window);
 
     // g_signal_connect(G_OBJECT(main_window), "task-notify", G_CALLBACK(ptk_file_task_notify_handler), nullptr);
 
@@ -1380,7 +1383,7 @@ main_window_init(MainWindow* main_window)
 static void
 main_window_finalize(GObject* obj)
 {
-    std::ranges::remove(all_windows, MAIN_WINDOW_REINTERPRET(obj));
+    std::ranges::remove(global::all_windows, MAIN_WINDOW_REINTERPRET(obj));
 
     g_object_unref((MAIN_WINDOW_REINTERPRET(obj))->wgroup);
 
@@ -2478,9 +2481,9 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
 MainWindow*
 main_window_get_last_active()
 {
-    if (!all_windows.empty())
+    if (!global::all_windows.empty())
     {
-        return all_windows.at(0);
+        return global::all_windows.at(0);
     }
     return nullptr;
 }
@@ -2488,7 +2491,7 @@ main_window_get_last_active()
 const std::span<MainWindow*>
 main_window_get_all()
 {
-    return all_windows;
+    return global::all_windows;
 }
 
 static long
@@ -2584,7 +2587,7 @@ main_window_get_on_current_desktop()
     }
 
     bool invalid = false;
-    for (MainWindow* window : all_windows)
+    for (MainWindow* window : global::all_windows)
     {
         const i64 desktop = get_desktop_index(GTK_WINDOW(window));
         // ztd::logger::info( "    test win {} = {}", ztd::logger::utils::ptr(window), desktop);

@@ -97,7 +97,10 @@ static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* 
 
 static GObjectClass* parent_class = nullptr;
 
-static std::unordered_map<ptk::dir_tree::column, GType> column_types;
+namespace global
+{
+std::unordered_map<ptk::dir_tree::column, GType> column_types;
+}
 
 GType
 ptk_dir_tree_get_type()
@@ -180,9 +183,9 @@ ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface)
     iface->iter_nth_child = ptk_dir_tree_iter_nth_child;
     iface->iter_parent = ptk_dir_tree_iter_parent;
 
-    column_types[ptk::dir_tree::column::icon] = GDK_TYPE_PIXBUF;
-    column_types[ptk::dir_tree::column::disp_name] = G_TYPE_STRING;
-    column_types[ptk::dir_tree::column::info] = G_TYPE_POINTER;
+    global::column_types[ptk::dir_tree::column::icon] = GDK_TYPE_PIXBUF;
+    global::column_types[ptk::dir_tree::column::disp_name] = G_TYPE_STRING;
+    global::column_types[ptk::dir_tree::column::info] = G_TYPE_POINTER;
 }
 
 static void
@@ -227,7 +230,7 @@ ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index)
     (void)tree_model;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     // assert(index > (i32)G_N_ELEMENTS(column_types));
-    return column_types[ptk::dir_tree::column(index)];
+    return global::column_types[ptk::dir_tree::column(index)];
 }
 
 static gboolean
@@ -306,7 +309,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
     const auto node = static_cast<ptk::dir_tree::node*>(iter->user_data)->shared_from_this();
     assert(node != nullptr);
 
-    g_value_init(value, column_types[ptk::dir_tree::column(column)]);
+    g_value_init(value, global::column_types[ptk::dir_tree::column(column)]);
     const auto& file = node->file;
     switch (ptk::dir_tree::column(column))
     {

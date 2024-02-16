@@ -33,12 +33,9 @@
 
 #include "vfs/vfs-trash-can.hxx"
 
-static std::shared_ptr<vfs::trash_can> global_trash_can = nullptr;
-
-void
-vfs::trash_init() noexcept
+namespace global
 {
-    global_trash_can = vfs::trash_can::create();
+const std::shared_ptr<vfs::trash_can> trash_can = vfs::trash_can::create();
 }
 
 ////////////////
@@ -114,7 +111,7 @@ vfs::trash_can::get_trash_dir(const std::filesystem::path& path) noexcept
 bool
 vfs::trash_can::trash(const std::filesystem::path& path) noexcept
 {
-    const auto trash_dir = global_trash_can->get_trash_dir(path);
+    const auto trash_dir = global::trash_can->get_trash_dir(path);
     if (!trash_dir)
     {
         return false;

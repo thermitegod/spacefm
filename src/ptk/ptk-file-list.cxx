@@ -113,7 +113,9 @@ static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
 
 static GObjectClass* parent_class = nullptr;
 
-static const std::unordered_map<ptk::file_list::column, GType> column_types{
+namespace global
+{
+const std::unordered_map<ptk::file_list::column, GType> column_types{
     {ptk::file_list::column::big_icon, GDK_TYPE_PIXBUF},
     {ptk::file_list::column::small_icon, GDK_TYPE_PIXBUF},
     {ptk::file_list::column::name, G_TYPE_STRING},
@@ -130,6 +132,7 @@ static const std::unordered_map<ptk::file_list::column, GType> column_types{
     {ptk::file_list::column::mtime, G_TYPE_STRING},
     {ptk::file_list::column::info, G_TYPE_POINTER},
 };
+}
 
 GType
 ptk_file_list_get_type()
@@ -281,8 +284,8 @@ ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
-    // assert(index > column_types.size());
-    return column_types.at(ptk::file_list::column(index));
+    // assert(index > global::column_types.size());
+    return global::column_types.at(ptk::file_list::column(index));
 }
 
 static gboolean
@@ -343,9 +346,9 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(iter != nullptr);
-    // assert(column > column_types.size());
+    // assert(column > global::column_types.size());
 
-    g_value_init(value, column_types.at(ptk::file_list::column(column)));
+    g_value_init(value, global::column_types.at(ptk::file_list::column(column)));
 
     const auto file = static_cast<vfs::file*>(iter->user_data2)->shared_from_this();
 
@@ -732,28 +735,28 @@ compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::fil
     return list->sort_order == GtkSortType::GTK_SORT_ASCENDING ? result : -result;
 }
 
-static const std::unordered_map<ptk::file_list::column, compare_function_t>
-    compare_function_ptr_table{
-        {ptk::file_list::column::name, &compare_file_name},
-        {ptk::file_list::column::size, &compare_file_size},
-        {ptk::file_list::column::bytes, &compare_file_size},
-        {ptk::file_list::column::type, &compare_file_type},
-        {ptk::file_list::column::mime, &compare_file_mime},
-        {ptk::file_list::column::perm, &compare_file_perm},
-        {ptk::file_list::column::owner, &compare_file_owner},
-        {ptk::file_list::column::group, &compare_file_group},
-        {ptk::file_list::column::atime, &compare_file_atime},
-        {ptk::file_list::column::btime, &compare_file_btime},
-        {ptk::file_list::column::ctime, &compare_file_ctime},
-        {ptk::file_list::column::mtime, &compare_file_mtime},
-    };
-
 static GList*
 ptk_file_info_list_sort(ptk::file_list* list)
 {
     assert(list->sort_col != ptk::file_list::column::big_icon);
     assert(list->sort_col != ptk::file_list::column::small_icon);
     assert(list->sort_col != ptk::file_list::column::info);
+
+    static const std::unordered_map<ptk::file_list::column, compare_function_t>
+        compare_function_ptr_table{
+            {ptk::file_list::column::name, &compare_file_name},
+            {ptk::file_list::column::size, &compare_file_size},
+            {ptk::file_list::column::bytes, &compare_file_size},
+            {ptk::file_list::column::type, &compare_file_type},
+            {ptk::file_list::column::mime, &compare_file_mime},
+            {ptk::file_list::column::perm, &compare_file_perm},
+            {ptk::file_list::column::owner, &compare_file_owner},
+            {ptk::file_list::column::group, &compare_file_group},
+            {ptk::file_list::column::atime, &compare_file_atime},
+            {ptk::file_list::column::btime, &compare_file_btime},
+            {ptk::file_list::column::ctime, &compare_file_ctime},
+            {ptk::file_list::column::mtime, &compare_file_mtime},
+        };
 
     auto file_list = glist_to_vector_vfs_file(list->files);
 

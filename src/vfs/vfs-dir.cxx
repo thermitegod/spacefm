@@ -53,7 +53,10 @@
 
 #include "vfs/vfs-dir.hxx"
 
-static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
+namespace global
+{
+ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
+}
 
 vfs::dir::dir(const std::filesystem::path& path) : path_(path)
 {
@@ -93,14 +96,14 @@ const std::shared_ptr<vfs::dir>
 vfs::dir::create(const std::filesystem::path& path) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
-    if (dir_smart_cache.contains(path))
+    if (global::dir_smart_cache.contains(path))
     {
-        dir = dir_smart_cache.at(path);
+        dir = global::dir_smart_cache.at(path);
         // ztd::logger::debug("vfs::dir::dir({}) cache   {}", ztd::logger::utils::ptr(dir.get()), path);
     }
     else
     {
-        dir = dir_smart_cache.create(
+        dir = global::dir_smart_cache.create(
             path,
             std::bind([](const auto& path) { return std::make_shared<vfs::dir>(path); }, path));
         // ztd::logger::debug("vfs::dir::dir({}) new     {}", ztd::logger::utils::ptr(dir.get()), path);
@@ -309,14 +312,14 @@ void
 vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
 {
     const auto action = [size](const auto& dir) { dir->unload_thumbnails(size); };
-    std::ranges::for_each(dir_smart_cache.items(), action);
+    std::ranges::for_each(global::dir_smart_cache.items(), action);
 }
 
 void
 vfs::dir::global_reload_mime_type() noexcept
 {
     const auto action = [](const auto& dir) { dir->reload_mime_type(); };
-    std::ranges::for_each(dir_smart_cache.items(), action);
+    std::ranges::for_each(global::dir_smart_cache.items(), action);
 }
 
 const std::shared_ptr<vfs::file>

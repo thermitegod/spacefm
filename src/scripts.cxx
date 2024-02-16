@@ -28,11 +28,6 @@
 
 using namespace std::literals::string_view_literals;
 
-static const std::unordered_map<spacefm::script, const std::string_view> script_map{
-    {spacefm::script::config_update, "config-update"sv},
-    {spacefm::script::config_update_git, "config-update-git"sv},
-};
-
 bool
 script_exists(spacefm::script script) noexcept
 {
@@ -60,5 +55,10 @@ script_exists(const std::filesystem::path& script) noexcept
 const std::filesystem::path
 get_script_path(spacefm::script script) noexcept
 {
+    static const std::unordered_map<spacefm::script, const std::string_view> script_map{
+        {spacefm::script::config_update, "config-update"sv},
+        {spacefm::script::config_update_git, "config-update-git"sv},
+    };
+
     return std::filesystem::path() / PACKAGE_SCRIPTS_PATH / script_map.at(script);
 }

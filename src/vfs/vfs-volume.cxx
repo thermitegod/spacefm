@@ -80,20 +80,6 @@ volume_callback_data::volume_callback_data(vfs::volume::callback_t callback, voi
 
 using volume_callback_data_t = std::shared_ptr<volume_callback_data>;
 
-static std::vector<std::shared_ptr<vfs::volume>> volumes;
-static std::vector<volume_callback_data_t> callbacks;
-
-static libudev::udev udev;
-static libudev::monitor umonitor;
-
-#if (GTK_MAJOR_VERSION == 4)
-static Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
-static Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
-#elif (GTK_MAJOR_VERSION == 3)
-static Glib::RefPtr<Glib::IOChannel> uchannel;
-static Glib::RefPtr<Glib::IOChannel> mchannel;
-#endif
-
 /*
  * DeviceMount
  */
@@ -123,7 +109,24 @@ DeviceMount::DeviceMount(dev_t major, dev_t minor)
 
 using devmount_t = std::shared_ptr<DeviceMount>;
 
-static std::vector<devmount_t> devmounts;
+namespace global
+{
+std::vector<std::shared_ptr<vfs::volume>> volumes;
+std::vector<volume_callback_data_t> callbacks;
+
+libudev::udev udev;
+libudev::monitor umonitor;
+
+#if (GTK_MAJOR_VERSION == 4)
+Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
+Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
+#elif (GTK_MAJOR_VERSION == 3)
+Glib::RefPtr<Glib::IOChannel> uchannel;
+Glib::RefPtr<Glib::IOChannel> mchannel;
+#endif
+
+std::vector<devmount_t> devmounts;
+} // namespace global
 
 /**
  * udev & mount monitors
@@ -167,7 +170,7 @@ parse_mounts(const bool report) noexcept
                 {
                     // is a subdir mount - ignore if block device
                     const dev_t devnum = makedev(mount.major, mount.minor);
-                    const auto check_udevice = udev.device_from_devnum('b', devnum);
+                    const auto check_udevice = global::udev.device_from_devnum('b', devnum);
                     if (check_udevice)
                     {
                         const auto& udevice = check_udevice.value();
@@ -187,7 +190,7 @@ parse_mounts(const bool report) noexcept
             {
                 // initial load !report do not add non-block devices
                 const dev_t devnum = makedev(mount.major, mount.minor);
-                const auto check_udevice = udev.device_from_devnum('b', devnum);
+                const auto check_udevice = global::udev.device_from_devnum('b', devnum);
                 if (check_udevice)
                 {
                     const auto& udevice = check_udevice.value();
@@ -237,7 +240,7 @@ parse_mounts(const bool report) noexcept
             // ztd::logger::debug("finding {}:{}", devmount->major, devmount->minor);
 
             devmount_t found = nullptr;
-            for (const devmount_t& search : devmounts)
+            for (const devmount_t& search : global::devmounts)
             {
                 if (search)
                 {
@@ -255,7 +258,7 @@ parse_mounts(const bool report) noexcept
                 {
                     // ztd::logger::debug("    freed");
                     // no change to mount points, so remove from old list
-                    std::ranges::remove(devmounts, found);
+                    std::ranges::remove(global::devmounts, found);
                 }
             }
             else
@@ -274,7 +277,7 @@ parse_mounts(const bool report) noexcept
 
     // ztd::logger::debug("REMAINING");
     // any remaining devices in old list have changed mount status
-    for (const devmount_t& devmount : devmounts)
+    for (const devmount_t& devmount : global::devmounts)
     {
         // ztd::logger::debug("remain {}:{}", devmount->major, devmount->minor);
         if (devmount && report)
@@ -284,7 +287,7 @@ parse_mounts(const bool report) noexcept
     }
 
     // will free old devmounts, and update with new devmounts
-    devmounts = newmounts;
+    global::devmounts = newmounts;
 
     // report
     if (report && !changed.empty())
@@ -292,7 +295,7 @@ parse_mounts(const bool report) noexcept
         for (const devmount_t& devmount : changed)
         {
             const dev_t devnum = makedev(devmount->major, devmount->minor);
-            const auto check_udevice = udev.device_from_devnum('b', devnum);
+            const auto check_udevice = global::udev.device_from_devnum('b', devnum);
             if (!check_udevice)
             {
                 continue;
@@ -325,7 +328,7 @@ devmount_fstype(const dev_t device) noexcept
     const auto major = gnu_dev_major(device);
     const auto minor = gnu_dev_minor(device);
 
-    for (const devmount_t& devmount : devmounts)
+    for (const devmount_t& devmount : global::devmounts)
     {
         if (devmount->major == major && devmount->minor == minor)
         {
@@ -361,7 +364,7 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
         return condition != Glib::IOCondition::IO_HUP;
     }
 
-    const auto check_udevice = umonitor.receive_device();
+    const auto check_udevice = global::umonitor.receive_device();
     if (check_udevice)
     {
         const auto& udevice = check_udevice.value();
@@ -468,7 +471,7 @@ device_removed(const libudev::device& udevice) noexcept
         if (volume->is_device_type(vfs::volume::device_type::block) && volume->devnum() == devnum)
         { // remove volume
             // ztd::logger::debug("remove volume {}", volume->device_file);
-            std::ranges::remove(volumes, volume);
+            std::ranges::remove(global::volumes, volume);
             call_callbacks(volume, vfs::volume::state::removed);
             if (volume->is_mounted() && !volume->mount_point().empty())
             {
@@ -485,7 +488,7 @@ bool
 vfs::volume_init() noexcept
 {
     // create udev
-    if (!udev.is_initialized())
+    if (!global::udev.is_initialized())
     {
         ztd::logger::warn("unable to initialize udev");
         return false;
@@ -495,7 +498,7 @@ vfs::volume_init() noexcept
     parse_mounts(false);
 
     // enumerate devices
-    const auto enumerate = udev.enumerate_new();
+    const auto enumerate = global::udev.enumerate_new();
     if (enumerate.is_initialized())
     {
         enumerate.add_match_subsystem("block");
@@ -504,7 +507,7 @@ vfs::volume_init() noexcept
         for (const auto& device : devices)
         {
             const auto syspath = device.get_syspath();
-            const auto udevice = udev.device_from_syspath(syspath.value());
+            const auto udevice = global::udev.device_from_syspath(syspath.value());
             if (udevice)
             {
                 const auto volume = read_by_device(udevice.value());
@@ -520,54 +523,54 @@ vfs::volume_init() noexcept
     parse_mounts(true);
 
     // start udev monitor
-    const auto check_umonitor = udev.monitor_new_from_netlink("udev");
+    const auto check_umonitor = global::udev.monitor_new_from_netlink("udev");
     if (!check_umonitor)
     {
         ztd::logger::warn("cannot create udev from netlink");
         return false;
     }
-    umonitor = check_umonitor.value();
-    if (!umonitor.is_initialized())
+    global::umonitor = check_umonitor.value();
+    if (!global::umonitor.is_initialized())
     {
         ztd::logger::warn("cannot create udev monitor");
         return false;
     }
-    if (!umonitor.enable_receiving())
+    if (!global::umonitor.enable_receiving())
     {
         ztd::logger::warn("cannot enable udev monitor receiving");
         return false;
     }
-    if (!umonitor.filter_add_match_subsystem_devtype("block"))
+    if (!global::umonitor.filter_add_match_subsystem_devtype("block"))
     {
         ztd::logger::warn("cannot set udev filter");
         return false;
     }
 
-    const i32 ufd = umonitor.get_fd();
+    const i32 ufd = global::umonitor.get_fd();
     if (ufd == 0)
     {
         ztd::logger::warn("cannot get udev monitor socket file descriptor");
         return false;
     }
 
-    uchannel = Glib::IOChannel::create_from_fd(ufd);
+    global::uchannel = Glib::IOChannel::create_from_fd(ufd);
 #if (GTK_MAJOR_VERSION == 4)
-    uchannel->set_flags(Glib::IOFlags::NONBLOCK);
+    global::uchannel->set_flags(Glib::IOFlags::NONBLOCK);
 #elif (GTK_MAJOR_VERSION == 3)
-    uchannel->set_flags(Glib::IO_FLAG_NONBLOCK);
+    global::uchannel->set_flags(Glib::IO_FLAG_NONBLOCK);
 #endif
-    uchannel->set_close_on_unref(true);
+    global::uchannel->set_close_on_unref(true);
 
     Glib::signal_io().connect(sigc::ptr_fun(cb_udev_monitor_watch),
-                              uchannel,
+                              global::uchannel,
                               Glib::IOCondition::IO_IN | Glib::IOCondition::IO_HUP);
 
     // start mount monitor
-    mchannel = Glib::IOChannel::create_from_file(MOUNTINFO, "r");
-    mchannel->set_close_on_unref(true);
+    global::mchannel = Glib::IOChannel::create_from_file(MOUNTINFO, "r");
+    global::mchannel->set_close_on_unref(true);
 
     Glib::signal_io().connect(sigc::ptr_fun(cb_mount_monitor_watch),
-                              mchannel,
+                              global::mchannel,
                               Glib::IOCondition::IO_ERR);
 
     return true;
@@ -578,25 +581,25 @@ vfs::volume_finalize() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     // stop global mount monitor
-    mchannel = nullptr;
+    global::mchannel = nullptr;
     // stop global udev monitor
-    uchannel = nullptr;
+    global::uchannel = nullptr;
 #endif
 
     // free all devmounts
-    devmounts.clear();
+    global::devmounts.clear();
 
     // free callbacks
-    callbacks.clear(); // free all shared_ptr
+    global::callbacks.clear(); // free all shared_ptr
 
     // free volumes
-    volumes.clear();
+    global::volumes.clear();
 }
 
 const std::span<const std::shared_ptr<vfs::volume>>
 vfs::volume_get_all_volumes() noexcept
 {
-    return volumes;
+    return global::volumes;
 }
 
 const std::shared_ptr<vfs::volume>
@@ -620,7 +623,7 @@ vfs::volume_get_by_device(const std::string_view device_file) noexcept
 static void
 call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state) noexcept
 {
-    for (const auto& callback : callbacks)
+    for (const auto& callback : global::callbacks)
     {
         callback->cb(vol, state, callback->user_data);
     }
@@ -636,17 +639,17 @@ vfs::volume_add_callback(vfs::volume::callback_t cb, void* user_data) noexcept
 
     const volume_callback_data_t data = std::make_shared<volume_callback_data>(cb, user_data);
 
-    callbacks.push_back(data);
+    global::callbacks.push_back(data);
 }
 
 void
 vfs::volume_remove_callback(vfs::volume::callback_t cb, void* user_data) noexcept
 {
-    for (const auto& callback : callbacks)
+    for (const auto& callback : global::callbacks)
     {
         if (callback->cb == cb && callback->user_data == user_data)
         {
-            std::ranges::remove(callbacks, callback);
+            std::ranges::remove(global::callbacks, callback);
             break;
         }
     }
@@ -661,7 +664,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
     // return false to detect changes in this dir, true to avoid change detection
 
     // ztd::logger::debug("vfs::volume_dir_avoid_changes({})", dir);
-    if (!std::filesystem::exists(dir) || !udev.is_initialized())
+    if (!std::filesystem::exists(dir) || !global::udev.is_initialized())
     {
         return false;
     }
@@ -959,7 +962,7 @@ vfs::volume::device_added() noexcept
     }
 
     // add as new volume
-    volumes.push_back(this->shared_from_this());
+    global::volumes.push_back(this->shared_from_this());
     call_callbacks(this->shared_from_this(), vfs::volume::state::added);
 
     // refresh tabs containing changed mount point

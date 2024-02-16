@@ -1017,13 +1017,6 @@ const std::unordered_map<xset::panel, panel_lookup_data> xset_panel_lookup{
 
 using namespace std::literals::string_view_literals;
 
-static const std::unordered_map<xset::main_window_panel, std::string_view> main_window_panel_mode_map{
-    {xset::main_window_panel::panel_neither, "0"sv},
-    {xset::main_window_panel::panel_horiz,   "1"sv},
-    {xset::main_window_panel::panel_vert,    "2"sv},
-    {xset::main_window_panel::panel_both,    "3"sv},
-};
-
 // clang-format on
 
 xset::name
@@ -1088,5 +1081,13 @@ xset::get_name_from_panel_mode(panel_t panel, xset::panel name, xset::main_windo
 const std::string_view
 xset::get_window_panel_mode(xset::main_window_panel mode)
 {
+    static const std::unordered_map<xset::main_window_panel, std::string_view>
+        main_window_panel_mode_map{
+            {xset::main_window_panel::panel_neither, "0"sv},
+            {xset::main_window_panel::panel_horiz, "1"sv},
+            {xset::main_window_panel::panel_vert, "2"sv},
+            {xset::main_window_panel::panel_both, "3"sv},
+        };
+
     return main_window_panel_mode_map.at(mode);
 }

@@ -215,12 +215,6 @@ static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GT
 /*  Drag & Drop/Clipboard targets  */
 static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
-// instance-wide command history
-std::vector<std::string> xset_cmd_history;
-
-// history of closed tabs
-static std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
-
 void
 ptk::browser::navigation_history_data::go_back() noexcept
 {
@@ -315,8 +309,16 @@ struct column_data
     ptk::file_list::column column;
 };
 
+namespace global
+{
+// instance-wide command history
+std::vector<std::string> xset_cmd_history;
+
+// history of closed tabs
+std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
+
 // must match ipc-command.cxx run_ipc_command()
-static constexpr std::array<column_data, 12> columns{
+constexpr std::array<column_data, 12> columns{
     {{
          "Name",
          xset::panel::detcol_name,
@@ -378,6 +380,7 @@ static constexpr std::array<column_data, 12> columns{
          ptk::file_list::column::mtime,
      }},
 };
+} // namespace global
 
 GType
 ptk_file_browser_get_type()
@@ -529,12 +532,12 @@ save_command_history(GtkEntry* entry)
         return;
     }
 
-    xset_cmd_history.push_back(text);
+    global::xset_cmd_history.push_back(text);
 
     // shorten to 200 entries
-    while (xset_cmd_history.size() > 200)
+    while (global::xset_cmd_history.size() > 200)
     {
-        xset_cmd_history.erase(xset_cmd_history.begin());
+        global::xset_cmd_history.erase(global::xset_cmd_history.begin());
     }
 }
 
@@ -1792,7 +1795,7 @@ on_folder_view_columns_changed(GtkTreeView* view, ptk::browser* file_browser)
         return;
     }
 
-    for (const auto i : std::views::iota(0uz, columns.size()))
+    for (const auto i : std::views::iota(0uz, global::columns.size()))
     {
         GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
         if (!col)
@@ -1800,7 +1803,7 @@ on_folder_view_columns_changed(GtkTreeView* view, ptk::browser* file_browser)
             return;
         }
         const char* title = gtk_tree_view_column_get_title(col);
-        for (const auto column : columns)
+        for (const auto column : global::columns)
         {
             if (title == column.title)
             {
@@ -2166,7 +2169,7 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view)
     const panel_t p = file_browser->panel_;
     const xset::main_window_panel mode = file_browser->main_window_->panel_context.at(p);
 
-    for (const auto column : columns)
+    for (const auto column : global::columns)
     {
         GtkTreeViewColumn* col = gtk_tree_view_column_new();
         gtk_tree_view_column_set_resizable(col, true);
@@ -2175,10 +2178,10 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view)
 
         // column order
         usize idx = 0;
-        for (const auto [order_index, order_value] : std::views::enumerate(columns))
+        for (const auto [order_index, order_value] : std::views::enumerate(global::columns))
         {
             idx = order_index;
-            if (xset_get_int_panel(p, columns.at(order_index).xset_name, xset::var::x) ==
+            if (xset_get_int_panel(p, global::columns.at(order_index).xset_name, xset::var::x) ==
                 magic_enum::enum_integer(column.column))
             {
                 break;
@@ -2188,7 +2191,7 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view)
         // column width
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
-        const xset_t set = xset_get_panel_mode(p, columns.at(idx).xset_name, mode);
+        const xset_t set = xset_get_panel_mode(p, global::columns.at(idx).xset_name, mode);
         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
@@ -2227,7 +2230,7 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view)
             else
             {
                 gtk_tree_view_column_set_fixed_width(col, width);
-                // ztd::logger::info("init set_width {} {}", magic_enum::enum_name(columns.at(index).xset_name), width);
+                // ztd::logger::info("init set_width {} {}", magic_enum::enum_name(global::columns.at(index).xset_name), width);
             }
         }
 
@@ -3673,7 +3676,7 @@ ptk::browser::new_tab_here() noexcept
 void
 ptk::browser::close_tab() noexcept
 {
-    closed_tabs_restore[this->panel_].push_back(this->cwd());
+    global::closed_tabs_restore[this->panel_].push_back(this->cwd());
     // ztd::logger::info("close_tab() fb={}, path={}", ztd::logger::utils::ptr(this), closed_tabs_restore[this->panel_].back());
 
     GtkNotebook* notebook =
@@ -3744,14 +3747,14 @@ ptk::browser::close_tab() noexcept
 void
 ptk::browser::restore_tab() noexcept
 {
-    if (closed_tabs_restore[this->panel_].empty())
+    if (global::closed_tabs_restore[this->panel_].empty())
     {
         ztd::logger::info("No tabs to restore for panel {}", this->panel_);
         return;
     }
 
-    const auto file_path = closed_tabs_restore[this->panel_].back();
-    closed_tabs_restore[this->panel_].pop_back();
+    const auto file_path = global::closed_tabs_restore[this->panel_].back();
+    global::closed_tabs_restore[this->panel_].pop_back();
     // ztd::logger::info("restore_tab() fb={}, panel={} path={}", ztd::logger::utils::ptr(this), this->panel_, file_path);
 
     MainWindow* main_window = this->main_window_;
@@ -5000,7 +5003,7 @@ ptk::browser::update_views() noexcept
         if (GTK_IS_TREE_VIEW(this->folder_view_))
         {
             // ztd::logger::info("    set widths   mode = {}", mode);
-            for (const auto i : std::views::iota(0uz, columns.size()))
+            for (const auto i : std::views::iota(0uz, global::columns.size()))
             {
                 GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(this->folder_view_),
                                                                   static_cast<i32>(i));
@@ -5009,7 +5012,7 @@ ptk::browser::update_views() noexcept
                     break;
                 }
                 const char* title = gtk_tree_view_column_get_title(col);
-                for (const auto [index, column] : std::views::enumerate(columns))
+                for (const auto [index, column] : std::views::enumerate(global::columns))
                 {
                     if (title == column.title)
                     {
@@ -5020,7 +5023,7 @@ ptk::browser::update_views() noexcept
                         if (width)
                         {
                             gtk_tree_view_column_set_fixed_width(col, width);
-                            // ztd::logger::info("upd set_width {} {}", magic_enum::enum_name(columns.at(j).xset_name), width);
+                            // ztd::logger::info("upd set_width {} {}", magic_enum::enum_name(global::columns.at(j).xset_name), width);
                         }
                         // set column visibility
                         gtk_tree_view_column_set_visible(col,
@@ -5130,7 +5133,7 @@ ptk::browser::save_column_widths() const noexcept
         const panel_t p = this->panel_;
         const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
         // ztd::logger::debug("save_columns  fb={} (panel {})  mode = {}", ztd::logger::utils::ptr(this), p, mode);
-        for (const auto i : std::views::iota(0uz, columns.size()))
+        for (const auto i : std::views::iota(0uz, global::columns.size()))
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
             if (!col)
@@ -5138,7 +5141,7 @@ ptk::browser::save_column_widths() const noexcept
                 return;
             }
             const char* title = gtk_tree_view_column_get_title(col);
-            for (const auto column : columns)
+            for (const auto column : global::columns)
             {
                 if (title == column.title)
                 {

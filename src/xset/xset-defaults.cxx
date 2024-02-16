@@ -26,7 +26,10 @@
 
 #include "xset/xset.hxx"
 
-static std::vector<xset_t> keysets;
+namespace global
+{
+std::vector<xset_t> keysets;
+}
 
 void
 xset_defaults()
@@ -1746,7 +1749,7 @@ def_key(xset::name name, u32 key, u32 keymod)
     }
 
     // key combo already in use?
-    for (const xset_t& keyset : keysets)
+    for (const xset_t& keyset : global::keysets)
     {
         assert(keyset != nullptr);
 
@@ -1763,14 +1766,14 @@ void
 xset_default_keys()
 {
     // read all currently set or unset keys
-    keysets.reserve(xsets.size());
+    global::keysets.reserve(xsets.size());
     for (const xset_t& set : xsets)
     {
         assert(set != nullptr);
 
         if (set->key)
         {
-            keysets.push_back(set);
+            global::keysets.push_back(set);
         }
     }
 

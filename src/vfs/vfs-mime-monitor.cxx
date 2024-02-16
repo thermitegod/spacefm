@@ -33,7 +33,10 @@
 
 #include "vfs/vfs-mime-monitor.hxx"
 
-static u32 mime_change_timer = 0;
+namespace global
+{
+u32 mime_change_timer = 0;
+}
 
 struct mime_monitor
 {
@@ -60,7 +63,7 @@ mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept
 {
     (void)file;
 
-    if (mime_change_timer != 0)
+    if (global::mime_change_timer != 0)
     {
         // timer is already running, so ignore request
         // ztd::logger::debug("MIME-UPDATE already set");
@@ -68,12 +71,15 @@ mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept
     }
 
     // update mime database in 2 seconds
-    mime_change_timer =
+    global::mime_change_timer =
         g_timeout_add_seconds(2, (GSourceFunc)mime_monitor::on_mime_change_timer, nullptr);
     // ztd::logger::debug("MIME-UPDATE timer started");
 }
 
+namespace global
+{
 std::shared_ptr<mime_monitor> user_mime_monitor = nullptr;
+}
 
 bool
 mime_monitor::on_mime_change_timer(void* user_data) noexcept
@@ -91,15 +97,15 @@ mime_monitor::on_mime_change_timer(void* user_data) noexcept
     ztd::logger::info("COMMAND({})", command2);
     Glib::spawn_command_line_async(command2);
 
-    g_source_remove(mime_change_timer);
-    mime_change_timer = 0;
+    g_source_remove(global::mime_change_timer);
+    global::mime_change_timer = 0;
     return false;
 }
 
 void
 vfs::mime_monitor() noexcept
 {
-    if (user_mime_monitor)
+    if (global::user_mime_monitor)
     {
         return;
     }
@@ -110,13 +116,13 @@ vfs::mime_monitor() noexcept
         return;
     }
 
-    user_mime_monitor = mime_monitor::create(vfs::dir::create(path));
+    global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path));
 
     // ztd::logger::debug("MIME-UPDATE watch started");
-    user_mime_monitor->dir->add_event<spacefm::signal::file_created>(
+    global::user_mime_monitor->dir->add_event<spacefm::signal::file_created>(
         std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
-    user_mime_monitor->dir->add_event<spacefm::signal::file_changed>(
+    global::user_mime_monitor->dir->add_event<spacefm::signal::file_changed>(
         std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
-    user_mime_monitor->dir->add_event<spacefm::signal::file_deleted>(
+    global::user_mime_monitor->dir->add_event<spacefm::signal::file_deleted>(
         std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
 }

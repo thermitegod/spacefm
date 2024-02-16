@@ -133,18 +133,21 @@ vfs::user::runtime() noexcept
     return Glib::get_user_runtime_dir();
 }
 
-std::filesystem::path global_config_path = vfs::user::config() / PACKAGE_NAME;
+namespace global
+{
+std::filesystem::path config_path = vfs::user::config() / PACKAGE_NAME;
+}
 
 const std::filesystem::path
 vfs::program::config() noexcept
 {
-    return global_config_path;
+    return global::config_path;
 }
 
 void
 vfs::program::config(const std::filesystem::path& path) noexcept
 {
-    global_config_path = path;
+    global::config_path = path;
 }
 
 const std::filesystem::path

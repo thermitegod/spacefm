@@ -45,8 +45,11 @@
 
 #include "vfs/vfs-mime-type.hxx"
 
-static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
+namespace global
+{
+std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
 std::mutex mime_map_lock;
+} // namespace global
 
 const std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create(const std::string_view type_name) noexcept
@@ -64,14 +67,14 @@ vfs::mime_type_get_from_file(const std::filesystem::path& file_path) noexcept
 const std::shared_ptr<vfs::mime_type>
 vfs::mime_type_get_from_type(const std::string_view type) noexcept
 {
-    const std::unique_lock<std::mutex> lock(mime_map_lock);
-    if (mime_map.contains(type.data()))
+    const std::unique_lock<std::mutex> lock(global::mime_map_lock);
+    if (global::mime_map.contains(type.data()))
     {
-        return mime_map.at(type.data());
+        return global::mime_map.at(type.data());
     }
 
     const auto mime_type = vfs::mime_type::create(type);
-    mime_map.insert({mime_type->type().data(), mime_type});
+    global::mime_map.insert({mime_type->type().data(), mime_type});
     return mime_type;
 }
 
