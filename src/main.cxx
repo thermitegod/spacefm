@@ -41,7 +41,6 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 
 #include "vfs/linux/self.hxx"
@@ -296,9 +295,8 @@ main(int argc, char* argv[])
 #endif
 
     // Initialize vfs system
-    vfs_volume_init();
-    vfs_thumbnail_init();
-    vfs_trash_init();
+    vfs::volume_init();
+    vfs::thumbnail_init();
 
     // load config file
     load_settings();
@@ -311,7 +309,7 @@ main(int argc, char* argv[])
 
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
-    std::atexit(vfs_volume_finalize);
+    std::atexit(vfs::volume_finalize);
     std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
 

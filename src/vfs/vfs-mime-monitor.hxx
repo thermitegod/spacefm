@@ -15,4 +15,7 @@
 
 #pragma once
 
-void vfs_mime_monitor();
+namespace vfs
+{
+void mime_monitor() noexcept;
+}

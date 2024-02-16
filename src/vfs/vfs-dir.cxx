@@ -145,7 +145,7 @@ vfs::dir::hidden_files() const noexcept
 void
 vfs::dir::update_avoid_changes() noexcept
 {
-    this->avoid_changes_ = vfs_volume_dir_avoid_changes(this->path_);
+    this->avoid_changes_ = vfs::volume_dir_avoid_changes(this->path_);
 }
 
 void

@@ -1725,12 +1725,12 @@ socket::command(const std::string_view socket_commands_json) noexcept
             if (property == "umount" && std::filesystem::is_directory(value))
             {
                 // umount DIR
-                if (is_path_mountpoint(value))
+                if (vfs::is_path_mountpoint(value))
                 {
                     if (ec || !real_path_stat.is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
-                        vol = vfs_volume_get_by_device(value);
+                        vol = vfs::volume_get_by_device(value);
                         if (!vol)
                         {
                             return {SOCKET_INVALID, std::format("invalid TARGET '{}'", value)};
@@ -1741,7 +1741,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             else if (!ec && real_path_stat.is_block_file())
             {
                 // block device eg /dev/sda1
-                vol = vfs_volume_get_by_device(value);
+                vol = vfs::volume_get_by_device(value);
             }
             else
             {

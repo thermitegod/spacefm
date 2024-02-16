@@ -212,7 +212,7 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
 }
 
 GdkPixbuf*
-vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
+vfs::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
     const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
     const std::string filename = std::format("{}.png", file_hash);
@@ -337,7 +337,7 @@ vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size)
 }
 
 void
-vfs_thumbnail_init()
+vfs::thumbnail_init() noexcept
 {
     const auto dir = vfs::user::cache() / "thumbnails/normal";
     if (!std::filesystem::is_directory(dir))

@@ -235,7 +235,7 @@ init_associated_apps_tab(GtkWidget* dialog, const std::shared_ptr<vfs::mime_type
         const std::vector<std::string> apps = mime_type->actions();
         if (apps.empty() && mime_type->is_text())
         {
-            // mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            // mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
         }
         if (!apps.empty())
         {

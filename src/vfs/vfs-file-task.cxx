@@ -410,7 +410,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
         return false;
     }
 
-    // ztd::logger::info("vfs_file_task_do_copy( {}, {} )", src_file, dest_file);
+    // ztd::logger::info("vfs::file_task::do_file_copy( {}, {} )", src_file, dest_file);
     this->lock();
     this->current_file = src_file;
     this->current_dest = dest_file;
@@ -1557,14 +1557,14 @@ vfs::file_task::run_task()
         if (this->type_ == vfs::file_task::type::chmod_chown && !this->src_paths.empty())
         {
             const auto dir = this->src_paths.at(0).parent_path();
-            this->avoid_changes = vfs_volume_dir_avoid_changes(dir);
+            this->avoid_changes = vfs::volume_dir_avoid_changes(dir);
         }
         else
         {
             if (this->dest_dir)
             {
                 const auto checked_dest_dir = this->dest_dir.value();
-                this->avoid_changes = vfs_volume_dir_avoid_changes(checked_dest_dir);
+                this->avoid_changes = vfs::volume_dir_avoid_changes(checked_dest_dir);
             }
             else
             {

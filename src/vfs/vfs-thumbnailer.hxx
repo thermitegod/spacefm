@@ -64,9 +64,9 @@ struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
     std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};
     std::deque<std::shared_ptr<vfs::file>> update_queue{};
 };
-} // namespace vfs
 
 // Ensure the thumbnail dirs exist and have proper file permission.
-void vfs_thumbnail_init();
+void thumbnail_init() noexcept;
 
-GdkPixbuf* vfs_thumbnail_load(const std::shared_ptr<vfs::file>& file, i32 thumb_size);
+GdkPixbuf* thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept;
+} // namespace vfs

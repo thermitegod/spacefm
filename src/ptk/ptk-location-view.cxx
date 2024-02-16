@@ -140,7 +140,7 @@ static void
 on_model_destroy(void* data, GObject* object)
 {
     (void)data;
-    vfs_volume_remove_callback(on_volume_event, (void*)object);
+    vfs::volume_remove_callback(on_volume_event, (void*)object);
 
     model = nullptr;
 }
@@ -223,7 +223,7 @@ update_all()
 
     std::shared_ptr<vfs::volume> v = nullptr;
 
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (volume)
         {
@@ -263,7 +263,7 @@ static void
 update_names()
 {
     std::shared_ptr<vfs::volume> v = nullptr;
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -405,7 +405,7 @@ ptk::view::location::open_block(const std::filesystem::path& block, const bool n
     // may be link so get real path
     const auto canon = std::filesystem::canonical(block);
 
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -433,9 +433,9 @@ ptk_location_view_init_model(GtkListStore* list)
 {
     (void)list;
 
-    vfs_volume_add_callback(on_volume_event, model);
+    vfs::volume_add_callback(on_volume_event, model);
 
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -880,7 +880,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
 {
     (void)task;
     // ztd::logger::info("on_autoopen_cb");
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -1540,7 +1540,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     ptk::browser* file_browser = nullptr;
 
     // validate vol
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -1726,7 +1726,7 @@ ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* file_browser,
     // file_browser may be nullptr
     g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
 
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume || !volume_is_visible(volume))
         {

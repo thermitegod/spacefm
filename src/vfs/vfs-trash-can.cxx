@@ -36,7 +36,7 @@
 static std::shared_ptr<vfs::trash_can> global_trash_can = nullptr;
 
 void
-vfs_trash_init()
+vfs::trash_init() noexcept
 {
     global_trash_can = vfs::trash_can::create();
 }

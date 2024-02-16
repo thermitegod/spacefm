@@ -150,7 +150,7 @@ load_settings()
     const auto main_editor = xset_get_s(xset::name::editor);
     if (!main_editor)
     {
-        const auto mime_type = vfs_mime_type_get_from_type("text/plain");
+        const auto mime_type = vfs::mime_type_get_from_type("text/plain");
         if (mime_type)
         {
             const auto default_app = mime_type->default_action();

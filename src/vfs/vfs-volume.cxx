@@ -54,9 +54,10 @@
 #include "vfs/vfs-volume.hxx"
 
 [[nodiscard]] static const std::shared_ptr<vfs::volume>
-vfs_volume_read_by_device(const libudev::device& udevice);
-static void vfs_volume_device_removed(const libudev::device& udevice);
-static void call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state);
+read_by_device(const libudev::device& udevice) noexcept;
+static void device_removed(const libudev::device& udevice) noexcept;
+static void call_callbacks(const std::shared_ptr<vfs::volume>& vol,
+                           const vfs::volume::state state) noexcept;
 
 struct volume_callback_data
 {
@@ -129,7 +130,7 @@ static std::vector<devmount_t> devmounts;
  */
 
 static void
-parse_mounts(bool report)
+parse_mounts(const bool report) noexcept
 {
     // ztd::logger::debug("parse_mounts report={}", report);
 
@@ -306,7 +307,7 @@ parse_mounts(bool report)
                     // block device
                     ztd::logger::info("mount changed: {}", devnode);
 
-                    const auto volume = vfs_volume_read_by_device(udevice);
+                    const auto volume = read_by_device(udevice);
                     if (volume != nullptr)
                     { // frees volume if needed
                         volume->device_added();
@@ -318,8 +319,8 @@ parse_mounts(bool report)
     // ztd::logger::debug("END PARSE");
 }
 
-static const std::optional<std::string>
-get_devmount_fstype(dev_t device)
+[[nodiscard]] static const std::optional<std::string>
+devmount_fstype(const dev_t device) noexcept
 {
     const auto major = gnu_dev_major(device);
     const auto minor = gnu_dev_minor(device);
@@ -334,8 +335,8 @@ get_devmount_fstype(dev_t device)
     return std::nullopt;
 }
 
-static bool
-cb_mount_monitor_watch(Glib::IOCondition condition)
+[[nodiscard]] static bool
+cb_mount_monitor_watch(const Glib::IOCondition condition) noexcept
 {
     if (condition == Glib::IOCondition::IO_ERR)
     {
@@ -348,8 +349,8 @@ cb_mount_monitor_watch(Glib::IOCondition condition)
     return true;
 }
 
-static bool
-cb_udev_monitor_watch(Glib::IOCondition condition)
+[[nodiscard]] static bool
+cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
 {
     if (condition == Glib::IOCondition::IO_NVAL)
     {
@@ -393,7 +394,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
         // add/remove volume
         if (action == "add" || action == "change")
         {
-            const auto volume = vfs_volume_read_by_device(udevice);
+            const auto volume = read_by_device(udevice);
             if (volume != nullptr)
             { // frees volume if needed
                 volume->device_added();
@@ -401,7 +402,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
         }
         else if (action == "remove")
         {
-            vfs_volume_device_removed(udevice);
+            device_removed(udevice);
         }
         // what to do for move action?
 
@@ -415,7 +416,7 @@ cb_udev_monitor_watch(Glib::IOCondition condition)
 }
 
 [[nodiscard]] static const std::shared_ptr<vfs::volume>
-vfs_volume_read_by_device(const libudev::device& udevice)
+read_by_device(const libudev::device& udevice) noexcept
 { // uses udev to read device parameters into returned volume
     if (!udevice.is_initialized())
     {
@@ -434,7 +435,7 @@ vfs_volume_read_by_device(const libudev::device& udevice)
 }
 
 bool
-is_path_mountpoint(const std::filesystem::path& path)
+vfs::is_path_mountpoint(const std::filesystem::path& path) noexcept
 {
     if (!std::filesystem::exists(path))
     {
@@ -448,7 +449,7 @@ is_path_mountpoint(const std::filesystem::path& path)
 }
 
 static void
-vfs_volume_device_removed(const libudev::device& udevice)
+device_removed(const libudev::device& udevice) noexcept
 {
     if (!udevice.is_initialized())
     {
@@ -457,7 +458,7 @@ vfs_volume_device_removed(const libudev::device& udevice)
 
     const dev_t devnum = udevice.get_devnum();
 
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -481,7 +482,7 @@ vfs_volume_device_removed(const libudev::device& udevice)
 }
 
 bool
-vfs_volume_init()
+vfs::volume_init() noexcept
 {
     // create udev
     if (!udev.is_initialized())
@@ -506,7 +507,7 @@ vfs_volume_init()
             const auto udevice = udev.device_from_syspath(syspath.value());
             if (udevice)
             {
-                const auto volume = vfs_volume_read_by_device(udevice.value());
+                const auto volume = read_by_device(udevice.value());
                 if (volume != nullptr)
                 { // frees volume if needed
                     volume->device_added();
@@ -573,7 +574,7 @@ vfs_volume_init()
 }
 
 void
-vfs_volume_finalize()
+vfs::volume_finalize() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     // stop global mount monitor
@@ -593,15 +594,15 @@ vfs_volume_finalize()
 }
 
 const std::span<const std::shared_ptr<vfs::volume>>
-vfs_volume_get_all_volumes()
+vfs::volume_get_all_volumes() noexcept
 {
     return volumes;
 }
 
 const std::shared_ptr<vfs::volume>
-vfs_volume_get_by_device(const std::string_view device_file)
+vfs::volume_get_by_device(const std::string_view device_file) noexcept
 {
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {
@@ -617,7 +618,7 @@ vfs_volume_get_by_device(const std::string_view device_file)
 }
 
 static void
-call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state)
+call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state) noexcept
 {
     for (const auto& callback : callbacks)
     {
@@ -626,7 +627,7 @@ call_callbacks(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state
 }
 
 void
-vfs_volume_add_callback(vfs::volume::callback_t cb, void* user_data)
+vfs::volume_add_callback(vfs::volume::callback_t cb, void* user_data) noexcept
 {
     if (cb == nullptr)
     {
@@ -639,7 +640,7 @@ vfs_volume_add_callback(vfs::volume::callback_t cb, void* user_data)
 }
 
 void
-vfs_volume_remove_callback(vfs::volume::callback_t cb, void* user_data)
+vfs::volume_remove_callback(vfs::volume::callback_t cb, void* user_data) noexcept
 {
     for (const auto& callback : callbacks)
     {
@@ -652,14 +653,14 @@ vfs_volume_remove_callback(vfs::volume::callback_t cb, void* user_data)
 }
 
 bool
-vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
+vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
 {
     // determines if file change detection should be disabled for this
     // dir (eg nfs stat calls block when a write is in progress so file
     // change detection is unwanted)
     // return false to detect changes in this dir, true to avoid change detection
 
-    // ztd::logger::debug("vfs_volume_dir_avoid_changes({})", dir);
+    // ztd::logger::debug("vfs::volume_dir_avoid_changes({})", dir);
     if (!std::filesystem::exists(dir) || !udev.is_initialized())
     {
         return false;
@@ -675,7 +676,7 @@ vfs_volume_dir_avoid_changes(const std::filesystem::path& dir)
     }
     // ztd::logger::debug("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
 
-    const auto check_fstype = get_devmount_fstype(stat.dev());
+    const auto check_fstype = devmount_fstype(stat.dev());
     if (!check_fstype)
     {
         return false;
@@ -892,7 +893,7 @@ vfs::volume::device_added() noexcept
     }
 
     // check if we already have this volume device file
-    for (const auto& volume : vfs_volume_get_all_volumes())
+    for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
         {

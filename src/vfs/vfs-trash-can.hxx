@@ -112,6 +112,6 @@ struct trash_can
     // Data Members
     std::unordered_map<u64, std::shared_ptr<trash_dir>> trash_dirs_;
 };
-} // namespace vfs
 
-void vfs_trash_init();
+void trash_init() noexcept;
+} // namespace vfs

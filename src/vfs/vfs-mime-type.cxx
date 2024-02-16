@@ -55,14 +55,14 @@ vfs::mime_type::create(const std::string_view type_name) noexcept
 }
 
 const std::shared_ptr<vfs::mime_type>
-vfs_mime_type_get_from_file(const std::filesystem::path& file_path)
+vfs::mime_type_get_from_file(const std::filesystem::path& file_path) noexcept
 {
     const std::string type = mime_type_get_by_file(file_path);
-    return vfs_mime_type_get_from_type(type);
+    return vfs::mime_type_get_from_type(type);
 }
 
 const std::shared_ptr<vfs::mime_type>
-vfs_mime_type_get_from_type(const std::string_view type)
+vfs::mime_type_get_from_type(const std::string_view type) noexcept
 {
     const std::unique_lock<std::mutex> lock(mime_map_lock);
     if (mime_map.contains(type.data()))
@@ -84,7 +84,7 @@ vfs::mime_type::mime_type(const std::string_view type_name) : type_(type_name)
     if (this->description_.empty() && this->type_ != XDG_MIME_TYPE_UNKNOWN)
     {
         ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
-        const auto mime_unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        const auto mime_unknown = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (mime_unknown)
         {
             this->description_ = mime_unknown->description();
@@ -178,7 +178,7 @@ vfs::mime_type::icon(bool big) noexcept
     if (this->description_.empty())
     {
         ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
-        const auto vfs_mime = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        const auto vfs_mime = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         if (vfs_mime)
         {
             this->description_ = vfs_mime->description();
@@ -211,7 +211,7 @@ vfs::mime_type::icon(bool big) noexcept
         if (this->type_ != XDG_MIME_TYPE_UNKNOWN)
         {
             /* FIXME: fallback to icon of parent mime-type */
-            const auto unknown = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+            const auto unknown = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
             icon = unknown->icon(big);
         }
         else /* unknown */
@@ -328,14 +328,14 @@ vfs::mime_type::is_video() const noexcept
 }
 
 const std::optional<std::filesystem::path>
-vfs_mime_type_locate_desktop_file(const std::string_view desktop_id)
+vfs::mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept
 {
-    return mime_type_locate_desktop_file(desktop_id);
+    return ::mime_type_locate_desktop_file(desktop_id);
 }
 
 const std::optional<std::filesystem::path>
-vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
-                                  const std::string_view desktop_id)
+vfs::mime_type_locate_desktop_file(const std::filesystem::path& dir,
+                                   const std::string_view desktop_id) noexcept
 {
-    return mime_type_locate_desktop_file(dir, desktop_id);
+    return ::mime_type_locate_desktop_file(dir, desktop_id);
 }

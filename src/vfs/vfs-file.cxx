@@ -94,7 +94,7 @@ vfs::file::update() noexcept
     this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow, ec);
     if (ec)
     {
-        this->mime_type_ = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        this->mime_type_ = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         return false;
     }
 
@@ -103,7 +103,7 @@ vfs::file::update() noexcept
     // this->status = std::filesystem::status(file_path);
     this->status_ = std::filesystem::symlink_status(this->path_);
 
-    this->mime_type_ = vfs_mime_type_get_from_file(this->path_);
+    this->mime_type_ = vfs::mime_type_get_from_file(this->path_);
 
     // file size formated
     this->display_size_ = vfs::utils::format_file_size(this->size());
@@ -201,7 +201,7 @@ vfs::file::mime_type() const noexcept
 void
 vfs::file::reload_mime_type() noexcept
 {
-    this->mime_type_ = vfs_mime_type_get_from_file(this->path_);
+    this->mime_type_ = vfs::mime_type_get_from_file(this->path_);
     this->load_special_info();
 }
 
@@ -706,7 +706,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (this->mime_type_->is_image() || this->mime_type_->is_video())
         {
             GdkPixbuf* thumbnail =
-                vfs_thumbnail_load(this->shared_from_this(), config::settings->icon_size_big());
+                vfs::thumbnail_load(this->shared_from_this(), config::settings->icon_size_big());
             if (thumbnail)
             {
                 this->big_thumbnail_ = thumbnail;
@@ -735,7 +735,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (this->mime_type_->is_image() || this->mime_type_->is_video())
         {
             GdkPixbuf* thumbnail =
-                vfs_thumbnail_load(this->shared_from_this(), config::settings->icon_size_small());
+                vfs::thumbnail_load(this->shared_from_this(), config::settings->icon_size_small());
             if (thumbnail)
             {
                 this->small_thumbnail_ = thumbnail;

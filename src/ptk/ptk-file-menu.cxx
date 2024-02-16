@@ -1147,7 +1147,7 @@ ptk_file_menu_new(ptk::browser* browser,
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
         if (is_text)
         {
-            const auto txt_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
+            const auto txt_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_PLAIN_TEXT);
             const std::vector<std::string> txt_apps = txt_type->actions();
             if (!txt_apps.empty())
             {
@@ -1573,12 +1573,12 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
         mime_type = data->file->mime_type();
         if (!mime_type)
         {
-            mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+            mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
         }
     }
     else
     {
-        mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_DIRECTORY);
+        mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_DIRECTORY);
     }
 
     GtkWidget* parent = nullptr;
@@ -1627,7 +1627,7 @@ get_shared_desktop_file_location(const std::string_view name)
 {
     for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
-        auto ret = vfs_mime_type_locate_desktop_file(sys_dir, name);
+        auto ret = vfs::mime_type_locate_desktop_file(sys_dir, name);
         if (ret)
         {
             return ret;
@@ -1662,7 +1662,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
     auto mime_type = data->file->mime_type();
     if (!mime_type)
     {
-        mime_type = vfs_mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
+        mime_type = vfs::mime_type_get_from_type(XDG_MIME_TYPE_UNKNOWN);
     }
 
     switch (ptk::file_menu::app_job(job))
@@ -1677,7 +1677,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
             const auto path = vfs::user::data() / "applications" / desktop->name();
             if (!std::filesystem::exists(path))
             {
-                const auto check_share_desktop = vfs_mime_type_locate_desktop_file(desktop->name());
+                const auto check_share_desktop = vfs::mime_type_locate_desktop_file(desktop->name());
                 if (!check_share_desktop ||
                     std::filesystem::equivalent(check_share_desktop.value(), path))
                 {
@@ -1893,7 +1893,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                 xset_edit(GTK_WIDGET(data->browser), mime_file);
             }
 
-            vfs_mime_monitor();
+            vfs::mime_monitor();
             break;
         }
         case ptk::file_menu::app_job::view_type:
@@ -1934,7 +1934,7 @@ app_job(GtkWidget* item, GtkWidget* app_item)
                     path,
                     ptk::browser::open_action::new_tab);
             }
-            vfs_mime_monitor();
+            vfs::mime_monitor();
             break;
         }
         case ptk::file_menu::app_job::update:

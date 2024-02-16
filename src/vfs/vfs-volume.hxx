@@ -124,18 +124,19 @@ struct volume : public std::enable_shared_from_this<volume>
 
     bool ever_mounted_{false};
 };
+
+bool volume_init() noexcept;
+void volume_finalize() noexcept;
+
+const std::span<const std::shared_ptr<vfs::volume>> volume_get_all_volumes() noexcept;
+
+void volume_add_callback(vfs::volume::callback_t cb, void* user_data) noexcept;
+void volume_remove_callback(vfs::volume::callback_t cb, void* user_data) noexcept;
+
+const std::shared_ptr<vfs::volume>
+volume_get_by_device(const std::string_view device_file) noexcept;
+
+bool volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept;
+
+bool is_path_mountpoint(const std::filesystem::path& path) noexcept;
 } // namespace vfs
-
-bool vfs_volume_init();
-void vfs_volume_finalize();
-
-const std::span<const std::shared_ptr<vfs::volume>> vfs_volume_get_all_volumes();
-
-void vfs_volume_add_callback(vfs::volume::callback_t cb, void* user_data);
-void vfs_volume_remove_callback(vfs::volume::callback_t cb, void* user_data);
-
-const std::shared_ptr<vfs::volume> vfs_volume_get_by_device(const std::string_view device_file);
-
-bool vfs_volume_dir_avoid_changes(const std::filesystem::path& dir);
-
-bool is_path_mountpoint(const std::filesystem::path& path);

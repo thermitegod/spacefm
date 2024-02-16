@@ -84,16 +84,15 @@ struct mime_type
     i32 icon_size_big_{0};
     i32 icon_size_small_{0};
 };
+
+[[nodiscard]] const std::shared_ptr<vfs::mime_type>
+mime_type_get_from_file(const std::filesystem::path& file_path) noexcept;
+[[nodiscard]] const std::shared_ptr<vfs::mime_type>
+mime_type_get_from_type(const std::string_view type) noexcept;
+
+[[nodiscard]] const std::optional<std::filesystem::path>
+mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept;
+[[nodiscard]] const std::optional<std::filesystem::path>
+mime_type_locate_desktop_file(const std::filesystem::path& dir,
+                              const std::string_view desktop_id) noexcept;
 } // namespace vfs
-
-const std::shared_ptr<vfs::mime_type>
-vfs_mime_type_get_from_file(const std::filesystem::path& file_path);
-const std::shared_ptr<vfs::mime_type> vfs_mime_type_get_from_type(const std::string_view type);
-
-//////////////////////
-
-const std::optional<std::filesystem::path>
-vfs_mime_type_locate_desktop_file(const std::string_view desktop_id);
-const std::optional<std::filesystem::path>
-vfs_mime_type_locate_desktop_file(const std::filesystem::path& dir,
-                                  const std::string_view desktop_id);

@@ -34,7 +34,6 @@
 #include "vfs/vfs-mime-monitor.hxx"
 
 static u32 mime_change_timer = 0;
-static bool on_mime_change_timer(void* user_data);
 
 struct mime_monitor
 {
@@ -46,7 +45,8 @@ struct mime_monitor
     std::shared_ptr<vfs::dir> dir;
 
     // signals
-    static void on_mime_change(const std::shared_ptr<vfs::file>& file);
+    static void on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept;
+    static bool on_mime_change_timer(void* user_data) noexcept;
 };
 
 const std::shared_ptr<mime_monitor>
@@ -56,7 +56,7 @@ mime_monitor::create(const std::shared_ptr<vfs::dir>& dir) noexcept
 }
 
 void
-mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file)
+mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept
 {
     (void)file;
 
@@ -68,14 +68,15 @@ mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file)
     }
 
     // update mime database in 2 seconds
-    mime_change_timer = g_timeout_add_seconds(2, (GSourceFunc)on_mime_change_timer, nullptr);
+    mime_change_timer =
+        g_timeout_add_seconds(2, (GSourceFunc)mime_monitor::on_mime_change_timer, nullptr);
     // ztd::logger::debug("MIME-UPDATE timer started");
 }
 
 std::shared_ptr<mime_monitor> user_mime_monitor = nullptr;
 
-static bool
-on_mime_change_timer(void* user_data)
+bool
+mime_monitor::on_mime_change_timer(void* user_data) noexcept
 {
     (void)user_data;
 
@@ -96,7 +97,7 @@ on_mime_change_timer(void* user_data)
 }
 
 void
-vfs_mime_monitor()
+vfs::mime_monitor() noexcept
 {
     if (user_mime_monitor)
     {
