@@ -15,8 +15,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <unordered_map>
-
 #include <algorithm>
 
 #include <chrono>
@@ -115,7 +113,7 @@ static GObjectClass* parent_class = nullptr;
 
 namespace global
 {
-const std::unordered_map<ptk::file_list::column, GType> column_types{
+const ztd::map<ptk::file_list::column, GType, 15> column_types{{{
     {ptk::file_list::column::big_icon, GDK_TYPE_PIXBUF},
     {ptk::file_list::column::small_icon, GDK_TYPE_PIXBUF},
     {ptk::file_list::column::name, G_TYPE_STRING},
@@ -131,7 +129,7 @@ const std::unordered_map<ptk::file_list::column, GType> column_types{
     {ptk::file_list::column::ctime, G_TYPE_STRING},
     {ptk::file_list::column::mtime, G_TYPE_STRING},
     {ptk::file_list::column::info, G_TYPE_POINTER},
-};
+}}};
 }
 
 GType
@@ -742,8 +740,8 @@ ptk_file_info_list_sort(ptk::file_list* list)
     assert(list->sort_col != ptk::file_list::column::small_icon);
     assert(list->sort_col != ptk::file_list::column::info);
 
-    static const std::unordered_map<ptk::file_list::column, compare_function_t>
-        compare_function_ptr_table{
+    static const ztd::map<ptk::file_list::column, compare_function_t, 12>
+        compare_function_ptr_table{{{
             {ptk::file_list::column::name, &compare_file_name},
             {ptk::file_list::column::size, &compare_file_size},
             {ptk::file_list::column::bytes, &compare_file_size},
@@ -756,7 +754,7 @@ ptk_file_info_list_sort(ptk::file_list* list)
             {ptk::file_list::column::btime, &compare_file_btime},
             {ptk::file_list::column::ctime, &compare_file_ctime},
             {ptk::file_list::column::mtime, &compare_file_mtime},
-        };
+        }}};
 
     auto file_list = glist_to_vector_vfs_file(list->files);
 

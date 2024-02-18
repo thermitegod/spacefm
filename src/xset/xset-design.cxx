@@ -471,7 +471,7 @@ xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_ins
         gtk_menu_item_set_submenu(GTK_MENU_ITEM(newitem), submenu);
         gtk_container_add(GTK_CONTAINER(design_menu), newitem);
 
-        for (const auto& it : xset_toolbar_get_builtin_tools())
+        for (const auto& it : xset_toolbar_builtin_tools())
         {
             const auto name = it.second.name;
             if (name)

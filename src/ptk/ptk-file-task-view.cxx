@@ -21,7 +21,6 @@
 #include <filesystem>
 
 #include <array>
-#include <unordered_map>
 #include <vector>
 
 #include <chrono>
@@ -56,7 +55,7 @@
 
 #include "ptk/ptk-file-task-view.hxx"
 
-const std::unordered_map<ptk::view::file_task::column, const std::string_view> task_titles{
+static constexpr ztd::map<ptk::view::file_task::column, const std::string_view, 14> task_titles{{{
     // If you change "Status", also change it in on_task_button_press_event
     {ptk::view::file_task::column::status, "Status"},
     {ptk::view::file_task::column::count, "#"},
@@ -72,7 +71,7 @@ const std::unordered_map<ptk::view::file_task::column, const std::string_view> t
     {ptk::view::file_task::column::avgspeed, "Average"},
     {ptk::view::file_task::column::avgest, "Remain"},
     {ptk::view::file_task::column::starttime, "StartTime"},
-};
+}}};
 
 inline constexpr std::array<xset::name, 13> task_names{
     xset::name::task_col_status,
@@ -1022,7 +1021,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
     xset_t set;
 
     // ztd::logger::info("ptk::view::file_task::update_task  ptask={}", ptask);
-    const std::unordered_map<vfs::file_task::type, const std::string_view> job_titles{
+    static constexpr ztd::map<vfs::file_task::type, const std::string_view, 7> job_titles{{{
         {vfs::file_task::type::move, "moving"},
         {vfs::file_task::type::copy, "copying"},
         {vfs::file_task::type::trash, "trashing"},
@@ -1030,7 +1029,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
         {vfs::file_task::type::link, "linking"},
         {vfs::file_task::type::chmod_chown, "changing"},
         {vfs::file_task::type::exec, "running"},
-    };
+    }}};
 
     if (!ptask)
     {

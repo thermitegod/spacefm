@@ -24,7 +24,6 @@
 
 #include <array>
 #include <vector>
-#include <unordered_map>
 
 #include <optional>
 
@@ -732,7 +731,7 @@ on_error_combo_changed(GtkComboBox* box, ptk::file_task* ptask)
 void
 ptk::file_task::progress_open() noexcept
 {
-    const std::unordered_map<vfs::file_task::type, const std::string_view> job_actions{
+    static constexpr ztd::map<vfs::file_task::type, const std::string_view, 7> job_actions{{{
         {vfs::file_task::type::move, "Move: "},
         {vfs::file_task::type::copy, "Copy: "},
         {vfs::file_task::type::trash, "Trash: "},
@@ -740,8 +739,8 @@ ptk::file_task::progress_open() noexcept
         {vfs::file_task::type::link, "Link: "},
         {vfs::file_task::type::chmod_chown, "Change: "},
         {vfs::file_task::type::exec, "Run: "},
-    };
-    const std::unordered_map<vfs::file_task::type, const std::string_view> job_titles{
+    }}};
+    static constexpr ztd::map<vfs::file_task::type, const std::string_view, 7> job_titles{{{
         {vfs::file_task::type::move, "Moving..."},
         {vfs::file_task::type::copy, "Copying..."},
         {vfs::file_task::type::trash, "Trashing..."},
@@ -749,7 +748,7 @@ ptk::file_task::progress_open() noexcept
         {vfs::file_task::type::link, "Linking..."},
         {vfs::file_task::type::chmod_chown, "Changing..."},
         {vfs::file_task::type::exec, "Running..."},
-    };
+    }}};
 
     if (this->progress_dlg_)
     {

@@ -17,16 +17,10 @@
 
 #include <filesystem>
 
-#include <unordered_map>
-
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
 #include "scripts.hxx"
-
-// #define SPACEFM_USER_SCRIPT_OVERRIDE
-
-using namespace std::literals::string_view_literals;
 
 bool
 script_exists(spacefm::script script) noexcept
@@ -55,10 +49,10 @@ script_exists(const std::filesystem::path& script) noexcept
 const std::filesystem::path
 get_script_path(spacefm::script script) noexcept
 {
-    static const std::unordered_map<spacefm::script, const std::string_view> script_map{
-        {spacefm::script::config_update, "config-update"sv},
-        {spacefm::script::config_update_git, "config-update-git"sv},
-    };
+    static constexpr ztd::map<spacefm::script, const std::string_view, 2> script_map{{{
+        {spacefm::script::config_update, "config-update"},
+        {spacefm::script::config_update_git, "config-update-git"},
+    }}};
 
     return std::filesystem::path() / PACKAGE_SCRIPTS_PATH / script_map.at(script);
 }
