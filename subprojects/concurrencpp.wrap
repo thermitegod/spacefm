@@ -1,0 +1,8 @@
+[wrap-file]
+directory = concurrencpp-v.0.1.7
+source_url = https://github.com/David-Haim/concurrencpp/archive/refs/tags/v.0.1.7.tar.gz
+source_filename = concurrencpp-0.1.7.tar.gz
+source_hash = 049f3e83ad1828e0b8b518652de1a3160d5849fdff03d521d0a5af0167338e89
+
+[provide]
+dependency_names = concurrencpp

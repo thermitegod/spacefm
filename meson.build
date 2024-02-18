@@ -205,7 +205,11 @@ endif
 toml11_dep = dependency('toml11', required : false)
 if not toml11_dep.found() # using subproject
   cmake = import('cmake')
-  toml11_proj = cmake.subproject('toml11', required : true)
+  # Hard requires having a cpp standard set
+  cmake_opt_var = cmake.subproject_options()
+  # cmake_opt_var.set_override_option('CMAKE_CXX_STANDARD', '23')
+  cmake_opt_var.add_cmake_defines({'CMAKE_CXX_STANDARD': '23'})
+  toml11_proj = cmake.subproject('toml11', required : true, options: cmake_opt_var)
   toml11_dep = toml11_proj.dependency('toml11')
 endif
 
@@ -214,6 +218,14 @@ cli11_dep = dependency('CLI11', required : false)
 if not cli11_dep.found() # using subproject
   cli11_dep_proj = subproject('cli11', required : true)
   cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
+endif
+
+# concurrencpp use system or subproject
+concurrencpp_dep = dependency('concurrencpp', required : false)
+if not concurrencpp_dep.found() # using subproject
+  cmake = import('cmake')
+  concurrencpp_proj = cmake.subproject('concurrencpp', required : true)
+  concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
 endif
 
 libudev_dep = dependency('libudev', required : true)
@@ -248,6 +260,7 @@ dependencies = [
   sigc_dep,
   pugixml_dep,
   cli11_dep,
+  concurrencpp_dep,
 
   libudev_dep,
   libffmpegthumbnailer_dep,
