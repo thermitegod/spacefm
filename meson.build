@@ -375,6 +375,7 @@ sources += files(
   'src/about.cxx',
   'src/autosave.cxx',
   'src/bookmarks.cxx',
+  'src/concurrency.cxx',
   'src/file-search.cxx',
   'src/main.cxx',
   'src/main-window.cxx',
