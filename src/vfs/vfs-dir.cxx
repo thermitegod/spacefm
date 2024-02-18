@@ -398,6 +398,7 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
     { /* The file does not exist */
         if (std::ranges::contains(this->files_, file))
         {
+            const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
             // TODO - FIXME - using std::ranges::remove here will
             // caues a segfault when deleting/moving/loading thumbails
             // std::ranges::remove(this->files_, file);
