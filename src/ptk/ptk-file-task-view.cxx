@@ -73,7 +73,7 @@ static constexpr ztd::map<ptk::view::file_task::column, const std::string_view, 
     {ptk::view::file_task::column::starttime, "StartTime"},
 }}};
 
-inline constexpr std::array<xset::name, 13> task_names{
+static constexpr std::array<xset::name, 13> task_names{
     xset::name::task_col_status,
     xset::name::task_col_count,
     xset::name::task_col_path,

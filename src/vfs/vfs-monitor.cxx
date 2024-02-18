@@ -42,9 +42,6 @@
 
 #include "vfs/vfs-monitor.hxx"
 
-inline constexpr auto EVENT_SIZE = (sizeof(inotify_event));
-inline constexpr auto EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
-
 const std::shared_ptr<vfs::monitor>
 vfs::monitor::create(const std::filesystem::path& path, const callback_t& callback) noexcept
 {
@@ -121,6 +118,8 @@ bool
 vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
 {
     // ztd::logger::debug("vfs::monitor::on_inotify_event({})  {}", ztd::logger::utils::ptr(this), this->path_);
+    static constexpr auto EVENT_SIZE = (sizeof(inotify_event));
+    static constexpr auto EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
 
     if (condition == Glib::IOCondition::IO_HUP || condition == Glib::IOCondition::IO_ERR)
     {

@@ -50,9 +50,6 @@
 
 #include "vfs/mime-type/mime-type.hxx"
 
-// https://www.rfc-editor.org/rfc/rfc6838#section-4.2
-inline constexpr u32 MIME_HEADER_MAX_SIZE = 127;
-
 [[nodiscard]] static bool
 is_data_plain_text(const std::span<const std::byte> data) noexcept
 {
@@ -107,6 +104,9 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
     const auto fd = open(path.c_str(), O_RDONLY, 0);
     if (fd != -1)
     {
+        // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
+        static constexpr auto MIME_HEADER_MAX_SIZE = 127;
+
         std::array<std::byte, MIME_HEADER_MAX_SIZE> data{};
 
         const auto length = read(fd, data.data(), data.size());

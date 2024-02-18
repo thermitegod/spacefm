@@ -65,7 +65,7 @@
 #include "settings/settings.hxx"
 
 // This limits the small icon size for side panes and task list
-inline constexpr i32 PANE_MAX_ICON_SIZE = 48;
+static constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
 static GtkTreeModel* model = nullptr;
 

@@ -118,7 +118,7 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
     app.add_flag("-n,--no-saved-tab", opt->no_tabs, "Do not load saved tabs");
     app.add_flag("-w,--new-window", opt->new_window, "Open directories in new window");
 
-    const std::array<panel_t, 4> panels = {panel_1, panel_2, panel_3, panel_4};
+    static constexpr std::array<panel_t, 4> panels = {panel_1, panel_2, panel_3, panel_4};
     app.add_option("-p,--panel", opt->panel, "Open directories in panel")
         ->expected(1)
         ->check(CLI::IsMember(panels));
@@ -147,7 +147,7 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
                  opt->git_backed_settings,
                  "Do not use git to keep session history");
 
-    const std::array<std::string, 8> loglevels =
+    static constexpr std::array<std::string_view, 8> loglevels =
         {"trace", "debug", "info", "warning", "error", "critical", "off"};
     app.add_option("--loglevel", opt->loglevel, "Set the loglevel")
         ->expected(1)

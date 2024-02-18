@@ -60,29 +60,6 @@
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-file-task.hxx"
 
-inline constexpr std::array<std::filesystem::perms, 12> chmod_flags{
-    // User
-    std::filesystem::perms::owner_read,
-    std::filesystem::perms::owner_write,
-    std::filesystem::perms::owner_exec,
-    // Group
-    std::filesystem::perms::group_read,
-    std::filesystem::perms::group_write,
-    std::filesystem::perms::group_exec,
-
-    // Other
-    std::filesystem::perms::others_read,
-    std::filesystem::perms::others_write,
-    std::filesystem::perms::others_exec,
-
-    // uid/gid
-    std::filesystem::perms::set_uid,
-    std::filesystem::perms::set_gid,
-
-    // sticky bit
-    std::filesystem::perms::sticky_bit,
-};
-
 const std::shared_ptr<vfs::file_task>
 vfs::file_task::create(const vfs::file_task::type task_type,
                        const std::span<const std::filesystem::path> src_files,
@@ -1101,6 +1078,29 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
 void
 vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
 {
+    static constexpr std::array<std::filesystem::perms, 12> chmod_flags{
+        // User
+        std::filesystem::perms::owner_read,
+        std::filesystem::perms::owner_write,
+        std::filesystem::perms::owner_exec,
+        // Group
+        std::filesystem::perms::group_read,
+        std::filesystem::perms::group_write,
+        std::filesystem::perms::group_exec,
+
+        // Other
+        std::filesystem::perms::others_read,
+        std::filesystem::perms::others_write,
+        std::filesystem::perms::others_exec,
+
+        // uid/gid
+        std::filesystem::perms::set_uid,
+        std::filesystem::perms::set_gid,
+
+        // sticky bit
+        std::filesystem::perms::sticky_bit,
+    };
+
     if (this->should_abort())
     {
         return;

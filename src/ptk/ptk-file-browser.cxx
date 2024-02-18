@@ -318,7 +318,7 @@ std::vector<std::string> xset_cmd_history;
 std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
 // must match ipc-command.cxx run_ipc_command()
-constexpr std::array<column_data, 12> columns{
+static constexpr std::array<column_data, 12> columns{
     {{
          "Name",
          xset::panel::detcol_name,
