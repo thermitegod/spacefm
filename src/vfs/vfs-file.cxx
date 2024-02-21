@@ -35,8 +35,8 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/thumbnails/thumbnails.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
@@ -705,8 +705,8 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 
         if (this->mime_type_->is_image() || this->mime_type_->is_video())
         {
-            GdkPixbuf* thumbnail =
-                vfs::thumbnail_load(this->shared_from_this(), config::settings->icon_size_big());
+            GdkPixbuf* thumbnail = vfs::detail::thumbnail_load(this->shared_from_this(),
+                                                               config::settings->icon_size_big());
             if (thumbnail)
             {
                 this->big_thumbnail_ = thumbnail;
@@ -734,8 +734,8 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 
         if (this->mime_type_->is_image() || this->mime_type_->is_video())
         {
-            GdkPixbuf* thumbnail =
-                vfs::thumbnail_load(this->shared_from_this(), config::settings->icon_size_small());
+            GdkPixbuf* thumbnail = vfs::detail::thumbnail_load(this->shared_from_this(),
+                                                               config::settings->icon_size_small());
             if (thumbnail)
             {
                 this->small_thumbnail_ = thumbnail;

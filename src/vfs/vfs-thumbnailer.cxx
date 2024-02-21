@@ -16,14 +16,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
-#include <filesystem>
-
-#include <chrono>
-
 #include <memory>
 
 #include <ranges>
@@ -38,14 +30,9 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/shell-quote.hxx"
-
-#include "settings/settings.hxx"
-
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-async-task.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 
 #include "vfs/vfs-thumbnailer.hxx"
 
@@ -209,140 +196,4 @@ thumbnailer_thread(vfs::async_task* task, const std::shared_ptr<vfs::thumbnailer
     }
     // ztd::logger::debug("THREAD ENDED!");
     return nullptr;
-}
-
-GdkPixbuf*
-vfs::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
-{
-    const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
-    const std::string filename = std::format("{}.png", file_hash);
-
-    const auto thumbnail_file = vfs::user::cache() / "thumbnails/normal" / filename;
-
-    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
-
-    // if the mtime of the file being thumbnailed is less than 5 sec ago,
-    // do not create a thumbnail. This means that newly created files
-    // will not have a thumbnail until a refresh
-    const auto mtime = file->mtime();
-    const auto now = std::chrono::system_clock::now();
-    if (now - mtime < std::chrono::seconds(5))
-    {
-        return nullptr;
-    }
-
-    // load existing thumbnail
-    i32 w = 0;
-    i32 h = 0;
-    std::chrono::system_clock::time_point embeded_mtime;
-    GdkPixbuf* thumbnail = nullptr;
-    if (std::filesystem::is_regular_file(thumbnail_file))
-    {
-        // ztd::logger::debug("Existing thumb: {}", thumbnail_file);
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
-        if (thumbnail)
-        { // need to check for broken thumbnail images
-            w = gdk_pixbuf_get_width(thumbnail);
-            h = gdk_pixbuf_get_height(thumbnail);
-            const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
-            if (thumb_mtime != nullptr)
-            {
-                embeded_mtime = std::chrono::system_clock::from_time_t(std::stol(thumb_mtime));
-            }
-        }
-    }
-
-    if (!thumbnail || (w < thumb_size && h < thumb_size) ||
-        // TODO? on disk thumbnail mtime metadata does not store nanoseconds
-        std::chrono::time_point_cast<std::chrono::seconds>(embeded_mtime) !=
-            std::chrono::time_point_cast<std::chrono::seconds>(mtime))
-    {
-        // ztd::logger::debug("New thumb: {}", thumbnail_file);
-
-        if (thumbnail)
-        {
-            g_object_unref(thumbnail);
-        }
-
-        // create new thumbnail
-        if (config::settings->thumbnailer_use_api())
-        {
-            try
-            {
-                ffmpegthumbnailer::VideoThumbnailer video_thumb;
-                // video_thumb.setLogCallback(nullptr);
-                // video_thumb.clearFilters();
-                video_thumb.setSeekPercentage(25);
-                video_thumb.setThumbnailSize(thumb_size);
-                video_thumb.setMaintainAspectRatio(true);
-                video_thumb.generateThumbnail(file->path(),
-                                              ThumbnailerImageType::Png,
-                                              thumbnail_file,
-                                              nullptr);
-            }
-            catch (const std::logic_error& e)
-            {
-                // file cannot be opened
-                return nullptr;
-            }
-        }
-        else
-        {
-            const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
-                                             thumb_size,
-                                             ::utils::shell_quote(file->path().string()),
-                                             ::utils::shell_quote(thumbnail_file.string()));
-            // ztd::logger::info("COMMAND({})", command);
-            Glib::spawn_command_line_sync(command);
-
-            if (!std::filesystem::exists(thumbnail_file))
-            {
-                return nullptr;
-            }
-        }
-
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
-    }
-
-    GdkPixbuf* result = nullptr;
-    if (thumbnail)
-    {
-        w = gdk_pixbuf_get_width(thumbnail);
-        h = gdk_pixbuf_get_height(thumbnail);
-
-        if (w > h)
-        {
-            h = h * thumb_size / w;
-            w = thumb_size;
-        }
-        else if (h > w)
-        {
-            w = w * thumb_size / h;
-            h = thumb_size;
-        }
-        else
-        {
-            w = h = thumb_size;
-        }
-
-        if (w > 0 && h > 0)
-        {
-            result = gdk_pixbuf_scale_simple(thumbnail, w, h, GdkInterpType::GDK_INTERP_BILINEAR);
-        }
-
-        g_object_unref(thumbnail);
-    }
-
-    return result;
-}
-
-void
-vfs::thumbnail_init() noexcept
-{
-    const auto dir = vfs::user::cache() / "thumbnails/normal";
-    if (!std::filesystem::is_directory(dir))
-    {
-        std::filesystem::create_directories(dir);
-    }
-    std::filesystem::permissions(dir, std::filesystem::perms::owner_all);
 }

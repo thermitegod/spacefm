@@ -22,8 +22,6 @@
 
 #include <memory>
 
-#include <gdkmm.h>
-
 #include <ztd/ztd.hxx>
 
 #include "vfs/vfs-file.hxx"
@@ -64,9 +62,4 @@ struct thumbnailer : public std::enable_shared_from_this<thumbnailer>
     std::deque<std::shared_ptr<vfs::thumbnailer::request>> queue{};
     std::deque<std::shared_ptr<vfs::file>> update_queue{};
 };
-
-// Ensure the thumbnail dirs exist and have proper file permission.
-void thumbnail_init() noexcept;
-
-GdkPixbuf* thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept;
 } // namespace vfs

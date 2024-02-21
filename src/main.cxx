@@ -41,7 +41,6 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-thumbnailer.hxx"
 
 #include "vfs/linux/self.hxx"
 
@@ -296,7 +295,6 @@ main(int argc, char* argv[])
 
     // Initialize vfs system
     vfs::volume_init();
-    vfs::thumbnail_init();
 
     // load config file
     load_settings();

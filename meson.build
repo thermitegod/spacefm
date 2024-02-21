@@ -444,6 +444,8 @@ sources += files(
 
   'src/vfs/utils/vfs-utils.cxx',
 
+  'src/vfs/thumbnails/thumbnails.cxx',
+
   'src/vfs/libudevpp/udev.cxx',
   'src/vfs/libudevpp/udev_device.cxx',
   'src/vfs/libudevpp/udev_enumerate.cxx',
