@@ -38,6 +38,7 @@ namespace vfs::detail::mime_type
 [[nodiscard]] bool is_executable(const std::string_view mime_type) noexcept;
 [[nodiscard]] bool is_archive(const std::string_view mime_type) noexcept;
 [[nodiscard]] bool is_video(const std::string_view mime_type) noexcept;
+[[nodiscard]] bool is_audio(const std::string_view mime_type) noexcept;
 [[nodiscard]] bool is_image(const std::string_view mime_type) noexcept;
 [[nodiscard]] bool is_unknown(const std::string_view mime_type) noexcept;
 

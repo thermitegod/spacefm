@@ -117,6 +117,14 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] bool is_verity() const noexcept;     // file has fs-verity enabled
     [[nodiscard]] bool is_dax() const noexcept; // file is in the DAX (cpu direct access) state
 
+    // Get generic Audio,Video,Image metadata data
+    struct metadata_data
+    {
+        std::string description;
+        std::string value;
+    };
+    [[nodiscard]] const std::vector<metadata_data> metadata() noexcept;
+
     // update file info
     [[nodiscard]] bool update() noexcept;
 
@@ -145,6 +153,8 @@ struct file : public std::enable_shared_from_this<file>
     bool is_special_desktop_entry_{false}; // is a .desktop file
 
     bool is_hidden_{false}; // if the filename starts with '.'
+
+    // std::vector<metadata_data> metadata_{};
 
   private:
     void load_special_info() noexcept;

@@ -335,6 +335,12 @@ vfs::detail::mime_type::is_video(const std::string_view mime_type) noexcept
 }
 
 bool
+vfs::detail::mime_type::is_audio(const std::string_view mime_type) noexcept
+{
+    return mime_type.starts_with("audio/");
+}
+
+bool
 vfs::detail::mime_type::is_unknown(const std::string_view mime_type) noexcept
 {
     return mime_type == vfs::constants::mime_type::unknown;

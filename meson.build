@@ -353,6 +353,40 @@ if get_option('socket')
   )
 endif
 
+if get_option('media')
+  # ffmpeg
+  libavcodec_dep = dependency('libavcodec')
+  # libavdevice_dep = dependency('libavdevice')
+  # libavfilter_dep = dependency('libavfilter')
+  libavformat_dep = dependency('libavformat')
+  libavutil_dep = dependency('libavutil')
+  # libswresample_dep = dependency('libswresample')
+  # libswscale_dep = dependency('libswscale')
+
+  gexiv_dep = dependency('gexiv2')
+  gdkpixbuf_dep = dependency('gdk-pixbuf-2.0')
+
+  dependencies += [
+    libavcodec_dep,
+    # libavdevice_dep,
+    # libavfilter_dep,
+    libavformat_dep,
+    libavutil_dep,
+    # libswresample_dep,
+    # libswscale_dep,
+
+    gexiv_dep,
+    gdkpixbuf_dep,
+  ]
+
+  features += '-DHAVE_MEDIA'
+
+  sources += files(
+    'src/vfs/media/audio-video-metadata.cxx',
+    'src/vfs/media/image-metadata.cxx',
+  )
+endif
+
 foreach a : features
   add_project_arguments(a, language : ['c', 'cpp'])
 endforeach

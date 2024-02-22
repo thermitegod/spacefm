@@ -84,6 +84,7 @@ struct mime_type
     [[nodiscard]] bool is_text() const noexcept;
     [[nodiscard]] bool is_image() const noexcept;
     [[nodiscard]] bool is_video() const noexcept;
+    [[nodiscard]] bool is_audio() const noexcept;
 
   private:
     [[nodiscard]] static const std::shared_ptr<vfs::mime_type>

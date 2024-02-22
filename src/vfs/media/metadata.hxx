@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -19,12 +17,13 @@
 
 #include <filesystem>
 
-#include <span>
-
-#include <gtkmm.h>
-
 #include "vfs/vfs-file.hxx"
 
-void ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
-                              const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                              const i32 page) noexcept;
+namespace vfs::detail
+{
+[[nodiscard]] const std::vector<vfs::file::metadata_data>
+image_metadata(const std::filesystem::path& path) noexcept;
+
+[[nodiscard]] const std::vector<vfs::file::metadata_data>
+audio_video_metadata(const std::filesystem::path& path) noexcept;
+} // namespace vfs::detail

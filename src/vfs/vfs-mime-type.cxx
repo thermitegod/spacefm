@@ -331,6 +331,12 @@ vfs::mime_type::is_video() const noexcept
     return vfs::detail::mime_type::is_video(this->type_);
 }
 
+bool
+vfs::mime_type::is_audio() const noexcept
+{
+    return vfs::detail::mime_type::is_audio(this->type_);
+}
+
 const std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept
 {

@@ -340,6 +340,21 @@ class PropertiesPage
     }
 
     void
+    add_row(GtkLabel* left_item, GtkLabel* right_item) noexcept
+    {
+        // assert(GTK_IS_LABEL(left_item));
+        // assert(GTK_IS_LABEL(right_item));
+        gtk_label_set_xalign(GTK_LABEL(left_item), 0.0);
+        gtk_label_set_yalign(GTK_LABEL(left_item), 0.5);
+
+        GtkBox* left_box = nullptr;
+        GtkBox* right_box = nullptr;
+        this->section_.new_split_vboxes(&left_box, &right_box);
+        gtk_box_pack_start(left_box, GTK_WIDGET(left_item), true, true, 0);
+        gtk_box_pack_start(right_box, GTK_WIDGET(right_item), true, true, 0);
+    }
+
+    void
     add_row_widget(GtkWidget* item) noexcept
     {
         gtk_box_pack_start(this->section_.contentbox(), GTK_WIDGET(item), true, true, 0);
@@ -547,6 +562,39 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
         page.add_row("Created:     ", GTK_WIDGET(create_prop_text_box_date(file->btime())));
         page.add_row("Metadata:    ", GTK_WIDGET(create_prop_text_box_date(file->ctime())));
         page.add_row("Modified:    ", GTK_WIDGET(create_prop_text_box_date(file->mtime())));
+    }
+
+    return GTK_WIDGET(page.box());
+}
+
+GtkWidget*
+init_media_tab(const std::shared_ptr<properties_dialog_data>& data,
+               const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
+{
+    (void)data;
+    if (selected_files.size() > 1)
+    {
+        return nullptr;
+    }
+
+    const auto& file = selected_files.front();
+    const auto metadata = file->metadata();
+    if (metadata.empty())
+    {
+        return nullptr;
+    }
+
+    auto page = PropertiesPage();
+
+    for (const auto& item : metadata)
+    {
+        // ztd::logger::debug("description={}   value={}", item.description, item.value);
+        GtkLabel* description_label = GTK_LABEL(gtk_label_new(item.description.data()));
+        GtkLabel* value_label = GTK_LABEL(gtk_label_new(item.value.data()));
+        gtk_label_set_xalign(value_label, 1.0);
+        gtk_label_set_yalign(value_label, 0.5);
+
+        page.add_row(description_label, value_label);
     }
 
     return GTK_WIDGET(page.box());
@@ -1011,11 +1059,22 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
     const auto data = std::make_shared<properties_dialog_data>(selected_files, cwd);
 
-    // clang-format off
-    gtk_notebook_append_page(notebook, init_file_info_tab(data, cwd, selected_files), gtk_label_new("File Info"));
-    gtk_notebook_append_page(notebook, init_attributes_tab(data, selected_files), gtk_label_new("Attributes"));
-    gtk_notebook_append_page(notebook, init_permissions_tab(data, selected_files), gtk_label_new("Permissions"));
-    // clang-format on
+    GtkWidget* tab_file = init_file_info_tab(data, cwd, selected_files);
+    GtkWidget* tab_media = init_media_tab(data, selected_files);
+    GtkWidget* tab_attributes = init_attributes_tab(data, selected_files);
+    GtkWidget* tab_permissions = init_permissions_tab(data, selected_files);
+
+    gtk_notebook_append_page(notebook, tab_file, gtk_label_new("File Info"));
+    if (tab_media != nullptr)
+    {
+        if (page > 1)
+        {
+            page++;
+        }
+        gtk_notebook_append_page(notebook, tab_media, gtk_label_new("Media"));
+    }
+    gtk_notebook_append_page(notebook, tab_attributes, gtk_label_new("Attributes"));
+    gtk_notebook_append_page(notebook, tab_permissions, gtk_label_new("Permissions"));
 
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 470, 400);
     // gtk_widget_set_size_request(GTK_WIDGET(dialog), 500, 800);
@@ -1050,7 +1109,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 void
 ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
                          const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                         i32 page) noexcept
+                         const i32 page) noexcept
 {
     if (selected_files.empty())
     {

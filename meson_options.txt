@@ -13,6 +13,11 @@ option('socket',
        value: true,
        description : 'Enable socket commands')
 
+option('media',
+       type : 'boolean',
+       value: true,
+       description : 'Enable extra Audio, Video, and Image support')
+
 option('zmp_port',
        type : 'integer',
        value: 59172,
