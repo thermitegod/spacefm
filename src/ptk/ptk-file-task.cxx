@@ -1498,18 +1498,15 @@ ptk::file_task::update() noexcept
     std::string dsp_elapsed;
     if (hours >= std::chrono::hours(1))
     {
-        // elapsed = std::format("{0:%H}:{1:%M}:{2:%S}", hours, minutes, seconds);
-        dsp_elapsed = std::format("{}:{}:{}", hours, minutes, seconds);
+        dsp_elapsed = std::format("{}:{}:{}", hours.count(), minutes.count(), seconds.count());
     }
     else if (minutes >= std::chrono::minutes(1))
     {
-        // elapsed = std::format("{0:%M}:{1:%S}", minutes, seconds);
-        dsp_elapsed = std::format("{}:{}", minutes, seconds);
+        dsp_elapsed = std::format("{}:{}", minutes.count(), seconds.count());
     }
     else
     {
-        // elapsed = std::format("{0:%S}", seconds);
-        dsp_elapsed = std::format("{}", seconds);
+        dsp_elapsed = std::format("{}", seconds.count());
     }
 
     this->display_elapsed_ = dsp_elapsed;
