@@ -1437,19 +1437,19 @@ MainWindow::store_positions() noexcept
             pos = gtk_paned_get_position(this->hpane_top);
             if (pos)
             {
-                xset_set(xset::name::panel_sliders, xset::var::x, std::to_string(pos));
+                xset_set(xset::name::panel_sliders, xset::var::x, std::format("{}", pos));
             }
 
             pos = gtk_paned_get_position(this->hpane_bottom);
             if (pos)
             {
-                xset_set(xset::name::panel_sliders, xset::var::y, std::to_string(pos));
+                xset_set(xset::name::panel_sliders, xset::var::y, std::format("{}", pos));
             }
 
             pos = gtk_paned_get_position(this->vpane);
             if (pos)
             {
-                xset_set(xset::name::panel_sliders, xset::var::s, std::to_string(pos));
+                xset_set(xset::name::panel_sliders, xset::var::s, std::format("{}", pos));
             }
 
             if (gtk_widget_get_visible(GTK_WIDGET(this->task_scroll)))
@@ -1460,7 +1460,7 @@ MainWindow::store_positions() noexcept
                     // save absolute height
                     xset_set(xset::name::task_show_manager,
                              xset::var::x,
-                             std::to_string(allocation.height - pos));
+                             std::format("{}", allocation.height - pos));
                     // ztd::logger::info("CLOS  win {}x{}    task height {}   slider {}",
                     // allocation.width, allocation.height, allocation.height - pos, pos);
                 }
@@ -2028,10 +2028,10 @@ MainWindow::set_window_title(ptk::browser* file_browser) noexcept
         const tab_t tab_count = counts.tab_count;
         const tab_t tab_num = counts.tab_num;
 
-        fmt = ztd::replace(fmt, "%t", std::to_string(tab_num));
-        fmt = ztd::replace(fmt, "%T", std::to_string(tab_count));
-        fmt = ztd::replace(fmt, "%p", std::to_string(this->curpanel));
-        fmt = ztd::replace(fmt, "%P", std::to_string(panel_count));
+        fmt = ztd::replace(fmt, "%t", std::format("{}", tab_num));
+        fmt = ztd::replace(fmt, "%T", std::format("{}", tab_count));
+        fmt = ztd::replace(fmt, "%p", std::format("{}", this->curpanel));
+        fmt = ztd::replace(fmt, "%P", std::format("{}", panel_count));
     }
     if (fmt.contains('*') && !this->is_main_tasks_running())
     {

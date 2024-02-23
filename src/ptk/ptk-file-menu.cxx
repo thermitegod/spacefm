@@ -333,7 +333,7 @@ on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order)
         xset_set_panel(file_browser->panel(),
                        xset::panel::list_detailed,
                        xset::var::y,
-                       std::to_string(v));
+                       std::format("{}", v));
         file_browser->set_sort_type((GtkSortType)v);
     }
     else
@@ -341,7 +341,7 @@ on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order)
         xset_set_panel(file_browser->panel(),
                        xset::panel::list_detailed,
                        xset::var::x,
-                       std::to_string(sort_order));
+                       std::format("{}", sort_order));
         file_browser->set_sort_order(static_cast<enum ptk::browser::sort_order>(sort_order));
     }
 }

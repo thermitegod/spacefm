@@ -66,7 +66,7 @@ single_instance_check() noexcept
 
     // use std::to_string to avoid locale formating of pid
     // from '12345' -> '12,345'
-    ::utils::write_file(pid_path, std::to_string(::getpid()));
+    ::utils::write_file(pid_path, std::format("{}", ::getpid()));
 
     return true;
 }

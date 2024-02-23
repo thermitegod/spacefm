@@ -1683,10 +1683,10 @@ xset_defaults()
         }
 
         set = xset_get_panel(p, xset::panel::sort_extra);
-        set->b = xset::b::xtrue;                                            // sort_natural
-        set->x = std::to_string(magic_enum::enum_integer(xset::b::xfalse)); // sort_case
+        set->b = xset::b::xtrue;                                               // sort_natural
+        set->x = std::format("{}", magic_enum::enum_integer(xset::b::xfalse)); // sort_case
         set->y = "1"; // ptk::file_list::sort_dir::PTK_LIST_SORT_DIR_FIRST
-        set->z = std::to_string(magic_enum::enum_integer(xset::b::xtrue)); // sort_hidden_first
+        set->z = std::format("{}", magic_enum::enum_integer(xset::b::xtrue)); // sort_hidden_first
 
         set = xset_get_panel(p, xset::panel::book_fol);
         xset_set_var(set, xset::var::menu_label, "Follow _Dir");

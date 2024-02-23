@@ -352,8 +352,8 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
 
     // Saving dialog dimensions
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    xset_set(xset::name::text_dlg, xset::var::s, std::to_string(allocation.width));
-    xset_set(xset::name::text_dlg, xset::var::z, std::to_string(allocation.height));
+    xset_set(xset::name::text_dlg, xset::var::s, std::format("{}", allocation.width));
+    xset_set(xset::name::text_dlg, xset::var::z, std::format("{}", allocation.height));
 
     gtk_widget_destroy(dlg);
 
@@ -457,8 +457,8 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    xset_set(xset::name::file_dlg, xset::var::x, std::to_string(allocation.width));
-    xset_set(xset::name::file_dlg, xset::var::y, std::to_string(allocation.height));
+    xset_set(xset::name::file_dlg, xset::var::x, std::format("{}", allocation.width));
+    xset_set(xset::name::file_dlg, xset::var::y, std::format("{}", allocation.height));
 
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {

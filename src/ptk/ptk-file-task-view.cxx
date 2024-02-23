@@ -138,7 +138,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
             {
                 const xset_t set = xset_get(value);
                 // save column position
-                xset_set_var(set, xset::var::x, std::to_string(i));
+                xset_set_var(set, xset::var::x, std::format("{}", i));
                 // if the window was opened maximized and stayed maximized, or the
                 // window is unmaximized and not fullscreen, save the columns
                 if ((!main_window->maximized || main_window->opened_maximized) &&
@@ -148,7 +148,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
                     if (width) // manager unshown, all widths are zero
                     {
                         // save column width
-                        xset_set_var(set, xset::var::y, std::to_string(width));
+                        xset_set_var(set, xset::var::y, std::format("{}", width));
                     }
                 }
                 // set column visibility
@@ -423,9 +423,9 @@ idle_set_task_height(MainWindow* main_window)
         // this is not perfect because panel half-width is set before user
         // adjusts window size
         const xset_t set = xset_get(xset::name::panel_sliders);
-        set->x = std::to_string(allocation.width / 2);
-        set->y = std::to_string(allocation.width / 2);
-        set->s = std::to_string(allocation.height / 2);
+        set->x = std::format("{}", allocation.width / 2);
+        set->y = std::format("{}", allocation.width / 2);
+        set->s = std::format("{}", allocation.height / 2);
     }
 
     // restore height (in case window height changed)
@@ -482,11 +482,11 @@ show_task_manager(MainWindow* main_window, bool show)
             if (pos)
             {
                 // save slider pos for version < 0.9.2 (in case of downgrade)
-                xset_set(xset::name::panel_sliders, xset::var::z, std::to_string(pos));
+                xset_set(xset::name::panel_sliders, xset::var::z, std::format("{}", pos));
                 // save absolute height introduced v0.9.2
                 xset_set(xset::name::task_show_manager,
                          xset::var::x,
-                         std::to_string(allocation.height - pos));
+                         std::format("{}", allocation.height - pos));
                 // ztd::logger::info("HIDE  win {}x{}    task height {}   slider {}",
                 // allocation.width, allocation.height, allocation.height - pos, pos);
             }

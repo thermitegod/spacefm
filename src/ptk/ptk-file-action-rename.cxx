@@ -1100,8 +1100,8 @@ on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>&
     // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    xset_set(xset::name::move_dlg_help, xset::var::x, std::to_string(allocation.width));
-    xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(allocation.height));
+    xset_set(xset::name::move_dlg_help, xset::var::x, std::format("{}", allocation.width));
+    xset_set(xset::name::move_dlg_help, xset::var::y, std::format("{}", allocation.height));
 
     gtk_widget_destroy(dlg);
 #endif
@@ -1311,8 +1311,8 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     // Saving dialog dimensions
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    xset_set(xset::name::move_dlg_help, xset::var::x, std::to_string(allocation.width));
-    xset_set(xset::name::move_dlg_help, xset::var::y, std::to_string(allocation.height));
+    xset_set(xset::name::move_dlg_help, xset::var::x, std::format("{}", allocation.width));
+    xset_set(xset::name::move_dlg_help, xset::var::y, std::format("{}", allocation.height));
 
     // save mode
     for (const auto [index, value] : std::views::enumerate(misc_modes))
@@ -1321,7 +1321,7 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         {
             xset_set(xset::name::move_dlg_help,
                      xset::var::z,
-                     std::to_string(magic_enum::enum_integer(value)));
+                     std::format("{}", magic_enum::enum_integer(value)));
             break;
         }
     }

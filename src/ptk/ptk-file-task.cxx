@@ -288,7 +288,7 @@ ptk::file_task::save_progress_dialog_size() const noexcept
 
     gtk_widget_get_allocation(GTK_WIDGET(this->progress_dlg), &allocation);
 
-    const std::string width = std::to_string(allocation.width);
+    const std::string width = std::format("{}", allocation.width);
     if (this->task->type_ == vfs::file_task::type::exec)
     {
         xset_set(xset::name::task_pop_top, xset::var::s, width);
@@ -298,7 +298,7 @@ ptk::file_task::save_progress_dialog_size() const noexcept
         xset_set(xset::name::task_pop_top, xset::var::x, width);
     }
 
-    const std::string height = std::to_string(allocation.height);
+    const std::string height = std::format("{}", allocation.height);
     if (this->task->type_ == vfs::file_task::type::exec)
     {
         xset_set(xset::name::task_pop_top, xset::var::z, height);
@@ -1521,7 +1521,7 @@ ptk::file_task::update() noexcept
         std::string size_average;
 
         // count
-        const std::string file_count = std::to_string(this->task->current_item);
+        const std::string file_count = std::format("{}", this->task->current_item);
         // size
         size_current = vfs::utils::format_file_size(this->task->progress);
         if (this->task->total_size)
@@ -2023,10 +2023,10 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             GPOINTER_TO_INT((void*)g_object_get_data(G_OBJECT(dlg), "has_overwrite_btn"));
         xset_set(xset::name::task_popups,
                  has_overwrite_btn ? xset::var::x : xset::var::s,
-                 std::to_string(allocation.width));
+                 std::format("{}", allocation.width));
         xset_set(xset::name::task_popups,
                  has_overwrite_btn ? xset::var::y : xset::var::z,
-                 std::to_string(allocation.height));
+                 std::format("{}", allocation.height));
     }
 
     gtk_widget_destroy(GTK_WIDGET(dlg));

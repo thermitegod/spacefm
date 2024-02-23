@@ -566,7 +566,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
     for (i32 i = 0;; ++i)
     {
         /* generate the basename */
-        cust = ztd::replace(cust_template, replace_txt, std::to_string(i));
+        cust = ztd::replace(cust_template, replace_txt, std::format("{}", i));
         /* test if the filename already exists */
         const auto path = dir / cust;
         if (!std::filesystem::exists(path))

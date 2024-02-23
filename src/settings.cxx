@@ -206,7 +206,7 @@ save_settings()
                         // save current tab
                         const i32 current_page =
                             gtk_notebook_get_current_page(main_window->get_panel_notebook(p));
-                        set->x = std::to_string(current_page);
+                        set->x = std::format("{}", current_page);
                     }
                 }
             }

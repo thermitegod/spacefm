@@ -875,7 +875,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
         return;
     }
 
-    xset_set(xset::name::drag_action, xset::var::x, std::to_string(value));
+    xset_set(xset::name::drag_action, xset::var::x, std::format("{}", value));
 }
 
 GtkComboBox*

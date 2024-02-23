@@ -1250,11 +1250,11 @@ on_sort_col_changed(GtkTreeSortable* sortable, ptk::browser* file_browser)
     xset_set_panel(file_browser->panel_,
                    xset::panel::list_detailed,
                    xset::var::x,
-                   std::to_string(magic_enum::enum_integer(file_browser->sort_order_)));
+                   std::format("{}", magic_enum::enum_integer(file_browser->sort_order_)));
     xset_set_panel(file_browser->panel_,
                    xset::panel::list_detailed,
                    xset::var::y,
-                   std::to_string(file_browser->sort_type_));
+                   std::format("{}", magic_enum::enum_integer(file_browser->sort_type_)));
 }
 
 void
@@ -1809,7 +1809,7 @@ on_folder_view_columns_changed(GtkTreeView* view, ptk::browser* file_browser)
             {
                 // save column position
                 const xset_t set = xset_get_panel(file_browser->panel_, column.xset_name);
-                set->x = std::to_string(i);
+                set->x = std::format("{}", i);
 
                 break;
             }
@@ -4239,15 +4239,19 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
     else if (set->xset_name == xset::name::sortx_case)
     {
         list->sort_case = set->b == xset::b::xtrue;
-        xset_set_panel(this->panel_, xset::panel::sort_extra, xset::var::x, std::to_string(set->b));
+        xset_set_panel(this->panel_,
+                       xset::panel::sort_extra,
+                       xset::var::x,
+                       std::format("{}", magic_enum::enum_integer(set->b)));
     }
     else if (set->xset_name == xset::name::sortx_directories)
     {
         list->sort_dir_ = ptk::file_list::sort_dir::first;
-        xset_set_panel(this->panel_,
-                       xset::panel::sort_extra,
-                       xset::var::y,
-                       std::to_string(magic_enum::enum_integer(ptk::file_list::sort_dir::first)));
+        xset_set_panel(
+            this->panel_,
+            xset::panel::sort_extra,
+            xset::var::y,
+            std::format("{}", magic_enum::enum_integer(ptk::file_list::sort_dir::first)));
     }
     else if (set->xset_name == xset::name::sortx_files)
     {
@@ -4255,20 +4259,24 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::y,
-                       std::to_string(magic_enum::enum_integer(ptk::file_list::sort_dir::last)));
+                       std::format("{}", magic_enum::enum_integer(ptk::file_list::sort_dir::last)));
     }
     else if (set->xset_name == xset::name::sortx_mix)
     {
         list->sort_dir_ = ptk::file_list::sort_dir::mixed;
-        xset_set_panel(this->panel_,
-                       xset::panel::sort_extra,
-                       xset::var::y,
-                       std::to_string(magic_enum::enum_integer(ptk::file_list::sort_dir::mixed)));
+        xset_set_panel(
+            this->panel_,
+            xset::panel::sort_extra,
+            xset::var::y,
+            std::format("{}", magic_enum::enum_integer(ptk::file_list::sort_dir::mixed)));
     }
     else if (set->xset_name == xset::name::sortx_hidfirst)
     {
         list->sort_hidden_first = set->b == xset::b::xtrue;
-        xset_set_panel(this->panel_, xset::panel::sort_extra, xset::var::z, std::to_string(set->b));
+        xset_set_panel(this->panel_,
+                       xset::panel::sort_extra,
+                       xset::var::z,
+                       std::format("{}", magic_enum::enum_integer(set->b)));
     }
     else if (set->xset_name == xset::name::sortx_hidlast)
     {
@@ -4276,7 +4284,10 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::z,
-                       std::to_string(set->b == xset::b::xtrue ? xset::b::xfalse : xset::b::xtrue));
+                       std::format("{}",
+                                   set->b == xset::b::xtrue
+                                       ? magic_enum::enum_integer(xset::b::xfalse)
+                                       : magic_enum::enum_integer(xset::b::xtrue)));
     }
     list->sort();
 }
@@ -5150,7 +5161,7 @@ ptk::browser::save_column_widths() const noexcept
                     const i32 width = gtk_tree_view_column_get_width(col);
                     if (width > 0)
                     {
-                        set->y = std::to_string(width);
+                        set->y = std::format("{}", width);
                         // ztd::logger::info("        {}\t{}", width, title);
                     }
 
@@ -5174,7 +5185,7 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
         const i32 pos = gtk_paned_get_position(this->hpane);
         if (!this->main_window_->fullscreen)
         {
-            set->x = std::to_string(pos);
+            set->x = std::format("{}", pos);
         }
         this->main_window_->panel_slide_x[p] = pos;
         // ztd::logger::debug("    slide_x = {}", pos);
@@ -5186,7 +5197,7 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
         pos = gtk_paned_get_position(this->side_vpane_top);
         if (!this->main_window_->fullscreen)
         {
-            set->y = std::to_string(pos);
+            set->y = std::format("{}", pos);
         }
         this->main_window_->panel_slide_y[p] = pos;
         // ztd::logger::debug("    slide_y = {}  ", pos);
@@ -5194,7 +5205,7 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
         pos = gtk_paned_get_position(this->side_vpane_bottom);
         if (!this->main_window_->fullscreen)
         {
-            set->s = std::to_string(pos);
+            set->s = std::format("{}", pos);
         }
         this->main_window_->panel_slide_s[p] = pos;
         // ztd::logger::debug("    slide_s = {}", pos);
