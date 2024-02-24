@@ -20,6 +20,8 @@
 
 #include <filesystem>
 
+#include <array>
+
 #include <memory>
 
 #include <system_error>
@@ -126,8 +128,8 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
         return false;
     }
 
-    char buffer[EVENT_BUF_LEN];
-    const auto length = read(this->inotify_fd_, buffer, EVENT_BUF_LEN);
+    std::array<char, EVENT_BUF_LEN> buffer{};
+    const auto length = read(this->inotify_fd_, buffer.data(), EVENT_BUF_LEN);
     if (length < 0)
     {
         ztd::logger::error("Error reading inotify event: {}", std::strerror(errno));
