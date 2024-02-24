@@ -47,7 +47,7 @@ vfs::file::create(const std::filesystem::path& path) noexcept
     return std::make_shared<vfs::file>(path);
 }
 
-vfs::file::file(const std::filesystem::path& path) : path_(path)
+vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
 {
     // ztd::logger::debug("vfs::file::file({})    {}", ztd::logger::utils::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
@@ -74,7 +74,7 @@ vfs::file::file(const std::filesystem::path& path) : path_(path)
     }
 }
 
-vfs::file::~file()
+vfs::file::~file() noexcept
 {
     // ztd::logger::debug("vfs::file::~file({})   {}", ztd::logger::utils::ptr(this), this->path_);
     if (this->big_thumbnail_)

@@ -20,7 +20,7 @@
 #include <gtest/gtest.h>
 
 int
-main(int argc, char** argv)
+main(int argc, char** argv) noexcept
 {
     std::locale::global(std::locale(""));
 

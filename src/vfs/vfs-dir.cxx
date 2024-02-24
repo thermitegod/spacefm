@@ -56,12 +56,12 @@ namespace global
 ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
-vfs::dir::dir(const std::filesystem::path& path) : path_(path)
+vfs::dir::dir(const std::filesystem::path& path) noexcept : path_(path)
 {
     // ztd::logger::debug("vfs::dir::dir({})   {}", ztd::logger::utils::ptr(this), this->path_.string());
 }
 
-vfs::dir::~dir()
+vfs::dir::~dir() noexcept
 {
     // ztd::logger::debug("vfs::dir::~dir({})  {}", ztd::logger::utils::ptr(this), this->path_.string());
 
@@ -325,7 +325,8 @@ vfs::dir::refresh_thread() noexcept
 
 /* Callback function which will be called when monitored events happen */
 void
-vfs::dir::on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path)
+vfs::dir::on_monitor_event(const vfs::monitor::event event,
+                           const std::filesystem::path& path) noexcept
 {
     switch (event)
     {
@@ -439,7 +440,7 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
 }
 
 static bool
-notify_file_change(void* user_data)
+notify_file_change(void* user_data) noexcept
 {
     const auto dir = static_cast<vfs::dir*>(user_data)->shared_from_this();
 

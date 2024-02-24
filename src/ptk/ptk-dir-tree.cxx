@@ -54,46 +54,30 @@ struct PtkDirTreeClass
     /* Default signal handlers */
 };
 
-static void ptk_dir_tree_init(ptk::dir_tree* tree);
+static void ptk_dir_tree_init(ptk::dir_tree* tree) noexcept;
+static void ptk_dir_tree_class_init(PtkDirTreeClass* klass) noexcept;
+static void ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface) noexcept;
+static void ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface) noexcept;
+static void ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
+static void ptk_dir_tree_finalize(GObject* object) noexcept;
 
-static void ptk_dir_tree_class_init(PtkDirTreeClass* klass);
-
-static void ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface);
-
-static void ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface);
-
-static void ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface);
-
-static void ptk_dir_tree_finalize(GObject* object);
-
-static GtkTreeModelFlags ptk_dir_tree_get_flags(GtkTreeModel* tree_model);
-
-static i32 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model);
-
-static GType ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index);
-
+static GtkTreeModelFlags ptk_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept;
+static i32 ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model) noexcept;
+static GType ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index) noexcept;
 static gboolean ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                      GtkTreePath* path);
-
-static GtkTreePath* ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
+                                      GtkTreePath* path) noexcept;
+static GtkTreePath* ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static void ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
-                                   GValue* value);
-
-static gboolean ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
+                                   GValue* value) noexcept;
+static gboolean ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static gboolean ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                           GtkTreeIter* parent);
-
-static gboolean ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
-static i32 ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
+                                           GtkTreeIter* parent) noexcept;
+static gboolean ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static i32 ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static gboolean ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                            GtkTreeIter* parent, i32 n);
-
+                                            GtkTreeIter* parent, i32 n) noexcept;
 static gboolean ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                         GtkTreeIter* child);
+                                         GtkTreeIter* child) noexcept;
 
 static GObjectClass* parent_class = nullptr;
 
@@ -103,7 +87,7 @@ std::unordered_map<ptk::dir_tree::column, GType> column_types;
 }
 
 GType
-ptk_dir_tree_get_type()
+ptk_dir_tree_get_type() noexcept
 {
     static GType type = 0;
     if (!type)
@@ -146,7 +130,7 @@ ptk_dir_tree_get_type()
 }
 
 static void
-ptk_dir_tree_init(ptk::dir_tree* tree)
+ptk_dir_tree_init(ptk::dir_tree* tree) noexcept
 {
     tree->root = ptk::dir_tree::node::create();
     tree->root->tree = tree;
@@ -157,7 +141,7 @@ ptk_dir_tree_init(ptk::dir_tree* tree)
 }
 
 static void
-ptk_dir_tree_class_init(PtkDirTreeClass* klass)
+ptk_dir_tree_class_init(PtkDirTreeClass* klass) noexcept
 {
     GObjectClass* object_class = nullptr;
 
@@ -168,7 +152,7 @@ ptk_dir_tree_class_init(PtkDirTreeClass* klass)
 }
 
 static void
-ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface)
+ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface) noexcept
 {
     iface->get_flags = ptk_dir_tree_get_flags;
     iface->get_n_columns = ptk_dir_tree_get_n_columns;
@@ -189,28 +173,28 @@ ptk_dir_tree_tree_model_init(GtkTreeModelIface* iface)
 }
 
 static void
-ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface)
+ptk_dir_tree_drag_source_init(GtkTreeDragSourceIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface)
+ptk_dir_tree_drag_dest_init(GtkTreeDragDestIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_dir_tree_finalize(GObject* object)
+ptk_dir_tree_finalize(GObject* object) noexcept
 {
     /* must chain up - finalize parent */
     (*parent_class->finalize)(object);
 }
 
 static GtkTreeModelFlags
-ptk_dir_tree_get_flags(GtkTreeModel* tree_model)
+ptk_dir_tree_get_flags(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
@@ -218,14 +202,14 @@ ptk_dir_tree_get_flags(GtkTreeModel* tree_model)
 }
 
 static i32
-ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model)
+ptk_dir_tree_get_n_columns(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
     return magic_enum::enum_count<ptk::dir_tree::column>();
 }
 
 static GType
-ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index)
+ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_DIR_TREE(tree_model) == true);
@@ -234,7 +218,7 @@ ptk_dir_tree_get_column_type(GtkTreeModel* tree_model, i32 index)
 }
 
 static gboolean
-ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
+ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(path != nullptr);
@@ -270,7 +254,7 @@ ptk_dir_tree_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* 
 }
 
 static GtkTreePath*
-ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
@@ -300,7 +284,8 @@ ptk_dir_tree_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static void
-ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, GValue* value)
+ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
+                       GValue* value) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(iter != nullptr);
@@ -353,7 +338,7 @@ ptk_dir_tree_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, 
 }
 
 static gboolean
-ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
 
@@ -383,7 +368,8 @@ ptk_dir_tree_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static gboolean
-ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent)
+ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
+                           GtkTreeIter* parent) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     assert(parent != nullptr);
@@ -417,7 +403,7 @@ ptk_dir_tree_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeI
 }
 
 static gboolean
-ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     (void)tree_model;
     assert(iter != nullptr);
@@ -428,7 +414,7 @@ ptk_dir_tree_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static i32
-ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
@@ -454,7 +440,8 @@ ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static gboolean
-ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent, i32 n)
+ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
+                            i32 n) noexcept
 {
     assert(PTK_IS_DIR_TREE(tree_model) == true);
     ptk::dir_tree* tree = PTK_DIR_TREE_REINTERPRET(tree_model);
@@ -488,7 +475,7 @@ ptk_dir_tree_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 }
 
 static gboolean
-ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child)
+ptk_dir_tree_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child) noexcept
 {
     assert(iter != nullptr);
     assert(child != nullptr);
@@ -722,14 +709,14 @@ ptk::dir_tree::get_dir_path(GtkTreeIter* iter) noexcept
 // ptk::dir_tree::node
 
 const std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::create()
+ptk::dir_tree::node::create() noexcept
 {
     return std::make_shared<ptk::dir_tree::node>();
 }
 
 const std::shared_ptr<ptk::dir_tree::node>
 ptk::dir_tree::node::create(ptk::dir_tree* tree, const std::shared_ptr<ptk::dir_tree::node>& parent,
-                            const std::filesystem::path& path)
+                            const std::filesystem::path& path) noexcept
 {
     const auto node = ptk::dir_tree::node::create();
     node->tree = tree;
@@ -745,7 +732,7 @@ ptk::dir_tree::node::create(ptk::dir_tree* tree, const std::shared_ptr<ptk::dir_
 }
 
 const std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::get_nth_node(i32 n) const
+ptk::dir_tree::node::get_nth_node(i32 n) const noexcept
 {
     if (n >= this->n_children || n < 0)
     {
@@ -764,7 +751,8 @@ ptk::dir_tree::node::get_nth_node(i32 n) const
 }
 
 isize
-ptk::dir_tree::node::get_node_index(const std::shared_ptr<ptk::dir_tree::node>& child) const
+ptk::dir_tree::node::get_node_index(
+    const std::shared_ptr<ptk::dir_tree::node>& child) const noexcept
 {
     if (!child)
     {
@@ -785,7 +773,7 @@ ptk::dir_tree::node::get_node_index(const std::shared_ptr<ptk::dir_tree::node>& 
 }
 
 const std::shared_ptr<ptk::dir_tree::node>
-ptk::dir_tree::node::find_node(const std::string_view name) const
+ptk::dir_tree::node::find_node(const std::string_view name) const noexcept
 {
     std::shared_ptr<ptk::dir_tree::node> child;
     for (child = this->children; child; child = child->next)
@@ -800,7 +788,7 @@ ptk::dir_tree::node::find_node(const std::string_view name) const
 
 void
 ptk::dir_tree::node::on_monitor_event(const vfs::monitor::event event,
-                                      const std::filesystem::path& path)
+                                      const std::filesystem::path& path) noexcept
 {
     auto child = this->find_node(path.filename().string());
 

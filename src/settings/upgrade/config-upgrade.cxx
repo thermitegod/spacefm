@@ -19,7 +19,7 @@
 #include "xset/xset.hxx"
 
 void
-config_upgrade(u64 version)
+config_upgrade(u64 version) noexcept
 {
     (void)version;
 }

@@ -48,7 +48,7 @@ vfs::monitor::create(const std::filesystem::path& path, const callback_t& callba
     return std::make_shared<vfs::monitor>(path, callback);
 }
 
-vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callback)
+vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false)
     : path_(path), callback_(callback)
 {
     this->inotify_fd_ = inotify_init();
@@ -96,7 +96,7 @@ vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callb
     // ztd::logger::debug("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", ztd::logger::utils::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
 }
 
-vfs::monitor::~monitor()
+vfs::monitor::~monitor() noexcept
 {
     // ztd::logger::debug("vfs::monitor::~monitor({}) {}", ztd::logger::utils::ptr(this),this->path_);
 

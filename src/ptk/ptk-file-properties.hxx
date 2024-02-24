@@ -27,4 +27,4 @@
 
 void ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
                               const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                              i32 page);
+                              i32 page) noexcept;

@@ -41,7 +41,7 @@ struct enumerate;
 struct udev
 {
   public:
-    explicit udev() : handle(udev_new(), &udev_unref) {}
+    explicit udev() noexcept : handle(udev_new(), &udev_unref) {}
     udev(const udev& other) = default;
     udev(udev&& other) noexcept : handle(std::move(other.handle)) {}
     udev& operator=(const udev& other) = default;
@@ -60,9 +60,9 @@ struct udev
      * @return A {@link monitor} instance
      */
     [[nodiscard]] const std::optional<monitor>
-    monitor_new_from_netlink(const std::string_view name = "udev");
+    monitor_new_from_netlink(const std::string_view name = "udev") const noexcept;
     [[nodiscard]] const std::optional<monitor>
-    monitor_new_from_netlink(netlink_type name = netlink_type::udev);
+    monitor_new_from_netlink(const netlink_type name = netlink_type::udev) const noexcept;
 
     [[nodiscard]] const std::optional<device>
     device_from_syspath(const std::filesystem::path& syspath) const noexcept;
@@ -73,17 +73,17 @@ struct udev
         character,
     };
 
-    [[nodiscard]] const std::optional<device> device_from_devnum(char type,
-                                                                 dev_t devnum) const noexcept;
-    [[nodiscard]] const std::optional<device> device_from_devnum(device_type type,
-                                                                 dev_t devnum) const noexcept;
+    [[nodiscard]] const std::optional<device> device_from_devnum(const char type,
+                                                                 const dev_t devnum) const noexcept;
+    [[nodiscard]] const std::optional<device> device_from_devnum(const device_type type,
+                                                                 const dev_t devnum) const noexcept;
 
     /**
      * Create new udev enumerator
      * @return A {@link enumerator} instance which can be used to enumerate devices known to
      * udev
      */
-    [[nodiscard]] enumerate enumerate_new();
+    [[nodiscard]] enumerate enumerate_new() const noexcept;
 
     [[nodiscard]] bool is_initialized() const noexcept;
 
@@ -98,7 +98,7 @@ struct monitor
 {
   public:
     monitor() = default;
-    monitor(struct ::udev_monitor* device) : handle(device, &udev_monitor_unref){};
+    monitor(struct ::udev_monitor* device) noexcept : handle(device, &udev_monitor_unref){};
     monitor(const monitor& other) = default;
     monitor(monitor&& other) noexcept : handle(std::move(other.handle)) {}
     monitor& operator=(const monitor& other) = default;
@@ -131,7 +131,8 @@ struct enumerate
 {
   public:
     enumerate() = default;
-    enumerate(struct ::udev_enumerate* enumerate) : handle(enumerate, &udev_enumerate_unref){};
+    enumerate(struct ::udev_enumerate* enumerate) noexcept
+        : handle(enumerate, &udev_enumerate_unref){};
     enumerate(const enumerate& other) = default;
     enumerate(enumerate&& other) noexcept : handle(std::move(other.handle)) {}
     enumerate& operator=(const enumerate& other) = default;
@@ -153,9 +154,9 @@ struct enumerate
 
     void add_match_tag(const std::string_view tag) const noexcept;
 
-    void add_match_sysname(const std::string_view sysname);
+    void add_match_sysname(const std::string_view sysname) const noexcept;
 
-    void add_match_parent(const device& device);
+    void add_match_parent(const device& device) const noexcept;
 
     void add_match_is_initialized() const noexcept;
 
@@ -175,7 +176,7 @@ struct device
 {
   public:
     device() = default;
-    device(struct ::udev_device* device) : handle(device, &udev_device_unref){};
+    device(struct ::udev_device* device) noexcept : handle(device, &udev_device_unref){};
     device(const device& other) = default;
     device(device&& other) noexcept : handle(std::move(other.handle)) {}
     device& operator=(const device& other) = default;

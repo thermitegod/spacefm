@@ -67,7 +67,7 @@
 #include "commandline/commandline.hxx"
 
 static void
-open_file(const std::filesystem::path& path)
+open_file(const std::filesystem::path& path) noexcept
 {
     const auto file = vfs::file::create(path);
     const auto mime_type = file->mime_type();
@@ -99,7 +99,7 @@ open_file(const std::filesystem::path& path)
 
 static void
 open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
-            const commandline_opt_data_t& opt)
+            const commandline_opt_data_t& opt) noexcept
 {
     // existing window
     bool tab_added = false;
@@ -140,7 +140,7 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
 }
 
 static void
-tmp_clean()
+tmp_clean() noexcept
 {
     const auto tmp = vfs::program::tmp();
     if (std::filesystem::exists(tmp))
@@ -151,7 +151,7 @@ tmp_clean()
 }
 
 static void
-activate(GtkApplication* app, void* user_data)
+activate(GtkApplication* app, void* user_data) noexcept
 {
     assert(GTK_IS_APPLICATION(app));
 
@@ -222,7 +222,7 @@ activate(GtkApplication* app, void* user_data)
 }
 
 int
-main(int argc, char* argv[])
+main(int argc, char* argv[]) noexcept
 {
     // set locale to system default
     std::locale::global(std::locale(""));

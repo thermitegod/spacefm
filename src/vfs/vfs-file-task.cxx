@@ -70,7 +70,7 @@ vfs::file_task::create(const vfs::file_task::type task_type,
 
 vfs::file_task::file_task(const vfs::file_task::type task_type,
                           const std::span<const std::filesystem::path> src_files,
-                          const std::filesystem::path& dest_dir)
+                          const std::filesystem::path& dest_dir) noexcept
     : type_(task_type)
 {
     this->src_paths = std::vector<std::filesystem::path>(src_files.begin(), src_files.end());
@@ -96,7 +96,7 @@ vfs::file_task::file_task(const vfs::file_task::type task_type,
     this->timer = ztd::timer();
 }
 
-vfs::file_task::~file_task()
+vfs::file_task::~file_task() noexcept
 {
     g_mutex_clear(this->mutex);
 
@@ -105,51 +105,51 @@ vfs::file_task::~file_task()
 }
 
 void
-vfs::file_task::lock() const
+vfs::file_task::lock() const noexcept
 {
     g_mutex_lock(this->mutex);
 }
 
 void
-vfs::file_task::unlock() const
+vfs::file_task::unlock() const noexcept
 {
     g_mutex_unlock(this->mutex);
 }
 
 void
-vfs::file_task::set_state_callback(const state_callback_t& cb, void* user_data)
+vfs::file_task::set_state_callback(const state_callback_t& cb, void* user_data) noexcept
 {
     this->state_cb = cb;
     this->state_cb_data = user_data;
 }
 
 void
-vfs::file_task::set_chmod(std::array<u8, 12> new_chmod_actions)
+vfs::file_task::set_chmod(std::array<u8, 12> new_chmod_actions) noexcept
 {
     this->chmod_actions = new_chmod_actions;
 }
 
 void
-vfs::file_task::set_chown(uid_t new_uid, gid_t new_gid)
+vfs::file_task::set_chown(uid_t new_uid, gid_t new_gid) noexcept
 {
     this->uid = new_uid;
     this->gid = new_gid;
 }
 
 void
-vfs::file_task::set_recursive(bool recursive)
+vfs::file_task::set_recursive(bool recursive) noexcept
 {
     this->is_recursive = recursive;
 }
 
 void
-vfs::file_task::set_overwrite_mode(const vfs::file_task::overwrite_mode mode)
+vfs::file_task::set_overwrite_mode(const vfs::file_task::overwrite_mode mode) noexcept
 {
     this->overwrite_mode_ = mode;
 }
 
 void
-vfs::file_task::append_add_log(const std::string_view msg) const
+vfs::file_task::append_add_log(const std::string_view msg) const noexcept
 {
     this->lock();
     GtkTextIter iter;
@@ -159,7 +159,7 @@ vfs::file_task::append_add_log(const std::string_view msg) const
 }
 
 bool
-vfs::file_task::should_abort()
+vfs::file_task::should_abort() noexcept
 {
     if (this->state_pause_ != vfs::file_task::state::running)
     {
@@ -192,7 +192,7 @@ vfs::file_task::should_abort()
  */
 bool
 vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                                char** new_dest_file)
+                                char** new_dest_file) noexcept
 {
     const auto exists = std::filesystem::exists(dest_file);
 
@@ -327,7 +327,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
 }
 
 bool
-vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir)
+vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir) noexcept
 {
     if (!this->dest_dir)
     {
@@ -366,7 +366,7 @@ vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir)
 }
 
 void
-vfs::file_task::file_copy(const std::filesystem::path& src_file)
+vfs::file_task::file_copy(const std::filesystem::path& src_file) noexcept
 {
     const auto filename = src_file.filename();
     const auto dest_file = this->dest_dir.value() / filename;
@@ -380,7 +380,7 @@ vfs::file_task::file_copy(const std::filesystem::path& src_file)
 
 bool
 vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
-                             const std::filesystem::path& dest_file)
+                             const std::filesystem::path& dest_file) noexcept
 {
     if (this->should_abort())
     {
@@ -703,7 +703,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
 }
 
 void
-vfs::file_task::file_move(const std::filesystem::path& src_file)
+vfs::file_task::file_move(const std::filesystem::path& src_file) noexcept
 {
     if (this->should_abort())
     {
@@ -762,7 +762,7 @@ vfs::file_task::file_move(const std::filesystem::path& src_file)
 
 i32
 vfs::file_task::do_file_move(const std::filesystem::path& src_file,
-                             const std::filesystem::path& dest_path)
+                             const std::filesystem::path& dest_path) noexcept
 {
     if (this->should_abort())
     {
@@ -878,7 +878,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
 }
 
 void
-vfs::file_task::file_trash(const std::filesystem::path& src_file)
+vfs::file_task::file_trash(const std::filesystem::path& src_file) noexcept
 {
     if (this->should_abort())
     {
@@ -923,7 +923,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file)
 }
 
 void
-vfs::file_task::file_delete(const std::filesystem::path& src_file)
+vfs::file_task::file_delete(const std::filesystem::path& src_file) noexcept
 {
     if (this->should_abort())
     {
@@ -986,7 +986,7 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file)
 }
 
 void
-vfs::file_task::file_link(const std::filesystem::path& src_file)
+vfs::file_task::file_link(const std::filesystem::path& src_file) noexcept
 {
     if (this->should_abort())
     {
@@ -1076,7 +1076,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file)
 }
 
 void
-vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
+vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
 {
     static constexpr std::array<std::filesystem::perms, 12> chmod_flags{
         // User
@@ -1195,7 +1195,8 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file)
 }
 
 static void
-call_state_callback(const std::shared_ptr<vfs::file_task>& task, const vfs::file_task::state state)
+call_state_callback(const std::shared_ptr<vfs::file_task>& task,
+                    const vfs::file_task::state state) noexcept
 {
     task->state_ = state;
 
@@ -1222,7 +1223,7 @@ call_state_callback(const std::shared_ptr<vfs::file_task>& task, const vfs::file
 }
 
 void
-vfs::file_task::file_exec(const std::filesystem::path& src_file)
+vfs::file_task::file_exec(const std::filesystem::path& src_file) noexcept
 {
     this->state_ = vfs::file_task::state::running;
     this->current_file = src_file;
@@ -1272,7 +1273,7 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file)
 }
 
 static bool
-on_size_timeout(const std::shared_ptr<vfs::file_task>& task)
+on_size_timeout(const std::shared_ptr<vfs::file_task>& task) noexcept
 {
     if (!task->abort)
     {
@@ -1282,7 +1283,7 @@ on_size_timeout(const std::shared_ptr<vfs::file_task>& task)
 }
 
 static void*
-vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
+vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
 {
     u32 size_timeout = 0;
     if (task->type_ < vfs::file_task::type::move || task->type_ >= vfs::file_task::type::last)
@@ -1550,7 +1551,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task)
 }
 
 void
-vfs::file_task::run_task()
+vfs::file_task::run_task() noexcept
 {
     if (this->type_ != vfs::file_task::type::exec)
     {
@@ -1584,7 +1585,7 @@ vfs::file_task::run_task()
 }
 
 void
-vfs::file_task::try_abort_task()
+vfs::file_task::try_abort_task() noexcept
 {
     this->abort = true;
     if (this->pause_cond)
@@ -1608,7 +1609,7 @@ vfs::file_task::try_abort_task()
 }
 
 void
-vfs::file_task::abort_task()
+vfs::file_task::abort_task() noexcept
 {
     this->abort = true;
     /* Called from another thread */
@@ -1629,7 +1630,7 @@ vfs::file_task::abort_task()
  * NOTE: *size should be set to zero before calling this function.
  */
 u64
-vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path)
+vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path) noexcept
 {
     if (this->abort)
     {
@@ -1679,7 +1680,7 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path)
 }
 
 void
-vfs::file_task::task_error(i32 errnox, const std::string_view action)
+vfs::file_task::task_error(i32 errnox, const std::string_view action) noexcept
 {
     if (errnox)
     {
@@ -1698,7 +1699,7 @@ vfs::file_task::task_error(i32 errnox, const std::string_view action)
 
 void
 vfs::file_task::task_error(i32 errnox, const std::string_view action,
-                           const std::filesystem::path& target)
+                           const std::filesystem::path& target) noexcept
 {
     this->error = errnox;
     const std::string errno_msg = std::strerror(errnox);

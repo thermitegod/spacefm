@@ -25,13 +25,13 @@
 #include "ptk/utils/ptk-utils.hxx"
 
 void
-ptk::utils::set_window_icon(GtkWindow* window)
+ptk::utils::set_window_icon(GtkWindow* window) noexcept
 {
     gtk_window_set_icon_name(GTK_WINDOW(window), "spacefm");
 }
 
 u32
-ptk::utils::get_keymod(GdkModifierType event)
+ptk::utils::get_keymod(GdkModifierType event) noexcept
 {
     return (event & (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK |
 #if (GTK_MAJOR_VERSION == 4)

@@ -59,8 +59,8 @@ struct file_task
     file_task(const vfs::file_task::type type,
               const std::span<const std::filesystem::path> src_files,
               const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-              GtkWidget* task_view);
-    ~file_task();
+              GtkWidget* task_view) noexcept;
+    ~file_task() noexcept;
     file_task(const file_task& other) = delete;
     file_task(file_task&& other) = delete;
     file_task& operator=(const file_task& other) = delete;
@@ -158,15 +158,15 @@ struct file_task
 
 ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
                                   const std::span<const std::filesystem::path> src_files,
-                                  GtkWindow* parent_window, GtkWidget* task_view);
+                                  GtkWindow* parent_window, GtkWidget* task_view) noexcept;
 
 ptk::file_task* ptk_file_task_new(const vfs::file_task::type type,
                                   const std::span<const std::filesystem::path> src_files,
                                   const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-                                  GtkWidget* task_view);
+                                  GtkWidget* task_view) noexcept;
 
 ptk::file_task* ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
-                                  GtkWidget* task_view);
+                                  GtkWidget* task_view) noexcept;
 ptk::file_task* ptk_file_exec_new(const std::string_view item_name,
                                   const std::filesystem::path& dest_dir, GtkWidget* parent,
-                                  GtkWidget* task_view);
+                                  GtkWidget* task_view) noexcept;

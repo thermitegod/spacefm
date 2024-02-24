@@ -41,7 +41,7 @@ using setvars_t = std::unordered_map<std::string, std::string>;
 using xsetpak_t = std::unordered_map<std::string, setvars_t>;
 
 const setvars_t
-pack_xset(const xset_t& set)
+pack_xset(const xset_t& set) noexcept
 {
     assert(set != nullptr);
 
@@ -242,7 +242,7 @@ pack_xset(const xset_t& set)
 }
 
 const xsetpak_t
-pack_xsets()
+pack_xsets() noexcept
 {
     // this is stupid, but it works.
     // trying to .emplace_back() a toml::value into a toml::value

@@ -26,15 +26,15 @@
 
 #include <gtkmm.h>
 
-GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text);
-const std::optional<std::string> multi_input_get_text(GtkWidget* input);
+GtkTextView* multi_input_new(GtkScrolledWindow* scrolled, const char* text) noexcept;
+const std::optional<std::string> multi_input_get_text(GtkWidget* input) noexcept;
 
 const std::tuple<bool, std::string>
 xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
                  const std::string_view msg2, const std::string_view defstring,
-                 const std::string_view defreset, bool edit_care);
+                 const std::string_view defreset, bool edit_care) noexcept;
 
 const std::optional<std::filesystem::path>
 xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
                  const std::optional<std::filesystem::path>& deffolder,
-                 const std::optional<std::filesystem::path>& deffile);
+                 const std::optional<std::filesystem::path>& deffile) noexcept;

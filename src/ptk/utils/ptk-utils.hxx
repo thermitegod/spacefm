@@ -26,9 +26,9 @@
 
 namespace ptk::utils
 {
-void set_window_icon(GtkWindow* win);
+void set_window_icon(GtkWindow* win) noexcept;
 
-u32 get_keymod(GdkModifierType event);
+u32 get_keymod(GdkModifierType event) noexcept;
 
 /**
  *  @brief stamp

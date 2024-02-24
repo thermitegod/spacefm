@@ -38,8 +38,8 @@ struct file : public std::enable_shared_from_this<file>
 {
   public:
     file() = delete;
-    file(const std::filesystem::path& file_path);
-    ~file();
+    file(const std::filesystem::path& file_path) noexcept;
+    ~file() noexcept;
     file(const file& other) = delete;
     file(file&& other) = delete;
     file& operator=(const file& other) = delete;

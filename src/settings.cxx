@@ -54,7 +54,7 @@
 #include "settings.hxx"
 
 void
-load_settings()
+load_settings() noexcept
 {
     const auto settings_config_dir = vfs::program::config();
 
@@ -167,7 +167,7 @@ load_settings()
 }
 
 void
-save_settings()
+save_settings() noexcept
 {
     // ztd::logger::info("save_settings");
 
@@ -236,7 +236,7 @@ save_settings()
 
 #if 0
 void
-multi_input_select_region(GtkWidget* input, i32 start, i32 end)
+multi_input_select_region(GtkWidget* input, i32 start, i32 end) noexcept
 {
     GtkTextIter iter, siter;
 

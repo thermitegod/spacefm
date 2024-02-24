@@ -1106,17 +1106,17 @@ enum class main_window_panel
     panel_both
 };
 
-xset::name get_xsetname_from_name(const std::string_view name);
-const std::string_view get_name_from_xsetname(xset::name name);
+xset::name get_xsetname_from_name(const std::string_view name) noexcept;
+const std::string_view get_name_from_xsetname(xset::name name) noexcept;
 
-xset::name get_xsetname_from_panel(panel_t panel, xset::panel name);
-const std::string_view get_name_from_panel(panel_t panel, xset::panel name);
+xset::name get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept;
+const std::string_view get_name_from_panel(panel_t panel, xset::panel name) noexcept;
 
 xset::name get_xsetname_from_panel_mode(panel_t panel, xset::panel name,
-                                        xset::main_window_panel mode);
+                                        xset::main_window_panel mode) noexcept;
 const std::string_view get_name_from_panel_mode(panel_t panel, xset::panel name,
-                                                xset::main_window_panel mode);
+                                                xset::main_window_panel mode) noexcept;
 
 // main window panel mode
-const std::string_view get_window_panel_mode(xset::main_window_panel mode);
+const std::string_view get_window_panel_mode(xset::main_window_panel mode) noexcept;
 } // namespace xset

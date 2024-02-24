@@ -17,4 +17,4 @@
 
 #include <ztd/ztd.hxx>
 
-void config_upgrade(u64 version);
+void config_upgrade(u64 version) noexcept;

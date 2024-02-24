@@ -54,7 +54,7 @@ void popup_errset(MainWindow* main_window, const std::string_view name = "") noe
 ptk::file_task* selected_task(GtkWidget* view) noexcept;
 void show_task_dialog(GtkWidget* view) noexcept;
 
-GtkWidget* create(MainWindow* main_window);
+GtkWidget* create(MainWindow* main_window) noexcept;
 void start_queued(GtkWidget* view, ptk::file_task* new_ptask) noexcept;
 void update_task(ptk::file_task* ptask) noexcept;
 void remove_task(ptk::file_task* ptask) noexcept;

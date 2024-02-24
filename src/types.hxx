@@ -59,8 +59,8 @@ inline constexpr panel_t INVALID_PANEL = 0; // 0 is unused for sanity reasons
 
 inline constexpr std::array<panel_t, MAX_PANELS> PANELS{panel_1, panel_2, panel_3, panel_4};
 
-bool is_valid_panel(panel_t p);
-bool is_valid_panel_code(panel_t p);
+bool is_valid_panel(panel_t p) noexcept;
+bool is_valid_panel_code(panel_t p) noexcept;
 
 // using a signed type because negative values are used as control codes
 using tab_t = i64;
@@ -90,7 +90,7 @@ inline constexpr tab_t INVALID_TAB = 0; // 0 is unused for sanity reasons
 
 inline constexpr std::array<panel_t, MAX_TABS> TABS{tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7, tab_8, tab_9, tab_10};
 
-bool is_valid_tab(tab_t t);
-bool is_valid_tab_code(tab_t t);
+bool is_valid_tab(tab_t t) noexcept;
+bool is_valid_tab_code(tab_t t) noexcept;
 
 // clang-format on

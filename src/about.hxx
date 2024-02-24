@@ -17,4 +17,4 @@
 
 #include <gtkmm.h>
 
-void show_about_dialog(GtkWindow* parent);
+void show_about_dialog(GtkWindow* parent) noexcept;

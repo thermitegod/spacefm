@@ -30,7 +30,7 @@
 #include "settings/config.hxx"
 
 static u64
-get_config_file_version(const toml::value& tbl)
+get_config_file_version(const toml::value& tbl) noexcept
 {
     if (!tbl.contains(config::disk_format::toml::section::version.data()))
     {
@@ -47,7 +47,7 @@ get_config_file_version(const toml::value& tbl)
 }
 
 static void
-config_parse_general(const toml::value& tbl, u64 version)
+config_parse_general(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 
@@ -153,7 +153,7 @@ config_parse_general(const toml::value& tbl, u64 version)
 }
 
 static void
-config_parse_window(const toml::value& tbl, u64 version)
+config_parse_window(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 
@@ -187,7 +187,7 @@ config_parse_window(const toml::value& tbl, u64 version)
 }
 
 static void
-config_parse_interface(const toml::value& tbl, u64 version)
+config_parse_interface(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 
@@ -216,7 +216,7 @@ config_parse_interface(const toml::value& tbl, u64 version)
 }
 
 static void
-config_parse_xset(const toml::value& tbl, u64 version)
+config_parse_xset(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 

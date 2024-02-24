@@ -18,5 +18,5 @@
 
 #pragma once
 
-void load_settings();
-void save_settings();
+void load_settings() noexcept;
+void save_settings() noexcept;

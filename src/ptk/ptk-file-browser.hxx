@@ -321,15 +321,15 @@ struct browser
 
   public:
     // signal
-    void on_folder_content_changed(const std::shared_ptr<vfs::file>& file);
-    void on_dir_file_listed();
+    void on_folder_content_changed(const std::shared_ptr<vfs::file>& file) noexcept;
+    void on_dir_file_listed() noexcept;
 
     // Signals
   public:
     // Signals Add Event
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::chdir_before, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_before");
         return this->evt_chdir_before.connect(fun);
@@ -337,7 +337,7 @@ struct browser
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::chdir_begin, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_begin");
         return this->evt_chdir_begin.connect(fun);
@@ -345,7 +345,7 @@ struct browser
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::chdir_after, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::chdir_after");
         return this->evt_chdir_after.connect(fun);
@@ -353,7 +353,7 @@ struct browser
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::open_item, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::open_item");
         return this->evt_open_file.connect(fun);
@@ -361,7 +361,7 @@ struct browser
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::change_content, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::change_content");
         return this->evt_change_content.connect(fun);
@@ -369,7 +369,7 @@ struct browser
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::change_sel, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::change_sel");
         return this->evt_change_sel.connect(fun);
@@ -377,7 +377,7 @@ struct browser
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::change_pane, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::change_pane");
         return this->evt_change_pane_mode.connect(fun);
@@ -386,7 +386,7 @@ struct browser
     // Signals Run Event
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::chdir_before, void>
-    run_event()
+    run_event() noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_before");
         this->evt_chdir_before.emit(this);
@@ -394,7 +394,7 @@ struct browser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::chdir_begin, void>
-    run_event()
+    run_event() noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_begin");
         this->evt_chdir_begin.emit(this);
@@ -402,7 +402,7 @@ struct browser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::chdir_after, void>
-    run_event()
+    run_event() noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::chdir_after");
         this->evt_chdir_after.emit(this);
@@ -410,7 +410,7 @@ struct browser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::open_item, void>
-    run_event(const std::filesystem::path& path, ptk::browser::open_action action)
+    run_event(const std::filesystem::path& path, ptk::browser::open_action action) noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::open_item");
         this->evt_open_file.emit(this, path, action);
@@ -418,7 +418,7 @@ struct browser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::change_content, void>
-    run_event()
+    run_event() noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::change_content");
         this->evt_change_content.emit(this);
@@ -426,7 +426,7 @@ struct browser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::change_sel, void>
-    run_event()
+    run_event() noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::change_sel");
         this->evt_change_sel.emit(this);
@@ -434,7 +434,7 @@ struct browser
 
     template<spacefm::signal evt>
     typename std::enable_if_t<evt == spacefm::signal::change_pane, void>
-    run_event()
+    run_event() noexcept
     {
         // ztd::logger::trace("Signal Execute   : spacefm::signal::change_pane");
         this->evt_change_pane_mode.emit(this);
@@ -462,11 +462,10 @@ struct browser
 } // namespace ptk
 
 GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
-                                MainWindow* main_window);
+                                MainWindow* main_window) noexcept;
 
-void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget);
-
-bool ptk_file_browser_delay_focus(ptk::browser* file_browser);
+void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget) noexcept;
+bool ptk_file_browser_delay_focus(ptk::browser* file_browser) noexcept;
 
 // xset callback wrapper functions
 namespace ptk::wrapper::browser

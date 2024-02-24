@@ -70,13 +70,13 @@ libudev::enumerate::add_match_tag(const std::string_view tag) const noexcept
 }
 
 void
-libudev::enumerate::add_match_sysname(const std::string_view sysname)
+libudev::enumerate::add_match_sysname(const std::string_view sysname) const noexcept
 {
     udev_enumerate_add_match_sysname(this->handle.get(), sysname.data());
 }
 
 void
-libudev::enumerate::add_match_parent(const device& device)
+libudev::enumerate::add_match_parent(const device& device) const noexcept
 {
     const auto check_sysname = device.get_sysname();
     if (check_sysname)

@@ -118,37 +118,37 @@ struct MainWindow
 
   public:
     // signals
-    void on_file_browser_before_chdir(ptk::browser* file_browser);
-    void on_file_browser_begin_chdir(ptk::browser* file_browser);
-    void on_file_browser_after_chdir(ptk::browser* file_browser);
+    void on_file_browser_before_chdir(ptk::browser* file_browser) noexcept;
+    void on_file_browser_begin_chdir(ptk::browser* file_browser) noexcept;
+    void on_file_browser_after_chdir(ptk::browser* file_browser) noexcept;
     void on_file_browser_open_item(ptk::browser* file_browser, const std::filesystem::path& path,
-                                   ptk::browser::open_action action);
-    void on_file_browser_content_change(ptk::browser* file_browser);
-    void on_file_browser_sel_change(ptk::browser* file_browser);
-    void on_file_browser_panel_change(ptk::browser* file_browser);
+                                   ptk::browser::open_action action) noexcept;
+    void on_file_browser_content_change(ptk::browser* file_browser) noexcept;
+    void on_file_browser_sel_change(ptk::browser* file_browser) noexcept;
+    void on_file_browser_panel_change(ptk::browser* file_browser) noexcept;
 };
 
-GType main_window_get_type();
+GType main_window_get_type() noexcept;
 
 /* Utility functions */
-ptk::browser* main_window_get_current_file_browser();
+ptk::browser* main_window_get_current_file_browser() noexcept;
 
-// void main_window_preference(MainWindow* main_window);
+// void main_window_preference(MainWindow* main_window) noexcept;
 
 /* get last active window */
-MainWindow* main_window_get_last_active();
-MainWindow* main_window_get_on_current_desktop();
+MainWindow* main_window_get_last_active() noexcept;
+MainWindow* main_window_get_on_current_desktop() noexcept;
 
-const std::span<MainWindow*> main_window_get_all();
+const std::span<MainWindow*> main_window_get_all() noexcept;
 
-void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window);
-void update_views_all_windows(GtkWidget* item, ptk::browser* file_browser);
-void main_window_reload_thumbnails_all_windows();
-void main_window_toggle_thumbnails_all_windows();
-void main_window_refresh_all_tabs_matching(const std::filesystem::path& path);
-void main_window_close_all_invalid_tabs();
-void main_window_rebuild_all_toolbars(ptk::browser* file_browser);
+void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window) noexcept;
+void update_views_all_windows(GtkWidget* item, ptk::browser* file_browser) noexcept;
+void main_window_reload_thumbnails_all_windows() noexcept;
+void main_window_toggle_thumbnails_all_windows() noexcept;
+void main_window_refresh_all_tabs_matching(const std::filesystem::path& path) noexcept;
+void main_window_close_all_invalid_tabs() noexcept;
+void main_window_rebuild_all_toolbars(ptk::browser* file_browser) noexcept;
 
-void main_window_rubberband_all();
-void main_window_refresh_all();
-void set_panel_focus(MainWindow* main_window, ptk::browser* file_browser);
+void main_window_rubberband_all() noexcept;
+void main_window_refresh_all() noexcept;
+void set_panel_focus(MainWindow* main_window, ptk::browser* file_browser) noexcept;

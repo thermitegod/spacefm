@@ -56,12 +56,12 @@
 
 static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                                       const vfs::file_task::state state, void* state_data,
-                                      void* user_data);
+                                      void* user_data) noexcept;
 
 ptk::file_task::file_task(const vfs::file_task::type type,
                           const std::span<const std::filesystem::path> src_files,
                           const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-                          GtkWidget* task_view)
+                          GtkWidget* task_view) noexcept
     : parent_window_(parent_window), task_view_(task_view)
 {
     this->task = vfs::file_task::create(type, src_files, dest_dir);
@@ -100,7 +100,7 @@ ptk::file_task::file_task(const vfs::file_task::type type,
     // ztd::logger::info("ptk::file_task::file_task({}) DONE", ztd::logger::utils::ptr(this));
 }
 
-ptk::file_task::~file_task()
+ptk::file_task::~file_task() noexcept
 {
     // ztd::logger::info("ptk::file_task::~file_task({})", ztd::logger::utils::ptr(this));
     if (this->timeout_)
@@ -213,7 +213,7 @@ ptk::file_task::display_average_estimate() const noexcept
 ptk::file_task*
 ptk_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files, GtkWindow* parent_window,
-                  GtkWidget* task_view)
+                  GtkWidget* task_view) noexcept
 {
     auto* const ptask = new ptk::file_task(type, src_files, "", parent_window, task_view);
 
@@ -224,7 +224,7 @@ ptk::file_task*
 ptk_file_task_new(const vfs::file_task::type type,
                   const std::span<const std::filesystem::path> src_files,
                   const std::filesystem::path& dest_dir, GtkWindow* parent_window,
-                  GtkWidget* task_view)
+                  GtkWidget* task_view) noexcept
 {
     auto* const ptask = new ptk::file_task(type, src_files, dest_dir, parent_window, task_view);
 
@@ -232,7 +232,8 @@ ptk_file_task_new(const vfs::file_task::type type,
 }
 
 ptk::file_task*
-ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget* task_view)
+ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent,
+                  GtkWidget* task_view) noexcept
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
@@ -256,7 +257,7 @@ ptk_file_exec_new(const std::string_view item_name, GtkWidget* parent, GtkWidget
 
 ptk::file_task*
 ptk_file_exec_new(const std::string_view item_name, const std::filesystem::path& dest_dir,
-                  GtkWidget* parent, GtkWidget* task_view)
+                  GtkWidget* parent, GtkWidget* task_view) noexcept
 {
     GtkWidget* parent_win = nullptr;
     if (parent)
@@ -318,7 +319,7 @@ ptk::file_task::set_complete_notify(GFunc callback, void* user_data) noexcept
 }
 
 static bool
-on_progress_timer(ptk::file_task* ptask)
+on_progress_timer(ptk::file_task* ptask) noexcept
 {
     // GThread *self = g_thread_self ();
     // ztd::logger::info("PROGRESS_TIMER_THREAD = {}", ztd::logger::utils::ptr(self));
@@ -415,7 +416,7 @@ on_progress_timer(ptk::file_task* ptask)
 }
 
 static bool
-ptk_file_task_add_main(ptk::file_task* ptask)
+ptk_file_task_add_main(ptk::file_task* ptask) noexcept
 {
     // ztd::logger::info("ptk_file_task_add_main ptask={}", ztd::logger::utils::ptr(ptask));
     if (ptask->timeout_)
@@ -578,7 +579,7 @@ ptk::file_task::pause(const vfs::file_task::state state) noexcept
 }
 
 static bool
-on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask)
+on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask) noexcept
 {
     (void)widget;
     (void)event;
@@ -587,7 +588,7 @@ on_progress_dlg_delete_event(GtkWidget* widget, GdkEvent* event, ptk::file_task*
 }
 
 static void
-on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask)
+on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask) noexcept
 {
     (void)dlg;
     ptask->save_progress_dialog_size();
@@ -647,14 +648,14 @@ on_progress_dlg_response(GtkDialog* dlg, i32 response, ptk::file_task* ptask)
 }
 
 static void
-on_progress_dlg_destroy(GtkDialog* dlg, ptk::file_task* ptask)
+on_progress_dlg_destroy(GtkDialog* dlg, ptk::file_task* ptask) noexcept
 {
     (void)dlg;
     ptask->progress_dlg_ = nullptr;
 }
 
 static void
-on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data)
+on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data) noexcept
 {
     (void)entry;
     (void)user_data;
@@ -707,7 +708,7 @@ ptk::file_task::set_progress_icon() noexcept
 }
 
 static void
-on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask)
+on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
 {
     i32 overwrite_mode = gtk_combo_box_get_active(box);
     if (overwrite_mode < 0)
@@ -718,7 +719,7 @@ on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask)
 }
 
 static void
-on_error_combo_changed(GtkComboBox* box, ptk::file_task* ptask)
+on_error_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
 {
     i32 error_mode = gtk_combo_box_get_active(box);
     if (error_mode < 0)
@@ -1777,7 +1778,8 @@ ptk::file_task::update() noexcept
 
 static bool
 on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
-                          const vfs::file_task::state state, void* state_data, void* user_data)
+                          const vfs::file_task::state state, void* state_data,
+                          void* user_data) noexcept
 {
     ptk::file_task* ptask = PTK_FILE_TASK(user_data);
     bool ret = true;
@@ -1856,7 +1858,7 @@ on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
 }
 
 static bool
-on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask)
+on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask) noexcept
 {
     (void)ptask;
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -1889,7 +1891,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptas
 }
 
 static void
-on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
+on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input) noexcept
 {
     (void)input_buf;
     const auto new_name = multi_input_get_text(query_input);
@@ -1918,7 +1920,7 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input)
 }
 
 static void
-query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* ptask)
+query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* ptask) noexcept
 {
     if (response == GtkResponseType::GTK_RESPONSE_DELETE_EVENT ||
         response == GtkResponseType::GTK_RESPONSE_CANCEL)
@@ -2048,7 +2050,7 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
 }
 
 static void
-on_query_button_press(GtkWidget* widget, ptk::file_task* ptask)
+on_query_button_press(GtkWidget* widget, ptk::file_task* ptask) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));

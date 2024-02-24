@@ -50,10 +50,10 @@ enum column
 };
 }
 
-EntryData::EntryData(ptk::browser* file_browser) : browser(file_browser) {}
+EntryData::EntryData(ptk::browser* file_browser) noexcept : browser(file_browser) {}
 
 static const std::filesystem::path
-get_cwd(GtkEntry* entry)
+get_cwd(GtkEntry* entry) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
@@ -85,7 +85,7 @@ get_cwd(GtkEntry* entry)
 }
 
 static bool
-seek_path(GtkEntry* entry)
+seek_path(GtkEntry* entry) noexcept
 {
     if (!GTK_IS_ENTRY(entry))
     {
@@ -165,7 +165,7 @@ seek_path(GtkEntry* entry)
 }
 
 static void
-seek_path_delayed(GtkEntry* entry, u32 delay = 250)
+seek_path_delayed(GtkEntry* entry, u32 delay = 250) noexcept
 {
     EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
     if (!(edata && edata->browser))
@@ -182,7 +182,8 @@ seek_path_delayed(GtkEntry* entry, u32 delay = 250)
 }
 
 static bool
-match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, void* user_data)
+match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
+           void* user_data) noexcept
 {
     (void)user_data;
 
@@ -205,7 +206,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
 }
 
 static void
-update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
+update_completion(GtkEntry* entry, GtkEntryCompletion* completion) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
@@ -282,7 +283,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion)
 }
 
 static void
-on_changed(GtkEntry* entry, void* user_data)
+on_changed(GtkEntry* entry, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -293,7 +294,7 @@ on_changed(GtkEntry* entry, void* user_data)
 }
 
 static void
-insert_complete(GtkEntry* entry)
+insert_complete(GtkEntry* entry) noexcept
 {
     // find a real completion
 #if (GTK_MAJOR_VERSION == 4)
@@ -401,7 +402,7 @@ insert_complete(GtkEntry* entry)
 }
 
 static bool
-on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata)
+on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata) noexcept
 {
     (void)edata;
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -424,7 +425,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata)
 }
 
 static bool
-on_insert_prefix(GtkEntryCompletion* completion, const char* prefix, GtkWidget* entry)
+on_insert_prefix(GtkEntryCompletion* completion, const char* prefix, GtkWidget* entry) noexcept
 {
     (void)completion;
     (void)prefix;
@@ -436,7 +437,7 @@ on_insert_prefix(GtkEntryCompletion* completion, const char* prefix, GtkWidget* 
 
 static bool
 on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIter* iter,
-                  GtkWidget* entry)
+                  GtkWidget* entry) noexcept
 {
     (void)completion;
 
@@ -478,7 +479,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
 }
 
 static bool
-on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
+on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
 {
     (void)evt;
     (void)user_data;
@@ -518,7 +519,7 @@ on_focus_in(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 }
 
 static bool
-on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
+on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
 {
     (void)evt;
     (void)user_data;
@@ -530,7 +531,7 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data)
 }
 
 static void
-on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser)
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) noexcept
 {
     if (!file_browser)
     {
@@ -564,13 +565,13 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser)
 }
 
 static void
-entry_data_free(EntryData* edata)
+entry_data_free(EntryData* edata) noexcept
 {
     delete edata;
 }
 
 GtkEntry*
-ptk_path_entry_new(ptk::browser* file_browser)
+ptk_path_entry_new(ptk::browser* file_browser) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_has_frame(entry, true);

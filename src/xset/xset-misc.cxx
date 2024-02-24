@@ -42,7 +42,7 @@
 #include "xset/xset-misc.hxx"
 
 GtkWidget*
-xset_get_image(const std::string_view icon, GtkIconSize icon_size)
+xset_get_image(const std::string_view icon, GtkIconSize icon_size) noexcept
 {
     /*
         GtkIconSize::GTK_ICON_SIZE_MENU,
@@ -67,7 +67,7 @@ xset_get_image(const std::string_view icon, GtkIconSize icon_size)
 }
 
 void
-xset_edit(GtkWidget* parent, const std::filesystem::path& path)
+xset_edit(GtkWidget* parent, const std::filesystem::path& path) noexcept
 {
     GtkWidget* dlgparent = nullptr;
     if (parent)

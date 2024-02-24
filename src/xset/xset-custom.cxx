@@ -35,7 +35,7 @@
 #include "xset/utils/xset-utils.hxx"
 
 const std::string
-xset_custom_new_name()
+xset_custom_new_name() noexcept
 {
     std::string setname;
 
@@ -58,7 +58,7 @@ xset_custom_new_name()
 }
 
 const xset_t
-xset_custom_new()
+xset_custom_new() noexcept
 {
     const std::string setname = xset_custom_new_name();
 
@@ -72,7 +72,7 @@ xset_custom_new()
 }
 
 const xset_t
-xset_custom_remove(const xset_t& set)
+xset_custom_remove(const xset_t& set) noexcept
 {
     assert(set != nullptr);
 
@@ -138,7 +138,7 @@ xset_custom_remove(const xset_t& set)
 }
 
 const std::string
-xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size)
+xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size) noexcept
 {
     assert(set != nullptr);
 
@@ -212,7 +212,7 @@ xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size
 }
 
 const xset_t
-xset_custom_copy(const xset_t& set, bool copy_next)
+xset_custom_copy(const xset_t& set, bool copy_next) noexcept
 {
     assert(set != nullptr);
 
@@ -263,7 +263,7 @@ xset_custom_copy(const xset_t& set, bool copy_next)
 }
 
 const xset_t
-xset_find_custom(const std::string_view search)
+xset_find_custom(const std::string_view search) noexcept
 {
     // find a custom command or submenu by label or xset name
     const std::string label = xset::utils::clean_label(search, true, false);
@@ -289,7 +289,7 @@ xset_find_custom(const std::string_view search)
 }
 
 void
-xset_custom_insert_after(const xset_t& target, const xset_t& set)
+xset_custom_insert_after(const xset_t& target, const xset_t& set) noexcept
 { // inserts single set 'set', no next
 
     assert(target != nullptr);

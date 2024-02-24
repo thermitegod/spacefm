@@ -102,7 +102,7 @@ ptk::view::file_task::on_reorder(GtkWidget* item, GtkWidget* parent) noexcept
 }
 
 static MainWindow*
-get_task_view_window(GtkWidget* view)
+get_task_view_window(GtkWidget* view) noexcept
 {
     for (MainWindow* window : main_window_get_all())
     {
@@ -115,7 +115,7 @@ get_task_view_window(GtkWidget* view)
 }
 
 static void
-on_task_columns_changed(GtkWidget* view, void* user_data)
+on_task_columns_changed(GtkWidget* view, void* user_data) noexcept
 {
     (void)user_data;
     MainWindow* main_window = get_task_view_window(view);
@@ -161,7 +161,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data)
 }
 
 static void
-on_task_destroy(GtkWidget* view, void* user_data)
+on_task_destroy(GtkWidget* view, void* user_data) noexcept
 {
     (void)user_data;
     const u32 id = g_signal_lookup("columns-changed", G_TYPE_FROM_INSTANCE(view));
@@ -183,7 +183,7 @@ on_task_destroy(GtkWidget* view, void* user_data)
 }
 
 static void
-on_task_column_selected(GtkMenuItem* item, GtkWidget* view)
+on_task_column_selected(GtkMenuItem* item, GtkWidget* view) noexcept
 {
     (void)item;
     on_task_columns_changed(view, nullptr);
@@ -299,7 +299,8 @@ ptk::view::file_task::start_queued(GtkWidget* view, ptk::file_task* new_ptask) n
 }
 
 static void
-on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2, ptk::file_task* ptask2)
+on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
+             ptk::file_task* ptask2) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
@@ -411,7 +412,7 @@ ptk::view::file_task::stop(GtkWidget* view, const xset_t& set2, ptk::file_task* 
 }
 
 static bool
-idle_set_task_height(MainWindow* main_window)
+idle_set_task_height(MainWindow* main_window) noexcept
 {
     GtkAllocation allocation;
 
@@ -458,7 +459,7 @@ idle_set_task_height(MainWindow* main_window)
 }
 
 static void
-show_task_manager(MainWindow* main_window, bool show)
+show_task_manager(MainWindow* main_window, bool show) noexcept
 {
     GtkAllocation allocation;
 
@@ -507,7 +508,7 @@ show_task_manager(MainWindow* main_window, bool show)
 }
 
 static void
-on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, const char* name2)
+on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, const char* name2) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
@@ -577,7 +578,7 @@ ptk::view::file_task::popup_show(MainWindow* main_window, const std::string_view
 }
 
 static void
-on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* name2)
+on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* name2) noexcept
 {
     (void)main_window;
     const char* name = nullptr;
@@ -743,7 +744,7 @@ ptk::view::file_task::show_task_dialog(GtkWidget* view) noexcept
 }
 
 static bool
-on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_window)
+on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_window) noexcept
 {
     GtkTreeModel* model = nullptr;
     GtkTreePath* tree_path = nullptr;
@@ -939,7 +940,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
 
 static void
 on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn* col,
-                      void* user_data)
+                      void* user_data) noexcept
 {
     (void)col;
     (void)user_data;
@@ -1332,7 +1333,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
 }
 
 GtkWidget*
-ptk::view::file_task::create(MainWindow* main_window)
+ptk::view::file_task::create(MainWindow* main_window) noexcept
 {
     GtkTreeViewColumn* col = nullptr;
     GtkCellRenderer* renderer = nullptr;

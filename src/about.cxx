@@ -18,7 +18,7 @@
 #include "about.hxx"
 
 void
-show_about_dialog(GtkWindow* parent)
+show_about_dialog(GtkWindow* parent) noexcept
 {
     (void)parent;
 

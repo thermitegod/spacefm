@@ -28,7 +28,8 @@
 #include "vfs/linux/sysfs.hxx"
 
 const std::optional<std::string>
-vfs::linux::sysfs::get_string(const std::filesystem::path& dir, const std::string_view attribute)
+vfs::linux::sysfs::get_string(const std::filesystem::path& dir,
+                              const std::string_view attribute) noexcept
 {
     const auto filename = dir / attribute;
 
@@ -45,7 +46,8 @@ vfs::linux::sysfs::get_string(const std::filesystem::path& dir, const std::strin
 }
 
 const std::optional<i64>
-vfs::linux::sysfs::get_i64(const std::filesystem::path& dir, const std::string_view attribute)
+vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
+                           const std::string_view attribute) noexcept
 {
     const auto filename = dir / attribute;
 
@@ -62,7 +64,8 @@ vfs::linux::sysfs::get_i64(const std::filesystem::path& dir, const std::string_v
 }
 
 const std::optional<u64>
-vfs::linux::sysfs::get_u64(const std::filesystem::path& dir, const std::string_view attribute)
+vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
+                           const std::string_view attribute) noexcept
 {
     const auto filename = dir / attribute;
 
@@ -79,7 +82,8 @@ vfs::linux::sysfs::get_u64(const std::filesystem::path& dir, const std::string_v
 }
 
 const std::optional<f64>
-vfs::linux::sysfs::get_f64(const std::filesystem::path& dir, const std::string_view attribute)
+vfs::linux::sysfs::get_f64(const std::filesystem::path& dir,
+                           const std::string_view attribute) noexcept
 {
     const auto filename = dir / attribute;
 
@@ -96,13 +100,15 @@ vfs::linux::sysfs::get_f64(const std::filesystem::path& dir, const std::string_v
 }
 
 bool
-vfs::linux::sysfs::file_exists(const std::filesystem::path& dir, const std::string_view attribute)
+vfs::linux::sysfs::file_exists(const std::filesystem::path& dir,
+                               const std::string_view attribute) noexcept
 {
     return std::filesystem::exists(dir / attribute);
 }
 
 const std::optional<std::string>
-vfs::linux::sysfs::resolve_link(const std::filesystem::path& path, const std::string_view name)
+vfs::linux::sysfs::resolve_link(const std::filesystem::path& path,
+                                const std::string_view name) noexcept
 {
     const auto full_path = path / name;
 

@@ -61,7 +61,7 @@ struct ParentInfo
 
 static bool
 open_archives(const std::shared_ptr<ParentInfo>& parent,
-              const std::span<const std::shared_ptr<vfs::file>> selected_files)
+              const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     const auto is_archive = [](const auto& file) { return file->mime_type()->is_archive(); };
     if (!std::ranges::all_of(selected_files, is_archive))
@@ -102,7 +102,7 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
 static bool
 open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
                     const std::span<const std::filesystem::path> open_files,
-                    const std::string_view app_desktop)
+                    const std::string_view app_desktop) noexcept
 {
     if (app_desktop.empty())
     {

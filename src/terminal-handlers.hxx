@@ -27,7 +27,7 @@
 struct TerminalHandler
 {
     TerminalHandler() = delete;
-    TerminalHandler(const std::string_view name, const std::string_view exec);
+    TerminalHandler(const std::string_view name, const std::string_view exec) noexcept;
 
     std::string name;
     std::filesystem::path path;
@@ -36,10 +36,10 @@ struct TerminalHandler
 
 struct TerminalHandlers
 {
-    TerminalHandlers();
+    TerminalHandlers() noexcept;
 
-    const std::vector<std::string> get_terminal_args(const std::string_view terminal);
-    const std::vector<std::string> get_supported_terminal_names();
+    const std::vector<std::string> get_terminal_args(const std::string_view terminal) noexcept;
+    const std::vector<std::string> get_supported_terminal_names() noexcept;
 
   private:
     std::unordered_map<std::string, TerminalHandler> handlers;

@@ -28,7 +28,7 @@
 #include "compat/gtk4-porting.hxx"
 
 static void
-dialog_response_cb(GObject* object, i32 response_id, void* user_data)
+dialog_response_cb(GObject* object, i32 response_id, void* user_data) noexcept
 {
     GTask* task = (GTask*)user_data;
 
@@ -39,7 +39,7 @@ dialog_response_cb(GObject* object, i32 response_id, void* user_data)
 }
 
 i32
-gtk_dialog_run(GtkDialog* dialog)
+gtk_dialog_run(GtkDialog* dialog) noexcept
 {
     assert(GTK_IS_DIALOG(dialog));
 
@@ -65,7 +65,7 @@ gtk_dialog_run(GtkDialog* dialog)
 #if (GTK_MAJOR_VERSION == 3)
 
 guint
-gdk_key_event_get_keyval(GdkEvent* event)
+gdk_key_event_get_keyval(GdkEvent* event) noexcept
 {
     guint keyval = 0;
     gdk_event_get_keyval(event, &keyval);
@@ -73,7 +73,7 @@ gdk_key_event_get_keyval(GdkEvent* event)
 }
 
 GdkModifierType
-gdk_event_get_modifier_state(GdkEvent* event)
+gdk_event_get_modifier_state(GdkEvent* event) noexcept
 {
     GdkModifierType state;
     gdk_event_get_state(event, &state);
@@ -81,7 +81,7 @@ gdk_event_get_modifier_state(GdkEvent* event)
 }
 
 guint
-gdk_button_event_get_button(GdkEvent* event)
+gdk_button_event_get_button(GdkEvent* event) noexcept
 {
     guint button = 0;
     gdk_event_get_button(event, &button);
@@ -89,7 +89,7 @@ gdk_button_event_get_button(GdkEvent* event)
 }
 
 gboolean
-gdk_event_get_position(GdkEvent* event, double* x, double* y)
+gdk_event_get_position(GdkEvent* event, double* x, double* y) noexcept
 {
     double xx = NAN;
     double yy = NAN;

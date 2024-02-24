@@ -57,10 +57,10 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
     /* <private> */
     struct node : public std::enable_shared_from_this<node>
     {
-        [[nodiscard]] static const std::shared_ptr<node> create();
-        [[nodiscard]] static const std::shared_ptr<node> create(ptk::dir_tree* tree,
-                                                                const std::shared_ptr<node>& parent,
-                                                                const std::filesystem::path& path);
+        [[nodiscard]] static const std::shared_ptr<node> create() noexcept;
+        [[nodiscard]] static const std::shared_ptr<node>
+        create(ptk::dir_tree* tree, const std::shared_ptr<node>& parent,
+               const std::filesystem::path& path) noexcept;
 
         std::shared_ptr<vfs::file> file{nullptr};
         std::shared_ptr<node> children{nullptr};
@@ -73,12 +73,13 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
         std::shared_ptr<node> last{nullptr};
         ptk::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
 
-        const std::shared_ptr<node> get_nth_node(i32 n) const;
-        const std::shared_ptr<node> find_node(const std::string_view name) const;
-        isize get_node_index(const std::shared_ptr<node>& child) const;
+        const std::shared_ptr<node> get_nth_node(i32 n) const noexcept;
+        const std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
+        isize get_node_index(const std::shared_ptr<node>& child) const noexcept;
 
         /* file monitor callback */
-        void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
+        void on_monitor_event(const vfs::monitor::event event,
+                              const std::filesystem::path& path) noexcept;
     };
     std::shared_ptr<node> root{nullptr};
 

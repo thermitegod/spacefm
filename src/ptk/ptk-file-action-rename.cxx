@@ -63,7 +63,7 @@
 struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {
     MoveSet() = delete;
-    MoveSet(const std::shared_ptr<vfs::file>& file);
+    MoveSet(const std::shared_ptr<vfs::file>& file) noexcept;
     ~MoveSet() = default;
     MoveSet(const MoveSet& other) = delete;
     MoveSet(MoveSet&& other) = delete;
@@ -156,13 +156,13 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
     bool is_move{false};
 };
 
-MoveSet::MoveSet(const std::shared_ptr<vfs::file>& file) : file(file) {}
+MoveSet::MoveSet(const std::shared_ptr<vfs::file>& file) noexcept : file(file) {}
 
-static void on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset);
-static const std::optional<std::filesystem::path> get_template_dir();
+static void on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset) noexcept;
+static const std::optional<std::filesystem::path> get_template_dir() noexcept;
 
 static bool
-on_move_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
+on_move_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)widget;
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
@@ -187,7 +187,8 @@ on_move_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveS
 }
 
 static bool
-on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
+on_move_entry_keypress(GtkWidget* widget, GdkEvent* event,
+                       const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)widget;
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
@@ -212,7 +213,7 @@ on_move_entry_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr
 }
 
 static void
-on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     g_signal_handlers_block_matched(mset->entry_ext,
                                     GSignalMatchType::G_SIGNAL_MATCH_FUNC,
@@ -768,7 +769,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 static void
-select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     if (GTK_IS_EDITABLE(widget))
     {
@@ -815,7 +816,8 @@ select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 static bool
-on_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<MoveSet>& mset)
+on_focus(GtkWidget* widget, GtkDirectionType direction,
+         const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)direction;
     select_input(widget, mset);
@@ -823,7 +825,8 @@ on_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<Mo
 }
 
 static bool
-on_button_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<MoveSet>& mset)
+on_button_focus(GtkWidget* widget, GtkDirectionType direction,
+                const std::shared_ptr<MoveSet>& mset) noexcept
 {
     if (direction == GtkDirectionType::GTK_DIR_TAB_FORWARD ||
         direction == GtkDirectionType::GTK_DIR_TAB_BACKWARD)
@@ -898,7 +901,7 @@ on_button_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared
 }
 
 static void
-on_revert_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+on_revert_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)widget;
     GtkWidget* temp = mset->last_widget;
@@ -909,7 +912,7 @@ on_revert_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 static void
-on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     (void)widget;
@@ -1116,7 +1119,7 @@ enum class file_misc_mode
 };
 
 static void
-on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
+on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg) noexcept
 {
     (void)item;
 
@@ -1164,7 +1167,7 @@ on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg)
 #endif
 
 static void
-on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     ptk::dialog::error(nullptr,
@@ -1332,7 +1335,7 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 static void
-on_opt_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
+on_opt_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)item;
 
@@ -1443,7 +1446,7 @@ on_opt_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
 }
 
 static void
-on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
+on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)item;
     bool someone_is_visible = false;
@@ -1658,7 +1661,7 @@ on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
 }
 
 static bool
-on_mnemonic_activate(GtkWidget* widget, bool arg1, const std::shared_ptr<MoveSet>& mset)
+on_mnemonic_activate(GtkWidget* widget, bool arg1, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)arg1;
     select_input(widget, mset);
@@ -1666,7 +1669,7 @@ on_mnemonic_activate(GtkWidget* widget, bool arg1, const std::shared_ptr<MoveSet
 }
 
 static void
-on_options_button_press(GtkWidget* btn, const std::shared_ptr<MoveSet>& mset)
+on_options_button_press(GtkWidget* btn, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)btn;
     GtkWidget* popup = gtk_menu_new();
@@ -1732,7 +1735,8 @@ on_options_button_press(GtkWidget* btn, const std::shared_ptr<MoveSet>& mset)
 }
 
 static bool
-on_label_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_ptr<MoveSet>& mset)
+on_label_focus(GtkWidget* widget, GtkDirectionType direction,
+               const std::shared_ptr<MoveSet>& mset) noexcept
 {
     GtkWidget* input = nullptr;
     GtkWidget* input2 = nullptr;
@@ -1941,7 +1945,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction, const std::shared_
 }
 
 static void
-copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     ztd::logger::debug("TODO - PORT - GdkClipboard");
@@ -2027,7 +2031,8 @@ copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 }
 
 static bool
-on_label_button_press(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset)
+on_label_button_press(GtkWidget* widget, GdkEvent* event,
+                      const std::shared_ptr<MoveSet>& mset) noexcept
 {
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
@@ -2103,7 +2108,7 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<
 }
 
 static const std::filesystem::path
-get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "")
+get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "") noexcept
 {
     const std::string base = "new";
 
@@ -2139,7 +2144,7 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
 }
 
 static const std::optional<std::filesystem::path>
-get_template_dir()
+get_template_dir() noexcept
 {
     const auto templates_path = vfs::user::templates();
 
@@ -2159,7 +2164,7 @@ get_template_dir()
 
 static const std::vector<std::filesystem::path>
 get_templates(const std::filesystem::path& templates_dir, const std::filesystem::path& subdir,
-              bool getdir)
+              bool getdir) noexcept
 {
     std::vector<std::filesystem::path> templates;
 
@@ -2240,7 +2245,7 @@ get_templates(const std::filesystem::path& templates_dir, const std::filesystem:
 }
 
 static void
-on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
+on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
     (void)widget;
 

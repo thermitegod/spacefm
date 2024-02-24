@@ -48,7 +48,7 @@ struct properties_dialog_data : public std::enable_shared_from_this<properties_d
 {
     properties_dialog_data() = delete;
     properties_dialog_data(std::span<const std::shared_ptr<vfs::file>> file_list,
-                           const std::filesystem::path& cwd);
+                           const std::filesystem::path& cwd) noexcept;
     ~properties_dialog_data() = default;
     properties_dialog_data(const properties_dialog_data& other) = delete;
     properties_dialog_data(properties_dialog_data&& other) = delete;
@@ -73,14 +73,15 @@ struct properties_dialog_data : public std::enable_shared_from_this<properties_d
 };
 
 properties_dialog_data::properties_dialog_data(
-    std::span<const std::shared_ptr<vfs::file>> file_list, const std::filesystem::path& cwd)
+    std::span<const std::shared_ptr<vfs::file>> file_list,
+    const std::filesystem::path& cwd) noexcept
     : file_list(file_list), cwd(cwd)
 {
 }
 
 const std::vector<std::filesystem::path>
 find_subdirectories(const std::filesystem::path& directory,
-                    const std::shared_ptr<properties_dialog_data>& data)
+                    const std::shared_ptr<properties_dialog_data>& data) noexcept
 {
     std::vector<std::filesystem::path> subdirectories;
 
@@ -118,7 +119,7 @@ find_subdirectories(const std::filesystem::path& directory,
 // calculation is cancelled.
 static void
 calc_total_size_of_files(const std::filesystem::path& path,
-                         const std::shared_ptr<properties_dialog_data>& data)
+                         const std::shared_ptr<properties_dialog_data>& data) noexcept
 {
     if (data->cancel)
     {
@@ -171,7 +172,7 @@ calc_total_size_of_files(const std::filesystem::path& path,
 }
 
 static void*
-calc_size(void* user_data)
+calc_size(void* user_data) noexcept
 {
     const auto data = static_cast<properties_dialog_data*>(user_data)->shared_from_this();
 
@@ -198,7 +199,7 @@ calc_size(void* user_data)
 }
 
 static bool
-on_update_labels(const std::shared_ptr<properties_dialog_data>& data)
+on_update_labels(const std::shared_ptr<properties_dialog_data>& data) noexcept
 {
     // need a better thread model for this. all of the
     // data->cancel checks are needed to avoid segfaults when
@@ -249,7 +250,7 @@ class PropertiesSection
     GtkBox* content_box_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 0));
 
   public:
-    PropertiesSection()
+    PropertiesSection() noexcept
     {
         // clang-format off
         GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
@@ -261,7 +262,7 @@ class PropertiesSection
     }
 
     void
-    new_split_vboxes(GtkBox** left_box, GtkBox** right_box)
+    new_split_vboxes(GtkBox** left_box, GtkBox** right_box) noexcept
     {
         *left_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
         gtk_box_set_homogeneous(*left_box, false);
@@ -278,13 +279,13 @@ class PropertiesSection
     }
 
     GtkBox*
-    box()
+    box() noexcept
     {
         return box_;
     }
 
     GtkBox*
-    contentbox()
+    contentbox() noexcept
     {
         return content_box_;
     }
@@ -297,7 +298,7 @@ class PropertiesPage
     PropertiesSection section_;
 
   public:
-    PropertiesPage()
+    PropertiesPage() noexcept
     {
         gtk_box_set_homogeneous(this->box_, false);
         gtk_box_set_spacing(this->box_, 12);
@@ -312,7 +313,7 @@ class PropertiesPage
     }
 
     void
-    add_row(const std::string_view left_item_name, GtkWidget* right_item = nullptr)
+    add_row(const std::string_view left_item_name, GtkWidget* right_item = nullptr) noexcept
     {
         GtkLabel* left_item = GTK_LABEL(gtk_label_new(left_item_name.data()));
         PangoAttrList* attr_list = pango_attr_list_new();
@@ -339,20 +340,20 @@ class PropertiesPage
     }
 
     void
-    add_row_widget(GtkWidget* item)
+    add_row_widget(GtkWidget* item) noexcept
     {
         gtk_box_pack_start(this->section_.contentbox(), GTK_WIDGET(item), true, true, 0);
     }
 
     GtkBox*
-    box()
+    box() noexcept
     {
         return this->box_;
     }
 };
 
 GtkEntry*
-create_prop_text_box(const std::string_view data)
+create_prop_text_box(const std::string_view data) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
 #if (GTK_MAJOR_VERSION == 4)
@@ -365,7 +366,7 @@ create_prop_text_box(const std::string_view data)
 }
 
 GtkEntry*
-create_prop_text_box_no_focus(const std::string_view data)
+create_prop_text_box_no_focus(const std::string_view data) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
 #if (GTK_MAJOR_VERSION == 4)
@@ -380,7 +381,7 @@ create_prop_text_box_no_focus(const std::string_view data)
 }
 
 GtkEntry*
-create_prop_text_box_date(const std::chrono::system_clock::time_point time_point)
+create_prop_text_box_date(const std::chrono::system_clock::time_point time_point) noexcept
 {
     const auto time_formated =
         std::format("{}", std::chrono::floor<std::chrono::seconds>(time_point));
@@ -398,7 +399,7 @@ create_prop_text_box_date(const std::chrono::system_clock::time_point time_point
 GtkWidget*
 init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
                    const std::filesystem::path& cwd,
-                   const std::span<const std::shared_ptr<vfs::file>> selected_files)
+                   const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     // FIXME using spaces to align the right GtkWiget with the label
     // This works but should be fixed with an alignment solution
@@ -553,7 +554,7 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
 
 GtkWidget*
 init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
-                    const std::span<const std::shared_ptr<vfs::file>> selected_files)
+                    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)data;
 
@@ -802,7 +803,7 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
 
 GtkWidget*
 init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
-                     const std::span<const std::shared_ptr<vfs::file>> selected_files)
+                     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)data;
 
@@ -959,7 +960,7 @@ init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
 }
 
 void
-close_dialog(GtkWidget* widget, void* user_data)
+close_dialog(GtkWidget* widget, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -973,7 +974,7 @@ close_dialog(GtkWidget* widget, void* user_data)
 void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
                             const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                            i32 page)
+                            i32 page) noexcept
 {
     GtkWidget* dialog =
         gtk_dialog_new_with_buttons("File Properties",
@@ -1048,7 +1049,8 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
 
 void
 ptk_show_file_properties(GtkWindow* parent, const std::filesystem::path& cwd,
-                         const std::span<const std::shared_ptr<vfs::file>> selected_files, i32 page)
+                         const std::span<const std::shared_ptr<vfs::file>> selected_files,
+                         i32 page) noexcept
 {
     if (selected_files.empty())
     {

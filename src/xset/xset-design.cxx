@@ -44,7 +44,7 @@
 #include "main-window.hxx"
 
 static void
-xset_design_job_set_key(const xset_t& set)
+xset_design_job_set_key(const xset_t& set) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(set->browser)));
@@ -56,7 +56,7 @@ xset_design_job_set_key(const xset_t& set)
 }
 
 static void
-xset_design_job_set_add_tool(const xset_t& set, xset::tool tool_type)
+xset_design_job_set_add_tool(const xset_t& set, xset::tool tool_type) noexcept
 {
     if (tool_type < xset::tool::devices || tool_type >= xset::tool::invalid ||
         set->tool == xset::tool::NOT)
@@ -71,21 +71,21 @@ xset_design_job_set_add_tool(const xset_t& set, xset::tool tool_type)
 }
 
 static void
-xset_design_job_set_cut(const xset_t& set)
+xset_design_job_set_cut(const xset_t& set) noexcept
 {
     xset_set_clipboard = set;
     xset_clipboard_is_cut = true;
 }
 
 static void
-xset_design_job_set_copy(const xset_t& set)
+xset_design_job_set_copy(const xset_t& set) noexcept
 {
     xset_set_clipboard = set;
     xset_clipboard_is_cut = false;
 }
 
 static bool
-xset_design_job_set_paste(const xset_t& set)
+xset_design_job_set_paste(const xset_t& set) noexcept
 {
     if (!xset_set_clipboard)
     {
@@ -126,7 +126,7 @@ xset_design_job_set_paste(const xset_t& set)
 }
 
 static bool
-xset_design_job_set_remove(const xset_t& set)
+xset_design_job_set_remove(const xset_t& set) noexcept
 {
     const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
 
@@ -173,7 +173,7 @@ xset_design_job_set_remove(const xset_t& set)
 }
 
 void
-xset_design_job(GtkWidget* item, const xset_t& set)
+xset_design_job(GtkWidget* item, const xset_t& set) noexcept
 {
     assert(set != nullptr);
 
@@ -231,7 +231,7 @@ xset_design_job(GtkWidget* item, const xset_t& set)
 }
 
 static bool
-xset_clipboard_in_set(const xset_t& set)
+xset_clipboard_in_set(const xset_t& set) noexcept
 { // look upward to see if clipboard is in set's tree
     assert(set != nullptr);
 
@@ -281,7 +281,7 @@ xset_clipboard_in_set(const xset_t& set)
 }
 
 bool
-xset_job_is_valid(const xset_t& set, xset::job job)
+xset_job_is_valid(const xset_t& set, xset::job job) noexcept
 {
     assert(set != nullptr);
 
@@ -328,14 +328,15 @@ xset_job_is_valid(const xset_t& set, xset::job job)
 }
 
 static void
-on_menu_hide(GtkWidget* widget, GtkWidget* design_menu)
+on_menu_hide(GtkWidget* widget, GtkWidget* design_menu) noexcept
 {
     gtk_widget_set_sensitive(widget, true);
     gtk_menu_shell_deactivate(GTK_MENU_SHELL(design_menu));
 }
 
 static GtkWidget*
-xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job, const xset_t& set)
+xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job,
+                    const xset_t& set) noexcept
 {
     GtkWidget* item = nullptr;
     item = gtk_menu_item_new_with_mnemonic(label.data());
@@ -348,7 +349,7 @@ xset_design_additem(GtkWidget* menu, const std::string_view label, xset::job job
 
 GtkWidget*
 xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_insert, u32 button,
-                      const std::chrono::system_clock::time_point time_point)
+                      const std::chrono::system_clock::time_point time_point) noexcept
 {
     (void)button;
     (void)time_point;
@@ -538,7 +539,7 @@ xset_design_show_menu(GtkWidget* menu, const xset_t& set, const xset_t& book_ins
 }
 
 bool
-xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set)
+xset_design_cb(GtkWidget* item, GdkEvent* event, const xset_t& set) noexcept
 {
     xset::job job = xset::job::invalid;
 

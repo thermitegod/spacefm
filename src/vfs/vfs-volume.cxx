@@ -62,7 +62,7 @@ static void call_callbacks(const std::shared_ptr<vfs::volume>& vol,
 struct volume_callback_data
 {
     volume_callback_data() = delete;
-    volume_callback_data(vfs::volume::callback_t callback, void* callback_data);
+    volume_callback_data(vfs::volume::callback_t callback, void* callback_data) noexcept;
     ~volume_callback_data() = default;
     volume_callback_data(const volume_callback_data& other) = delete;
     volume_callback_data(volume_callback_data&& other) = delete;
@@ -73,7 +73,8 @@ struct volume_callback_data
     void* user_data{nullptr};
 };
 
-volume_callback_data::volume_callback_data(vfs::volume::callback_t callback, void* callback_data)
+volume_callback_data::volume_callback_data(vfs::volume::callback_t callback,
+                                           void* callback_data) noexcept
     : cb(callback), user_data(callback_data)
 {
 }
@@ -87,7 +88,7 @@ using volume_callback_data_t = std::shared_ptr<volume_callback_data>;
 struct DeviceMount
 {
     DeviceMount() = delete;
-    DeviceMount(dev_t major, dev_t minor);
+    DeviceMount(dev_t major, dev_t minor) noexcept;
     ~DeviceMount() = default;
     DeviceMount(const DeviceMount& other) = delete;
     DeviceMount(DeviceMount&& other) = delete;
@@ -101,7 +102,7 @@ struct DeviceMount
     std::vector<std::string> mounts;
 };
 
-DeviceMount::DeviceMount(dev_t major, dev_t minor)
+DeviceMount::DeviceMount(dev_t major, dev_t minor) noexcept
 {
     this->major = major;
     this->minor = minor;
@@ -707,7 +708,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
  * vfs::volume
  */
 
-vfs::volume::volume(const std::shared_ptr<vfs::device>& device)
+vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
 {
     // ztd::logger::debug("vfs::volume::volume({})", ztd::logger::utils::ptr(this));
 

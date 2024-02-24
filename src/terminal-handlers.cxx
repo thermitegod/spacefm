@@ -27,13 +27,13 @@
 
 #include "terminal-handlers.hxx"
 
-TerminalHandler::TerminalHandler(const std::string_view name, const std::string_view exec)
+TerminalHandler::TerminalHandler(const std::string_view name, const std::string_view exec) noexcept
     : name(name), exec(exec)
 {
     this->path = Glib::find_program_in_path(name.data());
 }
 
-TerminalHandlers::TerminalHandlers()
+TerminalHandlers::TerminalHandlers() noexcept
 {
     // clang-format off
     this->handlers = {
@@ -63,7 +63,7 @@ TerminalHandlers::TerminalHandlers()
 }
 
 const std::vector<std::string>
-TerminalHandlers::get_terminal_args(const std::string_view terminal)
+TerminalHandlers::get_terminal_args(const std::string_view terminal) noexcept
 {
     // ztd::logger::debug("get_terminal_args={}", terminal);
     if (!this->handlers.contains(terminal.data()))
@@ -97,7 +97,7 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal)
 }
 
 const std::vector<std::string>
-TerminalHandlers::get_supported_terminal_names()
+TerminalHandlers::get_supported_terminal_names() noexcept
 {
     std::vector<std::string> terminal_names;
     terminal_names.reserve(handlers.size());

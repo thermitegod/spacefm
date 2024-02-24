@@ -22,5 +22,5 @@
 
 #include "vfs/vfs-file.hxx"
 
-const std::vector<std::shared_ptr<vfs::file>> glist_to_vector_vfs_file(GList* list);
-GList* vector_to_glist_vfs_file(const std::span<const std::shared_ptr<vfs::file>> list);
+const std::vector<std::shared_ptr<vfs::file>> glist_to_vector_vfs_file(GList* list) noexcept;
+GList* vector_to_glist_vfs_file(const std::span<const std::shared_ptr<vfs::file>> list) noexcept;

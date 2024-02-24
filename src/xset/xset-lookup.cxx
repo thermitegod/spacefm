@@ -1012,7 +1012,7 @@ static constexpr ztd::map<xset::panel, panel_lookup_data, 27> xset_panel_lookup{
 }}};
 
 xset::name
-xset::get_xsetname_from_name(const std::string_view name)
+xset::get_xsetname_from_name(const std::string_view name) noexcept
 {
     const auto enum_value = magic_enum::enum_cast<xset::name>(name);
     if (!enum_value.has_value())
@@ -1025,7 +1025,7 @@ xset::get_xsetname_from_name(const std::string_view name)
 }
 
 const std::string_view
-xset::get_name_from_xsetname(xset::name name)
+xset::get_name_from_xsetname(xset::name name) noexcept
 {
     const auto value = magic_enum::enum_name(name);
     return value;
@@ -1034,7 +1034,7 @@ xset::get_name_from_xsetname(xset::name name)
 // panel
 
 xset::name
-xset::get_xsetname_from_panel(panel_t panel, xset::panel name)
+xset::get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept
 {
     assert(panel == 1 || panel == 2 || panel == 3 || panel == 4);
 
@@ -1042,7 +1042,7 @@ xset::get_xsetname_from_panel(panel_t panel, xset::panel name)
 }
 
 const std::string_view
-xset::get_name_from_panel(panel_t panel, xset::panel name)
+xset::get_name_from_panel(panel_t panel, xset::panel name) noexcept
 {
     const auto set_name = xset::get_xsetname_from_panel(panel, name);
     const auto value = magic_enum::enum_name(set_name);
@@ -1052,7 +1052,8 @@ xset::get_name_from_panel(panel_t panel, xset::panel name)
 // panel mode
 
 xset::name
-xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode)
+xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name,
+                                   xset::main_window_panel mode) noexcept
 {
     assert(panel == 1 || panel == 2 || panel == 3 || panel == 4);
     assert(name != xset::panel::show);
@@ -1061,7 +1062,8 @@ xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name, xset::main_w
 }
 
 const std::string_view
-xset::get_name_from_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode)
+xset::get_name_from_panel_mode(panel_t panel, xset::panel name,
+                               xset::main_window_panel mode) noexcept
 {
     const auto set_name = xset::get_xsetname_from_panel_mode(panel, name, mode);
     const auto value = magic_enum::enum_name(set_name);
@@ -1071,7 +1073,7 @@ xset::get_name_from_panel_mode(panel_t panel, xset::panel name, xset::main_windo
 // main window panel mode
 
 const std::string_view
-xset::get_window_panel_mode(xset::main_window_panel mode)
+xset::get_window_panel_mode(xset::main_window_panel mode) noexcept
 {
     static constexpr ztd::map<xset::main_window_panel, std::string_view, 4>
         main_window_panel_mode_map{{{

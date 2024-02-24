@@ -46,8 +46,8 @@ struct mime_type
 {
   public:
     mime_type() = delete;
-    mime_type(const std::string_view type);
-    ~mime_type();
+    mime_type(const std::string_view type) noexcept;
+    ~mime_type() noexcept;
     mime_type(const mime_type& other) = delete;
     mime_type(mime_type&& other) = delete;
     mime_type& operator=(const mime_type& other) = delete;

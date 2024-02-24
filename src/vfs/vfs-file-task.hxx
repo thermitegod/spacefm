@@ -94,8 +94,8 @@ struct file_task : public std::enable_shared_from_this<file_task>
 
     file_task() = delete;
     file_task(const type type, const std::span<const std::filesystem::path> src_files,
-              const std::filesystem::path& dest_dir);
-    ~file_task();
+              const std::filesystem::path& dest_dir) noexcept;
+    ~file_task() noexcept;
     file_task(const file_task& other) = delete;
     file_task(file_task&& other) = delete;
     file_task& operator=(const file_task& other) = delete;
@@ -105,52 +105,53 @@ struct file_task : public std::enable_shared_from_this<file_task>
     create(const type type, const std::span<const std::filesystem::path> src_files,
            const std::filesystem::path& dest_dir) noexcept;
 
-    void lock() const;
-    void unlock() const;
+    void lock() const noexcept;
+    void unlock() const noexcept;
 
     using state_callback_t =
         std::function<bool(const std::shared_ptr<vfs::file_task>& task,
                            const vfs::file_task::state state, void* state_data, void* user_data)>;
 
-    void set_state_callback(const state_callback_t& cb, void* user_data);
+    void set_state_callback(const state_callback_t& cb, void* user_data) noexcept;
 
-    void set_chmod(std::array<u8, 12> new_chmod_actions);
-    void set_chown(uid_t new_uid, gid_t new_gid);
+    void set_chmod(std::array<u8, 12> new_chmod_actions) noexcept;
+    void set_chown(uid_t new_uid, gid_t new_gid) noexcept;
 
-    void set_recursive(bool recursive);
-    void set_overwrite_mode(const vfs::file_task::overwrite_mode mode);
+    void set_recursive(bool recursive) noexcept;
+    void set_overwrite_mode(const vfs::file_task::overwrite_mode mode) noexcept;
 
-    void run_task();
-    void try_abort_task();
-    void abort_task();
+    void run_task() noexcept;
+    void try_abort_task() noexcept;
+    void abort_task() noexcept;
 
   public: // private: // TODO
     [[nodiscard]] bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                                       char** new_dest_file);
-    [[nodiscard]] bool check_dest_in_src(const std::filesystem::path& src_dir);
+                                       char** new_dest_file) noexcept;
+    [[nodiscard]] bool check_dest_in_src(const std::filesystem::path& src_dir) noexcept;
 
-    void file_copy(const std::filesystem::path& src_file);
+    void file_copy(const std::filesystem::path& src_file) noexcept;
     [[nodiscard]] bool do_file_copy(const std::filesystem::path& src_file,
-                                    const std::filesystem::path& dest_file);
+                                    const std::filesystem::path& dest_file) noexcept;
 
-    void file_move(const std::filesystem::path& src_file);
+    void file_move(const std::filesystem::path& src_file) noexcept;
     [[nodiscard]] i32 do_file_move(const std::filesystem::path& src_file,
-                                   const std::filesystem::path& dest_path);
+                                   const std::filesystem::path& dest_path) noexcept;
 
-    void file_trash(const std::filesystem::path& src_file);
-    void file_delete(const std::filesystem::path& src_file);
-    void file_link(const std::filesystem::path& src_file);
-    void file_chown_chmod(const std::filesystem::path& src_file);
-    void file_exec(const std::filesystem::path& src_file);
+    void file_trash(const std::filesystem::path& src_file) noexcept;
+    void file_delete(const std::filesystem::path& src_file) noexcept;
+    void file_link(const std::filesystem::path& src_file) noexcept;
+    void file_chown_chmod(const std::filesystem::path& src_file) noexcept;
+    void file_exec(const std::filesystem::path& src_file) noexcept;
 
-    [[nodiscard]] bool should_abort();
+    [[nodiscard]] bool should_abort() noexcept;
 
-    [[nodiscard]] u64 get_total_size_of_dir(const std::filesystem::path& path);
+    [[nodiscard]] u64 get_total_size_of_dir(const std::filesystem::path& path) noexcept;
 
-    void append_add_log(const std::string_view msg) const;
+    void append_add_log(const std::string_view msg) const noexcept;
 
-    void task_error(i32 errnox, const std::string_view action);
-    void task_error(i32 errnox, const std::string_view action, const std::filesystem::path& target);
+    void task_error(i32 errnox, const std::string_view action) noexcept;
+    void task_error(i32 errnox, const std::string_view action,
+                    const std::filesystem::path& target) noexcept;
 
   public:
     vfs::file_task::type type_;

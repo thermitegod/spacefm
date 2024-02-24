@@ -28,7 +28,7 @@
 struct EntryData
 {
     EntryData() = delete;
-    EntryData(ptk::browser* browser);
+    EntryData(ptk::browser* browser) noexcept;
     ~EntryData() = default;
     EntryData(const EntryData& other) = delete;
     EntryData(EntryData&& other) = delete;
@@ -39,4 +39,4 @@ struct EntryData
     u32 seek_timer{0};
 };
 
-GtkEntry* ptk_path_entry_new(ptk::browser* file_browser);
+GtkEntry* ptk_path_entry_new(ptk::browser* file_browser) noexcept;

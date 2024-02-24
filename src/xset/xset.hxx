@@ -126,7 +126,7 @@ enum b
 struct XSet : public std::enable_shared_from_this<XSet>
 {
     XSet() = delete;
-    XSet(const std::string_view set_name, const xset::name xset_name);
+    XSet(const std::string_view set_name, const xset::name xset_name) noexcept;
     ~XSet() = default;
     XSet(const XSet& other) = delete;
     XSet(XSet&& other) = delete;

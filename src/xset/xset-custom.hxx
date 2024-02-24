@@ -22,12 +22,13 @@
 
 #include "xset/xset.hxx"
 
-const std::string xset_custom_new_name();
+const std::string xset_custom_new_name() noexcept;
 
-const xset_t xset_custom_new();
-const xset_t xset_custom_remove(const xset_t& set);
-const std::string xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon, i32 icon_size);
-const xset_t xset_custom_copy(const xset_t& set, bool copy_next);
+const xset_t xset_custom_new() noexcept;
+const xset_t xset_custom_remove(const xset_t& set) noexcept;
+const std::string xset_custom_get_app_name_icon(const xset_t& set, GdkPixbuf** icon,
+                                                i32 icon_size) noexcept;
+const xset_t xset_custom_copy(const xset_t& set, bool copy_next) noexcept;
 
-const xset_t xset_find_custom(const std::string_view search);
-void xset_custom_insert_after(const xset_t& target, const xset_t& set);
+const xset_t xset_find_custom(const std::string_view search) noexcept;
+void xset_custom_insert_after(const xset_t& target, const xset_t& set) noexcept;

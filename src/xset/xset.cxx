@@ -41,7 +41,7 @@
 
 std::vector<xset_t> xsets;
 
-xset::XSet::XSet(const std::string_view set_name, const xset::name xset_name)
+xset::XSet::XSet(const std::string_view set_name, const xset::name xset_name) noexcept
 {
     // ztd::logger::info("XSet Constructor");
     assert(set_name.empty() != true);

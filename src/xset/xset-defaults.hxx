@@ -15,5 +15,5 @@
 
 #pragma once
 
-void xset_defaults();
-void xset_default_keys();
+void xset_defaults() noexcept;
+void xset_default_keys() noexcept;

@@ -180,7 +180,7 @@ xset_toolbar_builtin_tools() noexcept
 }
 
 void
-xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event)
+xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event) noexcept
 {
     xset_t set2;
     panel_t p = 0;
@@ -272,7 +272,7 @@ xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* ev
 }
 
 const std::string
-xset_get_builtin_toolitem_label(xset::tool tool_type)
+xset_get_builtin_toolitem_label(xset::tool tool_type) noexcept
 {
     assert(tool_type != xset::tool::NOT);
     assert(tool_type != xset::tool::custom);
@@ -287,7 +287,7 @@ xset_get_builtin_toolitem_label(xset::tool tool_type)
 }
 
 const xset_t
-xset_new_builtin_toolitem(xset::tool tool_type)
+xset_new_builtin_toolitem(xset::tool tool_type) noexcept
 {
     if (tool_type < xset::tool::devices || tool_type >= xset::tool::invalid)
     {
@@ -305,7 +305,7 @@ xset_new_builtin_toolitem(xset::tool tool_type)
 }
 
 static bool
-on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
+on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set) noexcept
 {
     xset::job job = xset::job::invalid;
 
@@ -437,7 +437,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 }
 
 static bool
-on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
+on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set) noexcept
 {
     const auto button = gdk_button_event_get_button(event);
     // ztd::logger::info("on_tool_menu_button_press  {}   button = {}", set->menu_label,  button);
@@ -492,7 +492,7 @@ on_tool_menu_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 
 static GtkWidget*
 xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar, i32 icon_size,
-                  const xset_t& set, bool show_tooltips)
+                  const xset_t& set, bool show_tooltips) noexcept
 {
     if (!set)
     {
@@ -981,7 +981,7 @@ xset_add_toolitem(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* too
 
 void
 xset_fill_toolbar(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar,
-                  const xset_t& set_parent, bool show_tooltips)
+                  const xset_t& set_parent, bool show_tooltips) noexcept
 {
     static constexpr std::array<xset::tool, 7> default_tools{
         xset::tool::bookmarks,

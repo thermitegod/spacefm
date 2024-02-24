@@ -23,6 +23,6 @@
 
 #include "xset/xset.hxx"
 
-const std::string xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod);
+const std::string xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod) noexcept;
 
-void xset_set_key(GtkWidget* parent, const xset_t& set);
+void xset_set_key(GtkWidget* parent, const xset_t& set) noexcept;

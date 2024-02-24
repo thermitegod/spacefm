@@ -47,64 +47,43 @@ struct PtkFileListClass
     // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
 };
 
-GType ptk_file_list_get_type();
+GType ptk_file_list_get_type() noexcept;
 
-static void ptk_file_list_init(ptk::file_list* list);
+static void ptk_file_list_init(ptk::file_list* list) noexcept;
+static void ptk_file_list_class_init(PtkFileListClass* klass) noexcept;
+static void ptk_file_list_tree_model_init(GtkTreeModelIface* iface) noexcept;
+static void ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface) noexcept;
+static void ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface) noexcept;
+static void ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept;
+static void ptk_file_list_finalize(GObject* object) noexcept;
 
-static void ptk_file_list_class_init(PtkFileListClass* klass);
-
-static void ptk_file_list_tree_model_init(GtkTreeModelIface* iface);
-
-static void ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface);
-
-static void ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface);
-
-static void ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface);
-
-static void ptk_file_list_finalize(GObject* object);
-
-static GtkTreeModelFlags ptk_file_list_get_flags(GtkTreeModel* tree_model);
-
-static i32 ptk_file_list_get_n_columns(GtkTreeModel* tree_model);
-
-static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index);
-
+static GtkTreeModelFlags ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept;
+static i32 ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept;
+static GType ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index) noexcept;
 static gboolean ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                       GtkTreePath* path);
-
-static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
+                                       GtkTreePath* path) noexcept;
+static GtkTreePath* ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static void ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
-                                    GValue* value);
-
-static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
+                                    GValue* value) noexcept;
+static gboolean ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static gboolean ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                            GtkTreeIter* parent);
-
-static gboolean ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
-static i32 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter);
-
+                                            GtkTreeIter* parent) noexcept;
+static gboolean ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
+static i32 ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept;
 static gboolean ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                             GtkTreeIter* parent, i32 n);
-
+                                             GtkTreeIter* parent, i32 n) noexcept;
 static gboolean ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter,
-                                          GtkTreeIter* child);
-
+                                          GtkTreeIter* child) noexcept;
 static gboolean ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
-                                                 GtkSortType* order);
-
+                                                 GtkSortType* order) noexcept;
 static void ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id,
-                                             GtkSortType order);
-
+                                             GtkSortType order) noexcept;
 static void ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
                                         GtkTreeIterCompareFunc sort_func, void* user_data,
-                                        GDestroyNotify destroy);
-
+                                        GDestroyNotify destroy) noexcept;
 static void ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable,
                                                 GtkTreeIterCompareFunc sort_func, void* user_data,
-                                                GDestroyNotify destroy);
+                                                GDestroyNotify destroy) noexcept;
 
 #define PTK_TYPE_FILE_LIST    (ptk_file_list_get_type())
 #define PTK_IS_FILE_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_FILE_LIST))
@@ -133,7 +112,7 @@ const ztd::map<ptk::file_list::column, GType, 15> column_types{{{
 }
 
 GType
-ptk_file_list_get_type()
+ptk_file_list_get_type() noexcept
 {
     static GType type = 0;
     if (!type)
@@ -182,7 +161,7 @@ ptk_file_list_get_type()
 }
 
 static void
-ptk_file_list_init(ptk::file_list* list)
+ptk_file_list_init(ptk::file_list* list) noexcept
 {
     list->files = nullptr;
     list->sort_order = (GtkSortType)-1;
@@ -191,7 +170,7 @@ ptk_file_list_init(ptk::file_list* list)
 }
 
 static void
-ptk_file_list_class_init(PtkFileListClass* klass)
+ptk_file_list_class_init(PtkFileListClass* klass) noexcept
 {
     GObjectClass* object_class = nullptr;
 
@@ -202,7 +181,7 @@ ptk_file_list_class_init(PtkFileListClass* klass)
 }
 
 static void
-ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
+ptk_file_list_tree_model_init(GtkTreeModelIface* iface) noexcept
 {
     iface->get_flags = ptk_file_list_get_flags;
     iface->get_n_columns = ptk_file_list_get_n_columns;
@@ -219,7 +198,7 @@ ptk_file_list_tree_model_init(GtkTreeModelIface* iface)
 }
 
 static void
-ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
+ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface) noexcept
 {
     /* iface->sort_column_changed = ptk_file_list_sort_column_changed; */
     iface->get_sort_column_id = ptk_file_list_get_sort_column_id;
@@ -230,21 +209,21 @@ ptk_file_list_tree_sortable_init(GtkTreeSortableIface* iface)
 }
 
 static void
-ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface)
+ptk_file_list_drag_source_init(GtkTreeDragSourceIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface)
+ptk_file_list_drag_dest_init(GtkTreeDragDestIface* iface) noexcept
 {
     (void)iface;
     /* FIXME: Unused. Will this cause any problem? */
 }
 
 static void
-ptk_file_list_finalize(GObject* object)
+ptk_file_list_finalize(GObject* object) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(object);
 
@@ -263,7 +242,7 @@ ptk::file_list::create(const std::shared_ptr<vfs::dir>& dir, bool show_hidden) n
 }
 
 static GtkTreeModelFlags
-ptk_file_list_get_flags(GtkTreeModel* tree_model)
+ptk_file_list_get_flags(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
@@ -271,14 +250,14 @@ ptk_file_list_get_flags(GtkTreeModel* tree_model)
 }
 
 static i32
-ptk_file_list_get_n_columns(GtkTreeModel* tree_model)
+ptk_file_list_get_n_columns(GtkTreeModel* tree_model) noexcept
 {
     (void)tree_model;
     return magic_enum::enum_count<ptk::file_list::column>();
 }
 
 static GType
-ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
+ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index) noexcept
 {
     (void)tree_model;
     assert(PTK_IS_FILE_LIST(tree_model) == true);
@@ -287,7 +266,7 @@ ptk_file_list_get_column_type(GtkTreeModel* tree_model, i32 index)
 }
 
 static gboolean
-ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path)
+ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath* path) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
     assert(path != nullptr);
@@ -321,7 +300,7 @@ ptk_file_list_get_iter(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreePath*
 }
 
 static GtkTreePath*
-ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
@@ -337,7 +316,8 @@ ptk_file_list_get_path(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static void
-ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column, GValue* value)
+ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
+                        GValue* value) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(tree_model);
     assert(list != nullptr);
@@ -433,7 +413,7 @@ ptk_file_list_get_value(GtkTreeModel* tree_model, GtkTreeIter* iter, i32 column,
 }
 
 static gboolean
-ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     if (iter == nullptr || iter->user_data == nullptr)
     {
@@ -460,7 +440,8 @@ ptk_file_list_iter_next(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static gboolean
-ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent)
+ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter,
+                            GtkTreeIter* parent) noexcept
 {
     /* this is a list, nodes have no children */
     if (parent)
@@ -490,7 +471,7 @@ ptk_file_list_iter_children(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTree
 }
 
 static gboolean
-ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     (void)tree_model;
     (void)iter;
@@ -498,7 +479,7 @@ ptk_file_list_iter_has_child(GtkTreeModel* tree_model, GtkTreeIter* iter)
 }
 
 static i32
-ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
+ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
@@ -514,7 +495,7 @@ ptk_file_list_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter)
 
 static gboolean
 ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* parent,
-                             i32 n)
+                             i32 n) noexcept
 {
     assert(PTK_IS_FILE_LIST(tree_model) == true);
 
@@ -544,7 +525,7 @@ ptk_file_list_iter_nth_child(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTre
 }
 
 static gboolean
-ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child)
+ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIter* child) noexcept
 {
     (void)tree_model;
     (void)iter;
@@ -553,7 +534,8 @@ ptk_file_list_iter_parent(GtkTreeModel* tree_model, GtkTreeIter* iter, GtkTreeIt
 }
 
 static gboolean
-ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id, GtkSortType* order)
+ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
+                                 GtkSortType* order) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (sort_column_id)
@@ -568,7 +550,8 @@ ptk_file_list_get_sort_column_id(GtkTreeSortable* sortable, i32* sort_column_id,
 }
 
 static void
-ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, GtkSortType order)
+ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id,
+                                 GtkSortType order) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST_REINTERPRET(sortable);
     if (list->sort_col == ptk::file_list::column(sort_column_id) && list->sort_order == order)
@@ -584,7 +567,7 @@ ptk_file_list_set_sort_column_id(GtkTreeSortable* sortable, i32 sort_column_id, 
 static void
 ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
                             GtkTreeIterCompareFunc sort_func, void* user_data,
-                            GDestroyNotify destroy)
+                            GDestroyNotify destroy) noexcept
 {
     (void)sortable;
     (void)sort_column_id;
@@ -596,7 +579,7 @@ ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
 
 static void
 ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompareFunc sort_func,
-                                    void* user_data, GDestroyNotify destroy)
+                                    void* user_data, GDestroyNotify destroy) noexcept
 {
     (void)sortable;
     (void)sort_func;
@@ -607,7 +590,7 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
 
 static i32
 compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list)
+                  ptk::file_list* list) noexcept
 {
     i32 result = 0;
     // by display name
@@ -633,7 +616,7 @@ compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_size(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list)
+                  ptk::file_list* list) noexcept
 {
     (void)list;
     return (a->size() > b->size()) ? 1 : ((a->size() == b->size()) ? 0 : -1);
@@ -641,7 +624,7 @@ compare_file_size(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list)
+                  ptk::file_list* list) noexcept
 {
     (void)list;
     return a->mime_type()->description().compare(b->mime_type()->description());
@@ -649,7 +632,7 @@ compare_file_type(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_mime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list)
+                  ptk::file_list* list) noexcept
 {
     (void)list;
     return a->mime_type()->description().compare(b->mime_type()->description());
@@ -657,7 +640,7 @@ compare_file_mime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_perm(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                  ptk::file_list* list)
+                  ptk::file_list* list) noexcept
 {
     (void)list;
     return a->display_permissions().compare(b->display_permissions());
@@ -665,7 +648,7 @@ compare_file_perm(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
 
 static i32
 compare_file_owner(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list)
+                   ptk::file_list* list) noexcept
 {
     (void)list;
     return a->display_owner().compare(b->display_owner());
@@ -673,7 +656,7 @@ compare_file_owner(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_group(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list)
+                   ptk::file_list* list) noexcept
 {
     (void)list;
     return a->display_group().compare(b->display_group());
@@ -681,7 +664,7 @@ compare_file_group(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_atime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list)
+                   ptk::file_list* list) noexcept
 {
     (void)list;
     return (a->atime() > b->atime()) ? 1 : ((a->atime() == b->atime()) ? 0 : -1);
@@ -689,7 +672,7 @@ compare_file_atime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_btime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list)
+                   ptk::file_list* list) noexcept
 {
     (void)list;
     return (a->btime() > b->btime()) ? 1 : ((a->btime() == b->btime()) ? 0 : -1);
@@ -697,7 +680,7 @@ compare_file_btime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_ctime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list)
+                   ptk::file_list* list) noexcept
 {
     (void)list;
     return (a->ctime() > b->ctime()) ? 1 : ((a->ctime() == b->ctime()) ? 0 : -1);
@@ -705,7 +688,7 @@ compare_file_ctime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vf
 
 static i32
 compare_file_mtime(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-                   ptk::file_list* list)
+                   ptk::file_list* list) noexcept
 {
     (void)list;
     return (a->mtime() > b->mtime()) ? 1 : ((a->mtime() == b->mtime()) ? 0 : -1);
@@ -716,7 +699,7 @@ using compare_function_t = std::function<i32(const std::shared_ptr<vfs::file>&,
 
 static i32
 compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::file>& b,
-             ptk::file_list* list, const compare_function_t& func)
+             ptk::file_list* list, const compare_function_t& func) noexcept
 {
     // dirs before/after files
     if (list->sort_dir_ != ptk::file_list::sort_dir::mixed)
@@ -734,7 +717,7 @@ compare_file(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs::fil
 }
 
 static GList*
-ptk_file_info_list_sort(ptk::file_list* list)
+ptk_file_info_list_sort(ptk::file_list* list) noexcept
 {
     assert(list->sort_col != ptk::file_list::column::big_icon);
     assert(list->sort_col != ptk::file_list::column::small_icon);

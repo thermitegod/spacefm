@@ -27,7 +27,7 @@
 #include "vfs/linux/procfs.hxx"
 
 const std::vector<vfs::linux::procfs::MountInfoEntry>
-vfs::linux::procfs::mountinfo()
+vfs::linux::procfs::mountinfo() noexcept
 {
     std::vector<MountInfoEntry> mounts;
 

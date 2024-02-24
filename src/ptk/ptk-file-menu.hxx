@@ -60,7 +60,7 @@ struct file_menu
     };
 
     file_menu() = default;
-    ~file_menu();
+    ~file_menu() noexcept;
     file_menu(const file_menu& other) = delete;
     file_menu(file_menu&& other) = delete;
     file_menu& operator=(const file_menu& other) = delete;
@@ -82,7 +82,7 @@ struct file_menu
 struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 {
     AutoOpenCreate() = delete;
-    AutoOpenCreate(ptk::browser* file_browser, bool open_file);
+    AutoOpenCreate(ptk::browser* file_browser, bool open_file) noexcept;
     ~AutoOpenCreate() = default;
     AutoOpenCreate(const AutoOpenCreate& other) = delete;
     AutoOpenCreate(AutoOpenCreate&& other) = delete;
@@ -95,23 +95,24 @@ struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
     GFunc callback{nullptr};
 };
 
-GtkWidget* ptk_file_menu_new(ptk::browser* browser,
-                             const std::span<const std::shared_ptr<vfs::file>> sel_files = {});
+GtkWidget*
+ptk_file_menu_new(ptk::browser* browser,
+                  const std::span<const std::shared_ptr<vfs::file>> sel_files = {}) noexcept;
 
 #if (GTK_MAJOR_VERSION == 4)
 void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
-                                       GtkEventController* accel_group);
+                                       GtkEventController* accel_group) noexcept;
 #elif (GTK_MAJOR_VERSION == 3)
 void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
-                                       GtkAccelGroup* accel_group);
+                                       GtkAccelGroup* accel_group) noexcept;
 #endif
 
-void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data);
+void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept;
 
-void ptk_file_menu_action(ptk::browser* browser, const xset_t& set);
+void ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept;
 
-void on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order);
-void on_popup_list_detailed(GtkMenuItem* menuitem, ptk::browser* browser);
-void on_popup_list_icons(GtkMenuItem* menuitem, ptk::browser* browser);
-void on_popup_list_compact(GtkMenuItem* menuitem, ptk::browser* browser);
-void on_popup_list_large(GtkMenuItem* menuitem, ptk::browser* browser);
+void on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order) noexcept;
+void on_popup_list_detailed(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
+void on_popup_list_icons(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
+void on_popup_list_compact(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
+void on_popup_list_large(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;

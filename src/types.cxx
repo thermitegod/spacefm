@@ -16,20 +16,20 @@
 #include "types.hxx"
 
 bool
-is_valid_panel(panel_t p)
+is_valid_panel(panel_t p) noexcept
 {
     return (p != INVALID_PANEL && (p == panel_1 || p == panel_2 || p == panel_3 || p == panel_4));
 }
 
 bool
-is_valid_panel_code(panel_t p)
+is_valid_panel_code(panel_t p) noexcept
 {
     return (p == panel_control_code_prev || p == panel_control_code_next ||
             p == panel_control_code_hide);
 }
 
 bool
-is_valid_tab(tab_t t)
+is_valid_tab(tab_t t) noexcept
 {
     return (t != INVALID_TAB &&
             (t == tab_1 || t == tab_2 || t == tab_3 || t == tab_4 || t == tab_5 || t == tab_6 ||
@@ -37,7 +37,7 @@ is_valid_tab(tab_t t)
 }
 
 bool
-is_valid_tab_code(tab_t t)
+is_valid_tab_code(tab_t t) noexcept
 {
     return (t == tab_control_code_prev || t == tab_control_code_next ||
             t == tab_control_code_close || t == tab_control_code_restore);

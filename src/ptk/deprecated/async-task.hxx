@@ -32,7 +32,7 @@
 
 struct async_task
 {
-    using function_t = void* (*)(async_task*, void*);
+    using function_t = void* (*)(async_task*, void*) noexcept;
 
     GObject parent;
 

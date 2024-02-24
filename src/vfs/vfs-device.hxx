@@ -31,7 +31,7 @@ namespace vfs
 struct device
 {
     device() = delete;
-    device(const libudev::device& udevice);
+    device(const libudev::device& udevice) noexcept;
     ~device() = default;
     device(const device& other) = delete;
     device(device&& other) = delete;

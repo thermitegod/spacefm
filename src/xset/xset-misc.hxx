@@ -24,6 +24,6 @@
 
 #include <ztd/ztd.hxx>
 
-GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size);
+GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size) noexcept;
 
-void xset_edit(GtkWidget* parent, const std::filesystem::path& path);
+void xset_edit(GtkWidget* parent, const std::filesystem::path& path) noexcept;

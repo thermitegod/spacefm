@@ -82,7 +82,7 @@
 // https://source.chromium.org/chromium/chromium/src/+/main:base/strings/utf_string_conversion_utils.cc
 
 size_t
-WriteUnicodeCharacter(i32 code_point, std::string* output)
+WriteUnicodeCharacter(i32 code_point, std::string* output) noexcept
 {
     if (code_point >= 0 && code_point <= 0x7f)
     {
@@ -112,7 +112,7 @@ WriteUnicodeCharacter(i32 code_point, std::string* output)
 
 bool
 ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& contents,
-                            size_t max_size)
+                            size_t max_size) noexcept
 {
     const auto fd = open(path.c_str(), O_RDONLY, 0);
     if (fd == -1)
@@ -152,7 +152,7 @@ using MimeTypeMap = std::unordered_map<std::string, WeightedMime>;
 // value that is a MIME type if a higher weighted mime is found that currently
 // exists. Returns true if there was a valid list parsed from the file and false
 // otherwise.
-bool ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_types);
+bool ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_types) noexcept;
 
 // https://source.chromium.org/chromium/chromium/src/+/main:base/nix/mime_util_xdg.cc
 
@@ -180,7 +180,7 @@ struct FileInfo
 
 // Load all mime cache files on the system.
 void
-LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files)
+LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files) noexcept
 {
     std::vector<std::filesystem::path> mime_cache_files;
 
@@ -210,7 +210,7 @@ LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files)
 // `max_result`. `field_name` is used in error message.
 bool
 ReadInt(const std::string& buf, uint32_t offset, const std::string& field_name, uint32_t min_result,
-        size_t max_result, uint32_t* result)
+        size_t max_result, uint32_t* result) noexcept
 {
     if (offset > buf.size() - 4 || (offset & 0x3))
     {
@@ -234,7 +234,7 @@ ReadInt(const std::string& buf, uint32_t offset, const std::string& field_name, 
 }
 
 bool
-ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_types)
+ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_types) noexcept
 {
     // File format from
     // https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-0.21.html#idm46070612075440

@@ -50,10 +50,10 @@ enum class app_chooser_column
     full_path,
 };
 
-static void* load_all_known_apps_thread(async_task* task);
+static void* load_all_known_apps_thread(async_task* task) noexcept;
 
 static void
-init_list_view(GtkTreeView* tree_view)
+init_list_view(GtkTreeView* tree_view) noexcept
 {
     GtkCellRenderer* renderer = nullptr;
     GtkTreeViewColumn* column = gtk_tree_view_column_new();
@@ -84,7 +84,7 @@ init_list_view(GtkTreeView* tree_view)
 }
 
 static i32
-sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
+sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -105,7 +105,7 @@ sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_dat
 }
 
 static void
-add_list_item(GtkListStore* list_store, const std::string_view path)
+add_list_item(GtkListStore* list_store, const std::string_view path) noexcept
 {
     GtkTreeIter iter;
 
@@ -162,7 +162,7 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
 
 static void
 on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* column,
-                      GtkWidget* dialog)
+                      GtkWidget* dialog) noexcept
 {
     (void)tree_view;
     (void)path;
@@ -177,7 +177,7 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
 }
 
 static void
-on_load_all_apps_finish(async_task* task, bool is_cancelled, GtkWidget* dialog)
+on_load_all_apps_finish(async_task* task, bool is_cancelled, GtkWidget* dialog) noexcept
 {
     GtkTreeModel* model = GTK_TREE_MODEL(task->user_data());
     if (is_cancelled)
@@ -208,7 +208,8 @@ on_load_all_apps_finish(async_task* task, bool is_cancelled, GtkWidget* dialog)
 }
 
 GtkWidget*
-init_associated_apps_tab(GtkWidget* dialog, const std::shared_ptr<vfs::mime_type>& mime_type)
+init_associated_apps_tab(GtkWidget* dialog,
+                         const std::shared_ptr<vfs::mime_type>& mime_type) noexcept
 {
     GtkScrolledWindow* scrolled_window =
         GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
@@ -259,7 +260,7 @@ init_associated_apps_tab(GtkWidget* dialog, const std::shared_ptr<vfs::mime_type
 }
 
 GtkWidget*
-init_all_apps_tab(GtkWidget* dialog)
+init_all_apps_tab(GtkWidget* dialog) noexcept
 {
     GtkScrolledWindow* scrolled_window =
         GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
@@ -325,7 +326,8 @@ init_all_apps_tab(GtkWidget* dialog)
 
 static GtkWidget*
 app_chooser_dialog(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
-                   bool focus_all_apps, bool show_command, bool show_default, bool dir_default)
+                   bool focus_all_apps, bool show_command, bool show_default,
+                   bool dir_default) noexcept
 {
     // focus_all_apps      Focus All Apps tab by default
     // show_command        Show custom Command entry
@@ -474,7 +476,7 @@ app_chooser_dialog(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mim
  * with ".desktop" postfix.
  */
 const std::optional<std::string>
-app_chooser_dialog_get_selected_app(GtkWidget* dialog)
+app_chooser_dialog_get_selected_app(GtkWidget* dialog) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(g_object_get_data(G_OBJECT(dialog), "entry_command"));
 
@@ -515,7 +517,7 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
  * Check if the user set the selected app default handler.
  */
 static bool
-app_chooser_dialog_get_set_default(GtkWidget* dialog)
+app_chooser_dialog_get_set_default(GtkWidget* dialog) noexcept
 {
     GtkToggleButton* btn =
         GTK_TOGGLE_BUTTON(g_object_get_data(G_OBJECT(dialog), "btn_set_as_default"));
@@ -524,7 +526,7 @@ app_chooser_dialog_get_set_default(GtkWidget* dialog)
 }
 
 static void
-on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
+on_dialog_response(GtkDialog* dialog, i32 id, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -548,7 +550,7 @@ on_dialog_response(GtkDialog* dialog, i32 id, void* user_data)
 const std::optional<std::string>
 ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,
                              bool focus_all_apps, bool show_command, bool show_default,
-                             bool dir_default)
+                             bool dir_default) noexcept
 {
     /*
     focus_all_apps      Focus All Apps tab by default
@@ -595,7 +597,8 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
 }
 
 static void
-load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list, async_task* task)
+load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list,
+                     async_task* task) noexcept
 {
     if (!std::filesystem::is_directory(dir_path))
     {
@@ -633,7 +636,7 @@ load_all_apps_in_dir(const std::filesystem::path& dir_path, GtkListStore* list, 
 }
 
 static void*
-load_all_known_apps_thread(async_task* task)
+load_all_known_apps_thread(async_task* task) noexcept
 {
     GtkListStore* list = GTK_LIST_STORE(task->user_data());
 

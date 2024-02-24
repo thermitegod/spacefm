@@ -46,8 +46,8 @@ struct monitor
         std::function<void(const vfs::monitor::event event, const std::filesystem::path& path)>;
 
     monitor() = delete;
-    monitor(const std::filesystem::path& path, const callback_t& callback);
-    ~monitor();
+    monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false);
+    ~monitor() noexcept;
     monitor(const monitor& other) = delete;
     monitor(monitor&& other) = delete;
     monitor& operator=(const monitor& other) = delete;

@@ -22,7 +22,7 @@
 #include "vfs/vfs-file.hxx"
 
 const std::vector<std::shared_ptr<vfs::file>>
-glist_to_vector_vfs_file(GList* list)
+glist_to_vector_vfs_file(GList* list) noexcept
 {
     std::vector<std::shared_ptr<vfs::file>> vec;
     vec.reserve(g_list_length(list));
@@ -34,7 +34,7 @@ glist_to_vector_vfs_file(GList* list)
 }
 
 GList*
-vector_to_glist_vfs_file(const std::span<const std::shared_ptr<vfs::file>> list)
+vector_to_glist_vfs_file(const std::span<const std::shared_ptr<vfs::file>> list) noexcept
 {
     GList* l = nullptr;
     for (const auto& file : list)

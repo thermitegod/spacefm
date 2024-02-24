@@ -21,7 +21,7 @@
 
 #if (GTK_MAJOR_VERSION == 4)
 
-i32 gtk_dialog_run(GtkDialog* dialog);
+i32 gtk_dialog_run(GtkDialog* dialog) noexcept;
 
 // TODO
 //  - rename accel_group to shortcut_controller or controller. reusing the old name to avoid even more #if blocks.
@@ -44,10 +44,10 @@ i32 gtk_dialog_run(GtkDialog* dialog);
 #if (GTK_MAJOR_VERSION == 3)
 
 // Fake gtk4 compat apis go here
-guint gdk_key_event_get_keyval(GdkEvent* event);
-GdkModifierType gdk_event_get_modifier_state(GdkEvent* event);
-guint gdk_button_event_get_button(GdkEvent* event);
-gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y);
+guint gdk_key_event_get_keyval(GdkEvent* event) noexcept;
+GdkModifierType gdk_event_get_modifier_state(GdkEvent* event) noexcept;
+guint gdk_button_event_get_button(GdkEvent* event) noexcept;
+gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y) noexcept;
 
 // clang-format off
 // #define gtk_box_prepend(box, child) (gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(child), false, false, 0))

@@ -77,7 +77,7 @@ vfs::mime_type::create_from_type(const std::string_view type) noexcept
     return vfs::mime_type::create(type);
 }
 
-vfs::mime_type::mime_type(const std::string_view type) : type_(type)
+vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
 {
     const auto icon_data = vfs::detail::mime_type::get_desc_icon(this->type_);
     this->description_ = icon_data[1];
@@ -93,7 +93,7 @@ vfs::mime_type::mime_type(const std::string_view type) : type_(type)
     }
 }
 
-vfs::mime_type::~mime_type()
+vfs::mime_type::~mime_type() noexcept
 {
     if (this->big_icon_)
     {

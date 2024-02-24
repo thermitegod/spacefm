@@ -32,7 +32,7 @@
 #include "xset/utils/xset-utils.hxx"
 
 const std::string
-xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod)
+xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod) noexcept
 {
     u32 keyval = 0;
     u32 keymod = 0;
@@ -87,7 +87,7 @@ xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod)
 }
 
 static bool
-on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
+on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -197,7 +197,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
 }
 
 void
-xset_set_key(GtkWidget* parent, const xset_t& set)
+xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
 {
     xset_t keyset;
 

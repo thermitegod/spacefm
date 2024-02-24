@@ -74,19 +74,20 @@
 #include "ptk/ptk-bookmark-view.hxx"
 
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
-                                           void* user_data);
+                                           void* user_data) noexcept;
 static bool on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y,
-                               std::time_t time, ptk::browser* file_browser);
+                               std::time_t time, ptk::browser* file_browser) noexcept;
 
-static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data);
+static bool on_main_window_keypress(MainWindow* main_window, GdkEvent* event,
+                                    void* user_data) noexcept;
 static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
-                                         MainWindow* main_window);
-static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data);
+                                         MainWindow* main_window) noexcept;
+static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 
-static void on_preference_activate(GtkMenuItem* menuitem, void* user_data);
-static void on_about_activate(GtkMenuItem* menuitem, void* user_data);
-static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window);
-static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window);
+static void on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
+static void on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
+static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window) noexcept;
+static void on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window) noexcept;
 
 static GtkApplicationWindowClass* parent_class = nullptr;
 
@@ -103,17 +104,19 @@ struct MainWindowClass
     GtkApplicationWindowClass parent;
 };
 
-static void main_window_class_init(MainWindowClass* klass);
-static void main_window_init(MainWindow* main_window);
-static void main_window_finalize(GObject* obj);
-static void main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec);
+static void main_window_class_init(MainWindowClass* klass) noexcept;
+static void main_window_init(MainWindow* main_window) noexcept;
+static void main_window_finalize(GObject* obj) noexcept;
+static void main_window_get_property(GObject* obj, u32 prop_id, GValue* value,
+                                     GParamSpec* pspec) noexcept;
 static void main_window_set_property(GObject* obj, u32 prop_id, const GValue* value,
-                                     GParamSpec* pspec);
-static gboolean main_window_delete_event(GtkWidget* widget, GdkEventAny* event);
-static gboolean main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event);
+                                     GParamSpec* pspec) noexcept;
+static gboolean main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept;
+static gboolean main_window_window_state_event(GtkWidget* widget,
+                                               GdkEventWindowState* event) noexcept;
 
 GType
-main_window_get_type()
+main_window_get_type() noexcept
 {
     static GType type = G_TYPE_INVALID;
     if (type == G_TYPE_INVALID)
@@ -139,7 +142,7 @@ main_window_get_type()
 }
 
 static void
-main_window_class_init(MainWindowClass* klass)
+main_window_class_init(MainWindowClass* klass) noexcept
 {
     GObjectClass* object_class = nullptr;
     GtkWidgetClass* widget_class = nullptr;
@@ -167,7 +170,7 @@ main_window_class_init(MainWindowClass* klass)
 }
 
 static void
-on_devices_show(GtkMenuItem* item, MainWindow* main_window)
+on_devices_show(GtkMenuItem* item, MainWindow* main_window) noexcept
 {
     (void)item;
     ptk::browser* file_browser = main_window->current_file_browser();
@@ -189,7 +192,7 @@ on_devices_show(GtkMenuItem* item, MainWindow* main_window)
 }
 
 static void
-on_open_url(GtkWidget* widget, MainWindow* main_window)
+on_open_url(GtkWidget* widget, MainWindow* main_window) noexcept
 {
     (void)widget;
     ptk::browser* file_browser = main_window->current_file_browser();
@@ -201,7 +204,7 @@ on_open_url(GtkWidget* widget, MainWindow* main_window)
 }
 
 static void
-on_find_file_activate(GtkMenuItem* menuitem, void* user_data)
+on_find_file_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -257,7 +260,7 @@ MainWindow::open_terminal() const noexcept
 }
 
 static void
-on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data)
+on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -265,14 +268,14 @@ on_open_terminal_activate(GtkMenuItem* menuitem, void* user_data)
 }
 
 static void
-on_quit_activate(GtkMenuItem* menuitem, void* user_data)
+on_quit_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     main_window_delete_event(GTK_WIDGET(user_data), nullptr);
 }
 
 void
-main_window_rubberband_all()
+main_window_rubberband_all() noexcept
 {
     for (MainWindow* window : global::all_windows)
     {
@@ -295,7 +298,7 @@ main_window_rubberband_all()
 }
 
 void
-main_window_refresh_all()
+main_window_refresh_all() noexcept
 {
     for (MainWindow* window : global::all_windows)
     {
@@ -320,7 +323,7 @@ MainWindow::update_window_icon() noexcept
 }
 
 void
-main_window_close_all_invalid_tabs()
+main_window_close_all_invalid_tabs() noexcept
 {
     // do all windows all panels all tabs
     for (MainWindow* window : global::all_windows)
@@ -342,7 +345,7 @@ main_window_close_all_invalid_tabs()
 }
 
 void
-main_window_refresh_all_tabs_matching(const std::filesystem::path& path)
+main_window_refresh_all_tabs_matching(const std::filesystem::path& path) noexcept
 {
     (void)path;
     // This function actually closes the tabs because refresh does not work.
@@ -353,7 +356,7 @@ main_window_refresh_all_tabs_matching(const std::filesystem::path& path)
 }
 
 void
-main_window_rebuild_all_toolbars(ptk::browser* file_browser)
+main_window_rebuild_all_toolbars(ptk::browser* file_browser) noexcept
 {
     // ztd::logger::info("main_window_rebuild_all_toolbars");
 
@@ -385,7 +388,7 @@ main_window_rebuild_all_toolbars(ptk::browser* file_browser)
 }
 
 void
-update_views_all_windows(GtkWidget* item, ptk::browser* file_browser)
+update_views_all_windows(GtkWidget* item, ptk::browser* file_browser) noexcept
 {
     (void)item;
     // ztd::logger::info("update_views_all_windows");
@@ -420,7 +423,7 @@ update_views_all_windows(GtkWidget* item, ptk::browser* file_browser)
 }
 
 void
-main_window_reload_thumbnails_all_windows()
+main_window_reload_thumbnails_all_windows() noexcept
 {
     // update all windows/all panels/all browsers
     for (MainWindow* window : global::all_windows)
@@ -446,7 +449,7 @@ main_window_reload_thumbnails_all_windows()
 }
 
 void
-main_window_toggle_thumbnails_all_windows()
+main_window_toggle_thumbnails_all_windows() noexcept
 {
     // toggle
     config::settings->show_thumbnail(!config::settings->show_thumbnail());
@@ -557,7 +560,7 @@ MainWindow::focus_panel(const panel_t panel) noexcept
 }
 
 static void
-on_focus_panel(GtkMenuItem* item, void* user_data)
+on_focus_panel(GtkMenuItem* item, void* user_data) noexcept
 {
     const panel_t panel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "panel"));
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -565,7 +568,7 @@ on_focus_panel(GtkMenuItem* item, void* user_data)
 }
 
 void
-show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window)
+show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window) noexcept
 {
     (void)item;
     // do this window first
@@ -891,7 +894,7 @@ MainWindow::show_panels() noexcept
 }
 
 static bool
-on_menu_bar_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
+on_menu_bar_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window) noexcept
 {
     (void)widget;
     (void)event;
@@ -900,7 +903,7 @@ on_menu_bar_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
 }
 
 static bool
-bookmark_menu_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
+bookmark_menu_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcept
 {
     (void)event;
     (void)user_data;
@@ -1184,7 +1187,7 @@ MainWindow::rebuild_menus() noexcept
 }
 
 static void
-main_window_init(MainWindow* main_window)
+main_window_init(MainWindow* main_window) noexcept
 {
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
@@ -1380,7 +1383,7 @@ main_window_init(MainWindow* main_window)
 }
 
 static void
-main_window_finalize(GObject* obj)
+main_window_finalize(GObject* obj) noexcept
 {
     std::ranges::remove(global::all_windows, MAIN_WINDOW_REINTERPRET(obj));
 
@@ -1392,7 +1395,7 @@ main_window_finalize(GObject* obj)
 }
 
 static void
-main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec)
+main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* pspec) noexcept
 {
     (void)obj;
     (void)prop_id;
@@ -1401,7 +1404,7 @@ main_window_get_property(GObject* obj, u32 prop_id, GValue* value, GParamSpec* p
 }
 
 static void
-main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec)
+main_window_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamSpec* pspec) noexcept
 {
     (void)obj;
     (void)prop_id;
@@ -1490,7 +1493,7 @@ MainWindow::store_positions() noexcept
 }
 
 static gboolean
-main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
+main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept
 {
     (void)event;
     // ztd::logger::info("main_window_delete_event");
@@ -1542,7 +1545,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event)
 }
 
 static gboolean
-main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
+main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event) noexcept
 {
     MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
 
@@ -1565,7 +1568,7 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event)
 }
 
 static bool
-notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser)
+notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser) noexcept
 {
     (void)widget;
     MainWindow* main_window = file_browser->main_window();
@@ -1618,19 +1621,19 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser)
 }
 
 void
-MainWindow::on_file_browser_before_chdir(ptk::browser* file_browser)
+MainWindow::on_file_browser_before_chdir(ptk::browser* file_browser) noexcept
 {
     file_browser->update_statusbar();
 }
 
 void
-MainWindow::on_file_browser_begin_chdir(ptk::browser* file_browser)
+MainWindow::on_file_browser_begin_chdir(ptk::browser* file_browser) noexcept
 {
     file_browser->update_statusbar();
 }
 
 void
-MainWindow::on_file_browser_after_chdir(ptk::browser* file_browser)
+MainWindow::on_file_browser_after_chdir(ptk::browser* file_browser) noexcept
 {
     // main_window_stop_busy_task( main_window );
 
@@ -1846,7 +1849,7 @@ MainWindow::current_file_browser() const noexcept
 }
 
 ptk::browser*
-main_window_get_current_file_browser()
+main_window_get_current_file_browser() noexcept
 {
     MainWindow* main_window = main_window_get_last_active();
     if (main_window == nullptr)
@@ -1867,7 +1870,7 @@ main_window_get_current_file_browser()
 }
 
 static void
-on_preference_activate(GtkMenuItem* menuitem, void* user_data)
+on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -1875,7 +1878,7 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data)
 }
 
 static void
-on_about_activate(GtkMenuItem* menuitem, void* user_data)
+on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -1915,7 +1918,7 @@ MainWindow::add_new_window() noexcept
 }
 
 static void
-on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
+on_new_window_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -1927,7 +1930,7 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data)
 }
 
 void
-set_panel_focus(MainWindow* main_window, ptk::browser* file_browser)
+set_panel_focus(MainWindow* main_window, ptk::browser* file_browser) noexcept
 {
     if (!file_browser && !main_window)
     {
@@ -1976,7 +1979,7 @@ MainWindow::fullscreen_activate() noexcept
 }
 
 static void
-on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window)
+on_fullscreen_activate(GtkMenuItem* menuitem, MainWindow* main_window) noexcept
 {
     (void)menuitem;
     main_window->fullscreen_activate();
@@ -2050,7 +2053,7 @@ MainWindow::set_window_title(ptk::browser* file_browser) noexcept
 }
 
 static void
-on_update_window_title(GtkMenuItem* item, MainWindow* main_window)
+on_update_window_title(GtkMenuItem* item, MainWindow* main_window) noexcept
 {
     (void)item;
     main_window->set_window_title(nullptr);
@@ -2058,7 +2061,7 @@ on_update_window_title(GtkMenuItem* item, MainWindow* main_window)
 
 static void
 on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
-                               void* user_data)
+                               void* user_data) noexcept
 {
     (void)page;
     MainWindow* main_window = MAIN_WINDOW(user_data);
@@ -2116,7 +2119,7 @@ MainWindow::open_network(const std::string_view url, const bool new_tab) const n
 
 void
 MainWindow::on_file_browser_open_item(ptk::browser* file_browser, const std::filesystem::path& path,
-                                      ptk::browser::open_action action)
+                                      ptk::browser::open_action action) noexcept
 {
     if (path.empty())
     {
@@ -2146,7 +2149,7 @@ MainWindow::get_panel_notebook(const panel_t panel) const noexcept
 }
 
 void
-MainWindow::on_file_browser_panel_change(ptk::browser* file_browser)
+MainWindow::on_file_browser_panel_change(ptk::browser* file_browser) noexcept
 {
     // ztd::logger::info("panel_change  panel {}", file_browser->mypanel);
     this->curpanel = file_browser->panel();
@@ -2155,14 +2158,14 @@ MainWindow::on_file_browser_panel_change(ptk::browser* file_browser)
 }
 
 void
-MainWindow::on_file_browser_sel_change(ptk::browser* file_browser)
+MainWindow::on_file_browser_sel_change(ptk::browser* file_browser) noexcept
 {
     // ztd::logger::info("sel_change  panel {}", file_browser->mypanel);
     file_browser->update_statusbar();
 }
 
 void
-MainWindow::on_file_browser_content_change(ptk::browser* file_browser)
+MainWindow::on_file_browser_content_change(ptk::browser* file_browser) noexcept
 {
     // ztd::logger::info("content_change  panel {}", file_browser->mypanel);
     file_browser->update_statusbar();
@@ -2170,7 +2173,7 @@ MainWindow::on_file_browser_content_change(ptk::browser* file_browser)
 
 static bool
 on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y, std::time_t time,
-                   ptk::browser* file_browser)
+                   ptk::browser* file_browser) noexcept
 {
     (void)widget;
     (void)drag_context;
@@ -2185,7 +2188,7 @@ on_tab_drag_motion(GtkWidget* widget, GdkDragContext* drag_context, i32 x, i32 y
 }
 
 static bool
-on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window)
+on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* main_window) noexcept
 {
     (void)widget;
     const auto type = gdk_event_get_event_type(event);
@@ -2307,7 +2310,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
 }
 
 static bool
-on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data)
+on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_data) noexcept
 {
     return main_window->keypress(event, user_data);
 }
@@ -2478,7 +2481,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
 }
 
 MainWindow*
-main_window_get_last_active()
+main_window_get_last_active() noexcept
 {
     if (!global::all_windows.empty())
     {
@@ -2488,13 +2491,13 @@ main_window_get_last_active()
 }
 
 const std::span<MainWindow*>
-main_window_get_all()
+main_window_get_all() noexcept
 {
     return global::all_windows;
 }
 
 static long
-get_desktop_index(GtkWindow* win)
+get_desktop_index(GtkWindow* win) noexcept
 {
 #if 1
     (void)win;
@@ -2576,7 +2579,7 @@ get_desktop_index(GtkWindow* win)
 }
 
 MainWindow*
-main_window_get_on_current_desktop()
+main_window_get_on_current_desktop() noexcept
 { // find the last used spacefm window on the current desktop
     const i64 cur_desktop = get_desktop_index(nullptr);
     // ztd::logger::info("current_desktop = {}", cur_desktop);

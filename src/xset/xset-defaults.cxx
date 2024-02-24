@@ -32,7 +32,7 @@ std::vector<xset_t> keysets;
 }
 
 void
-xset_defaults()
+xset_defaults() noexcept
 {
     xset_t set;
 
@@ -1738,7 +1738,7 @@ xset_defaults()
 }
 
 static void
-def_key(xset::name name, u32 key, u32 keymod)
+def_key(xset::name name, u32 key, u32 keymod) noexcept
 {
     const xset_t set = xset_get(name);
 
@@ -1763,7 +1763,7 @@ def_key(xset::name name, u32 key, u32 keymod)
 }
 
 void
-xset_default_keys()
+xset_default_keys() noexcept
 {
     // read all currently set or unset keys
     global::keysets.reserve(xsets.size());

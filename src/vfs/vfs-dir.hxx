@@ -45,8 +45,8 @@ namespace vfs
 struct dir : public std::enable_shared_from_this<dir>
 {
     dir() = delete;
-    dir(const std::filesystem::path& path);
-    ~dir();
+    dir(const std::filesystem::path& path) noexcept;
+    ~dir() noexcept;
     dir(const dir& other) = delete;
     dir(dir&& other) = delete;
     dir& operator=(const dir& other) = delete;
@@ -105,7 +105,8 @@ struct dir : public std::enable_shared_from_this<dir>
     concurrencpp::result<bool> load_thread() noexcept;
     concurrencpp::result<bool> refresh_thread() noexcept;
 
-    void on_monitor_event(const vfs::monitor::event event, const std::filesystem::path& path);
+    void on_monitor_event(const vfs::monitor::event event,
+                          const std::filesystem::path& path) noexcept;
 
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
@@ -156,7 +157,7 @@ struct dir : public std::enable_shared_from_this<dir>
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::file_created, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
         return this->evt_file_created.connect(fun);
@@ -164,7 +165,7 @@ struct dir : public std::enable_shared_from_this<dir>
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::file_changed, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
         return this->evt_file_changed.connect(fun);
@@ -172,7 +173,7 @@ struct dir : public std::enable_shared_from_this<dir>
 
     template<spacefm::signal evt, typename bind_fun>
     typename std::enable_if_t<evt == spacefm::signal::file_deleted, sigc::connection>
-    add_event(bind_fun fun)
+    add_event(bind_fun fun) noexcept
     {
         // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
         return this->evt_file_deleted.connect(fun);

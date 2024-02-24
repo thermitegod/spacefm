@@ -69,23 +69,24 @@ static constexpr i32 PANE_MAX_ICON_SIZE = 48;
 
 static GtkTreeModel* model = nullptr;
 
-static void ptk_location_view_init_model(GtkListStore* list);
+static void ptk_location_view_init_model(GtkListStore* list) noexcept;
 
 static void on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state,
-                            void* user_data);
+                            void* user_data) noexcept;
 
-static void add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon);
-static void remove_volume(const std::shared_ptr<vfs::volume>& vol);
-static void update_volume(const std::shared_ptr<vfs::volume>& vol);
+static void add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept;
+static void remove_volume(const std::shared_ptr<vfs::volume>& vol) noexcept;
+static void update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept;
 
-static bool on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data);
-static bool on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser);
+static bool on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexcept;
+static bool on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser) noexcept;
 
-static bool try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol);
+static bool try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept;
 
 static void on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
-                        GtkWidget* view2);
-static void on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2);
+                        GtkWidget* view2) noexcept;
+static void on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
+                    GtkWidget* view2) noexcept;
 
 namespace ptk::location_view
 {
@@ -101,8 +102,8 @@ enum class column
 struct AutoOpen
 {
     AutoOpen() = delete;
-    AutoOpen(ptk::browser* file_browser);
-    ~AutoOpen();
+    AutoOpen(ptk::browser* file_browser) noexcept;
+    ~AutoOpen() noexcept;
     AutoOpen(const AutoOpen& other) = delete;
     AutoOpen(AutoOpen&& other) = delete;
     AutoOpen& operator=(const AutoOpen& other) = delete;
@@ -116,9 +117,9 @@ struct AutoOpen
     ptk::browser::open_action job{ptk::browser::open_action::dir};
 };
 
-AutoOpen::AutoOpen(ptk::browser* file_browser) : file_browser(file_browser) {}
+AutoOpen::AutoOpen(ptk::browser* file_browser) noexcept : file_browser(file_browser) {}
 
-AutoOpen::~AutoOpen()
+AutoOpen::~AutoOpen() noexcept
 {
     if (this->device_file)
     {
@@ -130,14 +131,14 @@ AutoOpen::~AutoOpen()
     }
 }
 
-static bool volume_is_visible(const std::shared_ptr<vfs::volume>& vol);
-static void update_all();
+static bool volume_is_visible(const std::shared_ptr<vfs::volume>& vol) noexcept;
+static void update_all() noexcept;
 
 /*  Drag & Drop/Clipboard targets  */
 // static GtkTargetEntry drag_targets[] = {{utils::strdup("text/uri-list"), 0, 0}};
 
 static void
-on_model_destroy(void* data, GObject* object)
+on_model_destroy(void* data, GObject* object) noexcept
 {
     (void)data;
     vfs::volume_remove_callback(on_volume_event, (void*)object);
@@ -186,7 +187,7 @@ ptk::view::location::update_volume_icons() noexcept
 }
 
 static void
-update_change_detection()
+update_change_detection() noexcept
 {
     // update all windows/all panels/all browsers
     for (MainWindow* window : main_window_get_all())
@@ -214,7 +215,7 @@ update_change_detection()
 }
 
 static void
-update_all()
+update_all() noexcept
 {
     if (!model)
     {
@@ -260,7 +261,7 @@ update_all()
 }
 
 static void
-update_names()
+update_names() noexcept
 {
     std::shared_ptr<vfs::volume> v = nullptr;
     for (const auto& volume : vfs::volume_get_all_volumes())
@@ -341,7 +342,7 @@ ptk::view::location::selected_volume(GtkTreeView* location_view) noexcept
 
 static void
 on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* col,
-                 ptk::browser* file_browser)
+                 ptk::browser* file_browser) noexcept
 {
     (void)col;
     // ztd::logger::info("on_row_activated   view = {}", view);
@@ -429,7 +430,7 @@ ptk::view::location::open_block(const std::filesystem::path& block, const bool n
 }
 
 static void
-ptk_location_view_init_model(GtkListStore* list)
+ptk_location_view_init_model(GtkListStore* list) noexcept
 {
     (void)list;
 
@@ -518,7 +519,7 @@ ptk::view::location::create(ptk::browser* file_browser) noexcept
 
 static void
 on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::state state,
-                void* user_data)
+                void* user_data) noexcept
 {
     (void)user_data;
     switch (state)
@@ -547,7 +548,7 @@ on_volume_event(const std::shared_ptr<vfs::volume>& vol, const vfs::volume::stat
 }
 
 static void
-add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
+add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept
 {
     if (!volume_is_visible(vol))
     {
@@ -601,7 +602,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon)
 }
 
 static void
-remove_volume(const std::shared_ptr<vfs::volume>& vol)
+remove_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
 {
     if (!vol)
     {
@@ -625,7 +626,7 @@ remove_volume(const std::shared_ptr<vfs::volume>& vol)
 }
 
 static void
-update_volume(const std::shared_ptr<vfs::volume>& vol)
+update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
 {
     if (!vol)
     {
@@ -684,7 +685,7 @@ ptk::view::location::mount_network(ptk::browser* file_browser, const std::string
 }
 
 static void
-popup_missing_mount(GtkWidget* view, i32 job)
+popup_missing_mount(GtkWidget* view, i32 job) noexcept
 {
     std::string cmd;
     if (job == 0)
@@ -707,7 +708,7 @@ popup_missing_mount(GtkWidget* view, i32 job)
 }
 
 static void
-on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
     GtkWidget* view = nullptr;
     if (!item)
@@ -759,7 +760,7 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
 }
 
 static void
-on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
     GtkWidget* view = nullptr;
     if (!item)
@@ -802,7 +803,7 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
 }
 
 static void
-on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
     GtkWidget* view = nullptr;
     if (!item)
@@ -876,7 +877,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
 }
 
 static bool
-on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
+on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexcept
 {
     (void)task;
     // ztd::logger::info("on_autoopen_cb");
@@ -921,7 +922,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao)
 }
 
 static bool
-try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
+try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
 {
     if (!view || !vol)
     {
@@ -976,7 +977,7 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol)
 }
 
 static void
-on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
     ptk::browser* file_browser = nullptr;
     GtkWidget* view = nullptr;
@@ -1044,7 +1045,7 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
 }
 
 static void
-on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
     ptk::browser* file_browser = nullptr;
     GtkWidget* view = nullptr;
@@ -1126,7 +1127,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
 }
 
 static void
-on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
     std::string msg;
     GtkWidget* view = nullptr;
@@ -1164,7 +1165,8 @@ on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
 }
 
 static void
-on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2)
+on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
+                 GtkWidget* view2) noexcept
 {
     std::string msg;
     GtkWidget* view = nullptr;
@@ -1203,7 +1205,7 @@ on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, Gtk
 }
 
 static bool
-volume_is_visible(const std::shared_ptr<vfs::volume>& vol)
+volume_is_visible(const std::shared_ptr<vfs::volume>& vol) noexcept
 {
     // network
     if (vol->is_device_type(vfs::volume::device_type::network))
@@ -1329,7 +1331,7 @@ ptk::view::location::on_action(GtkWidget* view, const xset_t& set) noexcept
 static void
 show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
                   ptk::browser* file_browser, u32 button,
-                  const std::chrono::system_clock::time_point time_point)
+                  const std::chrono::system_clock::time_point time_point) noexcept
 {
     (void)button;
     (void)time_point;
@@ -1426,7 +1428,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
 }
 
 static bool
-on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
+on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexcept
 {
     (void)user_data;
     const std::shared_ptr<vfs::volume>& vol = nullptr;
@@ -1502,7 +1504,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data)
 }
 
 static bool
-on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser)
+on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser) noexcept
 {
     (void)w;
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
@@ -1525,7 +1527,7 @@ on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser)
 }
 
 static void
-on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
+on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu) noexcept
 {
     gtk_widget_set_sensitive(widget, true);
     gtk_menu_shell_deactivate(GTK_MENU_SHELL(dev_menu));
@@ -1533,7 +1535,7 @@ on_dev_menu_hide(GtkWidget* widget, GtkWidget* dev_menu)
 
 static void
 show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr<vfs::volume>& vol,
-                     u32 button, const std::chrono::system_clock::time_point time_point)
+                     u32 button, const std::chrono::system_clock::time_point time_point) noexcept
 {
     (void)dev_item;
     (void)time_point;
@@ -1641,7 +1643,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 }
 
 static bool
-on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
+on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data) noexcept
 {
     (void)user_data;
     GtkWidget* item = gtk_menu_shell_get_selected_item(GTK_MENU_SHELL(menu));
@@ -1670,7 +1672,8 @@ on_dev_menu_keypress(GtkWidget* menu, GdkEvent* event, void* user_data)
 }
 
 static bool
-on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr<vfs::volume>& vol)
+on_dev_menu_button_press(GtkWidget* item, GdkEvent* event,
+                         const std::shared_ptr<vfs::volume>& vol) noexcept
 {
     GtkWidget* menu = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "menu"));
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
@@ -1710,7 +1713,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event, const std::shared_ptr
 
 #if 0
 static i32
-cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::volume>& b)
+cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::volume>& b) noexcept
 {
     return a->display_name().compare(b->display_name());
 }

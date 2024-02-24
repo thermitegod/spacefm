@@ -38,7 +38,7 @@
 #include "xset/xset-dialog.hxx"
 
 const std::optional<std::string>
-multi_input_get_text(GtkWidget* input)
+multi_input_get_text(GtkWidget* input) noexcept
 { // returns a string or nullopt if input is empty
     if (!GTK_IS_TEXT_VIEW(input))
     {
@@ -59,7 +59,7 @@ multi_input_get_text(GtkWidget* input)
 }
 
 static void
-on_multi_input_insert(GtkTextBuffer* buf)
+on_multi_input_insert(GtkTextBuffer* buf) noexcept
 { // remove linefeeds from pasted text
     GtkTextIter iter;
     GtkTextIter siter;
@@ -115,7 +115,7 @@ on_multi_input_insert(GtkTextBuffer* buf)
 }
 
 GtkTextView*
-multi_input_new(GtkScrolledWindow* scrolled, const char* text)
+multi_input_new(GtkScrolledWindow* scrolled, const char* text) noexcept
 {
     GtkTextIter iter;
 
@@ -150,7 +150,7 @@ multi_input_new(GtkScrolledWindow* scrolled, const char* text)
 }
 
 static bool
-on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg)
+on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
 {
     (void)widget;
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -165,7 +165,7 @@ on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg)
 const std::tuple<bool, std::string>
 xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
                  const std::string_view msg2, const std::string_view defstring,
-                 const std::string_view defreset, bool edit_care)
+                 const std::string_view defreset, bool edit_care) noexcept
 {
     GtkTextIter iter;
     GtkTextIter siter;
@@ -363,7 +363,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
 const std::optional<std::filesystem::path>
 xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
                  const std::optional<std::filesystem::path>& deffolder,
-                 const std::optional<std::filesystem::path>& deffile)
+                 const std::optional<std::filesystem::path>& deffile) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
     (void)parent;

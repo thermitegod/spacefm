@@ -76,7 +76,7 @@ class PreferenceSection
     }
 
     void
-    new_split_vboxes(GtkBox** left_box, GtkBox** right_box)
+    new_split_vboxes(GtkBox** left_box, GtkBox** right_box) noexcept
     {
         *left_box = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 6));
         gtk_box_set_homogeneous(*left_box, false);
@@ -91,13 +91,13 @@ class PreferenceSection
     }
 
     GtkBox*
-    box()
+    box() noexcept
     {
         return box_;
     }
 
     GtkBox*
-    contentbox()
+    contentbox() noexcept
     {
         return content_box_;
     }
@@ -122,7 +122,7 @@ class PreferencePage
     }
 
     void
-    new_section(const std::string_view header)
+    new_section(const std::string_view header) noexcept
     {
         this->section_ = PreferenceSection(header);
 
@@ -130,7 +130,7 @@ class PreferencePage
     }
 
     void
-    add_row(GtkWidget* left_item, GtkWidget* right_item = nullptr)
+    add_row(GtkWidget* left_item, GtkWidget* right_item = nullptr) noexcept
     {
         if (GTK_IS_LABEL(left_item))
         {
@@ -155,7 +155,7 @@ class PreferencePage
     }
 
     GtkBox*
-    box()
+    box() noexcept
     {
         return this->box_;
     }
@@ -190,7 +190,7 @@ constexpr std::array<big_icon_sizes_data, 13> big_icon_sizes{{
 }};
 
 static void
-changed_cb(GtkComboBox* combobox, void* user_data)
+changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -237,7 +237,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 }
 
 GtkComboBox*
-create_combobox()
+create_combobox() noexcept
 {
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : big_icon_sizes)
@@ -301,7 +301,7 @@ constexpr std::array<small_icon_sizes_data, 15> small_icon_sizes{{
 }};
 
 static void
-changed_cb(GtkComboBox* combobox, void* user_data)
+changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -348,7 +348,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 }
 
 GtkComboBox*
-create_combobox()
+create_combobox() noexcept
 {
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : small_icon_sizes)
@@ -404,7 +404,7 @@ constexpr std::array<tool_icon_sizes_data, 7> tool_icon_sizes{{
 }};
 
 static void
-changed_cb(GtkComboBox* combobox, void* user_data)
+changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -425,7 +425,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 }
 
 GtkComboBox*
-create_combobox()
+create_combobox() noexcept
 {
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : tool_icon_sizes)
@@ -465,7 +465,7 @@ create_combobox()
 namespace preference::single_click
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool single_click = gtk_toggle_button_get_active(button);
@@ -491,7 +491,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->single_click();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -504,7 +504,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::hover_selects
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool single_hover = gtk_toggle_button_get_active(button);
@@ -532,7 +532,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->single_hover();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -545,7 +545,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::thumbnail_show
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool show_thumbnail = gtk_toggle_button_get_active(button);
@@ -560,7 +560,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->show_thumbnail();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -573,7 +573,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::thumbnail_size_limits
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -581,7 +581,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->thumbnail_size_limit();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -594,7 +594,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::thumbnailer_api
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -602,7 +602,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->thumbnailer_use_api();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -615,7 +615,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::thumbnail_max_size
 {
 void
-spinner_cb(GtkSpinButton* spinbutton, void* user_data)
+spinner_cb(GtkSpinButton* spinbutton, void* user_data) noexcept
 {
     (void)user_data;
     const double value = gtk_spin_button_get_value(spinbutton);
@@ -633,7 +633,7 @@ spinner_cb(GtkSpinButton* spinbutton, void* user_data)
 
 GtkSpinButton*
 create_pref_spinner(double scale, double lower, double upper, double step_incr, double page_incr,
-                    i32 digits)
+                    i32 digits) noexcept
 {
     const double value = config::settings->max_thumb_size() / scale;
 
@@ -652,7 +652,7 @@ create_pref_spinner(double scale, double lower, double upper, double step_incr, 
 namespace preference::show_tab_bar
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool always_show_tabs = gtk_toggle_button_get_active(button);
@@ -679,7 +679,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->always_show_tabs();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -692,7 +692,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::hide_close_tab
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool show_close_tab_buttons = gtk_toggle_button_get_active(button);
@@ -722,7 +722,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->show_close_tab_buttons();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -735,7 +735,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::confirm
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -743,7 +743,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->confirm();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -756,7 +756,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::confirm_trash
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -764,7 +764,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->confirm_trash();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -777,7 +777,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::confirm_delete
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -785,7 +785,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->confirm_delete();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -798,7 +798,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::si_prefix
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -808,7 +808,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->use_si_prefix();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -821,7 +821,7 @@ create_pref_check_button(const std::string_view label)
 namespace preference::click_executes
 {
 void
-check_button_cb(GtkToggleButton* button, void* user_data)
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
 {
     (void)user_data;
     const bool value = gtk_toggle_button_get_active(button);
@@ -829,7 +829,7 @@ check_button_cb(GtkToggleButton* button, void* user_data)
 }
 
 GtkCheckButton*
-create_pref_check_button(const std::string_view label)
+create_pref_check_button(const std::string_view label) noexcept
 {
     const bool value = config::settings->click_executes();
     GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
@@ -855,7 +855,7 @@ constexpr std::array<drag_actions_data, 4> drag_actions_new{{
 }};
 
 static void
-changed_cb(GtkComboBox* combobox, void* user_data)
+changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -879,7 +879,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 }
 
 GtkComboBox*
-create_combobox()
+create_combobox() noexcept
 {
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : drag_actions_new)
@@ -923,7 +923,7 @@ create_combobox()
 namespace preference::editor
 {
 static void
-pref_text_box_cb(GtkEntry* entry, const void* user_data)
+pref_text_box_cb(GtkEntry* entry, const void* user_data) noexcept
 {
     (void)user_data;
 
@@ -937,7 +937,7 @@ pref_text_box_cb(GtkEntry* entry, const void* user_data)
 }
 
 GtkEntry*
-create_pref_text_box()
+create_pref_text_box() noexcept
 {
     const auto editor = xset_get_s(xset::name::editor).value_or("");
 
@@ -957,7 +957,7 @@ create_pref_text_box()
 namespace preference::terminal
 {
 static void
-changed_cb(GtkComboBox* combobox, void* user_data)
+changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
 
@@ -983,7 +983,7 @@ changed_cb(GtkComboBox* combobox, void* user_data)
 }
 
 GtkComboBox*
-create_combobox()
+create_combobox() noexcept
 {
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     const auto terminals = terminal_handlers->get_supported_terminal_names();
@@ -1027,7 +1027,7 @@ create_combobox()
 /////////////////////////////////////////////////////////////////
 
 GtkWidget*
-init_general_tab()
+init_general_tab() noexcept
 {
     auto page = PreferencePage();
 
@@ -1070,7 +1070,7 @@ init_general_tab()
 }
 
 GtkWidget*
-init_interface_tab()
+init_interface_tab() noexcept
 {
     auto page = PreferencePage();
 
@@ -1112,7 +1112,7 @@ init_interface_tab()
 }
 
 GtkWidget*
-init_advanced_tab()
+init_advanced_tab() noexcept
 {
     auto page = PreferencePage();
 
@@ -1130,7 +1130,7 @@ init_advanced_tab()
 }
 
 void
-on_response(GtkWidget* widget, void* user_data)
+on_response(GtkWidget* widget, void* user_data) noexcept
 {
     (void)user_data;
     GtkWidget* dialog = GTK_WIDGET(gtk_widget_get_ancestor(widget, GTK_TYPE_DIALOG));

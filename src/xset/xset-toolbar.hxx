@@ -27,11 +27,11 @@
 #include "xset/xset.hxx"
 
 void xset_fill_toolbar(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar,
-                       const xset_t& set_parent, bool show_tooltips);
+                       const xset_t& set_parent, bool show_tooltips) noexcept;
 
-const std::string xset_get_builtin_toolitem_label(xset::tool tool_type);
-const xset_t xset_new_builtin_toolitem(xset::tool tool_type);
-void xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event);
+const std::string xset_get_builtin_toolitem_label(xset::tool tool_type) noexcept;
+const xset_t xset_new_builtin_toolitem(xset::tool tool_type) noexcept;
+void xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event) noexcept;
 
 struct builtin_tool_data
 {

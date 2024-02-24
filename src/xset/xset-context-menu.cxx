@@ -46,11 +46,11 @@
 #if (GTK_MAJOR_VERSION == 4)
 void
 xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
-              const std::vector<xset::name>& submenu_entries)
+              const std::vector<xset::name>& submenu_entries) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 void
 xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-              const std::vector<xset::name>& submenu_entries)
+              const std::vector<xset::name>& submenu_entries) noexcept
 #endif
 {
     if (submenu_entries.empty())
@@ -66,7 +66,7 @@ xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_
 }
 
 static GtkWidget*
-xset_new_menuitem(const std::string_view label, const std::string_view icon)
+xset_new_menuitem(const std::string_view label, const std::string_view icon) noexcept
 {
     (void)icon;
 
@@ -94,11 +94,11 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon)
 #if (GTK_MAJOR_VERSION == 4)
 GtkWidget*
 xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
-                  const xset_t& set)
+                  const xset_t& set) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
 xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
-                  const xset_t& set)
+                  const xset_t& set) noexcept
 #endif
 {
     GtkWidget* item = nullptr;
@@ -314,7 +314,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
 }
 
 void
-xset_menu_cb(GtkWidget* item, const xset_t& set)
+xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
 {
     GFunc cb_func = nullptr;
     void* cb_data = nullptr;
