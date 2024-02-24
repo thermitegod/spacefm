@@ -308,7 +308,6 @@ main(int argc, char* argv[])
     std::atexit(tmp_clean);
     std::atexit(autosave_terminate);
     std::atexit(vfs::volume_finalize);
-    std::atexit(single_instance_finalize);
     std::atexit(save_bookmarks);
 
     GtkApplication* app =

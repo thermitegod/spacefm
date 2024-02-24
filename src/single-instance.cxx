@@ -13,15 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <format>
 
 #include <filesystem>
 
 #include <fstream>
 
-#include <signal.h>
+#include <csignal>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -33,25 +31,35 @@
 #include "single-instance.hxx"
 
 static const std::filesystem::path
-get_pid_path() noexcept
+pid_path() noexcept
 {
     return vfs::user::runtime() / std::format("{}.pid", PACKAGE_NAME);
 }
 
 static bool
-is_process_running(pid_t pid) noexcept
+is_process_running(const pid_t pid) noexcept
 {
     // could add another check here to make sure pid has
     // not been reissued in case of a stale pid file.
-    return (::kill(pid, 0) == 0);
+    return (kill(pid, 0) == 0);
+}
+
+static void
+single_instance_finalize() noexcept
+{
+    const auto path = pid_path();
+    if (std::filesystem::exists(path))
+    {
+        std::filesystem::remove(path);
+    }
 }
 
 bool
 single_instance_check() noexcept
 {
-    const auto pid_path = get_pid_path();
+    const auto path = pid_path();
 
-    std::ifstream pid_file(pid_path);
+    std::ifstream pid_file(path);
     if (pid_file)
     {
         pid_t pid = 0;
@@ -64,19 +72,9 @@ single_instance_check() noexcept
         }
     }
 
-    // use std::to_string to avoid locale formating of pid
-    // from '12345' -> '12,345'
-    ::utils::write_file(pid_path, std::format("{}", ::getpid()));
+    std::atexit(single_instance_finalize);
+
+    ::utils::write_file(path, std::format("{}", ::getpid()));
 
     return true;
-}
-
-void
-single_instance_finalize() noexcept
-{
-    const auto pid_path = get_pid_path();
-    if (std::filesystem::exists(pid_path))
-    {
-        std::filesystem::remove(pid_path);
-    }
 }

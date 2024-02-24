@@ -16,4 +16,3 @@
 #pragma once
 
 [[nodiscard]] bool single_instance_check() noexcept;
-void single_instance_finalize() noexcept;
