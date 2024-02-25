@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 Brandon Zorn <brandonzorn@cock.li>
+ * Copyright (C) 2024 Brandon Zorn <brandonzorn@cock.li>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

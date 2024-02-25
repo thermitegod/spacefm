@@ -13,7 +13,7 @@ project(
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 
-incdir = include_directories(['../src', 'src'])
+incdir = include_directories(['src', 'spacefm'])
 
 package = meson.project_name()
 version = meson.project_version()
@@ -145,6 +145,16 @@ endif
 add_global_arguments(flags, language: ['c', 'cpp'])
 add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
+## preprocessor
+
+preprocessor = [
+  '-DZTD_VERSION=2',
+]
+
+foreach a : preprocessor
+  add_project_arguments(a, language : ['c', 'cpp'])
+endforeach
+
 ## dependencies
 
 # ztd use system or subproject
@@ -235,10 +245,19 @@ dependencies = [
 
 ## Source files
 
-sources = files(
+sources = files()
+
+# Spacefm Source Files
+sources += files(
+  'spacefm/ptk/natsort/strnatcmp.c',
+)
+
+# Test Source Files
+sources += files(
   'src/main.cxx',
 
   # PTK
+  'src/ptk/natsort/natsort_test.cxx',
 
   # VFS
 )
