@@ -38,5 +38,9 @@ show_about_dialog(GtkWindow* parent)
     dialog.set_license_type(Gtk::License::LICENSE_GPL_3_0);
 #endif
 
+#if (GTK_MAJOR_VERSION == 4)
+    // TODO
+#elif (GTK_MAJOR_VERSION == 3)
     dialog.run();
+#endif
 }

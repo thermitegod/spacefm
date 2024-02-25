@@ -168,7 +168,12 @@ on_view_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColu
     (void)path;
     (void)column;
     GtkButton* btn = GTK_BUTTON(g_object_get_data(G_OBJECT(dialog), "btn_ok"));
+#if (GTK_MAJOR_VERSION == 4)
+    // TODO
+    (void)btn;
+#elif (GTK_MAJOR_VERSION == 3)
     gtk_button_clicked(btn);
+#endif
 }
 
 static void

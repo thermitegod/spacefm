@@ -117,14 +117,24 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data)
     {
         if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
         {
+#if (GTK_MAJOR_VERSION == 4)
+            // TODO
+            (void)btn_unset;
+#elif (GTK_MAJOR_VERSION == 3)
             // user pressed Enter after selecting a key, so click Set
             gtk_button_clicked(btn_set);
+#endif
             return true;
         }
         else if (keyval == GDK_KEY_Escape && *newkey == GDK_KEY_Escape)
         {
+#if (GTK_MAJOR_VERSION == 4)
+            // TODO
+            (void)btn_unset;
+#elif (GTK_MAJOR_VERSION == 3)
             // user pressed Escape twice so click Unset
             gtk_button_clicked(btn_unset);
+#endif
             return true;
         }
     }
