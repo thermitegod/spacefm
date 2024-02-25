@@ -36,10 +36,9 @@
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-
 #include "vfs/vfs-async-task.hxx"
 
-#include "ptk/natsort/strnatcmp.h"
+#include "ptk/natsort/strnatcmp.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 

@@ -1,5 +1,4 @@
-/* -*- mode: c; c-file-style: "k&r" -*-
-
+/*
   strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
   Copyright (C) 2000, 2004 by Martin Pool <mbp sourcefrog net>
 
@@ -20,19 +19,9 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <string_view>
 
-/* CUSTOMIZATION SECTION
- *
- * You can change this typedef, but must then also change the inline
- * functions in strnatcmp.c */
-typedef char nat_char;
+#include <ztd/ztd.hxx>
 
-int strnatcmp(nat_char const *a, nat_char const *b);
-int strnatcasecmp(nat_char const *a, nat_char const *b);
-
-#ifdef __cplusplus
-}
-#endif
+[[nodiscard]] i32 strnatcmp(const std::string_view a, const std::string_view b) noexcept;
+[[nodiscard]] i32 strnatcasecmp(const std::string_view a, const std::string_view b) noexcept;

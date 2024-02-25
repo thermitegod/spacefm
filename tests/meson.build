@@ -249,7 +249,7 @@ sources = files()
 
 # Spacefm Source Files
 sources += files(
-  'spacefm/ptk/natsort/strnatcmp.c',
+  'spacefm/ptk/natsort/strnatcmp.cxx',
 )
 
 # Test Source Files

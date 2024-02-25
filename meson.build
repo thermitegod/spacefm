@@ -425,7 +425,7 @@ sources += files(
 
   'src/ptk/utils/ptk-utils.cxx',
 
-  'src/ptk/natsort/strnatcmp.c',
+  'src/ptk/natsort/strnatcmp.cxx',
 
   'src/vfs/vfs-app-desktop.cxx',
   'src/vfs/vfs-async-task.cxx',

@@ -32,7 +32,7 @@
 
 #include "vfs/vfs-file.hxx"
 
-#include "ptk/natsort/strnatcmp.h"
+#include "ptk/natsort/strnatcmp.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-file-list.hxx"
@@ -616,11 +616,11 @@ compare_file_name(const std::shared_ptr<vfs::file>& a, const std::shared_ptr<vfs
         // natural
         if (list->sort_case)
         {
-            result = strnatcmp(a->name().data(), b->name().data());
+            result = strnatcmp(a->name(), b->name());
         }
         else
         {
-            result = strnatcasecmp(a->name().data(), b->name().data());
+            result = strnatcasecmp(a->name(), b->name());
         }
     }
     else

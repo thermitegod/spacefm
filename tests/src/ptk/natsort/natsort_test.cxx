@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "spacefm/ptk/natsort/strnatcmp.h"
+#include "spacefm/ptk/natsort/strnatcmp.hxx"
 
 #include "test_data.hxx"
 
@@ -28,7 +28,7 @@ TEST(natsort, dates)
     auto unsorted = data::dates::unsorted;
     auto sorted = data::dates::sorted;
 
-    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a.data(), b.data()) < 0; });
+    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a, b) < 0; });
 
     EXPECT_EQ(unsorted, sorted);
 }
@@ -38,7 +38,7 @@ TEST(natsort, fractions)
     auto unsorted = data::fractions::unsorted;
     auto sorted = data::fractions::sorted;
 
-    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a.data(), b.data()) < 0; });
+    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a, b) < 0; });
 
     EXPECT_EQ(unsorted, sorted);
 }
@@ -48,7 +48,7 @@ TEST(natsort, words)
     auto unsorted = data::words::unsorted;
     auto sorted = data::words::sorted;
 
-    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a.data(), b.data()) < 0; });
+    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a, b) < 0; });
 
     EXPECT_EQ(unsorted, sorted);
 }
@@ -58,7 +58,7 @@ TEST(natsort, simple_names)
     auto unsorted = data::simple_names::unsorted;
     auto sorted = data::simple_names::sorted;
 
-    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a.data(), b.data()) < 0; });
+    std::ranges::sort(unsorted, [](auto a, auto b) { return strnatcmp(a, b) < 0; });
 
     EXPECT_EQ(unsorted, sorted);
 }

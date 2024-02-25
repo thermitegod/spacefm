@@ -40,7 +40,7 @@
 #include "vfs/vfs-file.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
-#include "ptk/natsort/strnatcmp.h"
+#include "ptk/natsort/strnatcmp.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-dir-tree.hxx"
@@ -525,7 +525,7 @@ ptk::dir_tree::node_compare(const std::shared_ptr<ptk::dir_tree::node>& a,
     {
         return 0;
     }
-    return strnatcasecmp(file2->name().data(), file1->name().data());
+    return strnatcasecmp(file2->name(), file1->name());
 }
 
 void
