@@ -186,7 +186,7 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
 {
     (void)user_data;
 
-    char* name = nullptr;
+    g_autofree char* name = nullptr;
     GtkTreeModel* model = gtk_entry_completion_get_model(completion);
 
     key = (const char*)g_object_get_data(G_OBJECT(completion), "fn");
@@ -199,11 +199,8 @@ match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it, voi
 
     if (*key == 0 || g_ascii_strncasecmp(name, key, std::strlen(key)) == 0)
     {
-        std::free(name);
         return true;
     }
-
-    std::free(name);
     return false;
 }
 
@@ -443,14 +440,13 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
 {
     (void)completion;
 
-    char* c_path = nullptr;
+    g_autofree char* c_path = nullptr;
     gtk_tree_model_get(model, iter, ptk::path_entry::column::path, &c_path, -1);
     if (!(c_path && c_path[0]))
     {
         return true;
     }
     const std::filesystem::path path = c_path;
-    std::free(c_path);
 
     g_signal_handlers_block_matched(G_OBJECT(entry),
                                     GSignalMatchType::G_SIGNAL_MATCH_FUNC,

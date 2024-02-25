@@ -262,7 +262,7 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
     i32 n_targets = 0;
 
     gtk_target_list_add_text_targets(target_list, 0);
-    GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
+    g_autofree GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
     n_targets += 2;
     targets = g_renew(GtkTargetEntry, targets, n_targets);
     GtkTargetEntry* new_target = g_new0(GtkTargetEntry, 1);
@@ -288,8 +288,6 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
                                 clipboard_clean_data,
                                 nullptr);
 
-    std::free(targets);
-
     clipboard_file_list = file_list;
     clipboard_action = copy ? GdkDragAction::GDK_ACTION_COPY : GdkDragAction::GDK_ACTION_MOVE;
 }
@@ -302,7 +300,7 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> sel_fil
     i32 n_targets = 0;
 
     gtk_target_list_add_text_targets(target_list, 0);
-    GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
+    g_autofree GtkTargetEntry* targets = gtk_target_table_new_from_list(target_list, &n_targets);
     n_targets += 2;
     targets = g_renew(GtkTargetEntry, targets, n_targets);
     GtkTargetEntry* new_target = g_new0(GtkTargetEntry, 1);
@@ -329,7 +327,6 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> sel_fil
                                 clipboard_get_data,
                                 clipboard_clean_data,
                                 nullptr);
-    std::free(targets);
 
     clipboard_file_list = file_list;
     clipboard_action = copy ? GdkDragAction::GDK_ACTION_COPY : GdkDragAction::GDK_ACTION_MOVE;

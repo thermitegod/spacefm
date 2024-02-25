@@ -1627,13 +1627,12 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             return {SOCKET_INVALID, std::format("invalid task property '{}'", property)};
         }
-        char* str2 = nullptr;
+        g_autofree char* str2 = nullptr;
         gtk_tree_model_get(model, &it, j, &str2, -1);
         if (str2)
         {
             return {SOCKET_SUCCESS, std::format("{}", str2)};
         }
-        std::free(str2);
     }
     else if (command == "run-task")
     { // TYPE [OPTIONS] ...

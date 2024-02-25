@@ -1656,16 +1656,15 @@ ptk::file_task::update() noexcept
     {
         GtkTextIter iter;
         GtkTextIter siter;
-        char* text = nullptr;
         // get add_log text and delete
         gtk_text_buffer_get_start_iter(this->task->add_log_buf, &siter);
         gtk_text_buffer_get_iter_at_mark(this->task->add_log_buf, &iter, this->task->add_log_end);
-        text = gtk_text_buffer_get_text(this->task->add_log_buf, &siter, &iter, false);
+        g_autofree char* text =
+            gtk_text_buffer_get_text(this->task->add_log_buf, &siter, &iter, false);
         gtk_text_buffer_delete(this->task->add_log_buf, &siter, &iter);
         // insert into log
         gtk_text_buffer_get_iter_at_mark(this->log_buf_, &iter, this->log_end_);
         gtk_text_buffer_insert(this->log_buf_, &iter, text, -1);
-        std::free(text);
         this->log_appended_ = true;
 
         // trim log ?  (less than 64K and 800 lines)

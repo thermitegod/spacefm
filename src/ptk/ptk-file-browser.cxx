@@ -1877,7 +1877,7 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTre
     {
         const bool end = ztd::endswith(key, "$");
         bool start = !end && (key.size() < 3);
-        char* key2 = ::utils::strdup(key);
+        g_autofree char* key2 = ::utils::strdup(key);
         char* keyp = key2;
         if (key[0] == '^')
         {
@@ -1904,7 +1904,6 @@ folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTre
         {
             no_match = !name.contains(key);
         }
-        std::free(key2);
     }
     return no_match; // return false for match
 }

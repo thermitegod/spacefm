@@ -1200,17 +1200,16 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
 
     gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
     gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
-    char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
+    g_autofree char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
-    std::free(path);
 
     if (mode_default != file_misc_mode::parent)
     {
         gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        path = gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), path);
-        std::free(path);
+        g_autofree char* filename =
+            gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
+        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), filename);
     }
 
     gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
@@ -1285,25 +1284,27 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
             {
                 case file_misc_mode::filename:
                 {
-                    path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-                    const auto name = std::filesystem::path(path).filename();
+                    g_autofree char* filename =
+                        gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+                    const auto name = std::filesystem::path(filename).filename();
                     gtk_text_buffer_set_text(mset->buf_full_name, name.c_str(), -1);
                     break;
                 }
                 case file_misc_mode::parent:
                 {
-                    path = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dlg));
-                    gtk_text_buffer_set_text(mset->buf_path, path, -1);
+                    g_autofree char* filename =
+                        gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dlg));
+                    gtk_text_buffer_set_text(mset->buf_path, filename, -1);
                     break;
                 }
                 case file_misc_mode::path:
                 {
-                    path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-                    gtk_text_buffer_set_text(mset->buf_full_path, path, -1);
+                    g_autofree char* filename =
+                        gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
+                    gtk_text_buffer_set_text(mset->buf_full_path, filename, -1);
                     break;
                 }
             }
-            std::free(path);
             break;
         }
     }
@@ -1371,12 +1372,12 @@ on_opt_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset)
         GtkTextIter siter;
         gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
         gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-        char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
+        g_autofree char* full_path =
+            gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
         const auto new_path = std::filesystem::path(full_path).parent_path();
 
         const bool rename = (std::filesystem::equivalent(mset->old_path, new_path) ||
                              std::filesystem::equivalent(new_path, "."));
-        std::free(full_path);
 
         if (move)
         {
@@ -2020,9 +2021,8 @@ copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
     GtkTextIter siter;
     gtk_text_buffer_get_start_iter(buf, &siter);
     gtk_text_buffer_get_end_iter(buf, &iter);
-    char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
+    g_autofree char* text = gtk_text_buffer_get_text(buf, &siter, &iter, false);
     gtk_clipboard_set_text(clip, text, -1);
-    std::free(text);
 #endif
 }
 

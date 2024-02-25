@@ -87,19 +87,19 @@ static i32
 sort_by_name(GtkTreeModel* model, GtkTreeIter* a, GtkTreeIter* b, void* user_data)
 {
     (void)user_data;
-    char* name_a = nullptr;
+
     i32 ret = 0;
+
+    g_autofree char* name_a = nullptr;
     gtk_tree_model_get(model, a, app_chooser_column::app_name, &name_a, -1);
     if (name_a)
     {
-        char* name_b = nullptr;
+        g_autofree char* name_b = nullptr;
         gtk_tree_model_get(model, b, app_chooser_column::app_name, &name_b, -1);
         if (name_b)
         {
             ret = strnatcasecmp(name_a, name_b);
-            std::free(name_b);
         }
-        std::free(name_a);
     }
     return ret;
 }
@@ -114,7 +114,7 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
     {
         do
         {
-            char* file = nullptr;
+            g_autofree char* file = nullptr;
             gtk_tree_model_get(GTK_TREE_MODEL(list_store),
                                &iter,
                                app_chooser_column::desktop_file,
@@ -126,10 +126,8 @@ add_list_item(GtkListStore* list_store, const std::string_view path)
                 if (file == desktop->name())
                 {
                     // already exists
-                    std::free(file);
                     return;
                 }
-                std::free(file);
             }
         } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(list_store), &iter));
     }
@@ -498,13 +496,11 @@ app_chooser_dialog_get_selected_app(GtkWidget* dialog)
     GtkTreeIter it;
     if (gtk_tree_selection_get_selected(selection, &model, &it))
     {
-        char* c_app = nullptr;
+        g_autofree char* c_app = nullptr;
         gtk_tree_model_get(model, &it, app_chooser_column::desktop_file, &c_app, -1);
         if (c_app != nullptr)
         {
-            const std::string selected_app = c_app;
-            std::free(c_app);
-            return selected_app;
+            return std::string(c_app);
         }
     }
 
