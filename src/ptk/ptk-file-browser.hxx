@@ -93,7 +93,7 @@ struct browser
     std::shared_ptr<vfs::dir> dir_{nullptr};
     GtkTreeModel* file_list_{nullptr};
     u32 max_thumbnail_{0};
-    u64 n_sel_files_{0};
+    u64 n_selected_files_{0};
     u64 sel_size_{0};
     u64 sel_disk_size_{0};
     u32 sel_change_idle_{0};

@@ -43,25 +43,26 @@
 // https://docs.gtk.org/gtk4/migrating-3to4.html#replace-gtkclipboard-with-gdkclipboard
 
 void
-ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> sel_files,
+ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                                   bool copy) noexcept
 {
-    (void)sel_files;
+    (void)selected_files;
     (void)copy;
     ztd::logger::debug("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+ptk::clipboard::copy_as_text(
+    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
-    (void)sel_files;
+    (void)selected_files;
     ztd::logger::debug("TODO - PORT - GdkClipboard");
 }
 
 void
-ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
-    (void)sel_files;
+    (void)selected_files;
     ztd::logger::debug("TODO - PORT - GdkClipboard");
 }
 
@@ -111,10 +112,10 @@ ptk::clipboard::copy_text(const std::string_view text) noexcept
 }
 
 void
-ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> sel_files,
+ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selected_files,
                                       bool copy) noexcept
 {
-    (void)sel_files;
+    (void)selected_files;
     (void)copy;
     ztd::logger::debug("TODO - PORT - GdkClipboard");
 }
@@ -217,13 +218,14 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data) noexcept
 }
 
 void
-ptk::clipboard::copy_as_text(const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+ptk::clipboard::copy_as_text(
+    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 { // aka copy path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (const auto& file : sel_files)
+    for (const auto& file : selected_files)
     {
         const auto quoted = ::utils::shell_quote(file->path().string());
         file_text = std::format("{} {}", file_text, quoted);
@@ -233,13 +235,13 @@ ptk::clipboard::copy_as_text(const std::span<const std::shared_ptr<vfs::file>> s
 }
 
 void
-ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkClipboard* clip_primary = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
     std::string file_text;
-    for (const auto& file : sel_files)
+    for (const auto& file : selected_files)
     {
         file_text = std::format("{}{}\n", file_text, file->name());
     }
@@ -259,7 +261,7 @@ ptk::clipboard::copy_text(const std::string_view text) noexcept
 }
 
 void
-ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> sel_files,
+ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::file>> selected_files,
                                   bool copy) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -280,8 +282,8 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
     gtk_target_list_unref(target_list);
 
     std::vector<std::filesystem::path> file_list;
-    file_list.reserve(sel_files.size());
-    for (const auto& file : sel_files)
+    file_list.reserve(selected_files.size());
+    for (const auto& file : selected_files)
     {
         file_list.push_back(file->path());
     }
@@ -298,7 +300,7 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
 }
 
 void
-ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> sel_files,
+ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selected_files,
                                       bool copy) noexcept
 {
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -319,7 +321,7 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> sel_fil
     gtk_target_list_unref(target_list);
 
     std::vector<std::filesystem::path> file_list;
-    for (const auto& file : sel_files)
+    for (const auto& file : selected_files)
     {
         if (std::filesystem::path(file).is_absolute())
         {

@@ -33,7 +33,7 @@
 
 #include "vfs/vfs-file.hxx"
 
-/* sel_files is a list containing vfs::file structures
+/* selected_files is a list containing vfs::file structures
  * The list will be freed in this function, so the caller must not
  * free the list after calling this function.
  */
@@ -70,7 +70,7 @@ struct file_menu
     std::filesystem::path cwd;
     std::filesystem::path file_path;
     std::shared_ptr<vfs::file> file{nullptr};
-    std::vector<std::shared_ptr<vfs::file>> sel_files;
+    std::vector<std::shared_ptr<vfs::file>> selected_files;
 #if (GTK_MAJOR_VERSION == 4)
     GtkEventController* accel_group{nullptr};
 #elif (GTK_MAJOR_VERSION == 3)
@@ -97,7 +97,7 @@ struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 
 GtkWidget*
 ptk_file_menu_new(ptk::browser* browser,
-                  const std::span<const std::shared_ptr<vfs::file>> sel_files = {}) noexcept;
+                  const std::span<const std::shared_ptr<vfs::file>> selected_files = {}) noexcept;
 
 #if (GTK_MAJOR_VERSION == 4)
 void ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,

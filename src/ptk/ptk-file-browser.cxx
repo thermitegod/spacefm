@@ -1300,7 +1300,7 @@ ptk::browser::update_model() noexcept
 void
 ptk::browser::on_dir_file_listed() noexcept
 {
-    this->n_sel_files_ = 0;
+    this->n_selected_files_ = 0;
 
     this->signal_file_created.disconnect();
     this->signal_file_deleted.disconnect();
@@ -1381,7 +1381,7 @@ on_folder_view_item_sel_change_idle(ptk::browser* file_browser) noexcept
         return false;
     }
 
-    file_browser->n_sel_files_ = 0;
+    file_browser->n_selected_files_ = 0;
     file_browser->sel_size_ = 0;
     file_browser->sel_disk_size_ = 0;
 
@@ -1403,7 +1403,7 @@ on_folder_view_item_sel_change_idle(ptk::browser* file_browser) noexcept
         }
     }
 
-    file_browser->n_sel_files_ = selected_files.size();
+    file_browser->n_selected_files_ = selected_files.size();
 
     std::ranges::for_each(selected_files, gtk_tree_path_free);
 
@@ -3406,7 +3406,7 @@ ptk::browser::get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept
     {
         *sel_disk_size = this->sel_disk_size_;
     }
-    return this->n_sel_files_;
+    return this->n_selected_files_;
 }
 
 void
@@ -4122,7 +4122,7 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
             return;
         }
 
-        // rebuild sel_files with full paths
+        // rebuild selected_files with full paths
         std::vector<std::filesystem::path> file_list;
         file_list.reserve(selected_files.size());
         for (const auto& file : selected_files)

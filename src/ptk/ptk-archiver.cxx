@@ -49,10 +49,10 @@ is_archiver_installed() noexcept
 
 static const std::string
 archiver_create_shell_file_list(
-    const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     std::string file_list;
-    for (const auto& file : sel_files)
+    for (const auto& file : selected_files)
     {
         file_list.append(::utils::shell_quote(file->path().string()));
         file_list.append(" ");
@@ -62,16 +62,16 @@ archiver_create_shell_file_list(
 
 void
 ptk::archiver::create(ptk::browser* file_browser,
-                      const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+                      const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)file_browser;
 
-    if (!is_archiver_installed() || sel_files.empty())
+    if (!is_archiver_installed() || selected_files.empty())
     {
         return;
     }
 
-    const auto shell_file_list = archiver_create_shell_file_list(sel_files);
+    const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     const auto command = std::format("file-roller --add {}", shell_file_list);
     ztd::logger::info("COMMAND({})", command);
@@ -80,15 +80,15 @@ ptk::archiver::create(ptk::browser* file_browser,
 
 void
 ptk::archiver::extract(ptk::browser* file_browser,
-                       const std::span<const std::shared_ptr<vfs::file>> sel_files,
+                       const std::span<const std::shared_ptr<vfs::file>> selected_files,
                        const std::filesystem::path& dest_dir) noexcept
 {
-    if (!is_archiver_installed() || sel_files.empty())
+    if (!is_archiver_installed() || selected_files.empty())
     {
         return;
     }
 
-    const auto shell_file_list = archiver_create_shell_file_list(sel_files);
+    const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     std::string command = "file-roller ";
     if (dest_dir.empty())
@@ -109,16 +109,16 @@ ptk::archiver::extract(ptk::browser* file_browser,
 
 void
 ptk::archiver::open(ptk::browser* file_browser,
-                    const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+                    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)file_browser;
 
-    if (!is_archiver_installed() || sel_files.empty())
+    if (!is_archiver_installed() || selected_files.empty())
     {
         return;
     }
 
-    const auto shell_file_list = archiver_create_shell_file_list(sel_files);
+    const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     const auto command = std::format("file-roller {}", shell_file_list);
     ztd::logger::info("COMMAND({})", command);

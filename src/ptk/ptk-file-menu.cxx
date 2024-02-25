@@ -248,7 +248,7 @@ on_copycmd(GtkMenuItem* menuitem, ptk::file_menu* data, const xset_t& set2) noex
     }
     if (data->browser)
     {
-        data->browser->copycmd(data->sel_files, data->cwd, set->xset_name);
+        data->browser->copycmd(data->selected_files, data->cwd, set->xset_name);
     }
 }
 
@@ -447,7 +447,7 @@ on_hide_file(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
     (void)menuitem;
     if (data->browser)
     {
-        data->browser->hide_selected(data->sel_files, data->cwd);
+        data->browser->hide_selected(data->selected_files, data->cwd);
     }
 }
 
@@ -456,7 +456,7 @@ on_permission(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     if (data->browser)
     {
-        data->browser->on_permission(menuitem, data->sel_files, data->cwd);
+        data->browser->on_permission(menuitem, data->selected_files, data->cwd);
     }
 }
 
@@ -948,15 +948,15 @@ ptk_file_menu_free(ptk::file_menu* data) noexcept
 /* Retrieve popup menu for selected file(s) */
 GtkWidget*
 ptk_file_menu_new(ptk::browser* browser,
-                  const std::span<const std::shared_ptr<vfs::file>> sel_files) noexcept
+                  const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     assert(browser != nullptr);
 
     std::filesystem::path file_path;
     std::shared_ptr<vfs::file> file = nullptr;
-    if (!sel_files.empty())
+    if (!selected_files.empty())
     {
-        file = sel_files.front();
+        file = selected_files.front();
         file_path = file->path();
     }
 
@@ -967,7 +967,8 @@ ptk_file_menu_new(ptk::browser* browser,
     data->browser = browser;
     data->file_path = file_path;
     data->file = file;
-    data->sel_files = std::vector<std::shared_ptr<vfs::file>>(sel_files.begin(), sel_files.end());
+    data->selected_files =
+        std::vector<std::shared_ptr<vfs::file>>(selected_files.begin(), selected_files.end());
 
 #if (GTK_MAJOR_VERSION == 4)
     data->accel_group = gtk_shortcut_controller_new();
@@ -1031,12 +1032,12 @@ ptk_file_menu_new(ptk::browser* browser,
     GtkMenuItem* item = nullptr;
 
     // Open >
-    const bool set_disable = sel_files.empty();
+    const bool set_disable = selected_files.empty();
 
     set = xset_get(xset::name::con_open);
     set->disable = set_disable;
     item = GTK_MENU_ITEM(xset_add_menuitem(browser, popup, accel_group, set));
-    if (!sel_files.empty())
+    if (!selected_files.empty())
     {
         GtkWidget* submenu = gtk_menu_item_get_submenu(item);
 
@@ -1055,7 +1056,7 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_t set_archive_open = nullptr;
 
         const auto is_archive = [](const auto& file) { return file->mime_type()->is_archive(); };
-        if (mime_type && std::ranges::all_of(sel_files, is_archive))
+        if (mime_type && std::ranges::all_of(selected_files, is_archive))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);
             xset_set_cb(set_archive_extract, (GFunc)on_popup_extract_here_activate, data);
@@ -1184,7 +1185,7 @@ ptk_file_menu_new(ptk::browser* browser,
         }
 
         // Edit / Dir
-        if ((is_dir && browser) || (is_text && sel_files.size() == 1))
+        if ((is_dir && browser) || (is_text && selected_files.size() == 1))
         {
             item = GTK_MENU_ITEM(gtk_separator_menu_item_new());
             gtk_menu_shell_append(GTK_MENU_SHELL(submenu), GTK_WIDGET(item));
@@ -1560,7 +1561,7 @@ static void
 on_popup_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::action::open_files_with_app(data->cwd, data->sel_files, "", data->browser, true, false);
+    ptk::action::open_files_with_app(data->cwd, data->selected_files, "", data->browser, true, false);
 }
 
 static void
@@ -1597,7 +1598,7 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
     if (check_app)
     {
         const auto& app = check_app.value();
-        ptk::action::open_files_with_app(data->cwd, data->sel_files, app, data->browser, false, false);
+        ptk::action::open_files_with_app(data->cwd, data->selected_files, app, data->browser, false, false);
     }
 }
 
@@ -1605,7 +1606,7 @@ static void
 on_popup_open_all(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::action::open_files_with_app(data->cwd, data->sel_files, "", data->browser, false, true);
+    ptk::action::open_files_with_app(data->cwd, data->selected_files, "", data->browser, false, true);
 }
 
 static void
@@ -1616,7 +1617,7 @@ on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
     const auto desktop = vfs::desktop::create(desktop_file);
 
     ptk::action::open_files_with_app(data->cwd,
-                            data->sel_files,
+                            data->selected_files,
                             desktop->name(),
                             data->browser,
                             false,
@@ -2256,9 +2257,9 @@ on_popup_open_in_new_tab_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
 {
     (void)menuitem;
 
-    if (!data->sel_files.empty())
+    if (!data->selected_files.empty())
     {
-        for (const auto& file : data->sel_files)
+        for (const auto& file : data->selected_files)
         {
             if (data->browser && std::filesystem::is_directory(file->path()))
             {
@@ -2297,22 +2298,22 @@ static void
 on_popup_cut_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    if (data->sel_files.empty())
+    if (data->selected_files.empty())
     {
         return;
     }
-    ptk::clipboard::cut_or_copy_files(data->sel_files, false);
+    ptk::clipboard::cut_or_copy_files(data->selected_files, false);
 }
 
 static void
 on_popup_copy_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    if (data->sel_files.empty())
+    if (data->selected_files.empty())
     {
         return;
     }
-    ptk::clipboard::cut_or_copy_files(data->sel_files, true);
+    ptk::clipboard::cut_or_copy_files(data->selected_files, true);
 }
 
 static void
@@ -2359,14 +2360,14 @@ static void
 on_popup_copy_text_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::clipboard::copy_as_text(data->sel_files);
+    ptk::clipboard::copy_as_text(data->selected_files);
 }
 
 static void
 on_popup_copy_name_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::clipboard::copy_name(data->sel_files);
+    ptk::clipboard::copy_name(data->selected_files);
 }
 
 static void
@@ -2391,7 +2392,7 @@ on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
 
-    if (data->sel_files.empty())
+    if (data->selected_files.empty())
     {
         return;
     }
@@ -2406,7 +2407,7 @@ on_popup_delete_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 
         ptk::action::delete_files(GTK_WINDOW(parent),
                                   data->cwd,
-                                  data->sel_files,
+                                  data->selected_files,
                                   GTK_TREE_VIEW(data->browser->task_view()));
     }
 }
@@ -2416,7 +2417,7 @@ on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
 
-    if (data->sel_files.empty())
+    if (data->selected_files.empty())
     {
         return;
     }
@@ -2431,7 +2432,7 @@ on_popup_trash_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 
         ptk::action::trash_files(GTK_WINDOW(parent),
                                  data->cwd,
-                                 data->sel_files,
+                                 data->selected_files,
                                  GTK_TREE_VIEW(data->browser->task_view()));
     }
 }
@@ -2442,7 +2443,7 @@ on_popup_rename_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
     (void)menuitem;
     if (data->browser)
     {
-        data->browser->rename_selected_files(data->sel_files, data->cwd);
+        data->browser->rename_selected_files(data->selected_files, data->cwd);
     }
 }
 
@@ -2450,21 +2451,21 @@ static void
 on_popup_compress_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::archiver::create(data->browser, data->sel_files);
+    ptk::archiver::create(data->browser, data->selected_files);
 }
 
 static void
 on_popup_extract_to_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::archiver::extract(data->browser, data->sel_files, "");
+    ptk::archiver::extract(data->browser, data->selected_files, "");
 }
 
 static void
 on_popup_extract_here_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    ptk::archiver::extract(data->browser, data->sel_files, data->cwd);
+    ptk::archiver::extract(data->browser, data->selected_files, data->cwd);
 }
 
 static void
@@ -2472,7 +2473,7 @@ on_popup_extract_open_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noex
 {
     (void)menuitem;
     // If menuitem is set, function was called from GUI so files will contain an archive
-    ptk::archiver::open(data->browser, data->sel_files);
+    ptk::archiver::open(data->browser, data->selected_files);
 }
 
 static void
@@ -2506,8 +2507,13 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
             else
             {
                 const auto file = vfs::file::create(ao->path);
-                const std::vector<std::shared_ptr<vfs::file>> sel_files{file};
-                ptk::action::open_files_with_app(cwd, sel_files, "", ao->file_browser, false, true);
+                const std::vector<std::shared_ptr<vfs::file>> selected_files{file};
+                ptk::action::open_files_with_app(cwd,
+                                                 selected_files,
+                                                 "",
+                                                 ao->file_browser,
+                                                 false,
+                                                 true);
             }
         }
     }
@@ -2526,9 +2532,9 @@ create_new_file(ptk::file_menu* data, ptk::action::rename_mode create_new) noexc
     auto* const ao = new AutoOpenCreate(data->browser, false);
 
     std::shared_ptr<vfs::file> file = nullptr;
-    if (!data->sel_files.empty())
+    if (!data->selected_files.empty())
     {
-        file = data->sel_files.front();
+        file = data->selected_files.front();
     }
 
     ptk::action::rename_files(data->browser, data->cwd, file, nullptr, false, create_new, ao);
@@ -2568,7 +2574,7 @@ on_popup_file_properties_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
         parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
     }
-    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->sel_files, 0);
+    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 0);
 }
 
 static void
@@ -2584,7 +2590,7 @@ on_popup_file_attributes_activate(GtkMenuItem* menuitem, ptk::file_menu* data) n
         parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
     }
-    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->sel_files, 1);
+    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 1);
 }
 
 static void
@@ -2600,7 +2606,7 @@ on_popup_file_permissions_activate(GtkMenuItem* menuitem, ptk::file_menu* data) 
         parent = gtk_widget_get_toplevel(GTK_WIDGET(data->browser));
 #endif
     }
-    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->sel_files, 2);
+    ptk_show_file_properties(GTK_WINDOW(parent), data->cwd, data->selected_files, 2);
 }
 
 static void
@@ -2624,20 +2630,20 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
 
     // setup data
     const auto& cwd = browser->cwd();
-    const auto sel_files = browser->selected_files();
+    const auto selected_files = browser->selected_files();
 
     std::shared_ptr<vfs::file> file = nullptr;
     std::filesystem::path file_path;
-    if (!sel_files.empty())
+    if (!selected_files.empty())
     {
-        file = sel_files.front();
+        file = selected_files.front();
         file_path = file->path();
     }
 
     auto* const data = new ptk::file_menu;
     data->cwd = cwd;
     data->browser = browser;
-    data->sel_files = sel_files;
+    data->selected_files = selected_files;
     data->file_path = file_path;
     if (file)
     {
