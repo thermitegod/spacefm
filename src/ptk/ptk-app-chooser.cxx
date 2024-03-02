@@ -233,19 +233,12 @@ init_associated_apps_tab(GtkWidget* dialog,
 
     init_list_view(GTK_TREE_VIEW(tree_view));
 
-    if (mime_type)
+    const std::vector<std::string> actions = mime_type->actions();
+    if (!actions.empty())
     {
-        const std::vector<std::string> apps = mime_type->actions();
-        if (apps.empty() && mime_type->is_text())
+        for (const std::string_view action : actions)
         {
-            // mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::plain_text);
-        }
-        if (!apps.empty())
-        {
-            for (const std::string_view app : apps)
-            {
-                add_list_item(list_store, app);
-            }
+            add_list_item(list_store, action);
         }
     }
 

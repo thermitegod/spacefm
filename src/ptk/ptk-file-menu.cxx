@@ -48,6 +48,7 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-mime-monitor.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -1018,12 +1019,10 @@ ptk_file_menu_new(ptk::browser* browser,
     const tab_t tab_num = counts.tab_num;
 
     // Get mime type and apps
-    std::shared_ptr<vfs::mime_type> mime_type = nullptr;
     std::vector<std::string> apps{};
     if (file)
     {
-        mime_type = file->mime_type();
-        apps = mime_type->actions();
+        apps = file->mime_type()->actions();
     }
 
     xset_t set_radio;
@@ -1056,7 +1055,7 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_t set_archive_open = nullptr;
 
         const auto is_archive = [](const auto& file) { return file->mime_type()->is_archive(); };
-        if (mime_type && std::ranges::all_of(selected_files, is_archive))
+        if (std::ranges::all_of(selected_files, is_archive))
         {
             set_archive_extract = xset_get(xset::name::archive_extract);
             xset_set_cb(set_archive_extract, (GFunc)on_popup_extract_here_activate, data);
@@ -1268,11 +1267,7 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_add_menuitem(browser, submenu, accel_group, set);
 
         // Default
-        std::string plain_type;
-        if (mime_type)
-        {
-            plain_type = mime_type->type().data();
-        }
+        std::string plain_type = file->mime_type()->type().data();
         plain_type = ztd::replace(plain_type, "-", "_");
         plain_type = ztd::replace(plain_type, " ", "");
         plain_type = std::format("open_all_type_{}", plain_type);
@@ -1568,15 +1563,11 @@ static void
 on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    std::shared_ptr<vfs::mime_type> mime_type;
 
+    std::shared_ptr<vfs::mime_type> mime_type = nullptr;
     if (data->file)
     {
         mime_type = data->file->mime_type();
-        if (!mime_type)
-        {
-            mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
-        }
     }
     else
     {
@@ -1661,11 +1652,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
         return;
     }
 
-    auto mime_type = data->file->mime_type();
-    if (!mime_type)
-    {
-        mime_type = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
-    }
+    const auto mime_type = data->file->mime_type();
 
     switch (ptk::file_menu::app_job(job))
     {
@@ -2022,16 +2009,7 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
         return;
     }
 
-    std::string type;
-    const auto mime_type = data->file->mime_type();
-    if (mime_type)
-    {
-        type = mime_type->type();
-    }
-    else
-    {
-        type = "unknown";
-    }
+    const auto type = data->file->mime_type()->type();
 
     const std::string desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));

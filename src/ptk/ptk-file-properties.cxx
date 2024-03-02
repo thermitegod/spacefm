@@ -466,27 +466,14 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
         page.add_row("Link Target: ", GTK_WIDGET(create_prop_text_box(target)));
     }
 
-    std::shared_ptr<vfs::mime_type> type;
-    std::shared_ptr<vfs::mime_type> type2 = nullptr;
     bool same_type = true;
-    bool is_dirs = false;
+    const auto initial_type = selected_files.front()->mime_type();
     for (const auto& selected_file : selected_files)
     {
-        type = selected_file->mime_type();
-        if (!type2)
-        {
-            type2 = selected_file->mime_type();
-        }
-        if (selected_file->is_directory())
-        {
-            is_dirs = true;
-        }
-        if (type != type2)
+        const auto type = selected_file->mime_type();
+        if (type->type() != initial_type->type())
         {
             same_type = false;
-        }
-        if (is_dirs && !same_type)
-        {
             break;
         }
     }

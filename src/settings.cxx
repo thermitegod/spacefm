@@ -151,14 +151,11 @@ load_settings() noexcept
     if (!main_editor)
     {
         const auto mime_type = vfs::mime_type::create_from_type("text/plain");
-        if (mime_type)
+        const auto default_app = mime_type->default_action();
+        if (default_app)
         {
-            const auto default_app = mime_type->default_action();
-            if (default_app)
-            {
-                const auto desktop = vfs::desktop::create(default_app.value());
-                xset_set(xset::name::editor, xset::var::s, desktop->path().string());
-            }
+            const auto desktop = vfs::desktop::create(default_app.value());
+            xset_set(xset::name::editor, xset::var::s, desktop->path().string());
         }
     }
 

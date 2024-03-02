@@ -2488,16 +2488,8 @@ ptk::action::rename_files(ptk::browser* file_browser, const std::filesystem::pat
     else if (file)
     {
         const auto mime_type = file->mime_type();
-        if (mime_type)
-        {
-            mset->mime_type = mime_type->type();
-            type = std::format(" {} ( {} )", mime_type->description(), mset->mime_type);
-        }
-        else
-        {
-            mset->mime_type = "?";
-            type = mset->mime_type;
-        }
+        mset->mime_type = mime_type->type();
+        type = std::format(" {} ( {} )", mime_type->description(), mset->mime_type);
     }
     else // create
     {
