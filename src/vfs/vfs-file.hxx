@@ -65,7 +65,6 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] std::filesystem::perms permissions() const noexcept;
 
     [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
-    void reload_mime_type() noexcept;
 
     [[nodiscard]] const std::string_view display_owner() const noexcept;
     [[nodiscard]] const std::string_view display_group() const noexcept;

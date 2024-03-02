@@ -347,13 +347,6 @@ vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcep
     std::ranges::for_each(global::dir_smart_cache.items(), action);
 }
 
-void
-vfs::dir::global_reload_mime_type() noexcept
-{
-    const auto action = [](const auto& dir) { dir->reload_mime_type(); };
-    std::ranges::for_each(global::dir_smart_cache.items(), action);
-}
-
 const std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 {
@@ -543,24 +536,6 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
      * mainly to deal with the possibility thousands of large thumbnails
      * have been freed but the memory not actually released by SpaceFM */
     ::utils::memory_trim();
-}
-
-void
-vfs::dir::reload_mime_type() noexcept
-{
-    if (this->is_directory_empty())
-    {
-        return;
-    }
-
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
-
-    const auto reload_file_mime_action = [](const auto& file) { file->reload_mime_type(); };
-    std::ranges::for_each(this->files_, reload_file_mime_action);
-
-    const auto signal_file_changed_action = [this](const auto& file)
-    { this->run_event<spacefm::signal::file_changed>(file); };
-    std::ranges::for_each(this->files_, signal_file_changed_action);
 }
 
 /* signal handlers */

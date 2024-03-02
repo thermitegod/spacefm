@@ -202,13 +202,6 @@ vfs::file::mime_type() const noexcept
     return this->mime_type_;
 }
 
-void
-vfs::file::reload_mime_type() noexcept
-{
-    this->mime_type_ = vfs::mime_type::create_from_file(this->path_);
-    this->load_special_info();
-}
-
 const std::string_view
 vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 {

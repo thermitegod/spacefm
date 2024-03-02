@@ -57,8 +57,6 @@ struct dir : public std::enable_shared_from_this<dir>
 
     // unloads thumbnails in every vfs::dir
     static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
-    // reload mime types in every vfs::dir
-    static void global_reload_mime_type() noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
     [[nodiscard]] const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
@@ -83,8 +81,6 @@ struct dir : public std::enable_shared_from_this<dir>
                         const vfs::file::thumbnail_size size) noexcept;
     void unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
     void enable_thumbnails(const bool enabled) noexcept;
-
-    void reload_mime_type() noexcept;
 
     /* emit signals */
     void emit_file_created(const std::filesystem::path& path, bool force) noexcept;
