@@ -201,7 +201,8 @@ static void ptk_file_browser_open_item(ptk::browser* file_browser,
                                        const std::filesystem::path& path, i32 action) noexcept;
 static void ptk_file_browser_pane_mode_change(ptk::browser* file_browser) noexcept;
 
-static i32 file_list_order_from_sort_order(ptk::browser::sort_order order) noexcept;
+static ptk::file_list::column
+file_list_order_from_sort_order(const ptk::browser::sort_order order) noexcept;
 
 static GtkPanedClass* parent_class = nullptr;
 
@@ -1194,51 +1195,36 @@ on_sort_col_changed(GtkTreeSortable* sortable, ptk::browser* file_browser) noexc
     gtk_tree_sortable_get_sort_column_id(sortable, &col, &file_browser->sort_type_);
 
     const auto column = ptk::file_list::column(col);
-    auto sort_order = ptk::browser::sort_order::name;
-    switch (column)
-    {
-        case ptk::file_list::column::name:
-            sort_order = ptk::browser::sort_order::name;
-            break;
-        case ptk::file_list::column::size:
-            sort_order = ptk::browser::sort_order::size;
-            break;
-        case ptk::file_list::column::bytes:
-            sort_order = ptk::browser::sort_order::bytes;
-            break;
-        case ptk::file_list::column::type:
-            sort_order = ptk::browser::sort_order::type;
-            break;
-        case ptk::file_list::column::mime:
-            sort_order = ptk::browser::sort_order::mime;
-            break;
-        case ptk::file_list::column::perm:
-            sort_order = ptk::browser::sort_order::perm;
-            break;
-        case ptk::file_list::column::owner:
-            sort_order = ptk::browser::sort_order::owner;
-            break;
-        case ptk::file_list::column::group:
-            sort_order = ptk::browser::sort_order::group;
-            break;
-        case ptk::file_list::column::atime:
-            sort_order = ptk::browser::sort_order::atime;
-            break;
-        case ptk::file_list::column::btime:
-            sort_order = ptk::browser::sort_order::btime;
-            break;
-        case ptk::file_list::column::ctime:
-            sort_order = ptk::browser::sort_order::ctime;
-            break;
-        case ptk::file_list::column::mtime:
-            sort_order = ptk::browser::sort_order::mtime;
-            break;
-        case ptk::file_list::column::big_icon:
-        case ptk::file_list::column::small_icon:
-        case ptk::file_list::column::info:
-            break;
-    }
-    file_browser->sort_order_ = sort_order;
+
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::name) ==
+                  magic_enum::enum_integer(ptk::file_list::column::name) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::size) ==
+                  magic_enum::enum_integer(ptk::file_list::column::size) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::bytes) ==
+                  magic_enum::enum_integer(ptk::file_list::column::bytes) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::type) ==
+                  magic_enum::enum_integer(ptk::file_list::column::type) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::mime) ==
+                  magic_enum::enum_integer(ptk::file_list::column::mime) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::perm) ==
+                  magic_enum::enum_integer(ptk::file_list::column::perm) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::owner) ==
+                  magic_enum::enum_integer(ptk::file_list::column::owner) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::group) ==
+                  magic_enum::enum_integer(ptk::file_list::column::group) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::atime) ==
+                  magic_enum::enum_integer(ptk::file_list::column::atime) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::btime) ==
+                  magic_enum::enum_integer(ptk::file_list::column::btime) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::ctime) ==
+                  magic_enum::enum_integer(ptk::file_list::column::ctime) - 2);
+    static_assert(magic_enum::enum_integer(ptk::browser::sort_order::mtime) ==
+                  magic_enum::enum_integer(ptk::file_list::column::mtime) - 2);
+    assert(column != ptk::file_list::column::big_icon);
+    assert(column != ptk::file_list::column::small_icon);
+    assert(column != ptk::file_list::column::info);
+
+    file_browser->sort_order_ = ptk::browser::sort_order(magic_enum::enum_integer(column) - 2);
 
     xset_set_panel(file_browser->panel_,
                    xset::panel::list_detailed,
@@ -1271,9 +1257,10 @@ ptk::browser::update_model() noexcept
     list->sort_hidden_first =
         xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) == xset::b::xtrue;
 
-    gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(list),
-                                         file_list_order_from_sort_order(this->sort_order_),
-                                         this->sort_type_);
+    gtk_tree_sortable_set_sort_column_id(
+        GTK_TREE_SORTABLE(list),
+        magic_enum::enum_integer(file_list_order_from_sort_order(this->sort_order_)),
+        this->sort_type_);
 
     this->show_thumbnails(this->max_thumbnail_);
 
@@ -2932,50 +2919,35 @@ ptk_file_browser_create_dir_tree(ptk::browser* file_browser) noexcept
     return dir_tree;
 }
 
-static i32
-file_list_order_from_sort_order(ptk::browser::sort_order order) noexcept
+static ptk::file_list::column
+file_list_order_from_sort_order(const ptk::browser::sort_order order) noexcept
 {
-    ptk::file_list::column col;
-    switch (order)
-    {
-        case ptk::browser::sort_order::name:
-            col = ptk::file_list::column::name;
-            break;
-        case ptk::browser::sort_order::size:
-            col = ptk::file_list::column::size;
-            break;
-        case ptk::browser::sort_order::bytes:
-            col = ptk::file_list::column::bytes;
-            break;
-        case ptk::browser::sort_order::type:
-            col = ptk::file_list::column::type;
-            break;
-        case ptk::browser::sort_order::mime:
-            col = ptk::file_list::column::mime;
-            break;
-        case ptk::browser::sort_order::perm:
-            col = ptk::file_list::column::perm;
-            break;
-        case ptk::browser::sort_order::owner:
-            col = ptk::file_list::column::owner;
-            break;
-        case ptk::browser::sort_order::group:
-            col = ptk::file_list::column::group;
-            break;
-        case ptk::browser::sort_order::atime:
-            col = ptk::file_list::column::atime;
-            break;
-        case ptk::browser::sort_order::btime:
-            col = ptk::file_list::column::btime;
-            break;
-        case ptk::browser::sort_order::ctime:
-            col = ptk::file_list::column::ctime;
-            break;
-        case ptk::browser::sort_order::mtime:
-            col = ptk::file_list::column::mtime;
-            break;
-    }
-    return magic_enum::enum_integer(col);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::name) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::name) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::size) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::size) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::bytes) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::bytes) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::type) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::type) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::mime) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::mime) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::perm) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::perm) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::owner) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::owner) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::group) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::group) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::atime) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::atime) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::btime) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::btime) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::ctime) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::ctime) + 2);
+    static_assert(magic_enum::enum_integer(ptk::file_list::column::mtime) ==
+                  magic_enum::enum_integer(ptk::browser::sort_order::mtime) + 2);
+
+    return ptk::file_list::column(magic_enum::enum_integer(order) + 2);
 }
 
 static void
@@ -4163,13 +4135,12 @@ ptk::browser::set_sort_order(ptk::browser::sort_order order) noexcept
     }
 
     this->sort_order_ = order;
-    const i32 col = file_list_order_from_sort_order(order);
-
     if (this->file_list_)
     {
-        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(this->file_list_),
-                                             col,
-                                             this->sort_type_);
+        gtk_tree_sortable_set_sort_column_id(
+            GTK_TREE_SORTABLE(this->file_list_),
+            magic_enum::enum_integer(file_list_order_from_sort_order(order)),
+            this->sort_type_);
     }
 }
 

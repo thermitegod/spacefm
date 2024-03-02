@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <magic_enum.hpp>
 #include <string>
 #include <string_view>
 
@@ -32,6 +31,8 @@
 
 #include <gtkmm.h>
 #include <glibmm.h>
+
+#include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -1133,33 +1134,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "sort-by")
         { // COLUMN
-            switch (file_browser->sort_order_)
-            {
-                case ptk::browser::sort_order::name:
-                    return {SOCKET_SUCCESS, "name"};
-                case ptk::browser::sort_order::size:
-                    return {SOCKET_SUCCESS, "size"};
-                case ptk::browser::sort_order::bytes:
-                    return {SOCKET_SUCCESS, "bytes"};
-                case ptk::browser::sort_order::type:
-                    return {SOCKET_SUCCESS, "type"};
-                case ptk::browser::sort_order::mime:
-                    return {SOCKET_SUCCESS, "mime"};
-                case ptk::browser::sort_order::perm:
-                    return {SOCKET_SUCCESS, "permission"};
-                case ptk::browser::sort_order::owner:
-                    return {SOCKET_SUCCESS, "owner"};
-                case ptk::browser::sort_order::group:
-                    return {SOCKET_SUCCESS, "group"};
-                case ptk::browser::sort_order::atime:
-                    return {SOCKET_SUCCESS, "accessed"};
-                case ptk::browser::sort_order::btime:
-                    return {SOCKET_SUCCESS, "created"};
-                case ptk::browser::sort_order::ctime:
-                    return {SOCKET_SUCCESS, "metadata"};
-                case ptk::browser::sort_order::mtime:
-                    return {SOCKET_SUCCESS, "modified"};
-            }
+            return {SOCKET_SUCCESS, std::string(magic_enum::enum_name(file_browser->sort_order_))};
         }
         else if (property == "sort-ascend" || property == "sort-natural" ||
                  property == "sort-case" || property == "sort-hidden-first" ||
