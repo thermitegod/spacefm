@@ -124,7 +124,9 @@ struct dir : public std::enable_shared_from_this<dir>
 
     vfs::thumbnailer thumbnailer_{
         std::bind(&vfs::dir::emit_thumbnail_loaded, this, std::placeholders::_1)};
-    std::shared_ptr<vfs::monitor> monitor_{nullptr};
+    const vfs::monitor monitor_{
+        this->path_,
+        std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2)};
 
     std::vector<std::shared_ptr<vfs::file>> changed_files_;
     std::vector<std::filesystem::path> created_files_;

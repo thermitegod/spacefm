@@ -213,6 +213,8 @@ vfs::dir::load_thread() noexcept
     // load this dirs .hidden file
     this->load_user_hidden_files();
 
+    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
+
     for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
         if (this->shutdown_)
@@ -228,12 +230,6 @@ vfs::dir::load_thread() noexcept
 
         this->files_.push_back(vfs::file::create(dfile.path()));
     }
-
-    // Install file alteration monitor
-    // Do this here to avoid catching events while the dir is loading.
-    this->monitor_ = vfs::monitor::create(
-        this->path_,
-        std::bind(&vfs::dir::on_monitor_event, this, std::placeholders::_1, std::placeholders::_2));
 
     this->run_event<spacefm::signal::file_listed>();
 

@@ -22,8 +22,6 @@
 
 #include <array>
 
-#include <memory>
-
 #include <system_error>
 
 #include <cerrno>
@@ -41,12 +39,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-monitor.hxx"
-
-const std::shared_ptr<vfs::monitor>
-vfs::monitor::create(const std::filesystem::path& path, const callback_t& callback) noexcept
-{
-    return std::make_shared<vfs::monitor>(path, callback);
-}
 
 vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false)
     : path_(path), callback_(callback)
@@ -102,8 +94,11 @@ vfs::monitor::~monitor() noexcept
 
     this->signal_io_handler_.disconnect();
 
-    inotify_rm_watch(this->inotify_fd_, this->inotify_wd_);
-    close(this->inotify_fd_);
+    if (this->inotify_fd_ != -1)
+    {
+        inotify_rm_watch(this->inotify_fd_, this->inotify_wd_);
+        close(this->inotify_fd_);
+    }
 }
 
 void
@@ -153,7 +148,7 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
                 event_path = this->path_.parent_path() / event_filename;
             }
 
-            vfs::monitor::event monitor_event;
+            vfs::monitor::event monitor_event = event::other;
             if (event->mask & (IN_CREATE | IN_MOVED_TO))
             {
                 monitor_event = event::created;
@@ -165,10 +160,6 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
             else if (event->mask & (IN_MODIFY | IN_ATTRIB))
             {
                 monitor_event = event::changed;
-            }
-            else
-            {
-                monitor_event = event::other;
             }
 
             // ztd::logger::debug("inotify-event MASK={} EVENT({})={}", event->mask, magic_enum::enum_name(monitor_event), event_path.string());

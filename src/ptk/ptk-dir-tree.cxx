@@ -629,14 +629,11 @@ ptk::dir_tree::expand_row(GtkTreeIter* iter, GtkTreePath* tree_path) noexcept
 
     if (std::filesystem::is_directory(path))
     {
-        if (!node->monitor)
-        {
-            node->monitor = vfs::monitor::create(path,
-                                                 std::bind(&ptk::dir_tree::node::on_monitor_event,
-                                                           node,
-                                                           std::placeholders::_1,
-                                                           std::placeholders::_2));
-        }
+        node->monitor = vfs::monitor{path,
+                                     std::bind(&ptk::dir_tree::node::on_monitor_event,
+                                               node,
+                                               std::placeholders::_1,
+                                               std::placeholders::_2)};
 
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
@@ -679,10 +676,8 @@ ptk::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
         {
             return;
         }
-        if (node->monitor)
-        {
-            node->monitor = nullptr;
-        }
+        node->monitor = vfs::monitor();
+
         std::shared_ptr<ptk::dir_tree::node> child;
         std::shared_ptr<ptk::dir_tree::node> next;
         for (child = node->children; child; child = next)

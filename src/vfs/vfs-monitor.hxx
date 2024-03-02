@@ -19,8 +19,6 @@
 
 #include <filesystem>
 
-#include <memory>
-
 #include <functional>
 
 #include <gtkmm.h>
@@ -45,16 +43,13 @@ struct monitor
     using callback_t =
         std::function<void(const vfs::monitor::event event, const std::filesystem::path& path)>;
 
-    monitor() = delete;
+    monitor() = default;
     monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false);
     ~monitor() noexcept;
     monitor(const monitor& other) = delete;
     monitor(monitor&& other) = delete;
     monitor& operator=(const monitor& other) = delete;
-    monitor& operator=(monitor&& other) = delete;
-
-    [[nodiscard]] static const std::shared_ptr<monitor> create(const std::filesystem::path& path,
-                                                               const callback_t& callback) noexcept;
+    monitor& operator=(monitor&& other) = default;
 
   private:
     [[nodiscard]] bool on_inotify_event(const Glib::IOCondition condition) const noexcept;

@@ -65,13 +65,14 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
         std::shared_ptr<vfs::file> file{nullptr};
         std::shared_ptr<node> children{nullptr};
         i32 n_children{0};
-        std::shared_ptr<vfs::monitor> monitor{nullptr};
         i32 n_expand{0};
         std::shared_ptr<node> parent{nullptr};
         std::shared_ptr<node> next{nullptr};
         std::shared_ptr<node> prev{nullptr};
         std::shared_ptr<node> last{nullptr};
         ptk::dir_tree* tree{nullptr}; /* FIXME: This is a waste of memory :-( */
+
+        vfs::monitor monitor;
 
         const std::shared_ptr<node> get_nth_node(i32 n) const noexcept;
         const std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
