@@ -167,29 +167,7 @@ class PreferencePage
 
 namespace preference::large_icons
 {
-struct big_icon_sizes_data
-{
-    i32 value;
-    std::string_view name;
-};
-
-constexpr std::array<big_icon_sizes_data, 13> big_icon_sizes{{
-    {512, "512"},
-    {384, "384"},
-    {256, "256"},
-    {192, "192"},
-    {128, "128"},
-    {96, "96"},
-    {72, "72"},
-    {64, "64"},
-    {48, "48"},
-    {36, "36"},
-    {32, "32"},
-    {24, "24"},
-    {22, "22"},
-}};
-
-static void
+void
 changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
@@ -239,6 +217,27 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 GtkComboBox*
 create_combobox() noexcept
 {
+    struct big_icon_sizes_data
+    {
+        i32 value;
+        std::string_view name;
+    };
+    static constexpr std::array<big_icon_sizes_data, 13> big_icon_sizes{{
+        {512, "512"},
+        {384, "384"},
+        {256, "256"},
+        {192, "192"},
+        {128, "128"},
+        {96, "96"},
+        {72, "72"},
+        {64, "64"},
+        {48, "48"},
+        {36, "36"},
+        {32, "32"},
+        {24, "24"},
+        {22, "22"},
+    }};
+
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : big_icon_sizes)
     {
@@ -276,31 +275,7 @@ create_combobox() noexcept
 
 namespace preference::small_icons
 {
-struct small_icon_sizes_data
-{
-    i32 value;
-    std::string_view name;
-};
-
-constexpr std::array<small_icon_sizes_data, 15> small_icon_sizes{{
-    {512, "512"},
-    {384, "384"},
-    {256, "256"},
-    {192, "192"},
-    {128, "128"},
-    {96, "96"},
-    {72, "72"},
-    {64, "64"},
-    {48, "48"},
-    {36, "36"},
-    {32, "32"},
-    {24, "24"},
-    {22, "22"},
-    {16, "16"},
-    {12, "12"},
-}};
-
-static void
+void
 changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
@@ -350,6 +325,29 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 GtkComboBox*
 create_combobox() noexcept
 {
+    struct small_icon_sizes_data
+    {
+        i32 value;
+        std::string_view name;
+    };
+    static constexpr std::array<small_icon_sizes_data, 15> small_icon_sizes{{
+        {512, "512"},
+        {384, "384"},
+        {256, "256"},
+        {192, "192"},
+        {128, "128"},
+        {96, "96"},
+        {72, "72"},
+        {64, "64"},
+        {48, "48"},
+        {36, "36"},
+        {32, "32"},
+        {24, "24"},
+        {22, "22"},
+        {16, "16"},
+        {12, "12"},
+    }};
+
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : small_icon_sizes)
     {
@@ -387,23 +385,7 @@ create_combobox() noexcept
 
 namespace preference::tool_icons
 {
-struct tool_icon_sizes_data
-{
-    i32 value;
-    std::string_view name;
-};
-
-constexpr std::array<tool_icon_sizes_data, 7> tool_icon_sizes{{
-    {0, "GTK Default Size"}, // GtkIconSize::GTK_ICON_SIZE_INVALID,
-    {1, "Menu"},             // GtkIconSize::GTK_ICON_SIZE_MENU,
-    {2, "Small Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
-    {3, "Large Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
-    {4, "Button"},           // GtkIconSize::GTK_ICON_SIZE_BUTTON,
-    {5, "DND"},              // GtkIconSize::GTK_ICON_SIZE_DND,
-    {6, "Dialog"},           // GtkIconSize::GTK_ICON_SIZE_DIALOG
-}};
-
-static void
+void
 changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
@@ -427,6 +409,21 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 GtkComboBox*
 create_combobox() noexcept
 {
+    struct tool_icon_sizes_data
+    {
+        i32 value;
+        std::string_view name;
+    };
+    static constexpr std::array<tool_icon_sizes_data, 7> tool_icon_sizes{{
+        {0, "GTK Default Size"}, // GtkIconSize::GTK_ICON_SIZE_INVALID,
+        {1, "Menu"},             // GtkIconSize::GTK_ICON_SIZE_MENU,
+        {2, "Small Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
+        {3, "Large Toolbar"},    // GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
+        {4, "Button"},           // GtkIconSize::GTK_ICON_SIZE_BUTTON,
+        {5, "DND"},              // GtkIconSize::GTK_ICON_SIZE_DND,
+        {6, "Dialog"},           // GtkIconSize::GTK_ICON_SIZE_DIALOG
+    }};
+
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : tool_icon_sizes)
     {
@@ -841,20 +838,7 @@ create_pref_check_button(const std::string_view label) noexcept
 
 namespace preference::drag_actions
 {
-struct drag_actions_data
-{
-    i32 value;
-    std::string_view name;
-};
-
-constexpr std::array<drag_actions_data, 4> drag_actions_new{{
-    {0, "Automatic"},
-    {1, "Copy (Ctrl+Drag)"},
-    {2, "Move (Shift+Drag)"},
-    {3, "Link (Ctrl+Shift+Drag)"},
-}};
-
-static void
+void
 changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
@@ -881,6 +865,18 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 GtkComboBox*
 create_combobox() noexcept
 {
+    struct drag_actions_data
+    {
+        i32 value;
+        std::string_view name;
+    };
+    static constexpr std::array<drag_actions_data, 4> drag_actions_new{{
+        {0, "Automatic"},
+        {1, "Copy (Ctrl+Drag)"},
+        {2, "Move (Shift+Drag)"},
+        {3, "Link (Ctrl+Shift+Drag)"},
+    }};
+
     GtkListStore* model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     for (const auto& action : drag_actions_new)
     {
@@ -922,7 +918,7 @@ create_combobox() noexcept
 
 namespace preference::editor
 {
-static void
+void
 pref_text_box_cb(GtkEntry* entry, const void* user_data) noexcept
 {
     (void)user_data;
@@ -956,7 +952,7 @@ create_pref_text_box() noexcept
 
 namespace preference::terminal
 {
-static void
+void
 changed_cb(GtkComboBox* combobox, void* user_data) noexcept
 {
     (void)user_data;
@@ -1026,7 +1022,7 @@ create_combobox() noexcept
 
 /////////////////////////////////////////////////////////////////
 
-GtkWidget*
+static GtkWidget*
 init_general_tab() noexcept
 {
     auto page = PreferencePage();
@@ -1069,7 +1065,7 @@ init_general_tab() noexcept
     return GTK_WIDGET(page.box());
 }
 
-GtkWidget*
+static GtkWidget*
 init_interface_tab() noexcept
 {
     auto page = PreferencePage();
@@ -1111,7 +1107,7 @@ init_interface_tab() noexcept
     return GTK_WIDGET(page.box());
 }
 
-GtkWidget*
+static GtkWidget*
 init_advanced_tab() noexcept
 {
     auto page = PreferencePage();
@@ -1129,7 +1125,7 @@ init_advanced_tab() noexcept
     return GTK_WIDGET(page.box());
 }
 
-void
+static void
 on_response(GtkWidget* widget, void* user_data) noexcept
 {
     (void)user_data;
