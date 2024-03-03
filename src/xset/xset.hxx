@@ -96,8 +96,8 @@ enum class tool
     fwd,
     fwd_menu,
     refresh,
-    new_tab,
-    new_tab_here,
+    new_tab,      // Linked
+    new_tab_here, // Linked
     show_hidden,
     show_thumb,
     large_icons,

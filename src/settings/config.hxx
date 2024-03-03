@@ -75,6 +75,7 @@ constexpr std::string_view maximized{"maximized"};
 // Interface keys
 constexpr std::string_view show_tabs{"always_show_tabs"};
 constexpr std::string_view show_close{"show_close_tab_buttons"};
+constexpr std::string_view new_tab_here{"new_tab_here"};
 
 // XSet keys
 // The names for XSet member variables are deduced using magic_enum::enum_name()

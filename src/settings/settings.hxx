@@ -79,6 +79,9 @@ struct settings
     [[nodiscard]] bool show_close_tab_buttons() const noexcept;
     void show_close_tab_buttons(bool val) noexcept;
 
+    [[nodiscard]] bool new_tab_here() const noexcept;
+    void new_tab_here(bool val) noexcept;
+
     [[nodiscard]] bool use_si_prefix() const noexcept;
     void use_si_prefix(bool val) noexcept;
 
@@ -117,6 +120,7 @@ struct settings
     // Interface
     bool always_show_tabs_{true};
     bool show_close_tab_buttons_{false};
+    bool new_tab_here_{false};
 
     // Units
     bool use_si_prefix_{false};

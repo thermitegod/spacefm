@@ -240,6 +240,18 @@ config::detail::settings::show_close_tab_buttons(bool val) noexcept
 }
 
 bool
+config::detail::settings::new_tab_here() const noexcept
+{
+    return this->new_tab_here_;
+}
+
+void
+config::detail::settings::new_tab_here(bool val) noexcept
+{
+    this->new_tab_here_ = val;
+}
+
+bool
 config::detail::settings::use_si_prefix() const noexcept
 {
     return this->use_si_prefix_;

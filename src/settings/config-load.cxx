@@ -213,6 +213,13 @@ config_parse_interface(const toml::value& tbl, u64 version) noexcept
             toml::find<bool>(section, config::disk_format::toml::key::show_close.data());
         config::settings->show_close_tab_buttons(show_close_tab_buttons);
     }
+
+    if (section.contains(config::disk_format::toml::key::new_tab_here.data()))
+    {
+        const auto new_tab_here =
+            toml::find<bool>(section, config::disk_format::toml::key::new_tab_here.data());
+        config::settings->new_tab_here(new_tab_here);
+    }
 }
 
 static void

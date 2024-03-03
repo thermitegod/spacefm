@@ -2804,7 +2804,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
     }
     else if (set->xset_name == xset::name::tab_new_here)
     {
-        on_popup_open_in_new_tab_here(nullptr, data);
+        browser->new_tab_here();
     }
 
     ptk_file_menu_free(data);

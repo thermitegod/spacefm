@@ -6188,13 +6188,16 @@ ptk::browser::on_action(const xset::name setname) noexcept
     }
     else if (set->name.starts_with("tab_"))
     {
-        if (set->xset_name == xset::name::tab_new)
+        if (set->xset_name == xset::name::tab_new || set->xset_name == xset::name::tab_new_here)
         {
-            this->new_tab();
-        }
-        else if (set->xset_name == xset::name::tab_new_here)
-        {
-            this->new_tab_here();
+            if (config::settings->new_tab_here())
+            {
+                this->new_tab_here();
+            }
+            else
+            {
+                this->new_tab();
+            }
         }
         else
         {

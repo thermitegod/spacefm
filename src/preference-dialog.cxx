@@ -729,6 +729,27 @@ create_pref_check_button(const std::string_view label) noexcept
 }
 } // namespace preference::hide_close_tab
 
+namespace preference::new_tab
+{
+void
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
+{
+    (void)user_data;
+    const bool new_tab_here = gtk_toggle_button_get_active(button);
+    config::settings->new_tab_here(new_tab_here);
+}
+
+GtkCheckButton*
+create_pref_check_button(const std::string_view label) noexcept
+{
+    const bool value = config::settings->show_close_tab_buttons();
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
+} // namespace preference::new_tab
+
 namespace preference::confirm
 {
 void
@@ -1077,6 +1098,9 @@ init_interface_tab() noexcept
 
     page.add_row(GTK_WIDGET(
         preference::hide_close_tab::create_pref_check_button("Hide 'Close Tab' Buttons")));
+
+    page.add_row(GTK_WIDGET(
+        preference::new_tab::create_pref_check_button("Create New Tabs at current location")));
 
     page.new_section("Confirming");
 

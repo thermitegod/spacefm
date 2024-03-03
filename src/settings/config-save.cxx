@@ -312,6 +312,7 @@ config::save() noexcept
              // clang-format off
              {config::disk_format::toml::key::show_tabs.data(), config::settings->always_show_tabs()},
              {config::disk_format::toml::key::show_close.data(), config::settings->show_close_tab_buttons()},
+             {config::disk_format::toml::key::new_tab_here.data(), config::settings->new_tab_here()},
              // clang-format on
          }},
 

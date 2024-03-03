@@ -143,7 +143,7 @@ static constexpr ztd::map<xset::tool, builtin_tool_data, 19> builtin_tools{{{
      }},
     {xset::tool::new_tab_here,
      {
-         "New Tab Here",
+         "New Tab",
          "gtk-add",
          xset::name::tab_new_here,
      }},
