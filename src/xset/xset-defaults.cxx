@@ -472,6 +472,10 @@ xset_defaults() noexcept
     xset_set_var(set, xset::var::menu_label, "_Fullscreen");
     set->menu_style = xset::menu::check;
 
+    set = xset_get(xset::name::main_keybindings);
+    xset_set_var(set, xset::var::menu_label, "Keybindings");
+    xset_set_var(set, xset::var::icn, "gtk-preferences");
+
     set = xset_get(xset::name::main_prefs);
     xset_set_var(set, xset::var::menu_label, "_Preferences");
     xset_set_var(set, xset::var::icn, "gtk-preferences");

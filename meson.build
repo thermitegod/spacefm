@@ -411,6 +411,7 @@ sources += files(
   'src/bookmarks.cxx',
   'src/concurrency.cxx',
   'src/file-search.cxx',
+  'src/keybindings-dialog.cxx',
   'src/main.cxx',
   'src/main-window.cxx',
   'src/preference-dialog.cxx',

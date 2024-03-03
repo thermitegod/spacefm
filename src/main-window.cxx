@@ -51,6 +51,7 @@
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "about.hxx"
+#include "keybindings-dialog.hxx"
 #include "preference-dialog.hxx"
 
 #include "xset/xset.hxx"
@@ -84,6 +85,7 @@ static bool on_window_button_press_event(GtkWidget* widget, GdkEvent* event,
                                          MainWindow* main_window) noexcept;
 static void on_new_window_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 
+static void on_keybindings_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 static void on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 static void on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept;
 static void on_update_window_title(GtkMenuItem* item, MainWindow* main_window) noexcept;
@@ -968,6 +970,7 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
 {
     GtkWidget* newmenu = gtk_menu_new();
     xset_set_cb(xset::name::main_prefs, (GFunc)on_preference_activate, this);
+    xset_set_cb(xset::name::main_keybindings, (GFunc)on_keybindings_activate, this);
     xset_set_cb(xset::name::main_full, (GFunc)on_fullscreen_activate, this);
     xset_set_cb(xset::name::main_title, (GFunc)on_update_window_title, this);
 
@@ -1061,6 +1064,7 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
                       xset::name::main_title,
                       xset::name::main_full,
                       xset::name::separator,
+                      xset::name::main_keybindings,
                       xset::name::main_prefs,
                   });
     gtk_widget_show_all(GTK_WIDGET(newmenu));
@@ -1870,6 +1874,14 @@ main_window_get_current_file_browser() noexcept
 }
 
 static void
+on_keybindings_activate(GtkMenuItem* menuitem, void* user_data) noexcept
+{
+    (void)menuitem;
+    MainWindow* main_window = MAIN_WINDOW(user_data);
+    show_keybindings_dialog(GTK_WINDOW(main_window));
+}
+
+static void
 on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
@@ -2385,6 +2397,10 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         {
             xset_set_b(xset::name::main_full, !this->fullscreen);
             on_fullscreen_activate(nullptr, this);
+        }
+        else if (set->xset_name == xset::name::main_keybindings)
+        {
+            on_keybindings_activate(nullptr, this);
         }
         else if (set->xset_name == xset::name::main_prefs)
         {

@@ -128,6 +128,7 @@ enum class name
 
     main_title,
     main_full,
+    main_keybindings,
     main_prefs,
     root_bar,
     view_thumb,
