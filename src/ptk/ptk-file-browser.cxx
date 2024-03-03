@@ -206,8 +206,6 @@ file_list_order_from_sort_order(const ptk::browser::sort_order order) noexcept;
 
 static GtkPanedClass* parent_class = nullptr;
 
-static void rebuild_toolbox(GtkWidget* widget, ptk::browser* file_browser) noexcept;
-
 static u32 folder_view_auto_scroll_timer = 0;
 static GtkDirectionType folder_view_auto_scroll_direction = GtkDirectionType::GTK_DIR_TAB_FORWARD;
 
@@ -616,149 +614,37 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* file_browser) noexcept
 }
 
 void
-ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget) noexcept
-{ // store the toolbar widget created by set for later change of status
-    assert(set != nullptr);
-
-    if (!(set && !set->lock && set->browser && set->tool != xset::tool::NOT &&
-          GTK_IS_WIDGET(widget)))
-    {
-        return;
-    }
-
-    unsigned char x = 0;
-
-    switch (set->tool)
-    {
-        case xset::tool::up:
-            x = 0;
-            break;
-        case xset::tool::back:
-        case xset::tool::back_menu:
-            x = 1;
-            break;
-        case xset::tool::fwd:
-        case xset::tool::fwd_menu:
-            x = 2;
-            break;
-        case xset::tool::devices:
-            x = 3;
-            break;
-        case xset::tool::bookmarks:
-            // Deprecated - bookmark
-            x = 4;
-            break;
-        case xset::tool::tree:
-            x = 5;
-            break;
-        case xset::tool::show_hidden:
-            x = 6;
-            break;
-        case xset::tool::custom:
-            if (set->menu_style == xset::menu::check)
-            {
-                x = 7;
-                // attach set pointer to custom checkboxes so we can find it
-                g_object_set_data(G_OBJECT(widget), "set", set->name.data());
-            }
-            else
-            {
-                return;
-            }
-            break;
-        case xset::tool::show_thumb:
-            x = 8;
-            break;
-        case xset::tool::large_icons:
-            x = 9;
-            break;
-        case xset::tool::NOT:
-        case xset::tool::home:
-        case xset::tool::DEFAULT:
-        case xset::tool::refresh:
-        case xset::tool::new_tab:
-        case xset::tool::new_tab_here:
-        case xset::tool::invalid:
-            return;
-    }
-
-    set->browser->toolbar_widgets[x] = g_slist_append(set->browser->toolbar_widgets[x], widget);
-}
-
-static void
-rebuild_toolbox(GtkWidget* widget, ptk::browser* file_browser) noexcept
+ptk::browser::rebuild_toolbox() noexcept
 {
-    (void)widget;
     // ztd::logger::info("rebuild_toolbox");
-    if (!file_browser)
-    {
-        return;
-    }
 
-    const panel_t p = file_browser->panel_;
-    const xset::main_window_panel mode = file_browser->main_window_->panel_context.at(p);
+    this->path_bar_ = ptk_path_entry_new(this);
 
-    const bool show_tooltips = !xset_get_b_panel(1, xset::panel::tool_l);
+    // clang-format off
+    g_signal_connect(G_OBJECT(this->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), this);
+    g_signal_connect(G_OBJECT(this->path_bar_), "focus-in-event", G_CALLBACK(on_address_bar_focus_in), this);
+    // clang-format on
 
-    // destroy
-    if (file_browser->toolbar)
-    {
-        if (GTK_IS_WIDGET(file_browser->toolbar))
-        {
-            gtk_widget_destroy(GTK_WIDGET(file_browser->toolbar));
-        }
-        file_browser->toolbar = nullptr;
-        file_browser->path_bar_ = nullptr;
-    }
-
-    if (!file_browser->path_bar_)
-    {
-        file_browser->path_bar_ = ptk_path_entry_new(file_browser);
-
-        // clang-format off
-        g_signal_connect(G_OBJECT(file_browser->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), file_browser);
-        g_signal_connect(G_OBJECT(file_browser->path_bar_), "focus-in-event", G_CALLBACK(on_address_bar_focus_in), file_browser);
-        // clang-format on
-    }
-
-    // create toolbar
-    file_browser->toolbar = GTK_TOOLBAR(gtk_toolbar_new());
-    gtk_box_pack_start(file_browser->toolbox_, GTK_WIDGET(file_browser->toolbar), true, true, 0);
-    gtk_toolbar_set_style(file_browser->toolbar, GtkToolbarStyle::GTK_TOOLBAR_ICONS);
-    if (config::settings->icon_size_tool() > 0 &&
-        config::settings->icon_size_tool() <= GtkIconSize::GTK_ICON_SIZE_DIALOG)
-    {
-        gtk_toolbar_set_icon_size(file_browser->toolbar,
-                                  (GtkIconSize)config::settings->icon_size_tool());
-    }
+    std::vector<xset::name> items;
 
     // fill left toolbar
-    xset_fill_toolbar(GTK_WIDGET(file_browser),
-                      file_browser,
-                      file_browser->toolbar,
-                      xset_get_panel(p, xset::panel::tool_l),
-                      show_tooltips);
+    items = {xset::name::go_back,
+             xset::name::go_forward,
+             xset::name::go_up,
+             xset::name::go_home,
+             xset::name::tab_new};
+    xset_fill_toolbar(this, this->toolbar, items);
 
     // add pathbar
-    GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-    GtkToolItem* toolitem = gtk_tool_item_new();
-    gtk_tool_item_set_expand(toolitem, true);
-    gtk_toolbar_insert(file_browser->toolbar, toolitem, -1);
-    gtk_container_add(GTK_CONTAINER(toolitem), GTK_WIDGET(hbox));
-    gtk_box_pack_start(hbox, GTK_WIDGET(file_browser->path_bar_), true, true, 5);
+    gtk_box_pack_start(this->toolbar, GTK_WIDGET(this->path_bar_), true, true, 5);
 
     // fill right toolbar
-    xset_fill_toolbar(GTK_WIDGET(file_browser),
-                      file_browser,
-                      file_browser->toolbar,
-                      xset_get_panel(p, xset::panel::tool_r),
-                      show_tooltips);
+    items = {
+        xset::name::view_refresh,
+    };
+    xset_fill_toolbar(this, this->toolbar, items);
 
-    // show
-    if (xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
-    {
-        gtk_widget_show_all(GTK_WIDGET(file_browser->toolbox_));
-    }
+    gtk_widget_show_all(GTK_WIDGET(this->toolbar));
 }
 
 static bool
@@ -904,9 +790,12 @@ ptk_file_browser_init(ptk::browser* file_browser) noexcept
     // clang-format on
 
     // toolbox
-    file_browser->toolbar = nullptr;
-    file_browser->toolbox_ = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-    gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->toolbox_), false, false, 0);
+    file_browser->toolbar = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_widget_set_margin_start(GTK_WIDGET(file_browser->toolbar), 0);
+    gtk_widget_set_margin_end(GTK_WIDGET(file_browser->toolbar), 0);
+    gtk_widget_set_margin_top(GTK_WIDGET(file_browser->toolbar), 2);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->toolbar), 2);
+    gtk_box_pack_start(GTK_BOX(file_browser), GTK_WIDGET(file_browser->toolbar), false, false, 0);
 
     // lists area
     file_browser->hpane = GTK_PANED(gtk_paned_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL));
@@ -1022,12 +911,6 @@ ptk_file_browser_finalize(GObject* obj) noexcept
         g_object_unref(G_OBJECT(file_browser->file_list_));
     }
 
-    for (auto& toolbar_widget : file_browser->toolbar_widgets)
-    {
-        g_slist_free(toolbar_widget);
-        toolbar_widget = nullptr;
-    }
-
     G_OBJECT_CLASS(parent_class)->finalize(obj);
 
     /* Ensuring free space at the end of the heap is freed to the OS,
@@ -1067,11 +950,6 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
     file_browser->task_view_ = task_view;
     file_browser->main_window_ = main_window;
 
-    for (auto& toolbar_widget : file_browser->toolbar_widgets)
-    {
-        toolbar_widget = nullptr;
-    }
-
     if (xset_get_b_panel(curpanel, xset::panel::list_detailed))
     {
         file_browser->view_mode_ = ptk::browser::view_mode::list_view;
@@ -1107,6 +985,9 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
                                   GTK_WIDGET(file_browser->folder_view_));
     // gtk_widget_show_all(GTK_WIDGET(file_browser->folder_view_scroll_));
+
+    file_browser->rebuild_toolbox();
+    file_browser->rebuild_toolbars();
 
     gtk_widget_show_all(GTK_WIDGET(file_browser));
 
@@ -4793,20 +4674,15 @@ ptk::browser::update_views() noexcept
     // hide/show browser widgets based on user settings
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
-    bool need_enable_toolbar = false;
+    // bool need_enable_toolbar = false;
 
     if (xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
     {
-        if (!this->toolbar)
-        {
-            rebuild_toolbox(nullptr, this);
-            need_enable_toolbar = true;
-        }
-        gtk_widget_show_all(GTK_WIDGET(this->toolbox_));
+        gtk_widget_show_all(GTK_WIDGET(this->toolbar));
     }
     else
     {
-        gtk_widget_hide(GTK_WIDGET(this->toolbox_));
+        gtk_widget_hide(GTK_WIDGET(this->toolbar));
     }
 
     if (xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
@@ -4872,16 +4748,9 @@ ptk::browser::update_views() noexcept
         gtk_widget_hide(GTK_WIDGET(this->side_vbox));
     }
 
-    if (need_enable_toolbar)
-    {
-        this->enable_toolbar();
-    }
-    else
-    {
-        // toggle sidepane toolbar buttons
-        this->update_toolbar_widgets(xset::tool::devices);
-        this->update_toolbar_widgets(xset::tool::tree);
-    }
+    // toggle sidepane toolbar buttons
+    this->update_toolbar_widgets(xset::tool::devices);
+    this->update_toolbar_widgets(xset::tool::tree);
 
     // set slider positions
 
@@ -5145,21 +5014,12 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
 void
 ptk::browser::rebuild_toolbars() noexcept
 {
-    for (auto& toolbar_widget : this->toolbar_widgets)
-    {
-        g_slist_free(toolbar_widget);
-        toolbar_widget = nullptr;
-    }
-    if (this->toolbar)
-    {
-        rebuild_toolbox(nullptr, this);
-        const auto& cwd = this->cwd();
+    const auto& cwd = this->cwd();
 #if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
+    gtk_editable_set_text(GTK_EDITABLE(this->path_bar_), cwd.c_str());
 #elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
+    gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
 #endif
-    }
 
     this->enable_toolbar();
 }
@@ -5597,43 +5457,7 @@ ptk::browser::seek_path(const std::filesystem::path& seek_dir,
 }
 
 void
-ptk::browser::update_toolbar_widgets(const xset_t& set, xset::tool tool_type) noexcept
-{
-    (void)tool_type;
-
-    assert(set != nullptr);
-
-    if (set && !set->lock && set->menu_style == xset::menu::check &&
-        set->tool == xset::tool::custom)
-    {
-        // a custom checkbox is being updated
-        for (GSList* l = this->toolbar_widgets[7]; l; l = g_slist_next(l))
-        {
-            const xset_t test_set =
-                xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(l->data), "set")));
-            if (set == test_set)
-            {
-                GtkWidget* widget = GTK_WIDGET(l->data);
-                if (GTK_IS_TOGGLE_BUTTON(widget))
-                {
-                    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),
-                                                 set->b == xset::b::xtrue);
-                    return;
-                }
-            }
-        }
-        ztd::logger::warn("ptk::browser::update_toolbar_widget widget not found for set");
-        return;
-    }
-    else if (set)
-    {
-        ztd::logger::warn("ptk::browser::update_toolbar_widget invalid set");
-        return;
-    }
-}
-
-void
-ptk::browser::update_toolbar_widgets(xset::tool tool_type) noexcept
+ptk::browser::update_toolbar_widgets(xset::tool tool_type) const noexcept
 {
     // builtin tool
     bool b = false;
@@ -5688,24 +5512,6 @@ ptk::browser::update_toolbar_widgets(xset::tool tool_type) noexcept
         case xset::tool::invalid:
             ztd::logger::warn("ptk::browser::update_toolbar_widget invalid tool_type");
             return;
-    }
-
-    // update all widgets in list
-    for (GSList* l = this->toolbar_widgets[x]; l; l = g_slist_next(l))
-    {
-        GtkWidget* widget = GTK_WIDGET(l->data);
-        if (GTK_IS_TOGGLE_BUTTON(widget))
-        {
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), b);
-        }
-        else if (GTK_IS_WIDGET(widget))
-        {
-            gtk_widget_set_sensitive(widget, b);
-        }
-        else
-        {
-            ztd::logger::warn("ptk::browser::update_toolbar_widget invalid widget");
-        }
     }
 }
 

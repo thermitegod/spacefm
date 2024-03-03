@@ -438,9 +438,6 @@ enum class name
     panel1_detcol_mtime,
     panel1_sort_extra,
     panel1_book_fol,
-    panel1_tool_l,
-    panel1_tool_r,
-    panel1_tool_s,
 
     // panel2
     panel2_show_toolbox,
@@ -466,9 +463,6 @@ enum class name
     panel2_detcol_mtime,
     panel2_sort_extra,
     panel2_book_fol,
-    panel2_tool_l,
-    panel2_tool_r,
-    panel2_tool_s,
 
     // panel3
     panel3_show_toolbox,
@@ -494,9 +488,6 @@ enum class name
     panel3_detcol_mtime,
     panel3_sort_extra,
     panel3_book_fol,
-    panel3_tool_l,
-    panel3_tool_r,
-    panel3_tool_s,
 
     // panel4
     panel4_show_toolbox,
@@ -522,9 +513,6 @@ enum class name
     panel4_detcol_mtime,
     panel4_sort_extra,
     panel4_book_fol,
-    panel4_tool_l,
-    panel4_tool_r,
-    panel4_tool_s,
 
     // panel modes
 
@@ -554,9 +542,6 @@ enum class name
     panel1_detcol_mtime0,
     panel1_sort_extra0,
     panel1_book_fol0,
-    panel1_tool_l0,
-    panel1_tool_r0,
-    panel1_tool_s0,
 
     // panel1 mode 1
     panel1_show_toolbox1,
@@ -582,9 +567,6 @@ enum class name
     panel1_detcol_mtime1,
     panel1_sort_extra1,
     panel1_book_fol1,
-    panel1_tool_l1,
-    panel1_tool_r1,
-    panel1_tool_s1,
 
     // panel1 mode 2
     panel1_show_toolbox2,
@@ -610,9 +592,6 @@ enum class name
     panel1_detcol_mtime2,
     panel1_sort_extra2,
     panel1_book_fol2,
-    panel1_tool_l2,
-    panel1_tool_r2,
-    panel1_tool_s2,
 
     // panel1 mode 3
     panel1_show_toolbox3,
@@ -638,9 +617,6 @@ enum class name
     panel1_detcol_mtime3,
     panel1_sort_extra3,
     panel1_book_fol3,
-    panel1_tool_l3,
-    panel1_tool_r3,
-    panel1_tool_s3,
 
     // panel2
 
@@ -668,9 +644,6 @@ enum class name
     panel2_detcol_mtime0,
     panel2_sort_extra0,
     panel2_book_fol0,
-    panel2_tool_l0,
-    panel2_tool_r0,
-    panel2_tool_s0,
 
     // panel2 mode 1
     panel2_show_toolbox1,
@@ -696,9 +669,6 @@ enum class name
     panel2_detcol_mtime1,
     panel2_sort_extra1,
     panel2_book_fol1,
-    panel2_tool_l1,
-    panel2_tool_r1,
-    panel2_tool_s1,
 
     // panel2 mode 2
     panel2_show_toolbox2,
@@ -724,9 +694,6 @@ enum class name
     panel2_detcol_mtime2,
     panel2_sort_extra2,
     panel2_book_fol2,
-    panel2_tool_l2,
-    panel2_tool_r2,
-    panel2_tool_s2,
 
     // panel2 mode 3
     panel2_show_toolbox3,
@@ -752,9 +719,6 @@ enum class name
     panel2_detcol_mtime3,
     panel2_sort_extra3,
     panel2_book_fol3,
-    panel2_tool_l3,
-    panel2_tool_r3,
-    panel2_tool_s3,
 
     // panel3
 
@@ -782,9 +746,6 @@ enum class name
     panel3_detcol_mtime0,
     panel3_sort_extra0,
     panel3_book_fol0,
-    panel3_tool_l0,
-    panel3_tool_r0,
-    panel3_tool_s0,
 
     // panel3 mode 1
     panel3_show_toolbox1,
@@ -810,9 +771,6 @@ enum class name
     panel3_detcol_mtime1,
     panel3_sort_extra1,
     panel3_book_fol1,
-    panel3_tool_l1,
-    panel3_tool_r1,
-    panel3_tool_s1,
 
     // panel3 mode 2
     panel3_show_toolbox2,
@@ -838,9 +796,6 @@ enum class name
     panel3_detcol_mtime2,
     panel3_sort_extra2,
     panel3_book_fol2,
-    panel3_tool_l2,
-    panel3_tool_r2,
-    panel3_tool_s2,
 
     // panel3 mode 3
     panel3_show_toolbox3,
@@ -866,9 +821,6 @@ enum class name
     panel3_detcol_mtime3,
     panel3_sort_extra3,
     panel3_book_fol3,
-    panel3_tool_l3,
-    panel3_tool_r3,
-    panel3_tool_s3,
 
     // panel4
 
@@ -896,9 +848,6 @@ enum class name
     panel4_detcol_mtime0,
     panel4_sort_extra0,
     panel4_book_fol0,
-    panel4_tool_l0,
-    panel4_tool_r0,
-    panel4_tool_s0,
 
     // panel4 mode 1
     panel4_show_toolbox1,
@@ -924,9 +873,6 @@ enum class name
     panel4_detcol_mtime1,
     panel4_sort_extra1,
     panel4_book_fol1,
-    panel4_tool_l1,
-    panel4_tool_r1,
-    panel4_tool_s1,
 
     // panel4 mode 2
     panel4_show_toolbox2,
@@ -952,9 +898,6 @@ enum class name
     panel4_detcol_mtime2,
     panel4_sort_extra2,
     panel4_book_fol2,
-    panel4_tool_l2,
-    panel4_tool_r2,
-    panel4_tool_s2,
 
     // panel4 mode 3
     panel4_show_toolbox3,
@@ -980,9 +923,6 @@ enum class name
     panel4_detcol_mtime3,
     panel4_sort_extra3,
     panel4_book_fol3,
-    panel4_tool_l3,
-    panel4_tool_r3,
-    panel4_tool_s3,
 
     // speed
     book_newtab,
@@ -1025,11 +965,6 @@ enum class name
     handler_network_ssh,
     handler_network_udevil,
     handler_network_udevilsmb,
-
-    // other
-    tool_l,
-    tool_r,
-    tool_s,
 };
 
 enum class panel
@@ -1058,9 +993,6 @@ enum class panel
     detcol_mtime,
     sort_extra,
     book_fol,
-    tool_l,
-    tool_r,
-    tool_s,
 };
 
 enum class var

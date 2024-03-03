@@ -131,7 +131,6 @@ struct browser
     MainWindow* main_window_{nullptr};
     GtkNotebook* notebook_{nullptr};
     GtkWidget* task_view_{nullptr};
-    GtkBox* toolbox_{nullptr};
     GtkEntry* path_bar_{nullptr};
     GtkPaned* hpane{nullptr};
     GtkBox* side_vbox{nullptr};
@@ -144,8 +143,7 @@ struct browser
     GtkWidget* side_dev{nullptr};
     GtkStatusbar* statusbar{nullptr};
     GtkLabel* statusbar_label{nullptr};
-    GtkToolbar* toolbar{nullptr};
-    GSList* toolbar_widgets[10];
+    GtkBox* toolbar{nullptr};
 
     // private:
     struct navigation_history_data
@@ -270,12 +268,11 @@ struct browser
     void save_column_widths() const noexcept;
     bool slider_release(GtkPaned* pane) const noexcept;
 
+    void rebuild_toolbox() noexcept;
     void rebuild_toolbars() noexcept;
 
     void seek_path(const std::filesystem::path& seek_dir,
                    const std::filesystem::path& seek_name) noexcept;
-    void update_toolbar_widgets(xset::tool tool_type) noexcept;
-    void update_toolbar_widgets(const xset_t& set_ptr, xset::tool tool_type) noexcept;
 
     void show_history_menu(bool is_back_history, GdkEvent* event) noexcept;
 
@@ -318,6 +315,9 @@ struct browser
     GtkWidget* task_view() const noexcept;
     MainWindow* main_window() const noexcept;
     GtkEntry* path_bar() const noexcept;
+
+  private:
+    void update_toolbar_widgets(xset::tool tool_type) const noexcept;
 
   public:
     // signal
@@ -464,7 +464,6 @@ struct browser
 GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                                 MainWindow* main_window) noexcept;
 
-void ptk_file_browser_add_toolbar_widget(const xset_t& set, GtkWidget* widget) noexcept;
 bool ptk_file_browser_delay_focus(ptk::browser* file_browser) noexcept;
 
 // xset callback wrapper functions

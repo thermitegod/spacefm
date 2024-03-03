@@ -34,7 +34,7 @@ struct panel_lookup_data
     std::array<std::array<xset::name, 4>, MAX_PANELS> panel_mode{};
 };
 
-static constexpr ztd::map<xset::panel, panel_lookup_data, 27> xset_panel_lookup{{{
+static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{{{
     {
         xset::panel::show,
         {
@@ -894,117 +894,6 @@ static constexpr ztd::map<xset::panel, panel_lookup_data, 27> xset_panel_lookup{
                     xset::name::panel4_book_fol1,
                     xset::name::panel4_book_fol2,
                     xset::name::panel4_book_fol3,
-                },
-            }},
-        },
-    },
-    {
-        xset::panel::tool_l,
-        {
-            {
-                xset::name::panel1_tool_l,
-                xset::name::panel2_tool_l,
-                xset::name::panel3_tool_l,
-                xset::name::panel4_tool_l,
-            },
-            {{
-                {
-                    xset::name::panel1_tool_l0,
-                    xset::name::panel1_tool_l1,
-                    xset::name::panel1_tool_l2,
-                    xset::name::panel1_tool_l3,
-                },
-                {
-                    xset::name::panel2_tool_l0,
-                    xset::name::panel2_tool_l1,
-                    xset::name::panel2_tool_l2,
-                    xset::name::panel2_tool_l3,
-                },
-                {
-                    xset::name::panel3_tool_l0,
-                    xset::name::panel3_tool_l1,
-                    xset::name::panel3_tool_l2,
-                    xset::name::panel3_tool_l3,
-                },
-                {
-                    xset::name::panel4_tool_l0,
-                    xset::name::panel4_tool_l1,
-                    xset::name::panel4_tool_l2,
-                    xset::name::panel4_tool_l3,
-                },
-            }},
-        },
-    },
-    {
-        xset::panel::tool_r,
-        {
-            {
-                xset::name::panel1_tool_r,
-                xset::name::panel2_tool_r,
-                xset::name::panel3_tool_r,
-                xset::name::panel4_tool_r,
-            },
-            {{
-                {
-                    xset::name::panel1_tool_r0,
-                    xset::name::panel1_tool_r1,
-                    xset::name::panel1_tool_r2,
-                    xset::name::panel1_tool_r3,
-                },
-                {
-                    xset::name::panel2_tool_r0,
-                    xset::name::panel2_tool_r1,
-                    xset::name::panel2_tool_r2,
-                    xset::name::panel2_tool_r3,
-                },
-                {
-                    xset::name::panel3_tool_r0,
-                    xset::name::panel3_tool_r1,
-                    xset::name::panel3_tool_r2,
-                    xset::name::panel3_tool_r3,
-                },
-                {
-                    xset::name::panel4_tool_r0,
-                    xset::name::panel4_tool_r1,
-                    xset::name::panel4_tool_r2,
-                    xset::name::panel4_tool_r3,
-                },
-            }},
-        },
-    },
-    {
-        xset::panel::tool_s,
-        {
-            {
-                xset::name::panel1_tool_s,
-                xset::name::panel2_tool_s,
-                xset::name::panel3_tool_s,
-                xset::name::panel4_tool_s,
-            },
-            {{
-                {
-                    xset::name::panel1_tool_s0,
-                    xset::name::panel1_tool_s1,
-                    xset::name::panel1_tool_s2,
-                    xset::name::panel1_tool_s3,
-                },
-                {
-                    xset::name::panel2_tool_s0,
-                    xset::name::panel2_tool_s1,
-                    xset::name::panel2_tool_s2,
-                    xset::name::panel2_tool_s3,
-                },
-                {
-                    xset::name::panel3_tool_s0,
-                    xset::name::panel3_tool_s1,
-                    xset::name::panel3_tool_s2,
-                    xset::name::panel3_tool_s3,
-                },
-                {
-                    xset::name::panel4_tool_s0,
-                    xset::name::panel4_tool_s1,
-                    xset::name::panel4_tool_s2,
-                    xset::name::panel4_tool_s3,
                 },
             }},
         },

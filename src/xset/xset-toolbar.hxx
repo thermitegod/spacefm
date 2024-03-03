@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include <span>
+
 #include <optional>
 
 #include <gtkmm.h>
@@ -26,10 +28,9 @@
 
 #include "xset/xset.hxx"
 
-void xset_fill_toolbar(GtkWidget* parent, ptk::browser* file_browser, GtkToolbar* toolbar,
-                       const xset_t& set_parent, bool show_tooltips) noexcept;
+void xset_fill_toolbar(ptk::browser* file_browser, GtkBox* toolbar,
+                       const std::span<const xset::name> toolbar_items) noexcept;
 
-const std::string xset_get_builtin_toolitem_label(xset::tool tool_type) noexcept;
 const xset_t xset_new_builtin_toolitem(xset::tool tool_type) noexcept;
 void xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event) noexcept;
 

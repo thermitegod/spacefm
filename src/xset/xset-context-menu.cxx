@@ -357,11 +357,6 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             {
                 cb_func(item, cb_data);
             }
-
-            if (set->tool == xset::tool::custom)
-            {
-                set->browser->update_toolbar_widgets(set, xset::tool::invalid);
-            }
             break;
         case xset::menu::string:
         {

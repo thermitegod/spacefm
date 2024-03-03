@@ -62,7 +62,6 @@ gboolean gdk_event_get_position(GdkEvent* event, double* x, double* y) noexcept;
 #define gtk_popover_set_child(container, widget)            (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
 #define gtk_scrolled_window_set_child(container, widget)    (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
 #define gtk_toggle_button_set_child(container, widget)      (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
-#define gtk_toolbar_set_child(container, widget)            (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
 #define gtk_viewport_set_child(container, widget)           (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
 #define gtk_window_set_child(container, widget)             (gtk_container_add(GTK_CONTAINER(container), GTK_WIDGET(widget)))
 // clang-format on

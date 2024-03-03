@@ -19,6 +19,8 @@
 #include <gdkmm.h>
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -27,7 +29,6 @@
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-toolbar.hxx"
 #include "xset/xset-keyboard.hxx"
 #include "xset/utils/xset-utils.hxx"
 
@@ -208,7 +209,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
     }
     else if (set->tool > xset::tool::custom)
     {
-        name = xset_get_builtin_toolitem_label(set->tool);
+        name = magic_enum::enum_name(set->tool);
     }
     else
     {
