@@ -22,4 +22,7 @@
 
 #include <ztd/ztd.hxx>
 
-void xset_edit(GtkWidget* parent, const std::filesystem::path& path) noexcept;
+namespace vfs::utils
+{
+void open_editor(const std::filesystem::path& path) noexcept;
+}

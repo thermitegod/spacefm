@@ -47,7 +47,6 @@
 #include "types.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-misc.hxx"
 
 #include "utils/shell-quote.hxx"
 
@@ -57,6 +56,7 @@
 
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-volume.hxx"
+#include "vfs/utils/vfs-editor.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
@@ -1680,7 +1680,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, std::format("no such file '{}'", value)};
             }
-            xset_edit(GTK_WIDGET(file_browser), value);
+            vfs::utils::open_editor(value);
         }
         else if (property == "mount" || property == "umount")
         { // mount or unmount TARGET

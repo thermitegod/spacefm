@@ -22,14 +22,10 @@
 
 #include <vector>
 
-#include <optional>
-
 #include <memory>
 
 #include <gtkmm.h>
 #include <glibmm.h>
-
-#include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
@@ -39,25 +35,16 @@
 #include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-misc.hxx"
+
+#include "vfs/utils/vfs-editor.hxx"
 
 void
-xset_edit(GtkWidget* parent, const std::filesystem::path& path) noexcept
+vfs::utils::open_editor(const std::filesystem::path& path) noexcept
 {
-    GtkWidget* dlgparent = nullptr;
-    if (parent)
-    {
-#if (GTK_MAJOR_VERSION == 4)
-        dlgparent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(parent)));
-#elif (GTK_MAJOR_VERSION == 3)
-        dlgparent = gtk_widget_get_toplevel(GTK_WIDGET(parent));
-#endif
-    }
-
     const auto check_editor = xset_get_s(xset::name::editor);
     if (!check_editor)
     {
-        ptk::dialog::error(dlgparent ? GTK_WINDOW(dlgparent) : nullptr,
+        ptk::dialog::error(nullptr,
                            "Editor Not Set",
                            "Please set your editor in View|Preferences|Advanced");
         return;

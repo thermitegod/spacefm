@@ -432,7 +432,6 @@ sources += files(
   'src/xset/xset-dialog.cxx',
   'src/xset/xset-keyboard.cxx',
   'src/xset/xset-lookup.cxx',
-  'src/xset/xset-misc.cxx',
 
   'src/xset/utils/xset-utils.cxx',
 
@@ -486,6 +485,7 @@ sources += files(
   'src/vfs/vfs-user-dirs.cxx',
   'src/vfs/vfs-volume.cxx',
 
+  'src/vfs/utils/vfs-editor.cxx',
   'src/vfs/utils/vfs-utils.cxx',
 
   'src/vfs/thumbnails/thumbnails.cxx',

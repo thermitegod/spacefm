@@ -44,12 +44,12 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-misc.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-mime-monitor.hxx"
+#include "vfs/utils/vfs-editor.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-app-chooser.hxx"
@@ -288,7 +288,7 @@ static void
 on_file_edit(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    xset_edit(GTK_WIDGET(data->browser), data->file_path);
+    vfs::utils::open_editor(data->file_path);
 }
 
 static void
@@ -1698,7 +1698,8 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                     return;
                 }
             }
-            xset_edit(GTK_WIDGET(data->browser), path);
+            on_file_edit(nullptr, data);
+            vfs::utils::open_editor(path);
             break;
         }
         case ptk::file_menu::app_job::view:
@@ -1706,7 +1707,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             const auto desktop_path = get_shared_desktop_file_location(desktop->name());
             if (desktop_path)
             {
-                xset_edit(GTK_WIDGET(data->browser), desktop_path.value());
+               vfs::utils::open_editor(desktop_path.value());
             }
             break;
         }
@@ -1714,7 +1715,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
         {
             // $XDG_CONFIG_HOME=[~/.config]/mimeapps.list
             const auto path = vfs::user::config() / "mimeapps.list";
-            xset_edit(GTK_WIDGET(data->browser), path);
+            vfs::utils::open_editor(path);
             break;
         }
         case ptk::file_menu::app_job::browse:
@@ -1879,7 +1880,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             }
             if (std::filesystem::exists(mime_file))
             {
-                xset_edit(GTK_WIDGET(data->browser), mime_file);
+                vfs::utils::open_editor(mime_file);
             }
 
             vfs::mime_monitor();
@@ -1891,14 +1892,14 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             const auto path = std::filesystem::path() / "/usr/share/mime" / str2;
             if (std::filesystem::exists(path))
             {
-                xset_edit(GTK_WIDGET(data->browser), path);
+                vfs::utils::open_editor(path);
             }
             break;
         }
         case ptk::file_menu::app_job::view_over:
         {
             const std::filesystem::path path = "/usr/share/mime/packages/Overrides.xml";
-            xset_edit(GTK_WIDGET(data->browser), path);
+            vfs::utils::open_editor(path);
             break;
         }
         case ptk::file_menu::app_job::browse_mime_usr:
@@ -2632,7 +2633,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
     {
         if (set->xset_name == xset::name::open_edit)
         {
-            xset_edit(GTK_WIDGET(data->browser), data->file_path);
+            vfs::utils::open_editor(data->file_path);
         }
         else if (set->xset_name == xset::name::open_other)
         {
