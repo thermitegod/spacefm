@@ -433,7 +433,6 @@ sources += files(
   'src/xset/xset-keyboard.cxx',
   'src/xset/xset-lookup.cxx',
   'src/xset/xset-misc.cxx',
-  'src/xset/xset-toolbar.cxx',
 
   'src/xset/utils/xset-utils.cxx',
 

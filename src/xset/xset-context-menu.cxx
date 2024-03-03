@@ -80,12 +80,6 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon) noe
     {
         item = gtk_menu_item_new_with_mnemonic(label.data());
     }
-    // if (!(icon && icon[0]))
-    // {
-    //     return item;
-    // }
-    // GtkWidget* image = xset_get_image(icon, GtkIconSize::GTK_ICON_SIZE_MENU);
-
     return item;
 }
 

@@ -41,31 +41,6 @@
 #include "xset/xset.hxx"
 #include "xset/xset-misc.hxx"
 
-GtkWidget*
-xset_get_image(const std::string_view icon, GtkIconSize icon_size) noexcept
-{
-    /*
-        GtkIconSize::GTK_ICON_SIZE_MENU,
-        GtkIconSize::GTK_ICON_SIZE_SMALL_TOOLBAR,
-        GtkIconSize::GTK_ICON_SIZE_LARGE_TOOLBAR,
-        GtkIconSize::GTK_ICON_SIZE_BUTTON,
-        GtkIconSize::GTK_ICON_SIZE_DND,
-        GtkIconSize::GTK_ICON_SIZE_DIALOG
-    */
-
-    if (icon.empty())
-    {
-        return nullptr;
-    }
-
-    if (!icon_size)
-    {
-        icon_size = GtkIconSize::GTK_ICON_SIZE_MENU;
-    }
-
-    return gtk_image_new_from_icon_name(icon.data(), icon_size);
-}
-
 void
 xset_edit(GtkWidget* parent, const std::filesystem::path& path) noexcept
 {

@@ -15,15 +15,11 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
 
 #include <gtkmm.h>
 #include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
-
-GtkWidget* xset_get_image(const std::string_view icon, GtkIconSize icon_size) noexcept;
 
 void xset_edit(GtkWidget* parent, const std::filesystem::path& path) noexcept;

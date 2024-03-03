@@ -62,7 +62,6 @@
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/xset-toolbar.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
@@ -613,6 +612,80 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* file_browser) noexcept
     }
 }
 
+static bool
+on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set) noexcept
+{
+    const auto button = gdk_button_event_get_button(event);
+    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu_label.value_or(""), button);
+
+    const auto type = gdk_event_get_event_type(event);
+    if (type != GdkEventType::GDK_BUTTON_PRESS)
+    {
+        return false;
+    }
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
+
+    // get and focus browser
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
+    file_browser->focus_me();
+    set->browser = file_browser;
+
+    if (button == 1 && keymod == 0)
+    { // left click and no modifier
+        // ztd::logger::debug("set={}  menu={}", set->name, magic_enum::enum_name(set->menu_style));
+        set->browser->on_action(set->xset_name);
+        return true;
+    }
+    return true;
+}
+
+void
+fill_toolbar(ptk::browser* file_browser, GtkBox* toolbar,
+             const std::span<const xset::name> toolbar_items) noexcept
+{
+    for (const auto item : toolbar_items)
+    {
+        xset_t set = xset_get(item);
+        set->browser = file_browser;
+
+        const auto icon_size = config::settings->icon_size_tool();
+
+        // get real icon size from gtk icon size
+        i32 icon_w = 0;
+        i32 icon_h = 0;
+        gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
+
+        GtkWidget* image = nullptr;
+
+        // builtin tool item
+        if (set->icon)
+        {
+            // image = xset_get_image(set->icon.value(), (GtkIconSize)icon_size);
+            image = gtk_image_new_from_icon_name(set->icon.value().data(), (GtkIconSize)icon_size);
+        }
+        else
+        {
+            ztd::logger::warn("set missing icon {}", set->name);
+            // image = xset_get_image("gtk-execute", (GtkIconSize)icon_size);
+            image = gtk_image_new_from_icon_name("gtk-execute", (GtkIconSize)icon_size);
+        }
+
+        GtkButton* btn = GTK_BUTTON(gtk_button_new());
+        gtk_widget_show(GTK_WIDGET(image));
+        gtk_button_set_image(btn, image);
+        gtk_button_set_always_show_image(btn, true);
+        gtk_button_set_relief(btn, GTK_RELIEF_NONE);
+
+        // clang-format off
+        g_signal_connect(G_OBJECT(btn), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set.get());
+        // clang-format on
+
+        g_object_set_data(G_OBJECT(btn), "browser", file_browser);
+
+        gtk_box_pack_start(toolbar, GTK_WIDGET(btn), false, false, 0);
+    }
+}
+
 void
 ptk::browser::rebuild_toolbox() noexcept
 {
@@ -633,7 +706,7 @@ ptk::browser::rebuild_toolbox() noexcept
              xset::name::go_up,
              xset::name::go_home,
              xset::name::tab_new};
-    xset_fill_toolbar(this, this->toolbar, items);
+    fill_toolbar(this, this->toolbar, items);
 
     // add pathbar
     gtk_box_pack_start(this->toolbar, GTK_WIDGET(this->path_bar_), true, true, 5);
@@ -642,7 +715,7 @@ ptk::browser::rebuild_toolbox() noexcept
     items = {
         xset::name::view_refresh,
     };
-    xset_fill_toolbar(this, this->toolbar, items);
+    fill_toolbar(this, this->toolbar, items);
 
     gtk_widget_show_all(GTK_WIDGET(this->toolbar));
 }
