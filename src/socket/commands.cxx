@@ -47,8 +47,6 @@
 #include "types.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-custom.hxx"
-#include "xset/xset-context-menu.hxx"
 #include "xset/xset-misc.hxx"
 
 #include "utils/shell-quote.hxx"
@@ -80,6 +78,7 @@ unescape(const std::string_view t) noexcept
     return unescaped;
 }
 
+#if 0
 static bool
 delayed_show_menu(GtkWidget* menu) noexcept
 {
@@ -93,6 +92,7 @@ delayed_show_menu(GtkWidget* menu) noexcept
     g_signal_connect(G_OBJECT(menu), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);
     return false;
 }
+#endif
 
 const std::tuple<char, std::string>
 socket::command(const std::string_view socket_commands_json) noexcept
@@ -1906,6 +1906,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     }
     else if (command == "activate")
     {
+#if 0
         const std::vector<std::string> data = json["data"];
 
         xset_t set = xset_find_custom(data[i]);
@@ -1934,6 +1935,9 @@ socket::command(const std::string_view socket_commands_json) noexcept
             // activate item
             main_window->keypress(nullptr, set.get());
         }
+#else
+        return {SOCKET_INVALID, "Not Implemented"};
+#endif
     }
     else if (command == "add-event" || command == "replace-event" || command == "remove-event")
     {

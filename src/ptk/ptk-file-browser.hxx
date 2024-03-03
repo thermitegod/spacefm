@@ -269,12 +269,10 @@ struct browser
     bool slider_release(GtkPaned* pane) const noexcept;
 
     void rebuild_toolbox() noexcept;
-    void rebuild_toolbars() noexcept;
+    void rebuild_toolbars() const noexcept;
 
     void seek_path(const std::filesystem::path& seek_dir,
                    const std::filesystem::path& seek_name) noexcept;
-
-    void show_history_menu(bool is_back_history, GdkEvent* event) noexcept;
 
     void update_statusbar() const noexcept;
 
@@ -284,7 +282,6 @@ struct browser
     void on_action(const xset::name setname) noexcept;
 
     void focus_folder_view() noexcept;
-    void enable_toolbar() noexcept;
 
     void update_tab_label() noexcept;
 
@@ -315,9 +312,6 @@ struct browser
     GtkWidget* task_view() const noexcept;
     MainWindow* main_window() const noexcept;
     GtkEntry* path_bar() const noexcept;
-
-  private:
-    void update_toolbar_widgets(xset::tool tool_type) const noexcept;
 
   public:
     // signal

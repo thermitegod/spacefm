@@ -15,11 +15,7 @@
 
 #pragma once
 
-#include <string>
-
 #include <span>
-
-#include <optional>
 
 #include <gtkmm.h>
 #include <gdkmm.h>
@@ -30,14 +26,3 @@
 
 void xset_fill_toolbar(ptk::browser* file_browser, GtkBox* toolbar,
                        const std::span<const xset::name> toolbar_items) noexcept;
-
-const xset_t xset_new_builtin_toolitem(xset::tool tool_type) noexcept;
-void xset_builtin_tool_activate(xset::tool tool_type, const xset_t& set, GdkEvent* event) noexcept;
-
-struct builtin_tool_data
-{
-    std::optional<std::string> name;
-    std::optional<std::string> icon;
-    std::optional<xset::name> shared_key;
-};
-const ztd::map<xset::tool, builtin_tool_data, 19>& xset_toolbar_builtin_tools() noexcept;

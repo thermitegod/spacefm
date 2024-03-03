@@ -2179,7 +2179,6 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noex
         {
             // user released left button - due to an apparent gtk bug, activate
             // does not always fire on this event so handle it ourselves
-            // see also settings.c xset_design_cb()
             // test: gtk2 Crux theme with touchpad on Edit|Copy To|Location
             // https://github.com/IgnorantGuru/spacefm/issues/31
             // https://github.com/IgnorantGuru/spacefm/issues/228

@@ -428,10 +428,7 @@ sources += files(
 
   'src/xset/xset.cxx',
   'src/xset/xset-context-menu.cxx',
-  'src/xset/xset-custom.cxx',
   'src/xset/xset-defaults.cxx',
-  'src/xset/xset-design.cxx',
-  'src/xset/xset-design-clipboard.cxx',
   'src/xset/xset-dialog.cxx',
   'src/xset/xset-keyboard.cxx',
   'src/xset/xset-lookup.cxx',

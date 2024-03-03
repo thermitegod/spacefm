@@ -32,8 +32,6 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-custom.hxx"
-#include "xset/xset-design.hxx"
 #include "xset/xset-dialog.hxx"
 #include "xset/utils/xset-utils.hxx"
 
@@ -221,25 +219,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
         i32 icon_w = 0;
         i32 icon_h = 0;
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
-        const i32 icon_size = icon_w > icon_h ? icon_w : icon_h;
-
-        GdkPixbuf* app_icon = nullptr;
-        const auto cmd_type = xset::cmd(xset_get_int(set, xset::var::x));
-        if (!set->lock && cmd_type == xset::cmd::app)
-        {
-            // Application
-            const std::string menu_label = xset_custom_get_app_name_icon(set, &app_icon, icon_size);
-            item = xset_new_menuitem(menu_label, "");
-        }
-        else
-        {
-            item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
-        }
-
-        if (app_icon)
-        {
-            g_object_unref(app_icon);
-        }
+        item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
     }
 
     set->browser = file_browser;
@@ -297,9 +277,6 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
 #endif
         }
     }
-    // design mode callback
-    g_signal_connect(G_OBJECT(item), "button-press-event", G_CALLBACK(xset_design_cb), set.get());
-    g_signal_connect(G_OBJECT(item), "button-release-event", G_CALLBACK(xset_design_cb), set.get());
 
     gtk_widget_set_sensitive(item, !set->disable);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);

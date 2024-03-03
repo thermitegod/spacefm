@@ -1025,32 +1025,6 @@ ptk::browser::update_tab_label() noexcept
     }
 }
 
-static void
-on_history_menu_item_activate(GtkWidget* menu_item, ptk::browser* file_browser) noexcept
-{
-    const std::filesystem::path path =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(menu_item), "path"));
-    file_browser->chdir(path);
-}
-
-static GtkWidget*
-add_history_menu_item(ptk::browser* file_browser, GtkWidget* menu,
-                      const std::filesystem::path& path) noexcept
-{
-    GtkWidget* menu_item = gtk_menu_item_new_with_label(path.filename().c_str());
-    g_object_set_data_full(G_OBJECT(menu_item),
-                           "path",
-                           ::utils::strdup(path.c_str()),
-                           (GDestroyNotify)std::free);
-
-    // clang-format off
-    g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(on_history_menu_item_activate), file_browser);
-    // clang-format on
-
-    gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
-    return menu_item;
-}
-
 void
 ptk::browser::on_folder_content_changed(const std::shared_ptr<vfs::file>& file) noexcept
 {
@@ -2999,8 +2973,6 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 #endif
     }
 
-    this->enable_toolbar();
-
     return true;
 }
 
@@ -3420,8 +3392,6 @@ ptk::browser::show_hidden_files(bool show) noexcept
         ptk::view::dir_tree::show_hidden_files(GTK_TREE_VIEW(this->side_dir),
                                                this->show_hidden_files_);
     }
-
-    this->update_toolbar_widgets(xset::tool::show_hidden);
 }
 
 void
@@ -4662,7 +4632,6 @@ ptk::browser::show_thumbnails(const u32 max_file_size, const bool large_icons) n
         list->show_thumbnails(large_icons ? vfs::file::thumbnail_size::big
                                           : vfs::file::thumbnail_size::small,
                               thumbs_blacklisted ? 0 : max_file_size);
-        this->update_toolbar_widgets(xset::tool::show_thumb);
     }
 }
 
@@ -4674,7 +4643,6 @@ ptk::browser::update_views() noexcept
     // hide/show browser widgets based on user settings
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
-    // bool need_enable_toolbar = false;
 
     if (xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
     {
@@ -4748,10 +4716,6 @@ ptk::browser::update_views() noexcept
         gtk_widget_hide(GTK_WIDGET(this->side_vbox));
     }
 
-    // toggle sidepane toolbar buttons
-    this->update_toolbar_widgets(xset::tool::devices);
-    this->update_toolbar_widgets(xset::tool::tree);
-
     // set slider positions
 
     i32 pos = 0;
@@ -4798,7 +4762,6 @@ ptk::browser::update_views() noexcept
             this->folder_view(nullptr);
         }
         this->large_icons_ = large_icons;
-        this->update_toolbar_widgets(xset::tool::large_icons);
     }
 
     // List Styles
@@ -5012,7 +4975,7 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
 }
 
 void
-ptk::browser::rebuild_toolbars() noexcept
+ptk::browser::rebuild_toolbars() const noexcept
 {
     const auto& cwd = this->cwd();
 #if (GTK_MAJOR_VERSION == 4)
@@ -5020,8 +4983,6 @@ ptk::browser::rebuild_toolbars() noexcept
 #elif (GTK_MAJOR_VERSION == 3)
     gtk_entry_set_text(GTK_ENTRY(this->path_bar_), cwd.c_str());
 #endif
-
-    this->enable_toolbar();
 }
 
 void
@@ -5454,108 +5415,6 @@ ptk::browser::seek_path(const std::filesystem::path& seek_dir,
             break;
     }
     gtk_tree_path_free(path);
-}
-
-void
-ptk::browser::update_toolbar_widgets(xset::tool tool_type) const noexcept
-{
-    // builtin tool
-    bool b = false;
-    unsigned char x = 0;
-
-    switch (tool_type)
-    {
-        case xset::tool::up:
-            x = 0;
-            b = !std::filesystem::equivalent(this->cwd(), "/");
-            break;
-        case xset::tool::back:
-        case xset::tool::back_menu:
-            x = 1;
-            b = this->navigation_history->has_back();
-            break;
-        case xset::tool::fwd:
-        case xset::tool::fwd_menu:
-            x = 2;
-            b = this->navigation_history->has_forward();
-            break;
-        case xset::tool::devices:
-            x = 3;
-            b = !!this->side_dev;
-            break;
-        case xset::tool::bookmarks:
-            x = 4;
-            break;
-        case xset::tool::tree:
-            x = 5;
-            b = !!this->side_dir;
-            break;
-        case xset::tool::show_hidden:
-            x = 6;
-            b = this->show_hidden_files_;
-            break;
-        case xset::tool::show_thumb:
-            x = 8;
-            b = config::settings->show_thumbnail();
-            break;
-        case xset::tool::large_icons:
-            x = 9;
-            b = this->large_icons_;
-            break;
-        case xset::tool::NOT:
-        case xset::tool::custom:
-        case xset::tool::home:
-        case xset::tool::DEFAULT:
-        case xset::tool::refresh:
-        case xset::tool::new_tab:
-        case xset::tool::new_tab_here:
-        case xset::tool::invalid:
-            ztd::logger::warn("ptk::browser::update_toolbar_widget invalid tool_type");
-            return;
-    }
-}
-
-void
-ptk::browser::show_history_menu(bool is_back_history, GdkEvent* event) noexcept
-{
-    (void)event;
-
-    GtkWidget* menu = gtk_menu_new();
-    bool has_items = false;
-
-    if (is_back_history)
-    {
-        // back history
-        for (const auto& back_history : this->navigation_history->get_back())
-        {
-            add_history_menu_item(this, GTK_WIDGET(menu), back_history);
-            if (!has_items)
-            {
-                has_items = true;
-            }
-        }
-    }
-    else
-    {
-        // forward history
-        for (const auto& forward_history : this->navigation_history->get_back())
-        {
-            add_history_menu_item(this, GTK_WIDGET(menu), forward_history);
-            if (!has_items)
-            {
-                has_items = true;
-            }
-        }
-    }
-    if (has_items)
-    {
-        gtk_widget_show_all(GTK_WIDGET(menu));
-        gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-    }
-    else
-    {
-        gtk_widget_destroy(menu);
-    }
 }
 
 void
@@ -6259,19 +6118,6 @@ ptk::browser::focus_folder_view() noexcept
     gtk_widget_grab_focus(GTK_WIDGET(this->folder_view_));
 
     this->run_event<spacefm::signal::change_pane>();
-}
-
-void
-ptk::browser::enable_toolbar() noexcept
-{
-    this->update_toolbar_widgets(xset::tool::back);
-    this->update_toolbar_widgets(xset::tool::fwd);
-    this->update_toolbar_widgets(xset::tool::up);
-    this->update_toolbar_widgets(xset::tool::devices);
-    this->update_toolbar_widgets(xset::tool::tree);
-    this->update_toolbar_widgets(xset::tool::show_hidden);
-    this->update_toolbar_widgets(xset::tool::show_thumb);
-    this->update_toolbar_widgets(xset::tool::large_icons);
 }
 
 bool
