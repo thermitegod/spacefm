@@ -917,11 +917,8 @@ ptk_file_browser_init(ptk::browser* file_browser) noexcept
     // too much padding
     gtk_widget_set_margin_top(GTK_WIDGET(file_browser->statusbar), 0);
     gtk_widget_set_margin_bottom(GTK_WIDGET(file_browser->statusbar), 0);
+    file_browser->statusbar_label = GTK_LABEL(gtk_label_new(""));
 
-    GList* children = gtk_container_get_children(
-        GTK_CONTAINER(gtk_statusbar_get_message_area(file_browser->statusbar)));
-    file_browser->statusbar_label = GTK_LABEL(children->data);
-    g_list_free(children);
     // required for button event
     gtk_label_set_selectable(file_browser->statusbar_label, true);
     gtk_widget_set_can_focus(GTK_WIDGET(file_browser->statusbar_label), false);
