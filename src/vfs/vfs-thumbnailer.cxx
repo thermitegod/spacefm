@@ -83,10 +83,13 @@ vfs::thumbnailer::thumbnailer_thread() noexcept
             // std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
-        if (!this->abort_)
+        if (this->abort_)
         {
-            this->callback_(request.file);
+            // since thumbnail generation can take an indeterminate amount of time there
+            // needs to be another abort check before calling the callback.
+            break;
         }
+        this->callback_(request.file);
     }
 
     co_return true;
