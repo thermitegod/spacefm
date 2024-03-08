@@ -26,15 +26,15 @@
 struct socket_subcommand_data
 {
     // flags
-    std::string window{};
+    std::string window;
     panel_t panel{0};
     tab_t tab{0};
 
     // socket data
-    std::string command{};                  // get, set, etc...
-    std::string property{};                 // window-size, window-position, etc...
-    std::string subproperty{};              // values inside a property, name, size, type, etc...
-    std::vector<std::string> socket_data{}; // data to be use with property/subproperty
+    std::string command;                  // get, set, etc...
+    std::string property;                 // window-size, window-position, etc...
+    std::string subproperty;              // values inside a property, name, size, type, etc...
+    std::vector<std::string> socket_data; // data to be use with property/subproperty
 };
 
 using socket_subcommand_data_t = std::shared_ptr<socket_subcommand_data>;

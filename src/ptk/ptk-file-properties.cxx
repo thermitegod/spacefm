@@ -55,8 +55,8 @@ struct properties_dialog_data : public std::enable_shared_from_this<properties_d
     properties_dialog_data& operator=(const properties_dialog_data& other) = delete;
     properties_dialog_data& operator=(properties_dialog_data&& other) = delete;
 
-    std::span<const std::shared_ptr<vfs::file>> file_list{};
-    std::filesystem::path cwd{};
+    std::span<const std::shared_ptr<vfs::file>> file_list;
+    std::filesystem::path cwd;
 
     GtkLabel* total_size_label{nullptr};
     GtkLabel* size_on_disk_label{nullptr};

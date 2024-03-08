@@ -102,14 +102,14 @@ struct volume : public std::enable_shared_from_this<volume>
 
   private:
     dev_t devnum_{0};
-    std::string device_file_{};
-    std::string udi_{};
-    std::string disp_name_{};
-    std::string icon_{};
-    std::string mount_point_{};
+    std::string device_file_;
+    std::string udi_;
+    std::string disp_name_;
+    std::string icon_;
+    std::string mount_point_;
     u64 size_{0};
-    std::string label_{};
-    std::string fstype_{};
+    std::string label_;
+    std::string fstype_;
 
     vfs::volume::device_type device_type_{vfs::volume::device_type::block};
 

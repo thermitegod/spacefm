@@ -39,9 +39,9 @@
 struct run_task_file_opt_data
 {
     // flags
-    std::filesystem::path dir{};
+    std::filesystem::path dir;
     // file list
-    std::vector<std::string> files{};
+    std::vector<std::string> files;
 };
 
 using run_task_file_opt_data_t = std::shared_ptr<run_task_file_opt_data>;
@@ -53,12 +53,12 @@ struct run_task_cmd_opt_data
     bool popup{false};
     bool scroll{false};
     bool terminal{false};
-    std::string user{};
-    std::string title{};
-    std::string icon{};
-    std::string cwd{};
+    std::string user;
+    std::string title;
+    std::string icon;
+    std::string cwd;
     // actual command to be run
-    std::vector<std::string> cmd{};
+    std::vector<std::string> cmd;
 };
 
 using run_task_cmd_opt_data_t = std::shared_ptr<run_task_cmd_opt_data>;

@@ -124,23 +124,23 @@ struct file : public std::enable_shared_from_this<file>
     ztd::statx file_stat_; // cached copy of struct statx()
     std::filesystem::file_status status_;
 
-    std::filesystem::path path_{}; // real path on file system
-    std::string uri_{};            // uri of the real path on file system
+    std::filesystem::path path_; // real path on file system
+    std::string uri_;            // uri of the real path on file system
 
-    std::string name_{};                          // real name on file system
-    std::string display_size_{};                  // displayed human-readable file size
-    std::string display_size_bytes_{};            // displayed file size in bytes
-    std::string display_disk_size_{};             // displayed human-readable file size on disk
-    std::string display_owner_{};                 // displayed owner
-    std::string display_group_{};                 // displayed group
-    std::string display_atime_{};                 // displayed accessed time
-    std::string display_btime_{};                 // displayed created time
-    std::string display_ctime_{};                 // displayed last status change time
-    std::string display_mtime_{};                 // displayed modification time
-    std::string display_perm_{};                  // displayed permission in string form
-    std::shared_ptr<vfs::mime_type> mime_type_{}; // mime type related information
-    GdkPixbuf* big_thumbnail_{};                  // thumbnail of the file
-    GdkPixbuf* small_thumbnail_{};                // thumbnail of the file
+    std::string name_;                          // real name on file system
+    std::string display_size_;                  // displayed human-readable file size
+    std::string display_size_bytes_;            // displayed file size in bytes
+    std::string display_disk_size_;             // displayed human-readable file size on disk
+    std::string display_owner_;                 // displayed owner
+    std::string display_group_;                 // displayed group
+    std::string display_atime_;                 // displayed accessed time
+    std::string display_btime_;                 // displayed created time
+    std::string display_ctime_;                 // displayed last status change time
+    std::string display_mtime_;                 // displayed modification time
+    std::string display_perm_;                  // displayed permission in string form
+    std::shared_ptr<vfs::mime_type> mime_type_; // mime type related information
+    GdkPixbuf* big_thumbnail_{nullptr};         // thumbnail of the file
+    GdkPixbuf* small_thumbnail_{nullptr};       // thumbnail of the file
 
     bool is_special_desktop_entry_{false}; // is a .desktop file
 

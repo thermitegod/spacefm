@@ -91,11 +91,11 @@ struct trash_can
         static void check_dir_exists(const std::filesystem::path& path) noexcept;
 
         // the full path for this trash directory
-        std::filesystem::path trash_path_{};
+        std::filesystem::path trash_path_;
         // the path of the "files" subdirectory of this trash dir
-        std::filesystem::path files_path_{};
+        std::filesystem::path files_path_;
         // the path of the "info" subdirectory of this trash dir
-        std::filesystem::path info_path_{};
+        std::filesystem::path info_path_;
     };
 
     // return the mount point id for the file or directory

@@ -29,7 +29,7 @@
 
 struct commandline_opt_data : public std::enable_shared_from_this<commandline_opt_data>
 {
-    std::vector<std::filesystem::path> files{};
+    std::vector<std::filesystem::path> files;
 
     bool new_tab{true};
     bool reuse_tab{false};
@@ -38,12 +38,12 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
 
     panel_t panel{0};
 
-    std::filesystem::path config_dir{};
+    std::filesystem::path config_dir;
     bool git_backed_settings{true};
 
     std::string loglevel{"trace"};
     // std::filesystem::path logfile{"/tmp/test.log"};
-    std::filesystem::path logfile{};
+    std::filesystem::path logfile;
 
     bool version{false};
 };

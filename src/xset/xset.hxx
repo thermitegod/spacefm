@@ -136,7 +136,7 @@ struct XSet : public std::enable_shared_from_this<XSet>
     [[nodiscard]] static const std::shared_ptr<xset::XSet>
     create(const std::string_view set_name, const xset::name xset_name) noexcept;
 
-    std::string name{};
+    std::string name;
     xset::name xset_name;
 
     xset::b b{xset::b::unset}; // saved, tri-state enum 0=unset(false) 1=true 2=false
@@ -166,7 +166,7 @@ struct XSet : public std::enable_shared_from_this<XSet>
     xset::tool tool{xset::tool::NOT};                 // saved
     bool lock{true};                                  // not saved
 
-    std::vector<xset::name> context_menu_entries{}; // not saved, in order
+    std::vector<xset::name> context_menu_entries; // not saved, in order
 
     // Custom Command ( !lock )
     std::optional<std::string> prev{std::nullopt};   // saved

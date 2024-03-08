@@ -154,9 +154,9 @@ struct file_task : public std::enable_shared_from_this<file_task>
 
   public:
     vfs::file_task::type type_;
-    std::vector<std::filesystem::path> src_paths{};  // All source files. This list will be freed
-                                                     // after file operation is completed.
-    std::optional<std::filesystem::path> dest_dir{}; // Destinaton directory
+    std::vector<std::filesystem::path> src_paths;  // All source files. This list will be freed
+                                                   // after file operation is completed.
+    std::optional<std::filesystem::path> dest_dir; // Destinaton directory
     bool avoid_changes{false};
 
     vfs::file_task::overwrite_mode overwrite_mode_;
@@ -209,15 +209,15 @@ struct file_task : public std::enable_shared_from_this<file_task>
     GtkTextMark* add_log_end{nullptr};
 
     // run task
-    std::string exec_action{};
-    std::string exec_command{};
+    std::string exec_action;
+    std::string exec_command;
     bool exec_sync{true};
     bool exec_popup{false};
     bool exec_show_output{false};
     bool exec_show_error{false};
     bool exec_terminal{false};
     void* exec_browser{nullptr};
-    std::string exec_icon{};
+    std::string exec_icon;
     GCond* exec_cond{nullptr};
 };
 } // namespace vfs

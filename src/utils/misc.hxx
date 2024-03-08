@@ -23,8 +23,8 @@ namespace utils
 {
 struct split_basename_extension_data
 {
-    std::string basename{};
-    std::string extension{};
+    std::string basename;
+    std::string extension;
     bool is_multipart_extension{false};
 };
 

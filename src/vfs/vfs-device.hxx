@@ -67,9 +67,9 @@ struct device
   private:
     dev_t devnum_{0};
 
-    std::string devnode_{};
-    std::string native_path_{};
-    std::string mount_points_{};
+    std::string devnode_;
+    std::string native_path_;
+    std::string mount_points_;
 
     bool is_valid_{false};
 
@@ -80,11 +80,11 @@ struct device
     bool is_mounted_{false};
     bool is_media_ejectable_{false};
 
-    std::string id_{};
+    std::string id_;
     u64 size_{0};
     u64 block_size_{0};
-    std::string id_label_{};
-    std::string fstype_{};
+    std::string id_label_;
+    std::string fstype_;
 
   private:
     [[nodiscard]] const std::optional<std::string> info_mount_points() const noexcept;

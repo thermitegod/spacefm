@@ -166,8 +166,8 @@ struct browser
         path(const ptk::browser::chdir_mode mode = ptk::browser::chdir_mode::normal) const noexcept;
 
       private:
-        std::vector<std::filesystem::path> forward_{};
-        std::vector<std::filesystem::path> back_{};
+        std::vector<std::filesystem::path> forward_;
+        std::vector<std::filesystem::path> back_;
         std::filesystem::path current_{vfs::user::home()};
     };
     std::unique_ptr<navigation_history_data> navigation_history;
@@ -175,7 +175,7 @@ struct browser
     struct selection_history_data
     {
         std::unordered_map<std::filesystem::path, std::vector<std::filesystem::path>>
-            selection_history{};
+            selection_history;
     };
     std::unique_ptr<selection_history_data> selection_history;
 

@@ -63,7 +63,7 @@ struct monitor
     i32 inotify_fd_{-1};
     i32 inotify_wd_{-1};
 
-    std::filesystem::path path_{};
+    std::filesystem::path path_;
 
 #if (GTK_MAJOR_VERSION == 4)
     Glib::RefPtr<Glib::IOChannel> inotify_io_channel_ = nullptr;
@@ -72,6 +72,6 @@ struct monitor
 #endif
     sigc::connection signal_io_handler_;
 
-    callback_t callback_{};
+    callback_t callback_;
 };
 } // namespace vfs

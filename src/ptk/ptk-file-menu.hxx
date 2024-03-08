@@ -67,8 +67,8 @@ struct file_menu
     file_menu& operator=(file_menu&& other) = delete;
 
     ptk::browser* browser{nullptr};
-    std::filesystem::path cwd{};
-    std::filesystem::path file_path{};
+    std::filesystem::path cwd;
+    std::filesystem::path file_path;
     std::shared_ptr<vfs::file> file{nullptr};
     std::vector<std::shared_ptr<vfs::file>> sel_files;
 #if (GTK_MAJOR_VERSION == 4)
@@ -91,7 +91,7 @@ struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 
     ptk::browser* file_browser{nullptr};
     bool open_file{false};
-    std::filesystem::path path{};
+    std::filesystem::path path;
     GFunc callback{nullptr};
 };
 

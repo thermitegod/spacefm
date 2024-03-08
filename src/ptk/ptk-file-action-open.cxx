@@ -56,7 +56,7 @@
 struct ParentInfo
 {
     ptk::browser* file_browser{nullptr};
-    std::filesystem::path cwd{};
+    std::filesystem::path cwd;
 };
 
 static bool

@@ -76,27 +76,27 @@ struct desktop
                       const std::span<const std::filesystem::path> file_paths) const noexcept;
 
   private:
-    std::string filename_{};
-    std::filesystem::path path_{};
+    std::string filename_;
+    std::filesystem::path path_;
     bool loaded_{false};
 
     struct desktop_entry_data
     {
         // https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
-        std::string type{};
-        std::string name{};
-        std::string generic_name{};
+        std::string type;
+        std::string name;
+        std::string generic_name;
         bool no_display{false};
-        std::string comment{};
-        std::string icon{};
-        std::string exec{};
-        std::string try_exec{};
-        std::string path{}; // working dir
+        std::string comment;
+        std::string icon;
+        std::string exec;
+        std::string try_exec;
+        std::string path; // working dir
         bool terminal{false};
-        std::string actions{};
-        std::string mime_type{};
-        std::string categories{};
-        std::string keywords{};
+        std::string actions;
+        std::string mime_type;
+        std::string categories;
+        std::string keywords;
         bool startup_notify{false};
     };
 

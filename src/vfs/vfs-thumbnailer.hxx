@@ -55,7 +55,7 @@ struct thumbnailer
   private:
     concurrencpp::result<bool> thumbnailer_thread() noexcept;
 
-    std::queue<request_data> queue_{};
+    std::queue<request_data> queue_;
 
     std::shared_ptr<concurrencpp::thread_executor> executor_;
     concurrencpp::result<concurrencpp::result<bool>> executor_result_;
@@ -63,6 +63,6 @@ struct thumbnailer
     concurrencpp::async_lock lock_;
     bool abort_{false};
 
-    callback_t callback_{};
+    callback_t callback_;
 };
 } // namespace vfs

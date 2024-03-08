@@ -72,10 +72,10 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
 
     std::shared_ptr<vfs::file> file;
 
-    std::filesystem::path full_path{};
-    std::filesystem::path old_path{};
-    std::filesystem::path new_path{};
-    std::string desc{};
+    std::filesystem::path full_path;
+    std::filesystem::path old_path;
+    std::filesystem::path new_path;
+    std::string desc;
     bool is_dir{false};
     bool is_link{false};
     bool clip_copy{false};
@@ -88,7 +88,7 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
     GtkLabel* label_type{nullptr};
     GtkLabel* label_mime{nullptr};
     GtkBox* hbox_type{nullptr};
-    std::string mime_type{};
+    std::string mime_type;
 
     GtkLabel* label_target{nullptr};
     GtkEntry* entry_target{nullptr};

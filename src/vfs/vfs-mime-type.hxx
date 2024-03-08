@@ -89,8 +89,8 @@ struct mime_type
     [[nodiscard]] static const std::shared_ptr<vfs::mime_type>
     create(const std::string_view type) noexcept;
 
-    std::string type_{};
-    std::string description_{};
+    std::string type_;
+    std::string description_;
     GdkPixbuf* big_icon_{nullptr};
     GdkPixbuf* small_icon_{nullptr};
     i32 icon_size_big_{0};

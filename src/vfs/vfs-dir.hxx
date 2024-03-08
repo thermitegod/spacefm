@@ -118,15 +118,15 @@ struct dir : public std::enable_shared_from_this<dir>
     [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
     std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
 
-    std::filesystem::path path_{};
-    std::vector<std::shared_ptr<vfs::file>> files_{};
+    std::filesystem::path path_;
+    std::vector<std::shared_ptr<vfs::file>> files_;
 
     vfs::thumbnailer thumbnailer_{
         std::bind(&vfs::dir::emit_thumbnail_loaded, this, std::placeholders::_1)};
     std::shared_ptr<vfs::monitor> monitor_{nullptr};
 
-    std::vector<std::shared_ptr<vfs::file>> changed_files_{};
-    std::vector<std::filesystem::path> created_files_{};
+    std::vector<std::shared_ptr<vfs::file>> changed_files_;
+    std::vector<std::filesystem::path> created_files_;
 
     bool avoid_changes_{true}; // disable file events, for nfs mount locations.
 

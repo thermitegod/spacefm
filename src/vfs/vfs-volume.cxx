@@ -98,7 +98,7 @@ struct DeviceMount
     dev_t minor{0};
     std::string mount_points;
     std::string fstype;
-    std::vector<std::string> mounts{};
+    std::vector<std::string> mounts;
 };
 
 DeviceMount::DeviceMount(dev_t major, dev_t minor)
