@@ -66,7 +66,7 @@ utils::split_basename_extension(const std::filesystem::path& filename) noexcept
 {
     if (std::filesystem::is_directory(filename))
     {
-        return {filename.string()};
+        return {filename.string(), ""};
     }
 
     // Find the last dot in the filename
@@ -93,5 +93,5 @@ utils::split_basename_extension(const std::filesystem::path& filename) noexcept
     }
 
     // No valid extension found, return the whole filename as the basename
-    return {filename.string()};
+    return {filename.string(), ""};
 }
