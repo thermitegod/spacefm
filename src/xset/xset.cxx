@@ -757,59 +757,60 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
 {
     assert(set != nullptr);
 
-    std::optional<std::string> varstring = std::nullopt;
-    switch (var)
-    {
-        case xset::var::s:
-            varstring = xset_get_s(set);
-            break;
-        case xset::var::x:
-            varstring = xset_get_x(set);
-            break;
-        case xset::var::y:
-            varstring = xset_get_y(set);
-            break;
-        case xset::var::z:
-            varstring = xset_get_z(set);
-            break;
-        case xset::var::key:
-            return set->key;
-        case xset::var::keymod:
-            return set->keymod;
-        case xset::var::b:
-        case xset::var::style:
-        case xset::var::desc:
-        case xset::var::title:
-        case xset::var::menu_label:
-        case xset::var::icn:
-        case xset::var::menu_label_custom:
-        case xset::var::icon:
-        case xset::var::context_menu_entries:
-        case xset::var::shared_key:
-        case xset::var::next:
-        case xset::var::prev:
-        case xset::var::parent:
-        case xset::var::child:
-        case xset::var::context:
-        case xset::var::line:
-        case xset::var::tool:
-        case xset::var::task:
-        case xset::var::task_pop:
-        case xset::var::task_err:
-        case xset::var::task_out:
-        case xset::var::run_in_terminal:
-        case xset::var::keep_terminal:
-        case xset::var::scroll_lock:
-        case xset::var::disable:
-        case xset::var::opener:
-            return -1;
-    }
+    assert(var != xset::var::b);
+    assert(var != xset::var::key);
+    assert(var != xset::var::keymod);
+    assert(var != xset::var::style);
+    assert(var != xset::var::desc);
+    assert(var != xset::var::title);
+    assert(var != xset::var::menu_label);
+    assert(var != xset::var::menu_label_custom);
+    assert(var != xset::var::icn);
+    assert(var != xset::var::icon);
+    assert(var != xset::var::context_menu_entries);
+    assert(var != xset::var::shared_key);
+    assert(var != xset::var::next);
+    assert(var != xset::var::prev);
+    assert(var != xset::var::parent);
+    assert(var != xset::var::child);
+    assert(var != xset::var::context);
+    assert(var != xset::var::line);
+    assert(var != xset::var::tool);
+    assert(var != xset::var::task);
+    assert(var != xset::var::task_pop);
+    assert(var != xset::var::task_err);
+    assert(var != xset::var::task_out);
+    assert(var != xset::var::run_in_terminal);
+    assert(var != xset::var::keep_terminal);
+    assert(var != xset::var::scroll_lock);
+    assert(var != xset::var::disable);
+    assert(var != xset::var::opener);
 
-    if (varstring == std::nullopt)
+    if (var == xset::var::s)
     {
+        const auto val = xset_get_s(set);
+        return std::stoi(val.value_or("0"));
+    }
+    else if (var == xset::var::x)
+    {
+        const auto val = xset_get_x(set);
+        return std::stoi(val.value_or("0"));
+    }
+    else if (var == xset::var::y)
+    {
+        const auto val = xset_get_y(set);
+        return std::stoi(val.value_or("0"));
+    }
+    else if (var == xset::var::z)
+    {
+        const auto val = xset_get_z(set);
+        return std::stoi(val.value_or("0"));
+    }
+    else
+    {
+        ztd::logger::debug("xset_get_int({}) invalid", magic_enum::enum_name(var));
         return 0;
     }
-    return std::stoi(varstring.value());
 }
 
 i32
