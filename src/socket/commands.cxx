@@ -1163,7 +1163,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                                 xset_get_b_panel(file_browser->panel(), xset::panel::sort_extra) &&
                                         xset_get_int_panel(file_browser->panel(),
                                                            xset::panel::sort_extra,
-                                                           xset::var::x) == xset::b::xtrue
+                                                           xset::var::x) == xset::set::enabled::yes
                                     ? 1
                                     : 0)};
             }
@@ -1173,7 +1173,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                         std::format("{}",
                                     xset_get_int_panel(file_browser->panel(),
                                                        xset::panel::sort_extra,
-                                                       xset::var::z) == xset::b::xtrue
+                                                       xset::var::z) == xset::set::enabled::yes
                                         ? 1
                                         : 0)};
             }
@@ -1915,7 +1915,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             return {SOCKET_INVALID,
                     std::format("custom command or submenu '{}' not found", data[i])};
         }
-        if (set->menu_style == xset::menu::submenu)
+        if (set->menu.type == xset::set::menu_type::submenu)
         {
             // show submenu as popup menu
             set = xset_get(set->child.value());

@@ -41,19 +41,18 @@
 
 std::vector<xset_t> xsets;
 
-xset::XSet::XSet(const std::string_view set_name, const xset::name xset_name) noexcept
+xset::set::set(const std::string_view set_name, const xset::name xset_name) noexcept
 {
-    // ztd::logger::info("XSet Constructor");
+    // ztd::logger::debug("xset::set({})", ztd::logger::utils::ptr(this));
     assert(set_name.empty() != true);
-
     this->name = set_name;
     this->xset_name = xset_name;
 }
 
 const xset_t
-xset::XSet::create(const std::string_view name, const xset::name xset_name) noexcept
+xset::set::create(const std::string_view name, const xset::name xset_name) noexcept
 {
-    auto set = std::make_shared<xset::XSet>(name, xset_name);
+    auto set = std::make_shared<xset::set>(name, xset_name);
     xsets.push_back(set);
     return set;
 }
@@ -70,7 +69,7 @@ xset_get(const std::string_view name) noexcept
         }
     }
 
-    return xset::XSet::create(name, xset::get_xsetname_from_name(name));
+    return xset::set::create(name, xset::get_xsetname_from_name(name));
 }
 
 const xset_t
@@ -85,7 +84,7 @@ xset_get(xset::name name) noexcept
         }
     }
 
-    return xset::XSet::create(xset::get_name_from_xsetname(name), name);
+    return xset::set::create(xset::get_name_from_xsetname(name), name);
 }
 
 const xset_t
@@ -136,11 +135,11 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         {
             if (value == "1")
             {
-                set->b = xset::b::xtrue;
+                set->b = xset::set::enabled::yes;
             }
             else
             {
-                set->b = xset::b::xfalse;
+                set->b = xset::set::enabled::no;
             }
             break;
         }
@@ -201,7 +200,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->menu_style = xset::menu(result);
+            set->menu.type = xset::set::menu_type(result);
             break;
         }
         case xset::var::desc:
@@ -217,7 +216,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         case xset::var::menu_label:
         {
             // lbl is only used >= 0.9.0 for changed lock default menu_label
-            set->menu_label = value;
+            set->menu.label = value;
             if (set->lock)
             {
                 // indicate that menu label is not default and should be saved
@@ -240,9 +239,9 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         {
             // pre-0.9.0 menu_label or >= 0.9.0 custom item label
             // only save if custom or not default label
-            if (!set->lock || set->menu_label.value() != value)
+            if (!set->lock || set->menu.label.value() != value)
             {
-                set->menu_label = value;
+                set->menu.label = value;
                 if (set->lock)
                 {
                     // indicate that menu label is not default and should be saved
@@ -286,11 +285,6 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         case xset::var::line:
         {
             set->line = value;
-            break;
-        }
-        case xset::var::tool:
-        {
-            set->tool = xset::tool(std::stoi(value.data()));
             break;
         }
         case xset::var::task:
@@ -438,7 +432,7 @@ void
 xset_set_submenu(const xset_t& set, const std::vector<xset::name>& submenu_entries) noexcept
 {
     assert(set != nullptr);
-    assert(set->menu_style == xset::menu::submenu);
+    assert(set->menu.type == xset::set::menu_type::submenu);
     assert(submenu_entries.empty() == false);
 
     set->context_menu_entries = submenu_entries;
@@ -596,7 +590,7 @@ bool
 xset_get_b(const xset_t& set) noexcept
 {
     assert(set != nullptr);
-    return (set->b == xset::b::xtrue);
+    return (set->b == xset::set::enabled::yes);
 }
 
 bool
@@ -651,11 +645,11 @@ xset_set_b(const xset_t& set, bool bval) noexcept
     assert(set != nullptr);
     if (bval)
     {
-        set->b = xset::b::xtrue;
+        set->b = xset::set::enabled::yes;
     }
     else
     {
-        set->b = xset::b::xfalse;
+        set->b = xset::set::enabled::no;
     }
 }
 
@@ -666,11 +660,11 @@ xset_set_b(xset::name name, bool bval) noexcept
 
     if (bval)
     {
-        set->b = xset::b::xtrue;
+        set->b = xset::set::enabled::yes;
     }
     else
     {
-        set->b = xset::b::xfalse;
+        set->b = xset::set::enabled::no;
     }
 }
 
@@ -681,11 +675,11 @@ xset_set_b(const std::string_view name, bool bval) noexcept
 
     if (bval)
     {
-        set->b = xset::b::xtrue;
+        set->b = xset::set::enabled::yes;
     }
     else
     {
-        set->b = xset::b::xfalse;
+        set->b = xset::set::enabled::no;
     }
 }
 
@@ -775,7 +769,6 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
     assert(var != xset::var::child);
     assert(var != xset::var::context);
     assert(var != xset::var::line);
-    assert(var != xset::var::tool);
     assert(var != xset::var::task);
     assert(var != xset::var::task_pop);
     assert(var != xset::var::task_err);

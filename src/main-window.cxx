@@ -1086,7 +1086,7 @@ MainWindow::rebuild_menu_device(ptk::browser* file_browser) noexcept
 
     set = xset_get(xset::name::main_dev);
     xset_set_cb(set, (GFunc)on_devices_show, this);
-    set->b = file_browser->side_dev ? xset::b::xtrue : xset::b::unset;
+    set->b = file_browser->side_dev ? xset::set::enabled::yes : xset::set::enabled::unset;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
     set = xset_get(xset::name::separator);
@@ -2241,7 +2241,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
 
     if (user_data)
     {
-        const xset_t known_set = static_cast<xset::XSet*>(user_data)->shared_from_this();
+        const xset_t known_set = static_cast<xset::set*>(user_data)->shared_from_this();
         return this->keypress_found_key(known_set);
     }
 
@@ -2357,7 +2357,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
     }
 
     // run menu_cb
-    if (set->menu_style < xset::menu::submenu)
+    if (set->menu.type < xset::set::menu_type::submenu)
     {
         set->browser = browser;
         xset_menu_cb(nullptr, set); // also does custom activate

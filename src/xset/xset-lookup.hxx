@@ -1019,7 +1019,6 @@ enum class var
     child,
     context,
     line,
-    tool,
     task,
     task_pop,
     task_err,

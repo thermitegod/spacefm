@@ -84,21 +84,21 @@ pack_xset(const xset_t& set) noexcept
         setvars.insert({name.data(), value});
     }
     // menu label
-    if (set->menu_label)
+    if (set->menu.label)
     {
         if (set->lock)
         { // built-in
-            if (set->in_terminal && set->menu_label)
+            if (set->in_terminal && set->menu.label)
             { // only save lbl if menu_label was customized
                 const auto name = magic_enum::enum_name(xset::var::menu_label);
-                const auto value = std::format("{}", set->menu_label.value());
+                const auto value = std::format("{}", set->menu.label.value());
                 setvars.insert({name.data(), value});
             }
         }
         else
         { // custom
             const auto name = magic_enum::enum_name(xset::var::menu_label_custom);
-            const auto value = std::format("{}", set->menu_label.value());
+            const auto value = std::format("{}", set->menu.label.value());
             setvars.insert({name.data(), value});
         }
     }
@@ -137,25 +137,19 @@ pack_xset(const xset_t& set) noexcept
         const auto value = std::format("{}", set->context.value());
         setvars.insert({name.data(), value});
     }
-    if (set->b != xset::b::unset)
+    if (set->b != xset::set::enabled::unset)
     {
         const auto name = magic_enum::enum_name(xset::var::b);
         const auto value = std::format("{}", magic_enum::enum_integer(set->b));
         setvars.insert({name.data(), value});
     }
-    if (set->tool != xset::tool::NOT)
-    {
-        const auto name = magic_enum::enum_name(xset::var::tool);
-        const auto value = std::format("{}", magic_enum::enum_integer(set->tool));
-        setvars.insert({name.data(), value});
-    }
 
     if (!set->lock)
     {
-        if (set->menu_style != xset::menu::normal)
+        if (set->menu.type != xset::set::menu_type::normal)
         {
             const auto name = magic_enum::enum_name(xset::var::style);
-            const auto value = std::format("{}", magic_enum::enum_integer(set->menu_style));
+            const auto value = std::format("{}", magic_enum::enum_integer(set->menu.type));
             setvars.insert({name.data(), value});
         }
         if (set->desc)

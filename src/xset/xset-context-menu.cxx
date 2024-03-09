@@ -115,24 +115,20 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
         }
     }
 
-    if (set->tool != xset::tool::NOT && set->menu_style != xset::menu::submenu)
-    {
-        // item = xset_new_menuitem(set->menu_label, icon_name);
-    }
-    else if (set->menu_style != xset::menu::normal)
+    if (set->menu.type != xset::set::menu_type::normal)
     {
         xset_t set_radio;
-        switch (set->menu_style)
+        switch (set->menu.type)
         {
-            case xset::menu::check:
-                if (set->lock || (xset::cmd(xset_get_int(set, xset::var::x)) <= xset::cmd::script))
+            case xset::set::menu_type::check:
+                if (set->lock)
                 {
-                    item = gtk_check_menu_item_new_with_mnemonic(set->menu_label.value().data());
+                    item = gtk_check_menu_item_new_with_mnemonic(set->menu.label.value().data());
                     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
-                                                   set->b == xset::b::xtrue);
+                                                   set->b == xset::set::enabled::yes);
                 }
                 break;
-            case xset::menu::radio:
+            case xset::set::menu_type::radio:
                 if (set->ob2_data)
                 {
                     set_radio = xset_get(static_cast<const char*>(set->ob2_data));
@@ -142,14 +138,15 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
                     set_radio = set;
                 }
                 item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->ob2_data,
-                                                             set->menu_label.value().data());
+                                                             set->menu.label.value().data());
                 set_radio->ob2_data =
                     (void*)gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
-                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), set->b == xset::b::xtrue);
+                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
+                                               set->b == xset::set::enabled::yes);
                 break;
-            case xset::menu::submenu:
+            case xset::set::menu_type::submenu:
                 submenu = gtk_menu_new();
-                item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
+                item = xset_new_menuitem(set->menu.label.value_or(""), icon_name);
                 gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
                 if (set->lock)
                 {
@@ -186,24 +183,24 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
                     }
                 }
                 break;
-            case xset::menu::sep:
+            case xset::set::menu_type::sep:
                 item = gtk_separator_menu_item_new();
                 break;
-            case xset::menu::normal:
-            case xset::menu::string:
-            case xset::menu::reserved_00:
-            case xset::menu::reserved_01:
-            case xset::menu::reserved_02:
-            case xset::menu::reserved_03:
-            case xset::menu::reserved_04:
-            case xset::menu::reserved_05:
-            case xset::menu::reserved_06:
-            case xset::menu::reserved_07:
-            case xset::menu::reserved_08:
-            case xset::menu::reserved_09:
-            case xset::menu::reserved_10:
-            case xset::menu::reserved_11:
-            case xset::menu::reserved_12:
+            case xset::set::menu_type::normal:
+            case xset::set::menu_type::string:
+            case xset::set::menu_type::reserved_00:
+            case xset::set::menu_type::reserved_01:
+            case xset::set::menu_type::reserved_02:
+            case xset::set::menu_type::reserved_03:
+            case xset::set::menu_type::reserved_04:
+            case xset::set::menu_type::reserved_05:
+            case xset::set::menu_type::reserved_06:
+            case xset::set::menu_type::reserved_07:
+            case xset::set::menu_type::reserved_08:
+            case xset::set::menu_type::reserved_09:
+            case xset::set::menu_type::reserved_10:
+            case xset::set::menu_type::reserved_11:
+            case xset::set::menu_type::reserved_12:
                 break;
         }
     }
@@ -213,7 +210,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
         i32 icon_w = 0;
         i32 icon_h = 0;
         gtk_icon_size_lookup(GtkIconSize::GTK_ICON_SIZE_MENU, &icon_w, &icon_h);
-        item = xset_new_menuitem(set->menu_label.value_or(""), icon_name);
+        item = xset_new_menuitem(set->menu.label.value_or(""), icon_name);
     }
 
     set->browser = file_browser;
@@ -224,15 +221,15 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
     {
         g_object_set_data(G_OBJECT(item), set->ob1, set->ob1_data);
     }
-    if (set->menu_style != xset::menu::radio && set->ob2)
+    if (set->menu.type != xset::set::menu_type::radio && set->ob2)
     {
         g_object_set_data(G_OBJECT(item), set->ob2, set->ob2_data);
     }
 
-    if (set->menu_style < xset::menu::submenu)
+    if (set->menu.type < xset::set::menu_type::submenu)
     {
         // activate callback
-        if (!set->cb_func || set->menu_style != xset::menu::normal)
+        if (!set->cb_func || set->menu.type != xset::set::menu_type::normal)
         {
             // use xset menu callback
             g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_menu_cb), set.get());
@@ -292,7 +289,8 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
 
     if (item)
     {
-        if (set->lock && set->menu_style == xset::menu::radio && GTK_IS_CHECK_MENU_ITEM(item) &&
+        if (set->lock && set->menu.type == xset::set::menu_type::radio &&
+            GTK_IS_CHECK_MENU_ITEM(item) &&
             !gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
         {
             return;
@@ -304,24 +302,24 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
 
     GtkWidget* parent = GTK_WIDGET(set->browser);
 
-    switch (set->menu_style)
+    switch (set->menu.type)
     {
-        case xset::menu::normal:
+        case xset::set::menu_type::normal:
             if (cb_func)
             {
                 cb_func(item, cb_data);
             }
             break;
-        case xset::menu::sep:
+        case xset::set::menu_type::sep:
             break;
-        case xset::menu::check:
-            if (set->b == xset::b::xtrue)
+        case xset::set::menu_type::check:
+            if (set->b == xset::set::enabled::yes)
             {
-                set->b = xset::b::xfalse;
+                set->b = xset::set::enabled::no;
             }
             else
             {
-                set->b = xset::b::xtrue;
+                set->b = xset::set::enabled::yes;
             }
 
             if (cb_func)
@@ -329,7 +327,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
                 cb_func(item, cb_data);
             }
             break;
-        case xset::menu::string:
+        case xset::set::menu_type::string:
         {
             std::string title;
             std::string msg = set->desc.value();
@@ -340,7 +338,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             }
             else
             {
-                title = xset::utils::clean_label(set->menu_label.value(), false, false);
+                title = xset::utils::clean_label(set->menu.label.value(), false, false);
             }
             if (set->lock)
             {
@@ -363,30 +361,30 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             }
         }
         break;
-        case xset::menu::radio:
-            if (set->b != xset::b::xtrue)
+        case xset::set::menu_type::radio:
+            if (set->b != xset::set::enabled::yes)
             {
-                set->b = xset::b::xtrue;
+                set->b = xset::set::enabled::yes;
             }
             if (cb_func)
             {
                 cb_func(item, cb_data);
             }
             break;
-        case xset::menu::reserved_00:
-        case xset::menu::reserved_01:
-        case xset::menu::reserved_02:
-        case xset::menu::reserved_03:
-        case xset::menu::reserved_04:
-        case xset::menu::reserved_05:
-        case xset::menu::reserved_06:
-        case xset::menu::reserved_07:
-        case xset::menu::reserved_08:
-        case xset::menu::reserved_09:
-        case xset::menu::reserved_10:
-        case xset::menu::reserved_11:
-        case xset::menu::reserved_12:
-        case xset::menu::submenu:
+        case xset::set::menu_type::reserved_00:
+        case xset::set::menu_type::reserved_01:
+        case xset::set::menu_type::reserved_02:
+        case xset::set::menu_type::reserved_03:
+        case xset::set::menu_type::reserved_04:
+        case xset::set::menu_type::reserved_05:
+        case xset::set::menu_type::reserved_06:
+        case xset::set::menu_type::reserved_07:
+        case xset::set::menu_type::reserved_08:
+        case xset::set::menu_type::reserved_09:
+        case xset::set::menu_type::reserved_10:
+        case xset::set::menu_type::reserved_11:
+        case xset::set::menu_type::reserved_12:
+        case xset::set::menu_type::submenu:
             if (cb_func)
             {
                 cb_func(item, cb_data);
@@ -394,7 +392,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             break;
     }
 
-    if (set->menu_style != xset::menu::normal)
+    if (set->menu.type != xset::set::menu_type::normal)
     {
         autosave::request_add();
     }

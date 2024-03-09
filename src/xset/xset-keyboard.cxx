@@ -158,9 +158,9 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcep
             set2->keybinding.modifier == keymod && set2 != keyset)
         {
             std::string name;
-            if (set2->menu_label)
+            if (set2->menu.label)
             {
-                name = xset::utils::clean_label(set2->menu_label.value(), false, false);
+                name = xset::utils::clean_label(set2->menu.label.value(), false, false);
             }
             else
             {
@@ -203,13 +203,9 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
     xset_t keyset;
 
     std::string name;
-    if (set->menu_label)
+    if (set->menu.label)
     {
-        name = xset::utils::clean_label(set->menu_label.value(), false, true);
-    }
-    else if (set->tool > xset::tool::custom)
-    {
-        name = magic_enum::enum_name(set->tool);
+        name = xset::utils::clean_label(set->menu.label.value(), false, true);
     }
     else
     {

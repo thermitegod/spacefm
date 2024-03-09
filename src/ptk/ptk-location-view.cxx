@@ -1596,13 +1596,13 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     GtkWidget* popup = gtk_menu_new();
 
     set = xset_get(xset::name::dev_menu_remove);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
+    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
 
     set = xset_get(xset::name::dev_menu_unmount);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
+    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1611,7 +1611,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), gtk_separator_menu_item_new());
 
     set = xset_get(xset::name::dev_menu_open);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
+    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
     if (file_browser)
@@ -1624,7 +1624,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     }
 
     set = xset_get(xset::name::dev_menu_mount);
-    item = gtk_menu_item_new_with_mnemonic(set->menu_label.value().data());
+    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1755,9 +1755,9 @@ ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* file_browser,
     xset_set_cb(xset::name::dev_ignore_udisks_hide, (GFunc)update_all, nullptr);
     // xset_set_cb(xset::name::dev_show_hide_volumes, (GFunc)on_showhide, vol.get());
     xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
-    // bool auto_optical = set->b == xset::b::XSET_B_TRUE;
+    // bool auto_optical = set->b == xset::set::enabled::yes;
     xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
-    // bool auto_removable = set->b == xset::b::XSET_B_TRUE;
+    // bool auto_removable = set->b == xset::set::enabled::yes;
     xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
     // xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol.get());
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);

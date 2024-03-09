@@ -31,7 +31,7 @@ xset_defaults() noexcept
     // separator
     {
         const auto set = xset_get(xset::name::separator);
-        set->menu_style = xset::menu::sep;
+        set->menu.type = xset::set::menu_type::sep;
     }
 
     // dev menu
@@ -75,7 +75,7 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::dev_menu_settings);
         xset_set_var(set, xset::var::menu_label, "Setti_ngs");
         xset_set_var(set, xset::var::icn, "gtk-properties");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::dev_show,
@@ -92,7 +92,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::dev_show);
         xset_set_var(set, xset::var::menu_label, "S_how");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::dev_show_internal_drives,
@@ -109,35 +109,35 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::dev_show_internal_drives);
         xset_set_var(set, xset::var::menu_label, "_Internal Drives");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::dev_show_empty);
         xset_set_var(set, xset::var::menu_label, "_Empty Drives");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::dev_show_partition_tables);
         xset_set_var(set, xset::var::menu_label, "_Partition Tables");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::dev_show_net);
         xset_set_var(set, xset::var::menu_label, "Mounted _Networks");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::dev_show_file);
         xset_set_var(set, xset::var::menu_label, "Mounted _Other");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
@@ -160,13 +160,13 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::dev_ignore_udisks_hide);
         xset_set_var(set, xset::var::menu_label, "Ignore _Hide Policy");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::dev_dispname);
         xset_set_var(set, xset::var::menu_label, "_Display Name");
-        set->menu_style = xset::menu::string;
+        set->menu.type = xset::set::menu_type::string;
         xset_set_var(set, xset::var::title, "Set Display Name Format");
         xset_set_var(set,
                      xset::var::desc,
@@ -182,7 +182,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::dev_menu_auto);
         xset_set_var(set, xset::var::menu_label, "_Auto Mount");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::dev_automount_optical,
@@ -198,15 +198,15 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::dev_automount_optical);
         xset_set_var(set, xset::var::menu_label, "Mount _Optical");
-        set->b = xset::b::xtrue;
-        set->menu_style = xset::menu::check;
+        set->b = xset::set::enabled::yes;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::dev_automount_removable);
         xset_set_var(set, xset::var::menu_label, "_Mount Removable");
-        set->b = xset::b::xtrue;
-        set->menu_style = xset::menu::check;
+        set->b = xset::set::enabled::yes;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
@@ -229,7 +229,7 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::dev_automount_dirs);
         xset_set_var(set, xset::var::menu_label, "Mount _Dirs...");
         xset_set_var(set, xset::var::title, "Automatic Mount Point Dirs");
-        set->menu_style = xset::menu::string;
+        set->menu.type = xset::set::menu_type::string;
         xset_set_var(
             set,
             xset::var::desc,
@@ -244,21 +244,21 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::dev_auto_open);
         xset_set_var(set, xset::var::menu_label, "Open _Tab");
-        set->b = xset::b::xtrue;
-        set->menu_style = xset::menu::check;
+        set->b = xset::set::enabled::yes;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::dev_unmount_quit);
         xset_set_var(set, xset::var::menu_label, "_Unmount On Exit");
-        set->b = xset::b::unset;
-        set->menu_style = xset::menu::check;
+        set->b = xset::set::enabled::unset;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::dev_ignore_udisks_nopolicy);
         xset_set_var(set, xset::var::menu_label, "Ignore _No Policy");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
@@ -273,7 +273,7 @@ xset_defaults() noexcept
             "and is usually used to prevent SpaceFM becoming unresponsive with network "
             "filesystems.  "
             "Loading of thumbnails and subdirectory sizes will also be disabled.");
-        set->menu_style = xset::menu::string;
+        set->menu.type = xset::set::menu_type::string;
         xset_set_var(set, xset::var::title, "Change Detection Blacklist");
         xset_set_var(set, xset::var::icn, "gtk-edit");
         set->s = "cifs curlftpfs ftpfs fuse.sshfs nfs smbfs";
@@ -290,7 +290,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::book_settings);
         xset_set_var(set, xset::var::menu_label, "_Settings");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_var(set, xset::var::icn, "gtk-properties");
     }
 
@@ -304,7 +304,7 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::main_book);
         xset_set_var(set, xset::var::menu_label, "_Bookmarks");
         xset_set_var(set, xset::var::icn, "folder");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
     }
 
     // Fonts
@@ -327,54 +327,54 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::move_name);
         xset_set_var(set, xset::var::menu_label, "_Name");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::move_filename);
         xset_set_var(set, xset::var::menu_label, "F_ilename");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_parent);
         xset_set_var(set, xset::var::menu_label, "_Parent");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::move_path);
         xset_set_var(set, xset::var::menu_label, "P_ath");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_type);
         xset_set_var(set, xset::var::menu_label, "Typ_e");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_target);
         xset_set_var(set, xset::var::menu_label, "Ta_rget");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_template);
         xset_set_var(set, xset::var::menu_label, "Te_mplate");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_option);
         xset_set_var(set, xset::var::menu_label, "_Option");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::move_copy,
@@ -387,27 +387,27 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::move_copy);
         xset_set_var(set, xset::var::menu_label, "_Copy");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_link);
         xset_set_var(set, xset::var::menu_label, "_Link");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::move_copyt);
         xset_set_var(set, xset::var::menu_label, "Copy _Target");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::move_linkt);
         xset_set_var(set, xset::var::menu_label, "Lin_k Target");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
@@ -419,15 +419,15 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::move_dlg_confirm_create);
         xset_set_var(set, xset::var::menu_label, "_Confirm Create");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     // status bar
     {
         const auto set = xset_get(xset::name::status_middle);
         xset_set_var(set, xset::var::menu_label, "_Middle Click");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::status_name,
@@ -440,26 +440,26 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::status_name);
         xset_set_var(set, xset::var::menu_label, "Copy _Name");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::status_path);
         xset_set_var(set, xset::var::menu_label, "Copy _Path");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::status_info);
         xset_set_var(set, xset::var::menu_label, "File _Info");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::status_hide);
         xset_set_var(set, xset::var::menu_label, "_Hide Panel");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     // MAIN WINDOW MENUS
@@ -480,14 +480,14 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::main_terminal);
         xset_set_var(set, xset::var::menu_label, "_Terminal");
-        set->b = xset::b::unset; // discovery notification
+        set->b = xset::set::enabled::unset; // discovery notification
     }
 
-    // was previously used for 'Save Session' < 0.9.4 as xset::menu::NORMAL
+    // was previously used for 'Save Session' < 0.9.4 as xset::set::menu_type::NORMAL
     {
         const auto set = xset_get(xset::name::main_save_session);
         xset_set_var(set, xset::var::menu_label, "Open _URL");
-        set->menu_style = xset::menu::string;
+        set->menu.type = xset::set::menu_type::string;
         xset_set_var(set, xset::var::icn, "gtk-network");
         xset_set_var(set, xset::var::title, "Open URL");
         xset_set_var(
@@ -503,8 +503,8 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::main_save_tabs);
         xset_set_var(set, xset::var::menu_label, "Save Ta_bs");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
@@ -517,32 +517,32 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::panel1_show);
         xset_set_var(set, xset::var::menu_label, "Panel _1");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::panel2_show);
         xset_set_var(set, xset::var::menu_label, "Panel _2");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::panel3_show);
         xset_set_var(set, xset::var::menu_label, "Panel _3");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::panel4_show);
         xset_set_var(set, xset::var::menu_label, "Panel _4");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::main_focus_panel);
         xset_set_var(set, xset::var::menu_label, "F_ocus");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::panel_prev,
@@ -594,7 +594,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::main_title);
         xset_set_var(set, xset::var::menu_label, "Wi_ndow Title");
-        set->menu_style = xset::menu::string;
+        set->menu.type = xset::set::menu_type::string;
         xset_set_var(set, xset::var::title, "Set Window Title Format");
         xset_set_var(
             set,
@@ -611,7 +611,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::main_full);
         xset_set_var(set, xset::var::menu_label, "_Fullscreen");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
@@ -628,7 +628,7 @@ xset_defaults() noexcept
 
     {
         const auto set = xset_get(xset::name::root_bar); // in Preferences
-        set->b = xset::b::xtrue;
+        set->b = xset::set::enabled::yes;
     }
 
     {
@@ -636,7 +636,7 @@ xset_defaults() noexcept
         xset_set_var(set,
                      xset::var::menu_label,
                      "_Thumbnails (global)"); // in View|Panel View|Style
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     // Help
@@ -650,14 +650,14 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::main_dev);
         xset_set_var(set, xset::var::menu_label, "_Show Devices");
         set->shared_key = xset_get(xset::name::panel1_show_devmon);
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     // Tasks
     {
         const auto set = xset_get(xset::name::main_tasks);
         xset_set_var(set, xset::var::menu_label, "_Task Manager");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::task_show_manager,
@@ -673,8 +673,8 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_col_status);
         xset_set_var(set, xset::var::menu_label, "_Status");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "0";   // column position
         set->y = "130"; // column width
     }
@@ -682,39 +682,39 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_col_count);
         xset_set_var(set, xset::var::menu_label, "_Count");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
         set->x = "1";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_path);
         xset_set_var(set, xset::var::menu_label, "_Directory");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "2";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_file);
         xset_set_var(set, xset::var::menu_label, "_Item");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "3";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_to);
         xset_set_var(set, xset::var::menu_label, "_To");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "4";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_progress);
         xset_set_var(set, xset::var::menu_label, "_Progress");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "5";
         set->y = "100";
     }
@@ -722,8 +722,8 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_col_total);
         xset_set_var(set, xset::var::menu_label, "T_otal");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "6";
         set->y = "120";
     }
@@ -731,15 +731,15 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_col_started);
         xset_set_var(set, xset::var::menu_label, "Sta_rted");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
         set->x = "7";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_elapsed);
         xset_set_var(set, xset::var::menu_label, "_Elapsed");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "8";
         set->y = "70";
     }
@@ -747,23 +747,23 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_col_curspeed);
         xset_set_var(set, xset::var::menu_label, "C_urrent Speed");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "9";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_curest);
         xset_set_var(set, xset::var::menu_label, "Current Re_main");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
         set->x = "10";
     }
 
     {
         const auto set = xset_get(xset::name::task_col_avgspeed);
         xset_set_var(set, xset::var::menu_label, "_Average Speed");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
         set->x = "11";
         set->y = "60";
     }
@@ -771,7 +771,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_col_avgest);
         xset_set_var(set, xset::var::menu_label, "A_verage Remain");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
         set->x = "12";
         set->y = "65";
     }
@@ -813,7 +813,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_all);
         xset_set_var(set, xset::var::menu_label, "_All Tasks");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::task_stop_all,
@@ -850,21 +850,21 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_show_manager);
         xset_set_var(set, xset::var::menu_label, "Show _Manager");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_hide_manager);
         xset_set_var(set, xset::var::menu_label, "Auto-_Hide Manager");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::task_columns);
         xset_set_var(set, xset::var::menu_label, "_Columns");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::task_col_count,
@@ -887,7 +887,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_popups);
         xset_set_var(set, xset::var::menu_label, "_Popups");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::task_pop_all,
@@ -904,56 +904,56 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_pop_all);
         xset_set_var(set, xset::var::menu_label, "Popup _All Tasks");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_pop_top);
         xset_set_var(set, xset::var::menu_label, "Stay On _Top");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_pop_above);
         xset_set_var(set, xset::var::menu_label, "A_bove Others");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_pop_stick);
         xset_set_var(set, xset::var::menu_label, "All _Workspaces");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_pop_detail);
         xset_set_var(set, xset::var::menu_label, "_Detailed Stats");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_pop_over);
         xset_set_var(set, xset::var::menu_label, "_Overwrite Option");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::task_pop_err);
         xset_set_var(set, xset::var::menu_label, "_Error Option");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::task_errors);
         xset_set_var(set, xset::var::menu_label, "Err_ors");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::task_err_first,
@@ -965,28 +965,28 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_err_first);
         xset_set_var(set, xset::var::menu_label, "Stop If _First");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::task_err_any);
         xset_set_var(set, xset::var::menu_label, "Stop On _Any");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_err_cont);
         xset_set_var(set, xset::var::menu_label, "_Continue");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xfalse;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::no;
     }
 
     {
         const auto set = xset_get(xset::name::task_queue);
         xset_set_var(set, xset::var::menu_label, "Qu_eue");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::task_q_new,
@@ -998,21 +998,21 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::task_q_new);
         xset_set_var(set, xset::var::menu_label, "_Queue New Tasks");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::task_q_smart);
         xset_set_var(set, xset::var::menu_label, "_Smart Queue");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::task_q_pause);
         xset_set_var(set, xset::var::menu_label, "_Pause On Error");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     // PANELS COMMON
@@ -1020,7 +1020,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::con_open);
         xset_set_var(set, xset::var::menu_label, "_Open");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_var(set, xset::var::icn, "gtk-open");
     }
 
@@ -1050,7 +1050,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::open_in_tab);
         xset_set_var(set, xset::var::menu_label, "In _Tab");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::opentab_new,
@@ -1088,7 +1088,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::open_in_panel);
         xset_set_var(set, xset::var::menu_label, "In _Panel");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::open_in_panel_prev,
@@ -1130,7 +1130,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::archive_default);
         xset_set_var(set, xset::var::menu_label, "_Archive Defaults");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::archive_default_open_with_app,
@@ -1143,32 +1143,32 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::archive_default_open_with_app);
         xset_set_var(set, xset::var::menu_label, "Open With App");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::archive_default_extract);
         xset_set_var(set, xset::var::menu_label, "Extract");
-        set->menu_style = xset::menu::radio;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::radio;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::archive_default_extract_to);
         xset_set_var(set, xset::var::menu_label, "Extract To");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::archive_default_open_with_archiver);
         xset_set_var(set, xset::var::menu_label, "Open With Archiver");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::open_new);
         xset_set_var(set, xset::var::menu_label, "_New");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::new_file,
@@ -1216,8 +1216,8 @@ xset_defaults() noexcept
 
     {
         const auto set = xset_get(xset::name::arc_dlg);
-        set->b = xset::b::xtrue; // Extract To - Create Subdirectory
-        set->z = "1";            // Extract To - Write Access
+        set->b = xset::set::enabled::yes; // Extract To - Create Subdirectory
+        set->z = "1";                     // Extract To - Write Access
     }
 
     {
@@ -1241,7 +1241,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::con_go);
         xset_set_var(set, xset::var::menu_label, "_Go");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::go_back,
@@ -1302,7 +1302,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::go_focus);
         xset_set_var(set, xset::var::menu_label, "Fo_cus");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::focus_path_bar,
@@ -1346,7 +1346,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::go_tab);
         xset_set_var(set, xset::var::menu_label, "_Tab");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::tab_prev,
@@ -1386,20 +1386,20 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::con_view);
         xset_set_var(set, xset::var::menu_label, "_View");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_var(set, xset::var::icn, "gtk-preferences");
     }
 
     {
         const auto set = xset_get(xset::name::view_list_style);
         xset_set_var(set, xset::var::menu_label, "Styl_e");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
     }
 
     {
         const auto set = xset_get(xset::name::view_columns);
         xset_set_var(set, xset::var::menu_label, "C_olumns");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
     }
 
     {
@@ -1410,14 +1410,14 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::rubberband);
         xset_set_var(set, xset::var::menu_label, "_Rubberband Select");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::view_sortby);
         xset_set_var(set, xset::var::menu_label, "_Sort");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::sortby_name,    xset::name::sortby_size,
@@ -1439,135 +1439,135 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::sortby_name);
         xset_set_var(set, xset::var::menu_label, "_Name");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_size);
         xset_set_var(set, xset::var::menu_label, "_Size");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_bytes);
         xset_set_var(set, xset::var::menu_label, "_Size in Bytes");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_type);
         xset_set_var(set, xset::var::menu_label, "_Type");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_mime);
         xset_set_var(set, xset::var::menu_label, "_MIME Type");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_perm);
         xset_set_var(set, xset::var::menu_label, "_Permissions");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_owner);
         xset_set_var(set, xset::var::menu_label, "_Owner");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_group);
         xset_set_var(set, xset::var::menu_label, "_Group");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_atime);
         xset_set_var(set, xset::var::menu_label, "_Date Accessed");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_btime);
         xset_set_var(set, xset::var::menu_label, "_Date Created");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_ctime);
         xset_set_var(set, xset::var::menu_label, "_Date Metadata Changed");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_mtime);
         xset_set_var(set, xset::var::menu_label, "_Date Modified");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_ascend);
         xset_set_var(set, xset::var::menu_label, "_Ascending");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortby_descend);
         xset_set_var(set, xset::var::menu_label, "_Descending");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortx_natural);
         xset_set_var(set, xset::var::menu_label, "_Natural");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
 #if 0
     {
         const auto set = xset_get(xset::name::sortx_natural);
         xset_set_var(set, xset::var::menu_label, "Nat_ural");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 #endif
 
     {
         const auto set = xset_get(xset::name::sortx_case);
         xset_set_var(set, xset::var::menu_label, "_Case Sensitive");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::sortx_directories);
         xset_set_var(set, xset::var::menu_label, "Directories Fi_rst");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortx_files);
         xset_set_var(set, xset::var::menu_label, "F_iles First");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortx_mix);
         xset_set_var(set, xset::var::menu_label, "Mi_xed");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortx_hidfirst);
         xset_set_var(set, xset::var::menu_label, "_Hidden First");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
         const auto set = xset_get(xset::name::sortx_hidlast);
         xset_set_var(set, xset::var::menu_label, "Hidden _Last");
-        set->menu_style = xset::menu::radio;
+        set->menu.type = xset::set::menu_type::radio;
     }
 
     {
@@ -1579,8 +1579,8 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::path_seek);
         xset_set_var(set, xset::var::menu_label, "Auto See_k");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     // EDIT
@@ -1623,7 +1623,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::edit_submenu);
         xset_set_var(set, xset::var::menu_label, "_Actions");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::copy_name,
@@ -1685,7 +1685,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::copy_to);
         xset_set_var(set, xset::var::menu_label, "_Copy To");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::copy_loc,
@@ -1710,7 +1710,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::copy_tab);
         xset_set_var(set, xset::var::menu_label, "_Tab");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::copy_tab_prev,
@@ -1746,7 +1746,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::copy_panel);
         xset_set_var(set, xset::var::menu_label, "_Panel");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::copy_panel_prev,
@@ -1770,7 +1770,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::move_to);
         xset_set_var(set, xset::var::menu_label, "_Move To");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::move_loc,
@@ -1795,7 +1795,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::move_tab);
         xset_set_var(set, xset::var::menu_label, "_Tab");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::move_tab_prev,
@@ -1831,7 +1831,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::move_panel);
         xset_set_var(set, xset::var::menu_label, "_Panel");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::move_panel_prev,
@@ -1882,7 +1882,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::con_prop);
         xset_set_var(set, xset::var::menu_label, "Propert_ies");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::prop_info,
@@ -1914,7 +1914,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::prop_quick);
         xset_set_var(set, xset::var::menu_label, "_Quick");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::perm_r,
@@ -1961,7 +1961,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::perm_recurs);
         xset_set_var(set, xset::var::menu_label, "_Recursive");
-        set->menu_style = xset::menu::submenu;
+        set->menu.type = xset::set::menu_type::submenu;
         xset_set_submenu(set,
                          {
                              xset::name::perm_go_w,
@@ -1986,8 +1986,8 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::show_toolbox);
             xset_set_var(set, xset::var::menu_label, "_Toolbar");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::xtrue;
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::yes;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_show_toolbox);
@@ -1997,8 +1997,8 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::show_devmon);
             xset_set_var(set, xset::var::menu_label, "_Devices");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::unset;
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::unset;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_show_devmon);
@@ -2008,8 +2008,8 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::show_dirtree);
             xset_set_var(set, xset::var::menu_label, "T_ree");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::xtrue;
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::yes;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_show_dirtree);
@@ -2019,8 +2019,8 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::list_detailed);
             xset_set_var(set, xset::var::menu_label, "_Detailed");
-            set->menu_style = xset::menu::radio;
-            set->b = xset::b::xtrue;
+            set->menu.type = xset::set::menu_type::radio;
+            set->b = xset::set::enabled::yes;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_list_detailed);
@@ -2030,7 +2030,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::list_icons);
             xset_set_var(set, xset::var::menu_label, "_Icons");
-            set->menu_style = xset::menu::radio;
+            set->menu.type = xset::set::menu_type::radio;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_list_icons);
@@ -2040,7 +2040,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::list_compact);
             xset_set_var(set, xset::var::menu_label, "_Compact");
-            set->menu_style = xset::menu::radio;
+            set->menu.type = xset::set::menu_type::radio;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_list_compact);
@@ -2050,7 +2050,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::list_large);
             xset_set_var(set, xset::var::menu_label, "_Large Icons");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_list_large);
@@ -2060,7 +2060,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::show_hidden);
             xset_set_var(set, xset::var::menu_label, "_Hidden Files");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_show_hidden);
@@ -2070,16 +2070,16 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_name);
             xset_set_var(set, xset::var::menu_label, "_Name");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::xtrue; // visible
-            set->x = "0";            // position
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::yes; // visible
+            set->x = "0";                     // position
         }
 
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_size);
             xset_set_var(set, xset::var::menu_label, "_Size");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::xtrue;
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::yes;
             set->x = "1";
             if (p != 1)
             {
@@ -2090,8 +2090,8 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_bytes);
             xset_set_var(set, xset::var::menu_label, "_Bytes");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::xtrue;
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::yes;
             set->x = "2";
             if (p != 1)
             {
@@ -2102,7 +2102,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_type);
             xset_set_var(set, xset::var::menu_label, "_Type");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "3";
             if (p != 1)
             {
@@ -2113,7 +2113,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_mime);
             xset_set_var(set, xset::var::menu_label, "_MIME Type");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "4";
             if (p != 1)
             {
@@ -2124,7 +2124,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_perm);
             xset_set_var(set, xset::var::menu_label, "_Permissions");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "5";
             if (p != 1)
             {
@@ -2135,7 +2135,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_owner);
             xset_set_var(set, xset::var::menu_label, "_Owner");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "6";
             if (p != 1)
             {
@@ -2146,7 +2146,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_group);
             xset_set_var(set, xset::var::menu_label, "_Group");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "7";
             if (p != 1)
             {
@@ -2157,7 +2157,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_atime);
             xset_set_var(set, xset::var::menu_label, "_Accessed");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "8";
             if (p != 1)
             {
@@ -2168,7 +2168,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_btime);
             xset_set_var(set, xset::var::menu_label, "_Created");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "9";
             if (p != 1)
             {
@@ -2179,7 +2179,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_ctime);
             xset_set_var(set, xset::var::menu_label, "_Metadata");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "10";
             if (p != 1)
             {
@@ -2190,7 +2190,7 @@ xset_defaults() noexcept
         {
             const auto set = xset_get_panel(p, xset::panel::detcol_mtime);
             xset_set_var(set, xset::var::menu_label, "_Modified");
-            set->menu_style = xset::menu::check;
+            set->menu.type = xset::set::menu_type::check;
             set->x = "11";
             if (p != 1)
             {
@@ -2200,18 +2200,20 @@ xset_defaults() noexcept
 
         {
             const auto set = xset_get_panel(p, xset::panel::sort_extra);
-            set->b = xset::b::xtrue;                                               // sort_natural
-            set->x = std::format("{}", magic_enum::enum_integer(xset::b::xfalse)); // sort_case
+            set->b = xset::set::enabled::yes; // sort_natural
+            set->x =
+                std::format("{}", magic_enum::enum_integer(xset::set::enabled::no)); // sort_case
             set->y = "1"; // ptk::file_list::sort_dir::PTK_LIST_SORT_DIR_FIRST
             set->z =
-                std::format("{}", magic_enum::enum_integer(xset::b::xtrue)); // sort_hidden_first
+                std::format("{}",
+                            magic_enum::enum_integer(xset::set::enabled::yes)); // sort_hidden_first
         }
 
         {
             const auto set = xset_get_panel(p, xset::panel::book_fol);
             xset_set_var(set, xset::var::menu_label, "Follow _Dir");
-            set->menu_style = xset::menu::check;
-            set->b = xset::b::xtrue;
+            set->menu.type = xset::set::menu_type::check;
+            set->b = xset::set::enabled::yes;
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_book_fol);
@@ -2223,28 +2225,28 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::book_newtab);
         xset_set_var(set, xset::var::menu_label, "_New Tab");
-        set->menu_style = xset::menu::check;
+        set->menu.type = xset::set::menu_type::check;
     }
 
     {
         const auto set = xset_get(xset::name::book_single);
         xset_set_var(set, xset::var::menu_label, "_Single Click");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::dev_newtab);
         xset_set_var(set, xset::var::menu_label, "_New Tab");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     {
         const auto set = xset_get(xset::name::dev_single);
         xset_set_var(set, xset::var::menu_label, "_Single Click");
-        set->menu_style = xset::menu::check;
-        set->b = xset::b::xtrue;
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
     }
 
     for (const xset_t& set : xsets)

@@ -112,14 +112,14 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
             const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
             set->ob1 = ::utils::strdup(real_path.c_str());
             tab_added = true;
-            set->b = xset::b::xtrue;
+            set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
         else if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opt->panel))))
         {
             // show panel
             const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
-            set->b = xset::b::xtrue;
+            set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
         main_window->curpanel = opt->panel;
@@ -210,7 +210,7 @@ activate(GtkApplication* app, void* user_data) noexcept
         {
             // show panel
             const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
-            set->b = xset::b::xtrue;
+            set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
         main_window->focus_panel(opt->panel);

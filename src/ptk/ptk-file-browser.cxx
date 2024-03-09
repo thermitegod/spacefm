@@ -616,7 +616,7 @@ static bool
 on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set) noexcept
 {
     const auto button = gdk_button_event_get_button(event);
-    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu_label.value_or(""), button);
+    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu.label.value_or(""), button);
 
     const auto type = gdk_event_get_event_type(event);
     if (type != GdkEventType::GDK_BUTTON_PRESS)
@@ -632,7 +632,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 
     if (button == 1 && keymod == 0)
     { // left click and no modifier
-        // ztd::logger::debug("set={}  menu={}", set->name, magic_enum::enum_name(set->menu_style));
+        // ztd::logger::debug("set={}  menu={}", set->name, magic_enum::enum_name(set->menu.type));
         set->browser->on_action(set->xset_name);
         return true;
     }
@@ -805,7 +805,7 @@ on_status_middle_click_config(GtkMenuItem* menuitem, const xset_t& set) noexcept
     {
         if (set->xset_name == setname)
         {
-            set->b = xset::b::xtrue;
+            set->b = xset::set::enabled::yes;
         }
         else
         {
@@ -1175,12 +1175,13 @@ ptk::browser::update_model() noexcept
 
     // set file sorting settings
     list->sort_natural = xset_get_b_panel(this->panel_, xset::panel::sort_extra);
-    list->sort_case =
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) == xset::b::xtrue;
+    list->sort_case = xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::x) ==
+                      xset::set::enabled::yes;
     list->sort_dir_ = ptk::file_list::sort_dir(
         xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::y));
     list->sort_hidden_first =
-        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) == xset::b::xtrue;
+        xset_get_int_panel(this->panel_, xset::panel::sort_extra, xset::var::z) ==
+        xset::set::enabled::yes;
 
     gtk_tree_sortable_set_sort_column_id(
         GTK_TREE_SORTABLE(list),
@@ -4101,12 +4102,12 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
 
     if (set->xset_name == xset::name::sortx_natural)
     {
-        list->sort_natural = set->b == xset::b::xtrue;
+        list->sort_natural = set->b == xset::set::enabled::yes;
         xset_set_b_panel(this->panel_, xset::panel::sort_extra, list->sort_natural);
     }
     else if (set->xset_name == xset::name::sortx_case)
     {
-        list->sort_case = set->b == xset::b::xtrue;
+        list->sort_case = set->b == xset::set::enabled::yes;
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::x,
@@ -4140,7 +4141,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
     }
     else if (set->xset_name == xset::name::sortx_hidfirst)
     {
-        list->sort_hidden_first = set->b == xset::b::xtrue;
+        list->sort_hidden_first = set->b == xset::set::enabled::yes;
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::z,
@@ -4148,14 +4149,14 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
     }
     else if (set->xset_name == xset::name::sortx_hidlast)
     {
-        list->sort_hidden_first = set->b != xset::b::xtrue;
+        list->sort_hidden_first = set->b != xset::set::enabled::yes;
         xset_set_panel(this->panel_,
                        xset::panel::sort_extra,
                        xset::var::z,
                        std::format("{}",
-                                   set->b == xset::b::xtrue
-                                       ? magic_enum::enum_integer(xset::b::xfalse)
-                                       : magic_enum::enum_integer(xset::b::xtrue)));
+                                   set->b == xset::set::enabled::yes
+                                       ? magic_enum::enum_integer(xset::set::enabled::no)
+                                       : magic_enum::enum_integer(xset::set::enabled::yes)));
     }
     list->sort();
 }
@@ -4869,7 +4870,8 @@ ptk::browser::update_views() noexcept
                         }
                         // set column visibility
                         gtk_tree_view_column_set_visible(col,
-                                                         set->b == xset::b::xtrue || index == 0);
+                                                         set->b == xset::set::enabled::yes ||
+                                                             index == 0);
 
                         break;
                     }
@@ -5872,7 +5874,7 @@ ptk::browser::on_permission(GtkMenuItem* item,
 
     // task
     ptk::file_task* ptask =
-        ptk_file_exec_new(set->menu_label.value(), cwd, GTK_WIDGET(this), this->task_view_);
+        ptk_file_exec_new(set->menu.label.value(), cwd, GTK_WIDGET(this), this->task_view_);
     ptask->task->exec_command = std::format("{} {} {}", prog, cmd, file_paths);
     ptask->task->exec_browser = this;
     ptask->task->exec_sync = true;
@@ -6051,19 +6053,19 @@ ptk::browser::on_action(const xset::name setname) noexcept
         else if (set->xset_name == xset::name::sortby_ascend)
         {
             i = -1;
-            set->b = this->sort_type_ == GtkSortType::GTK_SORT_ASCENDING ? xset::b::xtrue
-                                                                         : xset::b::xfalse;
+            set->b = this->sort_type_ == GtkSortType::GTK_SORT_ASCENDING ? xset::set::enabled::yes
+                                                                         : xset::set::enabled::no;
         }
         else if (set->xset_name == xset::name::sortby_descend)
         {
             i = -2;
-            set->b = this->sort_type_ == GtkSortType::GTK_SORT_DESCENDING ? xset::b::xtrue
-                                                                          : xset::b::xfalse;
+            set->b = this->sort_type_ == GtkSortType::GTK_SORT_DESCENDING ? xset::set::enabled::yes
+                                                                          : xset::set::enabled::no;
         }
         if (i > 0)
         { // always want to show name
-            set->b =
-                this->sort_order_ == ptk::browser::sort_order(i) ? xset::b::xtrue : xset::b::xfalse;
+            set->b = this->sort_order_ == ptk::browser::sort_order(i) ? xset::set::enabled::yes
+                                                                      : xset::set::enabled::no;
         }
         on_popup_sortby(nullptr, this, i);
     }
@@ -6094,7 +6096,8 @@ ptk::browser::on_action(const xset::name setname) noexcept
             else if (xname.starts_with("show_")) // shared key
             {
                 set2 = xset_get_panel_mode(this->panel_, xname, mode);
-                set2->b = set2->b == xset::b::xtrue ? xset::b::unset : xset::b::xtrue;
+                set2->b = set2->b == xset::set::enabled::yes ? xset::set::enabled::unset
+                                                             : xset::set::enabled::yes;
                 update_views_all_windows(nullptr, this);
             }
             else if (xname == "list_detailed")
@@ -6121,7 +6124,8 @@ ptk::browser::on_action(const xset::name setname) noexcept
                      && this->view_mode_ == ptk::browser::view_mode::list_view)
             {
                 set2 = xset_get_panel_mode(this->panel_, xname, mode);
-                set2->b = set2->b == xset::b::xtrue ? xset::b::unset : xset::b::xtrue;
+                set2->b = set2->b == xset::set::enabled::yes ? xset::set::enabled::unset
+                                                             : xset::set::enabled::yes;
                 update_views_all_windows(nullptr, this);
             }
         }
