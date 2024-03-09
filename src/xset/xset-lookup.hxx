@@ -938,7 +938,6 @@ enum class name
 
     // other
     config_version,
-    book_new,
     drag_action,
     editor,
     root_editor,

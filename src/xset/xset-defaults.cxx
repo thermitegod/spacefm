@@ -469,18 +469,21 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::main_new_window);
         xset_set_var(set, xset::var::menu_label, "New _Window");
         xset_set_var(set, xset::var::icn, "spacefm");
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     {
         const auto set = xset_get(xset::name::main_search);
         xset_set_var(set, xset::var::menu_label, "_File Search");
         xset_set_var(set, xset::var::icn, "gtk-find");
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     {
         const auto set = xset_get(xset::name::main_terminal);
         xset_set_var(set, xset::var::menu_label, "_Terminal");
         set->b = xset::set::enabled::unset; // discovery notification
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     // was previously used for 'Save Session' < 0.9.4 as xset::set::menu_type::NORMAL
@@ -511,6 +514,7 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::main_exit);
         xset_set_var(set, xset::var::menu_label, "E_xit");
         xset_set_var(set, xset::var::icn, "gtk-quit");
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     // View
@@ -519,24 +523,28 @@ xset_defaults() noexcept
         xset_set_var(set, xset::var::menu_label, "Panel _1");
         set->menu.type = xset::set::menu_type::check;
         set->b = xset::set::enabled::yes;
+        set->keybinding.type = xset::set::keybinding_type::view;
     }
 
     {
         const auto set = xset_get(xset::name::panel2_show);
         xset_set_var(set, xset::var::menu_label, "Panel _2");
         set->menu.type = xset::set::menu_type::check;
+        set->keybinding.type = xset::set::keybinding_type::view;
     }
 
     {
         const auto set = xset_get(xset::name::panel3_show);
         xset_set_var(set, xset::var::menu_label, "Panel _3");
         set->menu.type = xset::set::menu_type::check;
+        set->keybinding.type = xset::set::keybinding_type::view;
     }
 
     {
         const auto set = xset_get(xset::name::panel4_show);
         xset_set_var(set, xset::var::menu_label, "Panel _4");
         set->menu.type = xset::set::menu_type::check;
+        set->keybinding.type = xset::set::keybinding_type::view;
     }
 
     {
@@ -612,18 +620,21 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::main_full);
         xset_set_var(set, xset::var::menu_label, "_Fullscreen");
         set->menu.type = xset::set::menu_type::check;
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     {
         const auto set = xset_get(xset::name::main_keybindings);
         xset_set_var(set, xset::var::menu_label, "Keybindings");
         xset_set_var(set, xset::var::icn, "gtk-preferences");
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     {
         const auto set = xset_get(xset::name::main_prefs);
         xset_set_var(set, xset::var::menu_label, "_Preferences");
         xset_set_var(set, xset::var::icn, "gtk-preferences");
+        set->keybinding.type = xset::set::keybinding_type::general;
     }
 
     {
@@ -1045,6 +1056,7 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::open_all);
         xset_set_var(set, xset::var::menu_label, "Open With _Default"); // virtual
+        set->keybinding.type = xset::set::keybinding_type::opening;
     }
 
     {
@@ -1187,18 +1199,21 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::new_file);
         xset_set_var(set, xset::var::menu_label, "_File");
         xset_set_var(set, xset::var::icn, "gtk-file");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::new_directory);
         xset_set_var(set, xset::var::menu_label, "Dir_ectory");
         xset_set_var(set, xset::var::icn, "folder");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::new_link);
         xset_set_var(set, xset::var::menu_label, "_Link");
         xset_set_var(set, xset::var::icn, "gtk-file");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
@@ -1206,36 +1221,42 @@ xset_defaults() noexcept
         xset_set_var(set, xset::var::menu_label, "_Bookmark");
         set->shared_key = xset_get(xset::name::book_add);
         xset_set_var(set, xset::var::icn, "gtk-jump-to");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::new_archive);
         xset_set_var(set, xset::var::menu_label, "_Archive");
         xset_set_var(set, xset::var::icn, "gtk-save-as");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::arc_dlg);
         set->b = xset::set::enabled::yes; // Extract To - Create Subdirectory
         set->z = "1";                     // Extract To - Write Access
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::tab_new);
         xset_set_var(set, xset::var::menu_label, "_Tab");
         xset_set_var(set, xset::var::icn, "gtk-add");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::tab_new_here);
         xset_set_var(set, xset::var::menu_label, "Tab _Here");
         xset_set_var(set, xset::var::icn, "gtk-add");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::new_app);
         xset_set_var(set, xset::var::menu_label, "_Desktop Application");
         xset_set_var(set, xset::var::icn, "gtk-add");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
@@ -1262,36 +1283,42 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::go_back);
         xset_set_var(set, xset::var::menu_label, "_Back");
         xset_set_var(set, xset::var::icn, "gtk-go-back");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::go_forward);
         xset_set_var(set, xset::var::menu_label, "_Forward");
         xset_set_var(set, xset::var::icn, "gtk-go-forward");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::go_up);
         xset_set_var(set, xset::var::menu_label, "_Up");
         xset_set_var(set, xset::var::icn, "gtk-go-up");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::go_home);
         xset_set_var(set, xset::var::menu_label, "_Home");
         xset_set_var(set, xset::var::icn, "gtk-home");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::go_default);
         xset_set_var(set, xset::var::menu_label, "_Default");
         xset_set_var(set, xset::var::icn, "gtk-home");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
         const auto set = xset_get(xset::name::go_set_default);
         xset_set_var(set, xset::var::menu_label, "_Set Default");
         xset_set_var(set, xset::var::icn, "gtk-save");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
@@ -1317,6 +1344,7 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::focus_path_bar);
         xset_set_var(set, xset::var::menu_label, "_Path Bar");
         xset_set_var(set, xset::var::icn, "gtk-dialog-question");
+        set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
     {
@@ -1367,20 +1395,87 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::tab_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::tab_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::tab_restore, xset::var::menu_label, "_Restore");
-        xset_set(xset::name::tab_close, xset::var::menu_label, "_Close");
-        xset_set(xset::name::tab_1, xset::var::menu_label, "Tab _1");
-        xset_set(xset::name::tab_2, xset::var::menu_label, "Tab _2");
-        xset_set(xset::name::tab_3, xset::var::menu_label, "Tab _3");
-        xset_set(xset::name::tab_4, xset::var::menu_label, "Tab _4");
-        xset_set(xset::name::tab_5, xset::var::menu_label, "Tab _5");
-        xset_set(xset::name::tab_6, xset::var::menu_label, "Tab _6");
-        xset_set(xset::name::tab_7, xset::var::menu_label, "Tab _7");
-        xset_set(xset::name::tab_8, xset::var::menu_label, "Tab _8");
-        xset_set(xset::name::tab_9, xset::var::menu_label, "Tab _9");
-        xset_set(xset::name::tab_10, xset::var::menu_label, "Tab 1_0");
+        const auto set = xset_get(xset::name::tab_prev);
+        xset_set(set, xset::var::menu_label, "_Prev");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_next);
+        xset_set(set, xset::var::menu_label, "_Next");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_restore);
+        xset_set(set, xset::var::menu_label, "_Restore");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_close);
+        xset_set(set, xset::var::menu_label, "_Close");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_1);
+        xset_set(set, xset::var::menu_label, "Tab _1");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_2);
+        xset_set(set, xset::var::menu_label, "Tab _2");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_3);
+        xset_set(set, xset::var::menu_label, "Tab _3");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_4);
+        xset_set(set, xset::var::menu_label, "Tab _4");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_5);
+        xset_set(set, xset::var::menu_label, "Tab _5");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_6);
+        xset_set(set, xset::var::menu_label, "Tab _6");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_7);
+        xset_set(set, xset::var::menu_label, "Tab _7");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_8);
+        xset_set(set, xset::var::menu_label, "Tab _8");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_9);
+        xset_set(set, xset::var::menu_label, "Tab _9");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
+    }
+
+    {
+        const auto set = xset_get(xset::name::tab_10);
+        xset_set(set, xset::var::menu_label, "Tab 1_0");
+        set->keybinding.type = xset::set::keybinding_type::tabs;
     }
 
     {
@@ -1574,6 +1669,7 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::view_refresh);
         xset_set_var(set, xset::var::menu_label, "Re_fresh");
         xset_set_var(set, xset::var::icn, "gtk-refresh");
+        set->keybinding.type = xset::set::keybinding_type::view;
     }
 
     {
@@ -1588,36 +1684,42 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::edit_cut);
         xset_set_var(set, xset::var::menu_label, "Cu_t");
         xset_set_var(set, xset::var::icn, "gtk-cut");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::edit_copy);
         xset_set_var(set, xset::var::menu_label, "_Copy");
         xset_set_var(set, xset::var::icn, "gtk-copy");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::edit_paste);
         xset_set_var(set, xset::var::menu_label, "_Paste");
         xset_set_var(set, xset::var::icn, "gtk-paste");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::edit_rename);
         xset_set_var(set, xset::var::menu_label, "_Rename");
         xset_set_var(set, xset::var::icn, "gtk-edit");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::edit_delete);
         xset_set_var(set, xset::var::menu_label, "_Delete");
         xset_set_var(set, xset::var::icn, "gtk-delete");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::edit_trash);
         xset_set_var(set, xset::var::menu_label, "_Trash");
         xset_set_var(set, xset::var::icn, "gtk-delete");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
@@ -1650,36 +1752,42 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::copy_name);
         xset_set_var(set, xset::var::menu_label, "Copy _Name");
         xset_set_var(set, xset::var::icn, "gtk-copy");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::copy_path);
         xset_set_var(set, xset::var::menu_label, "Copy _Path");
         xset_set_var(set, xset::var::icn, "gtk-copy");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::copy_parent);
         xset_set_var(set, xset::var::menu_label, "Copy Pa_rent");
         xset_set_var(set, xset::var::icn, "gtk-copy");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::paste_link);
         xset_set_var(set, xset::var::menu_label, "Paste _Link");
         xset_set_var(set, xset::var::icn, "gtk-paste");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::paste_target);
         xset_set_var(set, xset::var::menu_label, "Paste _Target");
         xset_set_var(set, xset::var::icn, "gtk-paste");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::paste_as);
         xset_set_var(set, xset::var::menu_label, "Paste _As");
         xset_set_var(set, xset::var::icn, "gtk-paste");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
@@ -1699,12 +1807,14 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::copy_loc);
         xset_set_var(set, xset::var::menu_label, "L_ocation");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::copy_loc_last);
         xset_set_var(set, xset::var::menu_label, "L_ast Location");
         xset_set_var(set, xset::var::icn, "gtk-redo");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
@@ -1861,21 +1971,25 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::select_all);
         xset_set_var(set, xset::var::menu_label, "_Select All");
         xset_set_var(set, xset::var::icn, "gtk-select-all");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::select_un);
         xset_set_var(set, xset::var::menu_label, "_Unselect All");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::select_invert);
         xset_set_var(set, xset::var::menu_label, "_Invert Selection");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::select_patt);
         xset_set_var(set, xset::var::menu_label, "S_elect By Pattern");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     // Properties
@@ -1897,18 +2011,21 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::prop_info);
         xset_set_var(set, xset::var::menu_label, "_Info");
         xset_set_var(set, xset::var::icn, "gtk-dialog-info");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::prop_attr);
         xset_set_var(set, xset::var::menu_label, "_Attributes");
         xset_set_var(set, xset::var::icn, "gtk-dialog-info");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
         const auto set = xset_get(xset::name::prop_perm);
         xset_set_var(set, xset::var::menu_label, "_Permissions");
         xset_set_var(set, xset::var::icn, "dialog-password");
+        set->keybinding.type = xset::set::keybinding_type::editing;
     }
 
     {
@@ -2061,6 +2178,10 @@ xset_defaults() noexcept
             const auto set = xset_get_panel(p, xset::panel::show_hidden);
             xset_set_var(set, xset::var::menu_label, "_Hidden Files");
             set->menu.type = xset::set::menu_type::check;
+            if (p == 1)
+            {
+                set->keybinding.type = xset::set::keybinding_type::view;
+            }
             if (p != 1)
             {
                 set->shared_key = xset_get(xset::name::panel1_show_hidden);
@@ -2367,7 +2488,6 @@ xset_default_keys() noexcept
 #endif
     def_key(keysets, xset::name::prop_perm, GDK_KEY_p, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::panel1_show_hidden, GDK_KEY_h, GdkModifierType::GDK_CONTROL_MASK);
-    def_key(keysets, xset::name::book_new, GDK_KEY_d, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::new_file, GDK_KEY_F, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::new_directory, GDK_KEY_N, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::new_link, GDK_KEY_L, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));

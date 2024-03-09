@@ -54,7 +54,7 @@ on_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* c
 }
 
 static GtkWidget*
-init_keybindings_tab() noexcept
+init_keybindings_tab(const xset::set::keybinding_type type) noexcept
 {
     GtkScrolledWindow* scrolled_window =
         GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
@@ -92,6 +92,11 @@ init_keybindings_tab() noexcept
 
     for (const auto& set : xsets)
     {
+        if (set->keybinding.type != type)
+        {
+            continue;
+        }
+
         GtkTreeIter iter;
         gtk_list_store_append(list_store, &iter);
         gtk_list_store_set(
@@ -150,7 +155,21 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
     gtk_widget_set_margin_top(GTK_WIDGET(notebook), 5);
     gtk_widget_set_margin_bottom(GTK_WIDGET(notebook), 5);
 
-    gtk_notebook_append_page(notebook, init_keybindings_tab(), gtk_label_new("Keybindings"));
+    GtkWidget* tab_navigation = init_keybindings_tab(xset::set::keybinding_type::navigation);
+    GtkWidget* tab_editing = init_keybindings_tab(xset::set::keybinding_type::editing);
+    GtkWidget* tab_view = init_keybindings_tab(xset::set::keybinding_type::view);
+    GtkWidget* tab_tabs = init_keybindings_tab(xset::set::keybinding_type::tabs);
+    GtkWidget* tab_general = init_keybindings_tab(xset::set::keybinding_type::general);
+    GtkWidget* tab_opening = init_keybindings_tab(xset::set::keybinding_type::opening);
+    // GtkWidget* tab_invalid = init_keybindings_tab(xset::set::keybinding_type::invalid);
+
+    gtk_notebook_append_page(notebook, tab_navigation, gtk_label_new("Navigation"));
+    gtk_notebook_append_page(notebook, tab_editing, gtk_label_new("Editing"));
+    gtk_notebook_append_page(notebook, tab_view, gtk_label_new("View"));
+    gtk_notebook_append_page(notebook, tab_tabs, gtk_label_new("Tabs"));
+    gtk_notebook_append_page(notebook, tab_general, gtk_label_new("General"));
+    gtk_notebook_append_page(notebook, tab_opening, gtk_label_new("Opening"));
+    // gtk_notebook_append_page(notebook, tab_invalid, gtk_label_new("Invalid"));
 
     gtk_widget_set_size_request(GTK_WIDGET(dialog), 800, 800);
     gtk_window_set_resizable(GTK_WINDOW(dialog), true);
