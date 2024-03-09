@@ -28,7 +28,7 @@ void save() noexcept;
 
 namespace disk_format
 {
-constexpr u64 version{2}; // 3.0.0-dev
+constexpr u64 version{3}; // 3.0.0-dev
 constexpr std::string_view filename{"session.toml"};
 
 // The delimiter used in the config file to
