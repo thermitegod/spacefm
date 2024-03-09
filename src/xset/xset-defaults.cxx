@@ -2277,7 +2277,7 @@ def_key(xset::name name, u32 key, u32 keymod) noexcept
     const xset_t set = xset_get(name);
 
     // key already set or unset?
-    if (set->key != 0 || key == 0)
+    if (set->keybinding.key != 0 || key == 0)
     {
         return;
     }
@@ -2286,14 +2286,14 @@ def_key(xset::name name, u32 key, u32 keymod) noexcept
     for (const xset_t& keyset : global::keysets)
     {
         assert(keyset != nullptr);
-
-        if (keyset->key == key && keyset->keymod == keymod)
+        if (keyset->keybinding.key == key && keyset->keybinding.modifier == keymod)
         {
+            ztd::logger::warn("Duplicate keybinding: {}, {}", set->name, keyset->name);
             return;
         }
     }
-    set->key = key;
-    set->keymod = keymod;
+    set->keybinding.key = key;
+    set->keybinding.modifier = keymod;
 }
 
 void
@@ -2305,7 +2305,7 @@ xset_default_keys() noexcept
     {
         assert(set != nullptr);
 
-        if (set->key)
+        if (set->keybinding.key != 0)
         {
             global::keysets.push_back(set);
         }

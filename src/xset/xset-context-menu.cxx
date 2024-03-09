@@ -252,21 +252,21 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
         {
             keyset = set;
         }
-        if (keyset->key > 0 && accel_group)
+        if (keyset->keybinding.key > 0 && accel_group)
         {
 #if (GTK_MAJOR_VERSION == 4)
             ztd::logger::debug("TODO - PORT - accel_group");
             // gtk_widget_add_controller(item, accel_group);
             // gtk_shortcut_controller_add_shortcut(
             //     GTK_SHORTCUT_CONTROLLER(accel_group),
-            //     gtk_shortcut_new(gtk_keyval_trigger_new(keyset->key, (GdkModifierType)keyset->keymod),
+            //     gtk_shortcut_new(gtk_keyval_trigger_new(keyset->keybinding.key, (GdkModifierType)keyset->keybinding.modifier),
             //                     gtk_callback_action_new(callback_func /* TODO */, nullptr, nullptr)))
 #elif (GTK_MAJOR_VERSION == 3)
             gtk_widget_add_accelerator(item,
                                        "activate",
                                        accel_group,
-                                       keyset->key,
-                                       (GdkModifierType)keyset->keymod,
+                                       keyset->keybinding.key,
+                                       (GdkModifierType)keyset->keybinding.modifier,
                                        GTK_ACCEL_VISIBLE);
 #endif
         }

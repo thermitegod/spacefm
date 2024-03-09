@@ -154,9 +154,25 @@ struct XSet : public std::enable_shared_from_this<XSet>
     char* ob2{nullptr};                                  // not saved
     void* ob2_data{nullptr};                             // not saved
     ptk::browser* browser{nullptr};                      // not saved - set automatically
-    u32 key{0};                                          // saved
-    u32 keymod{0};                                       // saved
     xset_t shared_key{nullptr};                          // not saved
+
+    enum class keybinding_type
+    {
+        invalid, // keybindings are disabled for this xset
+        navigation,
+        editing,
+        view,
+        tabs,
+        general,
+        opening,
+    };
+    struct keybinding_data
+    {
+        u32 key{0};                                     // saved
+        u32 modifier{0};                                // saved
+        keybinding_type type{keybinding_type::invalid}; // not saved
+    };
+    keybinding_data keybinding;
 
     std::optional<std::string> icon{std::nullopt};    // saved
     std::optional<std::string> desc{std::nullopt};    // saved if ( !lock ), or read if locked

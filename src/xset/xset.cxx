@@ -171,7 +171,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->key = result;
+            set->keybinding.key = result;
             break;
         }
         case xset::var::keymod:
@@ -186,7 +186,7 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                                    value);
                 break;
             }
-            set->keymod = result;
+            set->keybinding.modifier = result;
             break;
         }
         case xset::var::style:

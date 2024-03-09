@@ -94,13 +94,14 @@ init_keybindings_tab() noexcept
     {
         GtkTreeIter iter;
         gtk_list_store_append(list_store, &iter);
-        gtk_list_store_set(list_store,
-                           &iter,
-                           0,
-                           set->name.c_str(),
-                           1,
-                           xset_get_keyname(set, set->key, set->keymod).c_str(),
-                           -1);
+        gtk_list_store_set(
+            list_store,
+            &iter,
+            0,
+            set->name.c_str(),
+            1,
+            xset_get_keyname(set, set->keybinding.key, set->keybinding.modifier).c_str(),
+            -1);
     }
 
     gtk_widget_show_all(GTK_WIDGET(scrolled_window));

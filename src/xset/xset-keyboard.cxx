@@ -39,8 +39,8 @@ xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod) noexcept
     u32 keymod = 0;
     if (set)
     {
-        keyval = set->key;
-        keymod = set->keymod;
+        keyval = set->keybinding.key;
+        keymod = set->keybinding.modifier;
     }
     else
     {
@@ -154,8 +154,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcep
     for (const xset_t& set2 : xsets)
     {
         assert(set2 != nullptr);
-        if (set != set2 && set2->key > 0 && set2->key == keyval && set2->keymod == keymod &&
-            set2 != keyset)
+        if (set != set2 && set2->keybinding.key > 0 && set2->keybinding.key == keyval &&
+            set2->keybinding.modifier == keymod && set2 != keyset)
         {
             std::string name;
             if (set2->menu_label)
@@ -251,7 +251,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
     {
         keyset = set;
     }
-    if (keyset->key <= 0)
+    if (keyset->keybinding.key <= 0)
     {
         gtk_widget_set_sensitive(GTK_WIDGET(btn_unset), false);
     }
@@ -281,10 +281,11 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
             {
                 assert(set2 != nullptr);
 
-                if (set2 && set2->key > 0 && set2->key == newkey && set2->keymod == newkeymod)
+                if (set2 && set2->keybinding.key > 0 && set2->keybinding.key == newkey &&
+                    set2->keybinding.modifier == newkeymod)
                 {
-                    set2->key = 0;
-                    set2->keymod = 0;
+                    set2->keybinding.key = 0;
+                    set2->keybinding.modifier = 0;
                 }
             }
         }
@@ -303,7 +304,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
         {
             keyset = set;
         }
-        keyset->key = newkey;
-        keyset->keymod = newkeymod;
+        keyset->keybinding.key = newkey;
+        keyset->keybinding.modifier = newkeymod;
     }
 }

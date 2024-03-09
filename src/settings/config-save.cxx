@@ -71,16 +71,16 @@ pack_xset(const xset_t& set) noexcept
         const auto value = std::format("{}", set->z.value());
         setvars.insert({name.data(), value});
     }
-    if (set->key)
+    if (set->keybinding.key)
     {
         const auto name = magic_enum::enum_name(xset::var::key);
-        const auto value = std::format("{}", set->key);
+        const auto value = std::format("{}", set->keybinding.key);
         setvars.insert({name.data(), value});
     }
-    if (set->keymod)
+    if (set->keybinding.modifier)
     {
         const auto name = magic_enum::enum_name(xset::var::keymod);
-        const auto value = std::format("{}", set->keymod);
+        const auto value = std::format("{}", set->keybinding.modifier);
         setvars.insert({name.data(), value});
     }
     // menu label

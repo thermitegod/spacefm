@@ -2276,7 +2276,8 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         {
             // set has shared key
             xset_t shared_key_set = set->shared_key;
-            if (shared_key_set->key == keyval && shared_key_set->keymod == keymod)
+            if (shared_key_set->keybinding.key == keyval &&
+                shared_key_set->keybinding.modifier == keymod)
             {
                 // shared key match
                 if (shared_key_set->name.starts_with("panel"))
@@ -2303,7 +2304,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
                 continue;
             }
         }
-        if (set->key == keyval && set->keymod == keymod)
+        if (set->keybinding.key == keyval && set->keybinding.modifier == keymod)
         {
             return this->keypress_found_key(set);
         }
