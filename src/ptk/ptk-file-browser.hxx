@@ -220,7 +220,6 @@ struct browser
     const browser_count_data get_tab_panel_counts() const noexcept;
 
     void go_home() noexcept;
-    void go_default() noexcept;
     void go_tab(tab_t tab) noexcept;
     void go_back() noexcept;
     void go_forward() noexcept;
@@ -235,7 +234,6 @@ struct browser
     void close_tab() noexcept;
     void restore_tab() noexcept;
     void open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept;
-    void set_default_folder() const noexcept;
 
     const std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
     const std::vector<GtkTreePath*> selected_items(GtkTreeModel** model) const noexcept;
@@ -485,7 +483,6 @@ bool ptk_file_browser_delay_focus(ptk::browser* file_browser) noexcept;
 namespace ptk::wrapper::browser
 {
 void go_home(GtkWidget* item, ptk::browser* file_browser) noexcept;
-void go_default(GtkWidget* item, ptk::browser* file_browser) noexcept;
 void go_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
 void go_back(GtkWidget* item, ptk::browser* file_browser) noexcept;
 void go_forward(GtkWidget* item, ptk::browser* file_browser) noexcept;
@@ -497,7 +494,6 @@ void new_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
 void new_tab_here(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
 void close_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
 void restore_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
-void set_default_folder(GtkWidget* item, ptk::browser* file_browser) noexcept;
 
 void select_all(GtkWidget* item, ptk::browser* file_browser) noexcept;
 void unselect_all(GtkWidget* item, ptk::browser* file_browser) noexcept;

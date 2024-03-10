@@ -814,17 +814,7 @@ MainWindow::show_panels() noexcept
                 if (!tab_added)
                 {
                     // open default tab
-                    std::filesystem::path folder_path;
-                    const auto default_path = xset_get_s(xset::name::go_set_default);
-                    if (default_path)
-                    {
-                        folder_path = default_path.value();
-                    }
-                    else
-                    {
-                        folder_path = vfs::user::home();
-                    }
-                    this->new_tab(folder_path);
+                    this->new_tab(vfs::user::home());
                 }
             }
             gtk_widget_show(GTK_WIDGET(this->get_panel_notebook(p)));

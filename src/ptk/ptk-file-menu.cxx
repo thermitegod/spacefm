@@ -1299,10 +1299,6 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_up, browser);
         set->disable = std::filesystem::equivalent(cwd, "/");
         xset_set_cb(xset::name::go_home, (GFunc)ptk::wrapper::browser::go_home, browser);
-        xset_set_cb(xset::name::go_default, (GFunc)ptk::wrapper::browser::go_default, browser);
-        xset_set_cb(xset::name::go_set_default,
-                    (GFunc)ptk::wrapper::browser::set_default_folder,
-                    browser);
         xset_set_cb(xset::name::edit_canon, (GFunc)on_popup_canon, data);
         set = xset_get(xset::name::focus_path_bar);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);

@@ -3241,21 +3241,6 @@ ptk::browser::go_home() noexcept
 }
 
 void
-ptk::browser::go_default() noexcept
-{
-    this->focus_folder_view();
-    const auto default_path = xset_get_s(xset::name::go_set_default);
-    if (default_path)
-    {
-        this->chdir(default_path.value());
-    }
-    else
-    {
-        this->chdir(vfs::user::home());
-    }
-}
-
-void
 ptk::browser::go_tab(tab_t tab) noexcept
 {
     // ztd::logger::info("ptk::wrapper::browser::go_tab fb={}", ztd::logger::utils::ptr(this));
@@ -3422,24 +3407,14 @@ ptk::browser::new_tab() noexcept
 {
     this->focus_folder_view();
 
-    std::filesystem::path dir_path;
-    const auto default_path = xset_get_s(xset::name::go_set_default);
-    if (default_path)
-    {
-        dir_path = default_path.value();
-    }
-    else
-    {
-        dir_path = vfs::user::home();
-    }
-
-    if (!std::filesystem::is_directory(dir_path))
+    if (!std::filesystem::is_directory(vfs::user::home()))
     {
         this->run_event<spacefm::signal::open_item>("/", ptk::browser::open_action::new_tab);
     }
     else
     {
-        this->run_event<spacefm::signal::open_item>(dir_path, ptk::browser::open_action::new_tab);
+        this->run_event<spacefm::signal::open_item>(vfs::user::home(),
+                                                    ptk::browser::open_action::new_tab);
     }
 }
 
@@ -3451,15 +3426,7 @@ ptk::browser::new_tab_here() noexcept
     auto dir_path = this->cwd();
     if (!std::filesystem::is_directory(dir_path))
     {
-        const auto default_path = xset_get_s(xset::name::go_set_default);
-        if (default_path)
-        {
-            dir_path = default_path.value();
-        }
-        else
-        {
-            dir_path = vfs::user::home();
-        }
+        dir_path = vfs::user::home();
     }
     if (!std::filesystem::is_directory(dir_path))
     {
@@ -3502,17 +3469,7 @@ ptk::browser::close_tab() noexcept
 
     if (gtk_notebook_get_n_pages(notebook) == 0)
     {
-        std::filesystem::path path;
-        const auto default_path = xset_get_s(xset::name::go_set_default);
-        if (default_path)
-        {
-            path = default_path.value();
-        }
-        else
-        {
-            path = vfs::user::home();
-        }
-        main_window->new_tab(path);
+        main_window->new_tab(vfs::user::home());
         ptk::browser* a_browser =
             PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, 0));
         a_browser->update_views();
@@ -3595,12 +3552,6 @@ ptk::browser::open_in_tab(const std::filesystem::path& file_path, const tab_t ta
 
         file_browser->chdir(file_path);
     }
-}
-
-void
-ptk::browser::set_default_folder() const noexcept
-{
-    xset_set(xset::name::go_set_default, xset::var::s, this->cwd().string());
 }
 
 const std::vector<std::shared_ptr<vfs::file>>
@@ -5841,14 +5792,6 @@ ptk::browser::on_action(const xset::name setname) noexcept
         {
             this->go_home();
         }
-        else if (set->xset_name == xset::name::go_default)
-        {
-            this->go_default();
-        }
-        else if (set->xset_name == xset::name::go_set_default)
-        {
-            this->set_default_folder();
-        }
     }
     else if (set->name.starts_with("tab_"))
     {
@@ -6146,13 +6089,6 @@ ptk::wrapper::browser::go_home(GtkWidget* item, ptk::browser* file_browser) noex
 }
 
 void
-ptk::wrapper::browser::go_default(GtkWidget* item, ptk::browser* file_browser) noexcept
-{
-    (void)item;
-    file_browser->go_default();
-}
-
-void
 ptk::wrapper::browser::go_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     const tab_t tab = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "tab"));
@@ -6213,13 +6149,6 @@ ptk::wrapper::browser::restore_tab(GtkMenuItem* item, ptk::browser* file_browser
 {
     (void)item;
     file_browser->restore_tab();
-}
-
-void
-ptk::wrapper::browser::set_default_folder(GtkWidget* item, ptk::browser* file_browser) noexcept
-{
-    (void)item;
-    file_browser->set_default_folder();
 }
 
 void

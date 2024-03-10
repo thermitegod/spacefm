@@ -408,16 +408,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
     }
     else
     {
-        const auto default_path = xset_get_s(xset::name::go_set_default);
-        if (default_path)
-        {
-            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg),
-                                                default_path.value().c_str());
-        }
-        else
-        {
-            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), vfs::user::home().c_str());
-        }
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), vfs::user::home().c_str());
     }
     if (deffile)
     {

@@ -249,8 +249,6 @@ enum class name
     go_forward,
     go_up,
     go_home,
-    go_default,
-    go_set_default,
     edit_canon,
 
     go_focus,

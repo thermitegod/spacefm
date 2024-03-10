@@ -1229,8 +1229,6 @@ xset_defaults() noexcept
             xset::name::go_forward,
             xset::name::go_up,
             xset::name::go_home,
-            xset::name::go_default,
-            xset::name::go_set_default,
             xset::name::edit_canon,
             xset::name::separator,
             xset::name::go_tab,
@@ -1264,20 +1262,6 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::go_home);
         set->menu.label = "_Home";
         set->icon = "gtk-home";
-        set->keybinding.type = xset::set::keybinding_type::navigation;
-    }
-
-    {
-        const auto set = xset_get(xset::name::go_default);
-        set->menu.label = "_Default";
-        set->icon = "gtk-home";
-        set->keybinding.type = xset::set::keybinding_type::navigation;
-    }
-
-    {
-        const auto set = xset_get(xset::name::go_set_default);
-        set->menu.label = "_Set Default";
-        set->icon = "gtk-save";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
 
@@ -2405,7 +2389,7 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::paste_as, GDK_KEY_A, (GdkModifierType::GDK_SHIFT_MASK | GdkModifierType::GDK_CONTROL_MASK));
     def_key(keysets, xset::name::select_all, GDK_KEY_A, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::main_terminal, GDK_KEY_F4, 0);
-    def_key(keysets, xset::name::go_default, GDK_KEY_Escape, 0);
+    def_key(keysets, xset::name::go_home, GDK_KEY_Escape, 0);
 #if (GTK_MAJOR_VERSION == 4)
     def_key(keysets, xset::name::go_back, GDK_KEY_Left, GdkModifierType::GDK_ALT_MASK);
     def_key(keysets, xset::name::go_forward, GDK_KEY_Right, GdkModifierType::GDK_ALT_MASK);
