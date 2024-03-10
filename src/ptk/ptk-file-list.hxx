@@ -17,6 +17,10 @@
 
 #pragma once
 
+#include <string_view>
+
+#include <memory>
+
 #include <gtkmm.h>
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
@@ -60,7 +64,8 @@ struct file_list
     };
 
     [[nodiscard]] static ptk::file_list* create(const std::shared_ptr<vfs::dir>& dir,
-                                                bool show_hidden) noexcept;
+                                                const bool show_hidden,
+                                                const std::string_view pattern) noexcept;
 
     GObject parent;
 
@@ -69,6 +74,9 @@ struct file_list
     GList* files{nullptr};
 
     bool show_hidden{true};
+    // GObjects do not work with std::string
+    const char* pattern;
+
     vfs::file::thumbnail_size thumbnail_size{vfs::file::thumbnail_size::big};
     u64 max_thumbnail{0};
 
@@ -86,6 +94,8 @@ struct file_list
     void set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept;
     void show_thumbnails(const vfs::file::thumbnail_size size, u64 max_file_size) noexcept;
     void sort() noexcept;
+
+    [[nodiscard]] bool is_pattern_match(const std::filesystem::path& filename) const noexcept;
 
   private:
     void file_created(const std::shared_ptr<vfs::file>& file) noexcept;

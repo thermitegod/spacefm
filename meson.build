@@ -465,6 +465,7 @@ sources += files(
   'src/ptk/ptk-file-task-view.cxx',
   'src/ptk/ptk-location-view.cxx',
   'src/ptk/ptk-path-bar.cxx',
+  'src/ptk/ptk-search-bar.cxx',
 
   'src/ptk/utils/ptk-utils.cxx',
 

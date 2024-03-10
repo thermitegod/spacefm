@@ -15,6 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string_view>
+
 #include <algorithm>
 
 #include <chrono>
@@ -22,6 +24,9 @@
 #include <functional>
 
 #include <cassert>
+#include <cstring>
+
+#include <fnmatch.h>
 
 #include <magic_enum.hpp>
 
@@ -233,12 +238,24 @@ ptk_file_list_finalize(GObject* object) noexcept
 }
 
 ptk::file_list*
-ptk::file_list::create(const std::shared_ptr<vfs::dir>& dir, bool show_hidden) noexcept
+ptk::file_list::create(const std::shared_ptr<vfs::dir>& dir, const bool show_hidden,
+                       const std::string_view pattern) noexcept
 {
     ptk::file_list* list = PTK_FILE_LIST(g_object_new(PTK_TYPE_FILE_LIST, nullptr));
     list->show_hidden = show_hidden;
+    list->pattern = pattern.data();
     list->set_dir(dir);
     return list;
+}
+
+bool
+ptk::file_list::is_pattern_match(const std::filesystem::path& filename) const noexcept
+{
+    if (!this->pattern || std::strlen(this->pattern) == 0)
+    {
+        return true;
+    }
+    return fnmatch(this->pattern, filename.c_str(), 0) == 0;
 }
 
 static GtkTreeModelFlags
@@ -786,7 +803,7 @@ ptk::file_list::set_dir(const std::shared_ptr<vfs::dir>& new_dir) noexcept
 
     for (const auto& file : new_dir->files())
     {
-        if (this->show_hidden || !file->is_hidden())
+        if ((this->show_hidden || !file->is_hidden()) && this->is_pattern_match(file->name()))
         {
             this->files = g_list_prepend(this->files, file.get());
         }
@@ -812,7 +829,7 @@ ptk::file_list::sort() noexcept
 void
 ptk::file_list::file_created(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    if (!this->show_hidden && file->is_hidden())
+    if ((!this->show_hidden && file->is_hidden()) || !this->is_pattern_match(file->name()))
     {
         return;
     }
@@ -841,7 +858,7 @@ ptk::file_list::file_changed(const std::shared_ptr<vfs::file>& file) noexcept
         return;
     }
 
-    if (!this->show_hidden && file->is_hidden())
+    if ((!this->show_hidden && file->is_hidden()) || !this->is_pattern_match(file->name()))
     {
         return;
     }
@@ -920,7 +937,7 @@ ptk::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file
         return;
     }
 
-    if (!this->show_hidden && file->is_hidden())
+    if ((!this->show_hidden && file->is_hidden()) || !this->is_pattern_match(file->name()))
     {
         return;
     }

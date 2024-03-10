@@ -1632,6 +1632,13 @@ xset_defaults() noexcept
         set->b = xset::set::enabled::yes;
     }
 
+    {
+        const auto set = xset_get(xset::name::search_select);
+        set->menu.label = "Select Matches";
+        set->menu.type = xset::set::menu_type::check;
+        set->b = xset::set::enabled::yes;
+    }
+
     // EDIT
     {
         const auto set = xset_get(xset::name::edit_cut);

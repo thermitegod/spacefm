@@ -80,6 +80,7 @@
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-path-bar.hxx"
+#include "ptk/ptk-search-bar.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "main-window.hxx"
@@ -508,6 +509,12 @@ ptk::browser::path_bar() const noexcept
     return this->path_bar_;
 }
 
+GtkEntry*
+ptk::browser::search_bar() const noexcept
+{
+    return this->search_bar_;
+}
+
 static void
 save_command_history(GtkEntry* entry) noexcept
 {
@@ -528,6 +535,32 @@ save_command_history(GtkEntry* entry) noexcept
     while (global::xset_cmd_history.size() > 200)
     {
         global::xset_cmd_history.erase(global::xset_cmd_history.begin());
+    }
+}
+
+static bool
+on_search_bar_focus_in(GtkWidget* entry, GdkEventFocus* evt, ptk::browser* file_browser)
+{
+    (void)entry;
+    (void)evt;
+    file_browser->focus_me();
+    return false;
+}
+
+static void
+on_search_bar_activate(GtkWidget* entry, ptk::browser* file_browser)
+{
+    (void)file_browser;
+
+#if (GTK_MAJOR_VERSION == 4)
+    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
+#elif (GTK_MAJOR_VERSION == 3)
+    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
+#endif
+
+    if (text.empty())
+    {
+        return;
     }
 }
 
@@ -684,10 +717,15 @@ ptk::browser::rebuild_toolbox() noexcept
     // ztd::logger::info("rebuild_toolbox");
 
     this->path_bar_ = ptk::path_bar_new(this);
-
     // clang-format off
     g_signal_connect(G_OBJECT(this->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), this);
     g_signal_connect(G_OBJECT(this->path_bar_), "focus-in-event", G_CALLBACK(on_address_bar_focus_in), this);
+    // clang-format on
+
+    this->search_bar_ = ptk::search_bar_new(this);
+    // clang-format off
+    g_signal_connect(G_OBJECT(this->path_bar_), "activate", G_CALLBACK(on_search_bar_activate), this);
+    g_signal_connect(G_OBJECT(this->path_bar_), "focus-in-event", G_CALLBACK(on_search_bar_focus_in), this);
     // clang-format on
 
     std::vector<xset::name> items;
@@ -702,6 +740,10 @@ ptk::browser::rebuild_toolbox() noexcept
 
     // add pathbar
     gtk_box_pack_start(this->toolbar, GTK_WIDGET(this->path_bar_), true, true, 5);
+
+    // add searchbar
+    gtk_widget_set_size_request(GTK_WIDGET(this->search_bar_), 300, -1);
+    gtk_box_pack_start(GTK_BOX(this->toolbar), GTK_WIDGET(this->search_bar_), false, true, 5);
 
     // fill right toolbar
     items = {
@@ -847,12 +889,6 @@ ptk_file_browser_init(ptk::browser* file_browser) noexcept
                                    GtkOrientation::GTK_ORIENTATION_VERTICAL);
 
     file_browser->panel_ = 0; // do not load font yet in ptk_path_entry_new
-    file_browser->path_bar_ = ptk::path_bar_new(file_browser);
-
-    // clang-format off
-    g_signal_connect(G_OBJECT(file_browser->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), file_browser);
-    g_signal_connect(G_OBJECT(file_browser->path_bar_), "focus-in-event", G_CALLBACK(on_address_bar_focus_in), file_browser);
-    // clang-format on
 
     // toolbox
     file_browser->toolbar = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
@@ -1154,9 +1190,10 @@ on_sort_col_changed(GtkTreeSortable* sortable, ptk::browser* file_browser) noexc
 }
 
 void
-ptk::browser::update_model() noexcept
+ptk::browser::update_model(const std::string_view pattern) noexcept
 {
-    ptk::file_list* list = ptk::file_list::create(this->dir_, this->show_hidden_files_);
+    ptk::file_list* list =
+        ptk::file_list::create(this->dir_, this->show_hidden_files_, pattern.data());
     assert(list != nullptr);
     GtkTreeModel* old_list = this->file_list_;
     this->file_list_ = GTK_TREE_MODEL(list);
@@ -1238,16 +1275,6 @@ ptk::browser::on_dir_file_listed() noexcept
     if (this->side_dev)
     {
         ptk::view::location::chdir(GTK_TREE_VIEW(this->side_dev), this->cwd());
-    }
-
-    // FIXME:  This is already done in update_model, but is there any better way to
-    //            reduce unnecessary code?
-    if (this->view_mode_ == ptk::browser::view_mode::compact_view)
-    { // why is this needed for compact view???
-        if (this->file_list_)
-        {
-            this->show_thumbnails(this->max_thumbnail_);
-        }
     }
 }
 
@@ -1739,76 +1766,6 @@ on_folder_view_destroy(GtkTreeView* view, ptk::browser* file_browser) noexcept
     }
 }
 
-static bool
-folder_view_search_equal(GtkTreeModel* model, i32 col, const char* c_key, GtkTreeIter* it,
-                         void* search_data) noexcept
-{
-    (void)search_data;
-    bool no_match = false;
-
-    const auto column = ptk::file_list::column(col);
-    if (column != ptk::file_list::column::name)
-    {
-        return true;
-    }
-
-    char* c_name = nullptr;
-
-    gtk_tree_model_get(model, it, col, &c_name, -1);
-    if (!c_name || !c_key)
-    {
-        return true;
-    }
-
-    std::string key = c_key;
-    std::string name = c_name;
-
-    if (ztd::lower(key) == key)
-    {
-        // key is all lowercase so do icase search
-        name = ztd::lower(name);
-    }
-
-    if (key.contains("*") || key.contains('?'))
-    {
-        const std::string key2 = std::format("*{}*", key);
-        no_match = !(fnmatch(key2.data(), name.data(), 0) == 0);
-    }
-    else
-    {
-        const bool end = ztd::endswith(key, "$");
-        bool start = !end && (key.size() < 3);
-        g_autofree char* key2 = ::utils::strdup(key);
-        char* keyp = key2;
-        if (key[0] == '^')
-        {
-            keyp++;
-            start = true;
-        }
-        if (end)
-        {
-            key2[std::strlen(key2) - 1] = '\0';
-        }
-        if (start && end)
-        {
-            no_match = !name.contains(keyp);
-        }
-        else if (start)
-        {
-            no_match = !name.starts_with(keyp);
-        }
-        else if (end)
-        {
-            no_match = !name.ends_with(keyp);
-        }
-        else
-        {
-            no_match = !name.contains(key);
-        }
-    }
-    return no_match; // return false for match
-}
-
 static GtkWidget*
 create_folder_view(ptk::browser* file_browser, ptk::browser::view_mode view_mode) noexcept
 {
@@ -1874,24 +1831,7 @@ create_folder_view(ptk::browser* file_browser, ptk::browser::view_mode view_mode
 
             // search
 #if defined(USE_EXO)
-            exo_icon_view_set_enable_search(EXO_ICON_VIEW(folder_view), true);
-            exo_icon_view_set_search_column(EXO_ICON_VIEW(folder_view),
-                                            magic_enum::enum_integer(ptk::file_list::column::name));
-            exo_icon_view_set_search_equal_func(
-                EXO_ICON_VIEW(folder_view),
-                (ExoIconViewSearchEqualFunc)folder_view_search_equal,
-                nullptr,
-                nullptr);
-#else
-            // TODO - no gtk equivalent api
-            // gtk_icon_view_set_enable_search(GTK_ICON_VIEW(folder_view), true);
-            // gtk_icon_view_set_search_column(GTK_ICON_VIEW(folder_view),
-            //                                 magic_enum::enum_integer(ptk::file_list::column::name));
-            // gtk_icon_view_set_search_equal_func(
-            //     GTK_ICON_VIEW(folder_view),
-            //     (GtkIconViewSearchEqualFunc)folder_view_search_equal,
-            //     nullptr,
-            //     nullptr);
+            exo_icon_view_set_enable_search(EXO_ICON_VIEW(folder_view), false);
 #endif
 
             gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(folder_view),
@@ -2007,14 +1947,7 @@ create_folder_view(ptk::browser* file_browser, ptk::browser::view_mode view_mode
             }
 
             // Search
-            gtk_tree_view_set_enable_search(GTK_TREE_VIEW(folder_view), true);
-            gtk_tree_view_set_search_column(GTK_TREE_VIEW(folder_view),
-                                            magic_enum::enum_integer(ptk::file_list::column::name));
-            gtk_tree_view_set_search_equal_func(
-                GTK_TREE_VIEW(folder_view),
-                (GtkTreeViewSearchEqualFunc)folder_view_search_equal,
-                nullptr,
-                nullptr);
+            gtk_tree_view_set_enable_search(GTK_TREE_VIEW(folder_view), false);
 
             gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(folder_view),
                                                        file_browser->single_click_);

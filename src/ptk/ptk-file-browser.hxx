@@ -132,6 +132,7 @@ struct browser
     GtkNotebook* notebook_{nullptr};
     GtkWidget* task_view_{nullptr};
     GtkEntry* path_bar_{nullptr};
+    GtkEntry* search_bar_{nullptr};
     GtkPaned* hpane{nullptr};
     GtkBox* side_vbox{nullptr};
     GtkBox* side_toolbox{nullptr};
@@ -287,7 +288,10 @@ struct browser
 
     ////////////////
 
-    void update_model() noexcept;
+    /**
+    * @param[in] pattern Only show files matching the pattern, an empty pattern shows all files.
+    */
+    void update_model(const std::string_view pattern = "") noexcept;
 
     bool using_large_icons() const noexcept;
 
@@ -312,6 +316,7 @@ struct browser
     GtkWidget* task_view() const noexcept;
     MainWindow* main_window() const noexcept;
     GtkEntry* path_bar() const noexcept;
+    GtkEntry* search_bar() const noexcept;
 
   public:
     // signal

@@ -2262,9 +2262,14 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         (keymod == 0 && keyval != GDK_KEY_Escape && gdk_keyval_to_unicode(keyval))) // visible char
     {
         browser = this->current_file_browser();
-        if (browser && browser->path_bar() && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar())))
+        if (browser && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar())))
         {
-            return false; // send to pathbar
+            return false; // send to path bar
+        }
+
+        if (browser && gtk_widget_has_focus(GTK_WIDGET(browser->search_bar())))
+        {
+            return false; // send to search bar
         }
     }
 

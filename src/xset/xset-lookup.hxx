@@ -307,6 +307,7 @@ enum class name
 
     view_refresh,
     path_seek,
+    search_select,
     edit_cut,
     edit_copy,
     edit_paste,
