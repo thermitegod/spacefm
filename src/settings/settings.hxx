@@ -53,6 +53,10 @@ struct settings
     bool show_close_tab_buttons{false};
     bool new_tab_here{false};
 
+    bool show_toolbar_home{true};
+    bool show_toolbar_refresh{true};
+    bool show_toolbar_search{true};
+
     // Units
     bool use_si_prefix{false};
 

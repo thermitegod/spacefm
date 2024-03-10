@@ -202,6 +202,24 @@ config_parse_interface(const toml::value& tbl, u64 version) noexcept
         config::settings.new_tab_here =
             toml::find<bool>(section, config::disk_format::toml::key::new_tab_here.data());
     }
+
+    if (section.contains(config::disk_format::toml::key::show_toolbar_home.data()))
+    {
+        config::settings.show_toolbar_home =
+            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_home.data());
+    }
+
+    if (section.contains(config::disk_format::toml::key::show_toolbar_refresh.data()))
+    {
+        config::settings.show_toolbar_refresh =
+            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_refresh.data());
+    }
+
+    if (section.contains(config::disk_format::toml::key::show_toolbar_search.data()))
+    {
+        config::settings.show_toolbar_search =
+            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_search.data());
+    }
 }
 
 static void

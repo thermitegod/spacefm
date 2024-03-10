@@ -645,6 +645,143 @@ create_pref_spinner(double scale, double lower, double upper, double step_incr, 
 /**
  * Interface Tab
  */
+namespace preference::show_toolbar_home
+{
+void
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
+{
+    (void)user_data;
+    const bool show_toolbar_home = gtk_toggle_button_get_active(button);
+    if (show_toolbar_home != config::settings.show_toolbar_home)
+    {
+        config::settings.show_toolbar_home = show_toolbar_home;
+        for (MainWindow* window : main_window_get_all())
+        { // update all windows/all panels/all browsers
+            for (const panel_t p : PANELS)
+            {
+                GtkNotebook* notebook = window->get_panel_notebook(p);
+                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+                for (const auto i : std::views::iota(0z, total_pages))
+                {
+                    ptk::browser* file_browser =
+                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+
+                    if (show_toolbar_home)
+                    {
+                        gtk_widget_show(GTK_WIDGET(file_browser->toolbar_home));
+                    }
+                    else
+                    {
+                        gtk_widget_hide(GTK_WIDGET(file_browser->toolbar_home));
+                    }
+                }
+            }
+        }
+    }
+}
+
+GtkCheckButton*
+create_pref_check_button(const std::string_view label) noexcept
+{
+    const bool value = config::settings.show_toolbar_home;
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
+} // namespace preference::show_toolbar_home
+
+namespace preference::show_toolbar_refresh
+{
+void
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
+{
+    (void)user_data;
+    const bool show_toolbar_refresh = gtk_toggle_button_get_active(button);
+    if (show_toolbar_refresh != config::settings.show_toolbar_refresh)
+    {
+        config::settings.show_toolbar_refresh = show_toolbar_refresh;
+        for (MainWindow* window : main_window_get_all())
+        { // update all windows/all panels/all browsers
+            for (const panel_t p : PANELS)
+            {
+                GtkNotebook* notebook = window->get_panel_notebook(p);
+                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+                for (const auto i : std::views::iota(0z, total_pages))
+                {
+                    ptk::browser* file_browser =
+                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+
+                    if (show_toolbar_refresh)
+                    {
+                        gtk_widget_show(GTK_WIDGET(file_browser->toolbar_refresh));
+                    }
+                    else
+                    {
+                        gtk_widget_hide(GTK_WIDGET(file_browser->toolbar_refresh));
+                    }
+                }
+            }
+        }
+    }
+}
+
+GtkCheckButton*
+create_pref_check_button(const std::string_view label) noexcept
+{
+    const bool value = config::settings.show_toolbar_refresh;
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
+} // namespace preference::show_toolbar_refresh
+
+namespace preference::show_toolbar_search
+{
+void
+check_button_cb(GtkToggleButton* button, void* user_data) noexcept
+{
+    (void)user_data;
+    const bool show_toolbar_search = gtk_toggle_button_get_active(button);
+    if (show_toolbar_search != config::settings.show_toolbar_search)
+    {
+        config::settings.show_toolbar_search = show_toolbar_search;
+        for (MainWindow* window : main_window_get_all())
+        { // update all windows/all panels/all browsers
+            for (const panel_t p : PANELS)
+            {
+                GtkNotebook* notebook = window->get_panel_notebook(p);
+                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
+                for (const auto i : std::views::iota(0z, total_pages))
+                {
+                    ptk::browser* file_browser =
+                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
+
+                    if (show_toolbar_search)
+                    {
+                        gtk_widget_show(GTK_WIDGET(file_browser->search_bar_));
+                    }
+                    else
+                    {
+                        gtk_widget_hide(GTK_WIDGET(file_browser->search_bar_));
+                    }
+                }
+            }
+        }
+    }
+}
+
+GtkCheckButton*
+create_pref_check_button(const std::string_view label) noexcept
+{
+    const bool value = config::settings.show_toolbar_search;
+    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
+    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
+    return button;
+}
+} // namespace preference::show_toolbar_search
 
 namespace preference::show_tab_bar
 {
@@ -1090,6 +1227,17 @@ static GtkWidget*
 init_interface_tab() noexcept
 {
     auto page = PreferencePage();
+
+    page.new_section("Toolbar");
+
+    page.add_row(
+        GTK_WIDGET(preference::show_toolbar_home::create_pref_check_button("Show Home Button")));
+
+    page.add_row(GTK_WIDGET(
+        preference::show_toolbar_refresh::create_pref_check_button("Show Refresh Button")));
+
+    page.add_row(
+        GTK_WIDGET(preference::show_toolbar_search::create_pref_check_button("Show Search Bar")));
 
     page.new_section("Tabs");
 

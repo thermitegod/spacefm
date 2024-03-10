@@ -664,51 +664,49 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     return true;
 }
 
-void
-fill_toolbar(ptk::browser* file_browser, GtkBox* toolbar,
-             const std::span<const xset::name> toolbar_items) noexcept
+static GtkButton*
+add_toolbar_item(ptk::browser* file_browser, GtkBox* toolbar, const xset::name item) noexcept
 {
-    for (const auto item : toolbar_items)
+    xset_t set = xset_get(item);
+    set->browser = file_browser;
+
+    const auto icon_size = config::settings.icon_size_tool;
+
+    // get real icon size from gtk icon size
+    i32 icon_w = 0;
+    i32 icon_h = 0;
+    gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
+
+    GtkWidget* image = nullptr;
+
+    // builtin tool item
+    if (set->icon)
     {
-        xset_t set = xset_get(item);
-        set->browser = file_browser;
-
-        const auto icon_size = config::settings.icon_size_tool;
-
-        // get real icon size from gtk icon size
-        i32 icon_w = 0;
-        i32 icon_h = 0;
-        gtk_icon_size_lookup((GtkIconSize)icon_size, &icon_w, &icon_h);
-
-        GtkWidget* image = nullptr;
-
-        // builtin tool item
-        if (set->icon)
-        {
-            // image = xset_get_image(set->icon.value(), (GtkIconSize)icon_size);
-            image = gtk_image_new_from_icon_name(set->icon.value().data(), (GtkIconSize)icon_size);
-        }
-        else
-        {
-            ztd::logger::warn("set missing icon {}", set->name);
-            // image = xset_get_image("gtk-execute", (GtkIconSize)icon_size);
-            image = gtk_image_new_from_icon_name("gtk-execute", (GtkIconSize)icon_size);
-        }
-
-        GtkButton* btn = GTK_BUTTON(gtk_button_new());
-        gtk_widget_show(GTK_WIDGET(image));
-        gtk_button_set_image(btn, image);
-        gtk_button_set_always_show_image(btn, true);
-        gtk_button_set_relief(btn, GTK_RELIEF_NONE);
-
-        // clang-format off
-        g_signal_connect(G_OBJECT(btn), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set.get());
-        // clang-format on
-
-        g_object_set_data(G_OBJECT(btn), "browser", file_browser);
-
-        gtk_box_pack_start(toolbar, GTK_WIDGET(btn), false, false, 0);
+        // image = xset_get_image(set->icon.value(), (GtkIconSize)icon_size);
+        image = gtk_image_new_from_icon_name(set->icon.value().data(), (GtkIconSize)icon_size);
     }
+    else
+    {
+        ztd::logger::warn("set missing icon {}", set->name);
+        // image = xset_get_image("gtk-execute", (GtkIconSize)icon_size);
+        image = gtk_image_new_from_icon_name("gtk-execute", (GtkIconSize)icon_size);
+    }
+
+    GtkButton* button = GTK_BUTTON(gtk_button_new());
+    gtk_widget_show(GTK_WIDGET(image));
+    gtk_button_set_image(button, image);
+    gtk_button_set_always_show_image(button, true);
+    gtk_button_set_relief(button, GTK_RELIEF_NONE);
+
+    // clang-format off
+        g_signal_connect(G_OBJECT(button), "button-press-event", G_CALLBACK(on_tool_icon_button_press), set.get());
+    // clang-format on
+
+    g_object_set_data(G_OBJECT(button), "browser", file_browser);
+
+    gtk_box_pack_start(toolbar, GTK_WIDGET(button), false, false, 0);
+
+    return button;
 }
 
 void
@@ -728,15 +726,11 @@ ptk::browser::rebuild_toolbox() noexcept
     g_signal_connect(G_OBJECT(this->path_bar_), "focus-in-event", G_CALLBACK(on_search_bar_focus_in), this);
     // clang-format on
 
-    std::vector<xset::name> items;
-
-    // fill left toolbar
-    items = {xset::name::go_back,
-             xset::name::go_forward,
-             xset::name::go_up,
-             xset::name::go_home,
-             xset::name::tab_new};
-    fill_toolbar(this, this->toolbar, items);
+    this->toolbar_back = add_toolbar_item(this, this->toolbar, xset::name::go_back);
+    this->toolbar_forward = add_toolbar_item(this, this->toolbar, xset::name::go_forward);
+    this->toolbar_up = add_toolbar_item(this, this->toolbar, xset::name::go_up);
+    this->toolbar_home = add_toolbar_item(this, this->toolbar, xset::name::go_home);
+    this->toolbar_refresh = add_toolbar_item(this, this->toolbar, xset::name::view_refresh);
 
     // add pathbar
     gtk_box_pack_start(this->toolbar, GTK_WIDGET(this->path_bar_), true, true, 5);
@@ -744,14 +738,6 @@ ptk::browser::rebuild_toolbox() noexcept
     // add searchbar
     gtk_widget_set_size_request(GTK_WIDGET(this->search_bar_), 300, -1);
     gtk_box_pack_start(GTK_BOX(this->toolbar), GTK_WIDGET(this->search_bar_), false, true, 5);
-
-    // fill right toolbar
-    items = {
-        xset::name::view_refresh,
-    };
-    fill_toolbar(this, this->toolbar, items);
-
-    gtk_widget_show_all(GTK_WIDGET(this->toolbar));
 }
 
 static bool
@@ -1082,12 +1068,24 @@ ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(file_browser->folder_view_scroll_),
                                   GTK_WIDGET(file_browser->folder_view_));
-    // gtk_widget_show_all(GTK_WIDGET(file_browser->folder_view_scroll_));
 
     file_browser->rebuild_toolbox();
     file_browser->rebuild_toolbars();
 
     gtk_widget_show_all(GTK_WIDGET(file_browser));
+
+    if (!config::settings.show_toolbar_home)
+    {
+        gtk_widget_hide(GTK_WIDGET(file_browser->toolbar_home));
+    }
+    if (!config::settings.show_toolbar_refresh)
+    {
+        gtk_widget_hide(GTK_WIDGET(file_browser->toolbar_refresh));
+    }
+    if (!config::settings.show_toolbar_search)
+    {
+        gtk_widget_hide(GTK_WIDGET(file_browser->search_bar_));
+    }
 
     return GTK_IS_WIDGET(file_browser) ? GTK_WIDGET(file_browser) : nullptr;
 }
@@ -2969,6 +2967,11 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 #endif
     }
 
+    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_back), this->navigation_history->has_back());
+    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_forward),
+                             this->navigation_history->has_forward());
+    gtk_widget_set_sensitive(GTK_WIDGET(this->toolbar_up), this->cwd() != "/");
+
     return true;
 }
 
@@ -4642,7 +4645,7 @@ ptk::browser::update_views() noexcept
 
     if (xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
     {
-        gtk_widget_show_all(GTK_WIDGET(this->toolbar));
+        gtk_widget_show(GTK_WIDGET(this->toolbar));
     }
     else
     {

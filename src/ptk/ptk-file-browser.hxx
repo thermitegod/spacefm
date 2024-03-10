@@ -141,8 +141,6 @@ struct browser
     MainWindow* main_window_{nullptr};
     GtkNotebook* notebook_{nullptr};
     GtkWidget* task_view_{nullptr};
-    GtkEntry* path_bar_{nullptr};
-    GtkEntry* search_bar_{nullptr};
     GtkPaned* hpane{nullptr};
     GtkBox* side_vbox{nullptr};
     GtkBox* side_toolbox{nullptr};
@@ -154,7 +152,15 @@ struct browser
     GtkWidget* side_dev{nullptr};
     GtkStatusbar* statusbar{nullptr};
     GtkLabel* statusbar_label{nullptr};
+
     GtkBox* toolbar{nullptr};
+    GtkButton* toolbar_back{nullptr};
+    GtkButton* toolbar_forward{nullptr};
+    GtkButton* toolbar_up{nullptr};
+    GtkButton* toolbar_home{nullptr};
+    GtkButton* toolbar_refresh{nullptr};
+    GtkEntry* path_bar_{nullptr};
+    GtkEntry* search_bar_{nullptr};
 
     // private:
     struct navigation_history_data

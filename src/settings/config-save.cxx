@@ -166,6 +166,9 @@ config::save() noexcept
              {config::disk_format::toml::key::show_tabs.data(), config::settings.always_show_tabs},
              {config::disk_format::toml::key::show_close.data(), config::settings.show_close_tab_buttons},
              {config::disk_format::toml::key::new_tab_here.data(), config::settings.new_tab_here},
+             {config::disk_format::toml::key::show_toolbar_home.data(), config::settings.show_toolbar_home},
+             {config::disk_format::toml::key::show_toolbar_refresh.data(), config::settings.show_toolbar_refresh},
+             {config::disk_format::toml::key::show_toolbar_search.data(), config::settings.show_toolbar_search},
              // clang-format on
          }},
 
