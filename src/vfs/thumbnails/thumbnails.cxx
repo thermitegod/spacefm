@@ -105,7 +105,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         }
 
         // create new thumbnail
-        if (config::settings->thumbnailer_use_api())
+        if (config::settings.thumbnailer_use_api)
         {
             try
             {

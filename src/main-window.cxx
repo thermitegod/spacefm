@@ -439,7 +439,7 @@ main_window_reload_thumbnails_all_windows() noexcept
                 ptk::browser* file_browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 file_browser->show_thumbnails(
-                    config::settings->show_thumbnail() ? config::settings->max_thumb_size() : 0);
+                    config::settings.show_thumbnails ? config::settings.thumbnail_max_size : 0);
             }
         }
     }
@@ -454,7 +454,7 @@ void
 main_window_toggle_thumbnails_all_windows() noexcept
 {
     // toggle
-    config::settings->show_thumbnail(!config::settings->show_thumbnail());
+    config::settings.show_thumbnails = !config::settings.show_thumbnails;
 
     main_window_reload_thumbnails_all_windows();
 }
@@ -760,13 +760,13 @@ MainWindow::show_panels() noexcept
                 // load saved tabs
                 bool tab_added = false;
                 set = xset_get_panel(p, xset::panel::show);
-                if ((set->s && config::settings->load_saved_tabs()) || set->ob1)
+                if ((set->s && config::settings.load_saved_tabs) || set->ob1)
                 {
                     // set->ob1 is preload path
 
                     const std::string tabs_add = std::format(
                         "{}{}{}",
-                        set->s && config::settings->load_saved_tabs() ? set->s.value() : "",
+                        set->s && config::settings.load_saved_tabs ? set->s.value() : "",
                         set->ob1 ? config::disk_format::tab_delimiter : "",
                         set->ob1 ? set->ob1 : "");
 
@@ -1195,8 +1195,8 @@ main_window_init(MainWindow* main_window) noexcept
 {
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
-    main_window->opened_maximized = config::settings->maximized();
-    main_window->maximized = config::settings->maximized();
+    main_window->opened_maximized = config::settings.maximized;
+    main_window->maximized = config::settings.maximized;
 
     /* this is used to limit the scope of gtk_grab and modal dialogs */
     main_window->wgroup = gtk_window_group_new();
@@ -1350,9 +1350,9 @@ main_window_init(MainWindow* main_window) noexcept
 
     // show window
     gtk_window_set_default_size(GTK_WINDOW(main_window),
-                                config::settings->width(),
-                                config::settings->height());
-    if (config::settings->maximized())
+                                config::settings.width,
+                                config::settings.height);
+    if (config::settings.maximized)
     {
         gtk_window_maximize(GTK_WINDOW(main_window));
     }
@@ -1436,8 +1436,8 @@ MainWindow::store_positions() noexcept
 
         if (!this->maximized && allocation.width > 0)
         {
-            config::settings->width(allocation.width);
-            config::settings->height(allocation.height);
+            config::settings.width = allocation.width;
+            config::settings.height = allocation.height;
         }
         if (GTK_IS_PANED(this->hpane_top))
         {
@@ -1506,7 +1506,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept
     main_window->store_positions();
 
     // save settings
-    config::settings->maximized(main_window->maximized);
+    config::settings.maximized = main_window->maximized;
     autosave::request_cancel();
     save_settings();
 
@@ -1557,7 +1557,7 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event) no
         ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
 
     main_window->maximized = maximized;
-    config::settings->maximized(maximized);
+    config::settings.maximized = maximized;
 
     if (!main_window->maximized)
     {
@@ -1695,7 +1695,7 @@ MainWindow::create_tab_label(ptk::browser* file_browser) const noexcept
     }
     gtk_label_set_max_width_chars(label, 30);
     gtk_box_pack_start(box, GTK_WIDGET(label), false, false, 4);
-    if (config::settings->show_close_tab_buttons())
+    if (config::settings.show_close_tab_buttons)
     {
         GtkButton* close_btn = GTK_BUTTON(gtk_button_new());
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
@@ -1769,9 +1769,9 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
         return;
     }
 
-    file_browser->set_single_click(config::settings->single_click());
+    file_browser->set_single_click(config::settings.single_click);
     file_browser->show_thumbnails(
-        config::settings->show_thumbnail() ? config::settings->max_thumb_size() : 0);
+        config::settings.show_thumbnails ? config::settings.thumbnail_max_size : 0);
 
     const auto sort_order =
         xset_get_int_panel(file_browser->panel(), xset::panel::list_detailed, xset::var::x);
@@ -1808,7 +1808,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     gtk_notebook_set_tab_reorderable(this->notebook, GTK_WIDGET(file_browser), true);
     gtk_notebook_set_current_page(this->notebook, idx);
 
-    if (config::settings->always_show_tabs())
+    if (config::settings.always_show_tabs)
     {
         gtk_notebook_set_show_tabs(this->notebook, true);
     }
@@ -1907,12 +1907,12 @@ MainWindow::add_new_window() noexcept
         gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
         if (allocation.width > 0)
         {
-            config::settings->width(allocation.width);
-            config::settings->height(allocation.height);
+            config::settings.width = allocation.width;
+            config::settings.height = allocation.height;
         }
     }
 
-    config::settings->load_saved_tabs(false);
+    config::settings.load_saved_tabs = false;
 
     ztd::logger::info("Opening another window");
 
@@ -1926,7 +1926,7 @@ MainWindow::add_new_window() noexcept
 
     gtk_window_present(GTK_WINDOW(another_main_window));
 
-    config::settings->load_saved_tabs(true);
+    config::settings.load_saved_tabs = true;
 }
 
 static void

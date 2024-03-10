@@ -648,7 +648,7 @@ fill_toolbar(ptk::browser* file_browser, GtkBox* toolbar,
         xset_t set = xset_get(item);
         set->browser = file_browser;
 
-        const auto icon_size = config::settings->icon_size_tool();
+        const auto icon_size = config::settings.icon_size_tool;
 
         // get real icon size from gtk icon size
         i32 icon_w = 0;
@@ -1555,7 +1555,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
              * activated or user clicked on non-row */
             ret = true;
         }
-        else if (!config::settings->single_click())
+        else if (!config::settings.single_click)
         {
             /* sfm 1.0.6 set skip_release for Icon/Compact to prevent file
              * under cursor being selected when entering dir with double-click.
@@ -1625,7 +1625,7 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event,
         case ptk::browser::view_mode::PTK_FB_LIST_VIEW:
             if (gtk_tree_view_is_rubber_banding_active(GTK_TREE_VIEW(widget)))
                 return false;
-            if (config::settings->get_single_click())
+            if (config::settings.get_single_click)
             {
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
@@ -1825,8 +1825,8 @@ create_folder_view(ptk::browser* file_browser, ptk::browser::view_mode view_mode
     GtkCellRenderer* renderer = nullptr;
 
     i32 icon_size = 0;
-    const i32 big_icon_size = config::settings->icon_size_big();
-    const i32 small_icon_size = config::settings->icon_size_small();
+    const i32 big_icon_size = config::settings.icon_size_big;
+    const i32 small_icon_size = config::settings.icon_size_small;
 
     PangoAttrList* attr_list = pango_attr_list_new();
     pango_attr_list_insert(attr_list, pango_attr_insert_hyphens_new(false));
@@ -2104,7 +2104,7 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view) noexcept
         if (width)
         {
             if (column.column == ptk::file_list::column::name &&
-                !config::settings->always_show_tabs() &&
+                !config::settings.always_show_tabs &&
                 file_browser->view_mode_ == ptk::browser::view_mode::list_view &&
                 gtk_notebook_get_n_pages(file_browser->notebook_) == 1)
             {
@@ -2930,7 +2930,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
     // this->button_press_ = false;
     this->is_drag_ = false;
     this->menu_shown_ = false;
-    if (this->view_mode_ == ptk::browser::view_mode::list_view || config::settings->single_click())
+    if (this->view_mode_ == ptk::browser::view_mode::list_view || config::settings.single_click)
     {
         /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
@@ -3564,7 +3564,7 @@ ptk::browser::close_tab() noexcept
     // gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
     gtk_widget_destroy(GTK_WIDGET(this));
 
-    if (!config::settings->always_show_tabs())
+    if (!config::settings.always_show_tabs)
     {
         if (gtk_notebook_get_n_pages(notebook) == 1)
         {
@@ -5927,7 +5927,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
     {
         if (set->xset_name == xset::name::tab_new || set->xset_name == xset::name::tab_new_here)
         {
-            if (config::settings->new_tab_here())
+            if (config::settings.new_tab_here)
             {
                 this->new_tab_here();
             }

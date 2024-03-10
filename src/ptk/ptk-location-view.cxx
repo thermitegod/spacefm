@@ -157,7 +157,7 @@ ptk::view::location::update_volume_icons() noexcept
     GtkTreeIter it;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    i32 icon_size = config::settings->icon_size_small();
+    i32 icon_size = config::settings.icon_size_small;
     if (icon_size > PANE_MAX_ICON_SIZE)
     {
         icon_size = PANE_MAX_ICON_SIZE;
@@ -205,9 +205,8 @@ update_change_detection() noexcept
                     // update current dir change detection
                     file_browser->dir_->update_avoid_changes();
                     // update thumbnail visibility
-                    file_browser->show_thumbnails(config::settings->show_thumbnail()
-                                                      ? config::settings->max_thumb_size()
-                                                      : 0);
+                    file_browser->show_thumbnails(
+                        config::settings.show_thumbnails ? config::settings.thumbnail_max_size : 0);
                 }
             }
         }
@@ -586,7 +585,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept
                                       -1);
     if (set_icon)
     {
-        i32 icon_size = config::settings->icon_size_small();
+        i32 icon_size = config::settings.icon_size_small;
         if (icon_size > PANE_MAX_ICON_SIZE)
         {
             icon_size = PANE_MAX_ICON_SIZE;
@@ -648,7 +647,7 @@ update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
         return;
     }
 
-    i32 icon_size = config::settings->icon_size_small();
+    i32 icon_size = config::settings.icon_size_small;
     if (icon_size > PANE_MAX_ICON_SIZE)
     {
         icon_size = PANE_MAX_ICON_SIZE;

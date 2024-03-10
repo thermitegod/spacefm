@@ -260,7 +260,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             const auto icon_name = this->special_directory_get_icon_name();
-            return vfs::utils::load_icon(icon_name, config::settings->icon_size_big());
+            return vfs::utils::load_icon(icon_name, config::settings.icon_size_big);
         }
 
         if (!this->mime_type_)
@@ -279,7 +279,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             const auto icon_name = this->special_directory_get_icon_name();
-            return vfs::utils::load_icon(icon_name, config::settings->icon_size_small());
+            return vfs::utils::load_icon(icon_name, config::settings.icon_size_small);
         }
 
         if (!this->mime_type_)
@@ -703,7 +703,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (this->mime_type_->is_image() || this->mime_type_->is_video())
         {
             GdkPixbuf* thumbnail = vfs::detail::thumbnail_load(this->shared_from_this(),
-                                                               config::settings->icon_size_big());
+                                                               config::settings.icon_size_big);
             if (thumbnail)
             {
                 this->big_thumbnail_ = thumbnail;
@@ -732,7 +732,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (this->mime_type_->is_image() || this->mime_type_->is_video())
         {
             GdkPixbuf* thumbnail = vfs::detail::thumbnail_load(this->shared_from_this(),
-                                                               config::settings->icon_size_small());
+                                                               config::settings.icon_size_small);
             if (thumbnail)
             {
                 this->small_thumbnail_ = thumbnail;
@@ -762,8 +762,8 @@ vfs::file::load_special_info() noexcept
         return;
     }
 
-    const i32 big_size = config::settings->icon_size_big();
-    const i32 small_size = config::settings->icon_size_small();
+    const i32 big_size = config::settings.icon_size_big;
+    const i32 small_size = config::settings.icon_size_small;
     if (this->big_thumbnail_ == nullptr)
     {
         GdkPixbuf* icon = desktop->icon(big_size);

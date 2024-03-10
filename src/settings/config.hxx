@@ -54,7 +54,7 @@ constexpr std::string_view version{"version"};
 
 // General keys
 constexpr std::string_view show_thumbnail{"show_thumbnail"};
-constexpr std::string_view max_thumb_size{"max_thumb_size"};
+constexpr std::string_view thumbnail_max_size{"max_thumb_size"};
 constexpr std::string_view icon_size_big{"icon_size_big"};
 constexpr std::string_view icon_size_small{"icon_size_small"};
 constexpr std::string_view icon_size_tool{"icon_size_tool"};

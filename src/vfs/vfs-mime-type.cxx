@@ -112,7 +112,7 @@ vfs::mime_type::icon(const bool big) noexcept
 
     if (big)
     { // big icon
-        if (this->icon_size_big_ != config::settings->icon_size_big())
+        if (this->icon_size_big_ != config::settings.icon_size_big)
         { // big icon size has changed
             if (this->big_icon_)
             {
@@ -124,12 +124,12 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             return g_object_ref(this->big_icon_);
         }
-        this->icon_size_big_ = config::settings->icon_size_big();
+        this->icon_size_big_ = config::settings.icon_size_big;
         icon_size = this->icon_size_big_;
     }
     else
     { // small icon
-        if (this->icon_size_small_ != config::settings->icon_size_small())
+        if (this->icon_size_small_ != config::settings.icon_size_small)
         { // small icon size has changed
             if (this->small_icon_)
             {
@@ -141,7 +141,7 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             return g_object_ref(this->small_icon_);
         }
-        this->icon_size_small_ = config::settings->icon_size_small();
+        this->icon_size_small_ = config::settings.icon_size_small;
         icon_size = this->icon_size_small_;
     }
 

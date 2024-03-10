@@ -157,7 +157,7 @@ activate(GtkApplication* app, void* user_data) noexcept
 
     const auto opt = static_cast<commandline_opt_data*>(user_data)->shared_from_this();
 
-    config::settings->load_saved_tabs(!opt->no_tabs);
+    config::settings.load_saved_tabs = !opt->no_tabs;
 
     MainWindow* main_window =
         MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
@@ -216,7 +216,7 @@ activate(GtkApplication* app, void* user_data) noexcept
         main_window->focus_panel(opt->panel);
     }
 
-    config::settings->load_saved_tabs(true);
+    config::settings.load_saved_tabs = true;
 
     gtk_window_present(GTK_WINDOW(main_window));
 }

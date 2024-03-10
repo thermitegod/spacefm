@@ -687,7 +687,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "show-thumbnails")
         {
             const std::string subproperty = json["subproperty"];
-            if (config::settings->show_thumbnail() != (subproperty == "true"))
+            if (config::settings.show_thumbnails != (subproperty == "true"))
             {
                 main_window_toggle_thumbnails_all_windows();
             }
@@ -695,7 +695,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "max-thumbnail-size")
         {
             const std::string_view value = data[0];
-            config::settings->max_thumb_size(std::stoi(value.data()));
+            config::settings.thumbnail_max_size = std::stoi(value.data());
         }
         else if (property == "large-icons")
         {
@@ -839,14 +839,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "thumbnailer")
         {
             const std::string subproperty = json["subproperty"];
-            if (subproperty == "api")
-            {
-                config::settings->thumbnailer_use_api(true);
-            }
-            else // if (subproperty == "cli"))
-            {
-                config::settings->thumbnailer_use_api(false);
-            }
+
+            config::settings.thumbnailer_use_api = subproperty == "api";
         }
         else if (property == "editor")
         {
@@ -1202,13 +1196,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "show-thumbnails")
         {
-            return {SOCKET_SUCCESS, std::format("{}", config::settings->show_thumbnail() ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", config::settings.show_thumbnails ? 1 : 0)};
         }
         else if (property == "max-thumbnail-size")
         {
             return {SOCKET_SUCCESS,
                     std::format("{}",
-                                vfs::utils::format_file_size(config::settings->max_thumb_size()))};
+                                vfs::utils::format_file_size(config::settings.thumbnail_max_size))};
         }
         else if (property == "large-icons")
         {
@@ -1326,7 +1320,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "thumbnailer")
         {
-            return {SOCKET_SUCCESS, config::settings->thumbnailer_use_api() ? "api" : "cli"};
+            return {SOCKET_SUCCESS, config::settings.thumbnailer_use_api ? "api" : "cli"};
         }
         else if (property == "editor")
         {
