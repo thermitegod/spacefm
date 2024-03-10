@@ -308,9 +308,6 @@ struct column_data
 
 namespace global
 {
-// instance-wide command history
-std::vector<std::string> xset_cmd_history;
-
 // history of closed tabs
 std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
@@ -515,29 +512,6 @@ ptk::browser::search_bar() const noexcept
     return this->search_bar_;
 }
 
-static void
-save_command_history(GtkEntry* entry) noexcept
-{
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
-    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
-    if (text.empty())
-    {
-        return;
-    }
-
-    global::xset_cmd_history.push_back(text);
-
-    // shorten to 200 entries
-    while (global::xset_cmd_history.size() > 200)
-    {
-        global::xset_cmd_history.erase(global::xset_cmd_history.begin());
-    }
-}
-
 static bool
 on_search_bar_focus_in(GtkWidget* entry, GdkEventFocus* evt, ptk::browser* file_browser)
 {
@@ -592,7 +566,6 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* file_browser) noexcept
     // network path
     if ((!text.starts_with('/') && text.contains(":/")) || text.starts_with("//"))
     {
-        save_command_history(GTK_ENTRY(entry));
         ptk::view::location::mount_network(file_browser, text, false, false);
         return;
     }
