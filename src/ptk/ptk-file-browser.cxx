@@ -79,7 +79,7 @@
 #include "ptk/ptk-file-list.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-path-entry.hxx"
+#include "ptk/ptk-path-bar.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "main-window.hxx"
@@ -602,14 +602,6 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* file_browser) noexcept
 
     gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view_));
     gtk_editable_set_position(GTK_EDITABLE(entry), -1);
-
-    // inhibit auto seek because if multiple completions will change dir
-    EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
-    if (edata && edata->seek_timer)
-    {
-        g_source_remove(edata->seek_timer);
-        edata->seek_timer = 0;
-    }
 }
 
 static bool
@@ -691,7 +683,7 @@ ptk::browser::rebuild_toolbox() noexcept
 {
     // ztd::logger::info("rebuild_toolbox");
 
-    this->path_bar_ = ptk_path_entry_new(this);
+    this->path_bar_ = ptk::path_bar_new(this);
 
     // clang-format off
     g_signal_connect(G_OBJECT(this->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), this);
@@ -855,7 +847,7 @@ ptk_file_browser_init(ptk::browser* file_browser) noexcept
                                    GtkOrientation::GTK_ORIENTATION_VERTICAL);
 
     file_browser->panel_ = 0; // do not load font yet in ptk_path_entry_new
-    file_browser->path_bar_ = ptk_path_entry_new(file_browser);
+    file_browser->path_bar_ = ptk::path_bar_new(file_browser);
 
     // clang-format off
     g_signal_connect(G_OBJECT(file_browser->path_bar_), "activate", G_CALLBACK(on_address_bar_activate), file_browser);
@@ -2941,7 +2933,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 
     if (!std::filesystem::exists(new_path))
     {
-        ztd::logger::error("Failed to chdir into nonexistent path '{}'", new_path.string());
+        // ztd::logger::error("Failed to chdir into nonexistent path '{}'", new_path.string());
         return false;
     }
     const auto path = std::filesystem::absolute(new_path);
@@ -5339,7 +5331,7 @@ ptk::browser::seek_path(const std::filesystem::path& seek_dir,
     // prefix seek_name
     const auto& cwd = this->cwd();
 
-    if (!std::filesystem::equivalent(cwd, seek_dir))
+    if (cwd != seek_dir)
     {
         // change dir
         this->seek_name_ = seek_name;

@@ -19,24 +19,9 @@
 
 #include <gtkmm.h>
 
-#include <ztd/ztd.hxx>
-
 #include "ptk/ptk-file-browser.hxx"
 
-#define ENTRY_DATA(obj) (static_cast<EntryData*>(obj))
-
-struct EntryData
+namespace ptk
 {
-    EntryData() = delete;
-    EntryData(ptk::browser* browser) noexcept;
-    ~EntryData() = default;
-    EntryData(const EntryData& other) = delete;
-    EntryData(EntryData&& other) = delete;
-    EntryData& operator=(const EntryData& other) = delete;
-    EntryData& operator=(EntryData&& other) = delete;
-
-    ptk::browser* browser{nullptr};
-    u32 seek_timer{0};
-};
-
-GtkEntry* ptk_path_entry_new(ptk::browser* file_browser) noexcept;
+GtkEntry* path_bar_new(ptk::browser* file_browser) noexcept;
+}

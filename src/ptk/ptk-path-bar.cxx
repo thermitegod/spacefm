@@ -39,7 +39,7 @@
 
 #include "ptk/utils/ptk-utils.hxx"
 
-#include "ptk/ptk-path-entry.hxx"
+#include "ptk/ptk-path-bar.hxx"
 
 namespace ptk::path_entry
 {
@@ -49,8 +49,6 @@ enum column
     path,
 };
 }
-
-EntryData::EntryData(ptk::browser* file_browser) noexcept : browser(file_browser) {}
 
 static const std::filesystem::path
 get_cwd(GtkEntry* entry) noexcept
@@ -76,10 +74,6 @@ get_cwd(GtkEntry* entry) noexcept
     {
         return path.parent_path();
     }
-    // else
-    // {
-    //     ztd::logger::warn("entered path in pathbar is invalid: {}", path);
-    // }
 
     return vfs::user::home();
 }
@@ -90,18 +84,6 @@ seek_path(GtkEntry* entry) noexcept
     if (!GTK_IS_ENTRY(entry))
     {
         return false;
-    }
-
-    EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
-    if (!(edata && edata->browser))
-    {
-        return false;
-    }
-
-    if (edata->seek_timer)
-    {
-        g_source_remove(edata->seek_timer);
-        edata->seek_timer = 0;
     }
 
     if (!xset_get_b(xset::name::path_seek))
@@ -159,26 +141,12 @@ seek_path(GtkEntry* entry) noexcept
         }
     }
 
-    edata->browser->seek_path(is_unique ? seek_dir : "", seek_name);
+    auto* const file_browser =
+        static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
+
+    file_browser->seek_path(is_unique ? seek_dir : "", seek_name);
 
     return false;
-}
-
-static void
-seek_path_delayed(GtkEntry* entry, u32 delay = 250) noexcept
-{
-    EntryData* edata = ENTRY_DATA(g_object_get_data(G_OBJECT(entry), "edata"));
-    if (!(edata && edata->browser))
-    {
-        return;
-    }
-
-    // user is still typing - restart timer
-    if (edata->seek_timer)
-    {
-        g_source_remove(edata->seek_timer);
-    }
-    edata->seek_timer = g_timeout_add(delay, (GSourceFunc)seek_path, entry);
 }
 
 static bool
@@ -290,7 +258,7 @@ on_changed(GtkEntry* entry, void* user_data) noexcept
     GtkEntryCompletion* completion = gtk_entry_get_completion(entry);
     update_completion(entry, completion);
     gtk_entry_completion_complete(gtk_entry_get_completion(GTK_ENTRY(entry)));
-    seek_path_delayed(GTK_ENTRY(entry), 0);
+    seek_path(GTK_ENTRY(entry));
 }
 
 static void
@@ -402,9 +370,9 @@ insert_complete(GtkEntry* entry) noexcept
 }
 
 static bool
-on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata) noexcept
+on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
 {
-    (void)edata;
+    (void)user_data;
     const auto keyval = gdk_key_event_get_keyval(event);
 
     if (keyval == GDK_KEY_Tab)
@@ -417,7 +385,7 @@ on_key_press(GtkWidget* entry, GdkEvent* event, EntryData* edata) noexcept
 
         insert_complete(GTK_ENTRY(entry));
         on_changed(GTK_ENTRY(entry), nullptr);
-        seek_path_delayed(GTK_ENTRY(entry), 10);
+        seek_path(GTK_ENTRY(entry));
         return true;
     }
 
@@ -473,7 +441,7 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
                                       nullptr);
 
     on_changed(GTK_ENTRY(entry), nullptr);
-    seek_path_delayed(GTK_ENTRY(entry), 10);
+    seek_path(GTK_ENTRY(entry));
 
     return true;
 }
@@ -533,6 +501,8 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
 static void
 on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) noexcept
 {
+    (void)entry;
+
     if (!file_browser)
     {
         return;
@@ -549,47 +519,29 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) no
     set = xset_get(xset::name::separator);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
 
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
-    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
-    set->disable =
-        !(std::filesystem::exists(text) || text.starts_with(":/")) || text.starts_with("//");
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
-
     set = xset_get(xset::name::path_seek);
     xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
+
     gtk_widget_show_all(GTK_WIDGET(menu));
 }
 
-static void
-entry_data_free(EntryData* edata) noexcept
-{
-    delete edata;
-}
-
 GtkEntry*
-ptk_path_entry_new(ptk::browser* file_browser) noexcept
+ptk::path_bar_new(ptk::browser* file_browser) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_has_frame(entry, true);
     gtk_widget_set_size_request(GTK_WIDGET(entry), 50, -1);
-
-    auto* const edata = new EntryData(file_browser);
 
     // clang-format off
     g_signal_connect(G_OBJECT(entry), "focus-in-event", G_CALLBACK(on_focus_in), nullptr);
     g_signal_connect(G_OBJECT(entry), "focus-out-event", G_CALLBACK(on_focus_out), nullptr);
 
     // used to eat the tab key
-    g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_key_press), edata);
+    g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_key_press), nullptr);
     g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
     // clang-format on
 
-    g_object_weak_ref(G_OBJECT(entry), (GWeakNotify)entry_data_free, edata);
-    g_object_set_data(G_OBJECT(entry), "edata", edata);
+    g_object_set_data(G_OBJECT(entry), "browser", file_browser);
 
     return entry;
 }
