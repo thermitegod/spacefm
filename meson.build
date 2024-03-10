@@ -66,6 +66,7 @@ endif
 
 default_warning_flags = [
   # '-Wconversion',
+  '-Wcast-qual',
   '-Wchar-subscripts',
   '-Wcomment',
   '-Wdisabled-optimization',
@@ -113,7 +114,6 @@ default_warning_flags = [
   '-Wno-format-nonliteral',
 
   # TODO
-  # '-Wcast-qual',
   # '-Wconversion',
 ]
 

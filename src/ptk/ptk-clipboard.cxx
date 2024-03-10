@@ -339,7 +339,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
     vfs::file_task::type action;
-    char* uri_list_str = nullptr;
+    const char* uri_list_str = nullptr;
 
     GdkAtom gnome_target = gdk_atom_intern("x-special/gnome-copied-files", false);
     GtkSelectionData* sel_data = gtk_clipboard_wait_for_contents(clip, gnome_target);
@@ -352,7 +352,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
             return;
         }
 
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
         if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
         {
             action = vfs::file_task::type::move;
@@ -384,7 +384,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
             gtk_selection_data_free(sel_data);
             return;
         }
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
 
         if (clipboard_action == GdkDragAction::GDK_ACTION_MOVE)
         {
@@ -443,7 +443,7 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
     vfs::file_task::type action;
-    char* uri_list_str = nullptr;
+    const char* uri_list_str = nullptr;
 
     GdkAtom gnome_target = gdk_atom_intern("x-special/gnome-copied-files", false);
     GtkSelectionData* sel_data = gtk_clipboard_wait_for_contents(clip, gnome_target);
@@ -456,7 +456,7 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
             return;
         }
 
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
         action = vfs::file_task::type::link;
         if (uri_list_str)
         {
@@ -480,7 +480,7 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
             gtk_selection_data_free(sel_data);
             return;
         }
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
         action = vfs::file_task::type::link;
     }
 
@@ -525,7 +525,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
     vfs::file_task::type action;
-    char* uri_list_str = nullptr;
+    const char* uri_list_str = nullptr;
 
     GdkAtom gnome_target = gdk_atom_intern("x-special/gnome-copied-files", false);
     GtkSelectionData* sel_data = gtk_clipboard_wait_for_contents(clip, gnome_target);
@@ -538,7 +538,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
             return;
         }
 
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
         action = vfs::file_task::type::copy;
         if (uri_list_str)
         {
@@ -563,7 +563,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
             return;
         }
 
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
         action = vfs::file_task::type::copy;
     }
 
@@ -632,7 +632,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i
 
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
-    char* uri_list_str = nullptr;
+    const char* uri_list_str = nullptr;
     std::vector<std::filesystem::path> file_list;
 
     *is_cut = false;
@@ -650,7 +650,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i
             return file_list;
         }
 
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
         *is_cut = (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"));
 
         if (uri_list_str)
@@ -675,7 +675,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i
             gtk_selection_data_free(sel_data);
             return file_list;
         }
-        uri_list_str = (char*)gtk_selection_data_get_data(sel_data);
+        uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
     }
 
     if (!uri_list_str)
