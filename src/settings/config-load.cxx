@@ -252,20 +252,7 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                     ztd::logger::critical("Invalid xset::var enum name xset::var::{}", name);
                     continue;
                 }
-                const xset::var var = enum_value.value();
-
-                if (set->name.starts_with("cstm_"))
-                { // custom
-                    if (set->lock)
-                    {
-                        set->lock = false;
-                    }
-                    xset_set_var(set, var, value);
-                }
-                else
-                { // normal (lock)
-                    xset_set_var(set, var, value);
-                }
+                xset_set_var(set, enum_value.value(), value);
             }
         }
     }

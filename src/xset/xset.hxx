@@ -125,28 +125,11 @@ struct set : public std::enable_shared_from_this<set>
     };
     keybinding_data keybinding;
 
-    std::optional<std::string> icon{std::nullopt};    // saved
-    std::optional<std::string> desc{std::nullopt};    // saved if ( !lock ), or read if locked
-    std::optional<std::string> title{std::nullopt};   // saved if ( !lock ), or read if locked
-    std::optional<std::string> next{std::nullopt};    // saved
-    std::optional<std::string> context{std::nullopt}; // saved
-    bool lock{true};                                  // not saved
+    std::optional<std::string> icon{std::nullopt};  // saved
+    std::optional<std::string> desc{std::nullopt};  // saved if ( !lock ), or read if locked
+    std::optional<std::string> title{std::nullopt}; // saved if ( !lock ), or read if locked
 
     std::vector<xset::name> context_menu_entries; // not saved, in order
-
-    // Custom Command ( !lock )
-    std::optional<std::string> prev{std::nullopt};   // saved
-    std::optional<std::string> parent{std::nullopt}; // saved
-    std::optional<std::string> child{std::nullopt};  // saved
-    std::optional<std::string> line{std::nullopt};   // saved or help if lock
-    bool task{false};                                // saved
-    bool task_pop{false};                            // saved
-    bool task_err{false};                            // saved
-    bool task_out{false};                            // saved
-    bool in_terminal{false};                         // saved, or save menu_label if lock
-    bool keep_terminal{false};                       // saved, or save icon if lock
-    bool scroll_lock{false};                         // saved
-    char opener{0};                                  // saved
 };
 } // namespace xset
 

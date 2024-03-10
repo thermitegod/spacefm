@@ -1276,12 +1276,10 @@ ptk_file_menu_new(ptk::browser* browser,
         plain_type = std::format("open_all_type_{}", plain_type);
         set = xset_get(plain_type);
         xset_set_cb(set, (GFunc)on_popup_open_all, data);
-        set->lock = true;
         set->menu.type = xset::set::menu_type::normal;
         set->shared_key = xset_get(xset::name::open_all);
         set2 = xset_get(xset::name::open_all);
         set->menu.label = set2->menu.label;
-        set->context = std::nullopt;
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
         set->menu.label = std::nullopt; // do not bother to save this
 

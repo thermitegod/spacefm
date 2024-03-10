@@ -215,181 +215,12 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
         }
         case xset::var::menu_label:
         {
-            // lbl is only used >= 0.9.0 for changed lock default menu_label
             set->menu.label = value;
-            if (set->lock)
-            {
-                // indicate that menu label is not default and should be saved
-                set->in_terminal = true;
-            }
-            break;
-        }
-        case xset::var::icn:
-        {
-            // icn is only used >= 0.9.0 for changed lock default icon
-            set->icon = value;
-            if (set->lock)
-            {
-                // indicate that icon is not default and should be saved
-                set->keep_terminal = true;
-            }
-            break;
-        }
-        case xset::var::menu_label_custom:
-        {
-            // pre-0.9.0 menu_label or >= 0.9.0 custom item label
-            // only save if custom or not default label
-            if (!set->lock || set->menu.label.value() != value)
-            {
-                set->menu.label = value;
-                if (set->lock)
-                {
-                    // indicate that menu label is not default and should be saved
-                    set->in_terminal = true;
-                }
-            }
             break;
         }
         case xset::var::icon:
         {
-            // pre-0.9.0 icon or >= 0.9.0 custom item icon
-            // only save if custom or not default icon
-            // also check that stock name does not match
-            break;
-        }
-        case xset::var::next:
-        {
-            set->next = value;
-            break;
-        }
-        case xset::var::prev:
-        {
-            set->prev = value;
-            break;
-        }
-        case xset::var::parent:
-        {
-            set->parent = value;
-            break;
-        }
-        case xset::var::child:
-        {
-            set->child = value;
-            break;
-        }
-        case xset::var::context:
-        {
-            set->context = value;
-            break;
-        }
-        case xset::var::line:
-        {
-            set->line = value;
-            break;
-        }
-        case xset::var::task:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->task = result == 1;
-            break;
-        }
-        case xset::var::task_pop:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->task_pop = result == 1;
-            break;
-        }
-        case xset::var::task_err:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->task_err = result == 1;
-            break;
-        }
-        case xset::var::task_out:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->task_out = result == 1;
-            break;
-        }
-        case xset::var::run_in_terminal:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->in_terminal = result == 1;
-            break;
-        }
-        case xset::var::keep_terminal:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->keep_terminal = result == 1;
-            break;
-        }
-        case xset::var::scroll_lock:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->scroll_lock = result == 1;
+            set->icon = value;
             break;
         }
         case xset::var::disable:
@@ -405,21 +236,6 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
                 break;
             }
             set->disable = result == 1;
-            break;
-        }
-        case xset::var::opener:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->opener = result == 1;
             break;
         }
         case xset::var::shared_key:
@@ -447,8 +263,8 @@ xset_set(const xset_t& set, xset::var var, const std::string_view value) noexcep
 {
     assert(set != nullptr);
 
-    if (!set->lock || (var != xset::var::style && var != xset::var::desc &&
-                       var != xset::var::title && var != xset::var::shared_key))
+    if (var != xset::var::style && var != xset::var::desc && var != xset::var::title &&
+        var != xset::var::shared_key)
     {
         xset_set_var(set, var, value);
     }
@@ -758,26 +574,10 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
     assert(var != xset::var::desc);
     assert(var != xset::var::title);
     assert(var != xset::var::menu_label);
-    assert(var != xset::var::menu_label_custom);
-    assert(var != xset::var::icn);
     assert(var != xset::var::icon);
     assert(var != xset::var::context_menu_entries);
     assert(var != xset::var::shared_key);
-    assert(var != xset::var::next);
-    assert(var != xset::var::prev);
-    assert(var != xset::var::parent);
-    assert(var != xset::var::child);
-    assert(var != xset::var::context);
-    assert(var != xset::var::line);
-    assert(var != xset::var::task);
-    assert(var != xset::var::task_pop);
-    assert(var != xset::var::task_err);
-    assert(var != xset::var::task_out);
-    assert(var != xset::var::run_in_terminal);
-    assert(var != xset::var::keep_terminal);
-    assert(var != xset::var::scroll_lock);
     assert(var != xset::var::disable);
-    assert(var != xset::var::opener);
 
     if (var == xset::var::s)
     {

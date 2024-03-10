@@ -2362,10 +2362,6 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         set->browser = browser;
         xset_menu_cb(nullptr, set); // also does custom activate
     }
-    if (!set->lock)
-    {
-        return true;
-    }
 
     // handlers
     if (set->name.starts_with("dev_"))

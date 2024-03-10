@@ -121,12 +121,9 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
         switch (set->menu.type)
         {
             case xset::set::menu_type::check:
-                if (set->lock)
-                {
-                    item = gtk_check_menu_item_new_with_mnemonic(set->menu.label.value().data());
-                    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
-                                                   set->b == xset::set::enabled::yes);
-                }
+                item = gtk_check_menu_item_new_with_mnemonic(set->menu.label.value().data());
+                gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
+                                               set->b == xset::set::enabled::yes);
                 break;
             case xset::set::menu_type::radio:
                 if (set->ob2_data)
@@ -148,40 +145,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
                 submenu = gtk_menu_new();
                 item = xset_new_menuitem(set->menu.label.value_or(""), icon_name);
                 gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-                if (set->lock)
-                {
-                    if (!set->context_menu_entries.empty())
-                    {
-                        xset_add_menu(file_browser,
-                                      submenu,
-                                      accel_group,
-                                      set->context_menu_entries);
-                    }
-                }
-                else if (set->child)
-                {
-                    set_next = xset_get(set->child.value());
-                    xset_add_menuitem(file_browser, submenu, accel_group, set_next);
-                    GList* l = gtk_container_get_children(GTK_CONTAINER(submenu));
-                    if (l)
-                    {
-                        g_list_free(l);
-                    }
-                    else
-                    {
-                        // Nothing was added to the menu (all items likely have
-                        // invisible context) so destroy (hide) - issue #215
-                        gtk_widget_destroy(item);
-
-                        // next item
-                        if (set->next)
-                        {
-                            set_next = xset_get(set->next.value());
-                            xset_add_menuitem(file_browser, menu, accel_group, set_next);
-                        }
-                        return item;
-                    }
-                }
+                xset_add_menu(file_browser, submenu, accel_group, set->context_menu_entries);
                 break;
             case xset::set::menu_type::sep:
                 item = gtk_separator_menu_item_new();
@@ -272,12 +236,6 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
     gtk_widget_set_sensitive(item, !set->disable);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
-    // next item
-    if (set->next)
-    {
-        set_next = xset_get(set->next.value());
-        xset_add_menuitem(file_browser, menu, accel_group, set_next);
-    }
     return item;
 }
 
@@ -289,8 +247,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
 
     if (item)
     {
-        if (set->lock && set->menu.type == xset::set::menu_type::radio &&
-            GTK_IS_CHECK_MENU_ITEM(item) &&
+        if (set->menu.type == xset::set::menu_type::radio && GTK_IS_CHECK_MENU_ITEM(item) &&
             !gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(item)))
         {
             return;
@@ -330,9 +287,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
         case xset::set::menu_type::string:
         {
             std::string title;
-            std::string msg = set->desc.value();
-            std::string default_str;
-            if (set->title && set->lock)
+            if (set->title)
             {
                 title = set->title.value();
             }
@@ -340,15 +295,10 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             {
                 title = xset::utils::clean_label(set->menu.label.value(), false, false);
             }
-            if (set->lock)
-            {
-                default_str = set->z.value();
-            }
-            else
-            {
-                msg = ztd::replace(msg, "\\n", "\n");
-                msg = ztd::replace(msg, "\\t", "\t");
-            }
+
+            const auto msg = set->desc.value();
+            const auto default_str = set->z.value();
+
             const auto [response, answer] =
                 xset_text_dialog(parent, title, msg, "", set->s.value(), default_str, false);
             set->s = answer;
