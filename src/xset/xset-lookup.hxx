@@ -255,9 +255,9 @@ enum class name
 
     go_focus,
     focus_path_bar,
+    focus_search_bar,
     focus_filelist,
     focus_dirtree,
-    focus_book,
     focus_device,
 
     go_tab,

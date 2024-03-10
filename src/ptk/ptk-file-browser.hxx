@@ -86,6 +86,16 @@ struct browser
         file,
     };
 
+    enum class focus_widget
+    {
+        invalid,
+        path_bar,
+        search_bar,
+        filelist,
+        dirtree,
+        device,
+    };
+
     /* parent class */
     GtkBox parent;
 
@@ -264,7 +274,7 @@ struct browser
     void show_thumbnails(const u32 max_file_size, const bool large_icons) noexcept;
 
     void update_views() noexcept;
-    void focus(i32 job) noexcept;
+    void focus(const ptk::browser::focus_widget item) noexcept;
     void focus_me() noexcept;
     void save_column_widths() const noexcept;
     bool slider_release(GtkPaned* pane) const noexcept;

@@ -4825,15 +4825,15 @@ ptk::browser::update_views() noexcept
 }
 
 void
-ptk::browser::focus(i32 job) noexcept
+ptk::browser::focus(const ptk::browser::focus_widget item) noexcept
 {
     GtkWidget* widget = nullptr;
 
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
-    switch (job)
+    switch (item)
     {
-        case 0:
+        case ptk::browser::focus_widget::path_bar:
             // path bar
             if (!xset_get_b_panel_mode(p, xset::panel::show_toolbox, mode))
             {
@@ -4842,7 +4842,7 @@ ptk::browser::focus(i32 job) noexcept
             }
             widget = GTK_WIDGET(this->path_bar_);
             break;
-        case 1:
+        case ptk::browser::focus_widget::dirtree:
             if (!xset_get_b_panel_mode(p, xset::panel::show_dirtree, mode))
             {
                 xset_set_b_panel_mode(p, xset::panel::show_dirtree, mode, true);
@@ -4850,11 +4850,7 @@ ptk::browser::focus(i32 job) noexcept
             }
             widget = this->side_dir;
             break;
-        case 2:
-            // Deprecated - bookmark
-            widget = nullptr;
-            break;
-        case 3:
+        case ptk::browser::focus_widget::device:
             if (!xset_get_b_panel_mode(p, xset::panel::show_devmon, mode))
             {
                 xset_set_b_panel_mode(p, xset::panel::show_devmon, mode, true);
@@ -4862,10 +4858,13 @@ ptk::browser::focus(i32 job) noexcept
             }
             widget = this->side_dev;
             break;
-        case 4:
+        case ptk::browser::focus_widget::filelist:
             widget = this->folder_view_;
             break;
-        default:
+        case ptk::browser::focus_widget::search_bar:
+            widget = GTK_WIDGET(this->search_bar_);
+            break;
+        case ptk::browser::focus_widget::invalid:
             return;
     }
     if (gtk_widget_get_visible(widget))
@@ -5889,28 +5888,28 @@ ptk::browser::on_action(const xset::name setname) noexcept
     }
     else if (set->name.starts_with("focus_"))
     {
-        i32 i = 0;
+        ptk::browser::focus_widget widget = ptk::browser::focus_widget::invalid;
         if (set->xset_name == xset::name::focus_path_bar)
         {
-            i = 0;
+            widget = ptk::browser::focus_widget::path_bar;
+        }
+        else if (set->xset_name == xset::name::focus_search_bar)
+        {
+            widget = ptk::browser::focus_widget::search_bar;
         }
         else if (set->xset_name == xset::name::focus_filelist)
         {
-            i = 4;
+            widget = ptk::browser::focus_widget::filelist;
         }
         else if (set->xset_name == xset::name::focus_dirtree)
         {
-            i = 1;
-        }
-        else if (set->xset_name == xset::name::focus_book)
-        {
-            i = 2;
+            widget = ptk::browser::focus_widget::dirtree;
         }
         else if (set->xset_name == xset::name::focus_device)
         {
-            i = 3;
+            widget = ptk::browser::focus_widget::device;
         }
-        this->focus(i);
+        this->focus(widget);
     }
     else if (set->xset_name == xset::name::view_reorder_col)
     {
@@ -6245,7 +6244,12 @@ void
 ptk::wrapper::browser::focus(GtkMenuItem* item, ptk::browser* file_browser) noexcept
 {
     const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "job"));
-    file_browser->focus(job);
+
+    const auto enum_value = magic_enum::enum_cast<ptk::browser::focus_widget>(job);
+    if (enum_value.has_value())
+    {
+        file_browser->focus(enum_value.value());
+    }
 }
 
 bool

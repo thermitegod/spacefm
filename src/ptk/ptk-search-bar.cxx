@@ -81,6 +81,8 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
         gtk_entry_set_text(GTK_ENTRY(entry), "");
 #endif
+
+        file_browser->focus(ptk::browser::focus_widget::filelist);
     }
 
     return false;

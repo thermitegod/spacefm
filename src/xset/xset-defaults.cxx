@@ -1292,9 +1292,9 @@ xset_defaults() noexcept
         set->menu.type = xset::set::menu_type::submenu;
         set->context_menu_entries = {
             xset::name::focus_path_bar,
+            xset::name::focus_search_bar,
             xset::name::focus_filelist,
             xset::name::focus_dirtree,
-            xset::name::focus_book,
             xset::name::focus_device,
         };
     }
@@ -1302,6 +1302,13 @@ xset_defaults() noexcept
     {
         const auto set = xset_get(xset::name::focus_path_bar);
         set->menu.label = "_Path Bar";
+        set->icon = "gtk-dialog-question";
+        set->keybinding.type = xset::set::keybinding_type::navigation;
+    }
+
+    {
+        const auto set = xset_get(xset::name::focus_search_bar);
+        set->menu.label = "_Search Bar";
         set->icon = "gtk-dialog-question";
         set->keybinding.type = xset::set::keybinding_type::navigation;
     }
@@ -1316,12 +1323,6 @@ xset_defaults() noexcept
         const auto set = xset_get(xset::name::focus_dirtree);
         set->menu.label = "_Tree";
         set->icon = "folder";
-    }
-
-    {
-        const auto set = xset_get(xset::name::focus_book);
-        set->menu.label = "_Bookmarks";
-        set->icon = "gtk-jump-to";
     }
 
     {
@@ -2415,6 +2416,7 @@ xset_default_keys() noexcept
     def_key(keysets, xset::name::go_up, GDK_KEY_Up, GdkModifierType::GDK_MOD1_MASK);
 #endif
     def_key(keysets, xset::name::focus_path_bar, GDK_KEY_l, GdkModifierType::GDK_CONTROL_MASK);
+    def_key(keysets, xset::name::focus_search_bar, GDK_KEY_f, GdkModifierType::GDK_CONTROL_MASK);
     def_key(keysets, xset::name::view_refresh, GDK_KEY_F5, 0);
 #if (GTK_MAJOR_VERSION == 4)
     def_key(keysets, xset::name::prop_info, GDK_KEY_Return, GdkModifierType::GDK_ALT_MASK);
