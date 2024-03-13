@@ -262,7 +262,7 @@ struct browser
 
     void select_all() const noexcept;
     void unselect_all() const noexcept;
-    void select_last() noexcept;
+    void select_last() const noexcept;
     void select_file(const std::filesystem::path& filename,
                      const bool unselect_others = true) const noexcept;
     void select_files(const std::span<std::filesystem::path> select_filenames) const noexcept;

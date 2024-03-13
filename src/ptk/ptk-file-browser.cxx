@@ -4167,7 +4167,7 @@ ptk::browser::unselect_all() const noexcept
 }
 
 void
-ptk::browser::select_last() noexcept
+ptk::browser::select_last() const noexcept
 {
     // ztd::logger::debug("select_last");
     const auto& cwd = this->cwd();
