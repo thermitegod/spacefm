@@ -41,6 +41,8 @@
 
 #include "ptk/ptk-path-bar.hxx"
 
+// #define ENABLE_AUTO_SEEK
+
 namespace ptk::path_entry
 {
 enum column
@@ -78,6 +80,7 @@ get_cwd(GtkEntry* entry) noexcept
     return vfs::user::home();
 }
 
+#if defined(ENABLE_AUTO_SEEK)
 static bool
 seek_path(GtkEntry* entry) noexcept
 {
@@ -148,6 +151,7 @@ seek_path(GtkEntry* entry) noexcept
 
     return false;
 }
+#endif
 
 static bool
 match_func(GtkEntryCompletion* completion, const char* key, GtkTreeIter* it,
@@ -258,7 +262,9 @@ on_changed(GtkEntry* entry, void* user_data) noexcept
     GtkEntryCompletion* completion = gtk_entry_get_completion(entry);
     update_completion(entry, completion);
     gtk_entry_completion_complete(gtk_entry_get_completion(GTK_ENTRY(entry)));
+#if defined(ENABLE_AUTO_SEEK)
     seek_path(GTK_ENTRY(entry));
+#endif
 }
 
 static void
@@ -385,7 +391,9 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
 
         insert_complete(GTK_ENTRY(entry));
         on_changed(GTK_ENTRY(entry), nullptr);
+#if defined(ENABLE_AUTO_SEEK)
         seek_path(GTK_ENTRY(entry));
+#endif
         return true;
     }
 
@@ -441,7 +449,9 @@ on_match_selected(GtkEntryCompletion* completion, GtkTreeModel* model, GtkTreeIt
                                       nullptr);
 
     on_changed(GTK_ENTRY(entry), nullptr);
+#if defined(ENABLE_AUTO_SEEK)
     seek_path(GTK_ENTRY(entry));
+#endif
 
     return true;
 }
@@ -498,6 +508,7 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
     return false;
 }
 
+#if defined(ENABLE_AUTO_SEEK)
 static void
 on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) noexcept
 {
@@ -524,6 +535,7 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) no
 
     gtk_widget_show_all(GTK_WIDGET(menu));
 }
+#endif
 
 GtkEntry*
 ptk::path_bar_new(ptk::browser* file_browser) noexcept
@@ -538,7 +550,10 @@ ptk::path_bar_new(ptk::browser* file_browser) noexcept
 
     // used to eat the tab key
     g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_key_press), nullptr);
+
+#if defined (ENABLE_AUTO_SEEK)
     g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
+#endif
     // clang-format on
 
     g_object_set_data(G_OBJECT(entry), "browser", file_browser);
