@@ -3204,20 +3204,6 @@ ptk::browser::get_n_visible_files() const noexcept
     return this->file_list_ ? gtk_tree_model_iter_n_children(this->file_list_, nullptr) : 0;
 }
 
-u64
-ptk::browser::get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept
-{
-    if (sel_size)
-    {
-        *sel_size = this->sel_size_;
-    }
-    if (sel_disk_size)
-    {
-        *sel_disk_size = this->sel_disk_size_;
-    }
-    return this->n_selected_files_;
-}
-
 void
 ptk::browser::go_home() noexcept
 {
@@ -5384,14 +5370,10 @@ ptk::browser::update_statusbar() const noexcept
         return;
     }
 
-    u64 total_size = 0;
-    u64 total_on_disk_size = 0;
-
     // note: total size will not include content changes since last selection change
-    const auto num_sel = this->get_n_sel(&total_size, &total_on_disk_size);
     const auto num_vis = this->get_n_visible_files();
 
-    if (num_sel > 0)
+    if (this->n_selected_files_ > 0)
     {
         const auto selected_files = this->selected_files();
         if (selected_files.empty())
@@ -5399,13 +5381,16 @@ ptk::browser::update_statusbar() const noexcept
             return;
         }
 
-        const std::string file_size = vfs::utils::format_file_size(total_size);
-        const std::string disk_size = vfs::utils::format_file_size(total_on_disk_size);
+        const std::string file_size = vfs::utils::format_file_size(this->sel_size_);
+        const std::string disk_size = vfs::utils::format_file_size(this->sel_disk_size_);
 
-        statusbar_txt.append(
-            std::format("{:L} / {:L} ({} / {})", num_sel, num_vis, file_size, disk_size));
+        statusbar_txt.append(std::format("{:L} / {:L} ({} / {})",
+                                         this->n_selected_files_,
+                                         num_vis,
+                                         file_size,
+                                         disk_size));
 
-        if (num_sel == 1)
+        if (this->n_selected_files_ == 1)
         // display file name or symlink info in status bar if one file selected
         {
             const auto& file = selected_files.front();

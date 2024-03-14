@@ -207,10 +207,6 @@ struct browser
     void open_in_panel(const panel_t panel_num, const std::filesystem::path& file_path) noexcept;
     bool is_panel_visible(const panel_t panel) const noexcept;
 
-    u64 get_n_all_files() const noexcept;
-    u64 get_n_visible_files() const noexcept;
-    u64 get_n_sel(u64* sel_size, u64* sel_disk_size) const noexcept;
-
     struct browser_count_data
     {
         panel_t panel_count;
@@ -331,6 +327,10 @@ struct browser
     MainWindow* main_window() const noexcept;
     GtkEntry* path_bar() const noexcept;
     GtkEntry* search_bar() const noexcept;
+
+  private:
+    u64 get_n_all_files() const noexcept;
+    u64 get_n_visible_files() const noexcept;
 
   public:
     // signal
