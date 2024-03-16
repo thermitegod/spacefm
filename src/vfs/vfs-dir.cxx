@@ -213,22 +213,24 @@ vfs::dir::load_thread() noexcept
     // load this dirs .hidden file
     this->load_user_hidden_files();
 
-    const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
-
-    for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
     {
-        if (this->shutdown_)
-        {
-            co_return true;
-        }
+        const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
-        if (this->is_file_user_hidden(dfile.path()))
+        for (const auto& dfile : std::filesystem::directory_iterator(this->path_))
         {
-            this->xhidden_count_++;
-            continue;
-        }
+            if (this->shutdown_)
+            {
+                co_return true;
+            }
 
-        this->files_.push_back(vfs::file::create(dfile.path()));
+            if (this->is_file_user_hidden(dfile.path()))
+            {
+                this->xhidden_count_++;
+                continue;
+            }
+
+            this->files_.push_back(vfs::file::create(dfile.path()));
+        }
     }
 
     this->run_event<spacefm::signal::file_listed>();
