@@ -2172,7 +2172,7 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noex
 
     if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
-        if (button == 1 && keymod == 0)
+        if (button == GDK_BUTTON_PRIMARY && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
             // does not always fire on this event so handle it ourselves
@@ -2197,13 +2197,13 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noex
 
     switch (button)
     {
-        case 1:
-        case 3:
+        case GDK_BUTTON_PRIMARY:
+        case GDK_BUTTON_SECONDARY:
             // left or right click
             if (keymod == 0)
             {
                 // no modifier
-                if (button == 3)
+                if (button == GDK_BUTTON_SECONDARY)
                 {
                     // right
                     show_app_menu(menu, item, data, button, time_point);
@@ -2211,7 +2211,7 @@ on_app_button_press(GtkWidget* item, GdkEvent* event, ptk::file_menu* data) noex
                 }
             }
             break;
-        case 2:
+        case GDK_BUTTON_MIDDLE:
             // middle click
             if (keymod == 0)
             {

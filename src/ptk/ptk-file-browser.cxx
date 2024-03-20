@@ -628,7 +628,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     file_browser->focus_me();
     set->browser = file_browser;
 
-    if (button == 1 && keymod == 0)
+    if (button == GDK_BUTTON_PRIMARY && keymod == 0)
     { // left click and no modifier
         // ztd::logger::debug("set={}  menu={}", set->name, magic_enum::enum_name(set->menu.type));
         set->browser->on_action(set->xset_name);
@@ -724,7 +724,7 @@ on_status_bar_button_press(GtkWidget* widget, GdkEvent* event, ptk::browser* fil
 
     if (type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if (button == 2)
+        if (button == GDK_BUTTON_MIDDLE)
         {
             static constexpr std::array<xset::name, 4> setnames{
                 xset::name::status_name,
@@ -1399,14 +1399,15 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
         }
 
         // Alt - Left/Right Click
-
+        if (
 #if (GTK_MAJOR_VERSION == 4)
-        if ((keymod == GdkModifierType::GDK_ALT_MASK) && (button == 1 || button == 3))
+            (keymod == GdkModifierType::GDK_ALT_MASK)
 #elif (GTK_MAJOR_VERSION == 3)
-        if ((keymod == GdkModifierType::GDK_MOD1_MASK) && (button == 1 || button == 3))
+            (keymod == GdkModifierType::GDK_MOD1_MASK)
 #endif
+            && (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_SECONDARY))
         {
-            if (button == 1)
+            if (button == GDK_BUTTON_PRIMARY)
             {
                 file_browser->go_back();
             }
@@ -1433,7 +1434,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
                 model = gtk_icon_view_get_model(GTK_ICON_VIEW(widget));
 #endif
                 /* deselect selected files when right click on blank area */
-                if (!tree_path && button == 3)
+                if (!tree_path && button == GDK_BUTTON_SECONDARY)
                 {
 #if defined(USE_EXO)
                     exo_icon_view_unselect_all(EXO_ICON_VIEW(widget));
@@ -1474,7 +1475,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
         }
 
         /* middle button */
-        if (file && button == 2) /* middle click on a item */
+        if (file && button == GDK_BUTTON_MIDDLE) /* middle click on a item */
         {
             /* open in new tab if its a directory */
             if (file->is_directory())
@@ -1485,7 +1486,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             }
             ret = true;
         }
-        else if (button == 3) /* right click */
+        else if (button == GDK_BUTTON_SECONDARY) /* right click */
         {
             /* cancel all selection, and select the item if it is not selected */
             switch (file_browser->view_mode_)
@@ -1532,7 +1533,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
         }
         gtk_tree_path_free(tree_path);
     }
-    else if (type == GdkEventType::GDK_2BUTTON_PRESS && button == 1)
+    else if (type == GdkEventType::GDK_2BUTTON_PRESS && button == GDK_BUTTON_PRIMARY)
     {
         // double click event -  button = 0
 
@@ -2684,7 +2685,7 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* file_br
     const auto button = gdk_button_event_get_button(event);
     const auto type = gdk_event_get_event_type(event);
 
-    if (type == GdkEventType::GDK_BUTTON_PRESS && button == 2) /* middle click */
+    if (type == GdkEventType::GDK_BUTTON_PRESS && button == GDK_BUTTON_MIDDLE) /* middle click */
     {
         /* left and right click handled in ptk-dir-tree-view.c
          * on_dir_tree_view_button_press() */

@@ -1574,12 +1574,12 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser)
     // middle-click on tab closes
     if (type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if (button == 2)
+        if (button == GDK_BUTTON_MIDDLE)
         {
             file_browser->close_tab();
             return true;
         }
-        else if (button == 3)
+        else if (button == GDK_BUTTON_SECONDARY)
         {
             GtkWidget* popup = gtk_menu_new();
 

@@ -2039,7 +2039,7 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
 
     if (type == GdkEventType::GDK_BUTTON_PRESS)
     {
-        if (button == 1 || button == 2)
+        if (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_MIDDLE)
         {
             GtkWidget* input = nullptr;
             if (widget == GTK_WIDGET(mset->label_name))
@@ -2066,7 +2066,7 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
             {
                 gtk_label_select_region(mset->label_mime, 0, -1);
                 gtk_widget_grab_focus(GTK_WIDGET(mset->label_mime));
-                if (button == 2)
+                if (button == GDK_BUTTON_MIDDLE)
                 {
                     copy_entry_to_clipboard(widget, mset);
                 }
@@ -2092,7 +2092,7 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
             {
                 select_input(input, mset);
                 gtk_widget_grab_focus(input);
-                if (button == 2)
+                if (button == GDK_BUTTON_MIDDLE)
                 {
                     copy_entry_to_clipboard(widget, mset);
                 }

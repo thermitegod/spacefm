@@ -801,7 +801,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             {
                 return false;
             }
-            if (button == 1 && std::strcmp(gtk_tree_view_column_get_title(col), "Status") != 0)
+            if (button == GDK_BUTTON_PRIMARY &&
+                std::strcmp(gtk_tree_view_column_get_title(col), "Status") != 0)
             {
                 return false;
             }

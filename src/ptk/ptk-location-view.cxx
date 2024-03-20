@@ -1682,7 +1682,7 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event,
 
     if (type == GdkEventType::GDK_BUTTON_RELEASE)
     {
-        if (button == 1 && keymod == 0)
+        if (button == GDK_BUTTON_PRIMARY && keymod == 0)
         {
             // user released left button - due to an apparent gtk bug, activate
             // does not always fire on this event so handle it ourselves
@@ -1697,7 +1697,6 @@ on_dev_menu_button_press(GtkWidget* item, GdkEvent* event,
             gtk_menu_item_activate(GTK_MENU_ITEM(item));
             return true;
         }
-        return false;
         return false;
     }
     else if (type != GdkEventType::GDK_BUTTON_PRESS)

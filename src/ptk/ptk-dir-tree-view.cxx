@@ -409,7 +409,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* fi
     f64 y = NAN;
     gdk_event_get_position(event, &x, &y);
 
-    if (type == GdkEventType::GDK_BUTTON_PRESS && (button == 1 || button == 3))
+    if (type == GdkEventType::GDK_BUTTON_PRESS &&
+        (button == GDK_BUTTON_PRIMARY || button == GDK_BUTTON_SECONDARY))
     {
         // middle click 2 handled in ptk-file-browser.c on_dir_tree_button_press
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -425,7 +426,11 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* fi
             {
                 gtk_tree_view_set_cursor(GTK_TREE_VIEW(view), tree_path, tree_col, false);
 
-                if (button == 3)
+                if (button == GDK_BUTTON_PRIMARY)
+                {
+                    gtk_tree_view_row_activated(GTK_TREE_VIEW(view), tree_path, tree_col);
+                }
+                else
                 {
                     // right click
                     std::filesystem::path path;
@@ -456,15 +461,11 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* fi
                         return true;
                     }
                 }
-                else
-                {
-                    gtk_tree_view_row_activated(GTK_TREE_VIEW(view), tree_path, tree_col);
-                }
             }
             gtk_tree_path_free(tree_path);
         }
     }
-    else if (type == GdkEventType::GDK_2BUTTON_PRESS && button == 1)
+    else if (type == GdkEventType::GDK_2BUTTON_PRESS && button == GDK_BUTTON_PRIMARY)
     {
         // double click - expand/collapse
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
