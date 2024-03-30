@@ -649,19 +649,24 @@ void
 ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noexcept
 {
     (void)menu;
-    xset_t set;
-    xset_t set_radio;
 
     GtkWidget* parent = main_window->task_view;
-    set = xset_get(xset::name::task_show_manager);
-    xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-    xset_set_ob1(set, "name", set->name.data());
-    xset_set_ob2(set, nullptr, nullptr);
-    set_radio = set;
-    set = xset_get(xset::name::task_hide_manager);
-    xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-    xset_set_ob1(set, "name", set->name.data());
-    xset_set_ob2(set, nullptr, set_radio->name.data());
+    xset_t set_radio;
+
+    {
+        const auto set = xset_get(xset::name::task_show_manager);
+        xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
+        xset_set_ob1(set, "name", set->name.data());
+        set->menu.radio_set = nullptr;
+        set_radio = set;
+    }
+
+    {
+        const auto set = xset_get(xset::name::task_hide_manager);
+        xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
+        xset_set_ob1(set, "name", set->name.data());
+        set->menu.radio_set = set_radio;
+    }
 
     xset_set_cb(xset::name::task_col_count, (GFunc)on_task_column_selected, parent);
     xset_set_cb(xset::name::task_col_path, (GFunc)on_task_column_selected, parent);
@@ -677,19 +682,27 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     xset_set_cb(xset::name::task_col_avgest, (GFunc)on_task_column_selected, parent);
     xset_set_cb(xset::name::task_col_reorder, (GFunc)ptk::view::file_task::on_reorder, parent);
 
-    set = xset_get(xset::name::task_err_first);
-    xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-    xset_set_ob1(set, "name", set->name.data());
-    xset_set_ob2(set, nullptr, nullptr);
-    set_radio = set;
-    set = xset_get(xset::name::task_err_any);
-    xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-    xset_set_ob1(set, "name", set->name.data());
-    xset_set_ob2(set, nullptr, set_radio->name.data());
-    set = xset_get(xset::name::task_err_cont);
-    xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-    xset_set_ob1(set, "name", set->name.data());
-    xset_set_ob2(set, nullptr, set_radio->name.data());
+    {
+        const auto set = xset_get(xset::name::task_err_first);
+        xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
+        xset_set_ob1(set, "name", set->name.data());
+        set->menu.radio_set = nullptr;
+        set_radio = set;
+    }
+
+    {
+        const auto set = xset_get(xset::name::task_err_any);
+        xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
+        xset_set_ob1(set, "name", set->name.data());
+        set->menu.radio_set = set_radio;
+    }
+
+    {
+        const auto set = xset_get(xset::name::task_err_cont);
+        xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
+        xset_set_ob1(set, "name", set->name.data());
+        set->menu.radio_set = set_radio;
+    }
 }
 
 ptk::file_task*

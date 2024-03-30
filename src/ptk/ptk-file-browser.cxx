@@ -818,21 +818,32 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, ptk::browser* file_brows
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    xset_t set;
+    xset_t set_radio = nullptr;
 
-    set = xset_get(xset::name::status_name);
-    xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set.get());
-    xset_set_ob2(set, nullptr, nullptr);
-    const xset_t set_radio = set;
-    set = xset_get(xset::name::status_path);
-    xset_set_cb(xset::name::status_path, (GFunc)on_status_middle_click_config, set.get());
-    xset_set_ob2(set, nullptr, set_radio->name.data());
-    set = xset_get(xset::name::status_info);
-    xset_set_cb(xset::name::status_info, (GFunc)on_status_middle_click_config, set.get());
-    xset_set_ob2(set, nullptr, set_radio->name.data());
-    set = xset_get(xset::name::status_hide);
-    xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set.get());
-    xset_set_ob2(set, nullptr, set_radio->name.data());
+    {
+        const auto set = xset_get(xset::name::status_name);
+        xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set.get());
+        set->menu.radio_set = nullptr;
+        set_radio = set;
+    }
+
+    {
+        const auto set = xset_get(xset::name::status_path);
+        xset_set_cb(xset::name::status_path, (GFunc)on_status_middle_click_config, set.get());
+        set->menu.radio_set = set_radio;
+    }
+
+    {
+        const auto set = xset_get(xset::name::status_info);
+        xset_set_cb(xset::name::status_info, (GFunc)on_status_middle_click_config, set.get());
+        set->menu.radio_set = set_radio;
+    }
+
+    {
+        const auto set = xset_get(xset::name::status_hide);
+        xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set.get());
+        set->menu.radio_set = set_radio;
+    }
 
     xset_add_menu(file_browser,
                   menu,

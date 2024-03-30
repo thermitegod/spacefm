@@ -126,18 +126,19 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
                                                set->b == xset::set::enabled::yes);
                 break;
             case xset::set::menu_type::radio:
-                if (set->ob2_data)
+                if (set->menu.radio_set)
                 {
-                    set_radio = xset_get(static_cast<const char*>(set->ob2_data));
+                    set_radio = set->menu.radio_set;
                 }
                 else
                 {
                     set_radio = set;
+                    set_radio->menu.radio_group = nullptr;
                 }
-                item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->ob2_data,
+                item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->menu.radio_group,
                                                              set->menu.label.value().data());
-                set_radio->ob2_data =
-                    (void*)gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
+                set_radio->menu.radio_group =
+                    gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
                 gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
                                                set->b == xset::set::enabled::yes);
                 break;
@@ -184,10 +185,6 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
     if (set->ob1)
     {
         g_object_set_data(G_OBJECT(item), set->ob1, set->ob1_data);
-    }
-    if (set->menu.type != xset::set::menu_type::radio && set->ob2)
-    {
-        g_object_set_data(G_OBJECT(item), set->ob2, set->ob2_data);
     }
 
     if (set->menu.type < xset::set::menu_type::submenu)
