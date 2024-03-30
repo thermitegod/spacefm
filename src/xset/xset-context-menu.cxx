@@ -193,15 +193,18 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
     if (set->menu.type < xset::set::menu_type::submenu)
     {
         // activate callback
-        if (!set->cb_func || set->menu.type != xset::set::menu_type::normal)
+        if (!set->callback.func || set->menu.type != xset::set::menu_type::normal)
         {
             // use xset menu callback
             g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(xset_menu_cb), set.get());
         }
-        else if (set->cb_func)
+        else if (set->callback.func)
         {
             // use custom callback directly
-            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(set->cb_func), set->cb_data);
+            g_signal_connect(G_OBJECT(item),
+                             "activate",
+                             G_CALLBACK(set->callback.func),
+                             set->callback.data);
         }
 
         // key accel
@@ -253,8 +256,8 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             return;
         }
 
-        cb_func = set->cb_func;
-        cb_data = set->cb_data;
+        cb_func = set->callback.func;
+        cb_data = set->callback.data;
     }
 
     GtkWidget* parent = GTK_WIDGET(set->browser);

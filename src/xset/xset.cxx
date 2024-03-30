@@ -662,8 +662,8 @@ void
 xset_set_cb(const xset_t& set, GFunc cb_func, void* cb_data) noexcept
 {
     assert(set != nullptr);
-    set->cb_func = cb_func;
-    set->cb_data = cb_data;
+    set->callback.func = cb_func;
+    set->callback.data = cb_data;
 }
 
 void

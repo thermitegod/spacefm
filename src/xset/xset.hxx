@@ -69,14 +69,19 @@ struct set : public std::enable_shared_from_this<set>
     std::optional<std::string> y{std::nullopt}; // saved
     std::optional<std::string> z{std::nullopt}; // saved, for menu_string locked, stores default
     bool disable{false};                        // not saved
-    GFunc cb_func{nullptr};                     // not saved
-    void* cb_data{nullptr};                     // not saved
     char* ob1{nullptr};                         // not saved
     void* ob1_data{nullptr};                    // not saved
     char* ob2{nullptr};                         // not saved
     void* ob2_data{nullptr};                    // not saved
     ptk::browser* browser{nullptr};             // not saved - set automatically
     std::shared_ptr<set> shared_key{nullptr};   // not saved
+
+    struct callback_data
+    {
+        GFunc func{nullptr}; // not saved
+        void* data{nullptr}; // not saved
+    };
+    callback_data callback;
 
     enum class menu_type
     { // do not reorder - these values are saved in session files
