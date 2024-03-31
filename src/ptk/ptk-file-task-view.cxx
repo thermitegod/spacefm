@@ -138,7 +138,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data) noexcept
             {
                 const xset_t set = xset_get(value);
                 // save column position
-                xset_set_var(set, xset::var::x, std::format("{}", i));
+                set->x = std::format("{}", i);
                 // if the window was opened maximized and stayed maximized, or the
                 // window is unmaximized and not fullscreen, save the columns
                 if ((!main_window->maximized || main_window->opened_maximized) &&
@@ -148,7 +148,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data) noexcept
                     if (width) // manager unshown, all widths are zero
                     {
                         // save column width
-                        xset_set_var(set, xset::var::y, std::format("{}", width));
+                        set->y = std::format("{}", width);
                     }
                 }
                 // set column visibility

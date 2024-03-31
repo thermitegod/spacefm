@@ -3831,8 +3831,8 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
             {
                 move_dest = path;
             }
-            set = xset_get(xset::name::copy_loc_last);
-            xset_set_var(set, xset::var::desc, path.value().string());
+
+            xset_set(xset::name::copy_loc_last, xset::var::desc, path.value().string());
         }
         else
         {

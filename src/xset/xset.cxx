@@ -116,7 +116,21 @@ xset_is(const std::string_view name) noexcept
 /////////////////
 
 void
-xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noexcept
+xset_set_submenu(const xset_t& set, const std::vector<xset::name>& submenu_entries) noexcept
+{
+    assert(set != nullptr);
+    assert(set->menu.type == xset::set::menu_type::submenu);
+    assert(submenu_entries.empty() == false);
+
+    set->context_menu_entries = submenu_entries;
+}
+
+/**
+ * Generic Set
+ */
+
+void
+xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept
 {
     assert(set != nullptr);
     assert(var != xset::var::context_menu_entries);
@@ -243,40 +257,14 @@ xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noe
 }
 
 void
-xset_set_submenu(const xset_t& set, const std::vector<xset::name>& submenu_entries) noexcept
-{
-    assert(set != nullptr);
-    assert(set->menu.type == xset::set::menu_type::submenu);
-    assert(submenu_entries.empty() == false);
-
-    set->context_menu_entries = submenu_entries;
-}
-
-/**
- * Generic Set
- */
-
-void
-xset_set(const xset_t& set, xset::var var, const std::string_view value) noexcept
-{
-    assert(set != nullptr);
-
-    if (var != xset::var::style && var != xset::var::desc && var != xset::var::title &&
-        var != xset::var::shared_key)
-    {
-        xset_set_var(set, var, value);
-    }
-}
-
-void
-xset_set(xset::name name, xset::var var, const std::string_view value) noexcept
+xset_set(const xset::name name, const xset::var var, const std::string_view value) noexcept
 {
     const xset_t set = xset_get(name);
     xset_set(set, var, value);
 }
 
 void
-xset_set(const std::string_view name, xset::var var, const std::string_view value) noexcept
+xset_set(const std::string_view name, const xset::var var, const std::string_view value) noexcept
 {
     const xset_t set = xset_get(name);
     xset_set(set, var, value);
@@ -641,7 +629,7 @@ xset_set_panel(panel_t panel, const std::string_view name, xset::var var,
 {
     const std::string fullname = std::format("panel{}_{}", panel, name);
     const xset_t set = xset_get(fullname);
-    xset_set_var(set, var, value);
+    xset_set(set, var, value);
 }
 
 void
@@ -649,7 +637,7 @@ xset_set_panel(panel_t panel, xset::panel name, xset::var var,
                const std::string_view value) noexcept
 {
     const xset_t set = xset_get(xset::get_xsetname_from_panel(panel, name));
-    xset_set_var(set, var, value);
+    xset_set(set, var, value);
 }
 
 /**

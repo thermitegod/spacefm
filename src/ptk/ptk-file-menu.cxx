@@ -548,7 +548,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
         xset_set_cb(xset::name::view_reorder_col, (GFunc)ptk::view::file_task::on_reorder, browser);
 
         set = xset_get(xset::name::view_columns);
-        xset_set_var(set, xset::var::disable, "0");
+        set->disable = false;
         if (p == panel_1)
         {
             context_menu_entries = {

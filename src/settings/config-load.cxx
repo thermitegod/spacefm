@@ -257,7 +257,7 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                     ztd::logger::warn("Invalid xset::var enum name, xset::var::{}", toml_name);
                     continue;
                 }
-                xset_set_var(set, enum_var_value.value(), value);
+                xset_set(set, enum_var_value.value(), value);
             }
         }
     }

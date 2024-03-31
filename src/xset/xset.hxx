@@ -157,11 +157,10 @@ const xset_t xset_get(const std::string_view name) noexcept;
 const xset_t xset_is(xset::name name) noexcept;
 const xset_t xset_is(const std::string_view name) noexcept;
 
-void xset_set(const xset_t& set, xset::var var, const std::string_view value) noexcept;
-void xset_set(xset::name name, xset::var var, const std::string_view value) noexcept;
-void xset_set(const std::string_view name, xset::var var, const std::string_view value) noexcept;
-
-void xset_set_var(const xset_t& set, xset::var var, const std::string_view value) noexcept;
+void xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept;
+void xset_set(const xset::name name, const xset::var var, const std::string_view value) noexcept;
+void xset_set(const std::string_view name, const xset::var var,
+              const std::string_view value) noexcept;
 
 void xset_set_submenu(const xset_t& set, const std::vector<xset::name>& submenu_entries) noexcept;
 
