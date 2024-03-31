@@ -234,8 +234,13 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
         // get [XSet.name] and all vars
         for (const auto& [toml_name, toml_vars] : section.as_table())
         {
-            const std::string name = toml_name;
-            const xset_t set = xset_get(name);
+            const auto enum_name_value = magic_enum::enum_cast<xset::name>(toml_name);
+            if (!enum_name_value.has_value())
+            {
+                ztd::logger::warn("Invalid xset::name enum name, xset::var::{}", toml_name);
+                continue;
+            }
+            const xset_t set = xset_get(toml_name);
 
             // get var and value
             for (const auto& [toml_var, toml_value] : toml_vars.as_table())
@@ -246,13 +251,13 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
 
                 // ztd::logger::info("name: {} | var: {} | value: {}", name, setvar, value);
 
-                const auto enum_value = magic_enum::enum_cast<xset::var>(setvar);
-                if (!enum_value.has_value())
+                const auto enum_var_value = magic_enum::enum_cast<xset::var>(setvar);
+                if (!enum_var_value.has_value())
                 {
-                    ztd::logger::critical("Invalid xset::var enum name xset::var::{}", name);
+                    ztd::logger::warn("Invalid xset::var enum name, xset::var::{}", toml_name);
                     continue;
                 }
-                xset_set_var(set, enum_value.value(), value);
+                xset_set_var(set, enum_var_value.value(), value);
             }
         }
     }
