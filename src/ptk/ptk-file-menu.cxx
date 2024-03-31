@@ -673,9 +673,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // name
         set = xset_get(xset::name::sortby_name);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::name));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::name));
         set->b = browser->is_sort_order(ptk::browser::sort_order::name) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
         set->menu.radio_set = nullptr;
@@ -685,9 +683,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // size
         set = xset_get(xset::name::sortby_size);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::size));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::size));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::size) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
@@ -696,9 +692,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // size in bytes
         set = xset_get(xset::name::sortby_bytes);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::bytes));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::bytes));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::bytes) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -707,9 +701,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // type
         set = xset_get(xset::name::sortby_type);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::type));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::type));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::type) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
@@ -718,9 +710,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // MIME type
         set = xset_get(xset::name::sortby_mime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::mime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::mime));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::mime) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
@@ -729,9 +719,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // perm
         set = xset_get(xset::name::sortby_perm);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::perm));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::perm));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::perm) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
@@ -740,9 +728,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // owner
         set = xset_get(xset::name::sortby_owner);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::owner));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::owner));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::owner) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -751,9 +737,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // group
         set = xset_get(xset::name::sortby_group);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::group));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::group));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::group) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -762,9 +746,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // atime
         set = xset_get(xset::name::sortby_atime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::atime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::atime));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::atime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -773,9 +755,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // btime
         set = xset_get(xset::name::sortby_btime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::btime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::btime));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::btime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -784,9 +764,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // ctime
         set = xset_get(xset::name::sortby_ctime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::ctime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::ctime));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::ctime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -795,9 +773,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     { // mtime
         set = xset_get(xset::name::sortby_mtime);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set,
-                         "sortorder",
-                         magic_enum::enum_integer(ptk::browser::sort_order::mtime));
+        xset_set_ob(set, "sortorder", magic_enum::enum_integer(ptk::browser::sort_order::mtime));
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_order(ptk::browser::sort_order::mtime) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -806,7 +782,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     {
         set = xset_get(xset::name::sortby_ascend);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set, "sortorder", -1);
+        xset_set_ob(set, "sortorder", -1);
         set->b = browser->is_sort_type(GtkSortType::GTK_SORT_ASCENDING) ? xset::set::enabled::yes
                                                                         : xset::set::enabled::no;
         set->menu.radio_set = nullptr;
@@ -816,7 +792,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     {
         set = xset_get(xset::name::sortby_descend);
         xset_set_cb(set, (GFunc)on_popup_sortby, browser);
-        xset_set_ob1_int(set, "sortorder", -2);
+        xset_set_ob(set, "sortorder", -2);
         set->menu.radio_set = set_radio;
         set->b = browser->is_sort_type(GtkSortType::GTK_SORT_DESCENDING) ? xset::set::enabled::yes
                                                                          : xset::set::enabled::no;
@@ -1282,11 +1258,11 @@ ptk_file_menu_new(ptk::browser* browser,
                 // Open Dir
                 set = xset_get(xset::name::opentab_prev);
                 xset_set_cb(set, (GFunc)on_open_in_tab, data);
-                xset_set_ob1_int(set, "tab", tab_control_code_prev);
+                xset_set_ob(set, "tab", tab_control_code_prev);
                 set->disable = (tab_num == 1);
                 set = xset_get(xset::name::opentab_next);
                 xset_set_cb(set, (GFunc)on_open_in_tab, data);
-                xset_set_ob1_int(set, "tab", tab_control_code_next);
+                xset_set_ob(set, "tab", tab_control_code_next);
                 set->disable = (tab_num == tab_count);
                 set = xset_get(xset::name::opentab_new);
                 xset_set_cb(set, (GFunc)on_popup_open_in_new_tab_activate, data);
@@ -1295,17 +1271,17 @@ ptk_file_menu_new(ptk::browser* browser,
                     const std::string name = std::format("opentab_{}", tab);
                     set = xset_get(name);
                     xset_set_cb(set, (GFunc)on_open_in_tab, data);
-                    xset_set_ob1_int(set, "tab", tab);
+                    xset_set_ob(set, "tab", tab);
                     set->disable = (tab > tab_count) || (tab == tab_num);
                 }
 
                 set = xset_get(xset::name::open_in_panel_prev);
                 xset_set_cb(set, (GFunc)on_open_in_panel, data);
-                xset_set_ob1_int(set, "panel", panel_control_code_prev);
+                xset_set_ob(set, "panel", panel_control_code_prev);
                 set->disable = (panel_count == 1);
                 set = xset_get(xset::name::open_in_panel_next);
                 xset_set_cb(set, (GFunc)on_open_in_panel, data);
-                xset_set_ob1_int(set, "panel", panel_control_code_next);
+                xset_set_ob(set, "panel", panel_control_code_next);
                 set->disable = (panel_count == 1);
 
                 for (panel_t panel : PANELS)
@@ -1313,7 +1289,7 @@ ptk_file_menu_new(ptk::browser* browser,
                     const std::string name = std::format("open_in_panel{}", panel);
                     set = xset_get(name);
                     xset_set_cb(set, (GFunc)on_open_in_panel, data);
-                    xset_set_ob1_int(set, "panel", panel);
+                    xset_set_ob(set, "panel", panel);
                     // set->disable = ( p == i );
                 }
 
@@ -1381,42 +1357,42 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_set_cb(xset::name::edit_canon, (GFunc)on_popup_canon, data);
         set = xset_get(xset::name::focus_path_bar);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::path_bar));
+        xset_set_ob(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::path_bar));
         set = xset_get(xset::name::focus_search_bar);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::search_bar));
+        xset_set_ob(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::search_bar));
         set = xset_get(xset::name::focus_filelist);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::filelist));
+        xset_set_ob(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::filelist));
         set = xset_get(xset::name::focus_dirtree);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::dirtree));
+        xset_set_ob(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::dirtree));
         set = xset_get(xset::name::focus_device);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::device));
+        xset_set_ob(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::device));
 
         // Go > Tab >
         set = xset_get(xset::name::tab_prev);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
-        xset_set_ob1_int(set, "tab", tab_control_code_prev);
+        xset_set_ob(set, "tab", tab_control_code_prev);
         set->disable = (tab_count < 2);
         set = xset_get(xset::name::tab_next);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
-        xset_set_ob1_int(set, "tab", tab_control_code_next);
+        xset_set_ob(set, "tab", tab_control_code_next);
         set->disable = (tab_count < 2);
         set = xset_get(xset::name::tab_close);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
-        xset_set_ob1_int(set, "tab", tab_control_code_close);
+        xset_set_ob(set, "tab", tab_control_code_close);
         set = xset_get(xset::name::tab_restore);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
-        xset_set_ob1_int(set, "tab", tab_control_code_restore);
+        xset_set_ob(set, "tab", tab_control_code_restore);
 
         for (tab_t tab : TABS)
         {
             const std::string name = std::format("tab_{}", tab);
             set = xset_get(name);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::go_tab, browser);
-            xset_set_ob1_int(set, "tab", tab);
+            xset_set_ob(set, "tab", tab);
             set->disable = (tab > tab_count) || (tab == tab_num);
         }
         set = xset_get(xset::name::con_go);
@@ -1499,7 +1475,7 @@ ptk_file_menu_new(ptk::browser* browser,
         {
             set = xset_get(copycmd);
             xset_set_cb(set, (GFunc)on_copycmd, data);
-            xset_set_ob1(set, "set", set->name.data());
+            xset_set_ob(set, "set", set->name.data());
         }
 
         // enables
@@ -1611,7 +1587,7 @@ ptk_file_menu_new(ptk::browser* browser,
         {
             set = xset_get(permcmd);
             xset_set_cb(set, (GFunc)on_permission, data);
-            xset_set_ob1(set, "set", set->name.data());
+            xset_set_ob(set, "set", set->name.data());
         }
 
         set = xset_get(xset::name::prop_quick);

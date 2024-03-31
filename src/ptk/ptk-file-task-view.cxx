@@ -656,7 +656,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_show_manager);
         xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-        xset_set_ob1(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name.data());
         set->menu.radio_set = nullptr;
         set_radio = set;
     }
@@ -664,7 +664,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_hide_manager);
         xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-        xset_set_ob1(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name.data());
         set->menu.radio_set = set_radio;
     }
 
@@ -685,7 +685,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_err_first);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-        xset_set_ob1(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name.data());
         set->menu.radio_set = nullptr;
         set_radio = set;
     }
@@ -693,14 +693,14 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_err_any);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-        xset_set_ob1(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name.data());
         set->menu.radio_set = set_radio;
     }
 
     {
         const auto set = xset_get(xset::name::task_err_cont);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-        xset_set_ob1(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name.data());
         set->menu.radio_set = set_radio;
     }
 }
@@ -880,24 +880,24 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
 
             set = xset_get(xset::name::task_stop);
             xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob1(set, "task", ptask);
+            xset_set_ob(set, "task", ptask);
             set->disable = !ptask;
 
             set = xset_get(xset::name::task_pause);
             xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob1(set, "task", ptask);
+            xset_set_ob(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::pause ||
                             ptask->task->type_ == vfs::file_task::type::exec);
 
             set = xset_get(xset::name::task_que);
             xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob1(set, "task", ptask);
+            xset_set_ob(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::queue ||
                             ptask->task->type_ == vfs::file_task::type::exec);
 
             set = xset_get(xset::name::task_resume);
             xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob1(set, "task", ptask);
+            xset_set_ob(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::running ||
                             ptask->task->type_ == vfs::file_task::type::exec);
 

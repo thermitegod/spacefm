@@ -182,9 +182,9 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
     g_object_set_data(G_OBJECT(item), "menu", menu);
     g_object_set_data(G_OBJECT(item), "set", set->name.data());
 
-    if (set->ob1)
+    if (set->menu.obj.key)
     {
-        g_object_set_data(G_OBJECT(item), set->ob1, set->ob1_data);
+        g_object_set_data(G_OBJECT(item), set->menu.obj.key, set->menu.obj.data);
     }
 
     if (set->menu.type < xset::set::menu_type::submenu)

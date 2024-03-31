@@ -33,8 +33,6 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/strdup.hxx"
-
 #include "types.hxx"
 
 #include "xset/xset.hxx"
@@ -694,25 +692,17 @@ xset_set_cb_panel(panel_t panel, xset::panel name, GFunc cb_func, void* cb_data)
 }
 
 void
-xset_set_ob1_int(const xset_t& set, const char* ob1, i32 ob1_int) noexcept
+xset_set_ob(const xset_t& set, const std::string_view key, const i32 user_data) noexcept
 {
     assert(set != nullptr);
-    if (set->ob1)
-    {
-        std::free(set->ob1);
-    }
-    set->ob1 = ::utils::strdup(ob1);
-    set->ob1_data = GINT_TO_POINTER(ob1_int);
+    set->menu.obj.key = key.data();
+    set->menu.obj.data = GINT_TO_POINTER(user_data);
 }
 
 void
-xset_set_ob1(const xset_t& set, const char* ob1, void* ob1_data) noexcept
+xset_set_ob(const xset_t& set, const std::string_view key, void* user_data) noexcept
 {
     assert(set != nullptr);
-    if (set->ob1)
-    {
-        std::free(set->ob1);
-    }
-    set->ob1 = ::utils::strdup(ob1);
-    set->ob1_data = ob1_data;
+    set->menu.obj.key = key.data();
+    set->menu.obj.data = user_data;
 }

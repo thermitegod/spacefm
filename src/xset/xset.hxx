@@ -69,8 +69,6 @@ struct set : public std::enable_shared_from_this<set>
     std::optional<std::string> y{std::nullopt}; // saved
     std::optional<std::string> z{std::nullopt}; // saved, for menu_string locked, stores default
     bool disable{false};                        // not saved
-    char* ob1{nullptr};                         // not saved
-    void* ob1_data{nullptr};                    // not saved
     ptk::browser* browser{nullptr};             // not saved - set automatically
     std::shared_ptr<set> shared_key{nullptr};   // not saved
 
@@ -110,6 +108,13 @@ struct set : public std::enable_shared_from_this<set>
         // only used when type == menu_type::radio
         GSList* radio_group{nullptr};            // not saved
         std::shared_ptr<set> radio_set{nullptr}; // not saved
+        // gobject data
+        struct obj_data
+        {
+            const char* key{nullptr};
+            void* data{nullptr};
+        };
+        obj_data obj;
     };
     menu_data menu;
 
@@ -229,8 +234,8 @@ void xset_set_cb_panel(panel_t panel, const std::string_view name, GFunc cb_func
                        void* cb_data) noexcept;
 void xset_set_cb_panel(panel_t panel, xset::panel name, GFunc cb_func, void* cb_data) noexcept;
 
-void xset_set_ob1(const xset_t& set, const char* ob1, void* ob1_data) noexcept;
-void xset_set_ob1_int(const xset_t& set, const char* ob1, i32 ob1_int) noexcept;
+void xset_set_ob(const xset_t& set, const std::string_view key, void* user_data) noexcept;
+void xset_set_ob(const xset_t& set, const std::string_view key, const i32 user_data) noexcept;
 
 // Int
 

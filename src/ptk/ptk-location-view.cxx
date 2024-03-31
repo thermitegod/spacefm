@@ -1345,23 +1345,23 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
 
     set = xset_get(xset::name::dev_menu_remove);
     xset_set_cb(set, (GFunc)on_eject, vol.get());
-    xset_set_ob1(set, "view", view);
+    xset_set_ob(set, "view", view);
     set->disable = !vol;
     set = xset_get(xset::name::dev_menu_unmount);
     xset_set_cb(set, (GFunc)on_umount, vol.get());
-    xset_set_ob1(set, "view", view);
+    xset_set_ob(set, "view", view);
     set->disable = !vol; //!( vol && vol->is_mounted );
     set = xset_get(xset::name::dev_menu_open);
     xset_set_cb(set, (GFunc)on_open, vol.get());
-    xset_set_ob1(set, "view", view);
+    xset_set_ob(set, "view", view);
     set->disable = !vol;
     set = xset_get(xset::name::dev_menu_tab);
     xset_set_cb(set, (GFunc)on_open_tab, vol.get());
-    xset_set_ob1(set, "view", view);
+    xset_set_ob(set, "view", view);
     set->disable = !vol;
     set = xset_get(xset::name::dev_menu_mount);
     xset_set_cb(set, (GFunc)on_mount, vol.get());
-    xset_set_ob1(set, "view", view);
+    xset_set_ob(set, "view", view);
     set->disable = !vol; // || ( vol && vol->is_mounted );
 
     xset_set_cb(xset::name::dev_show_internal_drives, (GFunc)update_all, nullptr);
@@ -1377,7 +1377,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
     xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
     set = xset_get(xset::name::dev_automount_volumes);
     xset_set_cb(set, (GFunc)on_automountlist, vol.get());
-    xset_set_ob1(set, "view", view);
+    xset_set_ob(set, "view", view);
 
     std::vector<xset::name> context_menu_entries = {
         xset::name::dev_menu_remove,

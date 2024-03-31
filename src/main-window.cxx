@@ -986,31 +986,31 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
 
     set = xset_get(xset::name::panel_prev);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_control_code_prev);
+    xset_set_ob(set, "panel", panel_control_code_prev);
     set->disable = (vis_count == 1);
     set = xset_get(xset::name::panel_next);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_control_code_next);
+    xset_set_ob(set, "panel", panel_control_code_next);
     set->disable = (vis_count == 1);
     set = xset_get(xset::name::panel_hide);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_control_code_hide);
+    xset_set_ob(set, "panel", panel_control_code_hide);
     set->disable = (vis_count == 1);
     set = xset_get(xset::name::panel_1);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_1);
+    xset_set_ob(set, "panel", panel_1);
     set->disable = (this->curpanel == 1);
     set = xset_get(xset::name::panel_2);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_2);
+    xset_set_ob(set, "panel", panel_2);
     set->disable = (this->curpanel == 2);
     set = xset_get(xset::name::panel_3);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_3);
+    xset_set_ob(set, "panel", panel_3);
     set->disable = (this->curpanel == 3);
     set = xset_get(xset::name::panel_4);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob1_int(set, "panel", panel_4);
+    xset_set_ob(set, "panel", panel_4);
     set->disable = (this->curpanel == 4);
 
 #if (GTK_MAJOR_VERSION == 4)
