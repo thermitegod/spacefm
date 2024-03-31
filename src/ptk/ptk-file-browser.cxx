@@ -4223,17 +4223,14 @@ ptk::browser::select_pattern(const std::string_view search_key) noexcept
     std::string_view key;
     if (search_key.empty())
     {
-        // get pattern from user (store in ob1 so it is not saved)
         const xset_t set = xset_get(xset::name::select_patt);
-        const auto [response, answer] =
-            select_pattern_dialog(GTK_WIDGET(this->main_window_), set->ob1 ? set->ob1 : "");
+        const auto [response, answer] = select_pattern_dialog(GTK_WIDGET(this->main_window_), "");
 
-        set->ob1 = ::utils::strdup(answer);
-        if (!response || !set->ob1)
+        if (!response)
         {
             return;
         }
-        key = set->ob1;
+        key = answer;
     }
     else
     {

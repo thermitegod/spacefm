@@ -760,18 +760,11 @@ MainWindow::show_panels() noexcept
                 // load saved tabs
                 bool tab_added = false;
                 set = xset_get_panel(p, xset::panel::show);
-                if ((set->s && config::settings.load_saved_tabs) || set->ob1)
+                if ((set->s && config::settings.load_saved_tabs))
                 {
-                    // set->ob1 is preload path
-
-                    const std::string tabs_add = std::format(
-                        "{}{}{}",
-                        set->s && config::settings.load_saved_tabs ? set->s.value() : "",
-                        set->ob1 ? config::disk_format::tab_delimiter : "",
-                        set->ob1 ? set->ob1 : "");
-
                     const std::vector<std::string> tab_dirs =
-                        ztd::split(tabs_add, config::disk_format::tab_delimiter);
+                        ztd::split(config::settings.load_saved_tabs ? set->s.value_or("") : "",
+                                   config::disk_format::tab_delimiter);
 
                     for (const std::string_view tab_dir : tab_dirs)
                     {
@@ -792,7 +785,7 @@ MainWindow::show_panels() noexcept
                         this->new_tab(folder_path);
                         tab_added = true;
                     }
-                    if (set->x && !set->ob1)
+                    if (set->x)
                     {
                         // set current tab
                         const tab_t cur_tabx = std::stoi(set->x.value());
@@ -808,8 +801,6 @@ MainWindow::show_panels() noexcept
                             g_idle_add((GSourceFunc)ptk_file_browser_delay_focus, file_browser);
                         }
                     }
-                    std::free(set->ob1);
-                    set->ob1 = nullptr;
                 }
                 if (!tab_added)
                 {

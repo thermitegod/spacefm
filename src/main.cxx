@@ -48,9 +48,9 @@
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-location-view.hxx"
 
-#include "utils/strdup.hxx"
 #include "utils/shell-quote.hxx"
 
+#include "settings/config.hxx"
 #include "settings/settings.hxx"
 
 #include "single-instance.hxx"
@@ -98,7 +98,7 @@ open_file(const std::filesystem::path& path) noexcept
 }
 
 static void
-open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
+open_in_tab(MainWindow* main_window, const std::filesystem::path& path,
             const commandline_opt_data_t& opt) noexcept
 {
     // existing window
@@ -108,9 +108,19 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
         // change to user-specified panel
         if (!gtk_notebook_get_n_pages(main_window->get_panel_notebook(opt->panel)))
         {
-            // set panel to load real_path on panel load
+            // set panel to load path on panel load
             const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
-            set->ob1 = ::utils::strdup(real_path.c_str());
+            if (set->s)
+            {
+                set->s = std::format("{}{}{}",
+                                     set->s.value(),
+                                     config::disk_format::tab_delimiter,
+                                     path.string());
+            }
+            else
+            {
+                set->s = std::format("{}", path.string());
+            }
             tab_added = true;
             set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
@@ -129,12 +139,12 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& real_path,
     {
         if (opt->reuse_tab)
         {
-            main_window->open_path_in_current_tab(real_path);
+            main_window->open_path_in_current_tab(path);
             opt->reuse_tab = false;
         }
         else
         {
-            main_window->new_tab(real_path);
+            main_window->new_tab(path);
         }
     }
 }
