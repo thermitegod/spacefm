@@ -1381,19 +1381,19 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_set_cb(xset::name::edit_canon, (GFunc)on_popup_canon, data);
         set = xset_get(xset::name::focus_path_bar);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "job", magic_enum::enum_integer(ptk::browser::focus_widget::path_bar));
+        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::path_bar));
         set = xset_get(xset::name::focus_search_bar);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "job", magic_enum::enum_integer(ptk::browser::focus_widget::search_bar));
+        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::search_bar));
         set = xset_get(xset::name::focus_filelist);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "job", magic_enum::enum_integer(ptk::browser::focus_widget::filelist));
+        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::filelist));
         set = xset_get(xset::name::focus_dirtree);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "job", magic_enum::enum_integer(ptk::browser::focus_widget::dirtree));
+        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::dirtree));
         set = xset_get(xset::name::focus_device);
         xset_set_cb(set, (GFunc)ptk::wrapper::browser::focus, browser);
-        xset_set_ob1_int(set, "job", magic_enum::enum_integer(ptk::browser::focus_widget::device));
+        xset_set_ob1_int(set, "focus", magic_enum::enum_integer(ptk::browser::focus_widget::device));
 
         // Go > Tab >
         set = xset_get(xset::name::tab_prev);
