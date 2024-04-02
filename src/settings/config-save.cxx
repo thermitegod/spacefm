@@ -107,7 +107,7 @@ pack_xsets() noexcept
     // map layout <XSet->name, <XSet->var, XSet->value>>
     xsetpak_t xsetpak;
 
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     {
         assert(set != nullptr);
 

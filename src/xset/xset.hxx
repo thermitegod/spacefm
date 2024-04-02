@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <span>
+
 #include <optional>
 
 #include <memory>
@@ -147,7 +149,7 @@ struct set : public std::enable_shared_from_this<set>
 using xset_t = std::shared_ptr<xset::set>;
 
 // all xsets
-extern std::vector<xset_t> xsets;
+const std::span<const xset_t> xsets();
 
 // get/set //
 

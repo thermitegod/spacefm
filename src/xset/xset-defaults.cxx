@@ -2335,8 +2335,10 @@ xset_default_keys() noexcept
 {
     // read all currently set or unset keys
     std::vector<xset_t> keysets;
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     {
+        assert(set != nullptr);
+
         if (set->keybinding.key != 0)
         {
             keysets.push_back(set);

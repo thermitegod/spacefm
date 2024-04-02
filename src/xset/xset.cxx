@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <span>
+
 #include <optional>
 
 #include <memory>
@@ -39,7 +41,16 @@
 
 #include "xset/xset.hxx"
 
+namespace global
+{
 std::vector<xset_t> xsets;
+} // namespace global
+
+const std::span<const xset_t>
+xsets()
+{
+    return global::xsets;
+}
 
 xset::set::set(const xset::name xset_name) noexcept
 {
@@ -51,7 +62,7 @@ const xset_t
 xset::set::create(const xset::name xset_name) noexcept
 {
     auto set = std::make_shared<xset::set>(xset_name);
-    xsets.push_back(set);
+    global::xsets.push_back(set);
     return set;
 }
 
@@ -64,9 +75,10 @@ xset::set::name() const noexcept
 const xset_t
 xset_get(const std::string_view name) noexcept
 {
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     { // check for existing xset
         assert(set != nullptr);
+
         if (name == set->name())
         {
             return set;
@@ -86,9 +98,10 @@ xset_get(const std::string_view name) noexcept
 const xset_t
 xset_get(xset::name name) noexcept
 {
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     { // check for existing xset
         assert(set != nullptr);
+
         if (name == set->xset_name)
         {
             return set;
@@ -101,10 +114,9 @@ xset_get(xset::name name) noexcept
 const xset_t
 xset_is(xset::name name) noexcept
 {
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     { // check for existing xset
-        assert(set != nullptr);
-        if (name == set->xset_name)
+        if (set && name == set->xset_name)
         {
             return set;
         }
@@ -115,10 +127,9 @@ xset_is(xset::name name) noexcept
 const xset_t
 xset_is(const std::string_view name) noexcept
 {
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     { // check for existing xset
-        assert(set != nullptr);
-        if (name == set->name())
+        if (set && name == set->name())
         {
             return set;
         }

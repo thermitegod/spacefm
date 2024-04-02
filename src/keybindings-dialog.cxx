@@ -90,8 +90,10 @@ init_keybindings_tab(const xset::set::keybinding_type type) noexcept
         gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
     }
 
-    for (const auto& set : xsets)
+    for (const xset_t& set : xsets())
     {
+        assert(set != nullptr);
+
         if (set->keybinding.type != type)
         {
             continue;

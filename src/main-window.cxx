@@ -2254,7 +2254,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         }
     }
 
-    for (const xset_t& set : xsets)
+    for (const xset_t& set : xsets())
     {
         assert(set != nullptr);
 
