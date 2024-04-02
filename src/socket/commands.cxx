@@ -1469,7 +1469,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             else if (subproperty == "stop")
             {
                 ptk::view::file_task::stop(main_window->task_view,
-                                           xset_get(xset::name::task_stop_all),
+                                           xset::set::get(xset::name::task_stop_all),
                                            nullptr);
             }
             else
@@ -1912,7 +1912,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         if (set->menu.type == xset::set::menu_type::submenu)
         {
             // show submenu as popup menu
-            set = xset_get(set->child.value());
+            set = xset::set::get(set->child.value());
             GtkWidget* widget = gtk_menu_new();
 
 #if (GTK_MAJOR_VERSION == 4)
@@ -1938,7 +1938,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
 #if 0
         const std::vector<std::string> data = json["data"];
 
-        xset_t set = xset_is(data[i]);
+        const auto set = xset::set::get(data[i], true);
         if (!set)
         {
             return {SOCKET_INVALID, std::format("invalid event type '{}'", data[i])};

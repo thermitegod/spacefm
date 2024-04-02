@@ -1180,7 +1180,7 @@ on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) 
     GtkTextIter siter;
     file_misc_mode mode_default = file_misc_mode::parent;
 
-    const xset_t set = xset_get(xset::name::move_dlg_help);
+    const auto set = xset::set::get(xset::name::move_dlg_help);
     if (set->z)
     {
         mode_default = file_misc_mode(xset_get_int(xset::name::move_dlg_help, xset::var::z));
@@ -1682,51 +1682,51 @@ on_options_button_press(GtkWidget* btn, const std::shared_ptr<MoveSet>& mset) no
 
     xset_t set;
 
-    set = xset_get(xset::name::move_name);
+    set = xset::set::get(xset::name::move_name);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_filename);
+    set = xset::set::get(xset::name::move_filename);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_parent);
+    set = xset::set::get(xset::name::move_parent);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_path);
+    set = xset::set::get(xset::name::move_path);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_type);
+    set = xset::set::get(xset::name::move_type);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = (mset->create_new != ptk::action::rename_mode::rename || mset->is_link);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_target);
+    set = xset::set::get(xset::name::move_target);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->create_new != ptk::action::rename_mode::rename || !mset->is_link;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_template);
+    set = xset::set::get(xset::name::move_template);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->create_new == ptk::action::rename_mode::rename;
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
-    set = xset_get(xset::name::move_copy);
+    set = xset::set::get(xset::name::move_copy);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->clip_copy || mset->create_new != ptk::action::rename_mode::rename;
-    set = xset_get(xset::name::move_link);
+    set = xset::set::get(xset::name::move_link);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = mset->create_new != ptk::action::rename_mode::rename;
-    set = xset_get(xset::name::move_copyt);
+    set = xset::set::get(xset::name::move_copyt);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = !mset->is_link;
-    set = xset_get(xset::name::move_linkt);
+    set = xset::set::get(xset::name::move_linkt);
     xset_set_cb(set, (GFunc)on_toggled, mset.get());
     set->disable = !mset->is_link;
-    set = xset_get(xset::name::move_option);
+    set = xset::set::get(xset::name::move_option);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
-    set = xset_get(xset::name::separator);
+    set = xset::set::get(xset::name::separator);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::move_dlg_confirm_create);
+    set = xset::set::get(xset::name::move_dlg_confirm_create);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
-    set = xset_get(xset::name::separator);
+    set = xset::set::get(xset::name::separator);
     xset_add_menuitem(mset->browser, popup, accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(popup));

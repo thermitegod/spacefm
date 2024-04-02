@@ -640,7 +640,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 static GtkButton*
 add_toolbar_item(ptk::browser* file_browser, GtkBox* toolbar, const xset::name item) noexcept
 {
-    xset_t set = xset_get(item);
+    const auto set = xset::set::get(item);
     set->browser = file_browser;
 
     const auto icon_size = config::settings.icon_size_tool;
@@ -821,26 +821,26 @@ on_status_bar_popup(GtkWidget* widget, GtkWidget* menu, ptk::browser* file_brows
     xset_t set_radio = nullptr;
 
     {
-        const auto set = xset_get(xset::name::status_name);
+        const auto set = xset::set::get(xset::name::status_name);
         xset_set_cb(xset::name::status_name, (GFunc)on_status_middle_click_config, set.get());
         set->menu.radio_set = nullptr;
         set_radio = set;
     }
 
     {
-        const auto set = xset_get(xset::name::status_path);
+        const auto set = xset::set::get(xset::name::status_path);
         xset_set_cb(xset::name::status_path, (GFunc)on_status_middle_click_config, set.get());
         set->menu.radio_set = set_radio;
     }
 
     {
-        const auto set = xset_get(xset::name::status_info);
+        const auto set = xset::set::get(xset::name::status_info);
         xset_set_cb(xset::name::status_info, (GFunc)on_status_middle_click_config, set.get());
         set->menu.radio_set = set_radio;
     }
 
     {
-        const auto set = xset_get(xset::name::status_hide);
+        const auto set = xset::set::get(xset::name::status_hide);
         xset_set_cb(xset::name::status_hide, (GFunc)on_status_middle_click_config, set.get());
         set->menu.radio_set = set_radio;
     }
@@ -3718,7 +3718,7 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
     }
     else if (setname == xset::name::copy_loc_last)
     {
-        const xset_t set = xset_get(xset::name::copy_loc_last);
+        const auto set = xset::set::get(xset::name::copy_loc_last);
         copy_dest = set->desc.value();
     }
     else if (setname == xset::name::move_tab_prev)
@@ -3795,7 +3795,7 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
     }
     else if (setname == xset::name::move_loc_last)
     {
-        const xset_t set = xset_get(xset::name::copy_loc_last);
+        const auto set = xset::set::get(xset::name::copy_loc_last);
         move_dest = set->desc.value();
     }
 
@@ -3804,9 +3804,7 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
         !copy_dest && !move_dest)
     {
         std::filesystem::path folder;
-        xset_t set;
-
-        set = xset_get(xset::name::copy_loc_last);
+        const auto set = xset::set::get(xset::name::copy_loc_last);
         if (set->desc)
         {
             folder = set->desc.value();
@@ -3937,7 +3935,7 @@ ptk::browser::set_sort_type(GtkSortType order) noexcept
 void
 ptk::browser::set_sort_extra(xset::name setname) const noexcept
 {
-    const xset_t set = xset_get(setname);
+    const auto set = xset::set::get(setname);
 
     if (!set->name().starts_with("sortx_"))
     {
@@ -4209,7 +4207,7 @@ ptk::browser::select_pattern(const std::string_view search_key) noexcept
     std::string_view key;
     if (search_key.empty())
     {
-        const xset_t set = xset_get(xset::name::select_patt);
+        const auto set = xset::set::get(xset::name::select_patt);
         const auto [response, answer] = select_pattern_dialog(GTK_WIDGET(this->main_window_), "");
 
         if (!response)
@@ -5595,7 +5593,8 @@ ptk::browser::on_permission(GtkMenuItem* item,
         return;
     }
 
-    const xset_t set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
+    const auto set =
+        xset::set::get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     if (!set)
     {
         return;
@@ -5731,7 +5730,7 @@ ptk::browser::on_permission(GtkMenuItem* item,
 void
 ptk::browser::on_action(const xset::name setname) noexcept
 {
-    const xset_t set = xset_get(setname);
+    const auto set = xset::set::get(setname);
     // ztd::logger::info("ptk::browser::on_action {}", set->name());
 
     if (set->name().starts_with("book_"))

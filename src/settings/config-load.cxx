@@ -240,7 +240,7 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                 ztd::logger::warn("Invalid xset::name enum name, xset::var::{}", toml_name);
                 continue;
             }
-            const xset_t set = xset_get(toml_name);
+            const auto set = xset::set::get(toml_name);
 
             // get var and value
             for (const auto& [toml_var, toml_value] : toml_vars.as_table())

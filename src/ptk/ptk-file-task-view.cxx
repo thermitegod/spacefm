@@ -136,7 +136,7 @@ on_task_columns_changed(GtkWidget* view, void* user_data) noexcept
         {
             if (title == task_titles.at(ptk::view::file_task::column(index)))
             {
-                const xset_t set = xset_get(value);
+                const auto set = xset::set::get(value);
                 // save column position
                 set->x = std::format("{}", i);
                 // if the window was opened maximized and stayed maximized, or the
@@ -318,7 +318,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
 
     if (item)
     {
-        set = xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
+        set = xset::set::get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
     }
     else
     {
@@ -419,11 +419,11 @@ idle_set_task_height(MainWindow* main_window) noexcept
     gtk_widget_get_allocation(GTK_WIDGET(main_window), &allocation);
 
     // set new config panel sizes to half of window
-    if (!xset_is(xset::name::panel_sliders))
+    if (!xset::set::get(xset::name::panel_sliders, true))
     {
         // this is not perfect because panel half-width is set before user
         // adjusts window size
-        const xset_t set = xset_get(xset::name::panel_sliders);
+        const auto set = xset::set::get(xset::name::panel_sliders);
         set->x = std::format("{}", allocation.width / 2);
         set->y = std::format("{}", allocation.width / 2);
         set->s = std::format("{}", allocation.height / 2);
@@ -664,7 +664,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     xset_t set_radio;
 
     {
-        const auto set = xset_get(xset::name::task_show_manager);
+        const auto set = xset::set::get(xset::name::task_show_manager);
         xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
         xset_set_ob(set, "name", set->name());
         set->menu.radio_set = nullptr;
@@ -672,7 +672,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     }
 
     {
-        const auto set = xset_get(xset::name::task_hide_manager);
+        const auto set = xset::set::get(xset::name::task_hide_manager);
         xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
         xset_set_ob(set, "name", set->name());
         set->menu.radio_set = set_radio;
@@ -693,7 +693,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     xset_set_cb(xset::name::task_col_reorder, (GFunc)ptk::view::file_task::on_reorder, parent);
 
     {
-        const auto set = xset_get(xset::name::task_err_first);
+        const auto set = xset::set::get(xset::name::task_err_first);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
         xset_set_ob(set, "name", set->name());
         set->menu.radio_set = nullptr;
@@ -701,14 +701,14 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     }
 
     {
-        const auto set = xset_get(xset::name::task_err_any);
+        const auto set = xset::set::get(xset::name::task_err_any);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
         xset_set_ob(set, "name", set->name());
         set->menu.radio_set = set_radio;
     }
 
     {
-        const auto set = xset_get(xset::name::task_err_cont);
+        const auto set = xset::set::get(xset::name::task_err_cont);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
         xset_set_ob(set, "name", set->name());
         set->menu.radio_set = set_radio;
@@ -845,7 +845,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
                 case vfs::file_task::state::finish:
                     sname = xset::name::task_pause;
             }
-            set = xset_get(sname);
+            set = xset::set::get(sname);
             on_task_stop(nullptr, view, set, ptask);
             return true;
             break;
@@ -888,24 +888,24 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
 
             popup = gtk_menu_new();
 
-            set = xset_get(xset::name::task_stop);
+            set = xset::set::get(xset::name::task_stop);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob(set, "task", ptask);
             set->disable = !ptask;
 
-            set = xset_get(xset::name::task_pause);
+            set = xset::set::get(xset::name::task_pause);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::pause ||
                             ptask->task->type_ == vfs::file_task::type::exec);
 
-            set = xset_get(xset::name::task_que);
+            set = xset::set::get(xset::name::task_que);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::queue ||
                             ptask->task->type_ == vfs::file_task::type::exec);
 
-            set = xset_get(xset::name::task_resume);
+            set = xset::set::get(xset::name::task_resume);
             xset_set_cb(set, (GFunc)on_task_stop, view);
             xset_set_ob(set, "task", ptask);
             set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::running ||
@@ -915,7 +915,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             xset_set_cb(xset::name::task_pause_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_que_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_resume_all, (GFunc)on_task_stop, view);
-            set = xset_get(xset::name::task_all);
+            set = xset::set::get(xset::name::task_all);
             set->disable = !is_tasks;
 
             const std::vector<xset::name> context_menu_entries = {
@@ -1195,12 +1195,12 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
             // icon
             if (ptask->task->state_pause_ == vfs::file_task::state::pause)
             {
-                set = xset_get(xset::name::task_pause);
+                set = xset::set::get(xset::name::task_pause);
                 pixbuf = vfs::utils::load_icon(set->icon.value_or("media-playback-pause"), 22);
             }
             else if (ptask->task->state_pause_ == vfs::file_task::state::queue)
             {
-                set = xset_get(xset::name::task_que);
+                set = xset::set::get(xset::name::task_que);
                 pixbuf = vfs::utils::load_icon(set->icon.value_or("list-add"), 22);
             }
             else if (ptask->err_count_ && ptask->task->type_ != vfs::file_task::type::exec)

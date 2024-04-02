@@ -45,14 +45,38 @@ namespace xset
 struct set : public std::enable_shared_from_this<set>
 {
     set() = delete;
-    set(const xset::name xset_name) noexcept;
+    set(const xset::name name) noexcept;
     ~set() = default;
     set(const set& other) = delete;
     set(set&& other) = delete;
     set& operator=(const set& other) = delete;
     set& operator=(set&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<set> create(const xset::name xset_name) noexcept;
+    /**
+     * @brief get
+     * - create an xset or return an existing xset.
+     *
+     * @param[in] name the xset name
+     * @param[in] only_existing if true only return an xset if it already exists,
+     * otherwise return nullptr instead of creating a new xset.
+     *
+     * @return a valid xset::set
+     */
+    [[nodiscard]] static const std::shared_ptr<set> get(const xset::name name,
+                                                        const bool only_existing = false) noexcept;
+
+    /**
+     * @brief get
+     * - create an xset or return an existing xset.
+     *
+     * @param[in] name the xset name
+     * @param[in] only_existing if true only return an xset if it already exists,
+     * otherwise return nullptr instead of creating a new xset.
+     *
+     * @return a valid xset::set
+     */
+    [[nodiscard]] static const std::shared_ptr<set> get(const std::string_view name,
+                                                        const bool only_existing = false) noexcept;
 
     [[nodiscard]] const std::string_view name() const noexcept;
 
@@ -143,6 +167,9 @@ struct set : public std::enable_shared_from_this<set>
     std::optional<std::string> title{std::nullopt}; // saved if ( !lock ), or read if locked
 
     std::vector<xset::name> context_menu_entries; // not saved, in order
+
+  private:
+    [[nodiscard]] static const std::shared_ptr<set> create(const xset::name name) noexcept;
 };
 } // namespace xset
 
@@ -152,12 +179,6 @@ using xset_t = std::shared_ptr<xset::set>;
 const std::span<const xset_t> xsets();
 
 // get/set //
-
-const xset_t xset_get(xset::name name) noexcept;
-const xset_t xset_get(const std::string_view name) noexcept;
-
-const xset_t xset_is(xset::name name) noexcept;
-const xset_t xset_is(const std::string_view name) noexcept;
 
 void xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept;
 void xset_set(const xset::name name, const xset::var var, const std::string_view value) noexcept;

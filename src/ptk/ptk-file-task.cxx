@@ -666,7 +666,7 @@ on_view_popup(GtkTextView* entry, GtkMenu* menu, void* user_data) noexcept
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    const xset_t set = xset_get(xset::name::separator);
+    const auto set = xset::set::get(xset::name::separator);
     set->browser = nullptr;
     xset_add_menuitem(nullptr, GTK_WIDGET(menu), accel_group, set);
     gtk_widget_show_all(GTK_WIDGET(menu));
@@ -774,7 +774,7 @@ ptk::file_task::progress_open() noexcept
 
     // Buttons
     // Pause
-    // xset_t set = xset_get(xset::name::TASK_PAUSE);
+    // xset_t set = xset::set::get(xset::name::TASK_PAUSE);
 
     this->progress_btn_pause_ = GTK_BUTTON(gtk_button_new_with_mnemonic("Pa_use"));
 
@@ -2345,7 +2345,7 @@ ptk::file_task::query_overwrite() noexcept
                            GtkResponseType::GTK_RESPONSE_CANCEL,
                            nullptr);
 
-    // xset_t set = xset_get(xset::name::TASK_PAUSE);
+    // xset_t set = xset::set::get(xset::name::TASK_PAUSE);
     gtk_widget_set_sensitive(btn_pause, !!this->task_view_);
 
     // labels

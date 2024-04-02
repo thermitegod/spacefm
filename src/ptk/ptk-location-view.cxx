@@ -1139,7 +1139,7 @@ on_showhide(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
-    const xset_t set = xset_get(xset::name::dev_show_hide_volumes);
+    const auto set = xset::set::get(xset::name::dev_show_hide_volumes);
     if (vol)
     {
         const std::string devid = ztd::removeprefix(vol->udi(), "/");
@@ -1178,7 +1178,7 @@ on_automountlist(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
 
-    const xset_t set = xset_get(xset::name::dev_automount_volumes);
+    const auto set = xset::set::get(xset::name::dev_automount_volumes);
     if (vol)
     {
         const std::string devid = ztd::removeprefix(vol->udi(), "/");
@@ -1343,23 +1343,23 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    set = xset_get(xset::name::dev_menu_remove);
+    set = xset::set::get(xset::name::dev_menu_remove);
     xset_set_cb(set, (GFunc)on_eject, vol.get());
     xset_set_ob(set, "view", view);
     set->disable = !vol;
-    set = xset_get(xset::name::dev_menu_unmount);
+    set = xset::set::get(xset::name::dev_menu_unmount);
     xset_set_cb(set, (GFunc)on_umount, vol.get());
     xset_set_ob(set, "view", view);
     set->disable = !vol; //!( vol && vol->is_mounted );
-    set = xset_get(xset::name::dev_menu_open);
+    set = xset::set::get(xset::name::dev_menu_open);
     xset_set_cb(set, (GFunc)on_open, vol.get());
     xset_set_ob(set, "view", view);
     set->disable = !vol;
-    set = xset_get(xset::name::dev_menu_tab);
+    set = xset::set::get(xset::name::dev_menu_tab);
     xset_set_cb(set, (GFunc)on_open_tab, vol.get());
     xset_set_ob(set, "view", view);
     set->disable = !vol;
-    set = xset_get(xset::name::dev_menu_mount);
+    set = xset::set::get(xset::name::dev_menu_mount);
     xset_set_cb(set, (GFunc)on_mount, vol.get());
     xset_set_ob(set, "view", view);
     set->disable = !vol; // || ( vol && vol->is_mounted );
@@ -1375,7 +1375,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
     xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
-    set = xset_get(xset::name::dev_automount_volumes);
+    set = xset::set::get(xset::name::dev_automount_volumes);
     xset_set_cb(set, (GFunc)on_automountlist, vol.get());
     xset_set_ob(set, "view", view);
 
@@ -1399,7 +1399,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
     xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    set = xset_get(xset::name::dev_menu_settings);
+    set = xset::set::get(xset::name::dev_menu_settings);
     xset_set_submenu(set,
                      {
                          xset::name::dev_show,
@@ -1594,13 +1594,13 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     GtkWidget* item = nullptr;
     GtkWidget* popup = gtk_menu_new();
 
-    set = xset_get(xset::name::dev_menu_remove);
+    set = xset::set::get(xset::name::dev_menu_remove);
     item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol.get());
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
 
-    set = xset_get(xset::name::dev_menu_unmount);
+    set = xset::set::get(xset::name::dev_menu_unmount);
     item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol.get());
@@ -1609,7 +1609,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), gtk_separator_menu_item_new());
 
-    set = xset_get(xset::name::dev_menu_open);
+    set = xset::set::get(xset::name::dev_menu_open);
     item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1622,7 +1622,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open), vol.get());
     }
 
-    set = xset_get(xset::name::dev_menu_mount);
+    set = xset::set::get(xset::name::dev_menu_mount);
     item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol.get());
@@ -1760,7 +1760,7 @@ ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* file_browser,
     // xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol.get());
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    set = xset_get(xset::name::dev_menu_settings);
+    set = xset::set::get(xset::name::dev_menu_settings);
     xset_set_submenu(set,
                      {
                          xset::name::dev_show,

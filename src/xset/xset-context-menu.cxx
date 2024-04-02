@@ -60,7 +60,7 @@ xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_
 
     for (const auto submenu_entry : submenu_entries)
     {
-        const xset_t set = xset_get(submenu_entry);
+        const auto set = xset::set::get(submenu_entry);
         xset_add_menuitem(file_browser, menu, accel_group, set);
     }
 }

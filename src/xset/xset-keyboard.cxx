@@ -97,7 +97,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcep
     GtkButton* btn_set = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_set"));
     GtkButton* btn_unset = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_unset"));
 
-    const xset_t set =
+    const auto set =
         static_cast<xset::set*>(g_object_get_data(G_OBJECT(widget), "set"))->shared_from_this();
     assert(set != nullptr);
 

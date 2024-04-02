@@ -676,8 +676,9 @@ MainWindow::show_panels() noexcept
 
             const auto mode = this->panel_context.at(p);
 
-            set =
-                xset_is(xset::get_xsetname_from_panel_mode(p, xset::panel::slider_positions, mode));
+            set = xset::set::get(
+                xset::get_xsetname_from_panel_mode(p, xset::panel::slider_positions, mode),
+                true);
             if (!set)
             {
                 // ztd::logger::warn("no config for {}, {}", p, INT(mode));
@@ -971,44 +972,44 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
 
     xset_t set;
 
-    set = xset_get(xset::name::panel1_show);
+    set = xset::set::get(xset::name::panel1_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
     set->disable = (this->curpanel == 1 && vis_count == 1);
-    set = xset_get(xset::name::panel2_show);
+    set = xset::set::get(xset::name::panel2_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
     set->disable = (this->curpanel == 2 && vis_count == 1);
-    set = xset_get(xset::name::panel3_show);
+    set = xset::set::get(xset::name::panel3_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
     set->disable = (this->curpanel == 3 && vis_count == 1);
-    set = xset_get(xset::name::panel4_show);
+    set = xset::set::get(xset::name::panel4_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
     set->disable = (this->curpanel == 4 && vis_count == 1);
 
-    set = xset_get(xset::name::panel_prev);
+    set = xset::set::get(xset::name::panel_prev);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_control_code_prev);
     set->disable = (vis_count == 1);
-    set = xset_get(xset::name::panel_next);
+    set = xset::set::get(xset::name::panel_next);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_control_code_next);
     set->disable = (vis_count == 1);
-    set = xset_get(xset::name::panel_hide);
+    set = xset::set::get(xset::name::panel_hide);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_control_code_hide);
     set->disable = (vis_count == 1);
-    set = xset_get(xset::name::panel_1);
+    set = xset::set::get(xset::name::panel_1);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_1);
     set->disable = (this->curpanel == 1);
-    set = xset_get(xset::name::panel_2);
+    set = xset::set::get(xset::name::panel_2);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_2);
     set->disable = (this->curpanel == 2);
-    set = xset_get(xset::name::panel_3);
+    set = xset::set::get(xset::name::panel_3);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_3);
     set->disable = (this->curpanel == 3);
-    set = xset_get(xset::name::panel_4);
+    set = xset::set::get(xset::name::panel_4);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_4);
     set->disable = (this->curpanel == 4);
@@ -1065,20 +1066,20 @@ MainWindow::rebuild_menu_device(ptk::browser* file_browser) noexcept
 
     xset_t set;
 
-    set = xset_get(xset::name::main_dev);
+    set = xset::set::get(xset::name::main_dev);
     xset_set_cb(set, (GFunc)on_devices_show, this);
     set->b = file_browser->side_dev ? xset::set::enabled::yes : xset::set::enabled::unset;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
-    set = xset_get(xset::name::separator);
+    set = xset::set::get(xset::name::separator);
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
     ptk::view::location::dev_menu(GTK_WIDGET(file_browser), file_browser, newmenu);
 
-    set = xset_get(xset::name::separator);
+    set = xset::set::get(xset::name::separator);
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
-    set = xset_get(xset::name::dev_menu_settings);
+    set = xset::set::get(xset::name::dev_menu_settings);
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
 
     // show all
@@ -1098,7 +1099,7 @@ MainWindow::rebuild_menu_bookmarks(ptk::browser* file_browser) const noexcept
 #endif
 
     GtkWidget* newmenu = gtk_menu_new();
-    const xset_t set = xset_get(xset::name::book_add);
+    const auto set = xset::set::get(xset::name::book_add);
     xset_set_cb(set, (GFunc)ptk::view::bookmark::add_callback, file_browser);
     set->disable = false;
     xset_add_menuitem(file_browser, newmenu, accel_group, set);
@@ -1510,7 +1511,7 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept
             main_window->close_window();
 
             ptk::view::file_task::stop(main_window->task_view,
-                                       xset_get(xset::name::task_stop_all),
+                                       xset::set::get(xset::name::task_stop_all),
                                        nullptr);
             while (main_window->is_main_tasks_running())
             {
@@ -1582,16 +1583,16 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser)
 
             xset_t set;
 
-            set = xset_get(xset::name::tab_close);
+            set = xset::set::get(xset::name::tab_close);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::close_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_get(xset::name::tab_restore);
+            set = xset::set::get(xset::name::tab_restore);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::restore_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_get(xset::name::tab_new);
+            set = xset::set::get(xset::name::tab_new);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
-            set = xset_get(xset::name::tab_new_here);
+            set = xset::set::get(xset::name::tab_new_here);
             xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab_here, file_browser);
             xset_add_menuitem(file_browser, popup, accel_group, set);
             gtk_widget_show_all(GTK_WIDGET(popup));
@@ -2276,7 +2277,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
                             std::format("panel{}_{}",
                                         browser->panel(),
                                         shared_key_set->name().data() + 6);
-                        shared_key_set = xset_get(new_set_name);
+                        shared_key_set = xset::set::get(new_set_name);
                     }
                     else
                     { // failsafe
