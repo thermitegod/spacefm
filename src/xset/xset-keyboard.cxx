@@ -98,7 +98,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcep
     GtkButton* btn_unset = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_unset"));
 
     const xset_t set =
-        xset_get(static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "set")));
+        static_cast<xset::set*>(g_object_get_data(G_OBJECT(widget), "set"))->shared_from_this();
     assert(set != nullptr);
 
     const auto keyval = gdk_key_event_get_keyval(event);
@@ -255,7 +255,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
     u32 newkey = 0;
     u32 newkeymod = 0;
 
-    g_object_set_data(G_OBJECT(dialog), "set", set->name.data());
+    g_object_set_data(G_OBJECT(dialog), "set", set.get());
     g_object_set_data(G_OBJECT(dialog), "newkey", &newkey);
     g_object_set_data(G_OBJECT(dialog), "newkeymod", &newkeymod);
     g_object_set_data(G_OBJECT(dialog), "btn_set", btn_set);

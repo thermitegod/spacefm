@@ -325,24 +325,24 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
         set = set2;
     }
 
-    if (!set || !set->name.starts_with("task_"))
+    if (!set || !set->name().starts_with("task_"))
     {
         return;
     }
 
-    if (set->name.starts_with("task_stop"))
+    if (set->name().starts_with("task_stop"))
     {
         job = main_window_job::stop;
     }
-    else if (set->name.starts_with("task_pause"))
+    else if (set->name().starts_with("task_pause"))
     {
         job = main_window_job::pause;
     }
-    else if (set->name.starts_with("task_que"))
+    else if (set->name().starts_with("task_que"))
     {
         job = main_window_job::queue;
     }
-    else if (set->name.starts_with("task_resume"))
+    else if (set->name().starts_with("task_resume"))
     {
         job = main_window_job::resume;
     }
@@ -351,7 +351,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
         return;
     }
 
-    const bool all = set->name.ends_with("_all");
+    const bool all = set->name().ends_with("_all");
 
     if (all)
     {
@@ -525,7 +525,12 @@ on_task_popup_show(GtkMenuItem* item, MainWindow* main_window, const char* name2
 
     if (name)
     {
-        const xset::name xset_name = xset::get_xsetname_from_name(name);
+        const auto enum_value = magic_enum::enum_cast<xset::name>(name);
+        if (!enum_value.has_value())
+        {
+            return;
+        }
+        const xset::name xset_name = enum_value.value();
 
         if (xset_name == xset::name::task_show_manager)
         {
@@ -596,7 +601,12 @@ on_task_popup_errset(GtkMenuItem* item, MainWindow* main_window, const char* nam
         return;
     }
 
-    const xset::name xset_name = xset::get_xsetname_from_name(name);
+    const auto enum_value = magic_enum::enum_cast<xset::name>(name);
+    if (!enum_value.has_value())
+    {
+        return;
+    }
+    const xset::name xset_name = enum_value.value();
 
     if (xset_name == xset::name::task_err_first)
     {
@@ -656,7 +666,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_show_manager);
         xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-        xset_set_ob(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name());
         set->menu.radio_set = nullptr;
         set_radio = set;
     }
@@ -664,7 +674,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_hide_manager);
         xset_set_cb(set, (GFunc)on_task_popup_show, main_window);
-        xset_set_ob(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name());
         set->menu.radio_set = set_radio;
     }
 
@@ -685,7 +695,7 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_err_first);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-        xset_set_ob(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name());
         set->menu.radio_set = nullptr;
         set_radio = set;
     }
@@ -693,14 +703,14 @@ ptk::view::file_task::prepare_menu(MainWindow* main_window, GtkWidget* menu) noe
     {
         const auto set = xset_get(xset::name::task_err_any);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-        xset_set_ob(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name());
         set->menu.radio_set = set_radio;
     }
 
     {
         const auto set = xset_get(xset::name::task_err_cont);
         xset_set_cb(set, (GFunc)on_task_popup_errset, main_window);
-        xset_set_ob(set, "name", set->name.data());
+        xset_set_ob(set, "name", set->name());
         set->menu.radio_set = set_radio;
     }
 }

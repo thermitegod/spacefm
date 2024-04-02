@@ -43,17 +43,17 @@ namespace xset
 struct set : public std::enable_shared_from_this<set>
 {
     set() = delete;
-    set(const std::string_view set_name, const xset::name xset_name) noexcept;
+    set(const xset::name xset_name) noexcept;
     ~set() = default;
     set(const set& other) = delete;
     set(set&& other) = delete;
     set& operator=(const set& other) = delete;
     set& operator=(set&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<set> create(const std::string_view set_name,
-                                                           const xset::name xset_name) noexcept;
+    [[nodiscard]] static const std::shared_ptr<set> create(const xset::name xset_name) noexcept;
 
-    std::string name;
+    [[nodiscard]] const std::string_view name() const noexcept;
+
     xset::name xset_name;
 
     enum enabled
@@ -235,6 +235,8 @@ void xset_set_cb_panel(panel_t panel, xset::panel name, GFunc cb_func, void* cb_
 
 void xset_set_ob(const xset_t& set, const std::string_view key, void* user_data) noexcept;
 void xset_set_ob(const xset_t& set, const std::string_view key, const i32 user_data) noexcept;
+void xset_set_ob(const xset_t& set, const std::string_view key,
+                 const std::string_view user_data) noexcept;
 
 // Int
 

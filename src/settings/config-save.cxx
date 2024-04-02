@@ -114,7 +114,7 @@ pack_xsets() noexcept
         const setvars_t setvars = pack_xset(set);
         if (!setvars.empty())
         {
-            xsetpak.insert({std::format("{}", set->name), setvars});
+            xsetpak.insert({std::format("{}", set->name()), setvars});
         }
     }
 

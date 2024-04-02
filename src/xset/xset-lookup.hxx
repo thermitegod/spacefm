@@ -217,10 +217,10 @@ enum class name
     open_in_panel,
     open_in_panel_prev,
     open_in_panel_next,
-    open_in_panel1,
-    open_in_panel2,
-    open_in_panel3,
-    open_in_panel4,
+    open_in_panel_1,
+    open_in_panel_2,
+    open_in_panel_3,
+    open_in_panel_4,
 
     archive_extract,
     archive_extract_to,
@@ -1019,9 +1019,6 @@ enum class main_window_panel
     panel_vert,
     panel_both
 };
-
-xset::name get_xsetname_from_name(const std::string_view name) noexcept;
-const std::string_view get_name_from_xsetname(xset::name name) noexcept;
 
 xset::name get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept;
 const std::string_view get_name_from_panel(panel_t panel, xset::panel name) noexcept;

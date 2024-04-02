@@ -35,24 +35,30 @@
 
 #include "types.hxx"
 
+#include "utils/strdup.hxx"
+
 #include "xset/xset.hxx"
 
 std::vector<xset_t> xsets;
 
-xset::set::set(const std::string_view set_name, const xset::name xset_name) noexcept
+xset::set::set(const xset::name xset_name) noexcept
 {
     // ztd::logger::debug("xset::set({})", ztd::logger::utils::ptr(this));
-    assert(set_name.empty() != true);
-    this->name = set_name;
     this->xset_name = xset_name;
 }
 
 const xset_t
-xset::set::create(const std::string_view name, const xset::name xset_name) noexcept
+xset::set::create(const xset::name xset_name) noexcept
 {
-    auto set = std::make_shared<xset::set>(name, xset_name);
+    auto set = std::make_shared<xset::set>(xset_name);
     xsets.push_back(set);
     return set;
+}
+
+const std::string_view
+xset::set::name() const noexcept
+{
+    return magic_enum::enum_name(this->xset_name);
 }
 
 const xset_t
@@ -61,13 +67,20 @@ xset_get(const std::string_view name) noexcept
     for (const xset_t& set : xsets)
     { // check for existing xset
         assert(set != nullptr);
-        if (name == set->name)
+        if (name == set->name())
         {
             return set;
         }
     }
 
-    return xset::set::create(name, xset::get_xsetname_from_name(name));
+    const auto enum_value = magic_enum::enum_cast<xset::name>(name);
+    if (!enum_value.has_value())
+    {
+        // ztd::logger::debug("name lookup custom {}", name);
+        return xset::set::create(xset::name::custom);
+    }
+    // ztd::logger::debug("name lookup {}", name);
+    return xset::set::create(enum_value.value());
 }
 
 const xset_t
@@ -82,7 +95,7 @@ xset_get(xset::name name) noexcept
         }
     }
 
-    return xset::set::create(xset::get_name_from_xsetname(name), name);
+    return xset::set::create(name);
 }
 
 const xset_t
@@ -105,7 +118,7 @@ xset_is(const std::string_view name) noexcept
     for (const xset_t& set : xsets)
     { // check for existing xset
         assert(set != nullptr);
-        if (name == set->name)
+        if (name == set->name())
         {
             return set;
         }
@@ -680,6 +693,14 @@ xset_set_cb_panel(panel_t panel, xset::panel name, GFunc cb_func, void* cb_data)
 }
 
 void
+xset_set_ob(const xset_t& set, const std::string_view key, void* user_data) noexcept
+{
+    assert(set != nullptr);
+    set->menu.obj.key = key.data();
+    set->menu.obj.data = user_data;
+}
+
+void
 xset_set_ob(const xset_t& set, const std::string_view key, const i32 user_data) noexcept
 {
     assert(set != nullptr);
@@ -688,9 +709,14 @@ xset_set_ob(const xset_t& set, const std::string_view key, const i32 user_data) 
 }
 
 void
-xset_set_ob(const xset_t& set, const std::string_view key, void* user_data) noexcept
+xset_set_ob(const xset_t& set, const std::string_view key,
+            const std::string_view user_data) noexcept
 {
     assert(set != nullptr);
     set->menu.obj.key = key.data();
-    set->menu.obj.data = user_data;
+    if (set->menu.obj.data)
+    {
+        std::free(set->menu.obj.data);
+    }
+    set->menu.obj.data = ::utils::strdup(user_data);
 }

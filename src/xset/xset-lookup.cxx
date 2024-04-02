@@ -900,26 +900,6 @@ static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{
     },
 }}};
 
-xset::name
-xset::get_xsetname_from_name(const std::string_view name) noexcept
-{
-    const auto enum_value = magic_enum::enum_cast<xset::name>(name);
-    if (!enum_value.has_value())
-    {
-        // ztd::logger::debug("name lookup custom {}", name);
-        return xset::name::custom;
-    }
-    // ztd::logger::debug("name lookup {}", name);
-    return enum_value.value();
-}
-
-const std::string_view
-xset::get_name_from_xsetname(xset::name name) noexcept
-{
-    const auto value = magic_enum::enum_name(name);
-    return value;
-}
-
 // panel
 
 xset::name

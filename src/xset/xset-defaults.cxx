@@ -1068,20 +1068,20 @@ xset_defaults() noexcept
         set->context_menu_entries = {
             xset::name::open_in_panel_prev,
             xset::name::open_in_panel_next,
-            xset::name::open_in_panel1,
-            xset::name::open_in_panel2,
-            xset::name::open_in_panel3,
-            xset::name::open_in_panel4,
+            xset::name::open_in_panel_1,
+            xset::name::open_in_panel_2,
+            xset::name::open_in_panel_3,
+            xset::name::open_in_panel_4,
         };
     }
 
     {
         xset_set(xset::name::open_in_panel_prev, xset::var::menu_label, "_Prev");
         xset_set(xset::name::open_in_panel_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::open_in_panel1, xset::var::menu_label, "Panel _1");
-        xset_set(xset::name::open_in_panel2, xset::var::menu_label, "Panel _2");
-        xset_set(xset::name::open_in_panel3, xset::var::menu_label, "Panel _3");
-        xset_set(xset::name::open_in_panel4, xset::var::menu_label, "Panel _4");
+        xset_set(xset::name::open_in_panel_1, xset::var::menu_label, "Panel _1");
+        xset_set(xset::name::open_in_panel_2, xset::var::menu_label, "Panel _2");
+        xset_set(xset::name::open_in_panel_3, xset::var::menu_label, "Panel _3");
+        xset_set(xset::name::open_in_panel_4, xset::var::menu_label, "Panel _4");
     }
 
     {
@@ -2322,7 +2322,7 @@ def_key(const std::span<const xset_t> keysets, xset::name name, u32 key, u32 key
     {
         if (keyset->keybinding.key == key && keyset->keybinding.modifier == keymod)
         {
-            ztd::logger::warn("Duplicate keybinding: {}, {}", set->name, keyset->name);
+            ztd::logger::warn("Duplicate keybinding: {}, {}", set->name(), keyset->name());
             return;
         }
     }

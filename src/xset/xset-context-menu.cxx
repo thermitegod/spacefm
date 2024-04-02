@@ -30,6 +30,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+#include "utils/strdup.hxx"
+
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
@@ -99,7 +101,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
     xset_t set_next;
     std::string icon_name;
 
-    // ztd::logger::info("xset_add_menuitem {}", set->name);
+    // ztd::logger::info("xset_add_menuitem {}", set->name());
 
     if (icon_name.empty() && set->icon)
     {
@@ -108,7 +110,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
 
     if (icon_name.empty())
     {
-        const auto icon_file = vfs::program::config() / "scripts" / set->name / "icon";
+        const auto icon_file = vfs::program::config() / "scripts" / set->name() / "icon";
         if (std::filesystem::exists(icon_file))
         {
             icon_name = icon_file;
@@ -180,7 +182,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
 
     set->browser = file_browser;
     g_object_set_data(G_OBJECT(item), "menu", menu);
-    g_object_set_data(G_OBJECT(item), "set", set->name.data());
+    g_object_set_data(G_OBJECT(item), "set", ::utils::strdup(set->name()));
 
     if (set->menu.obj.key)
     {

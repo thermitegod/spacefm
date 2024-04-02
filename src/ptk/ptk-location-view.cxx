@@ -1301,7 +1301,7 @@ ptk::view::location::on_action(GtkWidget* view, const xset_t& set) noexcept
     else
     {
         // require vol != nullptr
-        if (set->name.starts_with("dev_menu_"))
+        if (set->name().starts_with("dev_menu_"))
         {
             if (set->xset_name == xset::name::dev_menu_remove)
             {

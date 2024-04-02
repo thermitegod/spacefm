@@ -103,7 +103,7 @@ init_keybindings_tab(const xset::set::keybinding_type type) noexcept
             list_store,
             &iter,
             0,
-            set->name.c_str(),
+            set->name().data(),
             1,
             xset_get_keyname(set, set->keybinding.key, set->keybinding.modifier).c_str(),
             -1);

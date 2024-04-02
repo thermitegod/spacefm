@@ -2266,7 +2266,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
                 shared_key_set->keybinding.modifier == keymod)
             {
                 // shared key match
-                if (shared_key_set->name.starts_with("panel"))
+                if (shared_key_set->name().starts_with("panel"))
                 {
                     // use current panel's set
                     browser = this->current_file_browser();
@@ -2275,7 +2275,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
                         const std::string new_set_name =
                             std::format("panel{}_{}",
                                         browser->panel(),
-                                        shared_key_set->name.data() + 6);
+                                        shared_key_set->name().data() + 6);
                         shared_key_set = xset_get(new_set_name);
                     }
                     else
@@ -2350,11 +2350,11 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
     }
 
     // handlers
-    if (set->name.starts_with("dev_"))
+    if (set->name().starts_with("dev_"))
     {
         ptk::view::location::on_action(GTK_WIDGET(browser->side_dev), set);
     }
-    else if (set->name.starts_with("main_"))
+    else if (set->name().starts_with("main_"))
     {
         if (set->xset_name == xset::name::main_new_window)
         {
@@ -2398,7 +2398,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
             on_about_activate(nullptr, this);
         }
     }
-    else if (set->name.starts_with("panel_"))
+    else if (set->name().starts_with("panel_"))
     {
         i32 i = 0;
         if (set->xset_name == xset::name::panel_prev)
@@ -2415,15 +2415,15 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         }
         else
         {
-            i = std::stoi(set->name);
+            i = std::stol(ztd::removeprefix(set->name(), "panel_"));
         }
         this->focus_panel(i);
     }
-    else if (set->name.starts_with("task_"))
+    else if (set->name().starts_with("task_"))
     {
         if (set->xset_name == xset::name::task_manager)
         {
-            ptk::view::file_task::popup_show(this, set->name);
+            ptk::view::file_task::popup_show(this, set->name());
         }
         else if (set->xset_name == xset::name::task_col_reorder)
         {
@@ -2462,9 +2462,9 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         {
             ptk::view::file_task::show_task_dialog(browser->task_view());
         }
-        else if (set->name.starts_with("task_err_"))
+        else if (set->name().starts_with("task_err_"))
         {
-            ptk::view::file_task::popup_errset(this, set->name);
+            ptk::view::file_task::popup_errset(this, set->name());
         }
     }
     else if (set->xset_name == xset::name::rubberband)

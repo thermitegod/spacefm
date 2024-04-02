@@ -1286,7 +1286,7 @@ ptk_file_menu_new(ptk::browser* browser,
 
                 for (panel_t panel : PANELS)
                 {
-                    const std::string name = std::format("open_in_panel{}", panel);
+                    const std::string name = std::format("open_in_panel_{}", panel);
                     set = xset_get(name);
                     xset_set_cb(set, (GFunc)on_open_in_panel, data);
                     xset_set_ob(set, "panel", panel);
@@ -1475,7 +1475,7 @@ ptk_file_menu_new(ptk::browser* browser,
         {
             set = xset_get(copycmd);
             xset_set_cb(set, (GFunc)on_copycmd, data);
-            xset_set_ob(set, "set", set->name.data());
+            xset_set_ob(set, "set", set->name());
         }
 
         // enables
@@ -1587,7 +1587,7 @@ ptk_file_menu_new(ptk::browser* browser,
         {
             set = xset_get(permcmd);
             xset_set_cb(set, (GFunc)on_permission, data);
-            xset_set_ob(set, "set", set->name.data());
+            xset_set_ob(set, "set", set->name());
         }
 
         set = xset_get(xset::name::prop_quick);
@@ -2655,7 +2655,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
 {
     assert(set != nullptr);
     assert(browser != nullptr);
-    // ztd::logger::debug("ptk_file_menu_action()={}", set->name);
+    // ztd::logger::debug("ptk_file_menu_action()={}", set->name());
 
     // setup data
     const auto& cwd = browser->cwd();
@@ -2680,7 +2680,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
     }
 
     // action
-    if (set->name.starts_with("open_") && !set->name.starts_with("open_in_"))
+    if (set->name().starts_with("open_") && !set->name().starts_with("open_in_"))
     {
         if (set->xset_name == xset::name::open_edit)
         {
@@ -2699,7 +2699,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
             on_popup_open_all(nullptr, data);
         }
     }
-    else if (set->name.starts_with("arc_"))
+    else if (set->name().starts_with("arc_"))
     {
         if (set->xset_name == xset::name::archive_extract)
         {
@@ -2714,7 +2714,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
             on_popup_extract_open_activate(nullptr, data);
         }
     }
-    else if (set->name.starts_with("new_"))
+    else if (set->name().starts_with("new_"))
     {
         if (set->xset_name == xset::name::new_file)
         {
@@ -2752,7 +2752,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
     {
         on_popup_file_permissions_activate(nullptr, data);
     }
-    else if (set->name.starts_with("edit_"))
+    else if (set->name().starts_with("edit_"))
     {
         if (set->xset_name == xset::name::edit_cut)
         {
@@ -2802,13 +2802,13 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
     {
         on_popup_copy_parent_activate(nullptr, data);
     }
-    else if (set->name.starts_with("copy_loc") || set->name.starts_with("copy_tab_") ||
-             set->name.starts_with("copy_panel_") || set->name.starts_with("move_loc") ||
-             set->name.starts_with("move_tab_") || set->name.starts_with("move_panel_"))
+    else if (set->name().starts_with("copy_loc") || set->name().starts_with("copy_tab_") ||
+             set->name().starts_with("copy_panel_") || set->name().starts_with("move_loc") ||
+             set->name().starts_with("move_tab_") || set->name().starts_with("move_panel_"))
     {
         on_copycmd(nullptr, data, set);
     }
-    if (set->name.starts_with("open_in_panel"))
+    if (set->name().starts_with("open_in_panel"))
     {
         panel_t i = 0;
         if (set->xset_name == xset::name::open_in_panel_prev)
@@ -2821,11 +2821,11 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         }
         else
         {
-            i = std::stol(set->name);
+            i = std::stol(ztd::removeprefix(set->name(), "open_in_panel_"));
         }
         data->browser->open_in_panel(i, data->file_path);
     }
-    else if (set->name.starts_with("opentab_"))
+    else if (set->name().starts_with("opentab_"))
     {
         tab_t i = 0;
         if (set->xset_name == xset::name::opentab_new)
@@ -2844,7 +2844,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
             }
             else
             {
-                i = std::stol(set->name);
+                i = std::stol(ztd::removeprefix(set->name(), "opentab_"));
             }
             data->browser->open_in_tab(data->file_path, i);
         }

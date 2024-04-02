@@ -630,7 +630,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 
     if (button == GDK_BUTTON_PRIMARY && keymod == 0)
     { // left click and no modifier
-        // ztd::logger::debug("set={}  menu={}", set->name, magic_enum::enum_name(set->menu.type));
+        // ztd::logger::debug("set={}  menu={}", set->name(), magic_enum::enum_name(set->menu.type));
         set->browser->on_action(set->xset_name);
         return true;
     }
@@ -660,7 +660,7 @@ add_toolbar_item(ptk::browser* file_browser, GtkBox* toolbar, const xset::name i
     }
     else
     {
-        ztd::logger::warn("set missing icon {}", set->name);
+        ztd::logger::warn("set missing icon {}", set->name());
         // image = xset_get_image("gtk-execute", (GtkIconSize)icon_size);
         image = gtk_image_new_from_icon_name("gtk-execute", (GtkIconSize)icon_size);
     }
@@ -3939,7 +3939,7 @@ ptk::browser::set_sort_extra(xset::name setname) const noexcept
 {
     const xset_t set = xset_get(setname);
 
-    if (!set->name.starts_with("sortx_"))
+    if (!set->name().starts_with("sortx_"))
     {
         return;
     }
@@ -5601,13 +5601,13 @@ ptk::browser::on_permission(GtkMenuItem* item,
         return;
     }
 
-    if (!set->name.starts_with("perm_"))
+    if (!set->name().starts_with("perm_"))
     {
         return;
     }
 
     std::string prog;
-    if (set->name.starts_with("perm_go") || set->name.starts_with("perm_ugo"))
+    if (set->name().starts_with("perm_go") || set->name().starts_with("perm_ugo"))
     {
         prog = "chmod -R";
     }
@@ -5732,16 +5732,16 @@ void
 ptk::browser::on_action(const xset::name setname) noexcept
 {
     const xset_t set = xset_get(setname);
-    // ztd::logger::info("ptk::browser::on_action {}", set->name);
+    // ztd::logger::info("ptk::browser::on_action {}", set->name());
 
-    if (set->name.starts_with("book_"))
+    if (set->name().starts_with("book_"))
     {
         if (set->xset_name == xset::name::book_add)
         {
             ptk::view::bookmark::add(this->cwd());
         }
     }
-    else if (set->name.starts_with("go_"))
+    else if (set->name().starts_with("go_"))
     {
         if (set->xset_name == xset::name::go_back)
         {
@@ -5760,7 +5760,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             this->go_home();
         }
     }
-    else if (set->name.starts_with("tab_"))
+    else if (set->name().starts_with("tab_"))
     {
         if (set->xset_name == xset::name::tab_new || set->xset_name == xset::name::tab_new_here)
         {
@@ -5794,12 +5794,12 @@ ptk::browser::on_action(const xset::name setname) noexcept
             }
             else
             {
-                i = std::stoi(ztd::removeprefix(set->name, "tab_"));
+                i = std::stoi(ztd::removeprefix(set->name(), "tab_"));
             }
             this->go_tab(i);
         }
     }
-    else if (set->name.starts_with("focus_"))
+    else if (set->name().starts_with("focus_"))
     {
         ptk::browser::focus_widget widget = ptk::browser::focus_widget::invalid;
         if (set->xset_name == xset::name::focus_path_bar)
@@ -5836,7 +5836,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
     {
         main_window_toggle_thumbnails_all_windows();
     }
-    else if (set->name.starts_with("sortby_"))
+    else if (set->name().starts_with("sortby_"))
     {
         i32 i = -3;
         if (set->xset_name == xset::name::sortby_name)
@@ -5906,22 +5906,22 @@ ptk::browser::on_action(const xset::name setname) noexcept
         }
         on_popup_sortby(nullptr, this, i);
     }
-    else if (set->name.starts_with("sortx_"))
+    else if (set->name().starts_with("sortx_"))
     {
         this->set_sort_extra(set->xset_name);
     }
-    else if (set->name.starts_with("panel"))
+    else if (set->name().starts_with("panel"))
     {
         const auto mode = this->main_window_->panel_context.at(this->panel_);
 
-        const panel_t panel_num = std::stoi(set->name.substr(5, 1));
+        const panel_t panel_num = std::stol(ztd::removeprefix(set->name(), "panel_"));
         // ztd::logger::debug("ACTION panel={}", panel_num);
 
         if (is_valid_panel(panel_num))
         {
             xset_t set2;
             const std::string fullxname = std::format("panel{}_", panel_num);
-            const std::string xname = ztd::removeprefix(set->name, fullxname);
+            const std::string xname = ztd::removeprefix(set->name(), fullxname);
             if (xname == "show_hidden") // shared key
             {
                 this->show_hidden_files(xset_get_b_panel(this->panel_, xset::panel::show_hidden));
@@ -5967,9 +5967,9 @@ ptk::browser::on_action(const xset::name setname) noexcept
             }
         }
     }
-    else if (set->name.starts_with("status_"))
+    else if (set->name().starts_with("status_"))
     {
-        if (set->name == "status_border" || set->name == "status_text")
+        if (set->name() == "status_border" || set->name() == "status_text")
         {
             on_status_effect_change(nullptr, this);
         }
@@ -5981,7 +5981,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             on_status_middle_click_config(nullptr, set);
         }
     }
-    else if (set->name.starts_with("paste_"))
+    else if (set->name().starts_with("paste_"))
     {
         if (set->xset_name == xset::name::paste_link)
         {
@@ -5996,7 +5996,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             ptk::action::paste_files(this, this->cwd());
         }
     }
-    else if (set->name.starts_with("select_"))
+    else if (set->name().starts_with("select_"))
     {
         if (set->xset_name == xset::name::select_all)
         {
