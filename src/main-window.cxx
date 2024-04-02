@@ -974,16 +974,16 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
 
     set = xset::set::get(xset::name::panel1_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == 1 && vis_count == 1);
+    set->disable = (this->curpanel == panel_1 && vis_count == 1);
     set = xset::set::get(xset::name::panel2_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == 2 && vis_count == 1);
+    set->disable = (this->curpanel == panel_2 && vis_count == 1);
     set = xset::set::get(xset::name::panel3_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == 3 && vis_count == 1);
+    set->disable = (this->curpanel == panel_3 && vis_count == 1);
     set = xset::set::get(xset::name::panel4_show);
     xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == 4 && vis_count == 1);
+    set->disable = (this->curpanel == panel_4 && vis_count == 1);
 
     set = xset::set::get(xset::name::panel_prev);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
@@ -1000,19 +1000,19 @@ MainWindow::rebuild_menu_view(ptk::browser* file_browser) noexcept
     set = xset::set::get(xset::name::panel_1);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_1);
-    set->disable = (this->curpanel == 1);
+    set->disable = (this->curpanel == panel_1);
     set = xset::set::get(xset::name::panel_2);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_2);
-    set->disable = (this->curpanel == 2);
+    set->disable = (this->curpanel == panel_2);
     set = xset::set::get(xset::name::panel_3);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_3);
-    set->disable = (this->curpanel == 3);
+    set->disable = (this->curpanel == panel_3);
     set = xset::set::get(xset::name::panel_4);
     xset_set_cb(set, (GFunc)on_focus_panel, this);
     xset_set_ob(set, "panel", panel_4);
-    set->disable = (this->curpanel == 4);
+    set->disable = (this->curpanel == panel_4);
 
 #if (GTK_MAJOR_VERSION == 4)
     GtkEventController* accel_group = gtk_shortcut_controller_new();

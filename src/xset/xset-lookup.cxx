@@ -905,7 +905,7 @@ static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{
 xset::name
 xset::get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept
 {
-    assert(panel == 1 || panel == 2 || panel == 3 || panel == 4);
+    assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
 
     return xset_panel_lookup.at(name).panel[panel - 1];
 }
@@ -924,7 +924,7 @@ xset::name
 xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name,
                                    xset::main_window_panel mode) noexcept
 {
-    assert(panel == 1 || panel == 2 || panel == 3 || panel == 4);
+    assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
     assert(name != xset::panel::show);
 
     return xset_panel_lookup.at(name).panel_mode[panel - 1][magic_enum::enum_integer(mode)];
