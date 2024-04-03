@@ -94,7 +94,7 @@ xset::set::get(const std::string_view name, const bool only_existing) noexcept
     if (!enum_value.has_value())
     {
         // ztd::logger::debug("name lookup custom {}", name);
-        return xset::set::create(xset::name::custom);
+        // return xset::set::create(xset::name::custom);
     }
     // ztd::logger::debug("name lookup {}", name);
     return xset::set::create(enum_value.value());

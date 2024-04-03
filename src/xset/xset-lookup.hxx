@@ -30,7 +30,7 @@ namespace xset
 enum class name
 {
     // all non builtin xsets will the 'custom' value.
-    custom,
+    // custom,
 
     // separator
     separator,

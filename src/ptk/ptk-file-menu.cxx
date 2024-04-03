@@ -1325,19 +1325,10 @@ ptk_file_menu_new(ptk::browser* browser,
         xset_set_cb(set, (GFunc)on_popup_open_with_another_activate, data);
         xset_add_menuitem(browser, submenu, accel_group, set);
 
-        // Default
-        std::string plain_type = file->mime_type()->type().data();
-        plain_type = ztd::replace(plain_type, "-", "_");
-        plain_type = ztd::replace(plain_type, " ", "");
-        plain_type = std::format("open_all_type_{}", plain_type);
-        set = xset::set::get(plain_type);
+        // Open With Default
+        set = xset::set::get(xset::name::open_all);
         xset_set_cb(set, (GFunc)on_popup_open_all, data);
-        set->menu.type = xset::set::menu_type::normal;
-        set->shared_key = xset::set::get(xset::name::open_all);
-        set2 = xset::set::get(xset::name::open_all);
-        set->menu.label = set2->menu.label;
         item = GTK_MENU_ITEM(xset_add_menuitem(browser, submenu, accel_group, set));
-        set->menu.label = std::nullopt; // do not bother to save this
 
         //
         g_signal_connect(G_OBJECT(submenu), "key-press-event", G_CALLBACK(app_menu_keypress), data);
