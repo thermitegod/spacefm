@@ -910,14 +910,6 @@ xset::get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept
     return xset_panel_lookup.at(name).panel[panel - 1];
 }
 
-const std::string_view
-xset::get_name_from_panel(panel_t panel, xset::panel name) noexcept
-{
-    const auto set_name = xset::get_xsetname_from_panel(panel, name);
-    const auto value = magic_enum::enum_name(set_name);
-    return value;
-}
-
 // panel mode
 
 xset::name
@@ -928,15 +920,6 @@ xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name,
     assert(name != xset::panel::show);
 
     return xset_panel_lookup.at(name).panel_mode[panel - 1][magic_enum::enum_integer(mode)];
-}
-
-const std::string_view
-xset::get_name_from_panel_mode(panel_t panel, xset::panel name,
-                               xset::main_window_panel mode) noexcept
-{
-    const auto set_name = xset::get_xsetname_from_panel_mode(panel, name, mode);
-    const auto value = magic_enum::enum_name(set_name);
-    return value;
 }
 
 // main window panel mode
