@@ -112,15 +112,6 @@
 struct PtkFileBrowserClass
 {
     GtkPanedClass parent;
-
-    /* Default signal handlers */
-    void (*before_chdir)(ptk::browser* file_browser, const std::filesystem::path& path);
-    void (*begin_chdir)(ptk::browser* file_browser);
-    void (*after_chdir)(ptk::browser* file_browser);
-    void (*open_item)(ptk::browser* file_browser, const std::filesystem::path& path, i32 action);
-    void (*content_change)(ptk::browser* file_browser);
-    void (*sel_change)(ptk::browser* file_browser);
-    void (*pane_mode_change)(ptk::browser* file_browser);
 };
 
 GType ptk_file_browser_get_type() noexcept;
@@ -190,16 +181,6 @@ static bool on_folder_view_drag_drop(GtkWidget* widget, GdkDragContext* drag_con
                                      std::time_t time, ptk::browser* file_browser) noexcept;
 static void on_folder_view_drag_end(GtkWidget* widget, GdkDragContext* drag_context,
                                     ptk::browser* file_browser) noexcept;
-
-/* Default signal handlers */
-static void ptk_file_browser_before_chdir(ptk::browser* file_browser,
-                                          const std::filesystem::path& path) noexcept;
-static void ptk_file_browser_after_chdir(ptk::browser* file_browser) noexcept;
-static void ptk_file_browser_content_change(ptk::browser* file_browser) noexcept;
-static void ptk_file_browser_sel_change(ptk::browser* file_browser) noexcept;
-static void ptk_file_browser_open_item(ptk::browser* file_browser,
-                                       const std::filesystem::path& path, i32 action) noexcept;
-static void ptk_file_browser_pane_mode_change(ptk::browser* file_browser) noexcept;
 
 static ptk::file_list::column
 file_list_order_from_sort_order(const ptk::browser::sort_order order) noexcept;
@@ -411,15 +392,6 @@ ptk_file_browser_class_init(PtkFileBrowserClass* klass) noexcept
     object_class->set_property = ptk_file_browser_set_property;
     object_class->get_property = ptk_file_browser_get_property;
     object_class->finalize = ptk_file_browser_finalize;
-
-    /* Signals */
-
-    klass->before_chdir = ptk_file_browser_before_chdir;
-    klass->after_chdir = ptk_file_browser_after_chdir;
-    klass->open_item = ptk_file_browser_open_item;
-    klass->content_change = ptk_file_browser_content_change;
-    klass->sel_change = ptk_file_browser_sel_change;
-    klass->pane_mode_change = ptk_file_browser_pane_mode_change;
 }
 
 bool
@@ -2782,47 +2754,6 @@ file_list_order_from_sort_order(const ptk::browser::sort_order order) noexcept
                   magic_enum::enum_integer(ptk::browser::sort_order::mtime) + 2);
 
     return ptk::file_list::column(magic_enum::enum_integer(order) + 2);
-}
-
-static void
-ptk_file_browser_before_chdir(ptk::browser* file_browser,
-                              const std::filesystem::path& path) noexcept
-{
-    (void)file_browser;
-    (void)path;
-}
-
-static void
-ptk_file_browser_after_chdir(ptk::browser* file_browser) noexcept
-{
-    (void)file_browser;
-}
-
-static void
-ptk_file_browser_content_change(ptk::browser* file_browser) noexcept
-{
-    (void)file_browser;
-}
-
-static void
-ptk_file_browser_sel_change(ptk::browser* file_browser) noexcept
-{
-    (void)file_browser;
-}
-
-static void
-ptk_file_browser_pane_mode_change(ptk::browser* file_browser) noexcept
-{
-    (void)file_browser;
-}
-
-static void
-ptk_file_browser_open_item(ptk::browser* file_browser, const std::filesystem::path& path,
-                           i32 action) noexcept
-{
-    (void)file_browser;
-    (void)path;
-    (void)action;
 }
 
 /**
