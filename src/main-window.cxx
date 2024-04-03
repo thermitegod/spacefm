@@ -1989,7 +1989,7 @@ MainWindow::set_window_title(ptk::browser* file_browser) noexcept
     }
 
     std::filesystem::path disp_path;
-    std::string disp_name;
+    std::filesystem::path disp_name;
 
     if (file_browser->dir_)
     {
@@ -2007,43 +2007,54 @@ MainWindow::set_window_title(ptk::browser* file_browser) noexcept
     }
 
     const auto orig_fmt = xset_get_s(xset::name::main_title);
-    std::string fmt;
+    std::string title;
     if (orig_fmt)
     {
-        fmt = orig_fmt.value();
-    }
-    else
-    {
-        fmt = "%d";
+        title = orig_fmt.value();
     }
 
-    if (fmt.contains("%t") || fmt.contains("%T") || fmt.contains("%p") || fmt.contains("%P"))
+    if (title.empty())
+    {
+        title = "%d";
+    }
+
+    if (title.contains("%t") || title.contains("%T") || title.contains("%p") ||
+        title.contains("%P"))
     {
         // get panel/tab info
         const auto counts = file_browser->get_tab_panel_counts();
-        const panel_t panel_count = counts.panel_count;
-        const tab_t tab_count = counts.tab_count;
-        const tab_t tab_num = counts.tab_num;
 
-        fmt = ztd::replace(fmt, "%t", std::format("{}", tab_num));
-        fmt = ztd::replace(fmt, "%T", std::format("{}", tab_count));
-        fmt = ztd::replace(fmt, "%p", std::format("{}", this->curpanel));
-        fmt = ztd::replace(fmt, "%P", std::format("{}", panel_count));
+        if (title.contains("%t"))
+        {
+            title = ztd::replace(title, "%t", std::format("{}", counts.tab_num));
+        }
+        if (title.contains("%T"))
+        {
+            title = ztd::replace(title, "%T", std::format("{}", counts.tab_count));
+        }
+        if (title.contains("%p"))
+        {
+            title = ztd::replace(title, "%p", std::format("{}", this->curpanel));
+        }
+        if (title.contains("%P"))
+        {
+            title = ztd::replace(title, "%P", std::format("{}", counts.panel_count));
+        }
     }
-    if (fmt.contains('*') && !this->is_main_tasks_running())
+    if (title.contains('*') && !this->is_main_tasks_running())
     {
-        fmt = ztd::replace(fmt, "*", "");
+        title = ztd::replace(title, "*", "");
     }
-    if (fmt.contains("%n"))
+    if (title.contains("%n"))
     {
-        fmt = ztd::replace(fmt, "%n", disp_name);
+        title = ztd::replace(title, "%n", disp_name.string());
     }
-    if (orig_fmt && orig_fmt.value().contains("%d"))
+    if (title.contains("%d"))
     {
-        fmt = ztd::replace(fmt, "%d", disp_path.string());
+        title = ztd::replace(title, "%d", disp_path.string());
     }
 
-    gtk_window_set_title(GTK_WINDOW(this), fmt.data());
+    gtk_window_set_title(GTK_WINDOW(this), title.data());
 }
 
 static void
