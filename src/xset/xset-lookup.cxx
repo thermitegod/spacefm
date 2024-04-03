@@ -903,7 +903,7 @@ static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{
 // panel
 
 xset::name
-xset::get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept
+xset::get_name_from_panel(const panel_t panel, const xset::panel name) noexcept
 {
     assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
 
@@ -913,8 +913,8 @@ xset::get_xsetname_from_panel(panel_t panel, xset::panel name) noexcept
 // panel mode
 
 xset::name
-xset::get_xsetname_from_panel_mode(panel_t panel, xset::panel name,
-                                   xset::main_window_panel mode) noexcept
+xset::get_name_from_panel_mode(const panel_t panel, const xset::panel name,
+                               const xset::main_window_panel mode) noexcept
 {
     assert(panel == panel_1 || panel == panel_2 || panel == panel_3 || panel == panel_4);
     assert(name != xset::panel::show);

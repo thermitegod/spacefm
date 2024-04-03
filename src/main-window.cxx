@@ -677,7 +677,7 @@ MainWindow::show_panels() noexcept
             const auto mode = this->panel_context.at(p);
 
             set = xset::set::get(
-                xset::get_xsetname_from_panel_mode(p, xset::panel::slider_positions, mode),
+                xset::get_name_from_panel_mode(p, xset::panel::slider_positions, mode),
                 true);
             if (!set)
             {
