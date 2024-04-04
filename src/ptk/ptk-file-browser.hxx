@@ -473,31 +473,31 @@ struct browser
 };
 } // namespace ptk
 
-GtkWidget* ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
-                                MainWindow* main_window) noexcept;
+GtkWidget* ptk_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
+                           MainWindow* main_window) noexcept;
 
-bool ptk_file_browser_delay_focus(ptk::browser* file_browser) noexcept;
+bool ptk_browser_delay_focus(ptk::browser* browser) noexcept;
 
 // xset callback wrapper functions
 namespace ptk::wrapper::browser
 {
-void go_home(GtkWidget* item, ptk::browser* file_browser) noexcept;
-void go_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
-void go_back(GtkWidget* item, ptk::browser* file_browser) noexcept;
-void go_forward(GtkWidget* item, ptk::browser* file_browser) noexcept;
-void go_up(GtkWidget* item, ptk::browser* file_browser) noexcept;
+void go_home(GtkWidget* item, ptk::browser* browser) noexcept;
+void go_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
+void go_back(GtkWidget* item, ptk::browser* browser) noexcept;
+void go_forward(GtkWidget* item, ptk::browser* browser) noexcept;
+void go_up(GtkWidget* item, ptk::browser* browser) noexcept;
 
-void refresh(GtkWidget* item, ptk::browser* file_browser) noexcept;
+void refresh(GtkWidget* item, ptk::browser* browser) noexcept;
 
-void new_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
-void new_tab_here(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
-void close_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
-void restore_tab(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
+void new_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
+void new_tab_here(GtkMenuItem* item, ptk::browser* browser) noexcept;
+void close_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
+void restore_tab(GtkMenuItem* item, ptk::browser* browser) noexcept;
 
-void select_all(GtkWidget* item, ptk::browser* file_browser) noexcept;
-void unselect_all(GtkWidget* item, ptk::browser* file_browser) noexcept;
-void invert_selection(GtkWidget* item, ptk::browser* file_browser) noexcept;
+void select_all(GtkWidget* item, ptk::browser* browser) noexcept;
+void unselect_all(GtkWidget* item, ptk::browser* browser) noexcept;
+void invert_selection(GtkWidget* item, ptk::browser* browser) noexcept;
 
-void focus(GtkMenuItem* item, ptk::browser* file_browser) noexcept;
-bool slider_release(GtkWidget* widget, GdkEvent* event, ptk::browser* file_browser) noexcept;
+void focus(GtkMenuItem* item, ptk::browser* browser) noexcept;
+bool slider_release(GtkWidget* widget, GdkEvent* event, ptk::browser* browser) noexcept;
 } // namespace ptk::wrapper::browser

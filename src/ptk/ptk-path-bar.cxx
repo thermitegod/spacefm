@@ -144,10 +144,9 @@ seek_path(GtkEntry* entry) noexcept
         }
     }
 
-    auto* const file_browser =
-        static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
+    auto* const browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
 
-    file_browser->seek_path(is_unique ? seek_dir : "", seek_name);
+    browser->seek_path(is_unique ? seek_dir : "", seek_name);
 
     return false;
 }
@@ -510,11 +509,11 @@ on_focus_out(GtkWidget* entry, GdkEventFocus* evt, void* user_data) noexcept
 
 #if defined(ENABLE_AUTO_SEEK)
 static void
-on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) noexcept
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcept
 {
     (void)entry;
 
-    if (!file_browser)
+    if (!browser)
     {
         return;
     }
@@ -528,17 +527,17 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) no
     xset_t set;
 
     set = xset::set::get(xset::name::separator);
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
+    xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
 
     set = xset::set::get(xset::name::path_seek);
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
+    xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(menu));
 }
 #endif
 
 GtkEntry*
-ptk::path_bar_new(ptk::browser* file_browser) noexcept
+ptk::path_bar_new(ptk::browser* browser) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_has_frame(entry, true);
@@ -552,11 +551,11 @@ ptk::path_bar_new(ptk::browser* file_browser) noexcept
     g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_key_press), nullptr);
 
 #if defined (ENABLE_AUTO_SEEK)
-    g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
+    g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), browser);
 #endif
     // clang-format on
 
-    g_object_set_data(G_OBJECT(entry), "browser", file_browser);
+    g_object_set_data(G_OBJECT(entry), "browser", browser);
 
     return entry;
 }

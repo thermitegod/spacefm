@@ -180,7 +180,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     {
         return {SOCKET_INVALID, std::format("invalid tab {}", tab)};
     }
-    ptk::browser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
+    ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
         gtk_notebook_get_nth_page(main_window->get_panel_notebook(panel), tab - 1));
 
     // command
@@ -324,19 +324,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
             if (subproperty == "filelist")
             {
-                widget = file_browser->folder_view();
+                widget = browser->folder_view();
             }
             else if (subproperty == "devices")
             {
-                widget = file_browser->side_dev;
+                widget = browser->side_dev;
             }
             else if (subproperty == "dirtree")
             {
-                widget = file_browser->side_dir;
+                widget = browser->side_dir;
             }
             else if (subproperty == "pathbar")
             {
-                widget = GTK_WIDGET(file_browser->path_bar());
+                widget = GTK_WIDGET(browser->path_bar());
             }
 
             if (GTK_IS_WIDGET(widget))
@@ -412,7 +412,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, std::format("invalid tab number: {}", new_tab)};
             }
-            file_browser->go_tab(new_tab);
+            browser->go_tab(new_tab);
         }
         else if (property == "new-tab")
         {
@@ -434,7 +434,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                                   xset::panel::show_devmon,
                                   main_window->panel_context.at(panel),
                                   subproperty == "true");
-            update_views_all_windows(nullptr, file_browser);
+            update_views_all_windows(nullptr, browser);
         }
         else if (property == "dirtree-visible")
         {
@@ -444,7 +444,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                                   xset::panel::show_dirtree,
                                   main_window->panel_context.at(panel),
                                   subproperty == "true");
-            update_views_all_windows(nullptr, file_browser);
+            update_views_all_windows(nullptr, browser);
         }
         else if (property == "toolbar-visible")
         {
@@ -454,14 +454,14 @@ socket::command(const std::string_view socket_commands_json) noexcept
                                   xset::panel::show_toolbox,
                                   main_window->panel_context.at(panel),
                                   subproperty == "true");
-            update_views_all_windows(nullptr, file_browser);
+            update_views_all_windows(nullptr, browser);
         }
         else if (property == "hidden-files-visible")
         {
             const std::string subproperty = json["subproperty"];
 
             xset_set_b_panel(panel, xset::panel::show_hidden, subproperty == "true");
-            update_views_all_windows(nullptr, file_browser);
+            update_views_all_windows(nullptr, browser);
         }
         else if (property == "panel1-visible")
         {
@@ -505,19 +505,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
             GtkPaned* pane = nullptr;
             if (property == "panel-hslider-top")
             {
-                pane = file_browser->side_vpane_top;
+                pane = browser->side_vpane_top;
             }
             else if (property == "panel-hslider-bottom")
             {
-                pane = file_browser->side_vpane_bottom;
+                pane = browser->side_vpane_bottom;
             }
             else
             {
-                pane = file_browser->hpane;
+                pane = browser->hpane;
             }
             gtk_paned_set_position(pane, width);
-            file_browser->slider_release(nullptr);
-            update_views_all_windows(nullptr, file_browser);
+            browser->slider_release(nullptr);
+            update_views_all_windows(nullptr, browser);
         }
         else if (property == "column-width")
         { // COLUMN WIDTH
@@ -530,13 +530,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, "invalid column width"};
             }
-            if (file_browser->is_view_mode(ptk::browser::view_mode::list_view))
+            if (browser->is_view_mode(ptk::browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
                 for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(browser->folder_view()),
                                                    static_cast<i32>(index));
                     if (!col)
                     {
@@ -629,28 +629,28 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, std::format("invalid column name '{}'", subproperty)};
             }
-            file_browser->set_sort_order(j);
+            browser->set_sort_order(j);
         }
         else if (property == "sort-ascend")
         {
             const std::string subproperty = json["subproperty"];
 
-            file_browser->set_sort_type(subproperty == "true" ? GtkSortType::GTK_SORT_ASCENDING
-                                                              : GtkSortType::GTK_SORT_DESCENDING);
+            browser->set_sort_type(subproperty == "true" ? GtkSortType::GTK_SORT_ASCENDING
+                                                         : GtkSortType::GTK_SORT_DESCENDING);
         }
         else if (property == "sort-natural")
         {
             const std::string subproperty = json["subproperty"];
 
             xset_set_b(xset::name::sortx_natural, subproperty == "true");
-            file_browser->set_sort_extra(xset::name::sortx_natural);
+            browser->set_sort_extra(xset::name::sortx_natural);
         }
         else if (property == "sort-case")
         {
             const std::string subproperty = json["subproperty"];
 
             xset_set_b(xset::name::sortx_case, subproperty == "true");
-            file_browser->set_sort_extra(xset::name::sortx_case);
+            browser->set_sort_extra(xset::name::sortx_case);
         }
         else if (property == "sort-hidden-first")
         {
@@ -659,7 +659,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const xset::name name =
                 subproperty == "true" ? xset::name::sortx_hidfirst : xset::name::sortx_hidlast;
             xset_set_b(name, true);
-            file_browser->set_sort_extra(name);
+            browser->set_sort_extra(name);
         }
         else if (property == "sort-first")
         {
@@ -682,7 +682,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_INVALID, std::format("invalid {} value", subproperty)};
             }
-            file_browser->set_sort_extra(name);
+            browser->set_sort_extra(name);
         }
         else if (property == "show-thumbnails")
         {
@@ -701,20 +701,20 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string subproperty = json["subproperty"];
 
-            if (!file_browser->is_view_mode(ptk::browser::view_mode::icon_view))
+            if (!browser->is_view_mode(ptk::browser::view_mode::icon_view))
             {
                 xset_set_b_panel_mode(panel,
                                       xset::panel::list_large,
                                       main_window->panel_context.at(panel),
                                       subproperty == "true");
-                update_views_all_windows(nullptr, file_browser);
+                update_views_all_windows(nullptr, browser);
             }
         }
         else if (property == "pathbar-text")
         { // TEXT [[SELSTART] SELEND]
             const std::string_view value = data[0];
 
-            GtkEntry* path_bar = file_browser->path_bar();
+            GtkEntry* path_bar = browser->path_bar();
 
 #if (GTK_MAJOR_VERSION == 4)
             gtk_editable_set_text(GTK_EDITABLE(path_bar), value.data());
@@ -781,13 +781,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
             if (select_filenames.empty())
             {
                 // unselect all
-                file_browser->unselect_all();
+                browser->unselect_all();
             }
             else
             {
                 for (const std::filesystem::path select_filename : select_filenames)
                 {
-                    file_browser->select_file(select_filename.filename(), false);
+                    browser->select_file(select_filename.filename(), false);
                 }
             }
         }
@@ -798,13 +798,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
             if (select_filenames.empty())
             {
                 // unselect all
-                file_browser->unselect_all();
+                browser->unselect_all();
             }
             else
             {
                 for (const std::filesystem::path select_filename : select_filenames)
                 {
-                    file_browser->unselect_file(select_filename.filename(), false);
+                    browser->unselect_file(select_filename.filename(), false);
                 }
             }
         }
@@ -815,11 +815,11 @@ socket::command(const std::string_view socket_commands_json) noexcept
             if (value.empty())
             {
                 // unselect all
-                file_browser->unselect_all();
+                browser->unselect_all();
             }
             else
             {
-                file_browser->select_pattern(value);
+                browser->select_pattern(value);
             }
         }
         else if (property == "current-dir")
@@ -834,7 +834,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_FAILURE, std::format("directory '{}' does not exist", value)};
             }
-            file_browser->chdir(value);
+            browser->chdir(value);
         }
         else if (property == "thumbnailer")
         {
@@ -963,20 +963,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "focused-pane")
         {
-            if (file_browser->folder_view() && gtk_widget_is_focus(file_browser->folder_view()))
+            if (browser->folder_view() && gtk_widget_is_focus(browser->folder_view()))
             {
                 return {SOCKET_SUCCESS, "filelist"};
             }
-            else if (file_browser->side_dev && gtk_widget_is_focus(file_browser->side_dev))
+            else if (browser->side_dev && gtk_widget_is_focus(browser->side_dev))
             {
                 return {SOCKET_SUCCESS, "devices"};
             }
-            else if (file_browser->side_dir && gtk_widget_is_focus(file_browser->side_dir))
+            else if (browser->side_dir && gtk_widget_is_focus(browser->side_dir))
             {
                 return {SOCKET_SUCCESS, "dirtree"};
             }
-            else if (file_browser->path_bar() &&
-                     gtk_widget_is_focus(GTK_WIDGET(file_browser->path_bar())))
+            else if (browser->path_bar() && gtk_widget_is_focus(GTK_WIDGET(browser->path_bar())))
             {
                 return {SOCKET_SUCCESS, "pathbar"};
             }
@@ -986,12 +985,12 @@ socket::command(const std::string_view socket_commands_json) noexcept
             return {SOCKET_SUCCESS,
                     std::format("{}",
                                 gtk_notebook_page_num(main_window->get_panel_notebook(panel),
-                                                      GTK_WIDGET(file_browser)) +
+                                                      GTK_WIDGET(browser)) +
                                     1)};
         }
         else if (property == "panel-count")
         {
-            const auto counts = file_browser->get_tab_panel_counts();
+            const auto counts = browser->get_tab_panel_counts();
             const panel_t panel_count = counts.panel_count;
             // const tab_t tab_count = counts.tab_count;
             // const tab_t tab_num = counts.tab_num;
@@ -1000,7 +999,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "tab-count")
         {
-            const auto counts = file_browser->get_tab_panel_counts();
+            const auto counts = browser->get_tab_panel_counts();
             // const panel_t panel_count = counts.panel_count;
             const tab_t tab_count = counts.tab_count;
             // const tab_t tab_num = counts.tab_num;
@@ -1066,15 +1065,15 @@ socket::command(const std::string_view socket_commands_json) noexcept
             GtkPaned* pane = nullptr;
             if (property == "panel-hslider-top")
             {
-                pane = file_browser->side_vpane_top;
+                pane = browser->side_vpane_top;
             }
             else if (property == "panel-hslider-bottom")
             {
-                pane = file_browser->side_vpane_bottom;
+                pane = browser->side_vpane_bottom;
             }
             else if (property == "panel-vslider")
             {
-                pane = file_browser->hpane;
+                pane = browser->hpane;
             }
             else
             {
@@ -1086,13 +1085,13 @@ socket::command(const std::string_view socket_commands_json) noexcept
         { // COLUMN
             const std::string subproperty = json["subproperty"];
 
-            if (file_browser->is_view_mode(ptk::browser::view_mode::list_view))
+            if (browser->is_view_mode(ptk::browser::view_mode::list_view))
             {
                 bool found = false;
                 GtkTreeViewColumn* col = nullptr;
                 for (const auto [index, column_title] : std::views::enumerate(column_titles))
                 {
-                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(file_browser->folder_view()),
+                    col = gtk_tree_view_get_column(GTK_TREE_VIEW(browser->folder_view()),
                                                    static_cast<i32>(index));
                     if (!col)
                     {
@@ -1128,7 +1127,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "sort-by")
         { // COLUMN
-            return {SOCKET_SUCCESS, std::string(magic_enum::enum_name(file_browser->sort_order_))};
+            return {SOCKET_SUCCESS, std::string(magic_enum::enum_name(browser->sort_order_))};
         }
         else if (property == "sort-ascend" || property == "sort-natural" ||
                  property == "sort-case" || property == "sort-hidden-first" ||
@@ -1136,26 +1135,25 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             if (property == "sort-ascend")
             {
-                return {SOCKET_SUCCESS,
-                        std::format(
-                            "{}",
-                            file_browser->is_sort_type(GtkSortType::GTK_SORT_ASCENDING) ? 1 : 0)};
+                return {
+                    SOCKET_SUCCESS,
+                    std::format("{}",
+                                browser->is_sort_type(GtkSortType::GTK_SORT_ASCENDING) ? 1 : 0)};
             }
             else if (property == "sort-natural")
             {
                 return {SOCKET_SUCCESS,
-                        std::format("{}",
-                                    xset_get_b_panel(file_browser->panel(), xset::panel::sort_extra)
-                                        ? 1
-                                        : 0)};
+                        std::format(
+                            "{}",
+                            xset_get_b_panel(browser->panel(), xset::panel::sort_extra) ? 1 : 0)};
             }
             else if (property == "sort-case")
             {
                 return {
                     SOCKET_SUCCESS,
                     std::format("{}",
-                                xset_get_b_panel(file_browser->panel(), xset::panel::sort_extra) &&
-                                        xset_get_int_panel(file_browser->panel(),
+                                xset_get_b_panel(browser->panel(), xset::panel::sort_extra) &&
+                                        xset_get_int_panel(browser->panel(),
                                                            xset::panel::sort_extra,
                                                            xset::var::x) == xset::set::enabled::yes
                                     ? 1
@@ -1165,7 +1163,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             {
                 return {SOCKET_SUCCESS,
                         std::format("{}",
-                                    xset_get_int_panel(file_browser->panel(),
+                                    xset_get_int_panel(browser->panel(),
                                                        xset::panel::sort_extra,
                                                        xset::var::z) == xset::set::enabled::yes
                                         ? 1
@@ -1173,9 +1171,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else if (property == "sort-first")
             {
-                const i32 result = xset_get_int_panel(file_browser->panel(),
-                                                      xset::panel::sort_extra,
-                                                      xset::var::y);
+                const i32 result =
+                    xset_get_int_panel(browser->panel(), xset::panel::sort_extra, xset::var::y);
                 if (result == 0)
                 {
                     return {SOCKET_SUCCESS, "mixed"};
@@ -1206,16 +1203,16 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "large-icons")
         {
-            return {SOCKET_SUCCESS, std::format("{}", file_browser->using_large_icons() ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", browser->using_large_icons() ? 1 : 0)};
         }
         else if (property == "statusbar-text")
         {
             return {SOCKET_SUCCESS,
-                    std::format("{}", gtk_label_get_text(file_browser->statusbar_label))};
+                    std::format("{}", gtk_label_get_text(browser->statusbar_label))};
         }
         else if (property == "pathbar-text")
         {
-            GtkEntry* path_bar = file_browser->path_bar();
+            GtkEntry* path_bar = browser->path_bar();
 
 #if (GTK_MAJOR_VERSION == 4)
             const std::string text = gtk_editable_get_text(GTK_EDITABLE(path_bar));
@@ -1293,7 +1290,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "selected-filenames" || property == "selected-files")
         {
-            const auto selected_files = file_browser->selected_files();
+            const auto selected_files = browser->selected_files();
             if (selected_files.empty())
             {
                 return {SOCKET_SUCCESS, ""};
@@ -1316,7 +1313,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "current-dir")
         {
-            return {SOCKET_SUCCESS, std::format("{}", file_browser->cwd().string())};
+            return {SOCKET_SUCCESS, std::format("{}", browser->cwd().string())};
         }
         else if (property == "thumbnailer")
         {
@@ -1639,10 +1636,10 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
             ptk::file_task* ptask =
                 ptk_file_exec_new(!opt_title.empty() ? opt_title : cmd,
-                                  !opt_cwd.empty() ? opt_cwd.data() : file_browser->cwd(),
-                                  GTK_WIDGET(file_browser),
-                                  file_browser->task_view());
-            ptask->task->exec_browser = file_browser;
+                                  !opt_cwd.empty() ? opt_cwd.data() : browser->cwd(),
+                                  GTK_WIDGET(browser),
+                                  browser->task_view());
+            ptask->task->exec_browser = browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_icon = opt_icon;
             ptask->task->exec_terminal = opt_terminal;
@@ -1745,10 +1742,10 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             // Task
             ptk::file_task* ptask = ptk_file_exec_new(property,
-                                                      file_browser->cwd(),
-                                                      GTK_WIDGET(file_browser),
-                                                      file_browser->task_view());
-            ptask->task->exec_browser = file_browser;
+                                                      browser->cwd(),
+                                                      GTK_WIDGET(browser),
+                                                      browser->task_view());
+            ptask->task->exec_browser = browser;
             ptask->task->exec_command = cmd;
             ptask->task->exec_terminal = false;
             ptask->task->exec_sync = true;
@@ -1851,16 +1848,16 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
 
 #if (GTK_MAJOR_VERSION == 4)
-            GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+            GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-            GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+            GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
             ptk::file_task* ptask = ptk_file_task_new(task_type,
                                                       file_list,
                                                       target_dir,
                                                       GTK_WINDOW(parent),
-                                                      file_browser->task_view());
+                                                      browser->task_view());
             ptask->run();
             return {SOCKET_SUCCESS,
                     std::format("# Note: $new_task_id not valid until approx one "
@@ -1921,7 +1918,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-            xset_add_menuitem(file_browser, GTK_WIDGET(widget), accel_group, set);
+            xset_add_menuitem(browser, GTK_WIDGET(widget), accel_group, set);
             g_idle_add((GSourceFunc)delayed_show_menu, widget);
         }
         else

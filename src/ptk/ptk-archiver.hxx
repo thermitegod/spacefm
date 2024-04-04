@@ -29,13 +29,13 @@
 
 namespace ptk::archiver
 {
-void create(ptk::browser* file_browser,
+void create(ptk::browser* browser,
             const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 
-void extract(ptk::browser* file_browser,
+void extract(ptk::browser* browser,
              const std::span<const std::shared_ptr<vfs::file>> selected_files,
              const std::filesystem::path& dest_dir) noexcept;
 
-void open(ptk::browser* file_browser,
+void open(ptk::browser* browser,
           const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept;
 } // namespace ptk::archiver

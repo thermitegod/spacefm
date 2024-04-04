@@ -2300,7 +2300,7 @@ on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noe
 }
 
 i32
-ptk::action::rename_files(ptk::browser* file_browser, const std::filesystem::path& file_dir,
+ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& file_dir,
                           const std::shared_ptr<vfs::file>& file, const char* dest_dir,
                           bool clip_copy, ptk::action::rename_mode create_new,
                           AutoOpenCreate* auto_open) noexcept
@@ -2375,16 +2375,16 @@ ptk::action::rename_files(ptk::browser* file_browser, const std::filesystem::pat
         mset->desc = "File";
     }
 
-    mset->browser = file_browser;
+    mset->browser = browser;
 
-    if (file_browser)
+    if (browser)
     {
 #if (GTK_MAJOR_VERSION == 4)
-        mset->parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+        mset->parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-        mset->parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+        mset->parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
-        task_view = file_browser->task_view();
+        task_view = browser->task_view();
     }
 
     mset->dlg =

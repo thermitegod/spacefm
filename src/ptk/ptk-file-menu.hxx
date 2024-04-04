@@ -82,14 +82,14 @@ struct file_menu
 struct AutoOpenCreate : public std::enable_shared_from_this<AutoOpenCreate>
 {
     AutoOpenCreate() = delete;
-    AutoOpenCreate(ptk::browser* file_browser, bool open_file) noexcept;
+    AutoOpenCreate(ptk::browser* browser, bool open_file) noexcept;
     ~AutoOpenCreate() = default;
     AutoOpenCreate(const AutoOpenCreate& other) = delete;
     AutoOpenCreate(AutoOpenCreate&& other) = delete;
     AutoOpenCreate& operator=(const AutoOpenCreate& other) = delete;
     AutoOpenCreate& operator=(AutoOpenCreate&& other) = delete;
 
-    ptk::browser* file_browser{nullptr};
+    ptk::browser* browser{nullptr};
     bool open_file{false};
     std::filesystem::path path;
     GFunc callback{nullptr};
@@ -111,7 +111,7 @@ void on_popup_open_in_new_tab_here(GtkMenuItem* menuitem, ptk::file_menu* data) 
 
 void ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept;
 
-void on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order) noexcept;
+void on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcept;
 void on_popup_list_detailed(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
 void on_popup_list_icons(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;
 void on_popup_list_compact(GtkMenuItem* menuitem, ptk::browser* browser) noexcept;

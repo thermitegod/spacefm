@@ -32,9 +32,9 @@ ptk::view::bookmark::add(const std::filesystem::path& book_path) noexcept
 }
 
 void
-ptk::view::bookmark::add_callback(GtkMenuItem* menuitem, ptk::browser* file_browser) noexcept
+ptk::view::bookmark::add_callback(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 {
     (void)menuitem;
 
-    ptk::view::bookmark::add(file_browser->cwd());
+    ptk::view::bookmark::add(browser->cwd());
 }

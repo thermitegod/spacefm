@@ -40,7 +40,7 @@
 #include "ptk/ptk-file-action-paste.hxx"
 
 void
-ptk::action::paste_files(ptk::browser* file_browser, const std::filesystem::path& cwd) noexcept
+ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd) noexcept
 {
     bool is_cut = false;
     i32 missing_targets = 0;
@@ -52,7 +52,7 @@ ptk::action::paste_files(ptk::browser* file_browser, const std::filesystem::path
     {
         const auto file = vfs::file::create(file_path);
 
-        const auto result = ptk::action::rename_files(file_browser,
+        const auto result = ptk::action::rename_files(browser,
                                                       file_path.parent_path(),
                                                       file,
                                                       cwd.c_str(),
@@ -68,12 +68,12 @@ ptk::action::paste_files(ptk::browser* file_browser, const std::filesystem::path
     if (missing_targets > 0)
     {
         GtkWidget* parent = nullptr;
-        if (file_browser)
+        if (browser)
         {
 #if (GTK_MAJOR_VERSION == 4)
-            parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+            parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-            parent = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+            parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
         }
 

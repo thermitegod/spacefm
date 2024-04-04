@@ -45,11 +45,11 @@
 
 #if (GTK_MAJOR_VERSION == 4)
 void
-xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+xset_add_menu(ptk::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
               const std::vector<xset::name>& submenu_entries) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 void
-xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+xset_add_menu(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
               const std::vector<xset::name>& submenu_entries) noexcept
 #endif
 {
@@ -61,7 +61,7 @@ xset_add_menu(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_
     for (const auto submenu_entry : submenu_entries)
     {
         const auto set = xset::set::get(submenu_entry);
-        xset_add_menuitem(file_browser, menu, accel_group, set);
+        xset_add_menuitem(browser, menu, accel_group, set);
     }
 }
 
@@ -87,11 +87,11 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon) noe
 
 #if (GTK_MAJOR_VERSION == 4)
 GtkWidget*
-xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkEventController* accel_group,
+xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkEventController* accel_group,
                   const xset_t& set) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
 GtkWidget*
-xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* accel_group,
+xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_group,
                   const xset_t& set) noexcept
 #endif
 {
@@ -148,7 +148,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
                 submenu = gtk_menu_new();
                 item = xset_new_menuitem(set->menu.label.value_or(""), icon_name);
                 gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-                xset_add_menu(file_browser, submenu, accel_group, set->context_menu_entries);
+                xset_add_menu(browser, submenu, accel_group, set->context_menu_entries);
                 break;
             case xset::set::menu_type::sep:
                 item = gtk_separator_menu_item_new();
@@ -180,7 +180,7 @@ xset_add_menuitem(ptk::browser* file_browser, GtkWidget* menu, GtkAccelGroup* ac
         item = xset_new_menuitem(set->menu.label.value_or(""), icon_name);
     }
 
-    set->browser = file_browser;
+    set->browser = browser;
     g_object_set_data(G_OBJECT(item), "menu", menu);
     g_object_set_data(G_OBJECT(item), "set", ::utils::strdup(set->name()));
 

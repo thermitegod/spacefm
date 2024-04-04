@@ -128,10 +128,10 @@ ptk::file_menu::~file_menu() noexcept
     }
 }
 
-AutoOpenCreate::AutoOpenCreate(ptk::browser* file_browser, bool open_file) noexcept
-    : file_browser(file_browser), open_file(open_file)
+AutoOpenCreate::AutoOpenCreate(ptk::browser* browser, bool open_file) noexcept
+    : browser(browser), open_file(open_file)
 {
-    if (this->file_browser)
+    if (this->browser)
     {
         this->callback = (GFunc)on_autoopen_create_cb;
     }
@@ -293,7 +293,7 @@ on_file_edit(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 }
 
 static void
-on_popup_sort_extra(GtkMenuItem* menuitem, ptk::browser* file_browser, const xset_t& set2) noexcept
+on_popup_sort_extra(GtkMenuItem* menuitem, ptk::browser* browser, const xset_t& set2) noexcept
 {
     xset_t set;
     if (menuitem)
@@ -305,11 +305,11 @@ on_popup_sort_extra(GtkMenuItem* menuitem, ptk::browser* file_browser, const xse
     {
         set = set2;
     }
-    file_browser->set_sort_extra(set->xset_name);
+    browser->set_sort_extra(set->xset_name);
 }
 
 void
-on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order) noexcept
+on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* browser, i32 order) noexcept
 {
     i32 v = 0;
 
@@ -333,31 +333,31 @@ on_popup_sortby(GtkMenuItem* menuitem, ptk::browser* file_browser, i32 order) no
         {
             v = GtkSortType::GTK_SORT_DESCENDING;
         }
-        xset_set_panel(file_browser->panel(),
+        xset_set_panel(browser->panel(),
                        xset::panel::list_detailed,
                        xset::var::y,
                        std::format("{}", v));
-        file_browser->set_sort_type((GtkSortType)v);
+        browser->set_sort_type((GtkSortType)v);
     }
     else
     {
-        xset_set_panel(file_browser->panel(),
+        xset_set_panel(browser->panel(),
                        xset::panel::list_detailed,
                        xset::var::x,
                        std::format("{}", sort_order));
-        file_browser->set_sort_order(static_cast<enum ptk::browser::sort_order>(sort_order));
+        browser->set_sort_order(static_cast<enum ptk::browser::sort_order>(sort_order));
     }
 }
 
 static void
-on_popup_detailed_column(GtkMenuItem* menuitem, ptk::browser* file_browser) noexcept
+on_popup_detailed_column(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 {
     (void)menuitem;
-    if (file_browser->is_view_mode(ptk::browser::view_mode::list_view))
+    if (browser->is_view_mode(ptk::browser::view_mode::list_view))
     {
         // get visiblity for correct mode
-        const MainWindow* main_window = file_browser->main_window();
-        const panel_t p = file_browser->panel();
+        const MainWindow* main_window = browser->main_window();
+        const panel_t p = browser->panel();
         const xset::main_window_panel mode = main_window->panel_context.at(p);
 
         xset_t set;
@@ -396,17 +396,17 @@ on_popup_detailed_column(GtkMenuItem* menuitem, ptk::browser* file_browser) noex
         set = xset::set::get(xset::panel::detcol_mtime, p, mode);
         set->b = xset::set::get(xset::panel::detcol_mtime, p)->b;
 
-        update_views_all_windows(nullptr, file_browser);
+        update_views_all_windows(nullptr, browser);
     }
 }
 
 static void
-on_popup_toggle_view(GtkMenuItem* menuitem, ptk::browser* file_browser) noexcept
+on_popup_toggle_view(GtkMenuItem* menuitem, ptk::browser* browser) noexcept
 {
     (void)menuitem;
     // get visiblity for correct mode
-    const MainWindow* main_window = file_browser->main_window();
-    const panel_t p = file_browser->panel();
+    const MainWindow* main_window = browser->main_window();
+    const panel_t p = browser->panel();
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
     xset_t set;
@@ -417,7 +417,7 @@ on_popup_toggle_view(GtkMenuItem* menuitem, ptk::browser* file_browser) noexcept
     set = xset::set::get(xset::panel::show_dirtree, p, mode);
     set->b = xset::set::get(xset::panel::show_dirtree, p)->b;
 
-    update_views_all_windows(nullptr, file_browser);
+    update_views_all_windows(nullptr, browser);
 }
 
 static void
@@ -2507,16 +2507,16 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
         return;
     }
 
-    if (GTK_IS_WIDGET(ao->file_browser) && std::filesystem::exists(ao->path))
+    if (GTK_IS_WIDGET(ao->browser) && std::filesystem::exists(ao->path))
     {
         const auto cwd = ao->path.parent_path();
 
         // select file
-        if (std::filesystem::equivalent(cwd, ao->file_browser->cwd()))
+        if (std::filesystem::equivalent(cwd, ao->browser->cwd()))
         {
             const auto file = vfs::file::create(ao->path);
-            ao->file_browser->dir_->emit_file_created(file->name(), true);
-            ao->file_browser->select_file(ao->path);
+            ao->browser->dir_->emit_file_created(file->name(), true);
+            ao->browser->select_file(ao->path);
         }
 
         // open file
@@ -2524,18 +2524,13 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
         {
             if (std::filesystem::is_directory(ao->path))
             {
-                ao->file_browser->chdir(ao->path);
+                ao->browser->chdir(ao->path);
             }
             else
             {
                 const auto file = vfs::file::create(ao->path);
                 const std::vector<std::shared_ptr<vfs::file>> selected_files{file};
-                ptk::action::open_files_with_app(cwd,
-                                                 selected_files,
-                                                 "",
-                                                 ao->file_browser,
-                                                 false,
-                                                 true);
+                ptk::action::open_files_with_app(cwd, selected_files, "", ao->browser, false, true);
             }
         }
     }

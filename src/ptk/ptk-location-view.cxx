@@ -79,7 +79,7 @@ static void remove_volume(const std::shared_ptr<vfs::volume>& vol) noexcept;
 static void update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept;
 
 static bool on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexcept;
-static bool on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser) noexcept;
+static bool on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* browser) noexcept;
 
 static bool try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept;
 
@@ -102,14 +102,14 @@ enum class column
 struct AutoOpen
 {
     AutoOpen() = delete;
-    AutoOpen(ptk::browser* file_browser) noexcept;
+    AutoOpen(ptk::browser* browser) noexcept;
     ~AutoOpen() noexcept;
     AutoOpen(const AutoOpen& other) = delete;
     AutoOpen(AutoOpen&& other) = delete;
     AutoOpen& operator=(const AutoOpen& other) = delete;
     AutoOpen& operator=(AutoOpen&& other) = delete;
 
-    ptk::browser* file_browser{nullptr};
+    ptk::browser* browser{nullptr};
     dev_t devnum{0};
     char* device_file{nullptr};
     char* mount_point{nullptr};
@@ -117,7 +117,7 @@ struct AutoOpen
     ptk::browser::open_action job{ptk::browser::open_action::dir};
 };
 
-AutoOpen::AutoOpen(ptk::browser* file_browser) noexcept : file_browser(file_browser) {}
+AutoOpen::AutoOpen(ptk::browser* browser) noexcept : browser(browser) {}
 
 AutoOpen::~AutoOpen() noexcept
 {
@@ -198,14 +198,14 @@ update_change_detection() noexcept
             const i32 num_pages = gtk_notebook_get_n_pages(notebook);
             for (const auto i : std::views::iota(0z, num_pages))
             {
-                ptk::browser* file_browser =
+                ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                if (file_browser)
+                if (browser)
                 {
                     // update current dir change detection
-                    file_browser->dir_->update_avoid_changes();
+                    browser->dir_->update_avoid_changes();
                     // update thumbnail visibility
-                    file_browser->show_thumbnails(
+                    browser->show_thumbnails(
                         config::settings.show_thumbnails ? config::settings.thumbnail_max_size : 0);
                 }
             }
@@ -341,11 +341,11 @@ ptk::view::location::selected_volume(GtkTreeView* location_view) noexcept
 
 static void
 on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* col,
-                 ptk::browser* file_browser) noexcept
+                 ptk::browser* browser) noexcept
 {
     (void)col;
     // ztd::logger::info("on_row_activated   view = {}", view);
-    if (!file_browser)
+    if (!browser)
     {
         return;
     }
@@ -383,15 +383,15 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
     {
         if (xset_get_b(xset::name::dev_newtab))
         {
-            file_browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
-                                                                ptk::browser::open_action::new_tab);
-            ptk::view::location::chdir(view, file_browser->cwd());
+            browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
+                                                           ptk::browser::open_action::new_tab);
+            ptk::view::location::chdir(view, browser->cwd());
         }
         else
         {
-            if (!std::filesystem::equivalent(vol->mount_point(), file_browser->cwd()))
+            if (!std::filesystem::equivalent(vol->mount_point(), browser->cwd()))
             {
-                file_browser->chdir(vol->mount_point());
+                browser->chdir(vol->mount_point());
             }
         }
     }
@@ -448,7 +448,7 @@ ptk_location_view_init_model(GtkListStore* list) noexcept
 }
 
 GtkWidget*
-ptk::view::location::create(ptk::browser* file_browser) noexcept
+ptk::view::location::create(ptk::browser* browser) noexcept
 {
     if (!model)
     {
@@ -505,12 +505,12 @@ ptk::view::location::create(ptk::browser* file_browser) noexcept
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
-    g_object_set_data(G_OBJECT(view), "browser", file_browser);
+    g_object_set_data(G_OBJECT(view), "browser", browser);
 
     // clang-format off
-    g_signal_connect(G_OBJECT(view), "row-activated", G_CALLBACK(on_row_activated), file_browser);
+    g_signal_connect(G_OBJECT(view), "row-activated", G_CALLBACK(on_row_activated), browser);
     g_signal_connect(G_OBJECT(view), "button-press-event", G_CALLBACK(on_button_press_event), nullptr);
-    g_signal_connect(G_OBJECT(view), "key-press-event", G_CALLBACK(on_key_press_event), file_browser);
+    g_signal_connect(G_OBJECT(view), "key-press-event", G_CALLBACK(on_key_press_event), browser);
     // clang-format on
 
     return view;
@@ -670,10 +670,10 @@ update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
 }
 
 void
-ptk::view::location::mount_network(ptk::browser* file_browser, const std::string_view url,
+ptk::view::location::mount_network(ptk::browser* browser, const std::string_view url,
                                    const bool new_tab, const bool force_new_mount) noexcept
 {
-    (void)file_browser;
+    (void)browser;
     (void)url;
     (void)new_tab;
     (void)force_new_mount;
@@ -727,11 +727,11 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     {
         return;
     }
-    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
-    // Note: file_browser may be nullptr
-    if (!GTK_IS_WIDGET(file_browser))
+    auto* browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+    // Note: browser may be nullptr
+    if (!GTK_IS_WIDGET(browser))
     {
-        file_browser = nullptr;
+        browser = nullptr;
     }
 
     // task
@@ -745,10 +745,10 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
     ptk::file_task* ptask =
-        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
+        ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
-    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_browser = browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
     ptask->task->exec_show_error = true;
@@ -769,11 +769,11 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
     {
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
-    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
-    // Note: file_browser may be nullptr
-    if (!GTK_IS_WIDGET(file_browser))
+    auto* browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+    // Note: browser may be nullptr
+    if (!GTK_IS_WIDGET(browser))
     {
-        file_browser = nullptr;
+        browser = nullptr;
     }
 
     // task
@@ -787,10 +787,10 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
 
     const std::string task_name = std::format("Unmount {}", vol->device_file());
     ptk::file_task* ptask =
-        ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
+        ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
     ptask->task->exec_command = unmount_command;
     ptask->task->exec_sync = true;
-    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_browser = browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
     ptask->task->exec_show_error = true;
@@ -811,11 +811,11 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     {
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
-    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
-    // Note: file_browser may be nullptr
-    if (!GTK_IS_WIDGET(file_browser))
+    auto* browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+    // Note: browser may be nullptr
+    if (!GTK_IS_WIDGET(browser))
     {
-        file_browser = nullptr;
+        browser = nullptr;
     }
 
     if (vol->is_mounted())
@@ -831,10 +831,10 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
 
         const std::string task_name = std::format("Remove {}", vol->device_file());
         ptk::file_task* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
+            ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
         ptask->task->exec_command = unmount_command;
         ptask->task->exec_sync = true;
-        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_browser = browser;
         ptask->task->exec_show_error = true;
         ptask->task->exec_terminal = false;
         ptask->task->exec_icon = vol->icon();
@@ -848,7 +848,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         const std::string line = std::format("eject {}", vol->device_file());
         const std::string task_name = std::format("Remove {}", vol->device_file());
         ptk::file_task* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
+            ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
         ptask->task->exec_show_error = false;
@@ -862,7 +862,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
         const std::string line = "sync";
         const std::string task_name = std::format("Remove {}", vol->device_file());
         ptk::file_task* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
+            ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
         ptask->task->exec_command = line;
         ptask->task->exec_sync = false;
         ptask->task->exec_show_error = false;
@@ -888,11 +888,10 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
         {
             if (volume->is_mounted())
             {
-                ptk::browser* file_browser = ao->file_browser;
-                if (GTK_IS_WIDGET(file_browser))
+                ptk::browser* browser = ao->browser;
+                if (GTK_IS_WIDGET(browser))
                 {
-                    file_browser->run_event<spacefm::signal::open_item>(volume->mount_point(),
-                                                                        ao->job);
+                    browser->run_event<spacefm::signal::open_item>(volume->mount_point(), ao->job);
                 }
                 else
                 {
@@ -906,11 +905,10 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
             break;
         }
     }
-    if (GTK_IS_WIDGET(ao->file_browser) && ao->job == ptk::browser::open_action::new_tab &&
-        ao->file_browser->side_dev)
+    if (GTK_IS_WIDGET(ao->browser) && ao->job == ptk::browser::open_action::new_tab &&
+        ao->browser->side_dev)
     {
-        ptk::view::location::chdir(GTK_TREE_VIEW(ao->file_browser->side_dev),
-                                   ao->file_browser->cwd());
+        ptk::view::location::chdir(GTK_TREE_VIEW(ao->browser->side_dev), ao->browser->cwd());
     }
 
     delete ao;
@@ -924,8 +922,8 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
     {
         return false;
     }
-    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
-    if (!file_browser)
+    auto* browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+    if (!browser)
     {
         return false;
     }
@@ -939,11 +937,10 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
     const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
-    ptk::file_task* ptask =
-        ptk_file_exec_new(task_name, GTK_WIDGET(view), file_browser->task_view());
+    ptk::file_task* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), browser->task_view());
     ptask->task->exec_command = mount_command;
     ptask->task->exec_sync = true;
-    ptask->task->exec_browser = file_browser;
+    ptask->task->exec_browser = browser;
     ptask->task->exec_popup = false;
     ptask->task->exec_show_output = false;
     ptask->task->exec_show_error = true; // set to true for error on click
@@ -951,7 +948,7 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
     ptask->task->exec_icon = vol->icon();
 
     // autoopen
-    auto* const ao = new AutoOpen(file_browser);
+    auto* const ao = new AutoOpen(browser);
     ao->devnum = vol->devnum();
 
     if (xset_get_b(xset::name::dev_newtab))
@@ -974,7 +971,7 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
 static void
 on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
-    ptk::browser* file_browser = nullptr;
+    ptk::browser* browser = nullptr;
     GtkWidget* view = nullptr;
 
     if (!item)
@@ -987,14 +984,14 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     }
     if (view)
     {
-        file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+        browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
-        file_browser = main_window_get_current_file_browser();
+        browser = main_window_get_current_browser();
     }
 
-    if (!file_browser || !vol)
+    if (!browser || !vol)
     {
         return;
     }
@@ -1012,10 +1009,10 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
 
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
-        ptk::file_task* ptask = ptk_file_exec_new(task_name, view, file_browser->task_view());
+        ptk::file_task* ptask = ptk_file_exec_new(task_name, view, browser->task_view());
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
-        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_browser = browser;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;
         ptask->task->exec_show_error = true;
@@ -1023,7 +1020,7 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
         ptask->task->exec_icon = vol->icon();
 
         // autoopen
-        auto* const ao = new AutoOpen(file_browser);
+        auto* const ao = new AutoOpen(browser);
         ao->devnum = vol->devnum();
         ao->job = ptk::browser::open_action::new_tab;
 
@@ -1034,15 +1031,15 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     }
     else
     {
-        file_browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
-                                                            ptk::browser::open_action::new_tab);
+        browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
+                                                       ptk::browser::open_action::new_tab);
     }
 }
 
 static void
 on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* view2) noexcept
 {
-    ptk::browser* file_browser = nullptr;
+    ptk::browser* browser = nullptr;
     GtkWidget* view = nullptr;
     if (!item)
     {
@@ -1054,11 +1051,11 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     if (view)
     {
-        file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+        browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
-        file_browser = main_window_get_current_file_browser();
+        browser = main_window_get_current_browser();
     }
 
     if (!vol)
@@ -1066,10 +1063,10 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
         return;
     }
 
-    // Note: file_browser may be nullptr
-    if (!GTK_IS_WIDGET(file_browser))
+    // Note: browser may be nullptr
+    if (!GTK_IS_WIDGET(browser))
     {
-        file_browser = nullptr;
+        browser = nullptr;
     }
 
     if (!vol->is_mounted())
@@ -1086,10 +1083,10 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
         ptk::file_task* ptask =
-            ptk_file_exec_new(task_name, view, file_browser ? file_browser->task_view() : nullptr);
+            ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
         ptask->task->exec_command = mount_command;
         ptask->task->exec_sync = true;
-        ptask->task->exec_browser = file_browser;
+        ptask->task->exec_browser = browser;
         ptask->task->exec_popup = false;
         ptask->task->exec_show_output = false;
         ptask->task->exec_show_error = true;
@@ -1097,7 +1094,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
         ptask->task->exec_icon = vol->icon();
 
         // autoopen
-        auto* const ao = new AutoOpen(file_browser);
+        auto* const ao = new AutoOpen(browser);
         ao->devnum = vol->devnum();
         ao->job = ptk::browser::open_action::dir;
 
@@ -1106,10 +1103,10 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
 
         ptask->run();
     }
-    else if (file_browser)
+    else if (browser)
     {
-        file_browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
-                                                            ptk::browser::open_action::dir);
+        browser->run_event<spacefm::signal::open_item>(vol->mount_point(),
+                                                       ptk::browser::open_action::dir);
     }
     else
     {
@@ -1324,9 +1321,8 @@ ptk::view::location::on_action(GtkWidget* view, const xset_t& set) noexcept
 }
 
 static void
-show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
-                  ptk::browser* file_browser, u32 button,
-                  const std::chrono::system_clock::time_point time_point) noexcept
+show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, ptk::browser* browser,
+                  u32 button, const std::chrono::system_clock::time_point time_point) noexcept
 {
     (void)button;
     (void)time_point;
@@ -1390,7 +1386,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
         context_menu_entries.push_back(xset::name::dev_menu_mark);
     }
 
-    xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
+    xset_add_menu(browser, popup, accel_group, context_menu_entries);
 
     xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
@@ -1407,7 +1403,7 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol,
                          xset::name::dev_newtab,
                      });
 
-    xset_add_menu(file_browser,
+    xset_add_menu(browser,
                   popup,
                   accel_group,
                   {
@@ -1439,8 +1435,8 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
     }
 
     // ztd::logger::info("on_button_press_event   view = {}", view);
-    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
-    file_browser->focus_me();
+    auto* browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+    browser->focus_me();
 
     // get selected vol
 
@@ -1485,7 +1481,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
             break;
         case 3:
             // right button
-            show_devices_menu(view, vol, file_browser, button, time_point);
+            show_devices_menu(view, vol, browser, button, time_point);
             ret = true;
             break;
     }
@@ -1498,7 +1494,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
 }
 
 static bool
-on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser) noexcept
+on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* browser) noexcept
 {
     (void)w;
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
@@ -1509,12 +1505,11 @@ on_key_press_event(GtkWidget* w, GdkEvent* event, ptk::browser* file_browser) no
         (keyval == GDK_KEY_F10 && keymod == GdkModifierType::GDK_SHIFT_MASK))
     {
         // simulate right-click (menu)
-        show_devices_menu(
-            GTK_TREE_VIEW(file_browser->side_dev),
-            ptk::view::location::selected_volume(GTK_TREE_VIEW(file_browser->side_dev)),
-            file_browser,
-            3,
-            time_point);
+        show_devices_menu(GTK_TREE_VIEW(browser->side_dev),
+                          ptk::view::location::selected_volume(GTK_TREE_VIEW(browser->side_dev)),
+                          browser,
+                          3,
+                          time_point);
         return true;
     }
     return false;
@@ -1533,7 +1528,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 {
     (void)dev_item;
     (void)time_point;
-    ptk::browser* file_browser = nullptr;
+    ptk::browser* browser = nullptr;
 
     // validate vol
     for (const auto& volume : vfs::volume_get_all_volumes())
@@ -1552,14 +1547,14 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
     if (xset_get_b(xset::name::dev_newtab))
     {
-        file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
+        browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
-        file_browser = nullptr;
+        browser = nullptr;
     }
 
-    // NOTE: file_browser may be nullptr
+    // NOTE: browser may be nullptr
     switch (button)
     {
         case 1:
@@ -1567,7 +1562,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
             // device opener?  note that context may be based on devices list sel
             // will not work for desktop because no DesktopWindow currently available
 
-            if (file_browser)
+            if (browser)
             {
                 on_open_tab(nullptr, vol, view);
             }
@@ -1608,7 +1603,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
     g_object_set_data(G_OBJECT(item), "view", view);
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
-    if (file_browser)
+    if (browser)
     {
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open_tab), vol.get());
     }
@@ -1712,14 +1707,13 @@ cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::v
 #endif
 
 void
-ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* file_browser,
-                              GtkWidget* menu) noexcept
+ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* browser, GtkWidget* menu) noexcept
 { // add currently visible devices to menu with dev design mode callback
     xset_t set;
 
     g_object_set_data(G_OBJECT(menu), "parent", parent);
-    // file_browser may be nullptr
-    g_object_set_data(G_OBJECT(parent), "browser", file_browser);
+    // browser may be nullptr
+    g_object_set_data(G_OBJECT(parent), "browser", browser);
 
     for (const auto& volume : vfs::volume_get_all_volumes())
     {

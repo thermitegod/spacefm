@@ -498,10 +498,10 @@ show_task_manager(MainWindow* main_window, bool show) noexcept
         if (tasks_has_focus)
         {
             // focus the file list
-            auto* const file_browser = main_window->current_file_browser();
-            if (file_browser)
+            auto* const browser = main_window->current_browser();
+            if (browser)
             {
-                gtk_widget_grab_focus(file_browser->folder_view());
+                gtk_widget_grab_focus(browser->folder_view());
             }
         }
     }
@@ -878,8 +878,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             }
 
             // build popup
-            auto* const file_browser = main_window->current_file_browser();
-            if (!file_browser)
+            auto* const browser = main_window->current_browser();
+            if (!browser)
             {
                 return false;
             }
@@ -942,7 +942,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
 
             ptk::view::file_task::prepare_menu(main_window, popup);
 
-            xset_add_menu(file_browser, popup, accel_group, context_menu_entries);
+            xset_add_menu(browser, popup, accel_group, context_menu_entries);
 
             gtk_widget_show_all(GTK_WIDGET(popup));
 

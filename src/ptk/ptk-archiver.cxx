@@ -61,10 +61,10 @@ archiver_create_shell_file_list(
 }
 
 void
-ptk::archiver::create(ptk::browser* file_browser,
+ptk::archiver::create(ptk::browser* browser,
                       const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
-    (void)file_browser;
+    (void)browser;
 
     if (!is_archiver_installed() || selected_files.empty())
     {
@@ -79,7 +79,7 @@ ptk::archiver::create(ptk::browser* file_browser,
 }
 
 void
-ptk::archiver::extract(ptk::browser* file_browser,
+ptk::archiver::extract(ptk::browser* browser,
                        const std::span<const std::shared_ptr<vfs::file>> selected_files,
                        const std::filesystem::path& dest_dir) noexcept
 {
@@ -99,7 +99,7 @@ ptk::archiver::extract(ptk::browser* file_browser,
     else
     {
         command.append(
-            std::format("--extract-to={} ", ::utils::shell_quote(file_browser->cwd().string())));
+            std::format("--extract-to={} ", ::utils::shell_quote(browser->cwd().string())));
     }
     command.append(shell_file_list);
 
@@ -108,10 +108,10 @@ ptk::archiver::extract(ptk::browser* file_browser,
 }
 
 void
-ptk::archiver::open(ptk::browser* file_browser,
+ptk::archiver::open(ptk::browser* browser,
                     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
-    (void)file_browser;
+    (void)browser;
 
     if (!is_archiver_installed() || selected_files.empty())
     {

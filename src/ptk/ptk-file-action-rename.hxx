@@ -38,7 +38,7 @@ enum class rename_mode
     new_link,
 };
 
-i32 rename_files(ptk::browser* file_browser, const std::filesystem::path& file_dir,
+i32 rename_files(ptk::browser* browser, const std::filesystem::path& file_dir,
                  const std::shared_ptr<vfs::file>& file, const char* dest_dir, bool clip_copy,
                  ptk::action::rename_mode create_new, AutoOpenCreate* auto_open = nullptr) noexcept;
 } // namespace ptk::action

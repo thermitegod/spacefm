@@ -21,5 +21,5 @@
 
 namespace ptk::action
 {
-void paste_files(ptk::browser* file_browser, const std::filesystem::path& cwd) noexcept;
+void paste_files(ptk::browser* browser, const std::filesystem::path& cwd) noexcept;
 }

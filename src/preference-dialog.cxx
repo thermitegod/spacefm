@@ -197,17 +197,17 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
             const i32 total_pages = gtk_notebook_get_n_pages(notebook);
             for (const auto i : std::views::iota(0z, total_pages))
             {
-                ptk::browser* file_browser =
+                ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 // update views
-                gtk_widget_destroy(file_browser->folder_view());
-                file_browser->folder_view(nullptr);
-                if (file_browser->side_dir)
+                gtk_widget_destroy(browser->folder_view());
+                browser->folder_view(nullptr);
+                if (browser->side_dir)
                 {
-                    gtk_widget_destroy(file_browser->side_dir);
-                    file_browser->side_dir = nullptr;
+                    gtk_widget_destroy(browser->side_dir);
+                    browser->side_dir = nullptr;
                 }
-                file_browser->update_views();
+                browser->update_views();
             }
         }
     }
@@ -305,17 +305,17 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
             const i32 total_pages = gtk_notebook_get_n_pages(notebook);
             for (const auto i : std::views::iota(0z, total_pages))
             {
-                ptk::browser* file_browser =
+                ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 // update views
-                gtk_widget_destroy(file_browser->folder_view());
-                file_browser->folder_view(nullptr);
-                if (file_browser->side_dir)
+                gtk_widget_destroy(browser->folder_view());
+                browser->folder_view(nullptr);
+                if (browser->side_dir)
                 {
-                    gtk_widget_destroy(file_browser->side_dir);
-                    file_browser->side_dir = nullptr;
+                    gtk_widget_destroy(browser->side_dir);
+                    browser->side_dir = nullptr;
                 }
-                file_browser->update_views();
+                browser->update_views();
             }
         }
     }
@@ -478,9 +478,9 @@ check_button_cb(GtkToggleButton* button, void* user_data) noexcept
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    ptk::browser* file_browser =
+                    ptk::browser* browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                    file_browser->set_single_click(config::settings.single_click);
+                    browser->set_single_click(config::settings.single_click);
                 }
             }
         }
@@ -517,11 +517,11 @@ check_button_cb(GtkToggleButton* button, void* user_data) noexcept
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    ptk::browser* file_browser =
+                    ptk::browser* browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                     // TODO
-                    (void)file_browser;
-                    // file_browser->set_single_hover(config::settings.single_hover);
+                    (void)browser;
+                    // browser->set_single_hover(config::settings.single_hover);
                 }
             }
         }
@@ -663,16 +663,16 @@ check_button_cb(GtkToggleButton* button, void* user_data) noexcept
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    ptk::browser* file_browser =
+                    ptk::browser* browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
 
                     if (show_toolbar_home)
                     {
-                        gtk_widget_show(GTK_WIDGET(file_browser->toolbar_home));
+                        gtk_widget_show(GTK_WIDGET(browser->toolbar_home));
                     }
                     else
                     {
-                        gtk_widget_hide(GTK_WIDGET(file_browser->toolbar_home));
+                        gtk_widget_hide(GTK_WIDGET(browser->toolbar_home));
                     }
                 }
             }
@@ -709,16 +709,16 @@ check_button_cb(GtkToggleButton* button, void* user_data) noexcept
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    ptk::browser* file_browser =
+                    ptk::browser* browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
 
                     if (show_toolbar_refresh)
                     {
-                        gtk_widget_show(GTK_WIDGET(file_browser->toolbar_refresh));
+                        gtk_widget_show(GTK_WIDGET(browser->toolbar_refresh));
                     }
                     else
                     {
-                        gtk_widget_hide(GTK_WIDGET(file_browser->toolbar_refresh));
+                        gtk_widget_hide(GTK_WIDGET(browser->toolbar_refresh));
                     }
                 }
             }
@@ -755,16 +755,16 @@ check_button_cb(GtkToggleButton* button, void* user_data) noexcept
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    ptk::browser* file_browser =
+                    ptk::browser* browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
 
                     if (show_toolbar_search)
                     {
-                        gtk_widget_show(GTK_WIDGET(file_browser->search_bar_));
+                        gtk_widget_show(GTK_WIDGET(browser->search_bar_));
                     }
                     else
                     {
-                        gtk_widget_hide(GTK_WIDGET(file_browser->search_bar_));
+                        gtk_widget_hide(GTK_WIDGET(browser->search_bar_));
                     }
                 }
             }
@@ -842,13 +842,13 @@ check_button_cb(GtkToggleButton* button, void* user_data) noexcept
                 const i32 total_pages = gtk_notebook_get_n_pages(notebook);
                 for (const auto i : std::views::iota(0z, total_pages))
                 {
-                    ptk::browser* file_browser =
+                    ptk::browser* browser =
                         PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                    GtkWidget* tab_label = window->create_tab_label(file_browser);
+                    GtkWidget* tab_label = window->create_tab_label(browser);
                     gtk_notebook_set_tab_label(notebook,
-                                               GTK_WIDGET(file_browser),
+                                               GTK_WIDGET(browser),
                                                GTK_WIDGET(tab_label));
-                    file_browser->update_tab_label();
+                    browser->update_tab_label();
                 }
             }
         }

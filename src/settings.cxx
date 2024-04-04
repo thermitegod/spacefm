@@ -188,7 +188,7 @@ save_settings() noexcept
                         std::string tabs;
                         for (const auto i : std::views::iota(0z, pages))
                         {
-                            ptk::browser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
+                            ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(
                                 gtk_notebook_get_nth_page(main_window->get_panel_notebook(p), i));
                             tabs = std::format("{}{}{}",
                                                tabs,
@@ -196,7 +196,7 @@ save_settings() noexcept
                                                // Need to use .string() as libfmt will by default
                                                // format paths with double quotes surrounding them
                                                // which will break config file parsing.
-                                               file_browser->cwd().string());
+                                               browser->cwd().string());
                         }
                         set->s = tabs;
 

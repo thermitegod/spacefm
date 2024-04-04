@@ -61,19 +61,19 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
     const auto keyval = gdk_key_event_get_keyval(event);
     if (keyval == GDK_KEY_Return)
     {
-        auto* const file_browser =
+        auto* const browser =
             static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(entry), "browser"));
 
         if (xset_get_b(xset::name::search_select))
         {
             if (!text.empty())
             {
-                file_browser->select_pattern(text);
+                browser->select_pattern(text);
             }
         }
         else
         {
-            file_browser->update_model(text);
+            browser->update_model(text);
         }
 
 #if (GTK_MAJOR_VERSION == 4)
@@ -82,18 +82,18 @@ on_key_press(GtkWidget* entry, GdkEvent* event, void* user_data) noexcept
         gtk_entry_set_text(GTK_ENTRY(entry), "");
 #endif
 
-        file_browser->focus(ptk::browser::focus_widget::filelist);
+        browser->focus(ptk::browser::focus_widget::filelist);
     }
 
     return false;
 }
 
 static void
-on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) noexcept
+on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcept
 {
     (void)entry;
 
-    if (!file_browser)
+    if (!browser)
     {
         return;
     }
@@ -107,16 +107,16 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* file_browser) no
     xset_t set;
 
     set = xset::set::get(xset::name::separator);
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
+    xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
 
     set = xset::set::get(xset::name::search_select);
-    xset_add_menuitem(file_browser, GTK_WIDGET(menu), accel_group, set);
+    xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
 
     gtk_widget_show_all(GTK_WIDGET(menu));
 }
 
 GtkEntry*
-ptk::search_bar_new(ptk::browser* file_browser) noexcept
+ptk::search_bar_new(ptk::browser* browser) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_placeholder_text(entry, "Search");
@@ -127,10 +127,10 @@ ptk::search_bar_new(ptk::browser* file_browser) noexcept
     g_signal_connect(G_OBJECT(entry), "focus-in-event", G_CALLBACK(on_focus_in), nullptr);
     g_signal_connect(G_OBJECT(entry), "focus-out-event", G_CALLBACK(on_focus_out), nullptr);
     g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_key_press), nullptr);
-    g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), file_browser);
+    g_signal_connect(G_OBJECT(entry), "populate-popup", G_CALLBACK(on_populate_popup), browser);
     // clang-format on
 
-    g_object_set_data(G_OBJECT(entry), "browser", file_browser);
+    g_object_set_data(G_OBJECT(entry), "browser", browser);
 
     return entry;
 }

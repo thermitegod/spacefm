@@ -23,5 +23,5 @@
 
 namespace ptk
 {
-GtkEntry* path_bar_new(ptk::browser* file_browser) noexcept;
+GtkEntry* path_bar_new(ptk::browser* browser) noexcept;
 }

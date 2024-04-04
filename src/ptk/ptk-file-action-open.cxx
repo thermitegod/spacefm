@@ -55,7 +55,7 @@
 
 struct ParentInfo
 {
-    ptk::browser* file_browser{nullptr};
+    ptk::browser* browser{nullptr};
     std::filesystem::path cwd;
 };
 
@@ -80,18 +80,18 @@ open_archives(const std::shared_ptr<ParentInfo>& parent,
     if (extract_here && ::utils::have_rw_access(parent->cwd))
     {
         // Extract Here
-        ptk::archiver::extract(parent->file_browser, selected_files, parent->cwd);
+        ptk::archiver::extract(parent->browser, selected_files, parent->cwd);
         return true;
     }
     else if (extract_here || xset_get_b(xset::name::archive_default_extract_to))
     {
         // Extract Here but no write access or Extract To option
-        ptk::archiver::extract(parent->file_browser, selected_files, "");
+        ptk::archiver::extract(parent->browser, selected_files, "");
         return true;
     }
     else if (xset_get_b(xset::name::archive_default_open_with_archiver))
     {
-        ptk::archiver::open(parent->file_browser, selected_files);
+        ptk::archiver::open(parent->browser, selected_files);
         return true;
     }
 
@@ -134,7 +134,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 void
 ptk::action::open_files_with_app(const std::filesystem::path& cwd,
                                  const std::span<const std::shared_ptr<vfs::file>> selected_files,
-                                 const std::string_view app_desktop, ptk::browser* file_browser,
+                                 const std::string_view app_desktop, ptk::browser* browser,
                                  const bool xforce, const bool xnever) noexcept
 {
     if (selected_files.empty())
@@ -142,7 +142,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
         return;
     }
 
-    const auto parent = std::make_shared<ParentInfo>(file_browser, cwd);
+    const auto parent = std::make_shared<ParentInfo>(browser, cwd);
 
     if (!app_desktop.empty())
     {
@@ -175,11 +175,10 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
             (config::settings.click_executes || xforce))
         {
             Glib::spawn_command_line_async(file->path());
-            if (file_browser)
+            if (browser)
             {
-                file_browser->run_event<spacefm::signal::open_item>(
-                    file->path(),
-                    ptk::browser::open_action::file);
+                browser->run_event<spacefm::signal::open_item>(file->path(),
+                                                               ptk::browser::open_action::file);
             }
             continue;
         }
@@ -225,9 +224,9 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
                 if (!std::filesystem::exists(target_path))
                 {
 #if (GTK_MAJOR_VERSION == 4)
-                    GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+                    GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-                    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+                    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
                     ptk::dialog::error(
@@ -250,9 +249,9 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
         {
             // Let the user choose an application
 #if (GTK_MAJOR_VERSION == 4)
-            GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(file_browser)));
+            GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-            GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(file_browser));
+            GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
             const auto ptk_app = ptk_choose_app_for_mime_type(GTK_WINDOW(toplevel),
@@ -260,7 +259,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
                                                               true,
                                                               true,
                                                               true,
-                                                              !file_browser);
+                                                              !browser);
 
             if (ptk_app)
             {
@@ -288,20 +287,19 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
         open_files_with_app(parent, open_files, desktop);
     }
 
-    if (file_browser && !dirs_to_open.empty())
+    if (browser && !dirs_to_open.empty())
     {
         if (dirs_to_open.size() == 1)
         {
-            file_browser->run_event<spacefm::signal::open_item>(dirs_to_open.front(),
-                                                                ptk::browser::open_action::dir);
+            browser->run_event<spacefm::signal::open_item>(dirs_to_open.front(),
+                                                           ptk::browser::open_action::dir);
         }
         else
         {
             for (const auto& dir : dirs_to_open)
             {
-                file_browser->run_event<spacefm::signal::open_item>(
-                    dir,
-                    ptk::browser::open_action::new_tab);
+                browser->run_event<spacefm::signal::open_item>(dir,
+                                                               ptk::browser::open_action::new_tab);
             }
         }
     }
