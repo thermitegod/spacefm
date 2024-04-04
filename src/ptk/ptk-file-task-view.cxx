@@ -498,7 +498,7 @@ show_task_manager(MainWindow* main_window, bool show) noexcept
         if (tasks_has_focus)
         {
             // focus the file list
-            ptk::browser* file_browser = main_window->current_file_browser();
+            auto* const file_browser = main_window->current_file_browser();
             if (file_browser)
             {
                 gtk_widget_grab_focus(file_browser->folder_view());
@@ -878,8 +878,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             }
 
             // build popup
-            ptk::browser* file_browser = nullptr;
-            file_browser = main_window->current_file_browser();
+            auto* const file_browser = main_window->current_file_browser();
             if (!file_browser)
             {
                 return false;

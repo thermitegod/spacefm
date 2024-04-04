@@ -621,7 +621,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
                                     void* user_data) noexcept
 {
     (void)info;
-    ptk::browser* file_browser = PTK_FILE_BROWSER(user_data);
+    auto* file_browser = static_cast<ptk::browser*>(user_data);
 
     /*  Do not call the default handler  */
     g_signal_stop_emission_by_name(widget, "drag-data-received");

@@ -727,7 +727,7 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     {
         return;
     }
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
     {
@@ -769,7 +769,7 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
     {
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
     {
@@ -811,7 +811,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     {
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
     {
@@ -924,7 +924,7 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
     {
         return false;
     }
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     if (!file_browser)
     {
         return false;
@@ -987,7 +987,7 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     }
     if (view)
     {
-        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+        file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
@@ -1054,7 +1054,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     if (view)
     {
-        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+        file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
@@ -1439,7 +1439,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
     }
 
     // ztd::logger::info("on_button_press_event   view = {}", view);
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     file_browser->focus_me();
 
     // get selected vol
@@ -1552,7 +1552,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
     if (xset_get_b(xset::name::dev_newtab))
     {
-        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
+        file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {

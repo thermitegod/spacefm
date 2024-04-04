@@ -37,7 +37,6 @@
 
 #include "types.hxx"
 
-#define PTK_FILE_BROWSER(obj)             (static_cast<ptk::browser*>(obj))
 #define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))
 
 // forward declare

@@ -175,7 +175,7 @@ static void
 on_devices_show(GtkMenuItem* item, MainWindow* main_window) noexcept
 {
     (void)item;
-    ptk::browser* file_browser = main_window->current_file_browser();
+    auto* const file_browser = main_window->current_file_browser();
     if (!file_browser)
     {
         return;
@@ -197,7 +197,7 @@ static void
 on_open_url(GtkWidget* widget, MainWindow* main_window) noexcept
 {
     (void)widget;
-    ptk::browser* file_browser = main_window->current_file_browser();
+    auto* const file_browser = main_window->current_file_browser();
     const auto url = xset_get_s(xset::name::main_save_session);
     if (file_browser && url)
     {
@@ -210,7 +210,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
-    ptk::browser* file_browser = main_window->current_file_browser();
+    auto* const file_browser = main_window->current_file_browser();
     const auto& cwd = file_browser->cwd();
 
     const std::vector<std::filesystem::path> search_dirs{cwd};
@@ -221,7 +221,7 @@ on_find_file_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 void
 MainWindow::open_terminal() const noexcept
 {
-    ptk::browser* file_browser = this->current_file_browser();
+    auto* const file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
@@ -532,7 +532,7 @@ MainWindow::focus_panel(const panel_t panel) noexcept
             gtk_widget_grab_focus(GTK_WIDGET(this->get_panel_notebook(panel_focus)));
             this->curpanel = panel_focus;
             this->notebook = this->get_panel_notebook(panel_focus);
-            ptk::browser* file_browser = this->current_file_browser();
+            auto* const file_browser = this->current_file_browser();
             if (file_browser)
             {
                 gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
@@ -546,7 +546,7 @@ MainWindow::focus_panel(const panel_t panel) noexcept
             gtk_widget_grab_focus(GTK_WIDGET(this->get_panel_notebook(panel_focus)));
             this->curpanel = panel_focus;
             this->notebook = this->get_panel_notebook(panel_focus);
-            ptk::browser* file_browser = this->current_file_browser();
+            auto* const file_browser = this->current_file_browser();
             if (file_browser)
             {
                 gtk_widget_grab_focus(GTK_WIDGET(file_browser->folder_view()));
@@ -1148,7 +1148,7 @@ MainWindow::rebuild_menus() noexcept
 {
     // ztd::logger::debug("MainWindow::rebuild_menus()");
 
-    ptk::browser* file_browser = this->current_file_browser();
+    auto* const file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
@@ -1736,7 +1736,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 {
     // ztd::logger::debug("New tab fb={} panel={} path={}", ztd::logger::utils::ptr(file_browser), this->curpanel, folder_path);
 
-    ptk::browser* current_file_browser = this->current_file_browser();
+    auto* const current_file_browser = this->current_file_browser();
     if (GTK_IS_WIDGET(current_file_browser))
     {
         // save sliders of current fb ( new tab while task manager is shown changes vals )
@@ -1744,7 +1744,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
         // save column widths of fb so new tab has same
         current_file_browser->save_column_widths();
     }
-    ptk::browser* file_browser = PTK_FILE_BROWSER_REINTERPRET(
+    auto* const file_browser = PTK_FILE_BROWSER_REINTERPRET(
         ptk_file_browser_new(this->curpanel, this->notebook, this->task_view, this));
     if (!file_browser)
     {
@@ -1948,7 +1948,7 @@ MainWindow::is_main_tasks_running() const noexcept
 void
 MainWindow::fullscreen_activate() noexcept
 {
-    ptk::browser* file_browser = this->current_file_browser();
+    auto* const file_browser = this->current_file_browser();
     if (xset_get_b(xset::name::main_full))
     {
         if (file_browser && file_browser->is_view_mode(ptk::browser::view_mode::list_view))
@@ -2073,7 +2073,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     ptk::browser* file_browser = nullptr;
 
     // save sliders of current fb ( new tab while task manager is shown changes vals )
-    ptk::browser* current_file_browser = main_window->current_file_browser();
+    auto* const current_file_browser = main_window->current_file_browser();
     if (current_file_browser)
     {
         current_file_browser->slider_release(nullptr);
@@ -2103,7 +2103,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
 void
 MainWindow::open_path_in_current_tab(const std::filesystem::path& path) const noexcept
 {
-    ptk::browser* file_browser = this->current_file_browser();
+    auto* const file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
@@ -2114,7 +2114,7 @@ MainWindow::open_path_in_current_tab(const std::filesystem::path& path) const no
 void
 MainWindow::open_network(const std::string_view url, const bool new_tab) const noexcept
 {
-    ptk::browser* file_browser = this->current_file_browser();
+    auto* const file_browser = this->current_file_browser();
     if (!file_browser)
     {
         return;
@@ -2207,7 +2207,7 @@ on_window_button_press_event(GtkWidget* widget, GdkEvent* event, MainWindow* mai
     // handle mouse back/forward buttons anywhere in the main window
     if (button == 4 || button == 5 || button == 8 || button == 9)
     {
-        ptk::browser* file_browser = main_window->current_file_browser();
+        auto* const file_browser = main_window->current_file_browser();
         if (!file_browser)
         {
             return false;
@@ -2243,8 +2243,6 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         return false;
     }
 
-    ptk::browser* browser = nullptr;
-
     if ((keyval == GDK_KEY_Home && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
         (keyval == GDK_KEY_End && (keymod == 0 || keymod == GdkModifierType::GDK_SHIFT_MASK)) ||
         (keyval == GDK_KEY_Delete && keymod == 0) || (keyval == GDK_KEY_Tab && keymod == 0) ||
@@ -2254,7 +2252,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
         (keyval == GDK_KEY_BackSpace && keymod == 0) ||
         (keymod == 0 && keyval != GDK_KEY_Escape && gdk_keyval_to_unicode(keyval))) // visible char
     {
-        browser = this->current_file_browser();
+        auto* const browser = this->current_file_browser();
         if (browser && gtk_widget_has_focus(GTK_WIDGET(browser->path_bar())))
         {
             return false; // send to path bar
@@ -2281,7 +2279,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
                 if (shared_key_set->name().starts_with("panel"))
                 {
                     // use current panel's set
-                    browser = this->current_file_browser();
+                    auto* const browser = this->current_file_browser();
                     if (browser)
                     {
                         const std::string new_set_name =
@@ -2329,7 +2327,7 @@ on_main_window_keypress(MainWindow* main_window, GdkEvent* event, void* user_dat
 bool
 MainWindow::keypress_found_key(const xset_t& set) noexcept
 {
-    ptk::browser* browser = this->current_file_browser();
+    auto* const browser = this->current_file_browser();
     if (!browser)
     {
         return true;

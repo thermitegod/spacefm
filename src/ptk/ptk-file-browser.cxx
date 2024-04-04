@@ -596,7 +596,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
 
     // get and focus browser
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(widget), "browser"));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(widget), "browser"));
     file_browser->focus_me();
     set->browser = file_browser;
 
@@ -983,7 +983,7 @@ GtkWidget*
 ptk_file_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
                      MainWindow* main_window) noexcept
 {
-    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
+    auto* file_browser = static_cast<ptk::browser*>(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
 
     file_browser->panel_ = curpanel;
     file_browser->notebook_ = notebook;
@@ -2171,7 +2171,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
     (void)y;
     (void)info;
 
-    ptk::browser* file_browser = PTK_FILE_BROWSER(user_data);
+    auto* file_browser = static_cast<ptk::browser*>(user_data);
 
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
         (gtk_selection_data_get_format(sel_data) == 8))
