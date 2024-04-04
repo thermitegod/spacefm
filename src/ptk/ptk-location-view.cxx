@@ -505,7 +505,7 @@ ptk::view::location::create(ptk::browser* file_browser) noexcept
     gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
     gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 
-    g_object_set_data(G_OBJECT(view), "file_browser", file_browser);
+    g_object_set_data(G_OBJECT(view), "browser", file_browser);
 
     // clang-format off
     g_signal_connect(G_OBJECT(view), "row-activated", G_CALLBACK(on_row_activated), file_browser);
@@ -727,8 +727,7 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     {
         return;
     }
-    ptk::browser* file_browser =
-        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
     {
@@ -770,8 +769,7 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
     {
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
-    ptk::browser* file_browser =
-        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
     {
@@ -813,8 +811,7 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     {
         view = GTK_WIDGET(g_object_get_data(G_OBJECT(item), "view"));
     }
-    ptk::browser* file_browser =
-        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     // Note: file_browser may be nullptr
     if (!GTK_IS_WIDGET(file_browser))
     {
@@ -927,8 +924,7 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
     {
         return false;
     }
-    ptk::browser* file_browser =
-        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     if (!file_browser)
     {
         return false;
@@ -991,7 +987,7 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     }
     if (view)
     {
-        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
@@ -1058,7 +1054,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     }
     if (view)
     {
-        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
@@ -1443,8 +1439,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
     }
 
     // ztd::logger::info("on_button_press_event   view = {}", view);
-    ptk::browser* file_browser =
-        PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+    ptk::browser* file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     file_browser->focus_me();
 
     // get selected vol
@@ -1557,7 +1552,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     GtkWidget* view = GTK_WIDGET(g_object_get_data(G_OBJECT(menu), "parent"));
     if (xset_get_b(xset::name::dev_newtab))
     {
-        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "file_browser"));
+        file_browser = PTK_FILE_BROWSER(g_object_get_data(G_OBJECT(view), "browser"));
     }
     else
     {
@@ -1724,7 +1719,7 @@ ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* file_browser,
 
     g_object_set_data(G_OBJECT(menu), "parent", parent);
     // file_browser may be nullptr
-    g_object_set_data(G_OBJECT(parent), "file_browser", file_browser);
+    g_object_set_data(G_OBJECT(parent), "browser", file_browser);
 
     for (const auto& volume : vfs::volume_get_all_volumes())
     {

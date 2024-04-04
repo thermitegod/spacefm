@@ -903,7 +903,7 @@ bookmark_menu_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noex
         }
 
         auto* const file_browser =
-            static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(widget), "file_browser"));
+            static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(widget), "browser"));
         MainWindow* main_window = file_browser->main_window();
 
         main_window->new_tab(file_path);
@@ -1110,7 +1110,7 @@ MainWindow::rebuild_menu_bookmarks(ptk::browser* file_browser) const noexcept
     {
         GtkWidget* item = gtk_menu_item_new_with_label(book_path.c_str());
 
-        g_object_set_data(G_OBJECT(item), "file_browser", file_browser);
+        g_object_set_data(G_OBJECT(item), "browser", file_browser);
         g_object_set_data(G_OBJECT(item), "path", ::utils::strdup(book_path.c_str()));
         g_object_set_data(G_OBJECT(item), "name", ::utils::strdup(book_name.c_str()));
 
