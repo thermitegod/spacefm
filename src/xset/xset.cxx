@@ -187,7 +187,12 @@ xset_set(const xset_t& set, const xset::var var, const std::string_view value) n
 {
     assert(set != nullptr);
     assert(var != xset::var::context_menu_entries);
+    assert(var != xset::var::style);
     assert(var != xset::var::shared_key);
+    assert(var != xset::var::icon);
+    assert(var != xset::var::key);
+    assert(var != xset::var::keymod);
+    assert(var != xset::var::disable);
 
     switch (var)
     {
@@ -223,59 +228,9 @@ xset_set(const xset_t& set, const xset::var var, const std::string_view value) n
             set->z = value;
             break;
         }
-        case xset::var::key:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->keybinding.key = result;
-            break;
-        }
-        case xset::var::keymod:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->keybinding.modifier = result;
-            break;
-        }
-        case xset::var::style:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->menu.type = xset::set::menu_type(result);
-            break;
-        }
         case xset::var::desc:
         {
             set->desc = value;
-            break;
-        }
-        case xset::var::title:
-        {
-            set->title = value;
             break;
         }
         case xset::var::menu_label:
@@ -283,26 +238,13 @@ xset_set(const xset_t& set, const xset::var var, const std::string_view value) n
             set->menu.label = value;
             break;
         }
-        case xset::var::icon:
-        {
-            set->icon = value;
-            break;
-        }
+
         case xset::var::disable:
-        {
-            u32 result{};
-            const auto [ptr, ec] =
-                std::from_chars(value.data(), value.data() + value.size(), result);
-            if (ec != std::errc())
-            {
-                ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                   magic_enum::enum_name(var),
-                                   value);
-                break;
-            }
-            set->disable = result == 1;
-            break;
-        }
+        case xset::var::title:
+        case xset::var::style:
+        case xset::var::icon:
+        case xset::var::key:
+        case xset::var::keymod:
         case xset::var::shared_key:
         case xset::var::context_menu_entries:
             break;
@@ -311,13 +253,6 @@ xset_set(const xset_t& set, const xset::var var, const std::string_view value) n
 
 void
 xset_set(const xset::name name, const xset::var var, const std::string_view value) noexcept
-{
-    const xset_t set = xset::set::get(name);
-    xset_set(set, var, value);
-}
-
-void
-xset_set(const std::string_view name, const xset::var var, const std::string_view value) noexcept
 {
     const xset_t set = xset::set::get(name);
     xset_set(set, var, value);

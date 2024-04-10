@@ -134,7 +134,7 @@ struct set : public std::enable_shared_from_this<set>
     xset::name xset_name;
 
     enum enabled
-    {
+    { // do not reorder - saved in config file
         unset,
         yes,
         no,
@@ -157,7 +157,7 @@ struct set : public std::enable_shared_from_this<set>
     callback_data callback;
 
     enum class menu_type
-    { // do not reorder - these values are saved in session files
+    { // do not reorder - saved in config file
         normal,
         check,
         string,
@@ -180,8 +180,8 @@ struct set : public std::enable_shared_from_this<set>
     };
     struct menu_data
     {
-        std::optional<std::string> label{std::nullopt}; // saved
-        menu_type type{menu_type::normal};              // saved if ( !lock ), or read if locked
+        std::optional<std::string> label{std::nullopt}; // not saved
+        menu_type type{menu_type::normal};              // not saved
         // only used when type == menu_type::radio
         GSList* radio_group{nullptr};            // not saved
         std::shared_ptr<set> radio_set{nullptr}; // not saved
@@ -213,9 +213,9 @@ struct set : public std::enable_shared_from_this<set>
     };
     keybinding_data keybinding;
 
-    std::optional<std::string> icon{std::nullopt};  // saved
-    std::optional<std::string> desc{std::nullopt};  // saved if ( !lock ), or read if locked
-    std::optional<std::string> title{std::nullopt}; // saved if ( !lock ), or read if locked
+    std::optional<std::string> icon{std::nullopt};  // not saved
+    std::optional<std::string> desc{std::nullopt};  // not saved
+    std::optional<std::string> title{std::nullopt}; // not saved
 
     std::vector<xset::name> context_menu_entries; // not saved, in order
 
@@ -233,8 +233,6 @@ const std::span<const xset_t> xsets();
 
 void xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept;
 void xset_set(const xset::name name, const xset::var var, const std::string_view value) noexcept;
-void xset_set(const std::string_view name, const xset::var var,
-              const std::string_view value) noexcept;
 
 void xset_set_submenu(const xset_t& set, const std::vector<xset::name>& submenu_entries) noexcept;
 

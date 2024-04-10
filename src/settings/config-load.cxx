@@ -257,7 +257,64 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                     ztd::logger::warn("Invalid xset::var enum name, xset::var::{}", toml_name);
                     continue;
                 }
-                xset_set(set, enum_var_value.value(), value);
+
+                const auto var = enum_var_value.value();
+
+                if (var == xset::var::s)
+                {
+                    set->s = value;
+                }
+                else if (var == xset::var::x)
+                {
+                    set->x = value;
+                }
+                else if (var == xset::var::y)
+                {
+                    set->y = value;
+                }
+                else if (var == xset::var::z)
+                {
+                    set->z = value;
+                }
+                else if (var == xset::var::key)
+                {
+                    u32 result = 0;
+                    const auto [ptr, ec] =
+                        std::from_chars(value.data(), value.data() + value.size(), result);
+                    if (ec != std::errc())
+                    {
+                        ztd::logger::error("Config: Failed trying to set xset.{} to {}",
+                                           magic_enum::enum_name(var),
+                                           value);
+                        continue;
+                    }
+                    set->keybinding.key = result;
+                }
+                else if (var == xset::var::keymod)
+                {
+                    u32 result = 0;
+                    const auto [ptr, ec] =
+                        std::from_chars(value.data(), value.data() + value.size(), result);
+                    if (ec != std::errc())
+                    {
+                        ztd::logger::error("Config: Failed trying to set xset.{} to {}",
+                                           magic_enum::enum_name(var),
+                                           value);
+                        continue;
+                    }
+                    set->keybinding.modifier = result;
+                }
+                else if (var == xset::var::b)
+                {
+                    if (value == "1")
+                    {
+                        set->b = xset::set::enabled::yes;
+                    }
+                    else
+                    {
+                        set->b = xset::set::enabled::no;
+                    }
+                }
             }
         }
     }

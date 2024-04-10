@@ -631,8 +631,11 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     }
     else
     {
-        xset_set(xset::name::view_columns, xset::var::disable, "1");
-        xset_set(xset::name::rubberband, xset::var::disable, "1");
+        set = xset::set::get(xset::name::view_columns);
+        set->disable = true;
+
+        set = xset::set::get(xset::name::rubberband);
+        set->disable = true;
     }
 
     set = xset::set::get(xset::name::view_thumb);
