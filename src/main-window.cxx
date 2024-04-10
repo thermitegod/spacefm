@@ -1409,7 +1409,6 @@ MainWindow::store_positions() noexcept
     if (!this->fullscreen)
     {
         // store width/height + sliders
-        i32 pos = 0;
         GtkAllocation allocation;
         gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
 
@@ -1420,22 +1419,24 @@ MainWindow::store_positions() noexcept
         }
         if (GTK_IS_PANED(this->hpane_top))
         {
-            pos = gtk_paned_get_position(this->hpane_top);
+            auto set = xset::set::get(xset::name::panel_sliders);
+
+            i32 pos = gtk_paned_get_position(this->hpane_top);
             if (pos)
             {
-                xset_set(xset::name::panel_sliders, xset::var::x, std::format("{}", pos));
+                set->x = std::format("{}", pos);
             }
 
             pos = gtk_paned_get_position(this->hpane_bottom);
             if (pos)
             {
-                xset_set(xset::name::panel_sliders, xset::var::y, std::format("{}", pos));
+                set->x = std::format("{}", pos);
             }
 
             pos = gtk_paned_get_position(this->vpane);
             if (pos)
             {
-                xset_set(xset::name::panel_sliders, xset::var::s, std::format("{}", pos));
+                set->x = std::format("{}", pos);
             }
 
             if (gtk_widget_get_visible(GTK_WIDGET(this->task_scroll)))
@@ -1444,11 +1445,9 @@ MainWindow::store_positions() noexcept
                 if (pos)
                 {
                     // save absolute height
-                    xset_set(xset::name::task_show_manager,
-                             xset::var::x,
-                             std::format("{}", allocation.height - pos));
-                    // ztd::logger::info("CLOS  win {}x{}    task height {}   slider {}",
-                    // allocation.width, allocation.height, allocation.height - pos, pos);
+                    set = xset::set::get(xset::name::panel_sliders);
+                    set->x = std::format("{}", allocation.height - pos);
+                    // ztd::logger::info("CLOS  win {}x{}    task height {}   slider {}", allocation.width, allocation.height, allocation.height - pos, pos);
                 }
             }
         }

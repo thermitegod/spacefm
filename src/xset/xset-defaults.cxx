@@ -1046,19 +1046,68 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::opentab_new, xset::var::menu_label, "N_ew");
-        xset_set(xset::name::opentab_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::opentab_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::opentab_1, xset::var::menu_label, "Tab _1");
-        xset_set(xset::name::opentab_2, xset::var::menu_label, "Tab _2");
-        xset_set(xset::name::opentab_3, xset::var::menu_label, "Tab _3");
-        xset_set(xset::name::opentab_4, xset::var::menu_label, "Tab _4");
-        xset_set(xset::name::opentab_5, xset::var::menu_label, "Tab _5");
-        xset_set(xset::name::opentab_6, xset::var::menu_label, "Tab _6");
-        xset_set(xset::name::opentab_7, xset::var::menu_label, "Tab _7");
-        xset_set(xset::name::opentab_8, xset::var::menu_label, "Tab _8");
-        xset_set(xset::name::opentab_9, xset::var::menu_label, "Tab _9");
-        xset_set(xset::name::opentab_10, xset::var::menu_label, "Tab 1_0");
+        const auto set = xset::set::get(xset::name::opentab_new);
+        set->menu.label = "N_ew";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_prev);
+        set->menu.label = "_Prev";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_next);
+        set->menu.label = "_Next";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_1);
+        set->menu.label = "Tab _1";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_2);
+        set->menu.label = "Tab _2";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_3);
+        set->menu.label = "Tab _3";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_4);
+        set->menu.label = "Tab _4";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_5);
+        set->menu.label = "Tab _5";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_6);
+        set->menu.label = "Tab _6";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_7);
+        set->menu.label = "Tab _7";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_8);
+        set->menu.label = "Tab _8";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_9);
+        set->menu.label = "Tab _9";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::opentab_10);
+        set->menu.label = "Tab 1_0";
     }
 
     {
@@ -1076,12 +1125,33 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::open_in_panel_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::open_in_panel_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::open_in_panel_1, xset::var::menu_label, "Panel _1");
-        xset_set(xset::name::open_in_panel_2, xset::var::menu_label, "Panel _2");
-        xset_set(xset::name::open_in_panel_3, xset::var::menu_label, "Panel _3");
-        xset_set(xset::name::open_in_panel_4, xset::var::menu_label, "Panel _4");
+        const auto set = xset::set::get(xset::name::open_in_panel_prev);
+        set->menu.label = "_Prev";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::open_in_panel_next);
+        set->menu.label = "_Next";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::open_in_panel_1);
+        set->menu.label = "Panel _1";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::open_in_panel_2);
+        set->menu.label = "Panel _2";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::open_in_panel_3);
+        set->menu.label = "Panel _3";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::open_in_panel_4);
+        set->menu.label = "Panel _4";
     }
 
     {
@@ -1781,18 +1851,63 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::copy_tab_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::copy_tab_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::copy_tab_1, xset::var::menu_label, "Tab _1");
-        xset_set(xset::name::copy_tab_2, xset::var::menu_label, "Tab _2");
-        xset_set(xset::name::copy_tab_3, xset::var::menu_label, "Tab _3");
-        xset_set(xset::name::copy_tab_4, xset::var::menu_label, "Tab _4");
-        xset_set(xset::name::copy_tab_5, xset::var::menu_label, "Tab _5");
-        xset_set(xset::name::copy_tab_6, xset::var::menu_label, "Tab _6");
-        xset_set(xset::name::copy_tab_7, xset::var::menu_label, "Tab _7");
-        xset_set(xset::name::copy_tab_8, xset::var::menu_label, "Tab _8");
-        xset_set(xset::name::copy_tab_9, xset::var::menu_label, "Tab _9");
-        xset_set(xset::name::copy_tab_10, xset::var::menu_label, "Tab 1_0");
+        const auto set = xset::set::get(xset::name::copy_tab_prev);
+        set->menu.label = "_Prev";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_next);
+        set->menu.label = "_Next";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_1);
+        set->menu.label = "Tab _1";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_2);
+        set->menu.label = "Tab _2";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_3);
+        set->menu.label = "Tab _3";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_4);
+        set->menu.label = "Tab _4";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_5);
+        set->menu.label = "Tab _5";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_6);
+        set->menu.label = "Tab _6";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_7);
+        set->menu.label = "Tab _7";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_8);
+        set->menu.label = "Tab _8";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_9);
+        set->menu.label = "Tab _9";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_tab_10);
+        set->menu.label = "Tab 1_0";
     }
 
     {
@@ -1810,12 +1925,33 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::copy_panel_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::copy_panel_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::copy_panel_1, xset::var::menu_label, "Panel _1");
-        xset_set(xset::name::copy_panel_2, xset::var::menu_label, "Panel _2");
-        xset_set(xset::name::copy_panel_3, xset::var::menu_label, "Panel _3");
-        xset_set(xset::name::copy_panel_4, xset::var::menu_label, "Panel _4");
+        const auto set = xset::set::get(xset::name::copy_panel_prev);
+        set->menu.label = "_Prev";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_panel_next);
+        set->menu.label = "_Next";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_panel_1);
+        set->menu.label = "Panel _1";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_panel_2);
+        set->menu.label = "Panel _2";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_panel_3);
+        set->menu.label = "Panel _3";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::copy_panel_4);
+        set->menu.label = "Panel _4";
     }
 
     {
@@ -1863,18 +1999,63 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::move_tab_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::move_tab_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::move_tab_1, xset::var::menu_label, "Tab _1");
-        xset_set(xset::name::move_tab_2, xset::var::menu_label, "Tab _2");
-        xset_set(xset::name::move_tab_3, xset::var::menu_label, "Tab _3");
-        xset_set(xset::name::move_tab_4, xset::var::menu_label, "Tab _4");
-        xset_set(xset::name::move_tab_5, xset::var::menu_label, "Tab _5");
-        xset_set(xset::name::move_tab_6, xset::var::menu_label, "Tab _6");
-        xset_set(xset::name::move_tab_7, xset::var::menu_label, "Tab _7");
-        xset_set(xset::name::move_tab_8, xset::var::menu_label, "Tab _8");
-        xset_set(xset::name::move_tab_9, xset::var::menu_label, "Tab _9");
-        xset_set(xset::name::move_tab_10, xset::var::menu_label, "Tab 1_0");
+        const auto set = xset::set::get(xset::name::move_tab_prev);
+        set->menu.label = "_Prev";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_next);
+        set->menu.label = "_Next";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_1);
+        set->menu.label = "Tab _1";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_2);
+        set->menu.label = "Tab _2";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_3);
+        set->menu.label = "Tab _3";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_4);
+        set->menu.label = "Tab _4";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_5);
+        set->menu.label = "Tab _5";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_6);
+        set->menu.label = "Tab _6";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_7);
+        set->menu.label = "Tab _7";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_8);
+        set->menu.label = "Tab _8";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_9);
+        set->menu.label = "Tab _9";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_tab_10);
+        set->menu.label = "Tab 1_0";
     }
 
     {
@@ -1892,12 +2073,33 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::move_panel_prev, xset::var::menu_label, "_Prev");
-        xset_set(xset::name::move_panel_next, xset::var::menu_label, "_Next");
-        xset_set(xset::name::move_panel_1, xset::var::menu_label, "Panel _1");
-        xset_set(xset::name::move_panel_2, xset::var::menu_label, "Panel _2");
-        xset_set(xset::name::move_panel_3, xset::var::menu_label, "Panel _3");
-        xset_set(xset::name::move_panel_4, xset::var::menu_label, "Panel _4");
+        const auto set = xset::set::get(xset::name::move_panel_prev);
+        set->menu.label = "_Prev";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_panel_next);
+        set->menu.label = "_Next";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_panel_1);
+        set->menu.label = "Panel _1";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_panel_2);
+        set->menu.label = "Panel _2";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_panel_3);
+        set->menu.label = "Panel _3";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::move_panel_4);
+        set->menu.label = "Panel _4";
     }
 
     {
@@ -1992,23 +2194,88 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::perm_r, xset::var::menu_label, "r--------");
-        xset_set(xset::name::perm_rw, xset::var::menu_label, "rw-------");
-        xset_set(xset::name::perm_rwx, xset::var::menu_label, "rwx------");
-        xset_set(xset::name::perm_r_r, xset::var::menu_label, "r--r-----");
-        xset_set(xset::name::perm_rw_r, xset::var::menu_label, "rw-r-----");
-        xset_set(xset::name::perm_rw_rw, xset::var::menu_label, "rw-rw----");
-        xset_set(xset::name::perm_rwxr_x, xset::var::menu_label, "rwxr-x---");
-        xset_set(xset::name::perm_rwxrwx, xset::var::menu_label, "rwxrwx---");
-        xset_set(xset::name::perm_r_r_r, xset::var::menu_label, "r--r--r--");
-        xset_set(xset::name::perm_rw_r_r, xset::var::menu_label, "rw-r--r--");
-        xset_set(xset::name::perm_rw_rw_rw, xset::var::menu_label, "rw-rw-rw-");
-        xset_set(xset::name::perm_rwxr_r, xset::var::menu_label, "rwxr--r--");
-        xset_set(xset::name::perm_rwxr_xr_x, xset::var::menu_label, "rwxr-xr-x");
-        xset_set(xset::name::perm_rwxrwxrwx, xset::var::menu_label, "rwxrwxrwx");
-        xset_set(xset::name::perm_rwxrwxrwt, xset::var::menu_label, "rwxrwxrwt");
-        xset_set(xset::name::perm_unstick, xset::var::menu_label, "-t");
-        xset_set(xset::name::perm_stick, xset::var::menu_label, "+t");
+        const auto set = xset::set::get(xset::name::perm_r);
+        set->menu.label = "r--------";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rw);
+        set->menu.label = "rw-------";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwx);
+        set->menu.label = "rwx------";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_r_r);
+        set->menu.label = "r--r-----";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rw_r);
+        set->menu.label = "rw-r-----";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rw_rw);
+        set->menu.label = "rw-rw----";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwxr_x);
+        set->menu.label = "rwxr-x---";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwxrwx);
+        set->menu.label = "rwxrwx---";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_r_r_r);
+        set->menu.label = "r--r--r--";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rw_r_r);
+        set->menu.label = "rw-r--r--";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rw_rw_rw);
+        set->menu.label = "rw-rw-rw-";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwxr_r);
+        set->menu.label = "rwxr--r--";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwxr_xr_x);
+        set->menu.label = "rwxr-xr-x";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwxrwxrwx);
+        set->menu.label = "rwxrwxrwx";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_rwxrwxrwt);
+        set->menu.label = "rwxrwxrwt";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_unstick);
+        set->menu.label = "-t";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_stick);
+        set->menu.label = "+t";
     }
 
     {
@@ -2025,11 +2292,28 @@ xset_defaults() noexcept
     }
 
     {
-        xset_set(xset::name::perm_go_w, xset::var::menu_label, "go-w");
-        xset_set(xset::name::perm_go_rwx, xset::var::menu_label, "go-rwx");
-        xset_set(xset::name::perm_ugo_w, xset::var::menu_label, "ugo+w");
-        xset_set(xset::name::perm_ugo_rx, xset::var::menu_label, "ugo+rX");
-        xset_set(xset::name::perm_ugo_rwx, xset::var::menu_label, "ugo+rwX");
+        const auto set = xset::set::get(xset::name::perm_go_w);
+        set->menu.label = "go-w";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_go_rwx);
+        set->menu.label = "go-rwx";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_ugo_w);
+        set->menu.label = "ugo+w";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_ugo_rx);
+        set->menu.label = "ugo+rX";
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::perm_ugo_rwx);
+        set->menu.label = "ugo+rwX";
     }
 
     // PANELS
