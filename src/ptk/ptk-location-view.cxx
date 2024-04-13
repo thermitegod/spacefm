@@ -1392,16 +1392,15 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, pt
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
     set = xset::set::get(xset::name::dev_menu_settings);
-    xset_set_submenu(set,
-                     {
-                         xset::name::dev_show,
-                         xset::name::separator,
-                         xset::name::dev_menu_auto,
-                         xset::name::dev_change,
-                         xset::name::separator,
-                         xset::name::dev_single,
-                         xset::name::dev_newtab,
-                     });
+    set->context_menu_entries = {
+        xset::name::dev_show,
+        xset::name::separator,
+        xset::name::dev_menu_auto,
+        xset::name::dev_change,
+        xset::name::separator,
+        xset::name::dev_single,
+        xset::name::dev_newtab,
+    };
 
     xset_add_menu(browser,
                   popup,
@@ -1750,12 +1749,11 @@ ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* browser, GtkWidge
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
     set = xset::set::get(xset::name::dev_menu_settings);
-    xset_set_submenu(set,
-                     {
-                         xset::name::dev_show,
-                         xset::name::separator,
-                         xset::name::dev_menu_auto,
-                         xset::name::dev_change,
-                         xset::name::dev_newtab,
-                     });
+    set->context_menu_entries = {
+        xset::name::dev_show,
+        xset::name::separator,
+        xset::name::dev_menu_auto,
+        xset::name::dev_change,
+        xset::name::dev_newtab,
+    };
 }

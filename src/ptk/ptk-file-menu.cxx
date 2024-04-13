@@ -623,7 +623,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
                 xset::name::view_reorder_col,
             };
         }
-        xset_set_submenu(set, context_menu_entries);
+        set->context_menu_entries = context_menu_entries;
 
         set = xset::set::get(xset::name::rubberband);
         xset_set_cb(set, (GFunc)main_window_rubberband_all, nullptr);
@@ -645,7 +645,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     if (browser->is_view_mode(ptk::browser::view_mode::icon_view))
     {
         set = xset::set::get(xset::panel::list_large, p);
-        xset_set_b(set, true);
+        set->b = xset::set::enabled::yes;
         set->disable = true;
     }
     else
@@ -923,7 +923,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
             xset::name::rubberband,
         };
     }
-    xset_set_submenu(set, context_menu_entries);
+    set->context_menu_entries = context_menu_entries;
 
     set = xset::set::get(xset::name::con_view);
     set->disable = !browser->file_list_;
@@ -987,7 +987,7 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
             xset::name::view_refresh,
         };
     }
-    xset_set_submenu(set, context_menu_entries);
+    set->context_menu_entries = context_menu_entries;
 
     xset_add_menuitem(browser, menu, accel_group, set);
 }

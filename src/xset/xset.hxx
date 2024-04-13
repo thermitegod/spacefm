@@ -222,23 +222,20 @@ struct set : public std::enable_shared_from_this<set>
   private:
     [[nodiscard]] static const std::shared_ptr<set> create(const xset::name name) noexcept;
 };
+
+// all xsets
+const std::span<const std::shared_ptr<xset::set>> sets();
 } // namespace xset
 
 using xset_t = std::shared_ptr<xset::set>;
 
-// all xsets
-const std::span<const xset_t> xsets();
-
 // get/set //
 
-void xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept;
+// void xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept;
 void xset_set(const xset::name name, const xset::var var, const std::string_view value) noexcept;
 
-void xset_set_submenu(const xset_t& set, const std::vector<xset::name>& submenu_entries) noexcept;
-
 // B
-bool xset_get_b(const xset_t& set) noexcept;
-bool xset_get_b(xset::name name) noexcept;
+bool xset_get_b(const xset::name name) noexcept;
 bool xset_get_b(const std::string_view name) noexcept;
 bool xset_get_b_panel(panel_t panel, const std::string_view name) noexcept;
 bool xset_get_b_panel(panel_t panel, xset::panel name) noexcept;
@@ -246,8 +243,7 @@ bool xset_get_b_panel_mode(panel_t panel, const std::string_view name,
                            xset::main_window_panel mode) noexcept;
 bool xset_get_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_panel mode) noexcept;
 
-void xset_set_b(const xset_t& set, bool bval) noexcept;
-void xset_set_b(xset::name name, bool bval) noexcept;
+void xset_set_b(const xset::name name, bool bval) noexcept;
 void xset_set_b(const std::string_view name, bool bval) noexcept;
 void xset_set_b_panel(panel_t panel, const std::string_view name, bool bval) noexcept;
 void xset_set_b_panel(panel_t panel, xset::panel name, bool bval) noexcept;
@@ -261,26 +257,22 @@ void xset_set_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_pa
  */
 
 // S
-const std::optional<std::string> xset_get_s(const xset_t& set) noexcept;
-const std::optional<std::string> xset_get_s(xset::name name) noexcept;
+const std::optional<std::string> xset_get_s(const xset::name name) noexcept;
 const std::optional<std::string> xset_get_s(const std::string_view name) noexcept;
 const std::optional<std::string> xset_get_s_panel(panel_t panel,
                                                   const std::string_view name) noexcept;
 const std::optional<std::string> xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
 
 // X
-const std::optional<std::string> xset_get_x(const xset_t& set) noexcept;
-const std::optional<std::string> xset_get_x(xset::name name) noexcept;
+const std::optional<std::string> xset_get_x(const xset::name name) noexcept;
 const std::optional<std::string> xset_get_x(const std::string_view name) noexcept;
 
 // Y
-const std::optional<std::string> xset_get_y(const xset_t& set) noexcept;
-const std::optional<std::string> xset_get_y(xset::name name) noexcept;
+const std::optional<std::string> xset_get_y(const xset::name name) noexcept;
 const std::optional<std::string> xset_get_y(const std::string_view name) noexcept;
 
 // Z
-const std::optional<std::string> xset_get_z(const xset_t& set) noexcept;
-const std::optional<std::string> xset_get_z(xset::name name) noexcept;
+const std::optional<std::string> xset_get_z(const xset::name name) noexcept;
 const std::optional<std::string> xset_get_z(const std::string_view name) noexcept;
 
 // Panel
@@ -292,7 +284,7 @@ void xset_set_panel(panel_t panel, xset::panel name, xset::var var,
 // CB
 
 void xset_set_cb(const xset_t& set, GFunc cb_func, void* cb_data) noexcept;
-void xset_set_cb(xset::name name, GFunc cb_func, void* cb_data) noexcept;
+void xset_set_cb(const xset::name name, GFunc cb_func, void* cb_data) noexcept;
 void xset_set_cb(const std::string_view name, GFunc cb_func, void* cb_data) noexcept;
 void xset_set_cb_panel(panel_t panel, const std::string_view name, GFunc cb_func,
                        void* cb_data) noexcept;
@@ -306,7 +298,7 @@ void xset_set_ob(const xset_t& set, const std::string_view key,
 // Int
 
 i32 xset_get_int(const xset_t& set, xset::var var) noexcept;
-i32 xset_get_int(xset::name name, xset::var var) noexcept;
+i32 xset_get_int(const xset::name name, xset::var var) noexcept;
 i32 xset_get_int(const std::string_view name, xset::var var) noexcept;
 i32 xset_get_int_panel(panel_t panel, const std::string_view name, xset::var var) noexcept;
 i32 xset_get_int_panel(panel_t panel, xset::panel name, xset::var var) noexcept;

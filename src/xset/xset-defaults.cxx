@@ -2619,7 +2619,7 @@ xset_default_keys() noexcept
 {
     // read all currently set or unset keys
     std::vector<xset_t> keysets;
-    for (const xset_t& set : xsets())
+    for (const xset_t& set : xset::sets())
     {
         assert(set != nullptr);
 

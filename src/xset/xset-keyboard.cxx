@@ -151,7 +151,7 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcep
 
     const std::string keyname = xset_get_keyname(nullptr, keyval, keymod);
 
-    for (const xset_t& set2 : xsets())
+    for (const xset_t& set2 : xset::sets())
     {
         assert(set2 != nullptr);
 
@@ -274,7 +274,7 @@ xset_set_key(GtkWidget* parent, const xset_t& set) noexcept
         if (response == GtkResponseType::GTK_RESPONSE_OK && (newkey || newkeymod))
         {
             // clear duplicate key assignments
-            for (const xset_t& set2 : xsets())
+            for (const xset_t& set2 : xset::sets())
             {
                 assert(set2 != nullptr);
 
