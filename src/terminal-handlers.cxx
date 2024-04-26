@@ -63,7 +63,7 @@ TerminalHandlers::TerminalHandlers() noexcept
 }
 
 const std::vector<std::string>
-TerminalHandlers::get_terminal_args(const std::string_view terminal) noexcept
+TerminalHandlers::get_terminal_args(const std::string_view terminal) const noexcept
 {
     // ztd::logger::debug("get_terminal_args={}", terminal);
     if (!this->handlers.contains(terminal.data()))
@@ -97,7 +97,7 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal) noexcept
 }
 
 const std::vector<std::string>
-TerminalHandlers::get_supported_terminal_names() noexcept
+TerminalHandlers::get_supported_terminal_names() const noexcept
 {
     std::vector<std::string> terminal_names;
     terminal_names.reserve(handlers.size());

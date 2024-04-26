@@ -38,8 +38,9 @@ struct TerminalHandlers
 {
     TerminalHandlers() noexcept;
 
-    const std::vector<std::string> get_terminal_args(const std::string_view terminal) noexcept;
-    const std::vector<std::string> get_supported_terminal_names() noexcept;
+    const std::vector<std::string>
+    get_terminal_args(const std::string_view terminal) const noexcept;
+    const std::vector<std::string> get_supported_terminal_names() const noexcept;
 
   private:
     std::unordered_map<std::string, TerminalHandler> handlers;
