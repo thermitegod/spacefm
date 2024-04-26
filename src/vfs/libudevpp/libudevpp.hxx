@@ -98,7 +98,7 @@ struct monitor
 {
   public:
     monitor() = default;
-    monitor(struct ::udev_monitor* device) noexcept : handle(device, &udev_monitor_unref){};
+    monitor(struct ::udev_monitor* device) noexcept : handle(device, &udev_monitor_unref) {};
     monitor(const monitor& other) = default;
     monitor(monitor&& other) noexcept : handle(std::move(other.handle)) {}
     monitor& operator=(const monitor& other) = default;
@@ -132,7 +132,7 @@ struct enumerate
   public:
     enumerate() = default;
     enumerate(struct ::udev_enumerate* enumerate) noexcept
-        : handle(enumerate, &udev_enumerate_unref){};
+        : handle(enumerate, &udev_enumerate_unref) {};
     enumerate(const enumerate& other) = default;
     enumerate(enumerate&& other) noexcept : handle(std::move(other.handle)) {}
     enumerate& operator=(const enumerate& other) = default;
@@ -176,7 +176,7 @@ struct device
 {
   public:
     device() = default;
-    device(struct ::udev_device* device) noexcept : handle(device, &udev_device_unref){};
+    device(struct ::udev_device* device) noexcept : handle(device, &udev_device_unref) {};
     device(const device& other) = default;
     device(device&& other) noexcept : handle(std::move(other.handle)) {}
     device& operator=(const device& other) = default;

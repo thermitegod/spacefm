@@ -40,7 +40,7 @@ u32 mime_change_timer = 0;
 
 struct mime_monitor
 {
-    mime_monitor(const std::shared_ptr<vfs::dir>& dir) : dir(dir){};
+    mime_monitor(const std::shared_ptr<vfs::dir>& dir) : dir(dir) {};
 
     [[nodiscard]] static const std::shared_ptr<mime_monitor>
     create(const std::shared_ptr<vfs::dir>& dir) noexcept;
