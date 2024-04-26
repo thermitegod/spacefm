@@ -43,8 +43,6 @@ using xsetpak_t = std::unordered_map<std::string, setvars_t>;
 const setvars_t
 pack_xset(const xset_t& set) noexcept
 {
-    assert(set != nullptr);
-
     setvars_t setvars;
 
     if (set->s)
@@ -109,8 +107,6 @@ pack_xsets() noexcept
 
     for (const xset_t& set : xset::sets())
     {
-        assert(set != nullptr);
-
         const setvars_t setvars = pack_xset(set);
         if (!setvars.empty())
         {

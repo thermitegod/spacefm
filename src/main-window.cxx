@@ -2261,8 +2261,6 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
 
     for (const xset_t& set : xset::sets())
     {
-        assert(set != nullptr);
-
         if (set->shared_key)
         {
             // set has shared key

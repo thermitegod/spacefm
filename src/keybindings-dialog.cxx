@@ -92,8 +92,6 @@ init_keybindings_tab(const xset::set::keybinding_type type) noexcept
 
     for (const xset_t& set : xset::sets())
     {
-        assert(set != nullptr);
-
         if (set->keybinding.type != type)
         {
             continue;

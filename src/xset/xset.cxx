@@ -77,8 +77,6 @@ xset::set::get(const std::string_view name, const bool only_existing) noexcept
 {
     for (const xset_t& set : xset::sets())
     { // check for existing xset
-        assert(set != nullptr);
-
         if (name == set->name())
         {
             return set;
@@ -105,8 +103,6 @@ xset::set::get(const xset::name name, const bool only_existing) noexcept
 {
     for (const xset_t& set : xset::sets())
     { // check for existing xset
-        assert(set != nullptr);
-
         if (name == set->xset_name)
         {
             return set;
