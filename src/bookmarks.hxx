@@ -18,12 +18,11 @@
 #include <filesystem>
 
 #include <array>
-#include <vector>
+#include <span>
 
 using bookmark_t = std::array<std::filesystem::path, 2>;
-using all_bookmarks_t = std::vector<bookmark_t>;
 
-const all_bookmarks_t& get_all_bookmarks() noexcept;
+[[nodiscard]] const std::span<bookmark_t> get_all_bookmarks() noexcept;
 
 void load_bookmarks() noexcept;
 void save_bookmarks() noexcept;

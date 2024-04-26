@@ -1140,7 +1140,7 @@ MainWindow::rebuild_menu_bookmarks(ptk::browser* browser) const noexcept
     gtk_menu_shell_append(GTK_MENU_SHELL(newmenu), gtk_separator_menu_item_new());
 
     // Add All Bookmarks
-    for (auto [book_path, book_name] : get_all_bookmarks())
+    for (const auto& [book_path, book_name] : get_all_bookmarks())
     {
         GtkWidget* item = gtk_menu_item_new_with_label(book_path.c_str());
 

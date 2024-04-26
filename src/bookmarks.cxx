@@ -20,6 +20,9 @@
 
 #include <filesystem>
 
+#include <vector>
+#include <span>
+
 #include <fstream>
 
 #include <ztd/ztd.hxx>
@@ -34,13 +37,12 @@
 // Bookmark Path, Bookmark Name
 namespace global
 {
-all_bookmarks_t bookmarks;
-
+std::vector<bookmark_t> bookmarks;
 bool bookmarks_changed = false;
 std::filesystem::path bookmark_file;
 } // namespace global
 
-const all_bookmarks_t&
+const std::span<bookmark_t>
 get_all_bookmarks() noexcept
 {
     return global::bookmarks;
@@ -49,12 +51,12 @@ get_all_bookmarks() noexcept
 static void
 parse_bookmarks(const std::string_view raw_line) noexcept
 {
-    const std::string line = ztd::strip(raw_line); // remove newline
+    const auto line = ztd::strip(raw_line); // remove newline
 
     const auto book_parts = ztd::rpartition(line, " ");
 
-    const std::string& book_path = book_parts[0];
-    const std::string& book_name = book_parts[2];
+    const auto& book_path = book_parts[0];
+    const auto& book_name = book_parts[2];
 
     if (book_path.empty())
     {
@@ -111,7 +113,7 @@ save_bookmarks() noexcept
     global::bookmarks_changed = false;
 
     std::string book_entry;
-    for (auto [book_path, book_name] : global::bookmarks)
+    for (const auto& [book_path, book_name] : global::bookmarks)
     {
         book_entry.append(std::format("file://{} {}\n", book_path.string(), book_name.string()));
     }
