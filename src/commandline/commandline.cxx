@@ -15,11 +15,7 @@
 
 #include <filesystem>
 
-#if defined(__cpp_lib_print)
 #include <print>
-#else
-#include <fmt/format.h>
-#endif
 
 #include <CLI/CLI.hpp>
 
@@ -61,18 +57,10 @@ run_commandline(const commandline_opt_data_t& opt) noexcept
 
     if (opt->version)
     {
-#if defined(__cpp_lib_print)
         std::println("{} {}", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
 #if defined(HAVE_SOCKET)
         std::println("Socket Port: {}", SOCKET_PORT);
 #endif
-#else
-        fmt::println("{} {}", PACKAGE_NAME_FANCY, PACKAGE_VERSION);
-#if defined(HAVE_SOCKET)
-        fmt::println("Socket Port: {}", SOCKET_PORT);
-#endif
-#endif
-
         std::exit(EXIT_SUCCESS);
     }
 

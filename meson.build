@@ -233,7 +233,6 @@ libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
 openssl_dep = dependency('openssl', required : true)
 
 spdlog_dep = dependency('spdlog', required : true)
-fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 pugixml_dep = dependency('pugixml', required : true)
 
@@ -256,7 +255,6 @@ dependencies = [
   toml11_dep,
 
   spdlog_dep,
-  fmt_dep,
   sigc_dep,
   pugixml_dep,
   cli11_dep,

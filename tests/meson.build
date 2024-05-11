@@ -193,7 +193,6 @@ openssl_dep = dependency('openssl', required : true)
 exo_dep = dependency('exo-2', required : true)
 # x11_dep = dependency('x11', required : true)
 spdlog_dep = dependency('spdlog', required : true)
-fmt_dep = dependency('fmt', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 pugixml_dep = dependency('pugixml', required : true)
 nlohmann_json_dep = dependency('nlohmann_json', required : true)
@@ -227,7 +226,6 @@ dependencies = [
     toml11_dep,
 
     spdlog_dep,
-    fmt_dep,
     sigc_dep,
     pugixml_dep,
     nlohmann_json_dep,
