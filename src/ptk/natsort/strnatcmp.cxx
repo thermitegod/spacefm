@@ -154,8 +154,8 @@ strnatcmp0(const char* a, const char* b, const bool fold_case) noexcept
 
         if (fold_case)
         {
-            ca = std::toupper(ca);
-            cb = std::toupper(cb);
+            ca = static_cast<char>(std::toupper(ca));
+            cb = static_cast<char>(std::toupper(cb));
         }
 
         if (ca < cb)
