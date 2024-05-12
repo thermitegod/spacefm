@@ -50,6 +50,7 @@ debug_flags = [
   '-pedantic-errors',
   # '-Wfatal-errors',
   # '-ftime-trace',
+  # '-fsave-optimization-record',
 ]
 
 if get_option('buildtype') == 'debug'
@@ -65,7 +66,6 @@ endif
 # Warnings
 
 default_warning_flags = [
-  # '-Wconversion',
   '-Wcast-qual',
   '-Wchar-subscripts',
   '-Wcomment',
@@ -114,7 +114,11 @@ default_warning_flags = [
   '-Wno-format-nonliteral',
 
   # TODO
-  # '-Wconversion',
+  '-Wconversion',
+  '-Wno-sign-conversion', # lots of errors in glibmm
+  '-Wno-shorten-64-to-32',
+
+  # '-Wno-deprecated-declarations',
 ]
 
 flags += cpp.get_supported_arguments(default_warning_flags)
