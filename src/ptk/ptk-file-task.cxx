@@ -1476,8 +1476,7 @@ ptk::file_task::update() noexcept
         i32 ipercent = 0;
         if (this->task->total_size)
         {
-            const f64 dpercent = ((f64)this->task->progress) / this->task->total_size;
-            ipercent = (i32)(dpercent * 100);
+            ipercent = (this->task->progress * 100) / this->task->total_size;
         }
         else
         {
