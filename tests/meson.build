@@ -255,7 +255,7 @@ sources += files(
   'src/main.cxx',
 
   # PTK
-  'src/ptk/natsort/natsort_test.cxx',
+  'src/ptk/natsort/test-natsort.cxx',
 
   # VFS
 )

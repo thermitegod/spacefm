@@ -21,7 +21,7 @@
 
 #include "spacefm/ptk/natsort/strnatcmp.hxx"
 
-#include "test_data.hxx"
+#include "test-natsort-data.hxx"
 
 TEST(natsort, dates)
 {
