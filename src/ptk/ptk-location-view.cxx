@@ -1462,7 +1462,13 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
     gdk_event_get_position(event, &x, &y);
 
     GtkTreePath* tree_path = nullptr;
-    if (gtk_tree_view_get_path_at_pos(view, x, y, &tree_path, nullptr, nullptr, nullptr))
+    if (gtk_tree_view_get_path_at_pos(view,
+                                      static_cast<i32>(x),
+                                      static_cast<i32>(y),
+                                      &tree_path,
+                                      nullptr,
+                                      nullptr,
+                                      nullptr))
     {
         GtkTreeSelection* selection = gtk_tree_view_get_selection(view);
         GtkTreeIter it;

@@ -804,8 +804,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
                 return false;
             }
             if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                               x,
-                                               y,
+                                               static_cast<i32>(x),
+                                               static_cast<i32>(y),
                                                &tree_path,
                                                &col,
                                                nullptr,
@@ -857,8 +857,8 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             if (is_tasks)
             {
                 if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                                  x,
-                                                  y,
+                                                  static_cast<i32>(x),
+                                                  static_cast<i32>(y),
                                                   &tree_path,
                                                   &col,
                                                   nullptr,

@@ -413,8 +413,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
         // middle click 2 handled in ptk-file-browser.c on_dir_tree_button_press
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          x,
-                                          y,
+                                          static_cast<i32>(x),
+                                          static_cast<i32>(y),
                                           &tree_path,
                                           &tree_col,
                                           nullptr,
@@ -467,8 +467,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
     {
         // double click - expand/collapse
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          x,
-                                          y,
+                                          static_cast<i32>(x),
+                                          static_cast<i32>(y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,

@@ -1376,7 +1376,9 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             case ptk::browser::view_mode::icon_view:
             case ptk::browser::view_mode::compact_view:
 #if defined(USE_EXO)
-                tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget), x, y);
+                tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget),
+                                                          static_cast<i32>(x),
+                                                          static_cast<i32>(y));
                 model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
 #else
                 tree_path = gtk_icon_view_get_path_at_pos(GTK_ICON_VIEW(widget), x, y);
@@ -1395,8 +1397,8 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
             case ptk::browser::view_mode::list_view:
                 model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
                 gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
-                                              x,
-                                              y,
+                                              static_cast<i32>(x),
+                                              static_cast<i32>(y),
                                               &tree_path,
                                               &col,
                                               nullptr,
@@ -2641,8 +2643,8 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser
         GtkTreePath* tree_path = nullptr;
         GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
         if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(view),
-                                          x,
-                                          y,
+                                          static_cast<i32>(x),
+                                          static_cast<i32>(y),
                                           &tree_path,
                                           nullptr,
                                           nullptr,
