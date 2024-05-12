@@ -44,8 +44,8 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
-#include "utils/strdup.hxx"
 #include "utils/shell-quote.hxx"
+#include "utils/strdup.hxx"
 #include "utils/misc.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -230,12 +230,8 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
             const auto old_name = dest_file.filename();
             const auto dest_file_dir = dest_file.parent_path();
 
-            const auto filename_parts = ::utils::split_basename_extension(old_name);
-
-            *new_dest_file = ::utils::strdup(vfs::utils::unique_name(dest_file_dir,
-                                                                     filename_parts.basename,
-                                                                     filename_parts.extension)
-                                                 .c_str());
+            *new_dest_file =
+                ::utils::strdup(vfs::utils::unique_name(dest_file_dir, old_name).c_str());
             *dest_exists = false;
             if (*new_dest_file)
             {

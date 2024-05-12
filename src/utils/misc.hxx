@@ -15,28 +15,10 @@
 
 #pragma once
 
-#include <string>
-
 #include <filesystem>
 
 namespace utils
 {
-struct split_basename_extension_data
-{
-    std::string basename;
-    std::string extension;
-    bool is_multipart_extension{false};
-};
-
-/**
- * Split a filename into its basename and extension,
- * unlike using std::filesystem::path::filename/std::filesystem::path::extension
- * this will support multi part extensions such as .tar.gz,.tar.zst,etc..
- * will not set an extension if the filename is a directory.
- */
-const split_basename_extension_data
-split_basename_extension(const std::filesystem::path& filename) noexcept;
-
 bool have_rw_access(const std::filesystem::path& path) noexcept;
 bool have_x_access(const std::filesystem::path& path) noexcept;
 } // namespace utils

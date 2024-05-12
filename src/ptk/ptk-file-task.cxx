@@ -46,7 +46,6 @@
 #include "xset/xset-dialog.hxx"
 
 #include "utils/strdup.hxx"
-#include "utils/misc.hxx"
 
 #include "vfs/utils/vfs-utils.hxx"
 
@@ -2249,10 +2248,9 @@ ptk::file_task::query_overwrite() noexcept
     const std::string src_dir = current_file.parent_path();
     const std::string dest_dir = current_dest.parent_path();
 
-    const auto filename_parts = ::utils::split_basename_extension(filename);
+    const auto filename_parts = vfs::utils::split_basename_extension(filename);
 
-    const std::string unique_name =
-        vfs::utils::unique_name(dest_dir, filename_parts.basename, filename_parts.extension);
+    const std::string unique_name = vfs::utils::unique_name(dest_dir, filename);
     const std::string new_name_plain =
         !unique_name.empty() ? std::filesystem::path(unique_name).filename() : "";
     const std::string new_name = !new_name_plain.empty() ? new_name_plain : "";

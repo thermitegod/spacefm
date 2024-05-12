@@ -74,36 +74,60 @@ vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
     }
 }
 
-const std::filesystem::path
-vfs::utils::unique_name(const std::filesystem::path& dest_dir, const std::string_view base_name,
-                        const std::string_view ext) noexcept
-{ // returns nullptr if all names used; otherwise newly allocated string
-    std::string new_name;
-    if (ext.empty())
+const vfs::utils::split_basename_extension_data
+vfs::utils::split_basename_extension(const std::filesystem::path& filename) noexcept
+{
+    if (std::filesystem::is_directory(filename))
     {
-        new_name = base_name.data();
-    }
-    else
-    {
-        new_name = std::format("{}.{}", base_name, ext);
+        return {filename.string(), "", false};
     }
 
-    auto new_dest_file = dest_dir / new_name;
+    // Find the last dot in the filename
+    const auto dot_pos = filename.string().find_last_of('.');
 
-    u32 n = 1;
-    while (std::filesystem::exists(new_dest_file))
+    // Check if the dot is not at the beginning or end of the filename
+    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos != filename.string().length() - 1)
     {
-        if (ext.empty())
+        const auto split = ztd::rpartition(filename.string(), ".");
+
+        // Check if the extension is a compressed tar archive
+        if (split[0].ends_with(".tar"))
         {
-            new_name = std::format("{}-copy{}", base_name, ++n);
+            // Find the second last dot in the filename
+            const auto split_second = ztd::rpartition(split[0], ".");
+
+            return {split_second[0], std::format(".{}.{}", split_second[2], split[2]), true};
         }
         else
         {
-            new_name = std::format("{}-copy{}.{}", base_name, ++n, ext);
+            // Return the basename and the extension
+            return {split[0], std::format(".{}", split[2]), false};
         }
-
-        new_dest_file = dest_dir / new_name;
     }
 
-    return new_dest_file;
+    // No valid extension found, return the whole filename as the basename
+    return {filename.string(), "", false};
+}
+
+const std::filesystem::path
+vfs::utils::unique_name(const std::filesystem::path& dest_dir,
+                        const std::filesystem::path& filename) noexcept
+{
+    if (dest_dir.empty() || filename.empty())
+    {
+        return "";
+    }
+
+    const auto filename_parts = split_basename_extension(filename);
+    const auto& basename = filename_parts.basename;
+    const auto& extension = filename_parts.extension;
+
+    u32 n = 0;
+    auto unique_path = dest_dir / std::format("{}{}", basename, extension);
+    while (std::filesystem::exists(unique_path))
+    {
+        unique_path = dest_dir / std::format("{}-copy{}{}", basename, ++n, extension);
+    }
+
+    return unique_path;
 }

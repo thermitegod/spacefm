@@ -149,6 +149,7 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
 preprocessor = [
   '-DZTD_VERSION=2',
+  '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'test_data')),
 ]
 
 foreach a : preprocessor
@@ -247,7 +248,10 @@ sources = files()
 
 # Spacefm Source Files
 sources += files(
+  'spacefm/settings/settings.cxx',
+
   'spacefm/ptk/natsort/strnatcmp.cxx',
+  'spacefm/vfs/utils/vfs-utils.cxx',
 )
 
 # Test Source Files
@@ -258,6 +262,7 @@ sources += files(
   'src/ptk/natsort/test-natsort.cxx',
 
   # VFS
+  'src/vfs/utils/test-vfs-utils.cxx',
 )
 
 ## Build

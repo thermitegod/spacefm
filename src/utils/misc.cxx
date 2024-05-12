@@ -13,17 +13,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <string_view>
-
-#include <format>
-
 #include <filesystem>
-
-#include <glibmm.h>
-
-#include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "utils/misc.hxx"
 
@@ -59,39 +49,4 @@ utils::have_rw_access(const std::filesystem::path& path) noexcept
                 std::filesystem::perms::none &&
             (status.permissions() & std::filesystem::perms::others_write) !=
                 std::filesystem::perms::none);
-}
-
-const ::utils::split_basename_extension_data
-utils::split_basename_extension(const std::filesystem::path& filename) noexcept
-{
-    if (std::filesystem::is_directory(filename))
-    {
-        return {filename.string(), ""};
-    }
-
-    // Find the last dot in the filename
-    const auto dot_pos = filename.string().find_last_of('.');
-
-    // Check if the dot is not at the beginning or end of the filename
-    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos != filename.string().length() - 1)
-    {
-        const auto split = ztd::rpartition(filename.string(), ".");
-
-        // Check if the extension is a compressed tar archive
-        if (split[0].ends_with(".tar"))
-        {
-            // Find the second last dot in the filename
-            const auto split_second = ztd::rpartition(split[0], ".");
-
-            return {split_second[0], std::format(".{}.{}", split_second[2], split[2]), true};
-        }
-        else
-        {
-            // Return the basename and the extension
-            return {split[0], std::format(".{}", split[2]), false};
-        }
-    }
-
-    // No valid extension found, return the whole filename as the basename
-    return {filename.string(), ""};
 }

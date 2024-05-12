@@ -54,8 +54,8 @@
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
-#include "utils/misc.hxx"
 #include "utils/shell-quote.hxx"
 
 #include "ptk/ptk-file-action-rename.hxx"
@@ -383,7 +383,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
         }
         else
         {
-            const auto filename_parts = ::utils::split_basename_extension(full_name);
+            const auto filename_parts = vfs::utils::split_basename_extension(full_name);
             gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
 #if (GTK_MAJOR_VERSION == 4)
             gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
@@ -496,7 +496,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
         }
         else
         {
-            const auto filename_parts = ::utils::split_basename_extension(full_name);
+            const auto filename_parts = vfs::utils::split_basename_extension(full_name);
             gtk_text_buffer_set_text(mset->buf_name, filename_parts.basename.data(), -1);
 #if (GTK_MAJOR_VERSION == 4)
             gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), filename_parts.extension.data());
@@ -801,7 +801,7 @@ select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
             }
             else
             {
-                const auto filename_parts = ::utils::split_basename_extension(full_name);
+                const auto filename_parts = vfs::utils::split_basename_extension(full_name);
                 gtk_text_buffer_get_iter_at_offset(buf, &iter, filename_parts.basename.size());
             }
         }
