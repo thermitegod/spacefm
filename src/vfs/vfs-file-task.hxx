@@ -124,19 +124,9 @@ struct file_task : public std::enable_shared_from_this<file_task>
     void try_abort_task() noexcept;
     void abort_task() noexcept;
 
-  public: // private: // TODO
-    [[nodiscard]] bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                                       char** new_dest_file) noexcept;
-    [[nodiscard]] bool check_dest_in_src(const std::filesystem::path& src_dir) noexcept;
-
+  public: // TODO private:
     void file_copy(const std::filesystem::path& src_file) noexcept;
-    [[nodiscard]] bool do_file_copy(const std::filesystem::path& src_file,
-                                    const std::filesystem::path& dest_file) noexcept;
-
     void file_move(const std::filesystem::path& src_file) noexcept;
-    [[nodiscard]] i32 do_file_move(const std::filesystem::path& src_file,
-                                   const std::filesystem::path& dest_path) noexcept;
-
     void file_trash(const std::filesystem::path& src_file) noexcept;
     void file_delete(const std::filesystem::path& src_file) noexcept;
     void file_link(const std::filesystem::path& src_file) noexcept;
@@ -152,6 +142,16 @@ struct file_task : public std::enable_shared_from_this<file_task>
     void task_error(i32 errnox, const std::string_view action) noexcept;
     void task_error(i32 errnox, const std::string_view action,
                     const std::filesystem::path& target) noexcept;
+
+  private:
+    [[nodiscard]] bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
+                                       char** new_dest_file) noexcept;
+    [[nodiscard]] bool check_dest_in_src(const std::filesystem::path& src_dir) noexcept;
+
+    [[nodiscard]] i32 do_file_move(const std::filesystem::path& src_file,
+                                   const std::filesystem::path& dest_path) noexcept;
+    [[nodiscard]] bool do_file_copy(const std::filesystem::path& src_file,
+                                    const std::filesystem::path& dest_file) noexcept;
 
   public:
     vfs::file_task::type type_;
