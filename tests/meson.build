@@ -248,6 +248,8 @@ sources = files()
 
 # Spacefm Source Files
 sources += files(
+  'spacefm/types.cxx',
+
   'spacefm/settings/settings.cxx',
 
   'spacefm/ptk/natsort/strnatcmp.cxx',
@@ -257,6 +259,9 @@ sources += files(
 # Test Source Files
 sources += files(
   'src/main.cxx',
+
+  # SFM
+  'src/base/test-types.cxx',
 
   # PTK
   'src/ptk/natsort/test-natsort.cxx',
