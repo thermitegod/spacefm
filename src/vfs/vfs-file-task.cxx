@@ -45,7 +45,6 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "utils/shell-quote.hxx"
-#include "utils/strdup.hxx"
 #include "utils/misc.hxx"
 
 #include "ptk/ptk-dialog.hxx"
@@ -191,20 +190,21 @@ vfs::file_task::should_abort() noexcept
  * The returned string is the new destination file chosen by the user
  */
 bool
-vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                                char** new_dest_file) noexcept
+vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool& dest_exists,
+                                std::filesystem::path& new_dest_file) noexcept
 {
     const auto exists = std::filesystem::exists(dest_file);
 
     while (true)
     {
-        *new_dest_file = nullptr;
+        new_dest_file = "";
+
         if (this->overwrite_mode_ == vfs::file_task::overwrite_mode::overwrite_all)
         {
             const auto checked_current_file = this->current_file.value_or("");
             const auto checked_current_dest = this->current_dest.value_or("");
 
-            *dest_exists = exists;
+            dest_exists = exists;
             if (std::filesystem::equivalent(checked_current_file, checked_current_dest))
             {
                 // src and dest are same file - do not overwrite (truncates)
@@ -215,13 +215,13 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
         }
         else if (this->overwrite_mode_ == vfs::file_task::overwrite_mode::skip_all)
         {
-            *dest_exists = exists;
-            return !*dest_exists;
+            dest_exists = exists;
+            return !dest_exists;
         }
         else if (this->overwrite_mode_ == vfs::file_task::overwrite_mode::auto_rename)
         {
-            *dest_exists = exists;
-            if (!*dest_exists)
+            dest_exists = exists;
+            if (!dest_exists)
             {
                 return !this->abort;
             }
@@ -230,18 +230,13 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
             const auto old_name = dest_file.filename();
             const auto dest_file_dir = dest_file.parent_path();
 
-            *new_dest_file =
-                ::utils::strdup(vfs::utils::unique_name(dest_file_dir, old_name).c_str());
-            *dest_exists = false;
-            if (*new_dest_file)
-            {
-                return !this->abort;
-            }
-            // else ran out of names - fall through to query user
+            new_dest_file = vfs::utils::unique_name(dest_file_dir, old_name);
+            dest_exists = false;
+            return !this->abort;
         }
 
-        *dest_exists = exists;
-        if (!*dest_exists)
+        dest_exists = exists;
+        if (!dest_exists)
         {
             return !this->abort;
         }
@@ -257,7 +252,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
         do
         {
             // destination file exists
-            *dest_exists = true;
+            dest_exists = true;
             this->state_ = vfs::file_task::state::query_overwrite;
             new_dest = nullptr;
 
@@ -291,7 +286,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
                     const auto checked_current_file = this->current_file.value_or("");
                     const auto checked_current_dest = this->current_dest.value_or("");
 
-                    *dest_exists = exists;
+                    dest_exists = exists;
                     if (std::filesystem::equivalent(checked_current_file, checked_current_dest))
                     {
                         // src and dest are same file - do not overwrite (truncates)
@@ -315,8 +310,8 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool* de
         if (new_dest)
         {
             // user renamed file to unique name
-            *dest_exists = false;
-            *new_dest_file = new_dest;
+            dest_exists = false;
+            new_dest_file = new_dest;
             return !this->abort;
         }
     }
@@ -398,7 +393,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
         return false;
     }
 
-    char* new_dest_file = nullptr;
+    std::filesystem::path new_dest_file;
     bool dest_exists = false;
     bool copy_fail = false;
 
@@ -408,28 +403,19 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     {
         if (this->check_dest_in_src(src_file))
         {
-            if (new_dest_file)
-            {
-                std::free(new_dest_file);
-            }
             return false;
         }
-        if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
+        if (!this->check_overwrite(actual_dest_file, dest_exists, new_dest_file))
         {
-            if (new_dest_file)
-            {
-                std::free(new_dest_file);
-            }
             return false;
         }
-        if (new_dest_file)
+        if (!new_dest_file.empty())
         {
             actual_dest_file = new_dest_file;
             this->lock();
             this->current_dest = actual_dest_file;
             this->unlock();
         }
-
         if (!dest_exists)
         {
             std::filesystem::create_directories(actual_dest_file);
@@ -475,13 +461,6 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 {
                     this->task_error(errno, "Removing", src_file);
                     copy_fail = true;
-                    if (this->should_abort())
-                    {
-                        if (new_dest_file)
-                        {
-                            std::free(new_dest_file);
-                        }
-                    }
                     return false;
                 }
             }
@@ -509,16 +488,12 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
 
         if (read_symlink)
         {
-            if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
+            if (!this->check_overwrite(actual_dest_file, dest_exists, new_dest_file))
             {
-                if (new_dest_file)
-                {
-                    std::free(new_dest_file);
-                }
                 return false;
             }
 
-            if (new_dest_file)
+            if (!new_dest_file.empty())
             {
                 actual_dest_file = new_dest_file;
                 this->lock();
@@ -533,10 +508,6 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 if (std::filesystem::exists(actual_dest_file) && errno != 2 /* no such file */)
                 {
                     this->task_error(errno, "Removing", actual_dest_file);
-                    if (new_dest_file)
-                    {
-                        std::free(new_dest_file);
-                    }
                     return false;
                 }
             }
@@ -575,17 +546,13 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
         const i32 rfd = open(src_file.c_str(), O_RDONLY);
         if (rfd >= 0)
         {
-            if (!this->check_overwrite(actual_dest_file, &dest_exists, &new_dest_file))
+            if (!this->check_overwrite(actual_dest_file, dest_exists, new_dest_file))
             {
                 close(rfd);
-                if (new_dest_file)
-                {
-                    std::free(new_dest_file);
-                }
                 return false;
             }
 
-            if (new_dest_file)
+            if (!new_dest_file.empty())
             {
                 actual_dest_file = new_dest_file;
                 this->lock();
@@ -601,10 +568,6 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 {
                     this->task_error(errno, "Removing", actual_dest_file);
                     close(rfd);
-                    if (new_dest_file)
-                    {
-                        std::free(new_dest_file);
-                    }
                     return false;
                 }
             }
@@ -687,10 +650,6 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
         }
     }
 
-    if (new_dest_file)
-    {
-        std::free(new_dest_file);
-    }
     if (!copy_fail && this->error_first)
     {
         this->error_first = false;
@@ -792,14 +751,14 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
         return 0;
     }
 
-    char* new_dest_file = nullptr;
+    std::filesystem::path new_dest_file;
     bool dest_exists = false;
-    if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
+    if (!this->check_overwrite(dest_file, dest_exists, new_dest_file))
     {
         return 0;
     }
 
-    if (new_dest_file)
+    if (!new_dest_file.empty())
     {
         dest_file = new_dest_file;
         this->lock();
@@ -849,7 +808,6 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
         this->task_error(errno, "Renaming", src_file);
         if (this->should_abort())
         {
-            std::free(new_dest_file);
             return 0;
         }
     }
@@ -866,10 +824,6 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     }
     this->unlock();
 
-    if (new_dest_file)
-    {
-        std::free(new_dest_file);
-    }
     return 0;
 }
 
@@ -1022,13 +976,13 @@ vfs::file_task::file_link(const std::filesystem::path& src_file) noexcept
 
     // FIXME: Check overwrite!!
     bool dest_exists = false;
-    char* new_dest_file = nullptr;
-    if (!this->check_overwrite(dest_file, &dest_exists, &new_dest_file))
+    std::filesystem::path new_dest_file;
+    if (!this->check_overwrite(dest_file, dest_exists, new_dest_file))
     {
         return;
     }
 
-    if (new_dest_file)
+    if (!new_dest_file.empty())
     {
         dest_file = new_dest_file;
         this->lock();
@@ -1064,11 +1018,6 @@ vfs::file_task::file_link(const std::filesystem::path& src_file) noexcept
         this->error_first = false;
     }
     this->unlock();
-
-    if (new_dest_file)
-    {
-        std::free(new_dest_file);
-    }
 }
 
 void

@@ -144,8 +144,8 @@ struct file_task : public std::enable_shared_from_this<file_task>
                     const std::filesystem::path& target) noexcept;
 
   private:
-    [[nodiscard]] bool check_overwrite(const std::filesystem::path& dest_file, bool* dest_exists,
-                                       char** new_dest_file) noexcept;
+    [[nodiscard]] bool check_overwrite(const std::filesystem::path& dest_file, bool& dest_exists,
+                                       std::filesystem::path& new_dest_file) noexcept;
     [[nodiscard]] bool check_dest_in_src(const std::filesystem::path& src_dir) noexcept;
 
     [[nodiscard]] i32 do_file_move(const std::filesystem::path& src_file,
