@@ -339,11 +339,10 @@ vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir) noexcept
     }
 
     // source is contained in destination dir
-    const std::string err =
-        std::format("Destination directory \"{}\" is contained in source \"{}\"",
-                    checked_dest_dir.string(),
-                    src_dir.string());
-    this->append_add_log(err);
+    this->append_add_log(std::format("Destination directory '{}' is contained in source '{}'",
+                                     checked_dest_dir.string(),
+                                     src_dir.string()));
+
     if (this->state_cb)
     {
         this->state_cb(this->shared_from_this(),
@@ -1630,13 +1629,11 @@ vfs::file_task::task_error(i32 errnox, const std::string_view action) noexcept
     if (errnox)
     {
         const std::string errno_msg = std::strerror(errnox);
-        const std::string msg = std::format("{}\n{}\n", action, errno_msg);
-        this->append_add_log(msg);
+        this->append_add_log(std::format("{}\n{}\n", action, errno_msg));
     }
     else
     {
-        const std::string msg = std::format("{}\n", action);
-        this->append_add_log(msg);
+        this->append_add_log(std::format("{}\n", action));
     }
 
     call_state_callback(this->shared_from_this(), vfs::file_task::state::error);
@@ -1648,7 +1645,6 @@ vfs::file_task::task_error(i32 errnox, const std::string_view action,
 {
     this->error = errnox;
     const std::string errno_msg = std::strerror(errnox);
-    const std::string msg = std::format("\n{} {}\nError: {}\n", action, target.string(), errno_msg);
-    this->append_add_log(msg);
+    this->append_add_log(std::format("\n{} {}\nError: {}\n", action, target.string(), errno_msg));
     call_state_callback(this->shared_from_this(), vfs::file_task::state::error);
 }
