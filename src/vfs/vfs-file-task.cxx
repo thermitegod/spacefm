@@ -125,14 +125,14 @@ vfs::file_task::set_state_callback(const state_callback_t& cb, void* user_data) 
 void
 vfs::file_task::set_chmod(std::array<u8, 12> new_chmod_actions) noexcept
 {
-    this->chmod_actions = new_chmod_actions;
+    this->chmod_actions_ = new_chmod_actions;
 }
 
 void
 vfs::file_task::set_chown(uid_t new_uid, gid_t new_gid) noexcept
 {
-    this->uid = new_uid;
-    this->gid = new_gid;
+    this->uid_ = new_uid;
+    this->gid_ = new_gid;
 }
 
 void
@@ -1061,9 +1061,9 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
     if (!ec)
     {
         /* chown */
-        if (!this->uid || !this->gid)
+        if (!this->uid_ || !this->gid_)
         {
-            const i32 result = chown(src_file.c_str(), this->uid, this->gid);
+            const i32 result = chown(src_file.c_str(), this->uid_, this->gid_);
             if (result != 0)
             {
                 this->task_error(errno, "chown", src_file);
@@ -1075,13 +1075,13 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
         }
 
         /* chmod */
-        if (this->chmod_actions)
+        if (this->chmod_actions_)
         {
             std::filesystem::perms new_perms;
             const std::filesystem::perms orig_perms =
                 std::filesystem::status(src_file).permissions();
 
-            const auto new_chmod_actions = chmod_actions.value();
+            const auto new_chmod_actions = chmod_actions_.value();
 
             for (const auto i :
                  std::views::iota(0uz, magic_enum::enum_count<vfs::file_task::chmod_action>()))
@@ -1502,18 +1502,18 @@ vfs::file_task::run_task() noexcept
         if (this->type_ == vfs::file_task::type::chmod_chown && !this->src_paths.empty())
         {
             const auto dir = this->src_paths.at(0).parent_path();
-            this->avoid_changes = vfs::volume_dir_avoid_changes(dir);
+            this->avoid_changes_ = vfs::volume_dir_avoid_changes(dir);
         }
         else
         {
             if (this->dest_dir)
             {
                 const auto checked_dest_dir = this->dest_dir.value();
-                this->avoid_changes = vfs::volume_dir_avoid_changes(checked_dest_dir);
+                this->avoid_changes_ = vfs::volume_dir_avoid_changes(checked_dest_dir);
             }
             else
             {
-                this->avoid_changes = false;
+                this->avoid_changes_ = false;
             }
         }
 

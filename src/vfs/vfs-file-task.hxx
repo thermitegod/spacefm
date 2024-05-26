@@ -155,22 +155,13 @@ struct file_task : public std::enable_shared_from_this<file_task>
 
   public:
     vfs::file_task::type type_;
-    std::vector<std::filesystem::path> src_paths;  // All source files. This list will be freed
-                                                   // after file operation is completed.
+    std::vector<std::filesystem::path> src_paths;  // All source files
     std::optional<std::filesystem::path> dest_dir; // Destinaton directory
-    bool avoid_changes{false};
 
     vfs::file_task::overwrite_mode overwrite_mode_;
     bool is_recursive{false}; // Apply operation to all files under directories
                               // recursively. This is default to copy/delete,
                               // and should be set manually for chown/chmod.
-
-    // For chown
-    uid_t uid{0};
-    gid_t gid{0};
-
-    // For chmod. If chmod is not needed, this should be nullptr
-    std::optional<std::array<u8, 12>> chmod_actions{std::nullopt};
 
     u64 total_size{0}; // Total size of the files to be processed, in bytes
     u64 progress{0};   // Total size of current processed files, in btytes
@@ -220,5 +211,15 @@ struct file_task : public std::enable_shared_from_this<file_task>
     void* exec_browser{nullptr};
     std::string exec_icon;
     GCond* exec_cond{nullptr};
+
+  private:
+    bool avoid_changes_{false};
+
+    // For chown
+    uid_t uid_{0};
+    gid_t gid_{0};
+
+    // For chmod. If chmod is not needed, this should be nullopt
+    std::optional<std::array<u8, 12>> chmod_actions_{std::nullopt};
 };
 } // namespace vfs
