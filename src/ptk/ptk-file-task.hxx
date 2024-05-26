@@ -146,13 +146,13 @@ struct file_task
     void set_progress_icon() noexcept;
     void progress_update() noexcept;
 
-    std::string display_file_count_{};
-    std::string display_size_tally_{};
-    std::string display_elapsed_{};
-    std::string display_current_speed_{};
-    std::string display_current_estimate_{};
-    std::string display_average_speed_{};
-    std::string display_average_estimate_{};
+    std::string display_file_count_;
+    std::string display_size_tally_;
+    std::string display_elapsed_;
+    std::string display_current_speed_;
+    std::string display_current_estimate_;
+    std::string display_average_speed_;
+    std::string display_average_estimate_;
 };
 } // namespace ptk
 
