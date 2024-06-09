@@ -439,7 +439,7 @@ vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesyst
 
         // desktop files with these keys can only open one file.
         // spawn multiple copies of the program for each selected file
-        commands.insert(commands.begin(), file_list.size() - 1, commands.front());
+        commands.insert(commands.cbegin(), file_list.size() - 1, commands.front());
 
         for (auto& argv : commands)
         {

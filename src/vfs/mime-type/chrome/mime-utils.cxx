@@ -361,7 +361,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
                 {
                     const std::string ext = n.ext.substr(1);
                     auto it = out_mime_types.find(ext);
-                    if (it == out_mime_types.end() || weight > it->second.weight)
+                    if (it == out_mime_types.cend() || weight > it->second.weight)
                     {
                         out_mime_types[ext] = {std::string(buf.c_str() + mime_type_offset), weight};
                     }

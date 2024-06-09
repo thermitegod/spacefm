@@ -72,7 +72,7 @@ vfs::file_task::file_task(const vfs::file_task::type task_type,
                           const std::filesystem::path& dest_dir) noexcept
     : type_(task_type)
 {
-    this->src_paths = std::vector<std::filesystem::path>(src_files.begin(), src_files.end());
+    this->src_paths = std::vector<std::filesystem::path>(src_files.cbegin(), src_files.cend());
     if (!dest_dir.empty())
     {
         this->dest_dir = dest_dir;

@@ -1095,7 +1095,7 @@ ptk_file_menu_new(ptk::browser* browser,
     data->file_path = file_path;
     data->file = file;
     data->selected_files =
-        std::vector<std::shared_ptr<vfs::file>>(selected_files.begin(), selected_files.end());
+        std::vector<std::shared_ptr<vfs::file>>(selected_files.cbegin(), selected_files.cend());
 
 #if (GTK_MAJOR_VERSION == 4)
     data->accel_group = gtk_shortcut_controller_new();
