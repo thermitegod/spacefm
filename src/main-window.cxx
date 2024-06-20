@@ -669,11 +669,10 @@ MainWindow::show_panels() noexcept
         {
             // shown
             // test if panel and mode exists
-            xset_t set;
 
             const auto mode = this->panel_context.at(p);
 
-            set = xset::set::get(
+            xset_t set = xset::set::get(
                 xset::get_name_from_panel_mode(p, xset::panel::slider_positions, mode),
                 true);
             if (!set)
@@ -740,6 +739,7 @@ MainWindow::show_panels() noexcept
                                       xset::panel::detcol_mtime,
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_mtime));
+
                 const auto set_old = xset::set::get(xset::panel::slider_positions, p);
                 set = xset::set::get(xset::panel::slider_positions, p, mode);
                 set->x = set_old->x ? set_old->x : "0";
@@ -967,49 +967,80 @@ MainWindow::rebuild_menu_view(ptk::browser* browser) noexcept
         vis_count++;
     }
 
-    xset_t set;
+    {
+        const auto set = xset::set::get(xset::name::panel1_show);
+        xset_set_cb(set, (GFunc)show_panels_all_windows, this);
+        set->disable = (this->curpanel == panel_1 && vis_count == 1);
+    }
 
-    set = xset::set::get(xset::name::panel1_show);
-    xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == panel_1 && vis_count == 1);
-    set = xset::set::get(xset::name::panel2_show);
-    xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == panel_2 && vis_count == 1);
-    set = xset::set::get(xset::name::panel3_show);
-    xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == panel_3 && vis_count == 1);
-    set = xset::set::get(xset::name::panel4_show);
-    xset_set_cb(set, (GFunc)show_panels_all_windows, this);
-    set->disable = (this->curpanel == panel_4 && vis_count == 1);
+    {
+        const auto set = xset::set::get(xset::name::panel2_show);
+        xset_set_cb(set, (GFunc)show_panels_all_windows, this);
+        set->disable = (this->curpanel == panel_2 && vis_count == 1);
+    }
 
-    set = xset::set::get(xset::name::panel_prev);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_control_code_prev);
-    set->disable = (vis_count == 1);
-    set = xset::set::get(xset::name::panel_next);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_control_code_next);
-    set->disable = (vis_count == 1);
-    set = xset::set::get(xset::name::panel_hide);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_control_code_hide);
-    set->disable = (vis_count == 1);
-    set = xset::set::get(xset::name::panel_1);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_1);
-    set->disable = (this->curpanel == panel_1);
-    set = xset::set::get(xset::name::panel_2);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_2);
-    set->disable = (this->curpanel == panel_2);
-    set = xset::set::get(xset::name::panel_3);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_3);
-    set->disable = (this->curpanel == panel_3);
-    set = xset::set::get(xset::name::panel_4);
-    xset_set_cb(set, (GFunc)on_focus_panel, this);
-    xset_set_ob(set, "panel", panel_4);
-    set->disable = (this->curpanel == panel_4);
+    {
+        const auto set = xset::set::get(xset::name::panel3_show);
+        xset_set_cb(set, (GFunc)show_panels_all_windows, this);
+        set->disable = (this->curpanel == panel_3 && vis_count == 1);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel4_show);
+        xset_set_cb(set, (GFunc)show_panels_all_windows, this);
+        set->disable = (this->curpanel == panel_4 && vis_count == 1);
+    }
+
+    ////////////
+
+    {
+        const auto set = xset::set::get(xset::name::panel_prev);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_control_code_prev);
+        set->disable = (vis_count == 1);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel_next);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_control_code_next);
+        set->disable = (vis_count == 1);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel_hide);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_control_code_hide);
+        set->disable = (vis_count == 1);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel_1);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_1);
+        set->disable = (this->curpanel == panel_1);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel_2);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_2);
+        set->disable = (this->curpanel == panel_2);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel_3);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_3);
+        set->disable = (this->curpanel == panel_3);
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::panel_4);
+        xset_set_cb(set, (GFunc)on_focus_panel, this);
+        xset_set_ob(set, "panel", panel_4);
+        set->disable = (this->curpanel == panel_4);
+    }
 
 #if (GTK_MAJOR_VERSION == 4)
     GtkEventController* accel_group = gtk_shortcut_controller_new();
@@ -1061,23 +1092,29 @@ MainWindow::rebuild_menu_device(ptk::browser* browser) noexcept
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    xset_t set;
+    {
+        const auto set = xset::set::get(xset::name::main_dev);
+        xset_set_cb(set, (GFunc)on_devices_show, this);
+        set->b = browser->side_dev ? xset::set::enabled::yes : xset::set::enabled::unset;
+        xset_add_menuitem(browser, newmenu, accel_group, set);
+    }
 
-    set = xset::set::get(xset::name::main_dev);
-    xset_set_cb(set, (GFunc)on_devices_show, this);
-    set->b = browser->side_dev ? xset::set::enabled::yes : xset::set::enabled::unset;
-    xset_add_menuitem(browser, newmenu, accel_group, set);
-
-    set = xset::set::get(xset::name::separator);
-    xset_add_menuitem(browser, newmenu, accel_group, set);
+    {
+        const auto set = xset::set::get(xset::name::separator);
+        xset_add_menuitem(browser, newmenu, accel_group, set);
+    }
 
     ptk::view::location::dev_menu(GTK_WIDGET(browser), browser, newmenu);
 
-    set = xset::set::get(xset::name::separator);
-    xset_add_menuitem(browser, newmenu, accel_group, set);
+    {
+        const auto set = xset::set::get(xset::name::separator);
+        xset_add_menuitem(browser, newmenu, accel_group, set);
+    }
 
-    set = xset::set::get(xset::name::dev_menu_settings);
-    xset_add_menuitem(browser, newmenu, accel_group, set);
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_settings);
+        xset_add_menuitem(browser, newmenu, accel_group, set);
+    }
 
     // show all
     gtk_widget_show_all(GTK_WIDGET(newmenu));
@@ -1419,7 +1456,7 @@ MainWindow::store_positions() noexcept
         }
         if (GTK_IS_PANED(this->hpane_top))
         {
-            auto set = xset::set::get(xset::name::panel_sliders);
+            const auto set = xset::set::get(xset::name::panel_sliders);
 
             i32 pos = gtk_paned_get_position(this->hpane_top);
             if (pos)
@@ -1445,7 +1482,6 @@ MainWindow::store_positions() noexcept
                 if (pos)
                 {
                     // save absolute height
-                    set = xset::set::get(xset::name::panel_sliders);
                     set->x = std::format("{}", allocation.height - pos);
                     // ztd::logger::info("CLOS  win {}x{}    task height {}   slider {}", allocation.width, allocation.height, allocation.height - pos, pos);
                 }
@@ -1577,20 +1613,30 @@ notebook_clicked(GtkWidget* widget, GdkEvent* event, ptk::browser* browser) noex
             GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-            xset_t set;
+            {
+                const auto set = xset::set::get(xset::name::tab_close);
+                xset_set_cb(set, (GFunc)ptk::wrapper::browser::close_tab, browser);
+                xset_add_menuitem(browser, popup, accel_group, set);
+            }
 
-            set = xset::set::get(xset::name::tab_close);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::close_tab, browser);
-            xset_add_menuitem(browser, popup, accel_group, set);
-            set = xset::set::get(xset::name::tab_restore);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::restore_tab, browser);
-            xset_add_menuitem(browser, popup, accel_group, set);
-            set = xset::set::get(xset::name::tab_new);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab, browser);
-            xset_add_menuitem(browser, popup, accel_group, set);
-            set = xset::set::get(xset::name::tab_new_here);
-            xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab_here, browser);
-            xset_add_menuitem(browser, popup, accel_group, set);
+            {
+                const auto set = xset::set::get(xset::name::tab_restore);
+                xset_set_cb(set, (GFunc)ptk::wrapper::browser::restore_tab, browser);
+                xset_add_menuitem(browser, popup, accel_group, set);
+            }
+
+            {
+                const auto set = xset::set::get(xset::name::tab_new);
+                xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab, browser);
+                xset_add_menuitem(browser, popup, accel_group, set);
+            }
+
+            {
+                const auto set = xset::set::get(xset::name::tab_new_here);
+                xset_set_cb(set, (GFunc)ptk::wrapper::browser::new_tab_here, browser);
+                xset_add_menuitem(browser, popup, accel_group, set);
+            }
+
             gtk_widget_show_all(GTK_WIDGET(popup));
             // clang-format off
             g_signal_connect(G_OBJECT(popup), "selection-done", G_CALLBACK(gtk_widget_destroy), nullptr);

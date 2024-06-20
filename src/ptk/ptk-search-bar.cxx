@@ -104,13 +104,15 @@ on_populate_popup(GtkEntry* entry, GtkMenu* menu, ptk::browser* browser) noexcep
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    xset_t set;
+    {
+        const auto set = xset::set::get(xset::name::separator);
+        xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
+    }
 
-    set = xset::set::get(xset::name::separator);
-    xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
-
-    set = xset::set::get(xset::name::search_select);
-    xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
+    {
+        const auto set = xset::set::get(xset::name::search_select);
+        xset_add_menuitem(browser, GTK_WIDGET(menu), accel_group, set);
+    }
 
     gtk_widget_show_all(GTK_WIDGET(menu));
 }

@@ -4577,8 +4577,6 @@ ptk::browser::update_views() noexcept
         this->view_as_list();
 
         // Set column widths for this panel context
-        xset_t set;
-
         if (GTK_IS_TREE_VIEW(this->folder_view_))
         {
             // ztd::logger::info("    set widths   mode = {}", mode);
@@ -4596,7 +4594,7 @@ ptk::browser::update_views() noexcept
                     if (title == column.title)
                     {
                         // get column width for this panel context
-                        set = xset::set::get(column.xset_name, p, mode);
+                        const auto set = xset::set::get(column.xset_name, p, mode);
                         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
                         // ztd::logger::info("        {}\t{}", width, title );
                         if (width)
@@ -5809,7 +5807,6 @@ ptk::browser::on_action(const xset::name setname) noexcept
 
         if (is_valid_panel(panel_num))
         {
-            xset_t set2;
             const std::string fullxname = std::format("panel{}_", panel_num);
             const std::string xname = ztd::removeprefix(set->name(), fullxname);
             if (xname == "show_hidden") // shared key
@@ -5822,7 +5819,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             }
             else if (xname.starts_with("show_")) // shared key
             {
-                set2 = xset::set::get(xname, this->panel_, mode);
+                const auto set2 = xset::set::get(xname, this->panel_, mode);
                 set2->b = set2->b == xset::set::enabled::yes ? xset::set::enabled::unset
                                                              : xset::set::enabled::yes;
                 update_views_all_windows(nullptr, this);
@@ -5850,7 +5847,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             else if (xname.starts_with("detcol_") // shared key
                      && this->view_mode_ == ptk::browser::view_mode::list_view)
             {
-                set2 = xset::set::get(xname, this->panel_, mode);
+                const auto set2 = xset::set::get(xname, this->panel_, mode);
                 set2->b = set2->b == xset::set::enabled::yes ? xset::set::enabled::unset
                                                              : xset::set::enabled::yes;
                 update_views_all_windows(nullptr, this);

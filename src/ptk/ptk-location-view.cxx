@@ -1326,7 +1326,6 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, pt
 {
     (void)button;
     (void)time_point;
-    xset_t set;
     GtkWidget* popup = gtk_menu_new();
 
 #if (GTK_MAJOR_VERSION == 4)
@@ -1335,26 +1334,40 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, pt
     GtkAccelGroup* accel_group = gtk_accel_group_new();
 #endif
 
-    set = xset::set::get(xset::name::dev_menu_remove);
-    xset_set_cb(set, (GFunc)on_eject, vol.get());
-    xset_set_ob(set, "view", view);
-    set->disable = !vol;
-    set = xset::set::get(xset::name::dev_menu_unmount);
-    xset_set_cb(set, (GFunc)on_umount, vol.get());
-    xset_set_ob(set, "view", view);
-    set->disable = !vol; //!( vol && vol->is_mounted );
-    set = xset::set::get(xset::name::dev_menu_open);
-    xset_set_cb(set, (GFunc)on_open, vol.get());
-    xset_set_ob(set, "view", view);
-    set->disable = !vol;
-    set = xset::set::get(xset::name::dev_menu_tab);
-    xset_set_cb(set, (GFunc)on_open_tab, vol.get());
-    xset_set_ob(set, "view", view);
-    set->disable = !vol;
-    set = xset::set::get(xset::name::dev_menu_mount);
-    xset_set_cb(set, (GFunc)on_mount, vol.get());
-    xset_set_ob(set, "view", view);
-    set->disable = !vol; // || ( vol && vol->is_mounted );
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_remove);
+        xset_set_cb(set, (GFunc)on_eject, vol.get());
+        xset_set_ob(set, "view", view);
+        set->disable = !vol;
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_unmount);
+        xset_set_cb(set, (GFunc)on_umount, vol.get());
+        xset_set_ob(set, "view", view);
+        set->disable = !vol; //!( vol && vol->is_mounted );
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_open);
+        xset_set_cb(set, (GFunc)on_open, vol.get());
+        xset_set_ob(set, "view", view);
+        set->disable = !vol;
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_tab);
+        xset_set_cb(set, (GFunc)on_open_tab, vol.get());
+        xset_set_ob(set, "view", view);
+        set->disable = !vol;
+    }
+
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_mount);
+        xset_set_cb(set, (GFunc)on_mount, vol.get());
+        xset_set_ob(set, "view", view);
+        set->disable = !vol; // || ( vol && vol->is_mounted );
+    }
 
     xset_set_cb(xset::name::dev_show_internal_drives, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_show_empty, (GFunc)update_all, nullptr);
@@ -1367,9 +1380,12 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, pt
     xset_set_cb(xset::name::dev_automount_optical, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_automount_removable, (GFunc)update_all, nullptr);
     xset_set_cb(xset::name::dev_ignore_udisks_nopolicy, (GFunc)update_all, nullptr);
-    set = xset::set::get(xset::name::dev_automount_volumes);
-    xset_set_cb(set, (GFunc)on_automountlist, vol.get());
-    xset_set_ob(set, "view", view);
+
+    {
+        const auto set = xset::set::get(xset::name::dev_automount_volumes);
+        xset_set_cb(set, (GFunc)on_automountlist, vol.get());
+        xset_set_ob(set, "view", view);
+    }
 
     std::vector<xset::name> context_menu_entries = {
         xset::name::dev_menu_remove,
@@ -1391,16 +1407,18 @@ show_devices_menu(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol, pt
     xset_set_cb(xset::name::dev_dispname, (GFunc)update_names, nullptr);
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    set = xset::set::get(xset::name::dev_menu_settings);
-    set->context_menu_entries = {
-        xset::name::dev_show,
-        xset::name::separator,
-        xset::name::dev_menu_auto,
-        xset::name::dev_change,
-        xset::name::separator,
-        xset::name::dev_single,
-        xset::name::dev_newtab,
-    };
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_settings);
+        set->context_menu_entries = {
+            xset::name::dev_show,
+            xset::name::separator,
+            xset::name::dev_menu_auto,
+            xset::name::dev_change,
+            xset::name::separator,
+            xset::name::dev_single,
+            xset::name::dev_newtab,
+        };
+    }
 
     xset_add_menu(browser,
                   popup,
@@ -1579,44 +1597,50 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
     }
 
     // create menu
-    xset_t set;
-    GtkWidget* item = nullptr;
     GtkWidget* popup = gtk_menu_new();
 
-    set = xset::set::get(xset::name::dev_menu_remove);
-    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
-    g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol.get());
-    gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_remove);
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        g_object_set_data(G_OBJECT(item), "view", view);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol.get());
+        gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
+    }
 
-    set = xset::set::get(xset::name::dev_menu_unmount);
-    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
-    g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol.get());
-    gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
-    gtk_widget_set_sensitive(item, !!vol);
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_unmount);
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        g_object_set_data(G_OBJECT(item), "view", view);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol.get());
+        gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
+        gtk_widget_set_sensitive(item, !!vol);
+    }
 
     gtk_menu_shell_append(GTK_MENU_SHELL(popup), gtk_separator_menu_item_new());
 
-    set = xset::set::get(xset::name::dev_menu_open);
-    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
-    g_object_set_data(G_OBJECT(item), "view", view);
-    gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
-    if (browser)
     {
-        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open_tab), vol.get());
-    }
-    else
-    {
-        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open), vol.get());
+        const auto set = xset::set::get(xset::name::dev_menu_open);
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        g_object_set_data(G_OBJECT(item), "view", view);
+        gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
+        if (browser)
+        {
+            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open_tab), vol.get());
+        }
+        else
+        {
+            g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_open), vol.get());
+        }
     }
 
-    set = xset::set::get(xset::name::dev_menu_mount);
-    item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
-    g_object_set_data(G_OBJECT(item), "view", view);
-    g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol.get());
-    gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
-    gtk_widget_set_sensitive(item, !!vol);
+    {
+        const auto set = xset::set::get(xset::name::dev_menu_mount);
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        g_object_set_data(G_OBJECT(item), "view", view);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol.get());
+        gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
+        gtk_widget_set_sensitive(item, !!vol);
+    }
 
     // show menu
     gtk_widget_show_all(GTK_WIDGET(popup));
@@ -1708,8 +1732,6 @@ cmp_dev_name(const std::shared_ptr<vfs::volume>& a, const std::shared_ptr<vfs::v
 void
 ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* browser, GtkWidget* menu) noexcept
 { // add currently visible devices to menu with dev design mode callback
-    xset_t set;
-
     g_object_set_data(G_OBJECT(menu), "parent", parent);
     // browser may be nullptr
     g_object_set_data(G_OBJECT(parent), "browser", browser);
@@ -1748,7 +1770,7 @@ ptk::view::location::dev_menu(GtkWidget* parent, ptk::browser* browser, GtkWidge
     // xset_set_cb(xset::name::dev_automount_volumes, (GFunc)on_automountlist, vol.get());
     xset_set_cb(xset::name::dev_change, (GFunc)update_change_detection, nullptr);
 
-    set = xset::set::get(xset::name::dev_menu_settings);
+    const auto set = xset::set::get(xset::name::dev_menu_settings);
     set->context_menu_entries = {
         xset::name::dev_show,
         xset::name::separator,

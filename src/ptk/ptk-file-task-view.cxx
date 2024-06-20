@@ -305,7 +305,6 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
     ptk::file_task* ptask = nullptr;
-    xset_t set;
 
     enum class main_window_job
     {
@@ -316,6 +315,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
     };
     main_window_job job;
 
+    xset_t set;
     if (item)
     {
         set = xset::set::get(static_cast<const char*>(g_object_get_data(G_OBJECT(item), "set")));
@@ -774,7 +774,6 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
     GtkTreeViewColumn* col = nullptr;
     GtkTreeIter it;
     ptk::file_task* ptask = nullptr;
-    xset_t set;
     bool is_tasks = false;
 
     const auto button = gdk_button_event_get_button(event);
@@ -845,7 +844,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
                 case vfs::file_task::state::finish:
                     sname = xset::name::task_pause;
             }
-            set = xset::set::get(sname);
+            const auto set = xset::set::get(sname);
             on_task_stop(nullptr, view, set, ptask);
             return true;
             break;
@@ -883,39 +882,51 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
             {
                 return false;
             }
-            GtkWidget* popup = nullptr;
+            GtkWidget* popup = gtk_menu_new();
 
-            popup = gtk_menu_new();
+            {
+                const auto set = xset::set::get(xset::name::task_stop);
+                xset_set_cb(set, (GFunc)on_task_stop, view);
+                xset_set_ob(set, "task", ptask);
+                set->disable = !ptask;
+            }
 
-            set = xset::set::get(xset::name::task_stop);
-            xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob(set, "task", ptask);
-            set->disable = !ptask;
+            {
+                const auto set = xset::set::get(xset::name::task_pause);
+                xset_set_cb(set, (GFunc)on_task_stop, view);
+                xset_set_ob(set, "task", ptask);
+                set->disable =
+                    (!ptask || ptask->task->state_pause_ == vfs::file_task::state::pause ||
+                     ptask->task->type_ == vfs::file_task::type::exec);
+            }
 
-            set = xset::set::get(xset::name::task_pause);
-            xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob(set, "task", ptask);
-            set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::pause ||
-                            ptask->task->type_ == vfs::file_task::type::exec);
+            {
+                const auto set = xset::set::get(xset::name::task_que);
+                xset_set_cb(set, (GFunc)on_task_stop, view);
+                xset_set_ob(set, "task", ptask);
+                set->disable =
+                    (!ptask || ptask->task->state_pause_ == vfs::file_task::state::queue ||
+                     ptask->task->type_ == vfs::file_task::type::exec);
+            }
 
-            set = xset::set::get(xset::name::task_que);
-            xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob(set, "task", ptask);
-            set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::queue ||
-                            ptask->task->type_ == vfs::file_task::type::exec);
-
-            set = xset::set::get(xset::name::task_resume);
-            xset_set_cb(set, (GFunc)on_task_stop, view);
-            xset_set_ob(set, "task", ptask);
-            set->disable = (!ptask || ptask->task->state_pause_ == vfs::file_task::state::running ||
-                            ptask->task->type_ == vfs::file_task::type::exec);
+            {
+                const auto set = xset::set::get(xset::name::task_resume);
+                xset_set_cb(set, (GFunc)on_task_stop, view);
+                xset_set_ob(set, "task", ptask);
+                set->disable =
+                    (!ptask || ptask->task->state_pause_ == vfs::file_task::state::running ||
+                     ptask->task->type_ == vfs::file_task::type::exec);
+            }
 
             xset_set_cb(xset::name::task_stop_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_pause_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_que_all, (GFunc)on_task_stop, view);
             xset_set_cb(xset::name::task_resume_all, (GFunc)on_task_stop, view);
-            set = xset::set::get(xset::name::task_all);
-            set->disable = !is_tasks;
+
+            {
+                const auto set = xset::set::get(xset::name::task_all);
+                set->disable = !is_tasks;
+            }
 
             const std::vector<xset::name> context_menu_entries = {
                 xset::name::task_stop,
@@ -1042,7 +1053,6 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
     GtkWidget* view = nullptr;
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
-    xset_t set;
 
     // ztd::logger::info("ptk::view::file_task::update_task  ptask={}", ptask);
     static constexpr ztd::map<vfs::file_task::type, const std::string_view, 7> job_titles{{{
@@ -1194,12 +1204,12 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
             // icon
             if (ptask->task->state_pause_ == vfs::file_task::state::pause)
             {
-                set = xset::set::get(xset::name::task_pause);
+                const auto set = xset::set::get(xset::name::task_pause);
                 pixbuf = vfs::utils::load_icon(set->icon.value_or("media-playback-pause"), 22);
             }
             else if (ptask->task->state_pause_ == vfs::file_task::state::queue)
             {
-                set = xset::set::get(xset::name::task_que);
+                const auto set = xset::set::get(xset::name::task_que);
                 pixbuf = vfs::utils::load_icon(set->icon.value_or("list-add"), 22);
             }
             else if (ptask->err_count_ && ptask->task->type_ != vfs::file_task::type::exec)
