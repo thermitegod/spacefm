@@ -1719,7 +1719,7 @@ on_folder_view_columns_changed(GtkTreeView* view, ptk::browser* file_browser) no
             if (title == column.title)
             {
                 // save column position
-                const xset_t set = xset_get_panel(file_browser->panel_, column.xset_name);
+                const auto set = xset::set::get(column.xset_name, file_browser->panel_);
                 set->x = std::format("{}", i);
 
                 break;
@@ -2007,7 +2007,7 @@ init_list_view(ptk::browser* file_browser, GtkTreeView* list_view) noexcept
         // column width
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
-        const xset_t set = xset_get_panel_mode(p, global::columns.at(idx).xset_name, mode);
+        const auto set = xset::set::get(global::columns.at(idx).xset_name, p, mode);
         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
         if (width)
         {
@@ -4705,7 +4705,7 @@ ptk::browser::update_views() noexcept
                     if (title == column.title)
                     {
                         // get column width for this panel context
-                        set = xset_get_panel_mode(p, column.xset_name, mode);
+                        set = xset::set::get(column.xset_name, p, mode);
                         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
                         // ztd::logger::info("        {}\t{}", width, title );
                         if (width)
@@ -4834,7 +4834,7 @@ ptk::browser::save_column_widths() const noexcept
                 if (title == column.title)
                 {
                     // save column width for this panel context
-                    const xset_t set = xset_get_panel_mode(p, column.xset_name, mode);
+                    const auto set = xset::set::get(column.xset_name, p, mode);
                     const i32 width = gtk_tree_view_column_get_width(col);
                     if (width > 0)
                     {
@@ -4855,7 +4855,7 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
     const panel_t p = this->panel_;
     const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
 
-    const xset_t set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
+    const auto set = xset::set::get(xset::panel::slider_positions, p, mode);
 
     if (pane == this->hpane)
     {
@@ -5931,7 +5931,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             }
             else if (xname.starts_with("show_")) // shared key
             {
-                set2 = xset_get_panel_mode(this->panel_, xname, mode);
+                set2 = xset::set::get(xname, this->panel_, mode);
                 set2->b = set2->b == xset::set::enabled::yes ? xset::set::enabled::unset
                                                              : xset::set::enabled::yes;
                 update_views_all_windows(nullptr, this);
@@ -5959,7 +5959,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
             else if (xname.starts_with("detcol_") // shared key
                      && this->view_mode_ == ptk::browser::view_mode::list_view)
             {
-                set2 = xset_get_panel_mode(this->panel_, xname, mode);
+                set2 = xset::set::get(xname, this->panel_, mode);
                 set2->b = set2->b == xset::set::enabled::yes ? xset::set::enabled::unset
                                                              : xset::set::enabled::yes;
                 update_views_all_windows(nullptr, this);

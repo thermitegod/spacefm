@@ -2036,7 +2036,7 @@ xset_defaults() noexcept
     for (const panel_t p : PANELS)
     {
         {
-            const auto set = xset_get_panel(p, xset::panel::show_toolbox);
+            const auto set = xset::set::get(xset::panel::show_toolbox, p);
             set->menu.label = "_Toolbar";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::yes;
@@ -2047,7 +2047,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::show_devmon);
+            const auto set = xset::set::get(xset::panel::show_devmon, p);
             set->menu.label = "_Devices";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::unset;
@@ -2058,7 +2058,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::show_dirtree);
+            const auto set = xset::set::get(xset::panel::show_dirtree, p);
             set->menu.label = "T_ree";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::yes;
@@ -2069,7 +2069,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::list_detailed);
+            const auto set = xset::set::get(xset::panel::list_detailed, p);
             set->menu.label = "_Detailed";
             set->menu.type = xset::set::menu_type::radio;
             set->b = xset::set::enabled::yes;
@@ -2080,7 +2080,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::list_icons);
+            const auto set = xset::set::get(xset::panel::list_icons, p);
             set->menu.label = "_Icons";
             set->menu.type = xset::set::menu_type::radio;
             if (p != 1)
@@ -2090,7 +2090,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::list_compact);
+            const auto set = xset::set::get(xset::panel::list_compact, p);
             set->menu.label = "_Compact";
             set->menu.type = xset::set::menu_type::radio;
             if (p != 1)
@@ -2100,7 +2100,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::list_large);
+            const auto set = xset::set::get(xset::panel::list_large, p);
             set->menu.label = "_Large Icons";
             set->menu.type = xset::set::menu_type::check;
             if (p != 1)
@@ -2110,7 +2110,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::show_hidden);
+            const auto set = xset::set::get(xset::panel::show_hidden, p);
             set->menu.label = "_Hidden Files";
             set->menu.type = xset::set::menu_type::check;
             if (p == 1)
@@ -2124,7 +2124,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_name);
+            const auto set = xset::set::get(xset::panel::detcol_name, p);
             set->menu.label = "_Name";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::yes; // visible
@@ -2132,7 +2132,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_size);
+            const auto set = xset::set::get(xset::panel::detcol_size, p);
             set->menu.label = "_Size";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::yes;
@@ -2144,7 +2144,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_bytes);
+            const auto set = xset::set::get(xset::panel::detcol_bytes, p);
             set->menu.label = "_Bytes";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::yes;
@@ -2156,7 +2156,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_type);
+            const auto set = xset::set::get(xset::panel::detcol_type, p);
             set->menu.label = "_Type";
             set->menu.type = xset::set::menu_type::check;
             set->x = "3";
@@ -2167,7 +2167,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_mime);
+            const auto set = xset::set::get(xset::panel::detcol_mime, p);
             set->menu.label = "_MIME Type";
             set->menu.type = xset::set::menu_type::check;
             set->x = "4";
@@ -2178,7 +2178,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_perm);
+            const auto set = xset::set::get(xset::panel::detcol_perm, p);
             set->menu.label = "_Permissions";
             set->menu.type = xset::set::menu_type::check;
             set->x = "5";
@@ -2189,7 +2189,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_owner);
+            const auto set = xset::set::get(xset::panel::detcol_owner, p);
             set->menu.label = "_Owner";
             set->menu.type = xset::set::menu_type::check;
             set->x = "6";
@@ -2200,7 +2200,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_group);
+            const auto set = xset::set::get(xset::panel::detcol_group, p);
             set->menu.label = "_Group";
             set->menu.type = xset::set::menu_type::check;
             set->x = "7";
@@ -2211,7 +2211,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_atime);
+            const auto set = xset::set::get(xset::panel::detcol_atime, p);
             set->menu.label = "_Accessed";
             set->menu.type = xset::set::menu_type::check;
             set->x = "8";
@@ -2222,7 +2222,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_btime);
+            const auto set = xset::set::get(xset::panel::detcol_btime, p);
             set->menu.label = "_Created";
             set->menu.type = xset::set::menu_type::check;
             set->x = "9";
@@ -2233,7 +2233,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_ctime);
+            const auto set = xset::set::get(xset::panel::detcol_ctime, p);
             set->menu.label = "_Metadata";
             set->menu.type = xset::set::menu_type::check;
             set->x = "10";
@@ -2244,7 +2244,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::detcol_mtime);
+            const auto set = xset::set::get(xset::panel::detcol_mtime, p);
             set->menu.label = "_Modified";
             set->menu.type = xset::set::menu_type::check;
             set->x = "11";
@@ -2255,7 +2255,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::sort_extra);
+            const auto set = xset::set::get(xset::panel::sort_extra, p);
             set->b = xset::set::enabled::yes; // sort_natural
             set->x =
                 std::format("{}", magic_enum::enum_integer(xset::set::enabled::no)); // sort_case
@@ -2266,7 +2266,7 @@ xset_defaults() noexcept
         }
 
         {
-            const auto set = xset_get_panel(p, xset::panel::book_fol);
+            const auto set = xset::set::get(xset::panel::book_fol, p);
             set->menu.label = "Follow _Dir";
             set->menu.type = xset::set::menu_type::check;
             set->b = xset::set::enabled::yes;

@@ -109,7 +109,7 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& path,
         if (!gtk_notebook_get_n_pages(main_window->get_panel_notebook(opt->panel)))
         {
             // set panel to load path on panel load
-            const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
+            const auto set = xset::set::get(xset::panel::show, opt->panel);
             if (set->s)
             {
                 set->s = std::format("{}{}{}",
@@ -128,7 +128,7 @@ open_in_tab(MainWindow* main_window, const std::filesystem::path& path,
         else if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opt->panel))))
         {
             // show panel
-            const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
+            const auto set = xset::set::get(xset::panel::show, opt->panel);
             set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }
@@ -219,7 +219,7 @@ activate(GtkApplication* app, void* user_data) noexcept
         if (!gtk_widget_get_visible(GTK_WIDGET(main_window->get_panel_notebook(opt->panel))))
         {
             // show panel
-            const xset_t set = xset_get_panel(opt->panel, xset::panel::show);
+            const auto set = xset::set::get(xset::panel::show, opt->panel);
             set->b = xset::set::enabled::yes;
             show_panels_all_windows(nullptr, main_window);
         }

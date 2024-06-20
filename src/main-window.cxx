@@ -743,8 +743,8 @@ MainWindow::show_panels() noexcept
                                       xset::panel::detcol_mtime,
                                       mode,
                                       xset_get_b_panel(p, xset::panel::detcol_mtime));
-                const xset_t set_old = xset_get_panel(p, xset::panel::slider_positions);
-                set = xset_get_panel_mode(p, xset::panel::slider_positions, mode);
+                const auto set_old = xset::set::get(xset::panel::slider_positions, p);
+                set = xset::set::get(xset::panel::slider_positions, p, mode);
                 set->x = set_old->x ? set_old->x : "0";
                 set->y = set_old->y ? set_old->y : "0";
                 set->s = set_old->s ? set_old->s : "0";
@@ -760,7 +760,7 @@ MainWindow::show_panels() noexcept
                 this->curpanel = p;
                 // load saved tabs
                 bool tab_added = false;
-                set = xset_get_panel(p, xset::panel::show);
+                set = xset::set::get(xset::panel::show, p);
                 if ((set->s && config::settings.load_saved_tabs))
                 {
                     const std::vector<std::string> tab_dirs =

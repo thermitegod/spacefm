@@ -363,38 +363,38 @@ on_popup_detailed_column(GtkMenuItem* menuitem, ptk::browser* file_browser) noex
         xset_t set;
 
         // size
-        set = xset_get_panel_mode(p, xset::panel::detcol_size, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_size)->b;
+        set = xset::set::get(xset::panel::detcol_size, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_size, p)->b;
         // size in bytes
-        set = xset_get_panel_mode(p, xset::panel::detcol_bytes, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_bytes)->b;
+        set = xset::set::get(xset::panel::detcol_bytes, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_bytes, p)->b;
         // type
-        set = xset_get_panel_mode(p, xset::panel::detcol_type, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_type)->b;
+        set = xset::set::get(xset::panel::detcol_type, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_type, p)->b;
         // MIME type
-        set = xset_get_panel_mode(p, xset::panel::detcol_mime, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_mime)->b;
+        set = xset::set::get(xset::panel::detcol_mime, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_mime, p)->b;
         // perm
-        set = xset_get_panel_mode(p, xset::panel::detcol_perm, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_perm)->b;
+        set = xset::set::get(xset::panel::detcol_perm, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_perm, p)->b;
         // owner
-        set = xset_get_panel_mode(p, xset::panel::detcol_owner, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_owner)->b;
+        set = xset::set::get(xset::panel::detcol_owner, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_owner, p)->b;
         // group
-        set = xset_get_panel_mode(p, xset::panel::detcol_group, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_group)->b;
+        set = xset::set::get(xset::panel::detcol_group, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_group, p)->b;
         // atime
-        set = xset_get_panel_mode(p, xset::panel::detcol_atime, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_atime)->b;
+        set = xset::set::get(xset::panel::detcol_atime, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_atime, p)->b;
         // btime
-        set = xset_get_panel_mode(p, xset::panel::detcol_btime, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_btime)->b;
+        set = xset::set::get(xset::panel::detcol_btime, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_btime, p)->b;
         // ctime
-        set = xset_get_panel_mode(p, xset::panel::detcol_ctime, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_ctime)->b;
+        set = xset::set::get(xset::panel::detcol_ctime, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_ctime, p)->b;
         // mtime
-        set = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode);
-        set->b = xset_get_panel(p, xset::panel::detcol_mtime)->b;
+        set = xset::set::get(xset::panel::detcol_mtime, p, mode);
+        set->b = xset::set::get(xset::panel::detcol_mtime, p)->b;
 
         update_views_all_windows(nullptr, file_browser);
     }
@@ -410,12 +410,12 @@ on_popup_toggle_view(GtkMenuItem* menuitem, ptk::browser* file_browser) noexcept
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
     xset_t set;
-    set = xset_get_panel_mode(p, xset::panel::show_toolbox, mode);
-    set->b = xset_get_panel(p, xset::panel::show_toolbox)->b;
-    set = xset_get_panel_mode(p, xset::panel::show_devmon, mode);
-    set->b = xset_get_panel(p, xset::panel::show_devmon)->b;
-    set = xset_get_panel_mode(p, xset::panel::show_dirtree, mode);
-    set->b = xset_get_panel(p, xset::panel::show_dirtree)->b;
+    set = xset::set::get(xset::panel::show_toolbox, p, mode);
+    set->b = xset::set::get(xset::panel::show_toolbox, p)->b;
+    set = xset::set::get(xset::panel::show_devmon, p, mode);
+    set->b = xset::set::get(xset::panel::show_devmon, p)->b;
+    set = xset::set::get(xset::panel::show_dirtree, p, mode);
+    set->b = xset::set::get(xset::panel::show_dirtree, p)->b;
 
     update_views_all_windows(nullptr, file_browser);
 }
@@ -489,63 +489,63 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     const xset::main_window_panel mode = main_window->panel_context.at(p);
 
     xset_set_cb(xset::name::view_refresh, (GFunc)ptk::wrapper::browser::refresh, browser);
-    set = xset_get_panel(p, xset::panel::show_toolbox);
+    set = xset::set::get(xset::panel::show_toolbox, p);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, xset::panel::show_toolbox, mode)->b;
-    set = xset_get_panel(p, xset::panel::show_devmon);
+    set->b = xset::set::get(xset::panel::show_toolbox, p, mode)->b;
+    set = xset::set::get(xset::panel::show_devmon, p);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, xset::panel::show_devmon, mode)->b;
-    set = xset_get_panel(p, xset::panel::show_dirtree);
+    set->b = xset::set::get(xset::panel::show_devmon, p, mode)->b;
+    set = xset::set::get(xset::panel::show_dirtree, p);
     xset_set_cb(set, (GFunc)on_popup_toggle_view, browser);
-    set->b = xset_get_panel_mode(p, xset::panel::show_dirtree, mode)->b;
+    set->b = xset::set::get(xset::panel::show_dirtree, p, mode)->b;
     xset_set_cb_panel(p, xset::panel::show_hidden, (GFunc)on_popup_show_hidden, browser);
 
     if (browser->is_view_mode(ptk::browser::view_mode::list_view))
     {
         // size
-        set = xset_get_panel(p, xset::panel::detcol_size);
+        set = xset::set::get(xset::panel::detcol_size, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_size, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_size, p, mode)->b;
         // size in bytes
-        set = xset_get_panel(p, xset::panel::detcol_bytes);
+        set = xset::set::get(xset::panel::detcol_bytes, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_bytes, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_bytes, p, mode)->b;
         // type
-        set = xset_get_panel(p, xset::panel::detcol_type);
+        set = xset::set::get(xset::panel::detcol_type, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_type, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_type, p, mode)->b;
         // MIME type
-        set = xset_get_panel(p, xset::panel::detcol_mime);
+        set = xset::set::get(xset::panel::detcol_mime, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_mime, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_mime, p, mode)->b;
         // perm
-        set = xset_get_panel(p, xset::panel::detcol_perm);
+        set = xset::set::get(xset::panel::detcol_perm, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_perm, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_perm, p, mode)->b;
         // owner
-        set = xset_get_panel(p, xset::panel::detcol_owner);
+        set = xset::set::get(xset::panel::detcol_owner, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_owner, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_owner, p, mode)->b;
         // group
-        set = xset_get_panel(p, xset::panel::detcol_group);
+        set = xset::set::get(xset::panel::detcol_group, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_group, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_group, p, mode)->b;
         // atime
-        set = xset_get_panel(p, xset::panel::detcol_atime);
+        set = xset::set::get(xset::panel::detcol_atime, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_atime, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_atime, p, mode)->b;
         // btime
-        set = xset_get_panel(p, xset::panel::detcol_btime);
+        set = xset::set::get(xset::panel::detcol_btime, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_btime, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_btime, p, mode)->b;
         // ctime
-        set = xset_get_panel(p, xset::panel::detcol_ctime);
+        set = xset::set::get(xset::panel::detcol_ctime, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_ctime, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_ctime, p, mode)->b;
         // mtime
-        set = xset_get_panel(p, xset::panel::detcol_mtime);
+        set = xset::set::get(xset::panel::detcol_mtime, p);
         xset_set_cb(set, (GFunc)on_popup_detailed_column, browser);
-        set->b = xset_get_panel_mode(p, xset::panel::detcol_mtime, mode)->b;
+        set->b = xset::set::get(xset::panel::detcol_mtime, p, mode)->b;
 
         xset_set_cb(xset::name::view_reorder_col, (GFunc)ptk::view::file_task::on_reorder, browser);
 
@@ -641,33 +641,33 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
 
     if (browser->is_view_mode(ptk::browser::view_mode::icon_view))
     {
-        set = xset_get_panel(p, xset::panel::list_large);
+        set = xset::set::get(xset::panel::list_large, p);
         xset_set_b(set, true);
         set->disable = true;
     }
     else
     {
-        set = xset_get_panel(p, xset::panel::list_large);
+        set = xset::set::get(xset::panel::list_large, p);
         xset_set_cb(set, (GFunc)on_popup_list_large, browser);
         set->disable = false;
-        set->b = xset_get_panel_mode(p, xset::panel::list_large, mode)->b;
+        set->b = xset::set::get(xset::panel::list_large, p, mode)->b;
     }
 
     {
-        set = xset_get_panel(p, xset::panel::list_detailed);
+        set = xset::set::get(xset::panel::list_detailed, p);
         xset_set_cb(set, (GFunc)on_popup_list_detailed, browser);
         set->menu.radio_set = nullptr;
         set_radio = set;
     }
 
     {
-        set = xset_get_panel(p, xset::panel::list_icons);
+        set = xset::set::get(xset::panel::list_icons, p);
         xset_set_cb(set, (GFunc)on_popup_list_icons, browser);
         set->menu.radio_set = set_radio;
     }
 
     {
-        set = xset_get_panel(p, xset::panel::list_compact);
+        set = xset::set::get(xset::panel::list_compact, p);
         xset_set_cb(set, (GFunc)on_popup_list_compact, browser);
         set->menu.radio_set = set_radio;
     }

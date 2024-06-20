@@ -179,7 +179,7 @@ save_settings() noexcept
         {
             for (const panel_t p : PANELS)
             {
-                const xset_t set = xset_get_panel(p, xset::panel::show);
+                const auto set = xset::set::get(xset::panel::show, p);
                 if (GTK_IS_NOTEBOOK(main_window->get_panel_notebook(p)))
                 {
                     const i32 pages = gtk_notebook_get_n_pages(main_window->get_panel_notebook(p));
@@ -213,7 +213,7 @@ save_settings() noexcept
             // clear saved tabs
             for (const panel_t p : PANELS)
             {
-                const xset_t set = xset_get_panel(p, xset::panel::show);
+                const auto set = xset::set::get(xset::panel::show, p);
                 set->s = std::nullopt;
                 set->x = std::nullopt;
             }
