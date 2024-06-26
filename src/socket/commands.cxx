@@ -1259,7 +1259,9 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 gtk_selection_data_free(sel_data);
                 return {SOCKET_SUCCESS, ""};
             }
-            if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
+
+            const char* uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
+            if (std::string(uri_list_str).starts_with("cut"))
             {
                 if (property == "clipboard-copy-files")
                 {

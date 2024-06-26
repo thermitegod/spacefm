@@ -362,7 +362,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
         }
 
         uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
-        if (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"))
+        if (std::string(uri_list_str).starts_with("cut"))
         {
             action = vfs::file_task::type::move;
         }
@@ -663,7 +663,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
         }
 
         uri_list_str = (const char*)gtk_selection_data_get_data(sel_data);
-        *is_cut = (ztd::startswith((const char*)gtk_selection_data_get_data(sel_data), "cut"));
+        *is_cut = (std::string(uri_list_str).starts_with("cut"));
 
         if (uri_list_str)
         {

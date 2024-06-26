@@ -333,7 +333,7 @@ vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir) noexcept
     // Need to have the + '/' to avoid erroring when moving a dir
     // into another dir when the target starts the whole name of the source.
     // i.e. moving './new' into './new2'
-    if (!ztd::startswith(real_dest_path.string() + '/', real_src_path.string() + '/'))
+    if (!std::string(real_dest_path.string() + '/').starts_with(real_src_path.string() + '/'))
     {
         return false;
     }
