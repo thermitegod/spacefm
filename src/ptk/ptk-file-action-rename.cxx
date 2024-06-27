@@ -87,7 +87,7 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
 
     GtkLabel* label_name{nullptr};
     GtkScrolledWindow* scroll_name{nullptr};
-    GtkWidget* input_name{nullptr};
+    GtkTextView* input_name{nullptr};
     GtkTextBuffer* buf_name{nullptr};
     GtkLabel* blank_name{nullptr};
 
@@ -97,19 +97,19 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
 
     GtkLabel* label_full_name{nullptr};
     GtkScrolledWindow* scroll_full_name{nullptr};
-    GtkWidget* input_full_name{nullptr};
+    GtkTextView* input_full_name{nullptr};
     GtkTextBuffer* buf_full_name{nullptr};
     GtkLabel* blank_full_name{nullptr};
 
     GtkLabel* label_path{nullptr};
     GtkScrolledWindow* scroll_path{nullptr};
-    GtkWidget* input_path{nullptr};
+    GtkTextView* input_path{nullptr};
     GtkTextBuffer* buf_path{nullptr};
     GtkLabel* blank_path{nullptr};
 
     GtkLabel* label_full_path{nullptr};
     GtkScrolledWindow* scroll_full_path{nullptr};
-    GtkWidget* input_full_path{nullptr};
+    GtkTextView* input_full_path{nullptr};
     GtkTextBuffer* buf_full_path{nullptr};
 
     GtkWidget* opt_move{nullptr};
@@ -769,7 +769,7 @@ select_input(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
         GtkTextIter siter;
         GtkTextBuffer* buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
         if (widget == GTK_WIDGET(mset->input_full_name) &&
-            !gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+            !gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_name))))
         {
             // name is not visible so select name in filename
             gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
@@ -813,60 +813,59 @@ on_button_focus(GtkWidget* widget, GtkDirectionType direction,
     if (direction == GtkDirectionType::GTK_DIR_TAB_FORWARD ||
         direction == GtkDirectionType::GTK_DIR_TAB_BACKWARD)
     {
+        GtkWidget* input = nullptr;
         if (widget == mset->options || widget == mset->opt_move || widget == mset->opt_new_file)
         {
-            GtkWidget* input = nullptr;
-            if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+            if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_name))))
             {
-                input = mset->input_name;
+                input = GTK_WIDGET(mset->input_name);
             }
-            else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
+            else if (gtk_widget_get_visible(
+                         gtk_widget_get_parent(GTK_WIDGET(mset->input_full_name))))
             {
-                input = mset->input_full_name;
+                input = GTK_WIDGET(mset->input_full_name);
             }
-            else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
+            else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_path))))
             {
-                input = mset->input_path;
+                input = GTK_WIDGET(mset->input_path);
             }
-            else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
+            else if (gtk_widget_get_visible(
+                         gtk_widget_get_parent(GTK_WIDGET(mset->input_full_path))))
             {
-                input = mset->input_full_path;
+                input = GTK_WIDGET(mset->input_full_path);
             }
             else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->entry_target))))
             {
                 input = GTK_WIDGET(mset->entry_target);
             }
-            if (input)
-            {
-                select_input(input, mset);
-                gtk_widget_grab_focus(input);
-            }
         }
         else
         {
-            GtkWidget* input = nullptr;
-            if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
+            if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_full_path))))
             {
-                input = mset->input_full_path;
+                input = GTK_WIDGET(mset->input_full_path);
             }
-            else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
+            else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_path))))
             {
-                input = mset->input_path;
+                input = GTK_WIDGET(mset->input_path);
             }
-            else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
+            else if (gtk_widget_get_visible(
+                         gtk_widget_get_parent(GTK_WIDGET(mset->input_full_name))))
             {
-                input = mset->input_full_name;
+                input = GTK_WIDGET(mset->input_full_name);
             }
-            else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+            else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_name))))
             {
-                input = mset->input_name;
-            }
-            if (input)
-            {
-                select_input(input, mset);
-                gtk_widget_grab_focus(input);
+                input = GTK_WIDGET(mset->input_name);
             }
         }
+
+        if (input)
+        {
+            select_input(input, mset);
+            gtk_widget_grab_focus(input);
+        }
+
         return true;
     }
     return false;
@@ -1298,15 +1297,14 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                const std::shared_ptr<MoveSet>& mset) noexcept
 {
     GtkWidget* input = nullptr;
-    GtkWidget* input2 = nullptr;
-    GtkWidget* first_input = nullptr;
 
     switch (direction)
     {
         case GtkDirectionType::GTK_DIR_TAB_FORWARD:
+        {
             if (widget == GTK_WIDGET(mset->label_name))
             {
-                input = mset->input_name;
+                input = GTK_WIDGET(mset->input_name);
             }
             else if (widget == GTK_WIDGET(mset->label_ext))
             {
@@ -1314,15 +1312,15 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
             }
             else if (widget == GTK_WIDGET(mset->label_full_name))
             {
-                input = mset->input_full_name;
+                input = GTK_WIDGET(mset->input_full_name);
             }
             else if (widget == GTK_WIDGET(mset->label_path))
             {
-                input = mset->input_path;
+                input = GTK_WIDGET(mset->input_path);
             }
             else if (widget == GTK_WIDGET(mset->label_full_path))
             {
-                input = mset->input_full_path;
+                input = GTK_WIDGET(mset->input_full_path);
             }
             else if (widget == GTK_WIDGET(mset->label_type))
             {
@@ -1334,7 +1332,9 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                 input = GTK_WIDGET(mset->entry_target);
             }
             break;
+        }
         case GtkDirectionType::GTK_DIR_TAB_BACKWARD:
+        {
             if (widget == GTK_WIDGET(mset->label_name))
             {
                 if (mset->entry_target)
@@ -1343,12 +1343,12 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                 }
                 else
                 {
-                    input = mset->input_full_path;
+                    input = GTK_WIDGET(mset->input_full_path);
                 }
             }
             else if (widget == GTK_WIDGET(mset->label_ext))
             {
-                input = mset->input_name;
+                input = GTK_WIDGET(mset->input_name);
             }
             else if (widget == GTK_WIDGET(mset->label_full_name))
             {
@@ -1359,39 +1359,39 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                 }
                 else
                 {
-                    input = mset->input_name;
+                    input = GTK_WIDGET(mset->input_name);
                 }
             }
             else if (widget == GTK_WIDGET(mset->label_path))
             {
-                input = mset->input_full_name;
+                input = GTK_WIDGET(mset->input_full_name);
             }
             else if (widget == GTK_WIDGET(mset->label_full_path))
             {
-                input = mset->input_path;
+                input = GTK_WIDGET(mset->input_path);
             }
             else
             {
-                input = mset->input_full_path;
+                input = GTK_WIDGET(mset->input_full_path);
             }
 
-            first_input = input;
+            GtkWidget* first_input = input;
             while (input && !gtk_widget_get_visible(gtk_widget_get_parent(input)))
             {
-                input2 = nullptr;
+                GtkWidget* input2 = nullptr;
                 if (input == GTK_WIDGET(mset->entry_target))
                 {
-                    input2 = mset->input_full_path;
+                    input2 = GTK_WIDGET(mset->input_full_path);
                 }
-                else if (input == mset->input_full_path)
+                else if (input == GTK_WIDGET(mset->input_full_path))
                 {
-                    input2 = mset->input_path;
+                    input2 = GTK_WIDGET(mset->input_path);
                 }
-                else if (input == mset->input_path)
+                else if (input == GTK_WIDGET(mset->input_path))
                 {
-                    input2 = mset->input_full_name;
+                    input2 = GTK_WIDGET(mset->input_full_name);
                 }
-                else if (input == mset->input_full_name)
+                else if (input == GTK_WIDGET(mset->input_full_name))
                 {
                     if (gtk_widget_get_visible(
                             gtk_widget_get_parent(GTK_WIDGET(mset->entry_ext))) &&
@@ -1401,14 +1401,14 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                     }
                     else
                     {
-                        input2 = mset->input_name;
+                        input2 = GTK_WIDGET(mset->input_name);
                     }
                 }
                 else if (input == GTK_WIDGET(mset->entry_ext))
                 {
-                    input2 = mset->input_name;
+                    input2 = GTK_WIDGET(mset->input_name);
                 }
-                else if (input == mset->input_name)
+                else if (input == GTK_WIDGET(mset->input_name))
                 {
                     if (mset->entry_target)
                     {
@@ -1416,7 +1416,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                     }
                     else
                     {
-                        input2 = mset->input_full_path;
+                        input2 = GTK_WIDGET(mset->input_full_path);
                     }
                 }
 
@@ -1430,6 +1430,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                 }
             }
             break;
+        }
         case GtkDirectionType::GTK_DIR_UP:
         case GtkDirectionType::GTK_DIR_DOWN:
         case GtkDirectionType::GTK_DIR_LEFT:
@@ -1531,7 +1532,7 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
             GtkWidget* input = nullptr;
             if (widget == GTK_WIDGET(mset->label_name))
             {
-                input = mset->input_name;
+                input = GTK_WIDGET(mset->input_name);
             }
             else if (widget == GTK_WIDGET(mset->label_ext))
             {
@@ -1539,15 +1540,15 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
             }
             else if (widget == GTK_WIDGET(mset->label_full_name))
             {
-                input = mset->input_full_name;
+                input = GTK_WIDGET(mset->input_full_name);
             }
             else if (widget == GTK_WIDGET(mset->label_path))
             {
-                input = mset->input_path;
+                input = GTK_WIDGET(mset->input_path);
             }
             else if (widget == GTK_WIDGET(mset->label_full_path))
             {
-                input = mset->input_full_path;
+                input = GTK_WIDGET(mset->input_full_path);
             }
             else if (widget == GTK_WIDGET(mset->label_type))
             {
@@ -1872,8 +1873,8 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_halign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
     mset->scroll_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    mset->input_name = GTK_WIDGET(multi_input_new(mset->scroll_name, nullptr));
-    gtk_label_set_mnemonic_widget(mset->label_name, mset->input_name);
+    mset->input_name = multi_input_new(mset->scroll_name, nullptr);
+    gtk_label_set_mnemonic_widget(mset->label_name, GTK_WIDGET(mset->input_name));
     gtk_label_set_selectable(mset->label_name, true);
     mset->buf_name = GTK_TEXT_BUFFER(gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_name)));
     mset->blank_name = GTK_LABEL(gtk_label_new(nullptr));
@@ -1913,8 +1914,8 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_halign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
     mset->scroll_full_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    mset->input_full_name = GTK_WIDGET(multi_input_new(mset->scroll_full_name, nullptr));
-    gtk_label_set_mnemonic_widget(mset->label_full_name, mset->input_full_name);
+    mset->input_full_name = multi_input_new(mset->scroll_full_name, nullptr);
+    gtk_label_set_mnemonic_widget(mset->label_full_name, GTK_WIDGET(mset->input_full_name));
     gtk_label_set_selectable(mset->label_full_name, true);
     mset->buf_full_name = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_name));
     mset->blank_full_name = GTK_LABEL(gtk_label_new(nullptr));
@@ -1934,8 +1935,8 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_halign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
     mset->scroll_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    mset->input_path = GTK_WIDGET(multi_input_new(mset->scroll_path, nullptr));
-    gtk_label_set_mnemonic_widget(mset->label_path, mset->input_path);
+    mset->input_path = multi_input_new(mset->scroll_path, nullptr);
+    gtk_label_set_mnemonic_widget(mset->label_path, GTK_WIDGET(mset->input_path));
     gtk_label_set_selectable(mset->label_path, true);
     mset->buf_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_path));
     mset->blank_path = GTK_LABEL(gtk_label_new(nullptr));
@@ -1956,9 +1957,8 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_path), GtkAlign::GTK_ALIGN_START);
     mset->scroll_full_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     // set initial path
-    mset->input_full_path =
-        GTK_WIDGET(multi_input_new(mset->scroll_full_path, mset->new_path.c_str()));
-    gtk_label_set_mnemonic_widget(mset->label_full_path, mset->input_full_path);
+    mset->input_full_path = multi_input_new(mset->scroll_full_path, mset->new_path.c_str());
+    gtk_label_set_mnemonic_widget(mset->label_full_path, GTK_WIDGET(mset->input_full_path));
     gtk_label_set_selectable(mset->label_full_path, true);
     mset->buf_full_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_path));
 
@@ -2111,21 +2111,21 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     on_move_change(GTK_WIDGET(mset->buf_full_path), mset);
     on_opt_toggled(nullptr, mset);
 
-    if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_name)))
+    if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_name))))
     {
-        mset->last_widget = mset->input_name;
+        mset->last_widget = GTK_WIDGET(mset->input_name);
     }
-    else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_name)))
+    else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_full_name))))
     {
-        mset->last_widget = mset->input_full_name;
+        mset->last_widget = GTK_WIDGET(mset->input_full_name);
     }
-    else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_path)))
+    else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_path))))
     {
-        mset->last_widget = mset->input_path;
+        mset->last_widget = GTK_WIDGET(mset->input_path);
     }
-    else if (gtk_widget_get_visible(gtk_widget_get_parent(mset->input_full_path)))
+    else if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->input_full_path))))
     {
-        mset->last_widget = mset->input_full_path;
+        mset->last_widget = GTK_WIDGET(mset->input_full_path);
     }
 
     // select last widget
