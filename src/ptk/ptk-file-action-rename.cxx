@@ -20,14 +20,6 @@
 
 #include <filesystem>
 
-#include <array>
-#include <vector>
-
-#include <optional>
-
-#include <ranges>
-#include <algorithm>
-
 #include <memory>
 
 #include <system_error>
@@ -53,7 +45,6 @@
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "utils/shell-quote.hxx"
@@ -93,13 +84,6 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
     GtkLabel* label_target{nullptr};
     GtkEntry* entry_target{nullptr};
     GtkBox* hbox_target{nullptr};
-    GtkWidget* browse_target{nullptr};
-
-    GtkLabel* label_template{nullptr};
-    GtkComboBox* combo_template{nullptr};
-    GtkComboBox* combo_template_dir{nullptr};
-    GtkBox* hbox_template{nullptr};
-    GtkWidget* browse_template{nullptr};
 
     GtkLabel* label_name{nullptr};
     GtkScrolledWindow* scroll_name{nullptr};
@@ -139,7 +123,6 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
     GtkWidget* opt_new_link{nullptr};
 
     GtkWidget* options{nullptr};
-    GtkWidget* browse{nullptr};
     GtkWidget* revert{nullptr};
     GtkWidget* cancel{nullptr};
     GtkWidget* next{nullptr};
@@ -159,7 +142,6 @@ struct MoveSet : public std::enable_shared_from_this<MoveSet>
 MoveSet::MoveSet(const std::shared_ptr<vfs::file>& file) noexcept : file(file) {}
 
 static void on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset) noexcept;
-static const std::optional<std::filesystem::path> get_template_dir() noexcept;
 
 static bool
 on_move_keypress(GtkWidget* widget, GdkEvent* event, const std::shared_ptr<MoveSet>& mset) noexcept
@@ -854,16 +836,6 @@ on_button_focus(GtkWidget* widget, GtkDirectionType direction,
             {
                 input = GTK_WIDGET(mset->entry_target);
             }
-            else if (gtk_widget_get_visible(
-                         gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))))
-            {
-                input = GTK_WIDGET(mset->combo_template);
-            }
-            else if (gtk_widget_get_visible(
-                         gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))))
-            {
-                input = GTK_WIDGET(mset->combo_template_dir);
-            }
             if (input)
             {
                 select_input(input, mset);
@@ -909,429 +881,6 @@ on_revert_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) 
     mset->last_widget = temp;
     select_input(mset->last_widget, mset);
     gtk_widget_grab_focus(mset->last_widget);
-}
-
-static void
-on_create_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
-{
-#if (GTK_MAJOR_VERSION == 4)
-    (void)widget;
-    (void)mset;
-    ptk::dialog::error(nullptr,
-                       "Needs Update",
-                       "Gtk4 changed and then deprecated the GtkFileChooser API");
-    return;
-#elif (GTK_MAJOR_VERSION == 3)
-    i32 action = 0;
-    const char* title = nullptr;
-
-    std::filesystem::path dir;
-    std::filesystem::path name;
-
-    if (widget == GTK_WIDGET(mset->browse_target))
-    {
-        title = "Select Link Target";
-        action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN;
-
-#if (GTK_MAJOR_VERSION == 4)
-        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->entry_target));
-#elif (GTK_MAJOR_VERSION == 3)
-        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->entry_target));
-#endif
-
-        if (text.starts_with('/'))
-        {
-            const auto path = std::filesystem::path(text);
-            dir = path.parent_path();
-            name = path.filename();
-        }
-        else
-        {
-            dir = mset->full_path.parent_path();
-            if (!text.empty())
-            {
-                name = text;
-            }
-        }
-    }
-    else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
-    {
-        title = "Select Template File";
-        action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_OPEN;
-
-#if (GTK_MAJOR_VERSION == 4)
-        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->combo_template));
-#elif (GTK_MAJOR_VERSION == 3)
-        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->combo_template));
-#endif
-
-        if (text.starts_with('/'))
-        {
-            const auto path = std::filesystem::path(text);
-            dir = path.parent_path();
-            name = path.filename();
-        }
-        else
-        {
-            const auto valid_dir = get_template_dir();
-            if (valid_dir)
-            {
-                dir = valid_dir.value();
-            }
-            else
-            {
-                dir = mset->full_path.parent_path();
-            }
-            if (!text.empty())
-            {
-                name = text;
-            }
-        }
-    }
-    else
-    {
-        title = "Select Template Directory";
-        action = GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-
-#if (GTK_MAJOR_VERSION == 4)
-        const std::string text = gtk_editable_get_text(GTK_EDITABLE(mset->combo_template));
-#elif (GTK_MAJOR_VERSION == 3)
-        const std::string text = gtk_entry_get_text(GTK_ENTRY(mset->combo_template));
-#endif
-
-        if (text.starts_with('/'))
-        {
-            const auto path = std::filesystem::path(text);
-            dir = path.parent_path();
-            name = path.filename();
-        }
-        else
-        {
-            const auto valid_dir = get_template_dir();
-            if (valid_dir)
-            {
-                dir = valid_dir.value();
-            }
-            else
-            {
-                dir = mset->full_path.parent_path();
-            }
-            if (!text.empty())
-            {
-                name = text;
-            }
-        }
-    }
-
-    GtkWidget* dlg = gtk_file_chooser_dialog_new(title,
-                                                 mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
-                                                 (GtkFileChooserAction)action,
-                                                 "Cancel",
-                                                 GtkResponseType::GTK_RESPONSE_CANCEL,
-                                                 "OK",
-                                                 GtkResponseType::GTK_RESPONSE_OK,
-                                                 nullptr);
-
-    ptk::utils::set_window_icon(GTK_WINDOW(dlg));
-
-    if (name.empty())
-    {
-        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), dir.c_str());
-    }
-    else
-    {
-        const auto path = dir / name;
-        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dlg), path.c_str());
-    }
-
-    const auto width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
-    const auto height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
-    if (width && height)
-    {
-        // filechooser will not honor default size or size request ?
-        gtk_widget_show_all(GTK_WIDGET(dlg));
-#if (GTK_MAJOR_VERSION == 3)
-        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
-#endif
-        gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
-        while (g_main_context_pending(nullptr))
-        {
-            g_main_context_iteration(nullptr, true);
-        }
-#if (GTK_MAJOR_VERSION == 3)
-        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
-#endif
-    }
-
-    const auto response = gtk_dialog_run(GTK_DIALOG(dlg));
-    if (response == GtkResponseType::GTK_RESPONSE_OK)
-    {
-        const char* new_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-        const char* path = new_path;
-        GtkWidget* w = nullptr;
-        if (widget == GTK_WIDGET(mset->browse_target))
-        {
-            w = GTK_WIDGET(mset->entry_target);
-        }
-        else
-        {
-            if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
-            {
-                w = gtk_bin_get_child(GTK_BIN(mset->combo_template));
-            }
-            else
-            {
-                w = gtk_bin_get_child(GTK_BIN(mset->combo_template_dir));
-            }
-            const auto valid_dir = get_template_dir();
-            if (valid_dir)
-            {
-                dir = valid_dir.value();
-                if (ztd::startswith(new_path, dir.string()) && ztd::endswith(new_path, "/"))
-                {
-                    path = new_path + dir.string().size() + 1;
-                }
-            }
-        }
-#if (GTK_MAJOR_VERSION == 4)
-        gtk_editable_set_text(GTK_EDITABLE(w), path);
-#elif (GTK_MAJOR_VERSION == 3)
-        gtk_entry_set_text(GTK_ENTRY(w), path);
-#endif
-    }
-
-    // Saving dialog dimensions
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    xset_set(xset::name::move_dlg_help, xset::var::x, std::format("{}", allocation.width));
-    xset_set(xset::name::move_dlg_help, xset::var::y, std::format("{}", allocation.height));
-
-    gtk_widget_destroy(dlg);
-#endif
-}
-
-#if (GTK_MAJOR_VERSION == 3)
-enum class file_misc_mode
-{
-    filename,
-    parent,
-    path
-};
-
-static void
-on_browse_mode_toggled(GtkMenuItem* item, GtkWidget* dlg) noexcept
-{
-    (void)item;
-
-    GtkWidget** mode = (GtkWidget**)g_object_get_data(G_OBJECT(dlg), "mode");
-
-    static constexpr std::array<file_misc_mode, 3> misc_modes{
-        file_misc_mode::filename,
-        file_misc_mode::parent,
-        file_misc_mode::path,
-    };
-
-    for (const auto [index, value] : std::views::enumerate(misc_modes))
-    {
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
-        {
-            const GtkFileChooserAction action =
-                value == file_misc_mode::parent
-                    ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-                    : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE;
-            GtkAllocation allocation;
-            gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-            const auto width = allocation.width;
-            const auto height = allocation.height;
-            gtk_file_chooser_set_action(GTK_FILE_CHOOSER(dlg), action);
-            if (width && height)
-            {
-#if (GTK_MAJOR_VERSION == 3)
-                // under some circumstances, changing the action changes the size
-                gtk_window_set_position(GTK_WINDOW(dlg),
-                                        GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
-#endif
-                gtk_window_set_default_size(GTK_WINDOW(dlg), allocation.width, allocation.height);
-                while (g_main_context_pending(nullptr))
-                {
-                    g_main_context_iteration(nullptr, true);
-                }
-#if (GTK_MAJOR_VERSION == 3)
-                gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
-#endif
-            }
-            return;
-        }
-    }
-}
-#endif
-
-static void
-on_browse_button_press(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
-{
-#if (GTK_MAJOR_VERSION == 4)
-    ptk::dialog::error(nullptr,
-                       "Needs Update",
-                       "Gtk4 changed and then deprecated the GtkFileChooser API");
-    return;
-#elif (GTK_MAJOR_VERSION == 3)
-    (void)widget;
-    GtkTextIter iter;
-    GtkTextIter siter;
-    file_misc_mode mode_default = file_misc_mode::parent;
-
-    const auto set = xset::set::get(xset::name::move_dlg_help);
-    if (set->z)
-    {
-        mode_default = file_misc_mode(xset_get_int(xset::name::move_dlg_help, xset::var::z));
-    }
-
-    // action create directory does not work properly so not used:
-    //  it creates a directory by default with no way to stop it
-    //  it gives 'directory already exists' error popup
-    GtkWidget* dlg = gtk_file_chooser_dialog_new(
-        "Browse",
-        mset->parent ? GTK_WINDOW(mset->parent) : nullptr,
-        mode_default == file_misc_mode::parent
-            ? GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER
-            : GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE,
-        "Cancel",
-        GtkResponseType::GTK_RESPONSE_CANCEL,
-        "OK",
-        GtkResponseType::GTK_RESPONSE_OK,
-        nullptr);
-
-    gtk_text_buffer_get_start_iter(mset->buf_path, &siter);
-    gtk_text_buffer_get_end_iter(mset->buf_path, &iter);
-    g_autofree char* path = gtk_text_buffer_get_text(mset->buf_path, &siter, &iter, false);
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), path);
-
-    if (mode_default != file_misc_mode::parent)
-    {
-        gtk_text_buffer_get_start_iter(mset->buf_full_name, &siter);
-        gtk_text_buffer_get_end_iter(mset->buf_full_name, &iter);
-        g_autofree char* filename =
-            gtk_text_buffer_get_text(mset->buf_full_name, &siter, &iter, false);
-        gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), filename);
-    }
-
-    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dlg), false);
-
-    // Mode
-    static constexpr std::array<file_misc_mode, 3> misc_modes{
-        file_misc_mode::filename,
-        file_misc_mode::parent,
-        file_misc_mode::path,
-    };
-
-    GtkWidget* mode[3];
-
-    GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4));
-    mode[magic_enum::enum_integer(file_misc_mode::filename)] =
-        gtk_radio_button_new_with_mnemonic(nullptr, "Fil_ename");
-    mode[magic_enum::enum_integer(file_misc_mode::parent)] =
-        gtk_radio_button_new_with_mnemonic_from_widget(
-            GTK_RADIO_BUTTON(mode[magic_enum::enum_integer(file_misc_mode::filename)]),
-            "Pa_rent");
-    mode[magic_enum::enum_integer(file_misc_mode::path)] =
-        gtk_radio_button_new_with_mnemonic_from_widget(
-            GTK_RADIO_BUTTON(mode[magic_enum::enum_integer(file_misc_mode::filename)]),
-            "P_ath");
-
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(mode[magic_enum::enum_integer(mode_default)]),
-                                 true);
-    gtk_box_pack_start(hbox, gtk_label_new("Insert as"), false, true, 2);
-
-    for (const auto [index, value] : std::views::enumerate(misc_modes))
-    {
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mode[index]), false);
-        g_signal_connect(G_OBJECT(mode[index]), "toggled", G_CALLBACK(on_browse_mode_toggled), dlg);
-        gtk_box_pack_start(hbox, mode[index], false, true, 2);
-    }
-    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg)));
-    gtk_box_pack_start(GTK_BOX(content_area), GTK_WIDGET(hbox), false, true, 6);
-    g_object_set_data(G_OBJECT(dlg), "mode", mode);
-    gtk_widget_show_all(GTK_WIDGET(hbox));
-
-    const auto width = xset_get_int(xset::name::move_dlg_help, xset::var::x);
-    const auto height = xset_get_int(xset::name::move_dlg_help, xset::var::y);
-    if (width && height)
-    {
-        // filechooser will not honor default size or size request ?
-        gtk_widget_show_all(GTK_WIDGET(dlg));
-#if (GTK_MAJOR_VERSION == 3)
-        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER_ALWAYS);
-#endif
-        gtk_window_set_default_size(GTK_WINDOW(dlg), width, height);
-        while (g_main_context_pending(nullptr))
-        {
-            g_main_context_iteration(nullptr, true);
-        }
-#if (GTK_MAJOR_VERSION == 3)
-        gtk_window_set_position(GTK_WINDOW(dlg), GtkWindowPosition::GTK_WIN_POS_CENTER);
-#endif
-    }
-
-    const auto response = gtk_dialog_run(GTK_DIALOG(dlg));
-    // bogus GTK warning here: Unable to retrieve the file info for...
-    if (response == GtkResponseType::GTK_RESPONSE_OK)
-    {
-        for (const auto [index, value] : std::views::enumerate(misc_modes))
-        {
-            if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
-            {
-                continue;
-            }
-
-            switch (value)
-            {
-                case file_misc_mode::filename:
-                {
-                    g_autofree char* filename =
-                        gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-                    const auto name = std::filesystem::path(filename).filename();
-                    gtk_text_buffer_set_text(mset->buf_full_name, name.c_str(), -1);
-                    break;
-                }
-                case file_misc_mode::parent:
-                {
-                    g_autofree char* filename =
-                        gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dlg));
-                    gtk_text_buffer_set_text(mset->buf_path, filename, -1);
-                    break;
-                }
-                case file_misc_mode::path:
-                {
-                    g_autofree char* filename =
-                        gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg));
-                    gtk_text_buffer_set_text(mset->buf_full_path, filename, -1);
-                    break;
-                }
-            }
-            break;
-        }
-    }
-
-    // Saving dialog dimensions
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(GTK_WIDGET(dlg), &allocation);
-    xset_set(xset::name::move_dlg_help, xset::var::x, std::format("{}", allocation.width));
-    xset_set(xset::name::move_dlg_help, xset::var::y, std::format("{}", allocation.height));
-
-    // save mode
-    for (const auto [index, value] : std::views::enumerate(misc_modes))
-    {
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mode[index])))
-        {
-            xset_set(xset::name::move_dlg_help,
-                     xset::var::z,
-                     std::format("{}", magic_enum::enum_integer(value)));
-            break;
-        }
-    }
-
-    gtk_widget_destroy(dlg);
-#endif
 }
 
 static void
@@ -1589,9 +1138,9 @@ on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset) noexcept
         gtk_widget_hide(GTK_WIDGET(mset->hbox_type));
     }
 
-    bool new_file = false;
-    bool new_folder = false;
-    bool new_link = false;
+    [[maybe_unused]] bool new_file = false;
+    [[maybe_unused]] bool new_folder = false;
+    [[maybe_unused]] bool new_link = false;
     if (mset->create_new != ptk::action::rename_mode::rename)
     {
         new_file = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file));
@@ -1606,29 +1155,6 @@ on_toggled(GtkMenuItem* item, const std::shared_ptr<MoveSet>& mset) noexcept
     else
     {
         gtk_widget_hide(GTK_WIDGET(mset->hbox_target));
-    }
-
-    if ((new_file || new_folder) && xset_get_b(xset::name::move_template))
-    {
-        if (new_file)
-        {
-            gtk_widget_show(GTK_WIDGET(mset->combo_template));
-            gtk_label_set_mnemonic_widget(mset->label_template, GTK_WIDGET(mset->combo_template));
-            gtk_widget_hide(GTK_WIDGET(mset->combo_template_dir));
-        }
-        else
-        {
-            gtk_widget_show(GTK_WIDGET(mset->combo_template_dir));
-            gtk_label_set_mnemonic_widget(mset->label_template,
-                                          GTK_WIDGET(mset->combo_template_dir));
-            gtk_widget_hide(GTK_WIDGET(mset->combo_template));
-        }
-
-        gtk_widget_show(GTK_WIDGET(mset->hbox_template));
-    }
-    else
-    {
-        gtk_widget_hide(GTK_WIDGET(mset->hbox_template));
     }
 
     if (!someone_is_visible)
@@ -1715,13 +1241,6 @@ on_options_button_press(GtkWidget* btn, const std::shared_ptr<MoveSet>& mset) no
         const auto set = xset::set::get(xset::name::move_target);
         xset_set_cb(set, (GFunc)on_toggled, mset.get());
         set->disable = mset->create_new != ptk::action::rename_mode::rename || !mset->is_link;
-        xset_add_menuitem(mset->browser, popup, accel_group, set);
-    }
-
-    {
-        const auto set = xset::set::get(xset::name::move_template);
-        xset_set_cb(set, (GFunc)on_toggled, mset.get());
-        set->disable = mset->create_new == ptk::action::rename_mode::rename;
         xset_add_menuitem(mset->browser, popup, accel_group, set);
     }
 
@@ -1814,30 +1333,11 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
             {
                 input = GTK_WIDGET(mset->entry_target);
             }
-            else if (widget == GTK_WIDGET(mset->label_template))
-            {
-                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
-                {
-                    input = GTK_WIDGET(mset->combo_template);
-                }
-                else
-                {
-                    input = GTK_WIDGET(mset->combo_template_dir);
-                }
-            }
             break;
         case GtkDirectionType::GTK_DIR_TAB_BACKWARD:
             if (widget == GTK_WIDGET(mset->label_name))
             {
-                if (mset->combo_template_dir)
-                {
-                    input = GTK_WIDGET(mset->combo_template_dir);
-                }
-                else if (mset->combo_template)
-                {
-                    input = GTK_WIDGET(mset->combo_template);
-                }
-                else if (mset->entry_target)
+                if (mset->entry_target)
                 {
                     input = GTK_WIDGET(mset->entry_target);
                 }
@@ -1879,33 +1379,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
             while (input && !gtk_widget_get_visible(gtk_widget_get_parent(input)))
             {
                 input2 = nullptr;
-                if (input == GTK_WIDGET(mset->combo_template_dir))
-                {
-                    if (mset->combo_template)
-                    {
-                        input2 = GTK_WIDGET(mset->combo_template);
-                    }
-                    else if (mset->entry_target)
-                    {
-                        input2 = GTK_WIDGET(mset->entry_target);
-                    }
-                    else
-                    {
-                        input2 = mset->input_full_path;
-                    }
-                }
-                else if (input == GTK_WIDGET(mset->combo_template))
-                {
-                    if (mset->entry_target)
-                    {
-                        input2 = GTK_WIDGET(mset->entry_target);
-                    }
-                    else
-                    {
-                        input2 = mset->input_full_path;
-                    }
-                }
-                else if (input == GTK_WIDGET(mset->entry_target))
+                if (input == GTK_WIDGET(mset->entry_target))
                 {
                     input2 = mset->input_full_path;
                 }
@@ -1936,15 +1410,7 @@ on_label_focus(GtkWidget* widget, GtkDirectionType direction,
                 }
                 else if (input == mset->input_name)
                 {
-                    if (mset->combo_template_dir)
-                    {
-                        input2 = GTK_WIDGET(mset->combo_template_dir);
-                    }
-                    else if (mset->combo_template)
-                    {
-                        input2 = GTK_WIDGET(mset->combo_template);
-                    }
-                    else if (mset->entry_target)
+                    if (mset->entry_target)
                     {
                         input2 = GTK_WIDGET(mset->entry_target);
                     }
@@ -2036,25 +1502,6 @@ copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset)
         gtk_clipboard_set_text(clip, text.data(), -1);
         return;
     }
-    else if (widget == GTK_WIDGET(mset->label_template))
-    {
-        GtkWidget* w = nullptr;
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
-        {
-            w = gtk_bin_get_child(GTK_BIN(mset->combo_template));
-        }
-        else
-        {
-            w = gtk_bin_get_child(GTK_BIN(mset->combo_template_dir));
-        }
-#if (GTK_MAJOR_VERSION == 4)
-        const std::string text = gtk_editable_get_text(GTK_EDITABLE(w));
-#elif (GTK_MAJOR_VERSION == 3)
-        const std::string text = gtk_entry_get_text(GTK_ENTRY(w));
-#endif
-
-        gtk_clipboard_set_text(clip, text.data(), -1);
-    }
 
     if (!buf)
     {
@@ -2116,17 +1563,6 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
             {
                 input = GTK_WIDGET(mset->entry_target);
             }
-            else if (widget == GTK_WIDGET(mset->label_template))
-            {
-                if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
-                {
-                    input = GTK_WIDGET(mset->combo_template);
-                }
-                else
-                {
-                    input = GTK_WIDGET(mset->combo_template_dir);
-                }
-            }
 
             if (input)
             {
@@ -2181,162 +1617,6 @@ get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "
     }
 
     return path;
-}
-
-static const std::optional<std::filesystem::path>
-get_template_dir() noexcept
-{
-    const auto templates_path = vfs::user::templates();
-
-    std::error_code ec;
-    const bool equivalent = std::filesystem::equivalent(vfs::user::home(), templates_path, ec);
-    if (ec || equivalent)
-    {
-        /* If $XDG_TEMPLATES_DIR == $HOME this means it is disabled. Do not
-         * recurse it as this is too many files/directories and may slow
-         * dialog open and cause filesystem find loops.
-         * https://wiki.freedesktop.org/www/Software/xdg-user-dirs/ */
-        return std::nullopt;
-    }
-
-    return templates_path;
-}
-
-static const std::vector<std::filesystem::path>
-get_templates(const std::filesystem::path& templates_dir, const std::filesystem::path& subdir,
-              bool getdir) noexcept
-{
-    std::vector<std::filesystem::path> templates;
-
-    const auto templates_path = templates_dir / subdir;
-
-    if (!std::filesystem::is_directory(templates_path))
-    {
-        return templates;
-    }
-
-    for (const auto& file : std::filesystem::directory_iterator(templates_path))
-    {
-        const auto filename = file.path().filename();
-        const auto path = templates_path / filename;
-        if (getdir)
-        {
-            if (std::filesystem::is_directory(path))
-            {
-                std::filesystem::path subsubdir;
-                if (subdir.empty())
-                {
-                    subsubdir = filename;
-                }
-                else
-                {
-                    subsubdir = subdir / filename;
-                }
-
-                templates.push_back(subsubdir);
-
-                // prevent filesystem loops during recursive find
-                if (!std::filesystem::is_symlink(path))
-                {
-                    const std::vector<std::filesystem::path> subsubdir_templates =
-                        get_templates(templates_dir, subsubdir, getdir);
-
-                    templates = ztd::merge(templates, subsubdir_templates);
-                }
-            }
-        }
-        else
-        {
-            if (std::filesystem::is_regular_file(path))
-            {
-                if (subdir.empty())
-                {
-                    templates.push_back(filename);
-                }
-                else
-                {
-                    templates.push_back(subdir / filename);
-                }
-            }
-            else if (std::filesystem::is_directory(path) &&
-                     // prevent filesystem loops during recursive find
-                     !std::filesystem::is_symlink(path))
-            {
-                if (subdir.empty())
-                {
-                    const std::vector<std::filesystem::path> subsubdir_templates =
-                        get_templates(templates_dir, filename, getdir);
-
-                    templates = ztd::merge(templates, subsubdir_templates);
-                }
-                else
-                {
-                    const auto subsubdir = subdir / filename;
-                    const std::vector<std::filesystem::path> subsubdir_templates =
-                        get_templates(templates_dir, subsubdir, getdir);
-
-                    templates = ztd::merge(templates, subsubdir_templates);
-                }
-            }
-        }
-    }
-
-    return templates;
-}
-
-static void
-on_template_changed(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
-{
-    (void)widget;
-
-    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mset->opt_new_file)))
-    {
-        return;
-    }
-
-    GtkEntry* entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(mset->combo_template)));
-
-#if (GTK_MAJOR_VERSION == 4)
-    const std::string text = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
-    const std::string text = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
-    std::string ext;
-    if (!text.empty())
-    {
-        // ext = ztd::strip(text);
-        ext = ztd::rpartition(ext, "/")[2];
-        if (ext.contains('.'))
-        {
-            ext = ztd::rpartition(ext, ".")[2];
-        }
-        else
-        {
-            ext = "";
-        }
-    }
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_editable_set_text(GTK_EDITABLE(mset->entry_ext), ext.data());
-#elif (GTK_MAJOR_VERSION == 3)
-    gtk_entry_set_text(GTK_ENTRY(mset->entry_ext), ext.data());
-#endif
-
-    // need new name due to extension added?
-    GtkTextIter iter;
-    GtkTextIter siter;
-    gtk_text_buffer_get_start_iter(mset->buf_full_path, &siter);
-    gtk_text_buffer_get_end_iter(mset->buf_full_path, &iter);
-    const char* full_path = gtk_text_buffer_get_text(mset->buf_full_path, &siter, &iter, false);
-
-    // need to see broken symlinks
-    if (std::filesystem::exists(full_path))
-    {
-        const auto dir = std::filesystem::path(full_path).parent_path();
-        const auto unique_path = get_unique_name(dir, ext);
-
-        gtk_text_buffer_set_text(mset->buf_full_path, unique_path.c_str(), -1);
-    }
 }
 
 i32
@@ -2443,15 +1723,6 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_focus_on_click(GTK_WIDGET(mset->options), false);
     // clang-format off
     g_signal_connect(G_OBJECT(mset->options), "clicked", G_CALLBACK(on_options_button_press), mset.get());
-    // clang-format on
-
-    mset->browse = gtk_button_new_with_mnemonic("_Browse");
-    gtk_dialog_add_action_widget(GTK_DIALOG(mset->dlg),
-                                 mset->browse,
-                                 GtkResponseType::GTK_RESPONSE_YES);
-    gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse), false);
-    // clang-format off
-    g_signal_connect(G_OBJECT(mset->browse), "clicked", G_CALLBACK(on_browse_button_press), mset.get());
     // clang-format on
 
     mset->revert = gtk_button_new_with_mnemonic("Re_vert");
@@ -2568,21 +1839,14 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
 
         if (create_new != ptk::action::rename_mode::rename)
         {
-            // Target Browse button
-            mset->browse_target = gtk_button_new();
-            gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_target), false);
             if (!mset->new_path.empty() && file)
             {
 #if (GTK_MAJOR_VERSION == 4)
-                gtk_editable_set_text(GTK_EDITABLE(mset->entry_target),
-                                      valumset->new_pathe.c_str());
+                gtk_editable_set_text(GTK_EDITABLE(mset->entry_target), mset->new_path.c_str());
 #elif (GTK_MAJOR_VERSION == 3)
                 gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->new_path.c_str());
 #endif
             }
-            // clang-format off
-            g_signal_connect(G_OBJECT(mset->browse_target), "clicked", G_CALLBACK(on_create_browse_button_press), mset.get());
-            // clang-format on
         }
         else
         {
@@ -2592,7 +1856,6 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
             gtk_entry_set_text(GTK_ENTRY(mset->entry_target), mset->mime_type.data());
 #endif
             gtk_editable_set_editable(GTK_EDITABLE(mset->entry_target), false);
-            mset->browse_target = nullptr;
         }
         // clang-format off
         g_signal_connect(G_OBJECT(mset->entry_target), "changed", G_CALLBACK(on_move_change), mset.get());
@@ -2601,81 +1864,6 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     else
     {
         mset->label_target = nullptr;
-    }
-
-    // Template
-    if (create_new != ptk::action::rename_mode::rename)
-    {
-        mset->label_template = GTK_LABEL(gtk_label_new(nullptr));
-        gtk_label_set_markup_with_mnemonic(mset->label_template, "<b>_Template:</b>");
-        gtk_widget_set_halign(GTK_WIDGET(mset->label_template), GtkAlign::GTK_ALIGN_START);
-        gtk_widget_set_valign(GTK_WIDGET(mset->label_template), GtkAlign::GTK_ALIGN_END);
-        gtk_label_set_selectable(mset->label_template, true);
-
-        // clang-format off
-        g_signal_connect(G_OBJECT(mset->entry_target), "mnemonic-activate", G_CALLBACK(on_mnemonic_activate), mset.get());
-        g_signal_connect(G_OBJECT(mset->label_template), "button-press-event", G_CALLBACK(on_label_button_press), mset.get());
-        g_signal_connect(G_OBJECT(mset->label_template), "focus", G_CALLBACK(on_label_focus), mset.get());
-        // clang-format on
-
-        // template combo
-        mset->combo_template = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->combo_template), false);
-
-        // add entries
-        std::vector<std::filesystem::path> templates;
-
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), "Empty File");
-        templates = get_templates(get_template_dir().value_or(""), "", false);
-        if (!templates.empty())
-        {
-            std::ranges::sort(templates);
-            for (const auto& t : templates)
-            {
-                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template), t.c_str());
-            }
-        }
-        gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template), 0);
-        // clang-format off
-        g_signal_connect(G_OBJECT(mset->combo_template), "changed", G_CALLBACK(on_template_changed), mset.get());
-        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset.get());
-        // clang-format on
-
-        // template_dir combo
-        mset->combo_template_dir = GTK_COMBO_BOX(gtk_combo_box_text_new_with_entry());
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->combo_template_dir), false);
-
-        // add entries
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
-                                       "Empty Directory");
-        templates.clear();
-        templates = get_templates(get_template_dir().value_or(""), "", true);
-        if (!templates.empty())
-        {
-            std::ranges::sort(templates);
-            for (const auto& t : templates)
-            {
-                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(mset->combo_template_dir),
-                                               t.c_str());
-            }
-        }
-        gtk_combo_box_set_active(GTK_COMBO_BOX(mset->combo_template_dir), 0);
-        // clang-format off
-        g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(mset->combo_template_dir))), "key-press-event", G_CALLBACK(on_move_entry_keypress), mset.get());
-        // clang-format on
-
-        // Template Browse button
-        mset->browse_template = gtk_button_new();
-        gtk_widget_set_focus_on_click(GTK_WIDGET(mset->browse_template), false);
-        // clang-format off
-        g_signal_connect(G_OBJECT(mset->browse_template), "clicked", G_CALLBACK(on_create_browse_button_press), mset.get());
-        // clang-format on
-    }
-    else
-    {
-        mset->label_template = nullptr;
-        mset->combo_template = nullptr;
-        mset->combo_template_dir = nullptr;
     }
 
     // Name
@@ -2866,25 +2054,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
                            true,
                            true,
                            create_new != ptk::action::rename_mode::rename ? 3 : 0);
-        if (mset->browse_target)
-        {
-            gtk_box_pack_start(mset->hbox_target, GTK_WIDGET(mset->browse_target), false, true, 0);
-        }
         gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->hbox_target), false, true, 5);
-    }
-
-    mset->hbox_template = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 0));
-    if (mset->label_template)
-    {
-        gtk_box_pack_start(mset->hbox_template, GTK_WIDGET(mset->label_template), false, true, 0);
-        gtk_box_pack_start(mset->hbox_template, GTK_WIDGET(mset->combo_template), true, true, 3);
-        gtk_box_pack_start(mset->hbox_template,
-                           GTK_WIDGET(mset->combo_template_dir),
-                           true,
-                           true,
-                           3);
-        gtk_box_pack_start(mset->hbox_template, GTK_WIDGET(mset->browse_template), false, true, 0);
-        gtk_box_pack_start(dlg_vbox, GTK_WIDGET(mset->hbox_template), false, true, 5);
     }
 
     GtkBox* hbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_HORIZONTAL, 4));
@@ -3122,32 +2292,6 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
             else if (create_new != ptk::action::rename_mode::rename && new_file)
             {
                 // new file task
-                if (gtk_widget_get_visible(gtk_widget_get_parent(GTK_WIDGET(mset->combo_template))))
-                {
-                    const std::string str = gtk_combo_box_text_get_active_text(
-                        GTK_COMBO_BOX_TEXT(mset->combo_template));
-
-                    if (str.starts_with('/'))
-                    {
-                        from_path = ::utils::shell_quote(str);
-                    }
-                    else
-                    {
-                        const auto template_path = get_template_dir();
-                        if (template_path)
-                        {
-                            const auto template_file = template_path.value() / str;
-                            if (!std::filesystem::is_regular_file(template_file))
-                            {
-                                ptk::dialog::error(GTK_WINDOW(mset->dlg),
-                                                   "Template Missing",
-                                                   "The specified template does not exist");
-                                continue;
-                            }
-                            from_path = ::utils::shell_quote(template_file.string());
-                        }
-                    }
-                }
                 to_path = ::utils::shell_quote(full_path.string());
                 std::string over_cmd;
                 if (overwrite)
@@ -3185,32 +2329,6 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
                 if (!new_folder)
                 { // failsafe
                     continue;
-                }
-                if (gtk_widget_get_visible(
-                        gtk_widget_get_parent(GTK_WIDGET(mset->combo_template_dir))))
-                {
-                    const std::string str = gtk_combo_box_text_get_active_text(
-                        GTK_COMBO_BOX_TEXT(mset->combo_template_dir));
-                    if (str.starts_with('/'))
-                    {
-                        from_path = ::utils::shell_quote(str);
-                    }
-                    else
-                    {
-                        const auto template_path = get_template_dir();
-                        if (template_path)
-                        {
-                            const auto template_file = template_path.value() / str;
-                            if (!std::filesystem::is_directory(template_file))
-                            {
-                                ptk::dialog::error(GTK_WINDOW(mset->dlg),
-                                                   "Template Missing",
-                                                   "The specified template does not exist");
-                                continue;
-                            }
-                            from_path = ::utils::shell_quote(template_file.string());
-                        }
-                    }
                 }
                 to_path = ::utils::shell_quote(full_path.string());
 

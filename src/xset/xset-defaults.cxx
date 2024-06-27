@@ -347,13 +347,6 @@ xset_defaults() noexcept
     }
 
     {
-        const auto set = xset::set::get(xset::name::move_template);
-        set->menu.label = "Te_mplate";
-        set->menu.type = xset::set::menu_type::check;
-        set->b = xset::set::enabled::yes;
-    }
-
-    {
         const auto set = xset::set::get(xset::name::move_option);
         set->menu.label = "_Option";
         set->menu.type = xset::set::menu_type::submenu;

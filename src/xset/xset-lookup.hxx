@@ -86,7 +86,6 @@ enum class name
     move_path,
     move_type,
     move_target,
-    move_template,
     move_option,
     move_copy,
     move_link,
