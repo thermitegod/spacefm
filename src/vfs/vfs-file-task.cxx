@@ -230,7 +230,7 @@ vfs::file_task::check_overwrite(const std::filesystem::path& dest_file, bool& de
             const auto old_name = dest_file.filename();
             const auto dest_file_dir = dest_file.parent_path();
 
-            new_dest_file = vfs::utils::unique_name(dest_file_dir, old_name);
+            new_dest_file = vfs::utils::unique_name(dest_file_dir, old_name, "-copy");
             dest_exists = false;
             return !this->abort;
         }

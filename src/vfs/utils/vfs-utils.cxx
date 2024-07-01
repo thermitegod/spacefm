@@ -110,23 +110,21 @@ vfs::utils::split_basename_extension(const std::filesystem::path& filename) noex
 }
 
 const std::filesystem::path
-vfs::utils::unique_name(const std::filesystem::path& dest_dir,
-                        const std::filesystem::path& filename) noexcept
+vfs::utils::unique_name(const std::filesystem::path& path, const std::filesystem::path& filename,
+                        const std::string_view tag) noexcept
 {
-    if (dest_dir.empty() || filename.empty())
-    {
-        return "";
-    }
+    assert(!path.empty());
+    assert(!filename.empty());
 
     const auto filename_parts = split_basename_extension(filename);
     const auto& basename = filename_parts.basename;
     const auto& extension = filename_parts.extension;
 
     u32 n = 0;
-    auto unique_path = dest_dir / std::format("{}{}", basename, extension);
+    auto unique_path = path / std::format("{}{}", basename, extension);
     while (std::filesystem::exists(unique_path))
-    {
-        unique_path = dest_dir / std::format("{}-copy{}{}", basename, ++n, extension);
+    { // need to see broken symlinks
+        unique_path = path / std::format("{}{}{}{}", basename, tag, ++n, extension);
     }
 
     return unique_path;

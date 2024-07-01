@@ -50,6 +50,7 @@ split_basename_extension(const std::filesystem::path& filename) noexcept;
 /**
  * Create a unique filename
  */
-[[nodiscard]] const std::filesystem::path
-unique_name(const std::filesystem::path& dest_dir, const std::filesystem::path& filename) noexcept;
+[[nodiscard]] const std::filesystem::path unique_name(const std::filesystem::path& path,
+                                                      const std::filesystem::path& filename,
+                                                      const std::string_view tag = "") noexcept;
 } // namespace vfs::utils

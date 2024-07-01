@@ -1584,42 +1584,6 @@ on_label_button_press(GtkWidget* widget, GdkEvent* event,
     return true;
 }
 
-static const std::filesystem::path
-get_unique_name(const std::filesystem::path& dir, const std::string_view ext = "") noexcept
-{
-    const std::string base = "new";
-
-    std::filesystem::path path;
-
-    if (ext.empty())
-    {
-        path = dir / base;
-    }
-    else
-    {
-        const std::string name = std::format("{}.{}", base, ext);
-        path = dir / name;
-    }
-
-    u32 n = 1;
-    while (std::filesystem::exists(path))
-    { // need to see broken symlinks
-        std::string name;
-        if (ext.empty())
-        {
-            name = std::format("{}{}", base, ++n);
-        }
-        else
-        {
-            name = std::format("{}{}.{}", base, ++n, ext);
-        }
-
-        path = dir / name;
-    }
-
-    return path;
-}
-
 i32
 ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& file_dir,
                           const std::shared_ptr<vfs::file>& file, const char* dest_dir,
@@ -1665,7 +1629,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     }
     else
     {
-        mset->full_path = get_unique_name(file_dir);
+        mset->full_path = vfs::utils::unique_name(file_dir, "new");
         mset->new_path = mset->full_path;
         mset->is_dir = false; // is_dir is dynamic for create
         mset->is_link = false;
