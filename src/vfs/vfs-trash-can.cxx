@@ -30,6 +30,7 @@
 #include "utils/write.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/vfs-trash-can.hxx"
 
@@ -141,7 +142,7 @@ vfs::trash_can::trash(const std::filesystem::path& path) noexcept
 
     trash_dir->create_trash_dir();
 
-    const std::string target_name = trash_dir->unique_name(path);
+    const auto target_name = trash_dir->unique_name(path);
     trash_dir->create_trash_info(path, target_name);
     trash_dir->move(path, target_name);
 
@@ -181,33 +182,10 @@ vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept
     create_trash_dir();
 }
 
-const std::string
+const std::filesystem::path
 vfs::trash_can::trash_dir::unique_name(const std::filesystem::path& path) const noexcept
 {
-    const std::string filename = path.filename();
-    const std::string basename = path.stem();
-    const std::string ext = path.extension();
-
-    std::string to_trash_filename = filename;
-    const std::string to_trash_path = this->files_path_ / to_trash_filename;
-
-    if (!std::filesystem::exists(to_trash_path))
-    {
-        return to_trash_filename;
-    }
-
-    for (usize i = 1; true; ++i)
-    {
-        const std::string check_to_trash_filename = std::format("{}_{}{}", basename, i, ext);
-        const auto check_to_trash_path = this->files_path_ / check_to_trash_filename;
-        if (!std::filesystem::exists(check_to_trash_path))
-        {
-            to_trash_filename = check_to_trash_filename;
-            break;
-        }
-    }
-
-    return to_trash_filename;
+    return vfs::utils::unique_name(this->files_path_, path.filename(), "_").filename();
 }
 
 void
@@ -249,10 +227,11 @@ vfs::trash_can::trash_dir::create_trash_date(
 }
 
 void
-vfs::trash_can::trash_dir::create_trash_info(const std::filesystem::path& path,
-                                             const std::string_view target_name) const noexcept
+vfs::trash_can::trash_dir::create_trash_info(
+    const std::filesystem::path& path, const std::filesystem::path& target_filename) const noexcept
 {
-    const auto trash_info = this->info_path_ / std::format("{}.trashinfo", target_name);
+    const auto trash_info =
+        this->info_path_ / std::format("{}.trashinfo", target_filename.string());
 
     const auto iso_time = create_trash_date(std::chrono::system_clock::now());
 
@@ -264,9 +243,9 @@ vfs::trash_can::trash_dir::create_trash_info(const std::filesystem::path& path,
 
 void
 vfs::trash_can::trash_dir::move(const std::filesystem::path& path,
-                                const std::string_view target_name) const noexcept
+                                const std::filesystem::path& target_filename) const noexcept
 {
-    const auto target_path = this->files_path_ / target_name;
+    const auto target_path = this->files_path_ / target_filename;
 
     // ztd::logger::info("fp {}", this->files_path);
     // ztd::logger::info("ip {}", this->info_path);

@@ -70,18 +70,18 @@ struct trash_can
         trash_dir& operator=(trash_dir&& other) = delete;
 
         // Get a unique name for use within the trash directory
-        [[nodiscard]] const std::string
+        [[nodiscard]] const std::filesystem::path
         unique_name(const std::filesystem::path& path) const noexcept;
 
         void create_trash_dir() const noexcept;
 
         // Create a .trashinfo file for a file or directory 'path'
         void create_trash_info(const std::filesystem::path& path,
-                               const std::string_view target_name) const noexcept;
+                               const std::filesystem::path& target_filename) const noexcept;
 
         // Move a file or directory into the trash directory
         void move(const std::filesystem::path& path,
-                  const std::string_view target_name) const noexcept;
+                  const std::filesystem::path& target_filename) const noexcept;
 
       private:
         [[nodiscard]] static const std::string
