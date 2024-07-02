@@ -189,26 +189,20 @@ vfs::trash_can::trash_dir::unique_name(const std::filesystem::path& path) const 
 }
 
 void
-vfs::trash_can::trash_dir::check_dir_exists(const std::filesystem::path& path) noexcept
-{
-    if (std::filesystem::is_directory(path))
-    {
-        return;
-    }
-
-    // ztd::logger::info("trash mkdir {}", path);
-    std::filesystem::create_directories(path);
-    std::filesystem::permissions(path, std::filesystem::perms::owner_all);
-}
-
-void
 vfs::trash_can::trash_dir::create_trash_dir() const noexcept
 {
-    // ztd::logger::debug("create trash dirs {}", trash_path());
+    const auto create_dir = [](const std::filesystem::path& path)
+    {
+        if (!std::filesystem::is_directory(path))
+        {
+            std::filesystem::create_directories(path);
+            std::filesystem::permissions(path, std::filesystem::perms::owner_all);
+        }
+    };
 
-    this->check_dir_exists(this->trash_path_);
-    this->check_dir_exists(this->files_path_);
-    this->check_dir_exists(this->info_path_);
+    create_dir(this->trash_path_);
+    create_dir(this->files_path_);
+    create_dir(this->info_path_);
 }
 
 const std::string

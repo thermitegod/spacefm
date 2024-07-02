@@ -87,9 +87,6 @@ struct trash_can
         [[nodiscard]] static const std::string
         create_trash_date(const std::chrono::system_clock::time_point time_point) noexcept;
 
-        // Create a directory if it does not exist
-        static void check_dir_exists(const std::filesystem::path& path) noexcept;
-
         // the full path for this trash directory
         std::filesystem::path trash_path_;
         // the path of the "files" subdirectory of this trash dir
