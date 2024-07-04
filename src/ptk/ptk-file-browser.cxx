@@ -81,6 +81,7 @@
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-path-bar.hxx"
 #include "ptk/ptk-search-bar.hxx"
+#include "ptk/utils/multi-input.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "main-window.hxx"
@@ -4064,22 +4065,15 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
 #endif
 
-    GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_editable_set_text(GTK_EDITABLE(entry), default_pattern.data());
-#elif (GTK_MAJOR_VERSION == 3)
-    gtk_entry_set_text(GTK_ENTRY(entry), default_pattern.data());
-#endif
-    gtk_editable_set_editable(GTK_EDITABLE(entry), true);
+    GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
+    GtkTextView* input = ptk::utils::multi_input_new(scroll, default_pattern.data());
 
-    gtk_widget_set_margin_start(GTK_WIDGET(entry), 5);
-    gtk_widget_set_margin_end(GTK_WIDGET(entry), 5);
-    gtk_widget_set_margin_top(GTK_WIDGET(entry), 5);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(entry), 5);
+    gtk_widget_set_size_request(GTK_WIDGET(input), -1, 400);
+    gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 400);
 
-    gtk_box_pack_start(vbox, GTK_WIDGET(entry), true, true, 4);
+    gtk_box_pack_start(vbox, GTK_WIDGET(scroll), true, true, 4);
 
-    g_signal_connect(G_OBJECT(entry), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
+    g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
 
     // show
     gtk_widget_show_all(GTK_WIDGET(dialog));
@@ -4090,12 +4084,7 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     bool ret = false;
     if (response == GtkResponseType::GTK_RESPONSE_OK)
     {
-#if (GTK_MAJOR_VERSION == 4)
-        pattern = gtk_editable_get_text(GTK_EDITABLE(entry));
-#elif (GTK_MAJOR_VERSION == 3)
-        pattern = gtk_entry_get_text(GTK_ENTRY(entry));
-#endif
-
+        pattern = ptk::utils::multi_input_get_text(GTK_WIDGET(input)).value_or("");
         ret = true;
     }
 
