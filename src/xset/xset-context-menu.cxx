@@ -182,7 +182,7 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
 
     set->browser = browser;
     g_object_set_data(G_OBJECT(item), "menu", menu);
-    g_object_set_data(G_OBJECT(item), "set", ::utils::strdup(set->name()));
+    g_object_set_data_full(G_OBJECT(item), "set", ::utils::strdup(set->name()), std::free);
 
     if (set->menu.obj.key)
     {

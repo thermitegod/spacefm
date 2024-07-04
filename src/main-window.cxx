@@ -1145,8 +1145,14 @@ MainWindow::rebuild_menu_bookmarks(ptk::browser* browser) const noexcept
         GtkWidget* item = gtk_menu_item_new_with_label(book_path.c_str());
 
         g_object_set_data(G_OBJECT(item), "browser", browser);
-        g_object_set_data(G_OBJECT(item), "path", ::utils::strdup(book_path.c_str()));
-        g_object_set_data(G_OBJECT(item), "name", ::utils::strdup(book_name.c_str()));
+        g_object_set_data_full(G_OBJECT(item),
+                               "path",
+                               ::utils::strdup(book_path.c_str()),
+                               std::free);
+        g_object_set_data_full(G_OBJECT(item),
+                               "name",
+                               ::utils::strdup(book_name.c_str()),
+                               std::free);
 
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(bookmark_menu_keypress), nullptr);
 

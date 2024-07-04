@@ -2424,7 +2424,10 @@ ptk::file_task::query_overwrite() noexcept
     // name input
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     GtkWidget* query_input = GTK_WIDGET(ptk::utils::multi_input_new(scroll, filename));
-    g_object_set_data(G_OBJECT(query_input), "old_name", ::utils::strdup(filename.data()));
+    g_object_set_data_full(G_OBJECT(query_input),
+                           "old_name",
+                           ::utils::strdup(filename.data()),
+                           std::free);
     // clang-format off
     g_signal_connect(G_OBJECT(query_input), "key-press-event", G_CALLBACK(on_query_input_keypress), this);
     // clang-format on

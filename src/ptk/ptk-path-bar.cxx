@@ -192,10 +192,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion) noexcept
 
     // dir completion
     const std::string fn = ztd::rpartition(text, "/")[2];
-    g_object_set_data_full(G_OBJECT(completion),
-                           "fn",
-                           ::utils::strdup(fn),
-                           (GDestroyNotify)std::free);
+    g_object_set_data_full(G_OBJECT(completion), "fn", ::utils::strdup(fn), std::free);
 
     const std::string cwd = get_cwd(entry);
     const char* old_dir = (const char*)g_object_get_data(G_OBJECT(completion), "cwd");
@@ -204,10 +201,7 @@ update_completion(GtkEntry* entry, GtkEntryCompletion* completion) noexcept
         return;
     }
 
-    g_object_set_data_full(G_OBJECT(completion),
-                           "cwd",
-                           ::utils::strdup(cwd),
-                           (GDestroyNotify)std::free);
+    g_object_set_data_full(G_OBJECT(completion), "cwd", ::utils::strdup(cwd), std::free);
 
     if (std::filesystem::is_directory(cwd))
     {
