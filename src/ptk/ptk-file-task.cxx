@@ -43,15 +43,14 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-dialog.hxx"
 
 #include "utils/strdup.hxx"
 
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "ptk/ptk-file-task-view.hxx"
-
 #include "ptk/ptk-file-task.hxx"
+#include "ptk/utils/multi-input.hxx"
 
 static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                                       const vfs::file_task::state state, void* state_data,
@@ -1863,7 +1862,7 @@ on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptas
     if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
     {
         // User pressed enter in rename/overwrite dialog
-        const auto new_name = multi_input_get_text(widget);
+        const auto new_name = ptk::utils::multi_input_get_text(widget);
         const char* old_name =
             static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
 
@@ -1892,7 +1891,7 @@ static void
 on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input) noexcept
 {
     (void)input_buf;
-    const auto new_name = multi_input_get_text(query_input);
+    const auto new_name = ptk::utils::multi_input_get_text(query_input);
     const char* old_name =
         static_cast<const char*>(g_object_get_data(G_OBJECT(query_input), "old_name"));
     const bool can_rename = new_name && old_name && (new_name.value() != old_name);
@@ -1988,7 +1987,7 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             {
                 GtkWidget* query_input =
                     GTK_WIDGET(g_object_get_data(G_OBJECT(dlg), "query_input"));
-                str = multi_input_get_text(query_input);
+                str = ptk::utils::multi_input_get_text(query_input);
             }
             const auto filename = std::filesystem::path(str.value());
             if (str && !filename.empty() && ptask->task->current_dest)
@@ -2414,7 +2413,7 @@ ptk::file_task::query_overwrite() noexcept
 
     // name input
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    GtkWidget* query_input = GTK_WIDGET(multi_input_new(scroll, filename.data()));
+    GtkWidget* query_input = GTK_WIDGET(ptk::utils::multi_input_new(scroll, filename));
     // clang-format off
     g_signal_connect(G_OBJECT(query_input), "key-press-event", G_CALLBACK(on_query_input_keypress), this);
     // clang-format on

@@ -37,11 +37,11 @@
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
-#include "xset/xset-dialog.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-file-browser.hxx"
+#include "ptk/utils/multi-input.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
@@ -1837,7 +1837,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_halign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_name), GtkAlign::GTK_ALIGN_START);
     mset->scroll_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    mset->input_name = multi_input_new(mset->scroll_name, nullptr);
+    mset->input_name = ptk::utils::multi_input_new(mset->scroll_name);
     gtk_label_set_mnemonic_widget(mset->label_name, GTK_WIDGET(mset->input_name));
     gtk_label_set_selectable(mset->label_name, true);
     mset->buf_name = GTK_TEXT_BUFFER(gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_name)));
@@ -1878,7 +1878,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_halign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_name), GtkAlign::GTK_ALIGN_START);
     mset->scroll_full_name = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    mset->input_full_name = multi_input_new(mset->scroll_full_name, nullptr);
+    mset->input_full_name = ptk::utils::multi_input_new(mset->scroll_full_name);
     gtk_label_set_mnemonic_widget(mset->label_full_name, GTK_WIDGET(mset->input_full_name));
     gtk_label_set_selectable(mset->label_full_name, true);
     mset->buf_full_name = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_name));
@@ -1899,7 +1899,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_halign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(mset->label_path), GtkAlign::GTK_ALIGN_START);
     mset->scroll_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    mset->input_path = multi_input_new(mset->scroll_path, nullptr);
+    mset->input_path = ptk::utils::multi_input_new(mset->scroll_path);
     gtk_label_set_mnemonic_widget(mset->label_path, GTK_WIDGET(mset->input_path));
     gtk_label_set_selectable(mset->label_path, true);
     mset->buf_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_path));
@@ -1921,7 +1921,8 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     gtk_widget_set_valign(GTK_WIDGET(mset->label_full_path), GtkAlign::GTK_ALIGN_START);
     mset->scroll_full_path = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     // set initial path
-    mset->input_full_path = multi_input_new(mset->scroll_full_path, mset->new_path.c_str());
+    mset->input_full_path =
+        ptk::utils::multi_input_new(mset->scroll_full_path, mset->new_path.string());
     gtk_label_set_mnemonic_widget(mset->label_full_path, GTK_WIDGET(mset->input_full_path));
     gtk_label_set_selectable(mset->label_full_path, true);
     mset->buf_full_path = gtk_text_view_get_buffer(GTK_TEXT_VIEW(mset->input_full_path));

@@ -469,6 +469,7 @@ sources += files(
   'src/ptk/ptk-path-bar.cxx',
   'src/ptk/ptk-search-bar.cxx',
 
+  'src/ptk/utils/multi-input.cxx',
   'src/ptk/utils/ptk-utils.cxx',
 
   'src/ptk/natsort/strnatcmp.cxx',
