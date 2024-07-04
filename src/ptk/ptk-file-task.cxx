@@ -50,6 +50,7 @@
 #include "ptk/ptk-file-task-view.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/utils/multi-input.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                                       const vfs::file_task::state state, void* state_data,
@@ -1857,31 +1858,42 @@ static bool
 on_query_input_keypress(GtkWidget* widget, GdkEvent* event, ptk::file_task* ptask) noexcept
 {
     (void)ptask;
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
-    if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
+    if (keymod == 0)
     {
-        // User pressed enter in rename/overwrite dialog
-        const auto new_name = ptk::utils::multi_input_get_text(widget);
-        const char* old_name =
-            static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
+        switch (keyval)
+        {
+            case GDK_KEY_Return:
+            case GDK_KEY_KP_Enter:
+            {
+                // User pressed enter in rename/overwrite dialog
+                const auto new_name = ptk::utils::multi_input_get_text(widget);
+                const char* old_name =
+                    static_cast<const char*>(g_object_get_data(G_OBJECT(widget), "old_name"));
 
 #if (GTK_MAJOR_VERSION == 4)
-        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
+                GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(widget)));
 #elif (GTK_MAJOR_VERSION == 3)
-        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
+                GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(widget));
 #endif
 
-        if (new_name && old_name && new_name.value() != old_name)
-        {
-            gtk_dialog_response(GTK_DIALOG(parent),
-                                magic_enum::enum_integer(ptk::file_task::response::rename));
+                if (new_name && old_name && new_name.value() != old_name)
+                {
+                    gtk_dialog_response(GTK_DIALOG(parent),
+                                        magic_enum::enum_integer(ptk::file_task::response::rename));
+                }
+                else
+                {
+                    gtk_dialog_response(
+                        GTK_DIALOG(parent),
+                        magic_enum::enum_integer(ptk::file_task::response::auto_rename));
+                }
+                return true;
+            }
+            default:
+                break;
         }
-        else
-        {
-            gtk_dialog_response(GTK_DIALOG(parent),
-                                magic_enum::enum_integer(ptk::file_task::response::auto_rename));
-        }
-        return true;
     }
     return false;
 }
@@ -2412,6 +2424,7 @@ ptk::file_task::query_overwrite() noexcept
     // name input
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     GtkWidget* query_input = GTK_WIDGET(ptk::utils::multi_input_new(scroll, filename));
+    g_object_set_data(G_OBJECT(query_input), "old_name", ::utils::strdup(filename.data()));
     // clang-format off
     g_signal_connect(G_OBJECT(query_input), "key-press-event", G_CALLBACK(on_query_input_keypress), this);
     // clang-format on
