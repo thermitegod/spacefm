@@ -42,11 +42,21 @@ static bool
 on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
 {
     (void)widget;
+    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
-    if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
+    if (keymod == 0)
     {
-        gtk_dialog_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_OK);
-        return true;
+        switch (keyval)
+        {
+            case GDK_KEY_Return:
+            case GDK_KEY_KP_Enter:
+            {
+                gtk_dialog_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_OK);
+                return true;
+            }
+            default:
+                break;
+        }
     }
     return false;
 }
