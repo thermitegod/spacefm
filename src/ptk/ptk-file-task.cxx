@@ -35,7 +35,6 @@
 
 #include <magic_enum.hpp>
 
-#include <zmqpp/compatibility.hpp>
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
@@ -1919,14 +1918,6 @@ on_multi_input_changed(GtkWidget* input_buf, GtkWidget* query_input) noexcept
 static void
 query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* ptask) noexcept
 {
-    if (response == GtkResponseType::GTK_RESPONSE_DELETE_EVENT ||
-        response == GtkResponseType::GTK_RESPONSE_CANCEL)
-    {
-        // escape was pressed or window closed
-        ptask->task->abort = true;
-        return;
-    }
-
     switch (ptk::file_task::response(response))
     {
         case ptk::file_task::response::overwrite_all:
@@ -2008,8 +1999,15 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
             ptask->restart_timeout_ = false;
             break;
         }
-        default:
+        case ptk::file_task::response::close:
+        {
+            if (response == GtkResponseType::GTK_RESPONSE_CANCEL ||
+                response == GtkResponseType::GTK_RESPONSE_DELETE_EVENT)
+            { // escape was pressed or window closed
+                ptask->task->abort = true;
+            }
             break;
+        }
     }
 
     // save size
@@ -2032,8 +2030,8 @@ query_overwrite_response(GtkDialog* dlg, const i32 response, ptk::file_task* pta
     if (ptask->query_cond_)
     {
         ptask->lock();
-        ptask->query_ret_ = (response != GtkResponseType::GTK_RESPONSE_DELETE_EVENT) &&
-                            (response != GtkResponseType::GTK_RESPONSE_CANCEL);
+        ptask->query_ret_ = (response != GtkResponseType::GTK_RESPONSE_CANCEL) &&
+                            (response != GtkResponseType::GTK_RESPONSE_DELETE_EVENT);
         // g_cond_broadcast( ptask->query_cond );
         g_cond_signal(ptask->query_cond_);
         ptask->unlock();
@@ -2062,7 +2060,7 @@ on_query_button_press(GtkWidget* widget, ptk::file_task* ptask) noexcept
         return;
     }
 
-    ptk::file_task::response response;
+    ptk::file_task::response response = ptk::file_task::response::close;
     if (widget == rename_button)
     {
         response = ptk::file_task::response::rename;

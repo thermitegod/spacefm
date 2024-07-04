@@ -45,14 +45,15 @@ struct file_task
 
     enum class response
     {
-        overwrite = 1 << 0,
-        overwrite_all = 1 << 1,
-        rename = 1 << 2,
-        skip = 1 << 3,
-        skip_all = 1 << 4,
-        auto_rename = 1 << 5,
-        auto_rename_all = 1 << 6,
-        pause = 1 << 7,
+        close, // close window
+        overwrite,
+        overwrite_all,
+        rename,
+        skip,
+        skip_all,
+        auto_rename,
+        auto_rename_all,
+        pause,
     };
 
     file_task() = delete;
