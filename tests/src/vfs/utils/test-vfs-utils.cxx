@@ -22,7 +22,7 @@
 const std::filesystem::path test_data_path = TEST_DATA_PATH;
 
 /**
- * vfs::utils::unique_name
+ * vfs::utils::unique_path
  */
 
 TEST(vfs_utils, unique_name__file_missing_extension)
@@ -32,7 +32,7 @@ TEST(vfs_utils, unique_name__file_missing_extension)
 
     const auto result_wanted = path / "test-copy11";
 
-    const auto result = vfs::utils::unique_name(path, filename, "-copy");
+    const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
     EXPECT_EQ(result, result_wanted);
 }
@@ -44,7 +44,7 @@ TEST(vfs_utils, unique_name__file_multiple_extension)
 
     const auto result_wanted = path / "test-copy11.tar.gz";
 
-    const auto result = vfs::utils::unique_name(path, filename, "-copy");
+    const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
     EXPECT_EQ(result, result_wanted);
 }
@@ -56,7 +56,7 @@ TEST(vfs_utils, unique_name__file_single_extension)
 
     const auto result_wanted = path / "test-copy11.txt";
 
-    const auto result = vfs::utils::unique_name(path, filename, "-copy");
+    const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
     EXPECT_EQ(result, result_wanted);
 }
@@ -68,7 +68,7 @@ TEST(vfs_utils, unique_name__directory)
 
     const auto result_wanted = path / "test-copy11";
 
-    const auto result = vfs::utils::unique_name(path, filename, "-copy");
+    const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
     EXPECT_EQ(result, result_wanted);
 }

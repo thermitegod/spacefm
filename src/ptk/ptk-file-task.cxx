@@ -2250,7 +2250,7 @@ ptk::file_task::query_overwrite() noexcept
 
     const auto filename_parts = vfs::utils::split_basename_extension(filename);
 
-    const std::string unique_name = vfs::utils::unique_name(dest_dir, filename, "-copy");
+    const std::string unique_name = vfs::utils::unique_path(dest_dir, filename, "-copy");
     const std::string new_name_plain =
         !unique_name.empty() ? std::filesystem::path(unique_name).filename() : "";
     const std::string new_name = !new_name_plain.empty() ? new_name_plain : "";

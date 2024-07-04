@@ -110,7 +110,7 @@ vfs::utils::split_basename_extension(const std::filesystem::path& filename) noex
 }
 
 const std::filesystem::path
-vfs::utils::unique_name(const std::filesystem::path& path, const std::filesystem::path& filename,
+vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem::path& filename,
                         const std::string_view tag) noexcept
 {
     assert(!path.empty());

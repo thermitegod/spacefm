@@ -48,9 +48,18 @@ struct split_basename_extension_data
 split_basename_extension(const std::filesystem::path& filename) noexcept;
 
 /**
- * Create a unique filename
+ * @brief unique_path
+ *
+ * - Create a unique path given a base path and a filename. If the filename already exists
+ *   then the filename will be modified with an integer counter.
+ *
+ * @param[in] path The path the filename will be in, does not get modified. Must be a directory.
+ * @param[in] filename The filename, if an file already exists with this name it will be modified.
+ * @param[in] tag String to be appended before the numeric counter if a duplicate files exist.
+ *
+ * @return A unique path
  */
-[[nodiscard]] const std::filesystem::path unique_name(const std::filesystem::path& path,
+[[nodiscard]] const std::filesystem::path unique_path(const std::filesystem::path& path,
                                                       const std::filesystem::path& filename,
                                                       const std::string_view tag = "") noexcept;
 } // namespace vfs::utils

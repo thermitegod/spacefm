@@ -185,7 +185,7 @@ vfs::trash_can::trash_dir::trash_dir(const std::filesystem::path& path) noexcept
 const std::filesystem::path
 vfs::trash_can::trash_dir::unique_name(const std::filesystem::path& path) const noexcept
 {
-    return vfs::utils::unique_name(this->files_path_, path.filename(), "_").filename();
+    return vfs::utils::unique_path(this->files_path_, path.filename(), "_").filename();
 }
 
 void

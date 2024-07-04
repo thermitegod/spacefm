@@ -1629,7 +1629,7 @@ ptk::action::rename_files(ptk::browser* browser, const std::filesystem::path& fi
     }
     else
     {
-        mset->full_path = vfs::utils::unique_name(file_dir, "new");
+        mset->full_path = vfs::utils::unique_path(file_dir, "new");
         mset->new_path = mset->full_path;
         mset->is_dir = false; // is_dir is dynamic for create
         mset->is_link = false;
