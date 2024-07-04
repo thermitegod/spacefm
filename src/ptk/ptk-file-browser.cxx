@@ -4045,10 +4045,8 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
 
     gtk_window_set_title(GTK_WINDOW(dialog), "Select By Pattern");
 
-    gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 400);
+    gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 300);
     gtk_window_set_resizable(GTK_WINDOW(dialog), true);
-
-    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), FNMATCH_HELP.data());
 
     GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
 
@@ -4065,17 +4063,22 @@ select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern)
     gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
 #endif
 
+    GtkWidget* expander = gtk_expander_new("Show Pattern Matching Help");
+    gtk_expander_set_expanded(GTK_EXPANDER(expander), false);
+    gtk_expander_set_resize_toplevel(GTK_EXPANDER(expander), true);
+    GtkWidget* label = gtk_label_new(FNMATCH_HELP.data());
+    gtk_label_set_line_wrap(GTK_LABEL(label), true);
+    gtk_expander_set_child(GTK_EXPANDER(expander), label);
+    gtk_box_pack_start(vbox, GTK_WIDGET(expander), true, true, 4);
+
     GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
     GtkTextView* input = ptk::utils::multi_input_new(scroll, default_pattern.data());
-
-    gtk_widget_set_size_request(GTK_WIDGET(input), -1, 400);
-    gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 400);
-
+    gtk_widget_set_size_request(GTK_WIDGET(input), -1, 300);
+    gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 300);
     gtk_box_pack_start(vbox, GTK_WIDGET(scroll), true, true, 4);
 
     g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
 
-    // show
     gtk_widget_show_all(GTK_WIDGET(dialog));
 
     const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
