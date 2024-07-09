@@ -117,15 +117,13 @@ vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem
     assert(!path.empty());
     assert(!filename.empty());
 
-    const auto filename_parts = split_basename_extension(filename);
-    const auto& basename = filename_parts.basename;
-    const auto& extension = filename_parts.extension;
+    const auto parts = split_basename_extension(filename);
 
     u32 n = 0;
-    auto unique_path = path / std::format("{}{}", basename, extension);
+    auto unique_path = path / std::format("{}{}", parts.basename, parts.extension);
     while (std::filesystem::exists(unique_path))
     { // need to see broken symlinks
-        unique_path = path / std::format("{}{}{}{}", basename, tag, ++n, extension);
+        unique_path = path / std::format("{}{}{}{}", parts.basename, tag, ++n, parts.extension);
     }
 
     return unique_path;
