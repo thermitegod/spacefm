@@ -208,43 +208,43 @@ vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 {
     if (vfs::user::home() == this->path_)
     {
-        return (symbolic) ? "user-home-symbolic" : "user-home";
+        return symbolic ? "user-home-symbolic" : "user-home";
     }
     else if (vfs::user::desktop() == this->path_)
     {
-        return (symbolic) ? "user-desktop-symbolic" : "user-desktop";
+        return symbolic ? "user-desktop-symbolic" : "user-desktop";
     }
     else if (vfs::user::documents() == this->path_)
     {
-        return (symbolic) ? "folder-documents-symbolic" : "folder-documents";
+        return symbolic ? "folder-documents-symbolic" : "folder-documents";
     }
     else if (vfs::user::download() == this->path_)
     {
-        return (symbolic) ? "folder-download-symbolic" : "folder-download";
+        return symbolic ? "folder-download-symbolic" : "folder-download";
     }
     else if (vfs::user::music() == this->path_)
     {
-        return (symbolic) ? "folder-music-symbolic" : "folder-music";
+        return symbolic ? "folder-music-symbolic" : "folder-music";
     }
     else if (vfs::user::pictures() == this->path_)
     {
-        return (symbolic) ? "folder-pictures-symbolic" : "folder-pictures";
+        return symbolic ? "folder-pictures-symbolic" : "folder-pictures";
     }
     else if (vfs::user::public_share() == this->path_)
     {
-        return (symbolic) ? "folder-publicshare-symbolic" : "folder-publicshare";
+        return symbolic ? "folder-publicshare-symbolic" : "folder-publicshare";
     }
     else if (vfs::user::templates() == this->path_)
     {
-        return (symbolic) ? "folder-templates-symbolic" : "folder-templates";
+        return symbolic ? "folder-templates-symbolic" : "folder-templates";
     }
     else if (vfs::user::videos() == this->path_)
     {
-        return (symbolic) ? "folder-videos-symbolic" : "folder-videos";
+        return symbolic ? "folder-videos-symbolic" : "folder-videos";
     }
     else
     {
-        return (symbolic) ? "folder-symbolic" : "folder";
+        return symbolic ? "folder-symbolic" : "folder";
     }
 }
 
