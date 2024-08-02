@@ -82,13 +82,13 @@ vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
 vfs::file::~file() noexcept
 {
     // logger::debug<logger::domain::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), this->path_);
-    if (this->big_thumbnail_)
+    if (this->thumbnail_.big)
     {
-        g_object_unref(this->big_thumbnail_);
+        g_object_unref(this->thumbnail_.big);
     }
-    if (this->small_thumbnail_)
+    if (this->thumbnail_.small)
     {
-        g_object_unref(this->small_thumbnail_);
+        g_object_unref(this->thumbnail_.small);
     }
 }
 
@@ -253,9 +253,9 @@ vfs::file::icon(const thumbnail_size size) noexcept
 {
     if (size == thumbnail_size::big)
     {
-        if (this->is_desktop_entry() && this->big_thumbnail_)
+        if (this->is_desktop_entry() && this->thumbnail_.big)
         {
-            return g_object_ref(this->big_thumbnail_);
+            return g_object_ref(this->thumbnail_.big);
         }
 
         if (this->is_directory())
@@ -272,9 +272,9 @@ vfs::file::icon(const thumbnail_size size) noexcept
     }
     else
     {
-        if (this->is_desktop_entry() && this->small_thumbnail_)
+        if (this->is_desktop_entry() && this->thumbnail_.small)
         {
-            return g_object_ref(this->small_thumbnail_);
+            return g_object_ref(this->thumbnail_.small);
         }
 
         if (this->is_directory())
@@ -296,11 +296,11 @@ vfs::file::thumbnail(const thumbnail_size size) const noexcept
 {
     if (size == thumbnail_size::big)
     {
-        return this->big_thumbnail_ ? g_object_ref(this->big_thumbnail_) : nullptr;
+        return this->thumbnail_.big ? g_object_ref(this->thumbnail_.big) : nullptr;
     }
     else
     {
-        return this->small_thumbnail_ ? g_object_ref(this->small_thumbnail_) : nullptr;
+        return this->thumbnail_.small ? g_object_ref(this->thumbnail_.small) : nullptr;
     }
 }
 
@@ -309,18 +309,18 @@ vfs::file::unload_thumbnail(const thumbnail_size size) noexcept
 {
     if (size == thumbnail_size::big)
     {
-        if (this->big_thumbnail_)
+        if (this->thumbnail_.big)
         {
-            g_object_unref(this->big_thumbnail_);
-            this->big_thumbnail_ = nullptr;
+            g_object_unref(this->thumbnail_.big);
+            this->thumbnail_.big = nullptr;
         }
     }
     else
     {
-        if (this->small_thumbnail_)
+        if (this->thumbnail_.small)
         {
-            g_object_unref(this->small_thumbnail_);
-            this->small_thumbnail_ = nullptr;
+            g_object_unref(this->thumbnail_.small);
+            this->thumbnail_.small = nullptr;
         }
     }
 }
@@ -676,11 +676,11 @@ vfs::file::is_thumbnail_loaded(const thumbnail_size size) const noexcept
 {
     if (size == thumbnail_size::big)
     {
-        return (this->big_thumbnail_ != nullptr);
+        return (this->thumbnail_.big != nullptr);
     }
     else
     {
-        return (this->small_thumbnail_ != nullptr);
+        return (this->thumbnail_.small != nullptr);
     }
 }
 
@@ -689,7 +689,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
 {
     if (size == thumbnail_size::big)
     {
-        if (this->big_thumbnail_)
+        if (this->thumbnail_.big)
         {
             return;
         }
@@ -707,18 +707,18 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
                                                                config::settings.icon_size_big);
             if (thumbnail)
             {
-                this->big_thumbnail_ = thumbnail;
+                this->thumbnail_.big = thumbnail;
                 return;
             }
         }
 
         // fallback to mime_type icon
         // logger::debug<logger::domain::vfs>("mime={}", this->mime_type_->type());
-        this->big_thumbnail_ = this->icon(thumbnail_size::big);
+        this->thumbnail_.big = this->icon(thumbnail_size::big);
     }
     else
     {
-        if (this->small_thumbnail_)
+        if (this->thumbnail_.small)
         {
             return;
         }
@@ -736,14 +736,14 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
                                                                config::settings.icon_size_small);
             if (thumbnail)
             {
-                this->small_thumbnail_ = thumbnail;
+                this->thumbnail_.small = thumbnail;
                 return;
             }
         }
 
         // fallback to mime_type icon
         // logger::debug<logger::domain::vfs>("mime={}", this->mime_type_->type());
-        this->small_thumbnail_ = this->icon(vfs::file::thumbnail_size::small);
+        this->thumbnail_.small = this->icon(vfs::file::thumbnail_size::small);
     }
 }
 
@@ -765,20 +765,20 @@ vfs::file::load_special_info() noexcept
 
     const i32 big_size = config::settings.icon_size_big;
     const i32 small_size = config::settings.icon_size_small;
-    if (this->big_thumbnail_ == nullptr)
+    if (this->thumbnail_.big == nullptr)
     {
         GdkPixbuf* icon = desktop->icon(big_size);
         if (icon)
         {
-            this->big_thumbnail_ = icon;
+            this->thumbnail_.big = icon;
         }
     }
-    if (this->small_thumbnail_ == nullptr)
+    if (this->thumbnail_.small == nullptr)
     {
         GdkPixbuf* icon = desktop->icon(small_size);
         if (icon)
         {
-            this->small_thumbnail_ = icon;
+            this->thumbnail_.small = icon;
         }
     }
 }

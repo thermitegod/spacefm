@@ -146,16 +146,17 @@ struct file : public std::enable_shared_from_this<file>
     std::string display_mtime_;                 // displayed modification time
     std::string display_perm_;                  // displayed permission in string form
     std::shared_ptr<vfs::mime_type> mime_type_; // mime type related information
-    GdkPixbuf* big_thumbnail_{nullptr};         // thumbnail of the file
-    GdkPixbuf* small_thumbnail_{nullptr};       // thumbnail of the file
 
     bool is_special_desktop_entry_{false}; // is a .desktop file
+    bool is_hidden_{false};                // if the filename starts with '.'
 
-    bool is_hidden_{false}; // if the filename starts with '.'
+    struct thumbnail_data
+    {
+        GdkPixbuf* big{nullptr};
+        GdkPixbuf* small{nullptr};
+    };
+    thumbnail_data thumbnail_;
 
-    // std::vector<metadata_data> metadata_{};
-
-  private:
     void load_special_info() noexcept;
 
     [[nodiscard]] const std::string create_file_perm_string() const noexcept;
