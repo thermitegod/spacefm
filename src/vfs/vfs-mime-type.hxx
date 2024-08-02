@@ -92,10 +92,15 @@ struct mime_type
 
     std::string type_;
     std::string description_;
-    GdkPixbuf* big_icon_{nullptr};
-    GdkPixbuf* small_icon_{nullptr};
     i32 icon_size_big_{0};
     i32 icon_size_small_{0};
+
+    struct icon_data
+    {
+        GdkPixbuf* big{nullptr};
+        GdkPixbuf* small{nullptr};
+    };
+    icon_data icon_;
 };
 
 [[nodiscard]] const std::optional<std::filesystem::path>

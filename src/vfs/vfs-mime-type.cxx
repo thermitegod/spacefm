@@ -96,13 +96,13 @@ vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
 
 vfs::mime_type::~mime_type() noexcept
 {
-    if (this->big_icon_)
+    if (this->icon_.big)
     {
-        g_object_unref(this->big_icon_);
+        g_object_unref(this->icon_.big);
     }
-    if (this->small_icon_)
+    if (this->icon_.small)
     {
-        g_object_unref(this->small_icon_);
+        g_object_unref(this->icon_.small);
     }
 }
 
@@ -115,15 +115,15 @@ vfs::mime_type::icon(const bool big) noexcept
     { // big icon
         if (this->icon_size_big_ != config::settings.icon_size_big)
         { // big icon size has changed
-            if (this->big_icon_)
+            if (this->icon_.big)
             {
-                g_object_unref(this->big_icon_);
-                this->big_icon_ = nullptr;
+                g_object_unref(this->icon_.big);
+                this->icon_.big = nullptr;
             }
         }
-        if (this->big_icon_)
+        if (this->icon_.big)
         {
-            return g_object_ref(this->big_icon_);
+            return g_object_ref(this->icon_.big);
         }
         this->icon_size_big_ = config::settings.icon_size_big;
         icon_size = this->icon_size_big_;
@@ -132,15 +132,15 @@ vfs::mime_type::icon(const bool big) noexcept
     { // small icon
         if (this->icon_size_small_ != config::settings.icon_size_small)
         { // small icon size has changed
-            if (this->small_icon_)
+            if (this->icon_.small)
             {
-                g_object_unref(this->small_icon_);
-                this->small_icon_ = nullptr;
+                g_object_unref(this->icon_.small);
+                this->icon_.small = nullptr;
             }
         }
-        if (this->small_icon_)
+        if (this->icon_.small)
         {
-            return g_object_ref(this->small_icon_);
+            return g_object_ref(this->icon_.small);
         }
         this->icon_size_small_ = config::settings.icon_size_small;
         icon_size = this->icon_size_small_;
@@ -153,11 +153,11 @@ vfs::mime_type::icon(const bool big) noexcept
         icon = vfs::utils::load_icon("folder", icon_size);
         if (big)
         {
-            this->big_icon_ = icon;
+            this->icon_.big = icon;
         }
         else
         {
-            this->small_icon_ = icon;
+            this->icon_.small = icon;
         }
         return icon ? g_object_ref(icon) : nullptr;
     }
@@ -225,11 +225,11 @@ vfs::mime_type::icon(const bool big) noexcept
 
     if (big)
     {
-        this->big_icon_ = icon;
+        this->icon_.big = icon;
     }
     else
     {
-        this->small_icon_ = icon;
+        this->icon_.small = icon;
     }
     return icon ? g_object_ref(icon) : nullptr;
 }
