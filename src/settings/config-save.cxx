@@ -175,8 +175,8 @@ config::save() noexcept
     };
 
     // DEBUG
-    // std::cout << "###### TOML DUMP ######" << "\n\n";
-    // std::cout << toml_data << "\n\n";
+    // std::println("###### TOML DUMP ######");
+    // std::println("{}", toml_data.as_string());
 
     const auto config_file = vfs::program::config() / config::disk_format::filename;
 

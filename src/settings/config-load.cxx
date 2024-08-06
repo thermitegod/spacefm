@@ -326,9 +326,10 @@ config::load(const std::filesystem::path& session) noexcept
     try
     {
         const auto tbl = toml::parse(session);
+
         // DEBUG
-        // std::cout << "###### TOML PARSE ######" << "\n\n";
-        // std::cout << tbl << "\n\n";
+        // std::println("###### TOML PARSE ######");
+        // std::println("{}", tbl.as_string());
 
         const u64 version = get_config_file_version(tbl);
 
