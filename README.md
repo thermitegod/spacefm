@@ -12,21 +12,12 @@ You can find the instructions on how to fix it [**here**](extra/README-GTK3.md).
 
 ## Building
 
-__Gentoo__
+See [BUILD.md](BUILD.md) for instructions on building and running tests.
 
-ebuild at
-https://github.com/thermitegod/overlay/tree/master/x11-misc/spacefm
+## Packages
 
-
-__Everyone Else__
-
-```
-mkdir build
-cd build
-meson setup --buildtype=release ..
-ninja
-```
-
+Gentoo ebuild at
+<https://github.com/thermitegod/overlay/tree/master/x11-misc/spacefm>
 
 ## LICENSE
 

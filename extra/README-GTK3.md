@@ -5,6 +5,6 @@ The included gtk.css file "fixes" graphical bugs caused by the 'edge-overshot' o
 
 copy or merge into
 
-```
+```bash
 ~/.config/gtk-3.0/gtk.css
 ```
