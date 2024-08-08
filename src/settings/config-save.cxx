@@ -21,7 +21,11 @@
 
 #include <magic_enum.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#pragma GCC diagnostic ignored "-Wunused-result"
 #include <toml.hpp> // toml11
+#pragma GCC diagnostic pop
 
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
