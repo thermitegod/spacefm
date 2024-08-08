@@ -66,5 +66,9 @@
 #include <glibmm.h>
 
 // ZTD
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#pragma GCC diagnostic ignored "-Wimplicit-float-conversion"
 #include <ztd/ztd.hxx>
+#pragma GCC diagnostic pop
 #include <ztd/ztd_logger.hxx>

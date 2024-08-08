@@ -23,6 +23,11 @@ option('with-system-toml11',
        value: false,
        description : 'Use system toml11 instead of bundled version')
 
+option('with-system-ztd',
+       type : 'boolean',
+       value: false,
+       description : 'Use system ztd instead of bundled version')
+
 option('zmp_port',
        type : 'integer',
        value: 59172,

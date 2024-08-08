@@ -192,13 +192,6 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
 ## dependencies
 
-# ztd use system or subproject
-ztd_dep = dependency('ztd', version : '>=0.2.0', required : false)
-if not ztd_dep.found() # using subproject
-  ztd_proj = subproject('ztd', required : true)
-  ztd_dep = ztd_proj.get_variable('ztd_dep')
-endif
-
 # magic_enum use system or subproject
 magic_enum_dep = dependency('magic_enum', required : false)
 if not magic_enum_dep.found() # using subproject
@@ -255,8 +248,6 @@ dependencies = [
   libudev_dep,
   libffmpegthumbnailer_dep,
   openssl_dep,
-
-  ztd_dep,
 ]
 
 ## Source files
@@ -317,6 +308,13 @@ if get_option('with-system-toml11')
   dependencies += toml11_dep
 else
   incdir += include_directories('third_party/toml11')
+endif
+
+if get_option('with-system-ztd')
+  ztd_dep = dependency('ztd', required : true)
+  dependencies += ztd_dep
+else
+  incdir += include_directories('third_party/ztd/include')
 endif
 
 if get_option('socket')

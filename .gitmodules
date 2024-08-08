@@ -1,3 +1,6 @@
 [submodule "third_party/toml11"]
 	path = third_party/toml11
 	url = https://github.com/ToruNiina/toml11
+[submodule "third_party/ztd"]
+	path = third_party/ztd
+	url = https://github.com/thermitegod/ztd.git
