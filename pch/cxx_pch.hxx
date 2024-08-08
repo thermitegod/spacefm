@@ -52,10 +52,13 @@
 #include <sigc++/sigc++.h>
 
 // GTKMM
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <gtkmm.h>
 #include <gdkmm.h>
 #include <giomm.h>
 #include <glibmm.h>
+#pragma GCC diagnostic pop
 
 // MAGIC_ENUM
 #pragma GCC diagnostic push
@@ -64,4 +67,10 @@
 #pragma GCC diagnostic pop
 
 // ZTD
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#pragma GCC diagnostic ignored "-Wimplicit-float-conversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <ztd/ztd.hxx>
+#pragma GCC diagnostic pop

@@ -15,21 +15,12 @@
 
 #pragma once
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wswitch-enum"
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <concurrencpp/concurrencpp.h>
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#else
 #pragma GCC diagnostic pop
-#endif
 
 namespace global
 {
