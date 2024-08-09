@@ -91,8 +91,8 @@ on_set_key_keypress(GtkWidget* widget, GdkEvent* event, void* user_data) noexcep
 {
     (void)user_data;
 
-    i32* newkey = (i32*)g_object_get_data(G_OBJECT(widget), "newkey");
-    i32* newkeymod = (i32*)g_object_get_data(G_OBJECT(widget), "newkeymod");
+    u32* const newkey = (u32*)g_object_get_data(G_OBJECT(widget), "newkey");
+    u32* const newkeymod = (u32*)g_object_get_data(G_OBJECT(widget), "newkeymod");
     GtkButton* btn_set = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_set"));
     GtkButton* btn_unset = GTK_BUTTON(g_object_get_data(G_OBJECT(widget), "btn_unset"));
 
