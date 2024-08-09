@@ -41,7 +41,7 @@
 // using isize = ssize_t;
 
 // using a signed type because negative values are used as control codes
-using panel_t = i64;
+using panel_t = i32;
 
 inline constexpr panel_t panel_control_code_prev = -1;
 inline constexpr panel_t panel_control_code_next = -2;
@@ -63,7 +63,7 @@ bool is_valid_panel(panel_t p) noexcept;
 bool is_valid_panel_code(panel_t p) noexcept;
 
 // using a signed type because negative values are used as control codes
-using tab_t = i64;
+using tab_t = i32;
 
 inline constexpr tab_t tab_control_code_prev    = -1;
 inline constexpr tab_t tab_control_code_next    = -2;
