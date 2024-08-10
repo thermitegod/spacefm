@@ -44,6 +44,9 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
                 {logger::domain::basic,
                  {spdlog::level::trace, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] %v"}},
 
+                {logger::domain::autosave,
+                 {spdlog::level::off, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] [autosave] %v"}},
+
                 {logger::domain::ptk,
                  {spdlog::level::trace, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] [ptk] %v"}},
 

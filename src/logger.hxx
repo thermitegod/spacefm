@@ -32,6 +32,7 @@ namespace logger
 enum class domain
 {
     basic,
+    autosave,
     ptk,
     vfs,
 };

@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <atomic>
-
 #include <memory>
 
 #include <ztd/ztd.hxx>
@@ -27,7 +25,9 @@
 
 struct requests_data
 {
-    std::atomic<bool> pending{false};
+    std::mutex mutex;
+    i32 total{0};
+    bool pending{false};
 };
 
 const auto requests = std::make_unique<requests_data>();
@@ -35,15 +35,21 @@ const auto requests = std::make_unique<requests_data>();
 void
 autosave::request_add() noexcept
 {
-    // logger::debug("AUTOSAVE request add");
-    requests->pending.store(true);
+    const std::scoped_lock<std::mutex> lock(requests->mutex);
+
+    requests->total += 1;
+    logger::trace<logger::domain::autosave>("adding request, total {}", requests->total);
+    requests->pending = true;
 }
 
 void
 autosave::request_cancel() noexcept
 {
-    // logger::debug("AUTOSAVE request cancel");
-    requests->pending.store(false);
+    const std::scoped_lock<std::mutex> lock(requests->mutex);
+
+    logger::trace<logger::domain::autosave>("canceling request");
+    requests->total = 0;
+    requests->pending = false;
 }
 
 namespace autosave::detail
@@ -54,7 +60,7 @@ concurrencpp::timer timer;
 void
 autosave::create(const autosave_t& autosave_func) noexcept
 {
-    // logger::debug("AUTOSAVE init");
+    logger::trace<logger::domain::autosave>("starting autosave thread");
 
     using namespace std::chrono_literals;
 
@@ -65,11 +71,19 @@ autosave::create(const autosave_t& autosave_func) noexcept
         global::runtime.thread_executor(),
         [autosave_func]
         {
-            // logger::debug("AUTOSAVE Thread loop");
+            logger::trace<logger::domain::autosave>("checking for pending autosave requests");
             if (requests->pending)
             {
-                // logger::debug("AUTOSAVE Thread saving_settings");
-                requests->pending.store(false);
+                {
+                    const std::scoped_lock<std::mutex> lock(requests->mutex);
+
+                    logger::trace<logger::domain::autosave>(
+                        "found autosave requests, saving settings, total request for this period {}",
+                        requests->total);
+                    requests->total += 0;
+                    requests->pending = false;
+                }
+
                 autosave_func();
             }
         });
