@@ -30,7 +30,9 @@
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
-// #include "logger.hxx"
+#include <magic_enum.hpp>
+
+#include "logger.hxx"
 
 #include "xset/xset.hxx"
 
@@ -345,7 +347,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::chdir_before, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::chdir_before");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_chdir_before.connect(fun);
     }
 
@@ -353,7 +356,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::chdir_begin, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::chdir_begin");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_chdir_begin.connect(fun);
     }
 
@@ -361,7 +365,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::chdir_after, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::chdir_after");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_chdir_after.connect(fun);
     }
 
@@ -369,7 +374,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::open_item, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::open_item");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_open_file.connect(fun);
     }
 
@@ -377,7 +383,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::change_content, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::change_content");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_change_content.connect(fun);
     }
 
@@ -385,7 +392,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::change_sel, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::change_sel");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_change_sel.connect(fun);
     }
 
@@ -393,7 +401,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::change_pane, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::change_pane");
+        logger::trace<logger::domain::signals>(
+            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         return this->evt_change_pane_mode.connect(fun);
     }
 
@@ -402,7 +411,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::chdir_before, void>
     run_event() noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::chdir_before");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_chdir_before.emit(this);
     }
 
@@ -410,7 +420,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::chdir_begin, void>
     run_event() noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::chdir_begin");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_chdir_begin.emit(this);
     }
 
@@ -418,7 +429,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::chdir_after, void>
     run_event() noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::chdir_after");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_chdir_after.emit(this);
     }
 
@@ -426,7 +438,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::open_item, void>
     run_event(const std::filesystem::path& path, ptk::browser::open_action action) noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::open_item");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_open_file.emit(this, path, action);
     }
 
@@ -434,7 +447,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::change_content, void>
     run_event() noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::change_content");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_change_content.emit(this);
     }
 
@@ -442,7 +456,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::change_sel, void>
     run_event() noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::change_sel");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_change_sel.emit(this);
     }
 
@@ -450,7 +465,8 @@ struct browser
     typename std::enable_if_t<evt == spacefm::signal::change_pane, void>
     run_event() noexcept
     {
-        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::change_pane");
+        logger::trace<logger::domain::signals>(
+            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
         this->evt_change_pane_mode.emit(this);
     }
 
