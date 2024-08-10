@@ -1,54 +1,76 @@
-option('deprecated',
-       type : 'boolean',
-       value: false,
-       description : 'enable deprecated features')
+option(
+    'deprecated',
+    type : 'boolean',
+    value: false,
+    description : 'enable deprecated features'
+)
 
-option('exo',
-       type : 'boolean',
-       value: true,
-       description : 'Build PtkFileBrowser to use gtk wrapper exo (EXPERIMENTAL)')
+option(
+    'exo',
+    type : 'boolean',
+    value: true,
+    description : 'Build PtkFileBrowser to use gtk wrapper exo (EXPERIMENTAL)'
+)
 
-option('socket',
-       type : 'boolean',
-       value: true,
-       description : 'Enable socket commands')
+option(
+    'socket',
+    type : 'boolean',
+    value: true,
+    description : 'Enable socket commands'
+)
 
-option('media',
-       type : 'boolean',
-       value: true,
-       description : 'Enable extra Audio, Video, and Image support')
+option(
+    'media',
+    type : 'boolean',
+    value: true,
+    description : 'Enable extra Audio, Video, and Image support'
+)
 
-option('with-system-cli11',
-       type : 'boolean',
-       value: false,
-       description : 'Use system cli11 instead of bundled version')
+option(
+    'with-system-cli11',
+    type : 'boolean',
+    value: false,
+    description : 'Use system cli11 instead of bundled version'
+)
 
-option('with-system-concurrencpp',
-       type : 'boolean',
-       value: false,
-       description : 'Use system concurrencpp instead of bundled version')
+option(
+    'with-system-concurrencpp',
+    type : 'boolean',
+    value: false,
+    description : 'Use system concurrencpp instead of bundled version'
+)
 
-option('with-system-magic-enum',
-       type : 'boolean',
-       value: false,
-       description : 'Use system magic_enum instead of bundled version')
+option(
+    'with-system-magic-enum',
+    type : 'boolean',
+    value: false,
+    description : 'Use system magic_enum instead of bundled version'
+)
 
-option('with-system-spdlog',
-       type : 'boolean',
-       value: false,
-       description : 'Use system spdlog instead of bundled version')
+option(
+    'with-system-spdlog',
+    type : 'boolean',
+    value: false,
+    description : 'Use system spdlog instead of bundled version'
+)
 
-option('with-system-toml11',
-       type : 'boolean',
-       value: false,
-       description : 'Use system toml11 instead of bundled version')
+option(
+    'with-system-toml11',
+    type : 'boolean',
+    value: false,
+    description : 'Use system toml11 instead of bundled version'
+)
 
-option('with-system-ztd',
-       type : 'boolean',
-       value: false,
-       description : 'Use system ztd instead of bundled version')
+option(
+    'with-system-ztd',
+    type : 'boolean',
+    value: false,
+    description : 'Use system ztd instead of bundled version'
+)
 
-option('zmp_port',
-       type : 'integer',
-       value: 59172,
-       description : 'Port number to use for socket commands')
+option(
+    'zmp_port',
+    type : 'integer',
+    value: 59172,
+    description : 'Port number to use for socket commands'
+)

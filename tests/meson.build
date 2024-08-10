@@ -1,13 +1,16 @@
 project(
-  'test_suite', ['c', 'cpp'],
-  version : '1.0.0',
-  license : 'GPL3',
-  default_options : [
-    'cpp_std=c++23',
-    'warning_level=3',
-    'optimization=2',
-  ],
-  meson_version : '>= 1.0.0'
+    'test_suite',
+    ['c', 'cpp'],
+    version: '1.0.0',
+    license: 'GPL3',
+    default_options: [
+        'c_std=c23',
+        'cpp_std=c++23',
+        'buildtype=debug',
+        'warning_level=3',
+        'optimization=2',
+    ],
+    meson_version: '>= 1.0.0',
 )
 
 build_root = meson.project_build_root()
@@ -31,7 +34,6 @@ link_flags = []
 
 debug_flags = [
     '-ggdb3',
-
     '-pedantic',
     '-pedantic-errors',
     # '-Wfatal-errors',
@@ -91,7 +93,6 @@ default_warning_flags = [
     '-Wstring-compare',
     '-Walloca',
     '-Wdate-time',
-
     # Disabled Warnings
     '-Wno-double-promotion',
 ]
@@ -116,7 +117,6 @@ if cpp.get_id() == 'gcc'
         '-Wtrampolines',
         '-Walloc-zero',
         '-Wstringop-overflow=4',
-
         # Disabled Warnings
     ]
 
@@ -148,71 +148,77 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 ## preprocessor
 
 preprocessor = [
-  '-DZTD_VERSION=2',
-  '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'test_data')),
+    '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'test_data')),
 ]
 
-foreach a : preprocessor
-  add_project_arguments(a, language : ['c', 'cpp'])
+foreach a: preprocessor
+    add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
 
 ## dependencies
 
 # ztd use system or subproject
-ztd_dep = dependency('ztd', required : false)
+ztd_dep = dependency('ztd', required: false)
 if not ztd_dep.found() # using subproject
-  ztd_proj = subproject('ztd', required : true)
-  ztd_dep = ztd_proj.get_variable('ztd_dep')
+    ztd_proj = subproject('ztd', required: true)
+    ztd_dep = ztd_proj.get_variable('ztd_dep')
 endif
 
 # magic_enum use system or subproject
-magic_enum_dep = dependency('magic_enum', required : false)
+magic_enum_dep = dependency('magic_enum', required: false)
 if not magic_enum_dep.found() # using subproject
-  magic_enum_proj = subproject('magic_enum', required : true)
-  magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
+    magic_enum_proj = subproject('magic_enum', required: true)
+    magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
 endif
 
 # toml11 use system or subproject
-toml11_dep = dependency('toml11', required : false)
+toml11_dep = dependency('toml11', required: false)
 if not toml11_dep.found() # using subproject
-  cmake = import('cmake')
-  toml11_proj = cmake.subproject('toml11', required : true)
-  toml11_dep = toml11_proj.dependency('toml11')
+    cmake = import('cmake')
+    toml11_proj = cmake.subproject('toml11', required: true)
+    toml11_dep = toml11_proj.dependency('toml11')
 endif
 
 # CLI11 use system or subproject
-cli11_dep = dependency('CLI11', required : false)
+cli11_dep = dependency('CLI11', required: false)
 if not cli11_dep.found() # using subproject
-  cli11_dep_proj = subproject('cli11', required : true)
-  cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
+    cli11_dep_proj = subproject('cli11', required: true)
+    cli11_dep = cli11_dep_proj.get_variable('CLI11_dep')
 endif
 
-libudev_dep = dependency('libudev', required : true)
-libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
-openssl_dep = dependency('openssl', required : true)
+# concurrencpp use system or subproject
+concurrencpp_dep = dependency('concurrencpp', required: false)
+if not concurrencpp_dep.found() # using subproject
+    cmake = import('cmake')
+    concurrencpp_proj = cmake.subproject('concurrencpp', required: true)
+    concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
+endif
 
-exo_dep = dependency('exo-2', required : true)
-# x11_dep = dependency('x11', required : true)
-spdlog_dep = dependency('spdlog', required : true)
-sigc_dep = dependency('sigc++-3.0', required : true)
-pugixml_dep = dependency('pugixml', required : true)
-nlohmann_json_dep = dependency('nlohmann_json', required : true)
+libudev_dep = dependency('libudev', required: true)
+libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required: true)
+openssl_dep = dependency('openssl', required: true)
+
+exo_dep = dependency('exo-2', required: true)
+spdlog_dep = dependency('spdlog', required: true)
+sigc_dep = dependency('sigc++-3.0', required: true)
+pugixml_dep = dependency('pugixml', required: true)
+nlohmann_json_dep = dependency('nlohmann_json', required: true)
 
 # zmqpp does not provide a pkgconfig file
-libzmq_dep = dependency('libzmq', required : true)
+libzmq_dep = dependency('libzmq', required: true)
 libzmqpp_dep = cc.find_library('zmqpp', has_headers: ['zmqpp/zmqpp.hpp'], required: true)
 
 # Gtk3 CPP
-gtkmm_dep = dependency('gtkmm-3.0', required : true)
-glibmm_dep = dependency('glibmm-2.4', required : true)
-giomm_dep = dependency('giomm-2.4', required : true)
+gtkmm_dep = dependency('gtkmm-3.0', required: true)
+glibmm_dep = dependency('glibmm-2.4', required: true)
+giomm_dep = dependency('giomm-2.4', required: true)
 
 # Gtk4 CPP
-# gtkmm_dep = dependency('gtkmm-4.0', required : true)
-# glibmm_dep = dependency('glibmm-2.68', required : true)
-# giomm_dep = dependency('giomm-2.68', required : true)
+# gtkmm_dep = dependency('gtkmm-4.0', required: true)
+# glibmm_dep = dependency('glibmm-2.68', required: true)
+# giomm_dep = dependency('giomm-2.68', required: true)
 
-gtest_dep = dependency('gtest')
+gtest_dep = dependency('gtest', required: true)
 
 dependencies = [
     gtest_dep,
@@ -231,6 +237,7 @@ dependencies = [
     pugixml_dep,
     nlohmann_json_dep,
     cli11_dep,
+    concurrencpp_dep,
 
     libzmq_dep,
     libzmqpp_dep,
@@ -248,26 +255,35 @@ sources = files()
 
 # Spacefm Source Files
 sources += files(
-  'spacefm/types.cxx',
+    # SFM
+    'spacefm/concurrency.cxx',
+    'spacefm/types.cxx',
 
-  'spacefm/settings/settings.cxx',
+    # Settings
+    'spacefm/settings/settings.cxx',
 
-  'spacefm/ptk/natsort/strnatcmp.cxx',
-  'spacefm/vfs/utils/vfs-utils.cxx',
+    # PTK
+    'spacefm/ptk/natsort/strnatcmp.cxx',
+
+    # VFS
+    # 'spacefm/vfs/vfs-task.cxx',
+    # 'spacefm/vfs/utils/validate-filename.cxx',
+    'spacefm/vfs/utils/vfs-utils.cxx',
 )
 
 # Test Source Files
 sources += files(
-  'src/main.cxx',
+    'src/main.cxx',
 
-  # SFM
-  'src/base/test-types.cxx',
+    # SFM
+    'src/base/test-types.cxx',
 
-  # PTK
-  'src/ptk/natsort/test-natsort.cxx',
+    # PTK
+    'src/ptk/natsort/test-natsort.cxx',
 
-  # VFS
-  'src/vfs/utils/test-vfs-utils.cxx',
+    # VFS
+    # 'src/vfs/utils/test-validate-filename.cxx',
+    'src/vfs/utils/test-vfs-utils.cxx',
 )
 
 ## Build
@@ -275,12 +291,12 @@ target_name = 'test_suite'
 target_type = 'executable'
 
 test_suite = build_target(
-  target_name,
-  sources: sources,
-  target_type: target_type,
-  include_directories: incdir,
-  install : false,
-  dependencies: dependencies,
+    target_name,
+    sources: sources,
+    target_type: target_type,
+    include_directories: incdir,
+    install: false,
+    dependencies: dependencies,
 )
 
 test('SpaceFM Test Suite', test_suite)
