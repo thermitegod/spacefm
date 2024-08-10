@@ -198,13 +198,6 @@ if not magic_enum_dep.found() # using subproject
   magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
 endif
 
-# CLI11 use system or subproject
-cli11_dep = dependency('CLI11', required : false)
-if not cli11_dep.found() # using subproject
-  cli11_dep_proj = subproject('cli11', required : true)
-  cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
-endif
-
 # concurrencpp use system or subproject
 concurrencpp_dep = dependency('concurrencpp', required : false)
 if not concurrencpp_dep.found() # using subproject
@@ -241,7 +234,6 @@ dependencies = [
   spdlog_dep,
   sigc_dep,
   pugixml_dep,
-  cli11_dep,
   concurrencpp_dep,
 
   libudev_dep,
@@ -298,6 +290,16 @@ if get_option('exo')
   exo_dep = dependency('exo-2', required : true)
   dependencies += exo_dep
   features += '-DUSE_EXO'
+endif
+
+if get_option('with-system-cli11')
+  cli11_dep = dependency('CLI11', required : true)
+  dependencies += cli11_dep
+else
+  # using subproject
+  cli11_dep_proj = subproject('CLI11', required : true)
+  cli11_dep = cli11_dep_proj.get_variable('CLI11_dep')
+  dependencies += cli11_dep
 endif
 
 if get_option('with-system-toml11')
