@@ -65,6 +65,12 @@
 #include <giomm.h>
 #include <glibmm.h>
 
+// MAGIC_ENUM
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstring-conversion"
+#include <magic_enum.hpp>
+#pragma GCC diagnostic pop
+
 // ZTD
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>

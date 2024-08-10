@@ -191,13 +191,6 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
 ## system dependencies
 
-# magic_enum use system or subproject
-magic_enum_dep = dependency('magic_enum', required : false)
-if not magic_enum_dep.found() # using subproject
-  magic_enum_proj = subproject('magic_enum', required : true)
-  magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
-endif
-
 # concurrencpp use system or subproject
 concurrencpp_dep = dependency('concurrencpp', required : false)
 if not concurrencpp_dep.found() # using subproject
@@ -228,8 +221,6 @@ dependencies = [
   gtkmm_dep,
   glibmm_dep,
   giomm_dep,
-
-  magic_enum_dep,
 
   spdlog_dep,
   sigc_dep,
@@ -300,6 +291,17 @@ else
   cli11_dep_proj = subproject('CLI11', required : true)
   cli11_dep = cli11_dep_proj.get_variable('CLI11_dep')
   dependencies += cli11_dep
+endif
+
+if get_option('with-system-magic-enum')
+  magic_enum_dep = dependency('magic_enum', required : true)
+  dependencies += magic_enum_dep
+else
+  # using subproject
+  # TODO this is still building tests
+  magic_enum_proj = subproject('magic_enum', required : true, default_options: ['test=false'])
+  magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
+  dependencies += magic_enum_dep
 endif
 
 if get_option('with-system-toml11')

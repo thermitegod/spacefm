@@ -23,6 +23,11 @@ option('with-system-cli11',
        value: false,
        description : 'Use system cli11 instead of bundled version')
 
+option('with-system-magic-enum',
+       type : 'boolean',
+       value: false,
+       description : 'Use system magic_enum instead of bundled version')
+
 option('with-system-toml11',
        type : 'boolean',
        value: false,
