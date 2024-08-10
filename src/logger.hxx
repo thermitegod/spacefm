@@ -19,6 +19,8 @@
 
 #include <memory>
 
+#include <unordered_map>
+
 #include <magic_enum.hpp>
 
 #include <spdlog/spdlog.h>
@@ -27,15 +29,15 @@
 
 namespace logger
 {
-void initialize(const spdlog::level::level_enum level,
-                const std::filesystem::path& logfile = "") noexcept;
-
 enum class domain
 {
     basic,
     ptk,
     vfs,
 };
+
+void initialize(const std::unordered_map<std::string, std::string>& options,
+                const std::filesystem::path& logfile = "") noexcept;
 
 template<domain d = domain::basic, typename... Args>
 void

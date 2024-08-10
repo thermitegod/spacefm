@@ -15,9 +15,13 @@
 
 #include <filesystem>
 
+#include <algorithm>
+
 #include <print>
 
 #include <CLI/CLI.hpp>
+
+#include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 
@@ -64,34 +68,7 @@ run_commandline(const commandline_opt_data_t& opt) noexcept
         std::exit(EXIT_SUCCESS);
     }
 
-    if (opt->loglevel == "trace")
-    {
-        logger::initialize(spdlog::level::trace, opt->logfile);
-    }
-    else if (opt->loglevel == "debug")
-    {
-        logger::initialize(spdlog::level::debug, opt->logfile);
-    }
-    else if (opt->loglevel == "info")
-    {
-        logger::initialize(spdlog::level::info, opt->logfile);
-    }
-    else if (opt->loglevel == "warning")
-    {
-        logger::initialize(spdlog::level::warn, opt->logfile);
-    }
-    else if (opt->loglevel == "error")
-    {
-        logger::initialize(spdlog::level::err, opt->logfile);
-    }
-    else if (opt->loglevel == "critical")
-    {
-        logger::initialize(spdlog::level::critical, opt->logfile);
-    }
-    else
-    {
-        logger::initialize(spdlog::level::off);
-    }
+    logger::initialize(opt->log_levels, opt->logfile);
 }
 
 void
@@ -135,11 +112,35 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
                  opt->git_backed_settings,
                  "Do not use git to keep session history");
 
-    static constexpr std::array<std::string_view, 8> loglevels =
-        {"trace", "debug", "info", "warning", "error", "critical", "off"};
-    app.add_option("--loglevel", opt->loglevel, "Set the loglevel")
-        ->expected(1)
-        ->check(CLI::IsMember(loglevels));
+    app.add_option("--loglevel", opt->raw_log_levels, "Set the loglevel. Format: domain=level")
+        ->check(
+            [&opt](const auto& value)
+            {
+                constexpr auto log_levels = magic_enum::enum_names<spdlog::level::level_enum>();
+                constexpr auto valid_domains = magic_enum::enum_names<logger::domain>();
+
+                const auto pos = value.find('=');
+                if (pos == std::string::npos)
+                {
+                    return std::string("Must be in format domain=level");
+                }
+
+                const auto domain = value.substr(0, pos);
+                if (!std::ranges::contains(valid_domains, domain))
+                {
+                    return std::format("Invalid domain: {}", domain);
+                }
+
+                const auto level = value.substr(pos + 1);
+                if (!std::ranges::contains(log_levels, level))
+                {
+                    return std::format("Invalid log level: {}", level);
+                }
+
+                opt->log_levels.insert({domain, level});
+
+                return std::string();
+            });
 
     const auto is_logfile_path_valid = CLI::Validator(
         [](const std::filesystem::path& input)

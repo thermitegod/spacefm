@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <unordered_map>
+
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
@@ -41,7 +43,8 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
     std::filesystem::path config_dir;
     bool git_backed_settings{true};
 
-    std::string loglevel{"trace"};
+    std::vector<std::string> raw_log_levels;
+    std::unordered_map<std::string, std::string> log_levels;
     // std::filesystem::path logfile{"/tmp/test.log"};
     std::filesystem::path logfile;
 
