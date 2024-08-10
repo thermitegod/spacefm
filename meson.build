@@ -189,7 +189,7 @@ endif
 add_global_arguments(flags, language: ['c', 'cpp'])
 add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
-## dependencies
+## system dependencies
 
 # ztd use system or subproject
 ztd_dep = dependency('ztd', version : '>=0.2.0', required : false)
@@ -203,18 +203,6 @@ magic_enum_dep = dependency('magic_enum', required : false)
 if not magic_enum_dep.found() # using subproject
   magic_enum_proj = subproject('magic_enum', required : true)
   magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
-endif
-
-# toml11 use system or subproject
-toml11_dep = dependency('toml11', required : false)
-if not toml11_dep.found() # using subproject
-  cmake = import('cmake')
-  # Hard requires having a cpp standard set
-  cmake_opt_var = cmake.subproject_options()
-  # cmake_opt_var.set_override_option('CMAKE_CXX_STANDARD', '23')
-  cmake_opt_var.add_cmake_defines({'CMAKE_CXX_STANDARD': '23'})
-  toml11_proj = cmake.subproject('toml11', required : true, options: cmake_opt_var)
-  toml11_dep = toml11_proj.dependency('toml11')
 endif
 
 # CLI11 use system or subproject
@@ -256,7 +244,6 @@ dependencies = [
   giomm_dep,
 
   magic_enum_dep,
-  toml11_dep,
 
   spdlog_dep,
   sigc_dep,
@@ -322,6 +309,20 @@ if get_option('exo')
   exo_dep = dependency('exo-2', required : true)
   dependencies += exo_dep
   features += '-DUSE_EXO'
+endif
+
+if get_option('with-system-toml11')
+  toml11_dep = dependency('toml11', required : true)
+  dependencies += toml11_dep
+else
+  # using subproject
+  cmake = import('cmake')
+  # Hard requires having a cpp standard set
+  cmake_opt_var = cmake.subproject_options()
+  cmake_opt_var.add_cmake_defines({'CMAKE_CXX_STANDARD': '23'})
+  toml11_proj = cmake.subproject('toml11', required : true, options: cmake_opt_var)
+  toml11_dep = toml11_proj.dependency('toml11')
+  dependencies += toml11_dep
 endif
 
 if get_option('socket')
