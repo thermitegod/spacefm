@@ -1,3 +1,6 @@
 [submodule "subprojects/toml11"]
 	path = subprojects/toml11
 	url = https://github.com/ToruNiina/toml11
+[submodule "subprojects/ztd"]
+	path = subprojects/ztd
+	url = https://github.com/thermitegod/ztd.git
