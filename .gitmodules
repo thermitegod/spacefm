@@ -10,3 +10,6 @@
 [submodule "subprojects/magic_enum"]
 	path = subprojects/magic_enum
 	url = https://github.com/Neargye/magic_enum
+[submodule "subprojects/concurrencpp"]
+	path = subprojects/concurrencpp
+	url = https://github.com/David-Haim/concurrencpp

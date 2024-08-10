@@ -191,14 +191,6 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
 ## system dependencies
 
-# concurrencpp use system or subproject
-concurrencpp_dep = dependency('concurrencpp', required : false)
-if not concurrencpp_dep.found() # using subproject
-  cmake = import('cmake')
-  concurrencpp_proj = cmake.subproject('concurrencpp', required : true)
-  concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
-endif
-
 libudev_dep = dependency('libudev', required : true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
 openssl_dep = dependency('openssl', required : true)
@@ -225,7 +217,6 @@ dependencies = [
   spdlog_dep,
   sigc_dep,
   pugixml_dep,
-  concurrencpp_dep,
 
   libudev_dep,
   libffmpegthumbnailer_dep,
@@ -291,6 +282,18 @@ else
   cli11_dep_proj = subproject('CLI11', required : true)
   cli11_dep = cli11_dep_proj.get_variable('CLI11_dep')
   dependencies += cli11_dep
+endif
+
+if get_option('with-system-concurrencpp')
+  concurrencpp_dep = dependency('concurrencpp', required : true)
+  dependencies += concurrencpp_dep
+else
+  # using subproject
+  cmake = import('cmake')
+  concurrencpp_proj = cmake.subproject('concurrencpp', required : true)
+  concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
+  # incdir += include_directories('third_party/concurrencpp/include')
+  dependencies += concurrencpp_dep
 endif
 
 if get_option('with-system-magic-enum')
