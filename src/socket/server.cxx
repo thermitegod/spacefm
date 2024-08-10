@@ -25,7 +25,8 @@
 #include <zmqpp/zmqpp.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "socket/commands.hxx"
 #include "socket/server.hxx"
@@ -48,7 +49,7 @@ socket::server_thread() noexcept
         std::string command;
         request >> command;
 
-        ztd::logger::info("SOCKET({})", command);
+        logger::info("SOCKET({})", command);
         const auto [ret, response] = socket::command(command);
 
         nlohmann::json json;

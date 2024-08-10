@@ -37,7 +37,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -452,7 +453,7 @@ idle_set_task_height(MainWindow* main_window) noexcept
     {
         taskh = 90;
     }
-    // ztd::logger::info("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
+    // logger::info<logger::domain::ptk>("SHOW  win {}x{}    task height {}   slider {}", allocation.width,
     // allocation.height, taskh, allocation.height - taskh);
     gtk_paned_set_position(main_window->task_vpane, allocation.height - taskh);
     return false;
@@ -488,7 +489,7 @@ show_task_manager(MainWindow* main_window, bool show) noexcept
                 xset_set(xset::name::task_show_manager,
                          xset::var::x,
                          std::format("{}", allocation.height - pos));
-                // ztd::logger::info("HIDE  win {}x{}    task height {}   slider {}",
+                // logger::info<logger::domain::ptk>("HIDE  win {}x{}    task height {}   slider {}",
                 // allocation.width, allocation.height, allocation.height - pos, pos);
             }
         }
@@ -795,7 +796,7 @@ on_task_button_press_event(GtkWidget* view, GdkEvent* event, MainWindow* main_wi
         { // left or middle click
             // get selected task
             model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
-            // ztd::logger::info("x = {}  y = {}", event->x, event->y);
+            // logger::info<logger::domain::ptk>("x = {}  y = {}", event->x, event->y);
             // due to bug in gtk_tree_view_get_path_at_pos (gtk 2.24), a click
             // on the column header resize divider registers as a click on the
             // first row first column.  So if event->x < 7 ignore
@@ -1005,7 +1006,7 @@ on_task_row_activated(GtkWidget* view, GtkTreePath* tree_path, GtkTreeViewColumn
 void
 ptk::view::file_task::remove_task(ptk::file_task* ptask) noexcept
 {
-    // ztd::logger::info("ptk::view::file_task::remove_task  ptask={}", ptask);
+    // logger::info<logger::domain::ptk>("ptk::view::file_task::remove_task  ptask={}", ptask);
 
     GtkWidget* view = ptask->task_view_;
     if (!view)
@@ -1043,7 +1044,7 @@ ptk::view::file_task::remove_task(ptk::file_task* ptask) noexcept
         }
     }
 
-    // ztd::logger::info("ptk::view::file_task::remove_task DONE ptask={}", ptask);
+    // logger::info<logger::domain::ptk>("ptk::view::file_task::remove_task DONE ptask={}", ptask);
 }
 
 void
@@ -1054,7 +1055,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
     GtkTreeModel* model = nullptr;
     GtkTreeIter it;
 
-    // ztd::logger::info("ptk::view::file_task::update_task  ptask={}", ptask);
+    // logger::info<logger::domain::ptk>("ptk::view::file_task::update_task  ptask={}", ptask);
     static constexpr ztd::map<vfs::file_task::type, const std::string_view, 7> job_titles{{{
         {vfs::file_task::type::move, "moving"},
         {vfs::file_task::type::copy, "copying"},
@@ -1362,7 +1363,7 @@ ptk::view::file_task::update_task(ptk::file_task* ptask) noexcept
                            ptask->display_average_estimate().data(),
                            -1);
     }
-    // ztd::logger::info("DONE ptk::view::file_task::update_task");
+    // logger::info<logger::domain::ptk>("DONE ptk::view::file_task::update_task");
 }
 
 GtkWidget*

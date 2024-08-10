@@ -25,7 +25,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/utils/vfs-utils.hxx"
@@ -116,14 +117,14 @@ ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& cont
     const auto fd = open(path.c_str(), O_RDONLY, 0);
     if (fd == -1)
     {
-        ztd::logger::error("failed to open {}", path.string());
+        logger::error<logger::domain::vfs>("failed to open {}", path.string());
         return false;
     }
     std::vector<char> buffer(max_size);
     const auto length = read(fd, buffer.data(), max_size);
     if (length == -1)
     {
-        ztd::logger::error("failed to read {}", path.string());
+        logger::error<logger::domain::vfs>("failed to read {}", path.string());
         close(fd);
         return false;
     }
@@ -213,20 +214,21 @@ ReadInt(const std::string& buf, uint32_t offset, const std::string& field_name, 
 {
     if (offset > buf.size() - 4 || (offset & 0x3))
     {
-        ztd::logger::error("Invalid offset={} for {}, string size={}",
-                           offset,
-                           field_name,
-                           buf.size());
+        logger::error<logger::domain::vfs>("Invalid offset={} for {}, string size={}",
+                                           offset,
+                                           field_name,
+                                           buf.size());
         return false;
     }
     *result = ntohl(*reinterpret_cast<const uint32_t*>(buf.c_str() + offset));
     if (*result < min_result || *result > max_result)
     {
-        ztd::logger::error("Invalid {} = {} not between min_result={} and max_result={}",
-                           field_name,
-                           *result,
-                           min_result,
-                           max_result);
+        logger::error<logger::domain::vfs>(
+            "Invalid {} = {} not between min_result={} and max_result={}",
+            field_name,
+            *result,
+            min_result,
+            max_result);
         return false;
     }
     return true;
@@ -262,13 +264,14 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
     std::string buf;
     if (!ReadFileToStringWithMaxSize(file_path, buf, kMaxMimeTypesFileSize))
     {
-        ztd::logger::error("Failed reading in mime.cache file: {}", file_path.string());
+        logger::error<logger::domain::vfs>("Failed reading in mime.cache file: {}",
+                                           file_path.string());
         return false;
     }
 
     if (buf.size() < kHeaderSize)
     {
-        ztd::logger::error("Invalid mime.cache file size={}", buf.size());
+        logger::error<logger::domain::vfs>("Invalid mime.cache file size={}", buf.size());
         return false;
     }
 
@@ -282,7 +285,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
     }
     if (buf[alias_list_offset - 1] != 0)
     {
-        ztd::logger::error(
+        logger::error<logger::domain::vfs>(
             "Invalid mime.cache file does not contain null prior to ALIAS_LIST_OFFSET={}",
             alias_list_offset);
         return false;
@@ -392,14 +395,14 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
             // Check limits.
             if (++num_nodes > kMaxNodes)
             {
-                ztd::logger::error("Exceeded maxium number of nodes={}", kMaxNodes);
+                logger::error<logger::domain::vfs>("Exceeded maxium number of nodes={}", kMaxNodes);
                 return false;
             }
             if (node.ext.size() > kMaxExtSize)
             {
-                ztd::logger::warn("Ignoring large extension exceeds size={} ext={}",
-                                  kMaxExtSize,
-                                  node.ext);
+                logger::warn<logger::domain::vfs>("Ignoring large extension exceeds size={} ext={}",
+                                                  kMaxExtSize,
+                                                  node.ext);
                 continue;
             }
 

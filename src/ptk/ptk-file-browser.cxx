@@ -55,7 +55,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -194,7 +195,7 @@ ptk::browser::navigation_history_data::go_back() noexcept
 {
     if (this->back_.empty())
     {
-        // ztd::logger::debug("Back navigation history is empty");
+        // logger::debug<logger::domain::ptk>("Back navigation history is empty");
         return;
     }
     this->forward_.push_back(this->current_);
@@ -219,7 +220,7 @@ ptk::browser::navigation_history_data::go_forward() noexcept
 {
     if (this->forward_.empty())
     {
-        // ztd::logger::debug("Forward navigation history is empty");
+        // logger::debug<logger::domain::ptk>("Forward navigation history is empty");
         return;
     }
     this->back_.push_back(this->current_);
@@ -242,7 +243,7 @@ ptk::browser::navigation_history_data::get_forward() const noexcept
 void
 ptk::browser::navigation_history_data::new_forward(const std::filesystem::path& path) noexcept
 {
-    // ztd::logger::debug("New Forward navigation history");
+    // logger::debug<logger::domain::ptk>("New Forward navigation history");
     if (!this->current_.empty())
     {
         this->back_.push_back(this->current_);
@@ -565,12 +566,12 @@ on_address_bar_activate(GtkWidget* entry, ptk::browser* browser) noexcept
     }
     else if (std::filesystem::is_block_file(dir_path))
     { // open block device
-        // ztd::logger::info("opening block device: {}", dir_path);
+        // logger::info<logger::domain::ptk>("opening block device: {}", dir_path);
         ptk::view::location::open_block(dir_path, false);
     }
     else
     { // do nothing for other special files
-        // ztd::logger::info("special file ignored: {}", dir_path);
+        // logger::info<logger::domain::ptk>("special file ignored: {}", dir_path);
         // return;
     }
 
@@ -582,7 +583,7 @@ static bool
 on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set) noexcept
 {
     const auto button = gdk_button_event_get_button(event);
-    // ztd::logger::info("on_tool_icon_button_press  {}   button = {}", set->menu.label.value_or(""), button);
+    // logger::info<logger::domain::ptk>("on_tool_icon_button_press  {}   button = {}", set->menu.label.value_or(""), button);
 
     const auto type = gdk_event_get_event_type(event);
     if (type != GdkEventType::GDK_BUTTON_PRESS)
@@ -598,7 +599,7 @@ on_tool_icon_button_press(GtkWidget* widget, GdkEvent* event, const xset_t& set)
 
     if (button == GDK_BUTTON_PRIMARY && keymod == 0)
     { // left click and no modifier
-        // ztd::logger::debug("set={}  menu={}", set->name(), magic_enum::enum_name(set->menu.type));
+        // logger::debug<logger::domain::ptk>("set={}  menu={}", set->name(), magic_enum::enum_name(set->menu.type));
         set->browser->on_action(set->xset_name);
         return true;
     }
@@ -628,7 +629,7 @@ add_toolbar_item(ptk::browser* browser, GtkBox* toolbar, const xset::name item) 
     }
     else
     {
-        ztd::logger::warn("set missing icon {}", set->name());
+        logger::warn<logger::domain::ptk>("set missing icon {}", set->name());
         // image = xset_get_image("gtk-execute", (GtkIconSize)icon_size);
         image = gtk_image_new_from_icon_name("gtk-execute", (GtkIconSize)icon_size);
     }
@@ -653,7 +654,7 @@ add_toolbar_item(ptk::browser* browser, GtkBox* toolbar, const xset::name item) 
 void
 ptk::browser::rebuild_toolbox() noexcept
 {
-    // ztd::logger::info("rebuild_toolbox");
+    // logger::info<logger::domain::ptk>("rebuild_toolbox");
 
     this->path_bar_ = ptk::path_bar_new(this);
     // clang-format off
@@ -899,7 +900,7 @@ static void
 ptk_browser_finalize(GObject* obj) noexcept
 {
     ptk::browser* browser = PTK_FILE_BROWSER_REINTERPRET(obj);
-    // ztd::logger::info("ptk_browser_finalize");
+    // logger::info<logger::domain::ptk>("ptk_browser_finalize");
 
     browser->dir_ = nullptr;
 
@@ -1985,7 +1986,7 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
             else
             {
                 gtk_tree_view_column_set_fixed_width(col, width);
-                // ztd::logger::info("init set_width {} {}", magic_enum::enum_name(global::columns.at(index).xset_name), width);
+                // logger::info<logger::domain::ptk>("init set_width {} {}", magic_enum::enum_name(global::columns.at(index).xset_name), width);
             }
         }
 
@@ -2147,12 +2148,12 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
         // and because exo_icon_view has no get_drag_dest_row
         const char* dest_dir =
             folder_view_get_drop_dir(browser, browser->drag_x_, browser->drag_y_);
-        // ztd::logger::info("FB DnD dest_dir = {}", dest_dir );
+        // logger::info<logger::domain::ptk>("FB DnD dest_dir = {}", dest_dir );
         if (dest_dir)
         {
             if (browser->pending_drag_status_)
             {
-                // ztd::logger::debug("DnD DEFAULT");
+                // logger::debug<logger::domain::ptk>("DnD DEFAULT");
 
                 // We only want to update drag status, not really want to drop
                 gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_DEFAULT, time);
@@ -2212,13 +2213,13 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
                 if (browser->drag_source_dev_ != dest_dev ||
                     browser->drag_source_inode_ == dest_inode)
                 { // src and dest are on different devices or same dir
-                    // ztd::logger::debug("DnD COPY");
+                    // logger::debug<logger::domain::ptk>("DnD COPY");
                     gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                     file_action = vfs::file_task::type::copy;
                 }
                 else
                 {
-                    // ztd::logger::debug("DnD MOVE");
+                    // logger::debug<logger::domain::ptk>("DnD MOVE");
                     gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
                     file_action = vfs::file_task::type::move;
                 }
@@ -2243,7 +2244,7 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
 
                 if (!file_list.empty())
                 {
-                    // ztd::logger::info("DnD dest_dir = {}", dest_dir);
+                    // logger::info<logger::domain::ptk>("DnD dest_dir = {}", dest_dir);
 
 #if (GTK_MAJOR_VERSION == 4)
                     GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
@@ -2727,7 +2728,7 @@ bool
 ptk::browser::chdir(const std::filesystem::path& new_path,
                     const ptk::browser::chdir_mode mode) noexcept
 {
-    // ztd::logger::debug("ptk::browser::chdir");
+    // logger::debug<logger::domain::ptk>("ptk::browser::chdir");
 
     // this->button_press_ = false;
     this->is_drag_ = false;
@@ -2743,7 +2744,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
 
     if (!std::filesystem::exists(new_path))
     {
-        // ztd::logger::error("Failed to chdir into nonexistent path '{}'", new_path.string());
+        // logger::error<logger::domain::ptk>("Failed to chdir into nonexistent path '{}'", new_path.string());
         return false;
     }
     const auto path = std::filesystem::absolute(new_path);
@@ -3108,7 +3109,7 @@ ptk::browser::go_home() noexcept
 void
 ptk::browser::go_tab(tab_t tab) noexcept
 {
-    // ztd::logger::info("ptk::wrapper::browser::go_tab fb={}", ztd::logger::utils::ptr(this));
+    // logger::info<logger::domain::ptk>("ptk::wrapper::browser::go_tab fb={}", logger::utils::ptr(this));
 
     switch (tab)
     {
@@ -3307,7 +3308,7 @@ void
 ptk::browser::close_tab() noexcept
 {
     global::closed_tabs_restore[this->panel_].push_back(this->cwd());
-    // ztd::logger::info("close_tab() fb={}, path={}", ztd::logger::utils::ptr(this), closed_tabs_restore[this->panel_].back());
+    // logger::info<logger::domain::ptk>("close_tab() fb={}, path={}", logger::utils::ptr(this), closed_tabs_restore[this->panel_].back());
 
     GtkNotebook* notebook =
         GTK_NOTEBOOK(gtk_widget_get_ancestor(GTK_WIDGET(this), GTK_TYPE_NOTEBOOK));
@@ -3369,13 +3370,13 @@ ptk::browser::restore_tab() noexcept
 {
     if (global::closed_tabs_restore[this->panel_].empty())
     {
-        ztd::logger::info("No tabs to restore for panel {}", this->panel_);
+        logger::info<logger::domain::ptk>("No tabs to restore for panel {}", this->panel_);
         return;
     }
 
     const auto file_path = global::closed_tabs_restore[this->panel_].back();
     global::closed_tabs_restore[this->panel_].pop_back();
-    // ztd::logger::info("restore_tab() fb={}, panel={} path={}", ztd::logger::utils::ptr(this), this->panel_, file_path);
+    // logger::info<logger::domain::ptk>("restore_tab() fb={}, panel={} path={}", logger::utils::ptr(this), this->panel_, file_path);
 
     MainWindow* main_window = this->main_window_;
 
@@ -3983,7 +3984,7 @@ ptk::browser::unselect_all() const noexcept
 void
 ptk::browser::select_last() const noexcept
 {
-    // ztd::logger::debug("select_last");
+    // logger::debug<logger::domain::ptk>("select_last");
     const auto& cwd = this->cwd();
     if (this->selection_history->selection_history.contains(cwd))
     {
@@ -4449,7 +4450,7 @@ ptk::browser::show_thumbnails(const u32 max_file_size, const bool large_icons) n
 void
 ptk::browser::update_views() noexcept
 {
-    // ztd::logger::debug("ptk::browser::update_views fb={}  (panel {})", ztd::logger::utils::ptr(this), this->mypanel);
+    // logger::debug<logger::domain::ptk>("ptk::browser::update_views fb={}  (panel {})", logger::utils::ptr(this), this->mypanel);
 
     // hide/show browser widgets based on user settings
     const panel_t p = this->panel_;
@@ -4537,7 +4538,7 @@ ptk::browser::update_views() noexcept
     {
         pos = -1;
     }
-    // ztd::logger::info("    set slide_x = {}", pos);
+    // logger::info<logger::domain::ptk>("    set slide_x = {}", pos);
     if (pos > 0)
     {
         gtk_paned_set_position(this->hpane, pos);
@@ -4549,7 +4550,7 @@ ptk::browser::update_views() noexcept
     {
         pos = -1;
     }
-    // ztd::logger::info("    slide_y = {}", pos);
+    // logger::info<logger::domain::ptk>("    slide_y = {}", pos);
     gtk_paned_set_position(this->side_vpane_top, pos);
 
     // side_vpane_bottom
@@ -4558,7 +4559,7 @@ ptk::browser::update_views() noexcept
     {
         pos = -1;
     }
-    // ztd::logger::info( "    slide_s = {}", pos);
+    // logger::info<logger::domain::ptk>( "    slide_s = {}", pos);
     gtk_paned_set_position(this->side_vpane_bottom, pos);
 
     // Large Icons - option for Detailed and Compact list views
@@ -4583,7 +4584,7 @@ ptk::browser::update_views() noexcept
         // Set column widths for this panel context
         if (GTK_IS_TREE_VIEW(this->folder_view_))
         {
-            // ztd::logger::info("    set widths   mode = {}", mode);
+            // logger::info<logger::domain::ptk>("    set widths   mode = {}", mode);
             for (const auto i : std::views::iota(0uz, global::columns.size()))
             {
                 GtkTreeViewColumn* col = gtk_tree_view_get_column(GTK_TREE_VIEW(this->folder_view_),
@@ -4600,11 +4601,11 @@ ptk::browser::update_views() noexcept
                         // get column width for this panel context
                         const auto set = xset::set::get(column.xset_name, p, mode);
                         const i32 width = set->y ? std::stoi(set->y.value()) : 100;
-                        // ztd::logger::info("        {}\t{}", width, title );
+                        // logger::info<logger::domain::ptk>("        {}\t{}", width, title );
                         if (width)
                         {
                             gtk_tree_view_column_set_fixed_width(col, width);
-                            // ztd::logger::info("upd set_width {} {}", magic_enum::enum_name(global::columns.at(j).xset_name), width);
+                            // logger::info<logger::domain::ptk>("upd set_width {} {}", magic_enum::enum_name(global::columns.at(j).xset_name), width);
                         }
                         // set column visibility
                         gtk_tree_view_column_set_visible(col,
@@ -4634,7 +4635,7 @@ ptk::browser::update_views() noexcept
     // Show Hidden
     this->show_hidden_files(xset_get_b_panel(p, xset::panel::show_hidden));
 
-    // ztd::logger::info("ptk::browser::update_views fb={} DONE", ztd::logger::utils::ptr(this));
+    // logger::info<logger::domain::ptk>("ptk::browser::update_views fb={} DONE", logger::utils::ptr(this));
 }
 
 void
@@ -4713,7 +4714,7 @@ ptk::browser::save_column_widths() const noexcept
     {
         const panel_t p = this->panel_;
         const xset::main_window_panel mode = this->main_window_->panel_context.at(p);
-        // ztd::logger::debug("save_columns  fb={} (panel {})  mode = {}", ztd::logger::utils::ptr(this), p, mode);
+        // logger::debug<logger::domain::ptk>("save_columns  fb={} (panel {})  mode = {}", logger::utils::ptr(this), p, mode);
         for (const auto i : std::views::iota(0uz, global::columns.size()))
         {
             GtkTreeViewColumn* col = gtk_tree_view_get_column(view, static_cast<i32>(i));
@@ -4732,7 +4733,7 @@ ptk::browser::save_column_widths() const noexcept
                     if (width > 0)
                     {
                         set->y = std::format("{}", width);
-                        // ztd::logger::info("        {}\t{}", width, title);
+                        // logger::info<logger::domain::ptk>("        {}\t{}", width, title);
                     }
 
                     break;
@@ -4758,19 +4759,19 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
             set->x = std::format("{}", pos);
         }
         this->main_window_->panel_slide_x[p] = pos;
-        // ztd::logger::debug("    slide_x = {}", pos);
+        // logger::debug<logger::domain::ptk>("    slide_x = {}", pos);
     }
     else
     {
         i32 pos = 0;
-        // ztd::logger::debug("ptk::browser::slider_release fb={}  (panel {})  mode = {}", ztd::logger::utils::ptr(this), p, ztd::logger::utils::ptr(mode));
+        // logger::debug<logger::domain::ptk>("ptk::browser::slider_release fb={}  (panel {})  mode = {}", logger::utils::ptr(this), p, logger::utils::ptr(mode));
         pos = gtk_paned_get_position(this->side_vpane_top);
         if (!this->main_window_->fullscreen)
         {
             set->y = std::format("{}", pos);
         }
         this->main_window_->panel_slide_y[p] = pos;
-        // ztd::logger::debug("    slide_y = {}  ", pos);
+        // logger::debug<logger::domain::ptk>("    slide_y = {}  ", pos);
 
         pos = gtk_paned_get_position(this->side_vpane_bottom);
         if (!this->main_window_->fullscreen)
@@ -4778,7 +4779,7 @@ ptk::browser::slider_release(GtkPaned* pane) const noexcept
             set->s = std::format("{}", pos);
         }
         this->main_window_->panel_slide_s[p] = pos;
-        // ztd::logger::debug("    slide_s = {}", pos);
+        // logger::debug<logger::domain::ptk>("    slide_s = {}", pos);
     }
     return false;
 }
@@ -4798,7 +4799,7 @@ void
 ptk::browser::update_selection_history() const noexcept
 {
     const auto& cwd = this->cwd();
-    // ztd::logger::debug("selection history: {}", cwd.string());
+    // logger::debug<logger::domain::ptk>("selection history: {}", cwd.string());
     this->selection_history->selection_history.contains(cwd);
     {
         this->selection_history->selection_history.erase(cwd);
@@ -5297,7 +5298,7 @@ ptk::browser::update_statusbar() const noexcept
                 {
                     std::filesystem::path target_path;
 
-                    // ztd::logger::info("LINK: {}", file->path());
+                    // logger::info<logger::domain::ptk>("LINK: {}", file->path());
                     if (!target.is_absolute())
                     {
                         // relative link
@@ -5624,7 +5625,7 @@ void
 ptk::browser::on_action(const xset::name setname) noexcept
 {
     const auto set = xset::set::get(setname);
-    // ztd::logger::info("ptk::browser::on_action {}", set->name());
+    // logger::info<logger::domain::ptk>("ptk::browser::on_action {}", set->name());
 
     if (set->name().starts_with("book_"))
     {
@@ -5807,7 +5808,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
         const auto mode = this->main_window_->panel_context.at(this->panel_);
 
         const panel_t panel_num = std::stol(ztd::removeprefix(set->name(), "panel_"));
-        // ztd::logger::debug("ACTION panel={}", panel_num);
+        // logger::debug<logger::domain::ptk>("ACTION panel={}", panel_num);
 
         if (is_valid_panel(panel_num))
         {
@@ -5927,7 +5928,7 @@ ptk_browser_delay_focus(ptk::browser* browser) noexcept
 {
     if (GTK_IS_WIDGET(browser) && GTK_IS_WIDGET(browser->folder_view()))
     {
-        // ztd::logger::info("delayed_focus_browser fb={}", ztd::logger::utils::ptr(browser));
+        // logger::info<logger::domain::ptk>("delayed_focus_browser fb={}", logger::utils::ptr(browser));
         if (GTK_IS_WIDGET(browser) && GTK_IS_WIDGET(browser->folder_view()))
         {
             gtk_widget_grab_focus(browser->folder_view());

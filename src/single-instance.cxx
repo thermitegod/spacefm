@@ -22,7 +22,6 @@
 #include <csignal>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "utils/write.hxx"
 

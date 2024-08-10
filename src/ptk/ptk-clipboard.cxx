@@ -28,7 +28,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "utils/strdup.hxx"
 #include "utils/shell-quote.hxx"
@@ -40,6 +41,8 @@
 
 #if (GTK_MAJOR_VERSION == 4)
 
+#include "logger.hxx"
+
 // https://docs.gtk.org/gtk4/migrating-3to4.html#replace-gtkclipboard-with-gdkclipboard
 
 void
@@ -48,7 +51,7 @@ ptk::clipboard::cut_or_copy_files(const std::span<const std::shared_ptr<vfs::fil
 {
     (void)selected_files;
     (void)copy;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 void
@@ -56,14 +59,14 @@ ptk::clipboard::copy_as_text(
     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)selected_files;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 void
 ptk::clipboard::copy_name(const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
     (void)selected_files;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 void
@@ -76,7 +79,7 @@ ptk::clipboard::paste_files(GtkWindow* parent_win, const std::filesystem::path& 
     (void)task_view;
     (void)callback;
     (void)callback_win;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 void
@@ -89,7 +92,7 @@ ptk::clipboard::paste_links(GtkWindow* parent_win, const std::filesystem::path& 
     (void)task_view;
     (void)callback;
     (void)callback_win;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 void
@@ -102,7 +105,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
     (void)task_view;
     (void)callback;
     (void)callback_win;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 void
@@ -117,7 +120,7 @@ ptk::clipboard::cut_or_copy_file_list(const std::span<const std::string> selecte
 {
     (void)selected_files;
     (void)copy;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 }
 
 const std::vector<std::filesystem::path>
@@ -127,7 +130,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
     (void)cwd;
     (void)is_cut;
     (void)missing_targets;
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
     return {};
 }
 
@@ -204,7 +207,7 @@ clipboard_get_data(GtkClipboard* clipboard, GtkSelectionData* selection_data, u3
                            8,
                            (const unsigned char*)uri_list.data(),
                            static_cast<i32>(uri_list.size()));
-    // ztd::logger::debug("clipboard data: \n\n{}\n\n", uri_list);
+    // logger::debug<logger::domain::ptk>("clipboard data: \n\n{}\n\n", uri_list);
 }
 
 static void
@@ -212,7 +215,7 @@ clipboard_clean_data(GtkClipboard* clipboard, void* user_data) noexcept
 {
     (void)clipboard;
     (void)user_data;
-    // ztd::logger::debug("clean clipboard!");
+    // logger::debug<logger::domain::ptk>("clean clipboard!");
     clipboard_file_list.clear();
     clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 }

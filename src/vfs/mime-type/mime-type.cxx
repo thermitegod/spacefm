@@ -39,7 +39,8 @@
 #include <pugixml.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "utils/misc.hxx"
 
@@ -133,14 +134,14 @@ vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
 [[nodiscard]] static std::optional<std::array<std::string, 2>>
 parse_xml_file(const std::filesystem::path& path, bool is_local) noexcept
 {
-    // ztd::logger::info("MIME XML = {}", path);
+    // logger::info<logger::domain::vfs>("MIME XML = {}", path);
 
     pugi::xml_document doc;
     const pugi::xml_parse_result result = doc.load_file(path.c_str());
 
     if (!result)
     {
-        ztd::logger::error("XML parsing error: {}", result.description());
+        logger::error<logger::domain::vfs>("XML parsing error: {}", result.description());
         return std::nullopt;
     }
 
@@ -178,7 +179,7 @@ parse_xml_file(const std::filesystem::path& path, bool is_local) noexcept
         }
     }
 
-    // ztd::logger::info("MIME XML | icon_name = {} | comment = {}", icon_name, comment);
+    // logger::info<logger::domain::vfs>("MIME XML | icon_name = {} | comment = {}", icon_name, comment);
     return std::array{icon_name, comment};
 }
 

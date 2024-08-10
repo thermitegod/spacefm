@@ -31,7 +31,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -523,7 +524,7 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
         path = full_path.parent_path();
     }
 
-    // ztd::logger::info("path={}   full={}", path, full_path);
+    // logger::info<logger::domain::ptk>("path={}   full={}", path, full_path);
 
     // tests
     bool full_path_exists = false;
@@ -580,12 +581,12 @@ on_move_change(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
     }
 
     // clang-format off
-    // ztd::logger::info("TEST")
-    // ztd::logger::info( "  full_path_same {} {}", full_path_same, mset->full_path_same);
-    // ztd::logger::info( "  full_path_exists {} {}", full_path_exists, mset->full_path_exists);
-    // ztd::logger::info( "  full_path_exists_dir {} {}", full_path_exists_dir, mset->full_path_exists_dir);
-    // ztd::logger::info( "  path_missing {} {}", path_missing, mset->path_missing);
-    // ztd::logger::info( "  path_exists_file {} {}", path_exists_file, mset->path_exists_file);
+    // logger::info<logger::domain::ptk>("TEST")
+    // logger::info<logger::domain::ptk>( "  full_path_same {} {}", full_path_same, mset->full_path_same);
+    // logger::info<logger::domain::ptk>( "  full_path_exists {} {}", full_path_exists, mset->full_path_exists);
+    // logger::info<logger::domain::ptk>( "  full_path_exists_dir {} {}", full_path_exists_dir, mset->full_path_exists_dir);
+    // logger::info<logger::domain::ptk>( "  path_missing {} {}", path_missing, mset->path_missing);
+    // logger::info<logger::domain::ptk>( "  path_exists_file {} {}", path_exists_file, mset->path_exists_file);
     // clang-format on
 
     // update display
@@ -1455,7 +1456,7 @@ static void
 copy_entry_to_clipboard(GtkWidget* widget, const std::shared_ptr<MoveSet>& mset) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
 #elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
     GtkTextBuffer* buf = nullptr;

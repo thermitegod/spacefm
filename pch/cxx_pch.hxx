@@ -73,4 +73,3 @@
 
 // ZTD
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>

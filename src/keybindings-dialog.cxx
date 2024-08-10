@@ -19,7 +19,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -48,7 +49,7 @@ on_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* c
     {
         g_autofree char* name = nullptr;
         gtk_tree_model_get(model, &iter, 0, &name, -1);
-        // ztd::logger::debug("on_row_activated={}", name);
+        // logger::debug("on_row_activated={}", name);
         xset_set_key(nullptr, xset::set::get(name));
     }
 }

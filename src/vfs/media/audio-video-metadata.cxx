@@ -30,7 +30,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 extern "C"
 {
@@ -50,13 +51,14 @@ vfs::detail::audio_video_metadata(const std::filesystem::path& path) noexcept
 
     if (avformat_open_input(&format_context, path.c_str(), nullptr, nullptr) != 0)
     {
-        ztd::logger::error("FFMPEG Could not open input file: {}", path.string());
+        logger::error<logger::domain::vfs>("FFMPEG Could not open input file: {}", path.string());
         return data;
     }
 
     if (avformat_find_stream_info(format_context, nullptr) < 0)
     {
-        ztd::logger::error("FFMPEG Could not find stream information: {}", path.string());
+        logger::error<logger::domain::vfs>("FFMPEG Could not find stream information: {}",
+                                           path.string());
         avformat_close_input(&format_context);
         return data;
     }

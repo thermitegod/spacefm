@@ -23,7 +23,8 @@
 #include <filesystem>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "settings/settings.hxx"
 

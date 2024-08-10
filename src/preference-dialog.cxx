@@ -24,7 +24,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
 #include "compat/gtk4-porting.hxx"
@@ -1129,7 +1130,7 @@ changed_cb(GtkComboBox* combobox, void* user_data) noexcept
     const std::filesystem::path terminal = Glib::find_program_in_path(new_terminal);
     if (terminal.empty())
     {
-        ztd::logger::error("Failed to set new terminal: {}, not installed", new_terminal);
+        logger::error("Failed to set new terminal: {}, not installed", new_terminal);
         return;
     }
     xset_set(xset::name::main_terminal, xset::var::s, new_terminal);

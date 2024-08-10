@@ -25,7 +25,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "utils/shell-quote.hxx"
 
@@ -74,7 +75,7 @@ ptk::archiver::create(ptk::browser* browser,
     const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     const auto command = std::format("file-roller --add {}", shell_file_list);
-    ztd::logger::info("COMMAND({})", command);
+    logger::info<logger::domain::ptk>("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }
 
@@ -103,7 +104,7 @@ ptk::archiver::extract(ptk::browser* browser,
     }
     command.append(shell_file_list);
 
-    ztd::logger::info("COMMAND({})", command);
+    logger::info<logger::domain::ptk>("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }
 
@@ -121,6 +122,6 @@ ptk::archiver::open(ptk::browser* browser,
     const auto shell_file_list = archiver_create_shell_file_list(selected_files);
 
     const auto command = std::format("file-roller {}", shell_file_list);
-    ztd::logger::info("COMMAND({})", command);
+    logger::info<logger::domain::ptk>("COMMAND({})", command);
     Glib::spawn_command_line_async(command);
 }

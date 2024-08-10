@@ -22,7 +22,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/linux/procfs.hxx"
 
@@ -34,7 +35,7 @@ vfs::linux::procfs::mountinfo() noexcept
     std::ifstream file(MOUNTINFO);
     if (!file)
     {
-        ztd::logger::error("Failed to open the file: {}", MOUNTINFO);
+        logger::error<logger::domain::vfs>("Failed to open the file: {}", MOUNTINFO);
         return mounts;
     }
 
@@ -44,7 +45,9 @@ vfs::linux::procfs::mountinfo() noexcept
         const std::vector<std::string> fields = ztd::split(line, " ");
         if (fields.size() != 11)
         {
-            ztd::logger::error("Invalid mountinfo entry: size={}, line={}", fields.size(), line);
+            logger::error<logger::domain::vfs>("Invalid mountinfo entry: size={}, line={}",
+                                               fields.size(),
+                                               line);
             continue;
         }
 
@@ -64,19 +67,19 @@ vfs::linux::procfs::mountinfo() noexcept
         mount.mount_source = fields[9];
         mount.super_options = fields[10];
 
-        // ztd::logger::info("==========================================");
-        // ztd::logger::info("mount.mount_id        = {}", mount.mount_id);
-        // ztd::logger::info("mount.parent_id       = {}", mount.parent_id);
-        // ztd::logger::info("mount.major           = {}", mount.major);
-        // ztd::logger::info("mount.minor           = {}", mount.minor);
-        // ztd::logger::info("mount.root            = {}", mount.root);
-        // ztd::logger::info("mount.mount_point     = {}", mount.mount_point);
-        // ztd::logger::info("mount.mount_options   = {}", mount.mount_options);
-        // ztd::logger::info("mount.optional_fields = {}", mount.optional_fields);
-        // ztd::logger::info("mount.separator       = {}", mount.separator);
-        // ztd::logger::info("mount.filesystem_type = {}", mount.filesystem_type);
-        // ztd::logger::info("mount.mount_source    = {}", mount.mount_source);
-        // ztd::logger::info("mount.super_options   = {}", mount.super_options);
+        // logger::info<logger::domain::vfs>("==========================================");
+        // logger::info<logger::domain::vfs>("mount.mount_id        = {}", mount.mount_id);
+        // logger::info<logger::domain::vfs>("mount.parent_id       = {}", mount.parent_id);
+        // logger::info<logger::domain::vfs>("mount.major           = {}", mount.major);
+        // logger::info<logger::domain::vfs>("mount.minor           = {}", mount.minor);
+        // logger::info<logger::domain::vfs>("mount.root            = {}", mount.root);
+        // logger::info<logger::domain::vfs>("mount.mount_point     = {}", mount.mount_point);
+        // logger::info<logger::domain::vfs>("mount.mount_options   = {}", mount.mount_options);
+        // logger::info<logger::domain::vfs>("mount.optional_fields = {}", mount.optional_fields);
+        // logger::info<logger::domain::vfs>("mount.separator       = {}", mount.separator);
+        // logger::info<logger::domain::vfs>("mount.filesystem_type = {}", mount.filesystem_type);
+        // logger::info<logger::domain::vfs>("mount.mount_source    = {}", mount.mount_source);
+        // logger::info<logger::domain::vfs>("mount.super_options   = {}", mount.super_options);
 
         mounts.push_back(mount);
     }

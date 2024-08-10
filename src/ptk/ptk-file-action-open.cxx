@@ -34,7 +34,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-file.hxx"
 #include "xset/xset.hxx"
@@ -111,7 +112,7 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
 
     const auto desktop = vfs::desktop::create(app_desktop);
 
-    ztd::logger::info("EXEC({})={}", desktop->path().string(), desktop->exec());
+    logger::info<logger::domain::ptk>("EXEC({})={}", desktop->path().string(), desktop->exec());
 
     const bool opened = desktop->open_files(parent->cwd, open_files);
     if (!opened)
@@ -241,7 +242,7 @@ ptk::action::open_files_with_app(const std::filesystem::path& cwd,
             }
             catch (const std::filesystem::filesystem_error& e)
             {
-                ztd::logger::warn("{}", e.what());
+                logger::warn<logger::domain::ptk>("{}", e.what());
                 continue;
             }
         }

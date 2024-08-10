@@ -29,7 +29,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "settings/settings.hxx"
 
@@ -53,7 +54,7 @@ vfs::file::create(const std::filesystem::path& path) noexcept
 
 vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
 {
-    // ztd::logger::debug("vfs::file::file({})    {}", ztd::logger::utils::ptr(this), this->path_);
+    // logger::debug<logger::domain::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
 
     if (this->path_ == "/")
@@ -74,13 +75,13 @@ vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
     const auto result = this->update();
     if (!result)
     {
-        ztd::logger::error("Failed to create vfs::file for {}", path.string());
+        logger::error<logger::domain::vfs>("Failed to create vfs::file for {}", path.string());
     }
 }
 
 vfs::file::~file() noexcept
 {
-    // ztd::logger::debug("vfs::file::~file({})   {}", ztd::logger::utils::ptr(this), this->path_);
+    // logger::debug<logger::domain::vfs>("vfs::file::~file({})   {}", logger::utils::ptr(this), this->path_);
     if (this->big_thumbnail_)
     {
         g_object_unref(this->big_thumbnail_);
@@ -102,7 +103,7 @@ vfs::file::update() noexcept
         return false;
     }
 
-    // ztd::logger::debug("vfs::file::update({})    {}  size={}", ztd::logger::utils::ptr(this), this->name, this->file_stat.size());
+    // logger::debug<logger::domain::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
 
     // this->status = std::filesystem::status(file_path);
     this->status_ = std::filesystem::symlink_status(this->path_);
@@ -712,7 +713,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         }
 
         // fallback to mime_type icon
-        // ztd::logger::debug("mime={}", this->mime_type_->type());
+        // logger::debug<logger::domain::vfs>("mime={}", this->mime_type_->type());
         this->big_thumbnail_ = this->icon(thumbnail_size::big);
     }
     else
@@ -741,7 +742,7 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         }
 
         // fallback to mime_type icon
-        // ztd::logger::debug("mime={}", this->mime_type_->type());
+        // logger::debug<logger::domain::vfs>("mime={}", this->mime_type_->type());
         this->small_thumbnail_ = this->icon(vfs::file::thumbnail_size::small);
     }
 }

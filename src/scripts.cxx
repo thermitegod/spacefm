@@ -18,7 +18,8 @@
 #include <filesystem>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "scripts.hxx"
 
@@ -29,7 +30,7 @@ script_exists(spacefm::script script) noexcept
 
     if (!std::filesystem::exists(script_name))
     {
-        ztd::logger::error("Missing script: {}", script_name.string());
+        logger::error("Missing script: {}", script_name.string());
         return false;
     }
     return true;
@@ -40,7 +41,7 @@ script_exists(const std::filesystem::path& script) noexcept
 {
     if (!std::filesystem::exists(script))
     {
-        ztd::logger::error("Missing script {}", script.string());
+        logger::error("Missing script {}", script.string());
         return false;
     }
     return true;

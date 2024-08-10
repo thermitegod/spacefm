@@ -28,7 +28,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -182,7 +183,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
 
     if (selected_files.empty())
     {
-        ztd::logger::warn("Trying to delete an empty file list");
+        logger::warn<logger::domain::ptk>("Trying to delete an empty file list");
         return;
     }
 
@@ -219,7 +220,7 @@ ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
 
     if (selected_files.empty())
     {
-        ztd::logger::warn("Trying to trash an empty file list");
+        logger::warn<logger::domain::ptk>("Trying to trash an empty file list");
         return;
     }
 

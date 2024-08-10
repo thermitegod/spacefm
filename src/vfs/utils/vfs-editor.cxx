@@ -28,7 +28,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 
@@ -58,7 +59,7 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
     }
     else
     { // this might work
-        ztd::logger::warn("Editor is not set to a .desktop file");
+        logger::warn<logger::domain::vfs>("Editor is not set to a .desktop file");
         desktop = vfs::desktop::create(std::format("{}.desktop", editor));
     }
 

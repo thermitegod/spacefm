@@ -29,7 +29,8 @@
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "utils/shell-quote.hxx"
 
@@ -49,7 +50,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
     const auto thumbnail_cache = vfs::user::cache() / "thumbnails/normal";
     const auto thumbnail_file = thumbnail_cache / thumbnail_filename;
 
-    // ztd::logger::debug("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
+    // logger::debug<logger::domain::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
     // if the mtime of the file being thumbnailed is less than 5 sec ago,
     // do not create a thumbnail. This means that newly created files
@@ -68,7 +69,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
-        // ztd::logger::debug("Existing thumb: {}", thumbnail_file);
+        // logger::debug<logger::domain::vfs>("Existing thumb: {}", thumbnail_file);
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
         if (thumbnail)
         { // need to check for broken thumbnail images
@@ -87,7 +88,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         std::chrono::time_point_cast<std::chrono::seconds>(embeded_mtime) !=
             std::chrono::time_point_cast<std::chrono::seconds>(mtime))
     {
-        // ztd::logger::debug("New thumb: {}", thumbnail_file);
+        // logger::debug<logger::domain::vfs>("New thumb: {}", thumbnail_file);
 
         if (thumbnail)
         {
@@ -132,7 +133,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
                                              thumb_size,
                                              ::utils::shell_quote(file->path().string()),
                                              ::utils::shell_quote(thumbnail_file.string()));
-            // ztd::logger::info("COMMAND({})", command);
+            // logger::info<logger::domain::vfs>("COMMAND({})", command);
             Glib::spawn_command_line_sync(command);
 
             if (!std::filesystem::exists(thumbnail_file))

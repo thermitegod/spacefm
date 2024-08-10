@@ -18,7 +18,8 @@
 #include <memory>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "concurrency.hxx"
 
@@ -34,14 +35,14 @@ const auto requests = std::make_unique<requests_data>();
 void
 autosave::request_add() noexcept
 {
-    // ztd::logger::debug("AUTOSAVE request add");
+    // logger::debug("AUTOSAVE request add");
     requests->pending.store(true);
 }
 
 void
 autosave::request_cancel() noexcept
 {
-    // ztd::logger::debug("AUTOSAVE request cancel");
+    // logger::debug("AUTOSAVE request cancel");
     requests->pending.store(false);
 }
 
@@ -53,7 +54,7 @@ concurrencpp::timer timer;
 void
 autosave::create(const autosave_t& autosave_func) noexcept
 {
-    // ztd::logger::debug("AUTOSAVE init");
+    // logger::debug("AUTOSAVE init");
 
     using namespace std::chrono_literals;
 
@@ -64,10 +65,10 @@ autosave::create(const autosave_t& autosave_func) noexcept
         global::runtime.thread_executor(),
         [autosave_func]
         {
-            // ztd::logger::debug("AUTOSAVE Thread loop");
+            // logger::debug("AUTOSAVE Thread loop");
             if (requests->pending)
             {
-                // ztd::logger::debug("AUTOSAVE Thread saving_settings");
+                // logger::debug("AUTOSAVE Thread saving_settings");
                 requests->pending.store(false);
                 autosave_func();
             }

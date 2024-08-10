@@ -29,7 +29,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -530,7 +531,7 @@ on_dialog_response(GtkDialog* dialog, i32 id, void* user_data) noexcept
         auto* const task = ASYNC_TASK(g_object_get_data(G_OBJECT(dialog), "task"));
         if (task)
         {
-            // ztd::logger::info("app-chooser.cxx -> async_task_cancel");
+            // logger::info<logger::domain::ptk>("app-chooser.cxx -> async_task_cancel");
             // see note in vfs-async-task.c: async_task_real_cancel()
             task->cancel();
             // The GtkListStore will be freed in

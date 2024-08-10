@@ -38,7 +38,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -326,7 +327,7 @@ ptk::view::location::chdir(GtkTreeView* location_view,
 const std::shared_ptr<vfs::volume>
 ptk::view::location::selected_volume(GtkTreeView* location_view) noexcept
 {
-    // ztd::logger::info("ptk::view::location::selected_volume    view = {}", location_view);
+    // logger::info<logger::domain::ptk>("ptk::view::location::selected_volume    view = {}", location_view);
     GtkTreeIter it;
 
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(location_view));
@@ -344,7 +345,7 @@ on_row_activated(GtkTreeView* view, GtkTreePath* tree_path, GtkTreeViewColumn* c
                  ptk::browser* browser) noexcept
 {
     (void)col;
-    // ztd::logger::info("on_row_activated   view = {}", view);
+    // logger::info<logger::domain::ptk>("on_row_activated   view = {}", view);
     if (!browser)
     {
         return;
@@ -469,7 +470,7 @@ ptk::view::location::create(ptk::browser* browser) noexcept
 
     GtkWidget* view = gtk_tree_view_new_with_model(model);
     g_object_unref(G_OBJECT(model));
-    // ztd::logger::info("ptk::view::location::create   view = {}", view);
+    // logger::info<logger::domain::ptk>("ptk::view::location::create   view = {}", view);
     GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
     gtk_tree_selection_set_mode(selection, GtkSelectionMode::GTK_SELECTION_SINGLE);
 
@@ -876,7 +877,7 @@ static bool
 on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexcept
 {
     (void)task;
-    // ztd::logger::info("on_autoopen_cb");
+    // logger::info<logger::domain::ptk>("on_autoopen_cb");
     for (const auto& volume : vfs::volume_get_all_volumes())
     {
         if (!volume)
@@ -898,7 +899,7 @@ on_autoopen_cb(const std::shared_ptr<vfs::file_task>& task, AutoOpen* ao) noexce
                     const std::string exe = vfs::linux::proc::self::exe();
                     const std::string qpath = ::utils::shell_quote(volume->mount_point());
                     const std::string command = std::format("{} {}", exe, qpath);
-                    ztd::logger::info("COMMAND({})", command);
+                    logger::info<logger::domain::ptk>("COMMAND({})", command);
                     Glib::spawn_command_line_async(command);
                 }
             }
@@ -1113,7 +1114,7 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
         const std::string exe = vfs::linux::proc::self::exe();
         const std::string qpath = ::utils::shell_quote(vol->mount_point());
         const std::string command = std::format("{} {}", exe, qpath);
-        ztd::logger::info("COMMAND({})", command);
+        logger::info<logger::domain::ptk>("COMMAND({})", command);
         Glib::spawn_command_line_async(command);
     }
 }
@@ -1256,7 +1257,7 @@ volume_is_visible(const std::shared_ptr<vfs::volume>& vol) noexcept
 void
 ptk::view::location::on_action(GtkWidget* view, const xset_t& set) noexcept
 {
-    // ztd::logger::info("ptk::view::location::on_action");
+    // logger::info<logger::domain::ptk>("ptk::view::location::on_action");
     if (!view)
     {
         return;
@@ -1451,7 +1452,7 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
         return false;
     }
 
-    // ztd::logger::info("on_button_press_event   view = {}", view);
+    // logger::info<logger::domain::ptk>("on_button_press_event   view = {}", view);
     auto* browser = static_cast<ptk::browser*>(g_object_get_data(G_OBJECT(view), "browser"));
     browser->focus_me();
 

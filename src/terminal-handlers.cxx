@@ -23,7 +23,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "terminal-handlers.hxx"
 
@@ -65,10 +66,10 @@ TerminalHandlers::TerminalHandlers() noexcept
 const std::vector<std::string>
 TerminalHandlers::get_terminal_args(const std::string_view terminal) const noexcept
 {
-    // ztd::logger::debug("get_terminal_args={}", terminal);
+    // logger::debug("get_terminal_args={}", terminal);
     if (!this->handlers.contains(terminal.data()))
     {
-        ztd::logger::error("Unknown terminal: {}", terminal);
+        logger::error("Unknown terminal: {}", terminal);
         return {};
     }
 
@@ -78,7 +79,7 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal) const noexc
         if (this->handlers.contains(terminal_name))
         {
             const auto handler = this->handlers.at(terminal_name);
-            // ztd::logger::error("Terminal={}, name={}, exec={}", terminal, handler.name, handler.exec);
+            // logger::error("Terminal={}, name={}, exec={}", terminal, handler.name, handler.exec);
             return {handler.path, handler.exec};
         }
     }
@@ -87,12 +88,12 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal) const noexc
         if (this->handlers.contains(terminal.data()))
         {
             const auto handler = this->handlers.at(terminal.data());
-            // ztd::logger::error("Terminal={}, name={}, exec={}", terminal, handler.name, handler.exec);
+            // logger::error("Terminal={}, name={}, exec={}", terminal, handler.name, handler.exec);
             return {handler.path, handler.exec};
         }
     }
 
-    ztd::logger::error("Failed to get terminal: {}", terminal);
+    logger::error("Failed to get terminal: {}", terminal);
     return {};
 }
 

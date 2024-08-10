@@ -16,7 +16,8 @@
 #include <malloc.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "utils/memory.hxx"
 
@@ -26,6 +27,6 @@ utils::memory_trim() noexcept
     const auto ret = malloc_trim(0);
     if (ret == 0)
     {
-        ztd::logger::warn("Bad malloc_trim()");
+        logger::warn("Bad malloc_trim()");
     }
 }

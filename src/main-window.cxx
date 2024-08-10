@@ -35,7 +35,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -248,7 +249,7 @@ MainWindow::open_terminal() const noexcept
     const std::string terminal = Glib::find_program_in_path(main_term.value());
     if (terminal.empty())
     {
-        ztd::logger::warn("Cannot locate terminal in $PATH : {}", main_term.value());
+        logger::warn("Cannot locate terminal in $PATH : {}", main_term.value());
         return;
     }
 
@@ -357,7 +358,7 @@ main_window_refresh_all_tabs_matching(const std::filesystem::path& path) noexcep
 void
 main_window_rebuild_all_toolbars(ptk::browser* browser) noexcept
 {
-    // ztd::logger::info("main_window_rebuild_all_toolbars");
+    // logger::info("main_window_rebuild_all_toolbars");
 
     // do this browser first
     if (browser)
@@ -390,7 +391,7 @@ void
 update_views_all_windows(GtkWidget* item, ptk::browser* browser) noexcept
 {
     (void)item;
-    // ztd::logger::info("update_views_all_windows");
+    // logger::info("update_views_all_windows");
     // do this browser first
     if (!browser)
     {
@@ -677,7 +678,7 @@ MainWindow::show_panels() noexcept
                 true);
             if (!set)
             {
-                // ztd::logger::warn("no config for {}, {}", p, INT(mode));
+                // logger::warn("no config for {}, {}", p, INT(mode));
 
                 xset_set_b_panel_mode(p,
                                       xset::panel::show_toolbox,
@@ -750,7 +751,7 @@ MainWindow::show_panels() noexcept
             this->panel_slide_x[p] = set->x ? std::stoi(set->x.value()) : 0;
             this->panel_slide_y[p] = set->y ? std::stoi(set->y.value()) : 0;
             this->panel_slide_s[p] = set->s ? std::stoi(set->s.value()) : 0;
-            // ztd::logger::info("loaded panel {}", p);
+            // logger::info("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(this->get_panel_notebook(p)))
             {
                 this->notebook = this->get_panel_notebook(p);
@@ -795,7 +796,7 @@ MainWindow::show_panels() noexcept
                                 gtk_notebook_get_nth_page(this->get_panel_notebook(p), cur_tabx));
                             // if (browser->folder_view)
                             //      gtk_widget_grab_focus(browser->folder_view);
-                            // ztd::logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, ztd::logger::utils::ptr(browser->folder_view_), ztd::logger::utils::ptr(this));
+                            // logger::info("call delayed (showpanels) #{} {} window={}", cur_tabx, logger::utils::ptr(browser->folder_view_), logger::utils::ptr(this));
                             g_idle_add((GSourceFunc)ptk_browser_delay_focus, browser);
                         }
                     }
@@ -1186,7 +1187,7 @@ MainWindow::rebuild_menu_help(ptk::browser* browser) noexcept
 void
 MainWindow::rebuild_menus() noexcept
 {
-    // ztd::logger::debug("MainWindow::rebuild_menus()");
+    // logger::debug("MainWindow::rebuild_menus()");
 
     auto* const browser = this->current_browser();
     if (!browser)
@@ -1209,7 +1210,7 @@ MainWindow::rebuild_menus() noexcept
     // Help
     this->rebuild_menu_help(browser);
 
-    // ztd::logger::debug("MainWindow::rebuild_menus()  DONE");
+    // logger::debug("MainWindow::rebuild_menus()  DONE");
 }
 
 static void
@@ -1489,7 +1490,7 @@ MainWindow::store_positions() noexcept
                 {
                     // save absolute height
                     set->x = std::format("{}", allocation.height - pos);
-                    // ztd::logger::info("CLOS  win {}x{}    task height {}   slider {}", allocation.width, allocation.height, allocation.height - pos, pos);
+                    // logger::info("CLOS  win {}x{}    task height {}   slider {}", allocation.width, allocation.height, allocation.height - pos, pos);
                 }
             }
         }
@@ -1520,7 +1521,7 @@ static gboolean
 main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept
 {
     (void)event;
-    // ztd::logger::info("main_window_delete_event");
+    // logger::info("main_window_delete_event");
 
     MainWindow* main_window = MAIN_WINDOW_REINTERPRET(widget);
     main_window->store_positions();
@@ -1782,7 +1783,7 @@ MainWindow::create_tab_label(ptk::browser* browser) const noexcept
 void
 MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
 {
-    // ztd::logger::debug("New tab fb={} panel={} path={}", ztd::logger::utils::ptr(browser), this->curpanel, folder_path);
+    // logger::debug("New tab fb={} panel={} path={}", logger::utils::ptr(browser), this->curpanel, folder_path);
 
     auto* const current_browser = this->current_browser();
     if (GTK_IS_WIDGET(current_browser))
@@ -1860,8 +1861,8 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     //    while(g_main_context_pending(nullptr))  // wait for chdir to grab focus
     //        g_main_context_iteration(nullptr, true);
     // gtk_widget_grab_focus(GTK_WIDGET(browser->folder_view_));
-    // ztd::logger::info("focus browser {} {}", idx, ztd::logger::utils::ptr(browser->folder_view_));
-    // ztd::logger::info("call delayed (newtab) #{} {}", idx, ztd::logger::utils::ptr(browser->folder_view_));
+    // logger::info("focus browser {} {}", idx, logger::utils::ptr(browser->folder_view_));
+    // logger::info("call delayed (newtab) #{} {}", idx, logger::utils::ptr(browser->folder_view_));
     // g_idle_add((GSourceFunc)ptk_browser_delay_focus, browser);
 }
 
@@ -1943,7 +1944,7 @@ MainWindow::add_new_window() noexcept
 
     config::settings.load_saved_tabs = false;
 
-    ztd::logger::info("Opening another window");
+    logger::info("Opening another window");
 
     GtkApplication* app = gtk_window_get_application(GTK_WINDOW(this));
     assert(GTK_IS_APPLICATION(app));
@@ -2131,7 +2132,7 @@ on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_
     }
 
     browser = PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, page_num));
-    // ztd::logger::info("on_folder_notebook_switch_pape fb={}   panel={}   page={}", ztd::logger::utils::ptr(browser), browser->mypanel, page_num);
+    // logger::info("on_folder_notebook_switch_pape fb={}   panel={}   page={}", logger::utils::ptr(browser), browser->mypanel, page_num);
     main_window->curpanel = browser->panel();
     main_window->notebook = main_window->get_panel_notebook(main_window->curpanel);
 
@@ -2203,7 +2204,7 @@ MainWindow::get_panel_notebook(const panel_t panel) const noexcept
 void
 MainWindow::on_browser_panel_change(ptk::browser* browser) noexcept
 {
-    // ztd::logger::info("panel_change  panel {}", browser->mypanel);
+    // logger::info("panel_change  panel {}", browser->mypanel);
     this->curpanel = browser->panel();
     this->notebook = this->get_panel_notebook(this->curpanel);
     set_panel_focus(this, browser);
@@ -2212,14 +2213,14 @@ MainWindow::on_browser_panel_change(ptk::browser* browser) noexcept
 void
 MainWindow::on_browser_sel_change(ptk::browser* browser) noexcept
 {
-    // ztd::logger::info("sel_change  panel {}", browser->mypanel);
+    // logger::info("sel_change  panel {}", browser->mypanel);
     browser->update_statusbar();
 }
 
 void
 MainWindow::on_browser_content_change(ptk::browser* browser) noexcept
 {
-    // ztd::logger::info("content_change  panel {}", browser->mypanel);
+    // logger::info("content_change  panel {}", browser->mypanel);
     browser->update_statusbar();
 }
 
@@ -2277,7 +2278,7 @@ MainWindow::keypress(GdkEvent* event, void* user_data) noexcept
 {
     const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
     const auto keyval = gdk_key_event_get_keyval(event);
-    // ztd::logger::debug("main_keypress {} {}", keyval, keymod);
+    // logger::debug("main_keypress {} {}", keyval, keymod);
 
     if (user_data)
     {
@@ -2594,7 +2595,7 @@ get_desktop_index(GtkWindow* win) noexcept
 
     if (net_wm_desktop == None)
     {
-        ztd::logger::error("atom not found: {}", atom_name);
+        logger::error("atom not found: {}", atom_name);
     }
     else if (XGetWindowProperty(GDK_DISPLAY_XDISPLAY(display),
                                 GDK_WINDOW_XID(window),
@@ -2612,15 +2613,15 @@ get_desktop_index(GtkWindow* win) noexcept
     {
         if (type == None)
         {
-            ztd::logger::error("No such property from XGetWindowProperty() {}", atom_name);
+            logger::error("No such property from XGetWindowProperty() {}", atom_name);
         }
         else if (data == nullptr)
         {
-            ztd::logger::error("No data returned from XGetWindowProperty() {}", atom_name);
+            logger::error("No data returned from XGetWindowProperty() {}", atom_name);
         }
         else
         {
-            ztd::logger::error("XGetWindowProperty() {} failed\n", atom_name);
+            logger::error("XGetWindowProperty() {} failed\n", atom_name);
         }
     }
     else
@@ -2636,7 +2637,7 @@ MainWindow*
 main_window_get_on_current_desktop() noexcept
 { // find the last used spacefm window on the current desktop
     const i64 cur_desktop = get_desktop_index(nullptr);
-    // ztd::logger::info("current_desktop = {}", cur_desktop);
+    // logger::info("current_desktop = {}", cur_desktop);
     if (cur_desktop == -1)
     {
         return main_window_get_last_active(); // revert to dumb if no current
@@ -2646,7 +2647,7 @@ main_window_get_on_current_desktop() noexcept
     for (MainWindow* window : global::all_windows)
     {
         const i64 desktop = get_desktop_index(GTK_WINDOW(window));
-        // ztd::logger::info( "    test win {} = {}", ztd::logger::utils::ptr(window), desktop);
+        // logger::info( "    test win {} = {}", logger::utils::ptr(window), desktop);
         if (desktop == cur_desktop || desktop > 254 /* 255 == all desktops */)
         {
             return window;

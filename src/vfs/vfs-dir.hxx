@@ -32,6 +32,8 @@
 
 #include <ztd/ztd.hxx>
 
+// #include "logger.hxx"
+
 #include "concurrency.hxx"
 
 #include "vfs/vfs-file.hxx"
@@ -157,7 +159,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_created, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_created");
+        // logger::trace<logger::domain::vfs>("Signal Connect   : spacefm::signal::file_created");
         return this->evt_file_created.connect(fun);
     }
 
@@ -165,7 +167,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_changed, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_changed");
+        // logger::trace<logger::domain::vfs>("Signal Connect   : spacefm::signal::file_changed");
         return this->evt_file_changed.connect(fun);
     }
 
@@ -173,7 +175,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_deleted, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_deleted");
+        // logger::trace<logger::domain::vfs>("Signal Connect   : spacefm::signal::file_deleted");
         return this->evt_file_deleted.connect(fun);
     }
 
@@ -181,7 +183,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_listed, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_listed");
+        // logger::trace<logger::domain::vfs>("Signal Connect   : spacefm::signal::file_listed");
         return this->evt_file_listed.connect(fun);
     }
 
@@ -189,7 +191,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_thumbnail_loaded, sigc::connection>
     add_event(bind_fun fun) noexcept
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::file_thumbnail_loaded");
+        // logger::trace<logger::domain::vfs>("Signal Connect   : spacefm::signal::file_thumbnail_loaded");
         return this->evt_file_thumbnail_loaded.connect(fun);
     }
 
@@ -198,7 +200,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_created, void>
     run_event(const std::shared_ptr<vfs::file>& file) const noexcept
     {
-        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_created");
+        // logger::trace<logger::domain::vfs>("Signal Execute   : spacefm::signal::file_created");
         this->evt_file_created.emit(file);
     }
 
@@ -206,7 +208,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_changed, void>
     run_event(const std::shared_ptr<vfs::file>& file) const noexcept
     {
-        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_changed");
+        // logger::trace<logger::domain::vfs>("Signal Execute   : spacefm::signal::file_changed");
         this->evt_file_changed.emit(file);
     }
 
@@ -214,7 +216,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_deleted, void>
     run_event(const std::shared_ptr<vfs::file>& file) const noexcept
     {
-        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_deleted");
+        // logger::trace<logger::domain::vfs>("Signal Execute   : spacefm::signal::file_deleted");
         this->evt_file_deleted.emit(file);
     }
 
@@ -222,7 +224,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_listed, void>
     run_event() const noexcept
     {
-        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_listed");
+        // logger::trace<logger::domain::vfs>("Signal Execute   : spacefm::signal::file_listed");
         this->evt_file_listed.emit();
     }
 
@@ -230,7 +232,7 @@ struct dir : public std::enable_shared_from_this<dir>
     typename std::enable_if_t<evt == spacefm::signal::file_thumbnail_loaded, void>
     run_event(const std::shared_ptr<vfs::file>& file) const noexcept
     {
-        // ztd::logger::trace("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
+        // logger::trace<logger::domain::vfs>("Signal Execute   : spacefm::signal::file_thumbnail_loaded");
         this->evt_file_thumbnail_loaded.emit(file);
     }
 

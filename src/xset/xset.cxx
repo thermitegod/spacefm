@@ -33,7 +33,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "types.hxx"
 
@@ -54,7 +55,7 @@ xset::sets()
 
 xset::set::set(const xset::name name) noexcept
 {
-    // ztd::logger::debug("xset::set({})", ztd::logger::utils::ptr(this));
+    // logger::debug("xset::set({})", logger::utils::ptr(this));
     this->xset_name = name;
 }
 
@@ -91,10 +92,10 @@ xset::set::get(const std::string_view name, const bool only_existing) noexcept
     const auto enum_value = magic_enum::enum_cast<xset::name>(name);
     if (!enum_value.has_value())
     {
-        // ztd::logger::debug("name lookup custom {}", name);
+        // logger::debug("name lookup custom {}", name);
         // return xset::set::create(xset::name::custom);
     }
-    // ztd::logger::debug("name lookup {}", name);
+    // logger::debug("name lookup {}", name);
     return xset::set::create(enum_value.value());
 }
 
@@ -503,7 +504,7 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
     }
     else
     {
-        ztd::logger::debug("xset_get_int({}) invalid", magic_enum::enum_name(var));
+        logger::debug("xset_get_int({}) invalid", magic_enum::enum_name(var));
         return 0;
     }
 }

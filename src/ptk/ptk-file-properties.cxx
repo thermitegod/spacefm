@@ -32,7 +32,8 @@
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
 #include "compat/gtk4-porting.hxx"
@@ -575,7 +576,7 @@ init_media_tab(const std::shared_ptr<properties_dialog_data>& data,
 
     for (const auto& item : metadata)
     {
-        // ztd::logger::debug("description={}   value={}", item.description, item.value);
+        // logger::debug<logger::domain::ptk>("description={}   value={}", item.description, item.value);
         GtkLabel* description_label = GTK_LABEL(gtk_label_new(item.description.data()));
         GtkLabel* value_label = GTK_LABEL(gtk_label_new(item.value.data()));
         gtk_label_set_xalign(value_label, 1.0);

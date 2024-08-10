@@ -21,7 +21,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "xset/xset.hxx"
 
@@ -2599,7 +2600,7 @@ def_key(const std::span<const xset_t> keysets, xset::name name, u32 key, u32 key
     {
         if (keyset->keybinding.key == key && keyset->keybinding.modifier == keymod)
         {
-            ztd::logger::warn("Duplicate keybinding: {}, {}", set->name(), keyset->name());
+            logger::warn("Duplicate keybinding: {}, {}", set->name(), keyset->name());
             return;
         }
     }

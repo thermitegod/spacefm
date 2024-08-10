@@ -34,7 +34,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-file.hxx"
@@ -433,7 +434,7 @@ ptk_dir_tree_iter_n_children(GtkTreeModel* tree_model, GtkTreeIter* iter) noexce
 
     if (!node)
     {
-        ztd::logger::error("!node");
+        logger::error<logger::domain::ptk>("!node");
         return -1;
     }
     return node->n_children;

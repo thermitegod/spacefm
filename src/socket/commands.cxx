@@ -35,7 +35,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include <nlohmann/json.hpp>
 
@@ -143,7 +144,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     {
         for (MainWindow* window2 : main_window_get_all())
         {
-            const std::string str = std::format("{}", ztd::logger::utils::ptr(window2));
+            const std::string str = std::format("{}", logger::utils::ptr(window2));
             if (str == window)
             {
                 main_window = window2;
@@ -1365,7 +1366,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             do
             {
                 gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
-                const std::string str = std::format("{}", ztd::logger::utils::ptr(ptask));
+                const std::string str = std::format("{}", logger::utils::ptr(ptask));
                 if (str == data[i])
                 {
                     break;
@@ -1495,7 +1496,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             do
             {
                 gtk_tree_model_get(model, &it, ptk::view::file_task::column::data, &ptask, -1);
-                const std::string str = std::format("{}", ztd::logger::utils::ptr(ptask));
+                const std::string str = std::format("{}", logger::utils::ptr(ptask));
                 if (str == property)
                 {
                     break;
@@ -1660,8 +1661,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
                         std::format("Note: $new_task_id not valid until approx one "
                                     "half second after task start\nnew_task_window={}\n"
                                     "new_task_id={}",
-                                    ztd::logger::utils::ptr(main_window),
-                                    ztd::logger::utils::ptr(ptask))};
+                                    logger::utils::ptr(main_window),
+                                    logger::utils::ptr(ptask))};
             }
         }
         else if (property == "edit")
@@ -1865,8 +1866,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
                     std::format("# Note: $new_task_id not valid until approx one "
                                 "half second after task  start\nnew_task_window={}\n"
                                 "new_task_id={}",
-                                ztd::logger::utils::ptr(main_window),
-                                ztd::logger::utils::ptr(ptask))};
+                                logger::utils::ptr(main_window),
+                                logger::utils::ptr(ptask))};
         }
         else
         {

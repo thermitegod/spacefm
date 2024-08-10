@@ -31,7 +31,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/type-conversion.hxx"
 
@@ -591,7 +592,7 @@ ptk_file_list_set_sort_func(GtkTreeSortable* sortable, i32 sort_column_id,
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    ztd::logger::warn("ptk_file_list_set_sort_func: Not supported");
+    logger::warn<logger::domain::ptk>("ptk_file_list_set_sort_func: Not supported");
 }
 
 static void
@@ -602,7 +603,7 @@ ptk_file_list_set_default_sort_func(GtkTreeSortable* sortable, GtkTreeIterCompar
     (void)sort_func;
     (void)user_data;
     (void)destroy;
-    ztd::logger::warn("ptk_file_list_set_default_sort_func: Not supported");
+    logger::warn<logger::domain::ptk>("ptk_file_list_set_default_sort_func: Not supported");
 }
 
 static i32
@@ -958,7 +959,7 @@ ptk::file_list::on_file_list_file_deleted(const std::shared_ptr<vfs::file>& file
 void
 ptk::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
-    // ztd::logger::debug("LOADED: {}", file->name());
+    // logger::debug<logger::domain::ptk>("LOADED: {}", file->name());
     this->file_changed(file);
 }
 
@@ -1015,7 +1016,7 @@ ptk::file_list::show_thumbnails(const vfs::file::thumbnail_size size, u64 max_fi
             else
             {
                 this->dir->load_thumbnail(file, this->thumbnail_size);
-                // ztd::logger::debug("REQUEST: {}", file->name());
+                // logger::debug<logger::domain::ptk>("REQUEST: {}", file->name());
             }
         }
     }

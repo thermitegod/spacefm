@@ -46,7 +46,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -59,7 +60,7 @@ update_desktop_database() noexcept
 {
     const auto path = vfs::user::data() / "applications";
     const std::string command = std::format("update-desktop-database {}", path.string());
-    ztd::logger::info("COMMAND({})", command);
+    logger::info<logger::domain::vfs>("COMMAND({})", command);
     Glib::spawn_command_line_sync(command);
 }
 
@@ -67,7 +68,7 @@ update_desktop_database() noexcept
 static void
 remove_actions(const std::string_view mime_type, std::vector<std::string>& actions) noexcept
 {
-    // ztd::logger::info("remove_actions( {} )", type);
+    // logger::info<logger::domain::vfs>("remove_actions( {} )", type);
 
 #if (GTK_MAJOR_VERSION == 4)
     const auto kf = Glib::KeyFile::create();
@@ -128,7 +129,7 @@ remove_actions(const std::string_view mime_type, std::vector<std::string>& actio
         if (std::ranges::contains(actions, rem))
         {
             std::ranges::remove(actions, rem);
-            // ztd::logger::info("        ACTION-REMOVED {}", rem);
+            // logger::info<logger::domain::vfs>("        ACTION-REMOVED {}", rem);
         }
     }
 }
@@ -144,7 +145,7 @@ static void
 get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
             std::vector<std::string>& actions) noexcept
 {
-    // ztd::logger::info("get_actions( {}, {} )\n", dir, mime_type);
+    // logger::info<logger::domain::vfs>("get_actions( {}, {} )\n", dir, mime_type);
     std::vector<Glib::ustring> removed;
 
     static constexpr std::array<const std::string_view, 2> names{
@@ -157,11 +158,11 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
         "MIME Cache",
     };
 
-    // ztd::logger::info("get_actions( {}/, {} )", dir, mime_type);
+    // logger::info<logger::domain::vfs>("get_actions( {}/, {} )", dir, mime_type);
     for (const auto n : std::views::iota(0uz, names.size()))
     {
         const auto path = dir / names.at(n);
-        // ztd::logger::info( "    {}", path);
+        // logger::info<logger::domain::vfs>( "    {}", path);
 #if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
 #elif (GTK_MAJOR_VERSION == 3)
@@ -202,7 +203,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
         // mimeinfo.cache has only MIME Cache; others do not have it
         for (i32 k = (n == 0 ? 0 : 2); k < (n == 0 ? 2 : 3); ++k)
         {
-            // ztd::logger::info("        {} [{}]", groups[k], k);
+            // logger::info<logger::domain::vfs>("        {} [{}]", groups[k], k);
             bool is_removed = false;
             std::vector<Glib::ustring> apps;
             try
@@ -221,7 +222,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
             }
             for (auto& a : apps)
             {
-                //  ztd::logger::info("            {}", apps[i]);
+                //  logger::info<logger::domain::vfs>("            {}", apps[i]);
                 //  check if removed
                 is_removed = false;
                 if (!removed.empty() && n > 0)
@@ -230,7 +231,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
                     {
                         if (r == a)
                         {
-                            // ztd::logger::info("                REMOVED");
+                            // logger::info<logger::domain::vfs>("                REMOVED");
                             is_removed = true;
                             break;
                         }
@@ -242,12 +243,12 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
                     /* check for app existence */
                     if (vfs::detail::mime_type::locate_desktop_file(app))
                     {
-                        // ztd::logger::info("                EXISTS");
+                        // logger::info<logger::domain::vfs>("                EXISTS");
                         actions.push_back(app);
                     }
                     else
                     {
-                        // ztd::logger::info("                MISSING");
+                        // logger::info<logger::domain::vfs>("                MISSING");
                     }
                 }
             }
@@ -608,7 +609,7 @@ locate_desktop_file(const std::filesystem::path& dir, const std::string_view des
         return desktop_path;
     }
 
-    // ztd::logger::info("desktop_id={}", desktop_id);
+    // logger::info<logger::domain::vfs>("desktop_id={}", desktop_id);
 
     // mime encodes directory separators as '-'.
     // so the desktop_id 'mime-mime-mime.desktop' could be on-disk
@@ -619,7 +620,7 @@ locate_desktop_file(const std::filesystem::path& dir, const std::string_view des
     {
         new_desktop_id = ztd::replace(new_desktop_id, "-", "/", 1);
         auto new_desktop_path = dir / "applications" / new_desktop_id;
-        // ztd::logger::info("new_desktop_id={}", new_desktop_id);
+        // logger::info<logger::domain::vfs>("new_desktop_id={}", new_desktop_id);
         if (std::filesystem::is_regular_file(new_desktop_path))
         {
             return new_desktop_path;
@@ -665,7 +666,7 @@ vfs::detail::mime_type::get_default_action(const std::string_view mime_type) noe
     assert(mime_type.empty() != true);
 
     const auto command = std::format("xdg-mime query default {}", mime_type);
-    // ztd::logger::debug("COMMAND({})", command);
+    // logger::debug<logger::domain::vfs>("COMMAND({})", command);
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output, nullptr, nullptr);
     if (standard_output.empty())
@@ -684,6 +685,6 @@ vfs::detail::mime_type::set_default_action(const std::string_view mime_type,
     assert(desktop_id.empty() != true);
 
     const auto command = std::format("xdg-mime default {} {}", desktop_id, mime_type);
-    ztd::logger::debug("COMMAND({})", command);
+    logger::debug<logger::domain::vfs>("COMMAND({})", command);
     Glib::spawn_command_line_sync(command);
 }

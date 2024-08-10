@@ -28,7 +28,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "utils/strdup.hxx"
 
@@ -101,7 +102,7 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
     xset_t set_next;
     std::string icon_name;
 
-    // ztd::logger::info("xset_add_menuitem {}", set->name());
+    // logger::info("xset_add_menuitem {}", set->name());
 
     if (icon_name.empty() && set->icon)
     {
@@ -218,7 +219,7 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
         if (keyset->keybinding.key > 0 && accel_group)
         {
 #if (GTK_MAJOR_VERSION == 4)
-            ztd::logger::debug("TODO - PORT - accel_group");
+            logger::debug("TODO - PORT - accel_group");
             // gtk_widget_add_controller(item, accel_group);
             // gtk_shortcut_controller_add_shortcut(
             //     GTK_SHORTCUT_CONTROLLER(accel_group),

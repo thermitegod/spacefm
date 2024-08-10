@@ -38,7 +38,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "concurrency.hxx"
 
@@ -58,12 +59,12 @@ ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 
 vfs::dir::dir(const std::filesystem::path& path) noexcept : path_(path)
 {
-    // ztd::logger::debug("vfs::dir::dir({})   {}", ztd::logger::utils::ptr(this), this->path_.string());
+    // logger::debug<logger::domain::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
 }
 
 vfs::dir::~dir() noexcept
 {
-    // ztd::logger::debug("vfs::dir::~dir({})  {}", ztd::logger::utils::ptr(this), this->path_.string());
+    // logger::debug<logger::domain::vfs>("vfs::dir::~dir({})  {}", logger::utils::ptr(this), this->path_.string());
 
     this->shutdown_ = true;
 
@@ -90,24 +91,24 @@ vfs::dir::create(const std::filesystem::path& path) noexcept
     if (global::dir_smart_cache.contains(path))
     {
         dir = global::dir_smart_cache.at(path);
-        // ztd::logger::debug("vfs::dir::dir({}) cache   {}", ztd::logger::utils::ptr(dir.get()), this->path_.string());
+        // logger::debug<logger::domain::vfs>("vfs::dir::dir({}) cache   {}", logger::utils::ptr(dir.get()), this->path_.string());
     }
     else
     {
         dir = global::dir_smart_cache.create(
             path,
             std::bind([](const auto& path) { return std::make_shared<vfs::dir>(path); }, path));
-        // ztd::logger::debug("vfs::dir::dir({}) new     {}", ztd::logger::utils::ptr(dir.get()), this->path_.string());
+        // logger::debug<logger::domain::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), this->path_.string());
         dir->post_initialize();
     }
-    // ztd::logger::debug("dir({})     {}", ztd::logger::utils::ptr(dir.get()), path.string());
+    // logger::debug<logger::domain::vfs>("dir({})     {}", logger::utils::ptr(dir.get()), path.string());
     return dir;
 }
 
 void
 vfs::dir::post_initialize() noexcept
 {
-    // ztd::logger::debug("vfs::dir::post_initialize({})     {}", ztd::logger::utils::ptr(this), this->path_.string());
+    // logger::debug<logger::domain::vfs>("vfs::dir::post_initialize({})     {}", logger::utils::ptr(this), this->path_.string());
 
     this->update_avoid_changes();
 
@@ -161,7 +162,7 @@ vfs::dir::load_user_hidden_files() noexcept
     std::ifstream file(hidden_path);
     if (!file)
     {
-        ztd::logger::error("Failed to open the file: {}", hidden_path.string());
+        logger::error<logger::domain::vfs>("Failed to open the file: {}", hidden_path.string());
 
         this->user_hidden_files_ = std::nullopt;
         return;
@@ -175,7 +176,7 @@ vfs::dir::load_user_hidden_files() noexcept
         const std::filesystem::path hidden_file = ztd::strip(line); // remove newline
         if (hidden_file.is_absolute())
         {
-            ztd::logger::warn("Absolute path ignored in {}", hidden_path.string());
+            logger::warn<logger::domain::vfs>("Absolute path ignored in {}", hidden_path.string());
             continue;
         }
 
@@ -203,7 +204,7 @@ vfs::dir::is_file_user_hidden(const std::filesystem::path& path) const noexcept
 concurrencpp::result<bool>
 vfs::dir::load_thread() noexcept
 {
-    // ztd::logger::debug("vfs::dir::load_thread({})   {}", ztd::logger::utils::ptr(this), this->path_.string());
+    // logger::debug<logger::domain::vfs>("vfs::dir::load_thread({})   {}", logger::utils::ptr(this), this->path_.string());
 
     auto guard = co_await this->lock_.lock(this->executor_);
 
@@ -384,7 +385,7 @@ vfs::dir::load_thumbnail(const std::shared_ptr<vfs::file>& file,
 {
     if (this->enable_thumbnails_)
     {
-        // ztd::logger::debug("vfs::dir::load_thumbnail()  {}", file->name());
+        // logger::debug<logger::domain::vfs>("vfs::dir::load_thumbnail()  {}", file->name());
         this->thumbnailer_.request({file, size});
     }
 }
@@ -605,7 +606,7 @@ vfs::dir::emit_file_deleted(const std::filesystem::path& path) noexcept
 void
 vfs::dir::emit_file_changed(const std::filesystem::path& path, bool force) noexcept
 {
-    // ztd::logger::info("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
+    // logger::info<logger::domain::vfs>("vfs::dir::emit_file_changed dir={} filename={} avoid={}", this->path_, path.filename(), this->avoid_changes_);
 
     if (this->shutdown_)
     {

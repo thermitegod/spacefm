@@ -31,7 +31,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "types.hxx"
 
@@ -76,7 +77,7 @@ load_settings() noexcept
     {
         if (Glib::find_program_in_path("git").empty())
         {
-            ztd::logger::error("git backed settings enabled but git is not installed");
+            logger::error("git backed settings enabled but git is not installed");
             git_backed_settings = false;
         }
     }
@@ -94,7 +95,7 @@ load_settings() noexcept
                             config::disk_format::filename,
                             config::disk_format::version);
 
-            ztd::logger::info("SCRIPT={}", command_script.string());
+            logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);
         }
     }
@@ -109,7 +110,7 @@ load_settings() noexcept
                                                          settings_config_dir.string(),
                                                          config::disk_format::filename);
 
-            ztd::logger::info("SCRIPT={}", command_script.string());
+            logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);
         }
     }
@@ -120,7 +121,7 @@ load_settings() noexcept
     }
     else
     {
-        ztd::logger::info("No config file found, using defaults.");
+        logger::info("No config file found, using defaults.");
     }
 
     // turn off fullscreen
@@ -166,7 +167,7 @@ load_settings() noexcept
 void
 save_settings() noexcept
 {
-    // ztd::logger::info("save_settings");
+    // logger::info("save_settings");
 
     MainWindow* main_window = main_window_get_last_active();
 

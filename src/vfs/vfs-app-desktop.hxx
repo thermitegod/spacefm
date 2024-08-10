@@ -34,6 +34,8 @@
 
 #include <ztd/ztd.hxx>
 
+// #include "logger.hxx"
+
 namespace vfs
 {
 struct desktop
@@ -42,7 +44,7 @@ struct desktop
     desktop() = delete;
     desktop(const std::filesystem::path& desktop_file) noexcept;
     ~desktop() = default;
-    // ~desktop() { ztd::logger::info("vfs::desktop::~desktop({})", ztd::logger::utils::ptr(this)) };
+    // ~desktop() { logger::info<logger::domain::vfs>("vfs::desktop::~desktop({})", logger::utils::ptr(this)) };
     desktop(const desktop& other) = delete;
     desktop(desktop&& other) = delete;
     desktop& operator=(const desktop& other) = delete;

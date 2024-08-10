@@ -26,7 +26,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-user-dirs.hxx"
@@ -66,14 +67,14 @@ mime_monitor::on_mime_change(const std::shared_ptr<vfs::file>& file) noexcept
     if (global::mime_change_timer != 0)
     {
         // timer is already running, so ignore request
-        // ztd::logger::debug("MIME-UPDATE already set");
+        // logger::debug<logger::domain::vfs>("MIME-UPDATE already set");
         return;
     }
 
     // update mime database in 2 seconds
     global::mime_change_timer =
         g_timeout_add_seconds(2, (GSourceFunc)mime_monitor::on_mime_change_timer, nullptr);
-    // ztd::logger::debug("MIME-UPDATE timer started");
+    // logger::debug<logger::domain::vfs>("MIME-UPDATE timer started");
 }
 
 namespace global
@@ -86,15 +87,15 @@ mime_monitor::on_mime_change_timer(void* user_data) noexcept
 {
     (void)user_data;
 
-    // ztd::logger::debug("MIME-UPDATE on_timer");
+    // logger::debug<logger::domain::vfs>("MIME-UPDATE on_timer");
     const auto data_dir = vfs::user::data();
     const std::string command1 = std::format("update-mime-database {}/mime", data_dir.string());
-    ztd::logger::info("COMMAND({})", command1);
+    logger::info<logger::domain::vfs>("COMMAND({})", command1);
     Glib::spawn_command_line_async(command1);
 
     const std::string command2 =
         std::format("update-desktop-database {}/applications", data_dir.string());
-    ztd::logger::info("COMMAND({})", command2);
+    logger::info<logger::domain::vfs>("COMMAND({})", command2);
     Glib::spawn_command_line_async(command2);
 
     g_source_remove(global::mime_change_timer);
@@ -118,7 +119,7 @@ vfs::mime_monitor() noexcept
 
     global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path));
 
-    // ztd::logger::debug("MIME-UPDATE watch started");
+    // logger::debug<logger::domain::vfs>("MIME-UPDATE watch started");
     global::user_mime_monitor->dir->add_event<spacefm::signal::file_created>(
         std::bind(&mime_monitor::on_mime_change, std::placeholders::_1));
     global::user_mime_monitor->dir->add_event<spacefm::signal::file_changed>(

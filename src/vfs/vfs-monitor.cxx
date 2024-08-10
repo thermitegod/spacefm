@@ -36,7 +36,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-monitor.hxx"
 
@@ -85,12 +86,12 @@ vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callb
                                             this->path_.string()));
     }
 
-    // ztd::logger::debug("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", ztd::logger::utils::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
+    // logger::debug<logger::domain::vfs>("vfs::monitor::monitor({})  {} ({})  fd={} wd={}", logger::utils::ptr(this), real_path, this->path_, this->inotify_fd_, this->inotify_wd_);
 }
 
 vfs::monitor::~monitor() noexcept
 {
-    // ztd::logger::debug("vfs::monitor::~monitor({}) {}", ztd::logger::utils::ptr(this),this->path_);
+    // logger::debug<logger::domain::vfs>("vfs::monitor::~monitor({}) {}", logger::utils::ptr(this),this->path_);
 
     this->signal_io_handler_.disconnect();
 
@@ -105,20 +106,20 @@ void
 vfs::monitor::dispatch_event(const vfs::monitor::event event,
                              const std::filesystem::path& path) const noexcept
 {
-    // ztd::logger::debug("vfs::monitor::dispatch_event({})  {}   {}", ztd::logger::utils::ptr(this), magic_enum::enum_name(event), path.string());
+    // logger::debug<logger::domain::vfs>("vfs::monitor::dispatch_event({})  {}   {}", logger::utils::ptr(this), magic_enum::enum_name(event), path.string());
     this->callback_(event, path);
 }
 
 bool
 vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
 {
-    // ztd::logger::debug("vfs::monitor::on_inotify_event({})  {}", ztd::logger::utils::ptr(this), this->path_);
+    // logger::debug<logger::domain::vfs>("vfs::monitor::on_inotify_event({})  {}", logger::utils::ptr(this), this->path_);
     static constexpr auto EVENT_SIZE = (sizeof(inotify_event));
     static constexpr auto EVENT_BUF_LEN = (1024 * (EVENT_SIZE + 16));
 
     if (condition == Glib::IOCondition::IO_HUP || condition == Glib::IOCondition::IO_ERR)
     {
-        ztd::logger::error("Disconnected from inotify server");
+        logger::error<logger::domain::vfs>("Disconnected from inotify server");
         return false;
     }
 
@@ -126,7 +127,7 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
     const auto length = read(this->inotify_fd_, buffer.data(), EVENT_BUF_LEN);
     if (length < 0)
     {
-        ztd::logger::error("Error reading inotify event: {}", std::strerror(errno));
+        logger::error<logger::domain::vfs>("Error reading inotify event: {}", std::strerror(errno));
         return false;
     }
 
@@ -162,7 +163,7 @@ vfs::monitor::on_inotify_event(const Glib::IOCondition condition) const noexcept
                 monitor_event = event::changed;
             }
 
-            // ztd::logger::debug("inotify-event MASK={} EVENT({})={}", event->mask, magic_enum::enum_name(monitor_event), event_path.string());
+            // logger::debug<logger::domain::vfs>("inotify-event MASK={} EVENT({})={}", event->mask, magic_enum::enum_name(monitor_event), event_path.string());
 
             this->dispatch_event(monitor_event, event_path);
         }

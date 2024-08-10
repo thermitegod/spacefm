@@ -20,7 +20,8 @@
 #include <fstream>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 namespace utils
 {
@@ -31,7 +32,7 @@ write_file(const std::filesystem::path& path, const T& data) noexcept
     std::ofstream file(path);
     if (!file.is_open())
     {
-        ztd::logger::error("Failed to open file: {}", path.string());
+        logger::error("Failed to open file: {}", path.string());
         return false;
     }
 
@@ -39,7 +40,7 @@ write_file(const std::filesystem::path& path, const T& data) noexcept
 
     if (file.fail())
     {
-        ztd::logger::error("Failed to write file: {}", path.string());
+        logger::error("Failed to write file: {}", path.string());
         file.close();
         return false;
     }
@@ -48,7 +49,7 @@ write_file(const std::filesystem::path& path, const T& data) noexcept
 
     if (file.fail())
     {
-        ztd::logger::error("Failed to close file: {}", path.string());
+        logger::error("Failed to close file: {}", path.string());
         return false;
     }
 

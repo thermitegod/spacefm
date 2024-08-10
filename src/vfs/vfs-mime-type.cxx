@@ -34,7 +34,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "settings/settings.hxx"
 
@@ -83,7 +84,7 @@ vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
     this->description_ = icon_data[1];
     if (this->description_.empty() && this->type_ != vfs::constants::mime_type::unknown)
     {
-        ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
+        logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
         const auto mime_unknown =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
         if (mime_unknown)
@@ -178,7 +179,7 @@ vfs::mime_type::icon(const bool big) noexcept
     }
     if (this->description_.empty())
     {
-        ztd::logger::warn("mime-type {} has no description (comment)", this->type_);
+        logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
         const auto vfs_mime = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
         if (vfs_mime)
         {

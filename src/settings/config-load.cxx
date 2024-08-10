@@ -24,7 +24,8 @@
 #pragma GCC diagnostic pop
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "xset/xset.hxx"
 
@@ -38,8 +39,8 @@ get_config_file_version(const toml::value& tbl) noexcept
 {
     if (!tbl.contains(config::disk_format::toml::section::version.data()))
     {
-        ztd::logger::error("config missing TOML section [{}]",
-                           config::disk_format::toml::section::version);
+        logger::error("config missing TOML section [{}]",
+                      config::disk_format::toml::section::version);
         return 0;
     }
 
@@ -55,8 +56,8 @@ config_parse_general(const toml::value& tbl, u64 version) noexcept
 
     if (!tbl.contains(config::disk_format::toml::section::general.data()))
     {
-        ztd::logger::error("config missing TOML section [{}]",
-                           config::disk_format::toml::section::general);
+        logger::error("config missing TOML section [{}]",
+                      config::disk_format::toml::section::general);
         return;
     }
 
@@ -149,8 +150,8 @@ config_parse_window(const toml::value& tbl, u64 version) noexcept
 
     if (!tbl.contains(config::disk_format::toml::section::window.data()))
     {
-        ztd::logger::error("config missing TOML section [{}]",
-                           config::disk_format::toml::section::window);
+        logger::error("config missing TOML section [{}]",
+                      config::disk_format::toml::section::window);
         return;
     }
 
@@ -182,8 +183,8 @@ config_parse_interface(const toml::value& tbl, u64 version) noexcept
 
     if (!tbl.contains(config::disk_format::toml::section::interface.data()))
     {
-        ztd::logger::error("config missing TOML section [{}]",
-                           config::disk_format::toml::section::interface);
+        logger::error("config missing TOML section [{}]",
+                      config::disk_format::toml::section::interface);
         return;
     }
 
@@ -241,7 +242,7 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
             const auto enum_name_value = magic_enum::enum_cast<xset::name>(toml_name);
             if (!enum_name_value.has_value())
             {
-                ztd::logger::warn("Invalid xset::name enum name, xset::var::{}", toml_name);
+                logger::warn("Invalid xset::name enum name, xset::var::{}", toml_name);
                 continue;
             }
             const auto set = xset::set::get(toml_name);
@@ -253,12 +254,12 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                 const std::string value =
                     ztd::strip(toml::format(toml_value, std::numeric_limits<usize>::max()), "\"");
 
-                // ztd::logger::info("name: {} | var: {} | value: {}", name, setvar, value);
+                // logger::info("name: {} | var: {} | value: {}", name, setvar, value);
 
                 const auto enum_var_value = magic_enum::enum_cast<xset::var>(setvar);
                 if (!enum_var_value.has_value())
                 {
-                    ztd::logger::warn("Invalid xset::var enum name, xset::var::{}", toml_name);
+                    logger::warn("Invalid xset::var enum name, xset::var::{}", toml_name);
                     continue;
                 }
 
@@ -287,9 +288,9 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                         std::from_chars(value.data(), value.data() + value.size(), result);
                     if (ec != std::errc())
                     {
-                        ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                           magic_enum::enum_name(var),
-                                           value);
+                        logger::error("Config: Failed trying to set xset.{} to {}",
+                                      magic_enum::enum_name(var),
+                                      value);
                         continue;
                     }
                     set->keybinding.key = result;
@@ -301,9 +302,9 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
                         std::from_chars(value.data(), value.data() + value.size(), result);
                     if (ec != std::errc())
                     {
-                        ztd::logger::error("Config: Failed trying to set xset.{} to {}",
-                                           magic_enum::enum_name(var),
-                                           value);
+                        logger::error("Config: Failed trying to set xset.{} to {}",
+                                      magic_enum::enum_name(var),
+                                      value);
                         continue;
                     }
                     set->keybinding.modifier = result;
@@ -347,7 +348,7 @@ config::load(const std::filesystem::path& session) noexcept
     }
     catch (const toml::syntax_error& e)
     {
-        ztd::logger::error("Config file parsing failed: {}", e.what());
+        logger::error("Config file parsing failed: {}", e.what());
         return;
     }
 }

@@ -19,7 +19,6 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "xset/utils/xset-utils.hxx"
 

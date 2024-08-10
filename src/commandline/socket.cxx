@@ -29,7 +29,8 @@
 #include <zmqpp/socket_options.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+// #include "logger.hxx"
 
 #include "socket/server.hxx"
 
@@ -67,7 +68,7 @@ run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
     server_json["data"] = opt->socket_data;
     // std::println("JSON : {}", server_json.dump());
 
-    // ztd::logger::debug("Sending message {}\n", server_json.dump());
+    // logger::debug("Sending message {}\n", server_json.dump());
     const bool sent = socket::send_command(socket, server_json.dump());
     if (!sent)
     {

@@ -20,10 +20,10 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "logger.hxx"
 #include "types.hxx"
 
 #include "settings/settings.hxx"
@@ -66,31 +66,31 @@ run_commandline(const commandline_opt_data_t& opt) noexcept
 
     if (opt->loglevel == "trace")
     {
-        ztd::logger::initialize(spdlog::level::trace, opt->logfile);
+        logger::initialize(spdlog::level::trace, opt->logfile);
     }
     else if (opt->loglevel == "debug")
     {
-        ztd::logger::initialize(spdlog::level::debug, opt->logfile);
+        logger::initialize(spdlog::level::debug, opt->logfile);
     }
     else if (opt->loglevel == "info")
     {
-        ztd::logger::initialize(spdlog::level::info, opt->logfile);
+        logger::initialize(spdlog::level::info, opt->logfile);
     }
     else if (opt->loglevel == "warning")
     {
-        ztd::logger::initialize(spdlog::level::warn, opt->logfile);
+        logger::initialize(spdlog::level::warn, opt->logfile);
     }
     else if (opt->loglevel == "error")
     {
-        ztd::logger::initialize(spdlog::level::err, opt->logfile);
+        logger::initialize(spdlog::level::err, opt->logfile);
     }
     else if (opt->loglevel == "critical")
     {
-        ztd::logger::initialize(spdlog::level::critical, opt->logfile);
+        logger::initialize(spdlog::level::critical, opt->logfile);
     }
     else
     {
-        ztd::logger::initialize(spdlog::level::off);
+        logger::initialize(spdlog::level::off);
     }
 }
 

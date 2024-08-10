@@ -14,7 +14,6 @@
  */
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
 
 #include "xset/xset.hxx"
 

@@ -36,7 +36,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "utils/shell-quote.hxx"
 
@@ -136,7 +137,7 @@ std::vector<devmount_t> devmounts;
 static void
 parse_mounts(const bool report) noexcept
 {
-    // ztd::logger::debug("parse_mounts report={}", report);
+    // logger::debug<logger::domain::vfs>("parse_mounts report={}", report);
 
     // get all mount points for all devices
     std::vector<devmount_t> newmounts;
@@ -151,7 +152,7 @@ parse_mounts(const bool report) noexcept
             continue;
         }
 
-        // ztd::logger::debug("mount_point({}:{})={}", mount.major, mount.minor, mount.mount_point);
+        // logger::debug<logger::domain::vfs>("mount_point({}:{})={}", mount.major, mount.minor, mount.mount_point);
         devmount_t devmount = nullptr;
         for (const devmount_t& search : newmounts)
         {
@@ -164,7 +165,7 @@ parse_mounts(const bool report) noexcept
 
         if (!devmount)
         {
-            // ztd::logger::debug("     new devmount {}", mount.mount_point);
+            // logger::debug<logger::domain::vfs>("     new devmount {}", mount.mount_point);
             if (report)
             {
                 if (subdir_mount)
@@ -215,11 +216,11 @@ parse_mounts(const bool report) noexcept
 
         if (devmount && !std::ranges::contains(devmount->mounts, mount.mount_point))
         {
-            // ztd::logger::debug("    prepended");
+            // logger::debug<logger::domain::vfs>("    prepended");
             devmount->mounts.push_back(mount.mount_point);
         }
     }
-    // ztd::logger::debug("LINES DONE");
+    // logger::debug<logger::domain::vfs>("LINES DONE");
     // translate each mount points list to string
     for (const devmount_t& devmount : newmounts)
     {
@@ -229,7 +230,7 @@ parse_mounts(const bool report) noexcept
         devmount->mount_points = ztd::join(devmount->mounts, ",");
         devmount->mounts.clear();
 
-        // ztd::logger::debug("translate {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
+        // logger::debug<logger::domain::vfs>("translate {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
     }
 
     // compare old and new lists
@@ -238,7 +239,7 @@ parse_mounts(const bool report) noexcept
     {
         for (const devmount_t& devmount : newmounts)
         {
-            // ztd::logger::debug("finding {}:{}", devmount->major, devmount->minor);
+            // logger::debug<logger::domain::vfs>("finding {}:{}", devmount->major, devmount->minor);
 
             devmount_t found = nullptr;
             for (const devmount_t& search : global::devmounts)
@@ -254,10 +255,10 @@ parse_mounts(const bool report) noexcept
 
             if (found)
             {
-                // ztd::logger::debug("    found");
+                // logger::debug<logger::domain::vfs>("    found");
                 if (found->mount_points == devmount->mount_points)
                 {
-                    // ztd::logger::debug("    freed");
+                    // logger::debug<logger::domain::vfs>("    freed");
                     // no change to mount points, so remove from old list
                     std::ranges::remove(global::devmounts, found);
                 }
@@ -265,7 +266,7 @@ parse_mounts(const bool report) noexcept
             else
             {
                 // new mount
-                // ztd::logger::debug("    new mount {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
+                // logger::debug<logger::domain::vfs>("    new mount {}:{} {}", devmount->major, devmount->minor, devmount->mount_points);
                 const devmount_t devcopy =
                     std::make_shared<DeviceMount>(devmount->major, devmount->minor);
                 devcopy->mount_points = devmount->mount_points;
@@ -276,11 +277,11 @@ parse_mounts(const bool report) noexcept
         }
     }
 
-    // ztd::logger::debug("REMAINING");
+    // logger::debug<logger::domain::vfs>("REMAINING");
     // any remaining devices in old list have changed mount status
     for (const devmount_t& devmount : global::devmounts)
     {
-        // ztd::logger::debug("remain {}:{}", devmount->major, devmount->minor);
+        // logger::debug<logger::domain::vfs>("remain {}:{}", devmount->major, devmount->minor);
         if (devmount && report)
         {
             changed.push_back(devmount);
@@ -309,7 +310,7 @@ parse_mounts(const bool report) noexcept
                 if (!devnode.empty())
                 {
                     // block device
-                    ztd::logger::info("mount changed: {}", devnode);
+                    logger::info<logger::domain::vfs>("mount changed: {}", devnode);
 
                     const auto volume = read_by_device(udevice);
                     if (volume != nullptr)
@@ -320,7 +321,7 @@ parse_mounts(const bool report) noexcept
             }
         }
     }
-    // ztd::logger::debug("END PARSE");
+    // logger::debug<logger::domain::vfs>("END PARSE");
 }
 
 [[nodiscard]] static const std::optional<std::string>
@@ -347,7 +348,7 @@ cb_mount_monitor_watch(const Glib::IOCondition condition) noexcept
         return true;
     }
 
-    // ztd::logger::debug("@@@ {} changed", MOUNTINFO);
+    // logger::debug<logger::domain::vfs>("@@@ {} changed", MOUNTINFO);
     parse_mounts(true);
 
     return true;
@@ -380,19 +381,19 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
         // print action
         if (action == "add")
         {
-            ztd::logger::info("udev added:   {}", devnode);
+            logger::info<logger::domain::vfs>("udev added:   {}", devnode);
         }
         else if (action == "remove")
         {
-            ztd::logger::info("udev removed: {}", devnode);
+            logger::info<logger::domain::vfs>("udev removed: {}", devnode);
         }
         else if (action == "change")
         {
-            ztd::logger::info("udev changed: {}", devnode);
+            logger::info<logger::domain::vfs>("udev changed: {}", devnode);
         }
         else if (action == "move")
         {
-            ztd::logger::info("udev moved:   {}", devnode);
+            logger::info<logger::domain::vfs>("udev moved:   {}", devnode);
         }
 
         // add/remove volume
@@ -471,7 +472,7 @@ device_removed(const libudev::device& udevice) noexcept
 
         if (volume->is_device_type(vfs::volume::device_type::block) && volume->devnum() == devnum)
         { // remove volume
-            // ztd::logger::debug("remove volume {}", volume->device_file);
+            // logger::debug<logger::domain::vfs>("remove volume {}", volume->device_file);
             std::ranges::remove(global::volumes, volume);
             call_callbacks(volume, vfs::volume::state::removed);
             if (volume->is_mounted() && !volume->mount_point().empty())
@@ -491,7 +492,7 @@ vfs::volume_init() noexcept
     // create udev
     if (!global::udev.is_initialized())
     {
-        ztd::logger::warn("unable to initialize udev");
+        logger::warn<logger::domain::vfs>("unable to initialize udev");
         return false;
     }
 
@@ -527,30 +528,30 @@ vfs::volume_init() noexcept
     const auto check_umonitor = global::udev.monitor_new_from_netlink("udev");
     if (!check_umonitor)
     {
-        ztd::logger::warn("cannot create udev from netlink");
+        logger::warn<logger::domain::vfs>("cannot create udev from netlink");
         return false;
     }
     global::umonitor = check_umonitor.value();
     if (!global::umonitor.is_initialized())
     {
-        ztd::logger::warn("cannot create udev monitor");
+        logger::warn<logger::domain::vfs>("cannot create udev monitor");
         return false;
     }
     if (!global::umonitor.enable_receiving())
     {
-        ztd::logger::warn("cannot enable udev monitor receiving");
+        logger::warn<logger::domain::vfs>("cannot enable udev monitor receiving");
         return false;
     }
     if (!global::umonitor.filter_add_match_subsystem_devtype("block"))
     {
-        ztd::logger::warn("cannot set udev filter");
+        logger::warn<logger::domain::vfs>("cannot set udev filter");
         return false;
     }
 
     const i32 ufd = global::umonitor.get_fd();
     if (ufd == 0)
     {
-        ztd::logger::warn("cannot get udev monitor socket file descriptor");
+        logger::warn<logger::domain::vfs>("cannot get udev monitor socket file descriptor");
         return false;
     }
 
@@ -664,7 +665,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
     // change detection is unwanted)
     // return false to detect changes in this dir, true to avoid change detection
 
-    // ztd::logger::debug("vfs::volume_dir_avoid_changes({})", dir);
+    // logger::debug<logger::domain::vfs>("vfs::volume_dir_avoid_changes({})", dir);
     if (!std::filesystem::exists(dir) || !global::udev.is_initialized())
     {
         return false;
@@ -678,7 +679,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
     {
         return false;
     }
-    // ztd::logger::debug("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
+    // logger::debug<logger::domain::vfs>("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
 
     const auto check_fstype = devmount_fstype(stat.dev());
     if (!check_fstype)
@@ -686,7 +687,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
         return false;
     }
     const std::string& fstype = check_fstype.value();
-    // ztd::logger::debug("    fstype={}", fstype);
+    // logger::debug<logger::domain::vfs>("    fstype={}", fstype);
 
     const auto dev_change = xset_get_s(xset::name::dev_change).value_or("");
     const auto blacklisted = ztd::split(dev_change, " ");
@@ -698,7 +699,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
 
     // if (is_blacklisted)
     // {
-    //     ztd::logger::debug("    fstype '{}' matches blacklisted filesystem", fstype);
+    //     logger::debug<logger::domain::vfs>("    fstype '{}' matches blacklisted filesystem", fstype);
     // }
 
     return is_blacklisted;
@@ -710,7 +711,7 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
 
 vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
 {
-    // ztd::logger::debug("vfs::volume::volume({})", ztd::logger::utils::ptr(this));
+    // logger::debug<logger::domain::vfs>("vfs::volume::volume({})", logger::utils::ptr(this));
 
     this->devnum_ = device->devnum();
     this->device_file_ = device->devnode();
@@ -743,20 +744,20 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
 
     this->set_info();
 
-    // ztd::logger::debug("====devnum={}:{}", gnu_dev_major(this->devnum_), gnu_dev_minor(this->devnum_));
-    // ztd::logger::debug("    device_file={}", this->device_file_);
-    // ztd::logger::debug("    udi={}", this->udi_);
-    // ztd::logger::debug("    label={}", this->label_);
-    // ztd::logger::debug("    icon={}", this->icon_);
-    // ztd::logger::debug("    is_mounted={}", this->is_mounted_);
-    // ztd::logger::debug("    is_mountable={}", this->is_mountable_);
-    // ztd::logger::debug("    is_optical={}", this->is_optical_);
-    // ztd::logger::debug("    is_removable={}", this->is_removable_);
-    // ztd::logger::debug("    requires_eject={}", this->requires_eject_);
-    // ztd::logger::debug("    is_user_visible={}", this->is_user_visible_);
-    // ztd::logger::debug("    mount_point={}", this->mount_point_);
-    // ztd::logger::debug("    size={}", this->size_);
-    // ztd::logger::debug("    disp_name={}", this->disp_name_);
+    // logger::debug<logger::domain::vfs>("====devnum={}:{}", gnu_dev_major(this->devnum_), gnu_dev_minor(this->devnum_));
+    // logger::debug<logger::domain::vfs>("    device_file={}", this->device_file_);
+    // logger::debug<logger::domain::vfs>("    udi={}", this->udi_);
+    // logger::debug<logger::domain::vfs>("    label={}", this->label_);
+    // logger::debug<logger::domain::vfs>("    icon={}", this->icon_);
+    // logger::debug<logger::domain::vfs>("    is_mounted={}", this->is_mounted_);
+    // logger::debug<logger::domain::vfs>("    is_mountable={}", this->is_mountable_);
+    // logger::debug<logger::domain::vfs>("    is_optical={}", this->is_optical_);
+    // logger::debug<logger::domain::vfs>("    is_removable={}", this->is_removable_);
+    // logger::debug<logger::domain::vfs>("    requires_eject={}", this->requires_eject_);
+    // logger::debug<logger::domain::vfs>("    is_user_visible={}", this->is_user_visible_);
+    // logger::debug<logger::domain::vfs>("    mount_point={}", this->mount_point_);
+    // logger::debug<logger::domain::vfs>("    size={}", this->size_);
+    // logger::debug<logger::domain::vfs>("    disp_name={}", this->disp_name_);
 }
 
 const std::shared_ptr<vfs::volume>

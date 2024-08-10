@@ -32,7 +32,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "types.hxx"
 
@@ -79,7 +80,7 @@ open_file(const std::filesystem::path& path) noexcept
             ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
         if (!app_name)
         {
-            ztd::logger::error("no application to open file: {}", path.string());
+            logger::error("no application to open file: {}", path.string());
             return;
         }
     }
@@ -156,7 +157,7 @@ tmp_clean() noexcept
     if (std::filesystem::exists(tmp))
     {
         std::filesystem::remove_all(tmp);
-        ztd::logger::info("Removed {}", tmp.string());
+        logger::info("Removed {}", tmp.string());
     }
 }
 
@@ -174,8 +175,8 @@ activate(GtkApplication* app, void* user_data) noexcept
     gtk_window_set_application(GTK_WINDOW(main_window), app);
     assert(GTK_IS_APPLICATION_WINDOW(main_window));
 
-    // ztd::logger::debug("main_window = {}  {} {}",
-    //                    ztd::logger::utils::ptr(main_window),
+    // logger::debug("main_window = {}  {} {}",
+    //                    logger::utils::ptr(main_window),
     //                    opt->new_tab ? "new_tab" : "",
     //                    opt->reuse_tab ? "reuse_tab" : "");
 
@@ -209,7 +210,7 @@ activate(GtkApplication* app, void* user_data) noexcept
         }
         else
         {
-            ztd::logger::warn("File does not exist: {}", real_path.string());
+            logger::warn("File does not exist: {}", real_path.string());
         }
     }
 
@@ -264,7 +265,7 @@ main(int argc, char* argv[]) noexcept
     auto* const stream = std::freopen("/dev/null", "w", stderr);
     if (stream == nullptr)
     {
-        ztd::logger::error("Failed to freopen() stderr");
+        logger::error("Failed to freopen() stderr");
     }
 
     // ensure that there is only one instance of spacefm.
@@ -280,7 +281,7 @@ main(int argc, char* argv[]) noexcept
         {
             if (!std::filesystem::is_directory(file))
             {
-                ztd::logger::error("Not a directory: '{}'", file.string());
+                logger::error("Not a directory: '{}'", file.string());
                 continue;
             }
             const auto command = std::format("{} socket set new-tab {}",

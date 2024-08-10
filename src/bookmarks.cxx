@@ -26,7 +26,8 @@
 #include <fstream>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -63,7 +64,7 @@ parse_bookmarks(const std::string_view raw_line) noexcept
         return;
     }
 
-    // ztd::logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
+    // logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
 
     global::bookmarks.push_back({ztd::removeprefix(book_path, "file://"), book_name});
 }
@@ -91,7 +92,7 @@ load_bookmarks() noexcept
     std::ifstream file(global::bookmark_file);
     if (!file)
     {
-        ztd::logger::error("Failed to open the file: {}", global::bookmark_file.string());
+        logger::error("Failed to open the file: {}", global::bookmark_file.string());
         return;
     }
 

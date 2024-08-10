@@ -38,7 +38,8 @@
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -1126,7 +1127,7 @@ ptk_file_menu_new(ptk::browser* browser,
     const i32 no_write_access = faccessat(0, cwd.c_str(), W_OK, AT_EACCESS);
 
 #if (GTK_MAJOR_VERSION == 4)
-    ztd::logger::debug("TODO - PORT - GdkClipboard");
+    logger::debug<logger::domain::ptk>("TODO - PORT - GdkClipboard");
     bool is_clip = false;
 #elif (GTK_MAJOR_VERSION == 3)
     GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
@@ -2152,7 +2153,9 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                 catch (const Glib::FileError& e)
                 {
                     const std::string what = e.what();
-                    ztd::logger::warn("Error reading {}: {}", usr_path.string(), what);
+                    logger::warn<logger::domain::ptk>("Error reading {}: {}",
+                                                      usr_path.string(),
+                                                      what);
                 }
 
                 if (!contents.empty())
@@ -2246,11 +2249,11 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
         {
             const auto data_dir = vfs::user::data();
             command = std::format("update-mime-database {}/mime", data_dir.string());
-            ztd::logger::info("COMMAND({})", command);
+            logger::info<logger::domain::ptk>("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
 
             command = std::format("update-desktop-database {}/applications", data_dir.string());
-            ztd::logger::info("COMMAND({})", command);
+            logger::info<logger::domain::ptk>("COMMAND({})", command);
             Glib::spawn_command_line_async(command);
             break;
         }
@@ -2914,7 +2917,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
 {
     assert(set != nullptr);
     assert(browser != nullptr);
-    // ztd::logger::debug("ptk_file_menu_action()={}", set->name());
+    // logger::debug<logger::domain::ptk>("ptk_file_menu_action()={}", set->name());
 
     // setup data
     const auto& cwd = browser->cwd();

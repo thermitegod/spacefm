@@ -26,6 +26,8 @@
 
 #include <ztd/ztd.hxx>
 
+// #include "logger.hxx"
+
 #include "signals.hxx"
 
 #define ASYNC_TASK(obj) (static_cast<async_task*>(obj))
@@ -81,7 +83,7 @@ struct async_task
     typename std::enable_if_t<evt == spacefm::signal::task_finish, sigc::connection>
     add_event(evt_task_finished_load_app_t fun, GtkWidget* app) noexcept
     {
-        // ztd::logger::trace("Signal Connect   : spacefm::signal::task_finish");
+        // logger::trace<logger::domain::ptk>("Signal Connect   : spacefm::signal::task_finish");
         this->evt_data_load_app = app;
         return this->evt_task_finished_load_app.connect(sigc::ptr_fun(fun));
     }
@@ -91,7 +93,7 @@ struct async_task
     typename std::enable_if_t<evt == spacefm::signal::task_finish, void>
     run_event(bool is_cancelled) noexcept
     {
-        // ztd::logger::trace("Signal Execute   : spacefm::signal::task_finish");
+        // logger::trace<logger::domain::ptk>("Signal Execute   : spacefm::signal::task_finish");
         this->evt_task_finished_load_app.emit(this, is_cancelled, this->evt_data_load_app);
     }
 

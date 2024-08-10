@@ -29,6 +29,8 @@
 
 #include <ztd/ztd.hxx>
 
+// #include "logger.hxx"
+
 namespace vfs
 {
 struct device;
@@ -55,7 +57,7 @@ struct volume : public std::enable_shared_from_this<volume>
     volume() = delete;
     volume(const std::shared_ptr<vfs::device>& device) noexcept;
     ~volume() = default;
-    // ~volume() { ztd::logger::debug("vfs::volume::~volume({})", ztd::logger::utils::ptr(this)); };
+    // ~volume() { logger::debug<logger::domain::vfs>("vfs::volume::~volume({})", logger::utils::ptr(this)); };
     volume(const volume& other) = delete;
     volume(volume&& other) = delete;
     volume& operator=(const volume& other) = delete;

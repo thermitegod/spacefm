@@ -29,7 +29,8 @@
 #include <cmath>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 
@@ -745,7 +746,8 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
         }
         else
         {
-            ztd::logger::warn("bad dest_dir in on_dir_tree_view_drag_data_received");
+            logger::warn<logger::domain::ptk>(
+                "bad dest_dir in on_dir_tree_view_drag_data_received");
         }
     }
     /* If we are only getting drag status, not finished. */
