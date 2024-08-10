@@ -25,11 +25,8 @@
 #include <span>
 
 #include <array>
-#include <deque>
 #include <tuple>
 #include <vector>
-#include <queue>
-#include <stack>
 
 #include <map>
 #include <unordered_map>
@@ -47,14 +44,9 @@
 
 #include <chrono>
 
-#include <thread>
-#include <atomic>
-#include <condition_variable>
 #include <mutex>
-#include <future>
 
 #include <cassert>
-#include <exception>
 
 // SIGNALS
 #include <sigc++/sigc++.h>
