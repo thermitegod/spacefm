@@ -88,25 +88,23 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
         ->expected(1)
         ->check(CLI::IsMember(panels));
 
-    const auto is_config_path_valid = CLI::Validator(
-        [](const std::filesystem::path& input)
-        {
-            if (input.is_absolute())
-            {
-                if (std::filesystem::exists(input) && !std::filesystem::is_directory(input))
-                {
-                    return std::format("Config path must be a directory: {}", input.string());
-                }
-
-                // Validate pass
-                return std::string();
-            }
-            return std::format("Config path must be absolute: {}", input.string());
-        },
-        "");
     app.add_option("-c,--config", opt->config_dir, "Set configuration directory")
         ->expected(1)
-        ->check(is_config_path_valid);
+        ->check(
+            [](const std::filesystem::path& input)
+            {
+                if (input.is_absolute())
+                {
+                    if (std::filesystem::exists(input) && !std::filesystem::is_directory(input))
+                    {
+                        return std::format("Config path must be a directory: {}", input.string());
+                    }
+
+                    // Validate pass
+                    return std::string();
+                }
+                return std::format("Config path must be absolute: {}", input.string());
+            });
 
     app.add_flag("-g,--no-git-backed-settings",
                  opt->git_backed_settings,
@@ -142,19 +140,17 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
                 return std::string();
             });
 
-    const auto is_logfile_path_valid = CLI::Validator(
-        [](const std::filesystem::path& input)
-        {
-            if (input.is_absolute())
-            {
-                return std::string();
-            }
-            return std::format("Logfile path must be absolute: {}", input.string());
-        },
-        "");
     app.add_option("--logfile", opt->logfile, "absolute path to the logfile")
         ->expected(1)
-        ->check(is_logfile_path_valid);
+        ->check(
+            [](const std::filesystem::path& input)
+            {
+                if (input.is_absolute())
+                {
+                    return std::string();
+                }
+                return std::format("Logfile path must be absolute: {}", input.string());
+            });
 
     app.add_flag("-v,--version", opt->version, "Show version information");
 
