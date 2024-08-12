@@ -38,24 +38,20 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
         spdlog::level::level_enum default_level;
         std::string_view format;
     };
-    static constexpr ztd::
-        map<logger::domain, default_logger_options_data, magic_enum::enum_count<logger::domain>()>
-            default_logger_options{{{
-                {logger::domain::basic,
-                 {spdlog::level::trace, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] %v"}},
+    static constexpr ztd::map<logger::domain,
+                              default_logger_options_data,
+                              magic_enum::enum_count<logger::domain>()>
+        default_logger_options{{{
+            {logger::domain::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
 
-                {logger::domain::autosave,
-                 {spdlog::level::off, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] [autosave] %v"}},
+            {logger::domain::autosave, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t%v%$"}},
 
-                {logger::domain::signals,
-                 {spdlog::level::off, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] [signals] %v"}},
+            {logger::domain::signals, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 
-                {logger::domain::ptk,
-                 {spdlog::level::trace, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] [ptk] %v"}},
+            {logger::domain::ptk, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 
-                {logger::domain::vfs,
-                 {spdlog::level::trace, "[%Y-%m-%d %H:%M:%S.%e] [%^%L%$] [thread %t] [vfs] %v"}},
-            }}};
+            {logger::domain::vfs, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+        }}};
 
     spdlog::sink_ptr file_sink = nullptr;
     if (!logfile.empty())
