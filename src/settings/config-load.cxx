@@ -37,16 +37,16 @@
 static u64
 get_config_file_version(const toml::value& tbl) noexcept
 {
-    if (!tbl.contains(config::disk_format::toml::section::version.data()))
+    if (!tbl.contains(config::disk_format::toml::section::version))
     {
         logger::error("config missing TOML section [{}]",
                       config::disk_format::toml::section::version);
         return 0;
     }
 
-    const auto& version = toml::find(tbl, config::disk_format::toml::section::version.data());
+    const auto& version = toml::find(tbl, config::disk_format::toml::section::version);
 
-    return toml::find<u64>(version, config::disk_format::toml::key::version.data());
+    return toml::find<u64>(version, config::disk_format::toml::key::version);
 }
 
 static void
@@ -54,92 +54,91 @@ config_parse_general(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 
-    if (!tbl.contains(config::disk_format::toml::section::general.data()))
+    if (!tbl.contains(config::disk_format::toml::section::general))
     {
         logger::error("config missing TOML section [{}]",
                       config::disk_format::toml::section::general);
         return;
     }
 
-    const auto& section = toml::find(tbl, config::disk_format::toml::section::general.data());
+    const auto& section = toml::find(tbl, config::disk_format::toml::section::general);
 
-    if (section.contains(config::disk_format::toml::key::show_thumbnail.data()))
+    if (section.contains(config::disk_format::toml::key::show_thumbnail))
     {
         config::settings.show_thumbnails =
-            toml::find<bool>(section, config::disk_format::toml::key::show_thumbnail.data());
+            toml::find<bool>(section, config::disk_format::toml::key::show_thumbnail);
     }
 
-    if (section.contains(config::disk_format::toml::key::thumbnail_max_size.data()))
+    if (section.contains(config::disk_format::toml::key::thumbnail_max_size))
     {
         config::settings.thumbnail_max_size =
-            toml::find<u32>(section, config::disk_format::toml::key::thumbnail_max_size.data())
-            << 10;
+            toml::find<u32>(section, config::disk_format::toml::key::thumbnail_max_size) << 10;
     }
 
-    if (section.contains(config::disk_format::toml::key::icon_size_big.data()))
+    if (section.contains(config::disk_format::toml::key::icon_size_big))
     {
         config::settings.icon_size_big =
-            toml::find<i32>(section, config::disk_format::toml::key::icon_size_big.data());
+            toml::find<i32>(section, config::disk_format::toml::key::icon_size_big);
     }
 
-    if (section.contains(config::disk_format::toml::key::icon_size_small.data()))
+    if (section.contains(config::disk_format::toml::key::icon_size_small))
     {
         config::settings.icon_size_small =
-            toml::find<i32>(section, config::disk_format::toml::key::icon_size_small.data());
+            toml::find<i32>(section, config::disk_format::toml::key::icon_size_small);
     }
 
-    if (section.contains(config::disk_format::toml::key::icon_size_tool.data()))
+    if (section.contains(config::disk_format::toml::key::icon_size_tool))
     {
         config::settings.icon_size_tool =
-            toml::find<i32>(section, config::disk_format::toml::key::icon_size_tool.data());
+            toml::find<i32>(section, config::disk_format::toml::key::icon_size_tool);
     }
 
-    if (section.contains(config::disk_format::toml::key::single_click.data()))
+    if (section.contains(config::disk_format::toml::key::single_click))
     {
         config::settings.single_click =
-            toml::find<bool>(section, config::disk_format::toml::key::single_click.data());
+            toml::find<bool>(section, config::disk_format::toml::key::single_click);
     }
 
-    if (section.contains(config::disk_format::toml::key::single_hover.data()))
+    if (section.contains(config::disk_format::toml::key::single_hover))
     {
         config::settings.single_hover =
-            toml::find<bool>(section, config::disk_format::toml::key::single_hover.data());
+            toml::find<bool>(section, config::disk_format::toml::key::single_hover);
     }
 
-    if (section.contains(config::disk_format::toml::key::use_si_prefix.data()))
+    if (section.contains(config::disk_format::toml::key::use_si_prefix))
     {
         config::settings.use_si_prefix =
-            toml::find<bool>(section, config::disk_format::toml::key::use_si_prefix.data());
+            toml::find<bool>(section, config::disk_format::toml::key::use_si_prefix);
     }
 
-    if (section.contains(config::disk_format::toml::key::click_execute.data()))
+    if (section.contains(config::disk_format::toml::key::click_execute))
     {
         config::settings.click_executes =
-            toml::find<bool>(section, config::disk_format::toml::key::click_execute.data());
+            toml::find<bool>(section, config::disk_format::toml::key::click_execute);
     }
 
-    if (section.contains(config::disk_format::toml::key::confirm.data()))
+    if (section.contains(config::disk_format::toml::key::confirm))
     {
         config::settings.confirm =
-            toml::find<bool>(section, config::disk_format::toml::key::confirm.data());
+            toml::find<bool>(section, config::disk_format::toml::key::confirm);
     }
 
-    if (section.contains(config::disk_format::toml::key::confirm_delete.data()))
+    if (section.contains(config::disk_format::toml::key::confirm_delete))
     {
         config::settings.confirm_delete =
-            toml::find<bool>(section, config::disk_format::toml::key::confirm_delete.data());
+            toml::find<bool>(section, config::disk_format::toml::key::confirm_delete);
     }
 
-    if (section.contains(config::disk_format::toml::key::confirm_trash.data()))
+    if (section.contains(config::disk_format::toml::key::confirm_trash))
     {
         config::settings.confirm_trash =
-            toml::find<bool>(section, config::disk_format::toml::key::confirm_trash.data());
+            toml::find<bool>(section, config::disk_format::toml::key::confirm_trash);
     }
 
-    if (section.contains(config::disk_format::toml::key::thumbnailer_backend.data()))
+    if (section.contains(config::disk_format::toml::key::thumbnailer_backend))
     {
         config::settings.thumbnailer_use_api =
-            toml::find<bool>(section, config::disk_format::toml::key::thumbnailer_backend.data());
+            toml::find<bool>(section, config::disk_format::toml::key::thumbnailer_backend);
     }
 }
 
@@ -148,31 +147,29 @@ config_parse_window(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 
-    if (!tbl.contains(config::disk_format::toml::section::window.data()))
+    if (!tbl.contains(config::disk_format::toml::section::window))
     {
         logger::error("config missing TOML section [{}]",
                       config::disk_format::toml::section::window);
         return;
     }
 
-    const auto& section = toml::find(tbl, config::disk_format::toml::section::window.data());
+    const auto& section = toml::find(tbl, config::disk_format::toml::section::window);
 
-    if (section.contains(config::disk_format::toml::key::height.data()))
+    if (section.contains(config::disk_format::toml::key::height))
     {
-        config::settings.height =
-            toml::find<u64>(section, config::disk_format::toml::key::height.data());
+        config::settings.height = toml::find<u64>(section, config::disk_format::toml::key::height);
     }
 
-    if (section.contains(config::disk_format::toml::key::width.data()))
+    if (section.contains(config::disk_format::toml::key::width))
     {
-        config::settings.width =
-            toml::find<u64>(section, config::disk_format::toml::key::width.data());
+        config::settings.width = toml::find<u64>(section, config::disk_format::toml::key::width);
     }
 
-    if (section.contains(config::disk_format::toml::key::maximized.data()))
+    if (section.contains(config::disk_format::toml::key::maximized))
     {
         config::settings.maximized =
-            toml::find<bool>(section, config::disk_format::toml::key::maximized.data());
+            toml::find<bool>(section, config::disk_format::toml::key::maximized);
     }
 }
 
@@ -181,49 +178,49 @@ config_parse_interface(const toml::value& tbl, u64 version) noexcept
 {
     (void)version;
 
-    if (!tbl.contains(config::disk_format::toml::section::interface.data()))
+    if (!tbl.contains(config::disk_format::toml::section::interface))
     {
         logger::error("config missing TOML section [{}]",
                       config::disk_format::toml::section::interface);
         return;
     }
 
-    const auto& section = toml::find(tbl, config::disk_format::toml::section::interface.data());
+    const auto& section = toml::find(tbl, config::disk_format::toml::section::interface);
 
-    if (section.contains(config::disk_format::toml::key::show_tabs.data()))
+    if (section.contains(config::disk_format::toml::key::show_tabs))
     {
         config::settings.always_show_tabs =
-            toml::find<bool>(section, config::disk_format::toml::key::show_tabs.data());
+            toml::find<bool>(section, config::disk_format::toml::key::show_tabs);
     }
 
-    if (section.contains(config::disk_format::toml::key::show_close.data()))
+    if (section.contains(config::disk_format::toml::key::show_close))
     {
         config::settings.show_close_tab_buttons =
-            toml::find<bool>(section, config::disk_format::toml::key::show_close.data());
+            toml::find<bool>(section, config::disk_format::toml::key::show_close);
     }
 
-    if (section.contains(config::disk_format::toml::key::new_tab_here.data()))
+    if (section.contains(config::disk_format::toml::key::new_tab_here))
     {
         config::settings.new_tab_here =
-            toml::find<bool>(section, config::disk_format::toml::key::new_tab_here.data());
+            toml::find<bool>(section, config::disk_format::toml::key::new_tab_here);
     }
 
-    if (section.contains(config::disk_format::toml::key::show_toolbar_home.data()))
+    if (section.contains(config::disk_format::toml::key::show_toolbar_home))
     {
         config::settings.show_toolbar_home =
-            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_home.data());
+            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_home);
     }
 
-    if (section.contains(config::disk_format::toml::key::show_toolbar_refresh.data()))
+    if (section.contains(config::disk_format::toml::key::show_toolbar_refresh))
     {
         config::settings.show_toolbar_refresh =
-            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_refresh.data());
+            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_refresh);
     }
 
-    if (section.contains(config::disk_format::toml::key::show_toolbar_search.data()))
+    if (section.contains(config::disk_format::toml::key::show_toolbar_search))
     {
         config::settings.show_toolbar_search =
-            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_search.data());
+            toml::find<bool>(section, config::disk_format::toml::key::show_toolbar_search);
     }
 }
 
@@ -234,7 +231,7 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
 
     // loop over all of [[XSet]]
     for (const auto& section :
-         toml::find<toml::array>(tbl, config::disk_format::toml::section::xset.data()))
+         toml::find<toml::array>(tbl, config::disk_format::toml::section::xset))
     {
         // get [XSet.name] and all vars
         for (const auto& [toml_name, toml_vars] : section.as_table())

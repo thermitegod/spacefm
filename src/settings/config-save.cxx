@@ -126,52 +126,52 @@ config::save() noexcept
     // new values get appened at the top of the file,
     // declare in reverse order
     const toml::value toml_data = toml::value{
-        {config::disk_format::toml::section::version.data(),
+        {config::disk_format::toml::section::version,
          toml::value{
-             {config::disk_format::toml::key::version.data(), config::disk_format::version},
+             {config::disk_format::toml::key::version, config::disk_format::version},
          }},
 
-        {config::disk_format::toml::section::general.data(),
+        {config::disk_format::toml::section::general,
          toml::value{
              // clang-format off
-             {config::disk_format::toml::key::show_thumbnail.data(), config::settings.show_thumbnails},
-             {config::disk_format::toml::key::thumbnail_max_size.data(), config::settings.thumbnail_max_size >> 10},
-             {config::disk_format::toml::key::icon_size_big.data(), config::settings.icon_size_big},
-             {config::disk_format::toml::key::icon_size_small.data(), config::settings.icon_size_small},
-             {config::disk_format::toml::key::icon_size_tool.data(), config::settings.icon_size_tool},
-             {config::disk_format::toml::key::single_click.data(), config::settings.single_click},
-             {config::disk_format::toml::key::single_hover.data(), config::settings.single_hover},
-             {config::disk_format::toml::key::use_si_prefix.data(), config::settings.use_si_prefix},
-             {config::disk_format::toml::key::click_execute.data(), config::settings.click_executes},
-             {config::disk_format::toml::key::confirm.data(), config::settings.confirm},
-             {config::disk_format::toml::key::confirm_delete.data(), config::settings.confirm_delete},
-             {config::disk_format::toml::key::confirm_trash.data(), config::settings.confirm_trash},
-             {config::disk_format::toml::key::thumbnailer_backend.data(), config::settings.thumbnailer_use_api},
+             {config::disk_format::toml::key::show_thumbnail, config::settings.show_thumbnails},
+             {config::disk_format::toml::key::thumbnail_max_size, config::settings.thumbnail_max_size >> 10},
+             {config::disk_format::toml::key::icon_size_big, config::settings.icon_size_big},
+             {config::disk_format::toml::key::icon_size_small, config::settings.icon_size_small},
+             {config::disk_format::toml::key::icon_size_tool, config::settings.icon_size_tool},
+             {config::disk_format::toml::key::single_click, config::settings.single_click},
+             {config::disk_format::toml::key::single_hover, config::settings.single_hover},
+             {config::disk_format::toml::key::use_si_prefix, config::settings.use_si_prefix},
+             {config::disk_format::toml::key::click_execute, config::settings.click_executes},
+             {config::disk_format::toml::key::confirm, config::settings.confirm},
+             {config::disk_format::toml::key::confirm_delete, config::settings.confirm_delete},
+             {config::disk_format::toml::key::confirm_trash, config::settings.confirm_trash},
+             {config::disk_format::toml::key::thumbnailer_backend, config::settings.thumbnailer_use_api},
              // clang-format on
          }},
 
-        {config::disk_format::toml::section::window.data(),
+        {config::disk_format::toml::section::window,
          toml::value{
              // clang-format off
-             {config::disk_format::toml::key::height.data(), config::settings.height},
-             {config::disk_format::toml::key::width.data(), config::settings.width},
-             {config::disk_format::toml::key::maximized.data(), config::settings.maximized},
+             {config::disk_format::toml::key::height, config::settings.height},
+             {config::disk_format::toml::key::width, config::settings.width},
+             {config::disk_format::toml::key::maximized, config::settings.maximized},
              // clang-format on
          }},
 
-        {config::disk_format::toml::section::interface.data(),
+        {config::disk_format::toml::section::interface,
          toml::value{
              // clang-format off
-             {config::disk_format::toml::key::show_tabs.data(), config::settings.always_show_tabs},
-             {config::disk_format::toml::key::show_close.data(), config::settings.show_close_tab_buttons},
-             {config::disk_format::toml::key::new_tab_here.data(), config::settings.new_tab_here},
-             {config::disk_format::toml::key::show_toolbar_home.data(), config::settings.show_toolbar_home},
-             {config::disk_format::toml::key::show_toolbar_refresh.data(), config::settings.show_toolbar_refresh},
-             {config::disk_format::toml::key::show_toolbar_search.data(), config::settings.show_toolbar_search},
+             {config::disk_format::toml::key::show_tabs, config::settings.always_show_tabs},
+             {config::disk_format::toml::key::show_close, config::settings.show_close_tab_buttons},
+             {config::disk_format::toml::key::new_tab_here, config::settings.new_tab_here},
+             {config::disk_format::toml::key::show_toolbar_home, config::settings.show_toolbar_home},
+             {config::disk_format::toml::key::show_toolbar_refresh, config::settings.show_toolbar_refresh},
+             {config::disk_format::toml::key::show_toolbar_search, config::settings.show_toolbar_search},
              // clang-format on
          }},
 
-        {config::disk_format::toml::section::xset.data(),
+        {config::disk_format::toml::section::xset,
          toml::value{
              pack_xsets(),
          }},

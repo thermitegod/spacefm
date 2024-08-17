@@ -41,44 +41,44 @@ namespace toml::section
 // have to use std::string_view::data()
 
 // TOML config on disk names - TOML sections
-constexpr std::string_view version{"Version"};
-constexpr std::string_view general{"General"};
-constexpr std::string_view window{"Window"};
-constexpr std::string_view interface{"Interface"};
-constexpr std::string_view xset{"XSet"};
+constexpr const char* const version{"Version"};
+constexpr const char* const general{"General"};
+constexpr const char* const window{"Window"};
+constexpr const char* const interface{"Interface"};
+constexpr const char* const xset{"XSet"};
 } // namespace toml::section
 namespace toml::key
 {
 // TOML config on disk names - TOML section keys
-constexpr std::string_view version{"version"};
+constexpr const char* const version{"version"};
 
 // General keys
-constexpr std::string_view show_thumbnail{"show_thumbnail"};
-constexpr std::string_view thumbnail_max_size{"max_thumb_size"};
-constexpr std::string_view icon_size_big{"icon_size_big"};
-constexpr std::string_view icon_size_small{"icon_size_small"};
-constexpr std::string_view icon_size_tool{"icon_size_tool"};
-constexpr std::string_view single_click{"single_click"};
-constexpr std::string_view single_hover{"single_hover"};
-constexpr std::string_view use_si_prefix{"use_si_prefix"};
-constexpr std::string_view click_execute{"click_executes"};
-constexpr std::string_view confirm{"confirm"};
-constexpr std::string_view confirm_delete{"confirm_delete"};
-constexpr std::string_view confirm_trash{"confirm_trash"};
-constexpr std::string_view thumbnailer_backend{"thumbnailer_backend"};
+constexpr const char* const show_thumbnail{"show_thumbnail"};
+constexpr const char* const thumbnail_max_size{"max_thumb_size"};
+constexpr const char* const icon_size_big{"icon_size_big"};
+constexpr const char* const icon_size_small{"icon_size_small"};
+constexpr const char* const icon_size_tool{"icon_size_tool"};
+constexpr const char* const single_click{"single_click"};
+constexpr const char* const single_hover{"single_hover"};
+constexpr const char* const use_si_prefix{"use_si_prefix"};
+constexpr const char* const click_execute{"click_executes"};
+constexpr const char* const confirm{"confirm"};
+constexpr const char* const confirm_delete{"confirm_delete"};
+constexpr const char* const confirm_trash{"confirm_trash"};
+constexpr const char* const thumbnailer_backend{"thumbnailer_backend"};
 
 // Window keys
-constexpr std::string_view height{"height"};
-constexpr std::string_view width{"width"};
-constexpr std::string_view maximized{"maximized"};
+constexpr const char* const height{"height"};
+constexpr const char* const width{"width"};
+constexpr const char* const maximized{"maximized"};
 
 // Interface keys
-constexpr std::string_view show_tabs{"always_show_tabs"};
-constexpr std::string_view show_close{"show_close_tab_buttons"};
-constexpr std::string_view new_tab_here{"new_tab_here"};
-constexpr std::string_view show_toolbar_home{"show_toolbar_home_button"};
-constexpr std::string_view show_toolbar_refresh{"show_toolbar_refresh_button"};
-constexpr std::string_view show_toolbar_search{"show_toolbar_search_bar"};
+constexpr const char* const show_tabs{"always_show_tabs"};
+constexpr const char* const show_close{"show_close_tab_buttons"};
+constexpr const char* const new_tab_here{"new_tab_here"};
+constexpr const char* const show_toolbar_home{"show_toolbar_home_button"};
+constexpr const char* const show_toolbar_refresh{"show_toolbar_refresh_button"};
+constexpr const char* const show_toolbar_search{"show_toolbar_search_bar"};
 
 // XSet keys
 // The names for XSet member variables are deduced using magic_enum::enum_name()
