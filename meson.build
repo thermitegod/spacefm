@@ -439,7 +439,6 @@ sources += files(
     'src/types.cxx',
 
     'src/compat/gtk4-porting.cxx',
-    'src/compat/type-conversion.cxx',
 
     'src/commandline/commandline.cxx',
 

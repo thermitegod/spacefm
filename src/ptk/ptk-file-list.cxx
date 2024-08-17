@@ -17,6 +17,10 @@
 
 #include <string_view>
 
+#include <vector>
+
+#include <span>
+
 #include <algorithm>
 
 #include <chrono>
@@ -33,8 +37,6 @@
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
-
-#include "compat/type-conversion.hxx"
 
 #include "vfs/vfs-file.hxx"
 
@@ -757,7 +759,16 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
             {ptk::file_list::column::mtime, &compare_file_mtime},
         }}};
 
-    auto file_list = glist_to_vector_vfs_file(list->files);
+    auto file_list = [](GList* list)
+    {
+        std::vector<std::shared_ptr<vfs::file>> vec;
+        vec.reserve(g_list_length(list));
+        for (GList* l = list; l; l = g_list_next(l))
+        {
+            vec.push_back(static_cast<vfs::file*>(l->data)->shared_from_this());
+        }
+        return vec;
+    }(list->files);
 
     std::ranges::sort(
         file_list.begin(),
@@ -765,7 +776,15 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
         [&list](const auto& a, const auto& b)
         { return compare_file(a, b, list, compare_function_ptr_table.at(list->sort_col)) < 0; });
 
-    return vector_to_glist_vfs_file(file_list);
+    return [](const std::span<const std::shared_ptr<vfs::file>> list)
+    {
+        GList* l = nullptr;
+        for (const auto& file : list)
+        {
+            l = g_list_append(l, file.get());
+        }
+        return l;
+    }(file_list);
 }
 
 // ptk::file_list
