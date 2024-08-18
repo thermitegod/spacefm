@@ -44,11 +44,16 @@
 GdkPixbuf*
 vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
-    const std::string file_hash = ztd::compute_checksum(ztd::checksum::type::md5, file->uri());
-    const std::string thumbnail_filename = std::format("{}.png", file_hash);
+#if (GTK_MAJOR_VERSION == 4)
+    const auto hash =
+        Glib::Checksum::compute_checksum(Glib::Checksum::Type::MD5, file->uri().data());
+#elif (GTK_MAJOR_VERSION == 3)
+    const auto hash =
+        Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, file->uri().data());
+#endif
 
     const auto thumbnail_cache = vfs::user::cache() / "thumbnails/normal";
-    const auto thumbnail_file = thumbnail_cache / thumbnail_filename;
+    const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
 
     // logger::debug<logger::domain::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
 
@@ -100,7 +105,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         // Have this check run everytime because if the cache is
         // deleted while running then thumbnail loading will break.
         // TODO - have a monitor watch this directory and recreate if deleted.
-        if (!std::filesystem::is_directory(vfs::user::cache() / "thumbnails/normal"))
+        if (!std::filesystem::is_directory(thumbnail_cache))
         {
             std::filesystem::create_directories(thumbnail_cache);
         }
