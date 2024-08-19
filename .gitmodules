@@ -13,3 +13,6 @@
 [submodule "subprojects/concurrencpp"]
 	path = subprojects/concurrencpp
 	url = https://github.com/David-Haim/concurrencpp
+[submodule "subprojects/spdlog"]
+	path = subprojects/spdlog
+	url = https://github.com/gabime/spdlog

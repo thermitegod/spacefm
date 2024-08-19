@@ -33,6 +33,11 @@ option('with-system-magic-enum',
        value: false,
        description : 'Use system magic_enum instead of bundled version')
 
+option('with-system-spdlog',
+       type : 'boolean',
+       value: false,
+       description : 'Use system spdlog instead of bundled version')
+
 option('with-system-toml11',
        type : 'boolean',
        value: false,

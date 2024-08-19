@@ -195,7 +195,6 @@ libudev_dep = dependency('libudev', required : true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required : true)
 openssl_dep = dependency('openssl', required : true)
 
-spdlog_dep = dependency('spdlog', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 pugixml_dep = dependency('pugixml', required : true)
 
@@ -214,7 +213,6 @@ dependencies = [
   glibmm_dep,
   giomm_dep,
 
-  spdlog_dep,
   sigc_dep,
   pugixml_dep,
 
@@ -292,7 +290,6 @@ else
   cmake = import('cmake')
   concurrencpp_proj = cmake.subproject('concurrencpp', required : true)
   concurrencpp_dep = concurrencpp_proj.dependency('concurrencpp')
-  # incdir += include_directories('third_party/concurrencpp/include')
   dependencies += concurrencpp_dep
 endif
 
@@ -305,6 +302,20 @@ else
   magic_enum_proj = subproject('magic_enum', required : true, default_options: ['test=false'])
   magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
   dependencies += magic_enum_dep
+endif
+
+if get_option('with-system-spdlog')
+  spdlog_dep = dependency('spdlog', required : true)
+  dependencies += spdlog_dep
+else
+  # using subproject
+  cmake = import('cmake')
+  # use std::format over bundled fmt::format
+  cmake_opt_var = cmake.subproject_options()
+  cmake_opt_var.add_cmake_defines({'SPDLOG_USE_STD_FORMAT': '1'})
+  spdlog_proj = cmake.subproject('spdlog', required : true, options: cmake_opt_var)
+  spdlog_dep = spdlog_proj.dependency('spdlog')
+  dependencies += spdlog_dep
 endif
 
 if get_option('with-system-toml11')
