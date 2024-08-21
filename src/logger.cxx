@@ -41,7 +41,7 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
     static constexpr ztd::map<logger::domain,
                               default_logger_options_data,
                               magic_enum::enum_count<logger::domain>()>
-        default_logger_options{{{
+        default_logger_options{{
             {logger::domain::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
 
             {logger::domain::autosave, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t%v%$"}},
@@ -51,7 +51,7 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
             {logger::domain::ptk, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 
             {logger::domain::vfs, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
-        }}};
+        }};
 
     spdlog::sink_ptr file_sink = nullptr;
     if (!logfile.empty())

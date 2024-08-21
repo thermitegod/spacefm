@@ -33,7 +33,7 @@ struct panel_lookup_data
     std::array<std::array<xset::name, 4>, MAX_PANELS> panel_mode{};
 };
 
-static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{{{
+static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{{
     {
         xset::panel::show,
         {
@@ -897,7 +897,7 @@ static constexpr ztd::map<xset::panel, panel_lookup_data, 24> xset_panel_lookup{
             }},
         },
     },
-}}};
+}};
 
 // panel
 
@@ -927,12 +927,12 @@ const std::string_view
 xset::get_window_panel_mode(xset::main_window_panel mode) noexcept
 {
     static constexpr ztd::map<xset::main_window_panel, std::string_view, 4>
-        main_window_panel_mode_map{{{
+        main_window_panel_mode_map{{
             {xset::main_window_panel::panel_neither, "0"},
             {xset::main_window_panel::panel_horiz, "1"},
             {xset::main_window_panel::panel_vert, "2"},
             {xset::main_window_panel::panel_both, "3"},
-        }}};
+        }};
 
     return main_window_panel_mode_map.at(mode);
 }

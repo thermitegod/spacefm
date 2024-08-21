@@ -100,7 +100,7 @@ static GObjectClass* parent_class = nullptr;
 
 namespace global
 {
-const ztd::map<ptk::file_list::column, GType, 15> column_types{{{
+const ztd::map<ptk::file_list::column, GType, 15> column_types{{
     {ptk::file_list::column::big_icon, GDK_TYPE_PIXBUF},
     {ptk::file_list::column::small_icon, GDK_TYPE_PIXBUF},
     {ptk::file_list::column::name, G_TYPE_STRING},
@@ -116,7 +116,7 @@ const ztd::map<ptk::file_list::column, GType, 15> column_types{{{
     {ptk::file_list::column::ctime, G_TYPE_STRING},
     {ptk::file_list::column::mtime, G_TYPE_STRING},
     {ptk::file_list::column::info, G_TYPE_POINTER},
-}}};
+}};
 }
 
 GType
@@ -744,7 +744,7 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
     assert(list->sort_col != ptk::file_list::column::info);
 
     static const ztd::map<ptk::file_list::column, compare_function_t, 12>
-        compare_function_ptr_table{{{
+        compare_function_ptr_table{{
             {ptk::file_list::column::name, &compare_file_name},
             {ptk::file_list::column::size, &compare_file_size},
             {ptk::file_list::column::bytes, &compare_file_size},
@@ -757,7 +757,7 @@ ptk_file_info_list_sort(ptk::file_list* list) noexcept
             {ptk::file_list::column::btime, &compare_file_btime},
             {ptk::file_list::column::ctime, &compare_file_ctime},
             {ptk::file_list::column::mtime, &compare_file_mtime},
-        }}};
+        }};
 
     auto file_list = [](GList* list)
     {

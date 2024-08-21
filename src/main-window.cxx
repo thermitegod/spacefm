@@ -617,12 +617,12 @@ MainWindow::show_panels() noexcept
     }
 
     // which panels to show
-    const ztd::map<panel_t, bool, 4> show{{{
+    const ztd::map<panel_t, bool, 4> show{{
         {panel_1, xset_get_b_panel(panel_1, xset::panel::show)},
         {panel_2, xset_get_b_panel(panel_2, xset::panel::show)},
         {panel_3, xset_get_b_panel(panel_3, xset::panel::show)},
         {panel_4, xset_get_b_panel(panel_4, xset::panel::show)},
-    }}};
+    }};
 
     bool horiz = false;
     bool vert = false;

@@ -50,10 +50,10 @@ script_exists(const std::filesystem::path& script) noexcept
 const std::filesystem::path
 get_script_path(spacefm::script script) noexcept
 {
-    static constexpr ztd::map<spacefm::script, const std::string_view, 2> script_map{{{
+    static constexpr ztd::map<spacefm::script, std::string_view, 2> script_map{{
         {spacefm::script::config_update, "config-update"},
         {spacefm::script::config_update_git, "config-update-git"},
-    }}};
+    }};
 
     return std::filesystem::path() / PACKAGE_SCRIPTS_PATH / script_map.at(script);
 }

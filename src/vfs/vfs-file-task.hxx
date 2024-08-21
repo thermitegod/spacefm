@@ -172,7 +172,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
     std::chrono::seconds last_elapsed{std::chrono::seconds::zero()};
     u32 current_item{0};
 
-    ztd::timer timer;
+    ztd::timer<std::chrono::milliseconds> timer;
     std::chrono::system_clock::time_point start_time;
 
     // copy of Current processed file
