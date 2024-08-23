@@ -186,8 +186,7 @@ libudev::device::get_driver() const noexcept
 bool
 libudev::device::has_sysattr(const std::string_view named) const noexcept
 {
-    const auto keys = get_sysattr_keys();
-    return std::ranges::find(keys.cbegin(), keys.cend(), named) != keys.cend();
+    return std::ranges::contains(get_sysattr_keys(), named);
 }
 
 const std::optional<std::string>

@@ -320,7 +320,7 @@ vfs::detail::mime_type::is_archive(const std::string_view mime_type) noexcept
         "application/zstd",
     };
 
-    return std::ranges::find(archive_mime_types, mime_type) != archive_mime_types.cend();
+    return std::ranges::contains(archive_mime_types, mime_type);
 }
 
 bool
