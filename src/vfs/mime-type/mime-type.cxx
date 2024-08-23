@@ -194,8 +194,8 @@ vfs::detail::mime_type::get_desc_icon(const std::string_view type) noexcept
      * Since the spec really sucks, we do not follow it here.
      */
 
-    const std::string user_path = std::format("{}/mime/{}.xml", vfs::user::data().string(), type);
-    if (faccessat(0, user_path.data(), F_OK, AT_EACCESS) != -1)
+    const auto user_path = vfs::user::data() / "mime" / std::format("{}.xml", type);
+    if (faccessat(0, user_path.c_str(), F_OK, AT_EACCESS) != -1)
     {
         const auto icon_data = parse_xml_file(user_path, true);
         if (icon_data)
@@ -207,8 +207,8 @@ vfs::detail::mime_type::get_desc_icon(const std::string_view type) noexcept
     // look in system dirs
     for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
-        const std::string sys_path = std::format("{}/mime/{}.xml", sys_dir.string(), type);
-        if (faccessat(0, sys_path.data(), F_OK, AT_EACCESS) != -1)
+        const auto sys_path = sys_dir / "mime" / std::format("{}.xml", type);
+        if (faccessat(0, sys_path.c_str(), F_OK, AT_EACCESS) != -1)
         {
             const auto icon_data = parse_xml_file(sys_path, false);
             if (icon_data)
