@@ -22,7 +22,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include <zmqpp/zmqpp.hpp>
+#include <zmq.hpp>
 
 #include <ztd/ztd.hxx>
 
@@ -34,66 +34,50 @@
 void
 socket::server_thread() noexcept
 {
-    const zmqpp::context context;
-    zmqpp::socket server(context, zmqpp::socket_type::pair);
+    zmq::context_t context{1};
+    zmq::socket_t server(context, zmq::socket_type::pair);
 
-    server.bind(std::format("tcp://*:{}", SOCKET_PORT));
+    server.bind(std::format("tcp://localhost:{}", SOCKET_PORT));
 
     while (true)
     {
         // Wait for a command to be received
-        zmqpp::message request;
-        server.receive(request);
+        zmq::message_t request;
+        if (server.recv(request, zmq::recv_flags::none))
+        {
+            // Process the command and generate a response
+            const std::string command(static_cast<char*>(request.data()), request.size());
 
-        // Process the command and generate a response
-        std::string command;
-        request >> command;
+            logger::info("SOCKET({})", command);
+            const auto [ret, response] = socket::command(command);
 
-        logger::info("SOCKET({})", command);
-        const auto [ret, response] = socket::command(command);
+            nlohmann::json json;
+            json["exit"] = ret;
+            json["response"] = response;
 
-        nlohmann::json json;
-        json["exit"] = ret;
-        json["response"] = response;
-
-        // Send the response back to the sender
-        zmqpp::message reply;
-        reply << json.dump();
-        server.send(reply);
+            // Send the response back to the sender
+            zmq::message_t reply(json.dump().size());
+            std::memcpy(reply.data(), json.dump().data(), json.dump().size());
+            server.send(reply, zmq::send_flags::none);
+        }
     }
 }
 
 bool
-socket::send_command(zmqpp::socket& socket, const std::string_view message) noexcept
+socket::send_command(zmq::socket_t& socket, const std::string_view command) noexcept
 {
-    zmqpp::message msg;
-    msg << message.data();
-
-    try
-    {
-        socket.send(msg);
-    }
-    catch (const zmqpp::exception& e)
-    {
-        return false;
-    }
-    return true;
+    zmq::message_t message(command.size());
+    std::memcpy(message.data(), command.data(), command.size());
+    return socket.send(message, zmq::send_flags::none) != std::nullopt;
 }
 
 const std::optional<std::string>
-socket::receive_response(zmqpp::socket& socket) noexcept
+socket::receive_response(zmq::socket_t& socket) noexcept
 {
-    zmqpp::message msg;
-    socket.receive(msg);
-
-    std::string response;
-    try
+    zmq::message_t message;
+    if (socket.recv(message, zmq::recv_flags::none))
     {
-        msg >> response;
+        return std::string(static_cast<char*>(message.data()), message.size());
     }
-    catch (const zmqpp::exception& e)
-    {
-        return std::nullopt;
-    }
-    return response;
+    return std::nullopt;
 }

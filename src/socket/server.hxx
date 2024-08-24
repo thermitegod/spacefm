@@ -20,12 +20,12 @@
 
 #include <optional>
 
-#include <zmqpp/zmqpp.hpp>
+#include <zmq.hpp>
 
 namespace socket
 {
 [[noreturn]] void server_thread() noexcept;
 
-[[nodiscard]] bool send_command(zmqpp::socket& socket, const std::string_view message) noexcept;
-[[nodiscard]] const std::optional<std::string> receive_response(zmqpp::socket& socket) noexcept;
+[[nodiscard]] bool send_command(zmq::socket_t& socket, const std::string_view command) noexcept;
+[[nodiscard]] const std::optional<std::string> receive_response(zmq::socket_t& socket) noexcept;
 } // namespace socket

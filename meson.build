@@ -343,15 +343,11 @@ endif
 
 if get_option('socket')
     nlohmann_json_dep = dependency('nlohmann_json', required: true)
-
-    # zmqpp does not provide a pkgconfig file
-    libzmq_dep = dependency('libzmq', required: true)
-    libzmqpp_dep = cc.find_library('zmqpp', has_headers: ['zmqpp/zmqpp.hpp'], required: true)
+    cppzmq_dep = dependency('cppzmq', required: true)
 
     dependencies += [
         nlohmann_json_dep,
-        libzmq_dep,
-        libzmqpp_dep,
+        cppzmq_dep,
     ]
 
     features += '-DHAVE_SOCKET'

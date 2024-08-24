@@ -25,8 +25,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include <zmqpp/zmqpp.hpp>
-#include <zmqpp/socket_options.hpp>
+#include <zmq.hpp>
 
 #include <ztd/ztd.hxx>
 
@@ -42,16 +41,17 @@
 run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
 {
     // connect to server
-    const zmqpp::context context;
-    zmqpp::socket socket(context, zmqpp::socket_type::pair);
-    socket.set(zmqpp::socket_option::receive_timeout, 1000);
+    zmq::context_t context{1};
+    zmq::socket_t socket(context, zmq::socket_type::pair);
+    socket.set(zmq::sockopt::rcvtimeo, 1000);
+
     try
     {
         socket.connect(std::format("tcp://localhost:{}", SOCKET_PORT));
     }
-    catch (const zmqpp::exception& e)
+    catch (const zmq::error_t& e)
     {
-        std::println("Failed to connect to server");
+        std::print("Failed to connect to server: ", e.what());
         std::exit(EXIT_FAILURE);
     }
 
