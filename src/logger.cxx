@@ -48,6 +48,8 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
 
             {logger::domain::signals, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 
+            {logger::domain::socket, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
+
             {logger::domain::ptk, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
 
             {logger::domain::vfs, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},

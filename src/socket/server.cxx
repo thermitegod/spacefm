@@ -39,6 +39,9 @@ socket::server_thread() noexcept
 
     server.bind(std::format("tcp://localhost:{}", SOCKET_PORT));
 
+    logger::debug<logger::domain::socket>("starting socket thread {}",
+                                          std::format("tcp://localhost:{}", SOCKET_PORT));
+
     while (true)
     {
         // Wait for a command to be received
@@ -48,16 +51,17 @@ socket::server_thread() noexcept
             // Process the command and generate a response
             const std::string command(static_cast<char*>(request.data()), request.size());
 
-            logger::info("SOCKET({})", command);
-            const auto [ret, response] = socket::command(command);
+            logger::info<logger::domain::socket>("request: {}", command);
+            const auto [ret, result] = socket::command(command);
 
-            nlohmann::json json;
-            json["exit"] = ret;
-            json["response"] = response;
+            nlohmann::json response;
+            response["exit"] = ret;
+            response["result"] = result;
+            logger::info<logger::domain::socket>("result : {}", response.dump());
 
             // Send the response back to the sender
-            zmq::message_t reply(json.dump().size());
-            std::memcpy(reply.data(), json.dump().data(), json.dump().size());
+            zmq::message_t reply(response.dump().size());
+            std::memcpy(reply.data(), response.dump().data(), response.dump().size());
             server.send(reply, zmq::send_flags::none);
         }
     }

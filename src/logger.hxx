@@ -30,6 +30,7 @@ enum class domain
     basic,
     autosave,
     signals,
+    socket,
     ptk,
     vfs,
 };

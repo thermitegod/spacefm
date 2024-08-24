@@ -29,8 +29,6 @@
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
-
 #include "socket/server.hxx"
 
 #include "commandline/socket/subcommands.hxx"
@@ -68,7 +66,6 @@ run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
     server_json["data"] = opt->socket_data;
     // std::println("JSON : {}", server_json.dump());
 
-    // logger::debug("Sending message {}\n", server_json.dump());
     const bool sent = socket::send_command(socket, server_json.dump());
     if (!sent)
     {
@@ -83,13 +80,13 @@ run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
         std::println("Failed to receive response from server");
         std::exit(EXIT_FAILURE);
     }
-    const nlohmann::json response_json = nlohmann::json::parse(server_response.value());
-    const i32 ret = response_json["exit"];
-    const std::string response = response_json["response"];
+    const nlohmann::json response = nlohmann::json::parse(server_response.value());
+    const i32 ret = response["exit"];
+    const std::string result = response["result"];
 
-    if (!response.empty())
+    if (!result.empty())
     {
-        std::println("{}", response);
+        std::println("{}", result);
     }
     std::exit(ret);
 }
