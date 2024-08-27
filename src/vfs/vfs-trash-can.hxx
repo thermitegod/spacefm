@@ -16,7 +16,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include <filesystem>
 
@@ -36,7 +35,7 @@ namespace vfs
 {
 // This class implements some of the XDG Trash specification:
 //
-// https://standards.freedesktop.org/trash-spec/trashspec-1.0.html
+// https://specifications.freedesktop.org/trash-spec/1.0/
 struct trash_can
 {
     trash_can() noexcept;
@@ -84,8 +83,7 @@ struct trash_can
                   const std::filesystem::path& target_filename) const noexcept;
 
       private:
-        [[nodiscard]] static std::string
-        create_trash_date(const std::chrono::system_clock::time_point time_point) noexcept;
+        [[nodiscard]] static std::string trash_time() noexcept;
 
         // the full path for this trash directory
         std::filesystem::path trash_path_;

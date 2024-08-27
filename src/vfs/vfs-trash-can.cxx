@@ -46,7 +46,7 @@ vfs::trash_can::trash_can() noexcept
 {
     const auto home_id = ztd::statx(vfs::user::home()).mount_id();
     const auto user_trash = vfs::user::data() / "Trash";
-    auto home_trash = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
+    const auto home_trash = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
     this->trash_dirs_[home_id] = home_trash;
 }
 
@@ -209,9 +209,10 @@ vfs::trash_can::trash_dir::create_trash_dir() const noexcept
 }
 
 std::string
-vfs::trash_can::trash_dir::create_trash_date(
-    const std::chrono::system_clock::time_point time_point) noexcept
+vfs::trash_can::trash_dir::trash_time() noexcept
 {
+    const auto time_point = std::chrono::system_clock::now();
+
     const auto date = std::chrono::floor<std::chrono::days>(time_point);
 
     const auto midnight = time_point - std::chrono::floor<std::chrono::days>(time_point);
@@ -230,9 +231,9 @@ vfs::trash_can::trash_dir::create_trash_info(
     const auto trash_info =
         this->info_path_ / std::format("{}.trashinfo", target_filename.string());
 
-    const auto iso_time = create_trash_date(std::chrono::system_clock::now());
+    const auto iso_time = trash_time();
 
-    const std::string trash_info_content =
+    const auto trash_info_content =
         std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time);
 
     ::utils::write_file(trash_info, trash_info_content);
