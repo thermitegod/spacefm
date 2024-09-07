@@ -85,8 +85,9 @@ struct async_task
     typename std::enable_if_t<evt == spacefm::signal::task_finish, sigc::connection>
     add_event(evt_task_finished_load_app_t fun, GtkWidget* app) noexcept
     {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
+        logger::trace<logger::domain::signals>("Connect({}): {}",
+                                               logger::utils::ptr(this),
+                                               magic_enum::enum_name(evt));
         this->evt_data_load_app = app;
         return this->evt_task_finished_load_app.connect(sigc::ptr_fun(fun));
     }
@@ -96,8 +97,9 @@ struct async_task
     typename std::enable_if_t<evt == spacefm::signal::task_finish, void>
     run_event(bool is_cancelled) noexcept
     {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
+        logger::trace<logger::domain::signals>("Execute({}): {}",
+                                               logger::utils::ptr(this),
+                                               magic_enum::enum_name(evt));
         this->evt_task_finished_load_app.emit(this, is_cancelled, this->evt_data_load_app);
     }
 

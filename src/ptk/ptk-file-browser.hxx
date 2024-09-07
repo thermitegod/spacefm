@@ -341,138 +341,112 @@ struct browser
     void on_dir_file_listed() noexcept;
 
     // Signals
-  public:
-    // Signals Add Event
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::chdir_before, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_chdir_before.connect(fun);
-    }
 
     template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::chdir_begin, sigc::connection>
+    sigc::connection
     add_event(bind_fun fun) noexcept
     {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_chdir_begin.connect(fun);
+        logger::trace<logger::domain::signals>("Connect({}): {}",
+                                               logger::utils::ptr(this),
+                                               magic_enum::enum_name(evt));
+
+        if constexpr (evt == spacefm::signal::chdir_before)
+        {
+            return this->evt_chdir_before.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::chdir_begin)
+        {
+            return this->evt_chdir_begin.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::chdir_after)
+        {
+            return this->evt_chdir_after.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::open_item)
+        {
+            return this->evt_open_file.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::change_content)
+        {
+            return this->evt_change_content.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::change_sel)
+        {
+            return this->evt_change_sel.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::change_pane)
+        {
+            return this->evt_change_pane_mode.connect(fun);
+        }
+        else
+        {
+            static_assert(always_false<bind_fun>::value, "Unsupported signal type");
+        }
     }
 
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::chdir_after, sigc::connection>
-    add_event(bind_fun fun) noexcept
+    template<spacefm::signal evt, typename... Args>
+    void
+    run_event(Args&&... args) noexcept
     {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_chdir_after.connect(fun);
+        logger::trace<logger::domain::signals>("Execute({}): {}",
+                                               logger::utils::ptr(this),
+                                               magic_enum::enum_name(evt));
+
+        if constexpr (evt == spacefm::signal::chdir_before)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_chdir_before.emit(this);
+        }
+        else if constexpr (evt == spacefm::signal::chdir_begin)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_chdir_begin.emit(this);
+        }
+        else if constexpr (evt == spacefm::signal::chdir_after)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_chdir_after.emit(this);
+        }
+        else if constexpr (evt == spacefm::signal::open_item)
+        {
+            static_assert(
+                sizeof...(args) == 2 &&
+                std::is_constructible_v<
+                    std::filesystem::path,
+                    std::decay_t<typename std::tuple_element<0, std::tuple<Args...>>::type>> &&
+                std::is_same_v<
+                    ptk::browser::open_action,
+                    std::decay_t<typename std::tuple_element<1, std::tuple<Args...>>::type>>);
+            this->evt_open_file.emit(this, std::forward<Args>(args)...);
+        }
+        else if constexpr (evt == spacefm::signal::change_content)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_change_content.emit(this);
+        }
+        else if constexpr (evt == spacefm::signal::change_sel)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_change_sel.emit(this);
+        }
+        else if constexpr (evt == spacefm::signal::change_pane)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_change_pane_mode.emit(this);
+        }
+        else
+        {
+            static_assert(always_false<decltype(evt)>::value,
+                          "Unsupported signal type or incorrect number of arguments.");
+        }
     }
 
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::open_item, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_open_file.connect(fun);
-    }
-
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::change_content, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_change_content.connect(fun);
-    }
-
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::change_sel, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_change_sel.connect(fun);
-    }
-
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::change_pane, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_change_pane_mode.connect(fun);
-    }
-
-    // Signals Run Event
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::chdir_before, void>
-    run_event() noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_chdir_before.emit(this);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::chdir_begin, void>
-    run_event() noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_chdir_begin.emit(this);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::chdir_after, void>
-    run_event() noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_chdir_after.emit(this);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::open_item, void>
-    run_event(const std::filesystem::path& path, ptk::browser::open_action action) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_open_file.emit(this, path, action);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::change_content, void>
-    run_event() noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_change_content.emit(this);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::change_sel, void>
-    run_event() noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_change_sel.emit(this);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::change_pane, void>
-    run_event() noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_change_pane_mode.emit(this);
-    }
-
-    // Signals
   private:
-    // Signal types
+    // Signals
+    template<typename T> struct always_false : std::false_type
+    {
+    };
+
     sigc::signal<void(ptk::browser*)> evt_chdir_before;
     sigc::signal<void(ptk::browser*)> evt_chdir_begin;
     sigc::signal<void(ptk::browser*)> evt_chdir_after;

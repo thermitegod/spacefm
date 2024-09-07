@@ -153,103 +153,97 @@ struct dir : public std::enable_shared_from_this<dir>
     concurrencpp::result<concurrencpp::result<bool>> executor_result_;
     concurrencpp::async_lock lock_;
 
-    // Signals //
   public:
-    // Signals Add Event
+    // Signals
 
     template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::file_created, sigc::connection>
+    sigc::connection
     add_event(bind_fun fun) noexcept
     {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_file_created.connect(fun);
+        logger::trace<logger::domain::signals>("Connect({}): {}",
+                                               logger::utils::ptr(this),
+                                               magic_enum::enum_name(evt));
+
+        if constexpr (evt == spacefm::signal::file_created)
+        {
+            return this->evt_file_created.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::file_changed)
+        {
+            return this->evt_file_changed.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::file_deleted)
+        {
+            return this->evt_file_deleted.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::file_listed)
+        {
+            return this->evt_file_listed.connect(fun);
+        }
+        else if constexpr (evt == spacefm::signal::file_thumbnail_loaded)
+        {
+            return this->evt_file_thumbnail_loaded.connect(fun);
+        }
+        else
+        {
+            static_assert(always_false<bind_fun>::value, "Unsupported signal type");
+        }
     }
 
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::file_changed, sigc::connection>
-    add_event(bind_fun fun) noexcept
+    template<spacefm::signal evt, typename... Args>
+    void
+    run_event(Args&&... args) noexcept
     {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_file_changed.connect(fun);
-    }
+        logger::trace<logger::domain::signals>("Execute({}): {}",
+                                               logger::utils::ptr(this),
+                                               magic_enum::enum_name(evt));
 
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::file_deleted, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_file_deleted.connect(fun);
-    }
-
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::file_listed, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_file_listed.connect(fun);
-    }
-
-    template<spacefm::signal evt, typename bind_fun>
-    typename std::enable_if_t<evt == spacefm::signal::file_thumbnail_loaded, sigc::connection>
-    add_event(bind_fun fun) noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Connect({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        return this->evt_file_thumbnail_loaded.connect(fun);
-    }
-
-    // Signals Run Event
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::file_created, void>
-    run_event(const std::shared_ptr<vfs::file>& file) const noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_file_created.emit(file);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::file_changed, void>
-    run_event(const std::shared_ptr<vfs::file>& file) const noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_file_changed.emit(file);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::file_deleted, void>
-    run_event(const std::shared_ptr<vfs::file>& file) const noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_file_deleted.emit(file);
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::file_listed, void>
-    run_event() const noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_file_listed.emit();
-    }
-
-    template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::file_thumbnail_loaded, void>
-    run_event(const std::shared_ptr<vfs::file>& file) const noexcept
-    {
-        logger::trace<logger::domain::signals>(
-            std::format("Execute({}): {}", logger::utils::ptr(this), magic_enum::enum_name(evt)));
-        this->evt_file_thumbnail_loaded.emit(file);
+        if constexpr (evt == spacefm::signal::file_created)
+        {
+            static_assert(sizeof...(args) == 1 &&
+                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
+                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
+            this->evt_file_created.emit(std::forward<Args>(args)...);
+        }
+        else if constexpr (evt == spacefm::signal::file_changed)
+        {
+            static_assert(sizeof...(args) == 1 &&
+                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
+                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
+            this->evt_file_changed.emit(std::forward<Args>(args)...);
+        }
+        else if constexpr (evt == spacefm::signal::file_deleted)
+        {
+            static_assert(sizeof...(args) == 1 &&
+                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
+                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
+            this->evt_file_deleted.emit(std::forward<Args>(args)...);
+        }
+        else if constexpr (evt == spacefm::signal::file_listed)
+        {
+            static_assert(sizeof...(args) == 0);
+            this->evt_file_listed.emit(std::forward<Args>(args)...);
+        }
+        else if constexpr (evt == spacefm::signal::file_thumbnail_loaded)
+        {
+            static_assert(sizeof...(args) == 1 &&
+                          (std::is_same_v<std::nullptr_t, std::decay_t<Args>...> ||
+                           std::is_same_v<std::shared_ptr<vfs::file>, std::decay_t<Args>...>));
+            this->evt_file_thumbnail_loaded.emit(std::forward<Args>(args)...);
+        }
+        else
+        {
+            static_assert(always_false<decltype(evt)>::value,
+                          "Unsupported signal type or incorrect number of arguments.");
+        }
     }
 
   private:
-    // Signal types
+    // Signals
+    template<typename T> struct always_false : std::false_type
+    {
+    };
+
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_created;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_changed;
     sigc::signal<void(const std::shared_ptr<vfs::file>&)> evt_file_deleted;
