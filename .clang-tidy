@@ -41,6 +41,7 @@ Checks: 'clang-analyzer-*,
          -bugprone-assert-side-effect,
          -bugprone-assignment-in-if-condition,
          -bugprone-easily-swappable-parameters,
+         -bugprone-casting-through-void,
          -bugprone-narrowing-conversions'
 WarningsAsErrors: ''
 HeaderFileExtensions:
