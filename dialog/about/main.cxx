@@ -14,26 +14,14 @@
  */
 
 #include <gtkmm.h>
-
-#include "logger.hxx"
+#include <glibmm.h>
 
 #include "about.hxx"
 
-void
-show_about_dialog(GtkWindow* parent) noexcept
+int
+main(int argc, char* argv[])
 {
-    (void)parent;
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.about");
 
-#if defined(HAVE_DEV)
-    const auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ABOUT);
-#else
-    const auto command = Glib::find_program_in_path(DIALOG_ABOUT);
-#endif
-    if (command.empty())
-    {
-        logger::error("Failed to find about dialog binary: {}", DIALOG_ABOUT);
-        return;
-    }
-
-    Glib::spawn_command_line_async(command);
+    return app->make_window_and_run<AboutDialog>(argc, argv);
 }

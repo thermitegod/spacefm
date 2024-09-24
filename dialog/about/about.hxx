@@ -13,27 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include <gtkmm.h>
+#include <glibmm.h>
 
-#include "logger.hxx"
-
-#include "about.hxx"
-
-void
-show_about_dialog(GtkWindow* parent) noexcept
+class AboutDialog : public Gtk::AboutDialog
 {
-    (void)parent;
-
-#if defined(HAVE_DEV)
-    const auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ABOUT);
-#else
-    const auto command = Glib::find_program_in_path(DIALOG_ABOUT);
-#endif
-    if (command.empty())
-    {
-        logger::error("Failed to find about dialog binary: {}", DIALOG_ABOUT);
-        return;
-    }
-
-    Glib::spawn_command_line_async(command);
-}
+  public:
+    AboutDialog();
+};

@@ -204,19 +204,22 @@ sigc_dep = dependency('sigc++-3.0', required: true)
 pugixml_dep = dependency('pugixml', required: true)
 
 # Gtk3 CPP
-gtkmm_dep = dependency('gtkmm-3.0', required: true)
-glibmm_dep = dependency('glibmm-2.4', required: true)
-giomm_dep = dependency('giomm-2.4', required: true)
+gtkmm3_dep = dependency('gtkmm-3.0', required: true)
+glibmm3_dep = dependency('glibmm-2.4', required: true)
+giomm3_dep = dependency('giomm-2.4', required: true)
 
 # Gtk4 CPP
-# gtkmm_dep = dependency('gtkmm-4.0', required: true)
-# glibmm_dep = dependency('glibmm-2.68', required: true)
-# giomm_dep = dependency('giomm-2.68', required: true)
+gtkmm4_dep = dependency('gtkmm-4.0', required: true)
+glibmm4_dep = dependency('glibmm-2.68', required: true)
+giomm4_dep = dependency('giomm-2.68', required: true)
 
 dependencies = [
-    gtkmm_dep,
-    glibmm_dep,
-    giomm_dep,
+    gtkmm3_dep,
+    glibmm3_dep,
+    giomm3_dep,
+    # gtkmm4_dep,
+    # glibmm4_dep,
+    # giomm4_dep,
     sigc_dep,
 
     libudev_dep,
@@ -235,8 +238,16 @@ preprocessor = [
     '-DPACKAGE_NAME_FANCY="SpaceFM"',
     '-DPACKAGE_VERSION="@0@"'.format(meson.project_version()),
     '-DPACKAGE_APPLICATION_NAME="com.thermitegod.spacefm"',
-    '-DPACKAGE_BUGREPORT="TODO"',
+    '-DPACKAGE_GITHUB="https://www.github.com/thermitegod/spacefm"',
+    '-DPACKAGE_BUGREPORT="https://www.github.com/thermitegod/spacefm/issues"',
     '-DPACKAGE_ONLINE_DOCS="TODO"',
+
+    # used to run dialogs if they are not installed in the system path
+    '-DPACKAGE_BUILD_ROOT="@0@"'.format(build_root),
+    '-DDIALOG_BUILD_ROOT="@0@/dialog"'.format(build_root),
+
+    # Standalone dialog program names
+    '-DDIALOG_ABOUT="spacefm_about"',
 
     '-DG_DISABLE_ASSERT',
     '-DG_DISABLE_CAST_CHECKS',
@@ -528,13 +539,10 @@ sources += files(
     'src/vfs/mime-type/chrome/mime-utils.cxx',
 )
 
-target_name = 'spacefm'
-target_type = 'executable'
-
 spacefm = build_target(
-    target_name,
+    'spacefm',
     sources,
-    target_type: target_type,
+    target_type: 'executable',
     include_directories: incdir,
     install: true,
     install_dir: bindir,
@@ -542,8 +550,12 @@ spacefm = build_target(
     cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+## Standalone Dialogs
+
+subdir('dialog')
+
 ## Install
 
 install_subdir('data/applications', install_dir: datadir)
 install_subdir('data/icons', install_dir: datadir)
-install_subdir('data/scripts', install_dir: datadir / target_name)
+install_subdir('data/scripts', install_dir: datadir / 'spacefm')
