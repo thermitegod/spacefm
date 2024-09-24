@@ -210,4 +210,49 @@ struct response
     settings_data settings;
 };
 } // namespace create
+
+namespace rename
+{
+struct settings_data
+{
+    bool copy{false};
+    bool copyt{false};
+    bool filename{false};
+    bool link{false};
+    bool linkt{false};
+    bool parent{false};
+    bool path{false};
+    bool target{false};
+    bool type{false};
+    bool confirm{false};
+};
+
+enum class mode : std::uint8_t
+{
+    copy,
+    link,
+    move,
+    rename,
+    skip,   // rename button clicked with no change
+    cancel, // cancel any future renames
+};
+
+struct request
+{
+    std::string cwd;
+    std::string file;
+    std::string dest_dir;
+    bool clip_copy;
+    settings_data settings;
+};
+
+struct response
+{
+    std::string source;
+    std::string dest;
+    mode mode;
+    bool overwrite;
+    settings_data settings;
+};
+} // namespace rename
 } // namespace datatype

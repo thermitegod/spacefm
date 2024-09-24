@@ -132,6 +132,31 @@ spacefm = build_target(
     ],
 )
 
+# File Rename
+incdir_rename = include_directories(['file-rename', 'lib', '../src/datatypes'])
+sources_rename = files(
+    'file-rename/main.cxx',
+    'file-rename/rename.cxx',
+)
+sources_rename += sources_vfs
+
+spacefm = build_target(
+    'spacefm_rename',
+    sources_rename,
+    target_type: 'executable',
+    include_directories: incdir_rename,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+
+        pugixml_dep,
+    ],
+)
+
 # Keybinding
 incdir_keybinding = include_directories(['keybinding', '../src/datatypes'])
 sources_keybinding = files(

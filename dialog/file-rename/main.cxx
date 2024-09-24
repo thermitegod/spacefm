@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,20 +13,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <filesystem>
-#include <memory>
-
+#include <glibmm.h>
 #include <gtkmm.h>
 
-#include "ptk/ptk-file-browser.hxx"
+#include <CLI/CLI.hpp>
 
-#include "vfs/vfs-file.hxx"
+#include "logger.hxx"
+#include "rename.hxx"
 
-namespace ptk::action
+int
+main(int argc, char* argv[])
 {
-i32 rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
-                 const std::shared_ptr<vfs::file>& file, const char* dest_dir,
-                 const bool clip_copy) noexcept;
-} // namespace ptk::action
+    CLI::App capp{"Spacefm Dialog"};
+
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
+    logger::initialize();
+
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.rename");
+
+    return app->make_window_and_run<RenameDialog>(0,       // Gtk does not handle cli
+                                                  nullptr, // Gtk does not handle cli
+                                                  json_data);
+}

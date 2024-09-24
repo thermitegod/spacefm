@@ -255,6 +255,7 @@ preprocessor = [
     '-DDIALOG_ERROR="spacefm_error"',
     '-DDIALOG_FILE_ACTION="spacefm_action"',
     '-DDIALOG_FILE_CREATE="spacefm_create"',
+    '-DDIALOG_FILE_RENAME="spacefm_rename"',
     '-DDIALOG_KEYBINDINGS="spacefm_keybindings"',
     '-DDIALOG_KEYBINDING_SET="spacefm_keybinding_set_key"',
     '-DDIALOG_MESSAGE="spacefm_message"',
