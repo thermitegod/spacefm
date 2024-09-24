@@ -115,6 +115,8 @@ default_warning_flags = [
 
     # Disabled Warnings
     '-Wno-format-nonliteral',
+    '-Wno-cast-function-type-mismatch',
+    '-Wno-missing-include-dirs',
 
     # TODO
     '-Wconversion',
