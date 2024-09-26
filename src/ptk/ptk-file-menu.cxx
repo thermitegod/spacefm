@@ -42,6 +42,7 @@
 #include "ptk/ptk-bookmark-view.hxx"
 #include "ptk/ptk-clipboard.hxx"
 #include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-file-action-create.hxx"
 #include "ptk/ptk-file-action-misc.hxx"
 #include "ptk/ptk-file-action-open.hxx"
 #include "ptk/ptk-file-action-paste.hxx"
@@ -2808,7 +2809,7 @@ on_autoopen_create_cb(void* task, AutoOpenCreate* ao) noexcept
 }
 
 static void
-create_new_file(ptk::file_menu* data, ptk::action::rename_mode create_new) noexcept
+create_new_file(ptk::file_menu* data, ptk::action::create_mode mode) noexcept
 {
     if (data->cwd.empty())
     {
@@ -2823,28 +2824,28 @@ create_new_file(ptk::file_menu* data, ptk::action::rename_mode create_new) noexc
         file = data->selected_files.front();
     }
 
-    ptk::action::rename_files(data->browser, data->cwd, file, nullptr, false, create_new, ao);
+    ptk::action::create_files(data->browser, data->cwd, file, mode, ao);
 }
 
 static void
 on_popup_new_folder_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, ptk::action::rename_mode::new_dir);
+    create_new_file(data, ptk::action::create_mode::dir);
 }
 
 static void
 on_popup_new_text_file_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, ptk::action::rename_mode::new_file);
+    create_new_file(data, ptk::action::create_mode::file);
 }
 
 static void
 on_popup_new_link_activate(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     (void)menuitem;
-    create_new_file(data, ptk::action::rename_mode::new_link);
+    create_new_file(data, ptk::action::create_mode::link);
 }
 
 static void

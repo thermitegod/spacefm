@@ -23,12 +23,20 @@
 #include <gtkmm.h>
 
 #include "ptk/ptk-file-browser.hxx"
+#include "ptk/ptk-file-menu.hxx"
 
 #include "vfs/vfs-file.hxx"
 
 namespace ptk::action
 {
-i32 rename_files(ptk::browser* browser, const std::filesystem::path& cwd,
-                 const std::shared_ptr<vfs::file>& file, const char* dest_dir,
-                 bool clip_copy) noexcept;
+enum class create_mode : std::uint8_t
+{
+    file,
+    dir,
+    link,
+};
+
+i32 create_files(ptk::browser* browser, const std::filesystem::path& cwd,
+                 const std::shared_ptr<vfs::file>& file, const ptk::action::create_mode mode,
+                 AutoOpenCreate* auto_open) noexcept;
 } // namespace ptk::action

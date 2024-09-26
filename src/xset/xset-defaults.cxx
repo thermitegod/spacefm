@@ -309,12 +309,6 @@ xset_defaults() noexcept
 
     // Rename/Move Dialog
     {
-        const auto set = xset::set::get(xset::name::move_name);
-        set->menu.label = "_Name";
-        set->menu.type = xset::set::menu_type::check;
-    }
-
-    {
         const auto set = xset::set::get(xset::name::move_filename);
         set->menu.label = "F_ilename";
         set->menu.type = xset::set::menu_type::check;
@@ -384,12 +378,6 @@ xset_defaults() noexcept
         const auto set = xset::set::get(xset::name::move_linkt);
         set->menu.label = "Lin_k Target";
         set->menu.type = xset::set::menu_type::check;
-    }
-
-    {
-        const auto set = xset::set::get(xset::name::move_dlg_help);
-        set->menu.label = "_Help";
-        set->icon = "gtk-help";
     }
 
     {

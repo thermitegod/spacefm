@@ -80,7 +80,6 @@ enum class name : std::uint16_t
     font_view_compact,
 
     // Rename/Move Dialog
-    move_name,
     move_filename,
     move_parent,
     move_path,
@@ -91,7 +90,6 @@ enum class name : std::uint16_t
     move_link,
     move_copyt,
     move_linkt,
-    move_dlg_help,
     move_dlg_confirm_create,
 
     // status bar

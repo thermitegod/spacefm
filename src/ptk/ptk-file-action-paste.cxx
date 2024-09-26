@@ -47,12 +47,8 @@ ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd
     {
         const auto file = vfs::file::create(file_path);
 
-        const auto result = ptk::action::rename_files(browser,
-                                                      file_path.parent_path(),
-                                                      file,
-                                                      cwd.c_str(),
-                                                      !is_cut,
-                                                      ptk::action::rename_mode::rename);
+        const auto result =
+            ptk::action::rename_files(browser, file_path.parent_path(), file, cwd.c_str(), !is_cut);
         if (!result)
         {
             missing_targets = 0;
