@@ -248,6 +248,7 @@ preprocessor = [
 
     # Standalone dialog program names
     '-DDIALOG_ABOUT="spacefm_about"',
+    '-DDIALOG_PATTERN="spacefm_pattern"',
 
     '-DG_DISABLE_ASSERT',
     '-DG_DISABLE_CAST_CHECKS',

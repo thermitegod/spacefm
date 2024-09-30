@@ -52,6 +52,8 @@
 #include <exo/exo.h>
 #endif
 
+#include <glaze/glaze.hpp>
+
 #include <magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
@@ -59,6 +61,8 @@
 #include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
+
+#include "datatypes/datatypes.hxx"
 
 #include "xset/xset.hxx"
 #include "xset/xset-context-menu.hxx"
@@ -3975,124 +3979,56 @@ ptk::browser::select_last() const noexcept
     this->selection_history->selection_history.erase(cwd);
 }
 
-static bool
-on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
+static std::string
+select_pattern_dialog(GtkWidget* parent) noexcept
 {
-    (void)widget;
-    const auto keymod = ptk::utils::get_keymod(gdk_event_get_modifier_state(event));
-    const auto keyval = gdk_key_event_get_keyval(event);
-    if (keymod == 0)
-    {
-        switch (keyval)
-        {
-            case GDK_KEY_Return:
-            case GDK_KEY_KP_Enter:
-            {
-                gtk_dialog_response(GTK_DIALOG(dlg), GtkResponseType::GTK_RESPONSE_OK);
-                return true;
-            }
-            default:
-                break;
-        }
-    }
-    return false;
-}
+    (void)parent;
 
-static std::tuple<bool, std::string>
-select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern) noexcept
-{
-    // stolen from the fnmatch man page
-    static constexpr std::string_view FNMATCH_HELP =
-        "'?(pattern-list)'\n"
-        "The pattern matches if zero or one occurrences of any of the patterns in the pattern-list "
-        "match the input string.\n\n"
-        "'*(pattern-list)'\n"
-        "The pattern matches if zero or more occurrences of any of the patterns in the "
-        "pattern-list "
-        "match the input string.\n\n"
-        "'+(pattern-list)'\n"
-        "The pattern matches if one or more occurrences of any of the patterns in the pattern-list "
-        "match the input string.\n\n"
-        "'@(pattern-list)'\n"
-        "The pattern matches if exactly one occurrence of any of the patterns in the pattern-list "
-        "match the input string.\n\n"
-        "'!(pattern-list)'\n"
-        "The pattern matches if the input string cannot be matched with any of the patterns in the "
-        "pattern-list.\n";
-
-    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
-                                               GtkDialogFlags::GTK_DIALOG_MODAL,
-                                               GtkMessageType::GTK_MESSAGE_QUESTION,
-                                               GtkButtonsType::GTK_BUTTONS_OK_CANCEL,
-                                               "Enter a pattern to select files and directories");
-
-    gtk_window_set_title(GTK_WINDOW(dialog), "Select By Pattern");
-
-    gtk_widget_set_size_request(GTK_WIDGET(dialog), 600, 300);
-    gtk_window_set_resizable(GTK_WINDOW(dialog), true);
-
-    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
-
-    GtkBox* vbox = GTK_BOX(gtk_box_new(GtkOrientation::GTK_ORIENTATION_VERTICAL, 10));
-
-    gtk_widget_set_margin_start(GTK_WIDGET(vbox), 5);
-    gtk_widget_set_margin_end(GTK_WIDGET(vbox), 5);
-    gtk_widget_set_margin_top(GTK_WIDGET(vbox), 5);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(vbox), 5);
-
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_box_prepend(GTK_BOX(content_area), GTK_WIDGET(vbox));
-#elif (GTK_MAJOR_VERSION == 3)
-    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(vbox));
+#if defined(HAVE_DEV)
+    const auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_PATTERN);
+#else
+    const auto command = Glib::find_program_in_path(DIALOG_PATTERN);
 #endif
-
-    GtkWidget* expander = gtk_expander_new("Show Pattern Matching Help");
-    gtk_expander_set_expanded(GTK_EXPANDER(expander), false);
-    gtk_expander_set_resize_toplevel(GTK_EXPANDER(expander), true);
-    GtkWidget* label = gtk_label_new(FNMATCH_HELP.data());
-    gtk_label_set_line_wrap(GTK_LABEL(label), true);
-    gtk_expander_set_child(GTK_EXPANDER(expander), label);
-    gtk_box_pack_start(vbox, GTK_WIDGET(expander), true, true, 4);
-
-    GtkScrolledWindow* scroll = GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-    GtkTextView* input = ptk::utils::multi_input_new(scroll, default_pattern.data());
-    gtk_widget_set_size_request(GTK_WIDGET(input), -1, 300);
-    gtk_widget_set_size_request(GTK_WIDGET(scroll), -1, 300);
-    gtk_box_pack_start(vbox, GTK_WIDGET(scroll), true, true, 4);
-
-    g_signal_connect(G_OBJECT(input), "key-press-event", G_CALLBACK(on_input_keypress), dialog);
-
-    gtk_widget_show_all(GTK_WIDGET(dialog));
-
-    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-    std::string pattern;
-    bool ret = false;
-    if (response == GtkResponseType::GTK_RESPONSE_OK)
+    if (command.empty())
     {
-        pattern = ptk::utils::multi_input_get_text(GTK_WIDGET(input)).value_or("");
-        ret = true;
+        logger::error("Failed to find pattern dialog binary: {}", DIALOG_PATTERN);
+        return "";
     }
 
-    gtk_widget_destroy(dialog);
+    std::string standard_output;
+    Glib::spawn_command_line_sync(command, &standard_output);
+    if (standard_output.empty())
+    {
+        // an empty pattern will do nothing
+        return "";
+    }
 
-    return std::make_tuple(ret, pattern);
+    datatype::pattern_dialog::response response;
+    const auto ec = glz::read_json(response, standard_output);
+    if (ec)
+    {
+        logger::error<logger::domain::ptk>("Failed to decode json: {}",
+                                           glz::format_error(ec, standard_output));
+        return "";
+    }
+
+    return response.result;
 }
 
 void
 ptk::browser::select_pattern(const std::string_view search_key) noexcept
 {
-    std::string_view key;
+    std::string key;
     if (search_key.empty())
     {
         const auto set = xset::set::get(xset::name::select_patt);
-        const auto [response, answer] = select_pattern_dialog(GTK_WIDGET(this->main_window_), "");
+        const auto pattern = select_pattern_dialog(GTK_WIDGET(this->main_window_));
 
-        if (!response)
+        if (pattern.empty())
         {
             return;
         }
-        key = answer;
+        key = pattern;
     }
     else
     {
