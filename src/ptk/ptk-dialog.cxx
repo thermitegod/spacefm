@@ -17,7 +17,11 @@
 
 #include <gtkmm.h>
 
+#include <glaze/glaze.hpp>
+
 #include <ztd/ztd.hxx>
+
+#include "datatypes/datatypes.hxx"
 
 #include "logger.hxx"
 
@@ -54,27 +58,95 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
                      GtkButtonsType buttons, const std::string_view message,
                      const std::string_view secondary_message) noexcept
 {
-    GtkWidget* dialog =
-        gtk_message_dialog_new(GTK_WINDOW(parent),
-                               GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
-                                              GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
-                               action,
-                               buttons,
-                               message.data(),
-                               nullptr);
+    (void)parent;
+    (void)action;
 
-    gtk_window_set_title(GTK_WINDOW(dialog), title.data());
+    assert(buttons != GtkButtonsType::GTK_BUTTONS_NONE);
 
-    if (!secondary_message.empty())
+#if defined(HAVE_DEV)
+    auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_MESSAGE);
+#else
+    auto command = Glib::find_program_in_path(DIALOG_MESSAGE);
+#endif
+    if (command.empty())
     {
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
-                                                 secondary_message.data(),
-                                                 nullptr);
+        logger::error("Failed to find message dialog binary: {}", DIALOG_MESSAGE);
+        return GtkResponseType::GTK_RESPONSE_NONE;
     }
 
-    gtk_widget_show_all(GTK_WIDGET(dialog));
-    const auto response = gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+    std::string button_flag;
+    switch (buttons)
+    {
+        case GtkButtonsType::GTK_BUTTONS_OK:
+            button_flag = "--button-ok";
+            break;
+        case GtkButtonsType::GTK_BUTTONS_CLOSE:
+            button_flag = "--button-close";
+            break;
+        case GtkButtonsType::GTK_BUTTONS_CANCEL:
+            button_flag = "--button-cancel";
+            break;
+        case GtkButtonsType::GTK_BUTTONS_YES_NO:
+            button_flag = "--button-yes-no";
+            break;
+        case GtkButtonsType::GTK_BUTTONS_OK_CANCEL:
+            button_flag = "--button-ok-cancel";
+            break;
+        case GtkButtonsType::GTK_BUTTONS_NONE:
+        default:
+            assert(false);
+            break;
+    }
 
-    return response;
+    command = std::format(R"({} --title "{}" --message "{}" --secondary_message "{}" {})",
+                          command,
+                          title,
+                          message,
+                          secondary_message,
+                          button_flag);
+
+    std::string standard_output;
+    Glib::spawn_command_line_sync(command, &standard_output);
+
+    // Result
+
+    if (standard_output.empty())
+    {
+        return GtkResponseType::GTK_RESPONSE_NONE;
+    }
+
+    datatype::message_dialog::response response;
+    const auto ec = glz::read_json(response, standard_output);
+    if (ec)
+    {
+        logger::error<logger::domain::ptk>("Failed to decode json: {}",
+                                           glz::format_error(ec, standard_output));
+        return GtkResponseType::GTK_RESPONSE_NONE;
+    }
+
+    // Send correct gtk response code
+    if (response.result == "Ok")
+    {
+        return GtkResponseType::GTK_RESPONSE_OK;
+    }
+    else if (response.result == "Close")
+    {
+        return GtkResponseType::GTK_RESPONSE_CLOSE;
+    }
+    else if (response.result == "Cancel")
+    {
+        return GtkResponseType::GTK_RESPONSE_CANCEL;
+    }
+    else if (response.result == "Yes")
+    {
+        return GtkResponseType::GTK_RESPONSE_YES;
+    }
+    else if (response.result == "No")
+    {
+        return GtkResponseType::GTK_RESPONSE_NO;
+    }
+    else
+    {
+        return GtkResponseType::GTK_RESPONSE_NONE;
+    }
 }

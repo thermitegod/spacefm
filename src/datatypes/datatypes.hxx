@@ -19,6 +19,20 @@
 
 #include <glaze/glaze.hpp>
 
+namespace datatype::message_dialog
+{
+struct response
+{
+    std::string result;
+};
+} // namespace datatype::message_dialog
+
+template<> struct glz::meta<datatype::message_dialog::response>
+{
+    static constexpr auto value =
+        glz::object("result", &datatype::message_dialog::response::result);
+};
+
 namespace datatype::pattern_dialog
 {
 struct response

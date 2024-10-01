@@ -20,6 +20,29 @@ spacefm = build_target(
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+# Message
+incdir_message = include_directories(['message', '../src/datatypes'])
+sources_message = files(
+    'message/main.cxx',
+    'message/message.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_message',
+    sources_message,
+    target_type: 'executable',
+    include_directories: incdir_message,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
 # Pattern
 incdir_pattern = include_directories(['pattern', '../src/datatypes'])
 sources_pattern = files(
