@@ -13,6 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(HAVE_MEDIA)
+
 #include <string>
 
 #include <format>
@@ -38,14 +40,12 @@ extern "C"
 #include <libavformat/avformat.h>
 }
 
-#include "vfs/vfs-file.hxx"
+#include "media/metadata.hxx"
 
-#include "vfs/media/metadata.hxx"
-
-std::vector<vfs::file::metadata_data>
-vfs::detail::audio_video_metadata(const std::filesystem::path& path) noexcept
+std::vector<metadata_data>
+audio_video_metadata(const std::filesystem::path& path) noexcept
 {
-    std::vector<vfs::file::metadata_data> data;
+    std::vector<metadata_data> data;
 
     AVFormatContext* format_context = nullptr;
 
@@ -129,3 +129,5 @@ vfs::detail::audio_video_metadata(const std::filesystem::path& path) noexcept
 
     return data;
 }
+
+#endif

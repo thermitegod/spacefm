@@ -16,6 +16,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <glaze/glaze.hpp>
 
@@ -129,6 +130,27 @@ template<> struct glz::meta<datatype::pattern_dialog::response>
     // clang-format off
     static constexpr auto value = glz::object(
         "result", &datatype::pattern_dialog::response::result
+    );
+    // clang-format on
+};
+
+namespace datatype::properties_dialog
+{
+struct request
+{
+    std::string cwd;
+    std::uint32_t page;
+    std::vector<std::string> files;
+};
+} // namespace datatype::properties_dialog
+
+template<> struct glz::meta<datatype::properties_dialog::request>
+{
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "cwd",   &datatype::properties_dialog::request::cwd,
+        "page",  &datatype::properties_dialog::request::page,
+        "files", &datatype::properties_dialog::request::files
     );
     // clang-format on
 };

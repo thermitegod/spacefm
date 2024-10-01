@@ -1,0 +1,1013 @@
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <string_view>
+
+#include <filesystem>
+
+#include <print>
+
+#include <vector>
+
+#include <chrono>
+
+#include <gtkmm.h>
+#include <glibmm.h>
+#include <sigc++/sigc++.h>
+
+#include <ztd/ztd.hxx>
+
+#include "datatypes.hxx"
+
+#include "media/metadata.hxx"
+
+#include "vfs/vfs-file.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+
+#include "properties.hxx"
+
+// TODO
+//  - Fix label alignment
+
+class PropertiesSection : public Gtk::Box
+{
+  public:
+    PropertiesSection() noexcept
+    {
+        this->set_orientation(Gtk::Orientation::VERTICAL);
+        this->set_spacing(6);
+        // this->set_margin(6);
+
+        Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
+        hbox.append(this->content_box_);
+        this->append(hbox);
+    }
+
+    void
+    new_split_vboxes(Gtk::Box& left_box, Gtk::Box& right_box) noexcept
+    {
+        left_box = Gtk::Box(Gtk::Orientation::VERTICAL, 6);
+        left_box.set_homogeneous(false);
+
+        right_box = Gtk::Box(Gtk::Orientation::VERTICAL, 6);
+        right_box.set_homogeneous(false);
+
+        Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 12);
+        hbox.append(left_box);
+        hbox.append(right_box);
+        this->content_box_.append(hbox);
+
+        right_box.set_hexpand(true);
+    }
+
+    Gtk::Box&
+    contentbox() noexcept
+    {
+        this->content_box_.set_visible(true);
+        return this->content_box_;
+    }
+
+  private:
+    Gtk::Box content_box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 0);
+};
+
+class PropertiesPage : public Gtk::Box
+{
+  public:
+    PropertiesPage() noexcept
+    {
+        this->set_orientation(Gtk::Orientation::VERTICAL);
+        this->set_spacing(12);
+        // this->set_margin(12);
+
+        this->set_homogeneous(false);
+
+        this->set_margin_start(12);
+        this->set_margin_end(12);
+        this->set_margin_top(12);
+        this->set_margin_bottom(12);
+
+        this->section_ = PropertiesSection();
+        this->append(this->section_);
+    }
+
+    void
+    add_row(const std::string_view left_item_name) noexcept
+    {
+        Gtk::Label left_item = Gtk::Label(left_item_name.data());
+
+        Pango::AttrList attrs;
+        Pango::AttrInt attr = Pango::Attribute::create_attr_weight(Pango::Weight::BOLD);
+        attrs.insert(attr);
+        left_item.set_attributes(attrs);
+
+        left_item.set_xalign(0.0f);
+        left_item.set_yalign(0.5f);
+
+        this->section_.contentbox().append(left_item);
+    }
+
+    void
+    add_row(const std::string_view left_item_name, Gtk::Entry right_item) noexcept
+    {
+        Gtk::Label left_item = Gtk::Label(left_item_name.data());
+        left_item.set_xalign(0.0f);
+        left_item.set_yalign(0.5f);
+
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->section_.new_split_vboxes(left_box, right_box);
+
+        left_box.append(left_item);
+        right_box.append(right_item);
+    }
+
+    void
+    add_row(const std::string_view left_item_name, Gtk::Label& right_item) noexcept
+    {
+        Gtk::Label left_item = Gtk::Label(left_item_name.data());
+        left_item.set_xalign(0.0f);
+        left_item.set_yalign(0.5f);
+
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->section_.new_split_vboxes(left_box, right_box);
+        left_box.append(left_item);
+        right_box.append(right_item);
+    }
+
+    void
+    add_row(const std::string_view left_item_name, Gtk::CheckButton& right_item) noexcept
+    {
+        Gtk::Label left_item = Gtk::Label(left_item_name.data());
+        left_item.set_xalign(0.0f);
+        left_item.set_yalign(0.5f);
+
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->section_.new_split_vboxes(left_box, right_box);
+        left_box.append(left_item);
+        right_box.append(right_item);
+    }
+
+    void
+    add_row(const std::string_view left_item_name, const std::string_view right_item_name) noexcept
+    {
+        Gtk::Label left_item = Gtk::Label(left_item_name.data());
+        left_item.set_xalign(0.0f);
+        left_item.set_yalign(0.5f);
+
+        Gtk::Label right_item = Gtk::Label(right_item_name.data());
+        right_item.set_xalign(0.0f);
+        right_item.set_yalign(0.5f);
+
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->section_.new_split_vboxes(left_box, right_box);
+        left_box.append(left_item);
+        right_box.append(right_item);
+    }
+
+    void
+    add_row(Gtk::Label& left_item, Gtk::Label& right_item) noexcept
+    {
+        left_item.set_xalign(0.0f);
+        left_item.set_yalign(0.5f);
+
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->section_.new_split_vboxes(left_box, right_box);
+        left_box.append(left_item);
+        right_box.append(right_item);
+    }
+
+    void
+    add_row_widget(Gtk::Widget& item) noexcept
+    {
+        this->section_.contentbox().append(item);
+    }
+
+  private:
+    PropertiesSection section_;
+};
+
+PropertiesDialog::PropertiesDialog(const std::string_view json_data)
+{
+    this->executor_ = global::runtime.thread_executor();
+
+    datatype::properties_dialog::request data;
+    const auto ec = glz::read_json(data, json_data);
+    if (ec)
+    {
+        std::println("Failed to decode json: {}", glz::format_error(ec, json_data));
+        std::exit(EXIT_FAILURE);
+    }
+    this->cwd_ = data.cwd;
+
+    for (const auto& file : data.files)
+    {
+        this->file_list_.push_back(vfs::file::create(file));
+    }
+
+    this->set_size_request(470, 400);
+    this->set_title("File Properties");
+    this->set_resizable(false);
+
+    // Content //
+
+    this->vbox_ = Gtk::Box(Gtk::Orientation::VERTICAL, 5);
+    this->vbox_.set_margin_start(5);
+    this->vbox_.set_margin_end(5);
+    this->vbox_.set_margin_top(5);
+    this->vbox_.set_margin_bottom(5);
+
+    this->vbox_.append(this->notebook_);
+
+    this->init_file_info_tab();
+    this->init_media_info_tab();
+    this->init_attributes_tab();
+    this->init_permissions_tab();
+
+    auto key_controller = Gtk::EventControllerKey::create();
+    key_controller->signal_key_pressed().connect(
+        sigc::mem_fun(*this, &PropertiesDialog::on_key_press),
+        false);
+    this->add_controller(key_controller);
+
+    // Buttons //
+
+    this->button_box_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
+    this->button_close_ = Gtk::Button("_Close", true);
+    this->button_box_.set_halign(Gtk::Align::END);
+    this->button_box_.append(this->button_close_);
+    this->vbox_.append(this->button_box_);
+
+    this->button_close_.signal_clicked().connect(
+        sigc::mem_fun(*this, &PropertiesDialog::on_button_close_clicked));
+
+    this->set_child(this->vbox_);
+
+    this->set_visible(true);
+
+    this->notebook_.set_current_page(data.page);
+}
+
+bool
+PropertiesDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::ModifierType state)
+{
+    (void)keycode;
+    (void)state;
+    if (keyval == GDK_KEY_Escape)
+    {
+        this->on_button_close_clicked();
+    }
+    return false;
+}
+
+void
+PropertiesDialog::on_button_close_clicked()
+{
+    {
+        auto guard = this->lock_.lock(this->executor_);
+        this->abort_ = true;
+    }
+    this->condition_.notify_all();
+
+    this->close();
+}
+
+/////////////////////////////////////////////////////////
+
+std::vector<std::filesystem::path>
+PropertiesDialog::find_subdirectories(const std::filesystem::path& directory) noexcept
+{
+    std::vector<std::filesystem::path> subdirectories;
+
+    if (this->abort_)
+    {
+        return subdirectories;
+    }
+
+    for (const auto& entry : std::filesystem::directory_iterator(directory))
+    {
+        if (this->abort_)
+        {
+            return subdirectories;
+        }
+
+        if (entry.is_directory() && !entry.is_symlink())
+        {
+            const std::filesystem::path& subdirectory = entry.path();
+
+            subdirectories.push_back(subdirectory);
+            const auto nested_subdirectories = find_subdirectories(subdirectory);
+            subdirectories.insert(subdirectories.cend(),
+                                  nested_subdirectories.cbegin(),
+                                  nested_subdirectories.cend());
+        }
+    }
+
+    return subdirectories;
+}
+
+// Recursively count total size of all files in the specified directory.
+// If the path specified is a file, the size of the file is directly returned.
+// cancel is used to cancel the operation. This function will check the value
+// pointed by cancel in every iteration. If cancel is set to true, the
+// calculation is cancelled.
+void
+PropertiesDialog::calc_total_size_of_files(const std::filesystem::path& path) noexcept
+{
+    if (this->abort_)
+    {
+        return;
+    }
+
+    std::error_code ec;
+    const auto file_stat = ztd::lstat(path, ec);
+    if (ec)
+    {
+        return;
+    }
+
+    this->total_size_ += file_stat.size();
+    this->size_on_disk_ += file_stat.size_on_disk();
+
+    if (!std::filesystem::is_directory(path))
+    {
+        return;
+    }
+
+    // recursion time
+    std::vector<std::filesystem::path> subdirectories{path};
+    const auto found_subdirectories = find_subdirectories(path);
+    subdirectories.insert(subdirectories.cend(),
+                          found_subdirectories.cbegin(),
+                          found_subdirectories.cend());
+
+    for (const auto& directory : subdirectories)
+    {
+        if (this->abort_)
+        {
+            return;
+        }
+
+        for (const auto& directory_file : std::filesystem::directory_iterator(directory))
+        {
+            if (this->abort_)
+            {
+                return;
+            }
+
+            const auto directory_file_stat = ztd::lstat(directory_file);
+
+            this->total_size_ += directory_file_stat.size();
+            this->size_on_disk_ += directory_file_stat.size_on_disk();
+            ++this->total_count_file_;
+        }
+    }
+}
+
+concurrencpp::result<void>
+PropertiesDialog::calc_size() noexcept
+{
+    for (const auto& file : this->file_list_)
+    {
+        auto guard = co_await this->lock_.lock(this->executor_);
+
+        if (this->abort_)
+        {
+            break;
+        }
+
+        if (file->is_directory())
+        {
+            ++this->total_count_dir_;
+        }
+        else
+        {
+            ++this->total_count_file_;
+        }
+
+        calc_total_size_of_files(file->path());
+
+        on_update_labels();
+    }
+
+    co_return;
+}
+
+void
+PropertiesDialog::on_update_labels() noexcept
+{
+    this->total_size_label_.set_label(std::format("{} ( {:L} bytes )",
+                                                  vfs::utils::format_file_size(this->total_size_),
+                                                  this->total_size_));
+
+    this->size_on_disk_label_.set_label(
+        std::format("{} ( {:L} bytes )",
+                    vfs::utils::format_file_size(this->size_on_disk_),
+                    this->size_on_disk_));
+
+    this->count_label_.set_label(std::format("{:L} files, {:L} directories",
+                                             this->total_count_file_,
+                                             this->total_count_dir_));
+}
+
+Gtk::Entry
+PropertiesDialog::create_prop_text_box(const std::string_view data) const noexcept
+{
+    Gtk::Entry entry;
+    entry.set_text(data.data());
+    entry.set_editable(false);
+    return entry;
+}
+
+Gtk::Entry
+PropertiesDialog::create_prop_text_box_no_focus(const std::string_view data) const noexcept
+{
+    Gtk::Entry entry;
+    entry.set_text(data.data());
+    entry.set_editable(false);
+    entry.set_can_focus(false);
+    entry.set_sensitive(false);
+    return entry;
+}
+
+Gtk::Entry
+PropertiesDialog::create_prop_text_box_date(
+    const std::chrono::system_clock::time_point time_point) const noexcept
+{
+    const auto time_formated =
+        std::format("{}", std::chrono::floor<std::chrono::seconds>(time_point));
+
+    Gtk::Entry entry;
+    entry.set_text(time_formated);
+    entry.set_editable(false);
+    return entry;
+}
+
+void
+PropertiesDialog::init_file_info_tab() noexcept
+{
+    // FIXME using spaces to align the right GtkWiget with the label
+    // This works but should be fixed with an alignment solution
+
+    auto page = PropertiesPage();
+
+    const auto& file = this->file_list_.front();
+    const bool multiple_files = this->file_list_.size() > 1;
+
+    if (multiple_files)
+    {
+        page.add_row("File Name:   ", create_prop_text_box_no_focus("( multiple files )"));
+    }
+    else
+    {
+        if (file->is_symlink())
+        {
+            page.add_row("Link Name:   ", create_prop_text_box(file->name()));
+        }
+        else if (file->is_directory())
+        {
+            page.add_row("Directory:   ", create_prop_text_box(file->name()));
+        }
+        else
+        {
+            page.add_row("File Name:   ", create_prop_text_box(file->name()));
+        }
+    }
+
+    page.add_row("Location:    ", create_prop_text_box(this->cwd_.string()));
+
+    if (file->is_symlink())
+    {
+        std::string target;
+        try
+        {
+            target = std::filesystem::read_symlink(file->path());
+            if (!std::filesystem::exists(target))
+            {
+                target = "( broken link )";
+            }
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            target = "( read link error )";
+        }
+
+        page.add_row("Link Target: ", create_prop_text_box(target));
+    }
+
+    bool same_type = true;
+    const auto initial_type = this->file_list_.front()->mime_type();
+    for (const auto& selected_file : this->file_list_)
+    {
+        const auto type = selected_file->mime_type();
+        if (type->type() != initial_type->type())
+        {
+            same_type = false;
+            break;
+        }
+    }
+    if (same_type)
+    {
+        const auto mime = file->mime_type();
+        const auto file_type = std::format("{}\n{}", mime->description(), mime->type());
+        Gtk::Label type_label(file_type.data());
+        type_label.set_xalign(0.0f);
+        type_label.set_yalign(0.5f);
+
+        page.add_row("Type:        ", type_label);
+    }
+    else
+    {
+        Gtk::Label type_label("( multiple types )");
+        type_label.set_xalign(0.0f);
+        type_label.set_yalign(0.5f);
+
+        page.add_row("Type:        ", type_label);
+    }
+
+    this->total_size_label_.set_label("Calculating...");
+    this->total_size_label_.set_xalign(0.0f);
+    this->total_size_label_.set_yalign(0.5f);
+    page.add_row("Total Size:  ", this->total_size_label_);
+
+    this->size_on_disk_label_.set_label("Calculating...");
+    this->size_on_disk_label_.set_xalign(0.0f);
+    this->size_on_disk_label_.set_yalign(0.5f);
+    page.add_row("Size On Disk:", this->size_on_disk_label_);
+
+    this->count_label_.set_label("Calculating...");
+    this->count_label_.set_xalign(0.0f);
+    this->count_label_.set_yalign(0.5f);
+    page.add_row("Count:       ", this->count_label_);
+
+    bool need_calc_size = true;
+    if (!multiple_files && !file->is_directory())
+    {
+        need_calc_size = false;
+
+        this->total_size_label_.set_text(
+            std::format("{}  ( {:L} bytes )", file->display_size(), file->size()));
+
+        this->size_on_disk_label_.set_text(
+            std::format("{}  ( {:L} bytes )", file->display_size_on_disk(), file->size_on_disk()));
+
+        this->count_label_.set_text("1 file");
+    }
+    if (need_calc_size)
+    {
+        this->executor_result_ = this->executor_->submit([this] { return this->calc_size(); });
+    }
+
+    if (multiple_files)
+    {
+        page.add_row("Accessed:    ",
+                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
+        page.add_row("Created:     ",
+                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
+        page.add_row("Metadata:    ",
+                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
+        page.add_row("Modified:    ",
+                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
+    }
+    else
+    {
+        page.add_row("Accessed:    ", this->create_prop_text_box_date(file->atime()));
+        page.add_row("Created:     ", this->create_prop_text_box_date(file->btime()));
+        page.add_row("Metadata:    ", this->create_prop_text_box_date(file->ctime()));
+        page.add_row("Modified:    ", this->create_prop_text_box_date(file->mtime()));
+    }
+
+    auto tab_label = Gtk::Label("Info");
+    this->notebook_.append_page(page, tab_label);
+}
+
+void
+PropertiesDialog::init_media_info_tab() noexcept
+{
+#if defined(HAVE_MEDIA)
+    auto page = PropertiesPage();
+
+    const auto& file = this->file_list_.front();
+    const bool multiple_files = this->file_list_.size() > 1;
+
+    if (multiple_files)
+    {
+        return;
+    }
+
+    std::vector<metadata_data> metadata;
+    if (file->mime_type()->is_image())
+    {
+        metadata = image_metadata(file->path());
+    }
+    else if (file->mime_type()->is_video() || file->mime_type()->is_audio())
+    {
+        metadata = audio_video_metadata(file->path());
+    }
+
+    if (metadata.empty())
+    {
+        return;
+    }
+
+    for (const auto& item : metadata)
+    {
+        // logger::debug<logger::domain::ptk>("description={}   value={}", item.description, item.value);
+        Gtk::Label description_label(item.description.data());
+        Gtk::Label value_label(item.value.data());
+        value_label.set_xalign(1.0f);
+        value_label.set_yalign(0.5f);
+
+        page.add_row(description_label, value_label);
+    }
+
+    auto tab_label = Gtk::Label("Media");
+    this->notebook_.append_page(page, tab_label);
+#endif
+}
+
+void
+PropertiesDialog::init_attributes_tab() noexcept
+{
+    auto page = PropertiesPage();
+
+    const auto& selected_file = this->file_list_.front();
+    const bool multiple_files = this->file_list_.size() > 1;
+
+    if (multiple_files)
+    {
+        bool is_same_value_compressed = true;
+        bool is_same_value_immutable = true;
+        bool is_same_value_append = true;
+        bool is_same_value_nodump = true;
+        bool is_same_value_encrypted = true;
+        bool is_same_value_automount = true;
+        bool is_same_value_mount_root = true;
+        bool is_same_value_verity = true;
+        bool is_same_value_dax = true;
+
+        // The first file will get checked against itself
+        for (const auto& file : this->file_list_)
+        {
+            if (is_same_value_compressed)
+            {
+                is_same_value_compressed = selected_file->is_compressed() == file->is_compressed();
+            }
+            if (is_same_value_immutable)
+            {
+                is_same_value_immutable = selected_file->is_immutable() == file->is_immutable();
+            }
+            if (is_same_value_append)
+            {
+                is_same_value_append = selected_file->is_append() == file->is_append();
+            }
+            if (is_same_value_nodump)
+            {
+                is_same_value_nodump = selected_file->is_nodump() == file->is_nodump();
+            }
+            if (is_same_value_encrypted)
+            {
+                is_same_value_encrypted = selected_file->is_encrypted() == file->is_encrypted();
+            }
+            if (is_same_value_automount)
+            {
+                is_same_value_automount = selected_file->is_automount() == file->is_automount();
+            }
+            if (is_same_value_mount_root)
+            {
+                is_same_value_mount_root = selected_file->is_mount_root() == file->is_mount_root();
+            }
+            if (is_same_value_verity)
+            {
+                is_same_value_verity = selected_file->is_verity() == file->is_verity();
+            }
+            if (is_same_value_dax)
+            {
+                is_same_value_dax = selected_file->is_dax() == file->is_dax();
+            }
+        }
+
+        if (is_same_value_compressed)
+        {
+            Gtk::CheckButton cb_compressed(" ( All Selected Files ) ");
+            cb_compressed.set_sensitive(false);
+            cb_compressed.set_active(selected_file->is_compressed());
+
+            page.add_row("Compressed: ", cb_compressed);
+        }
+        else
+        {
+            page.add_row("Compressed: ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_immutable)
+        {
+            Gtk::CheckButton cb_immutable(" ( All Selected Files ) ");
+            cb_immutable.set_sensitive(false);
+            cb_immutable.set_active(selected_file->is_immutable());
+
+            page.add_row("Immutable:  ", cb_immutable);
+        }
+        else
+        {
+            page.add_row("Immutable:  ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_append)
+        {
+            Gtk::CheckButton cb_append(" ( All Selected Files ) ");
+            cb_append.set_sensitive(false);
+            cb_append.set_active(selected_file->is_append());
+
+            page.add_row("Append:     ", cb_append);
+        }
+        else
+        {
+            page.add_row("Append:     ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_nodump)
+        {
+            Gtk::CheckButton cb_nodump(" ( All Selected Files ) ");
+            cb_nodump.set_sensitive(false);
+            cb_nodump.set_active(selected_file->is_nodump());
+
+            page.add_row("Nodump:     ", cb_nodump);
+        }
+        else
+        {
+            page.add_row("Nodump:     ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_encrypted)
+        {
+            Gtk::CheckButton cb_encrypted(" ( All Selected Files ) ");
+            cb_encrypted.set_sensitive(false);
+            cb_encrypted.set_active(selected_file->is_encrypted());
+
+            page.add_row("Encrypted:  ", cb_encrypted);
+        }
+        else
+        {
+            page.add_row("Encrypted:  ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_automount)
+        {
+            Gtk::CheckButton cb_automount(" ( All Selected Files ) ");
+            cb_automount.set_sensitive(false);
+            cb_automount.set_active(selected_file->is_automount());
+
+            page.add_row("Automount:  ", cb_automount);
+        }
+        else
+        {
+            page.add_row("Automount:  ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_mount_root)
+        {
+            Gtk::CheckButton cb_mount_root(" ( All Selected Files ) ");
+            cb_mount_root.set_sensitive(false);
+            cb_mount_root.set_active(selected_file->is_mount_root());
+
+            page.add_row("Mount Root: ", cb_mount_root);
+        }
+        else
+        {
+            page.add_row("Mount Root: ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_verity)
+        {
+            Gtk::CheckButton cb_verity(" ( All Selected Files ) ");
+            cb_verity.set_sensitive(false);
+            cb_verity.set_active(selected_file->is_verity());
+
+            page.add_row("Verity:     ", cb_verity);
+        }
+        else
+        {
+            page.add_row("Verity:     ", " ( Multiple Values ) ");
+        }
+
+        if (is_same_value_dax)
+        {
+            Gtk::CheckButton cb_dax(" ( All Selected Files ) ");
+            cb_dax.set_sensitive(false);
+            cb_dax.set_active(selected_file->is_dax());
+
+            page.add_row("Dax:        ", cb_dax);
+        }
+        else
+        {
+            page.add_row("Dax:        ", " ( Multiple Values ) ");
+        }
+    }
+    else
+    {
+        Gtk::CheckButton cb_compressed;
+        cb_compressed.set_sensitive(false);
+        cb_compressed.set_active(selected_file->is_compressed());
+        page.add_row("Compressed: ", cb_compressed);
+
+        Gtk::CheckButton cb_immutable;
+        cb_immutable.set_sensitive(false);
+        cb_immutable.set_active(selected_file->is_immutable());
+        page.add_row("Immutable:  ", cb_immutable);
+
+        Gtk::CheckButton cb_append;
+        cb_append.set_sensitive(false);
+        cb_append.set_active(selected_file->is_append());
+        page.add_row("Append:     ", cb_append);
+
+        Gtk::CheckButton cb_nodump;
+        cb_nodump.set_sensitive(false);
+        cb_nodump.set_active(selected_file->is_nodump());
+        page.add_row("Nodump:     ", cb_nodump);
+
+        Gtk::CheckButton cb_encrypted;
+        cb_encrypted.set_sensitive(false);
+        cb_encrypted.set_active(selected_file->is_encrypted());
+        page.add_row("Encrypted:  ", cb_encrypted);
+
+        Gtk::CheckButton cb_automount;
+        cb_automount.set_sensitive(false);
+        cb_automount.set_active(selected_file->is_automount());
+        page.add_row("Automount:  ", cb_automount);
+
+        Gtk::CheckButton cb_mount_root;
+        cb_mount_root.set_sensitive(false);
+        cb_mount_root.set_active(selected_file->is_mount_root());
+        page.add_row("Mount Root: ", cb_mount_root);
+
+        Gtk::CheckButton cb_verity;
+        cb_verity.set_sensitive(false);
+        cb_verity.set_active(selected_file->is_verity());
+        page.add_row("Verity:     ", cb_verity);
+
+        Gtk::CheckButton cb_dax;
+        cb_dax.set_sensitive(false);
+        cb_dax.set_active(selected_file->is_dax());
+        page.add_row("Dax:        ", cb_dax);
+    }
+
+    auto tab_label = Gtk::Label("Attributes");
+    this->notebook_.append_page(page, tab_label);
+}
+
+void
+PropertiesDialog::init_permissions_tab() noexcept
+{
+    auto page = PropertiesPage();
+
+    const auto& selected_file = this->file_list_.front();
+
+    // Owner
+    page.add_row("Owner:", create_prop_text_box(selected_file->display_owner()));
+
+    // Group
+    page.add_row("Group:", create_prop_text_box(selected_file->display_group()));
+
+    // Permissions
+
+    Gtk::Grid grid;
+    grid.set_row_spacing(5);
+    grid.set_column_spacing(5);
+
+    // Create the labels for the first column
+    Gtk::Label label_perm_owner("Owner:");
+    Gtk::Label label_perm_group("Group:");
+    Gtk::Label label_perm_other("Other:");
+
+    grid.attach(label_perm_owner, 0, 0, 1, 1);
+    grid.attach(label_perm_group, 0, 1, 1, 1);
+    grid.attach(label_perm_other, 0, 2, 1, 1);
+
+    // Create the permissions checked buttons
+
+    // Owner
+    Gtk::CheckButton check_button_owner_read("Read");
+    Gtk::CheckButton check_button_owner_write("Write");
+    Gtk::CheckButton check_button_owner_exec("Execute");
+    check_button_owner_read.set_sensitive(false);
+    check_button_owner_write.set_sensitive(false);
+    check_button_owner_exec.set_sensitive(false);
+    grid.attach(check_button_owner_read, 1, 0, 1, 1);
+    grid.attach(check_button_owner_write, 2, 0, 1, 1);
+    grid.attach(check_button_owner_exec, 3, 0, 1, 1);
+
+    // Group
+    Gtk::CheckButton check_button_group_read("Read");
+    Gtk::CheckButton check_button_group_write("Write");
+    Gtk::CheckButton check_button_group_exec("Execute");
+    check_button_group_read.set_sensitive(false);
+    check_button_group_write.set_sensitive(false);
+    check_button_group_exec.set_sensitive(false);
+    grid.attach(check_button_group_read, 1, 1, 1, 1);
+    grid.attach(check_button_group_write, 2, 1, 1, 1);
+    grid.attach(check_button_group_exec, 3, 1, 1, 1);
+
+    // Other
+    Gtk::CheckButton check_button_others_read("Read");
+    Gtk::CheckButton check_button_others_write("Write");
+    Gtk::CheckButton check_button_others_exec("Execute");
+    check_button_others_read.set_sensitive(false);
+    check_button_others_write.set_sensitive(false);
+    check_button_others_exec.set_sensitive(false);
+    grid.attach(check_button_others_read, 1, 2, 1, 1);
+    grid.attach(check_button_others_write, 2, 2, 1, 1);
+    grid.attach(check_button_others_exec, 3, 2, 1, 1);
+
+    // Special - added at the end of the above
+    Gtk::CheckButton check_button_set_uid("Set UID");
+    Gtk::CheckButton check_button_set_gid("Set GID");
+    Gtk::CheckButton check_button_sticky_bit("Sticky Bit");
+    check_button_set_uid.set_sensitive(false);
+    check_button_set_gid.set_sensitive(false);
+    check_button_sticky_bit.set_sensitive(false);
+    grid.attach(check_button_set_uid, 4, 0, 1, 1);
+    grid.attach(check_button_set_gid, 4, 1, 1, 1);
+    grid.attach(check_button_sticky_bit, 4, 2, 1, 1);
+
+    // Set/unset the permission
+
+    const auto& permissions = selected_file->permissions();
+
+    // Owner
+    if ((permissions & std::filesystem::perms::owner_read) != std::filesystem::perms::none)
+    {
+        check_button_owner_read.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::owner_write) != std::filesystem::perms::none)
+    {
+        check_button_owner_write.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::owner_exec) != std::filesystem::perms::none)
+    {
+        check_button_owner_exec.set_active(true);
+    }
+
+    // Group
+    if ((permissions & std::filesystem::perms::group_read) != std::filesystem::perms::none)
+    {
+        check_button_group_read.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::group_write) != std::filesystem::perms::none)
+    {
+        check_button_group_write.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::group_exec) != std::filesystem::perms::none)
+    {
+        check_button_group_exec.set_active(true);
+    }
+
+    // Other
+    if ((permissions & std::filesystem::perms::others_read) != std::filesystem::perms::none)
+    {
+        check_button_others_read.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::others_write) != std::filesystem::perms::none)
+    {
+        check_button_others_write.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::others_exec) != std::filesystem::perms::none)
+    {
+        check_button_others_exec.set_active(true);
+    }
+
+    // Special
+    if ((permissions & std::filesystem::perms::set_uid) != std::filesystem::perms::none)
+    {
+        check_button_set_uid.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::set_gid) != std::filesystem::perms::none)
+    {
+        check_button_set_gid.set_active(true);
+    }
+    if ((permissions & std::filesystem::perms::sticky_bit) != std::filesystem::perms::none)
+    {
+        check_button_sticky_bit.set_active(true);
+    }
+
+    page.add_row_widget(grid);
+
+    auto tab_label = Gtk::Label("Permissions");
+    this->notebook_.append_page(page, tab_label);
+}

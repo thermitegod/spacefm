@@ -40,10 +40,6 @@
 #include "vfs/thumbnails/thumbnails.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
-#if defined(HAVE_MEDIA)
-#include "vfs/media/metadata.hxx"
-#endif
-
 #include "vfs/vfs-file.hxx"
 
 std::shared_ptr<vfs::file>
@@ -795,30 +791,4 @@ vfs::file::load_special_info() noexcept
             this->thumbnail_.small = icon;
         }
     }
-}
-
-std::vector<vfs::file::metadata_data>
-vfs::file::metadata() noexcept
-{
-#if defined(HAVE_MEDIA)
-    if (this->mime_type_->is_image())
-    {
-        // if (this->metadata_.empty())
-        // {
-        //     this->metadata_ = detail::image_metadata(this->path_);
-        // }
-        // return this->metadata_;
-        return detail::image_metadata(this->path_);
-    }
-    else if (this->mime_type_->is_video() || this->mime_type_->is_audio())
-    {
-        // if (this->metadata_.empty())
-        // {
-        //     this->metadata_ = detail::image_metadata(this->path_);
-        // }
-        // return this->metadata_;
-        return detail::audio_video_metadata(this->path_);
-    }
-#endif
-    return {};
 }

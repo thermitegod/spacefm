@@ -13,17 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "concurrency.hxx"
 
-#include <filesystem>
-
-#include "vfs/vfs-file.hxx"
-
-namespace vfs::detail
-{
-[[nodiscard]] std::vector<vfs::file::metadata_data>
-image_metadata(const std::filesystem::path& path) noexcept;
-
-[[nodiscard]] std::vector<vfs::file::metadata_data>
-audio_video_metadata(const std::filesystem::path& path) noexcept;
-} // namespace vfs::detail
+const concurrencpp::runtime global::runtime;

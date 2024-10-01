@@ -30,15 +30,13 @@
 
 #include "vfs/vfs-mime-type.hxx"
 
-// https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
-
 namespace vfs
 {
 struct file : public std::enable_shared_from_this<file>
 {
   public:
     file() = delete;
-    file(const std::filesystem::path& file_path) noexcept;
+    explicit file(const std::filesystem::path& file_path) noexcept;
     ~file() noexcept;
     file(const file& other) = delete;
     file(file&& other) = delete;
@@ -51,7 +49,6 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] std::string_view name() const noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] std::string_view uri() const noexcept;
 
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 size_on_disk() const noexcept;
@@ -72,23 +69,11 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] std::string_view display_btime() const noexcept;
     [[nodiscard]] std::string_view display_ctime() const noexcept;
     [[nodiscard]] std::string_view display_mtime() const noexcept;
-    [[nodiscard]] std::string_view display_permissions() noexcept;
 
     [[nodiscard]] std::chrono::system_clock::time_point atime() const noexcept;
     [[nodiscard]] std::chrono::system_clock::time_point btime() const noexcept;
     [[nodiscard]] std::chrono::system_clock::time_point ctime() const noexcept;
     [[nodiscard]] std::chrono::system_clock::time_point mtime() const noexcept;
-
-    enum class thumbnail_size : std::uint8_t
-    {
-        big,
-        small,
-    };
-    GdkPixbuf* icon(const thumbnail_size size) noexcept;
-    GdkPixbuf* thumbnail(const thumbnail_size size) const noexcept;
-    void load_thumbnail(const thumbnail_size size) noexcept;
-    void unload_thumbnail(const thumbnail_size size) noexcept;
-    [[nodiscard]] bool is_thumbnail_loaded(const thumbnail_size size) const noexcept;
 
     [[nodiscard]] bool is_directory() const noexcept;
     [[nodiscard]] bool is_regular_file() const noexcept;
@@ -100,8 +85,6 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] bool is_other() const noexcept;
 
     [[nodiscard]] bool is_hidden() const noexcept;
-
-    [[nodiscard]] bool is_desktop_entry() const noexcept;
 
     // File attributes
     [[nodiscard]] bool is_compressed() const noexcept; // file is compressed by the filesystem
@@ -120,11 +103,10 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] bool update() noexcept;
 
   private:
-    ztd::statx file_stat_; // cached copy of struct statx()
+    ztd::statx file_stat_;
     std::filesystem::file_status status_;
 
     std::filesystem::path path_; // real path on file system
-    std::string uri_;            // uri of the real path on file system
 
     std::string name_;                          // real name on file system
     std::string display_size_;                  // displayed human-readable file size
@@ -136,24 +118,8 @@ struct file : public std::enable_shared_from_this<file>
     std::string display_btime_;                 // displayed created time
     std::string display_ctime_;                 // displayed last status change time
     std::string display_mtime_;                 // displayed modification time
-    std::string display_perm_;                  // displayed permission in string form
     std::shared_ptr<vfs::mime_type> mime_type_; // mime type related information
 
-    bool is_special_desktop_entry_{false}; // is a .desktop file
-    bool is_hidden_{false};                // if the filename starts with '.'
-
-    struct thumbnail_data
-    {
-        GdkPixbuf* big{nullptr};
-        GdkPixbuf* small{nullptr};
-    };
-    thumbnail_data thumbnail_;
-
-    void load_special_info() noexcept;
-
-    [[nodiscard]] std::string create_file_perm_string() const noexcept;
-
-    [[nodiscard]] std::string_view
-    special_directory_get_icon_name(const bool symbolic = false) const noexcept;
+    bool is_hidden_{false}; // if the filename starts with '.'
 };
 } // namespace vfs

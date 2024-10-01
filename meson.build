@@ -252,6 +252,7 @@ preprocessor = [
     '-DDIALOG_KEYBINDING_SET="spacefm_keybinding_set_key"',
     '-DDIALOG_MESSAGE="spacefm_message"',
     '-DDIALOG_PATTERN="spacefm_pattern"',
+    '-DDIALOG_PROPERTIES="spacefm_properties"',
 
     '-DG_DISABLE_ASSERT',
     '-DG_DISABLE_CAST_CHECKS',
@@ -406,7 +407,7 @@ if get_option('media')
     gexiv_dep = dependency('gexiv2')
     gdkpixbuf_dep = dependency('gdk-pixbuf-2.0')
 
-    dependencies += [
+    media_dependencies = [
         libavcodec_dep,
         # libavdevice_dep,
         # libavfilter_dep,
@@ -419,11 +420,8 @@ if get_option('media')
     ]
 
     features += '-DHAVE_MEDIA'
-
-    sources += files(
-        'src/vfs/media/audio-video-metadata.cxx',
-        'src/vfs/media/image-metadata.cxx',
-    )
+else
+    media_dependencies += []
 endif
 
 foreach a: features

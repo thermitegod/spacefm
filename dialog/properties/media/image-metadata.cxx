@@ -13,6 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(HAVE_MEDIA)
+
 #include <string>
 #include <string_view>
 
@@ -35,12 +37,10 @@
 
 #include "logger.hxx"
 
-#include "vfs/vfs-file.hxx"
+#include "media/metadata.hxx"
 
-#include "vfs/media/metadata.hxx"
-
-std::vector<vfs::file::metadata_data>
-vfs::detail::image_metadata(const std::filesystem::path& path) noexcept
+std::vector<metadata_data>
+image_metadata(const std::filesystem::path& path) noexcept
 {
     struct image_exif_data
     {
@@ -118,7 +118,7 @@ vfs::detail::image_metadata(const std::filesystem::path& path) noexcept
         },
     }};
 
-    std::vector<vfs::file::metadata_data> data;
+    std::vector<metadata_data> data;
 
     GdkPixbufFormat* format = gdk_pixbuf_get_file_info(path.c_str(), nullptr, nullptr);
     g_autofree char* name = gdk_pixbuf_format_get_name(format);
@@ -199,3 +199,5 @@ vfs::detail::image_metadata(const std::filesystem::path& path) noexcept
 
     return data;
 }
+
+#endif

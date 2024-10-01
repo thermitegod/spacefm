@@ -161,3 +161,47 @@ spacefm = build_target(
     ],
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
+
+# Properties
+incdir_properties = include_directories(['properties', '../src/datatypes'])
+sources_properties = files(
+    'properties/main.cxx',
+    'properties/properties.cxx',
+
+    'properties/concurrency.cxx',
+    'properties/logger.cxx',
+
+    'properties/utils/misc.cxx',
+
+    'properties/vfs/vfs-file.cxx',
+    'properties/vfs/vfs-mime-type.cxx',
+    'properties/vfs/vfs-user-dirs.cxx',
+
+    'properties/vfs/utils/vfs-utils.cxx',
+
+	'properties/vfs/mime-type/chrome/mime-utils.cxx',
+	'properties/vfs/mime-type/mime-type.cxx',
+
+    'properties/media/audio-video-metadata.cxx',
+    'properties/media/image-metadata.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_properties',
+    sources_properties,
+    target_type: 'executable',
+    include_directories: incdir_properties,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+
+        concurrencpp_dep,
+        pugixml_dep,
+        media_dependencies,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
