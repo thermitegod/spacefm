@@ -20,6 +20,29 @@ spacefm = build_target(
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+# Error
+incdir_error = include_directories('error')
+sources_error = files(
+    'error/main.cxx',
+    'error/error.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_error',
+    sources_error,
+    target_type: 'executable',
+    include_directories: incdir_error,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
 # Message
 incdir_message = include_directories(['message', '../src/datatypes'])
 sources_message = files(

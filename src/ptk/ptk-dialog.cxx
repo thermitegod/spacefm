@@ -25,32 +25,28 @@
 
 #include "logger.hxx"
 
-#if (GTK_MAJOR_VERSION == 4)
-#include "compat/gtk4-porting.hxx"
-#endif
-
 #include "ptk/ptk-dialog.hxx"
 
 void
 ptk::dialog::error(GtkWindow* parent, const std::string_view title,
                    const std::string_view message) noexcept
 {
-    GtkWidget* dialog =
-        gtk_message_dialog_new(GTK_WINDOW(parent),
-                               GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
-                                              GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
-                               GtkMessageType::GTK_MESSAGE_ERROR,
-                               GtkButtonsType::GTK_BUTTONS_OK,
-                               message.data(),
-                               nullptr);
+    (void)parent;
 
-    gtk_window_set_title(GTK_WINDOW(dialog), title.empty() ? "Error" : title.data());
+#if defined(HAVE_DEV)
+    auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ERROR);
+#else
+    auto command = Glib::find_program_in_path(DIALOG_ERROR);
+#endif
+    if (command.empty())
+    {
+        logger::error("Failed to find error dialog binary: {}", DIALOG_ERROR);
+        return;
+    }
 
-    // g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(g_object_unref), nullptr);
-    // gtk_widget_show(GTK_WIDGET(dialog));
+    command = std::format(R"({} --title "{}" --message "{}")", command, title, message);
 
-    gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+    Glib::spawn_command_line_async(command);
 }
 
 i32
