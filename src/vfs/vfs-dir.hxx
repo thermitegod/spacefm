@@ -92,11 +92,6 @@ struct dir : public std::enable_shared_from_this<dir>
     void emit_file_changed(const std::filesystem::path& path, bool force) noexcept;
     void emit_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept;
 
-    // TODO private
-    void update_created_files() noexcept;
-    void update_changed_files() noexcept;
-    u32 change_notify_timeout{0};
-
   private:
     // this function is to be called right after a vfs::dir is created in ::create().
     // this is because this* only becomes a valid pointer after the constructor has finished.
@@ -118,6 +113,12 @@ struct dir : public std::enable_shared_from_this<dir>
     void load_user_hidden_files() noexcept;
     [[nodiscard]] bool is_file_user_hidden(const std::filesystem::path& path) const noexcept;
     std::optional<std::vector<std::filesystem::path>> user_hidden_files_{std::nullopt};
+
+    // file change notify
+    void update_created_files() noexcept;
+    void update_changed_files() noexcept;
+    bool timer_running_ = false;
+    Glib::SignalTimeout timer_ = Glib::signal_timeout();
 
     std::filesystem::path path_;
     std::vector<std::shared_ptr<vfs::file>> files_;

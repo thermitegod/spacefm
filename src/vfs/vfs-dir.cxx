@@ -75,11 +75,6 @@ vfs::dir::~dir() noexcept
     this->evt_file_listed.clear();
     this->evt_file_thumbnail_loaded.clear();
 
-    if (this->change_notify_timeout)
-    {
-        g_source_remove(this->change_notify_timeout);
-    }
-
     this->executor_result_.get().get();
 }
 
@@ -430,29 +425,23 @@ vfs::dir::update_file_info(const std::shared_ptr<vfs::file>& file) noexcept
     return file_updated;
 }
 
-static bool
-notify_file_change(void* user_data) noexcept
-{
-    const auto dir = static_cast<vfs::dir*>(user_data)->shared_from_this();
-
-    dir->update_changed_files();
-    dir->update_created_files();
-
-    /* remove the timeout */
-    dir->change_notify_timeout = 0;
-    return false;
-}
-
 void
 vfs::dir::notify_file_change(const std::chrono::milliseconds timeout) noexcept
 {
-    if (this->change_notify_timeout == 0)
+    if (!this->timer_running_)
     {
-        this->change_notify_timeout = g_timeout_add_full(G_PRIORITY_LOW,
-                                                         timeout.count(),
-                                                         (GSourceFunc)::notify_file_change,
-                                                         this,
-                                                         nullptr);
+        this->timer_running_ = true;
+
+        this->timer_.connect_once(
+            [this]()
+            {
+                this->update_changed_files();
+                this->update_created_files();
+
+                this->timer_running_ = false;
+            },
+            timeout.count(),
+            Glib::PRIORITY_LOW);
     }
 }
 
