@@ -24,8 +24,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "settings/settings.hxx"
 
 #include "vfs/utils/vfs-utils.hxx"

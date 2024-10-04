@@ -18,10 +18,6 @@
 #include <gtkmm.h>
 #include <glibmm.h>
 
-#include <ztd/ztd.hxx>
-
-#include "logger.hxx"
-
 #include "vfs/vfs-user-dirs.hxx"
 
 std::filesystem::path

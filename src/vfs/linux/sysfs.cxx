@@ -24,8 +24,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "vfs/linux/sysfs.hxx"
 
 std::optional<std::string>

@@ -24,8 +24,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "vfs/libudevpp/libudevpp.hxx"
 
 #include "vfs/linux/procfs.hxx"
