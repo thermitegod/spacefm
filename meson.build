@@ -455,7 +455,6 @@ sources += files(
 
     'src/settings/upgrade/config-upgrade.cxx',
 
-    'src/utils/memory.cxx',
     'src/utils/shell-quote.cxx',
     'src/utils/strdup.cxx',
     'src/utils/misc.cxx',

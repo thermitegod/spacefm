@@ -61,7 +61,6 @@
 #include "settings/settings.hxx"
 #include "settings/config.hxx"
 
-#include "utils/memory.hxx"
 #include "utils/strdup.hxx"
 
 #include "bookmarks.hxx"
@@ -441,11 +440,6 @@ main_window_reload_thumbnails_all_windows() noexcept
             }
         }
     }
-
-    /* Ensuring free space at the end of the heap is freed to the OS,
-     * mainly to deal with the possibility thousands of large thumbnails
-     * have been freed but the memory not actually released by SpaceFM */
-    ::utils::memory_trim();
 }
 
 void

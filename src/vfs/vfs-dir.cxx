@@ -43,7 +43,6 @@
 
 #include "concurrency.hxx"
 
-#include "utils/memory.hxx"
 #include "utils/write.hxx"
 
 #include "vfs/vfs-file.hxx"
@@ -534,11 +533,6 @@ vfs::dir::unload_thumbnails(const vfs::file::thumbnail_size size) noexcept
     {
         file->unload_thumbnail(size);
     }
-
-    /* Ensuring free space at the end of the heap is freed to the OS,
-     * mainly to deal with the possibility thousands of large thumbnails
-     * have been freed but the memory not actually released by SpaceFM */
-    ::utils::memory_trim();
 }
 
 /* signal handlers */

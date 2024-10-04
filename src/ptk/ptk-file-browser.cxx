@@ -94,7 +94,6 @@
 
 #include "settings/settings.hxx"
 
-#include "utils/memory.hxx"
 #include "utils/shell-quote.hxx"
 #include "utils/strdup.hxx"
 #include "utils/misc.hxx"
@@ -922,12 +921,6 @@ ptk_browser_finalize(GObject* obj) noexcept
     }
 
     G_OBJECT_CLASS(parent_class)->finalize(obj);
-
-    /* Ensuring free space at the end of the heap is freed to the OS,
-     * mainly to deal with the possibility that killing the browser results in
-     * thousands of large thumbnails being freed, but the memory not actually
-     * released by SpaceFM */
-    ::utils::memory_trim();
 }
 
 static void
@@ -1178,12 +1171,6 @@ ptk::browser::on_dir_file_listed() noexcept
         std::bind(&ptk::browser::on_folder_content_changed, this, std::placeholders::_1));
 
     this->update_model();
-
-    /* Ensuring free space at the end of the heap is freed to the OS,
-     * mainly to deal with the possibility that changing the directory results in
-     * thousands of large thumbnails being freed, but the memory not actually
-     * released by SpaceFM */
-    ::utils::memory_trim();
 
     this->run_event<spacefm::signal::chdir_after>();
     this->run_event<spacefm::signal::change_content>();
@@ -3209,11 +3196,6 @@ ptk::browser::refresh(const bool update_selected_files) noexcept
 
     // destroy file list and create new one
     this->update_model();
-
-    /* Ensuring free space at the end of the heap is freed to the OS,
-     * mainly to deal with the possibility thousands of large thumbnails
-     * have been freed but the memory not actually released by SpaceFM */
-    ::utils::memory_trim();
 
     // begin reload dir
     this->run_event<spacefm::signal::chdir_begin>();
