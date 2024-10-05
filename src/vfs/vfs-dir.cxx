@@ -79,7 +79,7 @@ vfs::dir::~dir() noexcept
 }
 
 const std::shared_ptr<vfs::dir>
-vfs::dir::create(const std::filesystem::path& path) noexcept
+vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
     if (global::dir_smart_cache.contains(path))
@@ -91,7 +91,8 @@ vfs::dir::create(const std::filesystem::path& path) noexcept
     {
         dir = global::dir_smart_cache.create(
             path,
-            std::bind([](const auto& path) { return std::make_shared<vfs::dir>(path); }, path));
+            [&path]() { return std::make_shared<vfs::dir>(path); },
+            permanent);
         // logger::debug<logger::domain::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), this->path_.string());
         dir->post_initialize();
     }
