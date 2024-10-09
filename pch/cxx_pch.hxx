@@ -48,16 +48,22 @@
 
 #include <cassert>
 
-// SIGNALS
-#include <sigc++/sigc++.h>
-
 // GTKMM
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <gtkmm.h>
 #include <gdkmm.h>
 #include <giomm.h>
 #include <glibmm.h>
+#include <sigc++/sigc++.h>
+
+// GLAZE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <glaze/glaze.hpp>
 #pragma GCC diagnostic pop
 
 // MAGIC_ENUM

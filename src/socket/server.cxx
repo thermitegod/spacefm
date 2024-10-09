@@ -20,7 +20,7 @@
 
 #include <optional>
 
-#include <nlohmann/json.hpp>
+#include <glaze/glaze.hpp>
 
 #include <zmq.hpp>
 
@@ -29,6 +29,7 @@
 #include "logger.hxx"
 
 #include "socket/commands.hxx"
+#include "socket/datatypes.hxx"
 #include "socket/server.hxx"
 
 void
@@ -54,14 +55,20 @@ socket::server_thread() noexcept
             logger::info<logger::domain::socket>("request: {}", command);
             const auto [ret, result] = socket::command(command);
 
-            nlohmann::json response;
-            response["exit"] = ret;
-            response["result"] = result;
-            logger::info<logger::domain::socket>("result : {}", response.dump());
+            const auto response = socket::socket_response_data{ret, result};
+            std::string buffer;
+            const auto ec = glz::write_json(response, buffer);
+            if (ec)
+            {
+                logger::info<logger::domain::socket>("Failed to create response: {}",
+                                                     glz::format_error(ec, buffer));
+                continue;
+            }
+            logger::info<logger::domain::socket>("result : {}", buffer);
 
             // Send the response back to the sender
-            zmq::message_t reply(response.dump().size());
-            std::memcpy(reply.data(), response.dump().data(), response.dump().size());
+            zmq::message_t reply(buffer.size());
+            std::memcpy(reply.data(), buffer.data(), buffer.size());
             server.send(reply, zmq::send_flags::none);
         }
     }

@@ -28,7 +28,7 @@ commandline::socket::set_task::icon(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("icon", "Set task icon");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "icon"; };
     sub->callback(run_subcommand);
@@ -43,7 +43,7 @@ commandline::socket::set_task::count(CLI::App* app, const socket_subcommand_data
 {
     auto* sub = app->add_subcommand("count", "Set task count");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "count"; };
     sub->callback(run_subcommand);
@@ -59,7 +59,7 @@ commandline::socket::set_task::directory(CLI::App* app,
 {
     auto* sub = app->add_subcommand("directory", "Set task directory");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "directory"; };
     sub->callback(run_subcommand);
@@ -74,7 +74,7 @@ commandline::socket::set_task::from(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("from", "Set task from");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "from"; };
     sub->callback(run_subcommand);
@@ -89,7 +89,7 @@ commandline::socket::set_task::item(CLI::App* app, const socket_subcommand_data_
 {
     auto* sub = app->add_subcommand("item", "Set task item");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "item"; };
     sub->callback(run_subcommand);
@@ -104,7 +104,7 @@ commandline::socket::set_task::to(CLI::App* app, const socket_subcommand_data_t&
 {
     auto* sub = app->add_subcommand("to", "Set task to");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "to"; };
     sub->callback(run_subcommand);
@@ -119,7 +119,7 @@ commandline::socket::set_task::progress(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("progress", "Set task progress");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "progress"; };
     sub->callback(run_subcommand);
@@ -134,7 +134,7 @@ commandline::socket::set_task::total(CLI::App* app, const socket_subcommand_data
 {
     auto* sub = app->add_subcommand("total", "Set task total");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "total"; };
     sub->callback(run_subcommand);
@@ -149,7 +149,7 @@ commandline::socket::set_task::curspeed(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("curspeed", "Set task curspeed");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "curspeed"; };
     sub->callback(run_subcommand);
@@ -165,7 +165,7 @@ commandline::socket::set_task::curremain(CLI::App* app,
 {
     auto* sub = app->add_subcommand("curremain", "Set task curremain");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "curremain"; };
     sub->callback(run_subcommand);
@@ -194,7 +194,7 @@ commandline::socket::set_task::avgremain(CLI::App* app,
 {
     auto* sub = app->add_subcommand("avgremain", "Set task avgremain");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "avgremain"; };
     sub->callback(run_subcommand);

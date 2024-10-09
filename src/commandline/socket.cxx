@@ -23,20 +23,21 @@
 
 #include <CLI/CLI.hpp>
 
-#include <nlohmann/json.hpp>
+#include <glaze/glaze.hpp>
 
 #include <zmq.hpp>
 
 #include <ztd/ztd.hxx>
 
+#include "socket/datatypes.hxx"
 #include "socket/server.hxx"
 
 #include "commandline/socket/subcommands.hxx"
 
 #include "commandline/socket.hxx"
 
-[[noreturn]] void
-run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
+[[noreturn]] static void
+run_subcommand_socket(const socket_subcommand_data_t& opt)
 {
     // connect to server
     zmq::context_t context{1};
@@ -54,19 +55,17 @@ run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
     }
 
     // server request
-    nlohmann::json server_json;
-    // flags
-    server_json["window"] = opt->window;
-    server_json["panel"] = opt->panel;
-    server_json["tab"] = opt->tab;
-    // socket data
-    server_json["command"] = opt->command;
-    server_json["property"] = opt->property;
-    server_json["subproperty"] = opt->subproperty;
-    server_json["data"] = opt->socket_data;
-    // std::println("JSON : {}", server_json.dump());
+    glz::error_ctx ec;
+    std::string buffer;
+    ec = glz::write_json(opt, buffer);
+    if (ec)
+    {
+        std::println("Failed to create socket JSON: {}", glz::format_error(ec, buffer));
+        std::exit(EXIT_FAILURE);
+    }
+    // std::println("JSON : {}", buffer);
 
-    const bool sent = socket::send_command(socket, server_json.dump());
+    const bool sent = socket::send_command(socket, buffer);
     if (!sent)
     {
         std::println("Failed to send command to server");
@@ -80,21 +79,28 @@ run_subcommand_socket(const socket_subcommand_data_t& opt) noexcept
         std::println("Failed to receive response from server");
         std::exit(EXIT_FAILURE);
     }
-    const nlohmann::json response = nlohmann::json::parse(server_response.value());
-    const i32 ret = response["exit"];
-    const std::string result = response["result"];
 
-    if (!result.empty())
+    socket::socket_response_data response_data;
+    ec = glz::read_json(response_data, server_response.value());
+    if (ec)
     {
-        std::println("{}", result);
+        std::println("Failed to decode socket response: {}",
+                     glz::format_error(ec, server_response.value()));
+        std::exit(EXIT_FAILURE);
     }
-    std::exit(ret);
+
+    if (!response_data.message.empty())
+    {
+        std::println("{}", response_data.message);
+    }
+
+    std::exit(response_data.exit_status);
 }
 
 void
 setup_subcommand_socket(CLI::App& app) noexcept
 {
-    auto opt = std::make_shared<socket_subcommand_data>();
+    auto opt = std::make_shared<socket::socket_request_data>();
     CLI::App* sub = app.add_subcommand("socket", "Send a socket command (See subcommand help)");
 
     // named flags

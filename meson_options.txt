@@ -41,6 +41,13 @@ option(
 )
 
 option(
+    'with-system-glaze',
+    type : 'boolean',
+    value: false,
+    description : 'Use system glaze instead of bundled version'
+)
+
+option(
     'with-system-magic-enum',
     type : 'boolean',
     value: false,

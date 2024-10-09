@@ -195,7 +195,7 @@ setup_subcommand_get_task(CLI::App* app, const socket_subcommand_data_t& opt) no
 {
     auto* sub = app->add_subcommand("get-task", "Gets a task property");
 
-    sub->add_option("property", opt->socket_data, "Property to get")->required(true)->expected(2);
+    sub->add_option("property", opt->data, "Property to get")->required(true)->expected(2);
 
     const auto run_subcommand = [opt]() { opt->command = "get-task"; };
     sub->callback(run_subcommand);
@@ -257,9 +257,7 @@ setup_subcommand_emit_key(CLI::App* app, const socket_subcommand_data_t& opt) no
     auto* sub =
         app->add_subcommand("emit-key", "Activates a menu item by emitting its shortcut key");
 
-    sub->add_option("property", opt->socket_data, "Property to get")
-        ->required(true)
-        ->expected(1, 2);
+    sub->add_option("property", opt->data, "Property to get")->required(true)->expected(1, 2);
 
     const auto run_subcommand = [opt]() { opt->command = "emit-key"; };
     sub->callback(run_subcommand);
@@ -274,7 +272,7 @@ setup_subcommand_activate(CLI::App* app, const socket_subcommand_data_t& opt) no
 {
     auto* sub = app->add_subcommand("activate", "Runs custom command or shows submenu named NAME");
 
-    sub->add_option("property", opt->socket_data, "Property to get")->required(true)->expected(1);
+    sub->add_option("property", opt->data, "Property to get")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->command = "activate"; };
     sub->callback(run_subcommand);
@@ -289,9 +287,7 @@ setup_subcommand_add_event(CLI::App* app, const socket_subcommand_data_t& opt) n
 {
     auto* sub = app->add_subcommand("add-event", "Add asynchronous handler COMMAND to EVENT");
 
-    sub->add_option("property", opt->socket_data, "Property to get")
-        ->required(true)
-        ->expected(2, -1);
+    sub->add_option("property", opt->data, "Property to get")->required(true)->expected(2, -1);
 
     const auto run_subcommand = [opt]() { opt->command = "add-event"; };
     sub->callback(run_subcommand);
@@ -308,9 +304,7 @@ setup_subcommand_replace_event(CLI::App* app, const socket_subcommand_data_t& op
         app->add_subcommand("replace-event",
                             "Add synchronous handler COMMAND to EVENT, replacing default handler");
 
-    sub->add_option("property", opt->socket_data, "Property to get")
-        ->required(true)
-        ->expected(2, -1);
+    sub->add_option("property", opt->data, "Property to get")->required(true)->expected(2, -1);
 
     const auto run_subcommand = [opt]() { opt->command = "replace-event"; };
     sub->callback(run_subcommand);
@@ -325,9 +319,7 @@ setup_subcommand_remove_event(CLI::App* app, const socket_subcommand_data_t& opt
 {
     auto* sub = app->add_subcommand("remove-event", "Remove handler COMMAND from EVENT");
 
-    sub->add_option("property", opt->socket_data, "Property to get")
-        ->required(true)
-        ->expected(2, -1);
+    sub->add_option("property", opt->data, "Property to get")->required(true)->expected(2, -1);
 
     const auto run_subcommand = [opt]() { opt->command = "remove-event"; };
     sub->callback(run_subcommand);

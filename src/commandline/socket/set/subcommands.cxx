@@ -50,7 +50,7 @@ commandline::socket::set::window_size(CLI::App* app, const socket_subcommand_dat
 {
     auto* sub = app->add_subcommand("window-size", "Set property window-size");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "window-size"; };
     sub->callback(run_subcommand);
@@ -66,7 +66,7 @@ commandline::socket::set::window_position(CLI::App* app,
 {
     auto* sub = app->add_subcommand("window-position", "Set property window-position");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "window-position"; };
     sub->callback(run_subcommand);
@@ -120,7 +120,7 @@ commandline::socket::set::window_vslider_top(CLI::App* app,
 {
     auto* sub = app->add_subcommand("window-vslider-top", "Set property window-vslider-top");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "window-vslider-top"; };
     sub->callback(run_subcommand);
@@ -136,7 +136,7 @@ commandline::socket::set::window_vslider_bottom(CLI::App* app,
 {
     auto* sub = app->add_subcommand("window-vslider-bottom", "Set property window-vslider-bottom");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "window-vslider-bottom"; };
     sub->callback(run_subcommand);
@@ -152,7 +152,7 @@ commandline::socket::set::window_hslider(CLI::App* app,
 {
     auto* sub = app->add_subcommand("window-hslider", "Set property window-hslider");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "window-hslider"; };
     sub->callback(run_subcommand);
@@ -168,7 +168,7 @@ commandline::socket::set::window_tslider(CLI::App* app,
 {
     auto* sub = app->add_subcommand("window-tslider", "Set property window-tslider");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "window-tslider"; };
     sub->callback(run_subcommand);
@@ -481,7 +481,7 @@ commandline::socket::set::new_tab(CLI::App* app, const socket_subcommand_data_t&
 {
     auto* sub = app->add_subcommand("new-tab", "Set property new-tab");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "new-tab"; };
     sub->callback(run_subcommand);
@@ -649,7 +649,7 @@ commandline::socket::set::panel_hslider_top(CLI::App* app,
 {
     auto* sub = app->add_subcommand("panel-hslider-top", "Set property panel-hslider-top");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "panel-hslider-top"; };
     sub->callback(run_subcommand);
@@ -665,7 +665,7 @@ commandline::socket::set::panel_hslider_bottom(CLI::App* app,
 {
     auto* sub = app->add_subcommand("panel-hslider-bottom", "Set property panel-hslider-bottom");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "panel-hslider-bottom"; };
     sub->callback(run_subcommand);
@@ -680,7 +680,7 @@ commandline::socket::set::panel_vslider(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("panel-vslider", "Set property panel-vslider");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "panel-vslider"; };
     sub->callback(run_subcommand);
@@ -695,7 +695,7 @@ setup_subcommand_set_column_width_name(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("name", "Set property name");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "name"; };
     sub->callback(run_subcommand);
@@ -706,7 +706,7 @@ setup_subcommand_set_column_width_size(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("size", "Set property size");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "size"; };
     sub->callback(run_subcommand);
@@ -717,7 +717,7 @@ setup_subcommand_set_column_width_bytes(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("bytes", "Set property bytes");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "bytes"; };
     sub->callback(run_subcommand);
@@ -728,7 +728,7 @@ setup_subcommand_set_column_width_type(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("type", "Set property type");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "type"; };
     sub->callback(run_subcommand);
@@ -739,7 +739,7 @@ setup_subcommand_set_column_width_mime(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("mime", "Set property mime");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "mime"; };
     sub->callback(run_subcommand);
@@ -751,7 +751,7 @@ setup_subcommand_set_column_width_permission(CLI::App* app,
 {
     auto* sub = app->add_subcommand("permission", "Set property permission");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "permission"; };
     sub->callback(run_subcommand);
@@ -762,7 +762,7 @@ setup_subcommand_set_column_width_owner(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("owner", "Set property owner");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "owner"; };
     sub->callback(run_subcommand);
@@ -773,7 +773,7 @@ setup_subcommand_set_column_width_group(CLI::App* app, const socket_subcommand_d
 {
     auto* sub = app->add_subcommand("group", "Set property group");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "group"; };
     sub->callback(run_subcommand);
@@ -785,7 +785,7 @@ setup_subcommand_set_column_width_date_accessed(CLI::App* app,
 {
     auto* sub = app->add_subcommand("accessed", "Set property accessed");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "accessed"; };
     sub->callback(run_subcommand);
@@ -797,7 +797,7 @@ setup_subcommand_set_column_width_date_created(CLI::App* app,
 {
     auto* sub = app->add_subcommand("created", "Set property created");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "created"; };
     sub->callback(run_subcommand);
@@ -809,7 +809,7 @@ setup_subcommand_set_column_width_date_metadata(CLI::App* app,
 {
     auto* sub = app->add_subcommand("metadata", "Set property metadata");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "metadata"; };
     sub->callback(run_subcommand);
@@ -821,7 +821,7 @@ setup_subcommand_set_column_width_date_modified(CLI::App* app,
 {
     auto* sub = app->add_subcommand("modified", "Set property modified");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->subproperty = "modified"; };
     sub->callback(run_subcommand);
@@ -1126,7 +1126,7 @@ commandline::socket::set::max_thumbnail_size(CLI::App* app,
 {
     auto* sub = app->add_subcommand("max-thumbnail-size", "Set property max-thumbnail-size");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "max-thumbnail-size"; };
     sub->callback(run_subcommand);
@@ -1159,7 +1159,7 @@ commandline::socket::set::pathbar_text(CLI::App* app, const socket_subcommand_da
 {
     auto* sub = app->add_subcommand("pathbar-text", "Set property pathbar-text");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "pathbar-text"; };
     sub->callback(run_subcommand);
@@ -1174,7 +1174,7 @@ commandline::socket::set::current_dir(CLI::App* app, const socket_subcommand_dat
 {
     auto* sub = app->add_subcommand("current-dir", "Set property current-dir");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "current-dir"; };
     sub->callback(run_subcommand);
@@ -1226,7 +1226,7 @@ commandline::socket::set::selected_files(CLI::App* app,
 {
     auto* sub = app->add_subcommand("selected-files", "Set property selected-files");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1, -1);
 
     const auto run_subcommand = [opt]() { opt->property = "selected-files"; };
     sub->callback(run_subcommand);
@@ -1242,7 +1242,7 @@ commandline::socket::set::selected_filenames(CLI::App* app,
 {
     auto* sub = app->add_subcommand("selected-filenames", "Set property selected-filenames");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1, -1);
 
     const auto run_subcommand = [opt]() { opt->property = "selected-filenames"; };
     sub->callback(run_subcommand);
@@ -1258,7 +1258,7 @@ commandline::socket::set::unselected_files(CLI::App* app,
 {
     auto* sub = app->add_subcommand("unselected-files", "Set property unselected-files");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1, -1);
 
     const auto run_subcommand = [opt]() { opt->property = "unselected-files"; };
     sub->callback(run_subcommand);
@@ -1274,7 +1274,7 @@ commandline::socket::set::unselected_filenames(CLI::App* app,
 {
     auto* sub = app->add_subcommand("unselected-filenames", "Set property unselected-filenames");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1, -1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1, -1);
 
     const auto run_subcommand = [opt]() { opt->property = "unselected-filenames"; };
     sub->callback(run_subcommand);
@@ -1290,7 +1290,7 @@ commandline::socket::set::selected_pattern(CLI::App* app,
 {
     auto* sub = app->add_subcommand("selected-pattern", "Set property selected-pattern");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "selected-pattern"; };
     sub->callback(run_subcommand);
@@ -1306,7 +1306,7 @@ commandline::socket::set::clipboard_text(CLI::App* app,
 {
     auto* sub = app->add_subcommand("clipboard-text", "Set property clipboard-text");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "clipboard-text"; };
     sub->callback(run_subcommand);
@@ -1323,7 +1323,7 @@ commandline::socket::set::clipboard_primary_text(CLI::App* app,
     auto* sub =
         app->add_subcommand("clipboard-primary-text", "Set property clipboard-primary-text");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "clipboard-primary-text"; };
     sub->callback(run_subcommand);
@@ -1339,7 +1339,7 @@ commandline::socket::set::clipboard_from_file(CLI::App* app,
 {
     auto* sub = app->add_subcommand("clipboard-from-file", "Set property clipboard-from-file");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "clipboard-from-file"; };
     sub->callback(run_subcommand);
@@ -1356,7 +1356,7 @@ commandline::socket::set::clipboard_primary_from_file(CLI::App* app,
     auto* sub = app->add_subcommand("clipboard-primary-from-file",
                                     "Set property clipboard-primary-from-file");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "clipboard-primary-from-file"; };
     sub->callback(run_subcommand);
@@ -1372,7 +1372,7 @@ commandline::socket::set::clipboard_copy_files(CLI::App* app,
 {
     auto* sub = app->add_subcommand("clipboard-copy-files", "Set property clipboard-copy-files");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "clipboard-copy-files"; };
     sub->callback(run_subcommand);
@@ -1388,7 +1388,7 @@ commandline::socket::set::clipboard_cut_files(CLI::App* app,
 {
     auto* sub = app->add_subcommand("clipboard-cut-files", "Set property clipboard-cut-files");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "clipboard-cut-files"; };
     sub->callback(run_subcommand);
@@ -1403,7 +1403,7 @@ commandline::socket::set::editor(CLI::App* app, const socket_subcommand_data_t& 
 {
     auto* sub = app->add_subcommand("editor", "Set property editor");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "editor"; };
     sub->callback(run_subcommand);
@@ -1418,7 +1418,7 @@ commandline::socket::set::terminal(CLI::App* app, const socket_subcommand_data_t
 {
     auto* sub = app->add_subcommand("terminal", "Set property terminal");
 
-    sub->add_option("value", opt->socket_data, "Value to set")->required(true)->expected(1);
+    sub->add_option("value", opt->data, "Value to set")->required(true)->expected(1);
 
     const auto run_subcommand = [opt]() { opt->property = "terminal"; };
     sub->callback(run_subcommand);

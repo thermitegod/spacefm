@@ -21,7 +21,8 @@ python = find_program('python3', required: true)
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 
-incdir = include_directories('src')
+incdir = []
+incdir += include_directories('src')
 
 package = meson.project_name()
 version = meson.project_version()
@@ -298,6 +299,13 @@ else
     dependencies += concurrencpp_dep
 endif
 
+if get_option('with-system-glaze')
+    glaze_dep = dependency('glaze', required: true)
+    dependencies += glaze_dep
+else
+    incdir += include_directories('subprojects/glaze/include')
+endif
+
 if get_option('with-system-magic-enum')
     magic_enum_dep = dependency('magic_enum', required: true)
     dependencies += magic_enum_dep
@@ -344,11 +352,9 @@ else
 endif
 
 if get_option('socket')
-    nlohmann_json_dep = dependency('nlohmann_json', required: true)
     cppzmq_dep = dependency('cppzmq', required: true)
 
     dependencies += [
-        nlohmann_json_dep,
         cppzmq_dep,
     ]
 
