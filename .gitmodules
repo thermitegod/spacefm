@@ -16,3 +16,6 @@
 [submodule "subprojects/spdlog"]
 	path = subprojects/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "subprojects/glaze"]
+	path = subprojects/glaze
+	url = https://github.com/stephenberry/glaze
