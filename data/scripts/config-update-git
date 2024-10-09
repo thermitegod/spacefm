@@ -119,13 +119,14 @@ if not args.config_version:
 
 config_dir: Path = Path(args.config_dir[0])
 config_file: Path = Path(args.config_file[0])
+config_file_ext: str = str(config_file).rpartition('.')[2]
 config_version: str = Path(args.config_version[0])
 
 session_path: Path = Path(config_dir / config_file)
 
 git_path: Path = Path(config_dir / '.git')
 
-git_branch_name: str = f'TOML/{config_version}'
+git_branch_name: str = f'{config_file_ext.upper()}/{config_version}'
 
 if not config_dir.exists():
     config_dir.mkdir(parents=True, exist_ok=True)

@@ -63,8 +63,22 @@ load_settings() noexcept
 
     xset_defaults();
 
-    const auto session =
-        std::filesystem::path() / settings_config_dir / config::disk_format::filename;
+    const auto get_config_file_path = [settings_config_dir]()
+    {
+        auto path_toml = settings_config_dir / config::disk_format::filename;
+        auto path_json = settings_config_dir / config::disk_format::filename_json;
+        if (std::filesystem::exists(path_json))
+        { // Try to load JSON config first
+            return path_json;
+        }
+        else if (std::filesystem::exists(path_toml))
+        { // Next try old TOML config
+            return path_toml;
+        }
+        // No config found use JSON
+        return path_json;
+    };
+    const auto session = get_config_file_path();
 
     if (!std::filesystem::exists(settings_config_dir))
     {
@@ -92,7 +106,7 @@ load_settings() noexcept
                 std::format("{} --config-dir {} --config-file {} --config-version {}",
                             command_script.string(),
                             settings_config_dir.string(),
-                            config::disk_format::filename,
+                            session.filename().string(),
                             config::disk_format::version);
 
             logger::info("SCRIPT={}", command_script.string());
@@ -108,7 +122,7 @@ load_settings() noexcept
             const std::string command_args = std::format("{} --config-dir {} --config-file {}",
                                                          command_script.string(),
                                                          settings_config_dir.string(),
-                                                         config::disk_format::filename);
+                                                         session.filename().string());
 
             logger::info("SCRIPT={}", command_script.string());
             Glib::spawn_command_line_sync(command_args);

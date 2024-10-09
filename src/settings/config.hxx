@@ -15,26 +15,45 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
 
 #include <filesystem>
 
+#include <map>
+
 #include <ztd/ztd.hxx>
+
+#include "settings/settings.hxx"
 
 namespace config
 {
+// map<var, value>
+using setvars_t = std::map<std::string, std::string>;
+// map<xset_name, setvars_t>
+using xsetpak_t = std::map<std::string, setvars_t>;
+
+struct config_file_data
+{
+    u64 version;
+    detail::settings settings;
+    xsetpak_t xset;
+};
+
 void load(const std::filesystem::path& session) noexcept;
 void save() noexcept;
 
 namespace disk_format
 {
-constexpr u64 version{3}; // 3.0.0-dev
+constexpr u64 version{4}; // 3.0.0-dev
 constexpr std::string_view filename{"session.toml"};
+constexpr std::string_view filename_json{"session.json"};
 
 // The delimiter used in the config file to
-// store a list of tabs as single sting
+// store a list of tabs as a single string
 constexpr std::string_view tab_delimiter{"///"};
 
+#if defined(HAVE_DEPRECATED)
 namespace toml::section
 {
 // toml11 does not work with std::string_view as a key,
@@ -83,5 +102,6 @@ constexpr const char* const show_toolbar_search{"show_toolbar_search_bar"};
 // XSet keys
 // The names for XSet member variables are deduced using magic_enum::enum_name()
 } // namespace toml::key
+#endif
 } // namespace disk_format
 } // namespace config

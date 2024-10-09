@@ -15,13 +15,19 @@
 
 #include <string>
 
+#include <filesystem>
+
 #include <magic_enum.hpp>
 
+#if defined(HAVE_DEPRECATED)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 #pragma GCC diagnostic ignored "-Wunused-result"
 #include <toml.hpp> // toml11
 #pragma GCC diagnostic pop
+#endif
+
+#include <glaze/glaze.hpp>
 
 #include <ztd/ztd.hxx>
 
@@ -33,6 +39,8 @@
 
 #include "settings/settings.hxx"
 #include "settings/config.hxx"
+
+#if defined(HAVE_DEPRECATED)
 
 static u64
 get_config_file_version(const toml::value& tbl) noexcept
@@ -322,30 +330,177 @@ config_parse_xset(const toml::value& tbl, u64 version) noexcept
     }
 }
 
+#endif
+
+static void
+config_parse_settings(const config::detail::settings& settings, const u64 version) noexcept
+{
+    (void)version;
+
+    config::settings.show_thumbnails = settings.show_thumbnails;
+    config::settings.thumbnail_max_size = settings.thumbnail_max_size;
+    config::settings.icon_size_big = settings.icon_size_big;
+    config::settings.icon_size_small = settings.icon_size_small;
+    config::settings.icon_size_tool = settings.icon_size_tool;
+    config::settings.single_click = settings.single_click;
+    config::settings.single_hover = settings.single_hover;
+    config::settings.use_si_prefix = settings.use_si_prefix;
+    config::settings.click_executes = settings.click_executes;
+    config::settings.confirm = settings.confirm;
+    config::settings.confirm_delete = settings.confirm_delete;
+    config::settings.confirm_trash = settings.confirm_trash;
+    config::settings.thumbnailer_use_api = settings.thumbnailer_use_api;
+    config::settings.height = settings.height;
+    config::settings.width = settings.width;
+    config::settings.maximized = settings.maximized;
+    config::settings.always_show_tabs = settings.always_show_tabs;
+    config::settings.show_close_tab_buttons = settings.show_close_tab_buttons;
+    config::settings.new_tab_here = settings.new_tab_here;
+    config::settings.show_toolbar_home = settings.show_toolbar_home;
+    config::settings.show_toolbar_refresh = settings.show_toolbar_refresh;
+    config::settings.show_toolbar_search = settings.show_toolbar_search;
+}
+
+static void
+config_parse_xset(const config::xsetpak_t& pak, const u64 version) noexcept
+{
+    (void)version;
+
+    for (const auto& [name, vars] : pak)
+    {
+        // const auto set = xset::set::get(name);
+        const auto enum_name_value = magic_enum::enum_cast<xset::name>(name);
+        if (!enum_name_value.has_value())
+        {
+            logger::warn("Invalid xset::name enum name, xset::var::{}", name);
+            continue;
+        }
+        const auto set = xset::set::get(enum_name_value.value());
+
+        for (const auto& [setvar, value] : vars)
+        {
+            // logger::info("name: {} | var: {} | value: {}", name, setvar, value);
+
+            const auto enum_var_value = magic_enum::enum_cast<xset::var>(setvar);
+            if (!enum_var_value.has_value())
+            {
+                logger::warn("Invalid xset::var enum name, xset::var::{}", setvar);
+                continue;
+            }
+
+            const auto var = enum_var_value.value();
+
+            if (var == xset::var::s)
+            {
+                set->s = value;
+            }
+            else if (var == xset::var::x)
+            {
+                set->x = value;
+            }
+            else if (var == xset::var::y)
+            {
+                set->y = value;
+            }
+            else if (var == xset::var::z)
+            {
+                set->z = value;
+            }
+            else if (var == xset::var::key)
+            {
+                u32 result = 0;
+                const auto [ptr, ec] =
+                    std::from_chars(value.data(), value.data() + value.size(), result);
+                if (ec != std::errc())
+                {
+                    logger::error("Config: Failed trying to set xset.{} to {}",
+                                  magic_enum::enum_name(var),
+                                  value);
+                    continue;
+                }
+                set->keybinding.key = result;
+            }
+            else if (var == xset::var::keymod)
+            {
+                u32 result = 0;
+                const auto [ptr, ec] =
+                    std::from_chars(value.data(), value.data() + value.size(), result);
+                if (ec != std::errc())
+                {
+                    logger::error("Config: Failed trying to set xset.{} to {}",
+                                  magic_enum::enum_name(var),
+                                  value);
+                    continue;
+                }
+                set->keybinding.modifier = result;
+            }
+            else if (var == xset::var::b)
+            {
+                if (value == "1")
+                {
+                    set->b = xset::set::enabled::yes;
+                }
+                else
+                {
+                    set->b = xset::set::enabled::no;
+                }
+            }
+        }
+    }
+}
+
 void
 config::load(const std::filesystem::path& session) noexcept
 {
-    try
+    if (session.extension() == ".json")
     {
-        const auto tbl = toml::parse(session);
+        logger::info("Loading JSON config");
 
-        // DEBUG
-        // std::println("###### TOML PARSE ######");
-        // std::println("{}", tbl.as_string());
+        config_file_data config_data;
+        std::string buffer;
+        const auto ec = glz::read_file_json(config_data, session.c_str(), buffer);
 
-        const u64 version = get_config_file_version(tbl);
+        if (ec)
+        {
+            logger::error("Failed to load config file: {}", glz::format_error(ec, buffer));
+            return;
+        }
 
-        config_parse_general(tbl, version);
-        config_parse_window(tbl, version);
-        config_parse_interface(tbl, version);
-        config_parse_xset(tbl, version);
+        config_parse_settings(config_data.settings, config_data.version);
+        config_parse_xset(config_data.xset, config_data.version);
 
         // upgrade config
-        config_upgrade(version);
+        config_upgrade(config_data.version);
     }
-    catch (const toml::syntax_error& e)
+    else if (session.extension() == ".toml")
+    { // Legacy toml config
+#if defined(HAVE_DEPRECATED)
+        logger::info("Loading TOML config");
+
+        try
+        {
+            const auto tbl = toml::parse(session);
+            const u64 version = get_config_file_version(tbl);
+
+            config_parse_general(tbl, version);
+            config_parse_window(tbl, version);
+            config_parse_interface(tbl, version);
+            config_parse_xset(tbl, version);
+
+            // upgrade config
+            config_upgrade(version);
+        }
+        catch (const toml::syntax_error& e)
+        {
+            logger::error("Config file parsing failed: {}", e.what());
+            return;
+        }
+#else
+        logger::error("Built without support for TOML config files");
+#endif
+    }
+    else
     {
-        logger::error("Config file parsing failed: {}", e.what());
-        return;
+        logger::error("Unsupported config file: {}", session.c_str());
     }
 }
