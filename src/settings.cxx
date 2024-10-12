@@ -38,8 +38,6 @@
 
 #include "main-window.hxx"
 
-#include "scripts.hxx"
-
 #include "xset/xset.hxx"
 #include "xset/xset-defaults.hxx"
 
@@ -86,48 +84,22 @@ load_settings() noexcept
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    bool git_backed_settings = config::settings.git_backed_settings;
-    if (git_backed_settings)
+#if defined(HAVE_DEV)
+    const auto command_script =
+        std::filesystem::path() / PACKAGE_SCRIPTS_PATH / "config-update-git";
+    if (std::filesystem::exists(command_script))
     {
-        if (Glib::find_program_in_path("git").empty())
-        {
-            logger::error("git backed settings enabled but git is not installed");
-            git_backed_settings = false;
-        }
+        const auto command_args =
+            std::format("{} --config-dir {} --config-file {} --config-version {}",
+                        command_script.string(),
+                        settings_config_dir.string(),
+                        session.filename().string(),
+                        config::disk_format::version);
+
+        logger::info("SCRIPT={}", command_script.string());
+        Glib::spawn_command_line_sync(command_args);
     }
-
-    if (git_backed_settings)
-    {
-        const auto command_script = get_script_path(spacefm::script::config_update_git);
-
-        if (script_exists(command_script))
-        {
-            const std::string command_args =
-                std::format("{} --config-dir {} --config-file {} --config-version {}",
-                            command_script.string(),
-                            settings_config_dir.string(),
-                            session.filename().string(),
-                            config::disk_format::version);
-
-            logger::info("SCRIPT={}", command_script.string());
-            Glib::spawn_command_line_sync(command_args);
-        }
-    }
-    else
-    {
-        const auto command_script = get_script_path(spacefm::script::config_update);
-
-        if (script_exists(command_script))
-        {
-            const std::string command_args = std::format("{} --config-dir {} --config-file {}",
-                                                         command_script.string(),
-                                                         settings_config_dir.string(),
-                                                         session.filename().string());
-
-            logger::info("SCRIPT={}", command_script.string());
-            Glib::spawn_command_line_sync(command_args);
-        }
-    }
+#endif
 
     if (std::filesystem::is_regular_file(session))
     {

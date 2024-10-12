@@ -41,7 +41,6 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
     panel_t panel{0};
 
     std::filesystem::path config_dir;
-    bool git_backed_settings{true};
 
     std::vector<std::string> raw_log_levels;
     std::unordered_map<std::string, std::string> log_levels;

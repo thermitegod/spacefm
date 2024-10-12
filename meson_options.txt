@@ -6,6 +6,13 @@ option(
 )
 
 option(
+    'dev',
+    type : 'boolean',
+    value: false,
+    description : 'enable development features'
+)
+
+option(
     'exo',
     type : 'boolean',
     value: true,

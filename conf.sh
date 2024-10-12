@@ -4,6 +4,7 @@
 #CC=gcc CXX=g++ meson setup --buildtype=release --prefix=$(pwd)/build ./build
 
 CC=clang CXX=clang++ meson setup \
+    -Ddev=true \
     -Ddeprecated=false \
     -Dwith-system-cli11=true \
     -Dwith-system-concurrencpp=true \

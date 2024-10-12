@@ -62,9 +62,6 @@ struct settings
 
     // thumbnailer backend cli/api
     bool thumbnailer_use_api{true};
-
-    // Git
-    bool git_backed_settings{true};
 };
 } // namespace detail
 

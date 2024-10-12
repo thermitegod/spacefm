@@ -287,6 +287,10 @@ if get_option('deprecated')
     endif
 endif
 
+if get_option('dev')
+    features += '-DHAVE_DEV'
+endif
+
 if get_option('exo')
     exo_dep = dependency('exo-2', required: true)
     dependencies += exo_dep
@@ -436,7 +440,6 @@ sources += files(
     'src/main.cxx',
     'src/main-window.cxx',
     'src/preference-dialog.cxx',
-    'src/scripts.cxx',
     'src/settings.cxx',
     'src/single-instance.cxx',
     'src/terminal-handlers.cxx',

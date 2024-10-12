@@ -30,8 +30,6 @@
 #include "logger.hxx"
 #include "types.hxx"
 
-#include "settings/settings.hxx"
-
 #if defined(HAVE_SOCKET)
 #include "commandline/socket.hxx"
 #endif
@@ -52,11 +50,6 @@ run_commandline(const commandline_opt_data_t& opt) noexcept
         }
 
         vfs::program::config(opt->config_dir);
-    }
-
-    if (opt->git_backed_settings != config::settings.git_backed_settings)
-    {
-        config::settings.git_backed_settings = opt->git_backed_settings;
     }
 
     if (opt->version)
@@ -105,10 +98,6 @@ setup_commandline(CLI::App& app, const commandline_opt_data_t& opt) noexcept
                 }
                 return std::format("Config path must be absolute: {}", input.string());
             });
-
-    app.add_flag("-g,--no-git-backed-settings",
-                 opt->git_backed_settings,
-                 "Do not use git to keep session history");
 
     app.add_option("--loglevel", opt->raw_log_levels, "Set the loglevel. Format: domain=level")
         ->check(
