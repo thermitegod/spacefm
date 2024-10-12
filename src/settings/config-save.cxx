@@ -114,7 +114,7 @@ config::save() noexcept
     const auto config_data =
         config_file_data{config::disk_format::version, config::settings, pack_xsets()};
 
-    const auto config_file = vfs::program::config() / config::disk_format::filename_json;
+    const auto config_file = vfs::program::config() / config::disk_format::filename;
 
     if (!std::filesystem::exists(vfs::program::config()))
     {

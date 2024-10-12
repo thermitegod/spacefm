@@ -289,19 +289,6 @@ features = []
 
 if get_option('deprecated')
     features += '-DHAVE_DEPRECATED'
-
-    if get_option('with-system-toml11')
-        toml11_dep = dependency('toml11', required: true)
-        dependencies += toml11_dep
-    else
-        cmake = import('cmake')
-        # Hard requires having a cpp standard set
-        cmake_opt_var = cmake.subproject_options()
-        cmake_opt_var.add_cmake_defines({'CMAKE_CXX_STANDARD': '23'})
-        toml11_proj = cmake.subproject('toml11', required: true, options: cmake_opt_var)
-        toml11_dep = toml11_proj.dependency('toml11')
-        dependencies += toml11_dep
-    endif
 endif
 
 if get_option('dev')
