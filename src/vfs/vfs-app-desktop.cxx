@@ -65,7 +65,7 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
     if (desktops_cache.contains(desktop_file))
     {
         // logger::info<logger::domain::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file.string());
-        const auto cache = desktops_cache.at(desktop_file);
+        const auto& cache = desktops_cache.at(desktop_file);
 
         const auto desktop_stat = ztd::stat(cache.desktop->path());
         if (desktop_stat.mtime() == cache.desktop_mtime)
