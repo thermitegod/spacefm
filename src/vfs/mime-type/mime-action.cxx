@@ -642,18 +642,18 @@ vfs::detail::mime_type::locate_desktop_file(const std::string_view desktop_id) n
 {
     const auto data_dir = vfs::user::data();
 
-    const auto data_desktop = ::locate_desktop_file(data_dir, desktop_id);
+    auto data_desktop = ::locate_desktop_file(data_dir, desktop_id);
     if (data_desktop)
     {
-        return data_desktop.value();
+        return data_desktop;
     }
 
     for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())
     {
-        const auto sys_desktop = ::locate_desktop_file(sys_dir, desktop_id);
+        auto sys_desktop = ::locate_desktop_file(sys_dir, desktop_id);
         if (sys_desktop)
         {
-            return sys_desktop.value();
+            return sys_desktop;
         }
     }
 
