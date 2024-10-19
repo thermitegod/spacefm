@@ -15,9 +15,11 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace spacefm
 {
-enum class signal
+enum class signal : std::uint8_t
 {
     // vfs::dir
     file_created,

@@ -39,7 +39,7 @@ namespace ptk
 struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::TreeModel
 {
     /* Columns of folder view */
-    enum class column
+    enum class column : std::uint8_t
     {
         icon,
         disp_name,

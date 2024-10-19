@@ -133,7 +133,7 @@ struct set : public std::enable_shared_from_this<set>
 
     xset::name xset_name;
 
-    enum enabled
+    enum enabled : std::uint8_t
     { // do not reorder - saved in config file
         unset,
         yes,
@@ -156,7 +156,7 @@ struct set : public std::enable_shared_from_this<set>
     };
     callback_data callback;
 
-    enum class menu_type
+    enum class menu_type : std::uint8_t
     { // do not reorder - saved in config file
         normal,
         check,
@@ -195,7 +195,7 @@ struct set : public std::enable_shared_from_this<set>
     };
     menu_data menu;
 
-    enum class keybinding_type
+    enum class keybinding_type : std::uint8_t
     {
         invalid, // keybindings are disabled for this xset
         navigation,

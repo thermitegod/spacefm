@@ -37,7 +37,7 @@ namespace ptk
 {
 struct file_list
 {
-    enum class column
+    enum class column : std::uint8_t
     { // Columns of directory view
         big_icon,
         small_icon,
@@ -56,7 +56,7 @@ struct file_list
         info,
     };
 
-    enum class sort_dir
+    enum class sort_dir : std::uint8_t
     { // sort_dir of directory view - do not change order, saved in config
         mixed,
         first,

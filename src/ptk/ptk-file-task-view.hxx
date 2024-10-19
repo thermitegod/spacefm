@@ -25,7 +25,7 @@
 
 namespace ptk::view::file_task
 {
-enum class column
+enum class column : std::uint8_t
 {
     status,
     count,

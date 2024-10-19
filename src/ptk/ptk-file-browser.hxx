@@ -50,14 +50,14 @@ namespace ptk
 {
 struct browser
 {
-    enum class view_mode
+    enum class view_mode : std::uint8_t
     {
         icon_view,
         list_view,
         compact_view,
     };
 
-    enum class sort_order
+    enum class sort_order : std::uint8_t
     {
         name,
         size,
@@ -73,14 +73,14 @@ struct browser
         mtime,
     };
 
-    enum class chdir_mode
+    enum class chdir_mode : std::uint8_t
     {
         normal,
         back,
         forward,
     };
 
-    enum class open_action
+    enum class open_action : std::uint8_t
     {
         dir,
         new_tab,
@@ -89,7 +89,7 @@ struct browser
         file,
     };
 
-    enum class focus_widget
+    enum class focus_widget : std::uint8_t
     {
         invalid,
         path_bar,

@@ -31,7 +31,7 @@ namespace vfs
 {
 struct monitor
 {
-    enum class event
+    enum class event : std::uint8_t
     {
         created,
         deleted,

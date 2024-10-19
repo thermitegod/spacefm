@@ -25,7 +25,7 @@
 
 namespace logger
 {
-enum class domain
+enum class domain : std::uint8_t
 {
     basic,
     autosave,

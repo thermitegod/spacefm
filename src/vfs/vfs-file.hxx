@@ -79,7 +79,7 @@ struct file : public std::enable_shared_from_this<file>
     [[nodiscard]] const std::chrono::system_clock::time_point ctime() const noexcept;
     [[nodiscard]] const std::chrono::system_clock::time_point mtime() const noexcept;
 
-    enum class thumbnail_size
+    enum class thumbnail_size : std::uint8_t
     {
         big,
         small,

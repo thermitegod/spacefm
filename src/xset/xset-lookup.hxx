@@ -27,7 +27,7 @@ namespace xset
  * When adding new names ensure that MAGIC_ENUM_RANGE_MIN, and MAGIC_ENUM_RANGE_MAX
  * are large enough to hold the entire enum.
  */
-enum class name
+enum class name : std::uint16_t
 {
     // all non builtin xsets will the 'custom' value.
     // custom,
@@ -964,7 +964,7 @@ enum class name
     handler_network_udevilsmb,
 };
 
-enum class panel
+enum class panel : std::uint8_t
 {
     show,
     show_toolbox,
@@ -992,7 +992,7 @@ enum class panel
     book_fol,
 };
 
-enum class var
+enum class var : std::uint8_t
 {
     s,
     b,
@@ -1011,7 +1011,7 @@ enum class var
     disable,
 };
 
-enum class main_window_panel
+enum class main_window_panel : std::uint8_t
 { // how a panel shares vertical and horizontal space with other panels
     panel_neither,
     panel_horiz,

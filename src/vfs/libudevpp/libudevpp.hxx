@@ -48,7 +48,7 @@ struct udev
     udev& operator=(udev&& other) = default;
     ~udev() = default;
 
-    enum class netlink_type
+    enum class netlink_type : std::uint8_t
     {
         udev,
         kernel,
@@ -67,7 +67,7 @@ struct udev
     [[nodiscard]] const std::optional<device>
     device_from_syspath(const std::filesystem::path& syspath) const noexcept;
 
-    enum class device_type
+    enum class device_type : std::uint8_t
     {
         block,
         character,

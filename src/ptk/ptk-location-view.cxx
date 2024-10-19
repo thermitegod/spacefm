@@ -93,7 +93,7 @@ static void on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol,
 
 namespace ptk::location_view
 {
-enum class column
+enum class column : std::uint8_t
 {
     icon,
     name,

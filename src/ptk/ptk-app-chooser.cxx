@@ -43,7 +43,7 @@
 
 #include "ptk/ptk-app-chooser.hxx"
 
-enum class app_chooser_column
+enum class app_chooser_column : std::uint8_t
 {
     app_icon,
     app_name,

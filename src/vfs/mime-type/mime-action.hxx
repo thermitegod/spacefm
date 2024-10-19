@@ -28,7 +28,7 @@
 
 namespace vfs::detail::mime_type
 {
-enum class action
+enum class action : std::uint8_t
 {
     DEFAULT,
     append,

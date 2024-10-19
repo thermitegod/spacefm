@@ -30,7 +30,7 @@
 
 namespace ptk::action
 {
-enum class rename_mode
+enum class rename_mode : std::uint8_t
 {
     rename,
     new_file,

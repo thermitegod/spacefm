@@ -36,14 +36,14 @@ namespace ptk
 {
 struct file_task
 {
-    enum class ptask_error
+    enum class ptask_error : std::uint8_t
     {
         first,
         any,
         cont
     };
 
-    enum class response
+    enum class response : std::uint8_t
     {
         close, // close window
         overwrite,

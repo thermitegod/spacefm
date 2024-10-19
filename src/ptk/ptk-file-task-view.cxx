@@ -309,7 +309,7 @@ on_task_stop(GtkMenuItem* item, GtkWidget* view, const xset_t& set2,
     GtkTreeIter it;
     ptk::file_task* ptask = nullptr;
 
-    enum class main_window_job
+    enum class main_window_job : std::uint8_t
     {
         stop,
         pause,

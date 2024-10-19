@@ -42,7 +42,7 @@ namespace vfs
 {
 struct file_task : public std::enable_shared_from_this<file_task>
 {
-    enum class type
+    enum class type : std::uint8_t
     {
         move,
         copy,
@@ -55,7 +55,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
         last,
     };
 
-    enum class state
+    enum class state : std::uint8_t
     {
         running,
         size_timeout,
@@ -66,7 +66,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
         finish,
     };
 
-    enum class overwrite_mode
+    enum class overwrite_mode : std::uint8_t
     {                  // do not reposition first four values
         overwrite,     // Overwrite current dest file / Ask
         overwrite_all, // Overwrite all existing files without prompt
@@ -76,7 +76,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
         rename,        // Rename file
     };
 
-    enum chmod_action
+    enum chmod_action : std::uint8_t
     {
         owner_r,
         owner_w,

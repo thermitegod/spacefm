@@ -46,7 +46,7 @@
 
 namespace ptk::path_entry
 {
-enum column
+enum column : std::uint8_t
 {
     name,
     path,

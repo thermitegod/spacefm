@@ -42,7 +42,7 @@ namespace ptk
 {
 struct file_menu
 {
-    enum class app_job
+    enum class app_job : std::uint8_t
     {
         default_action,
         edit,

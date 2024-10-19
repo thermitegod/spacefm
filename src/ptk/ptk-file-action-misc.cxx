@@ -46,7 +46,7 @@ static bool
 create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
                           const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
-    enum class file_action_column
+    enum class file_action_column : std::uint8_t
     {
         name,
         size,

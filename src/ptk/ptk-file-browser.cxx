@@ -6018,7 +6018,7 @@ ptk::wrapper::browser::focus(GtkMenuItem* item, ptk::browser* browser) noexcept
 {
     const i32 job = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(item), "focus"));
 
-    const auto enum_value = magic_enum::enum_cast<ptk::browser::focus_widget>(job);
+    const auto enum_value = magic_enum::enum_cast<ptk::browser::focus_widget>((u8)job);
     if (enum_value.has_value())
     {
         browser->focus(enum_value.value());

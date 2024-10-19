@@ -37,7 +37,7 @@ struct device;
 
 struct volume : public std::enable_shared_from_this<volume>
 {
-    enum class state
+    enum class state : std::uint8_t
     {
         added,
         removed,
@@ -47,7 +47,7 @@ struct volume : public std::enable_shared_from_this<volume>
         changed,
     };
 
-    enum class device_type
+    enum class device_type : std::uint8_t
     {
         block,
         network,
