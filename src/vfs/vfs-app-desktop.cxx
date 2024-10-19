@@ -57,7 +57,7 @@ struct desktop_cache_data
     std::chrono::system_clock::time_point desktop_mtime;
 };
 
-std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
+static std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
 
 const std::shared_ptr<vfs::desktop>
 vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept

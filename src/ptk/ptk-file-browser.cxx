@@ -115,7 +115,7 @@ struct PtkFileBrowserClass
     GtkPanedClass parent;
 };
 
-GType ptk_browser_get_type() noexcept;
+static GType ptk_browser_get_type() noexcept;
 
 #define PTK_TYPE_FILE_BROWSER (ptk_browser_get_type())
 
@@ -157,8 +157,8 @@ static bool on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* eve
                                                 ptk::browser* browser) noexcept;
 static bool on_folder_view_popup_menu(GtkWidget* widget, ptk::browser* browser) noexcept;
 
-void on_dir_tree_row_activated(GtkTreeView* view, GtkTreePath* path, GtkTreeViewColumn* column,
-                               ptk::browser* browser) noexcept;
+static void on_dir_tree_row_activated(GtkTreeView* view, GtkTreePath* path,
+                                      GtkTreeViewColumn* column, ptk::browser* browser) noexcept;
 
 /* Drag & Drop */
 static void on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_context,
@@ -286,7 +286,7 @@ struct column_data
 namespace global
 {
 // history of closed tabs
-std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
+static std::unordered_map<panel_t, std::vector<std::filesystem::path>> closed_tabs_restore{};
 
 // must match ipc-command.cxx run_ipc_command()
 static constexpr std::array<column_data, 12> columns{

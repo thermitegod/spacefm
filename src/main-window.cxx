@@ -95,7 +95,7 @@ static GtkApplicationWindowClass* parent_class = nullptr;
 
 namespace global
 {
-std::vector<MainWindow*> all_windows;
+static std::vector<MainWindow*> all_windows;
 }
 
 //  Drag & Drop/Clipboard targets

@@ -80,7 +80,7 @@ properties_dialog_data::properties_dialog_data(
 {
 }
 
-const std::vector<std::filesystem::path>
+const static std::vector<std::filesystem::path>
 find_subdirectories(const std::filesystem::path& directory,
                     const std::shared_ptr<properties_dialog_data>& data) noexcept
 {
@@ -368,7 +368,7 @@ class PropertiesPage
     }
 };
 
-GtkEntry*
+static GtkEntry*
 create_prop_text_box(const std::string_view data) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
@@ -381,7 +381,7 @@ create_prop_text_box(const std::string_view data) noexcept
     return entry;
 }
 
-GtkEntry*
+static GtkEntry*
 create_prop_text_box_no_focus(const std::string_view data) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(gtk_entry_new());
@@ -396,7 +396,7 @@ create_prop_text_box_no_focus(const std::string_view data) noexcept
     return entry;
 }
 
-GtkEntry*
+static GtkEntry*
 create_prop_text_box_date(const std::chrono::system_clock::time_point time_point) noexcept
 {
     const auto time_formated =
@@ -412,7 +412,7 @@ create_prop_text_box_date(const std::chrono::system_clock::time_point time_point
     return entry;
 }
 
-GtkWidget*
+static GtkWidget*
 init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
                    const std::filesystem::path& cwd,
                    const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
@@ -555,7 +555,7 @@ init_file_info_tab(const std::shared_ptr<properties_dialog_data>& data,
     return GTK_WIDGET(page.box());
 }
 
-GtkWidget*
+static GtkWidget*
 init_media_tab(const std::shared_ptr<properties_dialog_data>& data,
                const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
@@ -588,7 +588,7 @@ init_media_tab(const std::shared_ptr<properties_dialog_data>& data,
     return GTK_WIDGET(page.box());
 }
 
-GtkWidget*
+static GtkWidget*
 init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
                     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
@@ -837,7 +837,7 @@ init_attributes_tab(const std::shared_ptr<properties_dialog_data>& data,
     return GTK_WIDGET(page.box());
 }
 
-GtkWidget*
+static GtkWidget*
 init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
                      const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {
@@ -995,7 +995,7 @@ init_permissions_tab(const std::shared_ptr<properties_dialog_data>& data,
     return GTK_WIDGET(page.box());
 }
 
-void
+static void
 close_dialog(GtkWidget* widget, void* user_data) noexcept
 {
     (void)user_data;
@@ -1007,7 +1007,7 @@ close_dialog(GtkWidget* widget, void* user_data) noexcept
     gtk_widget_destroy(widget);
 }
 
-void
+static void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
                             const std::span<const std::shared_ptr<vfs::file>> selected_files,
                             i32 page) noexcept

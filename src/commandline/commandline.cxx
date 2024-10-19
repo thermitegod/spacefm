@@ -36,7 +36,7 @@
 
 #include "commandline/commandline.hxx"
 
-void
+static void
 run_commandline(const commandline_opt_data_t& opt) noexcept
 {
     (void)opt;

@@ -208,7 +208,7 @@ on_load_all_apps_finish(async_task* task, bool is_cancelled, GtkWidget* dialog) 
 #endif
 }
 
-GtkWidget*
+static GtkWidget*
 init_associated_apps_tab(GtkWidget* dialog,
                          const std::shared_ptr<vfs::mime_type>& mime_type) noexcept
 {
@@ -253,7 +253,7 @@ init_associated_apps_tab(GtkWidget* dialog,
     return GTK_WIDGET(scrolled_window);
 }
 
-GtkWidget*
+static GtkWidget*
 init_all_apps_tab(GtkWidget* dialog) noexcept
 {
     GtkScrolledWindow* scrolled_window =
@@ -469,7 +469,7 @@ app_chooser_dialog(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mim
  * These two can be separated by check if the returned string is ended
  * with ".desktop" postfix.
  */
-const std::optional<std::string>
+const static std::optional<std::string>
 app_chooser_dialog_get_selected_app(GtkWidget* dialog) noexcept
 {
     GtkEntry* entry = GTK_ENTRY(g_object_get_data(G_OBJECT(dialog), "entry_command"));

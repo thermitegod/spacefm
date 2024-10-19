@@ -81,7 +81,7 @@
 
 // https://source.chromium.org/chromium/chromium/src/+/main:base/strings/utf_string_conversion_utils.cc
 
-size_t
+static size_t
 WriteUnicodeCharacter(i32 code_point, std::string* output) noexcept
 {
     if (code_point >= 0 && code_point <= 0x7f)
@@ -110,7 +110,7 @@ WriteUnicodeCharacter(i32 code_point, std::string* output) noexcept
 // https://source.chromium.org/chromium/chromium/src/+/main:base/files/file_util.cc
 // only using the API
 
-bool
+static bool
 ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& contents,
                             size_t max_size) noexcept
 {
@@ -152,7 +152,8 @@ using MimeTypeMap = std::unordered_map<std::string, WeightedMime>;
 // value that is a MIME type if a higher weighted mime is found that currently
 // exists. Returns true if there was a valid list parsed from the file and false
 // otherwise.
-bool ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_types) noexcept;
+static bool ParseMimeTypes(const std::filesystem::path& file_path,
+                           MimeTypeMap& out_mime_types) noexcept;
 
 // https://source.chromium.org/chromium/chromium/src/+/main:base/nix/mime_util_xdg.cc
 
@@ -179,7 +180,7 @@ struct FileInfo
 };
 
 // Load all mime cache files on the system.
-void
+static void
 LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files) noexcept
 {
     std::vector<std::filesystem::path> mime_cache_files;
@@ -208,7 +209,7 @@ LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files) noexcept
 // Returns false if `offset > buf.size() - 4` or `offset` is not aligned to a
 // 4-byte word boundary, or `*result` is not between `min_result` and
 // `max_result`. `field_name` is used in error message.
-bool
+static bool
 ReadInt(const std::string& buf, uint32_t offset, const std::string& field_name, uint32_t min_result,
         size_t max_result, uint32_t* result) noexcept
 {

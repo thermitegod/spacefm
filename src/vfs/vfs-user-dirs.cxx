@@ -136,7 +136,7 @@ vfs::user::runtime() noexcept
 
 namespace global
 {
-std::filesystem::path config_path = vfs::user::config() / PACKAGE_NAME;
+static std::filesystem::path config_path = vfs::user::config() / PACKAGE_NAME;
 }
 
 const std::filesystem::path

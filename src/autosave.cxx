@@ -54,7 +54,7 @@ autosave::request_cancel() noexcept
 
 namespace autosave::detail
 {
-concurrencpp::timer timer;
+static concurrencpp::timer timer;
 } // namespace autosave::detail
 
 void

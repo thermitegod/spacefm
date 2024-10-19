@@ -48,8 +48,8 @@
 
 namespace global
 {
-std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
-std::mutex mime_map_lock;
+static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map;
+static std::mutex mime_map_lock;
 } // namespace global
 
 const std::shared_ptr<vfs::mime_type>

@@ -113,21 +113,21 @@ using devmount_t = std::shared_ptr<DeviceMount>;
 
 namespace global
 {
-std::vector<std::shared_ptr<vfs::volume>> volumes;
-std::vector<volume_callback_data_t> callbacks;
+static std::vector<std::shared_ptr<vfs::volume>> volumes;
+static std::vector<volume_callback_data_t> callbacks;
 
-libudev::udev udev;
-libudev::monitor umonitor;
+static libudev::udev udev;
+static libudev::monitor umonitor;
 
 #if (GTK_MAJOR_VERSION == 4)
 Glib::RefPtr<Glib::IOChannel> uchannel = nullptr;
 Glib::RefPtr<Glib::IOChannel> mchannel = nullptr;
 #elif (GTK_MAJOR_VERSION == 3)
-Glib::RefPtr<Glib::IOChannel> uchannel;
-Glib::RefPtr<Glib::IOChannel> mchannel;
+static Glib::RefPtr<Glib::IOChannel> uchannel;
+static Glib::RefPtr<Glib::IOChannel> mchannel;
 #endif
 
-std::vector<devmount_t> devmounts;
+static std::vector<devmount_t> devmounts;
 } // namespace global
 
 /**

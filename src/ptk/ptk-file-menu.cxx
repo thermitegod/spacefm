@@ -1942,7 +1942,7 @@ get_shared_desktop_file_location(const std::string_view name) noexcept
     return std::nullopt;
 }
 
-void
+static void
 app_job(GtkWidget* item, GtkWidget* app_item) noexcept
 {
     char* str = nullptr;

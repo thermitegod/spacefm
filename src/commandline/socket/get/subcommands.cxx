@@ -365,7 +365,7 @@ commandline::socket::get::panel_vslider(CLI::App* app, const socket_subcommand_d
  * subcommand column-width
  */
 
-void
+static void
 setup_subcommand_get_column_width_name(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("name", "Get property name");
@@ -374,7 +374,7 @@ setup_subcommand_get_column_width_name(CLI::App* app, const socket_subcommand_da
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_size(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("size", "Get property size");
@@ -383,7 +383,7 @@ setup_subcommand_get_column_width_size(CLI::App* app, const socket_subcommand_da
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_bytes(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("bytes", "Get property bytes");
@@ -392,7 +392,7 @@ setup_subcommand_get_column_width_bytes(CLI::App* app, const socket_subcommand_d
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_type(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("type", "Get property type");
@@ -401,7 +401,7 @@ setup_subcommand_get_column_width_type(CLI::App* app, const socket_subcommand_da
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_mime(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("mime", "Get property mime");
@@ -410,7 +410,7 @@ setup_subcommand_get_column_width_mime(CLI::App* app, const socket_subcommand_da
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_permission(CLI::App* app,
                                              const socket_subcommand_data_t& opt) noexcept
 {
@@ -420,7 +420,7 @@ setup_subcommand_get_column_width_permission(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_owner(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("owner", "Get property owner");
@@ -429,7 +429,7 @@ setup_subcommand_get_column_width_owner(CLI::App* app, const socket_subcommand_d
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_group(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
 {
     auto* sub = app->add_subcommand("group", "Get property group");
@@ -438,7 +438,7 @@ setup_subcommand_get_column_width_group(CLI::App* app, const socket_subcommand_d
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_accessed(CLI::App* app,
                                            const socket_subcommand_data_t& opt) noexcept
 {
@@ -448,7 +448,7 @@ setup_subcommand_get_column_width_accessed(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_modified(CLI::App* app,
                                            const socket_subcommand_data_t& opt) noexcept
 {
@@ -458,7 +458,7 @@ setup_subcommand_get_column_width_modified(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_get_column_width_created(CLI::App* app,
                                           const socket_subcommand_data_t& opt) noexcept
 {

@@ -84,10 +84,10 @@ static GObjectClass* parent_class = nullptr;
 
 namespace global
 {
-std::unordered_map<ptk::dir_tree::column, GType> column_types;
+static std::unordered_map<ptk::dir_tree::column, GType> column_types;
 }
 
-GType
+static GType
 ptk_dir_tree_get_type() noexcept
 {
     static GType type = 0;

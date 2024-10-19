@@ -25,6 +25,7 @@
 #include "logger.hxx"
 
 #include "xset/xset.hxx"
+#include "xset/xset-defaults.hxx"
 
 void
 xset_defaults() noexcept

@@ -53,7 +53,7 @@
 
 namespace global
 {
-ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
+static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
 vfs::dir::dir(const std::filesystem::path& path) noexcept : path_(path)

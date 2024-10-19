@@ -204,7 +204,7 @@ commandline::socket::set_task::avgremain(CLI::App* app,
  * subcommand queue_state
  */
 
-void
+static void
 setup_subcommand_set_task_queue_state_run(CLI::App* app,
                                           const socket_subcommand_data_t& opt) noexcept
 {
@@ -214,7 +214,7 @@ setup_subcommand_set_task_queue_state_run(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_set_task_queue_state_pause(CLI::App* app,
                                             const socket_subcommand_data_t& opt) noexcept
 {
@@ -224,7 +224,7 @@ setup_subcommand_set_task_queue_state_pause(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_set_task_queue_state_queue(CLI::App* app,
                                             const socket_subcommand_data_t& opt) noexcept
 {
@@ -234,7 +234,7 @@ setup_subcommand_set_task_queue_state_queue(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_set_task_queue_state_queued(CLI::App* app,
                                              const socket_subcommand_data_t& opt) noexcept
 {
@@ -244,7 +244,7 @@ setup_subcommand_set_task_queue_state_queued(CLI::App* app,
     sub->callback(run_subcommand);
 }
 
-void
+static void
 setup_subcommand_set_task_queue_state_stop(CLI::App* app,
                                            const socket_subcommand_data_t& opt) noexcept
 {

@@ -38,9 +38,9 @@
 // Bookmark Path, Bookmark Name
 namespace global
 {
-std::vector<bookmark_t> bookmarks;
-bool bookmarks_changed = false;
-std::filesystem::path bookmark_file;
+static std::vector<bookmark_t> bookmarks;
+static bool bookmarks_changed = false;
+static std::filesystem::path bookmark_file;
 } // namespace global
 
 const std::span<bookmark_t>

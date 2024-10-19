@@ -55,7 +55,7 @@ struct PtkFileListClass
     // void (*load_complete)(const std::shared_ptr<vfs::dir>& dir);
 };
 
-GType ptk_file_list_get_type() noexcept;
+static GType ptk_file_list_get_type() noexcept;
 
 static void ptk_file_list_init(ptk::file_list* list) noexcept;
 static void ptk_file_list_class_init(PtkFileListClass* klass) noexcept;

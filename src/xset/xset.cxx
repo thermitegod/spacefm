@@ -44,7 +44,7 @@
 
 namespace global
 {
-std::vector<xset_t> xsets;
+static std::vector<xset_t> xsets;
 } // namespace global
 
 const std::span<const std::shared_ptr<xset::set>>
@@ -169,7 +169,7 @@ xset::set::get(const xset::panel name, const panel_t panel,
  * Generic Set
  */
 
-void
+static void
 xset_set(const xset_t& set, const xset::var var, const std::string_view value) noexcept
 {
     assert(set != nullptr);

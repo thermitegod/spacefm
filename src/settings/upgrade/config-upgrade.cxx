@@ -15,7 +15,7 @@
 
 #include <ztd/ztd.hxx>
 
-#include "xset/xset.hxx"
+#include "settings/upgrade/config-upgrade.hxx"
 
 void
 config_upgrade(u64 version) noexcept

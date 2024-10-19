@@ -27,7 +27,7 @@ struct VFSAsyncTaskClass
     void (*finish)(async_task* task, bool is_cancelled);
 };
 
-GType async_task_get_type() noexcept;
+static GType async_task_get_type() noexcept;
 
 #define ASYNC_TASK_REINTERPRET(obj) (reinterpret_cast<async_task*>(obj))
 
@@ -121,7 +121,7 @@ on_idle(void* _task) noexcept
     return true; // the idle handler is removed in task->cleanup.
 }
 
-void*
+static void*
 async_task_thread(void* _task) noexcept
 {
     auto* const task = ASYNC_TASK(_task);

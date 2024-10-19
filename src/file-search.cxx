@@ -19,6 +19,8 @@
 
 #include "ptk/ptk-dialog.hxx"
 
+#include "file-search.hxx"
+
 void
 find_files(const std::span<const std::filesystem::path> search_dirs) noexcept
 {
