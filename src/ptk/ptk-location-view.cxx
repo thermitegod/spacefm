@@ -1508,6 +1508,8 @@ on_button_press_event(GtkTreeView* view, GdkEvent* event, void* user_data) noexc
             show_devices_menu(view, vol, browser, button, time_point);
             ret = true;
             break;
+        default:
+            break;
     }
 
     if (tree_path)
