@@ -76,7 +76,7 @@ xset_new_menuitem(const std::string_view label, const std::string_view icon) noe
     if (label.contains("\\_"))
     {
         // allow escape of underscore
-        const std::string str = xset::utils::clean_label(label, false, false);
+        const std::string str = xset::utils::clean_label(label, false);
         item = gtk_menu_item_new_with_label(str.data());
     }
     else
@@ -296,7 +296,7 @@ xset_menu_cb(GtkWidget* item, const xset_t& set) noexcept
             }
             else
             {
-                title = xset::utils::clean_label(set->menu.label.value(), false, false);
+                title = xset::utils::clean_label(set->menu.label.value(), false);
             }
 
             const auto msg = set->desc.value();

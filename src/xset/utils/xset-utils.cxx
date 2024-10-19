@@ -23,7 +23,7 @@
 #include "xset/utils/xset-utils.hxx"
 
 std::string
-xset::utils::clean_label(const std::string_view menu_label, bool kill_special, bool escape) noexcept
+xset::utils::clean_label(const std::string_view menu_label, bool escape) noexcept
 {
     if (menu_label.empty())
     {
@@ -42,12 +42,8 @@ xset::utils::clean_label(const std::string_view menu_label, bool kill_special, b
     {
         new_menu_label = ztd::replace(new_menu_label, "_", "");
     }
-    if (kill_special)
-    {
-        new_menu_label = ztd::replace(new_menu_label, "&", "");
-        new_menu_label = ztd::replace(new_menu_label, " ", "-");
-    }
-    else if (escape)
+
+    if (escape)
     {
         new_menu_label = Glib::Markup::escape_text(new_menu_label);
     }

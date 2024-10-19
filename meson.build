@@ -250,6 +250,8 @@ preprocessor = [
     '-DDIALOG_ABOUT="spacefm_about"',
     '-DDIALOG_ERROR="spacefm_error"',
     '-DDIALOG_FILE_ACTION="spacefm_action"',
+    '-DDIALOG_KEYBINDINGS="spacefm_keybindings"',
+    '-DDIALOG_KEYBINDING_SET="spacefm_keybinding_set_key"',
     '-DDIALOG_MESSAGE="spacefm_message"',
     '-DDIALOG_PATTERN="spacefm_pattern"',
 
@@ -468,7 +470,6 @@ sources += files(
     'src/xset/xset-context-menu.cxx',
     'src/xset/xset-defaults.cxx',
     'src/xset/xset-dialog.cxx',
-    'src/xset/xset-keyboard.cxx',
     'src/xset/xset-lookup.cxx',
 
     'src/xset/utils/xset-utils.cxx',

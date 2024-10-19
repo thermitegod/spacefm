@@ -36,16 +36,67 @@ struct response
 
 template<> struct glz::meta<datatype::file_action_dialog::request>
 {
-    static constexpr auto value =
-        glz::object("name", &datatype::file_action_dialog::request::name, "size",
-                    &datatype::file_action_dialog::request::size, "is_dir",
-                    &datatype::file_action_dialog::request::is_dir);
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "name",   &datatype::file_action_dialog::request::name,
+        "size",   &datatype::file_action_dialog::request::size,
+        "is_dir", &datatype::file_action_dialog::request::is_dir
+    );
+    // clang-format on
 };
 
 template<> struct glz::meta<datatype::file_action_dialog::response>
 {
-    static constexpr auto value =
-        glz::object("result", &datatype::file_action_dialog::response::result);
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "result", &datatype::file_action_dialog::response::result
+    );
+    // clang-format on
+};
+
+namespace datatype::keybinding_dialog
+{
+struct request
+{
+    std::string name;
+    std::string label;
+    std::string category;
+    std::string shared_key;
+    std::uint32_t key;
+    std::uint32_t modifier;
+};
+
+struct response
+{
+    std::string name;
+    std::uint32_t key;
+    std::uint32_t modifier;
+};
+} // namespace datatype::keybinding_dialog
+
+template<> struct glz::meta<datatype::keybinding_dialog::request>
+{
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "name",       &datatype::keybinding_dialog::request::name,
+        "label",      &datatype::keybinding_dialog::request::label,
+        "category",   &datatype::keybinding_dialog::request::category,
+        "shared_key", &datatype::keybinding_dialog::request::category,
+        "key",        &datatype::keybinding_dialog::request::key,
+        "modifier",   &datatype::keybinding_dialog::request::modifier
+    );
+    // clang-format on
+};
+
+template<> struct glz::meta<datatype::keybinding_dialog::response>
+{
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "name",     &datatype::keybinding_dialog::response::name,
+        "key",      &datatype::keybinding_dialog::response::key,
+        "modifier", &datatype::keybinding_dialog::response::modifier
+    );
+    // clang-format on
 };
 
 namespace datatype::message_dialog
@@ -58,8 +109,11 @@ struct response
 
 template<> struct glz::meta<datatype::message_dialog::response>
 {
-    static constexpr auto value =
-        glz::object("result", &datatype::message_dialog::response::result);
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "result", &datatype::message_dialog::response::result
+    );
+    // clang-format on
 };
 
 namespace datatype::pattern_dialog
@@ -72,6 +126,9 @@ struct response
 
 template<> struct glz::meta<datatype::pattern_dialog::response>
 {
-    static constexpr auto value =
-        glz::object("result", &datatype::pattern_dialog::response::result);
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "result", &datatype::pattern_dialog::response::result
+    );
+    // clang-format on
 };

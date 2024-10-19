@@ -66,6 +66,54 @@ spacefm = build_target(
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+# Keybinding
+incdir_keybinding = include_directories(['keybinding', '../src/datatypes'])
+sources_keybinding = files(
+    'keybinding/main.cxx',
+    'keybinding/keybinding.cxx',
+    'keybinding/utils.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_keybindings',
+    sources_keybinding,
+    target_type: 'executable',
+    include_directories: incdir_keybinding,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
+# Keybinding Set Key
+incdir_keybinding_set = include_directories(['keybinding_set_key', '../src/datatypes'])
+sources_keybinding_set = files(
+    'keybinding_set_key/main.cxx',
+    'keybinding_set_key/keybinding.cxx',
+    'keybinding_set_key/utils.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_keybinding_set_key',
+    sources_keybinding_set,
+    target_type: 'executable',
+    include_directories: incdir_keybinding_set,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
 # Message
 incdir_message = include_directories(['message', '../src/datatypes'])
 sources_message = files(

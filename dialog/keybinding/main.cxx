@@ -13,12 +13,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <CLI/CLI.hpp>
 
-#include <string>
-#include <string_view>
+#include <gtkmm.h>
+#include <glibmm.h>
 
-namespace xset::utils
+#include "keybinding.hxx"
+
+int
+main(int argc, char* argv[])
 {
-std::string clean_label(const std::string_view menu_label, bool escape = false) noexcept;
-} // namespace xset::utils
+    CLI::App capp{"Spacefm Dialog"};
+
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.keybinding");
+
+    return app->make_window_and_run<KeybindingDialog>(0,       // Gtk does not handle cli
+                                                      nullptr, // Gtk does not handle cli
+                                                      json_data);
+}

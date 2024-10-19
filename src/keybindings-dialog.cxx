@@ -18,166 +18,91 @@
 #include <gtkmm.h>
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
+#include "logger.hxx"
 
-#include "compat/gtk4-porting.hxx"
+#include "autosave.hxx"
 
-#include "settings.hxx"
+#include "datatypes/datatypes.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-keyboard.hxx"
+#include "xset/utils/xset-utils.hxx"
 
 #include "keybindings-dialog.hxx"
-
-// TODO
-//  - Search xset name
-//  - checkbox to hide xsets with no bindings
-//  - reload after key change
-
-static void
-on_row_activated(GtkTreeView* tree_view, GtkTreePath* path, GtkTreeViewColumn* column,
-                 void* user_data) noexcept
-{
-    (void)column;
-    (void)user_data;
-
-    GtkTreeIter iter;
-    GtkTreeModel* model = gtk_tree_view_get_model(tree_view);
-    if (gtk_tree_model_get_iter(model, &iter, path))
-    {
-        g_autofree char* name = nullptr;
-        gtk_tree_model_get(model, &iter, 0, &name, -1);
-        // logger::debug("on_row_activated={}", name);
-        xset_set_key(nullptr, xset::set::get(name));
-    }
-}
-
-static GtkWidget*
-init_keybindings_tab(const xset::set::keybinding_type type) noexcept
-{
-    GtkScrolledWindow* scrolled_window =
-        GTK_SCROLLED_WINDOW(gtk_scrolled_window_new(nullptr, nullptr));
-
-    GtkWidget* tree_view = gtk_tree_view_new();
-    // Name, Keybinding
-    GtkListStore* list_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
-    gtk_tree_view_set_model(GTK_TREE_VIEW(tree_view), GTK_TREE_MODEL(list_store));
-    gtk_widget_set_hexpand(GTK_WIDGET(tree_view), true);
-    gtk_widget_set_vexpand(GTK_WIDGET(tree_view), true);
-    g_signal_connect(G_OBJECT(tree_view), "row-activated", G_CALLBACK(on_row_activated), nullptr);
-    gtk_scrolled_window_set_child(scrolled_window, tree_view);
-
-    { // Name
-        GtkTreeViewColumn* column = gtk_tree_view_column_new();
-        gtk_tree_view_column_set_title(column, "Name");
-
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_tree_view_column_pack_start(column, renderer, true);
-        gtk_tree_view_column_add_attribute(column, renderer, "text", 0);
-
-        gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
-    }
-
-    { // Keybinding
-        GtkTreeViewColumn* column = gtk_tree_view_column_new();
-        gtk_tree_view_column_set_title(column, "Keybinding");
-
-        GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-        gtk_tree_view_column_pack_start(column, renderer, true);
-        gtk_tree_view_column_add_attribute(column, renderer, "text", 1);
-
-        gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
-    }
-
-    for (const xset_t& set : xset::sets())
-    {
-        if (set->keybinding.type != type)
-        {
-            continue;
-        }
-
-        GtkTreeIter iter;
-        gtk_list_store_append(list_store, &iter);
-        gtk_list_store_set(
-            list_store,
-            &iter,
-            0,
-            set->name().data(),
-            1,
-            xset_get_keyname(set, set->keybinding.key, set->keybinding.modifier).c_str(),
-            -1);
-    }
-
-    gtk_widget_show_all(GTK_WIDGET(scrolled_window));
-
-    return GTK_WIDGET(scrolled_window);
-}
-
-static void
-on_response(GtkWidget* widget, void* user_data) noexcept
-{
-    (void)user_data;
-    GtkWidget* dialog = GTK_WIDGET(gtk_widget_get_ancestor(widget, GTK_TYPE_DIALOG));
-
-    save_settings();
-
-    // Close the preference dialog
-    gtk_widget_destroy(dialog);
-}
 
 void
 show_keybindings_dialog(GtkWindow* parent) noexcept
 {
-    GtkWidget* dialog =
-        gtk_dialog_new_with_buttons("Preferences",
-                                    parent,
-                                    GtkDialogFlags(GtkDialogFlags::GTK_DIALOG_MODAL |
-                                                   GtkDialogFlags::GTK_DIALOG_DESTROY_WITH_PARENT),
-                                    "Close",
-                                    GtkResponseType::GTK_RESPONSE_OK,
-                                    nullptr);
+    (void)parent;
 
-    gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(parent));
+    // Create JSON data for keybindings
+    std::vector<datatype::keybinding_dialog::request> request;
+    for (const xset_t& set : xset::sets())
+    {
+        if (set->keybinding.type == xset::set::keybinding_type::invalid)
+        {
+            continue;
+        }
 
-    g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(on_response), nullptr);
+        request.push_back(datatype::keybinding_dialog::request{
+            .name = set->name().data(),
+            .label = xset::utils::clean_label(set->menu.label.value_or("")),
+            .category = magic_enum::enum_name(set->keybinding.type).data(),
+            .shared_key = set->shared_key ? set->shared_key->name().data() : "",
+            .key = set->keybinding.key,
+            .modifier = set->keybinding.modifier});
+    }
 
-    GtkBox* content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
-    GtkNotebook* notebook = GTK_NOTEBOOK(gtk_notebook_new());
-#if (GTK_MAJOR_VERSION == 4)
-    gtk_box_prepend(GTK_BOX(content_area), GTK_WIDGET(notebook));
-#elif (GTK_MAJOR_VERSION == 3)
-    gtk_container_add(GTK_CONTAINER(content_area), GTK_WIDGET(notebook));
+    std::string buffer;
+    auto ec = glz::write_json(request, buffer);
+    if (ec)
+    {
+        logger::error("Failed to create JSON: {}", glz::format_error(ec, buffer));
+        return;
+    }
+
+    // Run command
+
+#if defined(HAVE_DEV)
+    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_KEYBINDINGS);
+#else
+    const auto binary = Glib::find_program_in_path(DIALOG_KEYBINDINGS);
 #endif
+    if (binary.empty())
+    {
+        logger::error("Failed to find keybinding dialog binary: {}", DIALOG_KEYBINDINGS);
+        return;
+    }
 
-    gtk_widget_set_margin_start(GTK_WIDGET(notebook), 5);
-    gtk_widget_set_margin_end(GTK_WIDGET(notebook), 5);
-    gtk_widget_set_margin_top(GTK_WIDGET(notebook), 5);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(notebook), 5);
+    const auto command = std::format(R"({} --json '{}')", binary, buffer);
 
-    GtkWidget* tab_navigation = init_keybindings_tab(xset::set::keybinding_type::navigation);
-    GtkWidget* tab_editing = init_keybindings_tab(xset::set::keybinding_type::editing);
-    GtkWidget* tab_view = init_keybindings_tab(xset::set::keybinding_type::view);
-    GtkWidget* tab_tabs = init_keybindings_tab(xset::set::keybinding_type::tabs);
-    GtkWidget* tab_general = init_keybindings_tab(xset::set::keybinding_type::general);
-    GtkWidget* tab_opening = init_keybindings_tab(xset::set::keybinding_type::opening);
-    // GtkWidget* tab_invalid = init_keybindings_tab(xset::set::keybinding_type::invalid);
+    std::int32_t exit_status = 0;
+    std::string standard_output;
+    Glib::spawn_command_line_sync(command, &standard_output, nullptr, &exit_status);
+    if (exit_status != 0 || standard_output.empty())
+    {
+        return;
+    }
 
-    gtk_notebook_append_page(notebook, tab_navigation, gtk_label_new("Navigation"));
-    gtk_notebook_append_page(notebook, tab_editing, gtk_label_new("Editing"));
-    gtk_notebook_append_page(notebook, tab_view, gtk_label_new("View"));
-    gtk_notebook_append_page(notebook, tab_tabs, gtk_label_new("Tabs"));
-    gtk_notebook_append_page(notebook, tab_general, gtk_label_new("General"));
-    gtk_notebook_append_page(notebook, tab_opening, gtk_label_new("Opening"));
-    // gtk_notebook_append_page(notebook, tab_invalid, gtk_label_new("Invalid"));
+    std::vector<datatype::keybinding_dialog::response> response;
+    ec = glz::read_json(response, standard_output);
+    if (ec)
+    {
+        logger::error<logger::domain::ptk>("Failed to decode json: {}",
+                                           glz::format_error(ec, standard_output));
+        return;
+    }
 
-    gtk_widget_set_size_request(GTK_WIDGET(dialog), 800, 800);
-    gtk_window_set_resizable(GTK_WINDOW(dialog), true);
+    // Update xset keybindings
+    for (const auto& data : response)
+    {
+        const auto set = xset::set::get(data.name);
+        set->keybinding.key = data.key;
+        set->keybinding.modifier = data.modifier;
+    }
 
-#if (GTK_MAJOR_VERSION == 3)
-    gtk_window_set_type_hint(GTK_WINDOW(dialog), GdkWindowTypeHint::GDK_WINDOW_TYPE_HINT_DIALOG);
-#endif
-
-    gtk_widget_show_all(GTK_WIDGET(dialog));
+    autosave::request_add();
 }

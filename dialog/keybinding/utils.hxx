@@ -17,12 +17,6 @@
 
 #include <string>
 
-#include <gtkmm.h>
+#include <cstdint>
 
-#include <ztd/ztd.hxx>
-
-#include "xset/xset.hxx"
-
-std::string xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod) noexcept;
-
-void xset_set_key(GtkWidget* parent, const xset_t& set) noexcept;
+std::string keyname(std::uint32_t keyval, std::uint32_t keymod) noexcept;
