@@ -29,6 +29,8 @@
 
 #include <memory>
 
+#include <algorithm>
+
 #include <ranges>
 
 #include <cmath>
@@ -159,10 +161,7 @@ ptk::view::location::update_volume_icons() noexcept
 
     // GtkListStore* list = GTK_LIST_STORE( model );
     i32 icon_size = config::settings.icon_size_small;
-    if (icon_size > PANE_MAX_ICON_SIZE)
-    {
-        icon_size = PANE_MAX_ICON_SIZE;
-    }
+    icon_size = std::min(icon_size, PANE_MAX_ICON_SIZE);
 
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -587,10 +586,7 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept
     if (set_icon)
     {
         i32 icon_size = config::settings.icon_size_small;
-        if (icon_size > PANE_MAX_ICON_SIZE)
-        {
-            icon_size = PANE_MAX_ICON_SIZE;
-        }
+        icon_size = std::min(icon_size, PANE_MAX_ICON_SIZE);
 
         GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
         gtk_list_store_set(GTK_LIST_STORE(model), &it, ptk::location_view::column::icon, icon, -1);
@@ -649,10 +645,7 @@ update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
     }
 
     i32 icon_size = config::settings.icon_size_small;
-    if (icon_size > PANE_MAX_ICON_SIZE)
-    {
-        icon_size = PANE_MAX_ICON_SIZE;
-    }
+    icon_size = std::min(icon_size, PANE_MAX_ICON_SIZE);
 
     GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),

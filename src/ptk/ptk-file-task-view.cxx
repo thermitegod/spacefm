@@ -27,6 +27,8 @@
 
 #include <optional>
 
+#include <algorithm>
+
 #include <ranges>
 
 #include <cstring>
@@ -445,10 +447,7 @@ idle_set_task_height(MainWindow* main_window) noexcept
             taskh = allocation.height - pos;
         }
     }
-    if (taskh > allocation.height / 2)
-    {
-        taskh = allocation.height / 2;
-    }
+    taskh = std::min(taskh, allocation.height / 2);
     if (taskh < 1)
     {
         taskh = 90;

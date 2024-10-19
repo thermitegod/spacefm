@@ -27,6 +27,8 @@
 
 #include <optional>
 
+#include <algorithm>
+
 #include <chrono>
 
 #include <sys/wait.h>
@@ -710,10 +712,7 @@ static void
 on_overwrite_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
 {
     i32 overwrite_mode = gtk_combo_box_get_active(box);
-    if (overwrite_mode < 0)
-    {
-        overwrite_mode = 0;
-    }
+    overwrite_mode = std::max(overwrite_mode, 0);
     ptask->task->set_overwrite_mode(vfs::file_task::overwrite_mode(overwrite_mode));
 }
 
@@ -721,10 +720,7 @@ static void
 on_error_combo_changed(GtkComboBox* box, ptk::file_task* ptask) noexcept
 {
     i32 error_mode = gtk_combo_box_get_active(box);
-    if (error_mode < 0)
-    {
-        error_mode = 0;
-    }
+    error_mode = std::max(error_mode, 0);
     ptask->err_mode_ = ptk::file_task::ptask_error(error_mode);
 }
 
@@ -1242,10 +1238,7 @@ ptk::file_task::progress_update() noexcept
     {
         if (this->task->percent >= 0)
         {
-            if (this->task->percent > 100)
-            {
-                this->task->percent = 100;
-            }
+            this->task->percent = std::min(this->task->percent, 100);
             gtk_progress_bar_set_fraction(this->progress_bar_, ((f64)this->task->percent) / 100);
             const std::string percent_str = std::format("{} %", this->task->percent);
             gtk_progress_bar_set_text(this->progress_bar_, percent_str.data());

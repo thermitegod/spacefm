@@ -25,6 +25,8 @@
 
 #include <optional>
 
+#include <algorithm>
+
 #include <ranges>
 
 #include <system_error>
@@ -1426,14 +1428,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
             else
             {
                 j = std::stoi(value.data());
-                if (j < 0)
-                {
-                    j = 0;
-                }
-                if (j > 100)
-                {
-                    j = 100;
-                }
+                j = std::max(j, 0);
+                j = std::min(j, 100);
                 ptask->task->percent = j;
             }
             ptask->task->custom_percent = value != "0";

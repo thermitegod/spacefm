@@ -28,6 +28,8 @@
 
 #include <functional>
 
+#include <algorithm>
+
 #include <ranges>
 
 #include <cassert>
@@ -1379,16 +1381,10 @@ main_window_init(MainWindow* main_window) noexcept
     // do this after maximizing/showing window so slider positions are valid
     // in actual window size
     i32 pos = xset_get_int(xset::name::panel_sliders, xset::var::x);
-    if (pos < 200)
-    {
-        pos = 200;
-    }
+    pos = std::max(pos, 200);
     gtk_paned_set_position(main_window->hpane_top, pos);
     pos = xset_get_int(xset::name::panel_sliders, xset::var::y);
-    if (pos < 200)
-    {
-        pos = 200;
-    }
+    pos = std::max(pos, 200);
     gtk_paned_set_position(main_window->hpane_bottom, pos);
     pos = xset_get_int(xset::name::panel_sliders, xset::var::s);
     if (pos < 200)
