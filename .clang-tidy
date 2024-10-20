@@ -43,7 +43,8 @@ Checks: 'clang-analyzer-*,
          -bugprone-assignment-in-if-condition,
          -bugprone-easily-swappable-parameters,
          -bugprone-casting-through-void,
-         -bugprone-narrowing-conversions'
+         -bugprone-narrowing-conversions,
+         -bugprone-suspicious-stringview-data-usage'
 WarningsAsErrors: ''
 HeaderFileExtensions:
   - ''
