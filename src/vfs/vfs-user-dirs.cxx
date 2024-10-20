@@ -24,7 +24,7 @@
 
 #include "vfs/vfs-user-dirs.hxx"
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::desktop() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -34,7 +34,7 @@ vfs::user::desktop() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::documents() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -44,7 +44,7 @@ vfs::user::documents() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::download() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -54,7 +54,7 @@ vfs::user::download() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::music() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -64,7 +64,7 @@ vfs::user::music() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::pictures() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -74,7 +74,7 @@ vfs::user::pictures() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::public_share() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -84,7 +84,7 @@ vfs::user::public_share() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::templates() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -94,7 +94,7 @@ vfs::user::templates() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::videos() noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)
@@ -104,31 +104,31 @@ vfs::user::videos() noexcept
 #endif
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::home() noexcept
 {
     return Glib::get_home_dir();
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::cache() noexcept
 {
     return Glib::get_user_cache_dir();
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::data() noexcept
 {
     return Glib::get_user_data_dir();
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::config() noexcept
 {
     return Glib::get_user_config_dir();
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::user::runtime() noexcept
 {
     return Glib::get_user_runtime_dir();
@@ -139,7 +139,7 @@ namespace global
 static std::filesystem::path config_path = vfs::user::config() / PACKAGE_NAME;
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::program::config() noexcept
 {
     return global::config_path;
@@ -151,7 +151,7 @@ vfs::program::config(const std::filesystem::path& path) noexcept
     global::config_path = path;
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::program::tmp() noexcept
 {
     return vfs::user::cache() / PACKAGE_NAME;

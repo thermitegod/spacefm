@@ -27,5 +27,5 @@ namespace socket
 [[noreturn]] void server_thread() noexcept;
 
 [[nodiscard]] bool send_command(zmq::socket_t& socket, const std::string_view command) noexcept;
-[[nodiscard]] const std::optional<std::string> receive_response(zmq::socket_t& socket) noexcept;
+[[nodiscard]] std::optional<std::string> receive_response(zmq::socket_t& socket) noexcept;
 } // namespace socket

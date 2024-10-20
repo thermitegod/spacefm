@@ -33,7 +33,7 @@
 
 #include "vfs/vfs-device.hxx"
 
-const std::shared_ptr<vfs::device>
+std::shared_ptr<vfs::device>
 vfs::device::create(const libudev::device& udevice) noexcept
 {
     return std::make_shared<vfs::device>(udevice);
@@ -50,19 +50,19 @@ vfs::device::devnum() const noexcept
     return this->devnum_;
 }
 
-const std::string_view
+std::string_view
 vfs::device::devnode() const noexcept
 {
     return this->devnode_;
 }
 
-const std::string_view
+std::string_view
 vfs::device::native_path() const noexcept
 {
     return this->native_path_;
 }
 
-const std::string_view
+std::string_view
 vfs::device::mount_points() const noexcept
 {
     return this->mount_points_;
@@ -110,13 +110,13 @@ vfs::device::is_media_ejectable() const noexcept
     return this->is_media_ejectable_;
 }
 
-const std::string_view
+std::string_view
 vfs::device::id() const noexcept
 {
     return this->id_;
 }
 
-const std::string_view
+std::string_view
 vfs::device::id_label() const noexcept
 {
     return this->id_label_;
@@ -134,13 +134,13 @@ vfs::device::block_size() const noexcept
     return this->block_size_;
 }
 
-const std::string_view
+std::string_view
 vfs::device::fstype() const noexcept
 {
     return this->fstype_;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::device::info_mount_points() const noexcept
 {
     const dev_t dmajor = gnu_dev_major(this->devnum_);

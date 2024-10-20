@@ -47,7 +47,7 @@ namespace global
 static std::vector<xset_t> xsets;
 } // namespace global
 
-const std::span<const std::shared_ptr<xset::set>>
+std::span<const std::shared_ptr<xset::set>>
 xset::sets()
 {
     return global::xsets;
@@ -59,7 +59,7 @@ xset::set::set(const xset::name name) noexcept
     this->xset_name = name;
 }
 
-const xset_t
+xset_t
 xset::set::create(const xset::name name) noexcept
 {
     auto set = std::make_shared<xset::set>(name);
@@ -67,13 +67,13 @@ xset::set::create(const xset::name name) noexcept
     return set;
 }
 
-const std::string_view
+std::string_view
 xset::set::name() const noexcept
 {
     return magic_enum::enum_name(this->xset_name);
 }
 
-const xset_t
+xset_t
 xset::set::get(const std::string_view name, const bool only_existing) noexcept
 {
     for (const xset_t& set : xset::sets())
@@ -99,7 +99,7 @@ xset::set::get(const std::string_view name, const bool only_existing) noexcept
     return xset::set::create(enum_value.value());
 }
 
-const xset_t
+xset_t
 xset::set::get(const xset::name name, const bool only_existing) noexcept
 {
     for (const xset_t& set : xset::sets())
@@ -122,7 +122,7 @@ xset::set::get(const xset::name name, const bool only_existing) noexcept
  * Panel get
  */
 
-const xset_t
+xset_t
 xset::set::get(const std::string_view name, const panel_t panel) noexcept
 {
     assert(is_valid_panel(panel));
@@ -131,7 +131,7 @@ xset::set::get(const std::string_view name, const panel_t panel) noexcept
     return xset::set::get(fullname);
 }
 
-const xset_t
+xset_t
 xset::set::get(const xset::panel name, const panel_t panel) noexcept
 {
     assert(is_valid_panel(panel));
@@ -143,7 +143,7 @@ xset::set::get(const xset::panel name, const panel_t panel) noexcept
  * Panel mode get
  */
 
-const xset_t
+xset_t
 xset::set::get(const std::string_view name, const panel_t panel,
                const xset::main_window_panel mode) noexcept
 {
@@ -154,7 +154,7 @@ xset::set::get(const std::string_view name, const panel_t panel,
     return xset::set::get(fullname);
 }
 
-const xset_t
+xset_t
 xset::set::get(const xset::panel name, const panel_t panel,
                const xset::main_window_panel mode) noexcept
 {
@@ -249,28 +249,28 @@ xset_set(const xset::name name, const xset::var var, const std::string_view valu
  * S get
  */
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_s(const xset::name name) noexcept
 {
     const auto set = xset::set::get(name);
     return set->s;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_s(const std::string_view name) noexcept
 {
     const auto set = xset::set::get(name);
     return set->s;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_s_panel(panel_t panel, const std::string_view name) noexcept
 {
     const auto set = xset::set::get(std::format("panel{}_{}", panel, name));
     return set->s;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_s_panel(panel_t panel, xset::panel name) noexcept
 {
     const auto set = xset::set::get(xset::get_name_from_panel(panel, name));
@@ -281,14 +281,14 @@ xset_get_s_panel(panel_t panel, xset::panel name) noexcept
  * X get
  */
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_x(const xset::name name) noexcept
 {
     const auto set = xset::set::get(name);
     return set->x;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_x(const std::string_view name) noexcept
 {
     const auto set = xset::set::get(name);
@@ -299,14 +299,14 @@ xset_get_x(const std::string_view name) noexcept
  * Y get
  */
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_y(const xset::name name) noexcept
 {
     const auto set = xset::set::get(name);
     return set->y;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_y(const std::string_view name) noexcept
 {
     const auto set = xset::set::get(name);
@@ -317,14 +317,14 @@ xset_get_y(const std::string_view name) noexcept
  * Z get
  */
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_z(const xset::name name) noexcept
 {
     const auto set = xset::set::get(name);
     return set->z;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 xset_get_z(const std::string_view name) noexcept
 {
     const auto set = xset::set::get(name);

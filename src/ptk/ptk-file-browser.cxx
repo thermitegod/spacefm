@@ -208,7 +208,7 @@ ptk::browser::navigation_history_data::has_back() const noexcept
     return !this->back_.empty();
 }
 
-const std::span<const std::filesystem::path>
+std::span<const std::filesystem::path>
 ptk::browser::navigation_history_data::get_back() const noexcept
 {
     return this->back_;
@@ -233,7 +233,7 @@ ptk::browser::navigation_history_data::has_forward() const noexcept
     return !this->forward_.empty();
 }
 
-const std::span<const std::filesystem::path>
+std::span<const std::filesystem::path>
 ptk::browser::navigation_history_data::get_forward() const noexcept
 {
     return this->forward_;
@@ -2880,7 +2880,7 @@ ptk::browser::canon(const std::filesystem::path& path) noexcept
     }
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 ptk::browser::tab_cwd(const tab_t tab_num) const noexcept
 {
     tab_t tab_x = 0;
@@ -2914,7 +2914,7 @@ ptk::browser::tab_cwd(const tab_t tab_num) const noexcept
     return std::nullopt;
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 ptk::browser::panel_cwd(const panel_t panel_num) const noexcept
 {
     panel_t panel_x = this->panel();
@@ -3054,7 +3054,7 @@ ptk::browser::is_panel_visible(const panel_t panel) const noexcept
     return gtk_widget_get_visible(GTK_WIDGET(this->main_window_->get_panel_notebook(panel)));
 }
 
-const ptk::browser::browser_count_data
+ptk::browser::browser_count_data
 ptk::browser::get_tab_panel_counts() const noexcept
 {
     GtkNotebook* notebook = this->main_window_->get_panel_notebook(this->panel_);
@@ -3402,7 +3402,7 @@ ptk::browser::open_in_tab(const std::filesystem::path& file_path, const tab_t ta
     }
 }
 
-const std::vector<std::shared_ptr<vfs::file>>
+std::vector<std::shared_ptr<vfs::file>>
 ptk::browser::selected_files() const noexcept
 {
     GtkTreeModel* model = nullptr;
@@ -3998,7 +3998,7 @@ on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
     return false;
 }
 
-static const std::tuple<bool, std::string>
+static std::tuple<bool, std::string>
 select_pattern_dialog(GtkWidget* parent, const std::string_view default_pattern) noexcept
 {
     // stolen from the fnmatch man page
@@ -4803,7 +4803,7 @@ ptk::browser::update_selection_history() const noexcept
     this->selection_history->selection_history.insert({cwd, selected_filenames});
 }
 
-const std::vector<GtkTreePath*>
+std::vector<GtkTreePath*>
 ptk::browser::selected_items(GtkTreeModel** model) const noexcept
 {
     GList* selected = nullptr;

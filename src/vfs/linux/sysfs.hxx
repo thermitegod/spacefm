@@ -24,16 +24,16 @@
 
 namespace vfs::linux::sysfs
 {
-const std::optional<std::string> get_string(const std::filesystem::path& dir,
-                                            const std::string_view attribute) noexcept;
-const std::optional<i64> get_i64(const std::filesystem::path& dir,
-                                 const std::string_view attribute) noexcept;
-const std::optional<u64> get_u64(const std::filesystem::path& dir,
-                                 const std::string_view attribute) noexcept;
-const std::optional<f64> get_f64(const std::filesystem::path& dir,
-                                 const std::string_view attribute) noexcept;
+std::optional<std::string> get_string(const std::filesystem::path& dir,
+                                      const std::string_view attribute) noexcept;
+std::optional<i64> get_i64(const std::filesystem::path& dir,
+                           const std::string_view attribute) noexcept;
+std::optional<u64> get_u64(const std::filesystem::path& dir,
+                           const std::string_view attribute) noexcept;
+std::optional<f64> get_f64(const std::filesystem::path& dir,
+                           const std::string_view attribute) noexcept;
 
 bool file_exists(const std::filesystem::path& dir, const std::string_view attribute) noexcept;
-const std::optional<std::string> resolve_link(const std::filesystem::path& path,
-                                              const std::string_view name) noexcept;
+std::optional<std::string> resolve_link(const std::filesystem::path& path,
+                                        const std::string_view name) noexcept;
 } // namespace vfs::linux::sysfs

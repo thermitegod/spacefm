@@ -31,7 +31,7 @@
 #include "xset/xset-keyboard.hxx"
 #include "xset/utils/xset-utils.hxx"
 
-const std::string
+std::string
 xset_get_keyname(const xset_t& set, u32 key_val, u32 key_mod) noexcept
 {
     u32 keyval = 0;

@@ -36,12 +36,12 @@ const std::filesystem::path proc_self_stat{"/proc/self/stat"};
  *
  * @return Current executing program path
  */
-[[nodiscard]] const std::filesystem::path exe() noexcept;
+[[nodiscard]] std::filesystem::path exe() noexcept;
 
 /**
  * @brief Program Name
  *
  * @return Current executing program name
  */
-[[nodiscard]] const std::string name() noexcept;
+[[nodiscard]] std::string name() noexcept;
 } // namespace vfs::linux::proc::self

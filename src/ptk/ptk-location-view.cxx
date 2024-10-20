@@ -323,7 +323,7 @@ ptk::view::location::chdir(GtkTreeView* location_view,
     return false;
 }
 
-const std::shared_ptr<vfs::volume>
+std::shared_ptr<vfs::volume>
 ptk::view::location::selected_volume(GtkTreeView* location_view) noexcept
 {
     // logger::info<logger::domain::ptk>("ptk::view::location::selected_volume    view = {}", location_view);

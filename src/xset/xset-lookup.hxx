@@ -1025,5 +1025,5 @@ xset::name get_name_from_panel_mode(const panel_t panel, const xset::panel name,
                                     const xset::main_window_panel mode) noexcept;
 
 // main window panel mode
-const std::string_view get_window_panel_mode(xset::main_window_panel mode) noexcept;
+std::string_view get_window_panel_mode(xset::main_window_panel mode) noexcept;
 } // namespace xset

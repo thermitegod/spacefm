@@ -62,8 +62,8 @@ struct set : public std::enable_shared_from_this<set>
      *
      * @return a valid xset::set
      */
-    [[nodiscard]] static const std::shared_ptr<set> get(const xset::name name,
-                                                        const bool only_existing = false) noexcept;
+    [[nodiscard]] static std::shared_ptr<set> get(const xset::name name,
+                                                  const bool only_existing = false) noexcept;
 
     /**
      * @brief get
@@ -74,8 +74,8 @@ struct set : public std::enable_shared_from_this<set>
      *
      * @return a valid xset::set
      */
-    [[nodiscard]] static const std::shared_ptr<set> get(const std::string_view name,
-                                                        const panel_t panel) noexcept;
+    [[nodiscard]] static std::shared_ptr<set> get(const std::string_view name,
+                                                  const panel_t panel) noexcept;
 
     /**
      * @brief get
@@ -86,22 +86,8 @@ struct set : public std::enable_shared_from_this<set>
      *
      * @return a valid xset::set
      */
-    [[nodiscard]] static const std::shared_ptr<set> get(const xset::panel name,
-                                                        const panel_t panel) noexcept;
-
-    /**
-     * @brief get
-     * - create an xset or return an existing xset.
-     *
-     * @param[in] name the xset name
-     * @param[in] panel the panel number (1-4)
-     * @param[in] mode the main window mode
-     *
-     * @return a valid xset::set
-     */
-    [[nodiscard]] static const std::shared_ptr<set>
-    get(const std::string_view name, const panel_t panel,
-        const xset::main_window_panel mode) noexcept;
+    [[nodiscard]] static std::shared_ptr<set> get(const xset::panel name,
+                                                  const panel_t panel) noexcept;
 
     /**
      * @brief get
@@ -113,8 +99,21 @@ struct set : public std::enable_shared_from_this<set>
      *
      * @return a valid xset::set
      */
-    [[nodiscard]] static const std::shared_ptr<set>
-    get(const xset::panel name, const panel_t panel, const xset::main_window_panel mode) noexcept;
+    [[nodiscard]] static std::shared_ptr<set> get(const std::string_view name, const panel_t panel,
+                                                  const xset::main_window_panel mode) noexcept;
+
+    /**
+     * @brief get
+     * - create an xset or return an existing xset.
+     *
+     * @param[in] name the xset name
+     * @param[in] panel the panel number (1-4)
+     * @param[in] mode the main window mode
+     *
+     * @return a valid xset::set
+     */
+    [[nodiscard]] static std::shared_ptr<set> get(const xset::panel name, const panel_t panel,
+                                                  const xset::main_window_panel mode) noexcept;
 
     /**
      * @brief get
@@ -126,10 +125,10 @@ struct set : public std::enable_shared_from_this<set>
      *
      * @return a valid xset::set
      */
-    [[nodiscard]] static const std::shared_ptr<set> get(const std::string_view name,
-                                                        const bool only_existing = false) noexcept;
+    [[nodiscard]] static std::shared_ptr<set> get(const std::string_view name,
+                                                  const bool only_existing = false) noexcept;
 
-    [[nodiscard]] const std::string_view name() const noexcept;
+    [[nodiscard]] std::string_view name() const noexcept;
 
     xset::name xset_name;
 
@@ -220,11 +219,11 @@ struct set : public std::enable_shared_from_this<set>
     std::vector<xset::name> context_menu_entries; // not saved, in order
 
   private:
-    [[nodiscard]] static const std::shared_ptr<set> create(const xset::name name) noexcept;
+    [[nodiscard]] static std::shared_ptr<set> create(const xset::name name) noexcept;
 };
 
 // all xsets
-const std::span<const std::shared_ptr<xset::set>> sets();
+std::span<const std::shared_ptr<xset::set>> sets();
 } // namespace xset
 
 using xset_t = std::shared_ptr<xset::set>;
@@ -257,23 +256,22 @@ void xset_set_b_panel_mode(panel_t panel, xset::panel name, xset::main_window_pa
  */
 
 // S
-const std::optional<std::string> xset_get_s(const xset::name name) noexcept;
-const std::optional<std::string> xset_get_s(const std::string_view name) noexcept;
-const std::optional<std::string> xset_get_s_panel(panel_t panel,
-                                                  const std::string_view name) noexcept;
-const std::optional<std::string> xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
+std::optional<std::string> xset_get_s(const xset::name name) noexcept;
+std::optional<std::string> xset_get_s(const std::string_view name) noexcept;
+std::optional<std::string> xset_get_s_panel(panel_t panel, const std::string_view name) noexcept;
+std::optional<std::string> xset_get_s_panel(panel_t panel, xset::panel name) noexcept;
 
 // X
-const std::optional<std::string> xset_get_x(const xset::name name) noexcept;
-const std::optional<std::string> xset_get_x(const std::string_view name) noexcept;
+std::optional<std::string> xset_get_x(const xset::name name) noexcept;
+std::optional<std::string> xset_get_x(const std::string_view name) noexcept;
 
 // Y
-const std::optional<std::string> xset_get_y(const xset::name name) noexcept;
-const std::optional<std::string> xset_get_y(const std::string_view name) noexcept;
+std::optional<std::string> xset_get_y(const xset::name name) noexcept;
+std::optional<std::string> xset_get_y(const std::string_view name) noexcept;
 
 // Z
-const std::optional<std::string> xset_get_z(const xset::name name) noexcept;
-const std::optional<std::string> xset_get_z(const std::string_view name) noexcept;
+std::optional<std::string> xset_get_z(const xset::name name) noexcept;
+std::optional<std::string> xset_get_z(const std::string_view name) noexcept;
 
 // Panel
 void xset_set_panel(panel_t panel, const std::string_view name, xset::var var,

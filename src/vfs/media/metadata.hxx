@@ -21,9 +21,9 @@
 
 namespace vfs::detail
 {
-[[nodiscard]] const std::vector<vfs::file::metadata_data>
+[[nodiscard]] std::vector<vfs::file::metadata_data>
 image_metadata(const std::filesystem::path& path) noexcept;
 
-[[nodiscard]] const std::vector<vfs::file::metadata_data>
+[[nodiscard]] std::vector<vfs::file::metadata_data>
 audio_video_metadata(const std::filesystem::path& path) noexcept;
 } // namespace vfs::detail

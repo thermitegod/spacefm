@@ -53,7 +53,7 @@ enum column : std::uint8_t
 };
 }
 
-static const std::filesystem::path
+static std::filesystem::path
 get_cwd(GtkEntry* entry) noexcept
 {
 #if (GTK_MAJOR_VERSION == 4)

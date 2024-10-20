@@ -60,7 +60,7 @@
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-file-task.hxx"
 
-const std::shared_ptr<vfs::file_task>
+std::shared_ptr<vfs::file_task>
 vfs::file_task::create(const vfs::file_task::type task_type,
                        const std::span<const std::filesystem::path> src_files,
                        const std::filesystem::path& dest_dir) noexcept

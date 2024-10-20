@@ -45,6 +45,6 @@ void paste_targets(GtkWindow* parent_win, const std::filesystem::path& dest_dir,
                    GtkTreeView* task_view, GFunc callback, GtkWindow* callback_win) noexcept;
 void copy_text(const std::string_view text) noexcept;
 void cut_or_copy_file_list(const std::span<const std::string> selected_files, bool copy) noexcept;
-const std::vector<std::filesystem::path>
-get_file_paths(const std::filesystem::path& cwd, bool* is_cut, i32* missing_targets) noexcept;
+std::vector<std::filesystem::path> get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
+                                                  i32* missing_targets) noexcept;
 } // namespace ptk::clipboard

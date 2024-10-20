@@ -34,7 +34,7 @@ GtkWidget* create(ptk::browser* browser) noexcept;
 
 bool chdir(GtkTreeView* location_view, const std::filesystem::path& current_path) noexcept;
 void on_action(GtkWidget* view, const xset_t& set) noexcept;
-const std::shared_ptr<vfs::volume> selected_volume(GtkTreeView* location_view) noexcept;
+std::shared_ptr<vfs::volume> selected_volume(GtkTreeView* location_view) noexcept;
 void update_volume_icons() noexcept;
 void mount_network(ptk::browser* browser, const std::string_view url, const bool new_tab,
                    const bool force_new_mount) noexcept;

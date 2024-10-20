@@ -62,7 +62,7 @@ vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
     return icon;
 }
 
-const std::string
+std::string
 vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
 {
     if (config::settings.use_si_prefix)
@@ -75,7 +75,7 @@ vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
     }
 }
 
-const vfs::utils::split_basename_extension_data
+vfs::utils::split_basename_extension_data
 vfs::utils::split_basename_extension(const std::filesystem::path& filename) noexcept
 {
     if (std::filesystem::is_directory(filename))
@@ -110,7 +110,7 @@ vfs::utils::split_basename_extension(const std::filesystem::path& filename) noex
     return {filename.string(), "", false};
 }
 
-const std::filesystem::path
+std::filesystem::path
 vfs::utils::unique_path(const std::filesystem::path& path, const std::filesystem::path& filename,
                         const std::string_view tag) noexcept
 {

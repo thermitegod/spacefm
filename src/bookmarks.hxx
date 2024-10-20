@@ -22,7 +22,7 @@
 
 using bookmark_t = std::array<std::filesystem::path, 2>;
 
-[[nodiscard]] const std::span<bookmark_t> get_all_bookmarks() noexcept;
+[[nodiscard]] std::span<bookmark_t> get_all_bookmarks() noexcept;
 
 void load_bookmarks() noexcept;
 void save_bookmarks() noexcept;

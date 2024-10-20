@@ -52,13 +52,13 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
 
     void expand_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
     void collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept;
-    static const std::optional<std::filesystem::path> get_dir_path(GtkTreeIter* iter) noexcept;
+    static std::optional<std::filesystem::path> get_dir_path(GtkTreeIter* iter) noexcept;
 
     /* <private> */
     struct node : public std::enable_shared_from_this<node>
     {
-        [[nodiscard]] static const std::shared_ptr<node> create() noexcept;
-        [[nodiscard]] static const std::shared_ptr<node>
+        [[nodiscard]] static std::shared_ptr<node> create() noexcept;
+        [[nodiscard]] static std::shared_ptr<node>
         create(ptk::dir_tree* tree, const std::shared_ptr<node>& parent,
                const std::filesystem::path& path) noexcept;
 
@@ -74,8 +74,8 @@ struct dir_tree // : public std::enable_shared_from_this<ptk::dir_tree>, Gtk::Tr
 
         vfs::monitor monitor;
 
-        const std::shared_ptr<node> get_nth_node(i32 n) const noexcept;
-        const std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
+        std::shared_ptr<node> get_nth_node(i32 n) const noexcept;
+        std::shared_ptr<node> find_node(const std::string_view name) const noexcept;
         isize get_node_index(const std::shared_ptr<node>& child) const noexcept;
 
         /* file monitor callback */

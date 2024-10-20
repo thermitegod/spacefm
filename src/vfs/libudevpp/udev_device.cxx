@@ -39,7 +39,7 @@ libudev::device::has_action() const noexcept
     return udev_device_get_action(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_action() const noexcept
 {
     if (this->has_action())
@@ -55,7 +55,7 @@ libudev::device::has_devnode() const noexcept
     return udev_device_get_devnode(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_devnode() const noexcept
 {
     if (this->has_devnode())
@@ -77,7 +77,7 @@ libudev::device::has_devtype() const noexcept
     return udev_device_get_devtype(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_devtype() const noexcept
 {
     if (this->has_devtype())
@@ -93,7 +93,7 @@ libudev::device::has_subsystem() const noexcept
     return udev_device_get_subsystem(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_subsystem() const noexcept
 {
     if (this->has_subsystem())
@@ -109,7 +109,7 @@ libudev::device::has_devpath() const noexcept
     return udev_device_get_devpath(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_devpath() const noexcept
 {
     if (this->has_devpath())
@@ -125,7 +125,7 @@ libudev::device::has_syspath() const noexcept
     return udev_device_get_syspath(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 libudev::device::get_syspath() const noexcept
 {
     if (this->has_syspath())
@@ -141,7 +141,7 @@ libudev::device::has_sysname() const noexcept
     return udev_device_get_sysname(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_sysname() const noexcept
 {
     if (this->has_sysname())
@@ -157,7 +157,7 @@ libudev::device::has_sysnum() const noexcept
     return udev_device_get_sysnum(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_sysnum() const noexcept
 {
     if (this->has_sysnum())
@@ -173,7 +173,7 @@ libudev::device::has_driver() const noexcept
     return udev_device_get_driver(this->handle.get()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_driver() const noexcept
 {
     if (this->has_driver())
@@ -189,7 +189,7 @@ libudev::device::has_sysattr(const std::string_view named) const noexcept
     return std::ranges::contains(get_sysattr_keys(), named);
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_sysattr(const std::string_view named) const noexcept
 {
     if (this->has_sysattr(named))
@@ -206,7 +206,7 @@ libudev::device::set_sysattr(const std::string_view named,
     return udev_device_set_sysattr_value(this->handle.get(), named.data(), value.data()) >= 0;
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 libudev::device::get_sysattr_keys() const noexcept
 {
     std::vector<std::string> keys;
@@ -221,7 +221,7 @@ libudev::device::get_sysattr_keys() const noexcept
     return keys;
 }
 
-const std::unordered_map<std::string, std::string>
+std::unordered_map<std::string, std::string>
 libudev::device::get_sysattr_map() const noexcept
 {
     std::unordered_map<std::string, std::string> attr;
@@ -244,7 +244,7 @@ libudev::device::get_sysattr_map() const noexcept
     return attr;
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 libudev::device::get_devlinks() const noexcept
 {
     std::vector<std::string> links;
@@ -263,7 +263,7 @@ libudev::device::has_property(const std::string_view named) const noexcept
     return udev_device_get_property_value(this->handle.get(), named.data()) != nullptr;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 libudev::device::get_property(const std::string_view named) const noexcept
 {
     if (this->has_property(named))
@@ -273,7 +273,7 @@ libudev::device::get_property(const std::string_view named) const noexcept
     return std::nullopt;
 }
 
-const std::unordered_map<std::string, std::string>
+std::unordered_map<std::string, std::string>
 libudev::device::get_properties() const noexcept
 {
     std::unordered_map<std::string, std::string> property_map;
@@ -294,7 +294,7 @@ libudev::device::has_tag(const std::string_view named) const noexcept
     return udev_device_has_tag(this->handle.get(), named.data());
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 libudev::device::get_tags() const noexcept
 {
     std::vector<std::string> tags;
@@ -316,7 +316,7 @@ libudev::device::has_current_tag(const std::string_view named) const noexcept
     return udev_device_has_current_tag(this->handle.get(), named.data());
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 libudev::device::get_current_tags() const noexcept
 {
     std::vector<std::string> tags;
@@ -332,7 +332,7 @@ libudev::device::get_current_tags() const noexcept
     return tags;
 }
 
-const std::optional<libudev::device>
+std::optional<libudev::device>
 libudev::device::get_parent_device() const noexcept
 {
     if (!this->handle || this->is_disk())
@@ -354,7 +354,7 @@ libudev::device::get_parent_device() const noexcept
     return std::nullopt;
 }
 
-const std::optional<libudev::device>
+std::optional<libudev::device>
 libudev::device::get_parent_device(const std::string_view subsystem,
                                    const std::string_view type) const noexcept
 {

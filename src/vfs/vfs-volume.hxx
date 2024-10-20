@@ -63,26 +63,26 @@ struct volume : public std::enable_shared_from_this<volume>
     volume& operator=(const volume& other) = delete;
     volume& operator=(volume&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::volume>
+    [[nodiscard]] static std::shared_ptr<vfs::volume>
     create(const std::shared_ptr<vfs::device>& device) noexcept;
 
     using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,
                                 const vfs::volume::state state, void* user_data);
 
   public:
-    [[nodiscard]] const std::string_view display_name() const noexcept;
-    [[nodiscard]] const std::string_view mount_point() const noexcept;
-    [[nodiscard]] const std::string_view device_file() const noexcept;
-    [[nodiscard]] const std::string_view fstype() const noexcept;
-    [[nodiscard]] const std::string_view icon() const noexcept;
-    [[nodiscard]] const std::string_view udi() const noexcept;
-    [[nodiscard]] const std::string_view label() const noexcept;
+    [[nodiscard]] std::string_view display_name() const noexcept;
+    [[nodiscard]] std::string_view mount_point() const noexcept;
+    [[nodiscard]] std::string_view device_file() const noexcept;
+    [[nodiscard]] std::string_view fstype() const noexcept;
+    [[nodiscard]] std::string_view icon() const noexcept;
+    [[nodiscard]] std::string_view udi() const noexcept;
+    [[nodiscard]] std::string_view label() const noexcept;
 
     [[nodiscard]] dev_t devnum() const noexcept;
     [[nodiscard]] u64 size() const noexcept;
 
-    [[nodiscard]] const std::optional<std::string> device_mount_cmd() noexcept;
-    [[nodiscard]] const std::optional<std::string> device_unmount_cmd() noexcept;
+    [[nodiscard]] std::optional<std::string> device_mount_cmd() noexcept;
+    [[nodiscard]] std::optional<std::string> device_unmount_cmd() noexcept;
 
     [[nodiscard]] bool is_device_type(const vfs::volume::device_type type) const noexcept;
 
@@ -130,13 +130,12 @@ struct volume : public std::enable_shared_from_this<volume>
 bool volume_init() noexcept;
 void volume_finalize() noexcept;
 
-const std::span<const std::shared_ptr<vfs::volume>> volume_get_all_volumes() noexcept;
+std::span<const std::shared_ptr<vfs::volume>> volume_get_all_volumes() noexcept;
 
 void volume_add_callback(vfs::volume::callback_t cb, void* user_data) noexcept;
 void volume_remove_callback(vfs::volume::callback_t cb, void* user_data) noexcept;
 
-const std::shared_ptr<vfs::volume>
-volume_get_by_device(const std::string_view device_file) noexcept;
+std::shared_ptr<vfs::volume> volume_get_by_device(const std::string_view device_file) noexcept;
 
 bool volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept;
 

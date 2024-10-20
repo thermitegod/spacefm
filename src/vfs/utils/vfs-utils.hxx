@@ -30,7 +30,7 @@ namespace vfs::utils
 {
 GdkPixbuf* load_icon(const std::string_view icon_name, i32 icon_size) noexcept;
 
-[[nodiscard]] const std::string format_file_size(u64 size_in_bytes, bool decimal = true) noexcept;
+[[nodiscard]] std::string format_file_size(u64 size_in_bytes, bool decimal = true) noexcept;
 
 struct split_basename_extension_data
 {
@@ -44,7 +44,7 @@ struct split_basename_extension_data
  * this will support multi part extensions such as .tar.gz,.tar.zst,etc..
  * will not set an extension if the filename is a directory.
  */
-[[nodiscard]] const split_basename_extension_data
+[[nodiscard]] split_basename_extension_data
 split_basename_extension(const std::filesystem::path& filename) noexcept;
 
 /**
@@ -59,7 +59,7 @@ split_basename_extension(const std::filesystem::path& filename) noexcept;
  *
  * @return A unique path
  */
-[[nodiscard]] const std::filesystem::path unique_path(const std::filesystem::path& path,
-                                                      const std::filesystem::path& filename,
-                                                      const std::string_view tag = "") noexcept;
+[[nodiscard]] std::filesystem::path unique_path(const std::filesystem::path& path,
+                                                const std::filesystem::path& filename,
+                                                const std::string_view tag = "") noexcept;
 } // namespace vfs::utils

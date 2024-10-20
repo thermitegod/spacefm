@@ -139,7 +139,7 @@ ptk::browser* main_window_get_current_browser() noexcept;
 MainWindow* main_window_get_last_active() noexcept;
 MainWindow* main_window_get_on_current_desktop() noexcept;
 
-const std::span<MainWindow*> main_window_get_all() noexcept;
+std::span<MainWindow*> main_window_get_all() noexcept;
 
 void show_panels_all_windows(GtkMenuItem* item, MainWindow* main_window) noexcept;
 void update_views_all_windows(GtkWidget* item, ptk::browser* browser) noexcept;

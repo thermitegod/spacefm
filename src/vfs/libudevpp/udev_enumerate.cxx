@@ -103,7 +103,7 @@ libudev::enumerate::scan_subsystems() const noexcept
     udev_enumerate_scan_subsystems(this->handle.get());
 }
 
-const std::vector<libudev::device>
+std::vector<libudev::device>
 libudev::enumerate::enumerate_devices() const noexcept
 {
     std::vector<device> devices;

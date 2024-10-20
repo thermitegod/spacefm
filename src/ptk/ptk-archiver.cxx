@@ -48,7 +48,7 @@ is_archiver_installed() noexcept
     return true;
 }
 
-static const std::string
+static std::string
 archiver_create_shell_file_list(
     const std::span<const std::shared_ptr<vfs::file>> selected_files) noexcept
 {

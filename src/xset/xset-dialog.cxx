@@ -60,7 +60,7 @@ on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept
     return false;
 }
 
-const std::tuple<bool, std::string>
+std::tuple<bool, std::string>
 xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::string_view msg1,
                  const std::string_view msg2, const std::string_view defstring,
                  const std::string_view defreset, bool edit_care) noexcept
@@ -258,7 +258,7 @@ xset_text_dialog(GtkWidget* parent, const std::string_view title, const std::str
     return std::make_tuple(ret, answer);
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::string_view title,
                  const std::optional<std::filesystem::path>& deffolder,
                  const std::optional<std::filesystem::path>& deffile) noexcept

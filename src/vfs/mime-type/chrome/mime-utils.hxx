@@ -24,5 +24,5 @@ namespace vfs::detail::mime_type::chrome
 // threads that disallow blocking.
 //
 // If the mime type is unknown, this will return application/octet-stream.
-const std::string GetFileMimeType(const std::filesystem::path& filepath) noexcept;
+std::string GetFileMimeType(const std::filesystem::path& filepath) noexcept;
 } // namespace vfs::detail::mime_type::chrome

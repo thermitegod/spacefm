@@ -115,7 +115,7 @@ ptk::utils::multi_input_new(GtkScrolledWindow* scrolled, const std::string_view 
     return input;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 ptk::utils::multi_input_get_text(GtkWidget* input) noexcept
 {
     if (!GTK_IS_TEXT_VIEW(input))

@@ -59,7 +59,7 @@ struct desktop_cache_data
 
 static std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
 
-const std::shared_ptr<vfs::desktop>
+std::shared_ptr<vfs::desktop>
 vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 {
     if (desktops_cache.contains(desktop_file))
@@ -321,13 +321,13 @@ vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
 #endif
 }
 
-const std::string_view
+std::string_view
 vfs::desktop::name() const noexcept
 {
     return this->filename_;
 }
 
-const std::string_view
+std::string_view
 vfs::desktop::display_name() const noexcept
 {
     if (!this->desktop_entry_.name.empty())
@@ -337,7 +337,7 @@ vfs::desktop::display_name() const noexcept
     return this->filename_;
 }
 
-const std::string_view
+std::string_view
 vfs::desktop::exec() const noexcept
 {
     return this->desktop_entry_.exec;
@@ -355,7 +355,7 @@ vfs::desktop::path() const noexcept
     return this->path_;
 }
 
-const std::string_view
+std::string_view
 vfs::desktop::icon_name() const noexcept
 {
     return this->desktop_entry_.icon;
@@ -379,7 +379,7 @@ vfs::desktop::icon(i32 size) const noexcept
     return desktop_icon;
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 vfs::desktop::supported_mime_types() const noexcept
 {
     return ztd::split(this->desktop_entry_.mime_type, ";");
@@ -391,7 +391,7 @@ vfs::desktop::open_multiple_files() const noexcept
     return this->desktop_entry_.exec.contains("%F") || this->desktop_entry_.exec.contains("%U");
 }
 
-const std::optional<std::vector<std::vector<std::string>>>
+std::optional<std::vector<std::vector<std::string>>>
 vfs::desktop::app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
                                              bool quote_file_list) const noexcept
 {

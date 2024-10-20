@@ -24,7 +24,7 @@
 
 #include "utils/shell-quote.hxx"
 
-const std::string
+std::string
 utils::shell_quote(const std::string_view str) noexcept
 {
     if (str.empty())

@@ -63,7 +63,7 @@ TerminalHandlers::TerminalHandlers() noexcept
     // clang-format on
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 TerminalHandlers::get_terminal_args(const std::string_view terminal) const noexcept
 {
     // logger::debug("get_terminal_args={}", terminal);
@@ -97,7 +97,7 @@ TerminalHandlers::get_terminal_args(const std::string_view terminal) const noexc
     return {};
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 TerminalHandlers::get_supported_terminal_names() const noexcept
 {
     std::vector<std::string> terminal_names;

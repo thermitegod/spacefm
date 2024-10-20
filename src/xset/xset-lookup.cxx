@@ -923,7 +923,7 @@ xset::get_name_from_panel_mode(const panel_t panel, const xset::panel name,
 
 // main window panel mode
 
-const std::string_view
+std::string_view
 xset::get_window_panel_mode(xset::main_window_panel mode) noexcept
 {
     static constexpr ztd::map<xset::main_window_panel, std::string_view, 4>

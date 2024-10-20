@@ -38,16 +38,16 @@ struct device
     device& operator=(const device& other) = delete;
     device& operator=(device&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::device>
+    [[nodiscard]] static std::shared_ptr<vfs::device>
     create(const libudev::device& udevice) noexcept;
 
     libudev::device udevice;
 
     [[nodiscard]] dev_t devnum() const noexcept;
 
-    [[nodiscard]] const std::string_view devnode() const noexcept;
-    [[nodiscard]] const std::string_view native_path() const noexcept;
-    [[nodiscard]] const std::string_view mount_points() const noexcept;
+    [[nodiscard]] std::string_view devnode() const noexcept;
+    [[nodiscard]] std::string_view native_path() const noexcept;
+    [[nodiscard]] std::string_view mount_points() const noexcept;
 
     [[nodiscard]] bool is_valid() const noexcept;
 
@@ -58,11 +58,11 @@ struct device
     [[nodiscard]] bool is_mounted() const noexcept;
     [[nodiscard]] bool is_media_ejectable() const noexcept;
 
-    [[nodiscard]] const std::string_view id() const noexcept;
-    [[nodiscard]] const std::string_view id_label() const noexcept;
+    [[nodiscard]] std::string_view id() const noexcept;
+    [[nodiscard]] std::string_view id_label() const noexcept;
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 block_size() const noexcept;
-    [[nodiscard]] const std::string_view fstype() const noexcept;
+    [[nodiscard]] std::string_view fstype() const noexcept;
 
   private:
     dev_t devnum_{0};
@@ -87,7 +87,7 @@ struct device
     std::string fstype_;
 
   private:
-    [[nodiscard]] const std::optional<std::string> info_mount_points() const noexcept;
+    [[nodiscard]] std::optional<std::string> info_mount_points() const noexcept;
     [[nodiscard]] bool device_get_info() noexcept;
 };
 } // namespace vfs

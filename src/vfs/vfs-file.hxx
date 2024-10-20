@@ -45,20 +45,20 @@ struct file : public std::enable_shared_from_this<file>
     file& operator=(const file& other) = delete;
     file& operator=(file&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::file>
+    [[nodiscard]] static std::shared_ptr<vfs::file>
     create(const std::filesystem::path& path) noexcept;
 
-    [[nodiscard]] const std::string_view name() const noexcept;
+    [[nodiscard]] std::string_view name() const noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] const std::string_view uri() const noexcept;
+    [[nodiscard]] std::string_view uri() const noexcept;
 
     [[nodiscard]] u64 size() const noexcept;
     [[nodiscard]] u64 size_on_disk() const noexcept;
 
-    [[nodiscard]] const std::string_view display_size() const noexcept;
-    [[nodiscard]] const std::string_view display_size_in_bytes() const noexcept;
-    [[nodiscard]] const std::string_view display_size_on_disk() const noexcept;
+    [[nodiscard]] std::string_view display_size() const noexcept;
+    [[nodiscard]] std::string_view display_size_in_bytes() const noexcept;
+    [[nodiscard]] std::string_view display_size_on_disk() const noexcept;
 
     [[nodiscard]] u64 blocks() const noexcept;
 
@@ -66,18 +66,18 @@ struct file : public std::enable_shared_from_this<file>
 
     [[nodiscard]] const std::shared_ptr<vfs::mime_type>& mime_type() const noexcept;
 
-    [[nodiscard]] const std::string_view display_owner() const noexcept;
-    [[nodiscard]] const std::string_view display_group() const noexcept;
-    [[nodiscard]] const std::string_view display_atime() const noexcept;
-    [[nodiscard]] const std::string_view display_btime() const noexcept;
-    [[nodiscard]] const std::string_view display_ctime() const noexcept;
-    [[nodiscard]] const std::string_view display_mtime() const noexcept;
-    [[nodiscard]] const std::string_view display_permissions() noexcept;
+    [[nodiscard]] std::string_view display_owner() const noexcept;
+    [[nodiscard]] std::string_view display_group() const noexcept;
+    [[nodiscard]] std::string_view display_atime() const noexcept;
+    [[nodiscard]] std::string_view display_btime() const noexcept;
+    [[nodiscard]] std::string_view display_ctime() const noexcept;
+    [[nodiscard]] std::string_view display_mtime() const noexcept;
+    [[nodiscard]] std::string_view display_permissions() noexcept;
 
-    [[nodiscard]] const std::chrono::system_clock::time_point atime() const noexcept;
-    [[nodiscard]] const std::chrono::system_clock::time_point btime() const noexcept;
-    [[nodiscard]] const std::chrono::system_clock::time_point ctime() const noexcept;
-    [[nodiscard]] const std::chrono::system_clock::time_point mtime() const noexcept;
+    [[nodiscard]] std::chrono::system_clock::time_point atime() const noexcept;
+    [[nodiscard]] std::chrono::system_clock::time_point btime() const noexcept;
+    [[nodiscard]] std::chrono::system_clock::time_point ctime() const noexcept;
+    [[nodiscard]] std::chrono::system_clock::time_point mtime() const noexcept;
 
     enum class thumbnail_size : std::uint8_t
     {
@@ -122,7 +122,7 @@ struct file : public std::enable_shared_from_this<file>
         std::string description;
         std::string value;
     };
-    [[nodiscard]] const std::vector<metadata_data> metadata() noexcept;
+    [[nodiscard]] std::vector<metadata_data> metadata() noexcept;
 
     // update file info
     [[nodiscard]] bool update() noexcept;
@@ -159,9 +159,9 @@ struct file : public std::enable_shared_from_this<file>
 
     void load_special_info() noexcept;
 
-    [[nodiscard]] const std::string create_file_perm_string() const noexcept;
+    [[nodiscard]] std::string create_file_perm_string() const noexcept;
 
-    [[nodiscard]] const std::string_view
+    [[nodiscard]] std::string_view
     special_directory_get_icon_name(const bool symbolic = false) const noexcept;
 };
 } // namespace vfs

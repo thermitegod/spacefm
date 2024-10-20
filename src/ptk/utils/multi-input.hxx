@@ -28,5 +28,5 @@ GtkTextView* multi_input_new(GtkScrolledWindow* scrolled,
                              const std::string_view text = "") noexcept;
 
 // returns a string or nullopt if input is empty
-const std::optional<std::string> multi_input_get_text(GtkWidget* input) noexcept;
+std::optional<std::string> multi_input_get_text(GtkWidget* input) noexcept;
 } // namespace ptk::utils

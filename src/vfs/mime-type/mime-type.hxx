@@ -32,7 +32,7 @@ namespace vfs::detail::mime_type
  * If the mime-type could not be determined, the content of
  * the file will be checked, which is much more time-consuming.
  */
-[[nodiscard]] const std::string get_by_file(const std::filesystem::path& path) noexcept;
+[[nodiscard]] std::string get_by_file(const std::filesystem::path& path) noexcept;
 
 [[nodiscard]] bool is_text(const std::string_view mime_type) noexcept;
 [[nodiscard]] bool is_executable(const std::string_view mime_type) noexcept;
@@ -48,5 +48,5 @@ namespace vfs::detail::mime_type
  * xml file, it is used.  Otherwise vfs_mime_type_get_icon guesses the icon.
  * The Freedesktop spec /usr/share/mime/generic-icons is NOT parsed.
  */
-[[nodiscard]] const std::array<std::string, 2> get_desc_icon(const std::string_view type) noexcept;
+[[nodiscard]] std::array<std::string, 2> get_desc_icon(const std::string_view type) noexcept;
 } // namespace vfs::detail::mime_type

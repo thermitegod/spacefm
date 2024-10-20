@@ -22,7 +22,7 @@
 
 #include "xset/utils/xset-utils.hxx"
 
-const std::string
+std::string
 xset::utils::clean_label(const std::string_view menu_label, bool kill_special, bool escape) noexcept
 {
     if (menu_label.empty())

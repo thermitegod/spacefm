@@ -38,21 +38,21 @@ enum class action : std::uint8_t
 /*
  *  Get a list of applications supporting this mime-type
  */
-[[nodiscard]] const std::vector<std::string> get_actions(const std::string_view mime_type) noexcept;
+[[nodiscard]] std::vector<std::string> get_actions(const std::string_view mime_type) noexcept;
 
 /*
  * Add an applications used to open this mime-type
  * desktop_id is the name of *.desktop file.
  */
-[[nodiscard]] const std::string add_action(const std::string_view mime_type,
-                                           const std::string_view desktop_id) noexcept;
+[[nodiscard]] std::string add_action(const std::string_view mime_type,
+                                     const std::string_view desktop_id) noexcept;
 
 /*
  * Get default applications used to open this mime-type
  *
  * If std::nullopt is returned, that means a default app is not set for this mime-type.
  */
-[[nodiscard]] const std::optional<std::string>
+[[nodiscard]] std::optional<std::string>
 get_default_action(const std::string_view mime_type) noexcept;
 
 /*
@@ -69,8 +69,8 @@ void set_default_action(const std::string_view mime_type,
                         const std::string_view desktop_id) noexcept;
 
 /* Locate the file path of desktop file by desktop_id */
-[[nodiscard]] const std::optional<std::filesystem::path>
+[[nodiscard]] std::optional<std::filesystem::path>
 locate_desktop_file(const std::string_view desktop_id) noexcept;
-[[nodiscard]] const std::optional<std::filesystem::path>
+[[nodiscard]] std::optional<std::filesystem::path>
 locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id) noexcept;
 } // namespace vfs::detail::mime_type

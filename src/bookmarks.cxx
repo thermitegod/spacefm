@@ -43,7 +43,7 @@ static bool bookmarks_changed = false;
 static std::filesystem::path bookmark_file;
 } // namespace global
 
-const std::span<bookmark_t>
+std::span<bookmark_t>
 get_all_bookmarks() noexcept
 {
     return global::bookmarks;

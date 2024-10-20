@@ -50,14 +50,14 @@ struct desktop
     desktop& operator=(const desktop& other) = delete;
     desktop& operator=(desktop&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<desktop>
+    [[nodiscard]] static std::shared_ptr<desktop>
     create(const std::filesystem::path& desktop_file) noexcept;
 
-    [[nodiscard]] const std::string_view name() const noexcept;
-    [[nodiscard]] const std::string_view display_name() const noexcept;
-    [[nodiscard]] const std::string_view exec() const noexcept;
+    [[nodiscard]] std::string_view name() const noexcept;
+    [[nodiscard]] std::string_view display_name() const noexcept;
+    [[nodiscard]] std::string_view exec() const noexcept;
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] const std::string_view icon_name() const noexcept;
+    [[nodiscard]] std::string_view icon_name() const noexcept;
     [[nodiscard]] GdkPixbuf* icon(i32 size) const noexcept;
     [[nodiscard]] bool use_terminal() const noexcept;
     [[nodiscard]] bool open_file(const std::filesystem::path& working_dir,
@@ -65,11 +65,11 @@ struct desktop
     [[nodiscard]] bool open_files(const std::filesystem::path& working_dir,
                                   const std::span<const std::filesystem::path> file_paths) const;
 
-    [[nodiscard]] const std::vector<std::string> supported_mime_types() const noexcept;
+    [[nodiscard]] std::vector<std::string> supported_mime_types() const noexcept;
 
   private:
     [[nodiscard]] bool open_multiple_files() const noexcept;
-    [[nodiscard]] const std::optional<std::vector<std::vector<std::string>>>
+    [[nodiscard]] std::optional<std::vector<std::vector<std::string>>>
     app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
                                    bool quote_file_list) const noexcept;
     void exec_in_terminal(const std::filesystem::path& cwd,

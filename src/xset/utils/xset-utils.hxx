@@ -20,6 +20,5 @@
 
 namespace xset::utils
 {
-const std::string clean_label(const std::string_view menu_label, bool kill_special,
-                              bool escape) noexcept;
+std::string clean_label(const std::string_view menu_label, bool kill_special, bool escape) noexcept;
 } // namespace xset::utils

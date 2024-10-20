@@ -46,7 +46,7 @@
 
 #include "vfs/vfs-file.hxx"
 
-const std::shared_ptr<vfs::file>
+std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path) noexcept
 {
     return std::make_shared<vfs::file>(path);
@@ -143,7 +143,7 @@ vfs::file::update() noexcept
     return true;
 }
 
-const std::string_view
+std::string_view
 vfs::file::name() const noexcept
 {
     return this->name_;
@@ -155,7 +155,7 @@ vfs::file::path() const noexcept
     return this->path_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::uri() const noexcept
 {
     return this->uri_;
@@ -173,19 +173,19 @@ vfs::file::size_on_disk() const noexcept
     return this->file_stat_.size_on_disk();
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_size() const noexcept
 {
     return this->display_size_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_size_in_bytes() const noexcept
 {
     return this->display_size_bytes_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_size_on_disk() const noexcept
 {
     return this->display_disk_size_;
@@ -203,7 +203,7 @@ vfs::file::mime_type() const noexcept
     return this->mime_type_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::special_directory_get_icon_name(const bool symbolic) const noexcept
 {
     if (vfs::user::home() == this->path_)
@@ -325,67 +325,67 @@ vfs::file::unload_thumbnail(const thumbnail_size size) noexcept
     }
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_owner() const noexcept
 {
     return this->display_owner_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_group() const noexcept
 {
     return this->display_group_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_atime() const noexcept
 {
     return this->display_atime_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_btime() const noexcept
 {
     return this->display_btime_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_ctime() const noexcept
 {
     return this->display_ctime_;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_mtime() const noexcept
 {
     return this->display_mtime_;
 }
 
-const std::chrono::system_clock::time_point
+std::chrono::system_clock::time_point
 vfs::file::atime() const noexcept
 {
     return this->file_stat_.atime();
 }
 
-const std::chrono::system_clock::time_point
+std::chrono::system_clock::time_point
 vfs::file::btime() const noexcept
 {
     return this->file_stat_.btime();
 }
 
-const std::chrono::system_clock::time_point
+std::chrono::system_clock::time_point
 vfs::file::ctime() const noexcept
 {
     return this->file_stat_.ctime();
 }
 
-const std::chrono::system_clock::time_point
+std::chrono::system_clock::time_point
 vfs::file::mtime() const noexcept
 {
     return this->file_stat_.mtime();
 }
 
-const std::string
+std::string
 vfs::file::create_file_perm_string() const noexcept
 {
     static constexpr u8 file_type{0};
@@ -530,7 +530,7 @@ vfs::file::create_file_perm_string() const noexcept
     return perm;
 }
 
-const std::string_view
+std::string_view
 vfs::file::display_permissions() noexcept
 {
     if (this->display_perm_.empty())
@@ -783,7 +783,7 @@ vfs::file::load_special_info() noexcept
     }
 }
 
-const std::vector<vfs::file::metadata_data>
+std::vector<vfs::file::metadata_data>
 vfs::file::metadata() noexcept
 {
 #if defined(HAVE_MEDIA)

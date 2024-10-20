@@ -139,7 +139,7 @@ ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
 static GdkDragAction clipboard_action = GdkDragAction::GDK_ACTION_DEFAULT;
 static std::vector<std::filesystem::path> clipboard_file_list;
 
-static const std::vector<std::string>
+static std::vector<std::string>
 uri_list_extract_uris(const char* uri_list_str) noexcept
 {
     std::vector<std::string> uri_list;
@@ -639,7 +639,7 @@ ptk::clipboard::paste_targets(GtkWindow* parent_win, const std::filesystem::path
     gtk_selection_data_free(sel_data);
 }
 
-const std::vector<std::filesystem::path>
+std::vector<std::filesystem::path>
 ptk::clipboard::get_file_paths(const std::filesystem::path& cwd, bool* is_cut,
                                i32* missing_targets) noexcept
 {

@@ -40,7 +40,7 @@ namespace vfs
 struct trash_can
 {
     trash_can() noexcept;
-    [[nodiscard]] static const std::shared_ptr<vfs::trash_can> create() noexcept;
+    [[nodiscard]] static std::shared_ptr<vfs::trash_can> create() noexcept;
 
     // Move a file or directory into the trash.
     [[nodiscard]] static bool trash(const std::filesystem::path& path) noexcept;
@@ -70,7 +70,7 @@ struct trash_can
         trash_dir& operator=(trash_dir&& other) = delete;
 
         // Get a unique name for use within the trash directory
-        [[nodiscard]] const std::filesystem::path
+        [[nodiscard]] std::filesystem::path
         unique_name(const std::filesystem::path& path) const noexcept;
 
         void create_trash_dir() const noexcept;
@@ -84,7 +84,7 @@ struct trash_can
                   const std::filesystem::path& target_filename) const noexcept;
 
       private:
-        [[nodiscard]] static const std::string
+        [[nodiscard]] static std::string
         create_trash_date(const std::chrono::system_clock::time_point time_point) noexcept;
 
         // the full path for this trash directory
@@ -99,11 +99,10 @@ struct trash_can
     [[nodiscard]] static u64 mount_id(const std::filesystem::path& path) noexcept;
 
     // Find the toplevel directory (mount point) for the device that 'path' is on.
-    [[nodiscard]] static const std::filesystem::path
-    toplevel(const std::filesystem::path& path) noexcept;
+    [[nodiscard]] static std::filesystem::path toplevel(const std::filesystem::path& path) noexcept;
 
     // Return the trash dir to use for 'path'.
-    [[nodiscard]] const std::shared_ptr<trash_dir>
+    [[nodiscard]] std::shared_ptr<trash_dir>
     get_trash_dir(const std::filesystem::path& path) noexcept;
 
     // Data Members

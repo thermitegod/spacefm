@@ -297,7 +297,7 @@ ptk::view::dir_tree::chdir(GtkTreeView* dir_tree_view, const std::filesystem::pa
 }
 
 /* FIXME: should this API be put here? Maybe it belongs to prk-dir-tree.c */
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 ptk::view::dir_tree::dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept
 {
     GtkTreeIter real_it;
@@ -309,7 +309,7 @@ ptk::view::dir_tree::dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept
 }
 
 /* Return a newly allocated string containing path of current selected dir. */
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 ptk::view::dir_tree::selected_dir(GtkTreeView* dir_tree_view) noexcept
 {
     GtkTreeModel* model = nullptr;
@@ -574,7 +574,7 @@ on_dir_tree_view_key_press(GtkWidget* view, GdkEvent* event, ptk::browser* brows
 }
 
 // drag n drop
-static const std::optional<std::filesystem::path>
+static std::optional<std::filesystem::path>
 dir_tree_view_get_drop_dir(GtkWidget* view, i32 x, i32 y) noexcept
 {
     std::optional<std::filesystem::path> dest_path = std::nullopt;

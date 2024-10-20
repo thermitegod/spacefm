@@ -24,5 +24,5 @@
 
 namespace socket
 {
-const std::tuple<i32, std::string> command(const std::string_view socket_commands_json) noexcept;
+std::tuple<i32, std::string> command(const std::string_view socket_commands_json) noexcept;
 }

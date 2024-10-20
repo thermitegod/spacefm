@@ -256,7 +256,7 @@ get_actions(const std::filesystem::path& dir, const std::string_view mime_type,
     }
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 vfs::detail::mime_type::get_actions(const std::string_view mime_type) noexcept
 {
     std::vector<std::string> actions;
@@ -470,7 +470,7 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
     return found;
 }
 
-[[nodiscard]] static const std::string
+[[nodiscard]] static std::string
 make_custom_desktop_file(const std::string_view desktop_id,
                          const std::string_view mime_type) noexcept
 {
@@ -589,7 +589,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
  *
  * custom_desktop: used to store name of the newly created user-custom desktop file, can be nullptr.
  */
-const std::string
+std::string
 vfs::detail::mime_type::add_action(const std::string_view type,
                                    const std::string_view desktop_id) noexcept
 {
@@ -600,7 +600,7 @@ vfs::detail::mime_type::add_action(const std::string_view type,
     return make_custom_desktop_file(desktop_id, type);
 }
 
-[[nodiscard]] static const std::optional<std::filesystem::path>
+[[nodiscard]] static std::optional<std::filesystem::path>
 locate_desktop_file(const std::filesystem::path& dir, const std::string_view desktop_id) noexcept
 {
     auto desktop_path = dir / "applications" / desktop_id;
@@ -630,14 +630,14 @@ locate_desktop_file(const std::filesystem::path& dir, const std::string_view des
     return std::nullopt;
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 vfs::detail::mime_type::locate_desktop_file(const std::filesystem::path& dir,
                                             const std::string_view desktop_id) noexcept
 {
     return ::locate_desktop_file(dir, desktop_id);
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 vfs::detail::mime_type::locate_desktop_file(const std::string_view desktop_id) noexcept
 {
     const auto data_dir = vfs::user::data();
@@ -660,7 +660,7 @@ vfs::detail::mime_type::locate_desktop_file(const std::string_view desktop_id) n
     return std::nullopt;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::detail::mime_type::get_default_action(const std::string_view mime_type) noexcept
 {
     assert(mime_type.empty() != true);

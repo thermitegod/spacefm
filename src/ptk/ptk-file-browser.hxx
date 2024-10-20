@@ -170,11 +170,11 @@ struct browser
     {
         void go_back() noexcept;
         [[nodiscard]] bool has_back() const noexcept;
-        [[nodiscard]] const std::span<const std::filesystem::path> get_back() const noexcept;
+        [[nodiscard]] std::span<const std::filesystem::path> get_back() const noexcept;
 
         void go_forward() noexcept;
         [[nodiscard]] bool has_forward() const noexcept;
-        [[nodiscard]] const std::span<const std::filesystem::path> get_forward() const noexcept;
+        [[nodiscard]] std::span<const std::filesystem::path> get_forward() const noexcept;
 
         void new_forward(const std::filesystem::path& path) noexcept;
 
@@ -204,8 +204,8 @@ struct browser
     const std::filesystem::path& cwd() const noexcept;
     void canon(const std::filesystem::path& path) noexcept;
 
-    const std::optional<std::filesystem::path> tab_cwd(const tab_t tab_num) const noexcept;
-    const std::optional<std::filesystem::path> panel_cwd(const panel_t panel_num) const noexcept;
+    std::optional<std::filesystem::path> tab_cwd(const tab_t tab_num) const noexcept;
+    std::optional<std::filesystem::path> panel_cwd(const panel_t panel_num) const noexcept;
 
     void open_in_panel(const panel_t panel_num, const std::filesystem::path& file_path) noexcept;
     bool is_panel_visible(const panel_t panel) const noexcept;
@@ -216,7 +216,7 @@ struct browser
         tab_t tab_count;
         tab_t tab_num;
     };
-    const browser_count_data get_tab_panel_counts() const noexcept;
+    browser_count_data get_tab_panel_counts() const noexcept;
 
     void go_home() noexcept;
     void go_tab(tab_t tab) noexcept;
@@ -234,8 +234,8 @@ struct browser
     void restore_tab() noexcept;
     void open_in_tab(const std::filesystem::path& file_path, const tab_t tab) const noexcept;
 
-    const std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
-    const std::vector<GtkTreePath*> selected_items(GtkTreeModel** model) const noexcept;
+    std::vector<std::shared_ptr<vfs::file>> selected_files() const noexcept;
+    std::vector<GtkTreePath*> selected_items(GtkTreeModel** model) const noexcept;
 
     void open_selected_files() noexcept;
     void open_selected_files_with_app(const std::string_view app_desktop = "") noexcept;

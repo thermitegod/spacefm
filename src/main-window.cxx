@@ -2535,7 +2535,7 @@ main_window_get_last_active() noexcept
     return nullptr;
 }
 
-const std::span<MainWindow*>
+std::span<MainWindow*>
 main_window_get_all() noexcept
 {
     return global::all_windows;

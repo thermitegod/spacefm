@@ -21,13 +21,13 @@
 
 #include "vfs/linux/self.hxx"
 
-[[nodiscard]] const std::filesystem::path
+[[nodiscard]] std::filesystem::path
 vfs::linux::proc::self::exe() noexcept
 {
     return std::filesystem::read_symlink(detail::proc_self_exe);
 }
 
-[[nodiscard]] const std::string
+[[nodiscard]] std::string
 vfs::linux::proc::self::name() noexcept
 {
     return std::filesystem::read_symlink(detail::proc_self_exe).filename();

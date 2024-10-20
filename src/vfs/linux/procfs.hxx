@@ -60,5 +60,5 @@ struct MountInfoEntry
     std::string super_options;
 };
 
-const std::vector<MountInfoEntry> mountinfo() noexcept;
+std::vector<MountInfoEntry> mountinfo() noexcept;
 } // namespace vfs::linux::procfs

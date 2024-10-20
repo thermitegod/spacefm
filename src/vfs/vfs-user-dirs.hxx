@@ -24,91 +24,91 @@ namespace vfs::user
  *
  * @return The XDG directory XDG_DESKTOP_DIR.
  */
-[[nodiscard]] const std::filesystem::path desktop() noexcept;
+[[nodiscard]] std::filesystem::path desktop() noexcept;
 
 /**
  * @brief User documents directory
  *
  * @return The XDG directory XDG_DOCUMENTS_DIR.
  */
-[[nodiscard]] const std::filesystem::path documents() noexcept;
+[[nodiscard]] std::filesystem::path documents() noexcept;
 
 /**
  * @brief User download directory
  *
  * @return The XDG directory XDG_DOWNLOAD_DIR.
  */
-[[nodiscard]] const std::filesystem::path download() noexcept;
+[[nodiscard]] std::filesystem::path download() noexcept;
 
 /**
  * @brief User music directory
  *
  * @return The XDG directory XDG_MUSIC_DIR.
  */
-[[nodiscard]] const std::filesystem::path music() noexcept;
+[[nodiscard]] std::filesystem::path music() noexcept;
 
 /**
  * @brief User pictures directory
  *
  * @return The XDG directory XDG_PICTURES_DIR.
  */
-[[nodiscard]] const std::filesystem::path pictures() noexcept;
+[[nodiscard]] std::filesystem::path pictures() noexcept;
 
 /**
  * @brief User share directory
  *
  * @return The XDG directory XDG_PUBLICSHARE_DIR.
  */
-[[nodiscard]] const std::filesystem::path public_share() noexcept;
+[[nodiscard]] std::filesystem::path public_share() noexcept;
 
 /**
  * @brief User templates directory
  *
  * @return The XDG directory XDG_TEMPLATES_DIR.
  */
-[[nodiscard]] const std::filesystem::path templates() noexcept;
+[[nodiscard]] std::filesystem::path templates() noexcept;
 
 /**
  * @brief User videos directory
  *
  * @return The XDG directory XDG_VIDEOS_DIR.
  */
-[[nodiscard]] const std::filesystem::path videos() noexcept;
+[[nodiscard]] std::filesystem::path videos() noexcept;
 
 /**
  * @brief User home directory
  *
  * @return The users home directory.
  */
-[[nodiscard]] const std::filesystem::path home() noexcept;
+[[nodiscard]] std::filesystem::path home() noexcept;
 
 /**
  * @brief User cache directory
  *
  * @return The XDG directory XDG_CACHE_HOME.
  */
-[[nodiscard]] const std::filesystem::path cache() noexcept;
+[[nodiscard]] std::filesystem::path cache() noexcept;
 
 /**
  * @brief User data directory
  *
  * @return The XDG directory XDG_DATA_HOME.
  */
-[[nodiscard]] const std::filesystem::path data() noexcept;
+[[nodiscard]] std::filesystem::path data() noexcept;
 
 /**
  * @brief User config directory
  *
  * @return The XDG directory XDG_CONFIG_HOME.
  */
-[[nodiscard]] const std::filesystem::path config() noexcept;
+[[nodiscard]] std::filesystem::path config() noexcept;
 
 /**
  * @brief User runtime directory
  *
  * @return The XDG directory XDG_RUNTIME_DIR.
  */
-[[nodiscard]] const std::filesystem::path runtime() noexcept;
+[[nodiscard]] std::filesystem::path runtime() noexcept;
 } // namespace vfs::user
 
 namespace vfs::program
@@ -125,12 +125,12 @@ void config(const std::filesystem::path& path) noexcept;
  *
  * @return The Programs config directory.
  */
-[[nodiscard]] const std::filesystem::path config() noexcept;
+[[nodiscard]] std::filesystem::path config() noexcept;
 
 /**
  * @brief Programs tmp directory
  *
  * @return The Programs tmp directory.
  */
-[[nodiscard]] const std::filesystem::path tmp() noexcept;
+[[nodiscard]] std::filesystem::path tmp() noexcept;
 } // namespace vfs::program

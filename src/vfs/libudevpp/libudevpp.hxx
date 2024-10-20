@@ -59,12 +59,12 @@ struct udev
      * @param name Name can be "udev" or "kernel" (default is "udev")
      * @return A {@link monitor} instance
      */
-    [[nodiscard]] const std::optional<monitor>
+    [[nodiscard]] std::optional<monitor>
     monitor_new_from_netlink(const std::string_view name = "udev") const noexcept;
-    [[nodiscard]] const std::optional<monitor>
+    [[nodiscard]] std::optional<monitor>
     monitor_new_from_netlink(const netlink_type name = netlink_type::udev) const noexcept;
 
-    [[nodiscard]] const std::optional<device>
+    [[nodiscard]] std::optional<device>
     device_from_syspath(const std::filesystem::path& syspath) const noexcept;
 
     enum class device_type : std::uint8_t
@@ -73,10 +73,10 @@ struct udev
         character,
     };
 
-    [[nodiscard]] const std::optional<device> device_from_devnum(const char type,
-                                                                 const dev_t devnum) const noexcept;
-    [[nodiscard]] const std::optional<device> device_from_devnum(const device_type type,
-                                                                 const dev_t devnum) const noexcept;
+    [[nodiscard]] std::optional<device> device_from_devnum(const char type,
+                                                           const dev_t devnum) const noexcept;
+    [[nodiscard]] std::optional<device> device_from_devnum(const device_type type,
+                                                           const dev_t devnum) const noexcept;
 
     /**
      * Create new udev enumerator
@@ -108,7 +108,7 @@ struct monitor
     [[nodiscard]] bool enable_receiving() const noexcept;
     [[nodiscard]] int get_fd() const noexcept;
 
-    [[nodiscard]] const std::optional<device> receive_device() const noexcept;
+    [[nodiscard]] std::optional<device> receive_device() const noexcept;
 
     [[nodiscard]] bool
     filter_add_match_subsystem_devtype(const std::string_view subsystem) const noexcept;
@@ -165,7 +165,7 @@ struct enumerate
     void scan_devices() const noexcept;
     void scan_subsystems() const noexcept;
 
-    [[nodiscard]] const std::vector<device> enumerate_devices() const noexcept;
+    [[nodiscard]] std::vector<device> enumerate_devices() const noexcept;
 
   private:
     std::shared_ptr<struct ::udev_enumerate> handle;
@@ -188,59 +188,57 @@ struct device
     [[nodiscard]] bool is_initialized() const noexcept;
 
     [[nodiscard]] bool has_action() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_action() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_action() const noexcept;
 
     [[nodiscard]] bool has_devnode() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_devnode() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_devnode() const noexcept;
 
     [[nodiscard]] dev_t get_devnum() const noexcept;
 
     [[nodiscard]] bool has_devtype() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_devtype() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_devtype() const noexcept;
 
     [[nodiscard]] bool has_subsystem() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_subsystem() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_subsystem() const noexcept;
 
     [[nodiscard]] bool has_devpath() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_devpath() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_devpath() const noexcept;
 
     [[nodiscard]] bool has_syspath() const noexcept;
-    [[nodiscard]] const std::optional<std::filesystem::path> get_syspath() const noexcept;
+    [[nodiscard]] std::optional<std::filesystem::path> get_syspath() const noexcept;
 
     [[nodiscard]] bool has_sysname() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_sysname() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_sysname() const noexcept;
 
     [[nodiscard]] bool has_sysnum() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_sysnum() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_sysnum() const noexcept;
 
     [[nodiscard]] bool has_driver() const noexcept;
-    [[nodiscard]] const std::optional<std::string> get_driver() const noexcept;
+    [[nodiscard]] std::optional<std::string> get_driver() const noexcept;
 
     [[nodiscard]] bool has_sysattr(const std::string_view named) const noexcept;
-    [[nodiscard]] const std::optional<std::string>
+    [[nodiscard]] std::optional<std::string>
     get_sysattr(const std::string_view named) const noexcept;
     [[nodiscard]] bool set_sysattr(const std::string_view named,
                                    const std::string_view value) const noexcept;
-    [[nodiscard]] const std::vector<std::string> get_sysattr_keys() const noexcept;
-    [[nodiscard]] const std::unordered_map<std::string, std::string>
-    get_sysattr_map() const noexcept;
+    [[nodiscard]] std::vector<std::string> get_sysattr_keys() const noexcept;
+    [[nodiscard]] std::unordered_map<std::string, std::string> get_sysattr_map() const noexcept;
 
-    [[nodiscard]] const std::vector<std::string> get_devlinks() const noexcept;
+    [[nodiscard]] std::vector<std::string> get_devlinks() const noexcept;
 
     [[nodiscard]] bool has_property(const std::string_view named) const noexcept;
-    [[nodiscard]] const std::optional<std::string>
+    [[nodiscard]] std::optional<std::string>
     get_property(const std::string_view named) const noexcept;
-    [[nodiscard]] const std::unordered_map<std::string, std::string>
-    get_properties() const noexcept;
+    [[nodiscard]] std::unordered_map<std::string, std::string> get_properties() const noexcept;
 
     [[nodiscard]] bool has_tag(const std::string_view named) const noexcept;
-    [[nodiscard]] const std::vector<std::string> get_tags() const noexcept;
+    [[nodiscard]] std::vector<std::string> get_tags() const noexcept;
 
     [[nodiscard]] bool has_current_tag(const std::string_view named) const noexcept;
-    [[nodiscard]] const std::vector<std::string> get_current_tags() const noexcept;
+    [[nodiscard]] std::vector<std::string> get_current_tags() const noexcept;
 
-    [[nodiscard]] const std::optional<device> get_parent_device() const noexcept;
-    [[nodiscard]] const std::optional<device>
+    [[nodiscard]] std::optional<device> get_parent_device() const noexcept;
+    [[nodiscard]] std::optional<device>
     get_parent_device(const std::string_view subsystem, const std::string_view type) const noexcept;
 
     [[nodiscard]] bool is_disk() const noexcept;

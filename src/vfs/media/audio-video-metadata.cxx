@@ -42,7 +42,7 @@ extern "C"
 
 #include "vfs/media/metadata.hxx"
 
-const std::vector<vfs::file::metadata_data>
+std::vector<vfs::file::metadata_data>
 vfs::detail::audio_video_metadata(const std::filesystem::path& path) noexcept
 {
     std::vector<vfs::file::metadata_data> data;

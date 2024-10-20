@@ -53,31 +53,31 @@ struct mime_type
     mime_type& operator=(const mime_type& other) = delete;
     mime_type& operator=(mime_type&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::mime_type>
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_file(const std::filesystem::path& path) noexcept;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::mime_type>
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create_from_type(const std::string_view type) noexcept;
 
     [[nodiscard]] GdkPixbuf* icon(const bool big) noexcept;
 
     // Get mime-type string
-    [[nodiscard]] const std::string_view type() const noexcept;
+    [[nodiscard]] std::string_view type() const noexcept;
 
     // Get human-readable description of mime-type
-    [[nodiscard]] const std::string_view description() const noexcept;
+    [[nodiscard]] std::string_view description() const noexcept;
 
     // Get available actions (applications) for this mime-type
-    [[nodiscard]] const std::vector<std::string> actions() const noexcept;
+    [[nodiscard]] std::vector<std::string> actions() const noexcept;
 
     // Get default action (application) for this mime-type
-    [[nodiscard]] const std::optional<std::string> default_action() const noexcept;
+    [[nodiscard]] std::optional<std::string> default_action() const noexcept;
 
     // Set default action (application) for this mime-type
     void set_default_action(const std::string_view desktop_id) const noexcept;
 
     // If user-custom desktop file is created, it is returned in custom_desktop.
-    [[nodiscard]] const std::string add_action(const std::string_view desktop_id) const noexcept;
+    [[nodiscard]] std::string add_action(const std::string_view desktop_id) const noexcept;
 
     [[nodiscard]] bool is_archive() const noexcept;
     [[nodiscard]] bool is_executable() const noexcept;
@@ -87,7 +87,7 @@ struct mime_type
     [[nodiscard]] bool is_audio() const noexcept;
 
   private:
-    [[nodiscard]] static const std::shared_ptr<vfs::mime_type>
+    [[nodiscard]] static std::shared_ptr<vfs::mime_type>
     create(const std::string_view type) noexcept;
 
     std::string type_;
@@ -103,9 +103,9 @@ struct mime_type
     icon_data icon_;
 };
 
-[[nodiscard]] const std::optional<std::filesystem::path>
+[[nodiscard]] std::optional<std::filesystem::path>
 mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept;
-[[nodiscard]] const std::optional<std::filesystem::path>
+[[nodiscard]] std::optional<std::filesystem::path>
 mime_type_locate_desktop_file(const std::filesystem::path& dir,
                               const std::string_view desktop_id) noexcept;
 } // namespace vfs

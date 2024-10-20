@@ -70,7 +70,7 @@
 #include "socket/datatypes.hxx"
 #include "socket/commands.hxx"
 
-static const std::string
+static std::string
 unescape(const std::string_view t) noexcept
 {
     std::string unescaped = t.data();
@@ -98,7 +98,7 @@ delayed_show_menu(GtkWidget* menu) noexcept
 }
 #endif
 
-const std::tuple<i32, std::string>
+std::tuple<i32, std::string>
 socket::command(const std::string_view socket_commands_json) noexcept
 {
     // These are also the sockets return code

@@ -52,7 +52,7 @@ static std::unordered_map<std::string, std::shared_ptr<vfs::mime_type>> mime_map
 static std::mutex mime_map_lock;
 } // namespace global
 
-const std::shared_ptr<vfs::mime_type>
+std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create(const std::string_view type) noexcept
 {
     const std::unique_lock<std::mutex> lock(global::mime_map_lock);
@@ -66,13 +66,13 @@ vfs::mime_type::create(const std::string_view type) noexcept
     return mime_type;
 }
 
-const std::shared_ptr<vfs::mime_type>
+std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create_from_file(const std::filesystem::path& path) noexcept
 {
     return vfs::mime_type::create_from_type(vfs::detail::mime_type::get_by_file(path));
 }
 
-const std::shared_ptr<vfs::mime_type>
+std::shared_ptr<vfs::mime_type>
 vfs::mime_type::create_from_type(const std::string_view type) noexcept
 {
     return vfs::mime_type::create(type);
@@ -234,26 +234,26 @@ vfs::mime_type::icon(const bool big) noexcept
     return icon ? g_object_ref(icon) : nullptr;
 }
 
-const std::string_view
+std::string_view
 vfs::mime_type::type() const noexcept
 {
     return this->type_;
 }
 
 /* Get human-readable description of mime type */
-const std::string_view
+std::string_view
 vfs::mime_type::description() const noexcept
 {
     return this->description_;
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 vfs::mime_type::actions() const noexcept
 {
     return vfs::detail::mime_type::get_actions(this->type_);
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::mime_type::default_action() const noexcept
 {
     auto def = vfs::detail::mime_type::get_default_action(this->type_);
@@ -291,7 +291,7 @@ vfs::mime_type::set_default_action(const std::string_view desktop_id) const noex
 }
 
 /* If user-custom desktop file is created, it is returned in custom_desktop. */
-const std::string
+std::string
 vfs::mime_type::add_action(const std::string_view desktop_id) const noexcept
 {
     // do not create custom desktop file if desktop_id is not a command
@@ -338,13 +338,13 @@ vfs::mime_type::is_audio() const noexcept
     return vfs::detail::mime_type::is_audio(this->type_);
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(const std::string_view desktop_id) noexcept
 {
     return vfs::detail::mime_type::locate_desktop_file(desktop_id);
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 vfs::mime_type_locate_desktop_file(const std::filesystem::path& dir,
                                    const std::string_view desktop_id) noexcept
 {

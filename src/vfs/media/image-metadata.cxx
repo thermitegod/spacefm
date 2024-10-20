@@ -39,7 +39,7 @@
 
 #include "vfs/media/metadata.hxx"
 
-const std::vector<vfs::file::metadata_data>
+std::vector<vfs::file::metadata_data>
 vfs::detail::image_metadata(const std::filesystem::path& path) noexcept
 {
     struct image_exif_data

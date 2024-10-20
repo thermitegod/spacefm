@@ -54,7 +54,7 @@
 
 #include "vfs/vfs-volume.hxx"
 
-[[nodiscard]] static const std::shared_ptr<vfs::volume>
+[[nodiscard]] static std::shared_ptr<vfs::volume>
 read_by_device(const libudev::device& udevice) noexcept;
 static void device_removed(const libudev::device& udevice) noexcept;
 static void call_callbacks(const std::shared_ptr<vfs::volume>& vol,
@@ -324,7 +324,7 @@ parse_mounts(const bool report) noexcept
     // logger::debug<logger::domain::vfs>("END PARSE");
 }
 
-[[nodiscard]] static const std::optional<std::string>
+[[nodiscard]] static std::optional<std::string>
 devmount_fstype(const dev_t device) noexcept
 {
     const auto major = gnu_dev_major(device);
@@ -420,7 +420,7 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
     return true;
 }
 
-[[nodiscard]] static const std::shared_ptr<vfs::volume>
+[[nodiscard]] static std::shared_ptr<vfs::volume>
 read_by_device(const libudev::device& udevice) noexcept
 { // uses udev to read device parameters into returned volume
     if (!udevice.is_initialized())
@@ -598,13 +598,13 @@ vfs::volume_finalize() noexcept
     global::volumes.clear();
 }
 
-const std::span<const std::shared_ptr<vfs::volume>>
+std::span<const std::shared_ptr<vfs::volume>>
 vfs::volume_get_all_volumes() noexcept
 {
     return global::volumes;
 }
 
-const std::shared_ptr<vfs::volume>
+std::shared_ptr<vfs::volume>
 vfs::volume_get_by_device(const std::string_view device_file) noexcept
 {
     for (const auto& volume : vfs::volume_get_all_volumes())
@@ -760,13 +760,13 @@ vfs::volume::volume(const std::shared_ptr<vfs::device>& device) noexcept
     // logger::debug<logger::domain::vfs>("    disp_name={}", this->disp_name_);
 }
 
-const std::shared_ptr<vfs::volume>
+std::shared_ptr<vfs::volume>
 vfs::volume::create(const std::shared_ptr<vfs::device>& device) noexcept
 {
     return std::make_shared<vfs::volume>(device);
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::volume::device_mount_cmd() noexcept
 {
     const std::filesystem::path path = Glib::find_program_in_path("udiskie-mount");
@@ -777,7 +777,7 @@ vfs::volume::device_mount_cmd() noexcept
     return std::format("{} {}", path.string(), ::utils::shell_quote(this->device_file_));
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::volume::device_unmount_cmd() noexcept
 {
     const std::filesystem::path path = Glib::find_program_in_path("udiskie-umount");
@@ -788,42 +788,42 @@ vfs::volume::device_unmount_cmd() noexcept
     return std::format("{} {}", path.string(), ::utils::shell_quote(this->mount_point_));
 }
 
-const std::string_view
+std::string_view
 vfs::volume::display_name() const noexcept
 {
     return this->disp_name_;
 }
 
-const std::string_view
+std::string_view
 vfs::volume::mount_point() const noexcept
 {
     return this->mount_point_;
 }
 
-const std::string_view
+std::string_view
 vfs::volume::device_file() const noexcept
 {
     return this->device_file_;
 }
-const std::string_view
+std::string_view
 vfs::volume::fstype() const noexcept
 {
     return this->fstype_;
 }
 
-const std::string_view
+std::string_view
 vfs::volume::icon() const noexcept
 {
     return this->icon_;
 }
 
-const std::string_view
+std::string_view
 vfs::volume::udi() const noexcept
 {
     return this->udi_;
 }
 
-const std::string_view
+std::string_view
 vfs::volume::label() const noexcept
 {
     return this->label_;

@@ -1928,7 +1928,7 @@ on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
                                      false);
 }
 
-static const std::optional<std::filesystem::path>
+static std::optional<std::filesystem::path>
 get_shared_desktop_file_location(const std::string_view name) noexcept
 {
     for (const std::filesystem::path sys_dir : Glib::get_system_data_dirs())

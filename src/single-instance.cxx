@@ -29,7 +29,7 @@
 
 #include "single-instance.hxx"
 
-static const std::filesystem::path
+static std::filesystem::path
 pid_path() noexcept
 {
     return vfs::user::runtime() / std::format("{}.pid", PACKAGE_NAME);

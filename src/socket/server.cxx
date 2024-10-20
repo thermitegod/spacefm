@@ -82,7 +82,7 @@ socket::send_command(zmq::socket_t& socket, const std::string_view command) noex
     return socket.send(message, zmq::send_flags::none) != std::nullopt;
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 socket::receive_response(zmq::socket_t& socket) noexcept
 {
     zmq::message_t message;

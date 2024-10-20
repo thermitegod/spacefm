@@ -56,14 +56,14 @@ struct dir : public std::enable_shared_from_this<dir>
     dir& operator=(const dir& other) = delete;
     dir& operator=(dir&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::dir>
-    create(const std::filesystem::path& path, const bool permanent = false) noexcept;
+    [[nodiscard]] static std::shared_ptr<vfs::dir> create(const std::filesystem::path& path,
+                                                          const bool permanent = false) noexcept;
 
     // unloads thumbnails in every vfs::dir
     static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
 
     [[nodiscard]] const std::filesystem::path& path() const noexcept;
-    [[nodiscard]] const std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
+    [[nodiscard]] std::span<const std::shared_ptr<vfs::file>> files() const noexcept;
 
     void refresh() noexcept;
 
@@ -105,7 +105,7 @@ struct dir : public std::enable_shared_from_this<dir>
 
     void notify_file_change(const std::chrono::milliseconds timeout) noexcept;
 
-    [[nodiscard]] const std::shared_ptr<vfs::file>
+    [[nodiscard]] std::shared_ptr<vfs::file>
     find_file(const std::filesystem::path& filename) noexcept;
     [[nodiscard]] bool update_file_info(const std::shared_ptr<vfs::file>& file) noexcept;
 

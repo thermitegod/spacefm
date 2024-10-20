@@ -28,7 +28,7 @@
 
 #include "vfs/linux/sysfs.hxx"
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::linux::sysfs::get_string(const std::filesystem::path& dir,
                               const std::string_view attribute) noexcept
 {
@@ -46,7 +46,7 @@ vfs::linux::sysfs::get_string(const std::filesystem::path& dir,
     return contents;
 }
 
-const std::optional<i64>
+std::optional<i64>
 vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
                            const std::string_view attribute) noexcept
 {
@@ -64,7 +64,7 @@ vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
     return std::stoul(contents);
 }
 
-const std::optional<u64>
+std::optional<u64>
 vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
                            const std::string_view attribute) noexcept
 {
@@ -82,7 +82,7 @@ vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
     return std::stoll(contents);
 }
 
-const std::optional<f64>
+std::optional<f64>
 vfs::linux::sysfs::get_f64(const std::filesystem::path& dir,
                            const std::string_view attribute) noexcept
 {
@@ -107,7 +107,7 @@ vfs::linux::sysfs::file_exists(const std::filesystem::path& dir,
     return std::filesystem::exists(dir / attribute);
 }
 
-const std::optional<std::string>
+std::optional<std::string>
 vfs::linux::sysfs::resolve_link(const std::filesystem::path& path,
                                 const std::string_view name) noexcept
 {

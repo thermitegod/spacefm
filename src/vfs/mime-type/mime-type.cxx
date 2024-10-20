@@ -63,7 +63,7 @@ is_data_plain_text(const std::span<const std::byte> data) noexcept
     return std::ranges::all_of(data, is_text);
 }
 
-const std::string
+std::string
 vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept
 {
     const auto status = std::filesystem::status(path);
@@ -183,7 +183,7 @@ parse_xml_file(const std::filesystem::path& path, bool is_local) noexcept
     return std::array{icon_name, comment};
 }
 
-const std::array<std::string, 2>
+std::array<std::string, 2>
 vfs::detail::mime_type::get_desc_icon(const std::string_view type) noexcept
 {
     /*  //sfm 0.7.7+ FIXED:

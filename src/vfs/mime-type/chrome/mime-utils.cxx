@@ -414,7 +414,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
     return true;
 }
 
-const std::string
+std::string
 vfs::detail::mime_type::chrome::GetFileMimeType(const std::filesystem::path& filepath) noexcept
 {
     const std::string ext = vfs::utils::split_basename_extension(filepath).extension;

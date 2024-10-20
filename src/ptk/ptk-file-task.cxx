@@ -169,43 +169,43 @@ ptk::file_task::is_aborted() const noexcept
     return this->aborted_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_file_count() const noexcept
 {
     return this->display_file_count_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_size_tally() const noexcept
 {
     return this->display_size_tally_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_elapsed() const noexcept
 {
     return this->display_elapsed_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_current_speed() const noexcept
 {
     return this->display_current_speed_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_current_estimate() const noexcept
 {
     return this->display_current_estimate_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_average_speed() const noexcept
 {
     return this->display_average_speed_;
 }
 
-const std::string_view
+std::string_view
 ptk::file_task::display_average_estimate() const noexcept
 {
     return this->display_average_estimate_;

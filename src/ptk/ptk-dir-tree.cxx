@@ -689,7 +689,7 @@ ptk::dir_tree::collapse_row(GtkTreeIter* iter, GtkTreePath* path) noexcept
     }
 }
 
-const std::optional<std::filesystem::path>
+std::optional<std::filesystem::path>
 ptk::dir_tree::get_dir_path(GtkTreeIter* iter) noexcept
 {
     assert(iter->user_data != nullptr);
@@ -704,13 +704,13 @@ ptk::dir_tree::get_dir_path(GtkTreeIter* iter) noexcept
 
 // ptk::dir_tree::node
 
-const std::shared_ptr<ptk::dir_tree::node>
+std::shared_ptr<ptk::dir_tree::node>
 ptk::dir_tree::node::create() noexcept
 {
     return std::make_shared<ptk::dir_tree::node>();
 }
 
-const std::shared_ptr<ptk::dir_tree::node>
+std::shared_ptr<ptk::dir_tree::node>
 ptk::dir_tree::node::create(ptk::dir_tree* tree, const std::shared_ptr<ptk::dir_tree::node>& parent,
                             const std::filesystem::path& path) noexcept
 {
@@ -727,7 +727,7 @@ ptk::dir_tree::node::create(ptk::dir_tree* tree, const std::shared_ptr<ptk::dir_
     return node;
 }
 
-const std::shared_ptr<ptk::dir_tree::node>
+std::shared_ptr<ptk::dir_tree::node>
 ptk::dir_tree::node::get_nth_node(i32 n) const noexcept
 {
     if (n >= this->n_children || n < 0)
@@ -768,7 +768,7 @@ ptk::dir_tree::node::get_node_index(
     return -1;
 }
 
-const std::shared_ptr<ptk::dir_tree::node>
+std::shared_ptr<ptk::dir_tree::node>
 ptk::dir_tree::node::find_node(const std::string_view name) const noexcept
 {
     std::shared_ptr<ptk::dir_tree::node> child;

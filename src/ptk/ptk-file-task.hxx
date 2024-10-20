@@ -115,13 +115,13 @@ struct file_task
     [[nodiscard]] bool is_completed() const noexcept;
     [[nodiscard]] bool is_aborted() const noexcept;
 
-    [[nodiscard]] const std::string_view display_file_count() const noexcept;
-    [[nodiscard]] const std::string_view display_size_tally() const noexcept;
-    [[nodiscard]] const std::string_view display_elapsed() const noexcept;
-    [[nodiscard]] const std::string_view display_current_speed() const noexcept;
-    [[nodiscard]] const std::string_view display_current_estimate() const noexcept;
-    [[nodiscard]] const std::string_view display_average_speed() const noexcept;
-    [[nodiscard]] const std::string_view display_average_estimate() const noexcept;
+    [[nodiscard]] std::string_view display_file_count() const noexcept;
+    [[nodiscard]] std::string_view display_size_tally() const noexcept;
+    [[nodiscard]] std::string_view display_elapsed() const noexcept;
+    [[nodiscard]] std::string_view display_current_speed() const noexcept;
+    [[nodiscard]] std::string_view display_current_estimate() const noexcept;
+    [[nodiscard]] std::string_view display_average_speed() const noexcept;
+    [[nodiscard]] std::string_view display_average_estimate() const noexcept;
 
     void set_complete_notify(GFunc callback, void* user_data) noexcept;
     void set_chmod(const std::array<u8, 12> chmod_actions) noexcept;

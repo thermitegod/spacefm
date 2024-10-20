@@ -80,7 +80,7 @@ properties_dialog_data::properties_dialog_data(
 {
 }
 
-const static std::vector<std::filesystem::path>
+static std::vector<std::filesystem::path>
 find_subdirectories(const std::filesystem::path& directory,
                     const std::shared_ptr<properties_dialog_data>& data) noexcept
 {

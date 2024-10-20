@@ -78,7 +78,7 @@ vfs::dir::~dir() noexcept
     this->executor_result_.get().get();
 }
 
-const std::shared_ptr<vfs::dir>
+std::shared_ptr<vfs::dir>
 vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
@@ -117,7 +117,7 @@ vfs::dir::path() const noexcept
     return this->path_;
 }
 
-const std::span<const std::shared_ptr<vfs::file>>
+std::span<const std::shared_ptr<vfs::file>>
 vfs::dir::files() const noexcept
 {
     return this->files_;
@@ -345,7 +345,7 @@ vfs::dir::global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcep
     std::ranges::for_each(global::dir_smart_cache.items(), action);
 }
 
-const std::shared_ptr<vfs::file>
+std::shared_ptr<vfs::file>
 vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 {
     const std::scoped_lock<std::mutex> files_lock(this->files_lock_);

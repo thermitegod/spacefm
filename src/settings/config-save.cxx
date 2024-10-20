@@ -30,7 +30,7 @@
 #include "settings/settings.hxx"
 #include "settings/config.hxx"
 
-[[nodiscard]] static const config::setvars_t
+[[nodiscard]] static config::setvars_t
 pack_xset(const xset_t& set) noexcept
 {
     config::setvars_t setvars;
@@ -82,7 +82,7 @@ pack_xset(const xset_t& set) noexcept
     return setvars;
 }
 
-[[nodiscard]] static const config::xsetpak_t
+[[nodiscard]] static config::xsetpak_t
 pack_xsets() noexcept
 {
     // map layout <XSet->name, <XSet->var, XSet->value>>

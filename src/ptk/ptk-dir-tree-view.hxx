@@ -31,6 +31,6 @@ GtkWidget* create(ptk::browser* browser, bool show_hidden) noexcept;
 
 bool chdir(GtkTreeView* dir_tree_view, const std::filesystem::path& path) noexcept;
 void show_hidden_files(GtkTreeView* dir_tree_view, bool show_hidden) noexcept;
-const std::optional<std::filesystem::path> selected_dir(GtkTreeView* dir_tree_view) noexcept;
-const std::optional<std::filesystem::path> dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept;
+std::optional<std::filesystem::path> selected_dir(GtkTreeView* dir_tree_view) noexcept;
+std::optional<std::filesystem::path> dir_path(GtkTreeModel* model, GtkTreeIter* it) noexcept;
 } // namespace ptk::view::dir_tree

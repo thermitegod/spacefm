@@ -101,7 +101,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
     file_task& operator=(const file_task& other) = delete;
     file_task& operator=(file_task&& other) = delete;
 
-    [[nodiscard]] static const std::shared_ptr<vfs::file_task>
+    [[nodiscard]] static std::shared_ptr<vfs::file_task>
     create(const type type, const std::span<const std::filesystem::path> src_files,
            const std::filesystem::path& dest_dir) noexcept;
 

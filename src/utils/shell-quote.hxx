@@ -31,5 +31,5 @@ namespace utils
  *
  * @return a quoted string, if string is empty returns empty quotes
  */
-[[nodiscard]] const std::string shell_quote(const std::string_view str) noexcept;
+[[nodiscard]] std::string shell_quote(const std::string_view str) noexcept;
 } // namespace utils
