@@ -4,4 +4,4 @@
 run-clang-tidy -config-file=".clang-tidy" -quiet -p ./build
 
 # use this to oneshot a check
-# run-clang-tidy -quiet -fix -checks="-*," -p ./build
+# run-clang-tidy -quiet -fix -header-filter="src/" -checks="-*," -p ./build
