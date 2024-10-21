@@ -30,7 +30,7 @@
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
+#include "logger.hxx"
 
 #include "utils/shell-quote.hxx"
 
@@ -75,9 +75,10 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
     if (std::filesystem::is_regular_file(thumbnail_file))
     {
         // logger::debug<logger::domain::vfs>("Existing thumb: {}", thumbnail_file);
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
+        GError* error = nullptr;
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
         if (thumbnail)
-        { // need to check for broken thumbnail images
+        {
             w = gdk_pixbuf_get_width(thumbnail);
             h = gdk_pixbuf_get_height(thumbnail);
             const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
@@ -85,6 +86,17 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
             {
                 embeded_mtime = std::chrono::system_clock::from_time_t(std::stol(thumb_mtime));
             }
+        }
+        else
+        { // broken/corrupt thumbnail
+            logger::error<logger::domain::vfs>(
+                "Loading existing thumbnail for file '{}' failed with: {}",
+                file->name(),
+                error->message);
+            g_error_free(error);
+
+            // delete the bad thumbnail file
+            std::filesystem::remove(thumbnail_file);
         }
     }
 
@@ -129,6 +141,8 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
             catch (const std::logic_error& e)
             {
                 // file cannot be opened
+                logger::error<logger::domain::vfs>("Creating thumbnail failed for '{}'",
+                                                   file->name());
                 return nullptr;
             }
         }
@@ -143,11 +157,23 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
 
             if (!std::filesystem::exists(thumbnail_file))
             {
+                logger::error<logger::domain::vfs>("Creating thumbnail failed for '{}'",
+                                                   file->name());
                 return nullptr;
             }
         }
 
-        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), nullptr);
+        GError* error = nullptr;
+        thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
+        if (!thumbnail)
+        {
+            logger::error<logger::domain::vfs>(
+                "Loading existing thumbnail for file '{}' failed with: {}",
+                file->name(),
+                error->message);
+            g_error_free(error);
+            return nullptr;
+        }
     }
 
     GdkPixbuf* result = nullptr;
