@@ -82,8 +82,9 @@ struct async_task
 
     // Signals Add Event
     template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::task_finish, sigc::connection>
+    sigc::connection
     add_event(evt_task_finished_load_app_t fun, GtkWidget* app) noexcept
+        requires(evt == spacefm::signal::task_finish)
     {
         logger::trace<logger::domain::signals>("Connect({}): {}",
                                                logger::utils::ptr(this),
@@ -94,8 +95,9 @@ struct async_task
 
     // Signals Run Event
     template<spacefm::signal evt>
-    typename std::enable_if_t<evt == spacefm::signal::task_finish, void>
+    void
     run_event(bool is_cancelled) noexcept
+        requires(evt == spacefm::signal::task_finish)
     {
         logger::trace<logger::domain::signals>("Execute({}): {}",
                                                logger::utils::ptr(this),
