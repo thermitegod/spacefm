@@ -65,11 +65,11 @@ vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
 {
     if (config::settings.use_si_prefix)
     {
-        return ztd::format_filesize(size_in_bytes, ztd::format_base::si, decimal ? 1 : 0);
+        return ztd::format_filesize(size_in_bytes, ztd::base::si, decimal ? 1 : 0);
     }
     else
     {
-        return ztd::format_filesize(size_in_bytes, ztd::format_base::iec, decimal ? 1 : 0);
+        return ztd::format_filesize(size_in_bytes, ztd::base::iec, decimal ? 1 : 0);
     }
 }
 
