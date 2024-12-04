@@ -159,7 +159,7 @@ struct dir : public std::enable_shared_from_this<dir>
 
     template<spacefm::signal evt, typename bind_fun>
     sigc::connection
-    add_event(bind_fun fun) noexcept
+    add_event(const bind_fun& fun) noexcept
     {
         logger::trace<logger::domain::signals>("Connect({}): {}",
                                                logger::utils::ptr(this),
