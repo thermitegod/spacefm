@@ -28,6 +28,7 @@ namespace logger
 enum class domain : std::uint8_t
 {
     basic,
+    dev,
     autosave,
     signals,
     socket,

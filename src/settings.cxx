@@ -96,7 +96,7 @@ load_settings() noexcept
                         session.filename().string(),
                         config::disk_format::version);
 
-        logger::info("SCRIPT={}", command_script.string());
+        logger::debug<logger::domain::dev>("SCRIPT({})", command_script.string());
         Glib::spawn_command_line_sync(command_args);
     }
 #endif
