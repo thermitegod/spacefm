@@ -985,6 +985,10 @@ void
 ptk::file_list::on_file_list_file_thumbnail_loaded(const std::shared_ptr<vfs::file>& file) noexcept
 {
     // logger::debug<logger::domain::ptk>("LOADED: {}", file->name());
+    if (!file)
+    {
+        return;
+    }
     this->file_changed(file);
 }
 
