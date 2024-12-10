@@ -160,7 +160,9 @@ config::load(const std::filesystem::path& session) noexcept
 {
     config_file_data config_data;
     std::string buffer;
-    const auto ec = glz::read_file_json(config_data, session.c_str(), buffer);
+    const auto ec = glz::read_file_json<glz::opts{.error_on_unknown_keys = false}>(config_data,
+                                                                                   session.c_str(),
+                                                                                   buffer);
 
     if (ec)
     {
