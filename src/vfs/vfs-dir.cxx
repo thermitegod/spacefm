@@ -56,7 +56,9 @@ namespace global
 static ztd::smart_cache<std::filesystem::path, vfs::dir> dir_smart_cache;
 }
 
-vfs::dir::dir(const std::filesystem::path& path) noexcept : path_(path)
+vfs::dir::dir(const std::filesystem::path& path,
+              const std::shared_ptr<config::settings>& settings) noexcept
+    : path_(path), settings_(settings)
 {
     // logger::debug<logger::domain::vfs>("vfs::dir::dir({})   {}", logger::utils::ptr(this), this->path_.string());
 }
@@ -79,7 +81,8 @@ vfs::dir::~dir() noexcept
 }
 
 std::shared_ptr<vfs::dir>
-vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexcept
+vfs::dir::create(const std::filesystem::path& path,
+                 const std::shared_ptr<config::settings>& settings, const bool permanent) noexcept
 {
     std::shared_ptr<vfs::dir> dir = nullptr;
     if (global::dir_smart_cache.contains(path))
@@ -91,7 +94,7 @@ vfs::dir::create(const std::filesystem::path& path, const bool permanent) noexce
     {
         dir = global::dir_smart_cache.create(
             path,
-            [&path]() { return std::make_shared<vfs::dir>(path); },
+            [&path, &settings]() { return std::make_shared<vfs::dir>(path, settings); },
             permanent);
         // logger::debug<logger::domain::vfs>("vfs::dir::dir({}) new     {}", logger::utils::ptr(dir.get()), this->path_.string());
         dir->post_initialize();
@@ -225,7 +228,7 @@ vfs::dir::load_thread() noexcept
                 continue;
             }
 
-            this->files_.push_back(vfs::file::create(dfile.path()));
+            this->files_.push_back(vfs::file::create(dfile.path(), this->settings_));
         }
     }
 
@@ -494,7 +497,7 @@ vfs::dir::update_created_files() noexcept
 
                 const std::scoped_lock<std::mutex> files_lock(this->files_lock_);
 
-                const auto file = vfs::file::create(full_path);
+                const auto file = vfs::file::create(full_path, this->settings_);
                 this->files_.push_back(file);
 
                 this->run_event<spacefm::signal::file_created>(file);

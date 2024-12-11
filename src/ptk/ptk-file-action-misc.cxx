@@ -123,7 +123,7 @@ ptk::action::delete_files(GtkWindow* parent_win, const std::filesystem::path& cw
         return;
     }
 
-    if (config::settings.confirm_delete)
+    if (config::global::settings->confirm_delete)
     {
         const bool confirmed =
             create_file_action_dialog(parent_win, "Delete selected files?", selected_files);
@@ -160,7 +160,7 @@ ptk::action::trash_files(GtkWindow* parent_win, const std::filesystem::path& cwd
         return;
     }
 
-    if (config::settings.confirm_trash)
+    if (config::global::settings->confirm_trash)
     {
         const bool confirmed =
             create_file_action_dialog(parent_win, "Trash selected files?", selected_files);

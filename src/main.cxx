@@ -67,6 +67,13 @@
 
 #include "commandline/commandline.hxx"
 
+// This is easier with gtkmm, can just pass shared_ptr
+struct app_data : public std::enable_shared_from_this<app_data>
+{
+    std::shared_ptr<commandline_opt_data> opt = nullptr;
+    std::shared_ptr<config::settings> settings = nullptr;
+};
+
 static void
 open_file(const std::filesystem::path& path) noexcept
 {
@@ -166,9 +173,12 @@ activate(GtkApplication* app, void* user_data) noexcept
 {
     assert(GTK_IS_APPLICATION(app));
 
-    const auto opt = static_cast<commandline_opt_data*>(user_data)->shared_from_this();
+    const auto data = static_cast<app_data*>(user_data)->shared_from_this();
 
-    config::settings.load_saved_tabs = !opt->no_tabs;
+    const auto opt = data->opt;
+    const auto settings = data->settings;
+
+    settings->load_saved_tabs = !opt->no_tabs;
 
     MainWindow* main_window =
         MAIN_WINDOW(g_object_new(main_window_get_type(), "application", app, nullptr));
@@ -227,7 +237,7 @@ activate(GtkApplication* app, void* user_data) noexcept
         main_window->focus_panel(opt->panel);
     }
 
-    config::settings.load_saved_tabs = true;
+    settings->load_saved_tabs = true;
 
     gtk_window_present(GTK_WINDOW(main_window));
 }
@@ -300,26 +310,34 @@ main(int argc, char* argv[]) noexcept
     const std::jthread socket_server(socket::server_thread);
 #endif
 
+    // load config file
+    const auto settings = std::make_shared<config::settings>();
+    config::global::settings = settings; // settings used by legacy code
+    assert(settings != nullptr);
+    assert(config::global::settings != nullptr);
+    load_settings(settings);
+
     // Initialize vfs system
     vfs::volume_init();
-
-    // load config file
-    load_settings();
 
     // load user bookmarks
     load_bookmarks();
 
     // start autosave thread
-    autosave::create(save_settings);
+    autosave::create([&settings]() { save_settings(settings); });
 
     std::atexit(tmp_clean);
     std::atexit(autosave::close);
     std::atexit(vfs::volume_finalize);
     std::atexit(save_bookmarks);
 
+    const auto data = std::make_shared<app_data>();
+    data->opt = opt;
+    data->settings = settings;
+
     GtkApplication* app =
         gtk_application_new(PACKAGE_APPLICATION_NAME, G_APPLICATION_DEFAULT_FLAGS);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), opt.get());
+    g_signal_connect(app, "activate", G_CALLBACK(activate), data.get());
     // Do not pass argc/argv, the CLI is not handled by GTK
     const auto status = g_application_run(G_APPLICATION(app), 0, nullptr);
 

@@ -53,11 +53,11 @@
 #include "settings.hxx"
 
 void
-load_settings() noexcept
+load_settings(const std::shared_ptr<config::settings>& settings) noexcept
 {
     const auto settings_config_dir = vfs::program::config();
 
-    config::settings.load_saved_tabs = true;
+    settings->load_saved_tabs = true;
 
     xset_defaults();
 
@@ -88,7 +88,7 @@ load_settings() noexcept
 
     if (std::filesystem::is_regular_file(session))
     {
-        config::load(session);
+        config::load(session, settings);
     }
     else
     {
@@ -136,7 +136,7 @@ load_settings() noexcept
 }
 
 void
-save_settings() noexcept
+save_settings(const std::shared_ptr<config::settings>& settings) noexcept
 {
     // logger::info("save_settings");
 
@@ -200,7 +200,7 @@ save_settings() noexcept
         std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
     }
 
-    config::save();
+    config::save(settings);
 }
 
 #if 0

@@ -19,8 +19,6 @@
 
 namespace config
 {
-namespace detail
-{
 struct settings
 {
     // General Settings
@@ -55,7 +53,10 @@ struct settings
     // Units
     bool use_si_prefix{false};
 };
-} // namespace detail
 
-extern detail::settings settings;
+namespace global
+{
+// this is only to be used where dependency injection is not viable, i.e. the legacy gtk code
+extern std::shared_ptr<settings> settings;
+} // namespace global
 } // namespace config

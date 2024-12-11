@@ -107,12 +107,12 @@ pack_xsets() noexcept
 }
 
 void
-config::save() noexcept
+config::save(const std::shared_ptr<config::settings>& settings) noexcept
 {
     // const auto config_data = glz::object("version", config::disk_format::version, "settings", config::settings, "xset", pack_xsets());
 
     const auto config_data =
-        config_file_data{config::disk_format::version, config::settings, pack_xsets()};
+        config_file_data{config::disk_format::version, *settings, pack_xsets()};
 
     const auto config_file = vfs::program::config() / config::disk_format::filename;
 

@@ -79,6 +79,8 @@ struct MainWindow
     bool opened_maximized;
     bool fullscreen;
 
+    std::shared_ptr<config::settings> settings_;
+
   public:
     void update_window_icon() noexcept;
     void show_panels() noexcept;

@@ -36,12 +36,13 @@ using xsetpak_t = std::map<std::string, setvars_t>;
 struct config_file_data
 {
     u64 version;
-    detail::settings settings;
+    settings settings;
     xsetpak_t xset;
 };
 
-void load(const std::filesystem::path& session) noexcept;
-void save() noexcept;
+void load(const std::filesystem::path& session,
+          const std::shared_ptr<config::settings>& settings) noexcept;
+void save(const std::shared_ptr<config::settings>& settings) noexcept;
 
 namespace disk_format
 {

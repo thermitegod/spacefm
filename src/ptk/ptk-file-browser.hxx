@@ -40,6 +40,8 @@
 
 #include "logger.hxx"
 
+#include "settings/settings.hxx"
+
 #include "xset/xset.hxx"
 
 #include "vfs/vfs-dir.hxx"
@@ -116,6 +118,8 @@ struct browser
     u64 sel_size_{0};
     u64 sel_disk_size_{0};
     u32 sel_change_idle_{0};
+
+    std::shared_ptr<config::settings> settings_;
 
     // path bar auto seek
     bool inhibit_focus_{false};
@@ -470,7 +474,8 @@ struct browser
 } // namespace ptk
 
 GtkWidget* ptk_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
-                           MainWindow* main_window) noexcept;
+                           MainWindow* main_window,
+                           const std::shared_ptr<config::settings>& settings) noexcept;
 
 bool ptk_browser_delay_focus(ptk::browser* browser) noexcept;
 

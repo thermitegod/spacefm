@@ -166,8 +166,7 @@ ptk::view::location::update_volume_icons() noexcept
     GtkTreeIter it;
 
     // GtkListStore* list = GTK_LIST_STORE( model );
-    i32 icon_size = config::settings.icon_size_small;
-    icon_size = std::min(icon_size, PANE_MAX_ICON_SIZE);
+    const auto icon_size = std::min(config::global::settings->icon_size_small, PANE_MAX_ICON_SIZE);
 
     if (gtk_tree_model_get_iter_first(model, &it))
     {
@@ -211,8 +210,9 @@ update_change_detection() noexcept
                     // update current dir change detection
                     browser->dir_->update_avoid_changes();
                     // update thumbnail visibility
-                    browser->show_thumbnails(
-                        config::settings.show_thumbnails ? config::settings.thumbnail_max_size : 0);
+                    browser->show_thumbnails(config::global::settings->show_thumbnails
+                                                 ? config::global::settings->thumbnail_max_size
+                                                 : 0);
                 }
             }
         }
@@ -591,8 +591,8 @@ add_volume(const std::shared_ptr<vfs::volume>& vol, bool set_icon) noexcept
                                       -1);
     if (set_icon)
     {
-        i32 icon_size = config::settings.icon_size_small;
-        icon_size = std::min(icon_size, PANE_MAX_ICON_SIZE);
+        const auto icon_size =
+            std::min(config::global::settings->icon_size_small, PANE_MAX_ICON_SIZE);
 
         GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
         gtk_list_store_set(GTK_LIST_STORE(model), &it, ptk::location_view::column::icon, icon, -1);
@@ -650,8 +650,7 @@ update_volume(const std::shared_ptr<vfs::volume>& vol) noexcept
         return;
     }
 
-    i32 icon_size = config::settings.icon_size_small;
-    icon_size = std::min(icon_size, PANE_MAX_ICON_SIZE);
+    const auto icon_size = std::min(config::global::settings->icon_size_small, PANE_MAX_ICON_SIZE);
 
     GdkPixbuf* icon = vfs::utils::load_icon(vol->icon(), icon_size);
     gtk_list_store_set(GTK_LIST_STORE(model),

@@ -13,6 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include "settings/settings.hxx"
 
-config::detail::settings config::settings;
+namespace config::global
+{
+std::shared_ptr<config::settings> settings;
+}

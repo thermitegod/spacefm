@@ -44,6 +44,8 @@
 
 #include "concurrency.hxx"
 
+#include "settings/settings.hxx"
+
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
@@ -55,15 +57,17 @@ namespace vfs
 struct dir : public std::enable_shared_from_this<dir>
 {
     dir() = delete;
-    dir(const std::filesystem::path& path) noexcept;
+    explicit dir(const std::filesystem::path& path,
+                 const std::shared_ptr<config::settings>& settings) noexcept;
     ~dir() noexcept;
     dir(const dir& other) = delete;
     dir(dir&& other) = delete;
     dir& operator=(const dir& other) = delete;
     dir& operator=(dir&& other) = delete;
 
-    [[nodiscard]] static std::shared_ptr<vfs::dir> create(const std::filesystem::path& path,
-                                                          const bool permanent = false) noexcept;
+    [[nodiscard]] static std::shared_ptr<vfs::dir>
+    create(const std::filesystem::path& path, const std::shared_ptr<config::settings>& settings,
+           const bool permanent = false) noexcept;
 
     // unloads thumbnails in every vfs::dir
     static void global_unload_thumbnails(const vfs::file::thumbnail_size size) noexcept;
@@ -159,6 +163,8 @@ struct dir : public std::enable_shared_from_this<dir>
     std::shared_ptr<concurrencpp::thread_executor> executor_;
     concurrencpp::result<concurrencpp::result<bool>> executor_result_;
     concurrencpp::async_lock lock_;
+
+    std::shared_ptr<config::settings> settings_;
 
   public:
     // Signals

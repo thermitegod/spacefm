@@ -438,7 +438,7 @@ main_window_reload_thumbnails_all_windows() noexcept
                 ptk::browser* browser =
                     PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
                 browser->show_thumbnails(
-                    config::settings.show_thumbnails ? config::settings.thumbnail_max_size : 0);
+                    window->settings_->show_thumbnails ? window->settings_->thumbnail_max_size : 0);
             }
         }
     }
@@ -447,8 +447,7 @@ main_window_reload_thumbnails_all_windows() noexcept
 void
 main_window_toggle_thumbnails_all_windows() noexcept
 {
-    // toggle
-    config::settings.show_thumbnails = !config::settings.show_thumbnails;
+    config::global::settings->show_thumbnails = !config::global::settings->show_thumbnails;
 
     main_window_reload_thumbnails_all_windows();
 }
@@ -755,10 +754,10 @@ MainWindow::show_panels() noexcept
                 // load saved tabs
                 bool tab_added = false;
                 set = xset::set::get(xset::panel::show, p);
-                if ((set->s && config::settings.load_saved_tabs))
+                if ((set->s && this->settings_->load_saved_tabs))
                 {
                     const std::vector<std::string> tab_dirs =
-                        ztd::split(config::settings.load_saved_tabs ? set->s.value_or("") : "",
+                        ztd::split(this->settings_->load_saved_tabs ? set->s.value_or("") : "",
                                    config::disk_format::tab_delimiter);
 
                     for (const std::string_view tab_dir : tab_dirs)
@@ -1212,10 +1211,16 @@ MainWindow::rebuild_menus() noexcept
 static void
 main_window_init(MainWindow* main_window) noexcept
 {
+    // this is very ugly, because of how I know the gtk C pseudo classes to work you cannot
+    // pass extra arguments. use this ugly hack to set settings in the C class constructor.
+    // this is not a problem in the gtkmm rewrite.
+    // :(
+    main_window->settings_ = config::global::settings;
+
     main_window->configure_evt_timer = 0;
     main_window->fullscreen = false;
-    main_window->opened_maximized = config::settings.maximized;
-    main_window->maximized = config::settings.maximized;
+    main_window->opened_maximized = main_window->settings_->maximized;
+    main_window->maximized = main_window->settings_->maximized;
 
     /* this is used to limit the scope of gtk_grab and modal dialogs */
     main_window->wgroup = gtk_window_group_new();
@@ -1368,7 +1373,7 @@ main_window_init(MainWindow* main_window) noexcept
     ptk::view::file_task::popup_show(main_window, "");
 
     // show window
-    if (config::settings.maximized)
+    if (main_window->settings_->maximized)
     {
         gtk_window_maximize(GTK_WINDOW(main_window));
     }
@@ -1509,9 +1514,9 @@ main_window_delete_event(GtkWidget* widget, GdkEventAny* event) noexcept
     main_window->store_positions();
 
     // save settings
-    config::settings.maximized = main_window->maximized;
+    main_window->settings_->maximized = main_window->maximized;
     autosave::request_cancel();
-    save_settings();
+    save_settings(main_window->settings_);
 
     // tasks running?
     if (main_window->is_main_tasks_running())
@@ -1560,7 +1565,7 @@ main_window_window_state_event(GtkWidget* widget, GdkEventWindowState* event) no
         ((event->new_window_state & GdkWindowState::GDK_WINDOW_STATE_MAXIMIZED) != 0);
 
     main_window->maximized = maximized;
-    config::settings.maximized = maximized;
+    main_window->settings_->maximized = maximized;
 
     if (!main_window->maximized)
     {
@@ -1708,7 +1713,7 @@ MainWindow::create_tab_label(ptk::browser* browser) const noexcept
     }
     gtk_label_set_max_width_chars(label, 30);
     gtk_box_pack_start(box, GTK_WIDGET(label), false, false, 4);
-    if (config::settings.show_close_tab_buttons)
+    if (this->settings_->show_close_tab_buttons)
     {
         GtkButton* close_btn = GTK_BUTTON(gtk_button_new());
         gtk_widget_set_focus_on_click(GTK_WIDGET(close_btn), false);
@@ -1776,13 +1781,13 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
         current_browser->save_column_widths();
     }
     auto* const browser = PTK_FILE_BROWSER_REINTERPRET(
-        ptk_browser_new(this->curpanel, this->notebook, this->task_view, this));
+        ptk_browser_new(this->curpanel, this->notebook, this->task_view, this, this->settings_));
     if (!browser)
     {
         return;
     }
 
-    browser->show_thumbnails(config::settings.show_thumbnails ? config::settings.thumbnail_max_size
+    browser->show_thumbnails(this->settings_->show_thumbnails ? this->settings_->thumbnail_max_size
                                                               : 0);
 
     const auto sort_order =
@@ -1819,11 +1824,7 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
     gtk_notebook_set_tab_reorderable(this->notebook, GTK_WIDGET(browser), true);
     gtk_notebook_set_current_page(this->notebook, idx);
 
-    if (config::settings.always_show_tabs)
-    {
-        gtk_notebook_set_show_tabs(this->notebook, true);
-    }
-    else if (gtk_notebook_get_n_pages(this->notebook) > 1)
+    if (this->settings_->always_show_tabs || gtk_notebook_get_n_pages(this->notebook) > 1)
     {
         gtk_notebook_set_show_tabs(this->notebook, true);
     }
@@ -1897,7 +1898,7 @@ on_preference_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 {
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
-    show_preference_dialog(GTK_WINDOW(main_window));
+    show_preference_dialog(GTK_WINDOW(main_window), main_window->settings_);
 }
 
 static void
@@ -1911,7 +1912,7 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 void
 MainWindow::add_new_window() noexcept
 {
-    config::settings.load_saved_tabs = false;
+    this->settings_->load_saved_tabs = false;
 
     logger::info("Opening another window");
 
@@ -1925,7 +1926,7 @@ MainWindow::add_new_window() noexcept
 
     gtk_window_present(GTK_WINDOW(another_main_window));
 
-    config::settings.load_saved_tabs = true;
+    this->settings_->load_saved_tabs = true;
 }
 
 static void
@@ -1934,10 +1935,10 @@ on_new_window_activate(GtkMenuItem* menuitem, void* user_data) noexcept
     (void)menuitem;
     MainWindow* main_window = MAIN_WINDOW(user_data);
 
-    autosave::request_cancel();
     main_window->store_positions();
-    save_settings();
     main_window->add_new_window();
+
+    autosave::request_add();
 }
 
 void

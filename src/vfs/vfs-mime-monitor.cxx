@@ -117,7 +117,7 @@ vfs::mime_monitor() noexcept
         return;
     }
 
-    global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path));
+    global::user_mime_monitor = mime_monitor::create(vfs::dir::create(path, nullptr));
 
     // logger::debug<logger::domain::vfs>("MIME-UPDATE watch started");
     global::user_mime_monitor->dir->add_event<spacefm::signal::file_created>(

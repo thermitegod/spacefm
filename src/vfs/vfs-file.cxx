@@ -43,12 +43,15 @@
 #include "vfs/vfs-file.hxx"
 
 std::shared_ptr<vfs::file>
-vfs::file::create(const std::filesystem::path& path) noexcept
+vfs::file::create(const std::filesystem::path& path,
+                  const std::shared_ptr<config::settings>& settings) noexcept
 {
-    return std::make_shared<vfs::file>(path);
+    return std::make_shared<vfs::file>(path, settings);
 }
 
-vfs::file::file(const std::filesystem::path& path) noexcept : path_(path)
+vfs::file::file(const std::filesystem::path& path,
+                const std::shared_ptr<config::settings>& settings) noexcept
+    : path_(path), settings_(settings)
 {
     // logger::debug<logger::domain::vfs>("vfs::file::file({})    {}", logger::utils::ptr(this), this->path_);
     this->uri_ = Glib::filename_to_uri(this->path_.string());
@@ -95,7 +98,8 @@ vfs::file::update() noexcept
     this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow, ec);
     if (ec)
     {
-        this->mime_type_ = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+        this->mime_type_ =
+            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
         return false;
     }
 
@@ -104,7 +108,7 @@ vfs::file::update() noexcept
     // this->status = std::filesystem::status(file_path);
     this->status_ = std::filesystem::symlink_status(this->path_);
 
-    this->mime_type_ = vfs::mime_type::create_from_file(this->path_);
+    this->mime_type_ = vfs::mime_type::create_from_file(this->path_, this->settings_);
 
     // file size formated
     this->display_size_ = vfs::utils::format_file_size(this->size());
@@ -257,7 +261,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             const auto icon_name = this->special_directory_get_icon_name();
-            return vfs::utils::load_icon(icon_name, config::settings.icon_size_big);
+            return vfs::utils::load_icon(icon_name, this->settings_->icon_size_big);
         }
 
         if (!this->mime_type_)
@@ -276,7 +280,7 @@ vfs::file::icon(const thumbnail_size size) noexcept
         if (this->is_directory())
         {
             const auto icon_name = this->special_directory_get_icon_name();
-            return vfs::utils::load_icon(icon_name, config::settings.icon_size_small);
+            return vfs::utils::load_icon(icon_name, this->settings_->icon_size_small);
         }
 
         if (!this->mime_type_)
@@ -701,12 +705,12 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (this->mime_type_->is_image())
         {
             thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
-                                                      config::settings.icon_size_big);
+                                                      this->settings_->icon_size_big);
         }
         else if (this->mime_type_->is_video())
         {
             thumbnail = vfs::detail::thumbnail::video(this->shared_from_this(),
-                                                      config::settings.icon_size_big);
+                                                      this->settings_->icon_size_big);
         }
 
         if (thumbnail)
@@ -737,12 +741,12 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (this->mime_type_->is_image())
         {
             thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
-                                                      config::settings.icon_size_small);
+                                                      this->settings_->icon_size_small);
         }
         else if (this->mime_type_->is_video())
         {
             thumbnail = vfs::detail::thumbnail::video(this->shared_from_this(),
-                                                      config::settings.icon_size_small);
+                                                      this->settings_->icon_size_small);
         }
 
         if (thumbnail)
@@ -773,8 +777,8 @@ vfs::file::load_special_info() noexcept
         return;
     }
 
-    const i32 big_size = config::settings.icon_size_big;
-    const i32 small_size = config::settings.icon_size_small;
+    const i32 big_size = this->settings_->icon_size_big;
+    const i32 small_size = this->settings_->icon_size_small;
     if (this->thumbnail_.big == nullptr)
     {
         GdkPixbuf* icon = desktop->icon(big_size);

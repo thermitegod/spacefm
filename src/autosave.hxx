@@ -22,7 +22,6 @@ namespace autosave
 void request_add() noexcept;
 void request_cancel() noexcept;
 
-using autosave_t = std::function<void()>;
-void create(const autosave_t& autosave_func) noexcept;
+void create(const std::function<void()>& autosave_func) noexcept;
 void close() noexcept;
 } // namespace autosave

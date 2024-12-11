@@ -17,4 +17,7 @@
 
 #include <gtkmm.h>
 
-void show_preference_dialog(GtkWindow* parent) noexcept;
+#include "settings/settings.hxx"
+
+void show_preference_dialog(GtkWindow* parent,
+                            const std::shared_ptr<config::settings>& settings_) noexcept;

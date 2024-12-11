@@ -53,7 +53,8 @@ static std::mutex mime_map_lock;
 } // namespace global
 
 std::shared_ptr<vfs::mime_type>
-vfs::mime_type::create(const std::string_view type) noexcept
+vfs::mime_type::create(const std::string_view type,
+                       const std::shared_ptr<config::settings>& settings) noexcept
 {
     const std::unique_lock<std::mutex> lock(global::mime_map_lock);
     if (global::mime_map.contains(type.data()))
@@ -61,24 +62,28 @@ vfs::mime_type::create(const std::string_view type) noexcept
         return global::mime_map.at(type.data());
     }
 
-    const auto mime_type = std::make_shared<vfs::mime_type>(type);
+    const auto mime_type = std::make_shared<vfs::mime_type>(type, settings);
     global::mime_map.insert({type.data(), mime_type});
     return mime_type;
 }
 
 std::shared_ptr<vfs::mime_type>
-vfs::mime_type::create_from_file(const std::filesystem::path& path) noexcept
+vfs::mime_type::create_from_file(const std::filesystem::path& path,
+                                 const std::shared_ptr<config::settings>& settings) noexcept
 {
-    return vfs::mime_type::create_from_type(vfs::detail::mime_type::get_by_file(path));
+    return vfs::mime_type::create(vfs::detail::mime_type::get_by_file(path), settings);
 }
 
 std::shared_ptr<vfs::mime_type>
-vfs::mime_type::create_from_type(const std::string_view type) noexcept
+vfs::mime_type::create_from_type(const std::string_view type,
+                                 const std::shared_ptr<config::settings>& settings) noexcept
 {
-    return vfs::mime_type::create(type);
+    return vfs::mime_type::create(type, settings);
 }
 
-vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
+vfs::mime_type::mime_type(const std::string_view type,
+                          const std::shared_ptr<config::settings>& settings) noexcept
+    : type_(type), settings_(settings)
 {
     const auto icon_data = vfs::detail::mime_type::get_desc_icon(this->type_);
     this->description_ = icon_data[1];
@@ -86,7 +91,7 @@ vfs::mime_type::mime_type(const std::string_view type) noexcept : type_(type)
     {
         logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
         const auto mime_unknown =
-            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, settings);
         if (mime_unknown)
         {
             this->description_ = mime_unknown->description();
@@ -113,7 +118,7 @@ vfs::mime_type::icon(const bool big) noexcept
 
     if (big)
     { // big icon
-        if (this->icon_size_big_ != config::settings.icon_size_big)
+        if (this->icon_size_big_ != this->settings_->icon_size_big)
         { // big icon size has changed
             if (this->icon_.big)
             {
@@ -125,12 +130,12 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             return g_object_ref(this->icon_.big);
         }
-        this->icon_size_big_ = config::settings.icon_size_big;
+        this->icon_size_big_ = this->settings_->icon_size_big;
         icon_size = this->icon_size_big_;
     }
     else
     { // small icon
-        if (this->icon_size_small_ != config::settings.icon_size_small)
+        if (this->icon_size_small_ != this->settings_->icon_size_small)
         { // small icon size has changed
             if (this->icon_.small)
             {
@@ -142,7 +147,7 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             return g_object_ref(this->icon_.small);
         }
-        this->icon_size_small_ = config::settings.icon_size_small;
+        this->icon_size_small_ = this->settings_->icon_size_small;
         icon_size = this->icon_size_small_;
     }
 
@@ -180,7 +185,8 @@ vfs::mime_type::icon(const bool big) noexcept
     if (this->description_.empty())
     {
         logger::warn<logger::domain::vfs>("mime-type {} has no description (comment)", this->type_);
-        const auto vfs_mime = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+        const auto vfs_mime =
+            vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
         if (vfs_mime)
         {
             this->description_ = vfs_mime->description();
@@ -214,7 +220,7 @@ vfs::mime_type::icon(const bool big) noexcept
         {
             /* FIXME: fallback to icon of parent mime-type */
             const auto unknown =
-                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
+                vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, nullptr);
             icon = unknown->icon(big);
         }
         else /* unknown */

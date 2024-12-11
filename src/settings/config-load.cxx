@@ -39,31 +39,32 @@
 #include "settings/config.hxx"
 
 static void
-config_parse_settings(const config::detail::settings& settings, const u64 version) noexcept
+config_parse_settings(const u64 version, const config::settings& loaded_settings,
+                      const std::shared_ptr<config::settings>& settings) noexcept
 {
     (void)version;
 
-    config::settings.show_thumbnails = settings.show_thumbnails;
-    config::settings.thumbnail_max_size = settings.thumbnail_max_size;
-    config::settings.icon_size_big = settings.icon_size_big;
-    config::settings.icon_size_small = settings.icon_size_small;
-    config::settings.icon_size_tool = settings.icon_size_tool;
-    config::settings.use_si_prefix = settings.use_si_prefix;
-    config::settings.click_executes = settings.click_executes;
-    config::settings.confirm = settings.confirm;
-    config::settings.confirm_delete = settings.confirm_delete;
-    config::settings.confirm_trash = settings.confirm_trash;
-    config::settings.maximized = settings.maximized;
-    config::settings.always_show_tabs = settings.always_show_tabs;
-    config::settings.show_close_tab_buttons = settings.show_close_tab_buttons;
-    config::settings.new_tab_here = settings.new_tab_here;
-    config::settings.show_toolbar_home = settings.show_toolbar_home;
-    config::settings.show_toolbar_refresh = settings.show_toolbar_refresh;
-    config::settings.show_toolbar_search = settings.show_toolbar_search;
+    settings->show_thumbnails = loaded_settings.show_thumbnails;
+    settings->thumbnail_max_size = loaded_settings.thumbnail_max_size;
+    settings->icon_size_big = loaded_settings.icon_size_big;
+    settings->icon_size_small = loaded_settings.icon_size_small;
+    settings->icon_size_tool = loaded_settings.icon_size_tool;
+    settings->use_si_prefix = loaded_settings.use_si_prefix;
+    settings->click_executes = loaded_settings.click_executes;
+    settings->confirm = loaded_settings.confirm;
+    settings->confirm_delete = loaded_settings.confirm_delete;
+    settings->confirm_trash = loaded_settings.confirm_trash;
+    settings->maximized = loaded_settings.maximized;
+    settings->always_show_tabs = loaded_settings.always_show_tabs;
+    settings->show_close_tab_buttons = loaded_settings.show_close_tab_buttons;
+    settings->new_tab_here = loaded_settings.new_tab_here;
+    settings->show_toolbar_home = loaded_settings.show_toolbar_home;
+    settings->show_toolbar_refresh = loaded_settings.show_toolbar_refresh;
+    settings->show_toolbar_search = loaded_settings.show_toolbar_search;
 }
 
 static void
-config_parse_xset(const config::xsetpak_t& pak, const u64 version) noexcept
+config_parse_xset(const u64 version, const config::xsetpak_t& pak) noexcept
 {
     (void)version;
 
@@ -151,7 +152,8 @@ config_parse_xset(const config::xsetpak_t& pak, const u64 version) noexcept
 }
 
 void
-config::load(const std::filesystem::path& session) noexcept
+config::load(const std::filesystem::path& session,
+             const std::shared_ptr<config::settings>& settings) noexcept
 {
     config_file_data config_data;
     std::string buffer;
@@ -165,8 +167,8 @@ config::load(const std::filesystem::path& session) noexcept
         return;
     }
 
-    config_parse_settings(config_data.settings, config_data.version);
-    config_parse_xset(config_data.xset, config_data.version);
+    config_parse_settings(config_data.version, config_data.settings, settings);
+    config_parse_xset(config_data.version, config_data.xset);
 
     // upgrade config
     config_upgrade(config_data.version);

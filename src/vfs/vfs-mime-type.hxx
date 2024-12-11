@@ -32,6 +32,8 @@
 
 #include <ztd/ztd.hxx>
 
+#include "settings/settings.hxx"
+
 namespace vfs
 {
 namespace constants::mime_type
@@ -46,7 +48,8 @@ struct mime_type
 {
   public:
     mime_type() = delete;
-    mime_type(const std::string_view type) noexcept;
+    explicit mime_type(const std::string_view type,
+                       const std::shared_ptr<config::settings>& settings) noexcept;
     ~mime_type() noexcept;
     mime_type(const mime_type& other) = delete;
     mime_type(mime_type&& other) = delete;
@@ -54,10 +57,12 @@ struct mime_type
     mime_type& operator=(mime_type&& other) = delete;
 
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
-    create_from_file(const std::filesystem::path& path) noexcept;
+    create_from_file(const std::filesystem::path& path,
+                     const std::shared_ptr<config::settings>& settings = nullptr) noexcept;
 
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
-    create_from_type(const std::string_view type) noexcept;
+    create_from_type(const std::string_view type,
+                     const std::shared_ptr<config::settings>& settings = nullptr) noexcept;
 
     [[nodiscard]] GdkPixbuf* icon(const bool big) noexcept;
 
@@ -88,7 +93,7 @@ struct mime_type
 
   private:
     [[nodiscard]] static std::shared_ptr<vfs::mime_type>
-    create(const std::string_view type) noexcept;
+    create(const std::string_view type, const std::shared_ptr<config::settings>& settings) noexcept;
 
     std::string type_;
     std::string description_;
@@ -101,6 +106,8 @@ struct mime_type
         GdkPixbuf* small{nullptr};
     };
     icon_data icon_;
+
+    std::shared_ptr<config::settings> settings_;
 };
 
 [[nodiscard]] std::optional<std::filesystem::path>

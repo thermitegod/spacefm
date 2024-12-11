@@ -709,8 +709,8 @@ ptk_file_menu_add_panel_view_menu(ptk::browser* browser, GtkWidget* menu,
     {
         const auto set = xset::set::get(xset::name::view_thumb);
         xset_set_cb(set, (GFunc)main_window_toggle_thumbnails_all_windows, nullptr);
-        set->b =
-            config::settings.show_thumbnails ? xset::set::enabled::yes : xset::set::enabled::unset;
+        set->b = browser->settings_->show_thumbnails ? xset::set::enabled::yes
+                                                     : xset::set::enabled::unset;
     }
 
     if (browser->is_view_mode(ptk::browser::view_mode::icon_view))

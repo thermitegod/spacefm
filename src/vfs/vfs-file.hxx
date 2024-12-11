@@ -28,6 +28,8 @@
 
 #include <ztd/ztd.hxx>
 
+#include "settings/settings.hxx"
+
 #include "vfs/vfs-mime-type.hxx"
 
 // https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
@@ -38,7 +40,8 @@ struct file : public std::enable_shared_from_this<file>
 {
   public:
     file() = delete;
-    file(const std::filesystem::path& file_path) noexcept;
+    explicit file(const std::filesystem::path& file_path,
+                  const std::shared_ptr<config::settings>& settings) noexcept;
     ~file() noexcept;
     file(const file& other) = delete;
     file(file&& other) = delete;
@@ -46,7 +49,8 @@ struct file : public std::enable_shared_from_this<file>
     file& operator=(file&& other) = delete;
 
     [[nodiscard]] static std::shared_ptr<vfs::file>
-    create(const std::filesystem::path& path) noexcept;
+    create(const std::filesystem::path& path,
+           const std::shared_ptr<config::settings>& settings = nullptr) noexcept;
 
     [[nodiscard]] std::string_view name() const noexcept;
 
@@ -148,6 +152,8 @@ struct file : public std::enable_shared_from_this<file>
         GdkPixbuf* small{nullptr};
     };
     thumbnail_data thumbnail_;
+
+    std::shared_ptr<config::settings> settings_;
 
     void load_special_info() noexcept;
 

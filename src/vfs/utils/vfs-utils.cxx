@@ -63,7 +63,7 @@ vfs::utils::load_icon(const std::string_view icon_name, i32 icon_size) noexcept
 std::string
 vfs::utils::format_file_size(u64 size_in_bytes, bool decimal) noexcept
 {
-    if (config::settings.use_si_prefix)
+    if (config::global::settings->use_si_prefix)
     {
         return ztd::format_filesize(size_in_bytes, ztd::base::si, decimal ? 1 : 0);
     }

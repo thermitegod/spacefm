@@ -621,7 +621,7 @@ add_toolbar_item(ptk::browser* browser, GtkBox* toolbar, const xset::name item) 
     const auto set = xset::set::get(item);
     set->browser = browser;
 
-    const auto icon_size = config::settings.icon_size_tool;
+    const auto icon_size = browser->settings_->icon_size_tool;
 
     // get real icon size from gtk icon size
     i32 icon_w = 0;
@@ -952,10 +952,12 @@ ptk_browser_set_property(GObject* obj, u32 prop_id, const GValue* value, GParamS
 }
 
 GtkWidget*
-ptk_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
-                MainWindow* main_window) noexcept
+ptk_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view, MainWindow* main_window,
+                const std::shared_ptr<config::settings>& settings) noexcept
 {
     auto* browser = static_cast<ptk::browser*>(g_object_new(PTK_TYPE_FILE_BROWSER, nullptr));
+
+    browser->settings_ = settings;
 
     browser->panel_ = curpanel;
     browser->notebook_ = notebook;
@@ -1001,15 +1003,15 @@ ptk_browser_new(i32 curpanel, GtkNotebook* notebook, GtkWidget* task_view,
 
     gtk_widget_show_all(GTK_WIDGET(browser));
 
-    if (!config::settings.show_toolbar_home)
+    if (!browser->settings_->show_toolbar_home)
     {
         gtk_widget_hide(GTK_WIDGET(browser->toolbar_home));
     }
-    if (!config::settings.show_toolbar_refresh)
+    if (!browser->settings_->show_toolbar_refresh)
     {
         gtk_widget_hide(GTK_WIDGET(browser->toolbar_refresh));
     }
-    if (!config::settings.show_toolbar_search)
+    if (!browser->settings_->show_toolbar_search)
     {
         gtk_widget_hide(GTK_WIDGET(browser->search_bar_));
     }
@@ -1646,8 +1648,8 @@ create_folder_view(ptk::browser* browser, ptk::browser::view_mode view_mode) noe
     GtkCellRenderer* renderer = nullptr;
 
     i32 icon_size = 0;
-    const i32 big_icon_size = config::settings.icon_size_big;
-    const i32 small_icon_size = config::settings.icon_size_small;
+    const i32 big_icon_size = browser->settings_->icon_size_big;
+    const i32 small_icon_size = browser->settings_->icon_size_small;
 
     PangoAttrList* attr_list = pango_attr_list_new();
     pango_attr_list_insert(attr_list, pango_attr_insert_hyphens_new(false));
@@ -1895,7 +1897,7 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
         if (width)
         {
             if (column.column == ptk::file_list::column::name &&
-                !config::settings.always_show_tabs &&
+                !browser->settings_->always_show_tabs &&
                 browser->view_mode_ == ptk::browser::view_mode::list_view &&
                 gtk_notebook_get_n_pages(browser->notebook_) == 1)
             {
@@ -2765,7 +2767,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
     // load new dir
 
     this->signal_file_listed.disconnect();
-    this->dir_ = vfs::dir::create(path);
+    this->dir_ = vfs::dir::create(path, this->settings_);
 
     this->run_event<spacefm::signal::chdir_begin>();
 
@@ -3239,7 +3241,7 @@ ptk::browser::close_tab() noexcept
     // gtk_notebook_remove_page(notebook, gtk_notebook_get_current_page(notebook));
     gtk_widget_destroy(GTK_WIDGET(this));
 
-    if (!config::settings.always_show_tabs)
+    if (!this->settings_->always_show_tabs)
     {
         if (gtk_notebook_get_n_pages(notebook) == 1)
         {
@@ -5503,7 +5505,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
     {
         if (set->xset_name == xset::name::tab_new || set->xset_name == xset::name::tab_new_here)
         {
-            if (config::settings.new_tab_here)
+            if (this->settings_->new_tab_here)
             {
                 this->new_tab_here();
             }

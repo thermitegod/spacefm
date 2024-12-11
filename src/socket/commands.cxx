@@ -709,7 +709,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "show-thumbnails")
         {
             const auto subproperty = request_data.subproperty;
-            if (config::settings.show_thumbnails != (subproperty == "true"))
+            if (browser->settings_->show_thumbnails != (subproperty == "true"))
             {
                 main_window_toggle_thumbnails_all_windows();
             }
@@ -717,7 +717,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "max-thumbnail-size")
         {
             const std::string_view value = data[0];
-            config::settings.thumbnail_max_size = std::stoi(value.data());
+            browser->settings_->thumbnail_max_size = std::stoi(value.data());
         }
         else if (property == "large-icons")
         {
@@ -1209,13 +1209,14 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "show-thumbnails")
         {
-            return {SOCKET_SUCCESS, std::format("{}", config::settings.show_thumbnails ? 1 : 0)};
+            return {SOCKET_SUCCESS, std::format("{}", browser->settings_->show_thumbnails ? 1 : 0)};
         }
         else if (property == "max-thumbnail-size")
         {
-            return {SOCKET_SUCCESS,
-                    std::format("{}",
-                                vfs::utils::format_file_size(config::settings.thumbnail_max_size))};
+            return {
+                SOCKET_SUCCESS,
+                std::format("{}",
+                            vfs::utils::format_file_size(browser->settings_->thumbnail_max_size))};
         }
         else if (property == "large-icons")
         {

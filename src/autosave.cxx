@@ -58,7 +58,7 @@ static concurrencpp::timer timer;
 } // namespace autosave::detail
 
 void
-autosave::create(const autosave_t& autosave_func) noexcept
+autosave::create(const std::function<void()>& autosave_func) noexcept
 {
     logger::trace<logger::domain::autosave>("starting autosave thread");
 
@@ -69,7 +69,7 @@ autosave::create(const autosave_t& autosave_func) noexcept
         300000ms, // 5 Minutes
         300000ms, // 5 Minutes
         global::runtime.thread_executor(),
-        [autosave_func]
+        [&autosave_func]
         {
             logger::trace<logger::domain::autosave>("checking for pending autosave requests");
             if (requests->pending)
