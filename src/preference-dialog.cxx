@@ -499,47 +499,6 @@ create_pref_check_button(const std::string_view label) noexcept
 }
 } // namespace preference::single_click
 
-namespace preference::hover_selects
-{
-static void
-check_button_cb(GtkToggleButton* button, void* user_data) noexcept
-{
-    (void)user_data;
-    const bool single_hover = gtk_toggle_button_get_active(button);
-    if (single_hover != config::settings.single_hover)
-    {
-        config::settings.single_hover = single_hover;
-        // update all windows/all panels/all browsers
-        for (MainWindow* window : main_window_get_all())
-        {
-            for (const panel_t p : PANELS)
-            {
-                GtkNotebook* notebook = window->get_panel_notebook(p);
-                const i32 total_pages = gtk_notebook_get_n_pages(notebook);
-                for (const auto i : std::views::iota(0z, total_pages))
-                {
-                    ptk::browser* browser =
-                        PTK_FILE_BROWSER_REINTERPRET(gtk_notebook_get_nth_page(notebook, i));
-                    // TODO
-                    (void)browser;
-                    // browser->set_single_hover(config::settings.single_hover);
-                }
-            }
-        }
-    }
-}
-
-static GtkCheckButton*
-create_pref_check_button(const std::string_view label) noexcept
-{
-    const bool value = config::settings.single_hover;
-    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-    return button;
-}
-} // namespace preference::hover_selects
-
 namespace preference::thumbnail_show
 {
 static void
@@ -1201,9 +1160,6 @@ init_general_tab() noexcept
 
     page.add_row(
         GTK_WIDGET(preference::single_click::create_pref_check_button("Single Click Opens Files")));
-
-    page.add_row(
-        GTK_WIDGET(preference::hover_selects::create_pref_check_button("Hovering Selects Files")));
 
     page.new_section("Thumbnails");
 

@@ -33,7 +33,6 @@ struct settings
     i32 icon_size_tool{22};
 
     bool single_click{false};
-    bool single_hover{false};
 
     bool click_executes{false};
 

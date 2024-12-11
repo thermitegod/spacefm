@@ -49,7 +49,6 @@ config_parse_settings(const config::detail::settings& settings, const u64 versio
     config::settings.icon_size_small = settings.icon_size_small;
     config::settings.icon_size_tool = settings.icon_size_tool;
     config::settings.single_click = settings.single_click;
-    config::settings.single_hover = settings.single_hover;
     config::settings.use_si_prefix = settings.use_si_prefix;
     config::settings.click_executes = settings.click_executes;
     config::settings.confirm = settings.confirm;
