@@ -32,8 +32,6 @@ struct settings
     i32 icon_size_small{22};
     i32 icon_size_tool{22};
 
-    bool single_click{false};
-
     bool click_executes{false};
 
     bool confirm{true};

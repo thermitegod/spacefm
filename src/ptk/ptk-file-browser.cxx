@@ -1485,7 +1485,6 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
     else if (type == GdkEventType::GDK_2BUTTON_PRESS && button == GDK_BUTTON_PRIMARY)
     {
         // double click event -  button = 0
-
         if (browser->view_mode_ == ptk::browser::view_mode::list_view)
         {
             /* set ret true to prevent drag_begin starting in this tab after
@@ -1495,7 +1494,7 @@ on_folder_view_button_press_event(GtkWidget* widget, GdkEvent* event,
              * activated or user clicked on non-row */
             ret = true;
         }
-        else if (!config::settings.single_click)
+        else
         {
             /* sfm 1.0.6 set skip_release for Icon/Compact to prevent file
              * under cursor being selected when entering dir with double-click.
@@ -1539,53 +1538,6 @@ on_folder_view_button_release_event(GtkWidget* widget, GdkEvent* event,
         }
         return ret;
     }
-
-#if 0
-    switch (browser->view_mode)
-    {
-        case ptk::browser::view_mode::PTK_FB_ICON_VIEW:
-        case ptk::browser::view_mode::compact_view:
-            //if (exo_icon_view_is_rubber_banding_active(EXO_ICON_VIEW(widget)))
-            //    return false;
-            /* Conditional on single_click below was removed 1.0.2 708f0988 bc it
-             * caused a left-click to not unselect other files.  However, this
-             * caused file under cursor to be selected when entering directory by
-             * double-click in Icon/Compact styles.  To correct this, 1.0.6
-             * conditionally sets skip_release on GdkEventType::GDK_2BUTTON_PRESS, and does not
-             * reset skip_release in browser->chdir(). */
-            tree_path = exo_icon_view_get_path_at_pos(EXO_ICON_VIEW(widget), event->x, event->y);
-            model = exo_icon_view_get_model(EXO_ICON_VIEW(widget));
-            if (tree_path)
-            {
-                // unselect all but one file
-                exo_icon_view_unselect_all(EXO_ICON_VIEW(widget));
-                exo_icon_view_select_path(EXO_ICON_VIEW(widget), tree_path);
-            }
-            break;
-        case ptk::browser::view_mode::PTK_FB_LIST_VIEW:
-            if (gtk_tree_view_is_rubber_banding_active(GTK_TREE_VIEW(widget)))
-                return false;
-            if (config::settings.get_single_click)
-            {
-                model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-                gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget),
-                                              static_cast<i32>(event->x),
-                                              static_cast<i32>(event->y),
-                                              &tree_path,
-                                              nullptr,
-                                              nullptr,
-                                              nullptr);
-                tree_sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-                if (tree_path && tree_sel && gtk_tree_selection_count_selected_rows(tree_sel) > 1)
-                {
-                    // unselect all but one file
-                    gtk_tree_selection_unselect_all(tree_sel);
-                    gtk_tree_selection_select_path(tree_sel, tree_path);
-                }
-            }
-            break;
-    }
-#endif
 
     gtk_tree_path_free(tree_path);
     return false;
@@ -1754,9 +1706,6 @@ create_folder_view(ptk::browser* browser, ptk::browser::view_mode view_mode) noe
             exo_icon_view_set_enable_search(EXO_ICON_VIEW(folder_view), false);
 #endif
 
-            gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(folder_view),
-                                                       browser->single_click_);
-
             gtk_cell_layout_clear(GTK_CELL_LAYOUT(folder_view));
 
             browser->icon_render_ = renderer = gtk_cell_renderer_pixbuf_new();
@@ -1868,9 +1817,6 @@ create_folder_view(ptk::browser* browser, ptk::browser::view_mode view_mode) noe
 
             // Search
             gtk_tree_view_set_enable_search(GTK_TREE_VIEW(folder_view), false);
-
-            gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(folder_view),
-                                                       browser->single_click_);
 
             icon_size = browser->large_icons_ ? big_icon_size : small_icon_size;
 
@@ -2730,7 +2676,7 @@ ptk::browser::chdir(const std::filesystem::path& new_path,
     // this->button_press_ = false;
     this->is_drag_ = false;
     this->menu_shown_ = false;
-    if (this->view_mode_ == ptk::browser::view_mode::list_view || config::settings.single_click)
+    if (this->view_mode_ == ptk::browser::view_mode::list_view)
     {
         /* sfm 1.0.6 do not reset skip_release for Icon/Compact to prevent file
            under cursor being selected when entering dir with double-click.
@@ -3234,30 +3180,6 @@ ptk::browser::show_hidden_files(bool show) noexcept
         ptk::view::dir_tree::show_hidden_files(GTK_TREE_VIEW(this->side_dir),
                                                this->show_hidden_files_);
     }
-}
-
-void
-ptk::browser::set_single_click(bool single_click) noexcept
-{
-    if (single_click == this->single_click_)
-    {
-        return;
-    }
-
-    switch (this->view_mode_)
-    {
-        case ptk::browser::view_mode::icon_view:
-        case ptk::browser::view_mode::compact_view:
-            gtk_icon_view_set_activate_on_single_click(GTK_ICON_VIEW(this->folder_view_),
-                                                       single_click);
-            break;
-        case ptk::browser::view_mode::list_view:
-            gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(this->folder_view_),
-                                                       single_click);
-            break;
-    }
-
-    this->single_click_ = single_click;
 }
 
 void

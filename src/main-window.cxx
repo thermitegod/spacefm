@@ -1790,7 +1790,6 @@ MainWindow::new_tab(const std::filesystem::path& folder_path) noexcept
         return;
     }
 
-    browser->set_single_click(config::settings.single_click);
     browser->show_thumbnails(config::settings.show_thumbnails ? config::settings.thumbnail_max_size
                                                               : 0);
 

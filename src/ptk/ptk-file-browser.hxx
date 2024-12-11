@@ -126,7 +126,6 @@ struct browser
     ptk::browser::sort_order sort_order_{ptk::browser::sort_order::perm};
     ptk::browser::view_mode view_mode_{ptk::browser::view_mode::compact_view};
 
-    bool single_click_{true};
     bool show_hidden_files_{true};
     bool large_icons_{true};
     bool pending_drag_status_{true};
@@ -232,7 +231,6 @@ struct browser
     void refresh(const bool update_selected_files = true) noexcept;
 
     void show_hidden_files(bool show) noexcept;
-    void set_single_click(bool single_click) noexcept;
 
     void new_tab() noexcept;
     void new_tab_here() noexcept;
