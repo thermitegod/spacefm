@@ -43,6 +43,29 @@ spacefm = build_target(
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+# File Action
+incdir_action = include_directories(['file-action', '../src/datatypes'])
+sources_action = files(
+    'file-action/main.cxx',
+    'file-action/action.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_action',
+    sources_action,
+    target_type: 'executable',
+    include_directories: incdir_action,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
 # Message
 incdir_message = include_directories(['message', '../src/datatypes'])
 sources_message = files(

@@ -249,6 +249,7 @@ preprocessor = [
     # Standalone dialog program names
     '-DDIALOG_ABOUT="spacefm_about"',
     '-DDIALOG_ERROR="spacefm_error"',
+    '-DDIALOG_FILE_ACTION="spacefm_action"',
     '-DDIALOG_MESSAGE="spacefm_message"',
     '-DDIALOG_PATTERN="spacefm_pattern"',
 
