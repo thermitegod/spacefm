@@ -41,8 +41,6 @@ struct settings
     bool load_saved_tabs{true};
 
     // Window State
-    u64 width{640};
-    u64 height{480};
     bool maximized{false};
 
     // Interface

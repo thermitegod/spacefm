@@ -1368,9 +1368,6 @@ main_window_init(MainWindow* main_window) noexcept
     ptk::view::file_task::popup_show(main_window, "");
 
     // show window
-    gtk_window_set_default_size(GTK_WINDOW(main_window),
-                                config::settings.width,
-                                config::settings.height);
     if (config::settings.maximized)
     {
         gtk_window_maximize(GTK_WINDOW(main_window));
@@ -1446,11 +1443,6 @@ MainWindow::store_positions() noexcept
         GtkAllocation allocation;
         gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
 
-        if (!this->maximized && allocation.width > 0)
-        {
-            config::settings.width = allocation.width;
-            config::settings.height = allocation.height;
-        }
         if (GTK_IS_PANED(this->hpane_top))
         {
             const auto set = xset::set::get(xset::name::panel_sliders);
@@ -1919,18 +1911,6 @@ on_about_activate(GtkMenuItem* menuitem, void* user_data) noexcept
 void
 MainWindow::add_new_window() noexcept
 {
-    if (!this->maximized && !this->fullscreen)
-    {
-        // use current main_window's size for new window
-        GtkAllocation allocation;
-        gtk_widget_get_allocation(GTK_WIDGET(this), &allocation);
-        if (allocation.width > 0)
-        {
-            config::settings.width = allocation.width;
-            config::settings.height = allocation.height;
-        }
-    }
-
     config::settings.load_saved_tabs = false;
 
     logger::info("Opening another window");
