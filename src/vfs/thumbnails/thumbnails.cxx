@@ -37,8 +37,6 @@
 
 #include "utils/shell-quote.hxx"
 
-#include "settings/settings.hxx"
-
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -122,44 +120,17 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         }
 
         // create new thumbnail
-        if (config::settings.thumbnailer_use_api)
-        {
-            try
-            {
-                ffmpegthumbnailer::VideoThumbnailer video_thumb;
-                // video_thumb.setLogCallback(nullptr);
-                // video_thumb.clearFilters();
-                video_thumb.setSeekPercentage(25);
-                video_thumb.setThumbnailSize(thumb_size);
-                video_thumb.setMaintainAspectRatio(true);
-                video_thumb.generateThumbnail(file->path(),
-                                              ThumbnailerImageType::Png,
-                                              thumbnail_file,
-                                              nullptr);
-            }
-            catch (const std::logic_error& e)
-            {
-                // file cannot be opened
-                logger::error<logger::domain::vfs>("Creating thumbnail failed for '{}'",
-                                                   file->name());
-                return nullptr;
-            }
-        }
-        else
-        {
-            const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
-                                             thumb_size,
-                                             ::utils::shell_quote(file->path().string()),
-                                             ::utils::shell_quote(thumbnail_file.string()));
-            // logger::info<logger::domain::vfs>("COMMAND({})", command);
-            Glib::spawn_command_line_sync(command);
+        const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
+                                         thumb_size,
+                                         ::utils::shell_quote(file->path().string()),
+                                         ::utils::shell_quote(thumbnail_file.string()));
+        // logger::info<logger::domain::vfs>("COMMAND({})", command);
+        Glib::spawn_command_line_sync(command);
 
-            if (!std::filesystem::exists(thumbnail_file))
-            {
-                logger::error<logger::domain::vfs>("Creating thumbnail failed for '{}'",
-                                                   file->name());
-                return nullptr;
-            }
+        if (!std::filesystem::exists(thumbnail_file))
+        {
+            logger::error<logger::domain::vfs>("Failed to create thumbnail for '{}'", file->name());
+            return nullptr;
         }
 
         GError* error = nullptr;
