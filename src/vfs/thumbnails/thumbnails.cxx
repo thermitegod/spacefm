@@ -25,6 +25,9 @@
 
 #include <glibmm.h>
 
+#include <botan/hash.h>
+#include <botan/hex.h>
+
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
@@ -44,13 +47,9 @@
 GdkPixbuf*
 vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
 {
-#if (GTK_MAJOR_VERSION == 4)
-    const auto hash =
-        Glib::Checksum::compute_checksum(Glib::Checksum::Type::MD5, file->uri().data());
-#elif (GTK_MAJOR_VERSION == 3)
-    const auto hash =
-        Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, file->uri().data());
-#endif
+    const auto md5 = Botan::HashFunction::create("MD5");
+    md5->update(file->uri());
+    const auto hash = Botan::hex_encode(md5->final(), false);
 
     const auto thumbnail_cache = vfs::user::cache() / "thumbnails/normal";
     const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);

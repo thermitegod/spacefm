@@ -198,7 +198,7 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
 libudev_dep = dependency('libudev', required: true)
 libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required: true)
-openssl_dep = dependency('openssl', required: true)
+botan_dep = dependency('botan-3', required: true)
 
 sigc_dep = dependency('sigc++-3.0', required: true)
 pugixml_dep = dependency('pugixml', required: true)
@@ -225,7 +225,7 @@ dependencies = [
     libudev_dep,
     libffmpegthumbnailer_dep,
     pugixml_dep,
-    openssl_dep,
+    botan_dep,
 ]
 
 ## Source files
