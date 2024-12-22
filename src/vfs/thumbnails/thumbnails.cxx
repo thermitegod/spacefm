@@ -25,6 +25,8 @@
 
 #include <glibmm.h>
 
+#include <magic_enum.hpp>
+
 #include <botan/hash.h>
 #include <botan/hex.h>
 
@@ -42,14 +44,48 @@
 
 #include "vfs/thumbnails/thumbnails.hxx"
 
-GdkPixbuf*
-vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 thumb_size) noexcept
+enum class thumbnail_size : std::uint16_t
 {
+    normal = 128,
+    large = 256,
+    x_large = 512,
+    xx_large = 1024,
+};
+
+GdkPixbuf*
+vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
+{
+    const auto [thumbnail_create_size, thumbnail_cache] =
+        [](const auto thumb_size) -> std::pair<std::uint32_t, std::filesystem::path>
+    {
+        assert(thumb_size <= 1024);
+
+        if (thumb_size <= 128)
+        {
+            return {magic_enum::enum_integer(thumbnail_size::normal),
+                    vfs::user::cache() / "thumbnails/normal"};
+        }
+        else if (thumb_size <= 256)
+        {
+            return {magic_enum::enum_integer(thumbnail_size::large),
+                    vfs::user::cache() / "thumbnails/large"};
+        }
+        else if (thumb_size <= 512)
+        {
+            return {magic_enum::enum_integer(thumbnail_size::x_large),
+                    vfs::user::cache() / "thumbnails/x-large"};
+        }
+        else // if (thumb_size <= 1024)
+        {
+            return {magic_enum::enum_integer(thumbnail_size::xx_large),
+                    vfs::user::cache() / "thumbnails/xx-large"};
+        }
+    }(thumb_size);
+
     const auto md5 = Botan::HashFunction::create("MD5");
     md5->update(file->uri());
     const auto hash = Botan::hex_encode(md5->final(), false);
 
-    const auto thumbnail_cache = vfs::user::cache() / "thumbnails/normal";
     const auto thumbnail_file = thumbnail_cache / std::format("{}.png", hash);
 
     // logger::debug<logger::domain::vfs>("thumbnail_load()={} | uri={} | thumb_size={}", file->path().string(), file->uri(), thumb_size);
@@ -65,8 +101,6 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
     }
 
     // load existing thumbnail
-    i32 w = 0;
-    i32 h = 0;
     std::chrono::system_clock::time_point embeded_mtime;
     GdkPixbuf* thumbnail = nullptr;
     if (std::filesystem::is_regular_file(thumbnail_file))
@@ -76,8 +110,6 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         thumbnail = gdk_pixbuf_new_from_file(thumbnail_file.c_str(), &error);
         if (thumbnail)
         {
-            w = gdk_pixbuf_get_width(thumbnail);
-            h = gdk_pixbuf_get_height(thumbnail);
             const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
             if (thumb_mtime != nullptr)
             {
@@ -85,7 +117,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
             }
         }
         else
-        { // broken/corrupt thumbnail
+        { // broken/corrupt/empty thumbnail
             logger::error<logger::domain::vfs>(
                 "Loading existing thumbnail for file '{}' failed with: {}",
                 file->name(),
@@ -97,8 +129,8 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         }
     }
 
-    if (!thumbnail || (w < thumb_size && h < thumb_size) ||
-        // TODO? on disk thumbnail mtime metadata does not store nanoseconds
+    if (!thumbnail ||
+        // on disk thumbnail metadata does not store mtime nanoseconds
         std::chrono::time_point_cast<std::chrono::seconds>(embeded_mtime) !=
             std::chrono::time_point_cast<std::chrono::seconds>(mtime))
     {
@@ -121,7 +153,7 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
 
         // create new thumbnail
         const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
-                                         thumb_size,
+                                         thumbnail_create_size,
                                          ::utils::shell_quote(file->path().string()),
                                          ::utils::shell_quote(thumbnail_file.string()));
         // logger::info<logger::domain::vfs>("COMMAND({})", command);
@@ -146,34 +178,33 @@ vfs::detail::thumbnail_load(const std::shared_ptr<vfs::file>& file, const i32 th
         }
     }
 
-    GdkPixbuf* result = nullptr;
-    if (thumbnail)
-    {
-        w = gdk_pixbuf_get_width(thumbnail);
-        h = gdk_pixbuf_get_height(thumbnail);
-
-        if (w > h)
-        {
-            h = h * thumb_size / w;
-            w = thumb_size;
-        }
-        else if (h > w)
-        {
-            w = w * thumb_size / h;
-            h = thumb_size;
-        }
-        else
-        {
-            w = h = thumb_size;
-        }
-
-        if (w > 0 && h > 0)
-        {
-            result = gdk_pixbuf_scale_simple(thumbnail, w, h, GdkInterpType::GDK_INTERP_BILINEAR);
-        }
-
-        g_object_unref(thumbnail);
+    // Scale to correct size
+    const auto fixed_size = thumb_size;
+    const auto original_width = gdk_pixbuf_get_width(thumbnail);
+    const auto original_height = gdk_pixbuf_get_height(thumbnail);
+    auto new_width = fixed_size;
+    auto new_height = fixed_size;
+    if (original_width > original_height)
+    { // Scale by width
+        new_height = (fixed_size * original_height) / original_width;
+    }
+    else
+    { // Scale by height
+        new_width = (fixed_size * original_width) / original_height;
     }
 
-    return result;
+    GdkPixbuf* thumbnail_scaled = gdk_pixbuf_scale_simple(thumbnail,
+                                                          new_width,
+                                                          new_height,
+                                                          GdkInterpType::GDK_INTERP_BILINEAR);
+    g_object_unref(thumbnail);
+
+    return thumbnail_scaled;
+}
+
+GdkPixbuf*
+vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
+{
+    // TODO - use ffmpegthumbnailer -f
+    return vfs::detail::thumbnail::image(file, thumb_size);
 }

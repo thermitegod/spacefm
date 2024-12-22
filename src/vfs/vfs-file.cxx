@@ -701,15 +701,22 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
             return;
         }
 
-        if (this->mime_type_->is_image() || this->mime_type_->is_video())
+        GdkPixbuf* thumbnail = nullptr;
+        if (this->mime_type_->is_image())
         {
-            GdkPixbuf* thumbnail = vfs::detail::thumbnail_load(this->shared_from_this(),
-                                                               config::settings.icon_size_big);
-            if (thumbnail)
-            {
-                this->thumbnail_.big = thumbnail;
-                return;
-            }
+            thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
+                                                      config::settings.icon_size_big);
+        }
+        else if (this->mime_type_->is_video())
+        {
+            thumbnail = vfs::detail::thumbnail::video(this->shared_from_this(),
+                                                      config::settings.icon_size_big);
+        }
+
+        if (thumbnail)
+        {
+            this->thumbnail_.big = thumbnail;
+            return;
         }
 
         // fallback to mime_type icon
@@ -730,15 +737,22 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
             return;
         }
 
-        if (this->mime_type_->is_image() || this->mime_type_->is_video())
+        GdkPixbuf* thumbnail = nullptr;
+        if (this->mime_type_->is_image())
         {
-            GdkPixbuf* thumbnail = vfs::detail::thumbnail_load(this->shared_from_this(),
-                                                               config::settings.icon_size_small);
-            if (thumbnail)
-            {
-                this->thumbnail_.small = thumbnail;
-                return;
-            }
+            thumbnail = vfs::detail::thumbnail::image(this->shared_from_this(),
+                                                      config::settings.icon_size_small);
+        }
+        else if (this->mime_type_->is_video())
+        {
+            thumbnail = vfs::detail::thumbnail::video(this->shared_from_this(),
+                                                      config::settings.icon_size_small);
+        }
+
+        if (thumbnail)
+        {
+            this->thumbnail_.small = thumbnail;
+            return;
         }
 
         // fallback to mime_type icon
