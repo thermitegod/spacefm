@@ -20,6 +20,38 @@
 
 #include <glaze/glaze.hpp>
 
+namespace datatype::app_chooser_dialog
+{
+struct request
+{
+    std::string mime_type;
+    bool focus_all_apps;
+    bool show_command;
+    bool show_default;
+    bool dir_default;
+};
+
+struct response
+{
+    std::string app;
+    bool is_desktop;
+    bool set_default;
+};
+} // namespace datatype::app_chooser_dialog
+
+template<> struct glz::meta<datatype::app_chooser_dialog::request>
+{
+    // clang-format off
+    static constexpr auto value = glz::object(
+        "mime_type",      &datatype::app_chooser_dialog::request::mime_type,
+        "focus_all_apps", &datatype::app_chooser_dialog::request::focus_all_apps,
+        "show_command",   &datatype::app_chooser_dialog::request::show_command,
+        "show_default",   &datatype::app_chooser_dialog::request::show_default,
+        "dir_default",    &datatype::app_chooser_dialog::request::dir_default
+    );
+    // clang-format on
+};
+
 namespace datatype::file_action_dialog
 {
 struct request

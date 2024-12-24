@@ -246,6 +246,7 @@ preprocessor = [
 
     # Standalone dialog program names
     '-DDIALOG_ABOUT="spacefm_about"',
+    '-DDIALOG_APP_CHOOSER="spacefm_app_chooser"',
     '-DDIALOG_ERROR="spacefm_error"',
     '-DDIALOG_FILE_ACTION="spacefm_action"',
     '-DDIALOG_KEYBINDINGS="spacefm_keybindings"',
@@ -505,8 +506,6 @@ sources += files(
     'src/ptk/utils/ptk-utils.cxx',
 
     'src/ptk/natsort/strnatcmp.cxx',
-
-    'src/ptk/deprecated/async-task.cxx',
 
     'src/vfs/vfs-app-desktop.cxx',
     'src/vfs/vfs-device.cxx',

@@ -20,6 +20,44 @@ spacefm = build_target(
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+# App Chooser
+incdir_chooser = include_directories(['app-chooser', '../src/datatypes'])
+sources_chooser = files(
+    'app-chooser/main.cxx',
+    'app-chooser/app-chooser.cxx',
+
+    'app-chooser/logger.cxx',
+
+    'app-chooser/utils/misc.cxx',
+
+    'app-chooser/vfs/vfs-mime-type.cxx',
+    'app-chooser/vfs/vfs-user-dirs.cxx',
+
+    'app-chooser/vfs/utils/vfs-utils.cxx',
+
+	'app-chooser/vfs/mime-type/chrome/mime-utils.cxx',
+	'app-chooser/vfs/mime-type/mime-type.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_app_chooser',
+    sources_chooser,
+    target_type: 'executable',
+    include_directories: incdir_chooser,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+
+        concurrencpp_dep,
+        pugixml_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
 # Error
 incdir_error = include_directories('error')
 sources_error = files(

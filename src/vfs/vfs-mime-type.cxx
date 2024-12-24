@@ -283,6 +283,12 @@ vfs::mime_type::default_action() const noexcept
 void
 vfs::mime_type::set_default_action(const std::string_view desktop_id) const noexcept
 {
+    if (!desktop_id.ends_with(".desktop"))
+    {
+        logger::error<logger::domain::vfs>("Setting default action requires a desktop file");
+        return;
+    }
+
     const auto custom_desktop = this->add_action(desktop_id);
 
     vfs::detail::mime_type::set_default_action(this->type_,
