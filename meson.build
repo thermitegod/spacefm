@@ -197,7 +197,6 @@ add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 ## system dependencies
 
 libudev_dep = dependency('libudev', required: true)
-libffmpegthumbnailer_dep = dependency('libffmpegthumbnailer', required: true)
 botan_dep = dependency('botan-3', required: true)
 
 sigc_dep = dependency('sigc++-3.0', required: true)
@@ -223,7 +222,6 @@ dependencies = [
     sigc_dep,
 
     libudev_dep,
-    libffmpegthumbnailer_dep,
     pugixml_dep,
     botan_dep,
 ]

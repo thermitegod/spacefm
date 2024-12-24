@@ -716,12 +716,12 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (thumbnail)
         {
             this->thumbnail_.big = thumbnail;
-            return;
         }
-
-        // fallback to mime_type icon
-        // logger::debug<logger::domain::vfs>("mime={}", this->mime_type_->type());
-        this->thumbnail_.big = this->icon(thumbnail_size::big);
+        else
+        {
+            // fallback to mime_type icon
+            this->thumbnail_.big = this->icon(thumbnail_size::big);
+        }
     }
     else
     {
@@ -752,12 +752,12 @@ vfs::file::load_thumbnail(const thumbnail_size size) noexcept
         if (thumbnail)
         {
             this->thumbnail_.small = thumbnail;
-            return;
         }
-
-        // fallback to mime_type icon
-        // logger::debug<logger::domain::vfs>("mime={}", this->mime_type_->type());
-        this->thumbnail_.small = this->icon(vfs::file::thumbnail_size::small);
+        else
+        {
+            // fallback to mime_type icon
+            this->thumbnail_.small = this->icon(thumbnail_size::small);
+        }
     }
 }
 

@@ -30,9 +30,6 @@
 #include <botan/hash.h>
 #include <botan/hex.h>
 
-#include <libffmpegthumbnailer/imagetypes.h>
-#include <libffmpegthumbnailer/videothumbnailer.h>
-
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
@@ -52,8 +49,15 @@ enum class thumbnail_size : std::uint16_t
     xx_large = 1024,
 };
 
-GdkPixbuf*
-vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
+enum class thumbnail_mode : std::uint8_t
+{
+    image,
+    video,
+};
+
+static GdkPixbuf*
+thumbnail_create(const std::shared_ptr<vfs::file>& file, const u32 thumb_size,
+                 const thumbnail_mode mode) noexcept
 {
     const auto [thumbnail_create_size, thumbnail_cache] =
         [](const auto thumb_size) -> std::pair<std::uint32_t, std::filesystem::path>
@@ -152,10 +156,27 @@ vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 
         }
 
         // create new thumbnail
-        const auto command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
-                                         thumbnail_create_size,
-                                         ::utils::shell_quote(file->path().string()),
-                                         ::utils::shell_quote(thumbnail_file.string()));
+        std::string command;
+        switch (mode)
+        {
+            case thumbnail_mode::image:
+            {
+                command = std::format("ffmpegthumbnailer -s {} -i {} -o {}",
+                                      thumbnail_create_size,
+                                      ::utils::shell_quote(file->path().string()),
+                                      ::utils::shell_quote(thumbnail_file.string()));
+                break;
+            }
+            case thumbnail_mode::video:
+            {
+                command = std::format("ffmpegthumbnailer -f -s {} -i {} -o {}",
+                                      thumbnail_create_size,
+                                      ::utils::shell_quote(file->path().string()),
+                                      ::utils::shell_quote(thumbnail_file.string()));
+                break;
+            }
+        }
+
         // logger::info<logger::domain::vfs>("COMMAND({})", command);
         Glib::spawn_command_line_sync(command);
 
@@ -178,7 +199,7 @@ vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 
         }
     }
 
-    // Scale to correct size
+    // Scale thumbnail to requested size from cached thumbnail
     const auto fixed_size = thumb_size;
     const auto original_width = gdk_pixbuf_get_width(thumbnail);
     const auto original_height = gdk_pixbuf_get_height(thumbnail);
@@ -203,8 +224,13 @@ vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 
 }
 
 GdkPixbuf*
+vfs::detail::thumbnail::image(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
+{
+    return thumbnail_create(file, thumb_size, thumbnail_mode::image);
+}
+
+GdkPixbuf*
 vfs::detail::thumbnail::video(const std::shared_ptr<vfs::file>& file, const u32 thumb_size) noexcept
 {
-    // TODO - use ffmpegthumbnailer -f
-    return vfs::detail::thumbnail::image(file, thumb_size);
+    return thumbnail_create(file, thumb_size, thumbnail_mode::video);
 }
