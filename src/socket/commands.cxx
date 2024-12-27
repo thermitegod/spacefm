@@ -34,7 +34,13 @@
 #include <gtkmm.h>
 #include <glibmm.h>
 
+#if __has_include(<magic_enum/magic_enum.hpp>)
+// >=magic_enum-0.9.7
+#include <magic_enum/magic_enum.hpp>
+#else
+// <=magic_enum-0.9.6
 #include <magic_enum.hpp>
+#endif
 
 #include <glaze/glaze.hpp>
 
