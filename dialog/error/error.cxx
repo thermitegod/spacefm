@@ -13,7 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
 #include <string_view>
 
 #include <print>
@@ -22,6 +21,8 @@
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
 
+#include "vfs/utils/icon.hxx"
+
 #include "error.hxx"
 
 ErrorDialog::ErrorDialog(const std::string_view title, const std::string_view message)
@@ -29,32 +30,6 @@ ErrorDialog::ErrorDialog(const std::string_view title, const std::string_view me
     this->set_size_request(200, -1);
     this->set_title("Message Dialog");
     this->set_resizable(false);
-
-    // Error Icon //
-
-    const auto theme = Gtk::IconTheme::create();
-    if (theme)
-    {
-        const std::string icon_name = "dialog-error";
-
-        const auto theme_icon = theme->lookup_icon(icon_name, 64);
-
-        if (theme_icon)
-        {
-            this->icon_ = Gtk::Image(theme_icon);
-            this->icon_.set_margin_end(15);
-        }
-        else
-        {
-            std::print("Failed to load the '{}' icon from theme '{}'",
-                       icon_name,
-                       theme->property_theme_name().get_name());
-        }
-    }
-    else
-    {
-        std::print("Failed to load a theme");
-    }
 
     // Content //
 
@@ -65,8 +40,10 @@ ErrorDialog::ErrorDialog(const std::string_view title, const std::string_view me
     this->vbox_.set_margin_bottom(5);
 
     this->hbox_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
-    this->title_.set_markup(std::format("<big>{}</big>", title));
+    this->icon_ = vfs::utils::load_icon("dialog-error", 64);
+    this->icon_.set_margin_end(15);
     this->hbox_.append(this->icon_);
+    this->title_.set_markup(std::format("<big>{}</big>", title));
     this->hbox_.append(this->title_);
     this->vbox_.append(this->hbox_);
 

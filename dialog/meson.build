@@ -25,6 +25,8 @@ incdir_error = include_directories('error')
 sources_error = files(
     'error/main.cxx',
     'error/error.cxx',
+
+    'error/vfs/utils/icon.cxx',
 )
 
 spacefm = build_target(
