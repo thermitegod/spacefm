@@ -111,14 +111,14 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
 
-    datatype::message_dialog::response response;
-    const auto ec = glz::read_json(response, standard_output);
-    if (ec)
+    const auto data = glz::read_json<datatype::message_dialog::response>(standard_output);
+    if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(ec, standard_output));
+                                           glz::format_error(data.error(), standard_output));
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
+    const auto& response = data.value();
 
     // Send correct gtk response code
     if (response.result == "Ok")

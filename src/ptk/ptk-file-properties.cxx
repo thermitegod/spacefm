@@ -68,16 +68,15 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     };
     // clang-format on
 
-    std::string buffer;
-    auto ec = glz::write_json(request, buffer);
-    if (ec)
+    const auto buffer = glz::write_json(request);
+    if (!buffer)
     {
-        logger::error("Failed to create JSON: {}", glz::format_error(ec, buffer));
+        logger::error("Failed to create json: {}", glz::format_error(buffer));
         return;
     }
     // logger::trace("{}", buffer);
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer);
+    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
     Glib::spawn_command_line_async(command);
 }
 

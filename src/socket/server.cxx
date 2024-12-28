@@ -56,19 +56,18 @@ socket::server_thread() noexcept
             const auto [ret, result] = socket::command(command);
 
             const auto response = socket::socket_response_data{ret, result};
-            std::string buffer;
-            const auto ec = glz::write_json(response, buffer);
-            if (ec)
+            const auto buffer = glz::write_json(response);
+            if (!buffer)
             {
                 logger::info<logger::domain::socket>("Failed to create response: {}",
-                                                     glz::format_error(ec, buffer));
+                                                     glz::format_error(buffer));
                 continue;
             }
-            logger::info<logger::domain::socket>("result : {}", buffer);
+            logger::info<logger::domain::socket>("result : {}", buffer.value());
 
             // Send the response back to the sender
-            zmq::message_t reply(buffer.size());
-            std::memcpy(reply.data(), buffer.data(), buffer.size());
+            zmq::message_t reply(buffer.value().size());
+            std::memcpy(reply.data(), buffer.value().data(), buffer.value().size());
             server.send(reply, zmq::send_flags::none);
         }
     }

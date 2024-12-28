@@ -63,12 +63,10 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
         file_data.push_back({file->name().data(), file->size(), file->is_directory()});
     }
 
-    glz::error_ctx ec;
-    std::string buffer;
-    ec = glz::write_json(file_data, buffer);
-    if (ec)
+    const auto buffer = glz::write_json(file_data);
+    if (!buffer)
     {
-        logger::error("Failed to create dialog JSON: {}", glz::format_error(ec, buffer));
+        logger::error("Failed to create json: {}", glz::format_error(buffer));
         return false;
     }
 
@@ -86,7 +84,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
     }
 
     const auto command =
-        std::format(R"({} --header '{}' --json '{}')", binary, header_text, buffer);
+        std::format(R"({} --header '{}' --json '{}')", binary, header_text, buffer.value());
 
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output);
@@ -100,14 +98,14 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
         return false;
     }
 
-    datatype::file_action_dialog::response response;
-    ec = glz::read_json(response, standard_output);
-    if (ec)
+    const auto data = glz::read_json<datatype::file_action_dialog::response>(standard_output);
+    if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(ec, standard_output));
+                                           glz::format_error(data.error(), standard_output));
         return false;
     }
+    const auto& response = data.value();
 
     return response.result == "Confirm";
 }

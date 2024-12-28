@@ -31,14 +31,15 @@
 
 AppChooserDialog::AppChooserDialog(const std::string_view json_data)
 {
-    datatype::app_chooser_dialog::request data;
-    const auto ec = glz::read_json(data, json_data);
-    if (ec)
+    const auto data = glz::read_json<datatype::app_chooser_dialog::request>(json_data);
+    if (!data)
     {
-        std::println("Failed to decode json: {}", glz::format_error(ec, json_data));
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
         std::exit(EXIT_FAILURE);
     }
-    this->type_ = vfs::mime_type::create_from_type(data.mime_type);
+    const auto& opts = data.value();
+
+    this->type_ = vfs::mime_type::create_from_type(opts.mime_type);
 
     this->set_size_request(600, 600);
     this->set_title("File Properties");
@@ -64,7 +65,7 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
     this->file_type_hbox_.append(this->file_type_);
     this->vbox_.append(this->file_type_hbox_);
 
-    if (data.show_command)
+    if (opts.show_command)
     {
         this->entry_hbox_ = Gtk::Box(Gtk::Orientation::HORIZONTAL, 5);
         this->entry_label_.set_label("Command:");
@@ -85,7 +86,7 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
 
     this->btn_open_in_terminal_.set_label("Open in a terminal");
     this->vbox_.append(this->btn_open_in_terminal_);
-    if (data.show_default)
+    if (opts.show_default)
     {
         this->btn_set_as_default_.set_label("Set as the default application for this file type");
         this->vbox_.append(this->btn_set_as_default_);
@@ -119,7 +120,7 @@ AppChooserDialog::AppChooserDialog(const std::string_view json_data)
     this->set_visible(true);
 
     this->set_focus(this->notebook_);
-    this->notebook_.set_current_page(data.focus_all_apps ? 1 : 0);
+    this->notebook_.set_current_page(opts.focus_all_apps ? 1 : 0);
 }
 
 bool
@@ -142,7 +143,7 @@ void
 AppChooserDialog::on_button_ok_clicked()
 {
     std::string app;
-    bool is_desktop;
+    bool is_desktop = false;
 
     if (this->entry_.get_text_length() > 0)
     { // use command text
@@ -170,16 +171,13 @@ AppChooserDialog::on_button_ok_clicked()
         this->on_button_close_clicked();
     }
 
-    std::string buffer;
-    const auto ec = glz::write_json(
-        datatype::app_chooser_dialog::response{.app = app,
-                                               .is_desktop = is_desktop,
-                                               .set_default =
-                                                   this->btn_set_as_default_.get_active()},
-        buffer);
-    if (!ec)
+    const auto buffer = glz::write_json(datatype::app_chooser_dialog::response{
+        .app = app,
+        .is_desktop = is_desktop,
+        .set_default = this->btn_set_as_default_.get_active()});
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
 
     this->close();

@@ -77,16 +77,15 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
     };
     // clang-format on
 
-    std::string buffer;
-    auto ec = glz::write_json(request, buffer);
-    if (ec)
+    const auto buffer = glz::write_json(request);
+    if (!buffer)
     {
-        logger::error("Failed to create JSON: {}", glz::format_error(ec, buffer));
+        logger::error("Failed to create json: {}", glz::format_error(buffer));
         return std::nullopt;
     }
     // logger::trace("{}", buffer);
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer);
+    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
 
     std::int32_t exit_status = 0;
     std::string standard_output;
@@ -96,14 +95,14 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
         return std::nullopt;
     }
 
-    datatype::app_chooser_dialog::response response;
-    ec = glz::read_json(response, standard_output);
-    if (ec)
+    const auto data = glz::read_json<datatype::app_chooser_dialog::response>(standard_output);
+    if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(ec, standard_output));
+                                           glz::format_error(data.error(), standard_output));
         return std::nullopt;
     }
+    const auto& response = data.value();
 
     if (response.is_desktop && response.set_default)
     { // The selected app is set to default action

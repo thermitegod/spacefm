@@ -31,6 +31,14 @@
 
 ActionDialog::ActionDialog(const std::string_view header, const std::string_view json_data)
 {
+    const auto data = glz::read_json<std::vector<datatype::file_action_dialog::request>>(json_data);
+    if (!data)
+    {
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
+        std::exit(EXIT_FAILURE);
+    }
+    this->file_data_ = data.value();
+
     this->set_size_request(800, 800);
     this->set_title(header.data());
     this->set_resizable(false);
@@ -48,14 +56,6 @@ ActionDialog::ActionDialog(const std::string_view header, const std::string_view
     this->scrolled_window_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
     this->scrolled_window_.set_expand(true);
     this->vbox_.append(this->scrolled_window_);
-
-    // decode selected file data
-    const auto ec = glz::read_json(this->file_data_, json_data);
-    if (ec)
-    {
-        std::println("Failed to decode json: {}", glz::format_error(ec, json_data));
-        std::exit(EXIT_FAILURE);
-    }
 
     // create model
     this->create_model();
@@ -124,12 +124,11 @@ ActionDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mod
 void
 ActionDialog::on_button_ok_clicked()
 {
-    std::string buffer;
-    const auto ec =
-        glz::write_json(datatype::file_action_dialog::response{.result = "Confirm"}, buffer);
-    if (!ec)
+    const auto buffer =
+        glz::write_json(datatype::file_action_dialog::response{.result = "Confirm"});
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
 
     this->close();
@@ -138,12 +137,10 @@ ActionDialog::on_button_ok_clicked()
 void
 ActionDialog::on_button_cancel_clicked()
 {
-    std::string buffer;
-    const auto ec =
-        glz::write_json(datatype::file_action_dialog::response{.result = "Cancel"}, buffer);
-    if (!ec)
+    const auto buffer = glz::write_json(datatype::file_action_dialog::response{.result = "Cancel"});
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
 
     this->close();

@@ -39,25 +39,25 @@ get_keymod(Gdk::ModifierType event) noexcept
 
 SetKeyDialog::SetKeyDialog(const std::string_view key_name, const std::string_view json_data)
 {
-    this->set_size_request(300, -1);
-    this->set_title("Set Keybindings");
-    this->set_resizable(false);
-
-    // decode keybinding data
-    const auto ec = glz::read_json(this->keybindings_data_, json_data);
-    if (ec)
+    const auto data = glz::read_json<decltype(this->keybindings_data_)>(json_data);
+    if (!data)
     {
-        std::println("Failed to decode json: {}", glz::format_error(ec, json_data));
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
         std::exit(EXIT_FAILURE);
     }
-    for (const auto& data : this->keybindings_data_)
+    this->keybindings_data_ = data.value();
+    for (const auto& key_data : this->keybindings_data_)
     {
-        if (data.name == key_name)
+        if (key_data.name == key_name)
         {
-            this->keybinding_data_ = data;
+            this->keybinding_data_ = key_data;
             break;
         }
     }
+
+    this->set_size_request(300, -1);
+    this->set_title("Set Keybindings");
+    this->set_resizable(false);
 
     // Content //
 
@@ -212,11 +212,10 @@ SetKeyDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mod
 void
 SetKeyDialog::on_button_set_clicked()
 {
-    std::string buffer;
-    const auto ec = glz::write_json(this->result, buffer);
-    if (!ec)
+    const auto buffer = glz::write_json(this->result);
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
 
     this->close();
@@ -225,11 +224,10 @@ SetKeyDialog::on_button_set_clicked()
 void
 SetKeyDialog::on_button_unset_clicked()
 {
-    std::string buffer;
-    const auto ec = glz::write_json(this->result, buffer);
-    if (!ec)
+    const auto buffer = glz::write_json(this->result);
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
 
     this->close();
@@ -238,11 +236,10 @@ SetKeyDialog::on_button_unset_clicked()
 void
 SetKeyDialog::on_button_cancel_clicked()
 {
-    std::string buffer;
-    const auto ec = glz::write_json(this->result, buffer);
-    if (!ec)
+    const auto buffer = glz::write_json(this->result);
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
 
     this->close();

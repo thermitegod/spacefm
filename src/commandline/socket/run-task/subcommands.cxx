@@ -40,17 +40,16 @@ static void
 run_subcommand_cmd(const socket_subcommand_data_t& opt,
                    const std::shared_ptr<socket::socket_task_data>& task_opt) noexcept
 {
-    std::string buffer;
-    const auto ec = glz::write_json(task_opt, buffer);
-    if (ec)
+    const auto buffer = glz::write_json(task_opt);
+    if (!buffer)
     {
-        std::println("Failed to create socket task JSON: {}", glz::format_error(ec, buffer));
+        std::println("Failed to create socket task json: {}", glz::format_error(buffer));
         return;
     }
     // std::println("JSON : {}", buffer);
 
     opt->property = "cmd";
-    opt->data = {buffer};
+    opt->data = {buffer.value()};
 }
 
 void
@@ -129,17 +128,16 @@ run_subcommand_file_action(const socket_subcommand_data_t& opt,
                            const std::shared_ptr<socket::socket_file_task_data>& file_opt,
                            const std::string_view command) noexcept
 {
-    std::string buffer;
-    const auto ec = glz::write_json(file_opt, buffer);
-    if (ec)
+    const auto buffer = glz::write_json(file_opt);
+    if (!buffer)
     {
-        std::println("Failed to create socket file task JSON: {}", glz::format_error(ec, buffer));
+        std::println("Failed to create socket file task json: {}", glz::format_error(buffer));
         return;
     }
     // std::println("JSON : {}", buffer);
 
     opt->command = command;
-    opt->data = {buffer};
+    opt->data = {buffer.value()};
 }
 
 /*

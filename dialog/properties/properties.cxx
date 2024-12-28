@@ -207,16 +207,16 @@ PropertiesDialog::PropertiesDialog(const std::string_view json_data)
 {
     this->executor_ = global::runtime.thread_executor();
 
-    datatype::properties_dialog::request data;
-    const auto ec = glz::read_json(data, json_data);
-    if (ec)
+    const auto data = glz::read_json<datatype::properties_dialog::request>(json_data);
+    if (!data)
     {
-        std::println("Failed to decode json: {}", glz::format_error(ec, json_data));
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
         std::exit(EXIT_FAILURE);
     }
-    this->cwd_ = data.cwd;
+    const auto& opts = data.value();
+    this->cwd_ = opts.cwd;
 
-    for (const auto& file : data.files)
+    for (const auto& file : opts.files)
     {
         this->file_list_.push_back(vfs::file::create(file));
     }
@@ -261,7 +261,7 @@ PropertiesDialog::PropertiesDialog(const std::string_view json_data)
 
     this->set_visible(true);
 
-    this->notebook_.set_current_page(data.page);
+    this->notebook_.set_current_page(opts.page);
 }
 
 bool

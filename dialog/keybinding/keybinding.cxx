@@ -35,6 +35,14 @@
 
 KeybindingDialog::KeybindingDialog(const std::string_view json_data)
 {
+    const auto data = glz::read_json<decltype(this->keybindings_data_)>(json_data);
+    if (!data)
+    {
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
+        std::exit(EXIT_FAILURE);
+    }
+    this->keybindings_data_ = data.value();
+
     this->set_size_request(800, 800);
     this->set_title("Set Keybindings");
     this->set_resizable(false);
@@ -51,14 +59,6 @@ KeybindingDialog::KeybindingDialog(const std::string_view json_data)
     this->notebook_.set_vexpand(true);
     this->notebook_.set_hexpand(true);
     this->vbox_.append(this->notebook_);
-
-    // decode keybinding data
-    const auto ec = glz::read_json(this->keybindings_data_, json_data);
-    if (ec)
-    {
-        std::println("Failed to decode json: {}", glz::format_error(ec, json_data));
-        std::exit(EXIT_FAILURE);
-    }
 
     this->page_navigation_.init(this, this->keybindings_data_, "navigation");
     this->page_editing_.init(this, this->keybindings_data_, "editing");
@@ -121,11 +121,10 @@ KeybindingDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk:
 void
 KeybindingDialog::on_button_ok_clicked()
 {
-    std::string buffer;
-    const auto ec = glz::write_json(this->changed_keybindings_data_, buffer);
-    if (!ec)
+    const auto buffer = glz::write_json(this->changed_keybindings_data_);
+    if (buffer)
     {
-        std::println("{}", buffer);
+        std::println("{}", buffer.value());
     }
     this->close();
 }
@@ -197,16 +196,17 @@ KeybindingDialog::KeybindingPage::init(
             }
 
             // Create json data, needs to get recreated every time because keybindings can change.
-            std::string buffer;
-            auto ec = glz::write_json(parent->keybindings_data_, buffer);
-            if (ec)
+            const auto buffer = glz::write_json(parent->keybindings_data_);
+            if (!buffer)
             {
-                std::println("Failed to create JSON: {}", glz::format_error(ec, buffer));
+                std::println("Failed to create json: {}", glz::format_error(buffer));
                 std::exit(EXIT_FAILURE);
             }
 
-            const auto command =
-                std::format(R"({} --key-name '{}' --json '{}')", binary, name.get_value(), buffer);
+            const auto command = std::format(R"({} --key-name '{}' --json '{}')",
+                                             binary,
+                                             name.get_value(),
+                                             buffer.value());
 
             std::int32_t exit_status = 0;
             std::string standard_output;
@@ -218,14 +218,16 @@ KeybindingDialog::KeybindingPage::init(
             }
 
             // parse json return value
-            datatype::keybinding_dialog::response response;
-            ec = glz::read_json(response, standard_output);
-            if (ec)
+            const auto response_data =
+                glz::read_json<datatype::keybinding_dialog::response>(standard_output);
+            if (!response_data)
             {
-                std::println("Failed to decode json: {}", glz::format_error(ec, standard_output));
+                std::println("Failed to decode json: {}",
+                             glz::format_error(response_data.error(), standard_output));
                 // std::exit(EXIT_FAILURE);
                 return;
             }
+            const auto& response = response_data.value();
 
             // Keybinding update logic
 

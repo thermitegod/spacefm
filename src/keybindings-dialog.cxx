@@ -17,6 +17,7 @@
 
 #include <gtkmm.h>
 #include <glibmm.h>
+#include <vector>
 
 #if __has_include(<magic_enum/magic_enum.hpp>)
 // >=magic_enum-0.9.7
@@ -62,11 +63,10 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
             .modifier = set->keybinding.modifier});
     }
 
-    std::string buffer;
-    auto ec = glz::write_json(request, buffer);
-    if (ec)
+    auto buffer = glz::write_json(request);
+    if (!buffer)
     {
-        logger::error("Failed to create JSON: {}", glz::format_error(ec, buffer));
+        logger::error("Failed to create json: {}", glz::format_error(buffer));
         return;
     }
 
@@ -83,7 +83,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
         return;
     }
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer);
+    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
 
     std::int32_t exit_status = 0;
     std::string standard_output;
@@ -93,21 +93,22 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
         return;
     }
 
-    std::vector<datatype::keybinding_dialog::response> response;
-    ec = glz::read_json(response, standard_output);
-    if (ec)
+    const auto data =
+        glz::read_json<std::vector<datatype::keybinding_dialog::response>>(standard_output);
+    if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(ec, standard_output));
+                                           glz::format_error(data.error(), standard_output));
         return;
     }
+    const auto& response = data.value();
 
     // Update xset keybindings
-    for (const auto& data : response)
+    for (const auto& r : response)
     {
-        const auto set = xset::set::get(data.name);
-        set->keybinding.key = data.key;
-        set->keybinding.modifier = data.modifier;
+        const auto set = xset::set::get(r.name);
+        set->keybinding.key = r.key;
+        set->keybinding.modifier = r.modifier;
     }
 
     autosave::request_add();

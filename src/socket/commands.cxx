@@ -112,14 +112,19 @@ socket::command(const std::string_view socket_commands_json) noexcept
     static constexpr i32 SOCKET_FAILURE = 1; // Failing exit status.
     static constexpr i32 SOCKET_INVALID = 2; // Invalid request exit status.
 
-    socket::socket_request_data request_data;
-    const auto glz_ec = glz::read_json(request_data, socket_commands_json);
-    if (glz_ec)
+    const auto socket_request_data =
+        glz::read_json<socket::socket_request_data>(socket_commands_json);
+    if (!socket_request_data)
     {
-        return {
-            SOCKET_FAILURE,
-            std::format("JSON decode failed: {}", glz::format_error(glz_ec, socket_commands_json))};
+        logger::error<logger::domain::ptk>(
+            "Failed to decode json: {}",
+            glz::format_error(socket_request_data.error(), socket_commands_json));
+
+        return {SOCKET_FAILURE,
+                std::format("Failed to decode json: {}",
+                            glz::format_error(socket_request_data.error(), socket_commands_json))};
     }
+    const auto& request_data = socket_request_data.value();
 
     // socket flags
     auto panel = request_data.panel;
@@ -1624,13 +1629,18 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
             const auto data = request_data.data;
 
-            socket::socket_task_data task_data;
-            const auto task_ec = glz::read_json(task_data, data[0]);
-            if (task_ec)
+            const auto raw_task_data = glz::read_json<socket::socket_task_data>(data[0]);
+            if (!raw_task_data)
             {
+                logger::error<logger::domain::ptk>(
+                    "Failed to decode json: {}",
+                    glz::format_error(raw_task_data.error(), socket_commands_json));
+
                 return {SOCKET_FAILURE,
-                        std::format("JSON decode failed: {}", glz::format_error(task_ec, data[0]))};
+                        std::format("Failed to decode json: {}",
+                                    glz::format_error(raw_task_data.error(), data[0]))};
             }
+            const auto& task_data = raw_task_data.value();
 
             if (task_data.cmd.empty())
             {
@@ -1772,13 +1782,18 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
             const auto data = request_data.data;
 
-            socket::socket_file_task_data file_task_data;
-            const auto task_ec = glz::read_json(file_task_data, data[0]);
-            if (task_ec)
+            const auto raw_file_task_data = glz::read_json<socket::socket_file_task_data>(data[0]);
+            if (!raw_file_task_data)
             {
+                logger::error<logger::domain::ptk>(
+                    "Failed to decode json: {}",
+                    glz::format_error(raw_file_task_data.error(), socket_commands_json));
+
                 return {SOCKET_FAILURE,
-                        std::format("JSON decode failed: {}", glz::format_error(task_ec, data[0]))};
+                        std::format("Failed to decode json: {}",
+                                    glz::format_error(raw_file_task_data.error(), data[0]))};
             }
+            const auto& file_task_data = raw_file_task_data.value();
 
             if (file_task_data.files.empty())
             {

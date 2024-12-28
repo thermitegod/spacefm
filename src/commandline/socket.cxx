@@ -55,17 +55,15 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
     }
 
     // server request
-    glz::error_ctx ec;
-    std::string buffer;
-    ec = glz::write_json(opt, buffer);
-    if (ec)
+    const auto buffer = glz::write_json(opt);
+    if (!buffer)
     {
-        std::println("Failed to create socket JSON: {}", glz::format_error(ec, buffer));
+        std::println("Failed to create socket json: {}", glz::format_error(buffer));
         std::exit(EXIT_FAILURE);
     }
     // std::println("JSON : {}", buffer);
 
-    const bool sent = socket::send_command(socket, buffer);
+    const bool sent = socket::send_command(socket, buffer.value());
     if (!sent)
     {
         std::println("Failed to send command to server");
@@ -80,21 +78,21 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
         std::exit(EXIT_FAILURE);
     }
 
-    socket::socket_response_data response_data;
-    ec = glz::read_json(response_data, server_response.value());
-    if (ec)
+    const auto data = glz::read_json<socket::socket_response_data>(server_response.value());
+    if (!data)
     {
-        std::println("Failed to decode socket response: {}",
-                     glz::format_error(ec, server_response.value()));
+        std::println("Failed to decode json: {}",
+                     glz::format_error(data.error(), server_response.value()));
         std::exit(EXIT_FAILURE);
     }
+    const auto& response = data.value();
 
-    if (!response_data.message.empty())
+    if (!response.message.empty())
     {
-        std::println("{}", response_data.message);
+        std::println("{}", response.message);
     }
 
-    std::exit(response_data.exit_status);
+    std::exit(response.exit_status);
 }
 
 void
