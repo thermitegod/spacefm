@@ -224,23 +224,28 @@ SetKeyDialog::on_button_set_clicked()
 void
 SetKeyDialog::on_button_unset_clicked()
 {
-    const auto buffer = glz::write_json(this->result);
-    if (buffer)
-    {
-        std::println("{}", buffer.value());
-    }
+    this->button_set_.set_sensitive(true);
+    this->keybinding_.set_label("");
 
-    this->close();
+    this->result.name = this->keybinding_data_.name;
+    this->result.key = 0;
+    this->result.modifier = 0;
+
+    if (!this->keybinding_data_.shared_key.empty())
+    { // Switch to the shared_key
+        for (const auto& data : this->keybindings_data_)
+        {
+            if (this->keybinding_data_.shared_key == data.name)
+            {
+                this->result.name = data.name;
+                break;
+            }
+        }
+    }
 }
 
 void
 SetKeyDialog::on_button_cancel_clicked()
 {
-    const auto buffer = glz::write_json(this->result);
-    if (buffer)
-    {
-        std::println("{}", buffer.value());
-    }
-
     this->close();
 }
