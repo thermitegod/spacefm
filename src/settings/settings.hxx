@@ -54,9 +54,6 @@ struct settings
 
     // Units
     bool use_si_prefix{false};
-
-    // thumbnailer backend cli/api
-    bool thumbnailer_use_api{true};
 };
 } // namespace detail
 

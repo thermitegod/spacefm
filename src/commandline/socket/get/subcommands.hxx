@@ -60,7 +60,6 @@ void large_icons(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void statusbar_text(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void pathbar_text(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void current_dir(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
-void thumbnailer(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void selected_files(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void selected_filenames(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;
 void selected_pattern(CLI::App* app, const socket_subcommand_data_t& opt) noexcept;

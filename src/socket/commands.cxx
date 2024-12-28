@@ -858,12 +858,6 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             browser->chdir(value);
         }
-        else if (property == "thumbnailer")
-        {
-            const auto subproperty = request_data.subproperty;
-
-            config::settings.thumbnailer_use_api = subproperty == "api";
-        }
         else if (property == "editor")
         {
             const std::string_view value = data[0];
@@ -1338,10 +1332,6 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "current-dir")
         {
             return {SOCKET_SUCCESS, std::format("{}", browser->cwd().string())};
-        }
-        else if (property == "thumbnailer")
-        {
-            return {SOCKET_SUCCESS, config::settings.thumbnailer_use_api ? "api" : "cli"};
         }
         else if (property == "editor")
         {

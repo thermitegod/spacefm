@@ -509,27 +509,6 @@ create_pref_check_button(const std::string_view label) noexcept
 }
 } // namespace preference::thumbnail_size_limits
 
-namespace preference::thumbnailer_api
-{
-static void
-check_button_cb(GtkToggleButton* button, void* user_data) noexcept
-{
-    (void)user_data;
-    const bool value = gtk_toggle_button_get_active(button);
-    config::settings.thumbnailer_use_api = value;
-}
-
-static GtkCheckButton*
-create_pref_check_button(const std::string_view label) noexcept
-{
-    const bool value = config::settings.thumbnailer_use_api;
-    GtkCheckButton* button = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(label.data()));
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), value);
-    g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(check_button_cb), nullptr);
-    return button;
-}
-} // namespace preference::thumbnailer_api
-
 namespace preference::thumbnail_max_size
 {
 static void
@@ -1129,9 +1108,6 @@ init_general_tab() noexcept
         GTK_WIDGET(gtk_label_new("Max Image Size To Thumbnail")),
         GTK_WIDGET(
             preference::thumbnail_max_size::create_pref_spinner(1024 * 1024, 0, 1024, 1, 10, 0)));
-
-    page.add_row(
-        GTK_WIDGET(preference::thumbnailer_api::create_pref_check_button("Thumbnailer use API")));
 
     return GTK_WIDGET(page.box());
 }

@@ -53,7 +53,6 @@ config_parse_settings(const config::detail::settings& settings, const u64 versio
     config::settings.confirm = settings.confirm;
     config::settings.confirm_delete = settings.confirm_delete;
     config::settings.confirm_trash = settings.confirm_trash;
-    config::settings.thumbnailer_use_api = settings.thumbnailer_use_api;
     config::settings.maximized = settings.maximized;
     config::settings.always_show_tabs = settings.always_show_tabs;
     config::settings.show_close_tab_buttons = settings.show_close_tab_buttons;

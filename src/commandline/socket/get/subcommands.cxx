@@ -652,19 +652,6 @@ commandline::socket::get::current_dir(CLI::App* app, const socket_subcommand_dat
 }
 
 /*
- * subcommand thumbnailer
- */
-
-void
-commandline::socket::get::thumbnailer(CLI::App* app, const socket_subcommand_data_t& opt) noexcept
-{
-    auto* sub = app->add_subcommand("thumbnailer", "Get property thumbnailer");
-
-    const auto run_subcommand = [opt]() { opt->property = "thumbnailer"; };
-    sub->callback(run_subcommand);
-}
-
-/*
  * subcommand selected-files
  */
 
