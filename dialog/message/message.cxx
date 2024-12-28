@@ -27,11 +27,16 @@
 
 #include "message.hxx"
 
-MessageDialog::MessageDialog(const std::string_view title, const std::string_view message,
-                             const std::string_view secondary_message, const bool button_ok,
-                             const bool button_cancel, const bool button_close,
-                             const bool button_yes_no, const bool button_ok_cancel)
+MessageDialog::MessageDialog(const std::string_view json_data)
 {
+    const auto data = glz::read_json<datatype::message::request>(json_data);
+    if (!data)
+    {
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
+        std::exit(EXIT_FAILURE);
+    }
+    const auto& opts = data.value();
+
     this->set_size_request(200, -1);
     this->set_title("Message Dialog");
     this->set_resizable(false);
@@ -44,16 +49,16 @@ MessageDialog::MessageDialog(const std::string_view title, const std::string_vie
     this->vbox_.set_margin_top(5);
     this->vbox_.set_margin_bottom(5);
 
-    this->title_.set_markup(std::format("<big>{}</big>", title));
+    this->title_.set_markup(std::format("<big>{}</big>", opts.title));
     this->vbox_.append(this->title_);
 
-    this->message_.set_label(message.data());
+    this->message_.set_label(opts.message);
     this->message_.set_single_line_mode(false);
     this->vbox_.append(this->message_);
 
-    if (!secondary_message.empty())
+    if (!opts.secondary_message.empty())
     {
-        this->secondary_message_.set_label(secondary_message.data());
+        this->secondary_message_.set_label(opts.secondary_message);
         this->secondary_message_.set_single_line_mode(false);
         this->vbox_.append(this->secondary_message_);
     }
@@ -72,24 +77,24 @@ MessageDialog::MessageDialog(const std::string_view title, const std::string_vie
     this->button_no_ = Gtk::Button("_No", true);
     this->button_close_ = Gtk::Button("_Close", true);
     this->button_box_.set_halign(Gtk::Align::END);
-    if (button_ok)
+    if (opts.button_ok)
     {
         this->button_box_.append(this->button_ok_);
     }
-    else if (button_cancel)
+    else if (opts.button_cancel)
     {
         this->button_box_.append(this->button_cancel_);
     }
-    else if (button_close)
+    else if (opts.button_close)
     {
         this->button_box_.append(this->button_close_);
     }
-    else if (button_yes_no)
+    else if (opts.button_yes_no)
     {
         this->button_box_.append(this->button_no_);
         this->button_box_.append(this->button_yes_);
     }
-    else if (button_ok_cancel)
+    else if (opts.button_ok_cancel)
     {
         this->button_box_.append(this->button_cancel_);
         this->button_box_.append(this->button_ok_);

@@ -34,17 +34,26 @@ ptk::dialog::error(GtkWindow* parent, const std::string_view title,
     (void)parent;
 
 #if defined(HAVE_DEV)
-    auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ERROR);
+    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_ERROR);
 #else
-    auto command = Glib::find_program_in_path(DIALOG_ERROR);
+    const auto binary = Glib::find_program_in_path(DIALOG_ERROR);
 #endif
-    if (command.empty())
+    if (binary.empty())
     {
         logger::error("Failed to find error dialog binary: {}", DIALOG_ERROR);
         return;
     }
 
-    command = std::format(R"({} --title "{}" --message "{}")", command, title, message);
+    const auto request = datatype::error::request{.title = title.data(), .message = message.data()};
+    const auto buffer = glz::write_json(request);
+    if (!buffer)
+    {
+        logger::error("Failed to create json: {}", glz::format_error(buffer));
+        return;
+    }
+    // logger::trace("{}", buffer);
+
+    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
 
     Glib::spawn_command_line_async(command);
 }
@@ -60,46 +69,34 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
     assert(buttons != GtkButtonsType::GTK_BUTTONS_NONE);
 
 #if defined(HAVE_DEV)
-    auto command = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_MESSAGE);
+    const auto binary = std::format("{}/{}", DIALOG_BUILD_ROOT, DIALOG_MESSAGE);
 #else
-    auto command = Glib::find_program_in_path(DIALOG_MESSAGE);
+    const auto binary = Glib::find_program_in_path(DIALOG_MESSAGE);
 #endif
-    if (command.empty())
+    if (binary.empty())
     {
         logger::error("Failed to find message dialog binary: {}", DIALOG_MESSAGE);
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
 
-    std::string button_flag;
-    switch (buttons)
+    const auto request = datatype::message::request{
+        .title = title.data(),
+        .message = message.data(),
+        .secondary_message = secondary_message.data(),
+        .button_ok = buttons == GtkButtonsType::GTK_BUTTONS_OK,
+        .button_cancel = buttons == GtkButtonsType::GTK_BUTTONS_CANCEL,
+        .button_close = buttons == GtkButtonsType::GTK_BUTTONS_CLOSE,
+        .button_yes_no = buttons == GtkButtonsType::GTK_BUTTONS_YES_NO,
+        .button_ok_cancel = buttons == GtkButtonsType::GTK_BUTTONS_OK_CANCEL};
+    const auto buffer = glz::write_json(request);
+    if (!buffer)
     {
-        case GtkButtonsType::GTK_BUTTONS_OK:
-            button_flag = "--button-ok";
-            break;
-        case GtkButtonsType::GTK_BUTTONS_CLOSE:
-            button_flag = "--button-close";
-            break;
-        case GtkButtonsType::GTK_BUTTONS_CANCEL:
-            button_flag = "--button-cancel";
-            break;
-        case GtkButtonsType::GTK_BUTTONS_YES_NO:
-            button_flag = "--button-yes-no";
-            break;
-        case GtkButtonsType::GTK_BUTTONS_OK_CANCEL:
-            button_flag = "--button-ok-cancel";
-            break;
-        case GtkButtonsType::GTK_BUTTONS_NONE:
-        default:
-            assert(false);
-            break;
+        logger::error("Failed to create json: {}", glz::format_error(buffer));
+        return GtkResponseType::GTK_RESPONSE_NONE;
     }
+    // logger::trace("{}", buffer);
 
-    command = std::format(R"({} --title "{}" --message "{}" --secondary_message "{}" {})",
-                          command,
-                          title,
-                          message,
-                          secondary_message,
-                          button_flag);
+    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
 
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output);

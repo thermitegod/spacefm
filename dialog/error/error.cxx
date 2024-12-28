@@ -21,12 +21,24 @@
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
 
+#include <glaze/glaze.hpp>
+
+#include "datatypes.hxx"
+
 #include "vfs/utils/icon.hxx"
 
 #include "error.hxx"
 
-ErrorDialog::ErrorDialog(const std::string_view title, const std::string_view message)
+ErrorDialog::ErrorDialog(const std::string_view json_data)
 {
+    const auto data = glz::read_json<datatype::error::request>(json_data);
+    if (!data)
+    {
+        std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
+        std::exit(EXIT_FAILURE);
+    }
+    const auto& opts = data.value();
+
     this->set_size_request(200, -1);
     this->set_title("Message Dialog");
     this->set_resizable(false);
@@ -43,11 +55,11 @@ ErrorDialog::ErrorDialog(const std::string_view title, const std::string_view me
     this->icon_ = vfs::utils::load_icon("dialog-error", 64);
     this->icon_.set_margin_end(15);
     this->hbox_.append(this->icon_);
-    this->title_.set_markup(std::format("<big>{}</big>", title));
+    this->title_.set_markup(std::format("<big>{}</big>", opts.title));
     this->hbox_.append(this->title_);
     this->vbox_.append(this->hbox_);
 
-    this->message_.set_label(message.data());
+    this->message_.set_label(opts.message);
     this->message_.set_single_line_mode(false);
     this->vbox_.append(this->message_);
 

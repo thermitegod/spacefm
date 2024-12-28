@@ -23,7 +23,7 @@
 class ErrorDialog : public Gtk::Window
 {
   public:
-    ErrorDialog(const std::string_view title, const std::string_view message);
+    ErrorDialog(const std::string_view json_data);
 
   protected:
     Gtk::Box vbox_;

@@ -25,11 +25,8 @@ main(int argc, char* argv[])
 {
     CLI::App capp{"Spacefm Dialog"};
 
-    std::string title;
-    capp.add_option("--title", title, "Dialog title")->required();
-
-    std::string message;
-    capp.add_option("--message", message, "Dialog message")->required();
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
 
     CLI11_PARSE(capp, argc, argv);
 
@@ -37,6 +34,5 @@ main(int argc, char* argv[])
 
     return app->make_window_and_run<ErrorDialog>(0,       // Gtk does not handle cli
                                                  nullptr, // Gtk does not handle cli
-                                                 title,
-                                                 message);
+                                                 json_data);
 }

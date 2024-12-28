@@ -25,29 +25,8 @@ main(int argc, char* argv[])
 {
     CLI::App capp{"Spacefm Dialog"};
 
-    std::string title;
-    capp.add_option("--title", title, "Dialog title")->required();
-
-    std::string message;
-    capp.add_option("--message", message, "Dialog message")->required();
-
-    std::string secondary_message;
-    capp.add_option("--secondary_message", secondary_message, "Dialog optional secondary message");
-
-    bool button_ok = false;
-    capp.add_flag("--button-ok", button_ok, "Dialog add button 'Ok'");
-
-    bool button_close = false;
-    capp.add_flag("--button-close", button_close, "Dialog add button 'Close'");
-
-    bool button_cancel = false;
-    capp.add_flag("--button-cancel", button_cancel, "Dialog add button 'Cancel'");
-
-    bool button_yes_no = false;
-    capp.add_flag("--button-yes-no", button_yes_no, "Dialog add buttons 'Yes', 'No");
-
-    bool button_ok_cancel = false;
-    capp.add_flag("--button-ok-cancel", button_ok_cancel, "Dialog add buttons 'Ok', 'Cancel'");
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
 
     CLI11_PARSE(capp, argc, argv);
 
@@ -55,12 +34,5 @@ main(int argc, char* argv[])
 
     return app->make_window_and_run<MessageDialog>(0,       // Gtk does not handle cli
                                                    nullptr, // Gtk does not handle cli
-                                                   title,
-                                                   message,
-                                                   secondary_message,
-                                                   button_ok,
-                                                   button_cancel,
-                                                   button_close,
-                                                   button_yes_no,
-                                                   button_ok_cancel);
+                                                   json_data);
 }

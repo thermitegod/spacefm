@@ -23,10 +23,7 @@
 class MessageDialog : public Gtk::Window
 {
   public:
-    MessageDialog(const std::string_view title, const std::string_view message,
-                  const std::string_view secondary_message, const bool button_ok,
-                  const bool button_cancel, const bool button_close, const bool button_yes_no,
-                  const bool button_ok_cancel);
+    MessageDialog(const std::string_view json_data);
 
   protected:
     Gtk::Box vbox_;

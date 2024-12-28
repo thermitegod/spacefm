@@ -59,7 +59,7 @@ spacefm = build_target(
 )
 
 # Error
-incdir_error = include_directories('error')
+incdir_error = include_directories(['error', '../src/datatypes'])
 sources_error = files(
     'error/main.cxx',
     'error/error.cxx',

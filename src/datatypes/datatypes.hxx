@@ -41,6 +41,15 @@ struct response
 };
 } // namespace app_chooser
 
+namespace error
+{
+struct request
+{
+    std::string title;
+    std::string message;
+};
+} // namespace error
+
 namespace file_action
 {
 struct request
@@ -78,6 +87,18 @@ struct response
 
 namespace message
 {
+struct request
+{
+    std::string title;
+    std::string message;
+    std::string secondary_message;
+    bool button_ok;
+    bool button_cancel;
+    bool button_close;
+    bool button_yes_no;
+    bool button_ok_cancel;
+};
+
 struct response
 {
     std::string result;
