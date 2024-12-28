@@ -24,6 +24,8 @@
 
 #include <gtkmm.h>
 
+#include <glaze/glaze.hpp>
+
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"

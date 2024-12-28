@@ -15,13 +15,62 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
-#include <glaze/glaze.hpp>
-
 namespace datatype
 {
+struct settings
+{
+    // General Settings
+    bool show_thumbnails{false};
+    bool thumbnail_size_limit{true};
+    std::uint32_t thumbnail_max_size{8 << 20}; // 8 MiB
+
+    std::int32_t icon_size_big{48};
+    std::int32_t icon_size_small{22};
+    std::int32_t icon_size_tool{22};
+
+    bool click_executes{false};
+
+    bool confirm{true};
+    bool confirm_delete{true};
+    bool confirm_trash{true};
+
+    bool load_saved_tabs{true};
+
+    // Window State
+    bool maximized{false};
+
+    // Interface
+    bool always_show_tabs{true};
+    bool show_close_tab_buttons{false};
+    bool new_tab_here{false};
+
+    bool show_toolbar_home{true};
+    bool show_toolbar_refresh{true};
+    bool show_toolbar_search{true};
+
+    bool use_si_prefix{false};
+};
+
+// Only to be used by preference dialog
+struct settings_extended
+{
+    settings settings;
+
+    // xset settings
+    std::int32_t drag_action;
+    std::string editor;
+    std::string terminal;
+
+    struct
+    { // send only data
+        std::vector<std::string> supported_terminals;
+    } details;
+};
+
 namespace app_chooser
 {
 struct request

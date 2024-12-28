@@ -253,6 +253,7 @@ preprocessor = [
     '-DDIALOG_KEYBINDING_SET="spacefm_keybinding_set_key"',
     '-DDIALOG_MESSAGE="spacefm_message"',
     '-DDIALOG_PATTERN="spacefm_pattern"',
+    '-DDIALOG_PREFERENCE="spacefm_preference"',
     '-DDIALOG_PROPERTIES="spacefm_properties"',
 
     '-DG_DISABLE_ASSERT',

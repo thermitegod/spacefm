@@ -200,6 +200,29 @@ spacefm = build_target(
     # cpp_pch: 'pch/cxx_pch.hxx',
 )
 
+# Preference
+incdir_preference = include_directories(['preference', '../src/datatypes'])
+sources_preference = files(
+    'preference/main.cxx',
+    'preference/preference.cxx',
+)
+
+spacefm = build_target(
+    'spacefm_preference',
+    sources_preference,
+    target_type: 'executable',
+    include_directories: incdir_preference,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+    ],
+    # cpp_pch: 'pch/cxx_pch.hxx',
+)
+
 # Properties
 incdir_properties = include_directories(['properties', '../src/datatypes'])
 sources_properties = files(

@@ -21,6 +21,8 @@
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
 
+#include <glaze/glaze.hpp>
+
 #include <ztd/ztd.hxx>
 
 #include "datatypes.hxx"

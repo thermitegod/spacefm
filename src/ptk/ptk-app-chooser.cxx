@@ -22,6 +22,10 @@
 
 #include <optional>
 
+#include <glibmm.h>
+
+#include <glaze/glaze.hpp>
+
 #if __has_include(<magic_enum/magic_enum.hpp>)
 // >=magic_enum-0.9.7
 #include <magic_enum/magic_enum.hpp>
@@ -29,8 +33,6 @@
 // <=magic_enum-0.9.6
 #include <magic_enum.hpp>
 #endif
-
-#include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 

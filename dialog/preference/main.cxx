@@ -13,19 +13,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <CLI/CLI.hpp>
 
-#include <memory>
+#include <gtkmm.h>
+#include <glibmm.h>
 
-#include "datatypes/datatypes.hxx"
+#include "preference.hxx"
 
-namespace config
+int
+main(int argc, char* argv[])
 {
-using settings = datatype::settings;
+    CLI::App capp{"Spacefm Dialog"};
 
-namespace global
-{
-// this is only to be used where dependency injection is not viable, i.e. the legacy gtk code
-extern std::shared_ptr<settings> settings;
-} // namespace global
-} // namespace config
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.preference");
+
+    return app->make_window_and_run<PreferenceDialog>(0,       // Gtk does not handle cli
+                                                      nullptr, // Gtk does not handle cli
+                                                      json_data);
+}
