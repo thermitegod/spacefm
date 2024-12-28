@@ -137,8 +137,7 @@ KeybindingDialog::on_button_cancel_clicked()
 
 void
 KeybindingDialog::KeybindingPage::init(
-    KeybindingDialog* parent,
-    const std::span<const datatype::keybinding_dialog::request> keybindings,
+    KeybindingDialog* parent, const std::span<const datatype::keybinding::request> keybindings,
     const std::string_view category)
 {
     this->set_orientation(Gtk::Orientation::VERTICAL);
@@ -219,7 +218,7 @@ KeybindingDialog::KeybindingPage::init(
 
             // parse json return value
             const auto response_data =
-                glz::read_json<datatype::keybinding_dialog::response>(standard_output);
+                glz::read_json<datatype::keybinding::response>(standard_output);
             if (!response_data)
             {
                 std::println("Failed to decode json: {}",
@@ -302,7 +301,7 @@ KeybindingDialog::KeybindingPage::init(
 
 void
 KeybindingDialog::KeybindingPage::create_model(
-    const std::span<const datatype::keybinding_dialog::request> keybindings,
+    const std::span<const datatype::keybinding::request> keybindings,
     const std::string_view category)
 {
     this->liststore_ = Gio::ListStore<ModelColumns>::create();

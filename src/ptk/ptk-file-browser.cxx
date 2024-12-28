@@ -4009,7 +4009,7 @@ select_pattern_dialog(GtkWidget* parent) noexcept
         return "";
     }
 
-    const auto data = glz::read_json<datatype::pattern_dialog::response>(standard_output);
+    const auto data = glz::read_json<datatype::pattern::response>(standard_output);
     if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",

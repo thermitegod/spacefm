@@ -123,8 +123,8 @@ PatternDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mo
 void
 PatternDialog::on_button_ok_clicked()
 {
-    const auto buffer = glz::write_json(
-        datatype::pattern_dialog::response{.result = this->buf_->get_text().data()});
+    const auto buffer =
+        glz::write_json(datatype::pattern::response{.result = this->buf_->get_text().data()});
     if (buffer)
     {
         std::println("{}", buffer.value());

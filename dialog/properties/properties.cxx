@@ -207,7 +207,7 @@ PropertiesDialog::PropertiesDialog(const std::string_view json_data)
 {
     this->executor_ = global::runtime.thread_executor();
 
-    const auto data = glz::read_json<datatype::properties_dialog::request>(json_data);
+    const auto data = glz::read_json<datatype::properties::request>(json_data);
     if (!data)
     {
         std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));

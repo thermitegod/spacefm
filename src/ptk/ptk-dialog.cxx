@@ -111,7 +111,7 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
 
-    const auto data = glz::read_json<datatype::message_dialog::response>(standard_output);
+    const auto data = glz::read_json<datatype::message::response>(standard_output);
     if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",

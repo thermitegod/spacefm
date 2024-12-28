@@ -83,6 +83,6 @@ class ActionDialog : public Gtk::Window
     void on_bind_size(const Glib::RefPtr<Gtk::ListItem>& list_item);
 
   private:
-    std::vector<datatype::file_action_dialog::request> file_data_;
+    std::vector<datatype::file_action::request> file_data_;
     std::uint64_t total_size_ = 0;
 };

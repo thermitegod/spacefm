@@ -20,7 +20,9 @@
 
 #include <glaze/glaze.hpp>
 
-namespace datatype::app_chooser_dialog
+namespace datatype
+{
+namespace app_chooser
 {
 struct request
 {
@@ -37,22 +39,9 @@ struct response
     bool is_desktop;
     bool set_default;
 };
-} // namespace datatype::app_chooser_dialog
+} // namespace app_chooser
 
-template<> struct glz::meta<datatype::app_chooser_dialog::request>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "mime_type",      &datatype::app_chooser_dialog::request::mime_type,
-        "focus_all_apps", &datatype::app_chooser_dialog::request::focus_all_apps,
-        "show_command",   &datatype::app_chooser_dialog::request::show_command,
-        "show_default",   &datatype::app_chooser_dialog::request::show_default,
-        "dir_default",    &datatype::app_chooser_dialog::request::dir_default
-    );
-    // clang-format on
-};
-
-namespace datatype::file_action_dialog
+namespace file_action
 {
 struct request
 {
@@ -65,29 +54,9 @@ struct response
 {
     std::string result;
 };
-} // namespace datatype::file_action_dialog
+} // namespace file_action
 
-template<> struct glz::meta<datatype::file_action_dialog::request>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "name",   &datatype::file_action_dialog::request::name,
-        "size",   &datatype::file_action_dialog::request::size,
-        "is_dir", &datatype::file_action_dialog::request::is_dir
-    );
-    // clang-format on
-};
-
-template<> struct glz::meta<datatype::file_action_dialog::response>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "result", &datatype::file_action_dialog::response::result
-    );
-    // clang-format on
-};
-
-namespace datatype::keybinding_dialog
+namespace keybinding
 {
 struct request
 {
@@ -105,68 +74,25 @@ struct response
     std::uint32_t key;
     std::uint32_t modifier;
 };
-} // namespace datatype::keybinding_dialog
+} // namespace keybinding
 
-template<> struct glz::meta<datatype::keybinding_dialog::request>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "name",       &datatype::keybinding_dialog::request::name,
-        "label",      &datatype::keybinding_dialog::request::label,
-        "category",   &datatype::keybinding_dialog::request::category,
-        "shared_key", &datatype::keybinding_dialog::request::category,
-        "key",        &datatype::keybinding_dialog::request::key,
-        "modifier",   &datatype::keybinding_dialog::request::modifier
-    );
-    // clang-format on
-};
-
-template<> struct glz::meta<datatype::keybinding_dialog::response>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "name",     &datatype::keybinding_dialog::response::name,
-        "key",      &datatype::keybinding_dialog::response::key,
-        "modifier", &datatype::keybinding_dialog::response::modifier
-    );
-    // clang-format on
-};
-
-namespace datatype::message_dialog
+namespace message
 {
 struct response
 {
     std::string result;
 };
-} // namespace datatype::message_dialog
+} // namespace message
 
-template<> struct glz::meta<datatype::message_dialog::response>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "result", &datatype::message_dialog::response::result
-    );
-    // clang-format on
-};
-
-namespace datatype::pattern_dialog
+namespace pattern
 {
 struct response
 {
     std::string result;
 };
-} // namespace datatype::pattern_dialog
+} // namespace pattern
 
-template<> struct glz::meta<datatype::pattern_dialog::response>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "result", &datatype::pattern_dialog::response::result
-    );
-    // clang-format on
-};
-
-namespace datatype::properties_dialog
+namespace properties
 {
 struct request
 {
@@ -174,15 +100,5 @@ struct request
     std::uint32_t page;
     std::vector<std::string> files;
 };
-} // namespace datatype::properties_dialog
-
-template<> struct glz::meta<datatype::properties_dialog::request>
-{
-    // clang-format off
-    static constexpr auto value = glz::object(
-        "cwd",   &datatype::properties_dialog::request::cwd,
-        "page",  &datatype::properties_dialog::request::page,
-        "files", &datatype::properties_dialog::request::files
-    );
-    // clang-format on
-};
+} // namespace properties
+} // namespace datatype

@@ -46,7 +46,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
     (void)parent;
 
     // Create JSON data for keybindings
-    std::vector<datatype::keybinding_dialog::request> request;
+    std::vector<datatype::keybinding::request> request;
     for (const xset_t& set : xset::sets())
     {
         if (set->keybinding.type == xset::set::keybinding_type::invalid)
@@ -54,7 +54,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
             continue;
         }
 
-        request.push_back(datatype::keybinding_dialog::request{
+        request.push_back(datatype::keybinding::request{
             .name = set->name().data(),
             .label = xset::utils::clean_label(set->menu.label.value_or("")),
             .category = magic_enum::enum_name(set->keybinding.type).data(),
@@ -93,8 +93,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
         return;
     }
 
-    const auto data =
-        glz::read_json<std::vector<datatype::keybinding_dialog::response>>(standard_output);
+    const auto data = glz::read_json<std::vector<datatype::keybinding::response>>(standard_output);
     if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",

@@ -31,7 +31,7 @@
 
 AppChooserDialog::AppChooserDialog(const std::string_view json_data)
 {
-    const auto data = glz::read_json<datatype::app_chooser_dialog::request>(json_data);
+    const auto data = glz::read_json<datatype::app_chooser::request>(json_data);
     if (!data)
     {
         std::println("Failed to decode json: {}", glz::format_error(data.error(), json_data));
@@ -171,10 +171,10 @@ AppChooserDialog::on_button_ok_clicked()
         this->on_button_close_clicked();
     }
 
-    const auto buffer = glz::write_json(datatype::app_chooser_dialog::response{
-        .app = app,
-        .is_desktop = is_desktop,
-        .set_default = this->btn_set_as_default_.get_active()});
+    const auto buffer = glz::write_json(
+        datatype::app_chooser::response{.app = app,
+                                        .is_desktop = is_desktop,
+                                        .set_default = this->btn_set_as_default_.get_active()});
     if (buffer)
     {
         std::println("{}", buffer.value());

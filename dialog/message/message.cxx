@@ -128,7 +128,7 @@ MessageDialog::on_key_press(std::uint32_t keyval, std::uint32_t keycode, Gdk::Mo
 void
 MessageDialog::on_button_ok_clicked()
 {
-    const auto buffer = glz::write_json(datatype::message_dialog::response{.result = "Ok"});
+    const auto buffer = glz::write_json(datatype::message::response{.result = "Ok"});
     if (buffer)
     {
         std::println("{}", buffer.value());
@@ -140,7 +140,7 @@ MessageDialog::on_button_ok_clicked()
 void
 MessageDialog::on_button_cancel_clicked()
 {
-    const auto buffer = glz::write_json(datatype::message_dialog::response{.result = "Cancel"});
+    const auto buffer = glz::write_json(datatype::message::response{.result = "Cancel"});
     if (buffer)
     {
         std::println("{}", buffer.value());
@@ -152,7 +152,7 @@ MessageDialog::on_button_cancel_clicked()
 void
 MessageDialog::on_button_yes_clicked()
 {
-    const auto buffer = glz::write_json(datatype::message_dialog::response{.result = "Yes"});
+    const auto buffer = glz::write_json(datatype::message::response{.result = "Yes"});
     if (buffer)
     {
         std::println("{}", buffer.value());
@@ -163,7 +163,7 @@ MessageDialog::on_button_yes_clicked()
 void
 MessageDialog::on_button_no_clicked()
 {
-    const auto buffer = glz::write_json(datatype::message_dialog::response{.result = "No"});
+    const auto buffer = glz::write_json(datatype::message::response{.result = "No"});
     if (buffer)
     {
         std::println("{}", buffer.value());
@@ -175,7 +175,7 @@ MessageDialog::on_button_no_clicked()
 void
 MessageDialog::on_button_close_clicked()
 {
-    const auto buffer = glz::write_json(datatype::message_dialog::response{.result = "Close"});
+    const auto buffer = glz::write_json(datatype::message::response{.result = "Close"});
     if (buffer)
     {
         std::println("{}", buffer.value());

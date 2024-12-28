@@ -57,7 +57,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
 
     // Create
 
-    std::vector<datatype::file_action_dialog::request> file_data;
+    std::vector<datatype::file_action::request> file_data;
     for (const auto& file : selected_files)
     {
         file_data.push_back({file->name().data(), file->size(), file->is_directory()});
@@ -98,7 +98,7 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
         return false;
     }
 
-    const auto data = glz::read_json<datatype::file_action_dialog::response>(standard_output);
+    const auto data = glz::read_json<datatype::file_action::response>(standard_output);
     if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",

@@ -68,7 +68,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
     }
 
     // clang-format off
-    const auto request = datatype::app_chooser_dialog::request{
+    const auto request = datatype::app_chooser::request{
         .mime_type = mime_type->type().data(),
         .focus_all_apps = focus_all_apps,
         .show_command = show_command,
@@ -95,7 +95,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
         return std::nullopt;
     }
 
-    const auto data = glz::read_json<datatype::app_chooser_dialog::response>(standard_output);
+    const auto data = glz::read_json<datatype::app_chooser::response>(standard_output);
     if (!data)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",

@@ -53,7 +53,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     }
 
     // clang-format off
-    const auto request = datatype::properties_dialog::request{
+    const auto request = datatype::properties::request{
         .cwd = cwd,
         .page = (std::uint32_t)page,
         .files = [selected_files]()
