@@ -154,12 +154,13 @@ AppChooserDialog::on_button_ok_clicked()
     { // use selected app
         is_desktop = true;
 
-        const auto page = this->notebook_.get_current_page();
-        auto* app_page =
-            dynamic_cast<AppChooserDialog::AppPage*>(this->notebook_.get_nth_page(page));
-        auto* list = dynamic_cast<Gtk::ListView*>(app_page->get_child());
-        auto item = std::dynamic_pointer_cast<Gio::ListModel>(list->get_model())
-                        ->get_object(app_page->position_);
+        const auto current_page = this->notebook_.get_current_page();
+        auto* page =
+            dynamic_cast<AppChooserDialog::AppPage*>(this->notebook_.get_nth_page(current_page));
+
+        auto* list = dynamic_cast<Gtk::ListView*>(page->get_child());
+        auto model = std::dynamic_pointer_cast<Gio::ListModel>(list->get_model());
+        auto item = model->get_object(page->position_);
         if (auto app_info = std::dynamic_pointer_cast<Gio::AppInfo>(item))
         {
             app = app_info->get_id();
