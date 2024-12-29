@@ -38,169 +38,96 @@
 
 #include "properties.hxx"
 
-// TODO
-//  - Fix label alignment
-
-class PropertiesSection : public Gtk::Box
-{
-  public:
-    PropertiesSection() noexcept
-    {
-        this->set_orientation(Gtk::Orientation::VERTICAL);
-        this->set_spacing(6);
-        // this->set_margin(6);
-
-        Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
-        hbox.append(this->content_box_);
-        this->append(hbox);
-    }
-
-    void
-    new_split_vboxes(Gtk::Box& left_box, Gtk::Box& right_box) noexcept
-    {
-        left_box = Gtk::Box(Gtk::Orientation::VERTICAL, 6);
-        left_box.set_homogeneous(false);
-
-        right_box = Gtk::Box(Gtk::Orientation::VERTICAL, 6);
-        right_box.set_homogeneous(false);
-
-        Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 12);
-        hbox.append(left_box);
-        hbox.append(right_box);
-        this->content_box_.append(hbox);
-
-        right_box.set_hexpand(true);
-    }
-
-    Gtk::Box&
-    contentbox() noexcept
-    {
-        this->content_box_.set_visible(true);
-        return this->content_box_;
-    }
-
-  private:
-    Gtk::Box content_box_ = Gtk::Box(Gtk::Orientation::VERTICAL, 0);
-};
-
 class PropertiesPage : public Gtk::Box
 {
   public:
-    PropertiesPage() noexcept
+    PropertiesPage()
     {
         this->set_orientation(Gtk::Orientation::VERTICAL);
-        this->set_spacing(12);
-        // this->set_margin(12);
-
+        this->set_margin(5);
         this->set_homogeneous(false);
-
-        this->set_margin_start(12);
-        this->set_margin_end(12);
-        this->set_margin_top(12);
-        this->set_margin_bottom(12);
-
-        this->section_ = PropertiesSection();
-        this->append(this->section_);
-    }
-
-    void
-    add_row(const std::string_view left_item_name) noexcept
-    {
-        Gtk::Label left_item = Gtk::Label(left_item_name.data());
-
-        Pango::AttrList attrs;
-        Pango::AttrInt attr = Pango::Attribute::create_attr_weight(Pango::Weight::BOLD);
-        attrs.insert(attr);
-        left_item.set_attributes(attrs);
-
-        left_item.set_xalign(0.0f);
-        left_item.set_yalign(0.5f);
-
-        this->section_.contentbox().append(left_item);
-    }
-
-    void
-    add_row(const std::string_view left_item_name, Gtk::Entry right_item) noexcept
-    {
-        Gtk::Label left_item = Gtk::Label(left_item_name.data());
-        left_item.set_xalign(0.0f);
-        left_item.set_yalign(0.5f);
-
-        Gtk::Box left_box;
-        Gtk::Box right_box;
-        this->section_.new_split_vboxes(left_box, right_box);
-
-        left_box.append(left_item);
-        right_box.append(right_item);
-    }
-
-    void
-    add_row(const std::string_view left_item_name, Gtk::Label& right_item) noexcept
-    {
-        Gtk::Label left_item = Gtk::Label(left_item_name.data());
-        left_item.set_xalign(0.0f);
-        left_item.set_yalign(0.5f);
-
-        Gtk::Box left_box;
-        Gtk::Box right_box;
-        this->section_.new_split_vboxes(left_box, right_box);
-        left_box.append(left_item);
-        right_box.append(right_item);
-    }
-
-    void
-    add_row(const std::string_view left_item_name, Gtk::CheckButton& right_item) noexcept
-    {
-        Gtk::Label left_item = Gtk::Label(left_item_name.data());
-        left_item.set_xalign(0.0f);
-        left_item.set_yalign(0.5f);
-
-        Gtk::Box left_box;
-        Gtk::Box right_box;
-        this->section_.new_split_vboxes(left_box, right_box);
-        left_box.append(left_item);
-        right_box.append(right_item);
+        this->set_vexpand(true);
     }
 
     void
     add_row(const std::string_view left_item_name, const std::string_view right_item_name) noexcept
     {
-        Gtk::Label left_item = Gtk::Label(left_item_name.data());
-        left_item.set_xalign(0.0f);
-        left_item.set_yalign(0.5f);
-
-        Gtk::Label right_item = Gtk::Label(right_item_name.data());
-        right_item.set_xalign(0.0f);
-        right_item.set_yalign(0.5f);
+        Gtk::Label left_item(left_item_name.data());
+        Gtk::Label right_item(right_item_name.data());
 
         Gtk::Box left_box;
         Gtk::Box right_box;
-        this->section_.new_split_vboxes(left_box, right_box);
+        this->new_split_vboxes(left_box, right_box);
         left_box.append(left_item);
         right_box.append(right_item);
     }
 
     void
-    add_row(Gtk::Label& left_item, Gtk::Label& right_item) noexcept
+    add_row(const std::string_view left_item_name, Gtk::Widget& right_item) noexcept
     {
-        left_item.set_xalign(0.0f);
-        left_item.set_yalign(0.5f);
+        Gtk::Label left_item(left_item_name.data());
 
         Gtk::Box left_box;
         Gtk::Box right_box;
-        this->section_.new_split_vboxes(left_box, right_box);
+        this->new_split_vboxes(left_box, right_box);
         left_box.append(left_item);
         right_box.append(right_item);
     }
 
     void
-    add_row_widget(Gtk::Widget& item) noexcept
+    add_row(Gtk::Label& left_item, Gtk::Widget& right_item) noexcept
     {
-        this->section_.contentbox().append(item);
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->new_split_vboxes(left_box, right_box);
+        left_box.append(left_item);
+        right_box.append(right_item);
+    }
+
+    void
+    add_row(Gtk::Widget& item) noexcept
+    {
+        this->append(item);
+    }
+
+    void
+    add_entry(const std::string_view left_item_name, const std::string_view text,
+              const bool selectable = true) noexcept
+    {
+        Gtk::Label left_item(left_item_name.data());
+
+        Gtk::Entry entry;
+        entry.set_text(text.data());
+        entry.set_editable(false);
+        entry.set_hexpand(true);
+        if (!selectable)
+        {
+            entry.set_can_focus(false);
+            entry.set_sensitive(false);
+        }
+
+        Gtk::Box left_box;
+        Gtk::Box right_box;
+        this->new_split_vboxes(left_box, right_box);
+        left_box.append(left_item);
+        right_box.append(entry);
     }
 
   private:
-    PropertiesSection section_;
+    void
+    new_split_vboxes(Gtk::Box& left_box, Gtk::Box& right_box) noexcept
+    {
+        left_box.set_spacing(6);
+        left_box.set_homogeneous(false);
+
+        right_box.set_spacing(6);
+        right_box.set_homogeneous(false);
+
+        Gtk::Box hbox = Gtk::Box(Gtk::Orientation::HORIZONTAL, 12);
+        hbox.append(left_box);
+        hbox.append(right_box);
+        this->append(hbox);
+    }
 };
 
 PropertiesDialog::PropertiesDialog(const std::string_view json_data)
@@ -426,39 +353,6 @@ PropertiesDialog::on_update_labels() noexcept
                                              this->total_count_dir_));
 }
 
-Gtk::Entry
-PropertiesDialog::create_prop_text_box(const std::string_view data) const noexcept
-{
-    Gtk::Entry entry;
-    entry.set_text(data.data());
-    entry.set_editable(false);
-    return entry;
-}
-
-Gtk::Entry
-PropertiesDialog::create_prop_text_box_no_focus(const std::string_view data) const noexcept
-{
-    Gtk::Entry entry;
-    entry.set_text(data.data());
-    entry.set_editable(false);
-    entry.set_can_focus(false);
-    entry.set_sensitive(false);
-    return entry;
-}
-
-Gtk::Entry
-PropertiesDialog::create_prop_text_box_date(
-    const std::chrono::system_clock::time_point time_point) const noexcept
-{
-    const auto time_formated =
-        std::format("{}", std::chrono::floor<std::chrono::seconds>(time_point));
-
-    Gtk::Entry entry;
-    entry.set_text(time_formated);
-    entry.set_editable(false);
-    return entry;
-}
-
 void
 PropertiesDialog::init_file_info_tab() noexcept
 {
@@ -472,25 +366,25 @@ PropertiesDialog::init_file_info_tab() noexcept
 
     if (multiple_files)
     {
-        page.add_row("File Name:   ", create_prop_text_box_no_focus("( multiple files )"));
+        page.add_entry("File Name:   ", "( multiple files )", false);
     }
     else
     {
         if (file->is_symlink())
         {
-            page.add_row("Link Name:   ", create_prop_text_box(file->name()));
+            page.add_entry("Link Name:   ", file->name());
         }
         else if (file->is_directory())
         {
-            page.add_row("Directory:   ", create_prop_text_box(file->name()));
+            page.add_entry("Directory:   ", file->name());
         }
         else
         {
-            page.add_row("File Name:   ", create_prop_text_box(file->name()));
+            page.add_entry("File Name:   ", file->name());
         }
     }
 
-    page.add_row("Location:    ", create_prop_text_box(this->cwd_.string()));
+    page.add_entry("Location:    ", this->cwd_.string());
 
     if (file->is_symlink())
     {
@@ -508,7 +402,7 @@ PropertiesDialog::init_file_info_tab() noexcept
             target = "( read link error )";
         }
 
-        page.add_row("Link Target: ", create_prop_text_box(target));
+        page.add_entry("Link Target: ", target);
     }
 
     bool same_type = true;
@@ -576,21 +470,21 @@ PropertiesDialog::init_file_info_tab() noexcept
 
     if (multiple_files)
     {
-        page.add_row("Accessed:    ",
-                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
-        page.add_row("Created:     ",
-                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
-        page.add_row("Metadata:    ",
-                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
-        page.add_row("Modified:    ",
-                     this->create_prop_text_box_no_focus("( multiple timestamps )"));
+        page.add_entry("Accessed:    ", "( multiple timestamps )", false);
+        page.add_entry("Created:     ", "( multiple timestamps )", false);
+        page.add_entry("Metadata:    ", "( multiple timestamps )", false);
+        page.add_entry("Modified:    ", "( multiple timestamps )", false);
     }
     else
     {
-        page.add_row("Accessed:    ", this->create_prop_text_box_date(file->atime()));
-        page.add_row("Created:     ", this->create_prop_text_box_date(file->btime()));
-        page.add_row("Metadata:    ", this->create_prop_text_box_date(file->ctime()));
-        page.add_row("Modified:    ", this->create_prop_text_box_date(file->mtime()));
+        page.add_entry("Accessed:    ",
+                       std::format("{}", std::chrono::floor<std::chrono::seconds>(file->atime())));
+        page.add_entry("Created:     ",
+                       std::format("{}", std::chrono::floor<std::chrono::seconds>(file->btime())));
+        page.add_entry("Metadata:    ",
+                       std::format("{}", std::chrono::floor<std::chrono::seconds>(file->ctime())));
+        page.add_entry("Modified:    ",
+                       std::format("{}", std::chrono::floor<std::chrono::seconds>(file->mtime())));
     }
 
     auto tab_label = Gtk::Label("Info");
@@ -880,10 +774,10 @@ PropertiesDialog::init_permissions_tab() noexcept
     const auto& selected_file = this->file_list_.front();
 
     // Owner
-    page.add_row("Owner:", create_prop_text_box(selected_file->display_owner()));
+    page.add_entry("Owner:", selected_file->display_owner());
 
     // Group
-    page.add_row("Group:", create_prop_text_box(selected_file->display_group()));
+    page.add_entry("Group:", selected_file->display_group());
 
     // Permissions
 
@@ -1006,7 +900,7 @@ PropertiesDialog::init_permissions_tab() noexcept
         check_button_sticky_bit.set_active(true);
     }
 
-    page.add_row_widget(grid);
+    page.add_row(grid);
 
     auto tab_label = Gtk::Label("Permissions");
     this->notebook_.append_page(page, tab_label);

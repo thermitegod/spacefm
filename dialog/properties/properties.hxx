@@ -21,8 +21,6 @@
 
 #include <vector>
 
-#include <chrono>
-
 #include <gtkmm.h>
 
 #include "concurrency.hxx"
@@ -55,11 +53,6 @@ class PropertiesDialog : public Gtk::Window
     void calc_total_size_of_files(const std::filesystem::path& path) noexcept;
     concurrencpp::result<void> calc_size() noexcept;
     void on_update_labels() noexcept;
-
-    Gtk::Entry create_prop_text_box(const std::string_view data) const noexcept;
-    Gtk::Entry create_prop_text_box_no_focus(const std::string_view data) const noexcept;
-    Gtk::Entry create_prop_text_box_date(
-        const std::chrono::system_clock::time_point time_point) const noexcept;
 
     void init_file_info_tab() noexcept;
     void init_media_info_tab() noexcept;
