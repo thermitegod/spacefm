@@ -196,11 +196,10 @@ LoadAllMimeCacheFiles(MimeTypeMap& map, std::vector<FileInfo>& files) noexcept
 
     for (const auto& mime_cache : mime_cache_files)
     {
-        std::error_code ec;
-        const auto mime_stat = ztd::stat(mime_cache, ec);
-        if (!ec && ParseMimeTypes(mime_cache, map))
+        const auto mime_stat = ztd::stat::create(mime_cache);
+        if (mime_stat && ParseMimeTypes(mime_cache, map))
         {
-            files.emplace_back(mime_cache, mime_stat.mtime());
+            files.emplace_back(mime_cache, mime_stat->mtime());
         }
     }
 }
@@ -446,8 +445,12 @@ vfs::detail::mime_type::chrome::GetFileMimeType(const std::filesystem::path& fil
             if (std::ranges::any_of(xdg_mime_files,
                                     [](const FileInfo& file_info)
                                     {
-                                        const auto info = ztd::stat(file_info.path);
-                                        return file_info.last_modified != info.mtime();
+                                        const auto info = ztd::stat::create(file_info.path);
+                                        if (info)
+                                        {
+                                            return file_info.last_modified != info->mtime();
+                                        }
+                                        return false;
                                     }))
             {
                 mime_type_map.clear();

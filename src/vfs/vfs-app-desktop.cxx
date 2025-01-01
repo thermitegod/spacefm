@@ -54,7 +54,7 @@
 struct desktop_cache_data
 {
     std::shared_ptr<vfs::desktop> desktop;
-    std::chrono::system_clock::time_point desktop_mtime;
+    std::chrono::system_clock::time_point mtime;
 };
 
 static std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
@@ -67,15 +67,16 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
         // logger::info<logger::domain::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file.string());
         const auto& cache = desktops_cache.at(desktop_file);
 
-        const auto desktop_stat = ztd::stat(cache.desktop->path());
-        if (desktop_stat.mtime() == cache.desktop_mtime)
+        const auto desktop_stat = ztd::stat::create(cache.desktop->path());
+        if (desktop_stat && desktop_stat.value().mtime() == cache.mtime)
         {
             return cache.desktop;
         }
         // logger::info<logger::domain::vfs>("vfs::desktop({}) changed on disk, reloading", logger::utils::ptr(desktop));
     }
     const auto desktop = std::make_shared<vfs::desktop>(desktop_file);
-    desktops_cache.insert({desktop_file, {desktop, ztd::stat(desktop->path()).mtime()}});
+    desktops_cache.insert(
+        {desktop_file, {desktop, ztd::stat::create(desktop->path()).value().mtime()}});
     // logger::info<logger::domain::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file.string());
     return desktop;
 }

@@ -1693,15 +1693,14 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 return {SOCKET_INVALID, std::format("path does not exist '{}'", value)};
             }
 
-            std::error_code ec;
-            const auto real_path_stat = ztd::stat(value, ec);
+            const auto real_path_stat = ztd::stat::create(value);
             std::shared_ptr<vfs::volume> vol = nullptr;
             if (property == "umount" && std::filesystem::is_directory(value))
             {
                 // umount DIR
                 if (vfs::is_path_mountpoint(value))
                 {
-                    if (ec || !real_path_stat.is_block_file())
+                    if (!real_path_stat || !real_path_stat->is_block_file())
                     {
                         // NON-block device - try to find vol by mount point
                         vol = vfs::volume_get_by_device(value);
@@ -1712,7 +1711,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                     }
                 }
             }
-            else if (!ec && real_path_stat.is_block_file())
+            else if (real_path_stat && real_path_stat->is_block_file())
             {
                 // block device eg /dev/sda1
                 vol = vfs::volume_get_by_device(value);

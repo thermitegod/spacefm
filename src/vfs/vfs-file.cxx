@@ -94,14 +94,14 @@ vfs::file::~file() noexcept
 bool
 vfs::file::update() noexcept
 {
-    std::error_code ec;
-    this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow, ec);
-    if (ec)
+    const auto stat = ztd::statx::create(this->path_, ztd::statx::symlink::no_follow);
+    if (!stat)
     {
         this->mime_type_ =
             vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown, this->settings_);
         return false;
     }
+    this->file_stat_ = stat.value();
 
     // logger::debug<logger::domain::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
 
@@ -118,12 +118,18 @@ vfs::file::update() noexcept
     this->display_disk_size_ = vfs::utils::format_file_size(this->size_on_disk());
 
     // owner
-    const auto pw = ztd::passwd(this->file_stat_.uid());
-    this->display_owner_ = pw.name();
+    const auto pw = ztd::passwd::create(this->file_stat_.uid());
+    if (pw)
+    {
+        this->display_owner_ = pw->name();
+    }
 
     // group
-    const auto gr = ztd::group(this->file_stat_.gid());
-    this->display_group_ = gr.name();
+    const auto gr = ztd::group::create(this->file_stat_.gid());
+    if (gr)
+    {
+        this->display_group_ = gr->name();
+    }
 
     // time
     this->display_atime_ =

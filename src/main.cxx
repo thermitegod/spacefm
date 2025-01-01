@@ -201,9 +201,8 @@ activate(GtkApplication* app, void* user_data) noexcept
         }
         else if (std::filesystem::exists(real_path))
         {
-            std::error_code ec;
-            const auto file_stat = ztd::stat(real_path, ec);
-            if (!ec && file_stat.is_block_file())
+            const auto stat = ztd::stat::create(real_path);
+            if (stat && stat->is_block_file())
             {
                 // open block device eg /dev/sda1
                 ptk::view::location::open_block(real_path, true);

@@ -2127,8 +2127,8 @@ ptk::file_task::query_overwrite() noexcept
 
     const bool different_files = (!std::filesystem::equivalent(current_file, current_dest));
 
-    const auto src_stat = ztd::lstat(current_file);
-    const auto dest_stat = ztd::lstat(current_dest);
+    const auto src_stat = *ztd::lstat::create(current_file);  // already checked
+    const auto dest_stat = *ztd::lstat::create(current_dest); // already checked
 
     const bool is_src_dir = std::filesystem::is_directory(current_file);
     const bool is_dest_dir = std::filesystem::is_directory(current_dest);

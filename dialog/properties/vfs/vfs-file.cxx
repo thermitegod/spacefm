@@ -77,13 +77,13 @@ vfs::file::~file() noexcept
 bool
 vfs::file::update() noexcept
 {
-    std::error_code ec;
-    this->file_stat_ = ztd::statx(this->path_, ztd::statx::symlink::no_follow, ec);
-    if (ec)
+    const auto stat = ztd::statx::create(this->path_, ztd::statx::symlink::no_follow);
+    if (!stat)
     {
         this->mime_type_ = vfs::mime_type::create_from_type(vfs::constants::mime_type::unknown);
         return false;
     }
+    this->file_stat_ = stat.value();
 
     // logger::debug<logger::domain::vfs>("vfs::file::update({})    {}  size={}", logger::utils::ptr(this), this->name, this->file_stat.size());
 

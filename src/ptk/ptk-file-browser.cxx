@@ -2115,97 +2115,97 @@ on_folder_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_contex
             if (puri)
             {
                 // We only want to update drag status, not really want to drop
-                const auto dest_dir_stat = ztd::stat(dest_dir);
-
-                const dev_t dest_dev = dest_dir_stat.dev();
-                const ino_t dest_inode = dest_dir_stat.ino();
-                if (browser->drag_source_dev_ == 0)
+                const auto dest_dir_stat = ztd::stat::create(dest_dir);
+                if (dest_dir_stat)
                 {
-                    browser->drag_source_dev_ = dest_dev;
-                    for (; *puri; ++puri)
+                    const auto dest_dev = dest_dir_stat->dev();
+                    const auto dest_inode = dest_dir_stat->ino();
+                    if (browser->drag_source_dev_ == 0)
                     {
-                        const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
-
-                        std::error_code ec;
-                        const auto file_path_stat = ztd::stat(file_path, ec);
-                        if (!ec)
+                        browser->drag_source_dev_ = dest_dev;
+                        for (; *puri; ++puri)
                         {
-                            if (file_path_stat.dev() != dest_dev)
-                            {
-                                // different devices - store source device
-                                browser->drag_source_dev_ = file_path_stat.dev();
-                                break;
-                            }
-                            else if (browser->drag_source_inode_ == 0)
-                            {
-                                // same device - store source parent inode
-                                const auto src_dir = file_path.parent_path();
+                            const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
-                                std::error_code src_ec;
-                                const auto src_dir_stat = ztd::stat(src_dir, src_ec);
-                                if (!src_ec)
+                            const auto file_path_stat = ztd::stat::create(file_path);
+                            if (file_path_stat)
+                            {
+                                if (file_path_stat->dev() != dest_dev)
                                 {
-                                    browser->drag_source_inode_ = src_dir_stat.ino();
+                                    // different devices - store source device
+                                    browser->drag_source_dev_ = file_path_stat->dev();
+                                    break;
+                                }
+                                else if (browser->drag_source_inode_ == 0)
+                                {
+                                    // same device - store source parent inode
+                                    const auto src_dir = file_path.parent_path();
+
+                                    const auto src_dir_stat = ztd::stat::create(src_dir);
+                                    if (src_dir_stat)
+                                    {
+                                        browser->drag_source_inode_ = src_dir_stat->ino();
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                g_strfreev(list);
+                    g_strfreev(list);
 
-                vfs::file_task::type file_action;
+                    vfs::file_task::type file_action;
 
-                if (browser->drag_source_dev_ != dest_dev ||
-                    browser->drag_source_inode_ == dest_inode)
-                { // src and dest are on different devices or same dir
-                    // logger::debug<logger::domain::ptk>("DnD COPY");
-                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
-                    file_action = vfs::file_task::type::copy;
-                }
-                else
-                {
-                    // logger::debug<logger::domain::ptk>("DnD MOVE");
-                    gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
-                    file_action = vfs::file_task::type::move;
-                }
-
-                std::vector<std::filesystem::path> file_list;
-                puri = list = gtk_selection_data_get_uris(sel_data);
-                for (; *puri; ++puri)
-                {
-                    std::filesystem::path file_path;
-                    if (**puri == '/')
-                    {
-                        file_path = *puri;
+                    if (browser->drag_source_dev_ != dest_dev ||
+                        browser->drag_source_inode_ == dest_inode)
+                    { // src and dest are on different devices or same dir
+                        // logger::debug<logger::domain::ptk>("DnD COPY");
+                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
+                        file_action = vfs::file_task::type::copy;
                     }
                     else
                     {
-                        file_path = Glib::filename_from_uri(*puri);
+                        // logger::debug<logger::domain::ptk>("DnD MOVE");
+                        gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_MOVE, time);
+                        file_action = vfs::file_task::type::move;
                     }
 
-                    file_list.push_back(file_path);
-                }
-                g_strfreev(list);
+                    std::vector<std::filesystem::path> file_list;
+                    puri = list = gtk_selection_data_get_uris(sel_data);
+                    for (; *puri; ++puri)
+                    {
+                        std::filesystem::path file_path;
+                        if (**puri == '/')
+                        {
+                            file_path = *puri;
+                        }
+                        else
+                        {
+                            file_path = Glib::filename_from_uri(*puri);
+                        }
 
-                if (!file_list.empty())
-                {
-                    // logger::info<logger::domain::ptk>("DnD dest_dir = {}", dest_dir);
+                        file_list.push_back(file_path);
+                    }
+                    g_strfreev(list);
+
+                    if (!file_list.empty())
+                    {
+                        // logger::info<logger::domain::ptk>("DnD dest_dir = {}", dest_dir);
 
 #if (GTK_MAJOR_VERSION == 4)
-                    GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
+                        GtkWidget* parent = GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(browser)));
 #elif (GTK_MAJOR_VERSION == 3)
-                    GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
+                        GtkWidget* parent = gtk_widget_get_toplevel(GTK_WIDGET(browser));
 #endif
 
-                    ptk::file_task* ptask = ptk_file_task_new(file_action,
-                                                              file_list,
-                                                              dest_dir,
-                                                              GTK_WINDOW(parent),
-                                                              browser->task_view_);
-                    ptask->run();
+                        ptk::file_task* ptask = ptk_file_task_new(file_action,
+                                                                  file_list,
+                                                                  dest_dir,
+                                                                  GTK_WINDOW(parent),
+                                                                  browser->task_view_);
+                        ptask->run();
+                    }
+                    gtk_drag_finish(drag_context, true, false, time);
+                    return;
                 }
-                gtk_drag_finish(drag_context, true, false, time);
-                return;
             }
         }
     }
@@ -5171,11 +5171,10 @@ ptk::browser::update_statusbar() const noexcept
                     }
                     else
                     {
-                        std::error_code ec;
-                        const auto results = ztd::stat(target_path, ec);
-                        if (!ec)
+                        const auto results = ztd::stat::create(target_path);
+                        if (results)
                         {
-                            const std::string lsize = vfs::utils::format_file_size(results.size());
+                            const auto lsize = vfs::utils::format_file_size(results->size());
                             statusbar_txt.append(
                                 std::format("  Link -> {} ({})", target.string(), lsize));
                         }

@@ -639,26 +639,25 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
             if (browser->pending_drag_status_tree())
             {
                 // We only want to update drag status, not really want to drop
-                std::error_code ec;
-                const auto dest_statbuf = ztd::stat(dest_dir, ec);
-                if (!ec)
+                const auto dest_stat = ztd::stat::create(dest_dir);
+                if (dest_stat)
                 {
                     if (browser->drag_source_dev_tree_ == 0)
                     {
-                        browser->drag_source_dev_tree_ = dest_statbuf.dev();
+                        browser->drag_source_dev_tree_ = dest_stat->dev();
                         for (; *puri; ++puri)
                         {
                             const std::filesystem::path file_path = Glib::filename_from_uri(*puri);
 
-                            const auto statbuf = ztd::stat(file_path, ec);
-                            if (!ec && statbuf.dev() != dest_statbuf.dev())
+                            const auto file_stat = ztd::stat::create(file_path);
+                            if (file_stat && file_stat->dev() != dest_stat->dev())
                             {
-                                browser->drag_source_dev_tree_ = statbuf.dev();
+                                browser->drag_source_dev_tree_ = file_stat->dev();
                                 break;
                             }
                         }
                     }
-                    if (browser->drag_source_dev_tree_ != dest_statbuf.dev())
+                    if (browser->drag_source_dev_tree_ != dest_stat->dev())
                     { // src and dest are on different devices
                         gdk_drag_status(drag_context, GdkDragAction::GDK_ACTION_COPY, time);
                     }

@@ -393,9 +393,8 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
     this->current_item++;
     this->unlock();
 
-    std::error_code ec;
-    const auto file_stat = ztd::lstat(src_file, ec);
-    if (ec)
+    const auto file_stat = ztd::lstat::create(src_file);
+    if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
         return false;
@@ -434,7 +433,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
         {
             struct utimbuf times;
             this->lock();
-            this->progress += file_stat.size();
+            this->progress += file_stat->size();
             this->unlock();
 
             for (const auto& file : std::filesystem::directory_iterator(src_file))
@@ -455,10 +454,10 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 }
             }
 
-            chmod(actual_dest_file.c_str(), file_stat.mode());
+            chmod(actual_dest_file.c_str(), file_stat->mode());
 
-            times.actime = std::chrono::system_clock::to_time_t(file_stat.atime());
-            times.modtime = std::chrono::system_clock::to_time_t(file_stat.mtime());
+            times.actime = std::chrono::system_clock::to_time_t(file_stat->atime());
+            times.modtime = std::chrono::system_clock::to_time_t(file_stat->mtime());
             utime(actual_dest_file.c_str(), &times);
 
             /* Move files to different device: Need to delete source dir */
@@ -534,7 +533,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                     }
                 }
                 this->lock();
-                this->progress += file_stat.size();
+                this->progress += file_stat->size();
                 this->unlock();
             }
             else
@@ -580,7 +579,7 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                 }
             }
 
-            const i32 wfd = creat(actual_dest_file.c_str(), file_stat.mode() | S_IWUSR);
+            const i32 wfd = creat(actual_dest_file.c_str(), file_stat->mode() | S_IWUSR);
             if (wfd >= 0)
             {
                 // sshfs becomes unresponsive with this, nfs is okay with it
@@ -625,10 +624,10 @@ vfs::file_task::do_file_copy(const std::filesystem::path& src_file,
                     // do not chmod link
                     if (!std::filesystem::is_symlink(actual_dest_file))
                     {
-                        chmod(actual_dest_file.c_str(), file_stat.mode());
+                        chmod(actual_dest_file.c_str(), file_stat->mode());
                         struct utimbuf times;
-                        times.actime = std::chrono::system_clock::to_time_t(file_stat.atime());
-                        times.modtime = std::chrono::system_clock::to_time_t(file_stat.mtime());
+                        times.actime = std::chrono::system_clock::to_time_t(file_stat->atime());
+                        times.modtime = std::chrono::system_clock::to_time_t(file_stat->mtime());
                         utime(actual_dest_file.c_str(), &times);
                     }
 
@@ -680,16 +679,14 @@ vfs::file_task::file_move(const std::filesystem::path& src_file) noexcept
     const auto filename = src_file.filename();
     const auto dest_file = this->dest_dir.value() / filename;
 
-    std::error_code src_ec;
-    const auto src_stat = ztd::lstat(src_file, src_ec);
+    const auto src_stat = ztd::lstat::create(src_file);
 
-    std::error_code dest_ec;
-    const auto dest_stat = ztd::stat(this->dest_dir.value(), dest_ec);
+    const auto dest_stat = ztd::stat::create(this->dest_dir.value());
 
-    if (!src_ec && !dest_ec)
+    if (src_stat && dest_stat)
     {
         /* Not on the same device */
-        if (src_stat.dev() != dest_stat.dev())
+        if (src_stat->dev() != dest_stat->dev())
         {
             // logger::info<logger::domain::vfs>("not on the same dev: {}", src_file);
             const auto result = this->do_file_copy(src_file, dest_file);
@@ -741,9 +738,8 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     this->unlock();
 
     // logger::debug<logger::domain::vfs>("move '{}' to '{}'", src_file, dest_file);
-    std::error_code ec;
-    const auto file_stat = ztd::lstat(src_file, ec);
-    if (ec)
+    const auto file_stat = ztd::lstat::create(src_file);
+    if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
         return 0;
@@ -754,7 +750,7 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
         return 0;
     }
 
-    if (file_stat.is_directory() && this->check_dest_in_src(src_file))
+    if (file_stat->is_directory() && this->check_dest_in_src(src_file))
     {
         return 0;
     }
@@ -821,11 +817,11 @@ vfs::file_task::do_file_move(const std::filesystem::path& src_file,
     }
     else if (!std::filesystem::is_symlink(dest_file))
     { // do not chmod link
-        chmod(dest_file.c_str(), file_stat.mode());
+        chmod(dest_file.c_str(), file_stat->mode());
     }
 
     this->lock();
-    this->progress += file_stat.size();
+    this->progress += file_stat->size();
     if (this->error_first)
     {
         this->error_first = false;
@@ -848,9 +844,8 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file) noexcept
     this->current_item++;
     this->unlock();
 
-    std::error_code ec;
-    const auto file_stat = ztd::lstat(src_file, ec);
-    if (ec)
+    const auto file_stat = ztd::lstat::create(src_file);
+    if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
         return;
@@ -873,7 +868,7 @@ vfs::file_task::file_trash(const std::filesystem::path& src_file) noexcept
     }
 
     this->lock();
-    this->progress += file_stat.size();
+    this->progress += file_stat->size();
     if (this->error_first)
     {
         this->error_first = false;
@@ -894,15 +889,14 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file) noexcept
     this->current_item++;
     this->unlock();
 
-    std::error_code ec;
-    const auto file_stat = ztd::lstat(src_file, ec);
-    if (ec)
+    const auto file_stat = ztd::lstat::create(src_file);
+    if (!file_stat)
     {
         this->task_error(errno, "Accessing", src_file);
         return;
     }
 
-    if (file_stat.is_directory())
+    if (file_stat->is_directory())
     {
         for (const auto& file : std::filesystem::directory_iterator(src_file))
         {
@@ -936,7 +930,7 @@ vfs::file_task::file_delete(const std::filesystem::path& src_file) noexcept
         }
     }
     this->lock();
-    this->progress += file_stat.size();
+    this->progress += file_stat->size();
     if (this->error_first)
     {
         this->error_first = false;
@@ -968,12 +962,11 @@ vfs::file_task::file_link(const std::filesystem::path& src_file) noexcept
     this->current_item++;
     this->unlock();
 
-    std::error_code ec;
-    const auto src_stat = ztd::stat(src_file, ec);
-    if (ec)
+    const auto src_stat = ztd::stat::create(src_file);
+    if (!src_stat)
     {
         // allow link to broken symlink
-        if (errno != 2 || !std::filesystem::is_symlink(src_file))
+        if (src_stat.error() != std::errc(2) || !std::filesystem::is_symlink(src_file))
         {
             this->task_error(errno, "Accessing", src_file);
             if (this->should_abort())
@@ -1021,7 +1014,7 @@ vfs::file_task::file_link(const std::filesystem::path& src_file) noexcept
     }
 
     this->lock();
-    this->progress += src_stat.size();
+    this->progress += src_stat->size();
     if (this->error_first)
     {
         this->error_first = false;
@@ -1066,9 +1059,8 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
     this->unlock();
     // logger::debug<logger::domain::vfs>("chmod_chown: {}", src_file);
 
-    std::error_code ec;
-    const auto src_stat = ztd::lstat(src_file, ec);
-    if (!ec)
+    const auto src_stat = ztd::lstat::create(src_file);
+    if (src_stat)
     {
         /* chown */
         if (!this->uid_ || !this->gid_)
@@ -1125,10 +1117,10 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
         }
 
         this->lock();
-        this->progress += src_stat.size();
+        this->progress += src_stat->size();
         this->unlock();
 
-        if (src_stat.is_directory() && this->is_recursive)
+        if (src_stat->is_directory() && this->is_recursive)
         {
             for (const auto& file : std::filesystem::directory_iterator(src_file))
             {
@@ -1321,9 +1313,8 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
         size_timeout = g_timeout_add_seconds(5, (GSourceFunc)on_size_timeout, task.get());
         if (task->type_ != vfs::file_task::type::chmod_chown)
         {
-            std::error_code ec;
-            const auto file_stat = ztd::lstat(task->dest_dir.value(), ec);
-            if (!task->dest_dir || ec)
+            const auto file_stat = ztd::lstat::create(task->dest_dir.value());
+            if (!task->dest_dir || !file_stat)
             {
                 task->task_error(errno, "Accessing", task->dest_dir.value());
                 task->abort = true;
@@ -1338,21 +1329,20 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
                 }
                 return nullptr;
             }
-            dest_dev = file_stat.dev();
+            dest_dev = file_stat->dev();
         }
 
         for (const auto& src_path : task->src_paths)
         {
-            std::error_code ec;
-            const auto file_stat = ztd::lstat(src_path, ec);
-            if (ec)
+            const auto file_stat = ztd::lstat::create(src_path);
+            if (!file_stat)
             {
                 // do not report error here since it is reported later
                 // task->error(errno, "Accessing", (char*)l->data);
             }
             else
             {
-                if ((task->type_ == vfs::file_task::type::move) && file_stat.dev() != dest_dev)
+                if ((task->type_ == vfs::file_task::type::move) && file_stat->dev() != dest_dev)
                 {
                     // recursive size
                     const u64 size = task->get_total_size_of_dir(src_path);
@@ -1363,7 +1353,7 @@ vfs_file_task_thread(const std::shared_ptr<vfs::file_task>& task) noexcept
                 else
                 {
                     task->lock();
-                    task->total_size += file_stat.size();
+                    task->total_size += file_stat->size();
                     task->unlock();
                 }
             }
@@ -1591,17 +1581,16 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path) noexcep
         return 0;
     }
 
-    std::error_code ec;
-    const auto file_stat = ztd::lstat(path, ec);
-    if (ec)
+    const auto file_stat = ztd::lstat::create(path);
+    if (!file_stat)
     {
         return 0;
     }
 
-    u64 size = file_stat.size();
+    u64 size = file_stat->size();
 
     // Do not follow symlinks
-    if (file_stat.is_symlink() || !file_stat.is_directory())
+    if (file_stat->is_symlink() || !file_stat->is_directory())
     {
         return size;
     }
@@ -1617,7 +1606,7 @@ vfs::file_task::get_total_size_of_dir(const std::filesystem::path& path) noexcep
         const auto full_path = path / filename;
         if (std::filesystem::exists(full_path))
         {
-            const auto dir_file_stat = ztd::lstat(full_path);
+            const auto dir_file_stat = *ztd::lstat::create(full_path); // already checked
 
             if (dir_file_stat.is_directory())
             {

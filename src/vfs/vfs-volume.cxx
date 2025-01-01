@@ -447,10 +447,13 @@ vfs::is_path_mountpoint(const std::filesystem::path& path) noexcept
         return false;
     }
 
-    const auto path_stat_dev = ztd::stat(path).dev();
-    const auto path_statvfs_fsid = ztd::statvfs(path).fsid();
-
-    return (path_stat_dev == path_statvfs_fsid);
+    const auto path_stat = ztd::stat::create(path);
+    const auto path_statvfs = ztd::statvfs::create(path);
+    if (path_stat && path_statvfs)
+    {
+        return (path_stat->dev() == path_statvfs->fsid());
+    }
+    return false;
 }
 
 static void
@@ -673,15 +676,14 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
 
     const auto canon = std::filesystem::canonical(dir);
 
-    std::error_code ec;
-    const auto stat = ztd::stat(canon, ec);
-    if (ec || stat.is_block_file())
+    const auto stat = ztd::stat::create(canon);
+    if (!stat || (stat && stat->is_block_file()))
     {
         return false;
     }
     // logger::debug<logger::domain::vfs>("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
 
-    const auto check_fstype = devmount_fstype(stat.dev());
+    const auto check_fstype = devmount_fstype(stat->dev());
     if (!check_fstype)
     {
         return false;

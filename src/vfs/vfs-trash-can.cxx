@@ -44,7 +44,9 @@ const std::shared_ptr<vfs::trash_can> trash_can = vfs::trash_can::create();
 
 vfs::trash_can::trash_can() noexcept
 {
-    const auto home_id = ztd::statx(vfs::user::home()).mount_id();
+    const auto stat = *ztd::statx::create(vfs::user::home(), ztd::statx::symlink::follow);
+
+    const auto home_id = stat.mount_id();
     const auto user_trash = vfs::user::data() / "Trash";
     const auto home_trash = std::make_shared<vfs::trash_can::trash_dir>(user_trash);
     this->trash_dirs_[home_id] = home_trash;
@@ -53,7 +55,8 @@ vfs::trash_can::trash_can() noexcept
 u64
 vfs::trash_can::mount_id(const std::filesystem::path& path) noexcept
 {
-    return ztd::statx(path, ztd::statx::symlink::no_follow).mount_id();
+    const auto stat = *ztd::statx::create(path, ztd::statx::symlink::no_follow);
+    return stat.mount_id();
 }
 
 std::shared_ptr<vfs::trash_can>
