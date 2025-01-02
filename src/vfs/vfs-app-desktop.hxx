@@ -26,31 +26,22 @@
 
 #include <vector>
 
+#include <expected>
 #include <optional>
-
-#include <memory>
 
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
+#include "vfs/vfs-error.hxx"
 
 namespace vfs
 {
 struct desktop
 {
-  public:
     desktop() = delete;
-    desktop(const std::filesystem::path& desktop_file) noexcept;
-    ~desktop() = default;
-    // ~desktop() { logger::info<logger::domain::vfs>("vfs::desktop::~desktop({})", logger::utils::ptr(this)) };
-    desktop(const desktop& other) = delete;
-    desktop(desktop&& other) = delete;
-    desktop& operator=(const desktop& other) = delete;
-    desktop& operator=(desktop&& other) = delete;
 
-    [[nodiscard]] static std::shared_ptr<desktop>
+    [[nodiscard]] static std::expected<desktop, std::error_code>
     create(const std::filesystem::path& desktop_file) noexcept;
 
     [[nodiscard]] std::string_view name() const noexcept;
@@ -68,6 +59,9 @@ struct desktop
     [[nodiscard]] std::vector<std::string> supported_mime_types() const noexcept;
 
   private:
+    desktop(const std::filesystem::path& desktop_file) noexcept;
+    [[nodiscard]] vfs::error_code parse_desktop_file() noexcept;
+
     [[nodiscard]] bool open_multiple_files() const noexcept;
     [[nodiscard]] std::optional<std::vector<std::vector<std::string>>>
     app_exec_generate_desktop_argv(const std::span<const std::filesystem::path> file_list,
@@ -77,10 +71,8 @@ struct desktop
     void exec_desktop(const std::filesystem::path& working_dir,
                       const std::span<const std::filesystem::path> file_paths) const noexcept;
 
-  private:
     std::string filename_;
     std::filesystem::path path_;
-    bool loaded_{false};
 
     struct desktop_entry_data
     {
@@ -101,7 +93,6 @@ struct desktop
         std::string keywords;
         bool startup_notify{false};
     };
-
     desktop_entry_data desktop_entry_;
 };
 } // namespace vfs

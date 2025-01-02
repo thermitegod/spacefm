@@ -52,20 +52,21 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
     }
     const auto& editor = check_editor.value();
 
-    std::shared_ptr<vfs::desktop> desktop;
-    if (editor.ends_with(".desktop"))
+    if (!editor.ends_with(".desktop"))
     {
-        desktop = vfs::desktop::create(editor);
+        logger::error<logger::domain::vfs>("Editor is not set to a .desktop file");
+        return;
     }
-    else
-    { // this might work
-        logger::warn<logger::domain::vfs>("Editor is not set to a .desktop file");
-        desktop = vfs::desktop::create(std::format("{}.desktop", editor));
+
+    const auto desktop = vfs::desktop::create(editor);
+    if (!desktop)
+    {
+        return;
     }
 
     const std::vector<std::filesystem::path> open_files{path};
 
-    const bool opened = desktop->open_files(path.parent_path(), open_files);
+    const auto opened = desktop->open_files(path.parent_path(), open_files);
     if (!opened)
     {
         ptk::dialog::error(

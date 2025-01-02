@@ -29,9 +29,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include <expected>
 #include <optional>
-
-#include <memory>
 
 #include <ranges>
 
@@ -49,17 +48,18 @@
 
 #include "vfs/utils/vfs-utils.hxx"
 
+#include "vfs/vfs-error.hxx"
 #include "vfs/vfs-app-desktop.hxx"
 
 struct desktop_cache_data
 {
-    std::shared_ptr<vfs::desktop> desktop;
+    vfs::desktop desktop;
     std::chrono::system_clock::time_point mtime;
 };
 
 static std::unordered_map<std::filesystem::path, desktop_cache_data> desktops_cache;
 
-std::shared_ptr<vfs::desktop>
+std::expected<vfs::desktop, std::error_code>
 vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
 {
     if (desktops_cache.contains(desktop_file))
@@ -67,24 +67,41 @@ vfs::desktop::create(const std::filesystem::path& desktop_file) noexcept
         // logger::info<logger::domain::vfs>("vfs::desktop({})  cache   {}", logger::utils::ptr(desktop), desktop_file.string());
         const auto& cache = desktops_cache.at(desktop_file);
 
-        const auto desktop_stat = ztd::stat::create(cache.desktop->path());
-        if (desktop_stat && desktop_stat.value().mtime() == cache.mtime)
+        const auto desktop_stat = ztd::stat::create(cache.desktop.path());
+        if (desktop_stat && desktop_stat->mtime() == cache.mtime)
         {
             return cache.desktop;
         }
         // logger::info<logger::domain::vfs>("vfs::desktop({}) changed on disk, reloading", logger::utils::ptr(desktop));
     }
-    const auto desktop = std::make_shared<vfs::desktop>(desktop_file);
-    desktops_cache.insert(
-        {desktop_file, {desktop, ztd::stat::create(desktop->path()).value().mtime()}});
+
+    auto desktop = vfs::desktop(desktop_file);
+    const auto result = desktop.parse_desktop_file();
+    if (result != vfs::error_code::none)
+    {
+        return std::unexpected(result);
+    }
+
+    const auto stat = ztd::stat::create(desktop.path());
+    if (!stat)
+    {
+        return std::unexpected(vfs::error_code::file_not_found);
+    }
+
+    desktops_cache.insert({desktop_file, {desktop, stat->mtime()}});
     // logger::info<logger::domain::vfs>("vfs::desktop({})  new     {}", logger::utils::ptr(desktop), desktop_file.string());
     return desktop;
 }
 
 vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
+    : filename_(desktop_file.filename()), path_(desktop_file)
 {
     // logger::info<logger::domain::vfs>("vfs::desktop::desktop({})", logger::utils::ptr(this));
+}
 
+vfs::error_code
+vfs::desktop::parse_desktop_file() noexcept
+{
     static constexpr std::string DESKTOP_ENTRY_GROUP = "Desktop Entry";
 
     static constexpr std::string DESKTOP_ENTRY_KEY_TYPE = "Type";
@@ -103,39 +120,47 @@ vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
     static constexpr std::string DESKTOP_ENTRY_KEY_KEYWORDS = "Keywords";
     static constexpr std::string DESKTOP_ENTRY_KEY_STARTUPNOTIFY = "StartupNotify";
 
+    bool loaded = false;
+
 #if (GTK_MAJOR_VERSION == 4)
-
     const auto kf = Glib::KeyFile::create();
+#elif (GTK_MAJOR_VERSION == 3)
+    Glib::KeyFile kf;
+#endif
 
-    if (desktop_file.is_absolute())
+    if (this->path_.is_absolute())
     {
-        this->filename_ = desktop_file.filename();
-        this->path_ = desktop_file;
-        this->loaded_ = kf->load_from_file(desktop_file, Glib::KeyFile::Flags::NONE);
+#if (GTK_MAJOR_VERSION == 4)
+        loaded = kf->load_from_file(this->path_, Glib::KeyFile::Flags::NONE);
+#elif (GTK_MAJOR_VERSION == 3)
+        loaded = kf.load_from_file(this->path_, Glib::KEY_FILE_NONE);
+#endif
     }
     else
     {
-        this->filename_ = desktop_file.filename();
         const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
         std::string relative_full_path;
         try
         {
-            this->loaded_ = kf->load_from_data_dirs(relative_path, relative_full_path);
+#if (GTK_MAJOR_VERSION == 4)
+            loaded = kf->load_from_data_dirs(relative_path, relative_full_path);
+#elif (GTK_MAJOR_VERSION == 3)
+            loaded = kf.load_from_data_dirs(relative_path, relative_full_path);
+#endif
         }
         catch (...) // Glib::KeyFileError, Glib::FileError
         {
             logger::error<logger::domain::vfs>("Error opening desktop file: {}",
-                                               desktop_file.string());
-            return;
+                                               this->path_.string());
+            return vfs::error_code::file_open_failure;
         }
         this->path_ = relative_full_path;
     }
 
-    if (!this->loaded_)
+    if (!loaded)
     {
-        logger::error<logger::domain::vfs>("Failed to load desktop file: {}",
-                                           desktop_file.string());
-        return;
+        logger::error<logger::domain::vfs>("Failed to load desktop file: {}", this->path_.string());
+        return vfs::error_code::parse_error;
     }
 
     // Keys not loaded from .desktop files
@@ -148,15 +173,32 @@ vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
     // - PrefersNonDefaultGPU
     // - SingleMainWindow
 
+#if (GTK_MAJOR_VERSION == 4)
+
     // clang-format off
+
+    // Required Keys, must fail if missing
+
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
     {
         this->desktop_entry_.type = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
     }
+    else
+    {
+        return vfs::error_code::key_not_found;
+    }
+
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
     {
         this->desktop_entry_.name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
     }
+    else
+    {
+        return vfs::error_code::key_not_found;
+    }
+
+    // Optional Keys
+
     if (kf->has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
     {
         this->desktop_entry_.generic_name = kf->get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
@@ -213,58 +255,30 @@ vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
 
 #elif (GTK_MAJOR_VERSION == 3)
 
-    Glib::KeyFile kf;
-
-    if (desktop_file.is_absolute())
-    {
-        this->filename_ = desktop_file.filename();
-        this->path_ = desktop_file;
-        this->loaded_ = kf.load_from_file(desktop_file, Glib::KEY_FILE_NONE);
-    }
-    else
-    {
-        this->filename_ = desktop_file.filename();
-        const auto relative_path = std::filesystem::path() / "applications" / this->filename_;
-        std::string relative_full_path;
-        try
-        {
-            this->loaded_ = kf.load_from_data_dirs(relative_path, relative_full_path);
-        }
-        catch (...) // Glib::KeyFileError, Glib::FileError
-        {
-            logger::error<logger::domain::vfs>("Error opening desktop file: {}",
-                                               desktop_file.string());
-            return;
-        }
-        this->path_ = relative_full_path;
-    }
-
-    if (!this->loaded_)
-    {
-        logger::error<logger::domain::vfs>("Failed to load desktop file: {}",
-                                           desktop_file.string());
-        return;
-    }
-
-    // Keys not loaded from .desktop files
-    // - Hidden
-    // - OnlyShowIn
-    // - NotShowIn
-    // - DBusActivatable
-    // - StartupWMClass
-    // - URL
-    // - PrefersNonDefaultGPU
-    // - SingleMainWindow
-
     // clang-format off
+
+    // Required Keys, must fail if missing
+
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE))
     {
         this->desktop_entry_.type = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_TYPE);
     }
+    else
+    {
+        return vfs::error_code::key_not_found;
+    }
+
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME))
     {
         this->desktop_entry_.name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_NAME);
     }
+    else
+    {
+        return vfs::error_code::key_not_found;
+    }
+
+    // Optional Keys
+
     if (kf.has_key(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME))
     {
         this->desktop_entry_.generic_name = kf.get_string(DESKTOP_ENTRY_GROUP, DESKTOP_ENTRY_KEY_GENERICNAME);
@@ -320,6 +334,8 @@ vfs::desktop::desktop(const std::filesystem::path& desktop_file) noexcept
     // clang-format on
 
 #endif
+
+    return loaded ? vfs::error_code::none : vfs::error_code::parse_error;
 }
 
 std::string_view

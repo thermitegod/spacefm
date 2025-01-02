@@ -93,9 +93,13 @@ open_file(const std::filesystem::path& path) noexcept
     }
     const auto& app_name = check_app_name.value();
 
-    const auto desktop = vfs::desktop::create(app_name);
+    const auto desktop = vfs::desktop::create(check_app_name.value());
+    if (!desktop)
+    {
+        return;
+    }
 
-    const bool opened = desktop->open_file(Glib::get_current_dir(), path);
+    const auto opened = desktop->open_file(Glib::get_current_dir(), path);
     if (!opened)
     {
         ptk::dialog::error(

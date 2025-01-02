@@ -131,7 +131,10 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
         if (default_app)
         {
             const auto desktop = vfs::desktop::create(default_app.value());
-            xset_set(xset::name::editor, xset::var::s, desktop->path().string());
+            if (desktop)
+            {
+                xset_set(xset::name::editor, xset::var::s, desktop->path().string());
+            }
         }
     }
 

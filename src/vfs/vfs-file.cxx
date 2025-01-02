@@ -776,15 +776,20 @@ vfs::file::load_special_info() noexcept
     }
 
     this->is_special_desktop_entry_ = true;
+
     const auto desktop = vfs::desktop::create(this->path_);
+    if (!desktop)
+    {
+        return;
+    }
 
     if (desktop->icon_name().empty())
     {
         return;
     }
 
-    const i32 big_size = this->settings_->icon_size_big;
-    const i32 small_size = this->settings_->icon_size_small;
+    const auto big_size = this->settings_->icon_size_big;
+    const auto small_size = this->settings_->icon_size_small;
     if (this->thumbnail_.big == nullptr)
     {
         GdkPixbuf* icon = desktop->icon(big_size);

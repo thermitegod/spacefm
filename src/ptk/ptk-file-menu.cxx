@@ -1305,6 +1305,11 @@ ptk_file_menu_new(ptk::browser* browser,
             for (const std::string_view app : apps)
             {
                 const auto desktop = vfs::desktop::create(app);
+                if (!desktop)
+                {
+                    continue;
+                }
+
                 const auto app_name = desktop->display_name();
                 if (!app_name.empty())
                 {
@@ -1924,7 +1929,12 @@ on_popup_run_app(GtkMenuItem* menuitem, ptk::file_menu* data) noexcept
 {
     const char* desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(menuitem), "desktop_file"));
+
     const auto desktop = vfs::desktop::create(desktop_file);
+    if (!desktop)
+    {
+        return;
+    }
 
     ptk::action::open_files_with_app(data->cwd,
                                      data->selected_files,
@@ -1958,8 +1968,9 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
 
     const std::string desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+
     const auto desktop = vfs::desktop::create(desktop_file);
-    if (desktop->name().empty())
+    if (!desktop)
     {
         return;
     }
@@ -1985,8 +1996,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             const auto path = vfs::user::data() / "applications" / desktop->name();
             if (!std::filesystem::exists(path))
             {
-                const auto check_share_desktop =
-                    vfs::mime_type_locate_desktop_file(desktop->name());
+                const auto check_share_desktop = vfs::mime_type_locate_desktop_file(desktop->name());
                 if (!check_share_desktop ||
                     std::filesystem::equivalent(check_share_desktop.value(), path))
                 {
@@ -2278,9 +2288,8 @@ app_menu_keypress(GtkWidget* menu, GdkEvent* event, ptk::file_menu* data) noexce
     }
 
     // if original menu, desktop will be set
-    const std::string desktop_file =
-        static_cast<const char*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
-    const auto desktop = vfs::desktop::create(desktop_file);
+    // const std::string desktop_file = static_cast<const char*>(g_object_get_data(G_OBJECT(item), "desktop_file"));
+    // const auto desktop = vfs::desktop::create(desktop_file);
     // else if app menu, data will be set
     // ptk::file_menu* app_data = PTK_FILE_MENU(g_object_get_data(G_OBJECT(item), "data"));
 
@@ -2338,7 +2347,12 @@ show_app_menu(GtkWidget* menu, GtkWidget* app_item, ptk::file_menu* data, u32 bu
 
     const std::string desktop_file =
         static_cast<const char*>(g_object_get_data(G_OBJECT(app_item), "desktop_file"));
+
     const auto desktop = vfs::desktop::create(desktop_file);
+    if (!desktop)
+    {
+        return;
+    }
 
     GtkWidget* app_menu = gtk_menu_new();
 

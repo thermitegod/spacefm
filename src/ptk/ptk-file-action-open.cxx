@@ -111,10 +111,14 @@ open_files_with_app(const std::shared_ptr<ParentInfo>& parent,
     }
 
     const auto desktop = vfs::desktop::create(app_desktop);
+    if (!desktop)
+    {
+        return false;
+    }
 
     logger::info<logger::domain::ptk>("EXEC({})={}", desktop->path().string(), desktop->exec());
 
-    const bool opened = desktop->open_files(parent->cwd, open_files);
+    const auto opened = desktop->open_files(parent->cwd, open_files);
     if (!opened)
     {
         std::string file_list;

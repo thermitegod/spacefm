@@ -502,6 +502,7 @@ sources += files(
     'src/vfs/vfs-app-desktop.cxx',
     'src/vfs/vfs-device.cxx',
     'src/vfs/vfs-dir.cxx',
+    'src/vfs/vfs-error.cxx',
     'src/vfs/vfs-file.cxx',
     'src/vfs/vfs-file-task.cxx',
     'src/vfs/vfs-mime-type.cxx',
