@@ -29,9 +29,9 @@
 namespace config
 {
 // map<var, value>
-using setvars_t = std::map<std::string, std::string>;
+using setvars_t = std::map<std::string_view, std::string>;
 // map<xset_name, setvars_t>
-using xsetpak_t = std::map<std::string, setvars_t>;
+using xsetpak_t = std::map<std::string_view, setvars_t>;
 
 struct config_file_data
 {
@@ -42,7 +42,8 @@ struct config_file_data
 
 void load(const std::filesystem::path& session,
           const std::shared_ptr<config::settings>& settings) noexcept;
-void save(const std::shared_ptr<config::settings>& settings) noexcept;
+void save(const std::filesystem::path& session,
+          const std::shared_ptr<config::settings>& settings) noexcept;
 
 namespace disk_format
 {

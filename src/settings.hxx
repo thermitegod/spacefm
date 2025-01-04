@@ -23,4 +23,5 @@
 #include "settings/settings.hxx"
 
 void load_settings(const std::shared_ptr<config::settings>& settings) noexcept;
+void save_settings() noexcept;
 void save_settings(const std::shared_ptr<config::settings>& settings) noexcept;

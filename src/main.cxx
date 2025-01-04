@@ -324,7 +324,8 @@ main(int argc, char* argv[]) noexcept
     load_bookmarks();
 
     // start autosave thread
-    autosave::create([&settings]() { save_settings(settings); });
+    // autosave::create([&settings]() { save_settings(settings); }); // BUG
+    autosave::create([]() { save_settings(); });
 
     std::atexit(tmp_clean);
     std::atexit(autosave::close);

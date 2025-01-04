@@ -39,8 +39,8 @@
 #include "settings/config.hxx"
 
 static void
-config_parse_settings(const u64 version, const config::settings& loaded_settings,
-                      const std::shared_ptr<config::settings>& settings) noexcept
+parse_settings(const u64 version, const config::settings& loaded_settings,
+               const std::shared_ptr<config::settings>& settings) noexcept
 {
     (void)version;
 
@@ -64,7 +64,7 @@ config_parse_settings(const u64 version, const config::settings& loaded_settings
 }
 
 static void
-config_parse_xset(const u64 version, const config::xsetpak_t& pak) noexcept
+parse_xset(const u64 version, const config::xsetpak_t& pak) noexcept
 {
     (void)version;
 
@@ -167,8 +167,8 @@ config::load(const std::filesystem::path& session,
         return;
     }
 
-    config_parse_settings(config_data.version, config_data.settings, settings);
-    config_parse_xset(config_data.version, config_data.xset);
+    parse_settings(config_data.version, config_data.settings, settings);
+    parse_xset(config_data.version, config_data.xset);
 
     // upgrade config
     config_upgrade(config_data.version);

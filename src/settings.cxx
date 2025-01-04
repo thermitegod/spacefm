@@ -55,18 +55,21 @@
 void
 load_settings(const std::shared_ptr<config::settings>& settings) noexcept
 {
-    const auto settings_config_dir = vfs::program::config();
+    assert(settings != nullptr);
 
     settings->load_saved_tabs = true;
 
     xset_defaults();
 
-    const auto session = settings_config_dir / config::disk_format::filename;
-
-    if (!std::filesystem::exists(settings_config_dir))
+    if (!std::filesystem::exists(vfs::program::config()))
     {
-        std::filesystem::create_directories(settings_config_dir);
-        std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
+        std::filesystem::create_directories(vfs::program::config());
+        if (!std::filesystem::exists(vfs::program::config()))
+        {
+            logger::critical("Failed to create config dir: {}", vfs::program::config().string());
+            return;
+        }
+        std::filesystem::permissions(vfs::program::config(), std::filesystem::perms::owner_all);
     }
 
 #if defined(HAVE_DEV)
@@ -77,8 +80,8 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
         const auto command_args =
             std::format("{} --config-dir {} --config-file {} --config-version {}",
                         command_script.string(),
-                        settings_config_dir.string(),
-                        session.filename().string(),
+                        vfs::program::config().string(),
+                        config::disk_format::filename,
                         config::disk_format::version);
 
         logger::debug<logger::domain::dev>("SCRIPT({})", command_script.string());
@@ -86,6 +89,7 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
     }
 #endif
 
+    const auto session = vfs::program::config() / config::disk_format::filename;
     if (std::filesystem::is_regular_file(session))
     {
         config::load(session, settings);
@@ -136,9 +140,15 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
 }
 
 void
+save_settings() noexcept
+{
+    save_settings(config::global::settings);
+}
+
+void
 save_settings(const std::shared_ptr<config::settings>& settings) noexcept
 {
-    // logger::info("save_settings");
+    assert(settings != nullptr);
 
     MainWindow* main_window = main_window_get_last_active();
 
@@ -192,15 +202,18 @@ save_settings(const std::shared_ptr<config::settings>& settings) noexcept
         }
     }
 
-    /* save settings */
-    const auto settings_config_dir = vfs::program::config();
-    if (!std::filesystem::exists(settings_config_dir))
+    if (!std::filesystem::exists(vfs::program::config()))
     {
-        std::filesystem::create_directories(settings_config_dir);
-        std::filesystem::permissions(settings_config_dir, std::filesystem::perms::owner_all);
+        std::filesystem::create_directories(vfs::program::config());
+        if (!std::filesystem::exists(vfs::program::config()))
+        {
+            logger::critical("Failed to create config dir: {}", vfs::program::config().string());
+            return;
+        }
+        std::filesystem::permissions(vfs::program::config(), std::filesystem::perms::owner_all);
     }
 
-    config::save(settings);
+    config::save(vfs::program::config() / config::disk_format::filename, settings);
 }
 
 #if 0

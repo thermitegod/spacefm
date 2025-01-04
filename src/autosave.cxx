@@ -80,7 +80,7 @@ autosave::create(const std::function<void()>& autosave_func) noexcept
                     logger::trace<logger::domain::autosave>(
                         "found autosave requests, saving settings, total request for this period {}",
                         requests->total);
-                    requests->total += 0;
+                    requests->total = 0;
                     requests->pending = false;
                 }
 
