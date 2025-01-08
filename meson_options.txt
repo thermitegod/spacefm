@@ -1,4 +1,11 @@
 option(
+    'tests',
+    type : 'boolean',
+    value : false,
+    description : 'Build the test suite'
+)
+
+option(
     'deprecated',
     type : 'boolean',
     value: true,

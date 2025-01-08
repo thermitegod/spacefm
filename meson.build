@@ -281,6 +281,10 @@ if get_option('buildtype') == 'debug'
     # preprocessor += '-D_GLIBCXX_DEBUG'
 endif
 
+if get_option('tests')
+    preprocessor += '-DTEST_DATA_PATH="@0@"'.format(join_paths(meson.current_source_dir(), 'tests/test_data'))
+endif
+
 foreach a: preprocessor
     add_project_arguments(a, language: ['c', 'cpp'])
 endforeach
@@ -541,6 +545,12 @@ spacefm = build_target(
 ## Standalone Dialogs
 
 subdir('dialog')
+
+## Tests
+
+if get_option('tests')
+    subdir('tests')
+endif
 
 ## Install
 

@@ -15,47 +15,71 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include <doctest/doctest.h>
 
 #include "spacefm/types.hxx"
 
-/**
- * types
- */
-
-TEST(types, is_valid_panel)
+TEST_SUITE("spacefm types" * doctest::description(""))
 {
-    EXPECT_TRUE(is_valid_panel(1));
-    EXPECT_TRUE(is_valid_panel(2));
-    EXPECT_TRUE(is_valid_panel(3));
-    EXPECT_TRUE(is_valid_panel(4));
-}
+    TEST_CASE("is_valid_panel")
+    {
+        REQUIRE_EQ(is_valid_panel(1), true);
+        REQUIRE_EQ(is_valid_panel(2), true);
+        REQUIRE_EQ(is_valid_panel(3), true);
+        REQUIRE_EQ(is_valid_panel(4), true);
 
-TEST(types, is_valid_panel_code)
-{
-    EXPECT_TRUE(is_valid_panel_code(-1));
-    EXPECT_TRUE(is_valid_panel_code(-2));
-    EXPECT_TRUE(is_valid_panel_code(-3));
-}
+        REQUIRE_EQ(is_valid_panel(panel_1), true);
+        REQUIRE_EQ(is_valid_panel(panel_2), true);
+        REQUIRE_EQ(is_valid_panel(panel_3), true);
+        REQUIRE_EQ(is_valid_panel(panel_4), true);
+    }
 
-TEST(types, is_valid_tab)
-{
-    EXPECT_TRUE(is_valid_tab(1));
-    EXPECT_TRUE(is_valid_tab(2));
-    EXPECT_TRUE(is_valid_tab(3));
-    EXPECT_TRUE(is_valid_tab(4));
-    EXPECT_TRUE(is_valid_tab(5));
-    EXPECT_TRUE(is_valid_tab(6));
-    EXPECT_TRUE(is_valid_tab(7));
-    EXPECT_TRUE(is_valid_tab(8));
-    EXPECT_TRUE(is_valid_tab(9));
-    EXPECT_TRUE(is_valid_tab(10));
-}
+    TEST_CASE("is_valid_panel_code")
+    {
+        REQUIRE_EQ(is_valid_panel_code(-1), true);
+        REQUIRE_EQ(is_valid_panel_code(-2), true);
+        REQUIRE_EQ(is_valid_panel_code(-3), true);
 
-TEST(types, is_valid_tab_code)
-{
-    EXPECT_TRUE(is_valid_tab_code(-1));
-    EXPECT_TRUE(is_valid_tab_code(-2));
-    EXPECT_TRUE(is_valid_tab_code(-3));
-    EXPECT_TRUE(is_valid_tab_code(-4));
+        REQUIRE_EQ(is_valid_panel_code(panel_control_code_prev), true);
+        REQUIRE_EQ(is_valid_panel_code(panel_control_code_next), true);
+        REQUIRE_EQ(is_valid_panel_code(panel_control_code_hide), true);
+    }
+
+    TEST_CASE("is_valid_tab")
+    {
+        REQUIRE_EQ(is_valid_tab(1), true);
+        REQUIRE_EQ(is_valid_tab(2), true);
+        REQUIRE_EQ(is_valid_tab(3), true);
+        REQUIRE_EQ(is_valid_tab(4), true);
+        REQUIRE_EQ(is_valid_tab(5), true);
+        REQUIRE_EQ(is_valid_tab(6), true);
+        REQUIRE_EQ(is_valid_tab(7), true);
+        REQUIRE_EQ(is_valid_tab(8), true);
+        REQUIRE_EQ(is_valid_tab(9), true);
+        REQUIRE_EQ(is_valid_tab(10), true);
+
+        REQUIRE_EQ(is_valid_tab(tab_1), true);
+        REQUIRE_EQ(is_valid_tab(tab_2), true);
+        REQUIRE_EQ(is_valid_tab(tab_3), true);
+        REQUIRE_EQ(is_valid_tab(tab_4), true);
+        REQUIRE_EQ(is_valid_tab(tab_5), true);
+        REQUIRE_EQ(is_valid_tab(tab_6), true);
+        REQUIRE_EQ(is_valid_tab(tab_7), true);
+        REQUIRE_EQ(is_valid_tab(tab_8), true);
+        REQUIRE_EQ(is_valid_tab(tab_9), true);
+        REQUIRE_EQ(is_valid_tab(tab_10), true);
+    }
+
+    TEST_CASE("is_valid_tab_code")
+    {
+        REQUIRE_EQ(is_valid_tab_code(-1), true);
+        REQUIRE_EQ(is_valid_tab_code(-2), true);
+        REQUIRE_EQ(is_valid_tab_code(-3), true);
+        REQUIRE_EQ(is_valid_tab_code(-4), true);
+
+        REQUIRE_EQ(is_valid_tab_code(tab_control_code_prev), true);
+        REQUIRE_EQ(is_valid_tab_code(tab_control_code_next), true);
+        REQUIRE_EQ(is_valid_tab_code(tab_control_code_close), true);
+        REQUIRE_EQ(is_valid_tab_code(tab_control_code_restore), true);
+    }
 }

@@ -15,100 +15,107 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
+#include <doctest/doctest.h>
+
+#include <filesystem>
 
 #include "spacefm/vfs/utils/vfs-utils.hxx"
 
 const std::filesystem::path test_data_path = TEST_DATA_PATH;
 
-/**
- * vfs::utils::unique_path
- */
-
-TEST(vfs_utils, unique_name__file_missing_extension)
+TEST_SUITE("vfs::utils" * doctest::description(""))
 {
-    const auto path = test_data_path / "vfs/utils/unique_name/file-extension-missing";
-    const std::filesystem::path filename = "test";
+    TEST_CASE("vfs::utils::unique_path")
+    {
+        REQUIRE(std::filesystem::exists(test_data_path));
 
-    const auto result_wanted = path / "test-copy11";
+        SUBCASE("file missing extension")
+        {
+            const auto path = test_data_path / "vfs/utils/unique_name/file-extension-missing";
+            const std::filesystem::path filename = "test";
 
-    const auto result = vfs::utils::unique_path(path, filename, "-copy");
+            const auto result_wanted = path / "test-copy11";
 
-    EXPECT_EQ(result, result_wanted);
-}
+            const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-TEST(vfs_utils, unique_name__file_multiple_extension)
-{
-    const auto path = test_data_path / "vfs/utils/unique_name/file-extension-multiple";
-    const std::filesystem::path filename = "test.tar.gz";
+            REQUIRE_EQ(result, result_wanted);
+        }
 
-    const auto result_wanted = path / "test-copy11.tar.gz";
+        SUBCASE("file multiple extension")
+        {
+            const auto path = test_data_path / "vfs/utils/unique_name/file-extension-multiple";
+            const std::filesystem::path filename = "test.tar.gz";
 
-    const auto result = vfs::utils::unique_path(path, filename, "-copy");
+            const auto result_wanted = path / "test-copy11.tar.gz";
 
-    EXPECT_EQ(result, result_wanted);
-}
+            const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-TEST(vfs_utils, unique_name__file_single_extension)
-{
-    const auto path = test_data_path / "vfs/utils/unique_name/file-extension-single";
-    const std::filesystem::path filename = "test.txt";
+            REQUIRE_EQ(result, result_wanted);
+        }
 
-    const auto result_wanted = path / "test-copy11.txt";
+        SUBCASE("file single extension")
+        {
+            const auto path = test_data_path / "vfs/utils/unique_name/file-extension-single";
+            const std::filesystem::path filename = "test.txt";
 
-    const auto result = vfs::utils::unique_path(path, filename, "-copy");
+            const auto result_wanted = path / "test-copy11.txt";
 
-    EXPECT_EQ(result, result_wanted);
-}
+            const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-TEST(vfs_utils, unique_name__directory)
-{
-    const auto path = test_data_path / "vfs/utils/unique_name/directory";
-    const std::filesystem::path filename = "test";
+            REQUIRE_EQ(result, result_wanted);
+        }
 
-    const auto result_wanted = path / "test-copy11";
+        SUBCASE("directory")
+        {
+            const auto path = test_data_path / "vfs/utils/unique_name/directory";
+            const std::filesystem::path filename = "test";
 
-    const auto result = vfs::utils::unique_path(path, filename, "-copy");
+            const auto result_wanted = path / "test-copy11";
 
-    EXPECT_EQ(result, result_wanted);
-}
+            const auto result = vfs::utils::unique_path(path, filename, "-copy");
 
-/**
- * vfs::utils::split_basename_extension
- */
+            REQUIRE_EQ(result, result_wanted);
+        }
+    }
 
-TEST(vfs_utils, split_basename_extension__empty)
-{
-    const auto result = vfs::utils::split_basename_extension("");
+    TEST_CASE("vfs::utils::split_basename_extension")
+    {
+        REQUIRE(std::filesystem::exists(test_data_path));
 
-    EXPECT_EQ(result.basename, "");
-    EXPECT_EQ(result.extension, "");
-    EXPECT_EQ(result.is_multipart_extension, false);
-}
+        SUBCASE("empty")
+        {
+            const auto result = vfs::utils::split_basename_extension("");
 
-TEST(vfs_utils, split_basename_extension__missing_extension)
-{
-    const auto result = vfs::utils::split_basename_extension("test");
+            REQUIRE_EQ(result.basename, "");
+            REQUIRE_EQ(result.extension, "");
+            REQUIRE_EQ(result.is_multipart_extension, false);
+        }
 
-    EXPECT_EQ(result.basename, "test");
-    EXPECT_EQ(result.extension, "");
-    EXPECT_EQ(result.is_multipart_extension, false);
-}
+        SUBCASE("missing extension")
+        {
+            const auto result = vfs::utils::split_basename_extension("test");
 
-TEST(vfs_utils, split_basename_extension__multiple_extension)
-{
-    const auto result = vfs::utils::split_basename_extension("test.tar.gz");
+            REQUIRE_EQ(result.basename, "test");
+            REQUIRE_EQ(result.extension, "");
+            REQUIRE_EQ(result.is_multipart_extension, false);
+        }
 
-    EXPECT_EQ(result.basename, "test");
-    EXPECT_EQ(result.extension, ".tar.gz");
-    EXPECT_EQ(result.is_multipart_extension, true);
-}
+        SUBCASE("multiple extension")
+        {
+            const auto result = vfs::utils::split_basename_extension("test.tar.gz");
 
-TEST(vfs_utils, split_basename_extension__single_extension)
-{
-    const auto result = vfs::utils::split_basename_extension("test.txt");
+            REQUIRE_EQ(result.basename, "test");
+            REQUIRE_EQ(result.extension, ".tar.gz");
+            REQUIRE_EQ(result.is_multipart_extension, true);
+        }
 
-    EXPECT_EQ(result.basename, "test");
-    EXPECT_EQ(result.extension, ".txt");
-    EXPECT_EQ(result.is_multipart_extension, false);
+        SUBCASE("single extension")
+        {
+            const auto result = vfs::utils::split_basename_extension("test.txt");
+
+            REQUIRE_EQ(result.basename, "test");
+            REQUIRE_EQ(result.extension, ".txt");
+            REQUIRE_EQ(result.is_multipart_extension, false);
+        }
+    }
 }
