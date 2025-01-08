@@ -49,9 +49,8 @@
 
 #include "logger.hxx"
 
+#include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-
-#include "utils/write.hxx"
 
 #include "vfs/mime-type/mime-action.hxx"
 
@@ -568,7 +567,7 @@ make_custom_desktop_file(const std::string_view desktop_id,
         const auto path = dir / cust;
         if (!std::filesystem::exists(path))
         { /* this generated filename can be used */
-            ::utils::write_file(path, file_content);
+            [[maybe_unused]] auto ec = vfs::utils::write_file(path, file_content);
             break;
         }
     }

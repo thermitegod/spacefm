@@ -31,8 +31,6 @@
 
 #include <memory>
 
-#include <fcntl.h>
-
 #include <glibmm.h>
 
 #if __has_include(<magic_enum/magic_enum.hpp>)
@@ -57,6 +55,7 @@
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-mime-monitor.hxx"
 #include "vfs/utils/vfs-editor.hxx"
+#include "vfs/utils/file-ops.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-app-chooser.hxx"
@@ -74,7 +73,6 @@
 #include "ptk/utils/ptk-utils.hxx"
 
 #include "utils/strdup.hxx"
-#include "utils/write.hxx"
 
 #include "settings/settings.hxx"
 
@@ -2158,18 +2156,15 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
 
                 // build from /usr/share/mime type ?
 
-                std::string contents;
-                try
+                const auto buffer = vfs::utils::read_file(usr_path);
+                if (buffer)
                 {
-                    contents = Glib::file_get_contents(usr_path);
-                }
-                catch (const Glib::FileError& e)
-                {
-                    const std::string what = e.what();
                     logger::warn<logger::domain::ptk>("Error reading {}: {}",
                                                       usr_path.string(),
-                                                      what);
+                                                      buffer.error().message());
                 }
+
+                auto contents = buffer.value();
 
                 if (!contents.empty())
                 {
@@ -2207,7 +2202,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                                            msg);
                 }
 
-                ::utils::write_file(mime_file, contents);
+                [[maybe_unused]] auto ec = vfs::utils::write_file(mime_file, contents);
             }
             if (std::filesystem::exists(mime_file))
             {

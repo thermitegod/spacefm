@@ -63,6 +63,7 @@
 
 #include "terminal-handlers.hxx"
 
+#include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-file-task.hxx"
 #include "vfs/vfs-volume.hxx"
 #include "vfs/utils/vfs-editor.hxx"
@@ -770,16 +771,12 @@ socket::command(const std::string_view socket_commands_json) noexcept
 #elif (GTK_MAJOR_VERSION == 3)
             const std::string_view value = data[0];
 
-            std::string contents;
-            try
-            {
-                contents = Glib::file_get_contents(value.data());
-            }
-            catch (const Glib::FileError& e)
+            const auto buffer = vfs::utils::read_file(value);
+            if (!buffer)
             {
                 return {SOCKET_INVALID, std::format("error reading file '{}'", value)};
             }
-            if (!g_utf8_validate(contents.data(), -1, nullptr))
+            if (!g_utf8_validate(buffer->data(), -1, nullptr))
             {
                 return {SOCKET_INVALID,
                         std::format("file '{}' does not contain valid UTF-8 text", value)};
@@ -787,7 +784,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             GtkClipboard* clip =
                 gtk_clipboard_get(property == "clipboard-from-file" ? GDK_SELECTION_CLIPBOARD
                                                                     : GDK_SELECTION_PRIMARY);
-            gtk_clipboard_set_text(clip, contents.data(), -1);
+            gtk_clipboard_set_text(clip, buffer->data(), -1);
 #endif
         }
         else if (property == "clipboard-cut-files" || property == "clipboard-copy-files")

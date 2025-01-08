@@ -13,8 +13,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <format>
 
 #include <filesystem>
@@ -33,8 +31,6 @@
 
 #include <functional>
 
-#include <fstream>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
@@ -43,8 +39,7 @@
 
 #include "concurrency.hxx"
 
-#include "utils/write.hxx"
-
+#include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-volume.hxx"
@@ -157,28 +152,27 @@ vfs::dir::load_user_hidden_files() noexcept
         return;
     }
 
-    std::ifstream file(hidden_path);
-    if (!file)
+    const auto buffer = vfs::utils::read_file(hidden_path);
+    if (!buffer)
     {
-        logger::error<logger::domain::vfs>("Failed to open the file: {}", hidden_path.string());
-
+        logger::error<logger::domain::vfs>("Failed to read .hidden file: {} {}",
+                                           hidden_path.string(),
+                                           buffer.error().message());
         this->user_hidden_files_ = std::nullopt;
         return;
     }
 
     std::vector<std::filesystem::path> hidden;
 
-    std::string line;
-    while (std::getline(file, line))
+    for (const std::filesystem::path file : ztd::split(*buffer, "\n"))
     {
-        const std::filesystem::path hidden_file = ztd::strip(line); // remove newline
-        if (hidden_file.is_absolute())
+        if (file.is_absolute())
         {
             logger::warn<logger::domain::vfs>("Absolute path ignored in {}", hidden_path.string());
             continue;
         }
 
-        hidden.push_back(hidden_file);
+        hidden.push_back(file);
     }
 
     this->user_hidden_files_ = hidden;
@@ -365,10 +359,8 @@ vfs::dir::find_file(const std::filesystem::path& filename) noexcept
 bool
 vfs::dir::add_hidden(const std::shared_ptr<vfs::file>& file) const noexcept
 {
-    const auto file_path = this->path_ / ".hidden";
-    const std::string data = std::format("{}\n", file->name());
-
-    return ::utils::write_file(file_path, data);
+    return vfs::utils::write_file(this->path_ / ".hidden", std::format("{}\n", file->name())) ==
+           vfs::error_code::none;
 }
 
 void

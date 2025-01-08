@@ -13,18 +13,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
 #include <format>
 
 #include <filesystem>
 
-#include <fstream>
-
 #include <csignal>
 
-#include <ztd/ztd.hxx>
+#include "logger.hxx"
 
-#include "utils/write.hxx"
-
+#include "vfs/utils/file-ops.hxx"
+#include "vfs/vfs-error.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "single-instance.hxx"
@@ -58,12 +57,18 @@ single_instance_check() noexcept
 {
     const auto path = pid_path();
 
-    std::ifstream pid_file(path);
-    if (pid_file)
+    if (std::filesystem::exists(path))
     {
-        pid_t pid = 0;
-        pid_file >> pid;
-        pid_file.close();
+        const auto buffer = vfs::utils::read_file(path);
+        if (!buffer)
+        {
+            logger::critical("Failed to read pid file: {} {}",
+                             path.string(),
+                             buffer.error().message());
+            return true;
+        }
+
+        const pid_t pid = std::stoi(*buffer);
 
         if (is_process_running(pid))
         {
@@ -73,7 +78,11 @@ single_instance_check() noexcept
 
     std::atexit(single_instance_finalize);
 
-    ::utils::write_file(path, std::format("{}", ::getpid()));
+    const auto ec = vfs::utils::write_file(path, std::format("{}", ::getpid()));
+    if (ec)
+    {
+        logger::critical("Failed to write pid file: {} {}", path.string(), ec.message());
+    }
 
     return true;
 }

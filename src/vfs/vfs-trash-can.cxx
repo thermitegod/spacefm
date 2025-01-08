@@ -28,8 +28,7 @@
 
 #include "logger.hxx"
 
-#include "utils/write.hxx"
-
+#include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
@@ -231,15 +230,9 @@ void
 vfs::trash_can::trash_dir::create_trash_info(
     const std::filesystem::path& path, const std::filesystem::path& target_filename) const noexcept
 {
-    const auto trash_info =
-        this->info_path_ / std::format("{}.trashinfo", target_filename.string());
-
-    const auto iso_time = trash_time();
-
-    const auto trash_info_content =
-        std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), iso_time);
-
-    ::utils::write_file(trash_info, trash_info_content);
+    [[maybe_unused]] auto ec = vfs::utils::write_file(
+        this->info_path_ / std::format("{}.trashinfo", target_filename.string()),
+        std::format("[Trash Info]\nPath={}\nDeletionDate={}\n", path.string(), trash_time()));
 }
 
 void

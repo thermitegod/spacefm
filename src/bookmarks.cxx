@@ -23,15 +23,12 @@
 #include <vector>
 #include <span>
 
-#include <fstream>
-
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
 
+#include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-user-dirs.hxx"
-
-#include "utils/write.hxx"
 
 #include "bookmarks.hxx"
 
@@ -40,33 +37,12 @@ namespace global
 {
 static std::vector<bookmark_t> bookmarks;
 static bool bookmarks_changed = false;
-static std::filesystem::path bookmark_file;
 } // namespace global
 
 std::span<bookmark_t>
 get_all_bookmarks() noexcept
 {
     return global::bookmarks;
-}
-
-static void
-parse_bookmarks(const std::string_view raw_line) noexcept
-{
-    const auto line = ztd::strip(raw_line); // remove newline
-
-    const auto book_parts = ztd::rpartition(line, " ");
-
-    const auto& book_path = book_parts[0];
-    const auto& book_name = book_parts[2];
-
-    if (book_path.empty())
-    {
-        return;
-    }
-
-    // logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
-
-    global::bookmarks.push_back({ztd::removeprefix(book_path, "file://"), book_name});
 }
 
 void
@@ -78,30 +54,39 @@ load_bookmarks() noexcept
         global::bookmarks.clear();
     }
 
-    if (global::bookmark_file.empty())
-    {
-        global::bookmark_file = vfs::user::config() / "gtk-3.0" / "bookmarks";
-    }
+    const auto bookmark_file = vfs::user::config() / "gtk-3.0" / "bookmarks";
 
     // no bookmark file
-    if (!std::filesystem::exists(global::bookmark_file))
+    if (!std::filesystem::exists(bookmark_file))
     {
         return;
     }
 
-    std::ifstream file(global::bookmark_file);
-    if (!file)
+    const auto buffer = vfs::utils::read_file(bookmark_file);
+    if (!buffer)
     {
-        logger::error("Failed to open the file: {}", global::bookmark_file.string());
+        logger::error("Failed to read bookmark file: {} {}",
+                      bookmark_file.string(),
+                      buffer.error().message());
         return;
     }
 
-    std::string line;
-    while (std::getline(file, line))
+    for (const auto& line : ztd::split(*buffer, "\n"))
     {
-        parse_bookmarks(line);
+        const auto book_parts = ztd::rpartition(line, " ");
+
+        const auto& book_path = book_parts[0];
+        const auto& book_name = book_parts[2];
+
+        if (book_path.empty())
+        {
+            return;
+        }
+
+        // logger::info("Bookmark: Path={} | Name={}", book_path, book_name);
+
+        global::bookmarks.push_back({ztd::removeprefix(book_path, "file://"), book_name});
     }
-    file.close();
 }
 
 void
@@ -119,7 +104,13 @@ save_bookmarks() noexcept
         book_entry.append(std::format("file://{} {}\n", book_path.string(), book_name.string()));
     }
 
-    ::utils::write_file(global::bookmark_file, book_entry);
+    const auto bookmark_file = vfs::user::config() / "gtk-3.0" / "bookmarks";
+
+    const auto ec = vfs::utils::write_file(bookmark_file, book_entry);
+    if (ec)
+    {
+        logger::error("Failed to write bookmark file: {} {}", bookmark_file.string(), ec.message());
+    }
 }
 
 void

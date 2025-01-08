@@ -18,8 +18,6 @@
 
 #include <cstdint>
 
-#include <fcntl.h>
-
 #include <arpa/inet.h>
 
 #include <glibmm.h>
@@ -29,6 +27,7 @@
 #include "logger.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
+#include "vfs/utils/file-ops.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 
 #include "vfs/mime-type/chrome/mime-utils.hxx"
@@ -112,24 +111,18 @@ WriteUnicodeCharacter(i32 code_point, std::string* output) noexcept
 
 static bool
 ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& contents,
-                            size_t max_size) noexcept
+                            const std::size_t max_size) noexcept
 {
-    const auto fd = open(path.c_str(), O_RDONLY, 0);
-    if (fd == -1)
+    const auto buffer = vfs::utils::read_file(path, max_size);
+    if (!buffer)
     {
-        logger::error<logger::domain::vfs>("failed to open {}", path.string());
+        logger::error<logger::domain::vfs>("Failed to read file: {} {}",
+                                           path.string(),
+                                           buffer.error().message());
         return false;
     }
-    std::vector<char> buffer(max_size);
-    const auto length = read(fd, buffer.data(), max_size);
-    if (length == -1)
-    {
-        logger::error<logger::domain::vfs>("failed to read {}", path.string());
-        close(fd);
-        return false;
-    }
-    contents = std::string(buffer.cbegin(), buffer.cend());
-    close(fd);
+
+    contents = buffer.value();
     return true;
 }
 

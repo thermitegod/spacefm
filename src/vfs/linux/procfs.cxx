@@ -17,13 +17,13 @@
 
 #include <vector>
 
-#include <fstream>
-
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
+
+#include "vfs/utils/file-ops.hxx"
 
 #include "vfs/linux/procfs.hxx"
 
@@ -32,17 +32,23 @@ vfs::linux::procfs::mountinfo() noexcept
 {
     std::vector<MountInfoEntry> mounts;
 
-    std::ifstream file(MOUNTINFO);
-    if (!file)
+    const auto buffer = vfs::utils::read_file(MOUNTINFO);
+    if (!buffer)
     {
-        logger::error<logger::domain::vfs>("Failed to open the file: {}", MOUNTINFO);
+        logger::error<logger::domain::vfs>("Failed to read mountinfo: {} {}",
+                                           MOUNTINFO,
+                                           buffer.error().message());
         return mounts;
     }
 
-    std::string line;
-    while (std::getline(file, line))
+    for (const auto& line : ztd::split(*buffer, "\n"))
     {
-        const std::vector<std::string> fields = ztd::split(line, " ");
+        if (line.empty())
+        {
+            break; // EOF
+        }
+
+        const auto fields = ztd::split(line, " ");
         if (fields.size() != 11)
         {
             logger::error<logger::domain::vfs>("Invalid mountinfo entry: size={}, line={}",
@@ -83,5 +89,6 @@ vfs::linux::procfs::mountinfo() noexcept
 
         mounts.push_back(mount);
     }
+
     return mounts;
 }
