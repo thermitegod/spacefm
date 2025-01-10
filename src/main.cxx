@@ -80,20 +80,19 @@ open_file(const std::filesystem::path& path) noexcept
     const auto file = vfs::file::create(path);
     const auto mime_type = file->mime_type();
 
-    const auto check_app_name = mime_type->default_action();
-    if (!check_app_name)
+    const auto app_name = mime_type->default_action();
+    if (!app_name)
     {
-        const auto app_name =
+        const auto app_name_alt =
             ptk_choose_app_for_mime_type(nullptr, mime_type, true, true, true, false);
-        if (!app_name)
+        if (!app_name_alt)
         {
             logger::error("no application to open file: {}", path.string());
             return;
         }
     }
-    const auto& app_name = check_app_name.value();
 
-    const auto desktop = vfs::desktop::create(check_app_name.value());
+    const auto desktop = vfs::desktop::create(app_name.value());
     if (!desktop)
     {
         return;
@@ -105,7 +104,7 @@ open_file(const std::filesystem::path& path) noexcept
         ptk::dialog::error(
             nullptr,
             "Error",
-            std::format("Unable to use '{}' to open file:\n{}", app_name, path.string()));
+            std::format("Unable to use '{}' to open file:\n{}", app_name.value(), path.string()));
     }
 }
 

@@ -42,23 +42,22 @@
 void
 vfs::utils::open_editor(const std::filesystem::path& path) noexcept
 {
-    const auto check_editor = xset_get_s(xset::name::editor);
-    if (!check_editor)
+    const auto editor = xset_get_s(xset::name::editor);
+    if (!editor)
     {
         ptk::dialog::error(nullptr,
                            "Editor Not Set",
                            "Please set your editor in View|Preferences|Advanced");
         return;
     }
-    const auto& editor = check_editor.value();
 
-    if (!editor.ends_with(".desktop"))
+    if (!editor->ends_with(".desktop"))
     {
         logger::error<logger::domain::vfs>("Editor is not set to a .desktop file");
         return;
     }
 
-    const auto desktop = vfs::desktop::create(editor);
+    const auto desktop = vfs::desktop::create(editor.value());
     if (!desktop)
     {
         return;
@@ -72,6 +71,6 @@ vfs::utils::open_editor(const std::filesystem::path& path) noexcept
         ptk::dialog::error(
             nullptr,
             "Error",
-            std::format("Unable to use '{}' to open file:\n{}", editor, path.string()));
+            std::format("Unable to use '{}' to open file:\n{}", editor.value(), path.string()));
     }
 }

@@ -302,7 +302,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
 
     if (deffolder)
     {
-        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), deffolder.value().c_str());
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dlg), deffolder->c_str());
     }
     else
     {
@@ -313,7 +313,7 @@ xset_file_dialog(GtkWidget* parent, GtkFileChooserAction action, const std::stri
         if (action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SAVE ||
             action == GtkFileChooserAction::GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER)
         {
-            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile.value().c_str());
+            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dlg), deffile->c_str());
         }
         else
         {

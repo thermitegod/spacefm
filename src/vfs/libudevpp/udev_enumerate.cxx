@@ -81,7 +81,7 @@ libudev::enumerate::add_match_parent(const device& device) const noexcept
     const auto check_sysname = device.get_sysname();
     if (check_sysname)
     {
-        udev_enumerate_add_match_sysname(this->handle.get(), check_sysname.value().data());
+        udev_enumerate_add_match_sysname(this->handle.get(), check_sysname->data());
     }
 }
 

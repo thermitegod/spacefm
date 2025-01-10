@@ -1898,14 +1898,13 @@ on_popup_open_with_another_activate(GtkMenuItem* menuitem, ptk::file_menu* data)
 #endif
     }
 
-    const auto check_app =
+    const auto app =
         ptk_choose_app_for_mime_type(GTK_WINDOW(parent), mime_type, false, true, true, false);
-    if (check_app)
+    if (app)
     {
-        const auto& app = check_app.value();
         ptk::action::open_files_with_app(data->cwd,
                                          data->selected_files,
-                                         app,
+                                         app.value(),
                                          data->browser,
                                          false,
                                          false);
@@ -1996,13 +1995,11 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             const auto path = vfs::user::data() / "applications" / desktop->name();
             if (!std::filesystem::exists(path))
             {
-                const auto check_share_desktop = vfs::mime_type_locate_desktop_file(desktop->name());
-                if (!check_share_desktop ||
-                    std::filesystem::equivalent(check_share_desktop.value(), path))
+                const auto share_desktop = vfs::mime_type_locate_desktop_file(desktop->name());
+                if (!share_desktop || std::filesystem::equivalent(share_desktop.value(), path))
                 {
                     return;
                 }
-                const auto& share_desktop = check_share_desktop.value();
 
                 const auto response = ptk::dialog::message(
                     GTK_WINDOW(data->browser),
@@ -2013,7 +2010,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                                 "editing it, you can adjust the behavior and appearance of this "
                                 "application for the current user.\n\nCreate this copy now?",
                                 path.string(),
-                                share_desktop.string()));
+                                share_desktop->string()));
 
                 if (response != GtkResponseType::GTK_RESPONSE_YES)
                 {
@@ -2021,7 +2018,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
                 }
 
                 // need to copy
-                command = std::format("cp -a  {} {}", share_desktop.string(), path.string());
+                command = std::format("cp -a  {} {}", share_desktop->string(), path.string());
                 Glib::spawn_command_line_sync(command);
                 if (!std::filesystem::exists(path))
                 {
@@ -2068,7 +2065,7 @@ app_job(GtkWidget* item, GtkWidget* app_item) noexcept
             const auto desktop_path = get_shared_desktop_file_location(desktop->name());
             if (desktop_path)
             {
-                path = desktop_path.value().parent_path();
+                path = desktop_path->parent_path();
             }
             else
             {

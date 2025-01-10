@@ -432,12 +432,8 @@ on_dir_tree_view_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* br
                 else
                 {
                     // right click
-                    std::filesystem::path path;
-                    const auto check_path = ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(view));
-                    if (check_path)
-                    {
-                        path = check_path.value();
-                    }
+                    const auto path =
+                        ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(view)).value_or("");
                     if (path.empty())
                     {
                         // path will be empty if the right click is on
@@ -628,18 +624,16 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
     if ((gtk_selection_data_get_length(sel_data) >= 0) &&
         (gtk_selection_data_get_format(sel_data) == 8))
     {
-        const auto check_dest_dir = dir_tree_view_get_drop_dir(widget, x, y);
-        if (check_dest_dir)
+        const auto dest_dir = dir_tree_view_get_drop_dir(widget, x, y);
+        if (dest_dir)
         {
-            const auto& dest_dir = check_dest_dir.value();
-
             char** list = nullptr;
             char** puri = nullptr;
             puri = list = gtk_selection_data_get_uris(sel_data);
             if (browser->pending_drag_status_tree())
             {
                 // We only want to update drag status, not really want to drop
-                const auto dest_stat = ztd::stat::create(dest_dir);
+                const auto dest_stat = ztd::stat::create(dest_dir.value());
                 if (dest_stat)
                 {
                     if (browser->drag_source_dev_tree_ == 0)
@@ -733,7 +727,7 @@ on_dir_tree_view_drag_data_received(GtkWidget* widget, GdkDragContext* drag_cont
 
                         ptk::file_task* ptask = ptk_file_task_new(file_action,
                                                                   file_list,
-                                                                  dest_dir,
+                                                                  dest_dir.value(),
                                                                   GTK_WINDOW(parent),
                                                                   browser->task_view());
                         ptask->run();

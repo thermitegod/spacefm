@@ -283,18 +283,17 @@ vfs::detail::mime_type::get_actions(const std::string_view mime_type) noexcept
     remove_actions(mime_type, actions);
 
     /* ensure default app is in the list */
-    const auto check_default_app = get_default_action(mime_type);
-    if (check_default_app)
+    const auto default_app = get_default_action(mime_type);
+    if (default_app)
     {
-        const auto& default_app = check_default_app.value();
-        if (!std::ranges::contains(actions, default_app))
+        if (!std::ranges::contains(actions, default_app.value()))
         {
             // default app is not in the list, add it!
-            actions.push_back(default_app);
+            actions.push_back(default_app.value());
         }
         else /* default app is in the list, move it to the first. */
         {
-            const auto it = std::ranges::find(actions, default_app);
+            const auto it = std::ranges::find(actions, default_app.value());
             const auto index = std::ranges::distance(actions.cbegin(), it);
             if (index != 0)
             {
@@ -324,12 +323,11 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
 
     if (is_desktop)
     {
-        const auto check_filename = vfs::detail::mime_type::locate_desktop_file(desktop_id);
-        if (!check_filename)
+        const auto filename = vfs::detail::mime_type::locate_desktop_file(desktop_id);
+        if (!filename)
         {
             return false;
         }
-        const auto& filename = check_filename.value();
 
 #if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
@@ -339,9 +337,9 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
         try
         {
 #if (GTK_MAJOR_VERSION == 4)
-            kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
+            kf->load_from_file(filename.value(), Glib::KeyFile::Flags::NONE);
 #elif (GTK_MAJOR_VERSION == 3)
-            kf.load_from_file(filename, Glib::KEY_FILE_NONE);
+            kf.load_from_file(filename.value(), Glib::KEY_FILE_NONE);
 #endif
         }
         catch (const Glib::FileError& e)
@@ -410,12 +408,11 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
         }
         else /* Then, try to match by "Exec" and "Name" keys */
         {
-            const auto check_filename = vfs::detail::mime_type::locate_desktop_file(action);
-            if (!check_filename)
+            const auto filename = vfs::detail::mime_type::locate_desktop_file(action);
+            if (!filename)
             {
                 return false;
             }
-            const auto& filename = check_filename.value();
 
 #if (GTK_MAJOR_VERSION == 4)
             const auto kf = Glib::KeyFile::create();
@@ -425,9 +422,9 @@ mime_type_has_action(const std::string_view type, const std::string_view desktop
             try
             {
 #if (GTK_MAJOR_VERSION == 4)
-                kf->load_from_file(filename, Glib::KeyFile::Flags::NONE);
+                kf->load_from_file(filename.value(), Glib::KeyFile::Flags::NONE);
 #elif (GTK_MAJOR_VERSION == 3)
-                kf.load_from_file(filename, Glib::KEY_FILE_NONE);
+                kf.load_from_file(filename.value(), Glib::KEY_FILE_NONE);
 #endif
             }
             catch (const Glib::FileError& e)
@@ -482,12 +479,11 @@ make_custom_desktop_file(const std::string_view desktop_id,
 
     if (desktop_id.ends_with(desktop_ext))
     {
-        const auto check_filename = vfs::detail::mime_type::locate_desktop_file(desktop_id);
-        if (!check_filename)
+        const auto filename = vfs::detail::mime_type::locate_desktop_file(desktop_id);
+        if (!filename)
         {
             return "";
         }
-        const auto& filename = check_filename.value();
 
 #if (GTK_MAJOR_VERSION == 4)
         const auto kf = Glib::KeyFile::create();
@@ -497,9 +493,9 @@ make_custom_desktop_file(const std::string_view desktop_id,
         try
         {
 #if (GTK_MAJOR_VERSION == 4)
-            kf->load_from_file(filename, Glib::KeyFile::Flags::KEEP_TRANSLATIONS);
+            kf->load_from_file(filename.value(), Glib::KeyFile::Flags::KEEP_TRANSLATIONS);
 #elif (GTK_MAJOR_VERSION == 3)
-            kf.load_from_file(filename, Glib::KEY_FILE_KEEP_TRANSLATIONS);
+            kf.load_from_file(filename.value(), Glib::KEY_FILE_KEEP_TRANSLATIONS);
 #endif
         }
         catch (const Glib::FileError& e)

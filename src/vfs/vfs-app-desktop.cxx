@@ -599,17 +599,16 @@ void
 vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
                            const std::span<const std::filesystem::path> file_paths) const noexcept
 {
-    const auto check_desktop_commands =
+    const auto desktop_commands =
         this->app_exec_generate_desktop_argv(file_paths, this->use_terminal());
-    if (!check_desktop_commands)
+    if (!desktop_commands)
     {
         return;
     }
-    const auto& desktop_commands = check_desktop_commands.value();
 
     if (this->use_terminal())
     {
-        for (const auto& argv : desktop_commands)
+        for (const auto& argv : desktop_commands.value())
         {
             const std::string command = ztd::join(argv, " ");
             this->exec_in_terminal(!this->desktop_entry_.path.empty() ? this->desktop_entry_.path
@@ -619,7 +618,7 @@ vfs::desktop::exec_desktop(const std::filesystem::path& working_dir,
     }
     else
     {
-        for (const auto& argv : desktop_commands)
+        for (const auto& argv : desktop_commands.value())
         {
             Glib::spawn_async_with_pipes(
                 !this->desktop_entry_.path.empty() ? this->desktop_entry_.path

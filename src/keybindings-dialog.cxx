@@ -65,7 +65,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
             .modifier = set->keybinding.modifier});
     }
 
-    auto buffer = glz::write_json(request);
+    const auto buffer = glz::write_json(request);
     if (!buffer)
     {
         logger::error("Failed to create json: {}", glz::format_error(buffer));
@@ -95,17 +95,17 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
         return;
     }
 
-    const auto data = glz::read_json<std::vector<datatype::keybinding::response>>(standard_output);
-    if (!data)
+    const auto response =
+        glz::read_json<std::vector<datatype::keybinding::response>>(standard_output);
+    if (!response)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(data.error(), standard_output));
+                                           glz::format_error(response.error(), standard_output));
         return;
     }
-    const auto& response = data.value();
 
     // Update xset keybindings
-    for (const auto& r : response)
+    for (const auto& r : response.value())
     {
         const auto set = xset::set::get(r.name);
         set->keybinding.key = r.key;

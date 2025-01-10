@@ -734,18 +734,17 @@ on_mount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     }
 
     // task
-    const auto check_mount_command = vol->device_mount_cmd();
-    if (!check_mount_command)
+    const auto mount_command = vol->device_mount_cmd();
+    if (!mount_command)
     {
         popup_missing_mount(GTK_WIDGET(view), 0);
         return;
     }
-    const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
     ptk::file_task* ptask =
         ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
-    ptask->task->exec_command = mount_command;
+    ptask->task->exec_command = mount_command.value();
     ptask->task->exec_sync = true;
     ptask->task->exec_browser = browser;
     ptask->task->exec_popup = false;
@@ -776,18 +775,17 @@ on_umount(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget*
     }
 
     // task
-    const auto check_unmount_command = vol->device_unmount_cmd();
-    if (!check_unmount_command)
+    const auto unmount_command = vol->device_unmount_cmd();
+    if (!unmount_command)
     {
         popup_missing_mount(view, 1);
         return;
     }
-    const auto& unmount_command = check_unmount_command.value();
 
     const std::string task_name = std::format("Unmount {}", vol->device_file());
     ptk::file_task* ptask =
         ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
-    ptask->task->exec_command = unmount_command;
+    ptask->task->exec_command = unmount_command.value();
     ptask->task->exec_sync = true;
     ptask->task->exec_browser = browser;
     ptask->task->exec_popup = false;
@@ -820,18 +818,17 @@ on_eject(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* 
     if (vol->is_mounted())
     {
         // task
-        const auto check_unmount_command = vol->device_unmount_cmd();
-        if (!check_unmount_command)
+        const auto unmount_command = vol->device_unmount_cmd();
+        if (!unmount_command)
         {
             popup_missing_mount(view, 1);
             return;
         }
-        const auto& unmount_command = check_unmount_command.value();
 
         const std::string task_name = std::format("Remove {}", vol->device_file());
         ptk::file_task* ptask =
             ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
-        ptask->task->exec_command = unmount_command;
+        ptask->task->exec_command = unmount_command.value();
         ptask->task->exec_sync = true;
         ptask->task->exec_browser = browser;
         ptask->task->exec_show_error = true;
@@ -927,17 +924,16 @@ try_mount(GtkTreeView* view, const std::shared_ptr<vfs::volume>& vol) noexcept
         return false;
     }
     // task
-    const auto check_mount_command = vol->device_mount_cmd();
-    if (!check_mount_command)
+    const auto mount_command = vol->device_mount_cmd();
+    if (!mount_command)
     {
         popup_missing_mount(GTK_WIDGET(view), 0);
         return false;
     }
-    const auto& mount_command = check_mount_command.value();
 
     const std::string task_name = std::format("Mount {}", vol->device_file());
     ptk::file_task* ptask = ptk_file_exec_new(task_name, GTK_WIDGET(view), browser->task_view());
-    ptask->task->exec_command = mount_command;
+    ptask->task->exec_command = mount_command.value();
     ptask->task->exec_sync = true;
     ptask->task->exec_browser = browser;
     ptask->task->exec_popup = false;
@@ -998,18 +994,17 @@ on_open_tab(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidge
     if (!vol->is_mounted())
     {
         // get mount command
-        const auto check_mount_command = vol->device_mount_cmd();
-        if (!check_mount_command)
+        const auto mount_command = vol->device_mount_cmd();
+        if (!mount_command)
         {
             popup_missing_mount(view, 0);
             return;
         }
-        const auto& mount_command = check_mount_command.value();
 
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
         ptk::file_task* ptask = ptk_file_exec_new(task_name, view, browser->task_view());
-        ptask->task->exec_command = mount_command;
+        ptask->task->exec_command = mount_command.value();
         ptask->task->exec_sync = true;
         ptask->task->exec_browser = browser;
         ptask->task->exec_popup = false;
@@ -1071,19 +1066,18 @@ on_open(GtkMenuItem* item, const std::shared_ptr<vfs::volume>& vol, GtkWidget* v
     if (!vol->is_mounted())
     {
         // get mount command
-        const auto check_mount_command = vol->device_mount_cmd();
-        if (!check_mount_command)
+        const auto mount_command = vol->device_mount_cmd();
+        if (!mount_command)
         {
             popup_missing_mount(view, 0);
             return;
         }
-        const auto& mount_command = check_mount_command.value();
 
         // task
         const std::string task_name = std::format("Mount {}", vol->device_file());
         ptk::file_task* ptask =
             ptk_file_exec_new(task_name, view, browser ? browser->task_view() : nullptr);
-        ptask->task->exec_command = mount_command;
+        ptask->task->exec_command = mount_command.value();
         ptask->task->exec_sync = true;
         ptask->task->exec_browser = browser;
         ptask->task->exec_popup = false;
@@ -1608,7 +1602,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_remove);
-        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label->data());
         g_object_set_data(G_OBJECT(item), "view", view);
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_eject), vol.get());
         gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1616,7 +1610,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_unmount);
-        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label->data());
         g_object_set_data(G_OBJECT(item), "view", view);
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_umount), vol.get());
         gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
@@ -1627,7 +1621,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_open);
-        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label->data());
         g_object_set_data(G_OBJECT(item), "view", view);
         gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);
         if (browser)
@@ -1642,7 +1636,7 @@ show_dev_design_menu(GtkWidget* menu, GtkWidget* dev_item, const std::shared_ptr
 
     {
         const auto set = xset::set::get(xset::name::dev_menu_mount);
-        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label.value().data());
+        GtkWidget* item = gtk_menu_item_new_with_mnemonic(set->menu.label->data());
         g_object_set_data(G_OBJECT(item), "view", view);
         g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(on_mount), vol.get());
         gtk_menu_shell_append(GTK_MENU_SHELL(popup), item);

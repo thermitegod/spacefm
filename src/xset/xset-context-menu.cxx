@@ -130,7 +130,7 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
         switch (set->menu.type)
         {
             case xset::set::menu_type::check:
-                item = gtk_check_menu_item_new_with_mnemonic(set->menu.label.value().data());
+                item = gtk_check_menu_item_new_with_mnemonic(set->menu.label->data());
                 gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
                                                set->b == xset::set::enabled::yes);
                 break;
@@ -145,7 +145,7 @@ xset_add_menuitem(ptk::browser* browser, GtkWidget* menu, GtkAccelGroup* accel_g
                     set_radio->menu.radio_group = nullptr;
                 }
                 item = gtk_radio_menu_item_new_with_mnemonic((GSList*)set_radio->menu.radio_group,
-                                                             set->menu.label.value().data());
+                                                             set->menu.label->data());
                 set_radio->menu.radio_group =
                     gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
                 gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),

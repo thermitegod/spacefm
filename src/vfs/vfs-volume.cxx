@@ -172,11 +172,10 @@ parse_mounts(const bool report) noexcept
                 {
                     // is a subdir mount - ignore if block device
                     const dev_t devnum = makedev(mount.major, mount.minor);
-                    const auto check_udevice = global::udev.device_from_devnum('b', devnum);
-                    if (check_udevice)
+                    const auto udevice = global::udev.device_from_devnum('b', devnum);
+                    if (udevice)
                     {
-                        const auto& udevice = check_udevice.value();
-                        if (udevice.is_initialized())
+                        if (udevice->is_initialized())
                         {
                             // is block device with subdir mount - ignore
                             continue;
@@ -192,11 +191,10 @@ parse_mounts(const bool report) noexcept
             {
                 // initial load !report do not add non-block devices
                 const dev_t devnum = makedev(mount.major, mount.minor);
-                const auto check_udevice = global::udev.device_from_devnum('b', devnum);
-                if (check_udevice)
+                const auto udevice = global::udev.device_from_devnum('b', devnum);
+                if (udevice)
                 {
-                    const auto& udevice = check_udevice.value();
-                    if (udevice.is_initialized())
+                    if (udevice->is_initialized())
                     {
                         // is block device
                         if (subdir_mount)
@@ -297,22 +295,21 @@ parse_mounts(const bool report) noexcept
         for (const devmount_t& devmount : changed)
         {
             const dev_t devnum = makedev(devmount->major, devmount->minor);
-            const auto check_udevice = global::udev.device_from_devnum('b', devnum);
-            if (!check_udevice)
+            const auto udevice = global::udev.device_from_devnum('b', devnum);
+            if (!udevice)
             {
                 continue;
             }
 
-            const auto& udevice = check_udevice.value();
-            if (udevice.is_initialized())
+            if (udevice->is_initialized())
             {
-                const std::string devnode = udevice.get_devnode().value();
+                const auto devnode = udevice->get_devnode().value();
                 if (!devnode.empty())
                 {
                     // block device
                     logger::info<logger::domain::vfs>("mount changed: {}", devnode);
 
-                    const auto volume = read_by_device(udevice);
+                    const auto volume = read_by_device(udevice.value());
                     if (volume != nullptr)
                     { // frees volume if needed
                         volume->device_added();
@@ -366,13 +363,11 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
         return condition != Glib::IOCondition::IO_HUP;
     }
 
-    const auto check_udevice = global::umonitor.receive_device();
-    if (check_udevice)
+    const auto udevice = global::umonitor.receive_device();
+    if (udevice)
     {
-        const auto& udevice = check_udevice.value();
-
-        const auto action = udevice.get_action().value();
-        const auto devnode = udevice.get_devnode().value();
+        const auto action = udevice->get_action().value();
+        const auto devnode = udevice->get_devnode().value();
         if (action.empty())
         {
             return false;
@@ -399,7 +394,7 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
         // add/remove volume
         if (action == "add" || action == "change")
         {
-            const auto volume = read_by_device(udevice);
+            const auto volume = read_by_device(udevice.value());
             if (volume != nullptr)
             { // frees volume if needed
                 volume->device_added();
@@ -407,7 +402,7 @@ cb_udev_monitor_watch(const Glib::IOCondition condition) noexcept
         }
         else if (action == "remove")
         {
-            device_removed(udevice);
+            device_removed(udevice.value());
         }
         // what to do for move action?
 
@@ -683,19 +678,18 @@ vfs::volume_dir_avoid_changes(const std::filesystem::path& dir) noexcept
     }
     // logger::debug<logger::domain::vfs>("    stat.dev() = {}:{}", gnu_dev_major(stat.dev()), gnu_dev_minor(stat.dev()));
 
-    const auto check_fstype = devmount_fstype(stat->dev());
-    if (!check_fstype)
+    const auto fstype = devmount_fstype(stat->dev());
+    if (!fstype)
     {
         return false;
     }
-    const std::string& fstype = check_fstype.value();
     // logger::debug<logger::domain::vfs>("    fstype={}", fstype);
 
     const auto dev_change = xset_get_s(xset::name::dev_change).value_or("");
     const auto blacklisted = ztd::split(dev_change, " ");
 
     const auto has_blacklisted = [&fstype](const std::string_view blacklisted)
-    { return fstype.contains(blacklisted); };
+    { return fstype->contains(blacklisted); };
 
     const auto is_blacklisted = std::ranges::any_of(blacklisted, has_blacklisted);
 

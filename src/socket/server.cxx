@@ -66,8 +66,8 @@ socket::server_thread() noexcept
             logger::info<logger::domain::socket>("result : {}", buffer.value());
 
             // Send the response back to the sender
-            zmq::message_t reply(buffer.value().size());
-            std::memcpy(reply.data(), buffer.value().data(), buffer.value().size());
+            zmq::message_t reply(buffer->size());
+            std::memcpy(reply.data(), buffer->data(), buffer->size());
             server.send(reply, zmq::send_flags::none);
         }
     }

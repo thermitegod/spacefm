@@ -420,11 +420,10 @@ libudev::device::is_cdrom() const noexcept
         return false;
     }
 
-    const auto check_prop = this->get_property("ID_CDROM");
-    if (check_prop)
+    const auto prop = this->get_property("ID_CDROM");
+    if (prop)
     {
-        const auto& prop = check_prop.value();
-        if (std::stoi(prop) == 1)
+        if (std::stoi(prop.value()) == 1)
         {
             return true;
         }
@@ -441,11 +440,10 @@ libudev::device::is_hdd() const noexcept
         return false;
     }
 
-    const auto check_prop = this->get_property("ID_ATA_ROTATION_RATE_RPM");
-    if (check_prop)
+    const auto prop = this->get_property("ID_ATA_ROTATION_RATE_RPM");
+    if (prop)
     {
-        const auto& prop = check_prop.value();
-        if (std::stoi(prop) > 0)
+        if (std::stoi(prop.value()) > 0)
         {
             return true;
         }
@@ -462,11 +460,10 @@ libudev::device::is_ssd() const noexcept
         return false;
     }
 
-    const auto check_prop = this->get_property("ID_ATA_ROTATION_RATE_RPM");
-    if (check_prop)
+    const auto prop = this->get_property("ID_ATA_ROTATION_RATE_RPM");
+    if (prop)
     {
-        const auto& prop = check_prop.value();
-        if (std::stoi(prop) == 0)
+        if (std::stoi(prop.value()) == 0)
         {
             return true;
         }
@@ -501,11 +498,10 @@ libudev::device::is_hotswapable() const noexcept
         return false;
     }
 
-    const auto check_prop = this->get_property("ID_HOTPLUG");
-    if (check_prop)
+    const auto prop = this->get_property("ID_HOTPLUG");
+    if (prop)
     {
-        const auto& prop = check_prop.value();
-        if (std::stoi(prop) == 1)
+        if (std::stoi(prop.value()) == 1)
         {
             return true;
         }

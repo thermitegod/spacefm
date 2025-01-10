@@ -293,13 +293,13 @@ vfs::device::device_get_info() noexcept
         //
         //  Another way to get this information is the BLKSSZGET ioctl but we do not want
         //  to open the device. Ideally vol_id would export it.
-        const auto check_block_size =
+        const auto block_size =
             vfs::linux::sysfs::get_u64(this->native_path_, "queue/hw_sector_size");
-        if (check_block_size)
+        if (block_size)
         {
-            if (check_block_size.value() != 0)
+            if (block_size.value() != 0)
             {
-                this->block_size_ = check_block_size.value();
+                this->block_size_ = block_size.value();
             }
             else
             {

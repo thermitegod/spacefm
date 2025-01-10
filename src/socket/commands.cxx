@@ -112,28 +112,26 @@ socket::command(const std::string_view socket_commands_json) noexcept
     static constexpr i32 SOCKET_FAILURE = 1; // Failing exit status.
     static constexpr i32 SOCKET_INVALID = 2; // Invalid request exit status.
 
-    const auto socket_request_data =
-        glz::read_json<socket::socket_request_data>(socket_commands_json);
-    if (!socket_request_data)
+    const auto request_data = glz::read_json<socket::socket_request_data>(socket_commands_json);
+    if (!request_data)
     {
         logger::error<logger::domain::ptk>(
             "Failed to decode json: {}",
-            glz::format_error(socket_request_data.error(), socket_commands_json));
+            glz::format_error(request_data.error(), socket_commands_json));
 
         return {SOCKET_FAILURE,
                 std::format("Failed to decode json: {}",
-                            glz::format_error(socket_request_data.error(), socket_commands_json))};
+                            glz::format_error(request_data.error(), socket_commands_json))};
     }
-    const auto& request_data = socket_request_data.value();
 
     // socket flags
-    auto panel = request_data.panel;
-    auto tab = request_data.tab;
-    auto window = request_data.window;
+    auto panel = request_data->panel;
+    auto tab = request_data->tab;
+    auto window = request_data->window;
     // socket commands
     // subproperty and data are only retrived in the properties that need them
-    const auto command = request_data.command;
-    const auto property = request_data.property;
+    const auto command = request_data->command;
+    const auto property = request_data->property;
 
     // must match file-browser.c
     static constexpr std::array<const std::string_view, 12> column_titles{
@@ -211,7 +209,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
 
     if (command == "set")
     {
-        const auto data = request_data.data;
+        const auto data = request_data->data;
 
         if (property == "window-size" || property == "window-position")
         {
@@ -248,7 +246,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "window-maximized")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             if (subproperty == "true")
             {
@@ -261,7 +259,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "window-fullscreen")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b(xset::name::main_full, subproperty == "true");
             main_window->fullscreen_activate();
@@ -299,7 +297,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "focused-panel")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             i32 width = 0;
 
@@ -340,7 +338,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "focused-pane")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             GtkWidget* widget = nullptr;
 
@@ -368,7 +366,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "current-tab")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             tab_t new_tab = INVALID_TAB;
 
@@ -450,7 +448,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "devices-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel_mode(panel,
                                   xset::panel::show_devmon,
@@ -460,7 +458,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "dirtree-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel_mode(panel,
                                   xset::panel::show_dirtree,
@@ -470,7 +468,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "toolbar-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel_mode(panel,
                                   xset::panel::show_toolbox,
@@ -480,35 +478,35 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "hidden-files-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel(panel, xset::panel::show_hidden, subproperty == "true");
             update_views_all_windows(nullptr, browser);
         }
         else if (property == "panel1-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel(panel_1, xset::panel::show, subproperty == "true");
             show_panels_all_windows(nullptr, main_window);
         }
         else if (property == "panel2-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel(panel_2, xset::panel::show, subproperty == "true");
             show_panels_all_windows(nullptr, main_window);
         }
         else if (property == "panel3-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel(panel_3, xset::panel::show, subproperty == "true");
             show_panels_all_windows(nullptr, main_window);
         }
         else if (property == "panel4-visible")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b_panel(panel_4, xset::panel::show, subproperty == "true");
             show_panels_all_windows(nullptr, main_window);
@@ -544,7 +542,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "column-width")
         { // COLUMN WIDTH
             const std::string_view value = data[0];
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             const i32 width = std::stoi(value.data());
 
@@ -595,7 +593,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "sort-by")
         { // COLUMN
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             auto j = ptk::browser::sort_order::name;
             if (subproperty == "name")
@@ -655,28 +653,28 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "sort-ascend")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             browser->set_sort_type(subproperty == "true" ? GtkSortType::GTK_SORT_ASCENDING
                                                          : GtkSortType::GTK_SORT_DESCENDING);
         }
         else if (property == "sort-natural")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b(xset::name::sortx_natural, subproperty == "true");
             browser->set_sort_extra(xset::name::sortx_natural);
         }
         else if (property == "sort-case")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset_set_b(xset::name::sortx_case, subproperty == "true");
             browser->set_sort_extra(xset::name::sortx_case);
         }
         else if (property == "sort-hidden-first")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             const xset::name name =
                 subproperty == "true" ? xset::name::sortx_hidfirst : xset::name::sortx_hidlast;
@@ -685,7 +683,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "sort-first")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             xset::name name;
             if (subproperty == "files")
@@ -708,7 +706,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "show-thumbnails")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
             if (browser->settings_->show_thumbnails != (subproperty == "true"))
             {
                 main_window_toggle_thumbnails_all_windows();
@@ -721,7 +719,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "large-icons")
         {
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             if (!browser->is_view_mode(ptk::browser::view_mode::icon_view))
             {
@@ -1099,7 +1097,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "column-width")
         { // COLUMN
-            const auto subproperty = request_data.subproperty;
+            const auto subproperty = request_data->subproperty;
 
             if (browser->is_view_mode(ptk::browser::view_mode::list_view))
             {
@@ -1365,8 +1363,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
     }
     else if (command == "set-task")
     { // TASKNUM PROPERTY [VALUE]
-        const auto subproperty = request_data.subproperty;
-        const auto data = request_data.data;
+        const auto subproperty = request_data->subproperty;
+        const auto data = request_data->data;
         const std::string_view value = data[0];
 
         // find task
@@ -1618,50 +1616,49 @@ socket::command(const std::string_view socket_commands_json) noexcept
             //                     [--user USER] [--title TITLE]
             //                     [--icon ICON] [--dir DIR] COMMAND
 
-            const auto data = request_data.data;
+            const auto data = request_data->data;
 
-            const auto raw_task_data = glz::read_json<socket::socket_task_data>(data[0]);
-            if (!raw_task_data)
+            const auto task_data = glz::read_json<socket::socket_task_data>(data[0]);
+            if (!task_data)
             {
                 logger::error<logger::domain::ptk>(
                     "Failed to decode json: {}",
-                    glz::format_error(raw_task_data.error(), socket_commands_json));
+                    glz::format_error(task_data.error(), socket_commands_json));
 
                 return {SOCKET_FAILURE,
                         std::format("Failed to decode json: {}",
-                                    glz::format_error(raw_task_data.error(), data[0]))};
+                                    glz::format_error(task_data.error(), data[0]))};
             }
-            const auto& task_data = raw_task_data.value();
 
-            if (task_data.cmd.empty())
+            if (task_data->cmd.empty())
             {
                 return {SOCKET_FAILURE, std::format("{} requires a command", command)};
             }
             std::string cmd;
-            for (const std::string_view c : task_data.cmd)
+            for (const std::string_view c : task_data->cmd)
             {
                 cmd.append(std::format(" {}", c));
             }
 
             ptk::file_task* ptask =
-                ptk_file_exec_new(!task_data.title.empty() ? task_data.title : cmd,
-                                  !task_data.cwd.empty() ? task_data.cwd.data() : browser->cwd(),
+                ptk_file_exec_new(!task_data->title.empty() ? task_data->title : cmd,
+                                  !task_data->cwd.empty() ? task_data->cwd.data() : browser->cwd(),
                                   GTK_WIDGET(browser),
                                   browser->task_view());
             ptask->task->exec_browser = browser;
             ptask->task->exec_command = cmd;
-            ptask->task->exec_icon = task_data.icon;
-            ptask->task->exec_terminal = task_data.terminal;
-            ptask->task->exec_sync = task_data.task;
-            ptask->task->exec_popup = task_data.popup;
-            ptask->task->exec_show_output = task_data.popup;
+            ptask->task->exec_icon = task_data->icon;
+            ptask->task->exec_terminal = task_data->terminal;
+            ptask->task->exec_sync = task_data->task;
+            ptask->task->exec_popup = task_data->popup;
+            ptask->task->exec_show_output = task_data->popup;
             ptask->task->exec_show_error = true;
-            if (task_data.popup)
+            if (task_data->popup)
             {
                 gtk_window_present(GTK_WINDOW(main_window));
             }
             ptask->run();
-            if (task_data.task)
+            if (task_data->task)
             {
                 return {SOCKET_SUCCESS,
                         std::format("Note: $new_task_id not valid until approx one "
@@ -1673,7 +1670,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "edit")
         { // edit FILE
-            const auto data = request_data.data;
+            const auto data = request_data->data;
             const std::string_view value = data[0];
 
             if (!std::filesystem::is_regular_file(value))
@@ -1684,7 +1681,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
         }
         else if (property == "mount" || property == "umount")
         { // mount or unmount TARGET
-            const auto data = request_data.data;
+            const auto data = request_data->data;
             const std::string_view value = data[0];
 
             // Resolve TARGET
@@ -1728,18 +1725,18 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 // mount/unmount vol
                 if (property == "mount")
                 {
-                    const auto check_mount_command = vol->device_mount_cmd();
-                    if (check_mount_command)
+                    const auto mount_command = vol->device_mount_cmd();
+                    if (mount_command)
                     {
-                        cmd = check_mount_command.value();
+                        cmd = mount_command.value();
                     }
                 }
                 else
                 {
-                    const auto check_unmount_command = vol->device_unmount_cmd();
-                    if (check_unmount_command)
+                    const auto unmount_command = vol->device_unmount_cmd();
+                    if (unmount_command)
                     {
-                        cmd = check_unmount_command.value();
+                        cmd = unmount_command.value();
                     }
                 }
             }
@@ -1770,7 +1767,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             // delete SOURCE FILENAME [...]
             // get opts
 
-            const auto data = request_data.data;
+            const auto data = request_data->data;
 
             const auto raw_file_task_data = glz::read_json<socket::socket_file_task_data>(data[0]);
             if (!raw_file_task_data)
@@ -1889,7 +1886,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     else if (command == "emit-key")
     { // KEYCODE [KEYMOD]
 #if 0
-        const auto data = request_data.data;
+        const auto data = request_data->data;
 
         // this only handles keys assigned to menu items
         const auto event = (GdkEventKey*)gdk_event_new(GdkEventType::GDK_KEY_PRESS);
@@ -1913,7 +1910,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     else if (command == "activate")
     {
 #if 0
-        const auto data = request_data.data;
+        const auto data = request_data->data;
 
         xset_t set = xset_find_custom(data[i]);
         if (!set)
@@ -1948,7 +1945,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
     else if (command == "add-event" || command == "replace-event" || command == "remove-event")
     {
 #if 0
-        const auto data = request_data.data;
+        const auto data = request_data->data;
 
         const auto set = xset::set::get(data[i], true);
         if (!set)

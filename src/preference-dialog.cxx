@@ -506,42 +506,41 @@ show_preference_dialog(GtkWindow* parent,
         return;
     }
 
-    const auto data = glz::read_json<datatype::settings_extended>(standard_output);
-    if (!data)
+    const auto results = glz::read_json<datatype::settings_extended>(standard_output);
+    if (!results)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(data.error(), standard_output));
+                                           glz::format_error(results.error(), standard_output));
         return;
     }
-    const auto& new_settings = data.value();
 
     // update changed settings
 
     // General
-    update_big_icons(settings, new_settings);
-    update_small_icons(settings, new_settings);
-    update_tool_icons(settings, new_settings);
-    update_thumbnail_show(settings, new_settings);
-    update_thumbnail_size_limits(settings, new_settings);
-    update_thumbnail_max_size(settings, new_settings);
+    update_big_icons(settings, results.value());
+    update_small_icons(settings, results.value());
+    update_tool_icons(settings, results.value());
+    update_thumbnail_show(settings, results.value());
+    update_thumbnail_size_limits(settings, results.value());
+    update_thumbnail_max_size(settings, results.value());
 
     // Interface
-    update_show_toolbar_home(settings, new_settings);
-    update_show_toolbar_refresh(settings, new_settings);
-    update_show_toolbar_search(settings, new_settings);
-    update_show_tab_bar(settings, new_settings);
-    update_hide_close_tab(settings, new_settings);
-    update_new_tab(settings, new_settings);
-    update_confirm(settings, new_settings);
-    update_confirm_trash(settings, new_settings);
-    update_confirm_delete(settings, new_settings);
-    update_si_prefix(settings, new_settings);
-    update_click_executes(settings, new_settings);
-    update_drag_actions(settings, new_settings);
+    update_show_toolbar_home(settings, results.value());
+    update_show_toolbar_refresh(settings, results.value());
+    update_show_toolbar_search(settings, results.value());
+    update_show_tab_bar(settings, results.value());
+    update_hide_close_tab(settings, results.value());
+    update_new_tab(settings, results.value());
+    update_confirm(settings, results.value());
+    update_confirm_trash(settings, results.value());
+    update_confirm_delete(settings, results.value());
+    update_si_prefix(settings, results.value());
+    update_click_executes(settings, results.value());
+    update_drag_actions(settings, results.value());
 
     // Advanced
-    update_editor(settings, new_settings);
-    update_terminal(settings, new_settings);
+    update_editor(settings, results.value());
+    update_terminal(settings, results.value());
 
     autosave::request_add();
 }

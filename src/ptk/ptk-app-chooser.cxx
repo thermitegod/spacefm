@@ -97,24 +97,23 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
         return std::nullopt;
     }
 
-    const auto data = glz::read_json<datatype::app_chooser::response>(standard_output);
-    if (!data)
+    const auto response = glz::read_json<datatype::app_chooser::response>(standard_output);
+    if (!response)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(data.error(), standard_output));
+                                           glz::format_error(response.error(), standard_output));
         return std::nullopt;
     }
-    const auto& response = data.value();
 
-    if (response.is_desktop && response.set_default)
+    if (response->is_desktop && response->set_default)
     { // The selected app is set to default action
-        mime_type->set_default_action(response.app);
+        mime_type->set_default_action(response->app);
     }
     else if (/* mime_type->get_type() != mime_type::type::unknown && */
              (dir_default || mime_type->type() != vfs::constants::mime_type::directory))
     {
-        return mime_type->add_action(response.app);
+        return mime_type->add_action(response->app);
     }
 
-    return response.app;
+    return response->app;
 }

@@ -108,33 +108,32 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
 
-    const auto data = glz::read_json<datatype::message::response>(standard_output);
-    if (!data)
+    const auto response = glz::read_json<datatype::message::response>(standard_output);
+    if (!response)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(data.error(), standard_output));
+                                           glz::format_error(response.error(), standard_output));
         return GtkResponseType::GTK_RESPONSE_NONE;
     }
-    const auto& response = data.value();
 
     // Send correct gtk response code
-    if (response.result == "Ok")
+    if (response->result == "Ok")
     {
         return GtkResponseType::GTK_RESPONSE_OK;
     }
-    else if (response.result == "Close")
+    else if (response->result == "Close")
     {
         return GtkResponseType::GTK_RESPONSE_CLOSE;
     }
-    else if (response.result == "Cancel")
+    else if (response->result == "Cancel")
     {
         return GtkResponseType::GTK_RESPONSE_CANCEL;
     }
-    else if (response.result == "Yes")
+    else if (response->result == "Yes")
     {
         return GtkResponseType::GTK_RESPONSE_YES;
     }
-    else if (response.result == "No")
+    else if (response->result == "No")
     {
         return GtkResponseType::GTK_RESPONSE_NO;
     }

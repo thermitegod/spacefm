@@ -78,21 +78,20 @@ run_subcommand_socket(const socket_subcommand_data_t& opt)
         std::exit(EXIT_FAILURE);
     }
 
-    const auto data = glz::read_json<socket::socket_response_data>(server_response.value());
-    if (!data)
+    const auto response = glz::read_json<socket::socket_response_data>(server_response.value());
+    if (!response)
     {
         std::println("Failed to decode json: {}",
-                     glz::format_error(data.error(), server_response.value()));
+                     glz::format_error(response.error(), server_response.value()));
         std::exit(EXIT_FAILURE);
     }
-    const auto& response = data.value();
 
-    if (!response.message.empty())
+    if (!response->message.empty())
     {
-        std::println("{}", response.message);
+        std::println("{}", response->message);
     }
 
-    std::exit(response.exit_status);
+    std::exit(response->exit_status);
 }
 
 void

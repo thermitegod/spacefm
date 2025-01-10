@@ -634,7 +634,7 @@ add_toolbar_item(ptk::browser* browser, GtkBox* toolbar, const xset::name item) 
     if (set->icon)
     {
         // image = xset_get_image(set->icon.value(), (GtkIconSize)icon_size);
-        image = gtk_image_new_from_icon_name(set->icon.value().data(), (GtkIconSize)icon_size);
+        image = gtk_image_new_from_icon_name(set->icon->data(), (GtkIconSize)icon_size);
     }
     else
     {
@@ -1553,19 +1553,17 @@ on_dir_tree_update_sel(ptk::browser* browser) noexcept
         return false;
     }
 
-    const auto check_dir_path = ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(browser->side_dir));
-    if (check_dir_path)
+    const auto dir_path = ptk::view::dir_tree::selected_dir(GTK_TREE_VIEW(browser->side_dir));
+    if (dir_path)
     {
-        const auto& dir_path = check_dir_path.value();
-
-        if (!std::filesystem::equivalent(dir_path, browser->cwd()))
+        if (!std::filesystem::equivalent(dir_path.value(), browser->cwd()))
         {
-            if (browser->chdir(dir_path))
+            if (browser->chdir(dir_path.value()))
             {
 #if (GTK_MAJOR_VERSION == 4)
-                gtk_editable_set_text(GTK_EDITABLE(browser->path_bar_), dir_path.c_str());
+                gtk_editable_set_text(GTK_EDITABLE(browser->path_bar_), dir_path->c_str());
 #elif (GTK_MAJOR_VERSION == 3)
-                gtk_entry_set_text(GTK_ENTRY(browser->path_bar_), dir_path.c_str());
+                gtk_entry_set_text(GTK_ENTRY(browser->path_bar_), dir_path->c_str());
 #endif
             }
         }
@@ -2604,12 +2602,11 @@ on_dir_tree_button_press(GtkWidget* view, GdkEvent* event, ptk::browser* browser
                 gtk_tree_model_get(model, &it, ptk::dir_tree::column::info, &file, -1);
                 if (file)
                 {
-                    const auto check_file_path = ptk::view::dir_tree::dir_path(model, &it);
-                    if (check_file_path)
+                    const auto file_path = ptk::view::dir_tree::dir_path(model, &it);
+                    if (file_path)
                     {
-                        const auto& file_path = check_file_path.value();
                         browser->run_event<spacefm::signal::open_item>(
-                            file_path,
+                            file_path.value(),
                             ptk::browser::open_action::new_tab);
                     }
                 }
@@ -3641,7 +3638,7 @@ ptk::browser::copycmd(const std::span<const std::shared_ptr<vfs::file>> selected
                 move_dest = path;
             }
 
-            xset_set(xset::name::copy_loc_last, xset::var::desc, path.value().string());
+            xset_set(xset::name::copy_loc_last, xset::var::desc, path->string());
         }
         else
         {
@@ -3933,16 +3930,15 @@ select_pattern_dialog(GtkWidget* parent) noexcept
         return "";
     }
 
-    const auto data = glz::read_json<datatype::pattern::response>(standard_output);
-    if (!data)
+    const auto response = glz::read_json<datatype::pattern::response>(standard_output);
+    if (!response)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(data.error(), standard_output));
+                                           glz::format_error(response.error(), standard_output));
         return "";
     }
-    const auto& response = data.value();
 
-    return response.result;
+    return response->result;
 }
 
 void

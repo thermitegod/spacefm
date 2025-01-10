@@ -332,9 +332,7 @@ vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir) noexcept
         return false;
     }
 
-    const auto checked_dest_dir = this->dest_dir.value();
-
-    const auto real_dest_path = std::filesystem::canonical(checked_dest_dir);
+    const auto real_dest_path = std::filesystem::canonical(this->dest_dir.value());
     const auto real_src_path = std::filesystem::canonical(src_dir);
 
     // Need to have the + '/' to avoid erroring when moving a dir
@@ -347,7 +345,7 @@ vfs::file_task::check_dest_in_src(const std::filesystem::path& src_dir) noexcept
 
     // source is contained in destination dir
     this->append_add_log(std::format("Destination directory '{}' is contained in source '{}'",
-                                     checked_dest_dir.string(),
+                                     dest_dir->string(),
                                      src_dir.string()));
 
     if (this->state_cb)
@@ -1079,20 +1077,18 @@ vfs::file_task::file_chown_chmod(const std::filesystem::path& src_file) noexcept
         /* chmod */
         if (this->chmod_actions_)
         {
-            std::filesystem::perms new_perms;
+            std::filesystem::perms new_perms{};
             const std::filesystem::perms orig_perms =
                 std::filesystem::status(src_file).permissions();
-
-            const auto new_chmod_actions = chmod_actions_.value();
 
             for (const auto i :
                  std::views::iota(0uz, magic_enum::enum_count<vfs::file_task::chmod_action>()))
             {
-                if (new_chmod_actions[i] == 2)
+                if (this->chmod_actions_.value()[i] == 2)
                 { /* Do not change */
                     continue;
                 }
-                if (new_chmod_actions[i] == 0)
+                if (this->chmod_actions_.value()[i] == 0)
                 { /* Remove this bit */
                     new_perms &= ~chmod_flags.at(i);
                 }
@@ -1508,8 +1504,7 @@ vfs::file_task::run_task() noexcept
         {
             if (this->dest_dir)
             {
-                const auto checked_dest_dir = this->dest_dir.value();
-                this->avoid_changes_ = vfs::volume_dir_avoid_changes(checked_dest_dir);
+                this->avoid_changes_ = vfs::volume_dir_avoid_changes(this->dest_dir.value());
             }
             else
             {

@@ -98,16 +98,15 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
         return false;
     }
 
-    const auto data = glz::read_json<datatype::file_action::response>(standard_output);
-    if (!data)
+    const auto response = glz::read_json<datatype::file_action::response>(standard_output);
+    if (!response)
     {
         logger::error<logger::domain::ptk>("Failed to decode json: {}",
-                                           glz::format_error(data.error(), standard_output));
+                                           glz::format_error(response.error(), standard_output));
         return false;
     }
-    const auto& response = data.value();
 
-    return response.result == "Confirm";
+    return response->result == "Confirm";
 }
 
 void
