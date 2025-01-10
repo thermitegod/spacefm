@@ -333,7 +333,7 @@ else
 endif
 
 if get_option('with-system-magic-enum')
-    magic_enum_dep = dependency('magic_enum', required: true)
+    magic_enum_dep = dependency('magic_enum', required: true, version: '>=0.9.7')
     dependencies += magic_enum_dep
 else
     # TODO this is still building tests
