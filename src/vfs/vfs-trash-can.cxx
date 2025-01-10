@@ -13,26 +13,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <memory>
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <filesystem>
-
-#include <memory>
-
-#include <chrono>
-
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/utils/vfs-utils.hxx"
-
 #include "vfs/vfs-trash-can.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
 
 namespace global
 {

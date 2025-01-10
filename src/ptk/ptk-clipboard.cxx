@@ -13,31 +13,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <span>
 #include <vector>
-
-#include <memory>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
-
-#include "utils/strdup.hxx"
 #include "utils/shell-quote.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-file-task.hxx"
+#include "utils/strdup.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-file-task.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
 

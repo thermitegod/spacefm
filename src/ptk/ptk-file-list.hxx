@@ -17,12 +17,11 @@
 
 #pragma once
 
+#include <memory>
 #include <string_view>
 
-#include <memory>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <ztd/ztd.hxx>

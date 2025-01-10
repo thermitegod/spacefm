@@ -13,31 +13,25 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
 #include <vector>
 
-#include <memory>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "vfs/vfs-app-desktop.hxx"
+#include "xset/xset.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 
-#include "xset/xset.hxx"
-
 #include "vfs/utils/vfs-editor.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+
+#include "logger.hxx"
 
 void
 vfs::utils::open_editor(const std::filesystem::path& path) noexcept

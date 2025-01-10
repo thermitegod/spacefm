@@ -15,12 +15,10 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <optional>
-
-#include <memory>
 
 #include <ztd/ztd.hxx>
 

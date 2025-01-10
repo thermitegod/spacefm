@@ -18,18 +18,16 @@
 #pragma once
 
 #include <filesystem>
-
 #include <memory>
-
 #include <optional>
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-file.hxx"
+#include "vfs/vfs-monitor.hxx"
 
 #define PTK_DIR_TREE(obj)             (static_cast<ptk::dir_tree*>(obj))
 #define PTK_DIR_TREE_REINTERPRET(obj) (reinterpret_cast<ptk::dir_tree*>(obj))

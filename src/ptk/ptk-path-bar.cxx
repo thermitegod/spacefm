@@ -13,11 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <filesystem>
-
 #include <algorithm>
+#include <filesystem>
+#include <string>
 
 #include <cstring>
 
@@ -27,20 +25,16 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
 
 #include "utils/strdup.hxx"
 
 #include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
-
-#include "vfs/vfs-user-dirs.hxx"
-
-#include "ptk/utils/ptk-utils.hxx"
 
 #include "ptk/ptk-path-bar.hxx"
+#include "ptk/utils/ptk-utils.hxx"
+
+#include "vfs/vfs-user-dirs.hxx"
 
 // #define ENABLE_AUTO_SEEK
 

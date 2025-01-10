@@ -17,19 +17,17 @@
 
 #pragma once
 
-#include <queue>
-
 #include <functional>
-
 #include <memory>
+#include <queue>
 
 #include <gdkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "concurrency.hxx"
-
 #include "vfs/vfs-file.hxx"
+
+#include "concurrency.hxx"
 
 namespace vfs
 {

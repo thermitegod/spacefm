@@ -2,36 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <string>
-
-#include <filesystem>
-
-#include <unordered_map>
-
-#include <stack>
-
 #include <chrono>
-
+#include <filesystem>
+#include <stack>
+#include <string>
 #include <system_error>
-
+#include <unordered_map>
 #include <utility>
 
 #include <cstdint>
 
-#include <fcntl.h>
-
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "vfs/vfs-user-dirs.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-
 #include "vfs/mime-type/chrome/mime-utils.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
 
 // https://source.chromium.org/chromium/chromium/src/+/main:base/third_party/icu/icu_utf.h
 

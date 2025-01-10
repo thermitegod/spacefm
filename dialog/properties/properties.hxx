@@ -15,17 +15,15 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
-
+#include <string_view>
 #include <vector>
 
 #include <gtkmm.h>
 
-#include "concurrency.hxx"
-
 #include "vfs/vfs-file.hxx"
+
+#include "concurrency.hxx"
 
 class PropertiesDialog : public Gtk::Window
 {

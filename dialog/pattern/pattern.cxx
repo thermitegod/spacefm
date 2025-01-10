@@ -15,14 +15,13 @@
 
 #include <print>
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <glaze/glaze.hpp>
 
 #include "datatypes.hxx"
-
 #include "pattern.hxx"
 
 // stolen from the fnmatch man page

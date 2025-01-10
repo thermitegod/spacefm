@@ -15,14 +15,12 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <print>
-
 #include <span>
+#include <string_view>
+#include <vector>
 
 #include <gtkmm.h>
-#include <vector>
 
 #include "datatypes.hxx"
 

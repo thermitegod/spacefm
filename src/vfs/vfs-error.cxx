@@ -14,7 +14,6 @@
  */
 
 #include <string>
-
 #include <system_error>
 
 #include "vfs/vfs-error.hxx"

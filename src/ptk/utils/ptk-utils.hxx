@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include <gtkmm.h>
 #include <gdkmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

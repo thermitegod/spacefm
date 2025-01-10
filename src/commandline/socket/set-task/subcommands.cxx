@@ -16,7 +16,6 @@
 #include <CLI/CLI.hpp>
 
 #include "commandline/socket.hxx"
-
 #include "commandline/socket/set-task/subcommands.hxx"
 
 /*

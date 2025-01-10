@@ -13,24 +13,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
 #include <vector>
-#include <span>
 
 #include <ztd/ztd.hxx>
-
-#include "logger.hxx"
 
 #include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "bookmarks.hxx"
+#include "logger.hxx"
 
 // Bookmark Path, Bookmark Name
 namespace global

@@ -6,9 +6,8 @@
 
 #pragma once
 
-#include <string>
-
 #include <filesystem>
+#include <string>
 
 namespace vfs::detail::mime_type::chrome
 {

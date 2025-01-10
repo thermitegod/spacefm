@@ -17,17 +17,14 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
-
+#include <memory>
 #include <span>
+#include <string_view>
 #include <vector>
 
-#include <memory>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include "vfs/vfs-file.hxx"
 

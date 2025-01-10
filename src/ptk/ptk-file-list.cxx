@@ -15,17 +15,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string_view>
-
-#include <vector>
-
-#include <span>
-
 #include <algorithm>
-
 #include <chrono>
-
 #include <functional>
+#include <span>
+#include <string_view>
+#include <vector>
 
 #include <cassert>
 #include <cstring>
@@ -36,14 +31,13 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
+#include "ptk/natsort/strnatcmp.hxx"
+#include "ptk/ptk-file-list.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-file.hxx"
 
-#include "ptk/natsort/strnatcmp.hxx"
-#include "ptk/utils/ptk-utils.hxx"
-
-#include "ptk/ptk-file-list.hxx"
+#include "logger.hxx"
 
 struct PtkFileListClass
 {

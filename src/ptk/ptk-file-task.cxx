@@ -13,23 +13,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <span>
-
-#include <array>
 #include <vector>
-
-#include <optional>
-
-#include <algorithm>
-
-#include <chrono>
 
 #include <sys/wait.h>
 
@@ -39,21 +32,19 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
 
 #include "utils/strdup.hxx"
 
-#include "vfs/utils/vfs-utils.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset.hxx"
 
 #include "ptk/ptk-file-task-view.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/utils/multi-input.hxx"
 #include "ptk/utils/ptk-utils.hxx"
+
+#include "vfs/utils/vfs-utils.hxx"
 
 static bool on_vfs_file_task_state_cb(const std::shared_ptr<vfs::file_task>& task,
                                       const vfs::file_task::state state, void* state_data,

@@ -13,18 +13,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <print>
 #include <string_view>
 
-#include <print>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <glaze/glaze.hpp>
 
 #include "datatypes.hxx"
-
 #include "message.hxx"
 
 MessageDialog::MessageDialog(const std::string_view json_data)

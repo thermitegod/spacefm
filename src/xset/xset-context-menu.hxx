@@ -15,10 +15,8 @@
 
 #pragma once
 
-#include <gtkmm.h>
 #include <gdkmm.h>
-
-#include <ztd/ztd.hxx>
+#include <gtkmm.h>
 
 #include "xset/xset.hxx"
 

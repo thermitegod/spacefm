@@ -18,15 +18,14 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
+#include <string_view>
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-volume.hxx"
-
 #include "ptk/ptk-file-browser.hxx"
+
+#include "vfs/vfs-volume.hxx"
 
 namespace ptk::view::location
 {

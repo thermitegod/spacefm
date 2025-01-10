@@ -15,9 +15,8 @@
 
 #include <gtkmm.h>
 
-#include "logger.hxx"
-
 #include "about.hxx"
+#include "logger.hxx"
 
 void
 show_about_dialog(GtkWindow* parent) noexcept

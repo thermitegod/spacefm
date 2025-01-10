@@ -15,9 +15,8 @@
 
 #pragma once
 
-#include <filesystem>
-
 #include <array>
+#include <filesystem>
 #include <span>
 
 using bookmark_t = std::array<std::filesystem::path, 2>;

@@ -16,7 +16,6 @@
 #pragma once
 
 #include <filesystem>
-
 #include <unordered_map>
 
 #if __has_include(<magic_enum/magic_enum.hpp>)

@@ -13,26 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <array>
 #include <vector>
 
-#include <chrono>
-
-#include <optional>
-
-#include <algorithm>
-
-#include <ranges>
-
 #include <cstring>
-#include <cmath>
 
 #include <glibmm.h>
 
@@ -40,23 +32,19 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
 
-#include "ptk/ptk-file-browser.hxx"
-
-#include "main-window.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset.hxx"
 
 #include "ptk/ptk-dialog.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
-
-#include "vfs/vfs-file-task.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-
+#include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task-view.hxx"
+
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-file-task.hxx"
+
+#include "main-window.hxx"
 
 static constexpr ztd::map<ptk::view::file_task::column, std::string_view, 14> task_titles{{
     // If you change "Status", also change it in on_task_button_press_event

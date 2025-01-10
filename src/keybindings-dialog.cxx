@@ -14,10 +14,10 @@
  */
 
 #include <string>
-
-#include <gtkmm.h>
-#include <glibmm.h>
 #include <vector>
+
+#include <glibmm.h>
+#include <gtkmm.h>
 
 #include <glaze/glaze.hpp>
 
@@ -25,16 +25,14 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "autosave.hxx"
-
 #include "datatypes/datatypes.hxx"
 
-#include "xset/xset.hxx"
 #include "xset/utils/xset-utils.hxx"
+#include "xset/xset.hxx"
 
+#include "autosave.hxx"
 #include "keybindings-dialog.hxx"
+#include "logger.hxx"
 
 void
 show_keybindings_dialog(GtkWindow* parent) noexcept

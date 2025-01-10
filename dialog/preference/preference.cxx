@@ -13,15 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <limits>
+#include <print>
+#include <ranges>
 #include <string_view>
 
-#include <print>
-
-#include <ranges>
-#include <limits>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <glaze/glaze.hpp>
@@ -29,7 +27,6 @@
 #include <ztd/ztd.hxx>
 
 #include "datatypes.hxx"
-
 #include "preference.hxx"
 
 // TODO

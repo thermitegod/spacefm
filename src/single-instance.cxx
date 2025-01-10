@@ -13,19 +13,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <format>
-
 #include <filesystem>
+#include <format>
+#include <string>
 
 #include <csignal>
 
-#include "logger.hxx"
-
 #include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-error.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "logger.hxx"
 #include "single-instance.hxx"
 
 static std::filesystem::path

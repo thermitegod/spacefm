@@ -17,17 +17,13 @@
 
 #pragma once
 
+#include <expected>
+#include <filesystem>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <span>
-
 #include <vector>
-
-#include <expected>
-#include <optional>
 
 #include <gtkmm.h>
 

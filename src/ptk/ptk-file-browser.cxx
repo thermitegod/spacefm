@@ -13,40 +13,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <format>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <span>
-
-#include <array>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-#include <optional>
-
-#include <memory>
-
-#include <functional>
-
-#include <algorithm>
-
-#include <ranges>
-
-#include <system_error>
-
-#include <cstring>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 
 #include <fnmatch.h>
 
-#include <gtkmm.h>
 #include <gdkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 3)
 #include <exo/exo.h>
@@ -58,57 +47,48 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
 
 #include "datatypes/datatypes.hxx"
 
-#include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
-#include "xset/xset-dialog.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-
-#include "ptk/ptk-file-action-open.hxx"
-#include "ptk/ptk-file-action-rename.hxx"
-#include "ptk/ptk-file-action-paste.hxx"
-
-#include "ptk/ptk-bookmark-view.hxx"
-#include "ptk/ptk-file-properties.hxx"
-#include "ptk/ptk-location-view.hxx"
-#include "ptk/ptk-dir-tree-view.hxx"
-#include "ptk/ptk-dir-tree.hxx"
-#include "ptk/ptk-file-task-view.hxx"
-
-#include "ptk/ptk-file-list.hxx"
-#include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-file-menu.hxx"
-#include "ptk/ptk-path-bar.hxx"
-#include "ptk/ptk-search-bar.hxx"
-#include "ptk/utils/multi-input.hxx"
-#include "ptk/utils/ptk-utils.hxx"
-
-#include "main-window.hxx"
-
-#include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-dir.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/utils/vfs-utils.hxx"
+#include "utils/misc.hxx"
+#include "utils/shell-quote.hxx"
+#include "utils/strdup.hxx"
 
 #include "settings/settings.hxx"
 
-#include "utils/shell-quote.hxx"
-#include "utils/strdup.hxx"
-#include "utils/misc.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset-dialog.hxx"
+#include "xset/xset.hxx"
 
-#include "signals.hxx"
+#include "ptk/ptk-bookmark-view.hxx"
+#include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-dir-tree-view.hxx"
+#include "ptk/ptk-dir-tree.hxx"
+#include "ptk/ptk-file-action-open.hxx"
+#include "ptk/ptk-file-action-paste.hxx"
+#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-browser.hxx"
+#include "ptk/ptk-file-list.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-file-properties.hxx"
+#include "ptk/ptk-file-task-view.hxx"
+#include "ptk/ptk-location-view.hxx"
+#include "ptk/ptk-path-bar.hxx"
+#include "ptk/ptk-search-bar.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
-#include "types.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-dir.hxx"
+#include "vfs/vfs-file.hxx"
+#include "vfs/vfs-user-dirs.hxx"
 
 #include "autosave.hxx"
-
-#include "ptk/ptk-file-browser.hxx"
+#include "logger.hxx"
+#include "main-window.hxx"
+#include "signals.hxx"
+#include "types.hxx"
 
 #if defined(USE_EXO) && (GTK_MAJOR_VERSION == 4)
 #undef USE_EXO

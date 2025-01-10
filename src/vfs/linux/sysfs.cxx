@@ -13,16 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 
-#include <filesystem>
-
-#include <optional>
-
-#include "vfs/utils/file-ops.hxx"
-
 #include "vfs/linux/sysfs.hxx"
+#include "vfs/utils/file-ops.hxx"
 
 std::optional<std::string>
 vfs::linux::sysfs::get_string(const std::filesystem::path& dir,

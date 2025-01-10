@@ -21,12 +21,12 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
+#include "settings/config.hxx"
+#include "settings/settings.hxx"
 
 #include "xset/xset.hxx"
 
-#include "settings/settings.hxx"
-#include "settings/config.hxx"
+#include "logger.hxx"
 
 [[nodiscard]] static config::settings
 pack_settings(const std::shared_ptr<config::settings>& settings) noexcept

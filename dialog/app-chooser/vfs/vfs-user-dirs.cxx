@@ -15,8 +15,8 @@
 
 #include <filesystem>
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include "vfs/vfs-user-dirs.hxx"
 

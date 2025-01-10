@@ -16,15 +16,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string_view>
-
 #include <filesystem>
-
-#include <unordered_map>
-
-#include <ranges>
-
 #include <memory>
+#include <ranges>
+#include <string_view>
+#include <unordered_map>
 
 #include <cassert>
 
@@ -35,16 +31,15 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "vfs/vfs-monitor.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-
 #include "ptk/natsort/strnatcmp.hxx"
+#include "ptk/ptk-dir-tree.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
-#include "ptk/ptk-dir-tree.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-file.hxx"
+#include "vfs/vfs-monitor.hxx"
+
+#include "logger.hxx"
 
 #define PTK_TYPE_DIR_TREE    (ptk_dir_tree_get_type())
 #define PTK_IS_DIR_TREE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), PTK_TYPE_DIR_TREE))

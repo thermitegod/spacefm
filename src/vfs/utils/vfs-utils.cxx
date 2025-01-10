@@ -15,12 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
 
 #include <ztd/ztd.hxx>
 

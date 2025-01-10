@@ -18,7 +18,6 @@
 #pragma once
 
 #include <filesystem>
-
 #include <span>
 
 #include <gtkmm.h>

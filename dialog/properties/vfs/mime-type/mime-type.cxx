@@ -17,39 +17,30 @@
 
 /* Currently this library is NOT MT-safe */
 
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <filesystem>
-
-#include <array>
-
-#include <span>
-
-#include <optional>
-
-#include <algorithm>
-
 #include <fcntl.h>
+#include <pugixml.hpp>
 
 #include <glibmm.h>
 
-#include <pugixml.hpp>
-
 #include <ztd/ztd.hxx>
-
-#include "logger.hxx"
 
 #include "utils/misc.hxx"
 
-#include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-mime-type.hxx"
-
 #include "vfs/mime-type/chrome/mime-utils.hxx"
-
 #include "vfs/mime-type/mime-type.hxx"
+#include "vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
 
 [[nodiscard]] static bool
 is_data_plain_text(const std::span<const std::byte> data) noexcept

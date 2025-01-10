@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 class AboutDialog : public Gtk::AboutDialog
 {

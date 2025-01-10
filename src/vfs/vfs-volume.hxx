@@ -18,18 +18,13 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 
-#include <span>
-
-#include <optional>
-
-#include <memory>
-
 #include <ztd/ztd.hxx>
-
-// #include "logger.hxx"
 
 namespace vfs
 {

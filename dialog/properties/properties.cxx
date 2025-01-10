@@ -13,31 +13,25 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string_view>
-
+#include <chrono>
 #include <filesystem>
-
 #include <print>
-
+#include <string_view>
 #include <vector>
 
-#include <chrono>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <glaze/glaze.hpp>
 
 #include <ztd/ztd.hxx>
 
-#include "datatypes.hxx"
-
-#include "media/metadata.hxx"
-
-#include "vfs/vfs-file.hxx"
 #include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-file.hxx"
 
+#include "datatypes.hxx"
+#include "media/metadata.hxx"
 #include "properties.hxx"
 
 class PropertiesPage : public Gtk::Box

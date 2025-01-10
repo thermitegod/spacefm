@@ -19,8 +19,6 @@
 
 #include <cstring>
 
-#include <ztd/ztd.hxx>
-
 #include "utils/strdup.hxx"
 
 [[nodiscard]] char*

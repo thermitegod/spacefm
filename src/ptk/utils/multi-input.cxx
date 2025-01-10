@@ -13,16 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <optional>
 
 #include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
-
-#include "logger.hxx"
 
 #include "compat/gtk4-porting.hxx"
 

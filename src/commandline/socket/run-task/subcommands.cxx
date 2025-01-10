@@ -13,24 +13,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+#include <print>
 #include <string>
 #include <string_view>
-
-#include <print>
-
 #include <vector>
-
-#include <memory>
-
-#include <CLI/CLI.hpp>
 
 #include <glaze/glaze.hpp>
 
-#include "socket/datatypes.hxx"
+#include <CLI/CLI.hpp>
 
 #include "commandline/socket.hxx"
-
 #include "commandline/socket/run-task/subcommands.hxx"
+
+#include "socket/datatypes.hxx"
 
 /*
  * subcommand cmd

@@ -13,28 +13,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <format>
-
-#include <print>
-
 #include <memory>
-
-#include <CLI/CLI.hpp>
-
-#include <glaze/glaze.hpp>
+#include <print>
+#include <string>
 
 #include <zmq.hpp>
 
+#include <glaze/glaze.hpp>
+
+#include <CLI/CLI.hpp>
+
 #include <ztd/ztd.hxx>
+
+#include "commandline/socket.hxx"
+#include "commandline/socket/subcommands.hxx"
 
 #include "socket/datatypes.hxx"
 #include "socket/server.hxx"
-
-#include "commandline/socket/subcommands.hxx"
-
-#include "commandline/socket.hxx"
 
 [[noreturn]] static void
 run_subcommand_socket(const socket_subcommand_data_t& opt)

@@ -27,32 +27,26 @@
  * compatibility with older systems, and is NOT fully spec compliant.
  */
 
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <optional>
-
-#include <array>
 #include <vector>
 
-#include <ranges>
-#include <algorithm>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
+#include "vfs/mime-type/mime-action.hxx"
 #include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "vfs/mime-type/mime-action.hxx"
+#include "logger.hxx"
 
 static void
 update_desktop_database() noexcept

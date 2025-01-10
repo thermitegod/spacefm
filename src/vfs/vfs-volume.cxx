@@ -16,43 +16,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
 #include <vector>
-
-#include <optional>
-
-#include <algorithm>
-
-#include <memory>
-
-#include <system_error>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "utils/shell-quote.hxx"
 
 #include "xset/xset.hxx"
 
-#include "main-window.hxx"
-
-#include "vfs/vfs-device.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-
 #include "vfs/libudevpp/libudevpp.hxx"
 #include "vfs/linux/procfs.hxx"
 #include "vfs/linux/sysfs.hxx"
-
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-device.hxx"
 #include "vfs/vfs-volume.hxx"
+
+#include "logger.hxx"
+#include "main-window.hxx"
 
 [[nodiscard]] static std::shared_ptr<vfs::volume>
 read_by_device(const libudev::device& udevice) noexcept;

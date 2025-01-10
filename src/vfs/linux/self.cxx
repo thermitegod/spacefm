@@ -15,9 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <filesystem>
+#include <string>
 
 #include "vfs/linux/self.hxx"
 

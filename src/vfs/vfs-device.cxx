@@ -13,22 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <memory>
 
 #include <fcntl.h>
 
 #include <ztd/ztd.hxx>
 
 #include "vfs/libudevpp/libudevpp.hxx"
-
 #include "vfs/linux/procfs.hxx"
 #include "vfs/linux/sysfs.hxx"
-
 #include "vfs/vfs-device.hxx"
 
 std::shared_ptr<vfs::device>

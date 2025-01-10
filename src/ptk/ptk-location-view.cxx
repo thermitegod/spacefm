@@ -16,24 +16,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <ranges>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
 #include <vector>
-
-#include <chrono>
-
-#include <memory>
-
-#include <algorithm>
-
-#include <ranges>
-
-#include <cmath>
 
 #include <glibmm.h>
 
@@ -41,31 +32,28 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
 
 #include "utils/shell-quote.hxx"
 
-#include "xset/xset.hxx"
+#include "settings/settings.hxx"
+
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
-
-#include "types.hxx"
+#include "xset/xset.hxx"
 
 #include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/ptk-location-view.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
-#include "main-window.hxx"
-
-#include "vfs/vfs-volume.hxx"
-#include "vfs/utils/vfs-utils.hxx"
-
 #include "vfs/linux/self.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-volume.hxx"
 
-#include "settings/settings.hxx"
+#include "logger.hxx"
+#include "main-window.hxx"
+#include "types.hxx"
 
 // This limits the small icon size for side panes and task list
 static constexpr i32 PANE_MAX_ICON_SIZE = 48;

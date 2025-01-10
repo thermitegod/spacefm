@@ -13,9 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <filesystem>
+#include <string>
 
 #include <glaze/glaze.hpp>
 
@@ -23,14 +22,13 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
+#include "settings/config.hxx"
+#include "settings/settings.hxx"
+#include "settings/upgrade/config-upgrade.hxx"
 
 #include "xset/xset.hxx"
 
-#include "settings/upgrade/config-upgrade.hxx"
-
-#include "settings/settings.hxx"
-#include "settings/config.hxx"
+#include "logger.hxx"
 
 static void
 parse_settings(const u64 version, const config::settings& loaded_settings,

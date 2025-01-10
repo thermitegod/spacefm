@@ -17,12 +17,10 @@
 
 #pragma once
 
+#include <array>
+#include <filesystem>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <array>
 
 namespace vfs::detail::mime_type
 {

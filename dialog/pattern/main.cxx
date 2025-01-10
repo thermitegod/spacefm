@@ -13,8 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include "pattern.hxx"
 

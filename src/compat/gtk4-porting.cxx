@@ -15,8 +15,8 @@
 
 #include <cmath>
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

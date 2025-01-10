@@ -14,7 +14,6 @@
  */
 
 #include <filesystem>
-
 #include <span>
 
 #include "ptk/ptk-dialog.hxx"

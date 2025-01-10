@@ -13,36 +13,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
 #include <vector>
 
-#include <optional>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <magic_enum/magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
-
 #include "utils/strdup.hxx"
 
-#include "xset/xset.hxx"
+#include "xset/utils/xset-utils.hxx"
 #include "xset/xset-context-menu.hxx"
 #include "xset/xset-dialog.hxx"
-#include "xset/utils/xset-utils.hxx"
+#include "xset/xset.hxx"
 
-#include "autosave.hxx"
+#include "ptk/ptk-file-browser.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-file-browser.hxx"
+#include "autosave.hxx"
 
 #if (GTK_MAJOR_VERSION == 4)
 void

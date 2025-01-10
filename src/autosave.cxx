@@ -17,11 +17,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "concurrency.hxx"
-
 #include "autosave.hxx"
+#include "concurrency.hxx"
+#include "logger.hxx"
 
 struct requests_data
 {

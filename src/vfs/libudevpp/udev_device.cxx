@@ -13,15 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <vector>
 #include <unordered_map>
-
-#include <optional>
-
-#include <algorithm>
+#include <vector>
 
 #include <libudev.h>
 

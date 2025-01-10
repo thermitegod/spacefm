@@ -13,18 +13,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
+#include <memory>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
 #include <vector>
-
-#include <span>
-
-#include <optional>
-
-#include <memory>
 
 #include <cassert>
 
@@ -34,13 +29,12 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "types.hxx"
-
 #include "utils/strdup.hxx"
 
 #include "xset/xset.hxx"
+
+#include "logger.hxx"
+#include "types.hxx"
 
 namespace global
 {

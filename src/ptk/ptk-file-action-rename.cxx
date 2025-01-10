@@ -13,15 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
+#include <memory>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <memory>
-
 #include <system_error>
 
 #include <cstring>
@@ -32,25 +28,22 @@
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-file-task.hxx"
-#include "ptk/ptk-file-browser.hxx"
-#include "ptk/utils/multi-input.hxx"
-#include "ptk/utils/ptk-utils.hxx"
-
-#include "vfs/vfs-file.hxx"
-#include "vfs/utils/vfs-utils.hxx"
 
 #include "utils/shell-quote.hxx"
 
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset.hxx"
+
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-browser.hxx"
+#include "ptk/ptk-file-task.hxx"
+#include "ptk/utils/multi-input.hxx"
+#include "ptk/utils/ptk-utils.hxx"
+
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-file.hxx"
 
 struct MoveSet : public std::enable_shared_from_this<MoveSet>
 {

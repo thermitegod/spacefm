@@ -17,15 +17,11 @@
 
 #pragma once
 
-#include <filesystem>
-
-#include <vector>
-
-#include <mutex>
-
-#include <memory>
-
 #include <chrono>
+#include <filesystem>
+#include <memory>
+#include <mutex>
+#include <vector>
 
 #include <glibmm.h>
 #include <sigc++/sigc++.h>
@@ -34,16 +30,14 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "concurrency.hxx"
-
 #include "settings/settings.hxx"
 
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-monitor.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 
+#include "concurrency.hxx"
+#include "logger.hxx"
 #include "signals.hxx"
 
 namespace vfs

@@ -16,16 +16,14 @@
 #pragma once
 
 #include <filesystem>
-
-#include <span>
-
 #include <memory>
+#include <span>
 
 #include <gtkmm.h>
 
-#include "vfs/vfs-file.hxx"
-
 #include "ptk/ptk-file-browser.hxx"
+
+#include "vfs/vfs-file.hxx"
 
 namespace ptk::archiver
 {

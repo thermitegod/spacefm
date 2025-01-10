@@ -13,19 +13,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <string>
 #include <string_view>
-
 #include <vector>
-
-#include <memory>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
-
 #include "terminal-handlers.hxx"
 
 TerminalHandler::TerminalHandler(const std::string_view name, const std::string_view exec) noexcept

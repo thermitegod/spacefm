@@ -15,11 +15,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <doctest/doctest.h>
-
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
+
+#include <doctest/doctest.h>
 
 #include "spacefm/ptk/natsort/strnatcmp.hxx"
 

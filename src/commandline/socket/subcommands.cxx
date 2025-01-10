@@ -16,13 +16,11 @@
 #include <CLI/CLI.hpp>
 
 #include "commandline/socket.hxx"
-
-#include "commandline/socket/set/subcommands.hxx"
-#include "commandline/socket/get/subcommands.hxx"
-#include "commandline/socket/set-task/subcommands.hxx"
 #include "commandline/socket/get-task/subcommands.hxx"
+#include "commandline/socket/get/subcommands.hxx"
 #include "commandline/socket/run-task/subcommands.hxx"
-
+#include "commandline/socket/set-task/subcommands.hxx"
+#include "commandline/socket/set/subcommands.hxx"
 #include "commandline/socket/subcommands.hxx"
 
 /*

@@ -22,10 +22,10 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "xset/xset.hxx"
 #include "xset/xset-defaults.hxx"
+#include "xset/xset.hxx"
+
+#include "logger.hxx"
 
 void
 xset_defaults() noexcept

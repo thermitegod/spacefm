@@ -15,10 +15,10 @@
 
 #include <filesystem>
 
-#include "bookmarks.hxx"
-
-#include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-bookmark-view.hxx"
+#include "ptk/ptk-file-browser.hxx"
+
+#include "bookmarks.hxx"
 
 void
 ptk::view::bookmark::add(const std::filesystem::path& book_path) noexcept

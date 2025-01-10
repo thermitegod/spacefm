@@ -17,12 +17,10 @@
 
 #pragma once
 
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <memory>
 
 #include <gtkmm.h>
 

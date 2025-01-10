@@ -22,11 +22,9 @@
 
 #include <ztd/ztd.hxx>
 
-// #include "logger.hxx"
+#include "vfs/vfs-thumbnailer.hxx"
 
 #include "concurrency.hxx"
-
-#include "vfs/vfs-thumbnailer.hxx"
 
 vfs::thumbnailer::thumbnailer(const callback_t& callback) noexcept : callback_(callback)
 {

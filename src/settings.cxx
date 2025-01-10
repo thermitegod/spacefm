@@ -16,41 +16,33 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <filesystem>
-
-#include <optional>
-
-#include <ranges>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "types.hxx"
-
-#include "main-window.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-defaults.hxx"
-
-#include "settings/settings.hxx"
 #include "settings/config.hxx"
+#include "settings/settings.hxx"
 
-#include "terminal-handlers.hxx"
+#include "xset/xset-defaults.hxx"
+#include "xset/xset.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "logger.hxx"
+#include "main-window.hxx"
 #include "settings.hxx"
+#include "terminal-handlers.hxx"
+#include "types.hxx"
 
 void
 load_settings(const std::shared_ptr<config::settings>& settings) noexcept

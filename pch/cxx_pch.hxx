@@ -14,39 +14,23 @@
  */
 
 // SYSTEM
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <expected>
+#include <filesystem>
+#include <format>
+#include <functional>
+#include <map>
+#include <memory>
+#include <optional>
+#include <print>
+#include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-#include <print>
-
-#include <filesystem>
-
-#include <span>
-
-#include <array>
-#include <tuple>
-#include <vector>
-
-#include <map>
 #include <unordered_map>
-
-#include <optional>
-
-#include <functional>
-
-#include <algorithm>
-#include <ranges>
-
-#include <memory>
-
-#include <fstream>
-
-#include <chrono>
-
-#include <mutex>
-
-#include <cassert>
+#include <vector>
 
 // GTKMM
 #include <gtkmm.h>

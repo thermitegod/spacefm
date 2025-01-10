@@ -14,9 +14,7 @@
  */
 
 #include <filesystem>
-
 #include <memory>
-
 #include <unordered_map>
 
 #if __has_include(<magic_enum/magic_enum.hpp>)
@@ -27,9 +25,9 @@
 #include <magic_enum.hpp>
 #endif
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 #include <ztd/ztd.hxx>
 

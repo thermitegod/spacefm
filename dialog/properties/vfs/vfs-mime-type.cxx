@@ -15,27 +15,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
 #include <unordered_map>
 
-#include <mutex>
-
-#include <memory>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "vfs/mime-type/mime-type.hxx"
-
 #include "vfs/vfs-mime-type.hxx"
+
+#include "logger.hxx"
 
 namespace global
 {

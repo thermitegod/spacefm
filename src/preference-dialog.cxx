@@ -13,37 +13,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+#include <ranges>
 #include <string>
 
-#include <memory>
-
-#include <ranges>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <glaze/glaze.hpp>
 
 #include <ztd/ztd.hxx>
 
 #include "datatypes/datatypes.hxx"
-#include "logger.hxx"
-
-#include "types.hxx"
-#include "autosave.hxx"
 
 #include "settings/settings.hxx"
-
-#include "terminal-handlers.hxx"
-
-#include "main-window.hxx"
 
 #include "xset/xset-lookup.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
+#include "autosave.hxx"
+#include "logger.hxx"
+#include "main-window.hxx"
 #include "preference-dialog.hxx"
+#include "terminal-handlers.hxx"
+#include "types.hxx"
 
 /**
  * General Tab

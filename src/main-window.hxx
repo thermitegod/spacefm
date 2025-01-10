@@ -15,19 +15,17 @@
 
 #pragma once
 
+#include <filesystem>
+#include <map>
 #include <string_view>
 
-#include <filesystem>
-
-#include <map>
-
 #include <gtkmm.h>
-
-#include "types.hxx"
 
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-file-browser.hxx"
+
+#include "types.hxx"
 
 #define MAIN_WINDOW(obj)             (static_cast<MainWindow*>(obj))
 #define MAIN_WINDOW_REINTERPRET(obj) (reinterpret_cast<MainWindow*>(obj))

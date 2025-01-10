@@ -13,21 +13,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <print>
 #include <string_view>
 
-#include <print>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <glaze/glaze.hpp>
 
 #include <ztd/ztd.hxx>
 
-#include "datatypes.hxx"
-
 #include "action.hxx"
+#include "datatypes.hxx"
 
 ActionDialog::ActionDialog(const std::string_view header, const std::string_view json_data)
 {

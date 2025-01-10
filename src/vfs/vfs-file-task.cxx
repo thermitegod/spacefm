@@ -13,24 +13,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <span>
-
-#include <vector>
-
-#include <chrono>
-
-#include <memory>
-
-#include <ranges>
-
 #include <system_error>
+#include <vector>
 
 #include <cstring>
 
@@ -43,22 +35,20 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "utils/shell-quote.hxx"
 #include "utils/misc.hxx"
-
-#include "ptk/ptk-dialog.hxx"
+#include "utils/shell-quote.hxx"
 
 #include "xset/xset.hxx"
 
-#include "terminal-handlers.hxx"
+#include "ptk/ptk-dialog.hxx"
 
-#include "vfs/vfs-volume.hxx"
 #include "vfs/utils/vfs-utils.hxx"
-
-#include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-file-task.hxx"
+#include "vfs/vfs-trash-can.hxx"
+#include "vfs/vfs-volume.hxx"
+
+#include "logger.hxx"
+#include "terminal-handlers.hxx"
 
 std::shared_ptr<vfs::file_task>
 vfs::file_task::create(const vfs::file_task::type task_type,

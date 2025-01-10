@@ -15,24 +15,20 @@
 
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-
 #include <vector>
-
-#include <span>
-
-#include <optional>
-
-#include <memory>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "types.hxx"
-
 #include "xset/xset-lookup.hxx"
+
+#include "types.hxx"
 
 // need to forward declare to avoid circular header dependencies
 namespace ptk

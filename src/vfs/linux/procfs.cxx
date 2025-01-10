@@ -14,18 +14,16 @@
  */
 
 #include <string>
-
 #include <vector>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
+#include "vfs/linux/procfs.hxx"
 #include "vfs/utils/file-ops.hxx"
 
-#include "vfs/linux/procfs.hxx"
+#include "logger.hxx"
 
 std::vector<vfs::linux::procfs::MountInfoEntry>
 vfs::linux::procfs::mountinfo() noexcept

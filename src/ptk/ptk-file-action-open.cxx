@@ -13,46 +13,35 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <span>
-
-#include <vector>
 #include <unordered_map>
-
-#include <algorithm>
-
-#include <memory>
-
-#include <optional>
+#include <vector>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
+#include "utils/misc.hxx"
 
-#include "vfs/vfs-file.hxx"
 #include "xset/xset.hxx"
-
-#include "ptk/ptk-dialog.hxx"
 
 #include "ptk/ptk-app-chooser.hxx"
 #include "ptk/ptk-archiver.hxx"
+#include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-file-action-open.hxx"
 #include "ptk/ptk-file-browser.hxx"
 
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-file.hxx"
 
-#include "settings/settings.hxx"
-
-#include "utils/misc.hxx"
-
-#include "ptk/ptk-file-action-open.hxx"
+#include "logger.hxx"
 
 struct ParentInfo
 {

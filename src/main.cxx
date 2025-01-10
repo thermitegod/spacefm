@@ -13,59 +13,48 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
 #include <filesystem>
-
+#include <format>
 #include <memory>
-
-#include <system_error>
+#include <string>
 
 #include <cassert>
 
-#include <CLI/CLI.hpp>
-
-#include <gtkmm.h>
 #include <gdkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
+
+#include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
+#include "commandline/commandline.hxx"
 
-#include "types.hxx"
-
-#include "main-window.hxx"
-
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-file.hxx"
-#include "vfs/vfs-user-dirs.hxx"
-
-#include "vfs/linux/self.hxx"
-
-#include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-location-view.hxx"
+#if defined(HAVE_SOCKET)
+#include "socket/server.hxx"
+#endif
 
 #include "utils/shell-quote.hxx"
 
 #include "settings/config.hxx"
 #include "settings/settings.hxx"
 
-#include "single-instance.hxx"
+#include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-location-view.hxx"
+
+#include "vfs/linux/self.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-file.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
 #include "autosave.hxx"
-
-#if defined(HAVE_SOCKET)
-#include "socket/server.hxx"
-#endif
-
-#include "settings.hxx"
-
 #include "bookmarks.hxx"
-
-#include "commandline/commandline.hxx"
+#include "logger.hxx"
+#include "main-window.hxx"
+#include "settings.hxx"
+#include "single-instance.hxx"
+#include "types.hxx"
 
 // This is easier with gtkmm, can just pass shared_ptr
 struct app_data : public std::enable_shared_from_this<app_data>

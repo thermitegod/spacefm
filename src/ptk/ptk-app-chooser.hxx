@@ -17,9 +17,8 @@
 
 #pragma once
 
-#include <string>
-
 #include <optional>
+#include <string>
 
 #include <gtkmm.h>
 

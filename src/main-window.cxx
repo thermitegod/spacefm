@@ -13,24 +13,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <format>
+#include <functional>
+#include <map>
+#include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <array>
-#include <map>
 #include <vector>
-
-#include <optional>
-
-#include <functional>
-
-#include <algorithm>
-
-#include <ranges>
 
 #include <cassert>
 
@@ -38,43 +31,36 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
-
-#include "ptk/ptk-file-browser.hxx"
-#include "types.hxx"
-
-#include "ptk/ptk-location-view.hxx"
-
-#include "main-window.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-file-menu.hxx"
-#include "ptk/utils/ptk-utils.hxx"
-
-#include "about.hxx"
-#include "keybindings-dialog.hxx"
-#include "preference-dialog.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
-
-#include "settings/settings.hxx"
-#include "settings/config.hxx"
 
 #include "utils/strdup.hxx"
 
-#include "bookmarks.hxx"
-#include "settings.hxx"
-#include "file-search.hxx"
+#include "settings/config.hxx"
+#include "settings/settings.hxx"
 
-#include "autosave.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset.hxx"
+
+#include "ptk/ptk-bookmark-view.hxx"
+#include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-file-browser.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-file-task-view.hxx"
+#include "ptk/ptk-location-view.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "ptk/ptk-file-task-view.hxx"
-#include "ptk/ptk-bookmark-view.hxx"
+#include "about.hxx"
+#include "autosave.hxx"
+#include "bookmarks.hxx"
+#include "file-search.hxx"
+#include "keybindings-dialog.hxx"
+#include "logger.hxx"
+#include "main-window.hxx"
+#include "preference-dialog.hxx"
+#include "settings.hxx"
+#include "types.hxx"
 
 static void on_folder_notebook_switch_pape(GtkNotebook* notebook, GtkWidget* page, u32 page_num,
                                            void* user_data) noexcept;

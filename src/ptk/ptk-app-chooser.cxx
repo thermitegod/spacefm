@@ -13,14 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <memory>
-
-#include <optional>
 
 #include <glibmm.h>
 
@@ -30,13 +27,13 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "datatypes/datatypes.hxx"
+
+#include "ptk/ptk-app-chooser.hxx"
 
 #include "vfs/vfs-mime-type.hxx"
 
-#include "ptk/ptk-app-chooser.hxx"
+#include "logger.hxx"
 
 std::optional<std::string>
 ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_type>& mime_type,

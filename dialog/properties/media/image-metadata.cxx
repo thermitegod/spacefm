@@ -15,28 +15,24 @@
 
 #if defined(HAVE_MEDIA)
 
+#include <array>
+#include <filesystem>
+#include <format>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <array>
 #include <vector>
 
 #include <cstring>
 
-#include <gtkmm.h>
+#include <gexiv2/gexiv2.h>
+
 #include <gdkmm.h>
 #include <glibmm.h>
-
-#include <gexiv2/gexiv2.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
 #include "logger.hxx"
-
 #include "media/metadata.hxx"
 
 std::vector<metadata_data>

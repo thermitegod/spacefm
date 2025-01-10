@@ -13,28 +13,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
+#include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <span>
-
-#include <memory>
-
 #include <glibmm.h>
 
-#include <ztd/ztd.hxx>
-
-#include "logger.hxx"
-
 #include "utils/shell-quote.hxx"
-
-#include "ptk/ptk-dialog.hxx"
 
 #include "xset/xset.hxx"
 
 #include "ptk/ptk-archiver.hxx"
+#include "ptk/ptk-dialog.hxx"
+
+#include "logger.hxx"
 
 static bool
 is_archiver_installed() noexcept

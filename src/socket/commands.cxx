@@ -13,26 +13,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <array>
 #include <vector>
 
-#include <optional>
-
-#include <algorithm>
-
-#include <ranges>
-
-#include <system_error>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <glaze/glaze.hpp>
 
@@ -40,36 +32,31 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #if (GTK_MAJOR_VERSION == 4)
 #include "compat/gtk4-porting.hxx"
 #endif
 
-#include "ptk/ptk-file-browser.hxx"
-#include "types.hxx"
-
-#include "xset/xset.hxx"
+#include "socket/commands.hxx"
+#include "socket/datatypes.hxx"
 
 #include "utils/shell-quote.hxx"
 
-#include "settings/settings.hxx"
-
-#include "terminal-handlers.hxx"
-
-#include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-file-task.hxx"
-#include "vfs/vfs-volume.hxx"
-#include "vfs/utils/vfs-editor.hxx"
-#include "vfs/utils/vfs-utils.hxx"
+#include "xset/xset.hxx"
 
 #include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-file-task-view.hxx"
 
-#include "main-window.hxx"
+#include "vfs/utils/file-ops.hxx"
+#include "vfs/utils/vfs-editor.hxx"
+#include "vfs/utils/vfs-utils.hxx"
+#include "vfs/vfs-file-task.hxx"
+#include "vfs/vfs-volume.hxx"
 
-#include "socket/datatypes.hxx"
-#include "socket/commands.hxx"
+#include "logger.hxx"
+#include "main-window.hxx"
+#include "terminal-handlers.hxx"
+#include "types.hxx"
 
 static std::string
 unescape(const std::string_view t) noexcept

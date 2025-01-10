@@ -17,24 +17,18 @@
 
 #pragma once
 
+#include <array>
+#include <chrono>
+#include <filesystem>
+#include <functional>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <array>
 #include <vector>
 
-#include <chrono>
-
-#include <optional>
-
-#include <memory>
-
-#include <functional>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

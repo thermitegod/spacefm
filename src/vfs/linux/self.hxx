@@ -17,9 +17,8 @@
 
 #pragma once
 
-#include <string>
-
 #include <filesystem>
+#include <string>
 
 namespace vfs::linux::proc::self
 {

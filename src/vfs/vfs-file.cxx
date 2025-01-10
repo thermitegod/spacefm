@@ -15,32 +15,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
+#include <memory>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <memory>
-
 #include <system_error>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "settings/settings.hxx"
 
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-user-dirs.hxx"
 #include "vfs/thumbnails/thumbnails.hxx"
 #include "vfs/utils/vfs-utils.hxx"
-
+#include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-file.hxx"
+#include "vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
 
 std::shared_ptr<vfs::file>
 vfs::file::create(const std::filesystem::path& path,

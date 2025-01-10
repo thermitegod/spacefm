@@ -18,7 +18,6 @@
 #if defined(HAVE_MEDIA)
 
 #include <filesystem>
-
 #include <vector>
 
 struct metadata_data

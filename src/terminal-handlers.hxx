@@ -15,14 +15,11 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 struct TerminalHandler
 {

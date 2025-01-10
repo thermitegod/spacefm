@@ -18,28 +18,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
-
 #include <array>
-
+#include <cerrno>
+#include <filesystem>
 #include <system_error>
 
-#include <cerrno>
 #include <cstring>
 
 #include <sys/inotify.h>
 
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <magic_enum/magic_enum.hpp>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "vfs/vfs-monitor.hxx"
+
+#include "logger.hxx"
 
 vfs::monitor::monitor(const std::filesystem::path& path, const callback_t& callback) noexcept(false)
     : path_(path), callback_(callback)

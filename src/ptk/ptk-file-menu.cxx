@@ -13,23 +13,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <array>
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <span>
-
-#include <array>
 #include <vector>
-
-#include <chrono>
-
-#include <optional>
-
-#include <memory>
 
 #include <glibmm.h>
 
@@ -37,42 +30,38 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-context-menu.hxx"
-
-#include "vfs/vfs-app-desktop.hxx"
-#include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-mime-type.hxx"
-#include "vfs/vfs-mime-monitor.hxx"
-#include "vfs/utils/vfs-editor.hxx"
-#include "vfs/utils/file-ops.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-app-chooser.hxx"
-#include "ptk/ptk-archiver.hxx"
-#include "ptk/ptk-bookmark-view.hxx"
-#include "ptk/ptk-file-action-open.hxx"
-#include "ptk/ptk-file-action-misc.hxx"
-#include "ptk/ptk-file-action-rename.hxx"
-#include "ptk/ptk-file-action-paste.hxx"
-#include "ptk/ptk-file-properties.hxx"
-#include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-file-task-view.hxx"
-#include "ptk/ptk-file-list.hxx"
-#include "ptk/ptk-file-menu.hxx"
-#include "ptk/utils/ptk-utils.hxx"
 
 #include "utils/strdup.hxx"
 
-#include "settings/settings.hxx"
+#include "xset/xset-context-menu.hxx"
+#include "xset/xset.hxx"
 
-#include "types.hxx"
+#include "ptk/ptk-app-chooser.hxx"
+#include "ptk/ptk-archiver.hxx"
+#include "ptk/ptk-bookmark-view.hxx"
+#include "ptk/ptk-clipboard.hxx"
+#include "ptk/ptk-dialog.hxx"
+#include "ptk/ptk-file-action-misc.hxx"
+#include "ptk/ptk-file-action-open.hxx"
+#include "ptk/ptk-file-action-paste.hxx"
+#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-list.hxx"
+#include "ptk/ptk-file-menu.hxx"
+#include "ptk/ptk-file-properties.hxx"
+#include "ptk/ptk-file-task-view.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
+#include "vfs/utils/file-ops.hxx"
+#include "vfs/utils/vfs-editor.hxx"
+#include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-mime-monitor.hxx"
+#include "vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
 #include "main-window.hxx"
+#include "types.hxx"
 
 #define PTK_FILE_MENU(obj) (static_cast<ptk::file_menu*>(obj))
 

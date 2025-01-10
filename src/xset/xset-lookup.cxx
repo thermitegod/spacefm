@@ -13,9 +13,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string_view>
-
 #include <array>
+#include <string_view>
 
 #include <cassert>
 
@@ -23,9 +22,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "types.hxx"
-
 #include "xset/xset-lookup.hxx"
+
+#include "types.hxx"
 
 struct panel_lookup_data
 {

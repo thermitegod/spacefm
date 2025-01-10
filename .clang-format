@@ -134,21 +134,58 @@ ForEachMacros:
   - BOOST_FOREACH
 IfMacros:
   - KJ_IF_MAYBE
-IncludeBlocks:   Preserve
+IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority:        2
-    SortPriority:    0
-    CaseSensitive:   false
-  - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
-    Priority:        3
-    SortPriority:    0
-    CaseSensitive:   false
-  - Regex:           '.*'
-    Priority:        1
-    SortPriority:    0
-    CaseSensitive:   false
-IncludeIsMainRegex: '(Test)?$'
+  # C
+  - Regex: '^<(cassert|csignal|cstdint|cmath|cstring)>'
+    Priority: 2
+  # STL
+  - Regex: '^<[^.]*>$'
+    Priority: 1
+  # GTK
+  - Regex: '^<(glibmm.h|gtkmm.h|gdkmm.h)>'
+    Priority: 10
+  - Regex: '^<sigc\+\+/sigc\+\+\.h>'
+    Priority: 10
+  # Third Party
+  # - Regex: '^<(glaze/.*|magic_enum/.*|ztd/.*)>'
+  - Regex: '^<(glaze/.*)>'
+    Priority: 11
+  - Regex: '^<(magic_enum/.*)>'
+    Priority: 12
+  - Regex: '^<(botan/.*)>'
+    Priority: 13
+  - Regex: '^<(CLI/.*)>'
+    Priority: 14
+  - Regex: '^<(spdlog/.*)>'
+    Priority: 15
+  - Regex: '^<(ztd/.*)>'
+    Priority: 16
+  # Misc system
+  - Regex: '^<.*>$'
+    Priority: 3
+  # Internal
+  - Regex: '^"commandline/.*"'
+    Priority: 50
+  - Regex: '^"socket/.*"'
+    Priority: 51
+  - Regex: '^"compat/.*"'
+    Priority: 52
+  - Regex: '^"datatypes/.*"'
+    Priority: 53
+  - Regex: '^"utils/.*"'
+    Priority: 54
+  - Regex: '^"settings/.*"'
+    Priority: 55
+  - Regex: '^"xset/.*"'
+    Priority: 56
+  - Regex: '^"ptk/.*"'
+    Priority: 57
+  - Regex: '^"vfs/.*"'
+    Priority: 58
+  - Regex: '.*' # everything else
+    Priority: 100
+IncludeIsMainRegex: 'x' # using a 'bad' regex will disable this feature
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
 IndentCaseBlocks: false
@@ -212,7 +249,7 @@ RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
 SkipMacroDefinitionBody: false
-SortIncludes:    Never
+SortIncludes:    CaseSensitive
 SortJavaStaticImport: Before
 SortUsingDeclarations: LexicographicNumeric
 SpaceAfterCStyleCast: false

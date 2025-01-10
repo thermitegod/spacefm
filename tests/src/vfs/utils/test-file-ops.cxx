@@ -15,9 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <doctest/doctest.h>
-
 #include <filesystem>
+
+#include <doctest/doctest.h>
 
 #include "spacefm/vfs/utils/file-ops.hxx"
 

@@ -13,13 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
 #include <string>
 
-#include <format>
-
-#include <gtkmm.h>
 #include <gdkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include "utils.hxx"
 

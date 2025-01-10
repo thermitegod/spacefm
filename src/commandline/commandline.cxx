@@ -13,28 +13,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
-
 #include <algorithm>
-
+#include <filesystem>
 #include <print>
-
-#include <CLI/CLI.hpp>
 
 #include <magic_enum/magic_enum.hpp>
 
+#include <CLI/CLI.hpp>
+
 #include <ztd/ztd.hxx>
 
-#include "vfs/vfs-user-dirs.hxx"
-
-#include "logger.hxx"
-#include "types.hxx"
+#include "commandline/commandline.hxx"
 
 #if defined(HAVE_SOCKET)
 #include "commandline/socket.hxx"
 #endif
 
-#include "commandline/commandline.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
+#include "types.hxx"
 
 static void
 run_commandline(const commandline_opt_data_t& opt) noexcept

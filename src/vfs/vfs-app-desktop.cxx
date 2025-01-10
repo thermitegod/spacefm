@@ -15,41 +15,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
+#include <expected>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <chrono>
-
-#include <span>
-
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-#include <expected>
-#include <optional>
-
-#include <ranges>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "utils/shell-quote.hxx"
 
-// break vfs independence for exec_in_terminal
-#include "ptk/ptk-file-task.hxx"
+#include "ptk/ptk-file-task.hxx" // break vfs independence for exec_in_terminal
 
 #include "vfs/utils/vfs-utils.hxx"
-
-#include "vfs/vfs-error.hxx"
 #include "vfs/vfs-app-desktop.hxx"
+#include "vfs/vfs-error.hxx"
+
+#include "logger.hxx"
 
 struct desktop_cache_data final
 {

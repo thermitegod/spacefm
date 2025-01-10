@@ -13,13 +13,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
 #include <filesystem>
-
+#include <format>
 #include <span>
+#include <string>
 #include <vector>
 
 #include <gtkmm.h>
@@ -28,13 +25,13 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "datatypes/datatypes.hxx"
+
+#include "ptk/ptk-file-properties.hxx"
 
 #include "vfs/vfs-file.hxx"
 
-#include "ptk/ptk-file-properties.hxx"
+#include "logger.hxx"
 
 static void
 show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,

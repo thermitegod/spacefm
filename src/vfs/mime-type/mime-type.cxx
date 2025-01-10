@@ -17,35 +17,29 @@
 
 /* Currently this library is NOT MT-safe */
 
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <format>
+#include <optional>
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <filesystem>
-
-#include <array>
-#include <optional>
-
-#include <algorithm>
+#include <pugixml.hpp>
 
 #include <glibmm.h>
 
-#include <pugixml.hpp>
-
 #include <ztd/ztd.hxx>
-
-#include "logger.hxx"
 
 #include "utils/misc.hxx"
 
-#include "vfs/utils/file-ops.hxx"
-#include "vfs/vfs-user-dirs.hxx"
-#include "vfs/vfs-mime-type.hxx"
-
 #include "vfs/mime-type/chrome/mime-utils.hxx"
-
 #include "vfs/mime-type/mime-type.hxx"
+#include "vfs/utils/file-ops.hxx"
+#include "vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-user-dirs.hxx"
+
+#include "logger.hxx"
 
 std::string
 vfs::detail::mime_type::get_by_file(const std::filesystem::path& path) noexcept

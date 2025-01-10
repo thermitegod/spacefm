@@ -16,9 +16,9 @@
 #include <limits>
 #include <random>
 
-#include <gtkmm.h>
 #include <gdkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include <ztd/ztd.hxx>
 

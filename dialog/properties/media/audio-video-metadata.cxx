@@ -15,19 +15,15 @@
 
 #if defined(HAVE_MEDIA)
 
-#include <string>
-
-#include <format>
-
+#include <chrono>
 #include <filesystem>
-
+#include <format>
+#include <string>
 #include <vector>
 
-#include <chrono>
-
-#include <gtkmm.h>
 #include <gdkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #if __has_include(<magic_enum/magic_enum.hpp>)
 // >=magic_enum-0.9.7

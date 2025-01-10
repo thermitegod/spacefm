@@ -16,7 +16,6 @@
 #pragma once
 
 #include <filesystem>
-
 #include <unordered_map>
 
 #include <magic_enum/magic_enum.hpp>

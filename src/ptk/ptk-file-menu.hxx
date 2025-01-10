@@ -18,12 +18,9 @@
 #pragma once
 
 #include <filesystem>
-
-#include <vector>
-
-#include <span>
-
 #include <memory>
+#include <span>
+#include <vector>
 
 #include <gtkmm.h>
 

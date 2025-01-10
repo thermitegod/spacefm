@@ -13,26 +13,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
 #include <filesystem>
-
-#include <memory>
-
+#include <format>
 #include <functional>
+#include <memory>
+#include <string>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "vfs/vfs-dir.hxx"
+#include "vfs/vfs-mime-monitor.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "vfs/vfs-mime-monitor.hxx"
+#include "logger.hxx"
 
 namespace global
 {

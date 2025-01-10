@@ -13,15 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
-#include <filesystem>
-
 #include <chrono>
-
+#include <filesystem>
+#include <format>
 #include <memory>
+#include <string>
 
 #include <glibmm.h>
 
@@ -32,14 +28,13 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "utils/shell-quote.hxx"
 
+#include "vfs/thumbnails/thumbnails.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
-#include "vfs/thumbnails/thumbnails.hxx"
+#include "logger.hxx"
 
 enum class thumbnail_size : std::uint16_t
 {

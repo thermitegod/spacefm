@@ -13,24 +13,22 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
+#include <optional>
 #include <string>
 #include <string_view>
 
-#include <format>
-
-#include <optional>
+#include <zmq.hpp>
 
 #include <glaze/glaze.hpp>
 
-#include <zmq.hpp>
-
 #include <ztd/ztd.hxx>
-
-#include "logger.hxx"
 
 #include "socket/commands.hxx"
 #include "socket/datatypes.hxx"
 #include "socket/server.hxx"
+
+#include "logger.hxx"
 
 void
 socket::server_thread() noexcept

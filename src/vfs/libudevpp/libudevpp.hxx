@@ -15,17 +15,13 @@
 
 #pragma once
 
+#include <filesystem>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <vector>
 #include <unordered_map>
-
-#include <memory>
-
-#include <optional>
+#include <vector>
 
 #include <libudev.h>
 

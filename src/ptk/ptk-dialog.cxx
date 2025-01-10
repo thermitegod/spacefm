@@ -23,9 +23,9 @@
 
 #include "datatypes/datatypes.hxx"
 
-#include "logger.hxx"
-
 #include "ptk/ptk-dialog.hxx"
+
+#include "logger.hxx"
 
 void
 ptk::dialog::error(GtkWindow* parent, const std::string_view title,

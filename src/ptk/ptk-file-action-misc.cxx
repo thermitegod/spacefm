@@ -13,15 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
+#include <memory>
+#include <span>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <span>
 #include <vector>
-
-#include <memory>
 
 #include <gtkmm.h>
 
@@ -31,17 +28,16 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "datatypes/datatypes.hxx"
 
 #include "settings/settings.hxx"
 
-#include "vfs/vfs-file.hxx"
-
+#include "ptk/ptk-file-action-misc.hxx"
 #include "ptk/ptk-file-task.hxx"
 
-#include "ptk/ptk-file-action-misc.hxx"
+#include "vfs/vfs-file.hxx"
+
+#include "logger.hxx"
 
 static bool
 create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,

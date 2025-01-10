@@ -13,13 +13,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <glibmm.h>
+#include <gtkmm.h>
+
 #include <CLI/CLI.hpp>
 
-#include <gtkmm.h>
-#include <glibmm.h>
-
 #include "logger.hxx"
-
 #include "properties.hxx"
 
 int

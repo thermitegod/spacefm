@@ -13,13 +13,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <string_view>
-
-#include <format>
-
 #include <filesystem>
-
+#include <format>
+#include <string_view>
 #include <vector>
 
 #include <glibmm.h>
@@ -28,17 +24,15 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "xset/xset.hxx"
 
-#include "vfs/vfs-file.hxx"
-
-#include "ptk/ptk-dialog.hxx"
-#include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-clipboard.hxx"
-#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-dialog.hxx"
 #include "ptk/ptk-file-action-paste.hxx"
+#include "ptk/ptk-file-action-rename.hxx"
+#include "ptk/ptk-file-browser.hxx"
+
+#include "vfs/vfs-file.hxx"
 
 void
 ptk::action::paste_files(ptk::browser* browser, const std::filesystem::path& cwd) noexcept

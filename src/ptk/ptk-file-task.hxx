@@ -16,17 +16,14 @@
  */
 #pragma once
 
+#include <array>
+#include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 
-#include <span>
-
-#include <array>
-
-#include <memory>
-
-#include <gtkmm.h>
 #include <glibmm.h>
+#include <gtkmm.h>
 
 #include "vfs/vfs-file-task.hxx"
 

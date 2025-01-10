@@ -15,24 +15,18 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <filesystem>
-
+#include <memory>
+#include <optional>
 #include <span>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
-
-#include <optional>
-
-#include <memory>
 
 #include <gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include <magic_enum/magic_enum.hpp>
-
-#include "logger.hxx"
 
 #include "settings/settings.hxx"
 
@@ -41,6 +35,7 @@
 #include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
+#include "logger.hxx"
 #include "types.hxx"
 
 #define PTK_FILE_BROWSER_REINTERPRET(obj) (reinterpret_cast<ptk::browser*>(obj))

@@ -15,10 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <format>
 #include <string>
 #include <string_view>
-
-#include <format>
 
 #include <ztd/ztd.hxx>
 

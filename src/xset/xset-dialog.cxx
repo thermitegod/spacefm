@@ -13,14 +13,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
 #include <tuple>
-
-#include <optional>
 
 #include <gtkmm.h>
 
@@ -28,14 +25,14 @@
 
 #include "compat/gtk4-porting.hxx"
 
+#include "xset/xset-dialog.hxx"
+#include "xset/xset.hxx"
+
 #include "ptk/ptk-dialog.hxx"
-#include "ptk/utils/ptk-utils.hxx"
 #include "ptk/utils/multi-input.hxx"
+#include "ptk/utils/ptk-utils.hxx"
 
 #include "vfs/vfs-user-dirs.hxx"
-
-#include "xset/xset.hxx"
-#include "xset/xset-dialog.hxx"
 
 static bool
 on_input_keypress(GtkWidget* widget, GdkEvent* event, GtkWidget* dlg) noexcept

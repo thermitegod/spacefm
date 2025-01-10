@@ -15,9 +15,8 @@
 
 #pragma once
 
-#include <string_view>
-
 #include <print>
+#include <string_view>
 
 #include <gtkmm.h>
 

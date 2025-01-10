@@ -13,38 +13,28 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <format>
-
-#include <filesystem>
-
-#include <vector>
-
 #include <algorithm>
-
-#include <mutex>
-
-#include <optional>
-
-#include <memory>
-
 #include <chrono>
-
+#include <filesystem>
+#include <format>
 #include <functional>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <vector>
 
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
-#include "concurrency.hxx"
-
 #include "vfs/utils/file-ops.hxx"
+#include "vfs/vfs-dir.hxx"
 #include "vfs/vfs-file.hxx"
 #include "vfs/vfs-thumbnailer.hxx"
 #include "vfs/vfs-volume.hxx"
 
-#include "vfs/vfs-dir.hxx"
+#include "concurrency.hxx"
+#include "logger.hxx"
 
 namespace global
 {

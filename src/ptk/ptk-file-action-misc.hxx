@@ -16,10 +16,8 @@
 #pragma once
 
 #include <filesystem>
-
-#include <span>
-
 #include <memory>
+#include <span>
 
 #include <gtkmm.h>
 

@@ -15,33 +15,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-
-#include <filesystem>
-
-#include <memory>
-
-#include <optional>
-
-#include <system_error>
 
 #include <cmath>
 
 #include <ztd/ztd.hxx>
 
-#include "logger.hxx"
-
 #include "compat/gtk4-porting.hxx"
 
 #include "utils/strdup.hxx"
 
+#include "ptk/ptk-dir-tree-view.hxx"
 #include "ptk/ptk-dir-tree.hxx"
 #include "ptk/ptk-file-menu.hxx"
 #include "ptk/ptk-file-task.hxx"
 #include "ptk/utils/ptk-utils.hxx"
 
-#include "ptk/ptk-dir-tree-view.hxx"
+#include "logger.hxx"
 
 static GQuark dir_tree_view_data = 0;
 
