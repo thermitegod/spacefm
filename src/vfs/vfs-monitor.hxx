@@ -29,8 +29,9 @@
 
 namespace vfs
 {
-struct monitor
+class monitor final
 {
+  public:
     enum class event : std::uint8_t
     {
         created,

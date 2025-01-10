@@ -60,7 +60,7 @@ static void device_removed(const libudev::device& udevice) noexcept;
 static void call_callbacks(const std::shared_ptr<vfs::volume>& vol,
                            const vfs::volume::state state) noexcept;
 
-struct volume_callback_data
+struct volume_callback_data final
 {
     volume_callback_data() = delete;
     volume_callback_data(vfs::volume::callback_t callback, void* callback_data) noexcept;
@@ -86,8 +86,9 @@ using volume_callback_data_t = std::shared_ptr<volume_callback_data>;
  * DeviceMount
  */
 
-struct DeviceMount
+class DeviceMount final
 {
+  public:
     DeviceMount() = delete;
     DeviceMount(dev_t major, dev_t minor) noexcept;
     ~DeviceMount() = default;

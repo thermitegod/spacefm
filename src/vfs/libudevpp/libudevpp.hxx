@@ -31,14 +31,14 @@
 
 namespace libudev
 {
-struct monitor;
-struct device;
-struct enumerate;
+class monitor;
+class device;
+class enumerate;
 
 /**
  * Class representing a udev context
  */
-struct udev
+class udev final
 {
   public:
     explicit udev() noexcept : handle(udev_new(), &udev_unref) {}
@@ -94,7 +94,7 @@ struct udev
 /**
  * Class that encapsulates monitoring functionality provided by udev
  */
-struct monitor
+class monitor final
 {
   public:
     monitor() = default;
@@ -127,7 +127,7 @@ struct monitor
 /**
  * Class that encapsulated enumeration functionality provided by udev
  */
-struct enumerate
+class enumerate final
 {
   public:
     enumerate() = default;
@@ -174,7 +174,7 @@ struct enumerate
 /**
  * Class that encapsulates the concept of a device as described by dev
  */
-struct device
+class device final
 {
   public:
     device() = default;

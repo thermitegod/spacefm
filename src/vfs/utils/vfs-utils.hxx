@@ -32,7 +32,7 @@ GdkPixbuf* load_icon(const std::string_view icon_name, i32 icon_size) noexcept;
 
 [[nodiscard]] std::string format_file_size(u64 size_in_bytes, bool decimal = true) noexcept;
 
-struct split_basename_extension_data
+struct split_basename_extension_data final
 {
     std::string basename;
     std::string extension;

@@ -33,10 +33,11 @@
 
 namespace vfs
 {
-struct device;
+class device;
 
-struct volume : public std::enable_shared_from_this<volume>
+class volume final : public std::enable_shared_from_this<volume>
 {
+  public:
     enum class state : std::uint8_t
     {
         added,
@@ -69,7 +70,6 @@ struct volume : public std::enable_shared_from_this<volume>
     using callback_t = void (*)(const std::shared_ptr<vfs::volume>& volume,
                                 const vfs::volume::state state, void* user_data);
 
-  public:
     [[nodiscard]] std::string_view display_name() const noexcept;
     [[nodiscard]] std::string_view mount_point() const noexcept;
     [[nodiscard]] std::string_view device_file() const noexcept;

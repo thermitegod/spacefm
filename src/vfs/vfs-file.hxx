@@ -36,7 +36,7 @@
 
 namespace vfs
 {
-struct file : public std::enable_shared_from_this<file>
+class file final : public std::enable_shared_from_this<file>
 {
   public:
     file() = delete;
@@ -146,7 +146,7 @@ struct file : public std::enable_shared_from_this<file>
     bool is_special_desktop_entry_{false}; // is a .desktop file
     bool is_hidden_{false};                // if the filename starts with '.'
 
-    struct thumbnail_data
+    struct thumbnail_data final
     {
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};

@@ -54,8 +54,9 @@
 
 namespace vfs
 {
-struct dir : public std::enable_shared_from_this<dir>
+class dir final : public std::enable_shared_from_this<dir>
 {
+  public:
     dir() = delete;
     explicit dir(const std::filesystem::path& path,
                  const std::shared_ptr<config::settings>& settings) noexcept;

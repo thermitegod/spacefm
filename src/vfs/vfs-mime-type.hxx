@@ -44,7 +44,7 @@ inline constexpr std::string_view executable{"application/x-executable"};
 inline constexpr std::string_view plain_text{"text/plain"};
 } // namespace constants::mime_type
 
-struct mime_type
+class mime_type final
 {
   public:
     mime_type() = delete;
@@ -100,7 +100,7 @@ struct mime_type
     i32 icon_size_big_{0};
     i32 icon_size_small_{0};
 
-    struct icon_data
+    struct icon_data final
     {
         GdkPixbuf* big{nullptr};
         GdkPixbuf* small{nullptr};

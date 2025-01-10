@@ -36,8 +36,9 @@ namespace vfs
 // This class implements some of the XDG Trash specification:
 //
 // https://specifications.freedesktop.org/trash-spec/1.0/
-struct trash_can
+class trash_can final
 {
+  public:
     trash_can() noexcept;
     [[nodiscard]] static std::shared_ptr<vfs::trash_can> create() noexcept;
 
@@ -57,8 +58,9 @@ struct trash_can
     static void empty(const std::filesystem::path& path) noexcept;
 
   private:
-    struct trash_dir
+    class trash_dir final
     {
+      public:
         // Create the trash directory and subdirectories if they do not exist.
         trash_dir() = delete;
         trash_dir(const std::filesystem::path& path) noexcept;

@@ -129,7 +129,7 @@ ReadFileToStringWithMaxSize(const std::filesystem::path& path, std::string& cont
 // https://source.chromium.org/chromium/chromium/src/+/main:base/nix/mime_util_xdg.h
 
 // Mime type with weight.
-struct WeightedMime
+struct WeightedMime final
 {
     std::string mime_type;
     uint8_t weight{0};
@@ -166,7 +166,7 @@ constexpr uint32_t kMaxUnicode = 0x10ffff;
 constexpr uint8_t kDefaultGlobWeight = 50;
 
 // Path and last modified of mime.cache file.
-struct FileInfo
+struct FileInfo final
 {
     std::filesystem::path path;
     std::chrono::system_clock::time_point last_modified;
@@ -292,7 +292,7 @@ ParseMimeTypes(const std::filesystem::path& file_path, MimeTypeMap& out_mime_typ
         return false;
     }
 
-    struct Node
+    struct Node final
     {
         std::string ext;
         uint32_t n_children{0};

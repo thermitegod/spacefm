@@ -37,8 +37,9 @@
 
 namespace vfs
 {
-struct desktop
+class desktop final
 {
+  public:
     desktop() = delete;
 
     [[nodiscard]] static std::expected<desktop, std::error_code>
@@ -74,7 +75,7 @@ struct desktop
     std::string filename_;
     std::filesystem::path path_;
 
-    struct desktop_entry_data
+    struct desktop_entry_data final
     {
         // https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys
         std::string type;

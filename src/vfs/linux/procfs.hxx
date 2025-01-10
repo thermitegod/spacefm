@@ -44,7 +44,7 @@ namespace vfs::linux::procfs
  * (m+4) super options:   per super block options
  */
 
-struct MountInfoEntry
+struct MountInfoEntry final
 {
     u64 mount_id;
     u64 parent_id;

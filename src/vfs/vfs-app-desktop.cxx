@@ -51,7 +51,7 @@
 #include "vfs/vfs-error.hxx"
 #include "vfs/vfs-app-desktop.hxx"
 
-struct desktop_cache_data
+struct desktop_cache_data final
 {
     vfs::desktop desktop;
     std::chrono::system_clock::time_point mtime;

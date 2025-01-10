@@ -28,8 +28,9 @@
 
 namespace vfs
 {
-struct device
+class device final
 {
+  public:
     device() = delete;
     device(const libudev::device& udevice) noexcept;
     ~device() = default;
@@ -86,7 +87,6 @@ struct device
     std::string id_label_;
     std::string fstype_;
 
-  private:
     [[nodiscard]] std::optional<std::string> info_mount_points() const noexcept;
     [[nodiscard]] bool device_get_info() noexcept;
 };

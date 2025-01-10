@@ -33,8 +33,9 @@
 
 namespace vfs
 {
-struct thumbnailer
+class thumbnailer final
 {
+  public:
     using callback_t = std::function<void(const std::shared_ptr<vfs::file>& file)>;
 
     thumbnailer() = delete;
@@ -45,7 +46,7 @@ struct thumbnailer
     thumbnailer& operator=(const thumbnailer& other) = delete;
     thumbnailer& operator=(thumbnailer&& other) = delete;
 
-    struct request_data
+    struct request_data final
     {
         std::shared_ptr<vfs::file> file;
         vfs::file::thumbnail_size size;

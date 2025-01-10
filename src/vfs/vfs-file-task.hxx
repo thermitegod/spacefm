@@ -40,8 +40,9 @@
 
 namespace vfs
 {
-struct file_task : public std::enable_shared_from_this<file_task>
+class file_task final : public std::enable_shared_from_this<file_task>
 {
+  public:
     enum class type : std::uint8_t
     {
         move,
@@ -124,7 +125,7 @@ struct file_task : public std::enable_shared_from_this<file_task>
     void try_abort_task() noexcept;
     void abort_task() noexcept;
 
-  public: // TODO private:
+    // TODO private:
     void file_copy(const std::filesystem::path& src_file) noexcept;
     void file_move(const std::filesystem::path& src_file) noexcept;
     void file_trash(const std::filesystem::path& src_file) noexcept;
