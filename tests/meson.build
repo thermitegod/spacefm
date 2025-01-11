@@ -19,8 +19,10 @@ test_sources += files(
     'spacefm/ptk/natsort/strnatcmp.cxx',
 
     # VFS
-    'spacefm/vfs/vfs-error.cxx',
+    'spacefm/vfs/mime-type/chrome/mime-utils.cxx',
     'spacefm/vfs/utils/vfs-utils.cxx',
+    'spacefm/vfs/vfs-error.cxx',
+    'spacefm/vfs/vfs-user-dirs.cxx',
 )
 
 # Test Source Files
@@ -34,8 +36,10 @@ test_sources += files(
     'src/ptk/natsort/test-natsort.cxx',
 
     # VFS
-    'src/vfs/test-vfs-error.cxx',
+    'src/vfs/mime-type/chrome/mime-utils.cxx',
     'src/vfs/utils/test-vfs-utils.cxx',
+    'src/vfs/utils/test-file-ops.cxx',
+    'src/vfs/test-vfs-error.cxx',
 )
 
 ## Build
