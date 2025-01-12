@@ -386,7 +386,14 @@ PropertiesDialog::init_file_info_tab() noexcept
         }
     }
 
-    page.add_entry("Location:    ", this->cwd_.string());
+    if (file->is_directory())
+    {
+        page.add_entry("Location:    ", this->cwd_.parent_path().string());
+    }
+    else
+    {
+        page.add_entry("Location:    ", this->cwd_.string());
+    }
 
     if (file->is_symlink())
     {
