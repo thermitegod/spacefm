@@ -27,6 +27,8 @@
 
 #include "datatypes/datatypes.hxx"
 
+#include "utils/shell-quote.hxx"
+
 #include "xset/utils/xset-utils.hxx"
 #include "xset/xset.hxx"
 
@@ -77,7 +79,7 @@ show_keybindings_dialog(GtkWindow* parent) noexcept
         return;
     }
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
+    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
     std::int32_t exit_status = 0;
     std::string standard_output;

@@ -23,9 +23,7 @@
 namespace utils
 {
 /**
- * @brief Shell Quote
- *
- * - quote string so that is will work with ztd::Execute
+ * @brief Shell Quote - quote and escape a string
  *
  * @param[in] str The string to be quoted
  *

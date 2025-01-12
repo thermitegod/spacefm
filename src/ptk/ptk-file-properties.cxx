@@ -27,6 +27,8 @@
 
 #include "datatypes/datatypes.hxx"
 
+#include "utils/shell-quote.hxx"
+
 #include "ptk/ptk-file-properties.hxx"
 
 #include "vfs/vfs-file.hxx"
@@ -75,7 +77,7 @@ show_file_properties_dialog(GtkWindow* parent, const std::filesystem::path& cwd,
     }
     // logger::trace("{}", buffer);
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
+    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
     Glib::spawn_command_line_async(command);
 }
 

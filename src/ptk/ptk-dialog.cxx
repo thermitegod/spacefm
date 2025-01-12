@@ -23,6 +23,8 @@
 
 #include "datatypes/datatypes.hxx"
 
+#include "utils/shell-quote.hxx"
+
 #include "ptk/ptk-dialog.hxx"
 
 #include "logger.hxx"
@@ -53,7 +55,7 @@ ptk::dialog::error(GtkWindow* parent, const std::string_view title,
     }
     // logger::trace("{}", buffer);
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
+    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
     Glib::spawn_command_line_async(command);
 }
@@ -96,7 +98,7 @@ ptk::dialog::message(GtkWindow* parent, GtkMessageType action, const std::string
     }
     // logger::trace("{}", buffer);
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
+    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output);

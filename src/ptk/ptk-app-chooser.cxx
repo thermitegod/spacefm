@@ -29,6 +29,8 @@
 
 #include "datatypes/datatypes.hxx"
 
+#include "utils/shell-quote.hxx"
+
 #include "ptk/ptk-app-chooser.hxx"
 
 #include "vfs/vfs-mime-type.hxx"
@@ -78,7 +80,7 @@ ptk_choose_app_for_mime_type(GtkWindow* parent, const std::shared_ptr<vfs::mime_
     }
     // logger::trace("{}", buffer);
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
+    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
     std::int32_t exit_status = 0;
     std::string standard_output;

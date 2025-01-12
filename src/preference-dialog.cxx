@@ -26,6 +26,8 @@
 
 #include "datatypes/datatypes.hxx"
 
+#include "utils/shell-quote.hxx"
+
 #include "settings/settings.hxx"
 
 #include "xset/xset-lookup.hxx"
@@ -39,7 +41,6 @@
 #include "preference-dialog.hxx"
 #include "terminal-handlers.hxx"
 #include "types.hxx"
-
 /**
  * General Tab
  */
@@ -491,7 +492,7 @@ show_preference_dialog(GtkWindow* parent,
         return;
     }
 
-    const auto command = std::format(R"({} --json '{}')", binary, buffer.value());
+    const auto command = std::format(R"({} --json {})", binary, utils::shell_quote(buffer.value()));
 
     std::int32_t exit_status = 0;
     std::string standard_output;

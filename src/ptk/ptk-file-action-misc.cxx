@@ -30,6 +30,8 @@
 
 #include "datatypes/datatypes.hxx"
 
+#include "utils/shell-quote.hxx"
+
 #include "settings/settings.hxx"
 
 #include "ptk/ptk-file-action-misc.hxx"
@@ -73,8 +75,10 @@ create_file_action_dialog(GtkWindow* parent, const std::string_view header_text,
         return false;
     }
 
-    const auto command =
-        std::format(R"({} --header '{}' --json '{}')", binary, header_text, buffer.value());
+    const auto command = std::format(R"({} --header '{}' --json {})",
+                                     binary,
+                                     header_text,
+                                     utils::shell_quote(buffer.value()));
 
     std::string standard_output;
     Glib::spawn_command_line_sync(command, &standard_output);
