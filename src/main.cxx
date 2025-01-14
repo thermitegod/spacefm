@@ -236,9 +236,6 @@ activate(GtkApplication* app, void* user_data) noexcept
 int
 main(int argc, char* argv[]) noexcept
 {
-    // set locale to system default
-    std::locale::global(std::locale(""));
-
     // CLI11
     CLI::App cli_app{PACKAGE_NAME_FANCY, "A multi-panel tabbed file manager"};
 

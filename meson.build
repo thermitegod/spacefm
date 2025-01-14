@@ -172,9 +172,14 @@ endif
 # Codegen
 
 default_codegen_flags = [
+    '-finput-charset=UTF-8',
+    '-fexec-charset=UTF-8',
+
     '-fwrapv',
     # '-fwrapv-pointer',
     '-ftrivial-auto-var-init=zero',
+
+    '-fstack-protector-all',
 ]
 
 flags += cpp.get_supported_arguments(default_codegen_flags)
@@ -256,16 +261,16 @@ preprocessor = [
     '-DDIALOG_PREFERENCE="spacefm_preference"',
     '-DDIALOG_PROPERTIES="spacefm_properties"',
 
-    '-DG_DISABLE_ASSERT',
-    '-DG_DISABLE_CAST_CHECKS',
-    '-DG_DISABLE_CHECKS',
-    '-DG_LOG_DOMAIN="SpaceFM"',
-    #'-DG_DEBUG=fatal_warnings',
-
     '-DMAGIC_ENUM_RANGE_MIN=0',
     '-DMAGIC_ENUM_RANGE_MAX=2000',
 
     '-DLIBDIR_PATH="@0@"'.format(libdir),
+
+    '-DG_DISABLE_ASSERT',
+    '-DG_DISABLE_CAST_CHECKS',
+    '-DG_DISABLE_CHECKS',
+    #'-DG_LOG_DOMAIN="SpaceFM"',
+    #'-DG_DEBUG=fatal_warnings',
 
     '-DGTK_DISABLE_DEPRECATED',
     '-DGDK_DISABLE_DEPRECATED',
@@ -277,8 +282,13 @@ preprocessor = [
 ]
 
 if get_option('buildtype') == 'debug'
-    # TODO - looks like a lot of work
+    # GCC libstdc++
     # preprocessor += '-D_GLIBCXX_DEBUG'
+    # preprocessor += '-D_GLIBCXX_ASSERTIONS'
+
+    # LLVM libc++
+    # preprocessor += '-D_LIBCPP_ASSERT'
+    # preprocessor += '-D_LIBCPP_HARDENING_MODE_EXTENSIVE'
 endif
 
 if get_option('tests')

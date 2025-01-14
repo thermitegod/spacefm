@@ -14,8 +14,11 @@ CC=clang CXX=clang++ meson setup \
     -Dwith-system-spdlog=true \
     -Dwith-system-toml11=false \
     -Dwith-system-ztd=true \
-    --buildtype=debug \
+    --buildtype=debugoptimized \
+    -Db_lto=true -Db_lto_mode=thin -Db_thinlto_cache=true \
     --prefix=$(pwd)/build ./build
+
+    # -Db_sanitize=address -Db_lundef=false \
 
 #CC=clang CXX=clang++ meson setup --buildtype=release --prefix=$(pwd)/build ./build
 
