@@ -80,12 +80,12 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
 
         const auto domain_enum = magic_enum::enum_cast<logger::domain>(domain_name).value();
 
-        try
+        if (options.contains(domain_name.data()))
         {
             const auto level = options.at(domain_name.data());
             logger->set_level(magic_enum::enum_cast<spdlog::level::level_enum>(level).value());
         }
-        catch (const std::out_of_range& e)
+        else
         { // use default loglevel
             logger->set_level(default_logger_options.at(domain_enum).default_level);
         }
