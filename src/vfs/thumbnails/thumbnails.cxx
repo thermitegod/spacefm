@@ -112,7 +112,8 @@ thumbnail_create(const std::shared_ptr<vfs::file>& file, const u32 thumb_size,
             const char* thumb_mtime = gdk_pixbuf_get_option(thumbnail, "tEXt::Thumb::MTime");
             if (thumb_mtime != nullptr)
             {
-                embeded_mtime = std::chrono::system_clock::from_time_t(std::stol(thumb_mtime));
+                const auto result = ztd::from_string<time_t>(thumb_mtime);
+                embeded_mtime = std::chrono::system_clock::from_time_t(result.value_or(0));
             }
         }
         else

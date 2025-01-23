@@ -57,11 +57,11 @@ vfs::linux::procfs::mountinfo() noexcept
 
         MountInfoEntry mount;
 
-        mount.mount_id = std::stoul(fields[0]);
-        mount.parent_id = std::stoul(fields[1]);
+        mount.mount_id = ztd::from_string<u64>(fields[0]).value();
+        mount.parent_id = ztd::from_string<u64>(fields[1]).value();
         const auto minor_major = ztd::partition(fields[2], ":");
-        mount.major = std::stoul(minor_major[0]);
-        mount.minor = std::stoul(minor_major[2]);
+        mount.major = ztd::from_string<u64>(minor_major[0]).value();
+        mount.minor = ztd::from_string<u64>(minor_major[2]).value();
         mount.root = Glib::strcompress(fields[3]);        // Encoded Field
         mount.mount_point = Glib::strcompress(fields[4]); // Encoded Field
         mount.mount_options = fields[5];

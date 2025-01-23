@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <ztd/ztd.hxx>
+
 #include "vfs/linux/sysfs.hxx"
 #include "vfs/utils/file-ops.hxx"
 
@@ -40,12 +42,13 @@ std::optional<i64>
 vfs::linux::sysfs::get_i64(const std::filesystem::path& dir,
                            const std::string_view attribute) noexcept
 {
-    if (std::filesystem::exists(dir / attribute))
+    const auto buffer = get_string(dir, attribute);
+    if (buffer)
     {
-        const auto buffer = vfs::utils::read_file(dir / attribute);
-        if (buffer)
+        const auto result = ztd::from_string<i64>(*buffer);
+        if (result)
         {
-            return std::stoul(*buffer);
+            return result.value();
         }
     }
     return std::nullopt;
@@ -55,12 +58,13 @@ std::optional<u64>
 vfs::linux::sysfs::get_u64(const std::filesystem::path& dir,
                            const std::string_view attribute) noexcept
 {
-    if (std::filesystem::exists(dir / attribute))
+    const auto buffer = get_string(dir, attribute);
+    if (buffer)
     {
-        const auto buffer = vfs::utils::read_file(dir / attribute);
-        if (buffer)
+        const auto result = ztd::from_string<u64>(*buffer);
+        if (result)
         {
-            return std::stoll(*buffer);
+            return result.value();
         }
     }
     return std::nullopt;
@@ -70,12 +74,13 @@ std::optional<f64>
 vfs::linux::sysfs::get_f64(const std::filesystem::path& dir,
                            const std::string_view attribute) noexcept
 {
-    if (std::filesystem::exists(dir / attribute))
+    const auto buffer = get_string(dir, attribute);
+    if (buffer)
     {
-        const auto buffer = vfs::utils::read_file(dir / attribute);
-        if (buffer)
+        const auto result = ztd::from_string<f64>(*buffer);
+        if (result)
         {
-            return std::stod(*buffer);
+            return result.value();
         }
     }
     return std::nullopt;

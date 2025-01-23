@@ -1865,7 +1865,7 @@ init_list_view(ptk::browser* browser, GtkTreeView* list_view) noexcept
         gtk_tree_view_column_set_min_width(col, 50);
         gtk_tree_view_column_set_sizing(col, GtkTreeViewColumnSizing::GTK_TREE_VIEW_COLUMN_FIXED);
         const auto set = xset::set::get(global::columns.at(idx).xset_name, p, mode);
-        const i32 width = set->y ? std::stoi(set->y.value()) : 100;
+        const auto width = set->y ? ztd::from_string<i32>(set->y.value()).value_or(100) : 100;
         if (width)
         {
             if (column.column == ptk::file_list::column::name &&
@@ -4418,7 +4418,8 @@ ptk::browser::update_views() noexcept
                     {
                         // get column width for this panel context
                         const auto set = xset::set::get(column.xset_name, p, mode);
-                        const i32 width = set->y ? std::stoi(set->y.value()) : 100;
+                        const auto width =
+                            set->y ? ztd::from_string<i32>(set->y.value()).value_or(100) : 100;
                         // logger::info<logger::domain::ptk>("        {}\t{}", width, title );
                         if (width)
                         {
@@ -5485,7 +5486,7 @@ ptk::browser::on_action(const xset::name setname) noexcept
         }
         else
         {
-            i32 i = 0;
+            tab_t i = INVALID_TAB;
             if (set->xset_name == xset::name::tab_prev)
             {
                 i = tab_control_code_prev;
@@ -5504,7 +5505,8 @@ ptk::browser::on_action(const xset::name setname) noexcept
             }
             else
             {
-                i = std::stoi(ztd::removeprefix(set->name(), "tab_"));
+                const auto tab = ztd::removeprefix(set->name(), "tab_");
+                i = ztd::from_string<tab_t>(tab).value_or(INVALID_TAB);
             }
             this->go_tab(i);
         }
@@ -5624,12 +5626,13 @@ ptk::browser::on_action(const xset::name setname) noexcept
     {
         const auto mode = this->main_window_->panel_context.at(this->panel_);
 
-        const panel_t panel_num = std::stol(ztd::removeprefix(set->name(), "panel_"));
-        // logger::debug<logger::domain::ptk>("ACTION panel={}", panel_num);
+        const auto panel_num = ztd::removeprefix(set->name(), "panel_");
+        const auto panel = ztd::from_string<panel_t>(panel_num).value_or(INVALID_PANEL);
+        // logger::debug<logger::domain::ptk>("ACTION panel={}", panel);
 
-        if (is_valid_panel(panel_num))
+        if (is_valid_panel(panel))
         {
-            const std::string fullxname = std::format("panel{}_", panel_num);
+            const std::string fullxname = std::format("panel{}_", panel);
             const std::string xname = ztd::removeprefix(set->name(), fullxname);
             if (xname == "show_hidden") // shared key
             {

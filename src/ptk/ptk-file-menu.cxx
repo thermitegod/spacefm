@@ -3067,7 +3067,7 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
     }
     if (set->name().starts_with("open_in_panel"))
     {
-        panel_t i = 0;
+        panel_t i = INVALID_PANEL;
         if (set->xset_name == xset::name::open_in_panel_prev)
         {
             i = panel_control_code_prev;
@@ -3078,13 +3078,14 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
         }
         else
         {
-            i = std::stol(ztd::removeprefix(set->name(), "open_in_panel_"));
+            const auto panel = ztd::removeprefix(set->name(), "open_in_panel_");
+            i = ztd::from_string<panel_t>(panel).value_or(INVALID_PANEL);
         }
         data->browser->open_in_panel(i, data->file_path);
     }
     else if (set->name().starts_with("opentab_"))
     {
-        tab_t i = 0;
+        tab_t i = INVALID_TAB;
         if (set->xset_name == xset::name::opentab_new)
         {
             on_popup_open_in_new_tab_activate(nullptr, data);
@@ -3101,7 +3102,8 @@ ptk_file_menu_action(ptk::browser* browser, const xset_t& set) noexcept
             }
             else
             {
-                i = std::stol(ztd::removeprefix(set->name(), "opentab_"));
+                const auto tab = ztd::removeprefix(set->name(), "opentab_");
+                i = ztd::from_string<tab_t>(tab).value_or(INVALID_TAB);
             }
             data->browser->open_in_tab(data->file_path, i);
         }

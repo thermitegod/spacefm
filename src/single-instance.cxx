@@ -19,6 +19,8 @@
 
 #include <csignal>
 
+#include <ztd/ztd.hxx>
+
 #include "vfs/utils/file-ops.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
@@ -65,9 +67,9 @@ single_instance_check() noexcept
             return true;
         }
 
-        const pid_t pid = std::stoi(*buffer);
+        const auto pid = ztd::from_string<pid_t>(*buffer);
 
-        if (is_process_running(pid))
+        if (is_process_running(pid.value()))
         {
             return false;
         }

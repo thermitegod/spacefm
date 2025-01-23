@@ -102,31 +102,27 @@ parse_xset(const u64 version, const config::xsetpak_t& pak) noexcept
             }
             else if (var == xset::var::key)
             {
-                u32 result = 0;
-                const auto [ptr, ec] =
-                    std::from_chars(value.data(), value.data() + value.size(), result);
-                if (ec != std::errc())
+                const auto result = ztd::from_string<u32>(value);
+                if (!result)
                 {
                     logger::error("Config: Failed trying to set xset.{} to {}",
                                   magic_enum::enum_name(var),
                                   value);
                     continue;
                 }
-                set->keybinding.key = result;
+                set->keybinding.key = result.value();
             }
             else if (var == xset::var::keymod)
             {
-                u32 result = 0;
-                const auto [ptr, ec] =
-                    std::from_chars(value.data(), value.data() + value.size(), result);
-                if (ec != std::errc())
+                const auto result = ztd::from_string<u32>(value);
+                if (!result)
                 {
                     logger::error("Config: Failed trying to set xset.{} to {}",
                                   magic_enum::enum_name(var),
                                   value);
                     continue;
                 }
-                set->keybinding.modifier = result;
+                set->keybinding.modifier = result.value();
             }
             else if (var == xset::var::b)
             {

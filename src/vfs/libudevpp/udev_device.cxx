@@ -22,6 +22,8 @@
 
 #include <libudev.h>
 
+#include <ztd/ztd.hxx>
+
 #include "libudevpp.hxx"
 
 bool
@@ -420,7 +422,8 @@ libudev::device::is_cdrom() const noexcept
     const auto prop = this->get_property("ID_CDROM");
     if (prop)
     {
-        if (std::stoi(prop.value()) == 1)
+        const auto result = ztd::from_string<std::uint32_t>(prop.value());
+        if (result && result.value() == 1)
         {
             return true;
         }
@@ -440,7 +443,8 @@ libudev::device::is_hdd() const noexcept
     const auto prop = this->get_property("ID_ATA_ROTATION_RATE_RPM");
     if (prop)
     {
-        if (std::stoi(prop.value()) > 0)
+        const auto result = ztd::from_string<std::uint32_t>(prop.value());
+        if (result && result.value() > 0)
         {
             return true;
         }
@@ -460,7 +464,8 @@ libudev::device::is_ssd() const noexcept
     const auto prop = this->get_property("ID_ATA_ROTATION_RATE_RPM");
     if (prop)
     {
-        if (std::stoi(prop.value()) == 0)
+        const auto result = ztd::from_string<std::uint32_t>(prop.value());
+        if (result && result.value() == 0)
         {
             return true;
         }
@@ -498,7 +503,8 @@ libudev::device::is_hotswapable() const noexcept
     const auto prop = this->get_property("ID_HOTPLUG");
     if (prop)
     {
-        if (std::stoi(prop.value()) == 1)
+        const auto result = ztd::from_string<std::uint32_t>(prop.value());
+        if (result && result.value() == 1)
         {
             return true;
         }

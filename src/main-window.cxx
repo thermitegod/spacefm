@@ -729,9 +729,12 @@ MainWindow::show_panels() noexcept
                 set->s = set_old->s ? set_old->s : "0";
             }
             // load dynamic slider positions for this panel context
-            this->panel_slide_x[p] = set->x ? std::stoi(set->x.value()) : 0;
-            this->panel_slide_y[p] = set->y ? std::stoi(set->y.value()) : 0;
-            this->panel_slide_s[p] = set->s ? std::stoi(set->s.value()) : 0;
+            this->panel_slide_x[p] =
+                set->x ? ztd::from_string<panel_t>(set->x.value()).value_or(0) : 0;
+            this->panel_slide_y[p] =
+                set->y ? ztd::from_string<panel_t>(set->y.value()).value_or(0) : 0;
+            this->panel_slide_s[p] =
+                set->s ? ztd::from_string<panel_t>(set->s.value()).value_or(0) : 0;
             // logger::info("loaded panel {}", p);
             if (!gtk_notebook_get_n_pages(this->get_panel_notebook(p)))
             {
@@ -768,7 +771,7 @@ MainWindow::show_panels() noexcept
                     if (set->x)
                     {
                         // set current tab
-                        const tab_t cur_tabx = std::stoi(set->x.value());
+                        const auto cur_tabx = ztd::from_string<tab_t>(set->x.value()).value_or(0);
                         if (cur_tabx >= 0 &&
                             cur_tabx < gtk_notebook_get_n_pages(this->get_panel_notebook(p)))
                         {
@@ -2412,7 +2415,7 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
     }
     else if (set->name().starts_with("panel_"))
     {
-        i32 i = 0;
+        panel_t i = INVALID_PANEL;
         if (set->xset_name == xset::name::panel_prev)
         {
             i = panel_control_code_prev;
@@ -2427,7 +2430,8 @@ MainWindow::keypress_found_key(const xset_t& set) noexcept
         }
         else
         {
-            i = std::stol(ztd::removeprefix(set->name(), "panel_"));
+            const auto panel = ztd::removeprefix(set->name(), "panel_");
+            i = ztd::from_string<panel_t>(panel).value_or(INVALID_PANEL);
         }
         this->focus_panel(i);
     }

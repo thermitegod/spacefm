@@ -482,19 +482,35 @@ xset_get_int(const xset_t& set, xset::var var) noexcept
 
     if (var == xset::var::s)
     {
-        return std::stoi(set->s.value_or("0"));
+        if (!set->s)
+        {
+            return 0;
+        }
+        return ztd::from_string<i32>(set->s.value()).value();
     }
     else if (var == xset::var::x)
     {
-        return std::stoi(set->x.value_or("0"));
+        if (!set->x)
+        {
+            return 0;
+        }
+        return ztd::from_string<i32>(set->x.value()).value();
     }
     else if (var == xset::var::y)
     {
-        return std::stoi(set->y.value_or("0"));
+        if (!set->y)
+        {
+            return 0;
+        }
+        return ztd::from_string<i32>(set->y.value()).value();
     }
     else if (var == xset::var::z)
     {
-        return std::stoi(set->z.value_or("0"));
+        if (!set->z)
+        {
+            return 0;
+        }
+        return ztd::from_string<i32>(set->z.value()).value();
     }
     else
     {

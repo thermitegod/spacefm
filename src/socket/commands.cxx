@@ -206,8 +206,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 return {SOCKET_INVALID, std::format("invalid size format {}", value)};
             }
             const auto size = ztd::split(value, "x");
-            width = std::stoi(size[0]);
-            height = std::stoi(size[1]);
+            width = ztd::from_string<i32>(size[0]).value_or(0);
+            height = ztd::from_string<i32>(size[1]).value_or(0);
 
             if (height < 1 || width < 1)
             {
@@ -251,8 +251,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string_view value = data[0];
 
-            const i32 width = std::stoi(value.data());
-            if (width < 0)
+            const auto width = ztd::from_string<i32>(value.data()).value_or(0);
+            if (width <= 0)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
             }
@@ -498,9 +498,9 @@ socket::command(const std::string_view socket_commands_json) noexcept
         {
             const std::string_view value = data[0];
 
-            const i32 width = std::stoi(value.data());
+            const auto width = ztd::from_string<i32>(value.data()).value_or(0);
 
-            if (width < 0)
+            if (width <= 0)
             {
                 return {SOCKET_INVALID, "invalid slider value"};
             }
@@ -526,7 +526,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             const std::string_view value = data[0];
             const auto subproperty = request_data->subproperty;
 
-            const i32 width = std::stoi(value.data());
+            const auto width = ztd::from_string<i32>(value.data()).value_or(0);
 
             if (width < 1)
             {
@@ -697,7 +697,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
         else if (property == "max-thumbnail-size")
         {
             const std::string_view value = data[0];
-            browser->settings_->thumbnail_max_size = std::stoi(value.data());
+            browser->settings_->thumbnail_max_size =
+                ztd::from_string<u32>(value.data()).value_or(8 << 20);
         }
         else if (property == "large-icons")
         {
@@ -1031,7 +1032,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else if (property.starts_with("panel"))
             {
-                const panel_t j = std::stoi(property.substr(5, 1));
+                const auto j = ztd::from_string<panel_t>(property.substr(5, 1)).value_or(1);
                 return {SOCKET_SUCCESS, std::format("{}", xset_get_b_panel(j, xset::panel::show))};
             }
             if (!valid)
@@ -1405,10 +1406,8 @@ socket::command(const std::string_view socket_commands_json) noexcept
             }
             else
             {
-                j = std::stoi(value.data());
-                j = std::max(j, 0);
-                j = std::min(j, 100);
-                ptask->task->percent = j;
+                const auto v = ztd::from_string<i32>(value).value_or(0);
+                ptask->task->percent = std::min(std::max(0, v), 100);
             }
             ptask->task->custom_percent = value != "0";
             ptask->pause_change_view_ = ptask->pause_change_ = true;
