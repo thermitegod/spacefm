@@ -51,11 +51,11 @@
 #include "vfs/utils/vfs-editor.hxx"
 #include "vfs/utils/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
+#include "vfs/vfs-terminals.hxx"
 #include "vfs/vfs-volume.hxx"
 
 #include "logger.hxx"
 #include "main-window.hxx"
-#include "terminal-handlers.hxx"
 #include "types.hxx"
 
 static std::string
@@ -863,7 +863,7 @@ socket::command(const std::string_view socket_commands_json) noexcept
                 terminal = terminal.filename();
             }
 
-            const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
+            const auto supported_terminals = vfs::terminals::supported_names();
             for (const std::string_view supported_terminal : supported_terminals)
             {
                 if (terminal.string() == supported_terminal)

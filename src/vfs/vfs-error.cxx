@@ -56,6 +56,10 @@ vfs::error_category() noexcept
                     return "file write failure";
                 case vfs::error_code::file_close_failure:
                     return "file close failure";
+                case vfs::error_code::program_unknown:
+                    return "program unknown";
+                case vfs::error_code::program_not_in_path:
+                    return "program not in path";
                 default:
                     return "unknown error";
             }

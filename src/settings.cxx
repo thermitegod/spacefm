@@ -36,12 +36,12 @@
 
 #include "vfs/vfs-app-desktop.hxx"
 #include "vfs/vfs-mime-type.hxx"
+#include "vfs/vfs-terminals.hxx"
 #include "vfs/vfs-user-dirs.hxx"
 
 #include "logger.hxx"
 #include "main-window.hxx"
 #include "settings.hxx"
-#include "terminal-handlers.hxx"
 #include "types.hxx"
 
 void
@@ -98,7 +98,7 @@ load_settings(const std::shared_ptr<config::settings>& settings) noexcept
     const auto main_terminal = xset_get_s(xset::name::main_terminal);
     if (!main_terminal)
     {
-        const auto supported_terminals = terminal_handlers->get_supported_terminal_names();
+        const auto supported_terminals = vfs::terminals::supported_names();
         for (const std::string_view supported_terminal : supported_terminals)
         {
             const std::filesystem::path terminal =

@@ -35,12 +35,14 @@
 #include "ptk/ptk-file-browser.hxx"
 #include "ptk/ptk-location-view.hxx"
 
+#include "vfs/vfs-terminals.hxx"
+
 #include "autosave.hxx"
 #include "logger.hxx"
 #include "main-window.hxx"
 #include "preference-dialog.hxx"
-#include "terminal-handlers.hxx"
 #include "types.hxx"
+
 /**
  * General Tab
  */
@@ -473,7 +475,7 @@ show_preference_dialog(GtkWindow* parent,
         .drag_action = xset_get_int(xset::name::drag_action, xset::var::x),
         .editor = xset_get_s(xset::name::editor).value_or(""),
         .terminal = xset_get_s(xset::name::main_terminal).value_or(""),
-        .details = {.supported_terminals = terminal_handlers->get_supported_terminal_names()}});
+        .details = {.supported_terminals = vfs::terminals::supported_names()}});
     if (!buffer)
     {
         logger::error("Failed to create json: {}", glz::format_error(buffer));

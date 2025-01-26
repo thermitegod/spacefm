@@ -44,11 +44,11 @@
 
 #include "vfs/utils/vfs-utils.hxx"
 #include "vfs/vfs-file-task.hxx"
+#include "vfs/vfs-terminals.hxx"
 #include "vfs/vfs-trash-can.hxx"
 #include "vfs/vfs-volume.hxx"
 
 #include "logger.hxx"
-#include "terminal-handlers.hxx"
 
 std::shared_ptr<vfs::file_task>
 vfs::file_task::create(const vfs::file_task::type task_type,
@@ -1177,17 +1177,18 @@ vfs::file_task::file_exec(const std::filesystem::path& src_file) noexcept
             return;
         }
 
-        std::string term_exec_command;
-        const auto terminal_args = terminal_handlers->get_terminal_args(terminal_s.value());
-        for (const std::string_view terminal_arg : terminal_args)
+        const auto command =
+            vfs::terminals::create_command(terminal_s.value(),
+                                           ::utils::shell_quote(this->exec_command));
+        if (!command)
         {
-            term_exec_command.append(terminal_arg);
-            term_exec_command.append(" ");
+            logger::error<logger::domain::vfs>("Failed to create terminal command: {}",
+                                               command.error().message());
+            return;
         }
-        term_exec_command.append(::utils::shell_quote(this->exec_command));
 
-        logger::info<logger::domain::vfs>("COMMAND({})", term_exec_command);
-        Glib::spawn_command_line_async(term_exec_command);
+        logger::info<logger::domain::vfs>("COMMAND({})", command.value());
+        Glib::spawn_command_line_async(command.value());
     }
     else
     {

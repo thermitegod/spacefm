@@ -15,33 +15,20 @@
 
 #pragma once
 
-#include <filesystem>
+#include <expected>
 #include <string>
 #include <string_view>
-#include <unordered_map>
+#include <system_error>
 #include <vector>
 
-struct TerminalHandler
+namespace vfs
 {
-    TerminalHandler() = delete;
-    TerminalHandler(const std::string_view name, const std::string_view exec) noexcept;
-
-    std::string name;
-    std::filesystem::path path;
-    std::string exec;
-};
-
-struct TerminalHandlers
+class terminals final
 {
-    TerminalHandlers() noexcept;
+  public:
+    [[nodiscard]] static std::expected<std::string, std::error_code>
+    create_command(const std::string_view terminal, const std::string_view command) noexcept;
 
-    std::vector<std::string> get_terminal_args(const std::string_view terminal) const noexcept;
-    std::vector<std::string> get_supported_terminal_names() const noexcept;
-
-  private:
-    std::unordered_map<std::string, TerminalHandler> handlers;
+    [[nodiscard]] static std::vector<std::string> supported_names() noexcept;
 };
-
-using terminal_handlers_t = std::unique_ptr<TerminalHandlers>;
-
-extern const terminal_handlers_t terminal_handlers;
+} // namespace vfs

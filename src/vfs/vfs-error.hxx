@@ -37,6 +37,9 @@ enum class error_code : std::int32_t
     file_read_failure,
     file_write_failure,
     file_close_failure,
+    // Find in path errors
+    program_unknown,
+    program_not_in_path,
 };
 
 const std::error_category& error_category() noexcept;
