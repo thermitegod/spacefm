@@ -38,6 +38,7 @@ TerminalHandlers::TerminalHandlers() noexcept
         {"alacritty",      TerminalHandler("alacritty",      "-e")},
         {"aterm",          TerminalHandler("aterm",          "-e")},
         {"Eterm",          TerminalHandler("Eterm",          "-e")},
+        {"ghostty",        TerminalHandler("ghostty",        "-e")},
         {"gnome-terminal", TerminalHandler("gnome-terminal", "-x")},
         {"kitty",          TerminalHandler("kitty",          "")},
         {"Konsole",        TerminalHandler("Konsole",        "-e")},
