@@ -56,7 +56,7 @@ static concurrencpp::timer timer;
 } // namespace autosave::detail
 
 void
-autosave::create(const std::function<void()>& autosave_func) noexcept
+autosave::create(const std::function<void()> autosave_func) noexcept
 {
     logger::trace<logger::domain::autosave>("starting autosave thread");
 
