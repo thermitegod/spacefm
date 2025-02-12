@@ -5049,6 +5049,11 @@ ptk::browser::seek_path(const std::filesystem::path& seek_dir,
 void
 ptk::browser::update_statusbar() const noexcept
 {
+    if (!this->statusbar)
+    {
+        return;
+    }
+
     std::string statusbar_txt;
 
     const auto cwd = this->cwd();
