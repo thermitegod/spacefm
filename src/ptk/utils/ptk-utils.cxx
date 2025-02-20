@@ -14,7 +14,6 @@
  */
 
 #include <limits>
-#include <random>
 
 #include <gdkmm.h>
 #include <glibmm.h>
@@ -46,9 +45,5 @@ ptk::utils::get_keymod(GdkModifierType event) noexcept
 i32
 ptk::utils::stamp() noexcept
 {
-    std::mt19937 rng;
-    rng.seed(std::random_device{}());
-    std::uniform_int_distribution<i32> dist(0, std::numeric_limits<i32>::max());
-
-    return dist(rng);
+    return ztd::random<i32>(0, std::numeric_limits<i32>::max());
 }
