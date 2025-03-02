@@ -1,6 +1,4 @@
 /**
- * Copyright (C) 2006 Hong Jen Yee (PCMan) <pcman.tw@gmail.com>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -15,28 +13,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <filesystem>
-#include <memory>
-
+#include <glibmm.h>
 #include <gtkmm.h>
 
-#include "ptk/ptk-file-browser.hxx"
-#include "ptk/ptk-file-menu.hxx"
+#include <CLI/CLI.hpp>
 
-#include "vfs/vfs-file.hxx"
+#include "create.hxx"
+#include "logger.hxx"
 
-namespace ptk::action
+int
+main(int argc, char* argv[])
 {
-enum class create_mode : std::uint8_t
-{
-    file,
-    dir,
-    link,
-};
+    CLI::App capp{"Spacefm Dialog"};
 
-i32 create_files(ptk::browser* browser, const std::filesystem::path& cwd,
-                 const std::shared_ptr<vfs::file>& file, const ptk::action::create_mode init_mode,
-                 AutoOpenCreate* ao) noexcept;
-} // namespace ptk::action
+    std::string json_data;
+    capp.add_option("--json", json_data, "json data")->required();
+
+    CLI11_PARSE(capp, argc, argv);
+
+    logger::initialize();
+
+    auto app = Gtk::Application::create("org.thermitegod.spacefm.create");
+
+    return app->make_window_and_run<CreateDialog>(0,       // Gtk does not handle cli
+                                                  nullptr, // Gtk does not handle cli
+                                                  json_data);
+}

@@ -107,6 +107,31 @@ spacefm = build_target(
     ],
 )
 
+# File Create
+incdir_create = include_directories(['file-create', 'lib', '../src/datatypes'])
+sources_create = files(
+    'file-create/main.cxx',
+    'file-create/create.cxx',
+)
+sources_create += sources_vfs
+
+spacefm = build_target(
+    'spacefm_create',
+    sources_create,
+    target_type: 'executable',
+    include_directories: incdir_create,
+    install: true,
+    install_dir: bindir,
+    dependencies: [
+        gtkmm4_dep,
+        glibmm4_dep,
+        giomm4_dep,
+        sigc_dep,
+
+        pugixml_dep,
+    ],
+)
+
 # Keybinding
 incdir_keybinding = include_directories(['keybinding', '../src/datatypes'])
 sources_keybinding = files(

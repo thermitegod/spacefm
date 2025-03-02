@@ -172,4 +172,42 @@ struct request
     std::vector<std::string> files;
 };
 } // namespace properties
+
+namespace create
+{
+struct settings_data
+{
+    bool filename{false};
+    bool parent{false};
+    bool path{false};
+    bool target{false};
+    bool confirm{false};
+};
+
+enum class mode : std::uint8_t
+{
+    file,
+    dir,
+    link,
+    cancel,
+};
+
+struct request
+{
+    std::string cwd;
+    std::string file; // used to create a new symlink to the selected file
+    mode mode;
+    settings_data settings;
+};
+
+struct response
+{
+    std::string target; // only used when creating a symlink
+    std::string dest;
+    mode mode;
+    bool overwrite;
+    bool auto_open; // open file / chdir into dest
+    settings_data settings;
+};
+} // namespace create
 } // namespace datatype
